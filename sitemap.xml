@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://pcaiano.github.io/toolscout/</loc></url>
-  <url><loc>https://pcaiano.github.io/toolscout/tools/</loc></url>
-  <url><loc>https://pcaiano.github.io/toolscout/compare/</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tools.html</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/compare.html</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tool.html?tool=systeme-io</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tool.html?tool=hubspot</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tool.html?tool=jotform</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tool.html?tool=adcreative-ai</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tool.html?tool=pipedrive</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tool.html?tool=semrush</loc></url>
+  <url><loc>https://pcaiano.github.io/toolscout/tool.html?tool=jasper</loc></url>
 </urlset>
