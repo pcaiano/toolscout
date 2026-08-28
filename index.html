@@ -10,10 +10,10 @@
     *{box-sizing:border-box}body{margin:0}.wrap{max-width:1050px;margin:auto;padding:28px 20px 70px}
     nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:80px}.brand{font-weight:800;font-size:22px;letter-spacing:-.04em}.tag{font-size:13px;color:#6b7280}
     .hero{max-width:780px;margin:auto;text-align:center}.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;color:#6b7280}
-    h1{font-size:clamp(44px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:18px 0}.hero p{font-size:19px;line-height:1.55;color:#5b6472;max-width:620px;margin:0 auto 35px}
+    h1{font-size:clamp(44px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:18px 0}.hero>p{font-size:19px;line-height:1.55;color:#5b6472;max-width:620px;margin:0 auto 35px}
     .card{margin:38px auto 0;background:white;border:1px solid #e5e7eb;border-radius:24px;padding:26px;box-shadow:0 12px 40px rgba(0,0,0,.06);text-align:left;max-width:760px}
-    textarea{width:100%;min-height:125px;border:0;outline:0;resize:vertical;font:inherit;font-size:17px}.actions{display:flex;justify-content:space-between;align-items:center;gap:15px;border-top:1px solid #eee;padding-top:18px}.hint{font-size:13px;color:#8a919c}.btn{border:0;background:#111827;color:white;padding:13px 20px;border-radius:12px;font-weight:700;cursor:pointer}.btn:hover{opacity:.9}
-    #results{margin-top:25px;display:grid;gap:14px}.result{border:1px solid #e5e7eb;border-radius:18px;padding:20px;background:#fff}.result h3{margin:0 0 5px;font-size:20px}.score{float:right;font-weight:800}.meta{color:#687180;font-size:14px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}.chip{font-size:12px;background:#f1f3f5;border-radius:99px;padding:6px 9px}.note{margin-top:40px;text-align:center;font-size:12px;color:#8a919c}
+    textarea{width:100%;min-height:125px;border:0;outline:0;resize:vertical;font:inherit;font-size:17px}.actions{display:flex;justify-content:space-between;align-items:center;gap:15px;border-top:1px solid #eee;padding-top:18px}.hint{font-size:13px;color:#8a919c}.btn{display:inline-block;border:0;background:#111827;color:white;padding:12px 17px;border-radius:12px;font-weight:700;cursor:pointer;text-decoration:none}.btn:hover{opacity:.9}.secondary{background:#eef0f2;color:#111827}
+    #results{margin-top:25px;display:grid;gap:14px}.result{border:1px solid #e5e7eb;border-radius:18px;padding:20px;background:#fff;text-align:left}.result h3{margin:0 0 5px;font-size:20px}.result p{color:#5f6875;line-height:1.5}.score{float:right;font-weight:800}.meta{color:#687180;font-size:14px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}.chip{font-size:12px;background:#f1f3f5;border-radius:99px;padding:6px 9px}.note{margin-top:40px;text-align:center;font-size:12px;color:#8a919c}
   </style>
 </head>
 <body>
@@ -31,15 +31,6 @@
     <div class="note">ToolScout is an independent recommendation project. Affiliate relationships will be disclosed where applicable.</div>
   </main>
 </div>
-<script>
-const tools=[
-{name:'Systeme.io',cat:'marketing',text:'funnels email marketing courses digital products automation small businesses creators free',score:0,price:'Free plan available'},
-{name:'HubSpot',cat:'crm',text:'crm sales marketing service automation small business sales teams free',score:0,price:'Free tools available'},
-{name:'Jotform',cat:'forms',text:'forms payments workflows approvals integrations operations lead collection free',score:0,price:'Free plan available'},
-{name:'AdCreative.ai',cat:'marketing',text:'advertising ad creatives AI generation creative scoring marketers agencies ecommerce',score:0,price:'Paid plans'}
-];
-function recommend(q){const words=q.toLowerCase().split(/[^a-z0-9]+/).filter(x=>x.length>2);return tools.map(t=>{let s=0;words.forEach(w=>{if(t.text.includes(w))s+=2;if(t.cat.includes(w))s+=3});if(q.toLowerCase().includes('free')&&t.text.includes('free'))s+=4;return {...t,score:s}}).sort((a,b)=>b.score-a.score).slice(0,3)}
-document.getElementById('go').onclick=()=>{const q=document.getElementById('need').value.trim();if(!q)return;const out=document.getElementById('results');const rs=recommend(q);out.innerHTML=rs.map((r,i)=>`<article class="result"><span class="score">${Math.min(98,72+r.score*3)}/100</span><h3>${i===0?'Best match · ':''}${r.name}</h3><div class="meta">${r.price} · ${r.cat}</div><div class="chips">${r.text.split(' ').slice(0,5).map(x=>`<span class="chip">${x}</span>`).join('')}</div></article>`).join('')};
-</script>
+<script src="/app.js" defer></script>
 </body>
 </html>
