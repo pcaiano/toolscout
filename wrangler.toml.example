@@ -1,0 +1,15 @@
+name = "toolscout"
+main = "worker.js"
+compatibility_date = "2026-08-28"
+
+[assets]
+directory = "."
+
+[triggers]
+crons = ["15 3 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "toolscout"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
