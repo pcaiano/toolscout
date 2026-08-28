@@ -58,5 +58,50 @@
     "commission": "30–40% depending on affiliate level",
     "sourceUrl": "https://pt.adcreative.ai/affiliate",
     "lastVerified": "2026-08-28"
+  },
+  {
+    "slug": "pipedrive",
+    "name": "Pipedrive",
+    "category": "crm",
+    "description": "Sales CRM focused on managing pipelines, deals and sales activity.",
+    "pricing": "Paid plans; verify current pricing before publication",
+    "freePlan": false,
+    "features": ["crm", "sales pipeline", "deal management", "sales reporting", "integrations"],
+    "bestFor": ["sales teams", "small businesses", "consultants"],
+    "affiliateUrl": "",
+    "affiliateProgram": "Pipedrive Affiliate Partnership",
+    "commission": "20% of revenue for the first 12 months; higher tiers available",
+    "sourceUrl": "https://www.pipedrive.com/en/affiliate-partnership",
+    "lastVerified": "2026-08-28"
+  },
+  {
+    "slug": "semrush",
+    "name": "Semrush",
+    "category": "seo",
+    "description": "Online visibility platform covering SEO, AI visibility, content, social and competitive research.",
+    "pricing": "Paid plans with trial options; verify current pricing before publication",
+    "freePlan": false,
+    "features": ["seo", "keyword research", "competitive research", "content", "AI visibility"],
+    "bestFor": ["marketers", "SEO professionals", "agencies", "publishers"],
+    "affiliateUrl": "",
+    "affiliateProgram": "Semrush Affiliate Program",
+    "commission": "$100–$300 per sale depending on product; trial commissions also available",
+    "sourceUrl": "https://www.semrush.com/lp/affiliate-program/en/",
+    "lastVerified": "2026-08-28"
+  },
+  {
+    "slug": "jasper",
+    "name": "Jasper",
+    "category": "ai-writing",
+    "description": "AI platform for creating and managing marketing content and brand-focused workflows.",
+    "pricing": "Paid plans; verify current pricing before publication",
+    "freePlan": false,
+    "features": ["AI writing", "marketing content", "brand voice", "content workflows"],
+    "bestFor": ["marketing teams", "agencies", "content teams"],
+    "affiliateUrl": "",
+    "affiliateProgram": "Jasper Affiliate Program",
+    "commission": "Commission applies to eligible customers during the first 12 months",
+    "sourceUrl": "https://www.jasper.ai/legal/affiliates",
+    "lastVerified": "2026-08-28"
   }
 ]
