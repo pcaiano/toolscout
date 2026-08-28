@@ -1,4 +1,2 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://pcaiano.github.io/toolscout/sitemap.xml
