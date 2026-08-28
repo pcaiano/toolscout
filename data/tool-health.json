@@ -1,0 +1,9 @@
+{
+  "hubspot": {"url": "https://www.hubspot.com", "enabled": true},
+  "pipedrive": {"url": "https://www.pipedrive.com", "enabled": true},
+  "semrush": {"url": "https://www.semrush.com", "enabled": true},
+  "jasper": {"url": "https://www.jasper.ai", "enabled": true},
+  "zapier": {"url": "https://zapier.com", "enabled": true},
+  "surfer": {"url": "https://surferseo.com", "enabled": true},
+  "typeform": {"url": "https://www.typeform.com", "enabled": true}
+}
