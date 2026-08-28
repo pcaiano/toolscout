@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "systeme-io",
+    "name": "Systeme.io",
+    "category": "marketing",
+    "description": "All-in-one platform for funnels, email marketing, online courses and selling digital products.",
+    "pricing": "Free plan available; paid plans vary",
+    "freePlan": true,
+    "features": ["funnels", "email marketing", "courses", "digital products", "automation"],
+    "bestFor": ["small businesses", "creators", "digital entrepreneurs"],
+    "affiliateUrl": "",
+    "affiliateProgram": "Systeme.io Affiliate Program",
+    "commission": "60% lifetime recurring",
+    "sourceUrl": "https://systeme.io/affiliate-program",
+    "lastVerified": "2026-08-28"
+  },
+  {
+    "slug": "hubspot",
+    "name": "HubSpot",
+    "category": "crm",
+    "description": "CRM and customer platform covering sales, marketing, service and operations.",
+    "pricing": "Free tools available; paid tiers vary",
+    "freePlan": true,
+    "features": ["crm", "sales", "marketing", "service", "automation"],
+    "bestFor": ["small businesses", "sales teams", "growing companies"],
+    "affiliateUrl": "",
+    "affiliateProgram": "HubSpot Affiliate Program",
+    "commission": "30% recurring for up to one year",
+    "sourceUrl": "https://www.hubspot.com/partners/affiliates",
+    "lastVerified": "2026-08-28"
+  },
+  {
+    "slug": "jotform",
+    "name": "Jotform",
+    "category": "forms",
+    "description": "Online form and workflow platform for collecting information and automating processes.",
+    "pricing": "Free plan available; paid plans vary",
+    "freePlan": true,
+    "features": ["forms", "payments", "workflows", "approvals", "integrations"],
+    "bestFor": ["small businesses", "operations", "lead collection"],
+    "affiliateUrl": "",
+    "affiliateProgram": "Jotform Partner Program",
+    "commission": "30% recurring",
+    "sourceUrl": "https://www.jotform.com/partnership/",
+    "lastVerified": "2026-08-28"
+  },
+  {
+    "slug": "adcreative-ai",
+    "name": "AdCreative.ai",
+    "category": "marketing",
+    "description": "AI-powered platform for generating and optimizing advertising creatives.",
+    "pricing": "Paid plans; verify current pricing before publication",
+    "freePlan": false,
+    "features": ["ad creatives", "AI generation", "creative scoring", "advertising"],
+    "bestFor": ["marketers", "agencies", "ecommerce"],
+    "affiliateUrl": "",
+    "affiliateProgram": "AdCreative.ai Affiliate Program",
+    "commission": "30–40% depending on affiliate level",
+    "sourceUrl": "https://pt.adcreative.ai/affiliate",
+    "lastVerified": "2026-08-28"
+  }
+]
