@@ -9,9 +9,7 @@ export default {
 
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
 
-    if (url.pathname === '/api/health') {
-      return Response.json({ ok: true, service: 'toolscout-analytics' }, { headers: cors });
-    }
+    if (url.pathname === '/api/health') return Response.json({ ok: true, service: 'toolscout-analytics' }, { headers: cors });
 
     if (url.pathname === '/api/click' && request.method === 'POST') {
       try {
@@ -23,9 +21,7 @@ export default {
         if (!tool || !session) return Response.json({ error: 'invalid_event' }, { status: 400, headers: cors });
         await env.DB.prepare("INSERT INTO click_events (tool_slug, intent_slug, session_id, source, created_at) VALUES (?, ?, ?, ?, datetime('now'))").bind(tool, intent, session, source).run();
         return Response.json({ ok: true }, { headers: cors });
-      } catch {
-        return Response.json({ error: 'invalid_request' }, { status: 400, headers: cors });
-      }
+      } catch { return Response.json({ error: 'invalid_request' }, { status: 400, headers: cors }); }
     }
 
     if (url.pathname === '/api/search' && request.method === 'POST') {
@@ -38,9 +34,7 @@ export default {
         if (!session) return Response.json({ error: 'invalid_event' }, { status: 400, headers: cors });
         await env.DB.prepare("INSERT INTO search_events (intent_slug, profile_json, session_id, source, created_at) VALUES (?, ?, ?, ?, datetime('now'))").bind(intent, profile, session, source).run();
         return Response.json({ ok: true }, { headers: cors });
-      } catch {
-        return Response.json({ error: 'invalid_request' }, { status: 400, headers: cors });
-      }
+      } catch { return Response.json({ error: 'invalid_request' }, { status: 400, headers: cors }); }
     }
 
     if (url.pathname === '/api/stats') {
@@ -71,7 +65,7 @@ export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(Promise.all([
       env.DB.prepare("DELETE FROM click_events WHERE created_at < datetime('now','-180 days')").run(),
-      env.DB.prepare("DELETE FROM search_events WHERE created_at < datetime('now','180 days')").run()
+      env.DB.prepare("DELETE FROM search_events WHERE created_at < datetime('now','-180 days')").run()
     ]));
   }
 };
