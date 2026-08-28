@@ -1,0 +1,22 @@
+{
+  "best-crm-for-small-business": {
+    "title": "Best CRM for Small Business",
+    "weights": {"category": 30, "freePlan": 15, "price": 15, "automation": 15, "ease": 10, "integrations": 10, "sales": 5}
+  },
+  "best-free-crm": {
+    "title": "Best Free CRM Tools",
+    "weights": {"category": 30, "freePlan": 35, "price": 20, "ease": 10, "sales": 5}
+  },
+  "best-ai-marketing-tools": {
+    "title": "Best AI Marketing Tools",
+    "weights": {"category": 30, "ai": 20, "marketing": 20, "automation": 15, "integrations": 10, "ease": 5}
+  },
+  "best-seo-tools": {
+    "title": "Best SEO Tools",
+    "weights": {"category": 35, "seo": 25, "research": 15, "content": 10, "integrations": 10, "ease": 5}
+  },
+  "best-tools-for-agencies": {
+    "title": "Best Tools for Agencies",
+    "weights": {"category": 20, "automation": 20, "integrations": 20, "agency": 20, "marketing": 10, "ease": 10}
+  }
+}
