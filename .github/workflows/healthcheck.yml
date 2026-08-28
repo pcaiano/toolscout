@@ -1,0 +1,42 @@
+name: ToolScout health check
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Validate database
+        run: node scripts/validate-data.mjs
+      - name: Check source URLs
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const tools = JSON.parse(fs.readFileSync('data/tools.json', 'utf8'));
+          const urls = [...new Set(tools.map(t => t.sourceUrl))];
+          (async () => {
+            let failed = 0;
+            for (const url of urls) {
+              try {
+                const r = await fetch(url, {redirect: 'follow'});
+                console.log(`${r.status} ${url}`);
+                if (r.status >= 400) failed++;
+              } catch (e) {
+                console.error(`ERROR ${url}: ${e.message}`);
+                failed++;
+              }
+            }
+            if (failed) process.exit(1);
+          })();
+          NODE
