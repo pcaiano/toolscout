@@ -1,4 +1,4 @@
-const state = { tools: [], intents: [], step: 0, answers: [] };
+const state = { tools: [], intents: [], step: 0, answers: {} };
 const normalize = (value) => String(value || '').toLowerCase();
 const tokenize = (value) => normalize(value).split(/[^a-z0-9]+/).filter((x) => x.length > 2);
 
@@ -10,8 +10,7 @@ const questions = [
 ];
 
 const sessionId = (() => {
-  const key = 'toolscout_session';
-  let id = localStorage.getItem(key);
+  const key = 'toolscout_session'; let id = localStorage.getItem(key);
   if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`; localStorage.setItem(key, id); }
   return id;
 })();
@@ -31,25 +30,20 @@ function detectIntent(query) {
 function scoreTool(tool,query,intent,profile={}){
   const q=normalize(query),words=tokenize(query);const haystack=[tool.name,tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' ');let score=40;
   for(const word of words){if(haystack.includes(word))score+=3;if(normalize(tool.category).includes(word))score+=3;}
-  if(/free|budget|cheap|affordable/.test(q)&&tool.freePlan)score+=7;
-  if(intent&&intent.category===tool.category)score+=18;
+  if(/free|budget|cheap|affordable/.test(q)&&tool.freePlan)score+=7;if(intent&&intent.category===tool.category)score+=18;
   if(intent){const w=intent.weights||{};if(w.freePlan&&tool.freePlan)score+=w.freePlan;if(w.price&&/free|affordable|budget|low cost/i.test(tool.pricing||''))score+=w.price;if(w.automation&&haystack.includes('automation'))score+=w.automation;if(w.integrations&&haystack.includes('integrations'))score+=w.integrations;if(w.features)score+=Math.min(w.features,(tool.features||[]).length*2);}
   if(profile.goal&&normalize(tool.category)===profile.goal)score+=18;if(profile.budget==='free'&&tool.freePlan)score+=15;if(profile.budget==='low'&&/free|low|affordable|under/i.test(tool.pricing||''))score+=6;if(profile.priority==='automation'&&haystack.includes('automation'))score+=10;if(profile.priority==='integrations'&&haystack.includes('integrations'))score+=10;if(profile.priority==='features')score+=Math.min(8,(tool.features||[]).length);
   return Math.min(99,score);
 }
 
-async function trackClick(tool,intent,profile={}){
-  const event={tool:tool.slug,intent:intent?.slug||'general',session:sessionId,profile};
-  try{
-    const response=await fetch('/api/click',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(event),keepalive:true});
-    if(response.ok)return;
-  }catch{}
-  const clicks=JSON.parse(localStorage.getItem('toolscout_clicks')||'[]');clicks.push({...event,timestamp:new Date().toISOString()});localStorage.setItem('toolscout_clicks',JSON.stringify(clicks.slice(-500)));
-}
+async function postEvent(path,payload){try{await fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),keepalive:true});}catch{}}
+async function trackSearch(intent,profile={}){postEvent('/api/search',{intent:intent?.slug||'general',session:sessionId,profile,source:'recommendation'});}
+async function trackClick(tool,intent,profile={}){postEvent('/api/click',{tool:tool.slug,intent:intent?.slug||'general',session:sessionId,profile,source:'recommendation'});}
 
 function renderResults(query,profile={}){
-  const intent=detectIntent(query);const results=state.tools.map(tool=>({...tool,score:scoreTool(tool,query,intent,profile)})).sort((a,b)=>b.score-a.score).slice(0,3);const out=document.getElementById('results');
-  out.innerHTML=`<div class="result"><strong>Your profile</strong><div class="chips"><span class="chip">${profile.goal||'general'}</span><span class="chip">${profile.budget||'any budget'}</span><span class="chip">${profile.team||'any team'}</span><span class="chip">${profile.priority||'balanced'}</span></div></div>`+results.map((tool,i)=>{const cta=tool.affiliateUrl||tool.sourceUrl;return `<article class="result"><span class="score">${tool.score}/100</span><h3>${i===0?'Best match · ':''}${tool.name}</h3><div class="meta">${tool.pricing} · ${tool.category}</div><p>${tool.description}</p><div class="chips">${(tool.features||[]).slice(0,5).map(x=>`<span class="chip">${x}</span>`).join('')}</div><div class="actions" style="margin-top:16px"><span class="hint">${intent?`Matched for: ${intent.title}`:'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">See tool</a></div></article>`;}).join('');
+  const intent=detectIntent(query); trackSearch(intent,profile);
+  const results=state.tools.map(tool=>({...tool,score:scoreTool(tool,query,intent,profile)})).sort((a,b)=>b.score-a.score).slice(0,3);const out=document.getElementById('results');
+  out.innerHTML=`<div class="result"><strong>Your profile</strong><div class="chips"><span class="chip">${profile.goal||'general'}</span><span class="chip">${profile.budget||'any budget'}</span><span class="chip">${profile.team||'any team'}</span><span class="chip">${profile.priority||'balanced'}</span></div></div>`+results.map((tool,i)=>{const cta=`/go/${tool.slug}`;return `<article class="result"><span class="score">${tool.score}/100</span><h3>${i===0?'Best match · ':''}${tool.name}</h3><div class="meta">${tool.pricing} · ${tool.category}</div><p>${tool.description}</p><div class="chips">${(tool.features||[]).slice(0,5).map(x=>`<span class="chip">${x}</span>`).join('')}</div><div class="actions" style="margin-top:16px"><span class="hint">${intent?`Matched for: ${intent.title}`:'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">See tool</a></div></article>`;}).join('');
   out.querySelectorAll('[data-tool]').forEach(link=>link.addEventListener('click',()=>trackClick(results.find(t=>t.slug===link.dataset.tool),intent,profile)));
   out.scrollIntoView({behavior:'smooth',block:'start'});
 }
