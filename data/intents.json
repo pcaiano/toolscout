@@ -1,7 +1,42 @@
 [
-  {"slug":"best-crm-for-small-business","title":"Best CRM for Small Business","category":"crm","keywords":["crm","sales","small business","pipeline","customers"]},
-  {"slug":"best-free-crm","title":"Best Free CRM Tools","category":"crm","keywords":["crm","free","budget","sales"]},
-  {"slug":"best-ai-marketing-tools","title":"Best AI Marketing Tools","category":"marketing","keywords":["ai","marketing","automation","email","funnels"]},
-  {"slug":"best-seo-tools","title":"Best SEO Tools","category":"seo","keywords":["seo","keywords","search","competitive research"]},
-  {"slug":"best-tools-for-agencies","title":"Best Tools for Agencies","category":"business","keywords":["agency","clients","marketing","crm","automation"]}
+  {
+    "slug":"best-crm-for-small-business",
+    "title":"Best CRM for Small Business",
+    "description":"CRM recommendations weighted for simplicity, affordability and practical sales automation.",
+    "category":"crm",
+    "weights":{"price":1.4,"freePlan":1.3,"simplicity":1.3,"automation":1.1,"integrations":1.0},
+    "keywords":["crm","sales","small business","pipeline","customers","affordable","simple"]
+  },
+  {
+    "slug":"best-free-crm",
+    "title":"Best Free CRM Tools",
+    "description":"CRM recommendations prioritising genuinely useful free plans and low-cost entry points.",
+    "category":"crm",
+    "weights":{"price":1.6,"freePlan":2.0,"simplicity":1.2,"automation":1.0,"integrations":1.0},
+    "keywords":["crm","free","budget","sales","no budget","cheap"]
+  },
+  {
+    "slug":"best-ai-marketing-tools",
+    "title":"Best AI Marketing Tools",
+    "description":"AI marketing tools selected for practical content, advertising and automation use cases.",
+    "category":"marketing",
+    "weights":{"price":1.0,"freePlan":1.0,"simplicity":1.0,"automation":1.4,"integrations":1.1},
+    "keywords":["ai","marketing","automation","email","funnels","advertising","content"]
+  },
+  {
+    "slug":"best-seo-tools",
+    "title":"Best SEO Tools",
+    "description":"SEO tools matched to keyword research, competitive intelligence and content workflows.",
+    "category":"seo",
+    "weights":{"price":1.0,"freePlan":0.9,"simplicity":1.0,"automation":1.2,"integrations":1.2},
+    "keywords":["seo","keywords","search","competitive research","content"]
+  },
+  {
+    "slug":"best-tools-for-agencies",
+    "title":"Best Tools for Agencies",
+    "description":"Software recommendations for agencies that need workflows, clients, collaboration and integrations.",
+    "category":"business",
+    "weights":{"price":0.9,"freePlan":0.8,"simplicity":1.0,"automation":1.4,"integrations":1.5},
+    "keywords":["agency","agencies","clients","marketing","crm","automation","collaboration","workflow"]
+  }
 ]
