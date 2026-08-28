@@ -1,0 +1,12 @@
+name = "toolscout-analytics"
+main = "src/index.js"
+compatibility_date = "2026-08-28"
+
+[assets]
+directory = "../"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "toolscout-analytics"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
