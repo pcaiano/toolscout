@@ -19,7 +19,7 @@ export default {
         for(const r of rows.results||[]) {
           const intent=String(r.intent_slug||'').slice(0,100); if(!intent||intent==='general')continue;
           let pageExists=false; try { pageExists=(await env.ASSETS.fetch(new Request(new URL('/'+intent+'.html',request.url)))).ok; } catch {}
-          const sessions=Number(r.search_sessions||0), demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|automation|lead|sales|email|project)/i.test(intent)?25:10, catalog=20, duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalog)), status=pageExists?'published':(score>=50?'ready':'candidate');
+          const sessions=Number(r.search_sessions||0), demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project)/i.test(intent)?25:10, catalog=20, duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalog)), status=pageExists?'published':(score>=50?'ready':'candidate');
           await env.DB.prepare("INSERT INTO seo_opportunities (intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at) VALUES (?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(intent_slug) DO UPDATE SET search_sessions=excluded.search_sessions,commercial_score=excluded.commercial_score,catalog_score=excluded.catalog_score,duplication_penalty=excluded.duplication_penalty,opportunity_score=excluded.opportunity_score,status=excluded.status,updated_at=datetime('now')").bind(intent,sessions,commercial,catalog,duplication,score,status).run();
           opportunities.push({intent_slug:intent,search_sessions:sessions,opportunity_score:score,status});
         }
@@ -64,7 +64,7 @@ export default {
       for(const r of rows.results||[]) {
         const intent=String(r.intent_slug||'').slice(0,100); if(!intent||intent==='general')continue;
         let pageExists=false; try { pageExists=(await env.ASSETS.fetch(new Request(new URL('/'+intent+'.html','https://toolscout.luxurybuyerintelligence.workers.dev')))).ok; } catch {}
-        const sessions=Number(r.search_sessions||0), demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|automation|lead|sales|email|project)/i.test(intent)?25:10, catalog=20, duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalog)), status=pageExists?'published':(score>=50?'ready':'candidate');
+        const sessions=Number(r.search_sessions||0), demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project)/i.test(intent)?25:10, catalog=20, duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalog)), status=pageExists?'published':(score>=50?'ready':'candidate');
         await env.DB.prepare("INSERT INTO seo_opportunities (intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at) VALUES (?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(intent_slug) DO UPDATE SET search_sessions=excluded.search_sessions,commercial_score=excluded.commercial_score,catalog_score=excluded.catalog_score,duplication_penalty=excluded.duplication_penalty,opportunity_score=excluded.opportunity_score,status=excluded.status,updated_at=datetime('now')").bind(intent,sessions,commercial,catalog,duplication,score,status).run();
       }
     };
