@@ -3,14 +3,16 @@ import path from 'node:path';
 
 const ROOT=process.cwd();
 const BASE='https://toolscout.luxurybuyerintelligence.workers.dev';
-const IGNORE=new Set(['404.html','admin.html','analytics.html','index.html','click.html','tool.html','compare.html','seo.html']);
+const IGNORE=new Set(['404.html','admin.html','analytics.html','index.html','click.html','tool.html','compare.html','seo.html','guides.html']);
 const ACRONYMS=new Map([['ai','AI'],['crm','CRM'],['seo','SEO'],['api','API'],['url','URL'],['saas','SaaS'],['roi','ROI']]);
 const humanize=slug=>slug.replace(/^best-/,'').replace(/-/g,' ').trim().split(/\s+/).map(w=>ACRONYMS.get(w.toLowerCase())||w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+const intentLike=slug=>/^best-[a-z0-9-]+$/i.test(slug);
 
 const files=fs.readdirSync(ROOT)
   .filter(name=>name.endsWith('.html'))
   .filter(name=>!IGNORE.has(name))
   .filter(name=>!/^google[0-9a-f]+\.html$/i.test(name))
+  .filter(name=>intentLike(name.replace(/\.html$/,'')))
   .sort();
 
 const items=files.map(file=>{const slug=file.replace(/\.html$/,'');return {slug,title:humanize(slug),url:`${BASE}/${file}`};});
