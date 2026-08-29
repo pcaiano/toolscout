@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://pcaiano.github.io/toolscout/sitemap.xml
+Sitemap: https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml
