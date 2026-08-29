@@ -5,9 +5,12 @@ on:
     paths:
       - 'data/intents.json'
       - 'data/tools.json'
+      - 'data/affiliate.json'
+      - 'data/affiliate-pipeline.json'
       - 'scripts/generate-seo-pages.mjs'
       - 'scripts/generate-blog.mjs'
       - 'scripts/build-blog-topics.mjs'
+      - 'scripts/build-growth-priority.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/validate-intent-coverage.mjs'
       - 'scripts/generate-sitemap.mjs'
@@ -33,6 +36,9 @@ jobs:
 
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
+
+      - name: Build growth priority
+        run: node scripts/build-growth-priority.mjs
 
       - name: Generate pages
         run: node scripts/generate-seo-pages.mjs
