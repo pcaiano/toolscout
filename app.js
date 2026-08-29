@@ -1,6 +1,8 @@
+const BASE = '/toolscout';
 const state = { tools: [], intents: [], step: 0, answers: {} };
 const normalize = (value) => String(value || '').toLowerCase();
 const tokenize = (value) => normalize(value).split(/[^a-z0-9]+/).filter((x) => x.length > 2);
+const api = (path) => `${BASE}${path}`;
 
 const questions = [
   { id: 'goal', title: 'What are you mainly trying to do?', choices: [['crm','Manage customers and sales'],['marketing','Marketing and automation'],['seo','Improve SEO and search visibility'],['forms','Collect information with forms']] },
@@ -16,7 +18,10 @@ const sessionId = (() => {
 })();
 
 async function boot() {
-  const [toolsResponse, intentsResponse] = await Promise.all([fetch('/data/tools.json',{cache:'no-store'}),fetch('/data/intents.json',{cache:'no-store'})]);
+  const [toolsResponse, intentsResponse] = await Promise.all([
+    fetch(api('/data/tools.json'), { cache: 'no-store' }),
+    fetch(api('/data/intents.json'), { cache: 'no-store' })
+  ]);
   if (!toolsResponse.ok || !intentsResponse.ok) throw new Error('Database unavailable');
   state.tools = await toolsResponse.json(); state.intents = await intentsResponse.json();
 }
@@ -27,7 +32,7 @@ function detectIntent(query) {
   return best;
 }
 
-function scoreTool(tool,query,intent,profile={}){
+function scoreTool(tool,query,intent,profile={}) {
   const q=normalize(query),words=tokenize(query);const haystack=[tool.name,tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' ');let score=40;
   for(const word of words){if(haystack.includes(word))score+=3;if(normalize(tool.category).includes(word))score+=3;}
   if(/free|budget|cheap|affordable/.test(q)&&tool.freePlan)score+=7;if(intent&&intent.category===tool.category)score+=18;
@@ -36,14 +41,14 @@ function scoreTool(tool,query,intent,profile={}){
   return Math.min(99,score);
 }
 
-async function postEvent(path,payload){try{await fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),keepalive:true});}catch{}}
+async function postEvent(path,payload){try{await fetch(api(path),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),keepalive:true});}catch{}}
 async function trackSearch(intent,profile={}){postEvent('/api/search',{intent:intent?.slug||'general',session:sessionId,profile,source:'recommendation'});}
 async function trackClick(tool,intent,profile={}){postEvent('/api/click',{tool:tool.slug,intent:intent?.slug||'general',session:sessionId,profile,source:'recommendation'});}
 
 function renderResults(query,profile={}){
   const intent=detectIntent(query); trackSearch(intent,profile);
   const results=state.tools.map(tool=>({...tool,score:scoreTool(tool,query,intent,profile)})).sort((a,b)=>b.score-a.score).slice(0,3);const out=document.getElementById('results');
-  out.innerHTML=`<div class="result"><strong>Your profile</strong><div class="chips"><span class="chip">${profile.goal||'general'}</span><span class="chip">${profile.budget||'any budget'}</span><span class="chip">${profile.team||'any team'}</span><span class="chip">${profile.priority||'balanced'}</span></div></div>`+results.map((tool,i)=>{const cta=`/go/${tool.slug}`;return `<article class="result"><span class="score">${tool.score}/100</span><h3>${i===0?'Best match · ':''}${tool.name}</h3><div class="meta">${tool.pricing} · ${tool.category}</div><p>${tool.description}</p><div class="chips">${(tool.features||[]).slice(0,5).map(x=>`<span class="chip">${x}</span>`).join('')}</div><div class="actions" style="margin-top:16px"><span class="hint">${intent?`Matched for: ${intent.title}`:'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">See tool</a></div></article>`;}).join('');
+  out.innerHTML=`<div class="result"><strong>Your profile</strong><div class="chips"><span class="chip">${profile.goal||'general'}</span><span class="chip">${profile.budget||'any budget'}</span><span class="chip">${profile.team||'any team'}</span><span class="chip">${profile.priority||'balanced'}</span></div></div>`+results.map((tool,i)=>{const cta=api(`/go/${tool.slug}`);return `<article class="result"><span class="score">${tool.score}/100</span><h3>${i===0?'Best match · ':''}${tool.name}</h3><div class="meta">${tool.pricing} · ${tool.category}</div><p>${tool.description}</p><div class="chips">${(tool.features||[]).slice(0,5).map(x=>`<span class="chip">${x}</span>`).join('')}</div><div class="actions" style="margin-top:16px"><span class="hint">${intent?`Matched for: ${intent.title}`:'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">See tool</a></div></article>`;}).join('');
   out.querySelectorAll('[data-tool]').forEach(link=>link.addEventListener('click',()=>trackClick(results.find(t=>t.slug===link.dataset.tool),intent,profile)));
   out.scrollIntoView({behavior:'smooth',block:'start'});
 }
