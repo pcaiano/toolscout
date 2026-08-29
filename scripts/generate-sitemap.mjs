@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT=process.cwd();
-const BASE='https://toolscout.luxurybuyerintelligence.workers.dev';
+const BASE='https://trytoolscout.org';
 const EXCLUDE=/^(404|admin|analytics|click|google[0-9a-f]+|seo|tool|tools|compare)\.html$/i;
 const intentSlugs=new Set(JSON.parse(fs.readFileSync(path.join(ROOT,'data','intents.json'),'utf8')).map(x=>x?.slug).filter(Boolean));
 const urls=[BASE+'/',`${BASE}/guides.html`,`${BASE}/blog/`];
