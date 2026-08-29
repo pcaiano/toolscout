@@ -33,7 +33,7 @@ const scoreTool = (tool, intent) => {
     if (!w) continue;
     let value = 0;
     if (key === 'freePlan') value = tool.freePlan ? 10 : 0;
-    else if (key === 'simplicity') value = Number(scores.ease || 0);
+    else if (key === 'simplicity' || key === 'ease') value = Number(scores.ease || 0);
     else if (key === 'price') value = Number(scores.price || 0);
     else value = Number(scores[key] || 0);
     total += value * w;
@@ -51,14 +51,26 @@ const topTools = intent => [...tools]
 const render = intent => {
   const title = titleFromIntent(intent);
   const desc = intent.description || `Tool recommendations for ${title.toLowerCase()}.`;
-  const cards = topTools(intent).map(tool => `
+  const toolsForPage = topTools(intent);
+  const category = intent.category || toolsForPage[0]?.category || 'software';
+  const criteria = Object.keys(intent.weights || {}).filter(k => !['category'].includes(k)).slice(0, 4);
+  const criteriaText = criteria.length ? criteria.join(', ') : 'practical fit, features and usability';
+  const faq = [
+    [`What is the best ${slugWords(intent.slug)}?`, `ToolScout compares options based on ${criteriaText} and the current catalog rather than a generic popularity ranking.`],
+    ['How does ToolScout choose these tools?', 'Recommendations are generated from the current ToolScout catalog and the intent profile for this guide.'],
+    ['Are these recommendations sponsored?', 'Some links may earn ToolScout an affiliate commission. Affiliate relationships do not change the stated fit criteria.']
+  ];
+  const cards = toolsForPage.map((tool, index) => `
     <article class="card">
+      <div class="rank">${index + 1}</div>
       <div class="meta">${esc(tool.category || 'Software')}</div>
       <h2>${esc(tool.name)}</h2>
       <p>${esc(tool.description)}</p>
       <div class="proof">${esc(tool.pricing || 'Pricing varies')}${tool.freePlan ? ' · Free plan' : ''}</div>
+      <div class="features">${(tool.features || []).slice(0, 5).map(f => `<span>${esc(f)}</span>`).join('')}</div>
       <a href="/go/${encodeURIComponent(tool.slug)}" rel="nofollow sponsored">Explore ${esc(tool.name)} →</a>
     </article>`).join('');
+  const faqHtml = faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
   return `<!doctype html>
 <html lang="en">
@@ -66,27 +78,38 @@ const render = intent => {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${esc(title)} — ToolScout</title>
-  <meta name="description" content="${esc(desc)}">
+  <meta name="description" content="${esc(desc)} Compare ${esc(category)} tools selected for ${esc(criteriaText)}.">
   <link rel="canonical" href="${BASE}/${encodeURIComponent(intent.slug)}.html">
   <meta name="robots" content="index,follow">
+  <meta property="og:title" content="${esc(title)} — ToolScout">
+  <meta property="og:description" content="${esc(desc)}">
   <style>
     body{font-family:Inter,system-ui,-apple-system,sans-serif;margin:0;background:#f6f7f9;color:#111827}
-    .wrap{max-width:920px;margin:auto;padding:28px 22px 72px}.brand{font-size:22px;font-weight:850;color:#111827;text-decoration:none}
-    .hero{padding:72px 0 28px}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:#667085}
-    h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:14px 0 18px}.lead{font-size:19px;line-height:1.6;color:#667085}
-    .grid{display:grid;gap:14px}.card{background:#fff;border:1px solid #e4e7ec;border-radius:20px;padding:22px}.meta{font-size:11px;text-transform:uppercase;color:#667085;letter-spacing:.08em;font-weight:800}.card h2{margin:8px 0;font-size:25px}.card p{font-size:16px;line-height:1.55;color:#667085}.proof{font-size:13px;color:#475467;margin:12px 0}.card a{display:inline-block;background:#111827;color:#fff;padding:11px 15px;border-radius:10px;text-decoration:none;font-weight:750}.footer{margin-top:44px;padding-top:24px;border-top:1px solid #e4e7ec;color:#667085;font-size:15px}
+    .wrap{max-width:940px;margin:auto;padding:28px 22px 80px}.brand{font-size:22px;font-weight:850;color:#111827;text-decoration:none}
+    .hero{padding:72px 0 32px}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:#667085}
+    h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:14px 0 18px}.lead{font-size:19px;line-height:1.65;color:#667085;max-width:780px}
+    .sub{font-size:14px;line-height:1.6;color:#475467;margin-top:20px}.grid{display:grid;gap:14px}.card{position:relative;background:#fff;border:1px solid #e4e7ec;border-radius:20px;padding:24px}.rank{position:absolute;right:20px;top:18px;font-size:12px;font-weight:850;color:#98a2b3}.meta{font-size:11px;text-transform:uppercase;color:#667085;letter-spacing:.08em;font-weight:800}.card h2{margin:8px 36px 8px 0;font-size:27px}.card p{font-size:16px;line-height:1.6;color:#667085}.proof{font-size:13px;color:#475467;margin:12px 0}.features{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.features span{font-size:11px;background:#f2f4f7;border:1px solid #eaecf0;border-radius:999px;padding:6px 8px;color:#475467}.card a{display:inline-block;background:#111827;color:#fff;padding:11px 15px;border-radius:10px;text-decoration:none;font-weight:750}.section{margin-top:48px;padding-top:34px;border-top:1px solid #e4e7ec}.section h2{font-size:27px;margin:0 0 10px}.section p{font-size:16px;line-height:1.65;color:#667085}details{background:#fff;border:1px solid #e4e7ec;border-radius:14px;padding:16px 18px;margin:10px 0}summary{cursor:pointer;font-weight:750}details p{margin:10px 0 0}.disclosure{margin-top:36px;color:#667085;font-size:12px;line-height:1.55}
   </style>
 </head>
 <body>
   <div class="wrap">
     <a class="brand" href="/">ToolScout</a>
     <main class="hero">
-      <div class="eyebrow">ToolScout guide</div>
+      <div class="eyebrow">ToolScout guide · ${esc(category)}</div>
       <h1>${esc(title)}</h1>
       <p class="lead">${esc(desc)}</p>
+      <p class="sub">This guide focuses on ${esc(criteriaText)}. Rankings are generated from the current ToolScout catalog and intent profile, then checked for usable matches.</p>
     </main>
     <section class="grid">${cards}</section>
-    <div class="footer">Tell ToolScout what you are trying to accomplish and get a recommendation based on your needs.</div>
+    <section class="section">
+      <h2>How ToolScout chooses</h2>
+      <p>We start with the job to be done, then evaluate the available tools against the needs represented by this guide. Prices and capabilities should be verified before purchase because vendors can change their offers.</p>
+    </section>
+    <section class="section">
+      <h2>Frequently asked questions</h2>
+      ${faqHtml}
+    </section>
+    <div class="disclosure">ToolScout may earn affiliate compensation from some outbound links. Recommendations are based on fit, not affiliate payout.</div>
   </div>
 </body>
 </html>
