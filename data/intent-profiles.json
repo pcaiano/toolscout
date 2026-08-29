@@ -18,6 +18,6 @@
   "best-seo-tools-for-agencies":{"title":"Best SEO Tools for Agencies","weights":{"category":25,"seo":25,"agency":25,"research":15,"integrations":10}},
   "best-workflow-automation-tools":{"title":"Best Workflow Automation Tools","weights":{"category":25,"automation":30,"integrations":30,"ease":10,"price":5}},
   "best-no-code-automation-tools":{"title":"Best No-Code Automation Tools","weights":{"category":25,"automation":30,"integrations":25,"ease":15,"price":5}},
-  "best-lead-capture-form-tools":{"title":"Best Lead Capture Form Tools","weights":{"category":25,"sales":20,"integrations":20,"automation":20,"ease":10,"price":5}},
-  "best-online-form-builders":{"title":"Best Online Form Builders","weights":{"category":30,"ease":25,"integrations":20,"price":15,"automation":10}}
+  "best-lead-capture-forms":{"title":"Best Lead Capture Forms","weights":{"category":30,"sales":18,"integrations":20,"automation":15,"ease":12,"price":5}},
+  "best-forms-for-small-business":{"title":"Best Forms for Small Business","weights":{"category":30,"ease":22,"price":18,"integrations":15,"automation":10,"sales":5}}
 }
