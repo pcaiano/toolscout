@@ -6,6 +6,15 @@
   "semrush": {"url": "", "enabled": false, "publicUrl": "https://www.semrush.com/"},
   "jasper": {"url": "", "enabled": false, "publicUrl": "https://www.jasper.ai/"},
   "zapier": {"url": "", "enabled": false, "publicUrl": "https://zapier.com/"},
+  "make": {"url": "", "enabled": false, "publicUrl": "https://www.make.com/"},
   "surfer": {"url": "", "enabled": false, "publicUrl": "https://surferseo.com/"},
-  "typeform": {"url": "", "enabled": false, "publicUrl": "https://www.typeform.com/"}
+  "typeform": {"url": "", "enabled": false, "publicUrl": "https://www.typeform.com/"},
+  "brevo": {"url": "", "enabled": false, "publicUrl": "https://www.brevo.com/"},
+  "activecampaign": {"url": "", "enabled": false, "publicUrl": "https://www.activecampaign.com/"},
+  "mailchimp": {"url": "", "enabled": false, "publicUrl": "https://mailchimp.com/"},
+  "zoho-crm": {"url": "", "enabled": false, "publicUrl": "https://www.zoho.com/crm/"},
+  "monday-crm": {"url": "", "enabled": false, "publicUrl": "https://monday.com/"},
+  "tally": {"url": "", "enabled": false, "publicUrl": "https://tally.so/"},
+  "ahrefs": {"url": "", "enabled": false, "publicUrl": "https://ahrefs.com/"},
+  "se-ranking": {"url": "", "enabled": false, "publicUrl": "https://seranking.com/"}
 }
