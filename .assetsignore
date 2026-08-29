@@ -2,6 +2,7 @@
 **/.git/**
 **/.wrangler
 **/.wrangler/**
+*.toml
 *.toml.example
 worker/
 workers/
