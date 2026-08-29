@@ -38,6 +38,7 @@ async function readAffiliateMap(request,env){
     return await response.json();
   }catch{return {};
 }}
+function rowsOnly(result){return result?.results||[];}
 async function stats(request,env){
   const url=new URL(request.url);
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
@@ -56,12 +57,12 @@ async function stats(request,env){
     env.DB.prepare("SELECT substr(created_at,1,10) AS day,COUNT(DISTINCT session_id) AS searches FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY substr(created_at,1,10) ORDER BY day ASC").all(),
     readAffiliateMap(request,env)
   ]);
-  const tools=byTool.results||[];
+  const tools=rowsOnly(byTool), intents=rowsOnly(byIntent), sources=rowsOnly(bySource), searchSources=rowsOnly(bySearchSource), searchRows=rowsOnly(searches), opps=rowsOnly(opportunities), clickDays=rowsOnly(dailyClicks), searchDays=rowsOnly(dailySearches);
   const activeSlugs=new Set(Object.entries(affiliate||{}).filter(([,entry])=>entry&&entry.enabled&&entry.url).map(([slug])=>slug));
   const monetizedClicks=tools.filter(row=>activeSlugs.has(String(row.tool_slug))).reduce((sum,row)=>sum+Number(row.clicks||0),0);
   const unmonetizedClicks=Number(total?.clicks||0)-monetizedClicks;
   const affiliateCoverage={catalogTools:Object.keys(affiliate||{}).length,activeTools:activeSlugs.size,toolsWithClicks:tools.length,monetizedClicks,unmonetizedClicks,activeToolSlugs:[...activeSlugs]};
-  return Response.json({total,byTool,byIntent,bySource,bySearchSource,searches,opportunities,dailyClicks,dailySearches,affiliateCoverage},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
+  return Response.json({total,byTool:tools,byIntent:intents,bySource:sources,bySearchSource:searchSources,searches:searchRows,opportunities:opps,dailyClicks:clickDays,dailySearches:searchDays,affiliateCoverage},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
 }
 export default {
   async fetch(request,env,ctx){
