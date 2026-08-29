@@ -102,5 +102,5 @@ function showQuestion() {
 document.getElementById('guidedStart').addEventListener('click', () => { state.step = 0; state.answers = {}; document.getElementById('results').innerHTML = ''; showQuestion(); });
 document.getElementById('back').addEventListener('click', () => { if (state.step > 0) { state.step--; showQuestion(); } });
 document.getElementById('go').addEventListener('click', () => { const query = document.getElementById('need').value.trim(); if (query) renderResults(query); });
-document.getElementById('need').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') document.getElementById('go').click(); });
+document.getElementById('need').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('go').click(); } });
 boot().catch(() => { document.getElementById('results').innerHTML = '<div class="result">ToolScout is temporarily unable to load its database.</div>'; });
