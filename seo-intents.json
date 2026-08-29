@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "pages": [
+    {"slug":"best-crm-for-agencies","title":"Best CRM for Agencies","intent":"best-crm-for-agencies","category":"crm","description":"Compare CRM tools for agencies managing leads, clients, pipelines and recurring workflows."},
+    {"slug":"best-crm-for-startups","title":"Best CRM for Startups","intent":"best-crm-for-startups","category":"crm","description":"A practical shortlist of CRM tools for startups that need to organise sales and customer relationships."},
+    {"slug":"best-automation-tools-for-agencies","title":"Best Automation Tools for Agencies","intent":"best-automation-tools-for-agencies","category":"automation","description":"Compare automation platforms for agencies connecting apps, workflows, data and client operations."},
+    {"slug":"best-marketing-automation-tools","title":"Best Marketing Automation Tools","intent":"best-marketing-automation-tools","category":"marketing","description":"Compare marketing automation platforms for campaigns, email, customer journeys and growth workflows."},
+    {"slug":"best-seo-tools-for-small-business","title":"Best SEO Tools for Small Business","intent":"best-seo-tools-for-small-business","category":"seo","description":"Compare SEO platforms for small businesses researching keywords, competitors, rankings and site health."},
+    {"slug":"best-project-management-tools","title":"Best Project Management Tools","intent":"best-project-management-tools","category":"project-management","description":"Compare project management tools for planning work, collaborating with teams and tracking delivery."},
+    {"slug":"best-email-marketing-tools","title":"Best Email Marketing Tools","intent":"best-email-marketing-tools","category":"marketing","description":"Compare email marketing platforms for campaigns, newsletters, automation and customer communication."},
+    {"slug":"best-lead-generation-tools","title":"Best Lead Generation Tools","intent":"best-lead-generation-tools","category":"marketing","description":"Compare tools for capturing, qualifying and managing leads across digital channels."}
+  ]
+}
