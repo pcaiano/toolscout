@@ -1,0 +1,40 @@
+name: Production Smoke Test
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check production health
+        run: |
+          set -e
+          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/api/health
+          echo
+
+      - name: Check robots
+        run: |
+          set -e
+          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/robots.txt | grep -F 'Sitemap: https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml'
+
+      - name: Check sitemap
+        run: |
+          set -e
+          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml | grep -F '<urlset'
+          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml | grep -F 'best-seo-tools.html'
+
+      - name: Check core pages
+        run: |
+          set -e
+          for page in / /seo.html /tools.html /compare.html /best-seo-tools.html /best-crm-for-small-business.html; do
+            echo "Checking $page"
+            curl --fail --silent --show-error --location "https://toolscout.luxurybuyerintelligence.workers.dev$page" >/dev/null
+          done
