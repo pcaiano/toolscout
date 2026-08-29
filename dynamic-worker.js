@@ -40,12 +40,11 @@ async function readAffiliateMap(request,env){
 }
 async function stats(request,env){
   const url=new URL(request.url);
-  const accessEmail=(request.headers.get('Cf-Access-Authenticated-User-Email')||'').trim().toLowerCase();
-  const configuredEmail=String(env.ACCESS_ADMIN_EMAIL||'').trim().toLowerCase();
-  const originAuthorized=url.hostname===new URL(BASE).hostname && !!configuredEmail && accessEmail===configuredEmail;
+  const accessIdentity=(request.headers.get('Cf-Access-Authenticated-User-Email')||'').trim();
+  const publicAccessAuthorized=url.hostname===new URL(BASE).hostname && !!accessIdentity;
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   const legacyAuthorized=url.hostname!=='trytoolscout.org' && !!env.ADMIN_TOKEN && token===env.ADMIN_TOKEN;
-  if(!originAuthorized&&!legacyAuthorized)return Response.json({error:'unauthorized'},{status:401});
+  if(!publicAccessAuthorized&&!legacyAuthorized)return Response.json({error:'unauthorized'},{status:401});
   const [byTool,byIntent,bySource,bySearchSource,total,searches,opportunities,dailyClicks,dailySearches,affiliate]=await Promise.all([
     env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),
     env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),
@@ -63,14 +62,7 @@ async function stats(request,env){
   const activeSlugs=new Set(Object.entries(affiliate||{}).filter(([,entry])=>entry&&entry.enabled&&entry.url).map(([slug])=>slug));
   const monetizedClicks=tools.filter(row=>activeSlugs.has(String(row.tool_slug))).reduce((sum,row)=>sum+Number(row.clicks||0),0);
   const unmonetizedClicks=Number(total?.clicks||0)-monetizedClicks;
-  const affiliateCoverage={
-    catalogTools:Object.keys(affiliate||{}).length,
-    activeTools:activeSlugs.size,
-    toolsWithClicks:tools.length,
-    monetizedClicks,
-    unmonetizedClicks,
-    activeToolSlugs:[...activeSlugs]
-  };
+  const affiliateCoverage={catalogTools:Object.keys(affiliate||{}).length,activeTools:activeSlugs.size,toolsWithClicks:tools.length,monetizedClicks,unmonetizedClicks,activeToolSlugs:[...activeSlugs]};
 
   return Response.json({total,byTool,byIntent,bySource,bySearchSource,searches,opportunities,dailyClicks,dailySearches,affiliateCoverage},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
 }
