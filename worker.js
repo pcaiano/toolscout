@@ -13,7 +13,7 @@ export default {
     if (url.pathname === '/api/stats') {
       const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,''); if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:cors});
       const [byTool,byIntent,total,searches,opportunities]=await Promise.all([env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT COUNT(*) AS clicks,COUNT(DISTINCT session_id) AS sessions FROM click_events').first(),env.DB.prepare('SELECT intent_slug,COUNT(DISTINCT session_id) AS searches FROM search_events GROUP BY intent_slug ORDER BY searches DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,search_sessions,opportunity_score,status FROM seo_opportunities ORDER BY opportunity_score DESC LIMIT 20').all()]);
-      return Response.json({total,byTool:byTool.results,byIntent:byIntent.results,searches:searches.results,opportunities:opportunities.results},{headers:cors});
+      return Response.json({total,byTool,byIntent,searches,opportunities},{headers:cors});
     }
     if (url.pathname === '/sitemap.xml' && request.method === 'GET') {
       try { const response=await env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url))); if(response.ok){const headers=new Headers(response.headers);headers.set('Content-Type','application/xml; charset=UTF-8');headers.set('Cache-Control','public, max-age=3600');headers.delete('Content-Encoding');return new Response(response.body,{status:response.status,headers});} } catch {}
@@ -29,15 +29,21 @@ export default {
         const response=await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url)));
         const config=await response.json(); const entry=config[tool];
         const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';
-        const source=referrer.includes('best-all-in-one-business-tools')||referrer.includes('best-sales-funnel-software')?'seo-page':'affiliate-redirect';
+        let seoIntent='general';
+        try {
+          const refUrl=new URL(referrer);
+          const page=refUrl.pathname.split('/').filter(Boolean).pop()?.replace(/\.html$/i,'')||'';
+          if(page && page!=='seo') seoIntent=page.slice(0,100);
+        } catch {}
+        const source=seoIntent!=='general'?'seo-page':'affiliate-redirect';
         const cookie=request.headers.get('Cookie')||''; const match=cookie.match(/(?:^|;\s*)toolscout_session=([^;]+)/); const session=match?.[1]||crypto.randomUUID();
         if(entry?.enabled&&entry.url){
-          await env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(tool,'general',session,source).run();
+          await env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(tool,seoIntent,session,source).run();
           const headers=new Headers(); headers.set('Location',entry.url); if(!match)headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=15552000; Path=/; SameSite=Lax`);
           return new Response(null,{status:302,headers});
         }
         if(entry?.publicUrl){
-          await env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(tool,'general',session,source).run();
+          await env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(tool,seoIntent,session,source).run();
           const headers=new Headers(); headers.set('Location',entry.publicUrl); if(!match)headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=15552000; Path=/; SameSite=Lax`);
           return new Response(null,{status:302,headers});
         }
