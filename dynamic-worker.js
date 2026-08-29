@@ -2,8 +2,14 @@ import base from './worker.js';
 import { renderOpportunityPage } from './seo-page.js';
 
 const BASE = 'https://trytoolscout.org';
-const LEGACY_BASE = 'https://toolscout.luxurybuyerintelligence.workers.dev';
-const xmlEscape = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&apos;');
+
+const xmlEscape = value => String(value ?? '')
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&apos;');
+
 const slugFromPath = pathname => { const match=pathname.match(/^\/([a-z0-9][a-z0-9-]*)\.html$/i); return match ? decodeURIComponent(match[1]) : null; };
 async function staticAsset(request,env){ try { const response=await env.ASSETS.fetch(request); return response.ok?response:null; } catch { return null; } }
 async function dynamicOpportunity(request,env,slug){
@@ -15,7 +21,7 @@ async function dynamicOpportunity(request,env,slug){
 }
 async function dynamicSitemap(request,env){
   const baseResponse=await staticAsset(new Request(new URL('/sitemap.xml',request.url)),env); const urls=new Set([BASE+'/']);
-  if(baseResponse){const text=await baseResponse.text();for(const match of text.matchAll(/<loc>([^<]+)<\/loc>/g))urls.add(match[1].replaceAll(LEGACY_BASE,BASE));}
+  if(baseResponse){const text=await baseResponse.text();for(const match of text.matchAll(/<loc>([^<]+)<\/loc>/g))urls.add(match[1]);}
   const rows=await env.DB.prepare("SELECT intent_slug FROM seo_opportunities WHERE status IN ('ready','published') ORDER BY opportunity_score DESC LIMIT 500").all();
   for(const row of rows.results||[]){const slug=String(row.intent_slug||'');if(/^[a-z0-9][a-z0-9-]*$/i.test(slug))urls.add(`${BASE}/${slug}.html`);}
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...urls].map(url=>`  <url><loc>${xmlEscape(url)}</loc></url>`).join('\n')}\n</urlset>\n`;
@@ -28,7 +34,6 @@ async function contentSignals(request,env){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(url.hostname===LEGACY_BASE.replace('https://','')) return Response.redirect(new URL(url.pathname+url.search,BASE).toString(),301);
     if(url.pathname==='/api/content-signals'&&request.method==='GET'){try{return await contentSignals(request,env);}catch{return Response.json({ok:false,signals:[]},{status:500});}}
     if(url.pathname==='/sitemap.xml'&&request.method==='GET'){try{return await dynamicSitemap(request,env);}catch{return base.fetch(request,env,ctx);}}
     if(url.pathname==='/robots.txt'&&request.method==='GET')return new Response(`User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n`,{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'public, max-age=300, s-maxage=3600'}});
