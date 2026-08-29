@@ -8,6 +8,7 @@ on:
       - 'scripts/generate-seo-pages.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/generate-sitemap.mjs'
+      - 'scripts/generate-distribution.mjs'
       - 'robots.txt'
       - '.github/workflows/seo-pages.yml'
   schedule:
@@ -27,6 +28,9 @@ jobs:
       - name: Generate pages
         run: node scripts/generate-seo-pages.mjs
 
+      - name: Generate distribution assets
+        run: node scripts/generate-distribution.mjs
+
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
 
@@ -35,12 +39,12 @@ jobs:
 
       - name: Commit generated SEO assets
         run: |
-          if [ -z "$(git status --porcelain -- '*.html' 'sitemap.xml' 'robots.txt')" ]; then
-            echo "No SEO asset changes to commit."
+          if [ -z "$(git status --porcelain -- '*.html' 'sitemap.xml' 'robots.txt' 'feed.xml')" ]; then
+            echo "No SEO/distribution asset changes to commit."
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.html' sitemap.xml robots.txt
-          git commit -m "Refresh SEO pages and sitemap"
+          git add -- '*.html' sitemap.xml robots.txt feed.xml
+          git commit -m "Refresh SEO and distribution assets"
           git push
