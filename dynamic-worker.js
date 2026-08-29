@@ -2,6 +2,7 @@ import base from './worker.js';
 import { renderOpportunityPage } from './seo-page.js';
 
 const BASE = 'https://trytoolscout.org';
+const ACCESS_IDENTITY_SHA256 = '9f265a1d47ed6b886aa0440b2ee58aab4bf6cac7d0bc4770f6d6cfb3a785217d9';
 
 const xmlEscape = value => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -38,19 +39,17 @@ async function readAffiliateMap(request,env){
     return await response.json();
   }catch{return {};}
 }
-async function stats(request,env,ctx){
+async function sha256Hex(value){
+  const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'').trim().toLowerCase()));
+  return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function stats(request,env){
   const url=new URL(request.url);
-  let accessAuthorized=false;
-  try{
-    if(url.hostname==='trytoolscout.org'&&ctx?.access){
-      const identity=await ctx.access.getIdentity();
-      accessAuthorized=Boolean(identity?.email);
-    }
-  }catch{}
+  const accessEmail=request.headers.get('Cf-Access-Authenticated-User-Email')||'';
+  const accessAuthorized=url.hostname===new URL(BASE).hostname && !!accessEmail && await sha256Hex(accessEmail)===ACCESS_IDENTITY_SHA256;
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   const legacyAuthorized=url.hostname!=='trytoolscout.org' && !!env.ADMIN_TOKEN && token===env.ADMIN_TOKEN;
   if(!accessAuthorized&&!legacyAuthorized)return Response.json({error:'unauthorized'},{status:401});
-
   const [byTool,byIntent,bySource,bySearchSource,total,searches,opportunities,dailyClicks,dailySearches,affiliate]=await Promise.all([
     env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),
     env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),
@@ -63,19 +62,17 @@ async function stats(request,env,ctx){
     env.DB.prepare("SELECT substr(created_at,1,10) AS day,COUNT(DISTINCT session_id) AS searches FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY substr(created_at,1,10) ORDER BY day ASC").all(),
     readAffiliateMap(request,env)
   ]);
-
   const tools=byTool.results||[];
   const activeSlugs=new Set(Object.entries(affiliate||{}).filter(([,entry])=>entry&&entry.enabled&&entry.url).map(([slug])=>slug));
   const monetizedClicks=tools.filter(row=>activeSlugs.has(String(row.tool_slug))).reduce((sum,row)=>sum+Number(row.clicks||0),0);
   const unmonetizedClicks=Number(total?.clicks||0)-monetizedClicks;
   const affiliateCoverage={catalogTools:Object.keys(affiliate||{}).length,activeTools:activeSlugs.size,toolsWithClicks:tools.length,monetizedClicks,unmonetizedClicks,activeToolSlugs:[...activeSlugs]};
-
   return Response.json({total,byTool,byIntent,bySource,bySearchSource,searches,opportunities,dailyClicks,dailySearches,affiliateCoverage},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
 }
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(url.pathname==='/api/stats'&&request.method==='GET'){try{return await stats(request,env,ctx);}catch{return Response.json({error:'stats_failed'},{status:500});}}
+    if(url.pathname==='/api/stats'&&request.method==='GET'){try{return await stats(request,env);}catch{return Response.json({error:'stats_failed'},{status:500});}}
     if(url.pathname==='/api/content-signals'&&request.method==='GET'){try{return await contentSignals(request,env);}catch{return Response.json({ok:false,signals:[]},{status:500});}}
     if(url.pathname==='/sitemap.xml'&&request.method==='GET'){try{return await dynamicSitemap(request,env);}catch{return base.fetch(request,env,ctx);}}
     if(url.pathname==='/robots.txt'&&request.method==='GET')return new Response(`User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n`,{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'public, max-age=300, s-maxage=3600'}});
