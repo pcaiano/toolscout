@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-29T21:30:30.761Z",
+  "generatedAt": "2026-08-29T21:33:06.925Z",
   "source": "aggregated content demand signals",
   "count": 21,
   "items": [
@@ -95,17 +95,31 @@
       "searches": 0
     },
     {
-      "slug": "best-funnel-builders-guide",
-      "intent": "best-funnel-builders",
-      "title": "Funnel Builders: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for funnel builders, shaped by ToolScout demand signals and the criteria that matter.",
+      "slug": "best-forms-for-small-business-guide",
+      "intent": "best-forms-for-small-business",
+      "title": "Forms For Small Business: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for forms for small business, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
-      "slug": "best-lead-capture-form-tools-guide",
-      "intent": "best-lead-capture-form-tools",
-      "title": "Lead Capture Form Tools: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for lead capture form tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "slug": "best-funnel-builder-guide",
+      "intent": "best-funnel-builder",
+      "title": "Funnel Builder: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for funnel builder, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-keyword-research-tools-guide",
+      "intent": "best-keyword-research-tools",
+      "title": "Keyword Research Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for keyword research tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-lead-capture-forms-guide",
+      "intent": "best-lead-capture-forms",
+      "title": "Lead Capture Forms: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for lead capture forms, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
@@ -120,20 +134,6 @@
       "intent": "best-no-code-automation-tools",
       "title": "No Code Automation Tools: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for no code automation tools, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 0
-    },
-    {
-      "slug": "best-online-form-builders-guide",
-      "intent": "best-online-form-builders",
-      "title": "Online Form Builders: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for online form builders, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 0
-    },
-    {
-      "slug": "best-seo-keyword-research-tools-guide",
-      "intent": "best-seo-keyword-research-tools",
-      "title": "SEO Keyword Research Tools: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for seo keyword research tools, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
