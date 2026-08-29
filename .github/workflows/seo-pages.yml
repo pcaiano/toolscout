@@ -9,6 +9,7 @@ on:
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/generate-sitemap.mjs'
       - 'scripts/generate-distribution.mjs'
+      - 'scripts/build-distribution-index.mjs'
       - 'robots.txt'
       - 'llms.txt'
       - '.github/workflows/seo-pages.yml'
@@ -31,6 +32,9 @@ jobs:
 
       - name: Generate distribution assets
         run: node scripts/generate-distribution.mjs
+
+      - name: Build clean guide index
+        run: node scripts/build-distribution-index.mjs
 
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
