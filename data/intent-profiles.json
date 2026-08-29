@@ -11,13 +11,16 @@
   "best-affordable-crm":{"title":"Best Affordable CRM","weights":{"category":30,"price":25,"freePlan":15,"ease":15,"sales":10,"automation":5}},
   "best-marketing-automation-tools":{"title":"Best Marketing Automation Tools","weights":{"category":25,"marketing":25,"automation":25,"integrations":15,"ease":10}},
   "best-email-marketing-tools":{"title":"Best Email Marketing Tools","weights":{"category":30,"marketing":25,"automation":20,"integrations":15,"ease":10}},
-  "best-funnel-builders":{"title":"Best Funnel Builders","weights":{"category":30,"marketing":25,"automation":20,"ease":15,"integrations":10}},
+  "best-funnel-builder":{"title":"Best Funnel Builder","weights":{"category":30,"marketing":25,"automation":20,"ease":15,"integrations":10}},
   "best-ai-ad-creative-tools":{"title":"Best AI Ad Creative Tools","weights":{"category":25,"ai":30,"marketing":25,"content":10,"automation":5,"agency":5}},
-  "best-seo-keyword-research-tools":{"title":"Best SEO Keyword Research Tools","weights":{"category":30,"seo":30,"research":25,"content":10,"ease":5}},
+  "best-keyword-research-tools":{"title":"Best Keyword Research Tools","weights":{"category":30,"seo":30,"research":25,"content":10,"ease":5}},
   "best-competitor-seo-tools":{"title":"Best Competitor SEO Tools","weights":{"category":30,"seo":30,"research":30,"content":5,"integrations":5}},
   "best-seo-tools-for-agencies":{"title":"Best SEO Tools for Agencies","weights":{"category":25,"seo":25,"agency":25,"research":15,"integrations":10}},
   "best-workflow-automation-tools":{"title":"Best Workflow Automation Tools","weights":{"category":25,"automation":30,"integrations":30,"ease":10,"price":5}},
   "best-no-code-automation-tools":{"title":"Best No-Code Automation Tools","weights":{"category":25,"automation":30,"integrations":25,"ease":15,"price":5}},
   "best-lead-capture-forms":{"title":"Best Lead Capture Forms","weights":{"category":30,"sales":18,"integrations":20,"automation":15,"ease":12,"price":5}},
-  "best-forms-for-small-business":{"title":"Best Forms for Small Business","weights":{"category":30,"ease":22,"price":18,"integrations":15,"automation":10,"sales":5}}
+  "best-forms-for-small-business":{"title":"Best Forms for Small Business","weights":{"category":30,"ease":22,"price":18,"integrations":15,"automation":10,"sales":5}},
+  "best-project-management-tools":{"title":"Best Project Management Tools","weights":{"category":30,"ease":15,"integrations":20,"automation":20,"price":15}},
+  "best-productivity-tools-for-teams":{"title":"Best Productivity Tools for Teams","weights":{"category":28,"ease":18,"integrations":20,"automation":18,"price":10,"agency":6}},
+  "best-free-project-management-tools":{"title":"Best Free Project Management Tools","weights":{"category":28,"freePlan":30,"price":20,"ease":12,"integrations":10}}
 }
