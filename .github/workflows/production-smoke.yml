@@ -35,11 +35,13 @@ jobs:
           sitemap="$(curl --fail --silent --show-error "$PROD_BASE/sitemap.xml")"
           printf '%s\n' "$sitemap" | grep -F '<urlset'
           printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/best-seo-tools.html"
+          printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/methodology.html"
+          printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/privacy.html"
 
       - name: Check core pages
         run: |
           set -e
-          for page in / /guides.html /blog/ /tools.html /compare.html /best-seo-tools.html /best-crm-for-small-business.html /tool.html?tool=systeme-io; do
+          for page in / /guides.html /blog/ /tools.html /compare.html /methodology.html /affiliate-disclosure.html /privacy.html /best-seo-tools.html /best-crm-for-small-business.html /tool.html?tool=systeme-io /reports/growth-priority.json; do
             echo "Checking $PROD_BASE$page"
             curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
           done
@@ -49,6 +51,12 @@ jobs:
           set -e
           html="$(curl --fail --silent --show-error "$PROD_BASE/best-ai-marketing-tools.html")"
           printf '%s\n' "$html" | grep -F '<link rel="canonical" href="https://trytoolscout.org/best-ai-marketing-tools.html">'
+
+      - name: Check public-domain analytics auth
+        run: |
+          set -e
+          code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "$PROD_BASE/api/stats")"
+          test "$code" = "401"
 
       - name: Check tracked affiliate redirect
         run: |
