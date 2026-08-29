@@ -28,9 +28,7 @@ export default {
       } catch {}
       return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://toolscout.luxurybuyerintelligence.workers.dev/</loc></url></urlset>',{status:200,headers:{'Content-Type':'application/xml; charset=UTF-8','Cache-Control':'public, max-age=3600'}});
     }
-    if (url.pathname === '/robots.txt' && request.method === 'GET') {
-      return new Response('User-agent: *\nAllow: /\n\nSitemap: https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml\n',{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'public, max-age=3600'}});
-    }
+    if (url.pathname === '/robots.txt') return new Response(null,{status:404});
     if (url.pathname.startsWith('/go/')) {
       const tool=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
       try {
