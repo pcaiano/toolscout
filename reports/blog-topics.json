@@ -1,41 +1,41 @@
 {
-  "generatedAt": "2026-08-29T20:32:11.633Z",
+  "generatedAt": "2026-08-29T20:32:41.164Z",
   "source": "aggregated content demand signals",
   "count": 5,
   "items": [
-    {
-      "slug": "best-ai-marketing-tools-guide",
-      "intent": "best-ai-marketing-tools",
-      "title": "AI Marketing Tools: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for ai marketing tools, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 0
-    },
     {
       "slug": "best-crm-for-small-business-guide",
       "intent": "best-crm-for-small-business",
       "title": "CRM For Small Business: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for crm for small business, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 0
+      "searches": 1
     },
     {
       "slug": "best-free-crm-guide",
       "intent": "best-free-crm",
       "title": "Free CRM: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for free crm, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 0
+      "searches": 1
     },
     {
       "slug": "best-seo-tools-guide",
       "intent": "best-seo-tools",
       "title": "SEO Tools: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for seo tools, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 0
+      "searches": 1
     },
     {
       "slug": "best-tools-for-agencies-guide",
       "intent": "best-tools-for-agencies",
       "title": "Tools For Agencies: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for tools for agencies, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 1
+    },
+    {
+      "slug": "best-ai-marketing-tools-guide",
+      "intent": "best-ai-marketing-tools",
+      "title": "AI Marketing Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for ai marketing tools, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     }
   ]
