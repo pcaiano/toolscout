@@ -17,7 +17,21 @@ export default {
     }
     if (url.pathname.startsWith('/go/')) {
       const tool=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
-      try { const response=await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url))); const config=await response.json(); const entry=config[tool]; if(entry?.enabled&&entry.url)return Response.redirect(entry.url,302); } catch {}
+      try {
+        const response=await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url)));
+        const config=await response.json();
+        const entry=config[tool];
+        if(entry?.enabled&&entry.url){
+          const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';
+          const source=referrer.includes('best-all-in-one-business-tools')?'seo-page':'affiliate-redirect';
+          const session=request.headers.get('Cookie')?.match(/(?:^|;\s*)toolscout_session=([^;]+)/)?.[1] || crypto.randomUUID();
+          await env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(tool,'general',session,source).run();
+          const headers=new Headers();
+          headers.set('Location',entry.url);
+          if(!request.headers.get('Cookie')?.includes('toolscout_session=')) headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=15552000; Path=/; SameSite=Lax`);
+          return new Response(null,{status:302,headers});
+        }
+      } catch {}
       return Response.redirect(new URL('/tools.html',request.url).toString(),302);
     }
     return env.ASSETS ? env.ASSETS.fetch(request) : new Response('Not found',{status:404});
