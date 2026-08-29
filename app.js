@@ -29,6 +29,25 @@ function getSessionId() {
 }
 const sessionId = getSessionId();
 
+function logoUrl(tool) {
+  try {
+    const host = new URL(tool.sourceUrl).hostname;
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`;
+  } catch {
+    return '';
+  }
+}
+
+function initials(name) {
+  return String(name || 'T').split(/\s+/).filter(Boolean).slice(0,2).map(x => x[0]).join('').toUpperCase();
+}
+
+function toolLogo(tool, large = false) {
+  const url = logoUrl(tool);
+  const sizeClass = large ? 'tool-logo large' : 'tool-logo';
+  return `<div class="${sizeClass}">${url ? `<img src="${url}" alt="${tool.name} logo" width="${large ? 52 : 44}" height="${large ? 52 : 44}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">` : ''}<span class="logo-fallback" ${url ? 'style="display:none"' : ''}>${initials(tool.name)}</span></div>`;
+}
+
 async function boot() {
   const [toolsResponse, intentsResponse] = await Promise.all([
     fetch(asset('/data/tools.json'), { cache: 'no-store' }),
@@ -84,9 +103,7 @@ function scoreTool(tool, query, intent, profile = {}) {
 }
 
 async function postEvent(path, payload) {
-  try {
-    await fetch(api(path), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), keepalive: true });
-  } catch {}
+  try { await fetch(api(path), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), keepalive: true }); } catch {}
 }
 async function trackSearch(intent, profile = {}) { postEvent('/api/search', { intent: intent?.slug || 'general', session: sessionId, profile, source: 'recommendation' }); }
 async function trackClick(tool, intent, profile = {}) { if (tool) postEvent('/api/click', { tool: tool.slug, intent: intent?.slug || 'general', session: sessionId, profile, source: 'recommendation' }); }
@@ -98,12 +115,12 @@ function renderResults(query, profile = {}) {
   const results = state.tools.map(tool => ({ ...tool, score: scoreTool(tool, query, intent, profile) })).sort((a, b) => b.score - a.score).slice(0, 3);
   const out = document.getElementById('results');
   if (!results.length) {
-    out.innerHTML = '<div class="result">No matching tools yet. Try describing your goal differently.</div>';
+    out.innerHTML = '<div class="empty-state"><strong>No close matches yet.</strong><span>Try describing the job, budget or team in a little more detail.</span></div>';
     return;
   }
-  out.innerHTML = `<div class="result"><strong>Your profile</strong><div class="chips"><span class="chip">${profile.goal || 'general'}</span><span class="chip">${profile.budget || 'any budget'}</span><span class="chip">${profile.team || 'any team'}</span><span class="chip">${profile.priority || 'balanced'}</span></div></div>` + results.map((tool, i) => {
+  out.innerHTML = `<div class="profile-card"><div><span class="eyebrow">Your fit profile</span><h2>We found a few strong matches.</h2></div><div class="chips"><span class="chip">${profile.goal || 'general'}</span><span class="chip">${profile.budget || 'any budget'}</span><span class="chip">${profile.team || 'any team'}</span><span class="chip">${profile.priority || 'balanced'}</span></div></div>` + results.map((tool, i) => {
     const cta = affiliate(tool.slug);
-    return `<article class="result"><span class="score">${tool.score}/100</span><h3>${i === 0 ? 'Best match · ' : ''}${tool.name}</h3><div class="meta">${tool.pricing} · ${tool.category}</div><p>${tool.description}</p><div class="chips">${(tool.features || []).slice(0, 5).map(x => `<span class="chip">${x}</span>`).join('')}</div><div class="actions" style="margin-top:16px"><span class="hint">${intent ? `Matched for: ${intent.title}` : 'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">See tool</a></div></article>`;
+    return `<article class="result-card ${i === 0 ? 'featured' : ''}"><div class="result-top"><div class="brand-row">${toolLogo(tool)}<div><div class="meta">${tool.category}</div><h3>${tool.name}</h3></div></div><div class="match-score"><span>Match</span><strong>${tool.score}%</strong></div></div><p>${tool.description}</p><div class="chips">${(tool.features || []).slice(0, 5).map(x => `<span class="chip">${x}</span>`).join('')}</div><div class="result-bottom"><span class="fit-note">${intent ? `Best for: ${intent.title}` : 'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">Explore ${tool.name} →</a></div></article>`;
   }).join('');
   out.querySelectorAll('[data-tool]').forEach(link => link.addEventListener('click', () => trackClick(results.find(t => t.slug === link.dataset.tool), intent, profile)));
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -150,6 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
   init();
   boot().catch(() => {
     const out = document.getElementById('results');
-    if (out) out.innerHTML = '<div class="result">ToolScout is temporarily unable to load its database. Please try again in a moment.</div>';
+    if (out) out.innerHTML = '<div class="empty-state"><strong>ToolScout is temporarily unable to load its database.</strong><span>Please try again in a moment.</span></div>';
   });
 });
