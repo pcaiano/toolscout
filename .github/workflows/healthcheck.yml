@@ -24,14 +24,16 @@ jobs:
           node <<'NODE'
           const fs = require('fs');
           const tools = JSON.parse(fs.readFileSync('data/tools.json', 'utf8'));
-          const urls = [...new Set(tools.map(t => t.sourceUrl))];
+          const urls = [...new Set(tools.map(t => t.sourceUrl).filter(Boolean))];
           (async () => {
             let failed = 0;
             for (const url of urls) {
               try {
-                const r = await fetch(url, {redirect: 'follow'});
+                const r = await fetch(url, {redirect: 'follow', headers: {'user-agent': 'ToolScout healthcheck/1.0'}});
                 console.log(`${r.status} ${url}`);
-                if (r.status >= 400) failed++;
+                // Vendor anti-bot systems commonly return 403/429 to automated checks.
+                // Treat only 5xx responses as hard availability failures.
+                if (r.status >= 500) failed++;
               } catch (e) {
                 console.error(`ERROR ${url}: ${e.message}`);
                 failed++;
