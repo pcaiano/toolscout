@@ -23,20 +23,35 @@ function logoUrl(tool) { try { const host=new URL(tool.sourceUrl).hostname; retu
 function initials(name) { return String(name||'T').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase(); }
 function toolLogo(tool,large=false){const url=logoUrl(tool),size=large?56:46;return `<div class="tool-logo${large?' large':''}">${url?`<img src="${url}" alt="${tool.name} logo" width="${size}" height="${size}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">`:''}<span class="logo-fallback" ${url?'style="display:none"':''}>${initials(tool.name)}</span></div>`;}
 
+function inferredProfile(query, profile={}) {
+  const q=normalize(query); const p={...profile};
+  if(!p.team && /\bagenc(?:y|ies)\b/.test(q)) p.team='agency';
+  if(!p.goal && /\bcrm\b|sales|customer/.test(q)) p.goal='crm';
+  if(!p.goal && /seo|search visibility|keywords|organic/.test(q)) p.goal='seo';
+  if(!p.goal && /forms?|surveys?|lead capture/.test(q)) p.goal='forms';
+  if(!p.goal && /marketing|email|automation|ads?/.test(q)) p.goal='marketing';
+  if(!p.budget && /free|budget|cheap|affordable/.test(q)) p.budget='free';
+  if(!p.priority && /automation|automate|workflow/.test(q)) p.priority='automation';
+  if(!p.priority && /integration|integrate|apps?/.test(q)) p.priority='integrations';
+  if(!p.priority && /simple|easy|ease/.test(q)) p.priority='ease';
+  return p;
+}
+
 function fitReasons(tool,query,intent,profile={}){
-  const q=normalize(query),haystack=[tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' '),reasons=[];
+  const p=inferredProfile(query,profile), q=normalize(query),haystack=[tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' '),reasons=[];
   const s=tool.scores||{};
+  if(p.team==='agency'&&Number(s.agency||0)>=8)reasons.push('Strong fit for agencies');
   if(intent&&intent.category===tool.category)reasons.push(`Strong ${tool.category} fit`);
-  if(profile.goal&&normalize(tool.category)===normalize(profile.goal)&&reasons.length<2)reasons.push(`Strong fit for ${profile.goal}`);
-  if(profile.budget==='free'&&tool.freePlan)reasons.push('Free plan available');
-  if(profile.priority==='automation'&&Number(s.automation||0)>=7)reasons.push('Strong automation fit');
-  if(profile.priority==='integrations'&&Number(s.integrations||0)>=7)reasons.push('Strong integration coverage');
-  if(profile.priority==='ease'&&Number(s.ease||0)>=8)reasons.push('Easy to use');
-  if(profile.priority==='features'&&Number(s.features||0)>=7)reasons.push('Strong feature depth');
-  if(profile.team==='solo'&&Number(s.ease||0)>=8)reasons.push('Well suited to solo users');
-  if(profile.team==='small'&&Number(s.agency||0)>=7)reasons.push('Strong fit for small teams and agencies');
-  if(profile.team==='team'&&Number(s.agency||0)>=7)reasons.push('Scales well for growing teams');
-  if(profile.team==='large'&&Number(s.agency||0)>=8)reasons.push('Built for larger organisations');
+  if(p.goal&&normalize(tool.category)===normalize(p.goal)&&reasons.length<2)reasons.push(`Strong fit for ${p.goal}`);
+  if(p.budget==='free'&&tool.freePlan)reasons.push('Free plan available');
+  if(p.priority==='automation'&&Number(s.automation||0)>=7)reasons.push('Strong automation fit');
+  if(p.priority==='integrations'&&Number(s.integrations||0)>=7)reasons.push('Strong integration coverage');
+  if(p.priority==='ease'&&Number(s.ease||0)>=8)reasons.push('Easy to use');
+  if(p.priority==='features'&&Number(s.features||0)>=7)reasons.push('Strong feature depth');
+  if(p.team==='solo'&&Number(s.ease||0)>=8)reasons.push('Well suited to solo users');
+  if(p.team==='small'&&Number(s.agency||0)>=7)reasons.push('Strong fit for small teams');
+  if(p.team==='team'&&Number(s.agency||0)>=7)reasons.push('Scales well for growing teams');
+  if(p.team==='large'&&Number(s.agency||0)>=8)reasons.push('Built for larger organisations');
   if(!reasons.length&&q){const words=tokenize(q),matched=words.find(w=>haystack.includes(w));if(matched)reasons.push(`Matches your ${matched} needs`);}
   if(!reasons.length&&tool.bestFor?.length)reasons.push(`Best for ${tool.bestFor[0]}`);
   return reasons.slice(0,3);
@@ -47,22 +62,23 @@ async function boot(){const [toolsResponse,intentsResponse]=await Promise.all([f
 function detectIntent(query){const q=normalize(query);let best=null,bestScore=0;for(const intent of state.intents){let score=0;for(const keyword of intent.keywords||[])if(q.includes(normalize(keyword)))score+=2;if(intent.slug.includes('free')&&/free|budget|cheap|affordable/.test(q))score+=5;if(intent.slug.includes('crm')&&/crm|sales|customer/.test(q))score+=4;if(intent.slug.includes('agency')&&/agency|agencies|client/.test(q))score+=6;if(intent.slug.includes('seo')&&/seo|keywords|organic|search/.test(q))score+=4;if(score>bestScore){best=intent;bestScore=score;}}return best;}
 
 function scoreTool(tool,query,intent,profile={}){
-  const q=normalize(query),words=tokenize(query),haystack=[tool.name,tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' ');
+  const p=inferredProfile(query,profile), q=normalize(query),words=tokenize(query),haystack=[tool.name,tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' ');
   let score=25; const s=tool.scores||{};
   for(const word of words){if(haystack.includes(word))score+=3;if(normalize(tool.category).includes(word))score+=3;}
   if(intent&&intent.category===tool.category)score+=18;
-  if(profile.goal&&normalize(tool.category)===normalize(profile.goal))score+=18;
-  if((profile.budget==='free'||/free|budget|cheap|affordable/.test(q))&&tool.freePlan)score+=10;
-  if(profile.budget==='low'&&Number(s.price||0)>=7)score+=7;
-  if(profile.budget==='mid'&&Number(s.price||0)>=5)score+=4;
-  if(profile.priority==='ease')score+=Number(s.ease||0)*1.5;
-  if(profile.priority==='automation')score+=Number(s.automation||0)*1.5;
-  if(profile.priority==='integrations')score+=Number(s.integrations||0)*1.5;
-  if(profile.priority==='features')score+=Number(s.features||0)*1.5;
-  if(profile.team==='solo')score+=Number(s.ease||0)*0.6;
-  if(profile.team==='small')score+=Number(s.agency||0)*0.9;
-  if(profile.team==='team')score+=Number(s.agency||0)*0.9;
-  if(profile.team==='large')score+=Number(s.agency||0)*1.1;
+  if(p.goal&&normalize(tool.category)===normalize(p.goal))score+=18;
+  if((p.budget==='free'||/free|budget|cheap|affordable/.test(q))&&tool.freePlan)score+=10;
+  if(p.budget==='low'&&Number(s.price||0)>=7)score+=7;
+  if(p.budget==='mid'&&Number(s.price||0)>=5)score+=4;
+  if(p.priority==='ease')score+=Number(s.ease||0)*1.5;
+  if(p.priority==='automation')score+=Number(s.automation||0)*1.5;
+  if(p.priority==='integrations')score+=Number(s.integrations||0)*1.5;
+  if(p.priority==='features')score+=Number(s.features||0)*1.5;
+  if(p.team==='agency')score+=Number(s.agency||0)*2.2;
+  if(p.team==='solo')score+=Number(s.ease||0)*0.6;
+  if(p.team==='small')score+=Number(s.agency||0)*0.9;
+  if(p.team==='team')score+=Number(s.agency||0)*0.9;
+  if(p.team==='large')score+=Number(s.agency||0)*1.1;
   if(intent){const w=intent.weights||{};if(w.freePlan&&tool.freePlan)score+=Math.min(8,w.freePlan*2);if(w.automation)score+=(Number(s.automation||0)*w.automation)/5;if(w.integrations)score+=(Number(s.integrations||0)*w.integrations)/5;if(w.features)score+=(Number(s.features||0)*w.features)/5;}
   return Math.round(Math.min(99,score));
 }
@@ -72,11 +88,11 @@ async function trackSearch(intent,profile={}){postEvent('/api/search',{intent:in
 async function trackClick(tool,intent,profile={}){if(tool)postEvent('/api/click',{tool:tool.slug,intent:intent?.slug||'general',session:sessionId,profile,source:'recommendation'});}
 
 function renderResults(query,profile={}){
-  if(!state.ready)return;const intent=detectIntent(query);trackSearch(intent,profile);
-  const results=state.tools.map(tool=>({...tool,score:scoreTool(tool,query,intent,profile)})).sort((a,b)=>b.score-a.score).slice(0,3);const out=document.getElementById('results');
+  if(!state.ready)return;const effectiveProfile=inferredProfile(query,profile),intent=detectIntent(query);trackSearch(intent,effectiveProfile);
+  const results=state.tools.map(tool=>({...tool,score:scoreTool(tool,query,intent,effectiveProfile)})).sort((a,b)=>b.score-a.score).slice(0,3);const out=document.getElementById('results');
   if(!results.length){out.innerHTML='<div class="empty-state"><strong>No close matches yet.</strong><span>Try describing the job, budget or team in a little more detail.</span></div>';return;}
-  out.innerHTML=`<div class="profile-card"><div><span class="eyebrow">Your fit profile</span><h2>We found a few strong matches.</h2></div><div class="chips">${profile.goal?`<span class="chip">${profile.goal}</span>`:''}${profile.budget?`<span class="chip">${profile.budget}</span>`:''}${profile.team?`<span class="chip">${profile.team}</span>`:''}${profile.priority?`<span class="chip">${profile.priority}</span>`:''}</div></div>`+results.map((tool,i)=>{const cta=affiliate(tool.slug),reasons=fitReasons(tool,query,intent,profile);return `<article class="result-card ${i===0?'featured':''}"><div class="result-top"><div class="brand-row">${toolLogo(tool)}<div><div class="meta">${tool.category}</div><h3>${tool.name}</h3></div></div><div class="match-score"><span>Match</span><strong>${tool.score}%</strong></div></div><div class="tool-proof"><span>${tool.pricing}</span>${tool.freePlan?'<span>Free plan</span>':''}</div><p>${tool.description}</p><div class="reason-grid">${reasons.map(reason=>`<div class="reason"><span>✓</span>${reason}</div>`).join('')}</div><div class="chips">${(tool.features||[]).slice(0,5).map(x=>`<span class="chip">${x}</span>`).join('')}</div><div class="result-bottom"><span class="fit-note">${i===0?'Top recommendation':intent?`Also worth considering for ${intent.title}`:'Strong alternative'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">Explore ${tool.name} <span>→</span></a></div></article>`;}).join('');
-  out.querySelectorAll('[data-tool]').forEach(link=>link.addEventListener('click',()=>trackClick(results.find(t=>t.slug===link.dataset.tool),intent,profile)));out.scrollIntoView({behavior:'smooth',block:'start'});
+  out.innerHTML=`<div class="profile-card"><div><span class="eyebrow">Your fit profile</span><h2>We found a few strong matches.</h2></div><div class="chips">${effectiveProfile.goal?`<span class="chip">${effectiveProfile.goal}</span>`:''}${effectiveProfile.budget?`<span class="chip">${effectiveProfile.budget}</span>`:''}${effectiveProfile.team?`<span class="chip">${effectiveProfile.team}</span>`:''}${effectiveProfile.priority?`<span class="chip">${effectiveProfile.priority}</span>`:''}</div></div>`+results.map((tool,i)=>{const cta=affiliate(tool.slug),reasons=fitReasons(tool,query,intent,effectiveProfile);return `<article class="result-card ${i===0?'featured':''}"><div class="result-top"><div class="brand-row">${toolLogo(tool)}<div><div class="meta">${tool.category}</div><h3>${tool.name}</h3></div></div><div class="match-score"><span>Match</span><strong>${tool.score}%</strong></div></div><div class="tool-proof"><span>${tool.pricing}</span>${tool.freePlan?'<span>Free plan</span>':''}</div><p>${tool.description}</p><div class="reason-grid">${reasons.map(reason=>`<div class="reason"><span>✓</span>${reason}</div>`).join('')}</div><div class="chips">${(tool.features||[]).slice(0,5).map(x=>`<span class="chip">${x}</span>`).join('')}</div><div class="result-bottom"><span class="fit-note">${i===0?'Top recommendation':intent?`Also worth considering for ${intent.title}`:'Strong alternative'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">Explore ${tool.name} <span>→</span></a></div></article>`;}).join('');
+  out.querySelectorAll('[data-tool]').forEach(link=>link.addEventListener('click',()=>trackClick(results.find(t=>t.slug===link.dataset.tool),intent,effectiveProfile)));out.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function showQuestion(){const q=questions[state.step];document.getElementById('guided').style.display='block';document.getElementById('progress').textContent=`Question ${state.step+1} of ${questions.length}`;document.getElementById('question').textContent=q.title;document.getElementById('choices').innerHTML=q.choices.map(([value,label])=>`<button type="button" class="choice ${state.answers[q.id]===value?'selected':''}" data-value="${value}">${label}</button>`).join('');document.getElementById('back').style.visibility=state.step?'visible':'hidden';document.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{state.answers[q.id]=btn.dataset.value;if(state.step<questions.length-1){state.step++;showQuestion();}else{document.getElementById('guided').style.display='none';renderResults('guided recommendation',{...state.answers});}}));}
