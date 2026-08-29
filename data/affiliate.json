@@ -1,11 +1,11 @@
 {
-  "systeme-io": {"url": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109", "enabled": true},
-  "jotform": {"url": "", "enabled": false},
-  "hubspot": {"url": "", "enabled": false},
-  "pipedrive": {"url": "", "enabled": false},
-  "semrush": {"url": "", "enabled": false},
-  "jasper": {"url": "", "enabled": false},
-  "zapier": {"url": "", "enabled": false},
-  "surfer": {"url": "", "enabled": false},
-  "typeform": {"url": "", "enabled": false}
+  "systeme-io": {"url": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109", "enabled": true, "publicUrl": "https://systeme.io/"},
+  "jotform": {"url": "", "enabled": false, "publicUrl": "https://www.jotform.com/"},
+  "hubspot": {"url": "", "enabled": false, "publicUrl": "https://www.hubspot.com/"},
+  "pipedrive": {"url": "", "enabled": false, "publicUrl": "https://www.pipedrive.com/"},
+  "semrush": {"url": "", "enabled": false, "publicUrl": "https://www.semrush.com/"},
+  "jasper": {"url": "", "enabled": false, "publicUrl": "https://www.jasper.ai/"},
+  "zapier": {"url": "", "enabled": false, "publicUrl": "https://zapier.com/"},
+  "surfer": {"url": "", "enabled": false, "publicUrl": "https://surferseo.com/"},
+  "typeform": {"url": "", "enabled": false, "publicUrl": "https://www.typeform.com/"}
 }
