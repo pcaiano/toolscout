@@ -9,6 +9,7 @@ on:
       - 'scripts/generate-blog.mjs'
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/validate-seo-pages.mjs'
+      - 'scripts/validate-intent-coverage.mjs'
       - 'scripts/generate-sitemap.mjs'
       - 'scripts/generate-distribution.mjs'
       - 'scripts/build-distribution-index.mjs'
@@ -29,6 +30,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate intent coverage
+        run: node scripts/validate-intent-coverage.mjs
 
       - name: Generate pages
         run: node scripts/generate-seo-pages.mjs
