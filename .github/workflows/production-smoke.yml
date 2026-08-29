@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+env:
+  PROD_BASE: https://trytoolscout.org
+  LEGACY_BASE: https://toolscout.luxurybuyerintelligence.workers.dev
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
@@ -17,24 +21,30 @@ jobs:
       - name: Check production health
         run: |
           set -e
-          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/api/health
+          curl --fail --silent --show-error "$PROD_BASE/api/health"
           echo
 
       - name: Check robots
         run: |
           set -e
-          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/robots.txt | grep -F 'Sitemap: https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml'
+          curl --fail --silent --show-error "$PROD_BASE/robots.txt" | grep -F "Sitemap: $PROD_BASE/sitemap.xml"
 
       - name: Check sitemap
         run: |
           set -e
-          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml | grep -F '<urlset'
-          curl --fail --silent --show-error https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml | grep -F 'best-seo-tools.html'
+          sitemap="$(curl --fail --silent --show-error "$PROD_BASE/sitemap.xml")"
+          printf '%s\n' "$sitemap" | grep -F '<urlset'
+          printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/best-seo-tools.html"
 
       - name: Check core pages
         run: |
           set -e
-          for page in / /seo.html /tools.html /compare.html /best-seo-tools.html /best-crm-for-small-business.html; do
-            echo "Checking $page"
-            curl --fail --silent --show-error --location "https://toolscout.luxurybuyerintelligence.workers.dev$page" >/dev/null
+          for page in / /guides.html /blog/ /tools.html /compare.html /best-seo-tools.html /best-crm-for-small-business.html; do
+            echo "Checking $PROD_BASE$page"
+            curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
           done
+
+      - name: Check legacy Worker endpoint
+        run: |
+          set -e
+          curl --fail --silent --show-error "$LEGACY_BASE/api/health" | grep -F '"ok":true'
