@@ -6,6 +6,8 @@ on:
       - 'data/intents.json'
       - 'data/tools.json'
       - 'scripts/generate-seo-pages.mjs'
+      - 'scripts/generate-blog.mjs'
+      - 'scripts/build-blog-topics.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/generate-sitemap.mjs'
       - 'scripts/generate-distribution.mjs'
@@ -31,6 +33,12 @@ jobs:
       - name: Generate pages
         run: node scripts/generate-seo-pages.mjs
 
+      - name: Generate blog topics
+        run: node scripts/build-blog-topics.mjs
+
+      - name: Generate blog
+        run: node scripts/generate-blog.mjs
+
       - name: Generate distribution assets
         run: node scripts/generate-distribution.mjs
 
@@ -48,12 +56,12 @@ jobs:
 
       - name: Commit generated SEO assets
         run: |
-          if [ -z "$(git status --porcelain -- '*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'reports/distribution-queue.json')" ]; then
+          if [ -z "$(git status --porcelain -- '*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.html' sitemap.xml robots.txt feed.xml llms.txt reports/distribution-queue.json
-          git commit -m "Refresh SEO and distribution assets"
+          git add -- '*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports
+          git commit -m "Refresh SEO, blog and distribution assets"
           git push
