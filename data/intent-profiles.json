@@ -1,22 +1,23 @@
 {
-  "best-crm-for-small-business": {
-    "title": "Best CRM for Small Business",
-    "weights": {"category": 30, "freePlan": 15, "price": 15, "automation": 15, "ease": 10, "integrations": 10, "sales": 5}
-  },
-  "best-free-crm": {
-    "title": "Best Free CRM Tools",
-    "weights": {"category": 30, "freePlan": 35, "price": 20, "ease": 10, "sales": 5}
-  },
-  "best-ai-marketing-tools": {
-    "title": "Best AI Marketing Tools",
-    "weights": {"category": 30, "ai": 20, "marketing": 20, "automation": 15, "integrations": 10, "ease": 5}
-  },
-  "best-seo-tools": {
-    "title": "Best SEO Tools",
-    "weights": {"category": 35, "seo": 25, "research": 15, "content": 10, "integrations": 10, "ease": 5}
-  },
-  "best-tools-for-agencies": {
-    "title": "Best Tools for Agencies",
-    "weights": {"category": 20, "automation": 20, "integrations": 20, "agency": 20, "marketing": 10, "ease": 10}
-  }
+  "best-crm-for-small-business":{"title":"Best CRM for Small Business","weights":{"category":30,"freePlan":15,"price":15,"automation":15,"ease":10,"integrations":10,"sales":5}},
+  "best-free-crm":{"title":"Best Free CRM Tools","weights":{"category":30,"freePlan":35,"price":20,"ease":10,"sales":5}},
+  "best-ai-marketing-tools":{"title":"Best AI Marketing Tools","weights":{"category":30,"ai":20,"marketing":20,"automation":15,"integrations":10,"ease":5}},
+  "best-seo-tools":{"title":"Best SEO Tools","weights":{"category":35,"seo":25,"research":15,"content":10,"integrations":10,"ease":5}},
+  "best-tools-for-agencies":{"title":"Best Tools for Agencies","weights":{"category":20,"automation":20,"integrations":20,"agency":20,"marketing":10,"ease":10}},
+  "best-crm-for-consultants":{"title":"Best CRM for Consultants","weights":{"category":30,"sales":20,"ease":15,"automation":15,"integrations":10,"price":10}},
+  "best-crm-for-real-estate":{"title":"Best CRM for Real Estate","weights":{"category":30,"sales":25,"automation":20,"integrations":15,"ease":10}},
+  "best-crm-for-sales-teams":{"title":"Best CRM for Sales Teams","weights":{"category":30,"sales":30,"automation":20,"integrations":15,"ease":5}},
+  "best-crm-with-automation":{"title":"Best CRM With Automation","weights":{"category":30,"automation":30,"integrations":20,"sales":15,"ease":5}},
+  "best-affordable-crm":{"title":"Best Affordable CRM","weights":{"category":30,"price":25,"freePlan":15,"ease":15,"sales":10,"automation":5}},
+  "best-marketing-automation-tools":{"title":"Best Marketing Automation Tools","weights":{"category":25,"marketing":25,"automation":25,"integrations":15,"ease":10}},
+  "best-email-marketing-tools":{"title":"Best Email Marketing Tools","weights":{"category":30,"marketing":25,"automation":20,"integrations":15,"ease":10}},
+  "best-funnel-builders":{"title":"Best Funnel Builders","weights":{"category":30,"marketing":25,"automation":20,"ease":15,"integrations":10}},
+  "best-ai-ad-creative-tools":{"title":"Best AI Ad Creative Tools","weights":{"category":25,"ai":30,"marketing":25,"content":10,"automation":5,"agency":5}},
+  "best-seo-keyword-research-tools":{"title":"Best SEO Keyword Research Tools","weights":{"category":30,"seo":30,"research":25,"content":10,"ease":5}},
+  "best-competitor-seo-tools":{"title":"Best Competitor SEO Tools","weights":{"category":30,"seo":30,"research":30,"content":5,"integrations":5}},
+  "best-seo-tools-for-agencies":{"title":"Best SEO Tools for Agencies","weights":{"category":25,"seo":25,"agency":25,"research":15,"integrations":10}},
+  "best-workflow-automation-tools":{"title":"Best Workflow Automation Tools","weights":{"category":25,"automation":30,"integrations":30,"ease":10,"price":5}},
+  "best-no-code-automation-tools":{"title":"Best No-Code Automation Tools","weights":{"category":25,"automation":30,"integrations":25,"ease":15,"price":5}},
+  "best-lead-capture-form-tools":{"title":"Best Lead Capture Form Tools","weights":{"category":25,"sales":20,"integrations":20,"automation":20,"ease":10,"price":5}},
+  "best-online-form-builders":{"title":"Best Online Form Builders","weights":{"category":30,"ease":25,"integrations":20,"price":15,"automation":10}}
 }
