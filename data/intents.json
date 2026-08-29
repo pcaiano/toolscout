@@ -1,42 +1,23 @@
 [
-  {
-    "slug":"best-crm-for-small-business",
-    "title":"Best CRM for Small Business",
-    "description":"CRM recommendations weighted for simplicity, affordability and practical sales automation.",
-    "category":"crm",
-    "weights":{"price":1.4,"freePlan":1.3,"simplicity":1.3,"automation":1.1,"integrations":1.0},
-    "keywords":["crm","sales","small business","pipeline","customers","affordable","simple"]
-  },
-  {
-    "slug":"best-free-crm",
-    "title":"Best Free CRM Tools",
-    "description":"CRM recommendations prioritising genuinely useful free plans and low-cost entry points.",
-    "category":"crm",
-    "weights":{"price":1.6,"freePlan":2.0,"simplicity":1.2,"automation":1.0,"integrations":1.0},
-    "keywords":["crm","free","budget","sales","no budget","cheap"]
-  },
-  {
-    "slug":"best-ai-marketing-tools",
-    "title":"Best AI Marketing Tools",
-    "description":"AI marketing tools selected for practical content, advertising and automation use cases.",
-    "category":"marketing",
-    "weights":{"price":1.0,"freePlan":1.0,"simplicity":1.0,"automation":1.4,"integrations":1.1},
-    "keywords":["ai","marketing","automation","email","funnels","advertising","content"]
-  },
-  {
-    "slug":"best-seo-tools",
-    "title":"Best SEO Tools",
-    "description":"SEO tools matched to keyword research, competitive intelligence and content workflows.",
-    "category":"seo",
-    "weights":{"price":1.0,"freePlan":0.9,"simplicity":1.0,"automation":1.2,"integrations":1.2},
-    "keywords":["seo","keywords","search","competitive research","content"]
-  },
-  {
-    "slug":"best-tools-for-agencies",
-    "title":"Best Tools for Agencies",
-    "description":"Software recommendations for agencies that need workflows, clients, collaboration and integrations.",
-    "category":"business",
-    "weights":{"price":0.9,"freePlan":0.8,"simplicity":1.0,"automation":1.4,"integrations":1.5},
-    "keywords":["agency","agencies","clients","marketing","crm","automation","collaboration","workflow"]
-  }
+  {"slug":"best-crm-for-small-business","title":"Best CRM for Small Business","description":"CRM recommendations weighted for simplicity, affordability and practical sales automation.","category":"crm","weights":{"price":1.4,"freePlan":1.3,"simplicity":1.3,"automation":1.1,"integrations":1.0},"keywords":["crm","sales","small business","pipeline","customers","affordable","simple"]},
+  {"slug":"best-free-crm","title":"Best Free CRM Tools","description":"CRM recommendations prioritising genuinely useful free plans and low-cost entry points.","category":"crm","weights":{"price":1.6,"freePlan":2.0,"simplicity":1.2,"automation":1.0,"integrations":1.0},"keywords":["crm","free","budget","sales","no budget","cheap"]},
+  {"slug":"best-ai-marketing-tools","title":"Best AI Marketing Tools","description":"AI marketing tools selected for practical content, advertising and automation use cases.","category":"marketing","weights":{"price":1.0,"freePlan":1.0,"simplicity":1.0,"automation":1.4,"integrations":1.1},"keywords":["ai","marketing","automation","email","funnels","advertising","content"]},
+  {"slug":"best-seo-tools","title":"Best SEO Tools","description":"SEO tools matched to keyword research, competitive intelligence and content workflows.","category":"seo","weights":{"price":1.0,"freePlan":0.9,"simplicity":1.0,"automation":1.2,"integrations":1.2},"keywords":["seo","keywords","search","competitive research","content"]},
+  {"slug":"best-tools-for-agencies","title":"Best Tools for Agencies","description":"Software recommendations for agencies that need workflows, clients, collaboration and integrations.","category":"business","weights":{"price":0.9,"freePlan":0.8,"simplicity":1.0,"automation":1.4,"integrations":1.5},"keywords":["agency","agencies","clients","marketing","crm","automation","collaboration","workflow"]},
+  {"slug":"best-crm-for-consultants","title":"Best CRM for Consultants","description":"CRM options for consultants who need simple pipelines, client management and automation without unnecessary complexity.","category":"crm","weights":{"category":2.0,"sales":1.4,"ease":1.3,"automation":1.2,"integrations":1.0,"price":1.0},"keywords":["crm for consultants","consultant crm","consultants","client management","sales pipeline"]},
+  {"slug":"best-crm-for-real-estate","title":"Best CRM for Real Estate","description":"CRM options for property professionals managing leads, follow-ups, pipelines and client relationships.","category":"crm","weights":{"category":2.0,"sales":1.6,"automation":1.4,"integrations":1.2,"ease":1.0},"keywords":["real estate crm","crm for real estate","property crm","estate agents","real estate agents"]},
+  {"slug":"best-crm-for-sales-teams","title":"Best CRM for Sales Teams","description":"Sales CRM recommendations focused on pipeline management, deal activity, reporting and automation.","category":"crm","weights":{"category":2.0,"sales":2.0,"automation":1.5,"integrations":1.3,"ease":1.0},"keywords":["sales crm","sales team crm","sales teams","pipeline","deals"]},
+  {"slug":"best-crm-with-automation","title":"Best CRM With Automation","description":"CRM platforms with strong workflow and sales automation capabilities.","category":"crm","weights":{"category":1.8,"automation":2.0,"integrations":1.4,"sales":1.3,"ease":0.8},"keywords":["crm automation","automated crm","sales automation","workflow crm"]},
+  {"slug":"best-affordable-crm","title":"Best Affordable CRM","description":"Lower-cost CRM options for teams that need useful sales features without enterprise pricing.","category":"crm","weights":{"category":1.8,"price":2.0,"freePlan":1.3,"ease":1.2,"sales":1.1,"automation":1.0},"keywords":["affordable crm","cheap crm","low cost crm","budget crm"]},
+  {"slug":"best-marketing-automation-tools","title":"Best Marketing Automation Tools","description":"Marketing automation platforms for campaigns, workflows, customer journeys and repeatable execution.","category":"marketing","weights":{"category":1.8,"marketing":1.8,"automation":2.0,"integrations":1.4,"ease":1.0},"keywords":["marketing automation","marketing automation tools","automated marketing","customer journeys"]},
+  {"slug":"best-email-marketing-tools","title":"Best Email Marketing Tools","description":"Email platforms selected for campaign creation, audience management, automation and analytics.","category":"marketing","weights":{"category":1.8,"marketing":1.8,"automation":1.5,"ease":1.2,"integrations":1.2,"price":0.9},"keywords":["email marketing","email tool","newsletter software","email campaigns"]},
+  {"slug":"best-funnel-builders","title":"Best Funnel Builders","description":"Funnel and landing-page platforms for lead generation, email capture and online conversion flows.","category":"marketing","weights":{"category":1.8,"marketing":1.5,"automation":1.5,"ease":1.3,"integrations":1.2},"keywords":["funnel builder","sales funnel","landing page builder","lead funnel"]},
+  {"slug":"best-ai-ad-creative-tools","title":"Best AI Ad Creative Tools","description":"AI tools for generating, testing and improving advertising creatives at scale.","category":"marketing","weights":{"category":1.8,"ai":2.0,"marketing":1.8,"content":1.4,"automation":1.2,"agency":1.0},"keywords":["ai ad creative","ad creative ai","advertising creative","ai ads"]},
+  {"slug":"best-seo-keyword-research-tools","title":"Best SEO Keyword Research Tools","description":"Keyword research tools for search discovery, competitive analysis and content planning.","category":"seo","weights":{"category":1.8,"seo":2.0,"research":2.0,"content":1.2,"ease":1.0},"keywords":["keyword research","seo keyword tools","keyword planner","search keywords"]},
+  {"slug":"best-competitor-seo-tools","title":"Best Competitor SEO Tools","description":"SEO platforms for researching competitor visibility, keywords, backlinks and content opportunities.","category":"seo","weights":{"category":1.8,"seo":2.0,"research":2.0,"content":1.1,"integrations":1.0},"keywords":["competitor seo","seo competitor analysis","competitor research","competitor keywords"]},
+  {"slug":"best-seo-tools-for-agencies","title":"Best SEO Tools for Agencies","description":"SEO platforms suited to agencies managing multiple clients, reporting and repeatable search workflows.","category":"seo","weights":{"category":1.8,"seo":1.8,"agency":2.0,"research":1.6,"integrations":1.4},"keywords":["seo tools for agencies","agency seo software","seo agency tools","client seo"]},
+  {"slug":"best-workflow-automation-tools","title":"Best Workflow Automation Tools","description":"Workflow automation platforms for connecting apps, moving data and eliminating repetitive work.","category":"automation","weights":{"category":1.8,"automation":2.0,"integrations":2.0,"ease":1.1,"price":0.9},"keywords":["workflow automation","automation tools","automate tasks","business automation"]},
+  {"slug":"best-no-code-automation-tools","title":"Best No-Code Automation Tools","description":"No-code platforms for building multi-step automations without traditional programming.","category":"automation","weights":{"category":1.8,"automation":2.0,"integrations":1.8,"ease":1.6,"price":1.0},"keywords":["no code automation","no-code automation","visual automation","automation without coding"]},
+  {"slug":"best-lead-capture-form-tools","title":"Best Lead Capture Form Tools","description":"Form platforms for capturing leads, qualifying prospects and routing information into workflows.","category":"forms","weights":{"category":1.8,"ease":1.4,"integrations":1.6,"automation":1.5,"sales":1.4},"keywords":["lead capture form","lead generation forms","lead form builder","contact forms"]},
+  {"slug":"best-online-form-builders","title":"Best Online Form Builders","description":"Online form tools for data collection, surveys, payments and simple business workflows.","category":"forms","weights":{"category":1.8,"ease":1.8,"integrations":1.5,"price":1.2,"automation":1.1},"keywords":["online form builder","form builder","forms","survey forms"]}
 ]
