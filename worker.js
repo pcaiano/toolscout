@@ -15,6 +15,7 @@ export default {
       if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:cors});
       try {
         const catalog=await (await env.ASSETS.fetch(new Request(new URL('/data/intents.json',request.url)))).json();
+        const tools=await (await env.ASSETS.fetch(new Request(new URL('/data/tools.json',request.url)))).json();
         const rows=await env.DB.prepare("SELECT intent_slug,COUNT(DISTINCT session_id) AS search_sessions FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY intent_slug").all();
         const demandMap=new Map((rows.results||[]).map(r=>[String(r.intent_slug),Number(r.search_sessions||0)]));
         const opportunities=[];
@@ -22,7 +23,8 @@ export default {
           const intent=String(item.slug||'').slice(0,100); if(!intent)continue;
           const sessions=demandMap.get(intent)||0;
           let pageExists=false; try { pageExists=(await env.ASSETS.fetch(new Request(new URL('/'+intent+'.html',request.url)))).ok; } catch {}
-          const demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project)/i.test(intent)?25:10, catalogFit=20, duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalogFit)), status=pageExists?'published':(score>=50?'ready':'candidate');
+          const matches=(tools||[]).filter(t=>String(t.category||'').toLowerCase()===String(item.category||'').toLowerCase() || (Array.isArray(t.bestFor)&&t.bestFor.some(x=>item.slug==='best-tools-for-agencies' && /agency/i.test(String(x))))).length;
+          const demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project)/i.test(intent)?25:10, catalogFit=Math.min(20,matches*4), duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalogFit)), status=pageExists?'published':(score>=50?'ready':'candidate');
           await env.DB.prepare("INSERT INTO seo_opportunities (intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at) VALUES (?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(intent_slug) DO UPDATE SET search_sessions=excluded.search_sessions,commercial_score=excluded.commercial_score,catalog_score=excluded.catalog_score,duplication_penalty=excluded.duplication_penalty,opportunity_score=excluded.opportunity_score,status=excluded.status,updated_at=datetime('now')").bind(intent,sessions,commercial,catalogFit,duplication,score,status).run();
           opportunities.push({intent_slug:intent,search_sessions:sessions,opportunity_score:score,status});
         }
@@ -62,13 +64,15 @@ export default {
       await env.DB.prepare("DELETE FROM click_events WHERE created_at < datetime('now','-180 days')").run();
       await env.DB.prepare("DELETE FROM search_events WHERE created_at < datetime('now','-180 days')").run();
       const catalog=await (await env.ASSETS.fetch(new Request(new URL('/data/intents.json','https://toolscout.luxurybuyerintelligence.workers.dev')))).json();
+      const tools=await (await env.ASSETS.fetch(new Request(new URL('/data/tools.json','https://toolscout.luxurybuyerintelligence.workers.dev')))).json();
       const rows=await env.DB.prepare("SELECT intent_slug,COUNT(DISTINCT session_id) AS search_sessions FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY intent_slug").all();
       const demandMap=new Map((rows.results||[]).map(r=>[String(r.intent_slug),Number(r.search_sessions||0)]));
       for(const item of catalog||[]) {
         const intent=String(item.slug||'').slice(0,100); if(!intent)continue;
         const sessions=demandMap.get(intent)||0;
         let pageExists=false; try { pageExists=(await env.ASSETS.fetch(new Request(new URL('/'+intent+'.html','https://toolscout.luxurybuyerintelligence.workers.dev')))).ok; } catch {}
-        const demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project)/i.test(intent)?25:10, catalogFit=20, duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalogFit)), status=pageExists?'published':(score>=50?'ready':'candidate');
+        const matches=(tools||[]).filter(t=>String(t.category||'').toLowerCase()===String(item.category||'').toLowerCase() || (Array.isArray(t.bestFor)&&t.bestFor.some(x=>item.slug==='best-tools-for-agencies' && /agency/i.test(String(x))))).length;
+        const demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project)/i.test(intent)?25:10, catalogFit=Math.min(20,matches*4), duplication=0, score=Math.max(0,Math.min(100,demand+commercial+catalogFit)), status=pageExists?'published':(score>=50?'ready':'candidate');
         await env.DB.prepare("INSERT INTO seo_opportunities (intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at) VALUES (?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(intent_slug) DO UPDATE SET search_sessions=excluded.search_sessions,commercial_score=excluded.commercial_score,catalog_score=excluded.catalog_score,duplication_penalty=excluded.duplication_penalty,opportunity_score=excluded.opportunity_score,status=excluded.status,updated_at=datetime('now')").bind(intent,sessions,commercial,catalogFit,duplication,score,status).run();
       }
     };
