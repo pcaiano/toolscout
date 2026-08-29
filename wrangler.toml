@@ -4,6 +4,9 @@ compatibility_date = "2026-08-28"
 
 [assets]
 directory = "."
+html_handling = "none"
+not_found_handling = "404-page"
+binding = "ASSETS"
 
 [triggers]
 crons = ["15 3 * * *"]
