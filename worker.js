@@ -15,6 +15,22 @@ export default {
       const [byTool,byIntent,total,searches,opportunities]=await Promise.all([env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT COUNT(*) AS clicks,COUNT(DISTINCT session_id) AS sessions FROM click_events').first(),env.DB.prepare('SELECT intent_slug,COUNT(DISTINCT session_id) AS searches FROM search_events GROUP BY intent_slug ORDER BY searches DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,search_sessions,opportunity_score,status FROM seo_opportunities ORDER BY opportunity_score DESC LIMIT 20').all()]);
       return Response.json({total,byTool:byTool.results,byIntent:byIntent.results,searches:searches.results,opportunities:opportunities.results},{headers:cors});
     }
+    if (url.pathname === '/sitemap.xml' && request.method === 'GET') {
+      try {
+        const response = await env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url)));
+        if (response.ok) {
+          const headers = new Headers(response.headers);
+          headers.set('Content-Type','application/xml; charset=UTF-8');
+          headers.set('Cache-Control','public, max-age=3600');
+          headers.delete('Content-Encoding');
+          return new Response(response.body,{status:response.status,headers});
+        }
+      } catch {}
+      return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://toolscout.luxurybuyerintelligence.workers.dev/</loc></url></urlset>',{status:200,headers:{'Content-Type':'application/xml; charset=UTF-8','Cache-Control':'public, max-age=3600'}});
+    }
+    if (url.pathname === '/robots.txt' && request.method === 'GET') {
+      return new Response('User-agent: *\nAllow: /\n\nSitemap: https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml\n',{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'public, max-age=3600'}});
+    }
     if (url.pathname.startsWith('/go/')) {
       const tool=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
       try {
