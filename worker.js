@@ -10,6 +10,22 @@ export default {
     if (url.pathname === '/api/search' && request.method === 'POST') {
       try { const b=await request.json(); const intent=String(b.intent||'general').slice(0,100),session=String(b.session||'').slice(0,100),source=String(b.source||'search').slice(0,100),profile=JSON.stringify(b.profile||{}).slice(0,2000); if(!session)return Response.json({error:'invalid_event'},{status:400,headers:cors}); await env.DB.prepare("INSERT INTO search_events (intent_slug,profile_json,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(intent,profile,session,source).run(); return Response.json({ok:true},{headers:cors}); } catch { return Response.json({error:'invalid_request'},{status:400,headers:cors}); }
     }
+    if (url.pathname === '/api/opportunities/refresh' && request.method === 'POST') {
+      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+      if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:cors});
+      try {
+        const rows=await env.DB.prepare("SELECT intent_slug,COUNT(DISTINCT session_id) AS search_sessions FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY intent_slug").all();
+        const opportunities=[];
+        for(const r of rows.results||[]) {
+          const intent=String(r.intent_slug||'').slice(0,100); if(!intent||intent==='general')continue;
+          let pageExists=false; try { pageExists=(await env.ASSETS.fetch(new Request(new URL('/'+intent+'.html',request.url)))).ok; } catch {}
+          const sessions=Number(r.search_sessions||0), demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|automation|lead|sales|email|project)/i.test(intent)?25:10, catalog=20, duplication=pageExists?30:0, score=Math.max(0,Math.min(100,demand+commercial+catalog-duplication)), status=pageExists?'published':(score>=50?'ready':'candidate');
+          await env.DB.prepare("INSERT INTO seo_opportunities (intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at) VALUES (?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(intent_slug) DO UPDATE SET search_sessions=excluded.search_sessions,commercial_score=excluded.commercial_score,catalog_score=excluded.catalog_score,duplication_penalty=excluded.duplication_penalty,opportunity_score=excluded.opportunity_score,status=excluded.status,updated_at=datetime('now')").bind(intent,sessions,commercial,catalog,duplication,score,status).run();
+          opportunities.push({intent_slug:intent,search_sessions:sessions,opportunity_score:score,status});
+        }
+        return Response.json({ok:true,refreshed:opportunities.length,opportunities},{headers:cors});
+      } catch(e) { return Response.json({error:'refresh_failed',message:String(e?.message||e)},{status:500,headers:cors}); }
+    }
     if (url.pathname === '/api/stats') {
       const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,''); if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:cors});
       const [byTool,byIntent,total,searches,opportunities]=await Promise.all([env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT COUNT(*) AS clicks,COUNT(DISTINCT session_id) AS sessions FROM click_events').first(),env.DB.prepare('SELECT intent_slug,COUNT(DISTINCT session_id) AS searches FROM search_events GROUP BY intent_slug ORDER BY searches DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status FROM seo_opportunities ORDER BY opportunity_score DESC LIMIT 20').all()]);
@@ -30,7 +46,7 @@ export default {
         const config=await response.json(); const entry=config[tool];
         const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';
         let seoIntent='general';
-        try { const refUrl=new URL(referrer); const page=refUrl.pathname.split('/').filter(Boolean).pop()?.replace(/\.html$/i,'')||''; if(page && page!=='seo') seoIntent=page.slice(0,100); } catch {}
+        try { const refUrl=new URL(referrer); const page=refUrl.pathname.split('/').filter(Boolean).pop()?.replace(/\.html$/i,'')||''; if(page&&page!=='seo')seoIntent=page.slice(0,100); } catch {}
         const source=seoIntent!=='general'?'seo-page':'affiliate-redirect';
         const cookie=request.headers.get('Cookie')||''; const match=cookie.match(/(?:^|;\s*)toolscout_session=([^;]+)/); const session=match?.[1]||crypto.randomUUID();
         if(entry?.enabled&&entry.url){ await env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(tool,seoIntent,session,source).run(); const headers=new Headers(); headers.set('Location',entry.url); if(!match)headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=15552000; Path=/; SameSite=Lax`); return new Response(null,{status:302,headers}); }
@@ -40,9 +56,18 @@ export default {
     }
     return env.ASSETS ? env.ASSETS.fetch(request) : new Response('Not found',{status:404});
   },
-  async scheduled(event,env,ctx){ctx.waitUntil(Promise.all([
-    env.DB.prepare("DELETE FROM click_events WHERE created_at < datetime('now','-180 days')").run(),
-    env.DB.prepare("DELETE FROM search_events WHERE created_at < datetime('now','-180 days')").run(),
-    env.DB.prepare("INSERT INTO seo_opportunities (intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at) SELECT intent_slug,COUNT(DISTINCT session_id),CASE WHEN intent_slug LIKE '%crm%' OR intent_slug LIKE '%seo%' OR intent_slug LIKE '%marketing%' OR intent_slug LIKE '%agency%' THEN 25 ELSE 10 END,CASE WHEN intent_slug != 'general' THEN 20 ELSE 0 END,0,MIN(100,MIN(50,COUNT(DISTINCT session_id)*5) + CASE WHEN intent_slug LIKE '%crm%' OR intent_slug LIKE '%seo%' OR intent_slug LIKE '%marketing%' OR intent_slug LIKE '%agency%' THEN 25 ELSE 10 END + CASE WHEN intent_slug != 'general' THEN 20 ELSE 0 END),'candidate',datetime('now')) FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY intent_slug ON CONFLICT(intent_slug) DO UPDATE SET search_sessions=excluded.search_sessions,commercial_score=excluded.commercial_score,catalog_score=excluded.catalog_score,duplication_penalty=excluded.duplication_penalty,opportunity_score=excluded.opportunity_score,status=excluded.status,updated_at=datetime('now')").run()
-  ]));}
+  async scheduled(event,env,ctx){
+    const run=async()=>{
+      await env.DB.prepare("DELETE FROM click_events WHERE created_at < datetime('now','-180 days')").run();
+      await env.DB.prepare("DELETE FROM search_events WHERE created_at < datetime('now','-180 days')").run();
+      const rows=await env.DB.prepare("SELECT intent_slug,COUNT(DISTINCT session_id) AS search_sessions FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY intent_slug").all();
+      for(const r of rows.results||[]) {
+        const intent=String(r.intent_slug||'').slice(0,100); if(!intent||intent==='general')continue;
+        let pageExists=false; try { pageExists=(await env.ASSETS.fetch(new Request(new URL('/'+intent+'.html','https://toolscout.luxurybuyerintelligence.workers.dev')))).ok; } catch {}
+        const sessions=Number(r.search_sessions||0), demand=Math.min(50,sessions*5), commercial=/(crm|seo|marketing|agency|automation|lead|sales|email|project)/i.test(intent)?25:10, catalog=20, duplication=pageExists?30:0, score=Math.max(0,Math.min(100,demand+commercial+catalog-duplication)), status=pageExists?'published':(score>=50?'ready':'candidate');
+        await env.DB.prepare("INSERT INTO seo_opportunities (intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at) VALUES (?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(intent_slug) DO UPDATE SET search_sessions=excluded.search_sessions,commercial_score=excluded.commercial_score,catalog_score=excluded.catalog_score,duplication_penalty=excluded.duplication_penalty,opportunity_score=excluded.opportunity_score,status=excluded.status,updated_at=datetime('now')").bind(intent,sessions,commercial,catalog,duplication,score,status).run();
+      }
+    };
+    ctx.waitUntil(run());
+  }
 };
