@@ -31,18 +31,43 @@ async function contentSignals(request,env){
   const rows=await env.DB.prepare("SELECT intent_slug,COUNT(DISTINCT session_id) AS searches FROM search_events WHERE created_at >= datetime('now','-30 days') AND intent_slug IS NOT NULL AND intent_slug != 'general' GROUP BY intent_slug ORDER BY searches DESC, intent_slug ASC LIMIT 100").all();
   return Response.json({ok:true,window_days:30,signals:(rows.results||[]).map(r=>({intent_slug:String(r.intent_slug),searches:Number(r.searches||0)}))},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=300, s-maxage=900'}});
 }
+async function readAffiliateMap(request,env){
+  try{
+    const response=await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url)));
+    if(!response.ok)return {};
+    return await response.json();
+  }catch{return {};}
+}
 async function stats(request,env){
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401});
-  const [byTool,byIntent,bySource,total,searches,opportunities]=await Promise.all([
+  const [byTool,byIntent,bySource,bySearchSource,total,searches,opportunities,dailyClicks,dailySearches,affiliate]=await Promise.all([
     env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),
     env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),
-    env.DB.prepare("SELECT source,COUNT(*) AS clicks FROM click_events GROUP BY source ORDER BY clicks DESC LIMIT 20").all(),
+    env.DB.prepare("SELECT COALESCE(NULLIF(source,''),'direct') AS source,COUNT(*) AS clicks FROM click_events GROUP BY COALESCE(NULLIF(source,''),'direct') ORDER BY clicks DESC LIMIT 20").all(),
+    env.DB.prepare("SELECT COALESCE(NULLIF(source,''),'direct') AS source,COUNT(DISTINCT session_id) AS searches FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY COALESCE(NULLIF(source,''),'direct') ORDER BY searches DESC LIMIT 20").all(),
     env.DB.prepare('SELECT COUNT(*) AS clicks,COUNT(DISTINCT session_id) AS sessions FROM click_events').first(),
     env.DB.prepare('SELECT intent_slug,COUNT(DISTINCT session_id) AS searches FROM search_events GROUP BY intent_slug ORDER BY searches DESC LIMIT 20').all(),
-    env.DB.prepare('SELECT intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status FROM seo_opportunities ORDER BY opportunity_score DESC LIMIT 20').all()
+    env.DB.prepare('SELECT intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status FROM seo_opportunities ORDER BY opportunity_score DESC LIMIT 20').all(),
+    env.DB.prepare("SELECT substr(created_at,1,10) AS day,COUNT(*) AS clicks FROM click_events WHERE created_at >= datetime('now','-30 days') GROUP BY substr(created_at,1,10) ORDER BY day ASC").all(),
+    env.DB.prepare("SELECT substr(created_at,1,10) AS day,COUNT(DISTINCT session_id) AS searches FROM search_events WHERE created_at >= datetime('now','-30 days') GROUP BY substr(created_at,1,10) ORDER BY day ASC").all(),
+    readAffiliateMap(request,env)
   ]);
-  return Response.json({total,byTool,byIntent,bySource,searches,opportunities},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
+
+  const tools=byTool.results||[];
+  const activeSlugs=new Set(Object.entries(affiliate||{}).filter(([,entry])=>entry&&entry.enabled&&entry.url).map(([slug])=>slug));
+  const monetizedClicks=tools.filter(row=>activeSlugs.has(String(row.tool_slug))).reduce((sum,row)=>sum+Number(row.clicks||0),0);
+  const unmonetizedClicks=Number(total?.clicks||0)-monetizedClicks;
+  const affiliateCoverage={
+    catalogTools:Object.keys(affiliate||{}).length,
+    activeTools:activeSlugs.size,
+    toolsWithClicks:tools.length,
+    monetizedClicks,
+    unmonetizedClicks,
+    activeToolSlugs:[...activeSlugs]
+  };
+
+  return Response.json({total,byTool,byIntent,bySource,bySearchSource,searches,opportunities,dailyClicks,dailySearches,affiliateCoverage},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
 }
 export default {
   async fetch(request,env,ctx){
