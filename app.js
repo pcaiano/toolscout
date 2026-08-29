@@ -80,7 +80,7 @@ function scoreTool(tool, query, intent, profile = {}) {
   if (profile.priority === 'automation' && haystack.includes('automation')) score += 10;
   if (profile.priority === 'integrations' && haystack.includes('integrations')) score += 10;
   if (profile.priority === 'features') score += Math.min(8, (tool.features || []).length);
-  return Math.min(99, score);
+  return Math.round(Math.min(99, score));
 }
 
 async function postEvent(path, payload) {
