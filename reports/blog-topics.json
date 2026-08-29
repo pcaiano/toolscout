@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-29T21:12:26.046Z",
+  "generatedAt": "2026-08-29T21:30:30.761Z",
   "source": "aggregated content demand signals",
-  "count": 5,
+  "count": 21,
   "items": [
     {
       "slug": "best-crm-for-small-business-guide",
@@ -32,10 +32,122 @@
       "searches": 1
     },
     {
+      "slug": "best-affordable-crm-guide",
+      "intent": "best-affordable-crm",
+      "title": "Affordable CRM: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for affordable crm, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-ai-ad-creative-tools-guide",
+      "intent": "best-ai-ad-creative-tools",
+      "title": "AI Ad Creative Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for ai ad creative tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
       "slug": "best-ai-marketing-tools-guide",
       "intent": "best-ai-marketing-tools",
       "title": "AI Marketing Tools: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for ai marketing tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-competitor-seo-tools-guide",
+      "intent": "best-competitor-seo-tools",
+      "title": "Competitor SEO Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for competitor seo tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-crm-for-consultants-guide",
+      "intent": "best-crm-for-consultants",
+      "title": "CRM For Consultants: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for crm for consultants, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-crm-for-real-estate-guide",
+      "intent": "best-crm-for-real-estate",
+      "title": "CRM For Real Estate: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for crm for real estate, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-crm-for-sales-teams-guide",
+      "intent": "best-crm-for-sales-teams",
+      "title": "CRM For Sales Teams: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for crm for sales teams, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-crm-with-automation-guide",
+      "intent": "best-crm-with-automation",
+      "title": "CRM With Automation: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for crm with automation, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-email-marketing-tools-guide",
+      "intent": "best-email-marketing-tools",
+      "title": "Email Marketing Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for email marketing tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-funnel-builders-guide",
+      "intent": "best-funnel-builders",
+      "title": "Funnel Builders: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for funnel builders, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-lead-capture-form-tools-guide",
+      "intent": "best-lead-capture-form-tools",
+      "title": "Lead Capture Form Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for lead capture form tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-marketing-automation-tools-guide",
+      "intent": "best-marketing-automation-tools",
+      "title": "Marketing Automation Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for marketing automation tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-no-code-automation-tools-guide",
+      "intent": "best-no-code-automation-tools",
+      "title": "No Code Automation Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for no code automation tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-online-form-builders-guide",
+      "intent": "best-online-form-builders",
+      "title": "Online Form Builders: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for online form builders, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-seo-keyword-research-tools-guide",
+      "intent": "best-seo-keyword-research-tools",
+      "title": "SEO Keyword Research Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for seo keyword research tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-seo-tools-for-agencies-guide",
+      "intent": "best-seo-tools-for-agencies",
+      "title": "SEO Tools For Agencies: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for seo tools for agencies, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-workflow-automation-tools-guide",
+      "intent": "best-workflow-automation-tools",
+      "title": "Workflow Automation Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for workflow automation tools, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     }
   ]
