@@ -1,4 +1,6 @@
 {
+  "systeme-io": {"url": "", "enabled": false},
+  "jotform": {"url": "", "enabled": false},
   "hubspot": {"url": "", "enabled": false},
   "pipedrive": {"url": "", "enabled": false},
   "semrush": {"url": "", "enabled": false},
