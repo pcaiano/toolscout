@@ -39,13 +39,31 @@ function logoUrl(tool) {
 }
 
 function initials(name) {
-  return String(name || 'T').split(/\s+/).filter(Boolean).slice(0,2).map(x => x[0]).join('').toUpperCase();
+  return String(name || 'T').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
 }
 
 function toolLogo(tool, large = false) {
   const url = logoUrl(tool);
-  const sizeClass = large ? 'tool-logo large' : 'tool-logo';
-  return `<div class="${sizeClass}">${url ? `<img src="${url}" alt="${tool.name} logo" width="${large ? 52 : 44}" height="${large ? 52 : 44}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">` : ''}<span class="logo-fallback" ${url ? 'style="display:none"' : ''}>${initials(tool.name)}</span></div>`;
+  const size = large ? 56 : 46;
+  return `<div class="tool-logo${large ? ' large' : ''}">${url ? `<img src="${url}" alt="${tool.name} logo" width="${size}" height="${size}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">` : ''}<span class="logo-fallback" ${url ? 'style="display:none"' : ''}>${initials(tool.name)}</span></div>`;
+}
+
+function fitReasons(tool, query, intent, profile = {}) {
+  const q = normalize(query);
+  const haystack = [tool.category, tool.description, ...(tool.features || []), ...(tool.bestFor || [])].map(normalize).join(' ');
+  const reasons = [];
+  if (intent && intent.category === tool.category) reasons.push(`Strong ${tool.category} fit`);
+  if (profile.budget === 'free' && tool.freePlan) reasons.push('Free plan available');
+  if (profile.priority === 'automation' && haystack.includes('automation')) reasons.push('Automation is a strength');
+  if (profile.priority === 'integrations' && haystack.includes('integrations')) reasons.push('Good integration coverage');
+  if (profile.team && haystack.includes(profile.team === 'solo' ? 'solopreneurs' : profile.team === 'small' ? 'small businesses' : 'teams')) reasons.push('Fits your team size');
+  if (!reasons.length && q) {
+    const words = tokenize(q);
+    const matched = words.find(w => haystack.includes(w));
+    if (matched) reasons.push(`Matches your ${matched} needs`);
+  }
+  if (!reasons.length && tool.bestFor?.length) reasons.push(`Best for ${tool.bestFor[0]}`);
+  return reasons.slice(0, 3);
 }
 
 async function boot() {
@@ -118,9 +136,10 @@ function renderResults(query, profile = {}) {
     out.innerHTML = '<div class="empty-state"><strong>No close matches yet.</strong><span>Try describing the job, budget or team in a little more detail.</span></div>';
     return;
   }
-  out.innerHTML = `<div class="profile-card"><div><span class="eyebrow">Your fit profile</span><h2>We found a few strong matches.</h2></div><div class="chips"><span class="chip">${profile.goal || 'general'}</span><span class="chip">${profile.budget || 'any budget'}</span><span class="chip">${profile.team || 'any team'}</span><span class="chip">${profile.priority || 'balanced'}</span></div></div>` + results.map((tool, i) => {
+  out.innerHTML = `<div class="profile-card"><div><span class="eyebrow">Your fit profile</span><h2>We found a few strong matches.</h2></div><div class="chips">${profile.goal ? `<span class="chip">${profile.goal}</span>` : ''}${profile.budget ? `<span class="chip">${profile.budget}</span>` : ''}${profile.team ? `<span class="chip">${profile.team}</span>` : ''}${profile.priority ? `<span class="chip">${profile.priority}</span>` : ''}</div></div>` + results.map((tool, i) => {
     const cta = affiliate(tool.slug);
-    return `<article class="result-card ${i === 0 ? 'featured' : ''}"><div class="result-top"><div class="brand-row">${toolLogo(tool)}<div><div class="meta">${tool.category}</div><h3>${tool.name}</h3></div></div><div class="match-score"><span>Match</span><strong>${tool.score}%</strong></div></div><p>${tool.description}</p><div class="chips">${(tool.features || []).slice(0, 5).map(x => `<span class="chip">${x}</span>`).join('')}</div><div class="result-bottom"><span class="fit-note">${intent ? `Best for: ${intent.title}` : 'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">Explore ${tool.name} →</a></div></article>`;
+    const reasons = fitReasons(tool, query, intent, profile);
+    return `<article class="result-card ${i === 0 ? 'featured' : ''}"><div class="result-top"><div class="brand-row">${toolLogo(tool)}<div><div class="meta">${tool.category}</div><h3>${tool.name}</h3></div></div><div class="match-score"><span>Match</span><strong>${tool.score}%</strong></div></div><div class="tool-proof"><span>${tool.pricing}</span>${tool.freePlan ? '<span>Free plan</span>' : ''}</div><p>${tool.description}</p><div class="reason-grid">${reasons.map(reason => `<div class="reason"><span>✓</span>${reason}</div>`).join('')}</div><div class="chips">${(tool.features || []).slice(0, 5).map(x => `<span class="chip">${x}</span>`).join('')}</div><div class="result-bottom"><span class="fit-note">${i === 0 ? 'Top recommendation' : intent ? `Also worth considering for ${intent.title}` : 'Strong alternative'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">Explore ${tool.name} <span>→</span></a></div></article>`;
   }).join('');
   out.querySelectorAll('[data-tool]').forEach(link => link.addEventListener('click', () => trackClick(results.find(t => t.slug === link.dataset.tool), intent, profile)));
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -147,20 +166,11 @@ function init() {
   const need = document.getElementById('need');
   if (!guidedStart || !back || !go || !need) return;
   go.disabled = true;
-  guidedStart.addEventListener('click', () => {
-    if (!state.ready) return;
-    state.step = 0; state.answers = {}; document.getElementById('results').innerHTML = ''; showQuestion();
-  });
+  guidedStart.addEventListener('click', () => { if (!state.ready) return; state.step = 0; state.answers = {}; document.getElementById('results').innerHTML = ''; showQuestion(); });
   back.addEventListener('click', () => { if (state.step > 0) { state.step--; showQuestion(); } });
-  go.addEventListener('click', () => {
-    const query = need.value.trim();
-    if (!query) { need.focus(); return; }
-    renderResults(query);
-  });
-  need.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go.click(); }
-  });
-  need.addEventListener('input', () => { if (need.value.trim()) go.disabled = !state.ready; });
+  go.addEventListener('click', () => { const query = need.value.trim(); if (!query) { need.focus(); return; } renderResults(query); });
+  need.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go.click(); } });
+  need.addEventListener('input', () => { go.disabled = !need.value.trim() || !state.ready; });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
