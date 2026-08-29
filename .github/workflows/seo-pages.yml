@@ -12,6 +12,7 @@ on:
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/validate-seo-pages.mjs'
+      - 'scripts/validate-public-surface.mjs'
       - 'scripts/validate-intent-coverage.mjs'
       - 'scripts/generate-sitemap.mjs'
       - 'scripts/generate-distribution.mjs'
@@ -36,6 +37,9 @@ jobs:
 
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
+
+      - name: Validate public surface
+        run: node scripts/validate-public-surface.mjs
 
       - name: Build growth priority
         run: node scripts/build-growth-priority.mjs
@@ -63,6 +67,9 @@ jobs:
 
       - name: Validate SEO pages
         run: node scripts/validate-seo-pages.mjs
+
+      - name: Validate generated public surface
+        run: node scripts/validate-public-surface.mjs
 
       - name: Commit generated SEO assets
         run: |
