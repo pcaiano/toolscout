@@ -1,0 +1,37 @@
+name: Generate SEO Pages
+
+on:
+  push:
+    paths:
+      - 'data/intents.json'
+      - 'data/tools.json'
+      - 'scripts/generate-seo-pages.mjs'
+      - '.github/workflows/seo-pages.yml'
+  schedule:
+    - cron: '45 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate pages
+        run: node scripts/generate-seo-pages.mjs
+
+      - name: Commit generated pages
+        run: |
+          if [ -z "$(git status --porcelain -- '*.html')" ]; then
+            echo "No new SEO pages to commit."
+            exit 0
+          fi
+          git config user.name "toolscout-seo-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- '*.html'
+          git commit -m "Generate SEO opportunity pages"
+          git push
