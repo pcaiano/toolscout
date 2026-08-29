@@ -1,0 +1,10 @@
+**/.git
+**/.git/**
+**/.wrangler
+**/.wrangler/**
+*.toml.example
+worker/
+workers/
+docs/
+scripts/
+.github/
