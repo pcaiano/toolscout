@@ -17,32 +17,29 @@ export default {
     }
     if (url.pathname === '/sitemap.xml' && request.method === 'GET') {
       try {
-        const response = await env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url)));
-        if (response.ok) {
-          const headers = new Headers(response.headers);
-          headers.set('Content-Type','application/xml; charset=UTF-8');
-          headers.set('Cache-Control','public, max-age=3600');
-          headers.delete('Content-Encoding');
-          return new Response(response.body,{status:response.status,headers});
-        }
+        const response=await env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url)));
+        if(response.ok){const headers=new Headers(response.headers);headers.set('Content-Type','application/xml; charset=UTF-8');headers.set('Cache-Control','public, max-age=3600');headers.delete('Content-Encoding');return new Response(response.body,{status:response.status,headers});}
       } catch {}
       return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://toolscout.luxurybuyerintelligence.workers.dev/</loc></url></urlset>',{status:200,headers:{'Content-Type':'application/xml; charset=UTF-8','Cache-Control':'public, max-age=3600'}});
     }
-    if (url.pathname === '/robots.txt') return new Response(null,{status:404});
+    if (url.pathname === '/robots.txt' && request.method === 'GET') {
+      try {
+        const response=await env.ASSETS.fetch(new Request(new URL('/robots.txt',request.url)));
+        if(response.ok){const headers=new Headers(response.headers);headers.set('Content-Type','text/plain; charset=UTF-8');headers.set('Cache-Control','public, max-age=3600');return new Response(response.body,{status:response.status,headers});}
+      } catch {}
+      return new Response('User-agent: *\nAllow: /\nSitemap: https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml\n',{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8'}});
+    }
     if (url.pathname.startsWith('/go/')) {
       const tool=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
       try {
         const response=await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url)));
-        const config=await response.json();
-        const entry=config[tool];
+        const config=await response.json(); const entry=config[tool];
         if(entry?.enabled&&entry.url){
           const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';
-          const source=referrer.includes('best-all-in-one-business-tools')?'seo-page':'affiliate-redirect';
-          const session=request.headers.get('Cookie')?.match(/(?:^|;\s*)toolscout_session=([^;]+)/)?.[1] || crypto.randomUUID();
+          const source=referrer.includes('best-all-in-one-business-tools')||referrer.includes('best-sales-funnel-software')?'seo-page':'affiliate-redirect';
+          const cookie=request.headers.get('Cookie')||''; const match=cookie.match(/(?:^|;\s*)toolscout_session=([^;]+)/); const session=match?.[1]||crypto.randomUUID();
           await env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,created_at) VALUES (?,?,?,?,datetime('now'))").bind(tool,'general',session,source).run();
-          const headers=new Headers();
-          headers.set('Location',entry.url);
-          if(!request.headers.get('Cookie')?.includes('toolscout_session=')) headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=15552000; Path=/; SameSite=Lax`);
+          const headers=new Headers(); headers.set('Location',entry.url); if(!match)headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=15552000; Path=/; SameSite=Lax`);
           return new Response(null,{status:302,headers});
         }
       } catch {}
