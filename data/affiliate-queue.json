@@ -1,0 +1,20 @@
+{
+  "lastReviewed":"2026-08-29",
+  "rules":{
+    "programVerified":"A public vendor source confirms a live affiliate/referral program.",
+    "linkRequired":"ToolScout only activates /go/ monetization after a private/personal affiliate link is supplied.",
+    "noGuessing":"Never fabricate affiliate parameters, partner IDs or tracking URLs."
+  },
+  "priority":[
+    {"slug":"make","programVerified":true,"commission":"35% on referred users for 12 months","source":"https://www.make.com/en/affiliate","nextAction":"Create affiliate account and add personal link"},
+    {"slug":"activecampaign","programVerified":true,"commission":"30% recurring for up to 12 months","source":"https://www.activecampaign.com/partners/affiliate","nextAction":"Apply and add personal link"},
+    {"slug":"jotform","programVerified":true,"commission":"30% per new paid user for up to 1 year","source":"https://www.jotform.com/partnership/affiliate/","nextAction":"Apply and add personal link"},
+    {"slug":"seranking","programVerified":true,"commission":"30% on subscription sales","source":"https://seranking.com/affiliate.html","nextAction":"Create/login to account and copy personal affiliate link"},
+    {"slug":"surferseo","programVerified":true,"commission":"Tiered CPA / revenue share","source":"https://surferseo.com/affiliate-program/","nextAction":"Apply and add personal link"},
+    {"slug":"hubspot","programVerified":true,"commission":"30% recurring up to 1 year for affiliate tier","source":"https://www.hubspot.com/partners/affiliates","nextAction":"Apply as affiliate; do not use Solutions Partner route unless separately justified"},
+    {"slug":"clickup","programVerified":true,"commission":"Up to $25 per new free workspace referral","source":"https://clickup.com/partners/affiliates","nextAction":"Apply and add personal link"},
+    {"slug":"pipedrive","programVerified":true,"commission":"20% of new customer revenue for first 12 months at entry tier","source":"https://www.pipedrive.com/pt/affiliate-partnership","nextAction":"Apply and add personal link"},
+    {"slug":"brevo","programVerified":true,"commission":"CPA available; $5 CPL after at least one paid account referral","source":"https://help.brevo.com/hc/pt/articles/16487784994322-O-programa-de-Afiliados-Brevo","nextAction":"Apply and add personal link"},
+    {"slug":"ahrefs","programVerified":false,"commission":"N/A","source":"https://ahrefs.com/blog/ahrefs-affiliate-program/","nextAction":"Do not apply; vendor says affiliate program discontinued"}
+  ]
+}
