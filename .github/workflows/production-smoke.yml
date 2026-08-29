@@ -41,7 +41,7 @@ jobs:
       - name: Check core pages
         run: |
           set -e
-          for page in / /guides.html /blog/ /tools.html /compare.html /methodology.html /affiliate-disclosure.html /privacy.html /best-seo-tools.html /best-crm-for-small-business.html /tool.html?tool=systeme-io /reports/growth-priority.json; do
+          for page in / /guides.html /blog/ /tools.html /compare.html /methodology.html /affiliate-disclosure.html /privacy.html /analytics.html /best-seo-tools.html /best-crm-for-small-business.html /tool.html?tool=systeme-io /reports/growth-priority.json; do
             echo "Checking $PROD_BASE$page"
             curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
           done
