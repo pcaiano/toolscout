@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "createdAt": "2026-08-30",
+  "objective": "Generate the first 100 genuinely external ToolScout sessions without paid acquisition, while preserving source-level measurement.",
+  "principles": [
+    "Prioritize useful intent pages over broad brand promotion.",
+    "Use one canonical ToolScout URL per asset and track channel/campaign with UTM parameters.",
+    "Do not treat owner tests, affiliate applications, or bot activity as acquisition proof.",
+    "Prefer communities and posts where the resource directly answers an existing question; avoid spammy link dropping.",
+    "Measure external sessions, searches, outbound clicks and monetized clicks separately."
+  ],
+  "priorityPages": [
+    {
+      "slug": "best-crm-for-small-business",
+      "why": "High commercial intent and an obvious business problem; strong fit for LinkedIn, founder/operator communities and search.",
+      "channels": ["linkedin", "reddit", "community", "seo"],
+      "utm_campaign": "crm-small-business"
+    },
+    {
+      "slug": "best-free-crm",
+      "why": "Broad entry intent with strong click potential and low-friction positioning.",
+      "channels": ["linkedin", "reddit", "seo"],
+      "utm_campaign": "free-crm"
+    },
+    {
+      "slug": "best-crm-for-agencies",
+      "why": "Narrow, commercial audience with clear distribution targets and strong ToolScout fit.",
+      "channels": ["linkedin", "agency-communities", "reddit", "seo"],
+      "utm_campaign": "crm-agencies"
+    },
+    {
+      "slug": "best-tools-for-agencies",
+      "why": "Cross-category agency intent gives a broader acquisition surface than a single tool category.",
+      "channels": ["linkedin", "agency-communities", "newsletter", "seo"],
+      "utm_campaign": "tools-agencies"
+    },
+    {
+      "slug": "best-seo-tools",
+      "why": "Strong informational-to-commercial bridge and natural fit for SEO practitioners and marketing communities.",
+      "channels": ["linkedin", "seo-communities", "reddit", "seo"],
+      "utm_campaign": "seo-tools"
+    },
+    {
+      "slug": "best-ai-marketing-tools",
+      "why": "Large addressable topic with strong content/distribution potential once external traffic starts appearing.",
+      "channels": ["linkedin", "x", "newsletter", "seo"],
+      "utm_campaign": "ai-marketing"
+    },
+    {
+      "slug": "best-crm-with-automation",
+      "why": "Combines high-value CRM intent with a concrete workflow requirement.",
+      "channels": ["linkedin", "automation-communities", "seo"],
+      "utm_campaign": "crm-automation"
+    },
+    {
+      "slug": "best-marketing-automation-tools",
+      "why": "Commercial problem with a clear content angle and several relevant affiliate categories.",
+      "channels": ["linkedin", "marketing-communities", "seo"],
+      "utm_campaign": "marketing-automation"
+    },
+    {
+      "slug": "best-lead-capture-forms",
+      "why": "Direct business problem with strong alignment to forms and conversion tooling.",
+      "channels": ["linkedin", "sales-communities", "seo"],
+      "utm_campaign": "lead-capture"
+    },
+    {
+      "slug": "best-funnel-builder",
+      "why": "Strong commercial language and a broad creator/marketing audience.",
+      "channels": ["linkedin", "x", "marketing-communities", "seo"],
+      "utm_campaign": "funnel-builder"
+    }
+  ],
+  "channelPlaybook": {
+    "linkedin": {
+      "role": "Primary warm distribution channel",
+      "format": "Problem-led post followed by one useful ToolScout link",
+      "cadence": "3-5 high-quality posts per week",
+      "tracking": "utm_source=linkedin&utm_medium=social&utm_campaign=<campaign>"
+    },
+    "reddit": {
+      "role": "High-intent discovery where community context permits",
+      "format": "Answer first; link only when materially useful and community rules allow it",
+      "cadence": "2-3 genuinely useful contributions per week",
+      "tracking": "utm_source=reddit&utm_medium=community&utm_campaign=<campaign>"
+    },
+    "x": {
+      "role": "Lightweight reach and testing",
+      "format": "Concise problem/insight thread with ToolScout as the resource",
+      "cadence": "2-4 posts per week",
+      "tracking": "utm_source=x&utm_medium=social&utm_campaign=<campaign>"
+    },
+    "newsletter": {
+      "role": "Owned distribution once a subscriber base exists",
+      "format": "One practical shortlist or comparison per send",
+      "cadence": "1 useful send per week",
+      "tracking": "utm_source=newsletter&utm_medium=email&utm_campaign=<campaign>"
+    },
+    "seo": {
+      "role": "Compounding acquisition engine",
+      "format": "Intent page + supporting guide + internal links",
+      "cadence": "Publish/refresh based on opportunity score and observed demand",
+      "tracking": "Search Console + GA4"
+    }
+  },
+  "first100Target": {
+    "externalSessions": 100,
+    "externalSearches": 25,
+    "externalClicks": 40,
+    "monetizedClicks": 10,
+    "firstCommission": true
+  },
+  "decisionRules": [
+    "If a page gets external sessions but low outbound clicks: improve recommendation clarity and CTA placement.",
+    "If a page gets outbound clicks but has no active affiliate URL: prioritize the matching affiliate application.",
+    "If a page gets impressions but weak CTR: improve title/meta and search intent alignment.",
+    "If a topic gets neither impressions nor external traffic after sufficient distribution, deprioritize it rather than mass-producing more pages."
+  ]
+}
