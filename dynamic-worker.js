@@ -2,9 +2,6 @@ import base from './worker.js';
 import { renderOpportunityPage } from './seo-page.js';
 
 const BASE = 'https://trytoolscout.org';
-const ACCESS_ISSUER = 'https://falling-unit-c85b.cloudflareaccess.com';
-const ACCESS_EMAIL = 'pcaiano@gmail.com';
-const ACCESS_JWKS = `${ACCESS_ISSUER}/cdn-cgi/access/certs`;
 
 const xmlEscape = value => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -15,39 +12,6 @@ const xmlEscape = value => String(value ?? '')
 
 const slugFromPath = pathname => { const match=pathname.match(/^\/([a-z0-9][a-z0-9-]*)\.html$/i); return match ? decodeURIComponent(match[1]) : null; };
 async function staticAsset(request,env){ try { const response=await env.ASSETS.fetch(request); return response.ok?response:null; } catch { return null; } }
-
-function base64urlToBytes(value){
-  const normalized=String(value||'').replace(/-/g,'+').replace(/_/g,'/');
-  const padded=normalized+'='.repeat((4-normalized.length%4)%4);
-  const binary=atob(padded);
-  return Uint8Array.from(binary,c=>c.charCodeAt(0));
-}
-function decodeJwtPart(value){
-  try{return JSON.parse(new TextDecoder().decode(base64urlToBytes(value)));}catch{return null;}
-}
-async function verifyAccessJwt(request){
-  if(new URL(request.url).hostname!=='trytoolscout.org')return false;
-  const token=request.headers.get('Cf-Access-Jwt-Assertion');
-  if(!token)return false;
-  const parts=String(token).split('.');
-  if(parts.length!==3)return false;
-  const header=decodeJwtPart(parts[0]);
-  const payload=decodeJwtPart(parts[1]);
-  if(!header||!payload||header.alg!=='RS256')return false;
-  if(payload.iss!==ACCESS_ISSUER)return false;
-  if(payload.email!==ACCESS_EMAIL)return false;
-  if(payload.exp&&Number(payload.exp)<=Math.floor(Date.now()/1000))return false;
-  try{
-    const response=await fetch(ACCESS_JWKS,{cf:{cacheTtl:300}});
-    if(!response.ok)return false;
-    const jwks=await response.json();
-    const jwk=(jwks.keys||[]).find(key=>key.kid===header.kid&&key.kty==='RSA');
-    if(!jwk)return false;
-    const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
-    return await crypto.subtle.verify({name:'RSASSA-PKCS1-v1_5'},key,base64urlToBytes(parts[2]),new TextEncoder().encode(`${parts[0]}.${parts[1]}`));
-  }catch{return false;}
-}
-
 async function dynamicOpportunity(request,env,slug){
   const row=await env.DB.prepare("SELECT intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at FROM seo_opportunities WHERE intent_slug=? LIMIT 1").bind(slug).first();
   if(!row||!['ready','published'].includes(String(row.status))) return null;
@@ -74,12 +38,19 @@ async function readAffiliateMap(request,env){
     return await response.json();
   }catch{return {};}
 }
-async function stats(request,env){
+async function stats(request,env,ctx){
   const url=new URL(request.url);
-  const accessAuthorized=await verifyAccessJwt(request);
+  let accessAuthorized=false;
+  try{
+    if(url.hostname==='trytoolscout.org'&&ctx?.access){
+      const identity=await ctx.access.getIdentity();
+      accessAuthorized=Boolean(identity?.email);
+    }
+  }catch{}
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   const legacyAuthorized=url.hostname!=='trytoolscout.org' && !!env.ADMIN_TOKEN && token===env.ADMIN_TOKEN;
   if(!accessAuthorized&&!legacyAuthorized)return Response.json({error:'unauthorized'},{status:401});
+
   const [byTool,byIntent,bySource,bySearchSource,total,searches,opportunities,dailyClicks,dailySearches,affiliate]=await Promise.all([
     env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),
     env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),
@@ -104,7 +75,7 @@ async function stats(request,env){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(url.pathname==='/api/stats'&&request.method==='GET'){try{return await stats(request,env);}catch{return Response.json({error:'stats_failed'},{status:500});}}
+    if(url.pathname==='/api/stats'&&request.method==='GET'){try{return await stats(request,env,ctx);}catch{return Response.json({error:'stats_failed'},{status:500});}}
     if(url.pathname==='/api/content-signals'&&request.method==='GET'){try{return await contentSignals(request,env);}catch{return Response.json({ok:false,signals:[]},{status:500});}}
     if(url.pathname==='/sitemap.xml'&&request.method==='GET'){try{return await dynamicSitemap(request,env);}catch{return base.fetch(request,env,ctx);}}
     if(url.pathname==='/robots.txt'&&request.method==='GET')return new Response(`User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n`,{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'public, max-age=300, s-maxage=3600'}});
