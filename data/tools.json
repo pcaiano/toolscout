@@ -1,107 +1,56 @@
 [
   {
-    "slug": "systeme-io",
-    "name": "Systeme.io",
-    "category": "marketing",
-    "description": "All-in-one platform for funnels, email marketing, online courses and selling digital products.",
-    "pricing": "Free plan available; paid plans vary",
-    "freePlan": true,
-    "features": ["funnels", "email marketing", "courses", "digital products", "automation"],
-    "bestFor": ["small businesses", "creators", "digital entrepreneurs"],
-    "affiliateUrl": "",
-    "affiliateProgram": "Systeme.io Affiliate Program",
-    "commission": "60% lifetime recurring",
-    "sourceUrl": "https://systeme.io/affiliate-program",
-    "lastVerified": "2026-08-28"
+    "slug":"systeme-io","name":"Systeme.io","category":"marketing","description":"All-in-one platform for funnels, email marketing, online courses and selling digital products.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["funnels","email marketing","courses","digital products","automation"],"bestFor":["small businesses","creators","digital entrepreneurs"],"affiliateUrl":"","affiliateProgram":"Systeme.io Affiliate Program","commission":"60% lifetime recurring","sourceUrl":"https://systeme.io/","lastVerified":"2026-08-28"
   },
   {
-    "slug": "hubspot",
-    "name": "HubSpot",
-    "category": "crm",
-    "description": "CRM and customer platform covering sales, marketing, service and operations.",
-    "pricing": "Free tools available; paid tiers vary",
-    "freePlan": true,
-    "features": ["crm", "sales", "marketing", "service", "automation"],
-    "bestFor": ["small businesses", "sales teams", "growing companies"],
-    "affiliateUrl": "",
-    "affiliateProgram": "HubSpot Affiliate Program",
-    "commission": "30% recurring for up to one year",
-    "sourceUrl": "https://www.hubspot.com/",
-    "lastVerified": "2026-08-28"
+    "slug":"hubspot","name":"HubSpot","category":"crm","description":"CRM and customer platform covering sales, marketing, service and operations.","pricing":"Free tools available; paid tiers vary","freePlan":true,"features":["crm","sales","marketing","service","automation","integrations"],"bestFor":["small businesses","sales teams","growing companies"],"affiliateUrl":"","affiliateProgram":"HubSpot Affiliate Program","commission":"30% recurring for up to one year","sourceUrl":"https://www.hubspot.com/","lastVerified":"2026-08-28"
   },
   {
-    "slug": "jotform",
-    "name": "Jotform",
-    "category": "forms",
-    "description": "Online form and workflow platform for collecting information and automating processes.",
-    "pricing": "Free plan available; paid plans vary",
-    "freePlan": true,
-    "features": ["forms", "payments", "workflows", "approvals", "integrations"],
-    "bestFor": ["small businesses", "operations", "lead collection"],
-    "affiliateUrl": "",
-    "affiliateProgram": "Jotform Partner Program",
-    "commission": "30% recurring",
-    "sourceUrl": "https://www.jotform.com/",
-    "lastVerified": "2026-08-28"
+    "slug":"jotform","name":"Jotform","category":"forms","description":"Online form and workflow platform for collecting information and automating processes.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["forms","payments","workflows","approvals","integrations","automation"],"bestFor":["small businesses","operations","lead collection"],"affiliateUrl":"","affiliateProgram":"Jotform Partner Program","commission":"30% recurring","sourceUrl":"https://www.jotform.com/","lastVerified":"2026-08-28"
   },
   {
-    "slug": "adcreative-ai",
-    "name": "AdCreative.ai",
-    "category": "marketing",
-    "description": "AI-powered platform for generating and optimizing advertising creatives.",
-    "pricing": "Paid plans; verify current pricing before publication",
-    "freePlan": false,
-    "features": ["ad creatives", "AI generation", "creative scoring", "advertising"],
-    "bestFor": ["marketers", "agencies", "ecommerce"],
-    "affiliateUrl": "",
-    "affiliateProgram": "AdCreative.ai Affiliate Program",
-    "commission": "30–40% depending on affiliate level",
-    "sourceUrl": "https://www.adcreative.ai/",
-    "lastVerified": "2026-08-28"
+    "slug":"adcreative-ai","name":"AdCreative.ai","category":"marketing","description":"AI-powered platform for generating and optimizing advertising creatives.","pricing":"Paid plans; verify current pricing before publication","freePlan":false,"features":["ad creatives","AI generation","creative scoring","advertising","automation"],"bestFor":["marketers","agencies","ecommerce"],"affiliateUrl":"","affiliateProgram":"AdCreative.ai Affiliate Program","commission":"Pending verification","sourceUrl":"https://www.adcreative.ai/","lastVerified":"2026-08-28"
   },
   {
-    "slug": "pipedrive",
-    "name": "Pipedrive",
-    "category": "crm",
-    "description": "Sales CRM focused on managing pipelines, deals and sales activity.",
-    "pricing": "Paid plans; verify current pricing before publication",
-    "freePlan": false,
-    "features": ["crm", "sales pipeline", "deal management", "sales reporting", "integrations"],
-    "bestFor": ["sales teams", "small businesses", "consultants"],
-    "affiliateUrl": "",
-    "affiliateProgram": "Pipedrive Affiliate Partnership",
-    "commission": "20% of revenue for the first 12 months; higher tiers available",
-    "sourceUrl": "https://www.pipedrive.com/",
-    "lastVerified": "2026-08-28"
+    "slug":"pipedrive","name":"Pipedrive","category":"crm","description":"Sales CRM focused on managing pipelines, deals and sales activity.","pricing":"Paid plans; verify current pricing before publication","freePlan":false,"features":["crm","sales pipeline","deal management","sales reporting","integrations","automation"],"bestFor":["sales teams","small businesses","consultants"],"affiliateUrl":"","affiliateProgram":"Pipedrive Affiliate Partnership","commission":"Pending verification","sourceUrl":"https://www.pipedrive.com/","lastVerified":"2026-08-28"
   },
   {
-    "slug": "semrush",
-    "name": "Semrush",
-    "category": "seo",
-    "description": "Online visibility platform covering SEO, AI visibility, content, social and competitive research.",
-    "pricing": "Paid plans with trial options; verify current pricing before publication",
-    "freePlan": false,
-    "features": ["seo", "keyword research", "competitive research", "content", "AI visibility"],
-    "bestFor": ["marketers", "SEO professionals", "agencies", "publishers"],
-    "affiliateUrl": "",
-    "affiliateProgram": "Semrush Affiliate Program",
-    "commission": "$100–$300 per sale depending on product; trial commissions also available",
-    "sourceUrl": "https://www.semrush.com/",
-    "lastVerified": "2026-08-28"
+    "slug":"semrush","name":"Semrush","category":"seo","description":"Online visibility platform covering SEO, AI visibility, content, social and competitive research.","pricing":"Paid plans with trial options; verify current pricing before publication","freePlan":false,"features":["seo","keyword research","competitive research","content","AI visibility","integrations"],"bestFor":["marketers","SEO professionals","agencies","publishers"],"affiliateUrl":"","affiliateProgram":"Semrush Affiliate Program","commission":"Pending verification","sourceUrl":"https://www.semrush.com/","lastVerified":"2026-08-28"
   },
   {
-    "slug": "jasper",
-    "name": "Jasper",
-    "category": "ai-writing",
-    "description": "AI platform for creating and managing marketing content and brand-focused workflows.",
-    "pricing": "Paid plans; verify current pricing before publication",
-    "freePlan": false,
-    "features": ["AI writing", "marketing content", "brand voice", "content workflows"],
-    "bestFor": ["marketing teams", "agencies", "content teams"],
-    "affiliateUrl": "",
-    "affiliateProgram": "Jasper Affiliate Program",
-    "commission": "Commission applies to eligible customers during the first 12 months",
-    "sourceUrl": "https://www.jasper.ai/",
-    "lastVerified": "2026-08-28"
+    "slug":"jasper","name":"Jasper","category":"ai-writing","description":"AI platform for creating and managing marketing content and brand-focused workflows.","pricing":"Paid plans; verify current pricing before publication","freePlan":false,"features":["AI writing","marketing content","brand voice","content workflows","automation"],"bestFor":["marketing teams","agencies","content teams"],"affiliateUrl":"","affiliateProgram":"Jasper Affiliate Program","commission":"Pending verification","sourceUrl":"https://www.jasper.ai/","lastVerified":"2026-08-28"
+  },
+  {
+    "slug":"brevo","name":"Brevo","category":"marketing","description":"Marketing and customer communication platform for email, SMS, automation and transactional messaging.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["email marketing","SMS","automation","CRM","transactional email","integrations"],"bestFor":["small businesses","ecommerce","marketing teams"],"affiliateUrl":"","affiliateProgram":"Brevo Partner Program","commission":"Pending verification","sourceUrl":"https://www.brevo.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"activecampaign","name":"ActiveCampaign","category":"marketing","description":"Customer experience automation platform combining email marketing, CRM and sales automation.","pricing":"Paid plans; verify current pricing before publication","freePlan":false,"features":["email marketing","CRM","marketing automation","sales automation","integrations"],"bestFor":["marketing teams","sales teams","growing businesses"],"affiliateUrl":"","affiliateProgram":"ActiveCampaign Affiliate Program","commission":"Pending verification","sourceUrl":"https://www.activecampaign.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"mailchimp","name":"Mailchimp","category":"marketing","description":"Email and marketing platform for campaigns, customer management, automation and audience growth.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["email marketing","automation","audience management","campaigns","analytics","integrations"],"bestFor":["small businesses","creators","ecommerce"],"affiliateUrl":"","affiliateProgram":"Mailchimp Partner Program","commission":"Pending verification","sourceUrl":"https://mailchimp.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"zapier","name":"Zapier","category":"automation","description":"Workflow automation platform connecting business apps and automating repetitive tasks.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["automation","workflows","integrations","AI automation","data transfer"],"bestFor":["small businesses","operations","marketers","agencies"],"affiliateUrl":"","affiliateProgram":"Zapier Affiliate Program","commission":"Pending verification","sourceUrl":"https://zapier.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"make","name":"Make","category":"automation","description":"Visual automation platform for connecting applications and building multi-step workflows.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["automation","visual workflows","integrations","webhooks","data transformation"],"bestFor":["operations teams","agencies","power users"],"affiliateUrl":"","affiliateProgram":"Make Partner Program","commission":"Pending verification","sourceUrl":"https://www.make.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"zoho-crm","name":"Zoho CRM","category":"crm","description":"CRM platform for managing leads, deals, customer relationships, sales processes and automation.","pricing":"Free and paid plans available; verify current pricing","freePlan":true,"features":["crm","lead management","sales pipeline","automation","analytics","integrations"],"bestFor":["small businesses","sales teams","growing companies"],"affiliateUrl":"","affiliateProgram":"Zoho Affiliate Program","commission":"Pending verification","sourceUrl":"https://www.zoho.com/crm/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"monday-crm","name":"monday CRM","category":"crm","description":"Flexible CRM and workflow platform for managing leads, pipelines, customer work and sales processes.","pricing":"Paid plans; verify current pricing before publication","freePlan":false,"features":["crm","pipeline management","workflows","automation","collaboration","integrations"],"bestFor":["small businesses","sales teams","agencies"],"affiliateUrl":"","affiliateProgram":"monday.com Partner Program","commission":"Pending verification","sourceUrl":"https://monday.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"typeform","name":"Typeform","category":"forms","description":"Conversational form and data-collection platform for surveys, lead capture and customer research.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["forms","surveys","lead capture","analytics","integrations"],"bestFor":["marketing teams","research","lead generation"],"affiliateUrl":"","affiliateProgram":"Typeform Partner Program","commission":"Pending verification","sourceUrl":"https://www.typeform.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"tally","name":"Tally","category":"forms","description":"Simple online form builder for creating forms, surveys and data-collection workflows.","pricing":"Free plan available; paid plans vary","freePlan":true,"features":["forms","surveys","payments","logic","integrations"],"bestFor":["startups","creators","small businesses"],"affiliateUrl":"","affiliateProgram":"Tally Partner Program","commission":"Pending verification","sourceUrl":"https://tally.so/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"ahrefs","name":"Ahrefs","category":"seo","description":"SEO and search marketing platform for keyword research, competitor analysis, backlinks and content research.","pricing":"Paid plans; verify current pricing before publication","freePlan":false,"features":["seo","keyword research","backlink analysis","competitor research","content research"],"bestFor":["SEO professionals","agencies","publishers","marketers"],"affiliateUrl":"","affiliateProgram":"Ahrefs Affiliate Program","commission":"Pending verification","sourceUrl":"https://ahrefs.com/","lastVerified":"2026-08-29"
+  },
+  {
+    "slug":"se-ranking","name":"SE Ranking","category":"seo","description":"SEO platform covering rank tracking, keyword research, competitor analysis and website audits.","pricing":"Paid plans; verify current pricing before publication","freePlan":false,"features":["seo","rank tracking","keyword research","competitor research","site audit"],"bestFor":["SEO professionals","agencies","small businesses"],"affiliateUrl":"","affiliateProgram":"SE Ranking Affiliate Program","commission":"Pending verification","sourceUrl":"https://seranking.com/","lastVerified":"2026-08-29"
   }
 ]
