@@ -48,13 +48,35 @@ const topTools = intent => [...tools]
   .slice(0, 3)
   .map(({ tool }) => tool);
 
+const relatedIntents = current => intents
+  .filter(item => item?.slug && item.slug !== current.slug)
+  .map(item => {
+    let similarity = 0;
+    if (item.category && current.category && item.category === current.category) similarity += 5;
+    const a = new Set(Object.keys(current.weights || {}));
+    const b = new Set(Object.keys(item.weights || {}));
+    for (const key of a) if (b.has(key)) similarity += 1;
+    const currentParts = String(current.slug).split('-');
+    const itemParts = String(item.slug).split('-');
+    if (currentParts[1] && currentParts[1] === itemParts[1]) similarity += 1;
+    return { item, similarity };
+  })
+  .sort((a, b) => b.similarity - a.similarity)
+  .slice(0, 4)
+  .map(({ item }) => item);
+
 const render = intent => {
   const title = titleFromIntent(intent);
   const desc = intent.description || `Tool recommendations for ${title.toLowerCase()}.`;
   const toolsForPage = topTools(intent);
   const category = intent.category || toolsForPage[0]?.category || 'software';
-  const criteria = Object.keys(intent.weights || {}).filter(k => !['category'].includes(k)).slice(0, 4);
+  const criteria = Object.keys(intent.weights || {}).filter(k => k !== 'category').slice(0, 4);
   const criteriaText = criteria.length ? criteria.join(', ') : 'practical fit, features and usability';
+  const related = relatedIntents(intent);
+  const relatedHtml = related.length ? `
+    <section class="section"><h2>Related guides</h2><div class="related">
+      ${related.map(item => `<a class="related-card" href="/${encodeURIComponent(item.slug)}.html"><strong>${esc(titleFromIntent(item))}</strong><span>Explore guide →</span></a>`).join('')}
+    </div></section>` : '';
   const faq = [
     [`What is the best ${slugWords(intent.slug)}?`, `ToolScout compares options based on ${criteriaText} and the current catalog rather than a generic popularity ranking.`],
     ['How does ToolScout choose these tools?', 'Recommendations are generated from the current ToolScout catalog and the intent profile for this guide.'],
@@ -83,12 +105,13 @@ const render = intent => {
   <meta name="robots" content="index,follow">
   <meta property="og:title" content="${esc(title)} — ToolScout">
   <meta property="og:description" content="${esc(desc)}">
+  <meta property="og:type" content="website">
   <style>
     body{font-family:Inter,system-ui,-apple-system,sans-serif;margin:0;background:#f6f7f9;color:#111827}
     .wrap{max-width:940px;margin:auto;padding:28px 22px 80px}.brand{font-size:22px;font-weight:850;color:#111827;text-decoration:none}
     .hero{padding:72px 0 32px}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:#667085}
     h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:14px 0 18px}.lead{font-size:19px;line-height:1.65;color:#667085;max-width:780px}
-    .sub{font-size:14px;line-height:1.6;color:#475467;margin-top:20px}.grid{display:grid;gap:14px}.card{position:relative;background:#fff;border:1px solid #e4e7ec;border-radius:20px;padding:24px}.rank{position:absolute;right:20px;top:18px;font-size:12px;font-weight:850;color:#98a2b3}.meta{font-size:11px;text-transform:uppercase;color:#667085;letter-spacing:.08em;font-weight:800}.card h2{margin:8px 36px 8px 0;font-size:27px}.card p{font-size:16px;line-height:1.6;color:#667085}.proof{font-size:13px;color:#475467;margin:12px 0}.features{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.features span{font-size:11px;background:#f2f4f7;border:1px solid #eaecf0;border-radius:999px;padding:6px 8px;color:#475467}.card a{display:inline-block;background:#111827;color:#fff;padding:11px 15px;border-radius:10px;text-decoration:none;font-weight:750}.section{margin-top:48px;padding-top:34px;border-top:1px solid #e4e7ec}.section h2{font-size:27px;margin:0 0 10px}.section p{font-size:16px;line-height:1.65;color:#667085}details{background:#fff;border:1px solid #e4e7ec;border-radius:14px;padding:16px 18px;margin:10px 0}summary{cursor:pointer;font-weight:750}details p{margin:10px 0 0}.disclosure{margin-top:36px;color:#667085;font-size:12px;line-height:1.55}
+    .sub{font-size:14px;line-height:1.6;color:#475467;margin-top:20px}.grid{display:grid;gap:14px}.card{position:relative;background:#fff;border:1px solid #e4e7ec;border-radius:20px;padding:24px}.rank{position:absolute;right:20px;top:18px;font-size:12px;font-weight:850;color:#98a2b3}.meta{font-size:11px;text-transform:uppercase;color:#667085;letter-spacing:.08em;font-weight:800}.card h2{margin:8px 36px 8px 0;font-size:27px}.card p{font-size:16px;line-height:1.6;color:#667085}.proof{font-size:13px;color:#475467;margin:12px 0}.features{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.features span{font-size:11px;background:#f2f4f7;border:1px solid #eaecf0;border-radius:999px;padding:6px 8px;color:#475467}.card a{display:inline-block;background:#111827;color:#fff;padding:11px 15px;border-radius:10px;text-decoration:none;font-weight:750}.section{margin-top:48px;padding-top:34px;border-top:1px solid #e4e7ec}.section h2{font-size:27px;margin:0 0 10px}.section p{font-size:16px;line-height:1.65;color:#667085}details{background:#fff;border:1px solid #e4e7ec;border-radius:14px;padding:16px 18px;margin:10px 0}summary{cursor:pointer;font-weight:750}details p{margin:10px 0 0}.related{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.related-card{display:flex;justify-content:space-between;gap:14px;align-items:center;background:#fff;border:1px solid #e4e7ec;border-radius:14px;padding:16px;color:#111827;text-decoration:none}.related-card span{font-size:12px;color:#667085}.disclosure{margin-top:36px;color:#667085;font-size:12px;line-height:1.55}@media(max-width:700px){.related{grid-template-columns:1fr}.related-card{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
@@ -101,14 +124,9 @@ const render = intent => {
       <p class="sub">This guide focuses on ${esc(criteriaText)}. Rankings are generated from the current ToolScout catalog and intent profile, then checked for usable matches.</p>
     </main>
     <section class="grid">${cards}</section>
-    <section class="section">
-      <h2>How ToolScout chooses</h2>
-      <p>We start with the job to be done, then evaluate the available tools against the needs represented by this guide. Prices and capabilities should be verified before purchase because vendors can change their offers.</p>
-    </section>
-    <section class="section">
-      <h2>Frequently asked questions</h2>
-      ${faqHtml}
-    </section>
+    ${relatedHtml}
+    <section class="section"><h2>How ToolScout chooses</h2><p>We start with the job to be done, then evaluate the available tools against the needs represented by this guide. Prices and capabilities should be verified before purchase because vendors can change their offers.</p></section>
+    <section class="section"><h2>Frequently asked questions</h2>${faqHtml}</section>
     <div class="disclosure">ToolScout may earn affiliate compensation from some outbound links. Recommendations are based on fit, not affiliate payout.</div>
   </div>
 </body>
@@ -117,16 +135,20 @@ const render = intent => {
 };
 
 let created = 0;
-let skipped = 0;
+let refreshed = 0;
 for (const intent of intents) {
   if (!intent?.slug) continue;
   const target = path.join(ROOT, `${intent.slug}.html`);
+  const html = render(intent);
   if (fs.existsSync(target)) {
-    skipped += 1;
+    if (fs.readFileSync(target, 'utf8') !== html) {
+      fs.writeFileSync(target, html, 'utf8');
+      refreshed += 1;
+    }
     continue;
   }
-  fs.writeFileSync(target, render(intent), 'utf8');
+  fs.writeFileSync(target, html, 'utf8');
   created += 1;
 }
 
-console.log(JSON.stringify({ created, skipped, intents: intents.length }));
+console.log(JSON.stringify({ created, refreshed, intents: intents.length }));
