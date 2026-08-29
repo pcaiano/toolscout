@@ -39,8 +39,13 @@ async function readAffiliateMap(request,env){
   }catch{return {};}
 }
 async function stats(request,env){
+  const url=new URL(request.url);
+  const accessEmail=(request.headers.get('Cf-Access-Authenticated-User-Email')||'').trim().toLowerCase();
+  const configuredEmail=String(env.ACCESS_ADMIN_EMAIL||'').trim().toLowerCase();
+  const originAuthorized=url.hostname===new URL(BASE).hostname && !!configuredEmail && accessEmail===configuredEmail;
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
-  if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401});
+  const legacyAuthorized=url.hostname!=='trytoolscout.org' && !!env.ADMIN_TOKEN && token===env.ADMIN_TOKEN;
+  if(!originAuthorized&&!legacyAuthorized)return Response.json({error:'unauthorized'},{status:401});
   const [byTool,byIntent,bySource,bySearchSource,total,searches,opportunities,dailyClicks,dailySearches,affiliate]=await Promise.all([
     env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),
     env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),
