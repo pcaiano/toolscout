@@ -25,12 +25,18 @@ function toolLogo(tool,large=false){const url=logoUrl(tool),size=large?56:46;ret
 
 function fitReasons(tool,query,intent,profile={}){
   const q=normalize(query),haystack=[tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' '),reasons=[];
+  const s=tool.scores||{};
   if(intent&&intent.category===tool.category)reasons.push(`Strong ${tool.category} fit`);
+  if(profile.goal&&normalize(tool.category)===normalize(profile.goal)&&reasons.length<2)reasons.push(`Strong fit for ${profile.goal}`);
   if(profile.budget==='free'&&tool.freePlan)reasons.push('Free plan available');
-  if(profile.priority==='automation'&&Number(tool.scores?.automation||0)>=7)reasons.push('Strong automation fit');
-  if(profile.priority==='integrations'&&Number(tool.scores?.integrations||0)>=7)reasons.push('Strong integration coverage');
-  if(profile.priority==='ease'&&Number(tool.scores?.ease||0)>=8)reasons.push('Easy to use');
-  if(profile.team&&haystack.includes(profile.team==='solo'?'solopreneurs':profile.team==='small'?'small businesses':'teams'))reasons.push('Fits your team size');
+  if(profile.priority==='automation'&&Number(s.automation||0)>=7)reasons.push('Strong automation fit');
+  if(profile.priority==='integrations'&&Number(s.integrations||0)>=7)reasons.push('Strong integration coverage');
+  if(profile.priority==='ease'&&Number(s.ease||0)>=8)reasons.push('Easy to use');
+  if(profile.priority==='features'&&Number(s.features||0)>=7)reasons.push('Strong feature depth');
+  if(profile.team==='solo'&&Number(s.ease||0)>=8)reasons.push('Well suited to solo users');
+  if(profile.team==='small'&&Number(s.agency||0)>=7)reasons.push('Strong fit for small teams and agencies');
+  if(profile.team==='team'&&Number(s.agency||0)>=7)reasons.push('Scales well for growing teams');
+  if(profile.team==='large'&&Number(s.agency||0)>=8)reasons.push('Built for larger organisations');
   if(!reasons.length&&q){const words=tokenize(q),matched=words.find(w=>haystack.includes(w));if(matched)reasons.push(`Matches your ${matched} needs`);}
   if(!reasons.length&&tool.bestFor?.length)reasons.push(`Best for ${tool.bestFor[0]}`);
   return reasons.slice(0,3);
@@ -38,28 +44,26 @@ function fitReasons(tool,query,intent,profile={}){
 
 async function boot(){const [toolsResponse,intentsResponse]=await Promise.all([fetch(asset('/data/tools.json'),{cache:'no-store'}),fetch(asset('/data/intents.json'),{cache:'no-store'})]);if(!toolsResponse.ok||!intentsResponse.ok)throw new Error('Database unavailable');state.tools=await toolsResponse.json();state.intents=await intentsResponse.json();state.ready=true;const go=document.getElementById('go');if(go)go.disabled=false;}
 
-function detectIntent(query){const q=normalize(query);let best=null,bestScore=0;for(const intent of state.intents){let score=0;for(const keyword of intent.keywords||[])if(q.includes(normalize(keyword)))score+=2;if(intent.slug.includes('free')&&/free|budget|cheap|affordable/.test(q))score+=5;if(intent.slug.includes('crm')&&/crm|sales|customer/.test(q))score+=4;if(intent.slug.includes('agency')&&/agency|agencies|client/.test(q))score+=4;if(intent.slug.includes('seo')&&/seo|keywords|organic|search/.test(q))score+=4;if(score>bestScore){best=intent;bestScore=score;}}return best;}
+function detectIntent(query){const q=normalize(query);let best=null,bestScore=0;for(const intent of state.intents){let score=0;for(const keyword of intent.keywords||[])if(q.includes(normalize(keyword)))score+=2;if(intent.slug.includes('free')&&/free|budget|cheap|affordable/.test(q))score+=5;if(intent.slug.includes('crm')&&/crm|sales|customer/.test(q))score+=4;if(intent.slug.includes('agency')&&/agency|agencies|client/.test(q))score+=6;if(intent.slug.includes('seo')&&/seo|keywords|organic|search/.test(q))score+=4;if(score>bestScore){best=intent;bestScore=score;}}return best;}
 
 function scoreTool(tool,query,intent,profile={}){
   const q=normalize(query),words=tokenize(query),haystack=[tool.name,tool.category,tool.description,...(tool.features||[]),...(tool.bestFor||[])].map(normalize).join(' ');
-  let score=25;
+  let score=25; const s=tool.scores||{};
   for(const word of words){if(haystack.includes(word))score+=3;if(normalize(tool.category).includes(word))score+=3;}
-  const s=tool.scores||{};
   if(intent&&intent.category===tool.category)score+=18;
-  if(profile.goal&&normalize(tool.category)===profile.goal)score+=18;
+  if(profile.goal&&normalize(tool.category)===normalize(profile.goal))score+=18;
   if((profile.budget==='free'||/free|budget|cheap|affordable/.test(q))&&tool.freePlan)score+=10;
   if(profile.budget==='low'&&Number(s.price||0)>=7)score+=7;
   if(profile.budget==='mid'&&Number(s.price||0)>=5)score+=4;
   if(profile.priority==='ease')score+=Number(s.ease||0)*1.5;
   if(profile.priority==='automation')score+=Number(s.automation||0)*1.5;
   if(profile.priority==='integrations')score+=Number(s.integrations||0)*1.5;
-  if(profile.priority==='features')score+=Math.min(10,(tool.features||[]).length*1.5);
-  if(profile.team==='solo'&&haystack.includes('small businesses'))score+=4;
-  if(profile.team==='small'&&(haystack.includes('small businesses')||haystack.includes('startups')))score+=5;
-  if(profile.team==='team'&&haystack.includes('teams'))score+=5;
-  if(profile.team==='large'&&Number(s.agency||0)>=8)score+=3;
-  if(intent){const w=intent.weights||{};if(w.freePlan&&tool.freePlan)score+=Math.min(8,w.freePlan*2);if(w.automation)score+=(Number(s.automation||0)*w.automation)/5;if(w.integrations)score+=(Number(s.integrations||0)*w.integrations)/5;if(w.features)score+=Math.min(8,w.features);}
-  if(Number(s[normalize(tool.category)]||0)>0)score+=Number(s[normalize(tool.category)])*0.5;
+  if(profile.priority==='features')score+=Number(s.features||0)*1.5;
+  if(profile.team==='solo')score+=Number(s.ease||0)*0.6;
+  if(profile.team==='small')score+=Number(s.agency||0)*0.9;
+  if(profile.team==='team')score+=Number(s.agency||0)*0.9;
+  if(profile.team==='large')score+=Number(s.agency||0)*1.1;
+  if(intent){const w=intent.weights||{};if(w.freePlan&&tool.freePlan)score+=Math.min(8,w.freePlan*2);if(w.automation)score+=(Number(s.automation||0)*w.automation)/5;if(w.integrations)score+=(Number(s.integrations||0)*w.integrations)/5;if(w.features)score+=(Number(s.features||0)*w.features)/5;}
   return Math.round(Math.min(99,score));
 }
 
