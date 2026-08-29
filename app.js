@@ -1,6 +1,6 @@
-const SITE_BASE = '/toolscout';
+const SITE_BASE = '.';
 const WORKER_ORIGIN = 'https://toolscout.luxurybuyerintelligence.workers.dev';
-const state = { tools: [], intents: [], step: 0, answers: {} };
+const state = { tools: [], intents: [], step: 0, answers: {}, ready: false };
 const normalize = (value) => String(value || '').toLowerCase();
 const tokenize = (value) => normalize(value).split(/[^a-z0-9]+/).filter((x) => x.length > 2);
 const asset = (path) => `${SITE_BASE}${path}`;
@@ -14,11 +14,20 @@ const questions = [
   { id: 'priority', title: 'What matters most?', choices: [['ease','Easy to use'],['automation','Automation'],['integrations','Integrations'],['features','Advanced features']] }
 ];
 
-const sessionId = (() => {
-  const key = 'toolscout_session'; let id = localStorage.getItem(key);
-  if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`; localStorage.setItem(key, id); }
-  return id;
-})();
+function getSessionId() {
+  try {
+    const key = 'toolscout_session';
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+      localStorage.setItem(key, id);
+    }
+    return id;
+  } catch {
+    return `${Date.now()}-${Math.random()}`;
+  }
+}
+const sessionId = getSessionId();
 
 async function boot() {
   const [toolsResponse, intentsResponse] = await Promise.all([
@@ -26,7 +35,11 @@ async function boot() {
     fetch(asset('/data/intents.json'), { cache: 'no-store' })
   ]);
   if (!toolsResponse.ok || !intentsResponse.ok) throw new Error('Database unavailable');
-  state.tools = await toolsResponse.json(); state.intents = await intentsResponse.json();
+  state.tools = await toolsResponse.json();
+  state.intents = await intentsResponse.json();
+  state.ready = true;
+  const go = document.getElementById('go');
+  if (go) go.disabled = false;
 }
 
 function detectIntent(query) {
@@ -47,7 +60,10 @@ function scoreTool(tool, query, intent, profile = {}) {
   const q = normalize(query), words = tokenize(query);
   const haystack = [tool.name, tool.category, tool.description, ...(tool.features || []), ...(tool.bestFor || [])].map(normalize).join(' ');
   let score = 40;
-  for (const word of words) { if (haystack.includes(word)) score += 3; if (normalize(tool.category).includes(word)) score += 3; }
+  for (const word of words) {
+    if (haystack.includes(word)) score += 3;
+    if (normalize(tool.category).includes(word)) score += 3;
+  }
   if (/free|budget|cheap|affordable/.test(q) && tool.freePlan) score += 7;
   if (intent && intent.category === tool.category) score += 18;
   if (intent) {
@@ -68,15 +84,23 @@ function scoreTool(tool, query, intent, profile = {}) {
 }
 
 async function postEvent(path, payload) {
-  try { await fetch(api(path), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), keepalive: true }); } catch {}
+  try {
+    await fetch(api(path), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), keepalive: true });
+  } catch {}
 }
 async function trackSearch(intent, profile = {}) { postEvent('/api/search', { intent: intent?.slug || 'general', session: sessionId, profile, source: 'recommendation' }); }
-async function trackClick(tool, intent, profile = {}) { postEvent('/api/click', { tool: tool.slug, intent: intent?.slug || 'general', session: sessionId, profile, source: 'recommendation' }); }
+async function trackClick(tool, intent, profile = {}) { if (tool) postEvent('/api/click', { tool: tool.slug, intent: intent?.slug || 'general', session: sessionId, profile, source: 'recommendation' }); }
 
 function renderResults(query, profile = {}) {
-  const intent = detectIntent(query); trackSearch(intent, profile);
+  if (!state.ready) return;
+  const intent = detectIntent(query);
+  trackSearch(intent, profile);
   const results = state.tools.map(tool => ({ ...tool, score: scoreTool(tool, query, intent, profile) })).sort((a, b) => b.score - a.score).slice(0, 3);
   const out = document.getElementById('results');
+  if (!results.length) {
+    out.innerHTML = '<div class="result">No matching tools yet. Try describing your goal differently.</div>';
+    return;
+  }
   out.innerHTML = `<div class="result"><strong>Your profile</strong><div class="chips"><span class="chip">${profile.goal || 'general'}</span><span class="chip">${profile.budget || 'any budget'}</span><span class="chip">${profile.team || 'any team'}</span><span class="chip">${profile.priority || 'balanced'}</span></div></div>` + results.map((tool, i) => {
     const cta = affiliate(tool.slug);
     return `<article class="result"><span class="score">${tool.score}/100</span><h3>${i === 0 ? 'Best match · ' : ''}${tool.name}</h3><div class="meta">${tool.pricing} · ${tool.category}</div><p>${tool.description}</p><div class="chips">${(tool.features || []).slice(0, 5).map(x => `<span class="chip">${x}</span>`).join('')}</div><div class="actions" style="margin-top:16px"><span class="hint">${intent ? `Matched for: ${intent.title}` : 'Matched to your request'}</span><a class="btn" href="${cta}" target="_blank" rel="nofollow sponsored noopener" data-tool="${tool.slug}">See tool</a></div></article>`;
@@ -90,7 +114,7 @@ function showQuestion() {
   document.getElementById('guided').style.display = 'block';
   document.getElementById('progress').textContent = `Question ${state.step + 1} of ${questions.length}`;
   document.getElementById('question').textContent = q.title;
-  document.getElementById('choices').innerHTML = q.choices.map(([value, label]) => `<button class="choice ${state.answers[q.id] === value ? 'selected' : ''}" data-value="${value}">${label}</button>`).join('');
+  document.getElementById('choices').innerHTML = q.choices.map(([value, label]) => `<button type="button" class="choice ${state.answers[q.id] === value ? 'selected' : ''}" data-value="${value}">${label}</button>`).join('');
   document.getElementById('back').style.visibility = state.step ? 'visible' : 'hidden';
   document.querySelectorAll('.choice').forEach(btn => btn.addEventListener('click', () => {
     state.answers[q.id] = btn.dataset.value;
@@ -99,8 +123,33 @@ function showQuestion() {
   }));
 }
 
-document.getElementById('guidedStart').addEventListener('click', () => { state.step = 0; state.answers = {}; document.getElementById('results').innerHTML = ''; showQuestion(); });
-document.getElementById('back').addEventListener('click', () => { if (state.step > 0) { state.step--; showQuestion(); } });
-document.getElementById('go').addEventListener('click', () => { const query = document.getElementById('need').value.trim(); if (query) renderResults(query); });
-document.getElementById('need').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('go').click(); } });
-boot().catch(() => { document.getElementById('results').innerHTML = '<div class="result">ToolScout is temporarily unable to load its database.</div>'; });
+function init() {
+  const guidedStart = document.getElementById('guidedStart');
+  const back = document.getElementById('back');
+  const go = document.getElementById('go');
+  const need = document.getElementById('need');
+  if (!guidedStart || !back || !go || !need) return;
+  go.disabled = true;
+  guidedStart.addEventListener('click', () => {
+    if (!state.ready) return;
+    state.step = 0; state.answers = {}; document.getElementById('results').innerHTML = ''; showQuestion();
+  });
+  back.addEventListener('click', () => { if (state.step > 0) { state.step--; showQuestion(); } });
+  go.addEventListener('click', () => {
+    const query = need.value.trim();
+    if (!query) { need.focus(); return; }
+    renderResults(query);
+  });
+  need.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go.click(); }
+  });
+  need.addEventListener('input', () => { if (need.value.trim()) go.disabled = !state.ready; });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  boot().catch(() => {
+    const out = document.getElementById('results');
+    if (out) out.innerHTML = '<div class="result">ToolScout is temporarily unable to load its database. Please try again in a moment.</div>';
+  });
+});
