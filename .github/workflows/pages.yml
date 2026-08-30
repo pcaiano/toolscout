@@ -3,6 +3,8 @@ name: Deploy ToolScout to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 permissions:
@@ -23,27 +25,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Generate SEO pages
         run: node scripts/generate-seo-pages.mjs
-
       - name: Generate acquisition content
         run: node scripts/generate-acquisition-content.mjs
-
+      - name: Generate acquisition priority
+        run: node scripts/generate-acquisition-priority.mjs
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
-
       - name: Guard public hostname
         run: node scripts/check-public-host.mjs
-
       - name: Configure Pages
         uses: actions/configure-pages@v5
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
