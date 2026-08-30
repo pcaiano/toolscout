@@ -24,6 +24,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate SEO pages
+        run: node scripts/generate-seo-pages.mjs
+
+      - name: Generate sitemap
+        run: node scripts/generate-sitemap.mjs
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
