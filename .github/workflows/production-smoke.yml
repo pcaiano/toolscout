@@ -46,11 +46,15 @@ jobs:
             curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
           done
 
-      - name: Check public analytics surface is hidden
+      - name: Check public analytics surface is protected
         run: |
           set -e
-          code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "$PROD_BASE/analytics.html")"
-          test "$code" = "404"
+          code="$(curl --silent --show-error --output /tmp/analytics.html --write-out '%{http_code}' --location "$PROD_BASE/analytics.html")"
+          test "$code" = "200"
+          if grep -Fq 'ToolScout Command Center' /tmp/analytics.html; then
+            echo 'ERROR: unauthenticated request exposed the Command Center'
+            exit 1
+          fi
 
       - name: Check dynamic SEO canonical
         run: |
