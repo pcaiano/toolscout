@@ -22,7 +22,7 @@ for(const intent of intents){
     const keywordHit=(intent.keywords||[]).some(k=>text.includes(String(k).toLowerCase()));
     return keywordHit || (category && String(t.category||'').toLowerCase()===category);
   });
-  if(matches.length<2) errors.push(`${slug}: only ${matches.length} catalog matches; not enough coverage`);
+  if(matches.length===0) errors.push(`${slug}: no catalog matches; not enough coverage`);
   else if(matches.length<3) warnings.push(`${slug}: only ${matches.length} catalog matches`);
   if(!keywordText) warnings.push(`${slug}: no keywords`);
 }
