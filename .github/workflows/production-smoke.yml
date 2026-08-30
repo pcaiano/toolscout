@@ -50,11 +50,16 @@ jobs:
         run: |
           set -e
           code="$(curl --silent --show-error --output /tmp/analytics.html --write-out '%{http_code}' --location "$PROD_BASE/analytics.html")"
-          test "$code" = "200"
-          if grep -Fq 'ToolScout Command Center' /tmp/analytics.html; then
-            echo 'ERROR: unauthenticated request exposed the Command Center'
-            exit 1
-          fi
+          case "$code" in
+            404) echo 'Public analytics surface correctly absent on public domain' ;;
+            200)
+              if grep -Fq 'ToolScout Command Center' /tmp/analytics.html; then
+                echo 'ERROR: unauthenticated request exposed the Command Center'
+                exit 1
+              fi
+              ;;
+            *) echo "ERROR: unexpected analytics page status $code"; exit 1 ;;
+          esac
 
       - name: Check dynamic SEO canonical
         run: |
