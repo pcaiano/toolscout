@@ -1,36 +1,8 @@
 {
-  "generatedAt": "2026-08-30T18:29:22.402Z",
+  "generatedAt": "2026-08-30T18:40:48.009Z",
   "source": "aggregated content demand signals",
   "count": 24,
   "items": [
-    {
-      "slug": "best-crm-for-small-business-guide",
-      "intent": "best-crm-for-small-business",
-      "title": "CRM For Small Business: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for crm for small business, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 1
-    },
-    {
-      "slug": "best-free-crm-guide",
-      "intent": "best-free-crm",
-      "title": "Free CRM: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for free crm, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 1
-    },
-    {
-      "slug": "best-seo-tools-guide",
-      "intent": "best-seo-tools",
-      "title": "SEO Tools: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for seo tools, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 1
-    },
-    {
-      "slug": "best-tools-for-agencies-guide",
-      "intent": "best-tools-for-agencies",
-      "title": "Tools For Agencies: How to Choose the Right Tool",
-      "description": "A practical guide to choosing software for tools for agencies, shaped by ToolScout demand signals and the criteria that matter.",
-      "searches": 1
-    },
     {
       "slug": "best-affordable-crm-guide",
       "intent": "best-affordable-crm",
@@ -81,6 +53,13 @@
       "searches": 0
     },
     {
+      "slug": "best-crm-for-small-business-guide",
+      "intent": "best-crm-for-small-business",
+      "title": "CRM For Small Business: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for crm for small business, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
       "slug": "best-crm-with-automation-guide",
       "intent": "best-crm-with-automation",
       "title": "CRM With Automation: How to Choose the Right Tool",
@@ -99,6 +78,13 @@
       "intent": "best-forms-for-small-business",
       "title": "Forms For Small Business: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for forms for small business, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-free-crm-guide",
+      "intent": "best-free-crm",
+      "title": "Free CRM: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for free crm, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
@@ -158,10 +144,24 @@
       "searches": 0
     },
     {
+      "slug": "best-seo-tools-guide",
+      "intent": "best-seo-tools",
+      "title": "SEO Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for seo tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
       "slug": "best-seo-tools-for-agencies-guide",
       "intent": "best-seo-tools-for-agencies",
       "title": "SEO Tools For Agencies: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for seo tools for agencies, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-tools-for-agencies-guide",
+      "intent": "best-tools-for-agencies",
+      "title": "Tools For Agencies: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for tools for agencies, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
