@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml
+Sitemap: https://trytoolscout.org/sitemap.xml
