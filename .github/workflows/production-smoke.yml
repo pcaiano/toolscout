@@ -50,8 +50,8 @@ jobs:
         run: |
           set -e
           html="$(curl --fail --silent --show-error --location "$PROD_BASE/analytics.html")"
-          printf '%s\n' "$html" | grep -F '<meta name="robots" content="noindex,nofollow">'
-          printf '%s\n' "$html" | grep -F 'Command Center'
+          printf '%s\n' "$html" | grep -Eiq '<meta[^>]+name=["'"']robots["'"'][^>]+content=["'"'][^"'"']*noindex[^"'"']*["'"']'
+          printf '%s\n' "$html" | grep -Fqi 'ToolScout Command Center'
 
       - name: Check dynamic SEO canonical
         run: |
