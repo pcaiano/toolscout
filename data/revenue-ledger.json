@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "currency": "EUR",
+  "lastUpdated": null,
+  "affiliates": {
+    "systeme-io": {
+      "status": "active",
+      "commission": 0,
+      "pending": 0,
+      "paid": 0,
+      "sales": 0,
+      "leads": 0,
+      "source": "manual",
+      "notes": "Populate from vendor reporting until API/import adapter is available."
+    },
+    "beehiiv": {
+      "status": "active",
+      "commission": 0,
+      "pending": 0,
+      "paid": 0,
+      "sales": 0,
+      "leads": 0,
+      "source": "manual",
+      "notes": "Populate from vendor reporting until API/import adapter is available."
+    }
+  }
+}
