@@ -1,0 +1,11 @@
+{
+  "clusters": [
+    {"slug":"crm","label":"CRM","intents":["best-crm-for-small-business","best-free-crm","best-crm-for-real-estate","best-crm-for-consultants","best-crm-for-sales-teams","best-crm-with-automation","best-affordable-crm"]},
+    {"slug":"seo","label":"SEO","intents":["best-seo-tools","best-keyword-research-tools","best-seo-tools-for-agencies","best-competitor-seo-tools"]},
+    {"slug":"marketing","label":"Marketing","intents":["best-ai-marketing-tools","best-email-marketing-tools","best-marketing-automation-tools","best-funnel-builder","best-ai-ad-creative-tools"]},
+    {"slug":"automation","label":"Automation","intents":["best-workflow-automation-tools","best-no-code-automation-tools"]},
+    {"slug":"forms","label":"Forms","intents":["best-lead-capture-forms","best-forms-for-small-business"]},
+    {"slug":"productivity","label":"Productivity & Work Management","intents":["best-project-management-tools","best-productivity-tools-for-teams","best-free-project-management-tools"]},
+    {"slug":"agency","label":"Agency & Client Workflows","intents":["best-tools-for-agencies","best-seo-tools-for-agencies"]}
+  ]
+}
