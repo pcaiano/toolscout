@@ -1,5 +1,6 @@
 {
   "systeme-io": {"url": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109", "enabled": true, "publicUrl": "https://systeme.io/"},
+  "beehiiv": {"url": "https://www.beehiiv.com/?via=pedro-caiano", "enabled": true, "publicUrl": "https://www.beehiiv.com/"},
   "jotform": {"url": "", "enabled": false, "publicUrl": "https://www.jotform.com/"},
   "hubspot": {"url": "", "enabled": false, "publicUrl": "https://www.hubspot.com/"},
   "pipedrive": {"url": "", "enabled": false, "publicUrl": "https://www.pipedrive.com/"},
