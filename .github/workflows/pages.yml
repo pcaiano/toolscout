@@ -27,6 +27,9 @@ jobs:
       - name: Generate SEO pages
         run: node scripts/generate-seo-pages.mjs
 
+      - name: Generate acquisition content
+        run: node scripts/generate-acquisition-content.mjs
+
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
 
