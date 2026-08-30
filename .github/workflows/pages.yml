@@ -33,6 +33,9 @@ jobs:
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
 
+      - name: Guard public hostname
+        run: node scripts/check-public-host.mjs
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
