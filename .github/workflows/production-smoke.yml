@@ -41,15 +41,21 @@ jobs:
       - name: Check core pages
         run: |
           set -e
-          for page in / /guides.html /blog/ /tools.html /compare.html /methodology.html /affiliate-disclosure.html /privacy.html /analytics.html /best-seo-tools.html /best-crm-for-small-business.html /tool.html?tool=systeme-io /reports/growth-priority.json; do
+          for page in / /guides.html /blog/ /tools.html /compare.html /methodology.html /affiliate-disclosure.html /privacy.html /best-seo-tools.html /best-crm-for-small-business.html /tool.html?tool=systeme-io /reports/growth-priority.json; do
             echo "Checking $PROD_BASE$page"
             curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
           done
 
+      - name: Check public analytics surface is hidden
+        run: |
+          set -e
+          code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "$PROD_BASE/analytics.html")"
+          test "$code" = "404"
+
       - name: Check dynamic SEO canonical
         run: |
           set -e
-          html="$(curl --fail --silent --show-error "$PROD_BASE/best-ai-marketing-tools.html")"
+          html="$(curl --fail --silent --show-error --location "$PROD_BASE/best-ai-marketing-tools.html")"
           printf '%s\n' "$html" | grep -F '<link rel="canonical" href="https://trytoolscout.org/best-ai-marketing-tools.html">'
 
       - name: Check public-domain analytics auth
@@ -64,6 +70,13 @@ jobs:
           headers="$(curl --fail --silent --show-error --head "$PROD_BASE/go/systeme-io")"
           printf '%s\n' "$headers" | grep -E '^HTTP/.* 302'
           printf '%s\n' "$headers" | grep -i '^location: https://systeme.io/'
+
+      - name: Check tracked beehiiv redirect
+        run: |
+          set -e
+          headers="$(curl --fail --silent --show-error --head "$PROD_BASE/go/beehiiv")"
+          printf '%s\n' "$headers" | grep -E '^HTTP/.* 302'
+          printf '%s\n' "$headers" | grep -i '^location: https://www.beehiiv.com/'
 
       - name: Check legacy Worker endpoint
         run: |
