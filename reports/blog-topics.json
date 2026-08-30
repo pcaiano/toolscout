@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-08-29T21:33:06.925Z",
+  "generatedAt": "2026-08-30T18:29:22.402Z",
   "source": "aggregated content demand signals",
-  "count": 21,
+  "count": 24,
   "items": [
     {
       "slug": "best-crm-for-small-business-guide",
@@ -102,6 +102,13 @@
       "searches": 0
     },
     {
+      "slug": "best-free-project-management-tools-guide",
+      "intent": "best-free-project-management-tools",
+      "title": "Free Project Management Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for free project management tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
       "slug": "best-funnel-builder-guide",
       "intent": "best-funnel-builder",
       "title": "Funnel Builder: How to Choose the Right Tool",
@@ -134,6 +141,20 @@
       "intent": "best-no-code-automation-tools",
       "title": "No Code Automation Tools: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for no code automation tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-productivity-tools-for-teams-guide",
+      "intent": "best-productivity-tools-for-teams",
+      "title": "Productivity Tools For Teams: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for productivity tools for teams, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-project-management-tools-guide",
+      "intent": "best-project-management-tools",
+      "title": "Project Management Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for project management tools, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {

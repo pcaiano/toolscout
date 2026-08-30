@@ -1,0 +1,415 @@
+{
+  "generatedAt": "2026-08-30T18:29:21.757Z",
+  "methodology": "Heuristic planning score using commercial intent, catalog depth, current tool fit and verified affiliate readiness. It does not claim search-volume data.",
+  "count": 24,
+  "items": [
+    {
+      "intent": "best-marketing-automation-tools",
+      "title": "Best Marketing Automation Tools",
+      "category": "marketing",
+      "priorityScore": 77,
+      "topFit": 9.22,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 15,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "activecampaign",
+        "mailchimp",
+        "brevo"
+      ],
+      "action": "invest-now"
+    },
+    {
+      "intent": "best-crm-for-real-estate",
+      "title": "Best CRM for Real Estate",
+      "category": "crm",
+      "priorityScore": 73,
+      "topFit": 9.21,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "pipedrive",
+        "zoho-crm"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-crm-for-sales-teams",
+      "title": "Best CRM for Sales Teams",
+      "category": "crm",
+      "priorityScore": 73,
+      "topFit": 9.21,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "pipedrive",
+        "zoho-crm"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-crm-for-small-business",
+      "title": "Best CRM for Small Business",
+      "category": "crm",
+      "priorityScore": 73,
+      "topFit": 9.05,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "tally",
+        "make"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-free-crm",
+      "title": "Best Free CRM Tools",
+      "category": "crm",
+      "priorityScore": 73,
+      "topFit": 9.15,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "tally",
+        "make"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-productivity-tools-for-teams",
+      "title": "Best Productivity Tools for Teams",
+      "category": "business",
+      "priorityScore": 73,
+      "topFit": 7.42,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 15,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "clickup",
+        "zapier",
+        "make"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-project-management-tools",
+      "title": "Best Project Management Tools",
+      "category": "business",
+      "priorityScore": 73,
+      "topFit": 7.35,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 15,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "clickup",
+        "zapier",
+        "make"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-seo-tools",
+      "title": "Best SEO Tools",
+      "category": "seo",
+      "priorityScore": 73,
+      "topFit": 9.11,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "make",
+        "hubspot"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-ai-marketing-tools",
+      "title": "Best AI Marketing Tools",
+      "category": "marketing",
+      "priorityScore": 72,
+      "topFit": 9.13,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "make",
+        "hubspot"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-email-marketing-tools",
+      "title": "Best Email Marketing Tools",
+      "category": "marketing",
+      "priorityScore": 72,
+      "topFit": 8.95,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "zapier",
+        "brevo"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-funnel-builder",
+      "title": "Best Funnel Builder",
+      "category": "marketing",
+      "priorityScore": 72,
+      "topFit": 8.9,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "hubspot",
+        "brevo"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "title": "Best No-Code Automation Tools",
+      "category": "automation",
+      "priorityScore": 71,
+      "topFit": 8.64,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "make",
+        "hubspot"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-workflow-automation-tools",
+      "title": "Best Workflow Automation Tools",
+      "category": "automation",
+      "priorityScore": 71,
+      "topFit": 8.67,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "make",
+        "hubspot"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-forms-for-small-business",
+      "title": "Best Forms for Small Business",
+      "category": "forms",
+      "priorityScore": 70,
+      "topFit": 8.86,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "tally",
+        "jotform",
+        "typeform"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-free-project-management-tools",
+      "title": "Best Free Project Management Tools",
+      "category": "business",
+      "priorityScore": 69,
+      "topFit": 7.88,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "clickup",
+        "tally",
+        "zapier"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-crm-for-consultants",
+      "title": "Best CRM for Consultants",
+      "category": "crm",
+      "priorityScore": 68,
+      "topFit": 9.2,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "pipedrive",
+        "monday-crm"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-crm-with-automation",
+      "title": "Best CRM with Automation",
+      "category": "crm",
+      "priorityScore": 68,
+      "topFit": 9.14,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "monday-crm",
+        "zoho-crm"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-affordable-crm",
+      "title": "Best Affordable CRM",
+      "category": "crm",
+      "priorityScore": 66,
+      "topFit": 8.22,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "zoho-crm",
+        "tally"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "title": "Best Lead Capture Forms",
+      "category": "forms",
+      "priorityScore": 64,
+      "topFit": 8.55,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "typeform",
+        "jotform",
+        "tally"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-competitor-seo-tools",
+      "title": "Best Competitor SEO Tools",
+      "category": "seo",
+      "priorityScore": 63,
+      "topFit": 9.16,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "semrush",
+        "ahrefs",
+        "se-ranking"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "title": "Best SEO Tools for Agencies",
+      "category": "seo",
+      "priorityScore": 63,
+      "topFit": 8.92,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "semrush",
+        "ahrefs",
+        "se-ranking"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-tools-for-agencies",
+      "title": "Best Tools for Agencies",
+      "category": "business",
+      "priorityScore": 59,
+      "topFit": 9.18,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 10,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "make",
+        "hubspot"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "title": "Best Keyword Research Tools",
+      "category": "seo",
+      "priorityScore": 51,
+      "topFit": 9.11,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "semrush",
+        "ahrefs",
+        "se-ranking"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-ai-ad-creative-tools",
+      "title": "Best AI Ad Creative Tools",
+      "category": "marketing",
+      "priorityScore": 50,
+      "topFit": 8.94,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "jasper",
+        "adcreative-ai",
+        "hubspot"
+      ],
+      "action": "watch"
+    }
+  ]
+}
