@@ -1,0 +1,20 @@
+{
+  "intents": [
+    {"slug":"best-crm-for-independent-consultants","title":"Best CRM for Independent Consultants","category":"crm","parent":"best-crm-for-consultants"},
+    {"slug":"best-crm-for-property-agents","title":"Best CRM for Property Agents","category":"crm","parent":"best-crm-for-real-estate"},
+    {"slug":"best-crm-for-small-sales-teams","title":"Best CRM for Small Sales Teams","category":"crm","parent":"best-crm-for-sales-teams"},
+    {"slug":"best-affordable-crm-with-automation","title":"Best Affordable CRM with Automation","category":"crm","parent":"best-affordable-crm"},
+    {"slug":"best-free-crm-for-small-business","title":"Best Free CRM for Small Business","category":"crm","parent":"best-free-crm"},
+    {"slug":"best-seo-tools-for-small-business","title":"Best SEO Tools for Small Business","category":"seo","parent":"best-seo-tools"},
+    {"slug":"best-seo-tools-for-content-marketing","title":"Best SEO Tools for Content Marketing","category":"seo","parent":"best-seo-tools"},
+    {"slug":"best-keyword-research-tools-for-small-business","title":"Best Keyword Research Tools for Small Business","category":"seo","parent":"best-keyword-research-tools"},
+    {"slug":"best-competitor-analysis-tools-for-seo","title":"Best Competitor Analysis Tools for SEO","category":"seo","parent":"best-competitor-seo-tools"},
+    {"slug":"best-ai-marketing-tools-for-small-business","title":"Best AI Marketing Tools for Small Business","category":"marketing","parent":"best-ai-marketing-tools"},
+    {"slug":"best-email-marketing-tools-for-small-business","title":"Best Email Marketing Tools for Small Business","category":"marketing","parent":"best-email-marketing-tools"},
+    {"slug":"best-marketing-automation-tools-for-small-business","title":"Best Marketing Automation Tools for Small Business","category":"marketing","parent":"best-marketing-automation-tools"},
+    {"slug":"best-no-code-automation-for-small-business","title":"Best No-Code Automation for Small Business","category":"automation","parent":"best-no-code-automation-tools"},
+    {"slug":"best-workflow-automation-for-agencies","title":"Best Workflow Automation for Agencies","category":"automation","parent":"best-workflow-automation-tools"},
+    {"slug":"best-lead-capture-forms-for-real-estate","title":"Best Lead Capture Forms for Real Estate","category":"forms","parent":"best-lead-capture-forms"},
+    {"slug":"best-free-project-management-for-small-teams","title":"Best Free Project Management for Small Teams","category":"business","parent":"best-free-project-management-tools"}
+  ]
+}
