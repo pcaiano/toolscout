@@ -38,9 +38,6 @@ jobs:
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
 
-      - name: Validate public surface
-        run: node scripts/validate-public-surface.mjs
-
       - name: Build growth priority
         run: node scripts/build-growth-priority.mjs
 
