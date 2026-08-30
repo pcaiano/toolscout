@@ -1,13 +1,13 @@
 {
   "topics": [
-    {"slug":"crm-for-real-estate","title":"How to Choose a CRM for Real Estate","intent":"best-crm-for-real-estate","category":"crm"},
-    {"slug":"crm-for-consultants","title":"How to Choose a CRM for Consultants","intent":"best-crm-for-consultants","category":"crm"},
-    {"slug":"affordable-crm","title":"How to Choose an Affordable CRM","intent":"best-affordable-crm","category":"crm"},
-    {"slug":"seo-tool-stack","title":"How to Build an SEO Tool Stack","intent":"best-seo-tools","category":"seo"},
-    {"slug":"competitor-seo-tools","title":"How to Research Competitors with SEO Tools","intent":"best-competitor-seo-tools","category":"seo"},
-    {"slug":"ai-marketing-stack","title":"How to Build an AI Marketing Tool Stack","intent":"best-ai-marketing-tools","category":"marketing"},
-    {"slug":"marketing-automation","title":"How to Choose Marketing Automation Software","intent":"best-marketing-automation-tools","category":"marketing"},
-    {"slug":"no-code-automation","title":"How to Choose No-Code Automation Tools","intent":"best-no-code-automation-tools","category":"automation"},
-    {"slug":"lead-capture","title":"How to Choose Lead Capture Software","intent":"best-lead-capture-forms","category":"forms"}
+    {"slug":"crm-for-real-estate","title":"How to Choose a CRM for Real Estate","intent":"best-crm-for-real-estate","category":"crm","searchAngles":["CRM for real estate","real estate CRM","CRM for property agents"]},
+    {"slug":"crm-for-consultants","title":"How to Choose a CRM for Consultants","intent":"best-crm-for-consultants","category":"crm","searchAngles":["CRM for consultants","consultant CRM","CRM for independent consultants"]},
+    {"slug":"affordable-crm","title":"How to Choose an Affordable CRM","intent":"best-affordable-crm","category":"crm","searchAngles":["affordable CRM","cheap CRM","low cost CRM"]},
+    {"slug":"seo-tool-stack","title":"How to Build an SEO Tool Stack","intent":"best-seo-tools","category":"seo","searchAngles":["SEO tools","SEO tool stack","SEO software"]},
+    {"slug":"competitor-seo-tools","title":"How to Research Competitors with SEO Tools","intent":"best-competitor-seo-tools","category":"seo","searchAngles":["competitor SEO tools","SEO competitor research","competitor analysis SEO"]},
+    {"slug":"ai-marketing-stack","title":"How to Build an AI Marketing Tool Stack","intent":"best-ai-marketing-tools","category":"marketing","searchAngles":["AI marketing tools","AI marketing software","marketing AI tools"]},
+    {"slug":"marketing-automation","title":"How to Choose Marketing Automation Software","intent":"best-marketing-automation-tools","category":"marketing","searchAngles":["marketing automation software","marketing automation tools","small business marketing automation"]},
+    {"slug":"no-code-automation","title":"How to Choose No-Code Automation Tools","intent":"best-no-code-automation-tools","category":"automation","searchAngles":["no-code automation","no-code automation tools","workflow automation"]},
+    {"slug":"lead-capture","title":"How to Choose Lead Capture Software","intent":"best-lead-capture-forms","category":"forms","searchAngles":["lead capture software","lead capture forms","real estate lead capture"]}
   ]
 }
