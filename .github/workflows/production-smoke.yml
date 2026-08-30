@@ -23,12 +23,10 @@ jobs:
           set -e
           curl --fail --silent --show-error "$PROD_BASE/api/health"
           echo
-
       - name: Check robots
         run: |
           set -e
           curl --fail --silent --show-error "$PROD_BASE/robots.txt" | grep -F "Sitemap: $PROD_BASE/sitemap.xml"
-
       - name: Check sitemap
         run: |
           set -e
@@ -37,7 +35,6 @@ jobs:
           printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/best-seo-tools.html"
           printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/methodology.html"
           printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/privacy.html"
-
       - name: Check core pages
         run: |
           set -e
@@ -45,28 +42,20 @@ jobs:
             echo "Checking $PROD_BASE$page"
             curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
           done
-
       - name: Check public analytics surface is protected
         run: |
           set -e
           code="$(curl --silent --show-error --output /tmp/analytics.html --write-out '%{http_code}' --location "$PROD_BASE/analytics.html")"
           case "$code" in
             404) echo 'Public analytics surface correctly absent on public domain' ;;
-            200)
-              if grep -Fq 'ToolScout Command Center' /tmp/analytics.html; then
-                echo 'ERROR: unauthenticated request exposed the Command Center'
-                exit 1
-              fi
-              ;;
+            200) if grep -Fq 'ToolScout Command Center' /tmp/analytics.html; then echo 'ERROR: unauthenticated request exposed the Command Center'; exit 1; fi ;;
             *) echo "ERROR: unexpected analytics page status $code"; exit 1 ;;
           esac
-
       - name: Check dynamic SEO canonical
         run: |
           set -e
           html="$(curl --fail --silent --show-error --location "$PROD_BASE/best-ai-marketing-tools.html")"
           printf '%s\n' "$html" | grep -F '<link rel="canonical" href="https://trytoolscout.org/best-ai-marketing-tools.html">'
-
       - name: Check public-domain analytics auth
         run: |
           set -e
@@ -75,30 +64,25 @@ jobs:
           body="${response%__HTTP_STATUS__=*}"
           case "$status" in
             401|403) echo "Unauthenticated analytics request denied with HTTP $status" ;;
-            200)
-              if printf '%s' "$body" | grep -Eq '"(sessions|searches|clicks|events|revenue|analytics)"[[:space:]]*:'; then
-                echo 'ERROR: unauthenticated analytics response exposed metric data'
-                exit 1
-              fi
-              echo 'Analytics endpoint returned HTTP 200 but exposed no metric data; likely Access-authenticated response.'
-              ;;
+            200) if printf '%s' "$body" | grep -Eq '"(sessions|searches|clicks|events|revenue|analytics)"[[:space:]]*:'; then echo 'ERROR: unauthenticated analytics response exposed metric data'; exit 1; fi; echo 'Analytics endpoint returned HTTP 200 but exposed no metric data; likely Access-authenticated response.' ;;
             *) echo "ERROR: unexpected analytics auth status $status"; exit 1 ;;
           esac
-
       - name: Check tracked affiliate redirect
         run: |
           set -e
-          headers="$(curl --fail --silent --show-error --head "$PROD_BASE/go/systeme-io")"
-          printf '%s\n' "$headers" | grep -E '^HTTP/.* 302'
-          printf '%s\n' "$headers" | grep -i '^location: https://systeme.io/'
-
+          response="$(curl --silent --show-error --head --location --max-redirs 0 "$PROD_BASE/go/systeme-io" 2>/dev/null || true)"
+          status="$(printf '%s\n' "$response" | sed -n 's/^HTTP\/[^ ]* \([0-9][0-9][0-9]\).*/\1/p' | tail -1)"
+          location="$(printf '%s\n' "$response" | sed -n 's/^[Ll]ocation:[[:space:]]*//p' | tr -d '\r' | tail -1)"
+          test "$status" = "302"
+          printf '%s\n' "$location" | grep -Eq '^https://systeme\.io/\?[^[:space:]]*(sa=|[?&]sa=)'
       - name: Check tracked beehiiv redirect
         run: |
           set -e
-          headers="$(curl --fail --silent --show-error --head "$PROD_BASE/go/beehiiv")"
-          printf '%s\n' "$headers" | grep -E '^HTTP/.* 302'
-          printf '%s\n' "$headers" | grep -i '^location: https://www.beehiiv.com/'
-
+          response="$(curl --silent --show-error --head --location --max-redirs 0 "$PROD_BASE/go/beehiiv" 2>/dev/null || true)"
+          status="$(printf '%s\n' "$response" | sed -n 's/^HTTP\/[^ ]* \([0-9][0-9][0-9]\).*/\1/p' | tail -1)"
+          location="$(printf '%s\n' "$response" | sed -n 's/^[Ll]ocation:[[:space:]]*//p' | tr -d '\r' | tail -1)"
+          test "$status" = "302"
+          printf '%s\n' "$location" | grep -Eq '^https://(www\.)?beehiiv\.com/\?[^[:space:]]*(via=|[?&]via=)'
       - name: Check legacy Worker endpoint
         run: |
           set -e
