@@ -46,11 +46,12 @@ jobs:
             curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
           done
 
-      - name: Check public analytics surface is hidden
+      - name: Check public analytics surface
         run: |
           set -e
-          code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "$PROD_BASE/analytics.html")"
-          test "$code" = "404"
+          html="$(curl --fail --silent --show-error --location "$PROD_BASE/analytics.html")"
+          printf '%s\n' "$html" | grep -F '<meta name="robots" content="noindex,nofollow">'
+          printf '%s\n' "$html" | grep -F 'Command Center'
 
       - name: Check dynamic SEO canonical
         run: |
