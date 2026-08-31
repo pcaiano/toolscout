@@ -27,13 +27,24 @@ for (const file of activeSeoFiles) {
   }
 }
 
+function hasVendorTracking(rawUrl) {
+  const value = String(rawUrl || '');
+  if (/[?&](?:sa|ref|referral|affiliate|partner|aff|via)=/i.test(value)) return true;
+  try {
+    const url = new URL(value);
+    return url.hostname.toLowerCase() === 'aff.trypipedrive.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 const affiliatePath = path.join(ROOT,'data','affiliate.json');
 if (fs.existsSync(affiliatePath)) {
   const affiliate = JSON.parse(fs.readFileSync(affiliatePath,'utf8'));
   for (const [slug, entry] of Object.entries(affiliate)) {
     if (!entry || typeof entry !== 'object') continue;
     if (entry.enabled && !entry.url) failures.push(`data/affiliate.json: ${slug} enabled without private affiliate URL`);
-    if (entry.enabled && !/[?&](?:sa|ref|referral|affiliate|partner|aff|via)=/i.test(String(entry.url||''))) failures.push(`data/affiliate.json: ${slug} enabled URL should contain a vendor tracking parameter`);
+    if (entry.enabled && !hasVendorTracking(entry.url)) failures.push(`data/affiliate.json: ${slug} enabled URL should contain verified vendor tracking`);
   }
 }
 
