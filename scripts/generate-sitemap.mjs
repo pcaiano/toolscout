@@ -8,7 +8,9 @@ const CORE_PAGES=['guides.html','tools.html','compare.html','methodology.html','
 const baseIntents=JSON.parse(fs.readFileSync(path.join(ROOT,'data','intents.json'),'utf8'));
 const longtailPath=path.join(ROOT,'data','seo-longtail.json');
 const longtail=fs.existsSync(longtailPath)?JSON.parse(fs.readFileSync(longtailPath,'utf8')).intents||[]:[];
-const intentSlugs=new Set([...baseIntents,...longtail].map(x=>x?.slug).filter(Boolean));
+const consolidationsPath=path.join(ROOT,'data','seo-consolidations.json');
+const consolidations=fs.existsSync(consolidationsPath)?JSON.parse(fs.readFileSync(consolidationsPath,'utf8')):{};
+const intentSlugs=new Set([...baseIntents,...longtail].map(x=>x?.slug).filter(slug=>slug&&!consolidations[slug]));
 const urls=[BASE+'/',`${BASE}/guides.html`,`${BASE}/blog/`,...CORE_PAGES.filter(file=>fs.existsSync(path.join(ROOT,file))).map(file=>`${BASE}/${file}`)];
 const files=fs.readdirSync(ROOT).filter(name=>name.endsWith('.html')).filter(name=>!EXCLUDE.test(name)).filter(name=>name!=='index.html').filter(name=>intentSlugs.has(name.replace(/\.html$/i,''))).sort();
 for(const file of files)urls.push(`${BASE}/${file}`);

@@ -7,7 +7,25 @@ directory = "."
 html_handling = "auto-trailing-slash"
 not_found_handling = "404-page"
 binding = "ASSETS"
-run_worker_first = ["/go/*"]
+run_worker_first = [
+  "/go/*",
+  "/best-crm-for-independent-consultants*",
+  "/best-crm-for-property-agents*",
+  "/best-crm-for-small-sales-teams*",
+  "/best-affordable-crm-with-automation*",
+  "/best-free-crm-for-small-business*",
+  "/best-seo-tools-for-small-business*",
+  "/best-seo-tools-for-content-marketing*",
+  "/best-keyword-research-tools-for-small-business*",
+  "/best-competitor-analysis-tools-for-seo*",
+  "/best-ai-marketing-tools-for-small-business*",
+  "/best-email-marketing-tools-for-small-business*",
+  "/best-marketing-automation-tools-for-small-business*",
+  "/best-no-code-automation-for-small-business*",
+  "/best-workflow-automation-for-agencies*",
+  "/best-lead-capture-forms-for-real-estate*",
+  "/best-free-project-management-for-small-teams*"
+]
 
 [triggers]
 crons = ["15 3 * * *"]

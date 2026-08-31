@@ -3,6 +3,8 @@ import path from 'node:path';
 
 const ROOT = process.cwd();
 const intents = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'intents.json'), 'utf8'));
+const consolidationsPath = path.join(ROOT, 'data', 'seo-consolidations.json');
+const consolidations = fs.existsSync(consolidationsPath) ? JSON.parse(fs.readFileSync(consolidationsPath, 'utf8')) : {};
 const failures = [];
 const seenCanonicals = new Set();
 
@@ -21,6 +23,14 @@ for (const intent of intents) {
   if (!canonical) failures.push(`${filename}: missing canonical`);
   else if (seenCanonicals.has(canonical)) failures.push(`${filename}: duplicate canonical ${canonical}`);
   else seenCanonicals.add(canonical);
+}
+
+const intentSlugs = new Set(intents.map(intent => intent?.slug).filter(Boolean));
+for (const [source,target] of Object.entries(consolidations)) {
+  if (source === target) failures.push(`${source}: consolidation cannot target itself`);
+  if (!intentSlugs.has(target)) failures.push(`${source}: consolidation target ${target} is not a curated intent`);
+  if (consolidations[target]) failures.push(`${source}: consolidation chain through ${target} is not allowed`);
+  if (fs.existsSync(path.join(ROOT, `${source}.html`))) failures.push(`${source}.html: consolidated page must not remain published`);
 }
 
 if (failures.length) {

@@ -59,6 +59,19 @@ jobs:
           set -e
           html="$(curl --fail --silent --show-error --location "$PROD_BASE/best-ai-marketing-tools.html")"
           printf '%s\n' "$html" | grep -F '<link rel="canonical" href="https://trytoolscout.org/best-ai-marketing-tools.html">'
+      - name: Check consolidated SEO redirects
+        run: |
+          set -e
+          check_consolidation() {
+            source="$1"
+            target="$2"
+            headers="$(curl --silent --show-error --head --max-redirs 0 "$PROD_BASE/$source.html" 2>/dev/null || true)"
+            printf '%s\n' "$headers" | grep -Eq '^HTTP/[^ ]+ 301'
+            printf '%s\n' "$headers" | tr -d '\r' | grep -Fi "location: $PROD_BASE/$target.html"
+          }
+          check_consolidation best-crm-for-independent-consultants best-crm-for-consultants
+          check_consolidation best-seo-tools-for-small-business best-seo-tools
+          check_consolidation best-marketing-automation-tools-for-small-business best-marketing-automation-tools
       - name: Check public-domain analytics auth
         run: |
           set -e

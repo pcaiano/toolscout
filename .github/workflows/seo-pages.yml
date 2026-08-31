@@ -7,6 +7,8 @@ on:
       - 'data/tools.json'
       - 'data/affiliate.json'
       - 'data/affiliate-pipeline.json'
+      - 'data/seo-longtail.json'
+      - 'data/seo-consolidations.json'
       - 'scripts/generate-seo-pages.mjs'
       - 'scripts/generate-blog.mjs'
       - 'scripts/build-blog-topics.mjs'

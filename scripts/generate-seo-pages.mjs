@@ -5,6 +5,7 @@ const ROOT = process.cwd();
 const BASE = 'https://trytoolscout.org';
 const intentsPath = path.join(ROOT, 'data', 'intents.json');
 const longtailPath = path.join(ROOT, 'data', 'seo-longtail.json');
+const consolidationsPath = path.join(ROOT, 'data', 'seo-consolidations.json');
 const toolsPath = path.join(ROOT, 'data', 'tools.json');
 const baseIntents = JSON.parse(fs.readFileSync(intentsPath, 'utf8'));
 const tools = JSON.parse(fs.readFileSync(toolsPath, 'utf8'));
@@ -14,8 +15,9 @@ const smartTitle = slug => words(slug).split(/\s+/).map(w=>ACRONYMS.get(w.toLowe
 const esc = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const titleFromIntent = item => item.title || smartTitle(item.slug);
 const longtailSeeds = fs.existsSync(longtailPath) ? JSON.parse(fs.readFileSync(longtailPath,'utf8')).intents || [] : [];
+const consolidations = fs.existsSync(consolidationsPath) ? JSON.parse(fs.readFileSync(consolidationsPath,'utf8')) : {};
 const baseBySlug = new Map(baseIntents.map(item => [item.slug,item]));
-const longtailIntents = longtailSeeds.map(seed => { const parent=baseBySlug.get(seed.parent); return {...parent,...seed,description:seed.description||parent?.description,weights:seed.weights||parent?.weights,keywords:[...(parent?.keywords||[]),...((seed.title||'').toLowerCase().split(/\s+/))]}; }).filter(item=>item.slug);
+const longtailIntents = longtailSeeds.map(seed => { const parent=baseBySlug.get(seed.parent); return {...parent,...seed,description:seed.description||parent?.description,weights:seed.weights||parent?.weights,keywords:[...(parent?.keywords||[]),...((seed.title||'').toLowerCase().split(/\s+/))]}; }).filter(item=>item.slug&&!consolidations[item.slug]);
 const intents = [...baseIntents,...longtailIntents.filter(item=>!baseBySlug.has(item.slug))];
 const scoreTool = (tool,intent) => {const scores=tool.scores||{},weights=intent.weights||{};let total=0,weight=0;for(const[key,rawWeight]of Object.entries(weights)){const w=Number(rawWeight)||0;if(!w)continue;let value=0;if(key==='freePlan')value=tool.freePlan?10:0;else if(key==='simplicity'||key==='ease')value=Number(scores.ease||0);else if(key==='price')value=Number(scores.price||0);else value=Number(scores[key]||0);total+=value*w;weight+=w;}return weight?total/weight:0;};
 const topTools=intent=>[...tools].map(tool=>({tool,score:scoreTool(tool,intent)})).sort((a,b)=>b.score-a.score).slice(0,3).map(({tool})=>tool);
