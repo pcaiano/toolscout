@@ -14,7 +14,6 @@ permissions:
 
 env:
   PROD_BASE: https://trytoolscout.org
-  LEGACY_BASE: https://toolscout.luxurybuyerintelligence.workers.dev
 
 jobs:
   smoke:
@@ -103,7 +102,3 @@ jobs:
           check_redirect systeme-io '^https://systeme\.io/\?[^[:space:]]*(sa=|[?&]sa=)'
           check_redirect beehiiv '^https://(www\.)?beehiiv\.com/\?[^[:space:]]*(via=|[?&]via=)'
           check_redirect jotform '^https://www\.jotform\.com/[^[:space:]]*[?&]partner=pcaiano'
-      - name: Check legacy Worker endpoint
-        run: |
-          set -e
-          curl --fail --silent --show-error "$LEGACY_BASE/api/health" | grep -F '"ok":true'

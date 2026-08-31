@@ -8,7 +8,6 @@
 - Last verified functional source/deployed commit: `7f03c86728e654f682b5e48320be4d44cd9c7b72`
 - Public origin: `https://trytoolscout.org`
 - Worker health: `GET /api/health` returned `{"ok":true,"service":"toolscout-analytics"}`
-- Legacy Worker origin: the compatibility URL defined as `LEGACY_BASE` in `production-smoke.yml`; its health endpoint also returned OK
 - Production Worker workflow run 52: successful for the verified commit
 - GitHub Pages workflow run 293: successful for the verified commit
 - Post-deploy production smoke run 180 and scheduled smoke run 181: successful for the verified commit
@@ -28,7 +27,7 @@ The permanent identity and isolation boundary is defined in `AGENTS.md`:
 | D1 database ID | `cac6bc3c-d838-4edd-ba29-597030afb397` |
 | Public domain | `trytoolscout.org` |
 
-BEARING / Luxury Buyer Intelligence is a separate project and is out of scope. A historical hostname still appears in explicitly allowed compatibility code and as `LEGACY_BASE` in the production smoke test, but this does not make BEARING resources available to ToolScout. Never infer, reuse, modify, or repoint any other project resource.
+BEARING / Luxury Buyer Intelligence is a separate project and is out of scope. M02 removed the historical foreign hostname from active ToolScout code and smoke checks; ToolScout now uses only `trytoolscout.org` for its internal request bases and public fallbacks. Never infer, reuse, inspect, modify, or repoint any other project resource.
 
 Before an infrastructure-affecting operation, verify this chain:
 
@@ -100,7 +99,7 @@ The Command Center sets a `toolscout_owner=1` cookie. New search and click event
 | Affiliate pipeline/queue | `data/affiliate-pipeline.json`, `data/affiliate-queue.json` | Growth reports and human follow-up |
 | Worker configuration | root `wrangler.toml` | Worker `toolscout`, assets, cron, D1 binding |
 | Active Worker | `revenue-worker.js` plus imported root Worker layers | Cloudflare Worker deployment |
-| D1 schema | root `migrations/0001` through `0006` | Applied automatically before Worker deploy |
+| D1 schema | root `migrations/0001` through `0008` | Applied automatically before Worker deploy |
 | Owner UI | `analytics.html` | Protected Command Center |
 | Older admin UI | `admin.html` | Token-prompt dashboard; excluded from asset upload by `.assetsignore` only indirectly through Worker access behavior, not by filename |
 | Static SEO inputs | `data/intents.json`, `data/seo-longtail.json`, `data/seo-consolidations.json` | Root intent HTML pages |
@@ -171,6 +170,7 @@ The canonical repository schema is the ordered root migration set:
 | `0005_sessions.sql` | `sessions` | Anonymous session registry with source/owner flag and first/last seen timestamps; primary key on session ID plus source/owner/time indexes |
 | `0006_revenue_ledger.sql` | `revenue_ledger` | Evidence-backed vendor conversion/commission ledger with lifecycle and attribution checks |
 | `0007_funnel_events.sql` | `funnel_events` | Allowlisted, idempotent anonymous funnel events with session/type/time and practical segmentation indexes |
+| `0008_verified_revenue_attribution.sql` | click/revenue attribution and audit | Adds PII-free click/sub-ID references, defensible attribution guards, deterministic record keys and append-only ledger audit evidence |
 
 `revenue_ledger` permits only `pending`, `confirmed`, `paid`, or `reversed` status and only `unattributed`, `attributed`, or `vendor_confirmed` attribution status. `(affiliate_slug, conversion_id)` is unique when a conversion ID exists. Additional indexes cover affiliate, status, attribution, tool, intent, session, and reporting period.
 
@@ -219,7 +219,7 @@ It reports:
 - revenue per 1,000 genuine non-owner funnel sessions only when a single-currency confirmed value and denominator exist;
 - a directional, explicitly non-euro monetization opportunity score for clicked tools without active affiliate coverage.
 
-When the ledger is absent or contains no evidence, revenue remains unavailable/unknown rather than being inferred from clicks. Raw vendor exports are not committed. `scripts/import-revenue-ledger.mjs` accepts only the explicitly supported `systeme-io`, `beehiiv`, and `jotform` program slugs and generates reviewable SQL; it does not apply that SQL.
+When the ledger is absent or contains no evidence, revenue remains unavailable/unknown rather than being inferred from clicks. Raw vendor exports are not committed. `scripts/import-revenue-ledger.mjs` accepts only the explicitly supported `systeme-io`, `beehiiv`, and `jotform` program slugs and generates reviewable SQL; it does not apply that SQL. M02 adds stable anonymous `click_ref` values and propagates them only for systeme.io through its officially documented `tk` affiliate tag. Attributed imports must match that exact vendor-returned value to the stored click; other programs remain unattributed until equivalent official support exists. Lifecycle and attribution breakdowns are exposed separately in the protected Command Center.
 
 ## Affiliate system
 
@@ -278,7 +278,7 @@ External/community distribution remains approval-led. The repository does not es
 | Deploy ToolScout to GitHub Pages | push, daily, manual | Regenerates selected SEO/acquisition/sitemap output, validates hostname, uploads repository-root artifact, deploys Pages |
 | Generate SEO Pages | relevant source changes, daily, manual | Runs the full generate/validate pipeline and commits changed generated assets back to `main` |
 | ToolScout health check | push, daily, manual | Validates tool data and checks vendor source URLs; only network/5xx failures are hard failures |
-| Production Smoke Test | after successful Worker deploy, hourly, manual | Checks health, robots, sitemap, core pages, analytics protection, canonical/redirect behavior, tracked affiliate destinations, and legacy Worker health |
+| Production Smoke Test | after successful Worker deploy, hourly, manual | Checks ToolScout health, robots, sitemap, core pages, analytics protection, canonical/redirect behavior and tracked affiliate destinations |
 
 Important coupling: every push to `main`, including a documentation-only push, triggers the Worker workflow, which applies pending migrations and deploys. The SEO bot's generated commit can in turn trigger the deployment workflows. Production changes should therefore be merged only when all generated assets and migrations have been reviewed.
 
@@ -296,7 +296,6 @@ The safe production acceptance surface is:
 - dynamic pages use `trytoolscout.org` canonicals;
 - consolidation aliases return 301 to the canonical ToolScout URL;
 - enabled `/go/*` routes return 302 to the expected vendor host with a verified tracking parameter;
-- the legacy Worker health endpoint remains available while it is part of the compatibility contract.
 
 Local pre-release checks should include all repository validation scripts and JavaScript syntax checks. Generation should then be run and the resulting diff reviewed; generated timestamps mean it must not be treated as a read-only command.
 
@@ -332,14 +331,14 @@ Local pre-release checks should include all repository validation scripts and Ja
 - `revenue_ledger.amount` and `commission` are non-null numeric fields defaulting to zero. Safety depends on the importer rule that no row exists without vendor evidence.
 - No automated unit/integration test suite exists; confidence comes from static validators, syntax checks, workflows, and production smoke tests.
 - `docs/DEPLOY.md` still references the obsolete `toolscout-db` creation name and generic creation steps. For the existing production project, `AGENTS.md` and root `wrangler.toml` override it; do not create a replacement database.
-- The active scheduled handler still uses the legacy Worker hostname internally for asset URLs. This is allowed by the hostname guard and works today, but should be reconciled deliberately rather than changed during discovery.
+- The legacy public hostname was removed from active code and smoke checks during M02 isolation reconciliation. No compatibility claim is made for resources outside the permanent ToolScout identity.
 
 ## Known product gaps
 
 - The canonical funnel is measurable only from M01 deployment onward; historical stages remain unknown because no fake backfill was created.
 - Individual `tool_viewed` is defined but not emitted by the current card-based recommendation UX; result impressions are recorded as `recommendation_result_viewed`.
-- No reliable click-to-conversion linkage; `revenue_ledger.click_id` exists but current click identity/propagation is not implemented.
-- Vendor-verified revenue may be stored, but attribution remains unknown unless independently supported by evidence.
+- Verified click-to-conversion linkage is available prospectively for systeme.io clicks recorded after migration `0008`; historical clicks and vendors without documented sub-ID support remain unattributed.
+- Vendor-confirmed revenue remains unknown until reviewed vendor evidence is imported; the repository contains no fabricated conversion or commission rows.
 - No bot exclusion beyond owner-cookie classification and no durable internal/test-event policy for all automated traffic.
 - Tool health schema exists without the planned scheduled collection/review surface.
 

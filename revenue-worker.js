@@ -1,4 +1,5 @@
 import base from './funnel-worker.js';
+import { summarizeLedger } from './revenue-attribution.js';
 
 const commercialIntent = value => /(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project|form|survey|keyword|content)/i.test(String(value || ''));
 
@@ -48,6 +49,7 @@ async function revenueSnapshot(request, env, stats) {
   const singleCurrency = currencies.length <= 1;
   const currency = currencies[0] || 'EUR';
   const conversionKeys = new Set(ledgerRows.filter(row => row.conversion_id).map(row => `${row.affiliate_slug}:${row.conversion_id}`));
+  const evidenceBreakdown = summarizeLedger(ledgerRows);
 
   const sumCommission = statuses => ledgerRows
     .filter(row => statuses.includes(String(row.status || '')))
@@ -72,6 +74,8 @@ async function revenueSnapshot(request, env, stats) {
     currencies,
     ledgerRows: ledgerRows.length,
     latestEvidenceAt: ledgerRows[0]?.created_at || null,
+    lifecycle: evidenceBreakdown.lifecycle,
+    attribution: evidenceBreakdown.attribution,
     opportunity: buildOpportunity(byTool, byIntent, activeSlugs, affiliate)
   };
 }

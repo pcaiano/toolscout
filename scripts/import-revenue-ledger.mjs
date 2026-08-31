@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 
 const [inputPath, outputPath = 'reports/revenue-ledger-import.sql'] = process.argv.slice(2);
 if (!inputPath) {
@@ -16,10 +17,13 @@ const q = value => value === null || value === undefined || value === ''
   ? 'NULL'
   : `'${String(value).replaceAll("'", "''")}'`;
 const n = value => {
-  const number = Number(value ?? 0);
+  if (value === null || value === undefined || value === '') throw new Error('Numeric evidence value is required.');
+  const number = Number(value);
   if (!Number.isFinite(number)) throw new Error(`Invalid number: ${value}`);
+  if (number < 0) throw new Error(`Negative evidence value is not allowed: ${value}`);
   return String(number);
 };
+const key = value => crypto.createHash('sha256').update(value).digest('hex');
 
 const statements = [];
 for (const [index, row] of rows.entries()) {
@@ -33,20 +37,41 @@ for (const [index, row] of rows.entries()) {
   if (row.conversion_id == null && row.period_start == null && row.period_end == null) {
     throw new Error(`Row ${index + 1}: provide conversion_id or a reporting period.`);
   }
+  const clickRef = row.click_ref == null ? null : String(row.click_ref);
+  const vendorSubId = row.vendor_sub_id == null ? null : String(row.vendor_sub_id);
+  if (attribution === 'unattributed' && (clickRef || vendorSubId)) {
+    throw new Error(`Row ${index + 1}: unattributed rows cannot include click_ref or vendor_sub_id.`);
+  }
+  if (attribution !== 'unattributed') {
+    if (affiliate !== 'systeme-io') throw new Error(`Row ${index + 1}: ${affiliate} has no verified sub-ID support.`);
+    if (!row.conversion_id || !clickRef || vendorSubId !== clickRef) {
+      throw new Error(`Row ${index + 1}: attributed rows require conversion_id and matching click_ref/vendor_sub_id.`);
+    }
+  }
+  const recordKey = key([affiliate, row.conversion_id || '', row.period_start || '', row.period_end || '', row.evidence_ref].join('|'));
+  const identitySelect = attribution === 'unattributed'
+    ? `${q(row.tool_slug)}, ${q(row.intent_slug)}, NULL, NULL`
+    : `(SELECT tool_slug FROM click_events WHERE click_ref=${q(clickRef)}), (SELECT intent_slug FROM click_events WHERE click_ref=${q(clickRef)}), (SELECT session_id FROM click_events WHERE click_ref=${q(clickRef)}), (SELECT id FROM click_events WHERE click_ref=${q(clickRef)})`;
 
+  const conflict = row.conversion_id == null
+    ? 'ON CONFLICT(record_key) WHERE record_key IS NOT NULL'
+    : 'ON CONFLICT(affiliate_slug, conversion_id) WHERE conversion_id IS NOT NULL';
   statements.push(`INSERT INTO revenue_ledger (
-    affiliate_slug, tool_slug, intent_slug, session_id, click_id, conversion_id,
+    affiliate_slug, tool_slug, intent_slug, session_id, click_id, click_ref, vendor_sub_id, record_key, conversion_id,
     status, attribution_status, amount, currency, commission, period_start, period_end,
     confirmed_at, paid_at, source, evidence_ref, notes
   ) VALUES (
-    ${q(affiliate)}, ${q(row.tool_slug)}, ${q(row.intent_slug)}, ${q(row.session_id)}, ${row.click_id == null ? 'NULL' : n(row.click_id)}, ${q(row.conversion_id)},
+    ${q(affiliate)}, ${identitySelect}, ${q(clickRef)}, ${q(vendorSubId)}, ${q(recordKey)}, ${q(row.conversion_id)},
     ${q(status)}, ${q(attribution)}, ${n(row.amount)}, ${q(row.currency || 'EUR')}, ${n(row.commission)}, ${q(row.period_start)}, ${q(row.period_end)},
     ${q(row.confirmed_at)}, ${q(row.paid_at)}, ${q(row.source || 'manual_import')}, ${q(row.evidence_ref)}, ${q(row.notes)}
-  ) ON CONFLICT(affiliate_slug, conversion_id) WHERE conversion_id IS NOT NULL DO UPDATE SET
+  ) ${conflict} DO UPDATE SET
     tool_slug=excluded.tool_slug,
     intent_slug=excluded.intent_slug,
     session_id=COALESCE(excluded.session_id, revenue_ledger.session_id),
     click_id=COALESCE(excluded.click_id, revenue_ledger.click_id),
+    click_ref=excluded.click_ref,
+    vendor_sub_id=excluded.vendor_sub_id,
+    record_key=excluded.record_key,
     status=excluded.status,
     attribution_status=excluded.attribution_status,
     amount=excluded.amount,
