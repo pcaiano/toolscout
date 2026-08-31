@@ -1,7 +1,7 @@
 {
   "systeme-io": {"url": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109", "enabled": true, "publicUrl": "https://systeme.io/"},
   "beehiiv": {"url": "https://www.beehiiv.com/?via=pedro-caiano", "enabled": true, "publicUrl": "https://www.beehiiv.com/"},
-  "jotform": {"url": "", "enabled": false, "publicUrl": "https://www.jotform.com/"},
+  "jotform": {"url": "https://www.jotform.com/products/form-builder/?partner=pcaiano", "enabled": true, "publicUrl": "https://www.jotform.com/", "links": {"form-builder": "https://www.jotform.com/products/form-builder/?partner=pcaiano", "sign": "https://www.jotform.com/products/sign/?partner=pcaiano", "apps": "https://www.jotform.com/products/apps/?partner=pcaiano", "ai-agents": "https://www.jotform.com/ai/agents/?partner=pcaiano", "pricing": "https://www.jotform.com/pricing/?partner=pcaiano", "homepage": "https://www.jotform.com/?partner=pcaiano"}},
   "hubspot": {"url": "", "enabled": false, "publicUrl": "https://www.hubspot.com/"},
   "pipedrive": {"url": "", "enabled": false, "publicUrl": "https://www.pipedrive.com/"},
   "semrush": {"url": "", "enabled": false, "publicUrl": "https://www.semrush.com/"},
