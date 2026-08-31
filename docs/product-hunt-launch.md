@@ -57,6 +57,31 @@ I'd much rather get honest feedback than a polite upvote.
 
 Thanks for taking a look.
 
+## Launch readiness gate
+Before launch, verify rather than change unless a failure is found:
+- Production homepage is healthy on trytoolscout.org.
+- robots.txt and sitemap.xml are reachable and use the canonical public host.
+- Core recommendation/search flow is usable.
+- Dynamic SEO pages declare trytoolscout.org canonicals.
+- Consolidated SEO pages redirect to their canonical targets.
+- /go/* affiliate routing returns redirects for enabled affiliate programs.
+- Public analytics/owner surfaces remain protected as intended.
+- No public URL leaks the legacy workers.dev hostname.
+- GitHub Pages and Worker production workflows are green.
+- No new feature work is introduced solely for launch day.
+
+If all checks pass, freeze non-essential engineering until initial launch data has been reviewed.
+
+## Launch-day operating sequence
+1. Confirm the Product Hunt listing is live at the scheduled time.
+2. Confirm the Product Hunt product link reaches trytoolscout.org.
+3. Run the production smoke/health validation without changing infrastructure.
+4. Publish the prepared first comment on Product Hunt.
+5. Share through approved authentic channels; ask for feedback, not votes.
+6. Observe Command Center for external sessions, searches, recommendations and outbound clicks.
+7. Record qualitative feedback and recurring failure modes separately from feature ideas.
+8. Fix only launch-blocking defects immediately; queue non-critical improvements for evidence-based prioritization.
+
 ## Launch-day distribution rules
 - Share the launch link publicly through authentic channels.
 - Ask for feedback, not upvotes.
@@ -83,6 +108,17 @@ Product Hunt / referral source
 → affiliate-covered click
 
 Use Command Center to identify which intents and acquisition sources deserve reinforcement.
+
+## First 24-hour decision rules
+Do not judge the launch on Product Hunt rank alone. Evaluate:
+- External sessions and identifiable Product Hunt/referral traffic.
+- Search/session rate.
+- Recommendation interactions.
+- Outbound clicks and clicks/session, while separating internal/test traffic where possible.
+- Affiliate-covered versus unmonetized outbound clicks.
+- Repeated user feedback about recommendation quality or missing workflows.
+
+Prioritize a change immediately only when it is a production defect, blocks the core recommendation flow, breaks attribution, or prevents monetizable outbound routing. Otherwise collect evidence before changing the product.
 
 ## Post-launch
 Within 24–48 hours:
