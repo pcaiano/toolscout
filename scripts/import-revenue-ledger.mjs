@@ -9,7 +9,7 @@ if (!inputPath) {
 
 const allowedStatus = new Set(['pending', 'confirmed', 'paid', 'reversed']);
 const allowedAttribution = new Set(['unattributed', 'attributed', 'vendor_confirmed']);
-const allowedAffiliates = new Set(['systeme-io', 'beehiiv', 'jotform']);
+const allowedAffiliates = new Set(['systeme-io', 'beehiiv', 'jotform', 'pipedrive']);
 const rows = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
 if (!Array.isArray(rows)) throw new Error('Input must be a JSON array.');
 
