@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-30T18:40:07.464Z",
+  "generatedAt": "2026-08-31T10:15:11.201Z",
   "methodology": "Heuristic planning score using commercial intent, catalog depth, current tool fit and verified affiliate readiness. It does not claim search-volume data.",
   "count": 24,
   "items": [
@@ -259,6 +259,23 @@
       "action": "build-next"
     },
     {
+      "intent": "best-competitor-seo-tools",
+      "title": "Best Competitor SEO Tools",
+      "category": "seo",
+      "priorityScore": 68,
+      "topFit": 9.16,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "semrush",
+        "ahrefs",
+        "se-ranking"
+      ],
+      "action": "build-next"
+    },
+    {
       "intent": "best-crm-for-consultants",
       "title": "Best CRM for Consultants",
       "category": "crm",
@@ -289,6 +306,23 @@
         "hubspot",
         "monday-crm",
         "zoho-crm"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "title": "Best SEO Tools for Agencies",
+      "category": "seo",
+      "priorityScore": 68,
+      "topFit": 8.92,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "semrush",
+        "ahrefs",
+        "se-ranking"
       ],
       "action": "build-next"
     },
@@ -327,40 +361,6 @@
       "action": "build-next"
     },
     {
-      "intent": "best-competitor-seo-tools",
-      "title": "Best Competitor SEO Tools",
-      "category": "seo",
-      "priorityScore": 63,
-      "topFit": 9.16,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "semrush",
-        "ahrefs",
-        "se-ranking"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-seo-tools-for-agencies",
-      "title": "Best SEO Tools for Agencies",
-      "category": "seo",
-      "priorityScore": 63,
-      "topFit": 8.92,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "semrush",
-        "ahrefs",
-        "se-ranking"
-      ],
-      "action": "build-next"
-    },
-    {
       "intent": "best-tools-for-agencies",
       "title": "Best Tools for Agencies",
       "category": "business",
@@ -381,12 +381,12 @@
       "intent": "best-keyword-research-tools",
       "title": "Best Keyword Research Tools",
       "category": "seo",
-      "priorityScore": 51,
+      "priorityScore": 56,
       "topFit": 9.11,
       "catalogDepth": 15,
       "commercialSignal": 8,
-      "affiliateSignal": 0,
-      "monetizationReadiness": "needs-affiliate-activation",
+      "affiliateSignal": 5,
+      "monetizationReadiness": "monetizable",
       "topTools": [
         "semrush",
         "ahrefs",
