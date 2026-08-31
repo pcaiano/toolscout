@@ -1,4 +1,4 @@
-import base from './dynamic-worker.js';
+import base from './funnel-worker.js';
 
 const commercialIntent = value => /(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project|form|survey|keyword|content)/i.test(String(value || ''));
 
@@ -16,7 +16,7 @@ async function revenueSnapshot(request, env, stats) {
   const activeSlugs = new Set(stats?.affiliateCoverage?.activeToolSlugs || []);
   const byTool = Array.isArray(stats?.byTool) ? stats.byTool : [];
   const byIntent = Array.isArray(stats?.byIntent) ? stats.byIntent : [];
-  const otherSessions = Number(stats?.audience?.otherSessions || 0);
+  const otherSessions = Number(stats?.funnel?.sessions || 0);
 
   let ledgerRows = [];
   try {

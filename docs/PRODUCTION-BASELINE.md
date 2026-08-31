@@ -38,22 +38,24 @@ Before an infrastructure-affecting operation, verify this chain:
 
 ToolScout is a static, client-rendered application served through a Cloudflare Worker with Workers Static Assets and a D1 binding. The Worker handles API, tracked redirects, protected analytics, dynamic SEO fallbacks, sitemap merging, and scheduled maintenance before falling through to static assets.
 
-The active Worker entry point is the root `revenue-worker.js`, selected by root `wrangler.toml`. It composes three layers:
+The active Worker entry point is the root `revenue-worker.js`, selected by root `wrangler.toml`. After M01 it composes four layers:
 
 1. `revenue-worker.js` augments authenticated `/api/stats` with evidence-backed Revenue Intelligence.
-2. `dynamic-worker.js` provides current domain/auth behavior, tracking, affiliate redirects, SEO consolidation redirects, dynamic opportunity pages, and the dynamic sitemap.
-3. `worker.js` provides base health, opportunity refresh, static asset fallback, and the scheduled maintenance/opportunity refresh implementation.
+2. `funnel-worker.js` provides strict funnel ingestion and genuine-session funnel aggregation.
+3. `dynamic-worker.js` provides current domain/auth behavior, tracking, affiliate redirects, SEO consolidation redirects, dynamic opportunity pages, and the dynamic sitemap. Its redirect path atomically records the canonical outbound funnel event alongside the historical click row.
+4. `worker.js` provides base health, opportunity refresh, static asset fallback, and the scheduled maintenance/opportunity refresh implementation.
 
 ```mermaid
 flowchart TD
     U[Visitor or owner] --> CF[Cloudflare Worker: toolscout]
     CF --> RW[revenue-worker.js]
-    RW --> DW[dynamic-worker.js]
+    RW --> FW[funnel-worker.js]
+    FW --> DW[dynamic-worker.js]
     DW --> BW[worker.js]
     DW -->|static fallback| A[Workers Static Assets]
     A --> H[HTML, app.js, data JSON, generated SEO/blog/reports]
     U -->|recommendation search| APP[Browser app.js]
-    APP -->|POST /api/search| DW
+    APP -->|POST /api/events and /api/search| FW
     U -->|GET /go/tool| DW
     DW -->|insert anonymous event| D1[(D1: toolscout)]
     DW -->|302| V[Vendor public or affiliate URL]
@@ -79,7 +81,7 @@ flowchart TD
 
 ### Session identity
 
-`app.js` creates an anonymous `toolscout_session` UUID in local storage and mirrors it into a six-month, `SameSite=Lax`, secure cookie. `/go/*` reads that cookie and creates a UUID if absent. No account is required. The event model stores no names, emails, raw IP addresses, or advertising IDs.
+`app.js` creates an anonymous UUID-based session with a 30-minute inactivity lifetime and mirrors it into a 30-minute, `SameSite=Lax`, secure cookie. `/go/*` validates that cookie and creates a UUID if absent or invalid. No account is required. The event model stores no names, emails, raw IP addresses, advertising IDs, or fingerprints.
 
 ### Owner classification
 
@@ -168,6 +170,7 @@ The canonical repository schema is the ordered root migration set:
 | `0004_tool_health.sql` | `tool_health` | HTTP health observations by tool; indexes on tool and checked time |
 | `0005_sessions.sql` | `sessions` | Anonymous session registry with source/owner flag and first/last seen timestamps; primary key on session ID plus source/owner/time indexes |
 | `0006_revenue_ledger.sql` | `revenue_ledger` | Evidence-backed vendor conversion/commission ledger with lifecycle and attribution checks |
+| `0007_funnel_events.sql` | `funnel_events` | Allowlisted, idempotent anonymous funnel events with session/type/time and practical segmentation indexes |
 
 `revenue_ledger` permits only `pending`, `confirmed`, `paid`, or `reversed` status and only `unattributed`, `attributed`, or `vendor_confirmed` attribution status. `(affiliate_slug, conversion_id)` is unique when a conversion ID exists. Additional indexes cover affiliate, status, attribution, tool, intent, session, and reporting period.
 
@@ -175,7 +178,7 @@ There are no repository-defined SQL views in the active migration tree. The old 
 
 ### Schema/application drift
 
-- `sessions` exists in migrations but current Worker code never inserts or updates it.
+- `sessions` is populated/upserted by canonical event ingestion and tracked redirects. Its `first_seen_at` is now the genuine anonymous-session source of truth; no historical sessions were fabricated.
 - `tool_health` exists in migrations but the current scheduled handler does not populate it; `docs/HEALTH_CHECKER.md` still describes this as a next implementation.
 - Current “session” analytics query distinct `session_id` from `click_events`; they do not query the `sessions` table and therefore exclude visitors who never click.
 - The application writes outbound clicks through `/go/*`. `/api/click` is available but no current public JavaScript caller was found.
@@ -188,14 +191,15 @@ There are no repository-defined SQL views in the active migration tree. The old 
 | --- | --- | --- | --- | --- |
 | Recommendation/search result rendered | `search_events` row | D1 `search_events` | `app.js` -> `POST /api/search` | `analytics.html`, opportunity scoring, content signals |
 | Anonymous outbound click | `click_events` row | D1 `click_events` | Primary: `GET /go/<slug>`; optional `POST /api/click` | `analytics.html`, `admin.html`, `opportunity-matrix.html`, Revenue Opportunity |
-| Click sessions | distinct click `session_id` | D1 `click_events` | Derived by `/api/stats` | Command Center |
+| Historical click sessions | distinct click `session_id` | D1 `click_events` | Retained in legacy `/api/stats` fields for continuity; not presented as genuine sessions | Legacy consumers only |
+| Genuine anonymous sessions and funnel | `sessions` plus `funnel_events` | D1 | `POST /api/events` and `/go/*`; aggregated by protected `/api/stats` | Command Center |
 | Search sessions by intent | distinct search `session_id` | D1 `search_events` | Derived by `/api/stats` and `/api/content-signals` | Command Center and SEO/content automation |
 | Acquisition source | event `source` | D1 click/search tables | UTM/source/referrer classification in `app.js`; redirect source in Worker | Command Center |
 | Owner/internal activity | `source = internal-test` | D1 click/search tables | `toolscout_owner=1` cookie | Command Center audience split |
 | SEO opportunity | `seo_opportunities` row | D1 `seo_opportunities` | Authenticated refresh route and daily scheduled refresh | Dynamic pages, sitemap, Command Center |
 | Vendor conversion/revenue | evidence ledger row | D1 `revenue_ledger` | Reviewed SQL generated by import script; no public ingestion API | `/api/stats` Revenue Intelligence and Command Center |
 
-Currently not recorded as canonical events: page views, landing sessions without a click, recommendation start, guided-flow steps, recommendation completion distinct from search result rendering, recommendation result impressions, individual tool page views, return visits, or verified conversion events outside the revenue ledger.
+M01 canonical events are `session_started`, `recommendation_started`, `recommendation_completed`, `recommendation_result_viewed`, `tool_viewed`, and `outbound_clicked`. The active recommendation UX emits all except `tool_viewed`, which is reserved for a future genuine detail-view boundary. Definitions, validation and limitations are authoritative in `docs/FUNNEL_ANALYTICS.md`.
 
 `/api/stats` is protected. On the public host it requires Cloudflare Access identity `pcaiano@gmail.com`; on a non-public/legacy host the code supports a bearer `ADMIN_TOKEN`. An unauthenticated public request was redirected by the live access layer during this audit and did not expose metrics.
 
@@ -212,7 +216,7 @@ It reports:
 - paid commission;
 - currency or mixed-currency state;
 - ledger evidence count/latest evidence timestamp;
-- revenue per 1,000 non-owner click sessions only when a single-currency confirmed value and denominator exist;
+- revenue per 1,000 genuine non-owner funnel sessions only when a single-currency confirmed value and denominator exist;
 - a directional, explicitly non-euro monetization opportunity score for clicked tools without active affiliate coverage.
 
 When the ledger is absent or contains no evidence, revenue remains unavailable/unknown rather than being inferred from clicks. Raw vendor exports are not committed. `scripts/import-revenue-ledger.mjs` accepts only the explicitly supported `systeme-io`, `beehiiv`, and `jotform` program slugs and generates reviewable SQL; it does not apply that SQL.
@@ -316,7 +320,7 @@ Local pre-release checks should include all repository validation scripts and Ja
 
 ## Known technical debt
 
-- Active Worker behavior is spread over three increasingly layered root files, with substantial duplication between `worker.js` and `dynamic-worker.js`.
+- Active Worker behavior is spread over four layered root files, with substantial duplication between `worker.js` and `dynamic-worker.js`.
 - A second legacy Worker tree and two admin surfaces remain in the repository without an explicit deprecation marker in filenames.
 - `sessions` and `tool_health` schemas are ahead of their application usage.
 - `/api/click` is exposed but has no current public caller; `/go/*` is the effective outbound collection point.
@@ -332,10 +336,8 @@ Local pre-release checks should include all repository validation scripts and Ja
 
 ## Known product gaps
 
-- No complete funnel from landing session through recommendation start/completion, result view, tool view, and outbound click.
-- Visitors who do not click are absent from current “session” totals.
-- Recommendation completion currently approximates one recorded search/result render; start and completion are not separate events.
-- No page/tool-view or result-impression event.
+- The canonical funnel is measurable only from M01 deployment onward; historical stages remain unknown because no fake backfill was created.
+- Individual `tool_viewed` is defined but not emitted by the current card-based recommendation UX; result impressions are recorded as `recommendation_result_viewed`.
 - No reliable click-to-conversion linkage; `revenue_ledger.click_id` exists but current click identity/propagation is not implemented.
 - Vendor-verified revenue may be stored, but attribution remains unknown unless independently supported by evidence.
 - No bot exclusion beyond owner-cookie classification and no durable internal/test-event policy for all automated traffic.
