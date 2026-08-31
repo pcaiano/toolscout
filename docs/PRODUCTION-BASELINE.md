@@ -5,14 +5,14 @@
 - Verified on: 2026-08-31 (Europe/Lisbon)
 - Repository: `pcaiano/toolscout`
 - Branch inspected: `main`
-- Last verified source/deployed commit: `bae31514fd9361e24ade5201f2ec2fadbdef432e`
+- Last verified functional source/deployed commit: `7f03c86728e654f682b5e48320be4d44cd9c7b72`
 - Public origin: `https://trytoolscout.org`
 - Worker health: `GET /api/health` returned `{"ok":true,"service":"toolscout-analytics"}`
 - Legacy Worker origin: the compatibility URL defined as `LEGACY_BASE` in `production-smoke.yml`; its health endpoint also returned OK
 - Production Worker workflow run 52: successful for the verified commit
 - GitHub Pages workflow run 293: successful for the verified commit
 - Post-deploy production smoke run 180 and scheduled smoke run 181: successful for the verified commit
-- Production discovery in this snapshot was read-only. No deployment, migration, database write, binding change, route change, or other production mutation was performed.
+- M01 production acceptance completed on 2026-08-31. Migration `0007_funnel_events.sql`, the canonical funnel, authenticated Command Center delivery, and legacy session-field reconciliation are deployed. A real owner-marked session produced `session_started`, `recommendation_started`, `recommendation_completed`, and `recommendation_result_viewed`; D1 and the protected Command Center both confirmed the result.
 
 This document describes observed and repository-backed state. Account-side Cloudflare metadata that could not be queried without credentials is identified as unverified rather than inferred.
 
@@ -368,13 +368,13 @@ These gaps are inputs to later missions, not authorization to implement features
 
 ## Last verified commit/date
 
-- Source commit: `bae31514fd9361e24ade5201f2ec2fadbdef432e`
-- Commit subject: `Document evidence-based affiliate revenue imports`
-- Commit timestamp: 2026-08-31 18:22:35 +01:00
-- Worker deployment workflow: successful on that commit (run 52)
-- Pages deployment workflow: successful on that commit (run 293)
-- Post-deploy production smoke: successful on that commit (run 180)
-- Later scheduled production smoke: successful on that commit (run 181)
+- Functional source commit: `7f03c86728e654f682b5e48320be4d44cd9c7b72`
+- Commit subject: `Align legacy session fields with canonical funnel`
+- Worker deployment workflow: successful (run 55)
+- Pages deployment workflow: successful (run 296)
+- ToolScout health check: successful (run 369)
+- Post-deploy production smoke: successful (run 184)
+- M01 schema migration: `0007_funnel_events.sql` present remotely; canonical internal events confirmed in D1
+- Command Center: authenticated production rendering confirmed; canonical and compatibility session fields both show genuine sessions
 - Baseline verification date: 2026-08-31
-
-The documentation commit created by M00 is not claimed as deployed because M00 does not push or deploy automatically. Update this section after the next authorized production deployment.
+- M01 status: **COMPLETE**
