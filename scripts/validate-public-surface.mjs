@@ -33,7 +33,7 @@ if (fs.existsSync(affiliatePath)) {
   for (const [slug, entry] of Object.entries(affiliate)) {
     if (!entry || typeof entry !== 'object') continue;
     if (entry.enabled && !entry.url) failures.push(`data/affiliate.json: ${slug} enabled without private affiliate URL`);
-    if (entry.enabled && !/[?&](?:sa|ref|referral|affiliate|partner|aff)=/i.test(String(entry.url||''))) failures.push(`data/affiliate.json: ${slug} enabled URL should contain a vendor tracking parameter`);
+    if (entry.enabled && !/[?&](?:sa|ref|referral|affiliate|partner|aff|via)=/i.test(String(entry.url||''))) failures.push(`data/affiliate.json: ${slug} enabled URL should contain a vendor tracking parameter`);
   }
 }
 
