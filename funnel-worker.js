@@ -94,7 +94,12 @@ export default {
       const response = await base.fetch(request, env, ctx);
       if (!response.ok) return response;
       const stats = await response.json();
-      try { return Response.json({...stats, funnel:await funnelSnapshot(env)}, {headers:{'Cache-Control':'private, max-age=60'}}); }
+      try {
+        const funnel=await funnelSnapshot(env);
+        const audience={...(stats.audience||{}),otherSessions:funnel.sessions,ownerSessions:Number(funnel.audience?.ownerSessions||0),otherClicks:funnel.outboundClicks};
+        const total={...(stats.total||{}),sessions:funnel.sessions};
+        return Response.json({...stats,total,audience,funnel}, {headers:{'Cache-Control':'private, max-age=60'}});
+      }
       catch { return Response.json({...stats, funnel:{status:'unavailable', reason:'Funnel migration is not available.'}}, {headers:{'Cache-Control':'private, max-age=60'}}); }
     }
     return base.fetch(request, env, ctx);
