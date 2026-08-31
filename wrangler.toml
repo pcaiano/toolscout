@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "dynamic-worker.js"
+main = "revenue-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
