@@ -73,9 +73,14 @@ jobs:
           check_redirect() {
             slug="$1"
             expected="$2"
-            response="$(curl --silent --show-error --dump-header - --output /dev/null --max-redirs 0 "$PROD_BASE/go/$slug" 2>/dev/null || true)"
-            status="$(printf '%s\n' "$response" | sed -n 's/^HTTP\/[^ ]* \([0-9][0-9][0-9]\).*/\1/p' | tail -1)"
-            location="$(printf '%s\n' "$response" | sed -n 's/^[Ll]ocation:[[:space:]]*//p' | tr -d '\r' | tail -1)"
+            headers="$(mktemp)"
+            curl --silent --show-error --dump-header "$headers" --output /dev/null --max-redirs 0 "$PROD_BASE/go/$slug" 2>/dev/null || true
+            echo "Headers for /go/$slug:"
+            cat "$headers"
+            status="$(sed -n 's/^HTTP\/[^ ]* \([0-9][0-9][0-9]\).*/\1/p' "$headers" | tail -1)"
+            location="$(sed -n 's/^[Ll]ocation:[[:space:]]*//p' "$headers" | tr -d '\r' | tail -1)"
+            rm -f "$headers"
+            echo "Parsed status=$status location=$location"
             test "$status" = "302"
             printf '%s\n' "$location" | grep -Eq "$expected"
           }
