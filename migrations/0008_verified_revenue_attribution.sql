@@ -36,7 +36,7 @@ CREATE TRIGGER IF NOT EXISTS trg_revenue_attribution_insert
 BEFORE INSERT ON revenue_ledger
 WHEN NEW.attribution_status IN ('attributed','vendor_confirmed')
 BEGIN
-  SELECT CASE
+  SELECT (CASE
     WHEN NEW.click_ref IS NULL OR NEW.vendor_sub_id IS NULL OR NEW.click_ref != NEW.vendor_sub_id
       THEN RAISE(ABORT, 'attributed revenue requires matching click_ref and vendor_sub_id')
     WHEN NEW.conversion_id IS NULL
@@ -47,14 +47,14 @@ BEGIN
         AND affiliate_sub_id = NEW.vendor_sub_id
         AND source != 'internal-test'
     ) THEN RAISE(ABORT, 'attributed revenue click evidence not found')
-  END;
+  END);
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_revenue_attribution_update
 BEFORE UPDATE ON revenue_ledger
 WHEN NEW.attribution_status IN ('attributed','vendor_confirmed')
 BEGIN
-  SELECT CASE
+  SELECT (CASE
     WHEN NEW.click_ref IS NULL OR NEW.vendor_sub_id IS NULL OR NEW.click_ref != NEW.vendor_sub_id
       THEN RAISE(ABORT, 'attributed revenue requires matching click_ref and vendor_sub_id')
     WHEN NEW.conversion_id IS NULL
@@ -65,7 +65,7 @@ BEGIN
         AND affiliate_sub_id = NEW.vendor_sub_id
         AND source != 'internal-test'
     ) THEN RAISE(ABORT, 'attributed revenue click evidence not found')
-  END;
+  END);
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_revenue_unattributed_insert
