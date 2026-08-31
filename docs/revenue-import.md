@@ -4,11 +4,12 @@ ToolScout treats vendor-side revenue as evidence, never as an estimate derived f
 
 ## Supported programs
 
-The initial import guard accepts:
+The import guard accepts:
 
 - `systeme-io`
 - `beehiiv`
 - `jotform`
+- `pipedrive`
 
 This list is intentionally explicit. Add another program only after its affiliate relationship and evidence format are verified.
 
@@ -32,16 +33,16 @@ node scripts/import-revenue-ledger.mjs /secure/path/vendor-records.json /tmp/rev
 ```json
 [
   {
-    "affiliate_slug": "jotform",
-    "tool_slug": "jotform",
+    "affiliate_slug": "pipedrive",
+    "tool_slug": "pipedrive",
     "conversion_id": "vendor-conversion-id",
     "status": "confirmed",
     "attribution_status": "unattributed",
     "amount": 0,
     "currency": "EUR",
     "commission": 0,
-    "confirmed_at": "2026-08-31T00:00:00Z",
-    "source": "jotform_report",
+    "confirmed_at": "2026-09-01T00:00:00Z",
+    "source": "pipedrive_partner_report",
     "evidence_ref": "vendor-report-reference"
   }
 ]
@@ -51,7 +52,7 @@ The zeroes above are placeholders for the input format, **not** assumptions abou
 
 ## Exact click attribution
 
-Every recorded outbound click now receives a PII-free `click_ref`. ToolScout sends that value to a vendor only when an official source confirms a supported affiliate tag/sub-ID parameter. As of 2026-08-31, only systeme.io is enabled for this behavior: its official help article documents the `tk` affiliate tag parameter. beehiiv and Jotform keep their existing affiliate URLs unchanged because no equivalent official evidence is recorded.
+Every recorded outbound affiliate click receives a PII-free `click_ref`. ToolScout sends that value to a vendor only when an official source confirms a supported affiliate tag/sub-ID parameter. As of 2026-09-01, only systeme.io is enabled for this behavior: its official help article documents the `tk` affiliate tag parameter. beehiiv, Jotform and Pipedrive keep their existing affiliate URLs unchanged because no equivalent verified sub-ID evidence is recorded.
 
 An attributed systeme.io import must include all of:
 
