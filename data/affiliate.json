@@ -3,7 +3,7 @@
   "beehiiv": {"url": "https://www.beehiiv.com/?via=pedro-caiano", "enabled": true, "publicUrl": "https://www.beehiiv.com/"},
   "jotform": {"url": "https://www.jotform.com/products/form-builder/?partner=pcaiano", "enabled": true, "publicUrl": "https://www.jotform.com/", "links": {"form-builder": "https://www.jotform.com/products/form-builder/?partner=pcaiano", "sign": "https://www.jotform.com/products/sign/?partner=pcaiano", "apps": "https://www.jotform.com/products/apps/?partner=pcaiano", "ai-agents": "https://www.jotform.com/ai/agents/?partner=pcaiano", "pricing": "https://www.jotform.com/pricing/?partner=pcaiano", "homepage": "https://www.jotform.com/?partner=pcaiano"}},
   "hubspot": {"url": "", "enabled": false, "publicUrl": "https://www.hubspot.com/"},
-  "pipedrive": {"url": "", "enabled": false, "publicUrl": "https://www.pipedrive.com/"},
+  "pipedrive": {"url": "https://aff.trypipedrive.com/e5qvcwi1i22u", "enabled": true, "publicUrl": "https://www.pipedrive.com/"},
   "semrush": {"url": "", "enabled": false, "publicUrl": "https://www.semrush.com/"},
   "jasper": {"url": "", "enabled": false, "publicUrl": "https://www.jasper.ai/"},
   "zapier": {"url": "", "enabled": false, "publicUrl": "https://zapier.com/"},
