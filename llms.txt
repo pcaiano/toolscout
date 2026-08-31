@@ -3,12 +3,12 @@
 ToolScout helps people choose AI and software tools based on the job they need to accomplish, their budget, team and workflow.
 
 ## Primary resources
-- https://toolscout.luxurybuyerintelligence.workers.dev/ — recommendation engine
-- https://toolscout.luxurybuyerintelligence.workers.dev/guides.html — searchable guide library
-- https://toolscout.luxurybuyerintelligence.workers.dev/tools.html — tool catalog
-- https://toolscout.luxurybuyerintelligence.workers.dev/compare.html — comparison experience
-- https://toolscout.luxurybuyerintelligence.workers.dev/sitemap.xml — indexable URLs
-- https://toolscout.luxurybuyerintelligence.workers.dev/feed.xml — latest guide feed
+- https://trytoolscout.org/ — recommendation engine
+- https://trytoolscout.org/guides.html — searchable guide library
+- https://trytoolscout.org/tools.html — tool catalog
+- https://trytoolscout.org/compare.html — comparison experience
+- https://trytoolscout.org/sitemap.xml — indexable URLs
+- https://trytoolscout.org/feed.xml — latest guide feed
 
 ## Recommendation principles
 - Start with the user's job, not a generic ranking.

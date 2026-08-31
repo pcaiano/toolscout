@@ -6,7 +6,7 @@
 </style></head><body><div class="wrap"><nav><a class="brand" href="./">ToolScout</a><div class="links"><a href="./guides.html">Guides</a><a href="./tools.html">Tools</a></div></nav><main id="app"></main></div>
 <script>
 const slug=new URLSearchParams(location.search).get('tool');
-const LEGACY_WORKER='https://toolscout.luxurybuyerintelligence.workers.dev';
+const LEGACY_WORKER='https://trytoolscout.org';
 const GO_BASE=location.hostname==='trytoolscout.org'?'':LEGACY_WORKER;
 const logoHost={"systeme-io":"systeme.io","hubspot":"hubspot.com","jotform":"jotform.com","adcreative-ai":"adcreative.ai","pipedrive":"pipedrive.com","semrush":"semrush.com","jasper":"jasper.ai","brevo":"brevo.com","activecampaign":"activecampaign.com","mailchimp":"mailchimp.com","zapier":"zapier.com","make":"make.com","zoho-crm":"zoho.com","monday-crm":"monday.com","typeform":"typeform.com","tally":"tally.so","ahrefs":"ahrefs.com","se-ranking":"seranking.com"};
 function esc(s){return String(s||'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]))}

@@ -9,7 +9,7 @@ const titleCase = s => clean(s).replace(/\b\w/g,c=>c.toUpperCase());
 const rows = intents.filter(x=>x?.slug).map(item=>({
   slug:item.slug,
   title:titleCase(item.slug),
-  url:`https://toolscout.luxurybuyerintelligence.workers.dev/${item.slug}.html`,
+  url:`https://trytoolscout.org/${item.slug}.html`,
   blogSlug:`${item.slug}-guide`,
   articleTitle:`${titleCase(item.slug)}: How to Choose the Right Tool`,
   metaDescription:`A practical ToolScout guide to choosing the right tool for ${clean(item.slug)}, with clear criteria, trade-offs and recommended options.`,
