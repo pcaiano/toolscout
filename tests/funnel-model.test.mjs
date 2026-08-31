@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseFunnelEvent, rate } from '../funnel-model.js';
-import { ingest } from '../funnel-worker.js';
+import funnelWorker, { ingest } from '../funnel-worker.js';
 import dynamicWorker from '../dynamic-worker.js';
 
 const valid = {
@@ -60,4 +60,14 @@ test('outbound redirect stays compatible, records canonical rows, and excludes c
   const smoke=new Request('https://trytoolscout.org/go/demo-tool',{headers:{'user-agent':'curl/8.0'}});
   assert.equal((await dynamicWorker.fetch(smoke,env,{})).status,302);
   assert.equal(batches.length,1);
+});
+
+test('Command Center asset is served only to the verified Access owner', async () => {
+  const env={ASSETS:{async fetch(){return new Response('<h1>ToolScout Command Center</h1>',{headers:{'content-type':'text/html'}})}}};
+  const denied=await funnelWorker.fetch(new Request('https://trytoolscout.org/analytics.html'),env,{});
+  assert.equal(denied.status,404);
+  const allowed=await funnelWorker.fetch(new Request('https://trytoolscout.org/analytics.html',{headers:{'Cf-Access-Authenticated-User-Email':'pcaiano@gmail.com'}}),env,{});
+  assert.equal(allowed.status,200);
+  assert.match(await allowed.text(),/ToolScout Command Center/);
+  assert.equal(allowed.headers.get('cache-control'),'private, no-store');
 });

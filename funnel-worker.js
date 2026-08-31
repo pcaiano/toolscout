@@ -80,6 +80,14 @@ async function funnelSnapshot(env) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname === '/analytics.html' && url.hostname === new URL(BASE).hostname) {
+      const email=request.headers.get('Cf-Access-Authenticated-User-Email')||request.headers.get('cf-access-authenticated-user-email')||'';
+      if (String(email).toLowerCase() !== 'pcaiano@gmail.com') return new Response('Not found',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store'}});
+      const dashboard=await env.ASSETS.fetch(request);
+      const headers=new Headers(dashboard.headers);
+      headers.set('Cache-Control','private, no-store');
+      return new Response(dashboard.body,{status:dashboard.status,headers});
+    }
     if (url.pathname === '/api/events' && request.method === 'OPTIONS') return new Response(null, {status:204, headers:eventHeaders(request)});
     if (url.pathname === '/api/events' && request.method === 'POST') return ingest(request, env);
     if (url.pathname === '/api/stats' && request.method === 'GET') {
