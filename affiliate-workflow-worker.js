@@ -1,7 +1,7 @@
 import base from './revenue-worker.js';
 
 const OWNER_EMAIL='pcaiano@gmail.com';
-const ALLOWED_STATUSES=new Set(['active','approved_needs_link','submitted','needs_info','ready_to_apply','program_exists','research_required','paused','rejected','no_program']);
+const ALLOWED_STATUSES=new Set(['active','approved_needs_link','submitted','appeal_pending','needs_info','ready_to_apply','program_exists','research_required','paused','rejected','no_program']);
 
 async function isOwner(request,ctx){
   const email=request.headers.get('Cf-Access-Authenticated-User-Email')||request.headers.get('cf-access-authenticated-user-email')||'';
@@ -9,7 +9,7 @@ async function isOwner(request,ctx){
   try{if(!ctx?.access)return false;const identity=await ctx.access.getIdentity();return String(identity?.email||'').toLowerCase()===OWNER_EMAIL;}catch{return false;}
 }
 async function assetJson(request,env,path,fallback){try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback;}catch{return fallback;}}
-function pipelineStatus(value){if(value==='active')return 'active';if(value==='program_exists')return 'program_exists';if(value==='paused_for_new_affiliates')return 'paused';if(value==='no_affiliate_program')return 'no_program';return 'research_required';}
+function pipelineStatus(value){if(value==='active')return 'active';if(value==='submitted')return 'submitted';if(value==='appeal_pending')return 'appeal_pending';if(value==='program_exists')return 'program_exists';if(value==='paused_for_new_affiliates')return 'paused';if(value==='no_affiliate_program')return 'no_program';return 'research_required';}
 async function workflowSnapshot(request,env){
   const [tools,pipeline,affiliate,rows]=await Promise.all([
     assetJson(request,env,'/data/tools.json',[]),
@@ -35,7 +35,7 @@ async function updateWorkflow(request,env,slug){
   if(!status&&notes===null&&affiliateUrl===null)return Response.json({error:'no_valid_fields'},{status:400});
   const existing=await env.DB.prepare('SELECT status,submitted_at,response_at,affiliate_url,notes FROM affiliate_workflow WHERE tool_slug=?').bind(slug).first();
   const nextStatus=status||existing?.status||'research_required';
-  const submittedAt=nextStatus==='submitted'&&!existing?.submitted_at?new Date().toISOString():existing?.submitted_at||null;
+  const submittedAt=['submitted','appeal_pending'].includes(nextStatus)&&!existing?.submitted_at?new Date().toISOString():existing?.submitted_at||null;
   const responseAt=['approved_needs_link','active','rejected','needs_info'].includes(nextStatus)&&!existing?.response_at?new Date().toISOString():existing?.response_at||null;
   await env.DB.prepare(`INSERT INTO affiliate_workflow(tool_slug,status,submitted_at,response_at,affiliate_url,notes,updated_at) VALUES(?,?,?,?,?,?,datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status=excluded.status,submitted_at=excluded.submitted_at,response_at=excluded.response_at,affiliate_url=excluded.affiliate_url,notes=excluded.notes,updated_at=datetime('now')`).bind(slug,nextStatus,submittedAt,responseAt,affiliateUrl??existing?.affiliate_url??null,notes??existing?.notes??null).run();
   return Response.json({ok:true,tool_slug:slug,status:nextStatus});
