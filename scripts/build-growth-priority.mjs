@@ -5,6 +5,9 @@ const profiles = JSON.parse(fs.readFileSync('data/intent-profiles.json','utf8'))
 const tools = JSON.parse(fs.readFileSync('data/tools.json','utf8'));
 const affiliate = JSON.parse(fs.readFileSync('data/affiliate.json','utf8'));
 const pipeline = JSON.parse(fs.readFileSync('data/affiliate-pipeline.json','utf8'));
+const gscPath = 'reports/gsc-signals.json';
+const gsc = fs.existsSync(gscPath) ? JSON.parse(fs.readFileSync(gscPath,'utf8')) : { items: [] };
+const gscByIntent = new Map((gsc.items || []).map(x => [String(x.intent), x]));
 
 const pipelineBySlug = new Map((pipeline.verified_programs || []).map(x => [String(x.slug), x]));
 const commercialPattern = /crm|seo|marketing|agency|automation|lead|sales|email|project|funnel|productivity|form/i;
@@ -51,7 +54,18 @@ const rows = intents.map(intent => {
   const category = categoryPriority[intent.category] || 4;
   const affiliateTools = ranked.slice(0,5).filter(x => affiliateReadiness(x.tool.slug) >= 15).length;
   const affiliateSignal = Math.min(15, affiliateTools * 5);
-  const score = Math.min(100, Math.round(commercial + category + catalogDepth + Math.min(20, topFit * 2) + affiliateSignal));
+  const observed = gscByIntent.get(intent.slug);
+  const impressions = Number(observed?.impressions || 0);
+  const clicks = Number(observed?.clicks || 0);
+  const position = Number(observed?.position || 0);
+  const realSearchSignal = impressions > 0
+    ? Math.min(50, 20 + Math.log10(impressions + 1) * 10 + clicks * 2 + (position > 0 && position <= 20 ? 8 : 0))
+    : 0;
+  const heuristicScore = Math.min(100, Math.round(commercial + category + catalogDepth + Math.min(20, topFit * 2) + affiliateSignal));
+  // Once Google has observed an intent, search evidence is the majority of its score.
+  const score = impressions > 0
+    ? Math.min(100, Math.round(realSearchSignal + heuristicScore * 0.5))
+    : heuristicScore;
   const readiness = affiliateTools > 0 ? 'monetizable' : 'needs-affiliate-activation';
   return {
     intent: intent.slug,
@@ -62,17 +76,24 @@ const rows = intents.map(intent => {
     catalogDepth,
     commercialSignal: commercial,
     affiliateSignal,
+    searchSignal: impressions > 0 ? { source: 'gsc', impressions, clicks, ctr: Number(observed.ctr || 0), position } : null,
+    signalBasis: impressions > 0 ? 'observed-gsc-majority' : 'heuristic-only',
     monetizationReadiness: readiness,
     topTools: top.map(x => x.tool.slug),
     action: score >= 75 ? 'invest-now' : score >= 60 ? 'build-next' : 'watch'
   };
 });
 
-rows.sort((a,b) => b.priorityScore - a.priorityScore || a.title.localeCompare(b.title));
+rows.sort((a,b) => {
+  const aObserved = a.searchSignal ? 1 : 0;
+  const bObserved = b.searchSignal ? 1 : 0;
+  return bObserved - aObserved || b.priorityScore - a.priorityScore || a.title.localeCompare(b.title);
+});
 fs.mkdirSync('reports', { recursive: true });
 fs.writeFileSync('reports/growth-priority.json', JSON.stringify({
   generatedAt: new Date().toISOString(),
-  methodology: 'Heuristic planning score using commercial intent, catalog depth, current tool fit and verified affiliate readiness. It does not claim search-volume data.',
+  methodology: 'Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.',
+  gsc: { available: gscByIntent.size > 0, intentsWithSignals: gscByIntent.size, source: gsc.source || null },
   count: rows.length,
   items: rows
 }, null, 2) + '\n');

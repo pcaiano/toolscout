@@ -1,6 +1,11 @@
 {
-  "generatedAt": "2026-08-31T23:15:12.377Z",
-  "methodology": "Heuristic planning score using commercial intent, catalog depth, current tool fit and verified affiliate readiness. It does not claim search-volume data.",
+  "generatedAt": "2026-09-01T06:39:20.750Z",
+  "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.",
+  "gsc": {
+    "available": false,
+    "intentsWithSignals": 0,
+    "source": null
+  },
   "count": 24,
   "items": [
     {
@@ -12,6 +17,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 15,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "activecampaign",
@@ -29,6 +36,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
@@ -46,6 +55,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
@@ -63,6 +74,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -80,6 +93,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -97,6 +112,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 15,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "clickup",
@@ -114,6 +131,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 15,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "clickup",
@@ -131,6 +150,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -148,6 +169,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -165,6 +188,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
@@ -182,6 +207,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -199,6 +226,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -216,6 +245,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -233,6 +264,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "tally",
@@ -250,6 +283,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "clickup",
@@ -267,6 +302,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "semrush",
@@ -284,6 +321,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
@@ -301,6 +340,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
@@ -318,6 +359,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "semrush",
@@ -335,6 +378,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
@@ -352,6 +397,8 @@
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "typeform",
@@ -369,6 +416,8 @@
       "catalogDepth": 15,
       "commercialSignal": 8,
       "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
@@ -386,6 +435,8 @@
       "catalogDepth": 15,
       "commercialSignal": 8,
       "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "semrush",
@@ -403,6 +454,8 @@
       "catalogDepth": 15,
       "commercialSignal": 8,
       "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
       "monetizationReadiness": "needs-affiliate-activation",
       "topTools": [
         "jasper",

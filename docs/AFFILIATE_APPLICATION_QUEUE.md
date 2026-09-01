@@ -1,6 +1,17 @@
 # Affiliate Application Queue
 
-Updated 2026-08-28.
+Updated 2026-09-01.
+
+## Immediate revenue queue
+
+### Make
+- Official programme: https://www.make.com/en/affiliate
+- Application/account route: https://make.com/user/affiliate
+- Published economics: 35% commission for 12 months.
+- ToolScout fit: automation, workflow, productivity and small-business CRM clusters.
+- Verified blocker: the application route redirects to Make sign-in in the available browser session.
+- Exact next action: Pedro signs in to the existing Make account, opens `/user/affiliate`, reviews the publisher declarations and submits them. Record the exact approved tracking URL only after it is issued.
+- Status: `login_required_not_applied`
 
 ## Priority 1 — Apply first
 
@@ -16,7 +27,12 @@ Updated 2026-08-28.
 - Published commission: varies by product; current page advertises up to $300 per sale at base tiers and up to $450 for Semrush One at Platinum, plus $10 for eligible trials.
 - Published cookie window: 120 days.
 - Fit: SEO, search visibility, AI visibility, marketing.
-- Status: `apply`
+- Application route: https://app.impact.com/campaign-campaign-info-v2/Semrush.brand
+- Current official base economics observed 2026-09-01: 120-day cookie; $10 for eligible trials; $200 per SEO Toolkit sale and $300 per Semrush One sale, with other products and higher loyalty tiers varying.
+- ToolScout fit: Semrush is already the first catalogue match for competitor SEO, SEO for agencies and keyword research pages.
+- Verified blocker: the route opens Impact's Semrush publisher signup and requires account/publisher declarations.
+- Exact next action: Pedro signs in to Impact, completes the Semrush publisher profile for `https://trytoolscout.org/`, and submits. Record the exact approved tracking URL only after acceptance.
+- Status: `impact_signup_required_not_applied`
 
 ## Priority 2 — Verify before activation
 

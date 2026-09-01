@@ -32,6 +32,8 @@ Primary URL: https://trytoolscout.org/
 
 **Important:** use a personal Product Hunt account. Do not buy votes, hunters or traffic.
 
+**Execution state (2026-09-01):** prepared, not submitted. Required human/account step: sign in with Pedro's personal Product Hunt account, choose the launch date, upload the final gallery assets, and submit the public launch. A repository checklist is not evidence of a submission.
+
 ## Priority 2 — SaaSHub
 
 **Why:** direct fit for software discovery and comparison, plus directory/discovery value.
@@ -42,6 +44,8 @@ Primary URL: https://trytoolscout.org/
 
 **Competitor references:** use established software discovery/comparison products where appropriate rather than inventing competitors.
 
+**Execution state (2026-09-01):** prepared, not submitted. Required assets: canonical URL, product name, short description above, category selection, square logo and account email. Submission is a third-party publisher action and must be confirmed at the final form step.
+
 ## Priority 3 — AlternativeTo
 
 **Why:** users already search for alternatives to software; ToolScout's comparison/recommendation positioning fits this intent.
@@ -50,11 +54,15 @@ Primary URL: https://trytoolscout.org/
 
 **Positioning:** ToolScout is a software discovery/recommendation service, not an individual SaaS replacement. Keep the description factual and concise.
 
+**Execution state (2026-09-01):** queued, not submitted; account creation/sign-in and moderation submission required.
+
 ## Priority 4 — Alternative.me
 
 **Why:** another software discovery surface with open submission.
 
 **Submission guide:** https://alternative.me/how-to/submit-software/
+
+**Execution state (2026-09-01):** queued, not submitted; follow the current submission instructions and do not claim listing approval until a public listing exists.
 
 ## Priority 5 — BetaList
 
@@ -63,6 +71,8 @@ Primary URL: https://trytoolscout.org/
 **Submission:** https://betalist.com/
 
 **Qualification:** ToolScout has a working site on its own domain, so it satisfies the core working-site requirement. Do not describe it as pre-launch.
+
+**Execution state (2026-09-01):** queued, not submitted; account/publisher form and current eligibility review required.
 
 ## Distribution content sequence
 
