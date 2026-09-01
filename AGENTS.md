@@ -1,5 +1,16 @@
 # ToolScout Agent Instructions
 
+## Mandatory startup context
+
+Before planning or executing ToolScout work, every agent, Codex session, Work session, automation, or repository operator must read:
+
+1. `AGENTS.md`
+2. `docs/PRODUCTION-BASELINE.md`
+3. `docs/COMMAND-CENTER.md`
+4. Any mission-specific or subsystem-specific documentation referenced by those files
+
+`docs/COMMAND-CENTER.md` is the canonical operational memory across ChatGPT chats, Work, Codex, GitHub sessions, and human actions. Do not rely on conversational memory or stale checkpoints when repository state can be inspected. After substantial execution, reconcile meaningful operational changes back into the Command Center and relevant source-of-truth files.
+
 ## Project Isolation Guardrails
 
 These rules are permanent safety constraints for every agent, automation, migration, deployment, and infrastructure change performed from this repository.
