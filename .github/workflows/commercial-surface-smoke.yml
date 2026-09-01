@@ -1,0 +1,98 @@
+name: Commercial Surface Smoke
+
+on:
+  workflow_run:
+    workflows: ["Deploy ToolScout Worker"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '35 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PROD_BASE: https://trytoolscout.org
+
+jobs:
+  smoke:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check every generated commercial comparison
+        run: |
+          set -e
+          sitemap="$(curl --fail --silent --show-error "$PROD_BASE/sitemap.xml")"
+          count=0
+          for file in ./*-vs-*.html; do
+            [ -e "$file" ] || continue
+            page="$(basename "$file" .html)"
+            count=$((count+1))
+            echo "Checking $page"
+            html="$(curl --fail --silent --show-error --location "$PROD_BASE/$page.html")"
+            printf '%s\n' "$html" | grep -F "<link rel=\"canonical\" href=\"$PROD_BASE/$page.html\">"
+            printf '%s\n' "$html" | grep -F 'No paid ranking.'
+            printf '%s\n' "$html" | grep -F 'Affiliate relationships do not influence scoring'
+            printf '%s\n' "$html" | grep -F '/tool.html?tool='
+            printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/$page.html"
+          done
+          test "$count" -gt 0
+          echo "Validated $count generated commercial comparison pages."
+
+      - name: Check tracked public outbound redirect
+        run: |
+          set -e
+          node <<'NODE' >/tmp/public-route.txt
+          const fs=require('fs');
+          const tools=JSON.parse(fs.readFileSync('data/tools.json','utf8'));
+          const affiliate=JSON.parse(fs.readFileSync('data/affiliate.json','utf8'));
+          const tool=tools.find(t=>{
+            const a=affiliate[t.slug]||{};
+            return !(a.enabled&&a.url) && (a.publicUrl||t.sourceUrl);
+          });
+          if(!tool)process.exit(1);
+          const a=affiliate[tool.slug]||{};
+          console.log(tool.slug);
+          console.log(a.publicUrl||tool.sourceUrl);
+          NODE
+          slug="$(sed -n '1p' /tmp/public-route.txt)"
+          expected="$(sed -n '2p' /tmp/public-route.txt)"
+          expected_host="$(node -e "console.log(new URL(process.argv[1]).hostname)" "$expected")"
+          headers="$(mktemp)"
+          curl --silent --show-error --dump-header "$headers" --output /dev/null --max-redirs 0 "$PROD_BASE/go/$slug" || true
+          cat "$headers"
+          status="$(sed -n 's/^HTTP\/[^ ]* \([0-9][0-9][0-9]\).*/\1/p' "$headers" | tail -1)"
+          location="$(sed -n 's/^[Ll]ocation:[[:space:]]*//p' "$headers" | tr -d '\r' | tail -1)"
+          cookie="$(sed -n 's/^[Ss]et-[Cc]ookie:[[:space:]]*//p' "$headers" | tr -d '\r' | grep -F 'toolscout_session=' | tail -1 || true)"
+          rm -f "$headers"
+          test "$status" = "302"
+          actual_host="$(node -e "console.log(new URL(process.argv[1]).hostname)" "$location")"
+          test "$actual_host" = "$expected_host"
+          test -n "$cookie"
+          echo "Tracked public route OK: $slug -> $actual_host with ToolScout session cookie."
+
+      - name: Check tracked affiliate outbound redirect
+        run: |
+          set -e
+          node <<'NODE' >/tmp/affiliate-route.txt
+          const fs=require('fs');
+          const affiliate=JSON.parse(fs.readFileSync('data/affiliate.json','utf8'));
+          const entry=Object.entries(affiliate).find(([,v])=>v&&v.enabled&&v.url);
+          if(!entry)process.exit(1);
+          console.log(entry[0]);
+          console.log(entry[1].url);
+          NODE
+          slug="$(sed -n '1p' /tmp/affiliate-route.txt)"
+          expected="$(sed -n '2p' /tmp/affiliate-route.txt)"
+          expected_host="$(node -e "console.log(new URL(process.argv[1]).hostname)" "$expected")"
+          headers="$(mktemp)"
+          curl --silent --show-error --dump-header "$headers" --output /dev/null --max-redirs 0 "$PROD_BASE/go/$slug" || true
+          location="$(sed -n 's/^[Ll]ocation:[[:space:]]*//p' "$headers" | tr -d '\r' | tail -1)"
+          rm -f "$headers"
+          actual_host="$(node -e "console.log(new URL(process.argv[1]).hostname)" "$location")"
+          test "$actual_host" = "$expected_host"
+          echo "Tracked affiliate route OK: $slug -> $actual_host."
