@@ -103,3 +103,4 @@ jobs:
           check_redirect beehiiv '^https://(www\.)?beehiiv\.com/\?[^[:space:]]*(via=|[?&]via=)'
           check_redirect jotform '^https://www\.jotform\.com/[^[:space:]]*[?&]partner=pcaiano'
           check_redirect pipedrive '^https://aff\.trypipedrive\.com/e5qvcwi1i22u/?$'
+          check_redirect make '^https://www\.make\.com/en/register\?pc=toolscout$'
