@@ -27,6 +27,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Generate SEO pages
         run: node scripts/generate-seo-pages.mjs
+      - name: Generate commercial comparisons and tool profiles
+        run: |
+          node scripts/generate-comparisons.mjs
+          node scripts/generate-tool-pages.mjs
+          node scripts/link-static-tool-profiles.mjs
       - name: Generate acquisition content
         run: node scripts/generate-acquisition-content.mjs
       - name: Generate acquisition priority
@@ -35,6 +40,8 @@ jobs:
         run: node scripts/generate-sitemap.mjs
       - name: Guard public hostname
         run: node scripts/check-public-host.mjs
+      - name: Validate commercial indexability
+        run: node scripts/validate-commercial-indexability.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

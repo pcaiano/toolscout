@@ -142,6 +142,8 @@ Distribution work should normally stay outside Work/Codex.
 
 ## SEO and acquisition status
 
+The 2026-09-01 commercial SEO sprint added crawlable, catalog-backed static profiles for all 100 tools, linked the 38 intent guides and 15 comparison pages bidirectionally through those profiles, centralized the comparison registry, and expanded the static sitemap from 107 to 207 URLs. No editorial ranking, affiliate configuration, distribution state, or speculative intent inventory changed. Full scope and acceptance evidence are recorded in `docs/SEO-COMMERCIAL-SPRINT-2026-09-01.md`.
+
 The repository currently generates:
 
 - `reports/blog-topics.json`

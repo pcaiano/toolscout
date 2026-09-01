@@ -1,0 +1,7 @@
+[
+  ["make", "zapier"], ["hubspot", "pipedrive"], ["beehiiv", "kit"],
+  ["jotform", "typeform"], ["semrush", "ahrefs"], ["notion", "clickup"],
+  ["asana", "clickup"], ["airtable", "notion"], ["n8n", "make"],
+  ["tally", "typeform"], ["brevo", "mailchimp"], ["activecampaign", "mailchimp"],
+  ["webflow", "framer"], ["shopify", "webflow"], ["apollo", "lemlist"]
+]
