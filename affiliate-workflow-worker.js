@@ -3,7 +3,20 @@ import base from './revenue-worker.js';
 const ALLOWED_STATUSES=new Set(['active','approved_needs_link','submitted','appeal_pending','needs_info','ready_to_apply','program_exists','research_required','paused','rejected','no_program']);
 
 async function assetJson(request,env,path,fallback){try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback;}catch{return fallback;}}
-function pipelineStatus(value){if(value==='active')return 'active';if(value==='submitted')return 'submitted';if(value==='appeal_pending')return 'appeal_pending';if(value==='ready_to_apply')return 'ready_to_apply';if(value==='program_exists')return 'program_exists';if(value==='paused_for_new_affiliates')return 'paused';if(value==='no_affiliate_program')return 'no_program';return 'research_required';}
+function pipelineStatus(value){
+  if(ALLOWED_STATUSES.has(value))return value;
+  if(value==='paused_for_new_affiliates')return 'paused';
+  if(value==='no_affiliate_program')return 'no_program';
+  return 'research_required';
+}
+function timeValue(value){const n=Date.parse(value||'');return Number.isFinite(n)?n:0;}
+function effectiveStatus({active,pipelineRow,stateRow}){
+  if(active)return 'active';
+  if(!pipelineRow&&!stateRow)return 'research_required';
+  if(!stateRow)return pipelineStatus(pipelineRow?.status);
+  if(!pipelineRow)return stateRow.status||'research_required';
+  return timeValue(pipelineRow.last_verified)>timeValue(stateRow.updated_at)?pipelineStatus(pipelineRow.status):(stateRow.status||pipelineStatus(pipelineRow.status));
+}
 async function workflowSnapshot(request,env){
   const [tools,pipeline,affiliate,rows]=await Promise.all([
     assetJson(request,env,'/data/tools.json',[]),
@@ -16,8 +29,8 @@ async function workflowSnapshot(request,env){
   const items=tools.map(t=>{
     const p=pmap.get(t.slug)||null,a=affiliate[t.slug]||{},s=smap.get(t.slug)||null;
     const active=Boolean(a.enabled&&a.url);
-    const status=s?.status||(active?'active':p?pipelineStatus(p.status):'research_required');
-    return {slug:t.slug,name:t.name,category:t.category,status,program_url:p?.source||null,application_url:p?.application_url||p?.source||null,commission:p?.commission_note||(t.commission!=='Pending verification'?t.commission:null),requirements:Array.isArray(p?.requirements)?p.requirements:[],form_guidance:p?.form_guidance||null,next_action:p?.next_action||null,affiliate_url:s?.affiliate_url||(active?a.url:null),submitted_at:s?.submitted_at||null,response_at:s?.response_at||null,notes:s?.notes||null,updated_at:s?.updated_at||p?.last_verified||t.lastVerified||null};
+    const status=effectiveStatus({active,pipelineRow:p,stateRow:s});
+    return {slug:t.slug,name:t.name,category:t.category,status,program_url:p?.source||null,application_url:p?.application_url||p?.source||null,commission:p?.commission_note||(t.commission!=='Pending verification'?t.commission:null),requirements:Array.isArray(p?.requirements)?p.requirements:[],form_guidance:p?.form_guidance||null,next_action:p?.next_action||null,affiliate_url:active?a.url:(s?.affiliate_url||null),submitted_at:s?.submitted_at||null,response_at:s?.response_at||null,notes:s?.notes||null,updated_at:timeValue(p?.last_verified)>timeValue(s?.updated_at)?(p?.last_verified||null):(s?.updated_at||p?.last_verified||t.lastVerified||null)};
   });
   return {tools:items,networkConstraints:pipeline.network_constraints||[],externalPrograms:pipeline.external_programs_not_in_catalog||[],applicationPack:{applicant:'Pedro Caiano',website:'https://trytoolscout.org',project:'ToolScout — an independent software discovery and recommendation platform.',promotion_method:'Editorial recommendations, intent-based software comparisons, SEO landing pages and contextual links inside ToolScout. Affiliate relationships never influence recommendation ranking.',audience:'Small businesses, consultants, agencies, creators, sales and marketing teams, and software buyers researching tools for specific workflows.',why_join:'ToolScout helps high-intent software buyers narrow a large market to a small set of relevant tools. I want to monetize qualified outbound referrals while keeping recommendations independent and transparent.',traffic_note:'Early-stage product. Traffic is growing through organic search, launch platforms, evergreen directories and direct discovery. I do not claim unsupported traffic volumes.',disclosure:'Affiliate relationships are disclosed publicly and do not alter ToolScout recommendation scores.'}};
 }
