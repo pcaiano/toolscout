@@ -1,0 +1,20 @@
+[
+  {"slug":"notion","name":"Notion","status":"validated-candidate","category":"business","sourceUrl":"https://www.notion.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"asana","name":"Asana","status":"validated-candidate","category":"business","sourceUrl":"https://asana.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"trello","name":"Trello","status":"validated-candidate","category":"business","sourceUrl":"https://trello.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"airtable","name":"Airtable","status":"validated-candidate","category":"business","sourceUrl":"https://www.airtable.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"n8n","name":"n8n","status":"validated-candidate","category":"automation","sourceUrl":"https://n8n.io/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"apollo","name":"Apollo","status":"validated-candidate","category":"sales","sourceUrl":"https://www.apollo.io/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"lemlist","name":"lemlist","status":"validated-candidate","category":"sales","sourceUrl":"https://www.lemlist.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"instantly","name":"Instantly","status":"validated-candidate","category":"sales","sourceUrl":"https://instantly.ai/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"intercom","name":"Intercom","status":"validated-candidate","category":"support","sourceUrl":"https://www.intercom.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"zendesk","name":"Zendesk","status":"validated-candidate","category":"support","sourceUrl":"https://www.zendesk.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"freshdesk","name":"Freshdesk","status":"validated-candidate","category":"support","sourceUrl":"https://www.freshworks.com/freshdesk/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"kit","name":"Kit","status":"validated-candidate","category":"marketing","sourceUrl":"https://kit.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"klaviyo","name":"Klaviyo","status":"validated-candidate","category":"marketing","sourceUrl":"https://www.klaviyo.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"canva","name":"Canva","status":"validated-candidate","category":"design","sourceUrl":"https://www.canva.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"grammarly","name":"Grammarly","status":"validated-candidate","category":"ai-writing","sourceUrl":"https://www.grammarly.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"buffer","name":"Buffer","status":"validated-candidate","category":"social","sourceUrl":"https://buffer.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"figma","name":"Figma","status":"validated-candidate","category":"design","sourceUrl":"https://www.figma.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
+  {"slug":"webflow","name":"Webflow","status":"validated-candidate","category":"website","sourceUrl":"https://webflow.com/","affiliateProgram":"Pending verification","commission":"Pending verification"}
+]
