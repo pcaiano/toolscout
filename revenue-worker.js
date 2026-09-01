@@ -12,6 +12,34 @@ async function readAffiliateMap(request, env) {
   }
 }
 
+async function monetizedClickBreakdown(env) {
+  try {
+    const result = await env.DB.prepare(`
+      SELECT COALESCE(s.classification, 'unknown/legacy') AS classification,
+             COUNT(*) AS clicks
+      FROM click_events c
+      LEFT JOIN sessions s ON s.session_id = c.session_id
+      WHERE c.affiliate_active_at_click = 1
+        AND c.source != 'internal-test'
+      GROUP BY COALESCE(s.classification, 'unknown/legacy')
+    `).all();
+    const breakdown = {
+      'likely-human': 0,
+      'known-bot/crawler': 0,
+      'synthetic/test': 0,
+      owner: 0,
+      'unknown/legacy': 0
+    };
+    for (const row of result?.results || []) {
+      const key = String(row.classification || 'unknown/legacy');
+      breakdown[key] = Number(row.clicks || 0);
+    }
+    return breakdown;
+  } catch {
+    return null;
+  }
+}
+
 async function revenueSnapshot(request, env, stats) {
   const affiliate = await readAffiliateMap(request, env);
   const activeSlugs = new Set(stats?.affiliateCoverage?.activeToolSlugs || []);
@@ -118,8 +146,14 @@ export default {
       const response = await base.fetch(request, env, ctx);
       if (!response.ok) return response;
       const stats = await response.json();
-      const revenue = await revenueSnapshot(request, env, stats);
-      return Response.json({ ...stats, revenue }, {
+      const [revenue, breakdown] = await Promise.all([
+        revenueSnapshot(request, env, stats),
+        monetizedClickBreakdown(env)
+      ]);
+      const affiliateCoverage = breakdown
+        ? { ...(stats.affiliateCoverage || {}), monetizedClickBreakdown: breakdown }
+        : stats.affiliateCoverage;
+      return Response.json({ ...stats, affiliateCoverage, revenue }, {
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Cache-Control': 'private, max-age=60'
