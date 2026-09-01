@@ -116,8 +116,11 @@ As of 2026-09-01, repository state records the following programs as active:
 - Pipedrive — active — 20% of new-customer revenue for the first 12 months at the entry tier; higher tiers available
 - Make — active — 35% for 12 months
 - beehiiv — active through Dub
+- Shopify — active through Impact; owner supplied the approved personal URL `https://shopify.pxf.io/JkvQJE`
 
 Submitted/current review: Semrush (Impact) and AdCreative.ai (PartnerStack). n8n was rejected by PartnerStack at 2026-09-01 19:21 UTC and must not be reapplied without a material eligibility change or explicit invitation. HubSpot and Grammarly are also rejected under advertiser-specific evidence. Ahrefs and Calendly have no current program. Notion is paused for new applications.
+
+Webflow was submitted successfully by the owner on 2026-09-01 and is awaiting review. Kit was not submitted: its PartnerStack application is blocked by the Marketplace first-commission gate and must not be represented as pending.
 
 Make referral URL provided by the owner:
 

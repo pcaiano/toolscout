@@ -88,7 +88,7 @@
     {
       "slug": "shopify",
       "provider": "Shopify",
-      "status": "ready_to_apply",
+      "status": "active",
       "commission_note": "Up to USD 150 per qualified referral; amount varies by referral location and eligible paid plan",
       "source": "https://www.shopify.com/affiliates",
       "application_url": "https://www.shopify.com/affiliates",
@@ -101,7 +101,9 @@
       ],
       "form_guidance": "Position ToolScout as an independent software discovery publisher creating reviews, comparisons and guides for software buyers. Emphasize ecommerce-tool comparison coverage and contextual Shopify recommendations. Do not claim unsupported traffic volumes.",
       "last_verified": "2026-09-01",
-      "next_action": "Apply through Shopify's affiliate application. ToolScout matches the content-publisher profile described by Shopify."
+      "next_action": "Keep the approved Impact affiliate URL live and monitor qualified Shopify clicks and commissions.",
+      "network": "Impact",
+      "evidence": "Owner received Shopify welcome notification in Impact and supplied the exact personal affiliate URL https://shopify.pxf.io/JkvQJE on 2026-09-01."
     },
     {
       "slug": "grammarly",
@@ -137,7 +139,7 @@
     {
       "slug": "webflow",
       "provider": "Webflow",
-      "status": "ready_to_apply",
+      "status": "submitted",
       "commission_note": "50% commission on a qualified new customer's first subscription for up to 12 months; 90-day cookie",
       "source": "https://webflow.com/solutions/affiliates",
       "application_url": "https://webflow.com/solutions/affiliates",
@@ -149,7 +151,9 @@
       ],
       "form_guidance": "Position ToolScout as a B2B software review and discovery publisher with website-builder comparisons and high-intent recommendation pages. State that ToolScout does not make one-to-one client referrals and uses editorial affiliate disclosure.",
       "last_verified": "2026-09-01",
-      "next_action": "Apply to Webflow Affiliate Program and prepare a Webflow-focused comparison/recommendation page for the post-approval 30-day content requirement."
+      "next_action": "Application submitted by the owner; wait for Webflow review and do not duplicate the application.",
+      "network": "Direct",
+      "evidence": "Owner confirmed successful Webflow affiliate application submission on 2026-09-01."
     },
     {
       "slug": "apollo",
@@ -186,7 +190,7 @@
     {
       "slug": "kit",
       "provider": "Kit",
-      "status": "ready_to_apply",
+      "status": "blocked",
       "commission_note": "50% of referred paid customer revenue for first 12 months, with additional recurring tiers for qualifying affiliates",
       "source": "https://kit.com/affiliate",
       "application_url": "https://kit.com/affiliate",
@@ -196,7 +200,9 @@
       ],
       "form_guidance": "Describe ToolScout as an independent software recommendation publisher covering email marketing, creator tools and newsletter platforms. Promotion will use contextual editorial links in relevant comparison and recommendation pages.",
       "last_verified": "2026-09-01",
-      "next_action": "Apply through Kit affiliate application and mark Submitted."
+      "next_action": "Do not submit while PartnerStack Marketplace is locked. Earn the first eligible commission in an existing PartnerStack program, then reassess Kit without duplicating any process.",
+      "network": "PartnerStack",
+      "evidence": "PartnerStack displayed the Marketplace lock on the Kit application: one commission in an existing program is required before joining more programs. No Kit application was submitted."
     },
     {
       "slug": "framer",
