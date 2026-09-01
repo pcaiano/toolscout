@@ -117,7 +117,7 @@ As of 2026-09-01, repository state records the following programs as active:
 - Make — active — 35% for 12 months
 - beehiiv — active through Dub
 
-Submitted/current review: Semrush (Impact), AdCreative.ai (PartnerStack), and n8n (PartnerStack). HubSpot and Grammarly are rejected under advertiser-specific evidence. Ahrefs and Calendly have no current program. Notion is paused for new applications.
+Submitted/current review: Semrush (Impact) and AdCreative.ai (PartnerStack). n8n was rejected by PartnerStack at 2026-09-01 19:21 UTC and must not be reapplied without a material eligibility change or explicit invitation. HubSpot and Grammarly are also rejected under advertiser-specific evidence. Ahrefs and Calendly have no current program. Notion is paused for new applications.
 
 Make referral URL provided by the owner:
 

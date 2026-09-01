@@ -235,7 +235,7 @@
     {
       "slug": "n8n",
       "provider": "n8n",
-      "status": "submitted",
+      "status": "rejected",
       "commission_note": "30% of n8n Cloud referrals for 12 months",
       "source": "https://n8n.io/affiliates/",
       "application_url": "https://n8n.io/affiliates/",
@@ -247,8 +247,9 @@
       ],
       "form_guidance": "ToolScout covers automation and AI workflow tools. Explain that n8n will be promoted through automation comparisons, no-code/AI workflow recommendation pages and contextual links to n8n Cloud.",
       "last_verified": "2026-09-01",
-      "next_action": "Application received by PartnerStack at 2026-09-01 10:54 UTC and submitted for n8n GmbH review. Wait for approval, rejection or request for information; do not enable affiliate routing until a verified affiliate URL is issued.",
-      "network": "PartnerStack"
+      "next_action": "Do not reapply. PartnerStack recorded n8n GmbH's rejection at 2026-09-01 19:21 UTC; reassess only after a material eligibility change or explicit invitation.",
+      "network": "PartnerStack",
+      "evidence": "PartnerStack rejection recorded 2026-09-01 19:21 UTC after the Affiliate Operations Engine snapshot."
     },
     {
       "slug": "zendesk",
