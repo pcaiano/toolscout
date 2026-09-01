@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -32,6 +32,34 @@ jobs:
           node scripts/generate-comparisons.mjs
           node scripts/generate-tool-pages.mjs
           node scripts/link-static-tool-profiles.mjs
+      - name: Validate tool profile branding
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const tools = require('./data/tools.json');
+          const failures = [];
+          for (const tool of tools) {
+            const file = `tools/${tool.slug}.html`;
+            const html = fs.readFileSync(file, 'utf8');
+            if (!html.includes('class="toolLogo"') || !html.includes(`${tool.name} logo`)) failures.push(file);
+          }
+          if (failures.length) {
+            console.error('Tool profiles missing brand logo markup:', failures.join(', '));
+            process.exit(1);
+          }
+          console.log(`Validated brand logo markup in ${tools.length} tool profiles.`);
+          NODE
+      - name: Persist generated commercial pages
+        run: |
+          if git diff --quiet -- tools; then
+            echo 'Generated tool profiles already committed.'
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add tools
+            git commit -m 'Regenerate tool profiles with brand logos'
+            git push
+          fi
       - name: Generate acquisition content
         run: node scripts/generate-acquisition-content.mjs
       - name: Generate acquisition priority
