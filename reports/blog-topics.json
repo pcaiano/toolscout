@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-01T06:43:32.679Z",
+  "generatedAt": "2026-09-01T09:40:34.171Z",
   "source": "aggregated content demand signals",
-  "count": 24,
+  "count": 38,
   "items": [
     {
       "slug": "best-affordable-crm-guide",
@@ -18,10 +18,38 @@
       "searches": 0
     },
     {
+      "slug": "best-ai-assistants-guide",
+      "intent": "best-ai-assistants",
+      "title": "AI Assistants: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for ai assistants, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-ai-coding-tools-guide",
+      "intent": "best-ai-coding-tools",
+      "title": "AI Coding Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for ai coding tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
       "slug": "best-ai-marketing-tools-guide",
       "intent": "best-ai-marketing-tools",
       "title": "AI Marketing Tools: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for ai marketing tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-ai-research-tools-guide",
+      "intent": "best-ai-research-tools",
+      "title": "AI Research Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for ai research tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-cold-email-tools-guide",
+      "intent": "best-cold-email-tools",
+      "title": "Cold Email Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for cold email tools, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
@@ -64,6 +92,34 @@
       "intent": "best-crm-with-automation",
       "title": "CRM With Automation: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for crm with automation, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-customer-support-tools-guide",
+      "intent": "best-customer-support-tools",
+      "title": "Customer Support Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for customer support tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-design-tools-guide",
+      "intent": "best-design-tools",
+      "title": "Design Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for design tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-developer-tools-guide",
+      "intent": "best-developer-tools",
+      "title": "Developer Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for developer tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-ecommerce-platforms-guide",
+      "intent": "best-ecommerce-platforms",
+      "title": "Ecommerce Platforms: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for ecommerce platforms, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
@@ -130,6 +186,13 @@
       "searches": 0
     },
     {
+      "slug": "best-product-analytics-tools-guide",
+      "intent": "best-product-analytics-tools",
+      "title": "Product Analytics Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for product analytics tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
       "slug": "best-productivity-tools-for-teams-guide",
       "intent": "best-productivity-tools-for-teams",
       "title": "Productivity Tools For Teams: How to Choose the Right Tool",
@@ -141,6 +204,13 @@
       "intent": "best-project-management-tools",
       "title": "Project Management Tools: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for project management tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-sales-prospecting-tools-guide",
+      "intent": "best-sales-prospecting-tools",
+      "title": "Sales Prospecting Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for sales prospecting tools, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
@@ -158,10 +228,38 @@
       "searches": 0
     },
     {
+      "slug": "best-social-media-management-tools-guide",
+      "intent": "best-social-media-management-tools",
+      "title": "Social Media Management Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for social media management tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-team-collaboration-tools-guide",
+      "intent": "best-team-collaboration-tools",
+      "title": "Team Collaboration Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for team collaboration tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
       "slug": "best-tools-for-agencies-guide",
       "intent": "best-tools-for-agencies",
       "title": "Tools For Agencies: How to Choose the Right Tool",
       "description": "A practical guide to choosing software for tools for agencies, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-video-content-tools-guide",
+      "intent": "best-video-content-tools",
+      "title": "Video Content Tools: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for video content tools, shaped by ToolScout demand signals and the criteria that matter.",
+      "searches": 0
+    },
+    {
+      "slug": "best-website-builders-guide",
+      "intent": "best-website-builders",
+      "title": "Website Builders: How to Choose the Right Tool",
+      "description": "A practical guide to choosing software for website builders, shaped by ToolScout demand signals and the criteria that matter.",
       "searches": 0
     },
     {
