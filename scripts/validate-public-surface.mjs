@@ -7,7 +7,9 @@ const coreFiles = [path.join(ROOT,'index.html'), path.join(ROOT,'app.js')];
 const intentsPath = path.join(ROOT,'data','intents.json');
 const intents = fs.existsSync(intentsPath) ? JSON.parse(fs.readFileSync(intentsPath,'utf8')) : [];
 const activeSeoFiles = intents.filter(i=>i?.slug).map(i=>path.join(ROOT,`${i.slug}.html`));
-const publicFiles = [...coreFiles, ...activeSeoFiles].filter(file=>fs.existsSync(file));
+const comparisonFiles = fs.readdirSync(ROOT).filter(name=>/^[a-z0-9-]+-vs-[a-z0-9-]+\.html$/i.test(name)).map(name=>path.join(ROOT,name));
+const editorialFiles = [...activeSeoFiles, ...comparisonFiles];
+const publicFiles = [...coreFiles, ...editorialFiles].filter(file=>fs.existsSync(file));
 
 for (const file of publicFiles) {
   const content = fs.readFileSync(file, 'utf8');
@@ -15,11 +17,12 @@ for (const file of publicFiles) {
   if (/toolscout\.luxurybuyerintelligence\.workers\.dev/i.test(content)) failures.push(`${rel}: exposes legacy workers.dev origin`);
 }
 
-for (const file of activeSeoFiles) {
+for (const file of editorialFiles) {
   const rel = path.relative(ROOT, file);
   if (!fs.existsSync(file)) { failures.push(`${rel}: missing active SEO file`); continue; }
   const html = fs.readFileSync(file, 'utf8');
   if (!/affiliate(?: relationship| compensation| disclosure)|affiliate/i.test(html)) failures.push(`${rel}: missing affiliate disclosure text`);
+  if (!/<link[^>]+rel=["']canonical["'][^>]+href=["']https:\/\/trytoolscout\.org\//i.test(html) && !/<link[^>]+href=["']https:\/\/trytoolscout\.org\/[^"']*["'][^>]+rel=["']canonical["']/i.test(html)) failures.push(`${rel}: missing ToolScout canonical URL`);
   const links = [...html.matchAll(/href=["']([^"']+)["'][^>]*rel=["'][^"']*nofollow[^"']*["']/gi)];
   for (const match of links) {
     const href = match[1];
@@ -52,4 +55,4 @@ if (fs.existsSync(affiliatePath)) {
 }
 
 if (failures.length) { console.error(failures.join('\n')); process.exit(1); }
-console.log(`Public-surface validation passed: ${publicFiles.length} active assets checked.`);
+console.log(`Public-surface validation passed: ${publicFiles.length} active assets checked, including ${comparisonFiles.length} comparisons.`);
