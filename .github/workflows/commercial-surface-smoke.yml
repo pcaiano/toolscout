@@ -37,7 +37,8 @@ jobs:
             printf '%s\n' "$html" | grep -F "<link rel=\"canonical\" href=\"$PROD_BASE/$page.html\">"
             printf '%s\n' "$html" | grep -F 'No paid ranking.'
             printf '%s\n' "$html" | grep -F 'Affiliate relationships do not influence scoring'
-            printf '%s\n' "$html" | grep -F '/tool.html?tool='
+            profile_links="$(printf '%s\n' "$html" | grep -oE 'href="/tools/[a-z0-9-]+\.html"' | wc -l)"
+            test "$profile_links" -ge 2
             printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/$page.html"
           done
           test "$count" -gt 0
