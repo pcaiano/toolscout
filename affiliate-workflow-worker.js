@@ -47,6 +47,20 @@ async function updateWorkflow(request,env,slug){
   await env.DB.prepare(`INSERT INTO affiliate_workflow(tool_slug,status,submitted_at,response_at,affiliate_url,notes,updated_at) VALUES(?,?,?,?,?,?,datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status=excluded.status,submitted_at=excluded.submitted_at,response_at=excluded.response_at,affiliate_url=excluded.affiliate_url,notes=excluded.notes,updated_at=datetime('now')`).bind(slug,nextStatus,submittedAt,responseAt,affiliateUrl??existing?.affiliate_url??null,notes??existing?.notes??null).run();
   return Response.json({ok:true,tool_slug:slug,status:nextStatus});
 }
+async function catalogFallbackRedirect(request,env,slug){
+  const [affiliate,tools]=await Promise.all([assetJson(request,env,'/data/affiliate.json',{}),assetJson(request,env,'/data/tools.json',[])]);
+  const entry=affiliate[slug];
+  if(entry?.enabled&&entry?.url)return null;
+  if(entry?.publicUrl)return null;
+  const tool=tools.find(t=>t?.slug===slug);
+  const destination=tool?.sourceUrl;
+  if(!destination)return null;
+  try{
+    const u=new URL(destination);
+    if(!/^https?:$/.test(u.protocol))return null;
+  }catch{return null;}
+  return new Response(null,{status:302,headers:{Location:destination,'Cache-Control':'no-store'}});
+}
 export default {async fetch(request,env,ctx){
   const url=new URL(request.url);
   const pageRoute=url.pathname==='/affiliate-workflow.html'||url.pathname==='/affiliate-workflow';
@@ -59,6 +73,10 @@ export default {async fetch(request,env,ctx){
     if(url.pathname==='/affiliate-workflow/api'&&request.method==='GET')return Response.json(await workflowSnapshot(request,env),{headers:{'Cache-Control':'private, no-store'}});
     if(url.pathname.startsWith('/affiliate-workflow/api/')&&request.method==='POST'){const slug=url.pathname.slice('/affiliate-workflow/api/'.length).toLowerCase().replace(/[^a-z0-9-]/g,'');if(!slug)return Response.json({error:'invalid_slug'},{status:400});return updateWorkflow(request,env,slug);}
     return new Response('Method not allowed',{status:405});
+  }
+  if(request.method==='GET'&&url.pathname.startsWith('/go/')){
+    const slug=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
+    if(slug){const fallback=await catalogFallbackRedirect(request,env,slug);if(fallback)return fallback;}
   }
   return base.fetch(request,env,ctx);
 },async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);}};
