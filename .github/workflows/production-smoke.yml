@@ -20,6 +20,8 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Check production health
         run: |
           set -e
@@ -104,3 +106,55 @@ jobs:
           check_redirect jotform '^https://www\.jotform\.com/[^[:space:]]*[?&]partner=pcaiano'
           check_redirect pipedrive '^https://aff\.trypipedrive\.com/e5qvcwi1i22u/?$'
           check_redirect make '^https://www\.make\.com/en/register\?pc=toolscout$'
+      - name: Check every catalog Explore redirect
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const tools = JSON.parse(fs.readFileSync('data/tools.json', 'utf8'));
+          const affiliate = JSON.parse(fs.readFileSync('data/affiliate.json', 'utf8'));
+          const prod = process.env.PROD_BASE;
+          const prodHost = new URL(prod).hostname;
+          const redirectStatuses = new Set([301, 302, 303, 307, 308]);
+          (async () => {
+            const failures = [];
+            for (const tool of tools) {
+              const entry = affiliate[tool.slug] || {};
+              const active = Boolean(entry.enabled && entry.url);
+              const expected = active ? entry.url : (entry.publicUrl || tool.sourceUrl);
+              if (!expected) {
+                failures.push(`${tool.slug}: no expected external destination`);
+                continue;
+              }
+              try {
+                const response = await fetch(`${prod}/go/${encodeURIComponent(tool.slug)}`, {
+                  redirect: 'manual',
+                  headers: {'user-agent': 'ToolScout production smoke/1.0'}
+                });
+                const location = response.headers.get('location');
+                if (!redirectStatuses.has(response.status) || !location) {
+                  failures.push(`${tool.slug}: HTTP ${response.status}, missing external redirect`);
+                  continue;
+                }
+                const destination = new URL(location, prod);
+                const expectedHost = new URL(expected).hostname;
+                if (destination.hostname === prodHost) {
+                  failures.push(`${tool.slug}: redirected back to ToolScout (${destination.href})`);
+                  continue;
+                }
+                if (destination.hostname !== expectedHost) {
+                  failures.push(`${tool.slug}: expected host ${expectedHost}, got ${destination.hostname}`);
+                  continue;
+                }
+                console.log(`OK ${tool.slug} -> ${destination.hostname}${active ? ' [affiliate]' : ' [public]'}`);
+              } catch (error) {
+                failures.push(`${tool.slug}: ${error.message}`);
+              }
+            }
+            if (failures.length) {
+              console.error(`Explore redirect failures (${failures.length}/${tools.length}):`);
+              for (const failure of failures) console.error(`- ${failure}`);
+              process.exit(1);
+            }
+            console.log(`All ${tools.length} catalog Explore routes redirect to their expected external host.`);
+          })();
+          NODE
