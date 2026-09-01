@@ -1,13 +1,7 @@
 import base from './revenue-worker.js';
 
-const OWNER_EMAIL='pcaiano@gmail.com';
 const ALLOWED_STATUSES=new Set(['active','approved_needs_link','submitted','appeal_pending','needs_info','ready_to_apply','program_exists','research_required','paused','rejected','no_program']);
 
-async function isOwner(request,ctx){
-  const email=request.headers.get('Cf-Access-Authenticated-User-Email')||request.headers.get('cf-access-authenticated-user-email')||'';
-  if(email.toLowerCase()===OWNER_EMAIL)return true;
-  try{if(!ctx?.access)return false;const identity=await ctx.access.getIdentity();return String(identity?.email||'').toLowerCase()===OWNER_EMAIL;}catch{return false;}
-}
 async function assetJson(request,env,path,fallback){try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback;}catch{return fallback;}}
 function pipelineStatus(value){if(value==='active')return 'active';if(value==='submitted')return 'submitted';if(value==='appeal_pending')return 'appeal_pending';if(value==='ready_to_apply')return 'ready_to_apply';if(value==='program_exists')return 'program_exists';if(value==='paused_for_new_affiliates')return 'paused';if(value==='no_affiliate_program')return 'no_program';return 'research_required';}
 async function workflowSnapshot(request,env){
@@ -42,12 +36,15 @@ async function updateWorkflow(request,env,slug){
 }
 export default {async fetch(request,env,ctx){
   const url=new URL(request.url);
-  const privateRoute=url.pathname==='/affiliate-workflow.html'||url.pathname==='/affiliate-workflow'||url.pathname==='/api/affiliate-workflow'||url.pathname.startsWith('/api/affiliate-workflow/');
-  if(privateRoute){
-    if(!(await isOwner(request,ctx)))return new Response(url.pathname.startsWith('/api/')?JSON.stringify({error:'unauthorized'}):'Private access required',{status:401,headers:{'Content-Type':url.pathname.startsWith('/api/')?'application/json':'text/plain','Cache-Control':'no-store'}});
-    if((url.pathname==='/affiliate-workflow.html'||url.pathname==='/affiliate-workflow')&&request.method==='GET')return env.ASSETS.fetch(new Request(new URL('/affiliate-workflow.html',request.url)));
-    if(url.pathname==='/api/affiliate-workflow'&&request.method==='GET')return Response.json(await workflowSnapshot(request,env),{headers:{'Cache-Control':'private, no-store'}});
-    if(url.pathname.startsWith('/api/affiliate-workflow/')&&request.method==='POST'){const slug=url.pathname.slice('/api/affiliate-workflow/'.length).toLowerCase().replace(/[^a-z0-9-]/g,'');if(!slug)return Response.json({error:'invalid_slug'},{status:400});return updateWorkflow(request,env,slug);}
+  const pageRoute=url.pathname==='/affiliate-workflow.html'||url.pathname==='/affiliate-workflow';
+  const apiRoute=url.pathname==='/affiliate-workflow/api'||url.pathname.startsWith('/affiliate-workflow/api/');
+  if(pageRoute){
+    if(request.method==='GET')return env.ASSETS.fetch(new Request(new URL('/affiliate-workflow.html',request.url)));
+    return new Response('Method not allowed',{status:405});
+  }
+  if(apiRoute){
+    if(url.pathname==='/affiliate-workflow/api'&&request.method==='GET')return Response.json(await workflowSnapshot(request,env),{headers:{'Cache-Control':'private, no-store'}});
+    if(url.pathname.startsWith('/affiliate-workflow/api/')&&request.method==='POST'){const slug=url.pathname.slice('/affiliate-workflow/api/'.length).toLowerCase().replace(/[^a-z0-9-]/g,'');if(!slug)return Response.json({error:'invalid_slug'},{status:400});return updateWorkflow(request,env,slug);}
     return new Response('Method not allowed',{status:405});
   }
   return base.fetch(request,env,ctx);
