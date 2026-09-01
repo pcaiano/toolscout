@@ -1,13 +1,23 @@
 {
   "verified_programs": [
     {"slug":"systeme-io","provider":"Systeme.io","status":"active","commission_note":"60% lifetime recurring","source":"https://systeme.io/","last_verified":"2026-08-28","next_action":"Keep live affiliate URL and monitor clicks."},
+    {"slug":"beehiiv","provider":"beehiiv","status":"active","commission_note":"Terms vary; verify current terms before publication","source":"https://www.beehiiv.com/","last_verified":"2026-09-01","next_action":"Keep live referral URL and monitor clicks."},
     {"slug":"jotform","provider":"Jotform","status":"active","commission_note":"30% recurring","source":"https://www.jotform.com/partnership/affiliate/","last_verified":"2026-09-01","next_action":"Keep live affiliate URL and monitor clicks."},
     {"slug":"pipedrive","provider":"Pipedrive","status":"active","commission_note":"20% of new customer revenue for first 12 months at entry tier; higher tiers available","source":"https://www.pipedrive.com/pt/affiliate-partnership","last_verified":"2026-09-01","next_action":"Keep live affiliate URL and monitor clicks."},
     {"slug":"make","provider":"Make","status":"active","commission_note":"35% for 12 months","source":"https://www.make.com/en/affiliate","last_verified":"2026-09-01","next_action":"Keep live referral URL and monitor clicks."},
+    {"slug":"semrush","provider":"Semrush","status":"submitted","commission_note":"Pending verification","source":"https://www.semrush.com/lp/affiliate-program/","last_verified":"2026-09-01","next_action":"Application received via Impact; wait for review decision."},
+    {"slug":"adcreative-ai","provider":"AdCreative.ai","status":"submitted","commission_note":"Pending verification","source":"https://www.adcreative.ai/affiliate","last_verified":"2026-09-01","next_action":"Application submitted via PartnerStack; wait for review decision."},
+    {"slug":"hubspot","provider":"HubSpot","status":"appeal_pending","commission_note":"30% recurring up to 1 year at affiliate tier","source":"https://www.hubspot.com/partners/affiliates","last_verified":"2026-09-01","next_action":"Initial application rejected; appeal/reconsideration email sent. Wait for response."},
     {"slug":"activecampaign","provider":"ActiveCampaign","status":"program_exists","commission_note":"30% recurring up to 12 months","source":"https://help.activecampaign.com/hc/pt-br/articles/115000065864-Programa-de-Afiliados","last_verified":"2026-08-29","next_action":"Apply and add personal affiliate URL after approval."},
     {"slug":"brevo","provider":"Brevo","status":"program_exists","commission_note":"CPA plus qualifying lead component; terms vary by programme path","source":"https://help.brevo.com/hc/pt/articles/16487784994322-O-programa-de-Afiliados-Brevo","last_verified":"2026-08-29","next_action":"Apply and add personal affiliate URL after approval."},
-    {"slug":"clickup","provider":"ClickUp","status":"program_exists","commission_note":"Up to $25 per new free workspace referral for starter affiliates","source":"https://clickup.com/partners/affiliates","last_verified":"2026-08-29","next_action":"Apply via PartnerStack and add personal affiliate URL after approval."},
+    {"slug":"clickup","provider":"ClickUp","status":"program_exists","commission_note":"Up to $25 per new free workspace referral for starter affiliates","source":"https://clickup.com/partners/affiliates","last_verified":"2026-08-29","next_action":"PartnerStack marketplace access is currently restricted; do not assume a new application can be submitted until access is restored."},
     {"slug":"notion","provider":"Notion","status":"paused_for_new_affiliates","commission_note":"Up to $50 per activated signup plus 20% of first-year revenue; new affiliates currently not accepted","source":"https://www.notion.com/pt/affiliates","last_verified":"2026-08-29","next_action":"Do not spend acquisition effort until applications reopen."},
     {"slug":"ahrefs","provider":"Ahrefs","status":"no_affiliate_program","commission_note":"No affiliate program","source":"https://ahrefs.com/blog/ahrefs-affiliate-program/","last_verified":"2026-08-29","next_action":"Keep disabled in affiliate routing; do not present as an affiliate opportunity."}
+  ],
+  "external_programs_not_in_catalog": [
+    {"provider":"Hostinger","status":"submitted","evidence":"Gmail application-under-review message dated 2026-08-29","last_verified":"2026-09-01","next_action":"Hostinger is not currently one of ToolScout's 100 canonical tools; decide separately whether to add it to the catalog before treating it as a ToolScout monetization route."}
+  ],
+  "network_constraints": [
+    {"provider":"PartnerStack","status":"marketplace_restricted","last_verified":"2026-09-01","next_action":"Existing partnerships remain usable, but new marketplace program access is restricted until the Network Profile is approved/re-evaluated."}
   ]
 }
