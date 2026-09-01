@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T09:53:36.331Z",
+  "generatedAt": "2026-09-01T09:59:43.382Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.",
   "gsc": {
     "available": false,
@@ -122,6 +122,25 @@
         "zapier",
         "n8n",
         "make"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
+      "title": "Best Sales Prospecting Tools",
+      "category": "sales",
+      "priorityScore": 67,
+      "topFit": 9.11,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "apollo",
+        "lemlist",
+        "instantly"
       ],
       "action": "build-next"
     },
@@ -297,6 +316,25 @@
       "action": "build-next"
     },
     {
+      "intent": "best-cold-email-tools",
+      "title": "Best Cold Email Tools",
+      "category": "sales",
+      "priorityScore": 63,
+      "topFit": 9.38,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "shopify",
+        "hubspot",
+        "lemlist"
+      ],
+      "action": "build-next"
+    },
+    {
       "intent": "best-email-marketing-tools",
       "title": "Best Email Marketing Tools",
       "category": "marketing",
@@ -411,25 +449,6 @@
       "action": "build-next"
     },
     {
-      "intent": "best-cold-email-tools",
-      "title": "Best Cold Email Tools",
-      "category": "sales",
-      "priorityScore": 58,
-      "topFit": 9.38,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "shopify",
-        "hubspot",
-        "lemlist"
-      ],
-      "action": "watch"
-    },
-    {
       "intent": "best-ecommerce-platforms",
       "title": "Best Ecommerce Platforms",
       "category": "ecommerce",
@@ -449,21 +468,21 @@
       "action": "watch"
     },
     {
-      "intent": "best-sales-prospecting-tools",
-      "title": "Best Sales Prospecting Tools",
-      "category": "sales",
-      "priorityScore": 57,
-      "topFit": 9.11,
+      "intent": "best-customer-support-tools",
+      "title": "Best Customer Support Tools",
+      "category": "support",
+      "priorityScore": 56,
+      "topFit": 9.51,
       "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
+      "commercialSignal": 8,
+      "affiliateSignal": 10,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
+      "monetizationReadiness": "monetizable",
       "topTools": [
-        "apollo",
-        "lemlist",
-        "instantly"
+        "zendesk",
+        "intercom",
+        "freshdesk"
       ],
       "action": "watch"
     },
@@ -502,6 +521,44 @@
         "copy-ai",
         "chatgpt",
         "jasper"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-product-analytics-tools",
+      "title": "Best Product Analytics Tools",
+      "category": "analytics",
+      "priorityScore": 51,
+      "topFit": 9.32,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "chatgpt",
+        "gemini",
+        "github"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-developer-tools",
+      "title": "Best Developer Tools",
+      "category": "developer",
+      "priorityScore": 50,
+      "topFit": 9.2,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "chatgpt",
+        "github",
+        "gemini"
       ],
       "action": "watch"
     },
@@ -620,25 +677,6 @@
       "action": "watch"
     },
     {
-      "intent": "best-customer-support-tools",
-      "title": "Best Customer Support Tools",
-      "category": "support",
-      "priorityScore": 46,
-      "topFit": 9.51,
-      "catalogDepth": 15,
-      "commercialSignal": 8,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "zendesk",
-        "intercom",
-        "freshdesk"
-      ],
-      "action": "watch"
-    },
-    {
       "intent": "best-design-tools",
       "title": "Best Design Tools",
       "category": "design",
@@ -654,25 +692,6 @@
         "chatgpt",
         "grammarly",
         "canva"
-      ],
-      "action": "watch"
-    },
-    {
-      "intent": "best-product-analytics-tools",
-      "title": "Best Product Analytics Tools",
-      "category": "analytics",
-      "priorityScore": 46,
-      "topFit": 9.32,
-      "catalogDepth": 15,
-      "commercialSignal": 8,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "chatgpt",
-        "gemini",
-        "github"
       ],
       "action": "watch"
     },
@@ -711,25 +730,6 @@
         "chatgpt",
         "copy-ai",
         "buffer"
-      ],
-      "action": "watch"
-    },
-    {
-      "intent": "best-developer-tools",
-      "title": "Best Developer Tools",
-      "category": "developer",
-      "priorityScore": 45,
-      "topFit": 9.2,
-      "catalogDepth": 15,
-      "commercialSignal": 8,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "chatgpt",
-        "github",
-        "gemini"
       ],
       "action": "watch"
     }
