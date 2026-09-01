@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T12:30:31.531Z",
+  "generatedAt": "2026-09-01T12:35:36.283Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.",
   "gsc": {
     "available": false,
