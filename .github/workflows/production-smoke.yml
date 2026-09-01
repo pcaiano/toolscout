@@ -39,12 +39,25 @@ jobs:
           printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/best-seo-tools.html"
           printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/methodology.html"
           printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/privacy.html"
+          for page in make-vs-zapier hubspot-vs-pipedrive beehiiv-vs-kit jotform-vs-typeform semrush-vs-ahrefs; do
+            printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/$page.html"
+          done
       - name: Check core pages
         run: |
           set -e
           for page in / /guides.html /blog/ /tools.html /compare.html /methodology.html /affiliate-disclosure.html /privacy.html /best-seo-tools.html /best-crm-for-small-business.html /tool.html?tool=systeme-io /reports/growth-priority.json; do
             echo "Checking $PROD_BASE$page"
             curl --fail --silent --show-error --location "$PROD_BASE$page" >/dev/null
+          done
+      - name: Check commercial comparison pages
+        run: |
+          set -e
+          for page in make-vs-zapier hubspot-vs-pipedrive beehiiv-vs-kit jotform-vs-typeform semrush-vs-ahrefs; do
+            echo "Checking comparison $PROD_BASE/$page.html"
+            html="$(curl --fail --silent --show-error --location "$PROD_BASE/$page.html")"
+            printf '%s\n' "$html" | grep -F "<link rel=\"canonical\" href=\"$PROD_BASE/$page.html\">"
+            printf '%s\n' "$html" | grep -F 'No paid ranking.'
+            printf '%s\n' "$html" | grep -F 'Affiliate relationships do not influence scoring'
           done
       - name: Check public analytics surface is protected
         run: |
