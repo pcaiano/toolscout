@@ -6,7 +6,8 @@ const tools = JSON.parse(fs.readFileSync('data/tools.json','utf8'));
 const affiliate = JSON.parse(fs.readFileSync('data/affiliate.json','utf8'));
 const pipeline = JSON.parse(fs.readFileSync('data/affiliate-pipeline.json','utf8'));
 const gscPath = 'reports/gsc-signals.json';
-const gsc = fs.existsSync(gscPath) ? JSON.parse(fs.readFileSync(gscPath,'utf8')) : { items: [] };
+const gscFilePresent = fs.existsSync(gscPath);
+const gsc = gscFilePresent ? JSON.parse(fs.readFileSync(gscPath,'utf8')) : { items: [] };
 const gscByIntent = new Map((gsc.items || []).map(x => [String(x.intent), x]));
 
 const pipelineBySlug = new Map((pipeline.verified_programs || []).map(x => [String(x.slug), x]));
@@ -89,12 +90,28 @@ rows.sort((a,b) => {
   const bObserved = b.searchSignal ? 1 : 0;
   return bObserved - aObserved || b.priorityScore - a.priorityScore || a.title.localeCompare(b.title);
 });
+
+const gscAvailable = gscByIntent.size > 0;
+const gscStatus = gscAvailable ? 'signals-imported' : gscFilePresent ? 'imported-no-matching-intents' : 'not-imported';
+const gscReason = gscAvailable
+  ? 'Google Search Console page signals are present and are used in growth prioritization.'
+  : gscFilePresent
+    ? 'A Google Search Console export was imported, but it contains no matching best-* intent pages.'
+    : 'No reports/gsc-signals.json file exists. This describes ToolScout ingestion state only; it does not mean the site is unverified, unindexed, or invisible to Google.';
+
 fs.mkdirSync('reports', { recursive: true });
 fs.writeFileSync('reports/growth-priority.json', JSON.stringify({
   generatedAt: new Date().toISOString(),
   methodology: 'Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.',
-  gsc: { available: gscByIntent.size > 0, intentsWithSignals: gscByIntent.size, source: gsc.source || null },
+  gsc: {
+    available: gscAvailable,
+    ingestionStatus: gscStatus,
+    intentsWithSignals: gscByIntent.size,
+    source: gsc.source || null,
+    reason: gscReason,
+    importCommand: 'node scripts/import-gsc-signals.mjs <gsc-pages.csv>'
+  },
   count: rows.length,
   items: rows
 }, null, 2) + '\n');
-console.log(JSON.stringify({ generated: rows.length, top: rows.slice(0,10) }, null, 2));
+console.log(JSON.stringify({ generated: rows.length, gsc: { available: gscAvailable, ingestionStatus: gscStatus, intentsWithSignals: gscByIntent.size }, top: rows.slice(0,10) }, null, 2));
