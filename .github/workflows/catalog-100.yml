@@ -1,0 +1,43 @@
+name: Catalog 100
+
+on:
+  push:
+    branches:
+      - catalog-100-wave-1
+    paths:
+      - 'data/catalog-wave1-enrichment.json'
+      - 'data/catalog-wave1-enrichment-final.json'
+      - 'data/catalog-wave2-enrichment.json'
+      - 'data/catalog-wave3-enrichment.json'
+      - 'scripts/build-catalog-100.mjs'
+      - '.github/workflows/catalog-100.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build 100-tool catalog
+        run: node scripts/build-catalog-100.mjs
+      - name: Validate JSON
+        run: |
+          node -e "const t=require('./data/tools.json'); if(t.length!==100) process.exit(1); console.log('tools', t.length)"
+          node -e "const r=require('./reports/catalog-100.json'); if(r.count!==100) process.exit(1); console.log(r.categories)"
+      - name: Commit generated catalog
+        run: |
+          if git diff --quiet -- data/tools.json reports/catalog-100.json; then
+            echo 'Catalog already up to date.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/tools.json reports/catalog-100.json
+          git commit -m 'Build 100-tool catalog'
+          git push
