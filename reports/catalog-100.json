@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-09-01T09:39:09.139Z",
+  "count": 100,
+  "baseCount": 100,
+  "stagedCount": 80,
+  "categories": {
+    "marketing": 12,
+    "crm": 9,
+    "forms": 5,
+    "seo": 8,
+    "ai-writing": 3,
+    "automation": 6,
+    "business": 13,
+    "ai-assistant": 3,
+    "analytics": 6,
+    "sales": 3,
+    "support": 6,
+    "design": 3,
+    "social": 5,
+    "website": 5,
+    "ai-research": 2,
+    "developer": 7,
+    "ecommerce": 3,
+    "content": 1
+  }
+}

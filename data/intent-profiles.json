@@ -22,5 +22,19 @@
   "best-forms-for-small-business":{"title":"Best Forms for Small Business","weights":{"category":30,"ease":22,"price":18,"integrations":15,"automation":10,"sales":5}},
   "best-project-management-tools":{"title":"Best Project Management Tools","weights":{"category":30,"ease":15,"integrations":20,"automation":20,"price":15}},
   "best-productivity-tools-for-teams":{"title":"Best Productivity Tools for Teams","weights":{"category":28,"ease":18,"integrations":20,"automation":18,"price":10,"agency":6}},
-  "best-free-project-management-tools":{"title":"Best Free Project Management Tools","weights":{"category":28,"freePlan":30,"price":20,"ease":12,"integrations":10}}
+  "best-free-project-management-tools":{"title":"Best Free Project Management Tools","weights":{"category":28,"freePlan":30,"price":20,"ease":12,"integrations":10}},
+  "best-sales-prospecting-tools":{"title":"Best Sales Prospecting Tools","weights":{"category":30,"sales":30,"research":20,"automation":10,"integrations":10}},
+  "best-cold-email-tools":{"title":"Best Cold Email Tools","weights":{"category":30,"sales":25,"automation":25,"integrations":10,"marketing":10}},
+  "best-customer-support-tools":{"title":"Best Customer Support Tools","weights":{"category":30,"automation":20,"integrations":15,"ai":15,"ease":15,"price":5}},
+  "best-social-media-management-tools":{"title":"Best Social Media Management Tools","weights":{"category":30,"marketing":25,"content":20,"automation":15,"ease":10}},
+  "best-website-builders":{"title":"Best Website Builders","weights":{"category":30,"ease":20,"seo":15,"marketing":15,"content":10,"price":10}},
+  "best-product-analytics-tools":{"title":"Best Product Analytics Tools","weights":{"category":30,"research":25,"integrations":15,"automation":15,"ai":10,"ease":5}},
+  "best-ai-research-tools":{"title":"Best AI Research Tools","weights":{"category":30,"ai":30,"research":25,"content":10,"ease":5}},
+  "best-ai-assistants":{"title":"Best AI Assistants","weights":{"category":30,"ai":30,"research":15,"content":15,"ease":10}},
+  "best-ai-coding-tools":{"title":"Best AI Coding Tools","weights":{"category":30,"ai":30,"automation":20,"integrations":10,"research":10}},
+  "best-developer-tools":{"title":"Best Developer Tools","weights":{"category":30,"automation":25,"integrations":25,"research":10,"ease":10}},
+  "best-ecommerce-platforms":{"title":"Best Ecommerce Platforms","weights":{"category":30,"sales":25,"integrations":15,"marketing":15,"automation":10,"seo":5}},
+  "best-design-tools":{"title":"Best Design Tools","weights":{"category":30,"content":30,"ai":15,"ease":15,"integrations":10}},
+  "best-video-content-tools":{"title":"Best Video Content Tools","weights":{"category":30,"content":30,"ai":20,"ease":10,"automation":10}},
+  "best-team-collaboration-tools":{"title":"Best Team Collaboration Tools","weights":{"category":30,"ease":20,"integrations":20,"automation":15,"agency":15}}
 }

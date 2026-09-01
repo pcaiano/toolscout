@@ -27,12 +27,15 @@ for (const file of activeSeoFiles) {
   }
 }
 
-function hasVendorTracking(rawUrl) {
+function hasVendorTracking(rawUrl, slug) {
   const value = String(rawUrl || '');
   if (/[?&](?:sa|ref|referral|affiliate|partner|aff|via)=/i.test(value)) return true;
   try {
     const url = new URL(value);
-    return url.hostname.toLowerCase() === 'aff.trypipedrive.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname);
+    const host = url.hostname.toLowerCase().replace(/^www\./,'');
+    if (host === 'aff.trypipedrive.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
+    if (slug === 'make' && host === 'make.com' && /^\/en\/register\/?$/i.test(url.pathname) && Boolean(url.searchParams.get('pc'))) return true;
+    return false;
   } catch {
     return false;
   }
@@ -44,7 +47,7 @@ if (fs.existsSync(affiliatePath)) {
   for (const [slug, entry] of Object.entries(affiliate)) {
     if (!entry || typeof entry !== 'object') continue;
     if (entry.enabled && !entry.url) failures.push(`data/affiliate.json: ${slug} enabled without private affiliate URL`);
-    if (entry.enabled && !hasVendorTracking(entry.url)) failures.push(`data/affiliate.json: ${slug} enabled URL should contain verified vendor tracking`);
+    if (entry.enabled && !hasVendorTracking(entry.url, slug)) failures.push(`data/affiliate.json: ${slug} enabled URL should contain verified vendor tracking`);
   }
 }
 

@@ -1,48 +1,51 @@
 {
-  "generatedAt": "2026-09-01T06:43:32.397Z",
+  "generatedAt": "2026-09-01T09:40:33.964Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.",
   "gsc": {
     "available": false,
+    "ingestionStatus": "not-imported",
     "intentsWithSignals": 0,
-    "source": null
+    "source": null,
+    "reason": "No reports/gsc-signals.json file exists. This describes ToolScout ingestion state only; it does not mean the site is unverified, unindexed, or invisible to Google.",
+    "importCommand": "node scripts/import-gsc-signals.mjs <gsc-pages.csv>"
   },
-  "count": 24,
+  "count": 38,
   "items": [
     {
-      "intent": "best-marketing-automation-tools",
-      "title": "Best Marketing Automation Tools",
-      "category": "marketing",
-      "priorityScore": 77,
-      "topFit": 9.22,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 15,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "activecampaign",
-        "mailchimp",
-        "brevo"
-      ],
-      "action": "invest-now"
-    },
-    {
-      "intent": "best-crm-for-real-estate",
-      "title": "Best CRM for Real Estate",
+      "intent": "best-crm-for-consultants",
+      "title": "Best CRM for Consultants",
       "category": "crm",
-      "priorityScore": 73,
-      "topFit": 9.21,
+      "priorityScore": 69,
+      "topFit": 9.32,
       "catalogDepth": 15,
       "commercialSignal": 20,
-      "affiliateSignal": 10,
+      "affiliateSignal": 5,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
-        "pipedrive",
-        "zoho-crm"
+        "close",
+        "pipedrive"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-crm-for-real-estate",
+      "title": "Best CRM for Real Estate",
+      "category": "crm",
+      "priorityScore": 69,
+      "topFit": 9.4,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "salesforce",
+        "close"
       ],
       "action": "build-next"
     },
@@ -50,170 +53,37 @@
       "intent": "best-crm-for-sales-teams",
       "title": "Best CRM for Sales Teams",
       "category": "crm",
-      "priorityScore": 73,
-      "topFit": 9.21,
+      "priorityScore": 69,
+      "topFit": 9.4,
       "catalogDepth": 15,
       "commercialSignal": 20,
-      "affiliateSignal": 10,
+      "affiliateSignal": 5,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "hubspot",
-        "pipedrive",
-        "zoho-crm"
+        "salesforce",
+        "close"
       ],
       "action": "build-next"
     },
     {
-      "intent": "best-crm-for-small-business",
-      "title": "Best CRM for Small Business",
-      "category": "crm",
-      "priorityScore": 73,
-      "topFit": 9.05,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "zapier",
-        "tally",
-        "make"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-free-crm",
-      "title": "Best Free CRM Tools",
-      "category": "crm",
-      "priorityScore": 73,
-      "topFit": 9.15,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "zapier",
-        "tally",
-        "make"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-productivity-tools-for-teams",
-      "title": "Best Productivity Tools for Teams",
-      "category": "business",
-      "priorityScore": 73,
-      "topFit": 7.42,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 15,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "clickup",
-        "zapier",
-        "make"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-project-management-tools",
-      "title": "Best Project Management Tools",
-      "category": "business",
-      "priorityScore": 73,
-      "topFit": 7.35,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 15,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "clickup",
-        "zapier",
-        "make"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-seo-tools",
-      "title": "Best SEO Tools",
-      "category": "seo",
-      "priorityScore": 73,
-      "topFit": 9.11,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "zapier",
-        "make",
-        "hubspot"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-ai-marketing-tools",
-      "title": "Best AI Marketing Tools",
+      "intent": "best-marketing-automation-tools",
+      "title": "Best Marketing Automation Tools",
       "category": "marketing",
-      "priorityScore": 72,
-      "topFit": 9.13,
+      "priorityScore": 68,
+      "topFit": 9.7,
       "catalogDepth": 15,
       "commercialSignal": 20,
-      "affiliateSignal": 10,
+      "affiliateSignal": 5,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
-        "zapier",
-        "make",
-        "hubspot"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-email-marketing-tools",
-      "title": "Best Email Marketing Tools",
-      "category": "marketing",
-      "priorityScore": 72,
-      "topFit": 8.95,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "hubspot",
-        "zapier",
-        "brevo"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-funnel-builder",
-      "title": "Best Funnel Builder",
-      "category": "marketing",
-      "priorityScore": 72,
-      "topFit": 8.9,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "zapier",
-        "hubspot",
-        "brevo"
+        "klaviyo",
+        "kit",
+        "omnisend"
       ],
       "action": "build-next"
     },
@@ -221,18 +91,18 @@
       "intent": "best-no-code-automation-tools",
       "title": "Best No-Code Automation Tools",
       "category": "automation",
-      "priorityScore": 71,
-      "topFit": 8.64,
+      "priorityScore": 68,
+      "topFit": 9.42,
       "catalogDepth": 15,
       "commercialSignal": 20,
-      "affiliateSignal": 10,
+      "affiliateSignal": 5,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
-        "make",
-        "hubspot"
+        "integrately",
+        "n8n"
       ],
       "action": "build-next"
     },
@@ -240,18 +110,18 @@
       "intent": "best-workflow-automation-tools",
       "title": "Best Workflow Automation Tools",
       "category": "automation",
-      "priorityScore": 71,
-      "topFit": 8.67,
+      "priorityScore": 68,
+      "topFit": 9.47,
       "catalogDepth": 15,
       "commercialSignal": 20,
-      "affiliateSignal": 10,
+      "affiliateSignal": 5,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
         "zapier",
-        "make",
-        "hubspot"
+        "n8n",
+        "make"
       ],
       "action": "build-next"
     },
@@ -259,132 +129,18 @@
       "intent": "best-forms-for-small-business",
       "title": "Best Forms for Small Business",
       "category": "forms",
-      "priorityScore": 70,
-      "topFit": 8.86,
+      "priorityScore": 65,
+      "topFit": 8.96,
       "catalogDepth": 15,
       "commercialSignal": 20,
-      "affiliateSignal": 10,
+      "affiliateSignal": 5,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "monetizable",
       "topTools": [
+        "fillout",
         "tally",
-        "jotform",
-        "typeform"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-free-project-management-tools",
-      "title": "Best Free Project Management Tools",
-      "category": "business",
-      "priorityScore": 69,
-      "topFit": 7.88,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "clickup",
-        "tally",
-        "zapier"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-competitor-seo-tools",
-      "title": "Best Competitor SEO Tools",
-      "category": "seo",
-      "priorityScore": 68,
-      "topFit": 9.16,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "semrush",
-        "ahrefs",
-        "se-ranking"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-crm-for-consultants",
-      "title": "Best CRM for Consultants",
-      "category": "crm",
-      "priorityScore": 68,
-      "topFit": 9.2,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "hubspot",
-        "pipedrive",
-        "monday-crm"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-crm-with-automation",
-      "title": "Best CRM with Automation",
-      "category": "crm",
-      "priorityScore": 68,
-      "topFit": 9.14,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "hubspot",
-        "monday-crm",
-        "zoho-crm"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-seo-tools-for-agencies",
-      "title": "Best SEO Tools for Agencies",
-      "category": "seo",
-      "priorityScore": 68,
-      "topFit": 8.92,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "semrush",
-        "ahrefs",
-        "se-ranking"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-affordable-crm",
-      "title": "Best Affordable CRM",
-      "category": "crm",
-      "priorityScore": 66,
-      "topFit": 8.22,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "hubspot",
-        "zoho-crm",
-        "tally"
+        "jotform"
       ],
       "action": "build-next"
     },
@@ -392,8 +148,8 @@
       "intent": "best-lead-capture-forms",
       "title": "Best Lead Capture Forms",
       "category": "forms",
-      "priorityScore": 64,
-      "topFit": 8.55,
+      "priorityScore": 65,
+      "topFit": 8.8,
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 5,
@@ -402,27 +158,312 @@
       "monetizationReadiness": "monetizable",
       "topTools": [
         "typeform",
-        "jotform",
-        "tally"
+        "paperform",
+        "jotform"
       ],
       "action": "build-next"
     },
     {
-      "intent": "best-tools-for-agencies",
-      "title": "Best Tools for Agencies",
-      "category": "business",
-      "priorityScore": 59,
-      "topFit": 9.18,
+      "intent": "best-competitor-seo-tools",
+      "title": "Best Competitor SEO Tools",
+      "category": "seo",
+      "priorityScore": 64,
+      "topFit": 9.4,
       "catalogDepth": 15,
-      "commercialSignal": 8,
-      "affiliateSignal": 10,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
       "searchSignal": null,
       "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "semrush",
+        "surfer",
+        "ahrefs"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-crm-for-small-business",
+      "title": "Best CRM for Small Business",
+      "category": "crm",
+      "priorityScore": 64,
+      "topFit": 9.43,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "buffer",
+        "chatgpt",
+        "integrately"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-crm-with-automation",
+      "title": "Best CRM with Automation",
+      "category": "crm",
+      "priorityScore": 64,
+      "topFit": 9.33,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "hubspot",
+        "salesforce",
+        "close"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-free-crm",
+      "title": "Best Free CRM Tools",
+      "category": "crm",
+      "priorityScore": 64,
+      "topFit": 9.47,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "buffer",
+        "chatgpt",
+        "integrately"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-seo-tools",
+      "title": "Best SEO Tools",
+      "category": "seo",
+      "priorityScore": 64,
+      "topFit": 9.41,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
       "topTools": [
         "zapier",
-        "make",
+        "github",
+        "buffer"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-affordable-crm",
+      "title": "Best Affordable CRM",
+      "category": "crm",
+      "priorityScore": 63,
+      "topFit": 9.02,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "attio",
+        "freshsales",
         "hubspot"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-ai-marketing-tools",
+      "title": "Best AI Marketing Tools",
+      "category": "marketing",
+      "priorityScore": 63,
+      "topFit": 9.42,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "zapier",
+        "github",
+        "buffer"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-email-marketing-tools",
+      "title": "Best Email Marketing Tools",
+      "category": "marketing",
+      "priorityScore": 63,
+      "topFit": 9.35,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "buffer",
+        "omnisend",
+        "kit"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-funnel-builder",
+      "title": "Best Funnel Builder",
+      "category": "marketing",
+      "priorityScore": 63,
+      "topFit": 9.33,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "buffer",
+        "omnisend",
+        "kit"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "title": "Best SEO Tools for Agencies",
+      "category": "seo",
+      "priorityScore": 63,
+      "topFit": 9.08,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "semrush",
+        "ahrefs",
+        "surfer"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-free-project-management-tools",
+      "title": "Best Free Project Management Tools",
+      "category": "business",
+      "priorityScore": 62,
+      "topFit": 9.45,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "trello",
+        "calendly",
+        "linear"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-productivity-tools-for-teams",
+      "title": "Best Productivity Tools for Teams",
+      "category": "business",
+      "priorityScore": 61,
+      "topFit": 9.15,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "calendly",
+        "linear",
+        "slack"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-project-management-tools",
+      "title": "Best Project Management Tools",
+      "category": "business",
+      "priorityScore": 61,
+      "topFit": 9.14,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "airtable",
+        "notion",
+        "slack"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "title": "Best Cold Email Tools",
+      "category": "sales",
+      "priorityScore": 58,
+      "topFit": 9.38,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "shopify",
+        "hubspot",
+        "lemlist"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-ecommerce-platforms",
+      "title": "Best Ecommerce Platforms",
+      "category": "ecommerce",
+      "priorityScore": 57,
+      "topFit": 9.17,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "shopify",
+        "bigcommerce",
+        "hubspot"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
+      "title": "Best Sales Prospecting Tools",
+      "category": "sales",
+      "priorityScore": 57,
+      "topFit": 9.11,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "apollo",
+        "lemlist",
+        "instantly"
       ],
       "action": "watch"
     },
@@ -430,27 +471,8 @@
       "intent": "best-keyword-research-tools",
       "title": "Best Keyword Research Tools",
       "category": "seo",
-      "priorityScore": 56,
-      "topFit": 9.11,
-      "catalogDepth": 15,
-      "commercialSignal": 8,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "semrush",
-        "ahrefs",
-        "se-ranking"
-      ],
-      "action": "watch"
-    },
-    {
-      "intent": "best-ai-ad-creative-tools",
-      "title": "Best AI Ad Creative Tools",
-      "category": "marketing",
-      "priorityScore": 50,
-      "topFit": 8.94,
+      "priorityScore": 52,
+      "topFit": 9.36,
       "catalogDepth": 15,
       "commercialSignal": 8,
       "affiliateSignal": 0,
@@ -458,9 +480,256 @@
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "needs-affiliate-activation",
       "topTools": [
-        "jasper",
-        "adcreative-ai",
-        "hubspot"
+        "surfer",
+        "semrush",
+        "ahrefs"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-ai-ad-creative-tools",
+      "title": "Best AI Ad Creative Tools",
+      "category": "marketing",
+      "priorityScore": 51,
+      "topFit": 9.57,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "copy-ai",
+        "chatgpt",
+        "jasper"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-tools-for-agencies",
+      "title": "Best Tools for Agencies",
+      "category": "business",
+      "priorityScore": 50,
+      "topFit": 9.43,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "zapier",
+        "github",
+        "buffer"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-website-builders",
+      "title": "Best Website Builders",
+      "category": "website",
+      "priorityScore": 50,
+      "topFit": 8.76,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "chatgpt",
+        "beehiiv",
+        "ubersuggest"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-team-collaboration-tools",
+      "title": "Best Team Collaboration Tools",
+      "category": "business",
+      "priorityScore": 49,
+      "topFit": 9.19,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "slack",
+        "airtable",
+        "calendly"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-ai-assistants",
+      "title": "Best AI Assistants",
+      "category": "ai-assistant",
+      "priorityScore": 46,
+      "topFit": 9.51,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "chatgpt",
+        "gemini",
+        "perplexity"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-ai-coding-tools",
+      "title": "Best AI Coding Tools",
+      "category": "developer",
+      "priorityScore": 46,
+      "topFit": 9.35,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "chatgpt",
+        "gemini",
+        "cursor"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-ai-research-tools",
+      "title": "Best AI Research Tools",
+      "category": "ai-research",
+      "priorityScore": 46,
+      "topFit": 9.61,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "chatgpt",
+        "gemini",
+        "perplexity"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-customer-support-tools",
+      "title": "Best Customer Support Tools",
+      "category": "support",
+      "priorityScore": 46,
+      "topFit": 9.51,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "zendesk",
+        "intercom",
+        "freshdesk"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-design-tools",
+      "title": "Best Design Tools",
+      "category": "design",
+      "priorityScore": 46,
+      "topFit": 9.45,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "chatgpt",
+        "grammarly",
+        "canva"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-product-analytics-tools",
+      "title": "Best Product Analytics Tools",
+      "category": "analytics",
+      "priorityScore": 46,
+      "topFit": 9.32,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "chatgpt",
+        "gemini",
+        "github"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-social-media-management-tools",
+      "title": "Best Social Media Management Tools",
+      "category": "social",
+      "priorityScore": 46,
+      "topFit": 9.49,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "buffer",
+        "kit",
+        "chatgpt"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-video-content-tools",
+      "title": "Best Video Content Tools",
+      "category": "content",
+      "priorityScore": 46,
+      "topFit": 9.58,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "chatgpt",
+        "copy-ai",
+        "buffer"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-developer-tools",
+      "title": "Best Developer Tools",
+      "category": "developer",
+      "priorityScore": 45,
+      "topFit": 9.2,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "chatgpt",
+        "github",
+        "gemini"
       ],
       "action": "watch"
     }

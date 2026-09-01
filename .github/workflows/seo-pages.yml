@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'data/intents.json'
+      - 'data/intent-profiles.json'
       - 'data/tools.json'
       - 'data/affiliate.json'
       - 'data/affiliate-pipeline.json'

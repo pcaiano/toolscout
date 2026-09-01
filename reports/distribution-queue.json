@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-01T06:43:33.335Z",
-  "count": 24,
+  "generatedAt": "2026-09-01T09:40:34.338Z",
+  "count": 38,
   "items": [
     {
       "slug": "best-affordable-crm",
@@ -383,6 +383,46 @@
       ]
     },
     {
+      "slug": "best-cold-email-tools",
+      "title": "Best Cold Email Tools",
+      "url": "https://trytoolscout.org/best-cold-email-tools.html",
+      "category": "sales",
+      "priorityScore": 26,
+      "searchSnippet": "Best Cold Email Tools — Cold email and sales engagement platforms for sequences, deliverability, personalization and outbound automation.",
+      "socialHook": "Need the right tool for best cold email tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best cold email tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-cold-email-tools.html",
+      "xPost": "Choosing a tool for best cold email tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-cold-email-tools.html",
+      "redditStyle": "I put together a practical guide for best cold email tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Cold Email Tools: a practical shortlist",
+      "newsletterIntro": "Cold email and sales engagement platforms for sequences, deliverability, personalization and outbound automation. See the shortlist and compare the options: https://trytoolscout.org/best-cold-email-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-sales-prospecting-tools",
+      "title": "Best Sales Prospecting Tools",
+      "url": "https://trytoolscout.org/best-sales-prospecting-tools.html",
+      "category": "sales",
+      "priorityScore": 26,
+      "searchSnippet": "Best Sales Prospecting Tools — Tools for finding B2B prospects, enriching contact data and supporting outbound sales workflows.",
+      "socialHook": "Need the right tool for best sales prospecting tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best sales prospecting tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-sales-prospecting-tools.html",
+      "xPost": "Choosing a tool for best sales prospecting tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-sales-prospecting-tools.html",
+      "redditStyle": "I put together a practical guide for best sales prospecting tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Sales Prospecting Tools: a practical shortlist",
+      "newsletterIntro": "Tools for finding B2B prospects, enriching contact data and supporting outbound sales workflows. See the shortlist and compare the options: https://trytoolscout.org/best-sales-prospecting-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
       "slug": "best-keyword-research-tools",
       "title": "Best Keyword Research Tools",
       "url": "https://trytoolscout.org/best-keyword-research-tools.html",
@@ -443,6 +483,26 @@
       ]
     },
     {
+      "slug": "best-team-collaboration-tools",
+      "title": "Best Team Collaboration Tools",
+      "url": "https://trytoolscout.org/best-team-collaboration-tools.html",
+      "category": "business",
+      "priorityScore": 14,
+      "searchSnippet": "Best Team Collaboration Tools — Collaboration platforms for communication, shared workspaces, whiteboards and asynchronous teamwork.",
+      "socialHook": "Need the right tool for best team collaboration tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best team collaboration tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-team-collaboration-tools.html",
+      "xPost": "Choosing a tool for best team collaboration tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-team-collaboration-tools.html",
+      "redditStyle": "I put together a practical guide for best team collaboration tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Team Collaboration Tools: a practical shortlist",
+      "newsletterIntro": "Collaboration platforms for communication, shared workspaces, whiteboards and asynchronous teamwork. See the shortlist and compare the options: https://trytoolscout.org/best-team-collaboration-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
       "slug": "best-tools-for-agencies",
       "title": "Best Tools for Agencies",
       "url": "https://trytoolscout.org/best-tools-for-agencies.html",
@@ -475,6 +535,226 @@
       "redditStyle": "I put together a practical guide for best forms for small business, focused on fit rather than a generic top-ten list.",
       "newsletterSubject": "Best Forms for Small Business: a practical shortlist",
       "newsletterIntro": "Simple form builders for enquiries, surveys, lead collection, payments and business workflows. See the shortlist and compare the options: https://trytoolscout.org/best-forms-for-small-business.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-ai-assistants",
+      "title": "Best AI Assistants",
+      "url": "https://trytoolscout.org/best-ai-assistants.html",
+      "category": "ai-assistant",
+      "priorityScore": 11,
+      "searchSnippet": "Best AI Assistants — General-purpose AI assistants for writing, analysis, research, coding and everyday knowledge work.",
+      "socialHook": "Need the right tool for best ai assistants? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best ai assistants? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-ai-assistants.html",
+      "xPost": "Choosing a tool for best ai assistants? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-ai-assistants.html",
+      "redditStyle": "I put together a practical guide for best ai assistants, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best AI Assistants: a practical shortlist",
+      "newsletterIntro": "General-purpose AI assistants for writing, analysis, research, coding and everyday knowledge work. See the shortlist and compare the options: https://trytoolscout.org/best-ai-assistants.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-ai-coding-tools",
+      "title": "Best AI Coding Tools",
+      "url": "https://trytoolscout.org/best-ai-coding-tools.html",
+      "category": "developer",
+      "priorityScore": 11,
+      "searchSnippet": "Best AI Coding Tools — Developer tools that use AI to understand codebases, write code, automate edits and accelerate software development.",
+      "socialHook": "Need the right tool for best ai coding tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best ai coding tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-ai-coding-tools.html",
+      "xPost": "Choosing a tool for best ai coding tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-ai-coding-tools.html",
+      "redditStyle": "I put together a practical guide for best ai coding tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best AI Coding Tools: a practical shortlist",
+      "newsletterIntro": "Developer tools that use AI to understand codebases, write code, automate edits and accelerate software development. See the shortlist and compare the options: https://trytoolscout.org/best-ai-coding-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-ai-research-tools",
+      "title": "Best AI Research Tools",
+      "url": "https://trytoolscout.org/best-ai-research-tools.html",
+      "category": "ai-research",
+      "priorityScore": 11,
+      "searchSnippet": "Best AI Research Tools — AI tools for web research, source synthesis, grounded answers and analytical knowledge work.",
+      "socialHook": "Need the right tool for best ai research tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best ai research tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-ai-research-tools.html",
+      "xPost": "Choosing a tool for best ai research tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-ai-research-tools.html",
+      "redditStyle": "I put together a practical guide for best ai research tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best AI Research Tools: a practical shortlist",
+      "newsletterIntro": "AI tools for web research, source synthesis, grounded answers and analytical knowledge work. See the shortlist and compare the options: https://trytoolscout.org/best-ai-research-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-customer-support-tools",
+      "title": "Best Customer Support Tools",
+      "url": "https://trytoolscout.org/best-customer-support-tools.html",
+      "category": "support",
+      "priorityScore": 11,
+      "searchSnippet": "Best Customer Support Tools — Helpdesk and customer support platforms for ticketing, messaging, knowledge and support automation.",
+      "socialHook": "Need the right tool for best customer support tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best customer support tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-customer-support-tools.html",
+      "xPost": "Choosing a tool for best customer support tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-customer-support-tools.html",
+      "redditStyle": "I put together a practical guide for best customer support tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Customer Support Tools: a practical shortlist",
+      "newsletterIntro": "Helpdesk and customer support platforms for ticketing, messaging, knowledge and support automation. See the shortlist and compare the options: https://trytoolscout.org/best-customer-support-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-design-tools",
+      "title": "Best Design Tools",
+      "url": "https://trytoolscout.org/best-design-tools.html",
+      "category": "design",
+      "priorityScore": 11,
+      "searchSnippet": "Best Design Tools — Design platforms for visual content, interfaces, prototypes and collaborative creative workflows.",
+      "socialHook": "Need the right tool for best design tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best design tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-design-tools.html",
+      "xPost": "Choosing a tool for best design tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-design-tools.html",
+      "redditStyle": "I put together a practical guide for best design tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Design Tools: a practical shortlist",
+      "newsletterIntro": "Design platforms for visual content, interfaces, prototypes and collaborative creative workflows. See the shortlist and compare the options: https://trytoolscout.org/best-design-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-developer-tools",
+      "title": "Best Developer Tools",
+      "url": "https://trytoolscout.org/best-developer-tools.html",
+      "category": "developer",
+      "priorityScore": 11,
+      "searchSnippet": "Best Developer Tools — Developer platforms for coding, collaboration, deployment, monitoring and software delivery workflows.",
+      "socialHook": "Need the right tool for best developer tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best developer tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-developer-tools.html",
+      "xPost": "Choosing a tool for best developer tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-developer-tools.html",
+      "redditStyle": "I put together a practical guide for best developer tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Developer Tools: a practical shortlist",
+      "newsletterIntro": "Developer platforms for coding, collaboration, deployment, monitoring and software delivery workflows. See the shortlist and compare the options: https://trytoolscout.org/best-developer-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-ecommerce-platforms",
+      "title": "Best Ecommerce Platforms",
+      "url": "https://trytoolscout.org/best-ecommerce-platforms.html",
+      "category": "ecommerce",
+      "priorityScore": 11,
+      "searchSnippet": "Best Ecommerce Platforms — Commerce platforms for building stores, managing products, checkout, payments and online selling workflows.",
+      "socialHook": "Need the right tool for best ecommerce platforms? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best ecommerce platforms? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-ecommerce-platforms.html",
+      "xPost": "Choosing a tool for best ecommerce platforms? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-ecommerce-platforms.html",
+      "redditStyle": "I put together a practical guide for best ecommerce platforms, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Ecommerce Platforms: a practical shortlist",
+      "newsletterIntro": "Commerce platforms for building stores, managing products, checkout, payments and online selling workflows. See the shortlist and compare the options: https://trytoolscout.org/best-ecommerce-platforms.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-product-analytics-tools",
+      "title": "Best Product Analytics Tools",
+      "url": "https://trytoolscout.org/best-product-analytics-tools.html",
+      "category": "analytics",
+      "priorityScore": 11,
+      "searchSnippet": "Best Product Analytics Tools — Analytics platforms for funnels, retention, user behavior, experiments and product decision-making.",
+      "socialHook": "Need the right tool for best product analytics tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best product analytics tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-product-analytics-tools.html",
+      "xPost": "Choosing a tool for best product analytics tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-product-analytics-tools.html",
+      "redditStyle": "I put together a practical guide for best product analytics tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Product Analytics Tools: a practical shortlist",
+      "newsletterIntro": "Analytics platforms for funnels, retention, user behavior, experiments and product decision-making. See the shortlist and compare the options: https://trytoolscout.org/best-product-analytics-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-social-media-management-tools",
+      "title": "Best Social Media Management Tools",
+      "url": "https://trytoolscout.org/best-social-media-management-tools.html",
+      "category": "social",
+      "priorityScore": 11,
+      "searchSnippet": "Best Social Media Management Tools — Social media platforms for scheduling, publishing, engagement, analytics and content workflows.",
+      "socialHook": "Need the right tool for best social media management tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best social media management tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-social-media-management-tools.html",
+      "xPost": "Choosing a tool for best social media management tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-social-media-management-tools.html",
+      "redditStyle": "I put together a practical guide for best social media management tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Social Media Management Tools: a practical shortlist",
+      "newsletterIntro": "Social media platforms for scheduling, publishing, engagement, analytics and content workflows. See the shortlist and compare the options: https://trytoolscout.org/best-social-media-management-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-video-content-tools",
+      "title": "Best Video Content Tools",
+      "url": "https://trytoolscout.org/best-video-content-tools.html",
+      "category": "content",
+      "priorityScore": 11,
+      "searchSnippet": "Best Video Content Tools — Tools for recording, editing and producing video or audiovisual content for teams and creators.",
+      "socialHook": "Need the right tool for best video content tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best video content tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-video-content-tools.html",
+      "xPost": "Choosing a tool for best video content tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-video-content-tools.html",
+      "redditStyle": "I put together a practical guide for best video content tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Video Content Tools: a practical shortlist",
+      "newsletterIntro": "Tools for recording, editing and producing video or audiovisual content for teams and creators. See the shortlist and compare the options: https://trytoolscout.org/best-video-content-tools.html",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "slug": "best-website-builders",
+      "title": "Best Website Builders",
+      "url": "https://trytoolscout.org/best-website-builders.html",
+      "category": "website",
+      "priorityScore": 11,
+      "searchSnippet": "Best Website Builders — Website-building platforms for launching and managing professional sites without a traditional development stack.",
+      "socialHook": "Need the right tool for best website builders? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best website builders? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\nhttps://trytoolscout.org/best-website-builders.html",
+      "xPost": "Choosing a tool for best website builders? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-website-builders.html",
+      "redditStyle": "I put together a practical guide for best website builders, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Website Builders: a practical shortlist",
+      "newsletterIntro": "Website-building platforms for launching and managing professional sites without a traditional development stack. See the shortlist and compare the options: https://trytoolscout.org/best-website-builders.html",
       "hashtags": [
         "#software",
         "#AITools",
