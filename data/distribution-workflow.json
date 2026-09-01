@@ -1,0 +1,27 @@
+{
+  "items": [
+    {"slug":"product-hunt","name":"Product Hunt","type":"launch_platform","status":"submitted","priority":"high","url":"https://www.producthunt.com/","action_url":"https://www.producthunt.com/posts/new","requires_signup":true,"cost":"Free submission","next_action":"Product page exists. Monitor launch/readiness and complete any remaining launch-day actions.","notes":"ToolScout product page already exists."},
+    {"slug":"uneed","name":"Uneed","type":"launch_platform","status":"scheduled","priority":"high","url":"https://www.uneed.best/","action_url":"https://www.uneed.best/submit-a-tool","requires_signup":true,"cost":"Paid submission completed","next_action":"Launch scheduled for 2026-09-15. No duplicate submission; prepare launch-day follow-up.","notes":"Submission and payment completed; launch scheduled for 15 September 2026."},
+    {"slug":"betalist","name":"BetaList","type":"startup_directory","status":"ready_to_submit","priority":"high","url":"https://betalist.com/","action_url":"https://betalist.com/submit","requires_signup":true,"cost":"Check current submission options","next_action":"Create/login to publisher account and submit ToolScout with concise product positioning and screenshots."},
+    {"slug":"microlaunch","name":"Microlaunch","type":"launch_platform","status":"ready_to_submit","priority":"high","url":"https://microlaunch.net/","action_url":"https://microlaunch.net/","requires_signup":true,"cost":"Verify current submission terms","next_action":"Create account and submit ToolScout as a software discovery and recommendation product."},
+    {"slug":"indie-hackers","name":"Indie Hackers","type":"community","status":"ready_to_submit","priority":"medium","url":"https://www.indiehackers.com/","action_url":"https://www.indiehackers.com/","requires_signup":true,"cost":"Free account","next_action":"Create/login and publish a useful founder/product post; avoid directory-style spam."},
+    {"slug":"hacker-news","name":"Hacker News — Show HN","type":"community_launch","status":"ready_to_submit","priority":"medium","url":"https://news.ycombinator.com/","action_url":"https://news.ycombinator.com/submit","requires_signup":true,"cost":"Free account","next_action":"Submit only when the product/story is strong enough for Show HN; use a factual non-promotional title."},
+    {"slug":"dev-hunt","name":"DevHunt","type":"launch_platform","status":"research_required","priority":"medium","url":"https://devhunt.org/","action_url":"https://devhunt.org/","requires_signup":true,"cost":"Verify current terms","next_action":"Verify current eligibility and submission flow before spending time on signup."},
+    {"slug":"startup-stash","name":"Startup Stash","type":"software_directory","status":"research_required","priority":"medium","url":"https://startupstash.com/","action_url":"https://startupstash.com/","requires_signup":true,"cost":"Verify listing terms","next_action":"Verify current listing/submission route and whether ToolScout fits the directory taxonomy."},
+    {"slug":"saas-hub","name":"SaaSHub","type":"software_directory","status":"research_required","priority":"medium","url":"https://www.saashub.com/","action_url":"https://www.saashub.com/","requires_signup":true,"cost":"Verify current listing terms","next_action":"Check whether ToolScout can be listed as a software discovery product and claim/manage the listing."},
+    {"slug":"alternativeto","name":"AlternativeTo","type":"software_directory","status":"research_required","priority":"medium","url":"https://alternativeto.net/","action_url":"https://alternativeto.net/","requires_signup":true,"cost":"Free account; verify submission rules","next_action":"Verify whether ToolScout qualifies as an application/service listing and add only if it fits current rules."},
+    {"slug":"g2","name":"G2","type":"review_directory","status":"research_required","priority":"low","url":"https://www.g2.com/","action_url":"https://www.g2.com/products/new","requires_signup":true,"cost":"Verify vendor/listing terms","next_action":"Check category fit and vendor eligibility before creating a listing."},
+    {"slug":"capterra","name":"Capterra","type":"review_directory","status":"research_required","priority":"low","url":"https://www.capterra.com/","action_url":"https://www.capterra.com/vendors/sign-up","requires_signup":true,"cost":"Verify vendor/listing terms","next_action":"Check whether ToolScout fits a Capterra software category before vendor signup."}
+  ],
+  "submission_pack": {
+    "product":"ToolScout",
+    "website":"https://trytoolscout.org",
+    "tagline":"Find the right software for the job — without the noise.",
+    "short_description":"ToolScout is an independent software discovery and recommendation platform that turns a buyer's workflow and intent into a focused shortlist of relevant tools, with transparent comparisons and no pay-to-rank recommendations.",
+    "audience":"Small businesses, consultants, agencies, creators, sales and marketing teams, and software buyers.",
+    "differentiator":"Intent-driven recommendations rather than a generic directory. Affiliate relationships never influence ranking.",
+    "founder":"Pedro Caiano",
+    "location":"Portugal",
+    "launch_url":"https://trytoolscout.org"
+  }
+}
