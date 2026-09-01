@@ -44,7 +44,7 @@ Primary URL: https://trytoolscout.org/
 
 **Competitor references:** use established software discovery/comparison products where appropriate rather than inventing competitors.
 
-**Execution state (2026-09-01):** prepared, not submitted. Required assets: canonical URL, product name, short description above, category selection, square logo and account email. Submission is a third-party publisher action and must be confirmed at the final form step.
+**Execution state (2026-09-01):** existing submission reconciled without duplication. The authenticated management page shows TryToolScout as `Pending approval`, with an estimated free-review window of up to 32 days. The $75 Priority+ upsell was declined. The candidate public path is `https://www.saashub.com/trytoolscout-alternatives`; do not call it live until approval is externally visible.
 
 ## Priority 3 — AlternativeTo
 
@@ -54,7 +54,7 @@ Primary URL: https://trytoolscout.org/
 
 **Positioning:** ToolScout is a software discovery/recommendation service, not an individual SaaS replacement. Keep the description factual and concise.
 
-**Execution state (2026-09-01):** queued, not submitted; account creation/sign-in and moderation submission required.
+**Execution state (2026-09-01):** submitted successfully to the free backlog with submission ID `e61abe20-b2ea-4d89-b3c4-21c68834b057`. The authenticated owner-only page at `https://alternativeto.net/software/toolscout/about/` confirms that the submission is waiting for review and may take a few months. It includes the canonical website, accurate author/origin/platform/pricing, public Product Hunt icon and screenshot, plus SaaSHub, AlternativeTo and Product Hunt as suggested alternatives. Do not share it as a live listing until editorial approval. The optional $5 priority review was not used and remains prohibited.
 
 ## Priority 4 — Alternative.me
 

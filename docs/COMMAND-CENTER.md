@@ -142,7 +142,13 @@ Current known distribution state:
 
 - Product Hunt: ToolScout product page exists and must remain monitored for launch/listing status and resulting traffic.
 - Uneed: submission/payment completed; launch scheduled for 2026-09-15.
+- SaaSHub: an existing TryToolScout submission was reconciled on 2026-09-01 without duplication. The authenticated management page shows `Pending approval` with an estimate of up to 32 days. The free queue is being used; the $75 Priority+ upsell is prohibited.
+- AlternativeTo: submitted successfully to the free backlog on 2026-09-01 with submission ID `e61abe20-b2ea-4d89-b3c4-21c68834b057`. The owner-only page confirms `waiting to be reviewed`; it is not public until editorial approval. SaaSHub, AlternativeTo and Product Hunt were added as relevant suggested alternatives. The $5 priority queue remains prohibited.
+- Peerlist Launchpad, MicroLaunch, and BetaList: current free paths were verified, but authentication/profile creation is required before automation can submit.
+- Fazier: the nominal free tier requires a backlink badge on the ToolScout homepage or footer. It is recorded as `unavailable_free` unless the owner separately authorizes that public reciprocal-link change; all paid tiers are prohibited.
 - Repository generates a distribution queue in `reports/distribution-queue.json`.
+
+The canonical platform-level evidence, blockers, URLs, free/paid classification, verification state, and next action are stored in `data/distribution-workflow.json`. Normalized sprint states include `discovered`, `eligible_free`, `prepared`, `human_action_required`, `submitted`, `pending_review`, `live`, `rejected`, `unavailable_free`, and `skipped_low_quality`.
 
 Default distribution workflow:
 
