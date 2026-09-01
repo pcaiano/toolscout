@@ -12,6 +12,7 @@ on:
       - 'data/seo-consolidations.json'
       - 'scripts/generate-seo-pages.mjs'
       - 'scripts/generate-comparisons.mjs'
+      - 'scripts/enrich-guide-comparisons.mjs'
       - 'scripts/generate-blog.mjs'
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
@@ -50,6 +51,9 @@ jobs:
 
       - name: Generate commercial comparisons
         run: node scripts/generate-comparisons.mjs
+
+      - name: Link guides to relevant comparisons
+        run: node scripts/enrich-guide-comparisons.mjs
 
       - name: Generate blog topics
         run: node scripts/build-blog-topics.mjs
