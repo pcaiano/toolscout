@@ -105,12 +105,19 @@ Primary business metrics:
 
 Canonical operational affiliate state is stored in `data/affiliate-pipeline.json` and active redirect configuration in `data/affiliate.json`.
 
+The private Affiliate Workflow is now the catalog-first Affiliate Operations Engine. It resolves all 100 catalog tools to one normalized state and one next action, keeps affiliate opportunity scoring separate from editorial ranking, exposes Human Actions Required first, and reports raw and traffic-weighted monetization coverage. D1 migration `0013_affiliate_operations_engine.sql` adds normalized operational metadata, append-only state history/evidence, and the Direct/Dub/Impact/PartnerStack registry.
+
+PartnerStack Marketplace remains blocked until ToolScout earns its first commission in an existing partnership. Pipedrive is the primary operational unlock target. Dub Marketplace access is available, but advertiser approval remains program-specific. Buffer's earlier process must not be duplicated; Framer remains creator-gated. Impact decisions are advertiser-specific.
+
 As of 2026-09-01, repository state records the following programs as active:
 
 - Systeme.io — active — 60% lifetime recurring
 - Jotform — active — 30% recurring
 - Pipedrive — active — 20% of new-customer revenue for the first 12 months at the entry tier; higher tiers available
 - Make — active — 35% for 12 months
+- beehiiv — active through Dub
+
+Submitted/current review: Semrush (Impact), AdCreative.ai (PartnerStack), and n8n (PartnerStack). HubSpot and Grammarly are rejected under advertiser-specific evidence. Ahrefs and Calendly have no current program. Notion is paused for new applications.
 
 Make referral URL provided by the owner:
 

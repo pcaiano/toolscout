@@ -171,6 +171,8 @@ The canonical repository schema is the ordered root migration set:
 | `0006_revenue_ledger.sql` | `revenue_ledger` | Evidence-backed vendor conversion/commission ledger with lifecycle and attribution checks |
 | `0007_funnel_events.sql` | `funnel_events` | Allowlisted, idempotent anonymous funnel events with session/type/time and practical segmentation indexes |
 | `0008_verified_revenue_attribution.sql` | click/revenue attribution and audit | Adds PII-free click/sub-ID references, defensible attribution guards, deterministic record keys and append-only ledger audit evidence |
+| `0013_affiliate_operations_engine.sql` | affiliate workflow, history and network registry | Normalizes operational metadata, preserves evidence-backed state transitions, and models Direct, Dub, Impact and PartnerStack constraints |
+| `0014_seed_affiliate_evidence.sql` | known affiliate state evidence | Seeds the preserved active/submitted/rejected/blocked/no-program/paused evidence and records production-verified active redirects |
 
 `revenue_ledger` permits only `pending`, `confirmed`, `paid`, or `reversed` status and only `unattributed`, `attributed`, or `vendor_confirmed` attribution status. `(affiliate_slug, conversion_id)` is unique when a conversion ID exists. Additional indexes cover affiliate, status, attribution, tool, intent, session, and reporting period.
 
