@@ -28,5 +28,5 @@
   {"slug":"loom","name":"Loom","status":"validated-candidate","category":"business","sourceUrl":"https://www.loom.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
   {"slug":"claude","name":"Claude","status":"validated-candidate","category":"ai-assistant","sourceUrl":"https://claude.ai/","affiliateProgram":"Pending verification","commission":"Pending verification"},
   {"slug":"calendly","name":"Calendly","status":"validated-candidate","category":"business","sourceUrl":"https://calendly.com/","affiliateProgram":"Pending verification","commission":"Pending verification"},
-  {"slug":"hootsuite","name":"Hootsuite","status":"validated-candidate","category":"social","sourceUrl":"https://www.hootsuite.com/","affiliateProgram":"Pending verification","commission":"Pending verification"}
+  {"slug":"miro","name":"Miro","status":"validated-candidate","category":"business","sourceUrl":"https://miro.com/","affiliateProgram":"Pending verification","commission":"Pending verification"}
 ]
