@@ -8,6 +8,9 @@ const pairs=JSON.parse(fs.readFileSync(path.join(ROOT,'data','comparisons.json')
 const sitemap=fs.readFileSync(path.join(ROOT,'sitemap.xml'),'utf8');
 const errors=[];
 const check=(ok,message)=>{if(!ok)errors.push(message)};
+const intentSlugs=new Set(intents.map(intent=>intent?.slug).filter(Boolean));
+const hasGuideLink=html=>[...html.matchAll(/href=["']\/([a-z0-9-]+)\.html["']/gi)].some(match=>intentSlugs.has(match[1]));
+
 for(const tool of tools){
   const rel=`tools/${tool.slug}.html`,file=path.join(ROOT,rel);
   check(fs.existsSync(file),`${rel}: missing profile`);
@@ -18,7 +21,7 @@ for(const tool of tools){
   check(html.includes('BreadcrumbList'),`${rel}: missing breadcrumb schema`);
   check(html.includes('FAQPage'),`${rel}: missing FAQ schema`);
   check(html.includes(`/go/${tool.slug}`),`${rel}: missing tracked CTA`);
-  check(html.includes('.html">')&&html.includes('Buying guides featuring'),`${rel}: missing guide links`);
+  check(hasGuideLink(html),`${rel}: missing guide links`);
   check(sitemap.includes(`<loc>${canonical}</loc>`),`${rel}: absent from sitemap`);
 }
 for(const intent of intents){const html=fs.readFileSync(path.join(ROOT,`${intent.slug}.html`),'utf8');check(html.includes('/tools/'),`${intent.slug}.html: no tool-profile link`);}
