@@ -95,6 +95,7 @@ jobs:
         run: node scripts/validate-commercial-indexability.mjs
 
       - name: Commit generated SEO assets
+        if: github.ref == 'refs/heads/main'
         run: |
           if [ -z "$(git status --porcelain -- '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
