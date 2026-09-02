@@ -12,6 +12,7 @@ on:
       - 'compare.html'
       - 'guides.html'
       - 'blog/**'
+      - 'admin.html'
       - 'analytics.html'
       - 'affiliate-workflow.html'
       - 'distribution-workflow.html'
@@ -82,6 +83,8 @@ jobs:
           grep -q 'Fit signal' best-crm-for-small-business.html
           grep -q 'ToolScout Journal' blog/index.html
           grep -q 'Signal,<br>not filler.' blog/index.html
+          grep -q 'brand-ops' admin.html
+          grep -q 'Command Center' admin.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
 
       - name: Show generated drift
