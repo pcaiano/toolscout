@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - 'brand-system.css'
       - 'tools.html'
+      - '*-tools.html'
       - 'categories.html'
       - 'compare.html'
       - 'guides.html'
@@ -89,6 +90,13 @@ jobs:
           grep -q 'brand-system.css' methodology.html
           grep -q 'brand-system.css' affiliate-disclosure.html
           grep -q 'brand-system.css' privacy.html
+          grep -q 'brand-system.css' crm-tools.html
+          grep -q 'brand-system.css' seo-tools.html
+          grep -q 'brand-system.css' marketing-tools.html
+          grep -q 'brand-system.css' automation-tools.html
+          grep -q 'brand-system.css' forms-tools.html
+          grep -q 'brand-system.css' productivity-tools.html
+          grep -q 'brand-system.css' agency-tools.html
           grep -q 'brand-ops' admin.html
           grep -q 'Command Center' admin.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
