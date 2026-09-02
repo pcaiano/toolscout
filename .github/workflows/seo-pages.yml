@@ -103,7 +103,7 @@ jobs:
         run: node scripts/validate-commercial-indexability.mjs
 
       - name: Commit generated SEO assets
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/brand-v1-redesign'
         run: |
           if [ -z "$(git status --porcelain -- '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
@@ -112,5 +112,5 @@ jobs:
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports
-          git commit -m "Refresh SEO, blog and distribution assets"
+          git commit -m "Refresh Brand v1 generated assets"
           git push
