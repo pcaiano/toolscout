@@ -55,13 +55,14 @@
     {
       "slug": "semrush",
       "provider": "Semrush",
-      "status": "submitted",
+      "status": "rejected",
       "commission_note": "Pending verification",
       "source": "https://www.semrush.com/lp/affiliate-program/",
       "application_url": "https://www.semrush.com/lp/affiliate-program/",
-      "last_verified": "2026-09-01",
-      "next_action": "Application received via Impact; wait for review decision.",
-      "network": "Impact"
+      "last_verified": "2026-09-03",
+      "next_action": "Impact recorded Semrush's rejection for low reach (traffic/followers). Do not reapply until ToolScout materially improves verified traffic or audience reach; keep affiliate routing disabled unless a future approval provides a verified affiliate URL.",
+      "network": "Impact",
+      "evidence": "Semrush Affiliate Team / Impact email dated 2026-09-02: proposed contract declined for low reach (traffic, followers)."
     },
     {
       "slug": "adcreative-ai",
@@ -120,7 +121,7 @@
     {
       "slug": "buffer",
       "provider": "Buffer",
-      "status": "blocked",
+      "status": "needs_info",
       "commission_note": "25% recurring commission on referred new customers for 12 months",
       "source": "https://buffer.com/partners",
       "application_url": "https://buffer.com/partners",
@@ -131,10 +132,10 @@
         "Product familiarity is preferred but being a customer is not required"
       ],
       "form_guidance": "Use ToolScout's social-media software discovery, comparison and recommendation use case. Audience includes creators, small teams, agencies and businesses researching social tools. Explain that links appear in relevant editorial recommendations and comparisons.",
-      "last_verified": "2026-09-01",
-      "next_action": "Review or await the existing Buffer process; do not submit another application.",
+      "last_verified": "2026-09-03",
+      "next_action": "Create the Dub Partners account using pedro@trytoolscout.org via the saved Buffer application. Dub states the application will only be submitted to Buffer after that account is created; do not create a duplicate Buffer application.",
       "network": "Dub",
-      "evidence": "An earlier Buffer application/process exists. Duplicate submission is prohibited."
+      "evidence": "Dub email dated 2026-09-02 confirms the Buffer application is saved but incomplete and requires creation of a Dub Partners account with pedro@trytoolscout.org before submission."
     },
     {
       "slug": "webflow",
