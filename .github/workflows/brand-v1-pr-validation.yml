@@ -1,0 +1,88 @@
+name: Brand v1 PR validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'brand-system.css'
+      - 'tools.html'
+      - 'categories.html'
+      - 'compare.html'
+      - 'guides.html'
+      - 'blog/**'
+      - 'analytics.html'
+      - 'affiliate-workflow.html'
+      - 'distribution-workflow.html'
+      - 'opportunity-matrix.html'
+      - 'data/**'
+      - 'scripts/generate-blog.mjs'
+      - 'scripts/generate-tool-pages.mjs'
+      - 'scripts/generate-seo-pages.mjs'
+      - 'scripts/validate-*.mjs'
+      - '.github/workflows/brand-v1-pr-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate catalog data
+        run: node scripts/validate-data.mjs
+
+      - name: Validate intent coverage
+        run: node scripts/validate-intent-coverage.mjs
+
+      - name: Regenerate buying-guide pages
+        run: node scripts/generate-seo-pages.mjs
+
+      - name: Regenerate commercial comparisons
+        run: node scripts/generate-comparisons.mjs
+
+      - name: Regenerate tool profiles
+        run: node scripts/generate-tool-pages.mjs
+
+      - name: Link directory to tool profiles
+        run: node scripts/link-static-tool-profiles.mjs
+
+      - name: Enrich guides with comparisons
+        run: node scripts/enrich-guide-comparisons.mjs
+
+      - name: Regenerate Journal
+        run: node scripts/generate-blog.mjs
+
+      - name: Regenerate sitemap
+        run: node scripts/generate-sitemap.mjs
+
+      - name: Validate SEO pages
+        run: node scripts/validate-seo-pages.mjs
+
+      - name: Validate public surface
+        run: node scripts/validate-public-surface.mjs
+
+      - name: Validate commercial indexability
+        run: node scripts/validate-commercial-indexability.mjs
+
+      - name: Verify Brand v1 generated surfaces
+        run: |
+          grep -q 'brand-system.css' tools/pipedrive.html
+          grep -q 'Where it fits' tools/pipedrive.html
+          grep -q 'Fit signal' best-crm-for-small-business.html
+          grep -q 'ToolScout Journal' blog/index.html
+          grep -q 'Signal, not filler.' blog/index.html
+          ! grep -q 'What Actually Matters Before You Buy' blog/index.html
+
+      - name: Show generated drift
+        run: git status --short
