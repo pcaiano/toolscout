@@ -49,23 +49,23 @@ jobs:
           }
           console.log(`Validated brand logo markup in ${tools.length} tool profiles.`);
           NODE
-      - name: Persist generated commercial pages
-        run: |
-          if git diff --quiet -- tools; then
-            echo 'Generated tool profiles already committed.'
-          else
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add tools
-            git commit -m 'Regenerate tool profiles with brand logos'
-            git push
-          fi
       - name: Generate acquisition content
         run: node scripts/generate-acquisition-content.mjs
       - name: Generate acquisition priority
         run: node scripts/generate-acquisition-priority.mjs
       - name: Apply canonical public navigation
         run: node scripts/unify-public-nav.mjs
+      - name: Persist generated public navigation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- '*.html' 'blog/*.html' 'tools/*.html'
+          if git diff --cached --quiet; then
+            echo 'Canonical public navigation already committed.'
+          else
+            git commit -m 'Persist canonical navigation across public pages'
+            git push
+          fi
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
       - name: Guard public hostname
