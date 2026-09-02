@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT=process.cwd();
-const SKIP=new Set(['analytics.html','affiliate-workflow.html','distribution-workflow.html']);
+const SKIP=new Set(['analytics.html','affiliate-workflow.html','distribution-workflow.html','admin.html','click.html']);
 const NAV='<nav class="ts-global-nav" aria-label="Primary"><a href="/guides.html">Guides</a><a href="/blog/">Blog</a><a href="/tools.html">Tools</a><a href="/compare.html">Compare</a><a href="/methodology.html">Methodology</a></nav>';
 const CSS='<style id="ts-global-nav-style">.ts-global-nav{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 32px}.ts-global-nav a{color:#667085;text-decoration:none;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500}.ts-global-nav a:hover{background:#fff;color:#101828;box-shadow:0 5px 18px rgba(16,24,40,.06)}@media(max-width:700px){.ts-global-nav{justify-content:flex-start;gap:2px;margin-bottom:24px}.ts-global-nav a{padding:8px 9px}}</style>';
 
