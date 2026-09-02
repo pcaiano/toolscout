@@ -21,6 +21,7 @@ on:
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/import-gsc-signals.mjs'
+      - 'scripts/sync-gsc-signals.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/validate-public-surface.mjs'
       - 'scripts/validate-commercial-indexability.mjs'
@@ -48,6 +49,13 @@ jobs:
 
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
+
+      - name: Sync Google Search Console signals
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+        run: node scripts/sync-gsc-signals.mjs
 
       - name: Build growth priority
         run: node scripts/build-growth-priority.mjs
