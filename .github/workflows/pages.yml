@@ -64,6 +64,8 @@ jobs:
         run: node scripts/generate-acquisition-content.mjs
       - name: Generate acquisition priority
         run: node scripts/generate-acquisition-priority.mjs
+      - name: Apply canonical public navigation
+        run: node scripts/unify-public-nav.mjs
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
       - name: Guard public hostname
