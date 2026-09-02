@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T20:16:59.637Z",
+  "generatedAt": "2026-09-02T21:06:50.190Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.",
   "gsc": {
     "available": false,
@@ -65,6 +65,25 @@
         "hubspot",
         "salesforce",
         "close"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "title": "Best Cold Email Tools",
+      "category": "sales",
+      "priorityScore": 68,
+      "topFit": 9.38,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "shopify",
+        "hubspot",
+        "lemlist"
       ],
       "action": "build-next"
     },
@@ -316,25 +335,6 @@
       "action": "build-next"
     },
     {
-      "intent": "best-cold-email-tools",
-      "title": "Best Cold Email Tools",
-      "category": "sales",
-      "priorityScore": 63,
-      "topFit": 9.38,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "shopify",
-        "hubspot",
-        "lemlist"
-      ],
-      "action": "build-next"
-    },
-    {
       "intent": "best-email-marketing-tools",
       "title": "Best Email Marketing Tools",
       "category": "marketing",
@@ -388,6 +388,25 @@
         "semrush",
         "ahrefs",
         "surfer"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-ecommerce-platforms",
+      "title": "Best Ecommerce Platforms",
+      "category": "ecommerce",
+      "priorityScore": 62,
+      "topFit": 9.17,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "shopify",
+        "bigcommerce",
+        "hubspot"
       ],
       "action": "build-next"
     },
@@ -447,25 +466,6 @@
         "slack"
       ],
       "action": "build-next"
-    },
-    {
-      "intent": "best-ecommerce-platforms",
-      "title": "Best Ecommerce Platforms",
-      "category": "ecommerce",
-      "priorityScore": 57,
-      "topFit": 9.17,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "shopify",
-        "bigcommerce",
-        "hubspot"
-      ],
-      "action": "watch"
     },
     {
       "intent": "best-customer-support-tools",
