@@ -44,6 +44,36 @@ function affiliateReadiness(slug) {
   return 5;
 }
 
+function searchOpportunity(observed) {
+  const impressions = Number(observed?.impressions || 0);
+  const clicks = Number(observed?.clicks || 0);
+  const position = Number(observed?.position || 0);
+  const ctr = Number(observed?.ctr || 0);
+  if (!impressions) return { score: 0, opportunity: 'unobserved' };
+
+  const demand = Math.min(28, Math.log10(impressions + 1) * 9);
+  const traffic = Math.min(8, Math.log10(clicks + 1) * 4);
+  let rankOpportunity = 2;
+  if (position > 0 && position <= 3) rankOpportunity = 6;
+  else if (position <= 10) rankOpportunity = 14;
+  else if (position <= 20) rankOpportunity = 18;
+  else if (position <= 40) rankOpportunity = 12;
+  else if (position <= 70) rankOpportunity = 7;
+
+  const ctrOpportunity = impressions >= 20 && ctr < 2 ? 6 : impressions >= 20 && ctr < 5 ? 3 : 0;
+  const score = Math.min(60, Math.round(demand + traffic + rankOpportunity + ctrOpportunity));
+  const opportunity = position > 3 && position <= 20
+    ? 'striking-distance'
+    : impressions >= 20 && ctr < 2
+      ? 'ctr-upside'
+      : position > 20 && position <= 40
+        ? 'page-two-upside'
+        : position > 0 && position <= 3
+          ? 'defend-winner'
+          : 'develop';
+  return { score, opportunity };
+}
+
 const rows = intents.map(intent => {
   const ranked = tools
     .map(tool => ({ tool, fit: scoreTool(tool, intent) }))
@@ -59,15 +89,17 @@ const rows = intents.map(intent => {
   const impressions = Number(observed?.impressions || 0);
   const clicks = Number(observed?.clicks || 0);
   const position = Number(observed?.position || 0);
-  const realSearchSignal = impressions > 0
-    ? Math.min(50, 20 + Math.log10(impressions + 1) * 10 + clicks * 2 + (position > 0 && position <= 20 ? 8 : 0))
-    : 0;
+  const ctr = Number(observed?.ctr || 0);
+  const search = searchOpportunity(observed);
   const heuristicScore = Math.min(100, Math.round(commercial + category + catalogDepth + Math.min(20, topFit * 2) + affiliateSignal));
-  // Once Google has observed an intent, search evidence is the majority of its score.
+  // Observed search demand controls 60% of the score; product/commercial readiness controls 40%.
   const score = impressions > 0
-    ? Math.min(100, Math.round(realSearchSignal + heuristicScore * 0.5))
+    ? Math.min(100, Math.round(search.score + heuristicScore * 0.4))
     : heuristicScore;
   const readiness = affiliateTools > 0 ? 'monetizable' : 'needs-affiliate-activation';
+  const action = impressions > 0 && search.opportunity === 'striking-distance'
+    ? 'optimize-now'
+    : score >= 75 ? 'invest-now' : score >= 60 ? 'build-next' : 'watch';
   return {
     intent: intent.slug,
     title: intent.title,
@@ -77,24 +109,25 @@ const rows = intents.map(intent => {
     catalogDepth,
     commercialSignal: commercial,
     affiliateSignal,
-    searchSignal: impressions > 0 ? { source: 'gsc', impressions, clicks, ctr: Number(observed.ctr || 0), position } : null,
+    searchSignal: impressions > 0 ? { source: 'gsc', impressions, clicks, ctr, position, opportunity: search.opportunity, opportunityScore: search.score } : null,
     signalBasis: impressions > 0 ? 'observed-gsc-majority' : 'heuristic-only',
     monetizationReadiness: readiness,
     topTools: top.map(x => x.tool.slug),
-    action: score >= 75 ? 'invest-now' : score >= 60 ? 'build-next' : 'watch'
+    action
   };
 });
 
 rows.sort((a,b) => {
+  const actionRank = { 'optimize-now': 4, 'invest-now': 3, 'build-next': 2, watch: 1 };
   const aObserved = a.searchSignal ? 1 : 0;
   const bObserved = b.searchSignal ? 1 : 0;
-  return bObserved - aObserved || b.priorityScore - a.priorityScore || a.title.localeCompare(b.title);
+  return bObserved - aObserved || (actionRank[b.action] || 0) - (actionRank[a.action] || 0) || b.priorityScore - a.priorityScore || a.title.localeCompare(b.title);
 });
 
 const gscAvailable = gscByIntent.size > 0;
 const gscStatus = gscAvailable ? 'signals-imported' : gscFilePresent ? 'imported-no-matching-intents' : 'not-imported';
 const gscReason = gscAvailable
-  ? 'Google Search Console page signals are present and are used in growth prioritization.'
+  ? 'Google Search Console page signals are present and drive growth prioritization, including striking-distance and CTR opportunities.'
   : gscFilePresent
     ? 'A Google Search Console export was imported, but it contains no matching best-* intent pages.'
     : 'No reports/gsc-signals.json file exists. This describes ToolScout ingestion state only; it does not mean the site is unverified, unindexed, or invisible to Google.';
@@ -102,7 +135,7 @@ const gscReason = gscAvailable
 fs.mkdirSync('reports', { recursive: true });
 fs.writeFileSync('reports/growth-priority.json', JSON.stringify({
   generatedAt: new Date().toISOString(),
-  methodology: 'Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.',
+  methodology: 'Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.',
   gsc: {
     available: gscAvailable,
     ingestionStatus: gscStatus,

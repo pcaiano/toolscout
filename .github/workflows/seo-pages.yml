@@ -11,6 +11,7 @@ on:
       - 'data/affiliate-pipeline.json'
       - 'data/seo-longtail.json'
       - 'data/seo-consolidations.json'
+      - 'reports/gsc-signals.json'
       - 'scripts/generate-seo-pages.mjs'
       - 'scripts/generate-comparisons.mjs'
       - 'scripts/generate-tool-pages.mjs'
@@ -19,6 +20,8 @@ on:
       - 'scripts/generate-blog.mjs'
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
+      - 'scripts/import-gsc-signals.mjs'
+      - 'scripts/sync-gsc-signals.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/validate-public-surface.mjs'
       - 'scripts/validate-commercial-indexability.mjs'
@@ -46,6 +49,13 @@ jobs:
 
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
+
+      - name: Sync Google Search Console signals
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+        run: node scripts/sync-gsc-signals.mjs
 
       - name: Build growth priority
         run: node scripts/build-growth-priority.mjs
@@ -93,6 +103,7 @@ jobs:
         run: node scripts/validate-commercial-indexability.mjs
 
       - name: Commit generated SEO assets
+        if: github.ref == 'refs/heads/main'
         run: |
           if [ -z "$(git status --porcelain -- '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json')" ]; then
             echo "No SEO/distribution asset changes to commit."

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-02T21:06:50.190Z",
-  "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, GSC contributes the majority of the score; otherwise the score uses commercial intent, catalog depth, fit and affiliate readiness.",
+  "generatedAt": "2026-09-02T09:40:05.321Z",
+  "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.",
   "gsc": {
     "available": false,
-    "ingestionStatus": "not-imported",
+    "ingestionStatus": "imported-no-matching-intents",
     "intentsWithSignals": 0,
-    "source": null,
-    "reason": "No reports/gsc-signals.json file exists. This describes ToolScout ingestion state only; it does not mean the site is unverified, unindexed, or invisible to Google.",
+    "source": "Google Search Console Search Analytics API",
+    "reason": "A Google Search Console export was imported, but it contains no matching best-* intent pages.",
     "importCommand": "node scripts/import-gsc-signals.mjs <gsc-pages.csv>"
   },
   "count": 38,

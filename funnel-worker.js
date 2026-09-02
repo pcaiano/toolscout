@@ -39,12 +39,13 @@ export async function ingest(request, env) {
 async function funnelSnapshot(env) {
   const window = "created_at >= datetime('now','-30 days')";
   const likelyHuman = "session_id IN (SELECT session_id FROM sessions WHERE classification='likely-human')";
-  const [eventCounts, sessionCount, byIntent, byTool, bySource, daily, audience] = await Promise.all([
+  const [eventCounts, sessionCount, byIntent, byTool, bySource, bySourceSessions, daily, audience] = await Promise.all([
     env.DB.prepare(`SELECT event_type,COUNT(*) AS events,COUNT(DISTINCT session_id) AS sessions FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY event_type`).all(),
     env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE first_seen_at >= datetime('now','-30 days') AND classification='likely-human'`).first(),
     env.DB.prepare(`SELECT COALESCE(intent_slug,'general') AS intent_slug,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} AND intent_slug IS NOT NULL GROUP BY intent_slug,event_type ORDER BY events DESC LIMIT 100`).all(),
     env.DB.prepare(`SELECT tool_slug,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} AND tool_slug IS NOT NULL GROUP BY tool_slug,event_type ORDER BY events DESC LIMIT 100`).all(),
     env.DB.prepare(`SELECT source,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY source,event_type ORDER BY events DESC LIMIT 100`).all(),
+    env.DB.prepare(`SELECT source,COUNT(DISTINCT session_id) AS sessions FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY source ORDER BY sessions DESC LIMIT 100`).all(),
     env.DB.prepare(`SELECT substr(created_at,1,10) AS day,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY day,event_type ORDER BY day`).all(),
     env.DB.prepare(`SELECT classification,COUNT(*) AS sessions FROM sessions WHERE first_seen_at >= datetime('now','-30 days') GROUP BY classification`).all()
   ]);
@@ -70,6 +71,7 @@ async function funnelSnapshot(env) {
     byIntent:rows(byIntent),
     byTool:rows(byTool),
     bySource:rows(bySource),
+    bySourceSessions:rows(bySourceSessions),
     daily:rows(daily),
     audience:Object.fromEntries(rows(audience).map(row => [row.classification, Number(row.sessions || 0)]))
   };
