@@ -1,5 +1,6 @@
 import base from './funnel-worker.js';
 import { summarizeLedger } from './revenue-attribution.js';
+import { buildCommercialPriorities, summarizeCommercialClicks } from './revenue-intelligence.js';
 
 const commercialIntent = value => /(crm|seo|marketing|agency|agencies|automation|lead|sales|email|project|form|survey|keyword|content)/i.test(String(value || ''));
 
@@ -108,6 +109,39 @@ async function revenueSnapshot(request, env, stats) {
   };
 }
 
+async function commercialSnapshot(env, stats) {
+  const clickResult = await env.DB.prepare(`
+    SELECT c.tool_slug,c.session_id,c.affiliate_active_at_click,
+      CASE WHEN c.intent_slug IS NOT NULL AND c.intent_slug!='general' THEN c.intent_slug END AS page_slug,
+      COALESCE(
+        CASE WHEN c.intent_slug IS NOT NULL AND c.intent_slug!='general' THEN c.intent_slug END,
+        (SELECT f.intent_slug FROM funnel_events f WHERE f.session_id=c.session_id
+          AND f.event_type IN ('recommendation_completed','recommendation_result_viewed')
+          AND f.intent_slug IS NOT NULL AND f.created_at<=c.created_at ORDER BY f.created_at DESC LIMIT 1)
+      ) AS attributed_intent,
+      CASE WHEN EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id
+        AND f.event_type IN ('recommendation_completed','recommendation_result_viewed')
+        AND f.created_at<=c.created_at) THEN 1 ELSE 0 END AS recommendation_assisted
+    FROM click_events c JOIN sessions s ON s.session_id=c.session_id
+    WHERE c.created_at>=datetime('now','-30 days') AND s.classification='likely-human'
+    ORDER BY c.created_at DESC LIMIT 5000
+  `).all();
+  const [pageSessions, intentSessions] = await Promise.all([
+    env.DB.prepare(`SELECT CASE WHEN path='/' THEN 'home' ELSE trim(replace(path,'.html',''),'/') END AS slug,COUNT(DISTINCT f.session_id) AS sessions
+      FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id
+      WHERE f.created_at>=datetime('now','-30 days') AND s.classification='likely-human' AND f.event_type='session_started' AND path IS NOT NULL
+      GROUP BY slug`).all(),
+    env.DB.prepare(`SELECT intent_slug AS slug,COUNT(DISTINCT f.session_id) AS sessions
+      FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id
+      WHERE f.created_at>=datetime('now','-30 days') AND s.classification='likely-human'
+        AND f.event_type IN ('recommendation_completed','recommendation_result_viewed') AND intent_slug IS NOT NULL
+      GROUP BY intent_slug`).all()
+  ]);
+  const toMap = result => Object.fromEntries((result?.results || []).filter(row=>row.slug).map(row=>[row.slug,Number(row.sessions||0)]));
+  const summary=summarizeCommercialClicks(clickResult?.results||[],{page:toMap(pageSessions),intent:toMap(intentSessions)},Number(stats?.funnel?.sessions||0));
+  return {...summary,...buildCommercialPriorities(summary),windowDays:30,status:'observed',definition:'Likely-human clicks only. Monetization is the immutable click-time snapshot. Page/intent attribution is emitted only from a recorded referrer slug or a prior recommendation event in the same session.',toolRateDefinition:'Tool outbound rate is tool clicks divided by all likely-human sessions in the window; page and intent rates use observed sessions for that page/intent.'};
+}
+
 function buildOpportunity(byTool, byIntent, activeSlugs, affiliate) {
   const intentStrength = new Map();
   for (const row of byIntent || []) {
@@ -146,14 +180,15 @@ export default {
       const response = await base.fetch(request, env, ctx);
       if (!response.ok) return response;
       const stats = await response.json();
-      const [revenue, breakdown] = await Promise.all([
+      const [revenue,commercial,breakdown] = await Promise.all([
         revenueSnapshot(request, env, stats),
+        commercialSnapshot(env,stats).catch(()=>({status:'unavailable',reason:'Revenue Intelligence v2 aggregation is unavailable; core analytics remain intact.'})),
         monetizedClickBreakdown(env)
       ]);
       const affiliateCoverage = breakdown
         ? { ...(stats.affiliateCoverage || {}), monetizedClickBreakdown: breakdown }
         : stats.affiliateCoverage;
-      return Response.json({ ...stats, affiliateCoverage, revenue }, {
+      return Response.json({ ...stats, affiliateCoverage, revenue, commercial }, {
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Cache-Control': 'private, max-age=60'
