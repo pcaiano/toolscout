@@ -12,6 +12,9 @@ on:
       - 'compare.html'
       - 'guides.html'
       - 'blog/**'
+      - 'methodology.html'
+      - 'affiliate-disclosure.html'
+      - 'privacy.html'
       - 'admin.html'
       - 'analytics.html'
       - 'affiliate-workflow.html'
@@ -83,6 +86,9 @@ jobs:
           grep -q 'Fit signal' best-crm-for-small-business.html
           grep -q 'ToolScout Journal' blog/index.html
           grep -q 'Signal,<br>not filler.' blog/index.html
+          grep -q 'brand-system.css' methodology.html
+          grep -q 'brand-system.css' affiliate-disclosure.html
+          grep -q 'brand-system.css' privacy.html
           grep -q 'brand-ops' admin.html
           grep -q 'Command Center' admin.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
