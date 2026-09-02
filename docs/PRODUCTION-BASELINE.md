@@ -207,6 +207,8 @@ M01 canonical events are `session_started`, `recommendation_started`, `recommend
 
 ## Revenue Intelligence
 
+Revenue Intelligence v2 extends the protected `/api/stats` response with a `commercial` object derived from the existing `click_events`, `sessions`, and `funnel_events` tables. It provides likely-human click-time monetized/unmonetized totals, conservative page/intent attribution, recommendation-assisted versus direct outbound, page/intent/tool rankings, Revenue Gaps, and a transparent Revenue Opportunity score. No new migration or revenue ingestion route is required; migration `0009_click_monetization_snapshot.sql` already preserves the required click-time affiliate state. Unknown historical monetization remains unknown, and vendor conversions/commission continue to come only from `revenue_ledger` evidence.
+
 `revenue-worker.js` is the active top Worker layer. It reads up to 5,000 recent ledger rows and adds a `revenue` object to authenticated stats.
 
 It reports:

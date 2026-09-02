@@ -90,6 +90,12 @@ Primary business metrics:
 - confirmed/paid commission;
 - revenue per 1,000 genuine non-owner sessions when evidence is available.
 
+Revenue Intelligence v2 is implemented in the existing protected Command Center. Its 30-day commercial view includes only sessions classified `likely-human`; owner, known bot/crawler, synthetic/test, and unknown/legacy traffic stay outside the primary metrics. Monetized versus unmonetized outbound uses the immutable `affiliate_active_at_click` snapshot introduced by migration `0009`; rows predating that snapshot remain unknown.
+
+Page attribution is shown only when the redirect recorded a valid internal referrer slug. Intent attribution uses that recorded slug or the latest prior recommendation result/completion with an intent in the same session. A click is recommendation-assisted only when such a prior recommendation event exists; otherwise it is direct/unattributed. Page and intent outbound rates use observed human sessions for the same page/intent. Tool outbound rate uses all likely-human sessions in the reporting window because result-impression events do not currently contain the displayed tool list.
+
+Revenue Gap score is `10 × unmonetized outbound + 2 × human sessions (capped at 25) + outbound rate percentage (capped at 50)`. Revenue Opportunity score is bounded to 100 and consists of traffic (30 points, 25 sessions reaches the cap), outbound propensity (40 points, 50% reaches the cap), and click-time monetization coverage (30 points). Both scores are prioritization aids, never estimates of conversions, commission, EPC, or currency value.
+
 ## Current production state
 
 - Public domain: `trytoolscout.org`
