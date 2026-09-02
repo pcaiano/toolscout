@@ -81,7 +81,7 @@ jobs:
           grep -q 'Where it fits' tools/pipedrive.html
           grep -q 'Fit signal' best-crm-for-small-business.html
           grep -q 'ToolScout Journal' blog/index.html
-          grep -q 'Signal, not filler.' blog/index.html
+          grep -q 'Signal,<br>not filler.' blog/index.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
 
       - name: Show generated drift
