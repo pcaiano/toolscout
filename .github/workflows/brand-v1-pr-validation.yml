@@ -27,6 +27,7 @@ on:
       - 'scripts/generate-comparisons.mjs'
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/generate-seo-pages.mjs'
+      - 'scripts/unify-public-nav.mjs'
       - 'scripts/validate-*.mjs'
       - '.github/workflows/brand-v1-pr-validation.yml'
   workflow_dispatch:
@@ -70,6 +71,9 @@ jobs:
       - name: Regenerate Journal
         run: node scripts/generate-blog.mjs
 
+      - name: Apply deploy-time public navigation
+        run: node scripts/unify-public-nav.mjs
+
       - name: Regenerate sitemap
         run: node scripts/generate-sitemap.mjs
 
@@ -104,6 +108,8 @@ jobs:
           grep -q 'brand-system.css' agency-tools.html
           grep -q 'brand-ops' admin.html
           grep -q 'Command Center' admin.html
+          ! grep -q 'ts-global-nav' index.html
+          ! grep -q 'ts-global-nav' tools/pipedrive.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
 
       - name: Show generated drift
