@@ -37,14 +37,14 @@ Provider-domain favicons are the approved tool-mark strategy for catalog/profile
 
 After the redesign branch was created, `main` advanced by five commits. Review of those commits shows that three were generated SEO/navigation persistence commits and two carried the AdCreative.ai affiliate activation state.
 
-The production source-of-truth affiliate changes are now mirrored into `brand-v1-redesign`:
+The production source-of-truth affiliate changes are mirrored into `brand-v1-redesign`:
 
 - `data/affiliate.json` matches current `main`, including the enabled verified AdCreative.ai custom referral URL;
 - `data/affiliate-pipeline.json` matches current `main`, including AdCreative.ai status `active`, 30% commission note, approval evidence and current follow-up guidance;
 - the Brand v1 AdCreative.ai profile continues to route through `/go/adcreative-ai`, keeping editorial UI independent from the private referral destination;
-- generated SEO/navigation differences are intentionally not copied from `main`; Brand v1 generators are the desired source for those outputs.
+- generated SEO/navigation outputs remain Brand v1-owned rather than copying the legacy generated presentation from `main`.
 
-The branch is still Git-history-diverged from `main`, so GitHub reports it as not mergeable until the generated-file conflicts are formally resolved. That is a release-preparation issue, not an unresolved affiliate-data gap.
+The current `main` head is now recorded as a parent of the redesign branch without changing the approved Brand v1 tree. The branch is therefore **0 commits behind `main`**, the merge base is the current production head, and PR #9 is mergeable again. This resolves the Git-level reconciliation gate while preserving both the newer production commercial state and the Brand v1 generated/visual outputs.
 
 ## Validation state
 
@@ -60,7 +60,8 @@ The branch is still Git-history-diverged from `main`, so GitHub reports it as no
 - Brand v1 generated-surface smoke checks: PASS;
 - comparison generator Brand v1 checks: PASS;
 - deploy-time navigation preservation checks: PASS;
-- Opportunity Matrix worker syntax and semantic regression checks: PASS.
+- Opportunity Matrix worker syntax and semantic regression checks: PASS;
+- branch/base reconciliation: PASS — current `main` is contained in redesign history and PR #9 is mergeable.
 
 ## Deliberately unchanged
 
@@ -75,15 +76,14 @@ The branch is still Git-history-diverged from `main`, so GitHub reports it as no
 
 Before merge/deploy:
 
-1. resolve Git-level divergence with latest `main`, preserving Brand v1 generated/visual outputs and current production data state;
-2. review homepage desktop and mobile against the approved V5 direction;
-3. verify recommendation input, guided flow, results and outbound links;
-4. verify Tools search, Categories links and Compare selectors/outbound links;
-5. verify Command Center secure load and Content Engine source panels;
-6. verify Affiliate Operations filtering/action links;
-7. verify Distribution status/note writes and copy-pack action;
-8. verify Opportunity Matrix secure load and its per-intent affiliate coverage payload against production-shaped data;
-9. run final repository CI/syntax checks;
-10. obtain explicit human approval before merge/deploy.
+1. review homepage desktop and mobile against the approved V5 direction;
+2. verify recommendation input, guided flow, results and outbound links;
+3. verify Tools search, Categories links and Compare selectors/outbound links;
+4. verify Command Center secure load and Content Engine source panels;
+5. verify Affiliate Operations filtering/action links;
+6. verify Distribution status/note writes and copy-pack action;
+7. verify Opportunity Matrix secure load and its per-intent affiliate coverage payload against production-shaped data;
+8. run final repository CI/syntax checks after any review fixes;
+9. obtain explicit human approval before merge/deploy.
 
 Keep the branch/PR draft until the visual and runtime review is accepted.
