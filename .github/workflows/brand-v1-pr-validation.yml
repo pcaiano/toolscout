@@ -22,6 +22,7 @@ on:
       - 'affiliate-workflow.html'
       - 'distribution-workflow.html'
       - 'opportunity-matrix.html'
+      - 'revenue-worker.js'
       - 'data/**'
       - 'scripts/build-distribution-index.mjs'
       - 'scripts/generate-acquisition-content.mjs'
@@ -56,6 +57,9 @@ jobs:
 
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
+
+      - name: Check operational worker syntax
+        run: node --check revenue-worker.js
 
       - name: Regenerate buying-guide pages
         run: node scripts/generate-seo-pages.mjs
@@ -131,6 +135,12 @@ jobs:
           grep -q 'Affiliate payout is not part of the scoring model.' .github/workflows/production-smoke.yml
           grep -q 'No paid winner.' .github/workflows/commercial-surface-smoke.yml
           grep -q 'Affiliate payout is not part of the scoring model.' .github/workflows/commercial-surface-smoke.yml
+          grep -q 'intentAffiliateCoverage' revenue-worker.js
+          grep -q 'intentCoverageDefinition' revenue-worker.js
+          grep -q 'coverageMap' opportunity-matrix.html
+          grep -q 'Historical unmonetized' opportunity-matrix.html
+          ! grep -q 'active.has(intent)' opportunity-matrix.html
+          ! grep -q 'active.has(x.intent_slug)' opportunity-matrix.html
           ! grep -q 'ts-global-nav' index.html
           ! grep -q 'ts-global-nav' tools/pipedrive.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
