@@ -19,7 +19,6 @@ on:
       - 'scripts/enrich-guide-comparisons.mjs'
       - 'scripts/generate-blog.mjs'
       - 'scripts/generate-acquisition-content.mjs'
-      - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/import-gsc-signals.mjs'
       - 'scripts/sync-gsc-signals.mjs'
@@ -76,9 +75,6 @@ jobs:
 
       - name: Link guides to relevant comparisons
         run: node scripts/enrich-guide-comparisons.mjs
-
-      - name: Generate blog topics
-        run: node scripts/build-blog-topics.mjs
 
       - name: Generate blog
         run: node scripts/generate-blog.mjs
