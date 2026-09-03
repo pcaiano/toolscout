@@ -67,13 +67,14 @@
     {
       "slug": "adcreative-ai",
       "provider": "AdCreative.ai",
-      "status": "submitted",
-      "commission_note": "Pending verification",
+      "status": "active",
+      "commission_note": "30% commission",
       "source": "https://www.adcreative.ai/affiliate",
       "application_url": "https://www.adcreative.ai/affiliate",
-      "last_verified": "2026-09-01",
-      "next_action": "Application submitted via PartnerStack; wait for review decision.",
-      "network": "PartnerStack"
+      "last_verified": "2026-09-03",
+      "next_action": "Keep the verified PartnerStack referral URL live and monitor ToolScout clicks, conversions and commissions; preserve affiliate-neutral editorial ranking.",
+      "network": "PartnerStack",
+      "evidence": "AdCreative.ai approval email received 2026-09-03 with a vendor-specific custom referral URL; link validated and activated in ToolScout production affiliate routing."
     },
     {
       "slug": "hubspot",
