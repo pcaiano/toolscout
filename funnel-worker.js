@@ -77,6 +77,78 @@ async function funnelSnapshot(env) {
   };
 }
 
+async function trafficSnapshot(env) {
+  const [dailyResult, monthRow, todayRow, yesterdayRow] = await Promise.all([
+    env.DB.prepare(`SELECT substr(first_seen_at,1,10) AS day,COUNT(*) AS sessions
+      FROM sessions
+      WHERE classification='likely-human' AND first_seen_at >= datetime('now','-60 days')
+      GROUP BY substr(first_seen_at,1,10) ORDER BY day`).all(),
+    env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions
+      WHERE classification='likely-human' AND strftime('%Y-%m',first_seen_at)=strftime('%Y-%m','now')`).first(),
+    env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions
+      WHERE classification='likely-human' AND date(first_seen_at)=date('now')`).first(),
+    env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions
+      WHERE classification='likely-human' AND date(first_seen_at)=date('now','-1 day')`).first()
+  ]);
+  return {
+    timezone:'UTC',
+    today:Number(todayRow?.sessions||0),
+    yesterday:Number(yesterdayRow?.sessions||0),
+    monthToDate:Number(monthRow?.sessions||0),
+    daily:rows(dailyResult).map(row=>({day:String(row.day),sessions:Number(row.sessions||0)}))
+  };
+}
+
+function injectTrafficDashboard(html) {
+  if (html.includes('id="trafficTimeSection"')) return html;
+  const css = `<style>
+#trafficTimeSection .trafficLive{display:inline-flex;align-items:center;gap:7px}.trafficDot{width:7px;height:7px;border-radius:999px;background:#067647;display:inline-block}.trafficBars .row{align-items:center}.trafficBars .bar{min-width:140px}.trafficTrend{font-weight:850}.trafficTrend.up{color:#067647}.trafficTrend.down{color:#b42318}
+</style>`;
+  const section = `<section class="section live" id="trafficTimeSection"><div class="sectionHead"><h2>Traffic over time</h2><span class="trafficLive"><i class="trafficDot"></i> auto-updates every 15s · UTC</span></div><div class="grid4" id="trafficTimeMetrics"></div><div class="grid2 section"><div class="panel"><div class="sectionHead"><h2>Daily visits</h2><span>Last 14 days · likely-human</span></div><div id="trafficDaily" class="trafficBars"></div></div><div class="panel"><div class="sectionHead"><h2>Momentum</h2><span>Temporal signals</span></div><div id="trafficMomentum"></div></div></div></section>`;
+  const script = `<script>
+(function(){
+  function fmt(v,d){return Number(v||0).toLocaleString(undefined,d?{maximumFractionDigits:d}:undefined)}
+  function pctDelta(current,previous){if(!previous)return current?null:0;return (current-previous)/previous*100}
+  function isoDay(offset){var d=new Date();d.setUTCDate(d.getUTCDate()+offset);return d.toISOString().slice(0,10)}
+  function fillDays(rows,count){var map=new Map((rows||[]).map(function(x){return [x.day,Number(x.sessions||0)]}));var out=[];for(var i=-(count-1);i<=0;i++){var day=isoDay(i);out.push({day:day,sessions:map.get(day)||0})}return out}
+  function metric(label,value,meta){return '<div class="card"><small>'+label+'</small><b>'+value+'</b><span>'+meta+'</span></div>'}
+  function renderTraffic(t){
+    if(!t)return;
+    var days60=fillDays(t.daily||[],60), days30=days60.slice(-30), days14=days60.slice(-14), last7=days60.slice(-7), prior7=days60.slice(-14,-7);
+    var sum=function(a){return a.reduce(function(s,x){return s+x.sessions},0)};
+    var last7Total=sum(last7), prior7Total=sum(prior7), rolling30=sum(days30), delta=pctDelta(last7Total,prior7Total);
+    var now=new Date(), dayOfMonth=now.getUTCDate(), daysInMonth=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()+1,0)).getUTCDate();
+    var dailyAvg=dayOfMonth?Number(t.monthToDate||0)/dayOfMonth:0, projection=Math.round(dailyAvg*daysInMonth);
+    var best=days30.reduce(function(a,b){return b.sessions>a.sessions?b:a},{day:'—',sessions:0});
+    document.getElementById('trafficTimeMetrics').innerHTML=
+      metric('Today',fmt(t.today),'Likely-human sessions')+
+      metric('This month',fmt(t.monthToDate),'Month-to-date')+
+      metric('Daily average',fmt(dailyAvg,1),'Current month')+
+      metric('Monthly pace',fmt(projection),'Projection at current average');
+    var max=Math.max.apply(null,[1].concat(days14.map(function(x){return x.sessions})));
+    document.getElementById('trafficDaily').innerHTML=days14.slice().reverse().map(function(x){var w=Math.max(3,Math.round(x.sessions/max*100));return '<div class="row"><div style="flex:1"><div class="name">'+x.day+'</div><div class="bar"><i style="width:'+w+'%"></i></div></div><div class="value">'+fmt(x.sessions)+'</div></div>'}).join('');
+    var deltaText=delta===null?'New traffic':((delta>=0?'+':'')+delta.toFixed(1)+'%');
+    var deltaClass=delta===null||delta>=0?'up':'down';
+    document.getElementById('trafficMomentum').innerHTML=
+      '<div class="row"><div><div class="name">Last 7 days</div><div class="meta">Likely-human sessions</div></div><div class="value">'+fmt(last7Total)+'</div></div>'+
+      '<div class="row"><div><div class="name">Previous 7 days</div><div class="meta">Comparison window</div></div><div class="value">'+fmt(prior7Total)+'</div></div>'+
+      '<div class="row"><div><div class="name">7-day change</div><div class="meta">Current vs previous seven days</div></div><div class="value trafficTrend '+deltaClass+'">'+deltaText+'</div></div>'+
+      '<div class="row"><div><div class="name">Yesterday</div><div class="meta">UTC day</div></div><div class="value">'+fmt(t.yesterday)+'</div></div>'+
+      '<div class="row"><div><div class="name">Best day · 30d</div><div class="meta">'+best.day+'</div></div><div class="value">'+fmt(best.sessions)+'</div></div>'+
+      '<div class="row"><div><div class="name">Rolling 30 days</div><div class="meta">Clean likely-human traffic</div></div><div class="value">'+fmt(rolling30)+'</div></div>';
+  }
+  async function refreshTraffic(){try{var res=await fetch('/api/stats?live='+Date.now(),{credentials:'same-origin',cache:'no-store'});if(res.ok){var d=await res.json();renderTraffic(d.traffic)}}catch(e){}}
+  refreshTraffic();
+  setInterval(function(){if(!document.hidden){if(typeof load==='function')load();refreshTraffic()}},15000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){if(typeof load==='function')load();refreshTraffic()}});
+})();
+</script>`;
+  let out = html.replace('</style>', '</style>'+css);
+  out = out.replace('<section class="section"><div class="sectionHead"><h2>End-to-end funnel</h2>', section+'<section class="section"><div class="sectionHead"><h2>End-to-end funnel</h2>');
+  out = out.replace('</body>', script+'</body>');
+  return out;
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -86,7 +158,9 @@ export default {
       const dashboard=await env.ASSETS.fetch(request);
       const headers=new Headers(dashboard.headers);
       headers.set('Cache-Control','private, no-store');
-      return new Response(dashboard.body,{status:dashboard.status,headers});
+      headers.set('Content-Type','text/html; charset=UTF-8');
+      const html=await dashboard.text();
+      return new Response(injectTrafficDashboard(html),{status:dashboard.status,headers});
     }
     if (url.pathname === '/api/events' && request.method === 'OPTIONS') return new Response(null, {status:204, headers:eventHeaders(request)});
     if (url.pathname === '/api/events' && request.method === 'POST') return ingest(request, env);
@@ -95,14 +169,14 @@ export default {
       if (!response.ok) return response;
       const stats = await response.json();
       try {
-        const funnel=await funnelSnapshot(env);
+        const [funnel,traffic]=await Promise.all([funnelSnapshot(env),trafficSnapshot(env)]);
         const counts=funnel.audience||{};
         const observedExternalSessions=Object.entries(counts).filter(([key])=>key!==SESSION_CLASSIFICATIONS.OWNER).reduce((sum,[,value])=>sum+Number(value||0),0);
         const audience={...(stats.audience||{}),likelyHumanSessions:funnel.sessions,observedExternalSessions,knownBotCrawlerSessions:Number(counts[SESSION_CLASSIFICATIONS.KNOWN_BOT]||0),syntheticTestSessions:Number(counts[SESSION_CLASSIFICATIONS.SYNTHETIC]||0),ownerSessions:Number(counts[SESSION_CLASSIFICATIONS.OWNER]||0),unknownLegacySessions:Number(counts[SESSION_CLASSIFICATIONS.UNKNOWN]||0),otherClicks:funnel.outboundClicks,classificationNote:'Likely-human requires a plausible browser user agent. Owner, known crawler and synthetic traffic are excluded. Historical rows remain unknown/legacy and are never promoted to human.'};
         const total={...(stats.total||{}),sessions:funnel.sessions};
-        return Response.json({...stats,total,audience,funnel}, {headers:{'Cache-Control':'private, max-age=60'}});
+        return Response.json({...stats,total,audience,funnel,traffic}, {headers:{'Cache-Control':'private, no-store','Content-Type':'application/json; charset=UTF-8'}});
       }
-      catch { return Response.json({...stats, funnel:{status:'unavailable', reason:'Funnel migration is not available.'}}, {headers:{'Cache-Control':'private, max-age=60'}}); }
+      catch { return Response.json({...stats, funnel:{status:'unavailable', reason:'Funnel migration is not available.'}}, {headers:{'Cache-Control':'private, no-store'}}); }
     }
     return base.fetch(request, env, ctx);
   },
