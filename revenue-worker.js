@@ -44,13 +44,15 @@ async function monetizedClickBreakdown(env) {
 async function intentAffiliateCoverage(env, activeSlugs) {
   try {
     const result = await env.DB.prepare(`
-      SELECT intent_slug, tool_slug, COUNT(*) AS clicks
-      FROM click_events
-      WHERE source != 'internal-test'
-        AND intent_slug IS NOT NULL
-        AND intent_slug != 'general'
-      GROUP BY intent_slug, tool_slug
-      ORDER BY intent_slug ASC, clicks DESC
+      SELECT c.intent_slug, c.tool_slug, COUNT(*) AS clicks
+      FROM click_events c
+      LEFT JOIN sessions s ON s.session_id = c.session_id
+      WHERE c.source != 'internal-test'
+        AND COALESCE(s.classification, 'unknown/legacy') != 'owner'
+        AND c.intent_slug IS NOT NULL
+        AND c.intent_slug != 'general'
+      GROUP BY c.intent_slug, c.tool_slug
+      ORDER BY c.intent_slug ASC, clicks DESC
     `).all();
     const byIntent = new Map();
     for (const row of result?.results || []) {
