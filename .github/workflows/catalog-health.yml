@@ -1,0 +1,66 @@
+name: ToolScout catalog health
+
+on:
+  schedule:
+    - cron: '37 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-catalog-health
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify catalog and affiliate links
+        id: verify
+        continue-on-error: true
+        run: node scripts/catalog-health.mjs
+
+      - name: Publish catalog health summary
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f reports/catalog-health.json ]; then
+            echo '## Catalog Health' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Report was not generated.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const r = require('./reports/catalog-health.json');
+          const s = r.summary;
+          console.log('## Catalog Health');
+          console.log('');
+          console.log(`Generated: ${s.generatedAt}`);
+          console.log('');
+          console.log(`- Tools: **${s.tools}**`);
+          console.log(`- Source links healthy: **${s.sourceLinks.healthy}** · broken: **${s.sourceLinks.confirmedBroken}** · warnings: **${s.sourceLinks.warnings}**`);
+          console.log(`- Active affiliate links: **${s.affiliateLinks.active}** · healthy: **${s.affiliateLinks.healthy}** · broken: **${s.affiliateLinks.confirmedBroken}** · warnings: **${s.affiliateLinks.warnings}**`);
+          console.log(`- Metadata verified ≤7 days: **${s.metadata.verifiedWithin7Days}** · weekly review due: **${s.metadata.needsWeeklyReview}** · >30 days: **${s.metadata.overdue30Days}**`);
+          console.log(`- Tools missing critical fields: **${s.metadata.missingCriticalFields}**`);
+          NODE
+
+      - name: Upload catalog health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-health
+          path: reports/catalog-health.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail on confirmed catalog breakage
+        if: steps.verify.outcome == 'failure'
+        run: exit 1
