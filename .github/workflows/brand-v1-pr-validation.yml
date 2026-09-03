@@ -20,6 +20,7 @@ on:
       - 'admin.html'
       - 'analytics.html'
       - 'affiliate-workflow.html'
+      - 'affiliate-workflow-worker.js'
       - 'distribution-workflow.html'
       - 'opportunity-matrix.html'
       - 'revenue-worker.js'
@@ -60,7 +61,9 @@ jobs:
         run: node scripts/validate-intent-coverage.mjs
 
       - name: Check operational worker syntax
-        run: node --check revenue-worker.js
+        run: |
+          node --check revenue-worker.js
+          node --check affiliate-workflow-worker.js
 
       - name: Regenerate buying-guide pages
         run: node scripts/generate-seo-pages.mjs
@@ -140,6 +143,9 @@ jobs:
           grep -q 'LEFT JOIN sessions s ON s.session_id = c.session_id' revenue-worker.js
           grep -q "COALESCE(s.classification, 'unknown/legacy') != 'owner'" revenue-worker.js
           grep -q 'intentCoverageDefinition' revenue-worker.js
+          grep -q 'isEligibleOperationalClick' affiliate-workflow-worker.js
+          grep -q 'const validClicks=(clicks.results||\[\]).filter(isEligibleOperationalClick)' affiliate-workflow-worker.js
+          grep -q 'record.monetized_clicks_30d=validClicks.filter' affiliate-workflow-worker.js
           grep -q 'coverageMap' opportunity-matrix.html
           grep -q 'Historical unmonetized' opportunity-matrix.html
           ! grep -q 'active.has(intent)' opportunity-matrix.html
