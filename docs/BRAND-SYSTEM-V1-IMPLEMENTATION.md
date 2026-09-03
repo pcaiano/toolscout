@@ -24,7 +24,7 @@ Provider-domain favicons are the approved tool-mark strategy for catalog/profile
 - buying-guide, tool-profile, comparison and acquisition generators converted to Brand v1;
 - tool-profile capability data retained but reduced from pill/chip UI to a quiet editorial capability line, preserving the underlying catalog information without visual clutter;
 - buying-guide and direct-comparison interaction targets aligned with the Brand Book accessibility rule: primary actions, profile links, nav links, decision links and FAQ summaries now expose at least 44px touch/click height without adding visual weight;
-- generated Brand v1 SEO/blog/tool-profile/comparison assets are persisted on `brand-v1-redesign` as well as `main`, so branch review reflects the actual generated release surface before merge;
+- generated Brand v1 SEO/blog/tool-profile/comparison assets are persisted on `brand-v1-redesign`, so branch review reflects the actual generated release surface before merge;
 - institutional pages and seven category landing pages converted to Brand v1;
 - Command Center and Analytics Admin redesigned as dark operational surfaces with existing analytics/revenue JS and APIs preserved;
 - Affiliate Operations, Distribution Workflow and Opportunity Matrix aligned to the same operational system;
