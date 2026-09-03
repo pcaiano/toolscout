@@ -1,6 +1,13 @@
 name: ToolScout catalog health
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/tools.json'
+      - 'data/affiliate.json'
+      - 'scripts/catalog-health.mjs'
+      - '.github/workflows/catalog-health.yml'
   schedule:
     - cron: '37 6 * * *'
   workflow_dispatch:
