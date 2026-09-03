@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const ROOT = process.cwd();
 const intents = JSON.parse(fs.readFileSync(path.join(ROOT,'data','intents.json'),'utf8'));
+const outputPath = path.join(ROOT,'reports','blog-topics.json');
 
 const clean = s => String(s || '').replace(/^best-/,'').replace(/-/g,' ').trim();
 const titleCase = s => clean(s).replace(/\b\w/g,c=>c.toUpperCase());
@@ -19,6 +20,16 @@ const rows = intents.filter(x=>x?.slug).map(item=>({
 
 const seen=new Set();
 const unique=rows.filter(x=>{if(seen.has(x.slug))return false;seen.add(x.slug);return true;});
-fs.mkdirSync(path.join(ROOT,'reports'),{recursive:true});
-fs.writeFileSync(path.join(ROOT,'reports','blog-topics.json'),JSON.stringify({generatedAt:new Date().toISOString(),count:unique.length,items:unique},null,2)+'\n');
-console.log(JSON.stringify({topics:unique.length}));
+
+let generatedAt=new Date().toISOString();
+if(fs.existsSync(outputPath)){
+  try{
+    const previous=JSON.parse(fs.readFileSync(outputPath,'utf8'));
+    const samePayload=previous?.count===unique.length&&JSON.stringify(previous?.items||[])===JSON.stringify(unique);
+    if(samePayload&&previous?.generatedAt)generatedAt=previous.generatedAt;
+  }catch{}
+}
+
+fs.mkdirSync(path.dirname(outputPath),{recursive:true});
+fs.writeFileSync(outputPath,JSON.stringify({generatedAt,count:unique.length,items:unique},null,2)+'\n');
+console.log(JSON.stringify({topics:unique.length,generatedAt,preservedTimestamp:fs.existsSync(outputPath)}));
