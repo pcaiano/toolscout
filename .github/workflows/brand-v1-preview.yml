@@ -1,0 +1,58 @@
+name: Deploy Brand v1 Preview
+
+on:
+  push:
+    branches: [brand-v1-redesign]
+    paths:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-brand-v1-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout redesign branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build isolated public preview surface
+        run: |
+          set -e
+          mkdir -p preview
+          rsync -a ./ preview/ \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'preview' \
+            --exclude 'admin.html' \
+            --exclude 'analytics.html' \
+            --exclude 'affiliate-workflow.html' \
+            --exclude 'distribution-workflow.html' \
+            --exclude 'opportunity-matrix.html' \
+            --exclude 'migrations' \
+            --exclude 'wrangler.toml'
+          cat > preview/_headers <<'EOF'
+          /*
+            X-Robots-Tag: noindex, nofollow
+            Cache-Control: no-store
+          EOF
+
+      - name: Ensure isolated Cloudflare Pages project exists
+        run: npx wrangler pages project create toolscout-brand-v1-preview --production-branch brand-v1-redesign || true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy redesign preview
+        run: npx wrangler pages deploy preview --project-name toolscout-brand-v1-preview --branch brand-v1-redesign --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
