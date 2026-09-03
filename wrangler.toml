@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "affiliate-workflow-worker.js"
+main = "command-center-entry-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
