@@ -23,6 +23,7 @@ on:
       - 'distribution-workflow.html'
       - 'opportunity-matrix.html'
       - 'data/**'
+      - 'scripts/generate-acquisition-content.mjs'
       - 'scripts/generate-blog.mjs'
       - 'scripts/generate-comparisons.mjs'
       - 'scripts/generate-tool-pages.mjs'
@@ -71,6 +72,9 @@ jobs:
       - name: Regenerate Journal
         run: node scripts/generate-blog.mjs
 
+      - name: Regenerate acquisition content
+        run: node scripts/generate-acquisition-content.mjs
+
       - name: Apply deploy-time public navigation
         run: node scripts/unify-public-nav.mjs
 
@@ -94,6 +98,10 @@ jobs:
           grep -q 'brand-system.css' hubspot-vs-pipedrive.html
           grep -q 'Where the choice separates.' hubspot-vs-pipedrive.html
           grep -q 'No paid winner.' hubspot-vs-pipedrive.html
+          grep -q 'brand-system.css' guides.html
+          grep -q 'Start with<br>the job.' guides.html
+          grep -q 'href="/best-crm-for-small-business.html"' guides.html
+          grep -q 'href="/hubspot-vs-pipedrive.html"' guides.html
           grep -q 'ToolScout Journal' blog/index.html
           grep -q 'Signal,<br>not filler.' blog/index.html
           grep -q 'brand-system.css' methodology.html
@@ -108,6 +116,8 @@ jobs:
           grep -q 'brand-system.css' agency-tools.html
           grep -q 'brand-ops' admin.html
           grep -q 'Command Center' admin.html
+          grep -q 'system:'"'"'brand-v1'"'"'' scripts/generate-acquisition-content.mjs
+          grep -q '../brand-system.css' scripts/generate-acquisition-content.mjs
           ! grep -q 'ts-global-nav' index.html
           ! grep -q 'ts-global-nav' tools/pipedrive.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
