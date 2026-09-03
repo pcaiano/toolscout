@@ -137,6 +137,8 @@ jobs:
           grep -q 'No paid winner.' .github/workflows/commercial-surface-smoke.yml
           grep -q 'Affiliate payout is not part of the scoring model.' .github/workflows/commercial-surface-smoke.yml
           grep -q 'intentAffiliateCoverage' revenue-worker.js
+          grep -q 'LEFT JOIN sessions s ON s.session_id = c.session_id' revenue-worker.js
+          grep -q "COALESCE(s.classification, 'unknown/legacy') != 'owner'" revenue-worker.js
           grep -q 'intentCoverageDefinition' revenue-worker.js
           grep -q 'coverageMap' opportunity-matrix.html
           grep -q 'Historical unmonetized' opportunity-matrix.html
