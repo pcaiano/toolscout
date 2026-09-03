@@ -8,6 +8,10 @@ html_handling = "auto-trailing-slash"
 not_found_handling = "404-page"
 binding = "ASSETS"
 run_worker_first = [
+  "/analytics.html",
+  "/analytics*",
+  "/api/stats",
+  "/api/stats*",
   "/go/*",
   "/api/affiliate-workflow*",
   "/affiliate-workflow*",
