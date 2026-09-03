@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T23:06:22.903Z",
+  "generatedAt": "2026-09-03T08:17:04.173Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.",
   "gsc": {
     "available": false,
