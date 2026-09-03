@@ -64,15 +64,26 @@ jobs:
             outbound_links="$(printf '%s\n' "$html" | grep -oE 'href="/go/[a-z0-9-]+"' | wc -l)"
             test "$outbound_links" -ge 2
           done
-      - name: Check public analytics surface is protected
+      - name: Check private operational surfaces are protected
         run: |
           set -e
-          code="$(curl --silent --show-error --output /tmp/analytics.html --write-out '%{http_code}' --location "$PROD_BASE/analytics.html")"
-          case "$code" in
-            404) echo 'Public analytics surface correctly absent on public domain' ;;
-            200) if grep -Fq 'ToolScout Command Center' /tmp/analytics.html; then echo 'ERROR: unauthenticated request exposed the Command Center'; exit 1; fi ;;
-            *) echo "ERROR: unexpected analytics page status $code"; exit 1 ;;
-          esac
+          check_private_page() {
+            path="$1"
+            marker="$2"
+            file="$(mktemp)"
+            code="$(curl --silent --show-error --output "$file" --write-out '%{http_code}' --location "$PROD_BASE$path")"
+            case "$code" in
+              401|403|404) echo "$path correctly protected with HTTP $code" ;;
+              200) if grep -Fq "$marker" "$file"; then echo "ERROR: unauthenticated request exposed private surface $path"; rm -f "$file"; exit 1; fi; echo "$path returned HTTP 200 without private marker; likely Access login/interstitial" ;;
+              *) echo "ERROR: unexpected private-surface status $code for $path"; rm -f "$file"; exit 1 ;;
+            esac
+            rm -f "$file"
+          }
+          check_private_page /analytics.html 'ToolScout Command Center'
+          check_private_page /admin.html 'Analytics Admin'
+          check_private_page /affiliate-workflow.html 'Affiliate Operations'
+          check_private_page /distribution-workflow.html 'Distribution Workflow'
+          check_private_page /opportunity-matrix.html 'Opportunity Matrix'
       - name: Check dynamic SEO canonical
         run: |
           set -e
