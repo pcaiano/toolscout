@@ -41,6 +41,65 @@ async function monetizedClickBreakdown(env) {
   }
 }
 
+async function trafficSnapshot(env) {
+  try {
+    const [dailyResult, todayRow, yesterdayRow, monthRow, last7Row, previous7Row] = await Promise.all([
+      env.DB.prepare(`
+        SELECT date(first_seen_at) AS day, COUNT(*) AS sessions
+        FROM sessions
+        WHERE classification='likely-human'
+          AND date(first_seen_at) >= date('now','-29 days')
+        GROUP BY date(first_seen_at)
+        ORDER BY day
+      `).all(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)=date('now')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)=date('now','-1 day')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)>=date('now','start of month')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)>=date('now','-6 days')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)>=date('now','-13 days') AND date(first_seen_at)<=date('now','-7 days')`).first()
+    ]);
+    const now = new Date();
+    const dayOfMonth = now.getUTCDate();
+    const daysInMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate();
+    const observed = new Map((dailyResult?.results || []).map(row => [String(row.day), Number(row.sessions || 0)]));
+    const daily = [];
+    for (let offset = 29; offset >= 0; offset -= 1) {
+      const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - offset));
+      const day = date.toISOString().slice(0, 10);
+      daily.push({ day, sessions: Number(observed.get(day) || 0) });
+    }
+    const today = Number(todayRow?.sessions || 0);
+    const yesterday = Number(yesterdayRow?.sessions || 0);
+    const monthToDate = Number(monthRow?.sessions || 0);
+    const last7Days = Number(last7Row?.sessions || 0);
+    const previous7Days = Number(previous7Row?.sessions || 0);
+    const dailyAverageMTD = dayOfMonth > 0 ? monthToDate / dayOfMonth : 0;
+    const last7DailyAverage = last7Days / 7;
+    const sevenDayChangeRate = previous7Days > 0 ? ((last7Days - previous7Days) / previous7Days) * 100 : null;
+    const projectedMonth = dayOfMonth > 0 ? dailyAverageMTD * daysInMonth : null;
+    const best = daily.reduce((current, row) => row.sessions > (current?.sessions || 0) ? row : current, null);
+    return {
+      status: 'observed',
+      timezone: 'UTC',
+      today,
+      yesterday,
+      monthToDate,
+      dayOfMonth,
+      daysInMonth,
+      dailyAverageMTD: Number(dailyAverageMTD.toFixed(1)),
+      last7Days,
+      last7DailyAverage: Number(last7DailyAverage.toFixed(1)),
+      previous7Days,
+      sevenDayChangeRate: sevenDayChangeRate === null ? null : Number(sevenDayChangeRate.toFixed(1)),
+      projectedMonth: projectedMonth === null ? null : Math.round(projectedMonth),
+      bestDay: best && best.sessions > 0 ? best : null,
+      daily
+    };
+  } catch (error) {
+    return { status: 'unavailable', reason: `Temporal traffic aggregation unavailable: ${String(error?.message || error)}` };
+  }
+}
+
 async function revenueSnapshot(request, env, stats) {
   const affiliate = await readAffiliateMap(request, env);
   const activeSlugs = new Set(stats?.affiliateCoverage?.activeToolSlugs || []);
@@ -173,6 +232,65 @@ function buildOpportunity(byTool, byIntent, activeSlugs, affiliate) {
   };
 }
 
+function commandCenterSection() {
+  return `<section class="section live" id="trafficOverTime"><div class="sectionHead"><h2>Traffic over time</h2><span>Likely-human · UTC · auto-refresh 15s</span></div><div class="grid4" id="trafficMetrics"><div class="note">Loading temporal analytics…</div></div><div class="grid2" style="margin-top:14px"><div class="panel"><div class="sectionHead"><h2>Daily sessions</h2><span>Last 14 days</span></div><div id="dailyTraffic"><div class="note">Loading…</div></div></div><div class="panel"><div class="sectionHead"><h2>Traffic pace</h2><span>Trend & projection</span></div><div id="trafficPace"><div class="note">Loading…</div></div></div></div></section>\n`;
+}
+
+function commandCenterScript() {
+  return `<script>
+(function(){
+  const tsDateLabel=value=>{try{return new Date(value+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})}catch{return value}};
+  const tsSigned=value=>value===null||value===undefined?'Not enough history':(Number(value)>=0?'+':'')+Number(value).toFixed(1)+'%';
+  function tsDailyRows(items){
+    const rows=(items||[]).slice(-14);if(!rows.length)return '<div class="note">No daily traffic yet.</div>';
+    const max=Math.max(1,...rows.map(x=>Number(x.sessions||0)));
+    return rows.map(x=>{const v=Number(x.sessions||0);return '<div class="row"><div style="flex:1"><div class="name">'+esc(tsDateLabel(x.day))+'</div><div class="bar"><i style="width:'+Math.max(v?3:0,Math.round(v/max*100))+'%"></i></div></div><div class="value">'+n(v)+'</div></div>'}).join('');
+  }
+  function tsRenderTraffic(d){
+    const t=d?.traffic||{};const f=d?.funnel||{};
+    const metrics=document.getElementById('trafficMetrics'),daily=document.getElementById('dailyTraffic'),pace=document.getElementById('trafficPace');
+    if(!metrics||!daily||!pace)return;
+    if(t.status!=='observed'){
+      metrics.innerHTML='<div class="note">Temporal analytics are temporarily unavailable.</div>';daily.innerHTML='';pace.innerHTML='';return;
+    }
+    metrics.innerHTML=card('Today',n(t.today),'Likely-human sessions · today so far')+card('This month',n(t.monthToDate),'Month-to-date')+card('MTD daily average',Number(t.dailyAverageMTD||0).toFixed(1),'Includes today so far')+card('Last 7 days',n(t.last7Days),Number(t.last7DailyAverage||0).toFixed(1)+' per day');
+    daily.innerHTML=tsDailyRows(t.daily);
+    const trendClass=Number(t.sevenDayChangeRate||0)>=0?'good':'warn';
+    const best=t.bestDay?tsDateLabel(t.bestDay.day)+' · '+n(t.bestDay.sessions):'No traffic yet';
+    pace.innerHTML='<div class="row"><div><div class="name">Yesterday</div><div class="meta">Completed UTC day</div></div><div class="value">'+n(t.yesterday)+'</div></div>'+
+      '<div class="row"><div><div class="name">Previous 7 days</div><div class="meta">Comparison period</div></div><div class="value">'+n(t.previous7Days)+'</div></div>'+
+      '<div class="row"><div><div class="name">7-day trend</div><div class="meta">Current 7 days vs previous 7</div></div><div class="value '+trendClass+'">'+esc(tsSigned(t.sevenDayChangeRate))+'</div></div>'+
+      '<div class="row"><div><div class="name">Best day</div><div class="meta">Within the last 30 calendar days</div></div><div class="value">'+esc(best)+'</div></div>'+
+      '<div class="row"><div><div class="name">Projected month</div><div class="meta">Simple projection at current MTD pace</div></div><div class="value">'+(t.projectedMonth==null?'—':n(t.projectedMonth))+'</div></div>'+
+      '<div class="row"><div><div class="name">Rolling 30 days</div><div class="meta">Primary likely-human audience window</div></div><div class="value">'+n(f.sessions)+'</div></div>';
+    statusEl.textContent='Live · updated '+new Date().toLocaleString()+' · auto-refresh 15s';
+  }
+  const tsBaseRender=window.render;
+  if(typeof tsBaseRender==='function')window.render=function(d){tsBaseRender(d);tsRenderTraffic(d)};
+  let tsBusy=false;
+  async function tsRefresh(){if(tsBusy||document.hidden||typeof window.load!=='function')return;tsBusy=true;try{await window.load()}finally{tsBusy=false}}
+  setTimeout(tsRefresh,900);
+  setInterval(tsRefresh,15000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)tsRefresh()});
+})();
+</script>`;
+}
+
+async function enhanceCommandCenter(request, env, ctx) {
+  const response = await base.fetch(request, env, ctx);
+  if (!response.ok) return response;
+  const type = response.headers.get('Content-Type') || '';
+  if (!type.includes('text/html')) return response;
+  let html = await response.text();
+  const anchor = '<section class="section"><div class="sectionHead"><h2>End-to-end funnel</h2>';
+  if (!html.includes('id="trafficOverTime"')) html = html.replace(anchor, commandCenterSection() + anchor);
+  if (!html.includes('tsRenderTraffic')) html = html.replace('</body>', commandCenterScript() + '</body>');
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'private, no-store');
+  headers.delete('Content-Length');
+  return new Response(html, { status: response.status, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -180,21 +298,23 @@ export default {
       const response = await base.fetch(request, env, ctx);
       if (!response.ok) return response;
       const stats = await response.json();
-      const [revenue,commercial,breakdown] = await Promise.all([
+      const [revenue,commercial,breakdown,traffic] = await Promise.all([
         revenueSnapshot(request, env, stats),
         commercialSnapshot(env,stats).catch(()=>({status:'unavailable',reason:'Revenue Intelligence v2 aggregation is unavailable; core analytics remain intact.'})),
-        monetizedClickBreakdown(env)
+        monetizedClickBreakdown(env),
+        trafficSnapshot(env)
       ]);
       const affiliateCoverage = breakdown
         ? { ...(stats.affiliateCoverage || {}), monetizedClickBreakdown: breakdown }
         : stats.affiliateCoverage;
-      return Response.json({ ...stats, affiliateCoverage, revenue, commercial }, {
+      return Response.json({ ...stats, affiliateCoverage, revenue, commercial, traffic }, {
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
-          'Cache-Control': 'private, max-age=60'
+          'Cache-Control': 'private, no-store'
         }
       });
     }
+    if (url.pathname === '/analytics.html' && request.method === 'GET') return enhanceCommandCenter(request, env, ctx);
     return base.fetch(request, env, ctx);
   },
   async scheduled(event, env, ctx) {
