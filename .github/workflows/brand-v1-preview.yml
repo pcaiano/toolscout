@@ -41,18 +41,42 @@ jobs:
             --exclude 'opportunity-matrix.html' \
             --exclude 'migrations' \
             --exclude 'wrangler.toml'
-          cat > preview/_headers <<'EOF'
-          /*
-            X-Robots-Tag: noindex, nofollow
-            Cache-Control: no-store
+          cat > preview-worker.js <<'EOF'
+          const PRIVATE_PATHS = new Set([
+            '/admin.html','/admin','/analytics.html','/analytics',
+            '/affiliate-workflow.html','/affiliate-workflow',
+            '/distribution-workflow.html','/distribution-workflow',
+            '/opportunity-matrix.html','/opportunity-matrix'
+          ]);
+          export default {
+            async fetch(request, env) {
+              const url = new URL(request.url);
+              if (PRIVATE_PATHS.has(url.pathname) || url.pathname.startsWith('/api/')) {
+                return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
+              }
+              const response = await env.ASSETS.fetch(request);
+              const headers = new Headers(response.headers);
+              headers.set('X-Robots-Tag', 'noindex, nofollow');
+              headers.set('Cache-Control', 'no-store');
+              return new Response(response.body, { status: response.status, headers });
+            }
+          };
+          EOF
+          cat > preview-wrangler.toml <<'EOF'
+          name = "toolscout-brand-v1-preview"
+          main = "preview-worker.js"
+          compatibility_date = "2026-09-03"
+          workers_dev = true
+
+          [assets]
+          directory = "./preview"
+          binding = "ASSETS"
+          html_handling = "auto-trailing-slash"
+          not_found_handling = "404-page"
+          run_worker_first = true
           EOF
 
-      - name: Ensure isolated Cloudflare Pages project exists
-        run: npx wrangler pages project create toolscout-brand-v1-preview --production-branch brand-v1-redesign || true
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Deploy redesign preview
-        run: npx wrangler pages deploy preview --project-name toolscout-brand-v1-preview --branch brand-v1-redesign --commit-dirty=true
+      - name: Deploy isolated redesign preview
+        run: npx wrangler deploy --config preview-wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
