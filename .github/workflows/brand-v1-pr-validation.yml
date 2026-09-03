@@ -32,6 +32,8 @@ on:
       - 'scripts/unify-public-nav.mjs'
       - 'scripts/validate-*.mjs'
       - '.github/workflows/brand-v1-pr-validation.yml'
+      - '.github/workflows/commercial-surface-smoke.yml'
+      - '.github/workflows/production-smoke.yml'
   workflow_dispatch:
 
 permissions:
@@ -125,6 +127,10 @@ jobs:
           grep -q 'system:'"'"'brand-v1'"'"'' scripts/generate-acquisition-content.mjs
           grep -q '../brand-system.css' scripts/generate-acquisition-content.mjs
           grep -q 'brand-v1-static-index' scripts/build-distribution-index.mjs
+          grep -q 'No paid winner.' .github/workflows/production-smoke.yml
+          grep -q 'Affiliate payout is not part of the scoring model.' .github/workflows/production-smoke.yml
+          grep -q 'No paid winner.' .github/workflows/commercial-surface-smoke.yml
+          grep -q 'Affiliate payout is not part of the scoring model.' .github/workflows/commercial-surface-smoke.yml
           ! grep -q 'ts-global-nav' index.html
           ! grep -q 'ts-global-nav' tools/pipedrive.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
