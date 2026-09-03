@@ -35,10 +35,13 @@ jobs:
             echo "Checking $page"
             html="$(curl --fail --silent --show-error --location "$PROD_BASE/$page.html")"
             printf '%s\n' "$html" | grep -F "<link rel=\"canonical\" href=\"$PROD_BASE/$page.html\">"
-            printf '%s\n' "$html" | grep -F 'No paid ranking.'
-            printf '%s\n' "$html" | grep -F 'Affiliate relationships do not influence scoring'
+            printf '%s\n' "$html" | grep -F 'Where the choice separates.'
+            printf '%s\n' "$html" | grep -F 'No paid winner.'
+            printf '%s\n' "$html" | grep -F 'Affiliate payout is not part of the scoring model.'
             profile_links="$(printf '%s\n' "$html" | grep -oE 'href="/tools/[a-z0-9-]+\.html"' | wc -l)"
             test "$profile_links" -ge 2
+            outbound_links="$(printf '%s\n' "$html" | grep -oE 'href="/go/[a-z0-9-]+"' | wc -l)"
+            test "$outbound_links" -ge 2
             printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/$page.html"
           done
           test "$count" -gt 0
