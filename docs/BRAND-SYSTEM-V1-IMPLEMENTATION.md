@@ -22,6 +22,8 @@ Provider-domain favicons are the approved tool-mark strategy for catalog/profile
 - public Tools, Categories, Compare and Guides surfaces aligned to the Brand System;
 - Journal index and generated editorial articles converted to Brand v1 with static indexable links;
 - buying-guide, tool-profile, comparison and acquisition generators converted to Brand v1;
+- tool-profile capability data retained but reduced from pill/chip UI to a quiet editorial capability line, preserving the underlying catalog information without visual clutter;
+- generated Brand v1 SEO/blog/tool-profile assets are now persisted on `brand-v1-redesign` as well as `main`, so branch review reflects the actual generated release surface before merge;
 - institutional pages and seven category landing pages converted to Brand v1;
 - Command Center and Analytics Admin redesigned as dark operational surfaces with existing analytics/revenue JS and APIs preserved;
 - Affiliate Operations, Distribution Workflow and Opportunity Matrix aligned to the same operational system;
@@ -51,11 +53,12 @@ The branch is still Git-history-diverged from `main`, so GitHub reports it as no
 - public-surface validation: PASS, including AdCreative.ai custom referral validation;
 - commercial indexability + internal-link validation: PASS;
 - 100 tool profiles / 38 core intents / 15 direct comparisons validated;
+- quieter capability-line tool profiles regenerated and persisted across the 100-tool profile surface;
 - Brand v1 generated-surface smoke checks: PASS;
 - comparison generator Brand v1 checks: PASS;
 - deploy-time navigation preservation checks: PASS;
 - Opportunity Matrix worker syntax and semantic regression checks: PASS;
-- latest `Generate SEO Pages` run after syncing both affiliate source files: PASS.
+- latest `Generate SEO Pages` run, including generated-asset persistence on the redesign branch: PASS.
 
 ## Deliberately unchanged
 
