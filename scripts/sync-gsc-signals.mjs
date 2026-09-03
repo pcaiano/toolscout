@@ -114,21 +114,37 @@ const items = [...byIntent.values()].map(x => ({
 })).sort((a,b) => b.impressions - a.impressions || b.clicks - a.clicks);
 
 fs.mkdirSync('reports', { recursive: true });
-fs.writeFileSync('reports/gsc-signals.json', JSON.stringify({
-  generatedAt: new Date().toISOString(),
+const reportPath='reports/gsc-signals.json';
+const reportPayload={
   source: 'Google Search Console Search Analytics API',
   property,
   startDate,
   endDate,
   count: items.length,
   items
-}, null, 2) + '\n');
+};
+const checkedAt=new Date().toISOString();
+let generatedAt=checkedAt;
+let unchanged=false;
+if(fs.existsSync(reportPath)){
+  try{
+    const previous=JSON.parse(fs.readFileSync(reportPath,'utf8'));
+    const previousPayload={source:previous?.source,property:previous?.property,startDate:previous?.startDate,endDate:previous?.endDate,count:previous?.count,items:previous?.items||[]};
+    if(JSON.stringify(previousPayload)===JSON.stringify(reportPayload)&&previous?.generatedAt){
+      generatedAt=previous.generatedAt;
+      unchanged=true;
+    }
+  }catch{}
+}
+fs.writeFileSync(reportPath, JSON.stringify({generatedAt,...reportPayload}, null, 2) + '\n');
 
 console.log(JSON.stringify({
   synced: items.length,
   property,
   startDate,
   endDate,
+  checkedAt,
+  dataChanged: !unchanged,
   impressions: items.reduce((n,x) => n + x.impressions, 0),
   clicks: items.reduce((n,x) => n + x.clicks, 0)
 }));

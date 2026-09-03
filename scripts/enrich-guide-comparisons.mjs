@@ -41,14 +41,18 @@ for (const intent of intents) {
   const cards = matches.map(({left,right}) => {
     const leftName = names.get(left) || left;
     const rightName = names.get(right) || right;
-    return `<a class="related-card" href="/${left}-vs-${right}.html"><strong>${esc(leftName)} vs ${esc(rightName)}</strong><span>Compare →</span></a>`;
+    return `<a href="/${left}-vs-${right}.html"><strong>${esc(leftName)} vs ${esc(rightName)}</strong><span>Compare →</span></a>`;
   }).join('');
-  const section = `${START}<section class="section"><h2>Useful comparisons</h2><p>Compare closely related tools before choosing your shortlist.</p><div class="related">${cards}</div></section>${END}`;
-  const anchor = '<section class="section"><h2>How ToolScout chooses</h2>';
-  if (!html.includes(anchor)) throw new Error(`${intent.slug}.html: expected methodology anchor missing`);
+  const section = `${START}<section class="section"><div class="kicker">Close calls</div><h2>Useful comparisons.</h2><p>Compare closely related tools before choosing your shortlist.</p><div class="related">${cards}</div></section>${END}`;
+
+  const brandV1Anchor = '<section class="section"><div class="kicker">Method</div><h2>How ToolScout chooses.</h2>';
+  const legacyAnchor = '<section class="section"><h2>How ToolScout chooses</h2>';
+  const anchor = html.includes(brandV1Anchor) ? brandV1Anchor : html.includes(legacyAnchor) ? legacyAnchor : null;
+  if (!anchor) throw new Error(`${intent.slug}.html: expected methodology anchor missing`);
+
   const next = html.replace(anchor, `${section}${anchor}`);
   fs.writeFileSync(file, next, 'utf8');
   enriched++;
 }
 
-console.log(JSON.stringify({enriched,unchanged,intents:intents.length}));
+console.log(JSON.stringify({enriched,unchanged,intents:intents.length,system:'brand-v1-compatible'}));

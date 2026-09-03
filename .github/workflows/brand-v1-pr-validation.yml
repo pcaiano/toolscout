@@ -1,0 +1,160 @@
+name: Brand v1 PR validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'brand-system.css'
+      - 'tools.html'
+      - '*-tools.html'
+      - '*-vs-*.html'
+      - 'categories.html'
+      - 'compare.html'
+      - 'guides.html'
+      - 'blog/**'
+      - 'methodology.html'
+      - 'affiliate-disclosure.html'
+      - 'privacy.html'
+      - 'admin.html'
+      - 'analytics.html'
+      - 'affiliate-workflow.html'
+      - 'affiliate-workflow-worker.js'
+      - 'distribution-workflow.html'
+      - 'opportunity-matrix.html'
+      - 'revenue-worker.js'
+      - 'data/**'
+      - 'scripts/build-distribution-index.mjs'
+      - 'scripts/generate-acquisition-content.mjs'
+      - 'scripts/generate-blog.mjs'
+      - 'scripts/generate-comparisons.mjs'
+      - 'scripts/generate-tool-pages.mjs'
+      - 'scripts/generate-seo-pages.mjs'
+      - 'scripts/unify-public-nav.mjs'
+      - 'scripts/validate-*.mjs'
+      - '.github/workflows/brand-v1-pr-validation.yml'
+      - '.github/workflows/seo-pages.yml'
+      - '.github/workflows/commercial-surface-smoke.yml'
+      - '.github/workflows/production-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate catalog data
+        run: node scripts/validate-data.mjs
+
+      - name: Validate intent coverage
+        run: node scripts/validate-intent-coverage.mjs
+
+      - name: Check operational worker syntax
+        run: |
+          node --check revenue-worker.js
+          node --check affiliate-workflow-worker.js
+
+      - name: Regenerate buying-guide pages
+        run: node scripts/generate-seo-pages.mjs
+
+      - name: Regenerate commercial comparisons
+        run: node scripts/generate-comparisons.mjs
+
+      - name: Regenerate tool profiles
+        run: node scripts/generate-tool-pages.mjs
+
+      - name: Link directory to tool profiles
+        run: node scripts/link-static-tool-profiles.mjs
+
+      - name: Enrich guides with comparisons
+        run: node scripts/enrich-guide-comparisons.mjs
+
+      - name: Regenerate Journal
+        run: node scripts/generate-blog.mjs
+
+      - name: Regenerate acquisition content
+        run: node scripts/generate-acquisition-content.mjs
+
+      - name: Rebuild guide index
+        run: node scripts/build-distribution-index.mjs
+
+      - name: Apply deploy-time public navigation
+        run: node scripts/unify-public-nav.mjs
+
+      - name: Regenerate sitemap
+        run: node scripts/generate-sitemap.mjs
+
+      - name: Validate SEO pages
+        run: node scripts/validate-seo-pages.mjs
+
+      - name: Validate public surface
+        run: node scripts/validate-public-surface.mjs
+
+      - name: Validate commercial indexability
+        run: node scripts/validate-commercial-indexability.mjs
+
+      - name: Verify Brand v1 generated surfaces
+        run: |
+          grep -q 'brand-system.css' tools/pipedrive.html
+          grep -q 'Where it fits' tools/pipedrive.html
+          grep -q 'Fit signal' best-crm-for-small-business.html
+          grep -q 'brand-system.css' hubspot-vs-pipedrive.html
+          grep -q 'Where the choice separates.' hubspot-vs-pipedrive.html
+          grep -q 'No paid winner.' hubspot-vs-pipedrive.html
+          grep -q 'brand-system.css' guides.html
+          grep -q 'Start with<br>the job.' guides.html
+          grep -q 'href="/best-crm-for-small-business.html"' guides.html
+          grep -q 'href="/hubspot-vs-pipedrive.html"' guides.html
+          grep -q 'ToolScout Journal' blog/index.html
+          grep -q 'Signal,<br>not filler.' blog/index.html
+          grep -q 'class="article" data-search=' blog/index.html
+          grep -q 'href="./best-crm-for-small-business-guide.html"' blog/index.html
+          grep -q 'brand-system.css' methodology.html
+          grep -q 'brand-system.css' affiliate-disclosure.html
+          grep -q 'brand-system.css' privacy.html
+          grep -q 'brand-system.css' crm-tools.html
+          grep -q 'brand-system.css' seo-tools.html
+          grep -q 'brand-system.css' marketing-tools.html
+          grep -q 'brand-system.css' automation-tools.html
+          grep -q 'brand-system.css' forms-tools.html
+          grep -q 'brand-system.css' productivity-tools.html
+          grep -q 'brand-system.css' agency-tools.html
+          grep -q 'brand-ops' admin.html
+          grep -q 'Command Center' admin.html
+          grep -q 'system:'"'"'brand-v1'"'"'' scripts/generate-acquisition-content.mjs
+          grep -q '../brand-system.css' scripts/generate-acquisition-content.mjs
+          grep -q 'brand-v1-static-index' scripts/build-distribution-index.mjs
+          grep -q 'No paid winner.' .github/workflows/production-smoke.yml
+          grep -q 'Affiliate payout is not part of the scoring model.' .github/workflows/production-smoke.yml
+          grep -q 'No paid winner.' .github/workflows/commercial-surface-smoke.yml
+          grep -q 'Affiliate payout is not part of the scoring model.' .github/workflows/commercial-surface-smoke.yml
+          grep -q 'intentAffiliateCoverage' revenue-worker.js
+          grep -q 'LEFT JOIN sessions s ON s.session_id = c.session_id' revenue-worker.js
+          grep -q "COALESCE(s.classification, 'unknown/legacy') != 'owner'" revenue-worker.js
+          grep -q 'intentCoverageDefinition' revenue-worker.js
+          grep -q 'isEligibleOperationalClick' affiliate-workflow-worker.js
+          grep -q 'const validClicks=(clicks.results||\[\]).filter(isEligibleOperationalClick)' affiliate-workflow-worker.js
+          grep -q 'record.monetized_clicks_30d=validClicks.filter' affiliate-workflow-worker.js
+          grep -q 'coverageMap' opportunity-matrix.html
+          grep -q 'Historical unmonetized' opportunity-matrix.html
+          ! grep -q 'active.has(intent)' opportunity-matrix.html
+          ! grep -q 'active.has(x.intent_slug)' opportunity-matrix.html
+          ! grep -q 'ts-global-nav' index.html
+          ! grep -q 'ts-global-nav' tools/pipedrive.html
+          ! grep -q 'What Actually Matters Before You Buy' blog/index.html
+
+      - name: Require clean generated surface
+        run: |
+          git status --short
+          test -z "$(git status --porcelain)"

@@ -92,7 +92,6 @@ const rows = intents.map(intent => {
   const ctr = Number(observed?.ctr || 0);
   const search = searchOpportunity(observed);
   const heuristicScore = Math.min(100, Math.round(commercial + category + catalogDepth + Math.min(20, topFit * 2) + affiliateSignal));
-  // Observed search demand controls 60% of the score; product/commercial readiness controls 40%.
   const score = impressions > 0
     ? Math.min(100, Math.round(search.score + heuristicScore * 0.4))
     : heuristicScore;
@@ -132,10 +131,9 @@ const gscReason = gscAvailable
     ? 'A Google Search Console export was imported, but it contains no matching best-* intent pages.'
     : 'No reports/gsc-signals.json file exists. This describes ToolScout ingestion state only; it does not mean the site is unverified, unindexed, or invisible to Google.';
 
-fs.mkdirSync('reports', { recursive: true });
-fs.writeFileSync('reports/growth-priority.json', JSON.stringify({
-  generatedAt: new Date().toISOString(),
-  methodology: 'Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.',
+const methodology = 'Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.';
+const payload = {
+  methodology,
   gsc: {
     available: gscAvailable,
     ingestionStatus: gscStatus,
@@ -146,5 +144,16 @@ fs.writeFileSync('reports/growth-priority.json', JSON.stringify({
   },
   count: rows.length,
   items: rows
-}, null, 2) + '\n');
+};
+const outputPath='reports/growth-priority.json';
+let generatedAt=new Date().toISOString();
+if(fs.existsSync(outputPath)){
+  try{
+    const previous=JSON.parse(fs.readFileSync(outputPath,'utf8'));
+    const previousPayload={methodology:previous?.methodology,gsc:previous?.gsc,count:previous?.count,items:previous?.items||[]};
+    if(JSON.stringify(previousPayload)===JSON.stringify(payload)&&previous?.generatedAt) generatedAt=previous.generatedAt;
+  }catch{}
+}
+fs.mkdirSync('reports', { recursive: true });
+fs.writeFileSync(outputPath, JSON.stringify({generatedAt,...payload}, null, 2) + '\n');
 console.log(JSON.stringify({ generated: rows.length, gsc: { available: gscAvailable, ingestionStatus: gscStatus, intentsWithSignals: gscByIntent.size }, top: rows.slice(0,10) }, null, 2));
