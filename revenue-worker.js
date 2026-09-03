@@ -41,6 +41,48 @@ async function monetizedClickBreakdown(env) {
   }
 }
 
+async function intentAffiliateCoverage(env, activeSlugs) {
+  try {
+    const result = await env.DB.prepare(`
+      SELECT intent_slug, tool_slug, COUNT(*) AS clicks
+      FROM click_events
+      WHERE source != 'internal-test'
+        AND intent_slug IS NOT NULL
+        AND intent_slug != 'general'
+      GROUP BY intent_slug, tool_slug
+      ORDER BY intent_slug ASC, clicks DESC
+    `).all();
+    const byIntent = new Map();
+    for (const row of result?.results || []) {
+      const intent = String(row.intent_slug || '');
+      const tool = String(row.tool_slug || '');
+      const clicks = Number(row.clicks || 0);
+      if (!intent || !tool || clicks <= 0) continue;
+      if (!byIntent.has(intent)) byIntent.set(intent, { intent_slug: intent, clicks: 0, coveredClicks: 0, uncoveredClicks: 0, activeTools: new Set(), inactiveTools: new Set() });
+      const item = byIntent.get(intent);
+      item.clicks += clicks;
+      if (activeSlugs.has(tool)) {
+        item.coveredClicks += clicks;
+        item.activeTools.add(tool);
+      } else {
+        item.uncoveredClicks += clicks;
+        item.inactiveTools.add(tool);
+      }
+    }
+    return [...byIntent.values()].map(item => ({
+      intent_slug: item.intent_slug,
+      clicks: item.clicks,
+      coveredClicks: item.coveredClicks,
+      uncoveredClicks: item.uncoveredClicks,
+      activeTools: [...item.activeTools],
+      inactiveTools: [...item.inactiveTools],
+      status: item.uncoveredClicks === 0 ? 'covered' : item.coveredClicks > 0 ? 'partial' : 'gap'
+    }));
+  } catch {
+    return null;
+  }
+}
+
 async function revenueSnapshot(request, env, stats) {
   const affiliate = await readAffiliateMap(request, env);
   const activeSlugs = new Set(stats?.affiliateCoverage?.activeToolSlugs || []);
@@ -180,14 +222,24 @@ export default {
       const response = await base.fetch(request, env, ctx);
       if (!response.ok) return response;
       const stats = await response.json();
-      const [revenue,commercial,breakdown] = await Promise.all([
+      const activeSlugs = new Set(stats?.affiliateCoverage?.activeToolSlugs || []);
+      const [revenue,commercial,breakdown,intentCoverage] = await Promise.all([
         revenueSnapshot(request, env, stats),
         commercialSnapshot(env,stats).catch(()=>({status:'unavailable',reason:'Revenue Intelligence v2 aggregation is unavailable; core analytics remain intact.'})),
-        monetizedClickBreakdown(env)
+        monetizedClickBreakdown(env),
+        intentAffiliateCoverage(env, activeSlugs)
       ]);
-      const affiliateCoverage = breakdown
-        ? { ...(stats.affiliateCoverage || {}), monetizedClickBreakdown: breakdown }
-        : stats.affiliateCoverage;
+      let affiliateCoverage = stats.affiliateCoverage;
+      if (affiliateCoverage && (breakdown || intentCoverage)) {
+        affiliateCoverage = {
+          ...affiliateCoverage,
+          ...(breakdown ? { monetizedClickBreakdown: breakdown } : {}),
+          ...(intentCoverage ? {
+            intentCoverage,
+            intentCoverageDefinition: 'Current affiliate routing coverage for tools that have received observed non-owner clicks within each intent. Covered/uncovered is evaluated against the current active affiliate map; historical monetized/unmonetized click counts remain immutable click-time evidence.'
+          } : {})
+        };
+      }
       return Response.json({ ...stats, affiliateCoverage, revenue, commercial }, {
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
