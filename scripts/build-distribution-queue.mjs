@@ -17,5 +17,16 @@ for(const item of intents){
   pages.push({slug:item.slug,title,url,category:item.category||'software',priorityScore,searchSnippet:`${title} — ${short}`,socialHook:`Need the right tool for ${title.toLowerCase()}? ToolScout compares options around the job, not generic rankings.`,linkedInPost:`Need the right tool for ${title.toLowerCase()}? I built a practical ToolScout guide that compares the available options around the job, budget and workflow — not a generic top-ten list.\n\n${url}`,xPost:`Choosing a tool for ${title.toLowerCase()}? ToolScout compares the options around the job, not generic rankings. ${url}`,redditStyle:`I put together a practical guide for ${title.toLowerCase()}, focused on fit rather than a generic top-ten list.`,newsletterSubject:`${title}: a practical shortlist`,newsletterIntro:`${short} See the shortlist and compare the options: ${url}`,hashtags:['#software','#AITools','#productivity','#ToolScout']});
 }
 pages.sort((a,b)=>b.priorityScore-a.priorityScore||a.title.localeCompare(b.title));
-fs.mkdirSync(path.join(ROOT,'reports'),{recursive:true});fs.writeFileSync(path.join(ROOT,'reports','distribution-queue.json'),JSON.stringify({generatedAt:new Date().toISOString(),count:pages.length,items:pages},null,2)+'\n');
+const outputPath=path.join(ROOT,'reports','distribution-queue.json');
+const payload={count:pages.length,items:pages};
+let generatedAt=new Date().toISOString();
+if(fs.existsSync(outputPath)){
+  try{
+    const previous=JSON.parse(fs.readFileSync(outputPath,'utf8'));
+    const previousPayload={count:previous?.count,items:previous?.items||[]};
+    if(JSON.stringify(previousPayload)===JSON.stringify(payload)&&previous?.generatedAt) generatedAt=previous.generatedAt;
+  }catch{}
+}
+fs.mkdirSync(path.dirname(outputPath),{recursive:true});
+fs.writeFileSync(outputPath,JSON.stringify({generatedAt,...payload},null,2)+'\n');
 console.log(JSON.stringify({queued:pages.length,top:pages[0]?.title||null}));
