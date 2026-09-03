@@ -26,18 +26,27 @@ const statusEl=document.getElementById('status');
 const btn=document.getElementById('load');
 const n=v=>Number(v||0).toLocaleString();
 const pct=v=>v===null||v===undefined?'Unknown':`${Number(v).toFixed(1)}%`;
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]));
 const card=(label,value,meta)=>`<div class="card"><small>${esc(label)}</small><b>${esc(value)}</b><span>${esc(meta)}</span></div>`;
 const row=(name,value,meta='')=>`<div class="row"><div><div class="name">${esc(name)}</div>${meta?`<div class="meta">${esc(meta)}</div>`:''}</div><div class="value">${esc(value)}</div></div>`;
+function firstDefined(...values){for(const v of values){if(v!==undefined&&v!==null&&Number.isFinite(Number(v)))return Number(v)}return null}
 function render(d){
- const f=d.funnel||{},a=d.audience||{},t=d.traffic||{},r=d.revenue||{},c=d.commercial||{},tr=d.tracking||{};
- const human=Number(a.likelyHumanSessions??f.sessions??0),out=Number(f.outboundClicks||0),mon=Number(c.monetizedOutbound||d.affiliateCoverage?.monetizedLikelyHumanClicks||0),unmon=Math.max(0,out-mon);
- document.getElementById('liveMetrics').innerHTML=card('Likely-human sessions',n(human),'Primary clean audience')+card('Recommendation completions',n(f.recommendationCompletions),`${pct(f.recommendationCompletionRate)} start → completion`)+card('Human outbound',n(out),`${pct(f.sessionToOutboundCtr)} session → outbound`)+card('Monetized outbound',n(mon),out?`${pct(mon/out*100)} of human outbound`:'No outbound yet');
+ const f=d.funnel||{},a=d.audience||{},t=d.traffic||{},r=d.revenue||{},c=d.commercial||{},tr=d.tracking||{},ac=d.affiliateCoverage||{};
+ const human=Number(a.likelyHumanSessions??f.sessions??0),out=Number(f.outboundClicks||0);
+ const commercialAvailable=c.status!=='unavailable';
+ const breakdown=ac.monetizedClickBreakdown||{};
+ const mon=firstDefined(c.totals?.monetizedOutbound,c.monetizedOutbound,ac.monetizedLikelyHumanClicks,breakdown['likely-human']);
+ const unmon=firstDefined(c.totals?.unmonetizedOutbound,c.unmonetizedOutbound);
+ const monDisplay=mon===null?'—':n(mon);
+ const unmonDisplay=unmon===null?'—':n(unmon);
+ const monMeta=mon===null?'Unavailable on this snapshot; not a confirmed zero':(out?`${pct(mon/out*100)} of human outbound`:'No outbound yet');
+ const unmonMeta=unmon===null?'Unavailable on this snapshot; not a confirmed zero':'Likely-human · public route at click time';
+ document.getElementById('liveMetrics').innerHTML=card('Likely-human sessions',n(human),'Primary clean audience')+card('Recommendation completions',n(f.recommendationCompletions),`${pct(f.recommendationCompletionRate)} start → completion`)+card('Human outbound',n(out),`${pct(f.sessionToOutboundCtr)} session → outbound`)+card('Monetized outbound',monDisplay,monMeta);
  document.getElementById('trafficMetrics').innerHTML=card('Today',n(t.today),'Likely-human sessions')+card('This month',n(t.monthToDate),'Month-to-date')+card('Avg/day MTD',n(t.dailyAverageMTD),'Current month')+card('Projected month',n(t.projectedMonth),'Linear pace; not a forecast');
- document.getElementById('revenueMetrics').innerHTML=card('Monetized human outbound',n(mon),'Affiliate active at exact click')+card('Unmonetized human outbound',n(unmon),'Current coverage gap')+card('Confirmed revenue',r.confirmedRevenue==null?'Unknown':String(r.confirmedRevenue),r.reportingStatus==='connected'?'Vendor evidence connected':'No vendor-side evidence imported')+card('Ledger rows',n(r.ledgerRows),'Vendor evidence records');
- const gaps=c.revenueGaps||[];document.getElementById('revenueGaps').innerHTML=gaps.length?gaps.slice(0,10).map(x=>row(x.slug||x.tool_slug,n(x.outboundClicks||x.clicks),`score ${Number(x.score||0).toFixed(1)}`)).join(''):'<div class="note">No current human revenue gaps.</div>';
+ document.getElementById('revenueMetrics').innerHTML=card('Monetized human outbound',monDisplay,monMeta)+card('Unmonetized human outbound',unmonDisplay,unmonMeta)+card('Confirmed revenue',r.confirmedRevenue==null?'Unknown':String(r.confirmedRevenue),r.reportingStatus==='connected'?'Vendor evidence connected':'No vendor-side evidence imported')+card('Ledger rows',n(r.ledgerRows),'Vendor evidence records');
+ const gaps=c.revenueGaps||[];document.getElementById('revenueGaps').innerHTML=!commercialAvailable?'<div class="note">Commercial aggregation unavailable on this snapshot. No zero is inferred.</div>':gaps.length?gaps.slice(0,10).map(x=>row(x.slug||x.tool_slug,n(x.outboundClicks||x.clicks),`score ${Number(x.score||0).toFixed(1)}`)).join(''):'<div class="note">No current human revenue gaps.</div>';
  document.getElementById('tracking').innerHTML=row('State',tr.status||'Unavailable',tr.api||'')+row('Human sessions · 24h',n(tr.humanSessionsLast24Hours),`${n(tr.humanSessionsLastHour)} last hour`)+row('Human events · 15m',n(tr.humanEventsLast15Minutes),'Snapshot at refresh time');
- const tools=c.rankings?.tool||[];document.getElementById('tools').innerHTML=tools.length?tools.slice(0,10).map(x=>row(x.tool_slug||'unknown',n(x.outboundClicks),`${n(x.humanSessions)} human sessions · ${n(x.monetizedOutbound)} monetized`)).join(''):'<div class="note">No tool ranking data.</div>';
+ const tools=c.rankings?.tool||[];document.getElementById('tools').innerHTML=!commercialAvailable?'<div class="note">Commercial ranking unavailable on this snapshot.</div>':tools.length?tools.slice(0,10).map(x=>row(x.tool_slug||'unknown',n(x.outboundClicks),`${n(x.humanSessions)} human sessions · ${n(x.monetizedOutbound)} monetized`)).join(''):'<div class="note">No tool ranking data.</div>';
  document.getElementById('audience').innerHTML=row('Likely human',n(a.likelyHumanSessions??f.sessions))+row('Observed external',n(a.observedExternalSessions))+row('Bots / crawlers',n(a.knownBotCrawlerSessions))+row('Owner',n(a.ownerSessions))+row('Unknown / legacy',n(a.unknownLegacySessions));
  statusEl.textContent=`Snapshot updated ${new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'})}. No automatic refresh is scheduled.`;
 }
