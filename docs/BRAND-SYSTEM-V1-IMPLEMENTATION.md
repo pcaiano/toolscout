@@ -56,11 +56,11 @@ The branch is still Git-history-diverged from `main`, so GitHub reports it as no
 - 100 tool profiles / 38 core intents / 15 direct comparisons validated;
 - quieter capability-line tool profiles regenerated and persisted across the 100-tool profile surface;
 - Brand v1 44px interaction-target pass applied to generated buying guides and direct comparisons;
+- the post-accessibility `Generate SEO Pages` run completed successfully through generation, profiles, navigation linking, blog/distribution generation, sitemap, SEO validation, public-surface validation, commercial indexability and generated-asset persistence;
 - Brand v1 generated-surface smoke checks: PASS;
 - comparison generator Brand v1 checks: PASS;
 - deploy-time navigation preservation checks: PASS;
-- Opportunity Matrix worker syntax and semantic regression checks: PASS;
-- latest `Generate SEO Pages` run after the accessibility pass: PASS, including generated-asset persistence.
+- Opportunity Matrix worker syntax and semantic regression checks: PASS.
 
 ## Deliberately unchanged
 
