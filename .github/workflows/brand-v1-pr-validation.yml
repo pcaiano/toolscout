@@ -145,5 +145,7 @@ jobs:
           ! grep -q 'ts-global-nav' tools/pipedrive.html
           ! grep -q 'What Actually Matters Before You Buy' blog/index.html
 
-      - name: Show generated drift
-        run: git status --short
+      - name: Require clean generated surface
+        run: |
+          git status --short
+          test -z "$(git status --porcelain)"
