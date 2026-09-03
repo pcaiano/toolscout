@@ -41,30 +41,81 @@ async function monetizedClickBreakdown(env) {
   }
 }
 
+function lisbonOffsetMinutes(date = new Date()) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+    }).formatToParts(date);
+    const values = Object.fromEntries(parts.filter(part => part.type !== 'literal').map(part => [part.type, part.value]));
+    const localAsUtc = Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day), Number(values.hour), Number(values.minute), Number(values.second));
+    return Math.round((localAsUtc - date.getTime()) / 60000);
+  } catch {
+    return 0;
+  }
+}
+
+function sqliteOffsetModifier(minutes) {
+  if (!minutes) return '+0 minutes';
+  return `${minutes >= 0 ? '+' : ''}${minutes} minutes`;
+}
+
+async function trackingHealth(env) {
+  try {
+    const [lastHumanSession, lastHumanEvent, sessions1h, sessions24h, events15m] = await Promise.all([
+      env.DB.prepare(`SELECT MAX(first_seen_at) AS at FROM sessions WHERE classification='likely-human'`).first(),
+      env.DB.prepare(`SELECT MAX(f.created_at) AS at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human'`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM sessions WHERE classification='likely-human' AND first_seen_at>=datetime('now','-1 hour')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM sessions WHERE classification='likely-human' AND first_seen_at>=datetime('now','-24 hours')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.created_at>=datetime('now','-15 minutes')`).first()
+    ]);
+    return {
+      status: 'observed',
+      api: 'live',
+      lastHumanSessionAt: lastHumanSession?.at || null,
+      lastHumanEventAt: lastHumanEvent?.at || null,
+      humanSessionsLastHour: Number(sessions1h?.n || 0),
+      humanSessionsLast24Hours: Number(sessions24h?.n || 0),
+      humanEventsLast15Minutes: Number(events15m?.n || 0),
+      checkedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    return { status: 'unavailable', api: 'live', reason: `Tracking health aggregation unavailable: ${String(error?.message || error)}`, checkedAt: new Date().toISOString() };
+  }
+}
+
 async function trafficSnapshot(env) {
   try {
+    const offsetMinutes = lisbonOffsetMinutes();
+    const offset = sqliteOffsetModifier(offsetMinutes);
+    const localDate = `date(first_seen_at,'${offset}')`;
+    const localNowDate = `date('now','${offset}')`;
     const [dailyResult, todayRow, yesterdayRow, monthRow, last7Row, previous7Row] = await Promise.all([
       env.DB.prepare(`
-        SELECT date(first_seen_at) AS day, COUNT(*) AS sessions
+        SELECT ${localDate} AS day, COUNT(*) AS sessions
         FROM sessions
         WHERE classification='likely-human'
-          AND date(first_seen_at) >= date('now','-29 days')
-        GROUP BY date(first_seen_at)
+          AND ${localDate} >= date('now','${offset}','-29 days')
+        GROUP BY ${localDate}
         ORDER BY day
       `).all(),
-      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)=date('now')`).first(),
-      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)=date('now','-1 day')`).first(),
-      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)>=date('now','start of month')`).first(),
-      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)>=date('now','-6 days')`).first(),
-      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at)>=date('now','-13 days') AND date(first_seen_at)<=date('now','-7 days')`).first()
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND ${localDate}=${localNowDate}`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND ${localDate}=date('now','${offset}','-1 day')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND ${localDate}>=date('now','${offset}','start of month')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND ${localDate}>=date('now','${offset}','-6 days')`).first(),
+      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human' AND ${localDate}>=date('now','${offset}','-13 days') AND ${localDate}<=date('now','${offset}','-7 days')`).first()
     ]);
     const now = new Date();
-    const dayOfMonth = now.getUTCDate();
-    const daysInMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate();
+    const lisbonParts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone:'Europe/Lisbon', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(now).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+    const year = Number(lisbonParts.year);
+    const month = Number(lisbonParts.month);
+    const dayOfMonth = Number(lisbonParts.day);
+    const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
     const observed = new Map((dailyResult?.results || []).map(row => [String(row.day), Number(row.sessions || 0)]));
     const daily = [];
-    for (let offset = 29; offset >= 0; offset -= 1) {
-      const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - offset));
+    const localToday = new Date(Date.UTC(year, month - 1, dayOfMonth));
+    for (let daysAgo = 29; daysAgo >= 0; daysAgo -= 1) {
+      const date = new Date(localToday.getTime() - daysAgo * 86400000);
       const day = date.toISOString().slice(0, 10);
       daily.push({ day, sessions: Number(observed.get(day) || 0) });
     }
@@ -80,7 +131,8 @@ async function trafficSnapshot(env) {
     const best = daily.reduce((current, row) => row.sessions > (current?.sessions || 0) ? row : current, null);
     return {
       status: 'observed',
-      timezone: 'UTC',
+      timezone: 'Europe/Lisbon',
+      offsetMinutes,
       today,
       yesterday,
       monthToDate,
@@ -233,13 +285,13 @@ function buildOpportunity(byTool, byIntent, activeSlugs, affiliate) {
 }
 
 function commandCenterSection() {
-  return `<section class="section live" id="trafficOverTime"><div class="sectionHead"><h2>Traffic over time</h2><span>Likely-human · UTC · auto-refresh 15s</span></div><div class="grid4" id="trafficMetrics"><div class="note">Loading temporal analytics…</div></div><div class="grid2" style="margin-top:14px"><div class="panel"><div class="sectionHead"><h2>Daily sessions</h2><span>Last 14 days</span></div><div id="dailyTraffic"><div class="note">Loading…</div></div></div><div class="panel"><div class="sectionHead"><h2>Traffic pace</h2><span>Trend & projection</span></div><div id="trafficPace"><div class="note">Loading…</div></div></div></div></section>\n`;
+  return `<section class="section live" id="trafficOverTime"><div class="sectionHead"><h2>Traffic over time</h2><span>Likely-human · Europe/Lisbon · auto-refresh 15s</span></div><div class="grid4" id="trafficMetrics"><div class="note">Loading temporal analytics…</div></div><div class="grid2" style="margin-top:14px"><div class="panel"><div class="sectionHead"><h2>Daily sessions</h2><span>Last 14 days</span></div><div id="dailyTraffic"><div class="note">Loading…</div></div></div><div class="panel"><div class="sectionHead"><h2>Traffic pace</h2><span>Trend & projection</span></div><div id="trafficPace"><div class="note">Loading…</div></div></div></div></section>\n`;
 }
 
 function commandCenterScript() {
   return `<script>
 (function(){
-  const tsDateLabel=value=>{try{return new Date(value+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})}catch{return value}};
+  const tsDateLabel=value=>{try{return new Date(value+'T12:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'Europe/Lisbon'})}catch{return value}};
   const tsSigned=value=>value===null||value===undefined?'Not enough history':(Number(value)>=0?'+':'')+Number(value).toFixed(1)+'%';
   function tsDailyRows(items){
     const rows=(items||[]).slice(-14);if(!rows.length)return '<div class="note">No daily traffic yet.</div>';
@@ -257,10 +309,10 @@ function commandCenterScript() {
     daily.innerHTML=tsDailyRows(t.daily);
     const trendClass=Number(t.sevenDayChangeRate||0)>=0?'good':'warn';
     const best=t.bestDay?tsDateLabel(t.bestDay.day)+' · '+n(t.bestDay.sessions):'No traffic yet';
-    pace.innerHTML='<div class="row"><div><div class="name">Yesterday</div><div class="meta">Completed UTC day</div></div><div class="value">'+n(t.yesterday)+'</div></div>'+
+    pace.innerHTML='<div class="row"><div><div class="name">Yesterday</div><div class="meta">Completed Lisbon day</div></div><div class="value">'+n(t.yesterday)+'</div></div>'+
       '<div class="row"><div><div class="name">Previous 7 days</div><div class="meta">Comparison period</div></div><div class="value">'+n(t.previous7Days)+'</div></div>'+
       '<div class="row"><div><div class="name">7-day trend</div><div class="meta">Current 7 days vs previous 7</div></div><div class="value '+trendClass+'">'+esc(tsSigned(t.sevenDayChangeRate))+'</div></div>'+
-      '<div class="row"><div><div class="name">Best day</div><div class="meta">Within the last 30 calendar days</div></div><div class="value">'+esc(best)+'</div></div>'+
+      '<div class="row"><div><div class="name">Best day</div><div class="meta">Within the last 30 Lisbon calendar days</div></div><div class="value">'+esc(best)+'</div></div>'+
       '<div class="row"><div><div class="name">Projected month</div><div class="meta">Simple projection at current MTD pace</div></div><div class="value">'+(t.projectedMonth==null?'—':n(t.projectedMonth))+'</div></div>'+
       '<div class="row"><div><div class="name">Rolling 30 days</div><div class="meta">Primary likely-human audience window</div></div><div class="value">'+n(f.sessions)+'</div></div>';
     statusEl.textContent='Live · updated '+new Date().toLocaleString()+' · auto-refresh 15s';
@@ -298,16 +350,17 @@ export default {
       const response = await base.fetch(request, env, ctx);
       if (!response.ok) return response;
       const stats = await response.json();
-      const [revenue,commercial,breakdown,traffic] = await Promise.all([
+      const [revenue,commercial,breakdown,traffic,tracking] = await Promise.all([
         revenueSnapshot(request, env, stats),
         commercialSnapshot(env,stats).catch(()=>({status:'unavailable',reason:'Revenue Intelligence v2 aggregation is unavailable; core analytics remain intact.'})),
         monetizedClickBreakdown(env),
-        trafficSnapshot(env)
+        trafficSnapshot(env),
+        trackingHealth(env)
       ]);
       const affiliateCoverage = breakdown
         ? { ...(stats.affiliateCoverage || {}), monetizedClickBreakdown: breakdown }
         : stats.affiliateCoverage;
-      return Response.json({ ...stats, affiliateCoverage, revenue, commercial, traffic }, {
+      return Response.json({ ...stats, affiliateCoverage, revenue, commercial, traffic, tracking }, {
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Cache-Control': 'private, no-store'
