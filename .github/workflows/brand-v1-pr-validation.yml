@@ -33,6 +33,7 @@ on:
       - 'scripts/unify-public-nav.mjs'
       - 'scripts/validate-*.mjs'
       - '.github/workflows/brand-v1-pr-validation.yml'
+      - '.github/workflows/seo-pages.yml'
       - '.github/workflows/commercial-surface-smoke.yml'
       - '.github/workflows/production-smoke.yml'
   workflow_dispatch:
