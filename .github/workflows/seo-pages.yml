@@ -18,10 +18,12 @@ on:
       - 'scripts/link-static-tool-profiles.mjs'
       - 'scripts/enrich-guide-comparisons.mjs'
       - 'scripts/generate-blog.mjs'
+      - 'scripts/generate-acquisition-content.mjs'
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/import-gsc-signals.mjs'
       - 'scripts/sync-gsc-signals.mjs'
+      - 'scripts/unify-public-nav.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/validate-public-surface.mjs'
       - 'scripts/validate-commercial-indexability.mjs'
@@ -81,6 +83,9 @@ jobs:
       - name: Generate blog
         run: node scripts/generate-blog.mjs
 
+      - name: Generate acquisition content
+        run: node scripts/generate-acquisition-content.mjs
+
       - name: Generate distribution assets
         run: node scripts/generate-distribution.mjs
 
@@ -89,6 +94,9 @@ jobs:
 
       - name: Build distribution queue
         run: node scripts/build-distribution-queue.mjs
+
+      - name: Apply deploy-time public navigation
+        run: node scripts/unify-public-nav.mjs
 
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
