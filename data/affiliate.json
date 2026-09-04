@@ -11,7 +11,7 @@
   "zapier": {"url": "", "enabled": false, "publicUrl": "https://zapier.com/"},
   "make": {"url": "https://www.make.com/en/register?pc=toolscout", "enabled": true, "publicUrl": "https://www.make.com/"},
   "surfer": {"url": "", "enabled": false, "publicUrl": "https://surferseo.com/"},
-  "typeform": {"url": "", "enabled": false, "publicUrl": "https://www.typeform.com/"},
+  "typeform": {"url": "https://typeform.cello.so/32NCHvHV6ws", "enabled": true, "publicUrl": "https://www.typeform.com/"},
   "brevo": {"url": "", "enabled": false, "publicUrl": "https://www.brevo.com/"},
   "activecampaign": {"url": "", "enabled": false, "publicUrl": "https://www.activecampaign.com/"},
   "mailchimp": {"url": "", "enabled": false, "publicUrl": "https://mailchimp.com/"},
