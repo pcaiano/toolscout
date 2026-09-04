@@ -2,9 +2,22 @@ import base from './affiliate-workflow-worker.js';
 
 const SESSION_COOKIE = 'toolscout_cc';
 const SESSION_TTL_SECONDS = 900;
+const OWNER_EMAIL = 'pcaiano@gmail.com';
 
 function commandCenterPage(url) {
   return url.pathname === '/analytics' || url.pathname === '/analytics/';
+}
+
+async function accessAuthenticated(request, ctx) {
+  const email = request.headers.get('Cf-Access-Authenticated-User-Email') || request.headers.get('cf-access-authenticated-user-email') || '';
+  if (String(email).toLowerCase() === OWNER_EMAIL) return true;
+  try {
+    if (!ctx?.access) return false;
+    const identity = await ctx.access.getIdentity();
+    return String(identity?.email || '').toLowerCase() === OWNER_EMAIL;
+  } catch {
+    return false;
+  }
 }
 
 async function digestHex(value) {
@@ -35,15 +48,21 @@ async function validSession(request, env) {
 }
 
 async function serveProtectedPage(request, env, ctx) {
-  const url = new URL(request.url);
-  url.pathname = '/analytics.html';
-  const authenticated = await base.fetch(new Request(url.toString(), request), env, ctx);
-  if (!authenticated.ok || !env.ADMIN_TOKEN) return authenticated;
-  const headers = new Headers(authenticated.headers);
+  if (!(await accessAuthenticated(request, ctx))) {
+    return new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' } });
+  }
+  if (!env.ADMIN_TOKEN) {
+    return new Response('Command Center unavailable', { status: 503, headers: { 'Cache-Control': 'no-store' } });
+  }
+  const assetUrl = new URL('/analytics.html', request.url);
+  const asset = await env.ASSETS.fetch(new Request(assetUrl.toString(), request));
+  if (!asset.ok) return asset;
+  const headers = new Headers(asset.headers);
   const value = await sessionValue(env.ADMIN_TOKEN, sessionBucket());
   headers.append('Set-Cookie', `${SESSION_COOKIE}=${value}; Max-Age=${SESSION_TTL_SECONDS}; Path=/analytics; HttpOnly; Secure; SameSite=Strict`);
+  headers.set('Content-Type', 'text/html; charset=UTF-8');
   headers.set('Cache-Control', 'private, no-store');
-  return new Response(authenticated.body, { status: authenticated.status, headers });
+  return new Response(asset.body, { status: asset.status, headers });
 }
 
 async function serveProtectedStats(request, env, ctx) {
