@@ -14,7 +14,8 @@ function initials(n){return String(n||'T').split(/\s+/).filter(Boolean).slice(0,
 function logoUrl(t){try{return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(t.sourceUrl).hostname)}&sz=128`}catch{return''}}
 function setMeta(selector,attr,value){const el=document.querySelector(selector);if(el)el.setAttribute(attr,value)}
 function comparisonsFor(tool,tools){return PAIRS.filter(([a,b])=>a===tool.slug||b===tool.slug).map(([a,b])=>({a:tools.find(x=>x.slug===a),b:tools.find(x=>x.slug===b),slug:`${a}-vs-${b}`})).filter(x=>x.a&&x.b).slice(0,4)}
-fetch('./data/tools.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(tools=>{const t=tools.find(x=>x.slug===slug);const app=document.getElementById('app');if(!t){app.innerHTML='<section class="hero"><h1>Tool not found</h1><p class="lede">Browse the ToolScout directory to find another software profile.</p><a class="btn" href="./tools.html">Browse tools →</a></section>';return}
+async function loadJson(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)return[];return r.json()}
+Promise.all([loadJson('./data/tools.json'),loadJson('./data/pending-affiliate-tools.json')]).then(([catalog,pending])=>{const bySlug=new Map(catalog.map(t=>[t.slug,t]));for(const t of pending){if(!bySlug.has(t.slug))bySlug.set(t.slug,t)}const tools=[...bySlug.values()];const t=tools.find(x=>x.slug===slug);const app=document.getElementById('app');if(!t){app.innerHTML='<section class="hero"><h1>Tool not found</h1><p class="lede">Browse the ToolScout directory to find another software profile.</p><a class="btn" href="./tools.html">Browse tools →</a></section>';return}
 const logo=logoUrl(t);
 const goUrl=`${GO_BASE}/go/${encodeURIComponent(t.slug)}`;
 const title=`${t.name} Review, Features & Best For — ToolScout`;
