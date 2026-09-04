@@ -39,6 +39,7 @@ function hasVendorTracking(rawUrl, slug) {
     if (host === 'aff.trypipedrive.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     if (slug === 'make' && host === 'make.com' && /^\/en\/register\/?$/i.test(url.pathname) && Boolean(url.searchParams.get('pc'))) return true;
     if (slug === 'shopify' && host === 'shopify.pxf.io' && /^\/[a-z0-9_-]+\/?$/i.test(url.pathname)) return true;
+    if (slug === 'adcreative-ai' && host === 'free-trial.adcreative.ai' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     return false;
   } catch {
     return false;
