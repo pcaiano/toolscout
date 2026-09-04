@@ -19,5 +19,6 @@
   "monday-crm": {"url": "", "enabled": false, "publicUrl": "https://monday.com/"},
   "tally": {"url": "", "enabled": false, "publicUrl": "https://tally.so/"},
   "ahrefs": {"url": "", "enabled": false, "publicUrl": "https://ahrefs.com/"},
-  "se-ranking": {"url": "", "enabled": false, "publicUrl": "https://seranking.com/"}
+  "se-ranking": {"url": "", "enabled": false, "publicUrl": "https://seranking.com/"},
+  "kit": {"url": "https://partners.kit.com/k3tjs4al3opn", "enabled": true, "publicUrl": "https://kit.com/"}
 }
