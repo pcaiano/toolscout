@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-04T15:47:55.007Z",
+  "generatedAt": "2026-09-04T18:38:53.636Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.",
   "gsc": {
     "available": true,
@@ -96,11 +96,11 @@
       "intent": "best-funnel-builder",
       "title": "Best Funnel Builder",
       "category": "marketing",
-      "priorityScore": 30,
+      "priorityScore": 32,
       "topFit": 9.33,
       "catalogDepth": 15,
       "commercialSignal": 20,
-      "affiliateSignal": 0,
+      "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
         "impressions": 1,
@@ -111,13 +111,70 @@
         "opportunityScore": 5
       },
       "signalBasis": "observed-gsc-majority",
-      "monetizationReadiness": "needs-affiliate-activation",
+      "monetizationReadiness": "monetizable",
       "topTools": [
         "buffer",
         "omnisend",
         "kit"
       ],
       "action": "watch"
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
+      "title": "Best Sales Prospecting Tools",
+      "category": "sales",
+      "priorityScore": 72,
+      "topFit": 9.11,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 15,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "apollo",
+        "lemlist",
+        "instantly"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-forms-for-small-business",
+      "title": "Best Forms for Small Business",
+      "category": "forms",
+      "priorityScore": 70,
+      "topFit": 8.96,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "fillout",
+        "tally",
+        "jotform"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "title": "Best Lead Capture Forms",
+      "category": "forms",
+      "priorityScore": 70,
+      "topFit": 8.8,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "typeform",
+        "paperform",
+        "jotform"
+      ],
+      "action": "build-next"
     },
     {
       "intent": "best-crm-for-consultants",
@@ -177,6 +234,44 @@
       "action": "build-next"
     },
     {
+      "intent": "best-email-marketing-tools",
+      "title": "Best Email Marketing Tools",
+      "category": "marketing",
+      "priorityScore": 68,
+      "topFit": 9.35,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "buffer",
+        "omnisend",
+        "kit"
+      ],
+      "action": "build-next"
+    },
+    {
+      "intent": "best-marketing-automation-tools",
+      "title": "Best Marketing Automation Tools",
+      "category": "marketing",
+      "priorityScore": 68,
+      "topFit": 9.7,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "klaviyo",
+        "kit",
+        "omnisend"
+      ],
+      "action": "build-next"
+    },
+    {
       "intent": "best-workflow-automation-tools",
       "title": "Best Workflow Automation Tools",
       "category": "automation",
@@ -192,63 +287,6 @@
         "zapier",
         "n8n",
         "make"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-sales-prospecting-tools",
-      "title": "Best Sales Prospecting Tools",
-      "category": "sales",
-      "priorityScore": 67,
-      "topFit": 9.11,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "apollo",
-        "lemlist",
-        "instantly"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-forms-for-small-business",
-      "title": "Best Forms for Small Business",
-      "category": "forms",
-      "priorityScore": 65,
-      "topFit": 8.96,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "fillout",
-        "tally",
-        "jotform"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-lead-capture-forms",
-      "title": "Best Lead Capture Forms",
-      "category": "forms",
-      "priorityScore": 65,
-      "topFit": 8.8,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "typeform",
-        "paperform",
-        "jotform"
       ],
       "action": "build-next"
     },
@@ -382,44 +420,6 @@
         "zapier",
         "github",
         "buffer"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-email-marketing-tools",
-      "title": "Best Email Marketing Tools",
-      "category": "marketing",
-      "priorityScore": 63,
-      "topFit": 9.35,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "buffer",
-        "omnisend",
-        "kit"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-marketing-automation-tools",
-      "title": "Best Marketing Automation Tools",
-      "category": "marketing",
-      "priorityScore": 63,
-      "topFit": 9.7,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "klaviyo",
-        "kit",
-        "omnisend"
       ],
       "action": "build-next"
     },
@@ -576,6 +576,25 @@
       "action": "watch"
     },
     {
+      "intent": "best-social-media-management-tools",
+      "title": "Best Social Media Management Tools",
+      "category": "social",
+      "priorityScore": 51,
+      "topFit": 9.49,
+      "catalogDepth": 15,
+      "commercialSignal": 8,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "buffer",
+        "kit",
+        "chatgpt"
+      ],
+      "action": "watch"
+    },
+    {
       "intent": "best-developer-tools",
       "title": "Best Developer Tools",
       "category": "developer",
@@ -724,25 +743,6 @@
         "chatgpt",
         "grammarly",
         "canva"
-      ],
-      "action": "watch"
-    },
-    {
-      "intent": "best-social-media-management-tools",
-      "title": "Best Social Media Management Tools",
-      "category": "social",
-      "priorityScore": 46,
-      "topFit": 9.49,
-      "catalogDepth": 15,
-      "commercialSignal": 8,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "buffer",
-        "kit",
-        "chatgpt"
       ],
       "action": "watch"
     },
