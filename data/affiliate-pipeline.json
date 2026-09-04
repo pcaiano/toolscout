@@ -288,11 +288,13 @@
     {
       "slug": "activecampaign",
       "provider": "ActiveCampaign",
-      "status": "program_exists",
+      "status": "submitted",
       "commission_note": "30% recurring up to 12 months",
       "source": "https://help.activecampaign.com/hc/pt-br/articles/115000065864-Programa-de-Afiliados",
-      "last_verified": "2026-08-29",
-      "next_action": "Apply and add personal affiliate URL after approval."
+      "last_verified": "2026-09-04",
+      "next_action": "Application submitted via PartnerStack and awaiting ActiveCampaign review. Do not enable affiliate routing unless approval provides a verified personal affiliate URL.",
+      "network": "PartnerStack",
+      "evidence": "PartnerStack application-received email dated 2026-09-04 confirms the application was submitted for ActiveCampaign review."
     },
     {
       "slug": "brevo",
