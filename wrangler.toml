@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "command-center-entry-worker.js"
+main = "affiliate-workflow-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
@@ -8,9 +8,6 @@ html_handling = "auto-trailing-slash"
 not_found_handling = "404-page"
 binding = "ASSETS"
 run_worker_first = [
-  "/analytics",
-  "/analytics/",
-  "/analytics/api/stats*",
   "/api/stats*",
   "/go/*",
   "/api/affiliate-workflow*",
