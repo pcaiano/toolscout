@@ -21,12 +21,12 @@
 <section class="grid2 section"><div class="panel"><div class="sectionHead"><h2>Top tools</h2><span>Human outbound</span></div><div id="tools" class="note">Refresh to load.</div></div><div class="panel"><div class="sectionHead"><h2>Audience</h2><span>Classification</span></div><div id="audience" class="note">Refresh to load.</div></div></section>
 </div>
 <script>
-const API='/analytics/api/stats';
+const API='/api/stats';
 const statusEl=document.getElementById('status');
 const btn=document.getElementById('load');
 const n=v=>Number(v||0).toLocaleString();
 const pct=v=>v===null||v===undefined?'Unknown':`${Number(v).toFixed(1)}%`;
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const card=(label,value,meta)=>`<div class="card"><small>${esc(label)}</small><b>${esc(value)}</b><span>${esc(meta)}</span></div>`;
 const row=(name,value,meta='')=>`<div class="row"><div><div class="name">${esc(name)}</div>${meta?`<div class="meta">${esc(meta)}</div>`:''}</div><div class="value">${esc(value)}</div></div>`;
 function firstDefined(...values){for(const v of values){if(v!==undefined&&v!==null&&Number.isFinite(Number(v)))return Number(v)}return null}
