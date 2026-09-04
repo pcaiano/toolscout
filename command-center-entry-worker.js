@@ -4,6 +4,11 @@ function normalizeCommandCenterRequest(request) {
   if (request.method !== 'GET') return request;
   const url = new URL(request.url);
   if (url.pathname === '/analytics' || url.pathname === '/analytics/') {
+    if (url.searchParams.get('stats') === '1') {
+      url.pathname = '/api/stats';
+      url.search = '';
+      return new Request(url.toString(), request);
+    }
     url.pathname = '/analytics.html';
     return new Request(url.toString(), request);
   }
