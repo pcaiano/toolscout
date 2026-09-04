@@ -1,0 +1,171 @@
+[
+  {
+    "affiliateUrl": "",
+    "slug": "hostinger",
+    "name": "Hostinger",
+    "category": "website",
+    "description": "Web hosting and website platform offering managed hosting, website building, domain services and tools for launching and running websites.",
+    "pricing": "Paid hosting plans with promotional pricing; verify current pricing before publication",
+    "freePlan": false,
+    "features": [
+      "web hosting",
+      "managed WordPress",
+      "website builder",
+      "domains",
+      "email hosting",
+      "site migration",
+      "AI website tools"
+    ],
+    "bestFor": [
+      "small businesses",
+      "creators",
+      "WordPress users",
+      "new websites",
+      "budget-conscious site owners"
+    ],
+    "affiliateProgram": "Hostinger Affiliate Program — application pending",
+    "commission": "Pending approval; verify current commission before activation",
+    "sourceUrl": "https://www.hostinger.com/",
+    "lastVerified": "2026-09-04",
+    "scores": {
+      "price": 9,
+      "ease": 9,
+      "automation": 7,
+      "integrations": 7,
+      "sales": 6,
+      "ai": 8,
+      "marketing": 6,
+      "seo": 7,
+      "research": 2,
+      "content": 6,
+      "agency": 8
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "thinkific",
+    "name": "Thinkific",
+    "category": "marketing",
+    "description": "Online course platform for creating, marketing and selling courses, memberships and learning products.",
+    "pricing": "Free trial and paid plans; verify current pricing before publication",
+    "freePlan": false,
+    "features": [
+      "online courses",
+      "course builder",
+      "memberships",
+      "digital products",
+      "payments",
+      "landing pages",
+      "student management",
+      "integrations"
+    ],
+    "bestFor": [
+      "course creators",
+      "experts",
+      "consultants",
+      "trainers",
+      "education businesses"
+    ],
+    "affiliateProgram": "Thinkific Affiliate Program — application pending",
+    "commission": "30% lifetime recurring on eligible standard paid plans; application pending",
+    "sourceUrl": "https://www.thinkific.com/",
+    "lastVerified": "2026-09-04",
+    "scores": {
+      "price": 7,
+      "ease": 9,
+      "automation": 8,
+      "integrations": 8,
+      "sales": 9,
+      "ai": 6,
+      "marketing": 9,
+      "seo": 5,
+      "research": 3,
+      "content": 9,
+      "agency": 7
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "frase",
+    "name": "Frase",
+    "category": "seo",
+    "description": "AI-assisted SEO and content optimization platform for researching, outlining, writing and improving search-focused content.",
+    "pricing": "Paid plans; verify current pricing before publication",
+    "freePlan": false,
+    "features": [
+      "SEO content optimization",
+      "SERP research",
+      "content briefs",
+      "AI writing",
+      "content scoring",
+      "topic research",
+      "GEO content workflows"
+    ],
+    "bestFor": [
+      "SEO professionals",
+      "content marketers",
+      "publishers",
+      "agencies",
+      "software reviewers"
+    ],
+    "affiliateProgram": "Frase Affiliate Program — application pending",
+    "commission": "30% for 12 months; higher tiers at qualifying referred revenue; application pending",
+    "sourceUrl": "https://www.frase.io/",
+    "lastVerified": "2026-09-04",
+    "scores": {
+      "price": 6,
+      "ease": 8,
+      "automation": 8,
+      "integrations": 7,
+      "sales": 4,
+      "ai": 10,
+      "marketing": 9,
+      "seo": 10,
+      "research": 9,
+      "content": 10,
+      "agency": 9
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "unbounce",
+    "name": "Unbounce",
+    "category": "marketing",
+    "description": "Landing page and conversion optimization platform for building campaign pages, capturing leads and improving marketing conversion rates.",
+    "pricing": "Paid plans with trial options; verify current pricing before publication",
+    "freePlan": false,
+    "features": [
+      "landing pages",
+      "lead generation",
+      "A/B testing",
+      "conversion optimization",
+      "AI copywriting",
+      "forms",
+      "integrations"
+    ],
+    "bestFor": [
+      "marketing teams",
+      "performance marketers",
+      "agencies",
+      "lead generation teams",
+      "small businesses"
+    ],
+    "affiliateProgram": "Unbounce Affiliate Program — application pending",
+    "commission": "25–35% recurring for 12 months; application pending",
+    "sourceUrl": "https://unbounce.com/",
+    "lastVerified": "2026-09-04",
+    "scores": {
+      "price": 5,
+      "ease": 9,
+      "automation": 8,
+      "integrations": 9,
+      "sales": 9,
+      "ai": 8,
+      "marketing": 10,
+      "seo": 6,
+      "research": 4,
+      "content": 8,
+      "agency": 10
+    }
+  }
+]
