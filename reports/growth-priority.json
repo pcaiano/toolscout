@@ -1,16 +1,124 @@
 {
-  "generatedAt": "2026-09-03T08:17:04.173Z",
+  "generatedAt": "2026-09-04T15:47:55.007Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.",
   "gsc": {
-    "available": false,
-    "ingestionStatus": "imported-no-matching-intents",
-    "intentsWithSignals": 0,
+    "available": true,
+    "ingestionStatus": "signals-imported",
+    "intentsWithSignals": 5,
     "source": "Google Search Console Search Analytics API",
-    "reason": "A Google Search Console export was imported, but it contains no matching best-* intent pages.",
+    "reason": "Google Search Console page signals are present and drive growth prioritization, including striking-distance and CTR opportunities.",
     "importCommand": "node scripts/import-gsc-signals.mjs <gsc-pages.csv>"
   },
   "count": 38,
   "items": [
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "title": "Best SEO Tools for Agencies",
+      "category": "seo",
+      "priorityScore": 46,
+      "topFit": 9.08,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 29,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 76.4828,
+        "opportunity": "ctr-upside",
+        "opportunityScore": 21
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "semrush",
+        "ahrefs",
+        "surfer"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-crm-for-sales-teams",
+      "title": "Best CRM for Sales Teams",
+      "category": "crm",
+      "priorityScore": 37,
+      "topFit": 9.4,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 5,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 75.8,
+        "opportunity": "develop",
+        "opportunityScore": 9
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "salesforce",
+        "close"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "title": "Best No-Code Automation Tools",
+      "category": "automation",
+      "priorityScore": 35,
+      "topFit": 9.42,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 4,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 71,
+        "opportunity": "develop",
+        "opportunityScore": 8
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "integrately",
+        "n8n"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-funnel-builder",
+      "title": "Best Funnel Builder",
+      "category": "marketing",
+      "priorityScore": 30,
+      "topFit": 9.33,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 1,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 83,
+        "opportunity": "develop",
+        "opportunityScore": 5
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "buffer",
+        "omnisend",
+        "kit"
+      ],
+      "action": "watch"
+    },
     {
       "intent": "best-crm-for-consultants",
       "title": "Best CRM for Consultants",
@@ -50,25 +158,6 @@
       "action": "build-next"
     },
     {
-      "intent": "best-crm-for-sales-teams",
-      "title": "Best CRM for Sales Teams",
-      "category": "crm",
-      "priorityScore": 69,
-      "topFit": 9.4,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "hubspot",
-        "salesforce",
-        "close"
-      ],
-      "action": "build-next"
-    },
-    {
       "intent": "best-cold-email-tools",
       "title": "Best Cold Email Tools",
       "category": "sales",
@@ -84,44 +173,6 @@
         "shopify",
         "hubspot",
         "lemlist"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-marketing-automation-tools",
-      "title": "Best Marketing Automation Tools",
-      "category": "marketing",
-      "priorityScore": 68,
-      "topFit": 9.7,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "klaviyo",
-        "kit",
-        "omnisend"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-no-code-automation-tools",
-      "title": "Best No-Code Automation Tools",
-      "category": "automation",
-      "priorityScore": 68,
-      "topFit": 9.42,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "zapier",
-        "integrately",
-        "n8n"
       ],
       "action": "build-next"
     },
@@ -354,11 +405,11 @@
       "action": "build-next"
     },
     {
-      "intent": "best-funnel-builder",
-      "title": "Best Funnel Builder",
+      "intent": "best-marketing-automation-tools",
+      "title": "Best Marketing Automation Tools",
       "category": "marketing",
       "priorityScore": 63,
-      "topFit": 9.33,
+      "topFit": 9.7,
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 0,
@@ -366,28 +417,9 @@
       "signalBasis": "heuristic-only",
       "monetizationReadiness": "needs-affiliate-activation",
       "topTools": [
-        "buffer",
-        "omnisend",
-        "kit"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-seo-tools-for-agencies",
-      "title": "Best SEO Tools for Agencies",
-      "category": "seo",
-      "priorityScore": 63,
-      "topFit": 9.08,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "semrush",
-        "ahrefs",
-        "surfer"
+        "klaviyo",
+        "kit",
+        "omnisend"
       ],
       "action": "build-next"
     },

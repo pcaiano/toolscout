@@ -1,9 +1,50 @@
 {
-  "generatedAt": "2026-09-03T08:17:04.092Z",
+  "generatedAt": "2026-09-04T15:47:54.325Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
-  "startDate": "2026-08-05",
-  "endDate": "2026-09-01",
-  "count": 0,
-  "items": []
+  "startDate": "2026-08-06",
+  "endDate": "2026-09-02",
+  "count": 5,
+  "items": [
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
+      "clicks": 0,
+      "impressions": 29,
+      "ctr": 0,
+      "position": 76.4828
+    },
+    {
+      "intent": "best-crm-for-sales-teams",
+      "page": "https://trytoolscout.org/best-crm-for-sales-teams.html",
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 75.8
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "page": "https://trytoolscout.org/best-no-code-automation-tools.html",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 71
+    },
+    {
+      "intent": "best-seo-keyword-research-tools",
+      "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 72.75
+    },
+    {
+      "intent": "best-funnel-builder",
+      "page": "https://trytoolscout.org/best-funnel-builder.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 83
+    }
+  ]
 }
