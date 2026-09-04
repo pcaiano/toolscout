@@ -1,0 +1,59 @@
+name: Sync pending affiliate tools
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/pending-affiliate-tools.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Merge pending affiliate tools into catalog
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const catalogPath = 'data/tools.json';
+          const pendingPath = 'data/pending-affiliate-tools.json';
+          const tools = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+          const pending = JSON.parse(fs.readFileSync(pendingPath, 'utf8'));
+          const slugs = new Set(tools.map(tool => tool.slug));
+          let added = 0;
+          for (const tool of pending) {
+            if (!slugs.has(tool.slug)) {
+              tools.push(tool);
+              slugs.add(tool.slug);
+              added += 1;
+            }
+          }
+          const required = ['slug','name','category','description','pricing','freePlan','features','bestFor','affiliateUrl','affiliateProgram','commission','sourceUrl','lastVerified','scores'];
+          for (const tool of tools) {
+            for (const key of required) {
+              if (!(key in tool)) throw new Error(`Missing ${key} on ${tool.slug || tool.name}`);
+            }
+          }
+          if (slugs.size !== tools.length) throw new Error('Duplicate tool slugs detected');
+          fs.writeFileSync(catalogPath, JSON.stringify(tools, null, 2) + '\n');
+          console.log(`Catalog tools: ${tools.length}; added: ${added}`);
+          NODE
+      - name: Commit catalog update
+        run: |
+          if git diff --quiet -- data/tools.json; then
+            echo 'No catalog changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/tools.json
+          git commit -m 'Add pending affiliate tools to catalog'
+          git push
