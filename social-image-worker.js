@@ -2,7 +2,7 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const RENDERER = 'flux2-brand-composer-v13';
+const RENDERER = 'flux2-brand-composer-v14';
 const FONT_URL = 'https://cdn.jsdelivr.net/npm/inter-font@3.19.0/ttf/Inter-VariableFont_slnt,wght.ttf';
 const PANEL_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGMQkND4DwAB3AFQAV1mkgAAAABJRU5ErkJggg==';
 const BLUE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGPQWvf/PwAFtALX9zL7BgAAAABJRU5ErkJggg==';
@@ -71,22 +71,17 @@ async function generate(env, prompt) {
 
 function rasterHandle(env, b64, width, height) {
   const stream = new Blob([decodeBase64(b64)], { type: 'image/png' }).stream();
-  return env.IMAGES.input(stream).transform({ width, height, fit: 'fill' });
+  return env.IMAGES.input(stream).transform({ width, height, fit: 'squeeze' });
 }
 
 function textHandle(env, text, size, color) {
-  return env.IMAGES.text(text, {
-    font: { url: FONT_URL },
-    size,
-    color
-  });
+  return env.IMAGES.text(text, { font: { url: FONT_URL }, size, color });
 }
 
 async function composeBrand(env, baseStream, variant, smoke = false) {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
-
   let base = env.IMAGES.input(baseStream);
-  if (smoke) base = base.transform({ width: 1024, height: 1024, fit: 'fill' });
+  if (smoke) base = base.transform({ width: 1024, height: 1024, fit: 'squeeze' });
 
   const pipeline = base
     .draw(rasterHandle(env, PANEL_B64, 1024, 300), { bottom: 0, left: 0, opacity: 0.92 })
@@ -110,17 +105,7 @@ export default {
     const variant = safe(url.searchParams.get('variant') || 'discovery', 24).toLowerCase();
 
     if (url.pathname === '/health') {
-      return json({
-        ok: true,
-        service: 'toolscout-social-image',
-        renderer: RENDERER,
-        primary: '@cf/black-forest-labs/flux-2-klein-9b',
-        fallback: '@cf/black-forest-labs/flux-2-klein-4b',
-        brandComposer: 'native-raster-text',
-        font: 'Inter via jsDelivr',
-        textPolicy: 'deterministic-brand-text-only',
-        cache: 'edge-cache-enabled'
-      });
+      return json({ ok: true, service: 'toolscout-social-image', renderer: RENDERER, primary: '@cf/black-forest-labs/flux-2-klein-9b', fallback: '@cf/black-forest-labs/flux-2-klein-4b', brandComposer: 'native-raster-text', font: 'Inter via jsDelivr', textPolicy: 'deterministic-brand-text-only', cache: 'edge-cache-enabled' });
     }
 
     if (url.pathname === '/brand-smoke') {
