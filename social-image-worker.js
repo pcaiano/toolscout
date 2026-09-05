@@ -9,10 +9,10 @@ function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v15',
+    'x-toolscout-renderer': 'flux2-brand-composer-v16',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
-    'x-toolscout-brand-composer': 'cloudflare-images-materialized-text'
+    'x-toolscout-brand-composer': 'cloudflare-images-direct-stream'
   };
 }
 
@@ -99,9 +99,9 @@ async function composeBrand(env, bytes, variant) {
   const baseStream = new Blob([bytes], { type: 'image/jpeg' }).stream();
   return (await env.IMAGES
     .input(baseStream)
-    .draw(env.IMAGES.input(pngStream(label)), { top: 54, left: 64 })
-    .draw(env.IMAGES.input(pngStream(brand)), { bottom: 86, left: 64 })
-    .draw(env.IMAGES.input(pngStream(tagline)), { bottom: 48, left: 66 })
+    .draw(pngStream(label), { top: 54, left: 64 })
+    .draw(pngStream(brand), { bottom: 86, left: 64 })
+    .draw(pngStream(tagline), { bottom: 48, left: 66 })
     .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
@@ -113,7 +113,7 @@ async function composeSmoke(env, variant) {
   ]);
   return (await env.IMAGES
     .input(pngStream(base))
-    .draw(env.IMAGES.input(pngStream(label)), { top: 0, left: 0 })
+    .draw(pngStream(label), { top: 0, left: 0 })
     .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
@@ -126,11 +126,11 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v15',
+        renderer: 'flux2-brand-composer-v16',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
-        brandComposer: 'cloudflare-images-materialized-text',
+        brandComposer: 'cloudflare-images-direct-stream',
         brandFontHost: 'cdn.jsdelivr.net'
       });
     }
