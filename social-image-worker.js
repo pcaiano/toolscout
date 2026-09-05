@@ -7,6 +7,15 @@ function json(data, status = 200) {
   });
 }
 
+function imageHeaders(variant) {
+  return {
+    'content-type': 'image/png',
+    'cache-control': 'public, max-age=86400',
+    'x-toolscout-renderer': 'deterministic-v1',
+    'x-toolscout-image-variant': variant
+  };
+}
+
 function crc32(bytes) {
   let c = 0xffffffff;
   for (const b of bytes) {
@@ -158,19 +167,12 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/health') return json({ ok: true, service: 'toolscout-social-image', renderer: 'deterministic-v1' });
     if (url.pathname !== '/generate') return json({ error: 'not_found' }, 404);
-    if (!['GET', 'POST'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
+    if (!['GET', 'POST', 'HEAD'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
     let body = {};
     if (request.method === 'POST') { try { body = await request.json(); } catch { return json({ error: 'invalid_json' }, 400); } }
     const variant = String(body.variant || url.searchParams.get('variant') || 'discovery').toLowerCase();
+    if (request.method === 'HEAD') return new Response(null, { status: 200, headers: imageHeaders(variant) });
     const png = await render(variant);
-    return new Response(png, {
-      status: 200,
-      headers: {
-        'content-type': 'image/png',
-        'cache-control': 'public, max-age=86400',
-        'x-toolscout-renderer': 'deterministic-v1',
-        'x-toolscout-image-variant': variant
-      }
-    });
+    return new Response(png, { status: 200, headers: imageHeaders(variant) });
   }
 };
