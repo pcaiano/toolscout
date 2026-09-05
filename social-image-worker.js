@@ -2,187 +2,24 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const RENDERER = 'flux2-brand-composer-v16';
-const FONT_SOURCE = 'https://cdn.jsdelivr.net/npm/inter-font@3.19.0/ttf/Inter-VariableFont_slnt,wght.ttf';
-const FONT_URL = 'https://toolscout-social-image.luxurybuyerintelligence.workers.dev/font';
+const RENDERER = 'flux2-brand-composer-v17';
 const PANEL_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGMQkND4DwAB3AFQAV1mkgAAAABJRU5ErkJggg==';
 const BLUE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGPQWvf/PwAFtALX9zL7BgAAAABJRU5ErkJggg==';
 const BASE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGOQMPL9DwAClAGXg6uDdgAAAABJRU5ErkJggg==';
+const TOOLSCOUT_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAUQAAAA1CAYAAAA545IWAAAKVElEQVR42u2deawX1RXHPwdlkUVB0SqKLAGtKKgVrSK12laJRqO22hiLaCzGKtjEahtia7Qt2sYtdW3QaGqpaXFJjUsVXKqgVtTYWDc0btW6FRcQhKrwvv1jrskLgffunTfzY2Z+55O8hDzu79zz7pz5/s7MnDkXHMdxHMdxHMdxHMdxHMdxNoz5EjQbSSOB1yOH9zazNb5qTruyqS+BU6D4GrAHsA8wERgPDAEGA1sAvYDVwCpgJfAO8J/w8yrwLPCcma3w1XQqIYiS7gWmVNTfg8zsIT9slRPCbYCTgOnA2O6yUGDz8O8x6zenN4DFwEJgEfC8mclX2vEM0am6GJ4KXAwMKsikAaPCz3Hhd/cCh/pqt3Wc7QH8M2LocjMb7ILotDpAtwBuAQ5uwXSb+Yo7niE6VRXDAcADwF6+Gk6T6OVL4OTgWhdDxwXR8exQmgIc7yvhuCA6DpzrS+A0Fb+H6KRkh2OA/RM+8gwwD3gMeA34mKwOcQBZbeJgYCdgAlnN4iRgG19ppwkny62KZ7KvWMuOy8iE47JpN7ZmRtpZI+nkHL6apK9JOkfSY53sPeRHsu3jeI/I2FvW9hmipB2BQ8jejhgHDAe2BPoDClnJB8BbwHPAk8ACM3vX/Usi9kHKRWZ2Q6rxUHz9dPi5UNLOZAXfO5ZwTPoA3whZ6e5kdY/DyOop+wGfkb1NsxR4CVgCPAIsMrOVHh9OpTJESX0lnSLpKeWjQ9Ijko6XtEkJ61EJ/wrOEB+KtLNLheN0P0k3SlqZ87h8Lmm+pKmh/Ki28SFpVuRc9yfavTfS7swNfH6yWsP0defuVVPxPTZ8a/ek/MPC/bCbgGclfadd/OsBQyLHvV/BmNlV0oJwP3NauI+Zh94hm5sL/NTjo1nUShAl9ZM0F7gZGFGg6V2ABZIukdSrqf4VQGx3pK9WLG5+Ei7DD/b4dRohiJI2Bx4EppZ4sp8F3Cqpd9P8K4iPIsddIKlvBWKml6TrgUuBPh6/+d13QayWGPYG7gD2a8F0RwM3NMm/Aom9FD4QeELSUd3dlyyZOcDJHr8uiE3LEC8EvtnC+aZKOq1B/hXF4oSxE4C/Av+VNE/SGZK+3qrMUdIMsnZkHr9OcwRR0l7hUiAlizkH2I2shGILYE/g18AnCXYuljSs7v4VzP05PjME+D5wBfA4sELS05LmSJouabei73tJGgVckvix1cB1wHeB0eHYDCArx/k2cAFZoXmj4tczxPKEq5SyG0n3J9h9WNLQLmyNkPRCgr05DfCvsLKbYO/REsofPpR0s6QfhHttPY3FeYnz3y5p+0jbB0m6L3zu/DrHR0LZzT2J69+jspsN2GxJYXalBVHS+ASbr0gaHCkQyyJtrpK0VV39K0kQDym5NuxTSdfnrWWUNFrS2hTRyJOhBvGeUfP4jRXEu9tFEKt+yXxCwthZZtbtYpjZG8BFkTY3C5dQdfWvcMxsAXB5iVP0J3sQ8pyka0Mj2hSmJcT1E8AMM+vIsQ43mdnVNY9fv2SumSAeHjnubeC2BLvXAF9Ejj2ixv6VxdlktXRlx+YpwDOSdkv43JEJY2eWvMtgU+KjgzahsoIYLh9iC3xvT9mEKHwT/z1y+L519K/kLHEN2X4n5wFlb1s6ArhP0g4RMTOI7Ol2DIvN7Ml2jd9E1rogbnzGE/9mRJ7Afipy3NaStquhf2WLoszsV2Ed7i55um2B28I2p10xISGm/9bm8euXzDUTxJEJY1/MYf+FxCylbv61ShiXmNnhwK7A78i6w5TBPsD3uhkzKsHeP9o8fv2SuWaCuHXC2A9y2P+gh75U3b9WC+MLZnZmyOb2Jquluw8octP5swtch7faPH6d9VDlfogpW0/m6U+XcqL2r6F/G0sYO8Ll3FPAb0JJy5fdsCcBB5C/v+HekgZ38TQ2ZR2WtXn8OjXLEC1hrDaC/ar7VxmBNLNnzOz3ZnaCmY0AxoRs76Uc8bp/TdasSfGRqhMDqClVFsRVCWMH5bA/MGHs6hr6V91vOrNXzexSsrZVZ5D2FLOrp82fJtgZ0ubxm0Jq95zNqSlVFsSUm/NDc9gf2kNfqu5fHYRRZnYVMLugdUlZh+FtHr8p9ItORbNKgNEuiMXz74SxeV7zGtdDX6ruX524vqCT8/UEO/u2efxC/NPjlAx258Ts1QUxkmeJv/exdw77E2O/XTewmU/V/asT7xR0+fevhJP8sDaPX4h/MLNtgl/H1DkQKyuIZvYx8Tfdj4wo2u2c1g8GDooc/ngd/SsDSTMkXRn2Zy6SlKfO73URMyuCEEVliJImtmv8BpbHHp+YLkSS+lFeD8rPIsf1qFt41d9lvjNy3A50X7TbmdMSFu6uGvtXNIOAmcDLku4MnW+K2LFwZsLYV7r5/9sTbF1ZckfvqsdH7JYQBhwVMe48yntJILYXZP+YrkGtyB7KaP81YSO3T1rdTfukSvvXyV5R25Cur13UUknXSZqSupdH2PPkZ2FLzRjWSBrYjc3U9l9Xp2RnneY5sruu1DWI3+0T/Hs37B+9IVtn5mj1ltL+a2CC3RMbKYjB7gOJDTa7CoAdExtsXtsA/8oWxHV7GT4i6XJJJ0jaV9JOkoZK2jTsOredpAMk/ULSS4kn0IORMXNLot3bYt/3DX355iU0iK16fLyXYG+ppNMlDZfUR9IwScdIejBn78uZiRrzdmxPREk/ljQ2XMY3ShAnJmQQCgd4lqRx4VtlkKTdJf1S0vLERqXbN8C/Vgpi2ZwUGTOjJf0vR2PaOSHzGyGpv6TNgghNlvRzSQvX+cz5DYiPeRvxeKYK4h0Fzj27loIYbF9W5YNVZf8aJIivpVyShwyhbM5vQHwcWiNBPL1sQazLrnuzgEUtnO/PoWC4Kf7VHQE/MrPYpqiY2RXAHzx+u2U+afWbG5M/ke+972hqIYhm9jlZ598nWjDdncCJTfKvAZwTti5IZTrwR4/fLn3rIHtqXRQPlyX+ZvYJ2ZPs9hbEsBjLyWqv/lLiNFcAR6dkInXxryBa3RdvLXCWmf02Z8ysNbMTQ4b2hcfvBn2bT7YtQU+5h2zbhFUlruNlwI3Vv6Yp8R7ieuY6TtKbBd5PWCJpSoFrURn/Cr6HuImkb0m6JvHpZB6elrRfgcdkfOIT38LuIdYhfiWZpKtyzr9G0uwva1LL2HVvPf7+sIdrOLsxghjm6yfp1HDi5OVRSVPLKM6tin9Fb0PayW6v8PT1XEkLJK0o4MT+TNJdko7IUxsY6fdkSXMlrczp4xfK9mWeJmlA0+JX0rGSXk3wYb6kPdexUbogdvqCPkzSReHL7nVJH4VjlEsQjQYgaSRwCNn7nePIKv+3ImvSKbL3Xz8E3gSeJ9vDYr6ZveP+FfY3bgLsHv6+McBYsq4nW5K94TKQrE9eB9lrWMuA94HXyNrhLwYWhdfvWuFvX7JmtZOC36OAYcHXvsHHFWSdYl4ma/P/KLDQzFY2OT4k9QGmAIeSNcH4Cll3nQ6yTt0vAguBW81sCY7jOI7jOI7jOI7jOI7jOG3C/wEWD6fTVXmblwAAAABJRU5ErkJggg==';
+const TAGLINE_B64 = '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';
+const DISCOVERY_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAG4AAAAUCAYAAABs4ghcAAAFGElEQVR42u2Ye4hWVRDAf7t6bO9eLaXsse1KGqVWkD00wR4UEaWBRmVaIElWhlgZiVhqqaUigaJWFmahq6nZH4XhC4TKzLKIrdYssshtESq2h86O66TbP/PB4XLd/Vx2/+obONzznZk5Z868zwclKEEJSlCCEvyPQNQWiVprNI6LWpOofSNqq0RtWDs8szK4QaK2XtQOilqL73VA1DaL2uhTyNBf1JaIWr2oHRG1o6L2vaitFrUROfRDRa1W1H7xM/4RtS9FbY6o9Y7odkVy3p6zT5moNUQ0A3L0kR0r29BdQX+Nft+rRC2IWl2EfyojQ/B7F/BTs3KWF2nLAPQBrgAeAj4TtUVFOsE1wFfAeGAA0MP3GgjcDdyRw3MfUA88CVwG9ARS4FJgIjA7Qz8d2As8APTzM3oBVwNzgTpRG+zktRHr+ByRrweqfb4nTcJPnRALAajy++72/ScBJxw/T9RqIvrpfm/8Xi93xHCzna4KmAIc8fUZojatCP4ZQAXQCoxzA5zjCloGNGWMMNyVmzjPQjdGpTvOY8CPEf1IYLHLeNTPqHTlvOlk/YD3RK0HsBk45ut3iVpFRt7YmGvz9JEmoSwzJp9Kd2kSyvz8fb5WCYxJk7DP74/rZLnfZwBQyFjHgUlpEk5mN+5ejLukSWgFDgOviFoT8Laj5oja62kSpA32gf79C3jHhWgGPvGRhRcjuVamSXgmwtX7yDpWAeamSdjo80ZRmwSM8Ei9BBiXJmGNqL0PjPWovNONiah1B+6JlLapM0pPmoQGUdsJDM3ofRYwBugPjPayMdmdFmBhmoT6vD3LOyDEBuCQ/+wN3NAOy2H/9gG2i9pEURssamU5KbIXcFO09FI7afgsIK63azKynsys3dZOurwV6OvzrWkSmjqpZ6iOzm4Ftrt8zcCjEWktUKi7+4EFp9qzvIOyHIjm/duhXZ1RzGoX6ndRWyFqfSN8DdDN58eAn9vZuzq6Q3OahN9yaOI9+vl3G/CHz0e5AxSTJgHm5zQft7dFCzQA1/p3XJqEryPn2hk5V0//ngQeTpNwvLMNV34aEboJmABki/zZXjN3eIrqKogju9VlMqCQUs+Iat2YKK1v6QJZyoHGnPVpQOx0r6ZJ2NMpBojb5ahuUURUkCZhbZqEi4EhwBPA1gg9BLjO5w1Rp1VRRDT/6t4JUClq5+bQXBTNGzJpqQD3A6OAM/335jQJLW01HJmxrY3GrsINA3Ah8K6XhFg/TVHzUsgIdKrh/JI1kWd+dBrRV5cmYVmahJHA+gh1geOPAB9G60+3s9/fwOfR0oSMk5Vn1nZEvHuj7vQW4PEi0mRHGpOWNAlLgV2+dB4wtTNCt6goE7XzRW0KsDJCzfMC2xbvelFbKmo3i1qNqPUQtcv9jVWAHzJe+q/PJ4vaAlGrFrUKURsoao+I2vKI/oVoPkfUxjptFbDKO0rcSBsy4hWirhtwo88PAR93QZqMG60poha62nDzPR0dBlZEBXRRmoQlRfBXeXrc5UppAb4FBjl+S6ZY7wEe9OakDJjpKU69KXrNW/sC/Qf+Vmz19n6j0zb6Y72QIkfnFPvaHHnX+fOH02hOdhehh22Rg1ZFz44ubTJOAH+6wt8AhqVJmFkk73PAUuALN775O64OeBa4Nye9rPPH9jLgO6dv9ou/lYky0iQsBoZ7+m3wN9hR/8fmeeDKNAn7c845CHxahDE7I2W2Rg9u3JlLUIISlKAEJShBBv4DWli3QTS+U6cAAAAASUVORK5CYII=';
+const COMPARISON_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAIEAAAAUCAYAAACqC16gAAAFUElEQVR42u2Ye4hXRRTHP7vrrM5OplYWrbtbaqaW4Pa2FxJEtZIZZLr5IkHMsLDAqKy1zF5IkFh/KIVJrVv2ZCkpzYTQHlhihmsmltS2hI/MWmdHd9Jf/5xfDJf7+/3ub/cH/XO/cLlzZ84999zvnDnnzECKFClSpEiRIkUBWOeHWudftM63Wec7rfPHrPM/WudXW+evjZG/wjrfbJ3/xTp/wjr/t3V+u3V+sXV+YET2eet8JrgWx+h7OSKzMM/7Gev8Sev8Qet8q3X+6hz/9FXkndExMnG6u63zHdb5d63zl+SRfzwyNso632Kd/0k4OWKd3yN6JuWwsac8HrfO10bGD8vY4VzzXJ7HAaYCbcADwEXAaYABLgRmA00R+YeAr4HpQB1QCfQHLgWWADvjCA8wxzpfEeirAmYU6bflwGDgNmCLdb4hYuNwYFzknZkJdSugGrgD2GqdH5pgEV0G7ADuAoYJJ4OAkaKnIead3vDYNzovSUmLM34c0AxoIAM8JwZVAWOAe4F9gfwEYJnoOwY0imwN8JqI1QGt1vnKHLbURkhpBAYk/I8mo1WZEJz9XoXYFCLOqaZZ58sS6K4DvpG+KuD2BHY9DPQTDhtlEZ0FXAesAI5EeC8Fj7Ot88N67QTAM0Afaa80Wi0yWrUbrZzRqs1otdJodV9IVNBeYrRaJ7IdwBxgr4yNkB+L4oDc5wZ990TGCsJodTRiyxjrvI5xgm6gVdrnAdcn0N0OfBp09Ulg0ki5HwXeMVp1Ga3+MFp9YbRaYLRaFHW4XvJ4Uux6sldOYJ3vD4wPul4oEPIGAFcGXa9HyDsV6bspRk3WyydY52us8/WiMwOsKTK6leWJbhfI42cRvTMThPaawPYMsCGBLb/LfRCwwTo/2zo/Oi7ylIjHZrlPL5B6C0aCWgmlAMeB/QV01AR6uoxWB2NkQh11MePb5aoQj58XTNa+IgrZgcBTQdcuo5WLSQXvyyR2yfNk63zfHGqXWuczQDtwudwbjVbfJzBpddC+UZ53A4ek6B1cYh4/knqiXOqHXqWDUiP0/EwOmVXZAhGYFukrhOxE/SlFK8Ap4BFxDgVMDUJmqzhHdjUPBG4tgrOOhOnpbWAW8HNk6ExgPrDROt+nxDw2BY49tqdO0C5EIUVNoSr4NyEcoMo6f3aMzPkR/XF4E+gEhkg1fCDI20lxCjgsK2K80Wq99N8iBRnAVqPVIWl/kCAlNAkPD8rzEOA9SZtJHOENo9VwoB5YAHwcDNcDV5WSR6PVJuBzcZilPXICo1WnKMliYYGf/AvYFnTNioTo8kjfxhx6jgFrw1BqtPLF7A6MVhVGq8FGq4lGq605dgXjs/vqSI5tsM6fkcO2E0ar5cBm6ToHuL8Y7zRa7TRarTBaTQBagqFzS8ljJBpMlCjXo3TQBPwj7XnW+WelYOtnnR9pnZ9rnZ9pnX8pkH86aC+2zk8R2WrgVTlbQPL7W3nsWRWEuldKdOB1upwbFEIlMKWATFgkz5c0k+/bLdb55db5G6zztdb5Suv8xbLnz2JvqXk0Wm0JnKSiR05gtPoSuFsKwzLgUQk/DtgjkzUikF8ve+KMhPJ1ItsR5Oh2YJLRqjuP8d/Jii43Wu2nNJgs4Rxgnej/7wJuLmKX8EkwadWiOx+qJQVsBn4FTgC7gFHZQi4sMEvFY8x2s2eFodFqrRwMrQB+kEq6S0hYE/FajFbL5DSuRQztlgOPHbJvHWu02v0/nH7PyLXtEmwKCr1r8h20GK0ywkcWCwp8+wlgOfCtbBe9cLgTeAy4M+YbJeHRaLUN+JAUKVKkSJEiRYqE+BdNd+paecZ63QAAAABJRU5ErkJggg==';
+const PRACTICAL_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAGsAAAAUCAYAAACKy8MYAAADIklEQVR42u2XTahVVRTHf1fd9rY7xUIJ/CielVG8SaCgRbxZJWgFSUoo2CQUiQoaVPQmlh9EkNikJilSA0ELoajoA7SHDpqFDz8IHDycmFCgy6Uu9TpZFw6Hc9895/DuJeP8YXP3Xned/d//s/ZeZ21o0KBBgwYN7mKI2h5Ra+faLVG7KGpHRW11Cf8bonZB1A6L2pNTcJ3MPff4FL7DovapqE2I2mVRuyJqZ0XtS1F72n0uFaylqJ0qWPsHdTjraOrFW4QZFWI4A1gIvAD8LmprevgHYBHwMjAuasMFC34YWJUzb+7yAjYAE8BbwBPAvUAClgOvAWN92LSVOatoqooywRpLMbSA+4D9bpsJfNzD/0HgD7fNAV4q8N1UYHtV1Fq5F7AK+AqIQBvY7fPPAUaAbcBfACmGBSmGlq9hbmaa6x27t5EegSrNWUdTHcwq65hi+FfUxnxHAYyIWkwxaBf/SVH7GVg5BVdH2A3gB+BF4CHgGeB4xm9n5vnPUwzvZ/6b8DbdqMtZVlNfTlYWrQopZAnwrA/bwE8FO/cRH/4KHChKG6I2FxjN/PfJAL7ZtTjLaup7sERtPrAjYzrV5VR9KGptYBJY4b8bUwx/TpEuvvFgXvXxelG7x/tLPe0CXAPOD6DGqstZVlPfgtV5+f9kUuBt4N0KHBdygQ/ABh/eAo564Dunbz6w9i6roPuuqUoavA1cAr4DRlMM33crMIAh4G0fLwaOeGrp4HlggffHUwx/e//bgrQx6eLxeYcH8O7rcFbR1N9qMMUwM8WwMMWwLsUw3qMYuZ5i2Av85qYHgDe6pIvRzn0DOJixrxG1+1MMl4FjGfs7/Y5UTc7SmgZVYFRF9sO8XdSCqM3zu1ovzAZeyZzWm97fKmq7RG2JqA2J2mOi9rqofTbNay/NWVPTfy5YPwLnvL8IWO9tyG2HcnefFvBcPm2kGE4AW/xj3wLe81SlwBngC+DRaT5dVTgrayqqC3JtfKDBSjG0gX0Z05u5dHGw4LFfMgXJU6K2zOf62i+j+4DTXmVd9c1wAPioD+svy1lLU4MGDRo0aPB/xR3b2y6MLl1xswAAAABJRU5ErkJggg==';
 
-function headersFor(variant, model = 'flux2') {
-  return {
-    'content-type': 'image/jpeg',
-    'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
-    'x-toolscout-renderer': RENDERER,
-    'x-toolscout-image-variant': variant,
-    'x-toolscout-image-model': model,
-    'x-toolscout-brand-composer': 'native-raster-text',
-    'x-toolscout-text-policy': 'deterministic-brand-text-only'
-  };
-}
-
-function safe(value, max = 240) {
-  return String(value || '').replace(/[\r\n]+/g, ' ').replace(/[^\p{L}\p{N}\s.,:;!?()&+\-/'’]/gu, '').trim().slice(0, max);
-}
-
-function variantLabel(variant) {
-  if (variant === 'comparison') return 'COMPARISON';
-  if (variant === 'practical') return 'PRACTICAL';
-  return 'DISCOVERY';
-}
-
-function decodeBase64(value) {
-  const binary = atob(value);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
-function buildPrompt(scene, concept) {
-  const idea = scene || concept || 'software selection by workflow fit';
-  return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.\n\nCENTRAL IDEA\n${idea}\n\nTOOLSCOUT ART DIRECTION\nRestrained, precise and useful with quiet charisma. Use near-black charcoal #101828, soft off-white #F5F7FB and white, with controlled cool blue/cyan accents. Generous negative space, crisp geometry, subtle depth, refined realistic materials and sophisticated B2B editorial art direction. The result must feel like one coherent ToolScout visual system, not generic SaaS advertising.\n\nILLUSTRATION\nUse premium photorealistic CGI or high-end advertising photography. Make one strong visual metaphor immediately understandable. Keep important subject matter above the lower quarter so a deterministic brand panel can be applied afterwards.\n\nABSOLUTE TEXT RULE\nNO WORDS, LETTERS, NUMBERS, LABELS, CAPTIONS, UI COPY, LOGOTYPES OR TYPOGRAPHY. Do not attempt to spell ToolScout.\n\nAVOID\nNo invented claims, fake software logos, fake UI, fake data, random abstract lines, cyberpunk neon, hologram overload, robots, stock-photo smiles, malformed icons, clip-art, Microsoft Paint aesthetics, watermarks or generic AI slop.\n\nFORMAT\n1024x1024. No border. No watermark. No text. Premium editorial campaign quality.`;
-}
-
-async function runFlux(env, model, prompt) {
-  const form = new FormData();
-  form.append('prompt', prompt);
-  form.append('width', '1024');
-  form.append('height', '1024');
-  form.append('guidance', '4');
-  const serialized = new Response(form);
-  return env.AI.run(model, { multipart: { body: serialized.body, contentType: serialized.headers.get('content-type') } });
-}
-
-async function generate(env, prompt) {
-  const models = ['@cf/black-forest-labs/flux-2-klein-9b', '@cf/black-forest-labs/flux-2-klein-4b'];
-  const errors = [];
-  for (const model of models) {
-    try {
-      const result = await runFlux(env, model, prompt);
-      if (result && typeof result.image === 'string' && result.image.length > 100) return { bytes: decodeBase64(result.image), model };
-      errors.push(`${model}: empty image response`);
-    } catch (error) {
-      const message = error?.message || String(error);
-      errors.push(`${model}: ${message}`);
-      if (message.includes('daily free allocation of 10,000 neurons')) break;
-    }
-  }
-  throw new Error(errors.join(' | '));
-}
-
-function rasterHandle(env, b64, width, height) {
-  const stream = new Blob([decodeBase64(b64)], { type: 'image/png' }).stream();
-  return env.IMAGES.input(stream).transform({ width, height, fit: 'squeeze' });
-}
-
-function textHandle(env, text, size, color) {
-  return env.IMAGES.text(text, { font: { url: FONT_URL }, size, color });
-}
-
-function smokeBase(env) {
-  const stream = new Blob([decodeBase64(BASE_B64)], { type: 'image/png' }).stream();
-  return env.IMAGES.input(stream).transform({ width: 1024, height: 1024, fit: 'squeeze' });
-}
-
-async function composeRasterOnly(env) {
-  const pipeline = smokeBase(env)
-    .draw(rasterHandle(env, PANEL_B64, 1024, 300), { bottom: 0, left: 0, opacity: 0.92 })
-    .draw(rasterHandle(env, PANEL_B64, 205, 44), { top: 42, left: 46, opacity: 0.84 })
-    .draw(rasterHandle(env, BLUE_B64, 96, 4), { bottom: 232, left: 64 });
-  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
-}
-
-async function composeTextOnly(env) {
-  const pipeline = smokeBase(env)
-    .draw(textHandle(env, 'DISCOVERY', 16, '#F5F7FB'), { top: 55, left: 68 })
-    .draw(textHandle(env, 'ToolScout', 58, '#FFFFFF'), { bottom: 86, left: 64 })
-    .draw(textHandle(env, 'FIND THE RIGHT TOOL. FASTER.', 18, '#D0D5DD'), { bottom: 48, left: 66 });
-  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
-}
-
-async function composeBrand(env, baseStream, variant, smoke = false) {
-  if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
-  let base = env.IMAGES.input(baseStream);
-  if (smoke) base = base.transform({ width: 1024, height: 1024, fit: 'squeeze' });
-  const pipeline = base
-    .draw(rasterHandle(env, PANEL_B64, 1024, 300), { bottom: 0, left: 0, opacity: 0.92 })
-    .draw(rasterHandle(env, PANEL_B64, 205, 44), { top: 42, left: 46, opacity: 0.84 })
-    .draw(rasterHandle(env, BLUE_B64, 96, 4), { bottom: 232, left: 64 })
-    .draw(textHandle(env, variantLabel(variant), 16, '#F5F7FB'), { top: 55, left: 68 })
-    .draw(textHandle(env, 'ToolScout', 58, '#FFFFFF'), { bottom: 86, left: 64 })
-    .draw(textHandle(env, 'FIND THE RIGHT TOOL. FASTER.', 18, '#D0D5DD'), { bottom: 48, left: 66 });
-  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
-}
-
-async function runSmoke(fn, env, label) {
-  try {
-    const result = await fn(env);
-    return new Response(result.body, { status: 200, headers: headersFor('discovery', label) });
-  } catch (error) {
-    return json({ error: 'brand_compose_failed', stage: label, detail: error?.message || String(error) }, 503);
-  }
-}
-
-async function serveFont() {
-  const upstream = await fetch(FONT_SOURCE, { cf: { cacheTtl: 86400, cacheEverything: true } });
-  if (!upstream.ok || !upstream.body) return new Response('font unavailable', { status: 502 });
-  return new Response(upstream.body, {
-    status: 200,
-    headers: {
-      'content-type': 'font/ttf',
-      'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
-      'access-control-allow-origin': '*'
-    }
-  });
-}
-
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-    const variant = safe(url.searchParams.get('variant') || 'discovery', 24).toLowerCase();
-
-    if (url.pathname === '/font') return serveFont();
-    if (url.pathname === '/health') return json({ ok: true, service: 'toolscout-social-image', renderer: RENDERER, brandComposer: 'native-raster-text', font: 'proxied-inter', diagnostics: ['brand-smoke-raster','brand-smoke-text'], cache: 'edge-cache-enabled' });
-    if (url.pathname === '/brand-smoke-raster') return runSmoke(composeRasterOnly, env, 'raster-only');
-    if (url.pathname === '/brand-smoke-text') return runSmoke(composeTextOnly, env, 'text-only');
-    if (url.pathname === '/brand-smoke') {
-      const base = new Blob([decodeBase64(BASE_B64)], { type: 'image/png' }).stream();
-      try {
-        const branded = await composeBrand(env, base, 'discovery', true);
-        return new Response(branded.body, { status: 200, headers: headersFor('discovery', 'brand-smoke-no-ai') });
-      } catch (error) {
-        return json({ error: 'brand_compose_failed', stage: 'brand-compose', detail: error?.message || String(error) }, 503);
-      }
-    }
-
-    if (url.pathname !== '/generate') return json({ error: 'not_found' }, 404);
-    if (!['GET', 'HEAD'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
-    if (request.method === 'HEAD') return new Response(null, { status: 200, headers: headersFor(variant) });
-
-    const cache = caches.default;
-    const cacheKey = new Request(url.toString(), { method: 'GET' });
-    const cached = await cache.match(cacheKey);
-    if (cached) return cached;
-
-    const scene = safe(url.searchParams.get('scene') || '', 420);
-    const concept = safe(url.searchParams.get('concept') || variant, 64);
-    let generated;
-    try {
-      generated = await generate(env, buildPrompt(scene, concept));
-    } catch (error) {
-      const detail = error?.message || String(error);
-      const quotaExceeded = detail.includes('daily free allocation of 10,000 neurons');
-      return json({ error: quotaExceeded ? 'workers_ai_daily_quota_exceeded' : 'flux_generation_failed', stage: 'flux-generation', retryAfterUtc: quotaExceeded ? '00:00 UTC next day' : null, detail }, quotaExceeded ? 429 : 503);
-    }
-
-    try {
-      const base = new Blob([generated.bytes], { type: 'image/jpeg' }).stream();
-      const branded = await composeBrand(env, base, variant, false);
-      const response = new Response(branded.body, { status: 200, headers: headersFor(variant, generated.model) });
-      await cache.put(cacheKey, response.clone());
-      return response;
-    } catch (error) {
-      return json({ error: 'brand_compose_failed', stage: 'brand-compose', model: generated.model, detail: error?.message || String(error) }, 503);
-    }
-  }
-};
+function headersFor(variant, model='flux2') { return { 'content-type':'image/jpeg','cache-control':'public, max-age=86400, stale-while-revalidate=604800','x-toolscout-renderer':RENDERER,'x-toolscout-image-variant':variant,'x-toolscout-image-model':model,'x-toolscout-brand-composer':'raster-brand-assets','x-toolscout-text-policy':'pre-rendered-brand-text-only' }; }
+function safe(v,m=240){return String(v||'').replace(/[\r\n]+/g,' ').replace(/[^\p{L}\p{N}\s.,:;!?()&+\-/'’]/gu,'').trim().slice(0,m)}
+function decode(v){const b=atob(v),o=new Uint8Array(b.length);for(let i=0;i<b.length;i++)o[i]=b.charCodeAt(i);return o}
+function labelAsset(v){return v==='comparison'?COMPARISON_B64:v==='practical'?PRACTICAL_B64:DISCOVERY_B64}
+function buildPrompt(scene,concept){const idea=scene||concept||'software selection by workflow fit';return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.\nCENTRAL IDEA\n${idea}\nTOOLSCOUT ART DIRECTION\nRestrained, precise and useful with quiet charisma. Near-black charcoal #101828, soft off-white #F5F7FB and white, controlled cool blue/cyan accents, generous negative space, crisp geometry, subtle depth, refined realistic materials, sophisticated B2B editorial quality.\nILLUSTRATION\nPremium photorealistic CGI or high-end advertising photography. One strong visual metaphor, immediately understandable. Keep important subject matter above the lower quarter.\nABSOLUTE TEXT RULE\nNO WORDS, LETTERS, NUMBERS, LABELS, CAPTIONS, UI COPY, LOGOTYPES OR TYPOGRAPHY.\nAVOID\nNo fake logos/UI/data, random abstract lines, cyberpunk neon, hologram overload, robots, stock-photo smiles, clip-art, Paint aesthetics, watermarks or generic AI slop.\nFORMAT\n1024x1024. No border. No watermark. No text.`}
+async function runFlux(env,model,prompt){const f=new FormData();f.append('prompt',prompt);f.append('width','1024');f.append('height','1024');f.append('guidance','4');const r=new Response(f);return env.AI.run(model,{multipart:{body:r.body,contentType:r.headers.get('content-type')}})}
+async function generate(env,prompt){const ms=['@cf/black-forest-labs/flux-2-klein-9b','@cf/black-forest-labs/flux-2-klein-4b'],e=[];for(const m of ms){try{const r=await runFlux(env,m,prompt);if(r&&typeof r.image==='string'&&r.image.length>100)return{bytes:decode(r.image),model:m};e.push(`${m}: empty image response`)}catch(x){const s=x?.message||String(x);e.push(`${m}: ${s}`);if(s.includes('daily free allocation of 10,000 neurons'))break}}throw new Error(e.join(' | '))}
+function handle(env,b64,w,h){const s=new Blob([decode(b64)],{type:'image/png'}).stream();return env.IMAGES.input(s).transform({width:w,height:h,fit:'squeeze'})}
+async function compose(env,baseStream,variant,smoke=false){let b=env.IMAGES.input(baseStream);if(smoke)b=b.transform({width:1024,height:1024,fit:'squeeze'});const p=b.draw(handle(env,PANEL_B64,1024,300),{bottom:0,left:0,opacity:.92}).draw(handle(env,PANEL_B64,205,44),{top:42,left:46,opacity:.84}).draw(handle(env,BLUE_B64,96,4),{bottom:232,left:64}).draw(handle(env,labelAsset(variant),variant==='comparison'?129:variant==='practical'?107:110,20),{top:55,left:68}).draw(handle(env,TOOLSCOUT_B64,324,53),{bottom:86,left:64}).draw(handle(env,TAGLINE_B64,294,21),{bottom:48,left:66});return(await p.output({format:'image/jpeg',quality:90})).response()}
+async function smoke(env){const b=new Blob([decode(BASE_B64)],{type:'image/png'}).stream();return compose(env,b,'discovery',true)}
+export default{async fetch(request,env){const url=new URL(request.url),variant=safe(url.searchParams.get('variant')||'discovery',24).toLowerCase();if(url.pathname==='/health')return json({ok:true,service:'toolscout-social-image',renderer:RENDERER,brandComposer:'raster-brand-assets',textPolicy:'pre-rendered-brand-text-only',cache:'edge-cache-enabled'});if(url.pathname==='/brand-smoke'){try{const r=await smoke(env);return new Response(r.body,{status:200,headers:headersFor('discovery','brand-smoke-no-ai')})}catch(e){return json({error:'brand_compose_failed',stage:'brand-compose',detail:e?.message||String(e)},503)}}if(url.pathname!=='/generate')return json({error:'not_found'},404);if(!['GET','HEAD'].includes(request.method))return json({error:'method_not_allowed'},405);if(request.method==='HEAD')return new Response(null,{status:200,headers:headersFor(variant)});const cache=caches.default,key=new Request(url.toString(),{method:'GET'}),cached=await cache.match(key);if(cached)return cached;const scene=safe(url.searchParams.get('scene')||'',420),concept=safe(url.searchParams.get('concept')||variant,64);let g;try{g=await generate(env,buildPrompt(scene,concept))}catch(e){const d=e?.message||String(e),q=d.includes('daily free allocation of 10,000 neurons');return json({error:q?'workers_ai_daily_quota_exceeded':'flux_generation_failed',stage:'flux-generation',retryAfterUtc:q?'00:00 UTC next day':null,detail:d},q?429:503)}try{const b=new Blob([g.bytes],{type:'image/jpeg'}).stream(),r=await compose(env,b,variant,false),out=new Response(r.body,{status:200,headers:headersFor(variant,g.model)});await cache.put(key,out.clone());return out}catch(e){return json({error:'brand_compose_failed',stage:'brand-compose',model:g.model,detail:e?.message||String(e)},503)}}};
