@@ -2,14 +2,16 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
+const BRAND_FONT = { url: 'https://raw.githubusercontent.com/google/fonts/master/ofl/basic/Basic-Regular.ttf' };
+
 function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v9',
+    'x-toolscout-renderer': 'flux2-brand-composer-v11',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
-    'x-toolscout-brand-composer': 'cloudflare-images'
+    'x-toolscout-brand-composer': 'cloudflare-images-native-text'
   };
 }
 
@@ -27,7 +29,7 @@ function creativeFromUrl(url, variant) {
 
 function buildPrompt(c) {
   const idea = c.scene || c.concept;
-  return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.\n\nCENTRAL IDEA\n${idea}\n\nSTRICT TOOLSCOUT ART DIRECTION\nUse the visual language of ToolScout's product: restrained, precise, independent and useful. Contemporary editorial design with quiet charisma. Foundation colours are near-black charcoal #101828, soft off-white #F5F7FB and white, with restrained cool blue and cyan accents. Generous negative space, crisp geometry, subtle depth, refined materials, sophisticated B2B technology art direction. The visual must feel like one coherent brand system, not generic SaaS advertising.\n\nILLUSTRATION\nUse premium photorealistic CGI or high-end advertising photography to make the central idea immediately understandable. Prefer a single strong metaphor involving software selection, filtering, workflow, comparison, focus, decision-making or reducing choice. Realistic lighting and materials, elegant composition, restrained detail. Keep important subject matter above the lower quarter of the image so a brand panel can be applied there afterwards.\n\nABSOLUTE TEXT RULE\nTHE GENERATED ILLUSTRATION MUST CONTAIN NO WORDS, NO LETTERS, NO NUMBERS, NO LABELS, NO CAPTIONS, NO UI COPY, NO LOGOTYPES AND NO TYPOGRAPHY OF ANY KIND. Leave clean negative space so ToolScout typography can be added separately by a deterministic brand compositor. Do not attempt to spell ToolScout.\n\nAVOID\nNo random abstract lines or blobs. No cyberpunk neon, hologram overload, robots, stock-photo smiles, fake software interfaces, fake logos, fake charts, fake data, malformed icons, clip-art, Microsoft Paint aesthetics, distorted anatomy, illegible glyphs, watermarks or generic AI slop.\n\nFORMAT\n1024x1024. No border. No watermark. No text. Premium editorial campaign quality.`;
+  return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.\n\nCENTRAL IDEA\n${idea}\n\nSTRICT TOOLSCOUT ART DIRECTION\nUse the visual language of ToolScout's product: restrained, precise, independent and useful. Contemporary editorial design with quiet charisma. Foundation colours are near-black charcoal #101828, soft off-white #F5F7FB and white, with restrained cool blue and cyan accents. Generous negative space, crisp geometry, subtle depth, refined materials, sophisticated B2B technology art direction. The visual must feel like one coherent brand system, not generic SaaS advertising. Reserve a clean dark negative-space area at the bottom and upper-left for deterministic brand typography added after generation.\n\nILLUSTRATION\nUse premium photorealistic CGI or high-end advertising photography to make the central idea immediately understandable. Prefer a single strong metaphor involving software selection, filtering, workflow, comparison, focus, decision-making or reducing choice. Realistic lighting and materials, elegant composition, restrained detail. Keep important subject matter away from the lower 18% and upper-left corner.\n\nABSOLUTE TEXT RULE\nTHE GENERATED ILLUSTRATION MUST CONTAIN NO WORDS, NO LETTERS, NO NUMBERS, NO LABELS, NO CAPTIONS, NO UI COPY, NO LOGOTYPES AND NO TYPOGRAPHY OF ANY KIND. Do not attempt to spell ToolScout.\n\nAVOID\nNo random abstract lines or blobs. No cyberpunk neon, hologram overload, robots, stock-photo smiles, fake software interfaces, fake logos, fake charts, fake data, malformed icons, clip-art, Microsoft Paint aesthetics, distorted anatomy, illegible glyphs, watermarks or generic AI slop.\n\nFORMAT\n1024x1024. No border. No watermark. No text. Premium editorial campaign quality.`;
 }
 
 function decodeBase64Image(image) {
@@ -75,55 +77,28 @@ function variantLabel(variant) {
   return 'DISCOVERY';
 }
 
-function brandOverlaySvg(variant) {
-  const label = variantLabel(variant);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-    <defs>
-      <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#101828" stop-opacity="0"/>
-        <stop offset="0.22" stop-color="#101828" stop-opacity="0.72"/>
-        <stop offset="1" stop-color="#101828" stop-opacity="0.96"/>
-      </linearGradient>
-    </defs>
-    <rect x="0" y="700" width="1024" height="324" fill="url(#panel)"/>
-    <rect x="64" y="788" width="96" height="4" rx="2" fill="#2AAEFF"/>
-    <rect x="48" y="44" width="176" height="42" rx="21" fill="#101828" fill-opacity="0.78"/>
-    <text x="70" y="71" fill="#F5F7FB" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="1.6">${label}</text>
-    <text x="64" y="932" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">ToolScout</text>
-    <text x="66" y="972" fill="#D0D5DD" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" letter-spacing="1.1">FIND THE RIGHT TOOL. FASTER.</text>
-    <g transform="translate(936 66)" stroke="#F5F7FB" stroke-width="3" fill="none" opacity="0.92">
-      <circle cx="0" cy="0" r="22"/>
-      <circle cx="0" cy="0" r="5" fill="#2AAEFF" stroke="none"/>
-      <path d="M-32 0H-17M17 0H32M0-32V-17M0 17V32"/>
-    </g>
-  </svg>`;
+function textHandle(env, content, size, color) {
+  return env.IMAGES.text(content, { font: BRAND_FONT, color, size });
 }
 
-function smokeBaseSvg() {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-    <defs>
-      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#101828"/>
-        <stop offset="1" stop-color="#243B53"/>
-      </linearGradient>
-    </defs>
-    <rect width="1024" height="1024" fill="url(#bg)"/>
-    <circle cx="512" cy="400" r="170" fill="#2AAEFF" fill-opacity="0.18"/>
-    <circle cx="512" cy="400" r="92" fill="none" stroke="#F5F7FB" stroke-opacity="0.28" stroke-width="2"/>
-  </svg>`;
-}
-
-async function composeBrand(env, bytes, variant, mimeType = 'image/jpeg') {
+async function composeBrand(env, bytes, variant) {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
-
-  const baseStream = new Blob([bytes], { type: mimeType }).stream();
-  const overlayStream = new Blob([brandOverlaySvg(variant)], { type: 'image/svg+xml' }).stream();
-
-  const pipeline = env.IMAGES
+  const baseStream = new Blob([bytes], { type: 'image/jpeg' }).stream();
+  return (await env.IMAGES
     .input(baseStream)
-    .draw(env.IMAGES.input(overlayStream), { top: 0, left: 0 });
+    .draw(textHandle(env, variantLabel(variant), 18, '#F5F7FB'), { top: 54, left: 64 })
+    .draw(textHandle(env, 'ToolScout', 62, '#FFFFFF'), { bottom: 86, left: 64 })
+    .draw(textHandle(env, 'FIND THE RIGHT TOOL. FASTER.', 19, '#D0D5DD'), { bottom: 48, left: 66 })
+    .output({ format: 'image/jpeg', quality: 90 })).response();
+}
 
-  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
+async function composeSmoke(env, variant) {
+  if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
+  const first = (await textHandle(env, 'ToolScout', 62, '#FFFFFF').output({ format: 'image/png' })).response();
+  return (await env.IMAGES
+    .input(first.body)
+    .draw(textHandle(env, variantLabel(variant), 18, '#F5F7FB'), { top: 0, left: 0 })
+    .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
 export default {
@@ -135,11 +110,11 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v9',
+        renderer: 'flux2-brand-composer-v11',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
-        brandComposer: 'cloudflare-images-svg-overlay'
+        brandComposer: 'cloudflare-images-native-text'
       });
     }
 
@@ -147,7 +122,7 @@ export default {
       if (!['GET', 'HEAD'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
       if (request.method === 'HEAD') return new Response(null, { status: 200, headers: responseHeaders(variant, 'brand-smoke') });
       try {
-        const branded = await composeBrand(env, new TextEncoder().encode(smokeBaseSvg()), variant, 'image/svg+xml');
+        const branded = await composeSmoke(env, variant);
         return new Response(branded.body, { status: 200, headers: responseHeaders(variant, 'brand-smoke') });
       } catch (error) {
         return json({ error: 'brand_compose_failed', stage: 'brand-compose-smoke', detail: error?.message || String(error) }, 503);
@@ -173,13 +148,11 @@ export default {
       }, quotaExceeded ? 429 : 503);
     }
 
-    let branded;
     try {
-      branded = await composeBrand(env, generated.bytes, variant);
+      const branded = await composeBrand(env, generated.bytes, variant);
+      return new Response(branded.body, { status: 200, headers: responseHeaders(variant, generated.model) });
     } catch (error) {
       return json({ error: 'brand_compose_failed', stage: 'brand-compose', model: generated.model, detail: error?.message || String(error) }, 503);
     }
-
-    return new Response(branded.body, { status: 200, headers: responseHeaders(variant, generated.model) });
   }
 };
