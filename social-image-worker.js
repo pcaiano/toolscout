@@ -56,33 +56,16 @@ async function render(variant,spec){ const g=canvas(); base(g,spec.headline,spec
 function specFromUrl(url, variant) {
   return { concept:url.searchParams.get('concept')||variant, headline:url.searchParams.get('headline')||'', kicker:url.searchParams.get('kicker')||'', left:url.searchParams.get('left')||'', center:url.searchParams.get('center')||'', right:url.searchParams.get('right')||'' };
 }
-function hasSemanticSpec(url) { return ['concept','headline','kicker','left','center','right'].some(k => url.searchParams.has(k)); }
-async function saveSpec(env, variant, spec) {
-  if (!env.DB) return;
-  await env.DB.prepare('CREATE TABLE IF NOT EXISTS social_visual_specs (variant TEXT PRIMARY KEY, spec TEXT NOT NULL, updated_at TEXT NOT NULL)').run();
-  await env.DB.prepare('INSERT INTO social_visual_specs (variant, spec, updated_at) VALUES (?1, ?2, ?3) ON CONFLICT(variant) DO UPDATE SET spec=excluded.spec, updated_at=excluded.updated_at').bind(variant, JSON.stringify(spec), new Date().toISOString()).run();
-}
-async function loadSpec(env, variant) {
-  if (!env.DB) return null;
-  await env.DB.prepare('CREATE TABLE IF NOT EXISTS social_visual_specs (variant TEXT PRIMARY KEY, spec TEXT NOT NULL, updated_at TEXT NOT NULL)').run();
-  const row = await env.DB.prepare('SELECT spec FROM social_visual_specs WHERE variant=?1').bind(variant).first();
-  if (!row || !row.spec) return null;
-  try { return JSON.parse(row.spec); } catch { return null; }
-}
 
 export default {
-  async fetch(request, env) {
+  async fetch(request) {
     const url=new URL(request.url);
     if(url.pathname==='/health') return json({ok:true,service:'toolscout-social-image',renderer:'semantic-editorial-v2'});
     if(url.pathname!=='/generate') return json({error:'not_found'},404);
     if(!['GET','HEAD'].includes(request.method)) return json({error:'method_not_allowed'},405);
     const variant=String(url.searchParams.get('variant')||'discovery').toLowerCase();
     if(request.method==='HEAD') return new Response(null,{status:200,headers:imageHeaders(variant)});
-    let spec=specFromUrl(url,variant);
-    try {
-      if(hasSemanticSpec(url)) await saveSpec(env,variant,spec);
-      else spec=(await loadSpec(env,variant)) || spec;
-    } catch {}
+    const spec=specFromUrl(url,variant);
     const png=await render(variant,spec);
     return new Response(png,{status:200,headers:imageHeaders(variant)});
   }
