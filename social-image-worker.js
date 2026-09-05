@@ -41,22 +41,43 @@ function drawMark(g, x, y) { const blue=[76,160,255],cyan=[92,226,214]; g.circle
 function base(g, headline, kicker) { const bg=[17,19,24],grid=[29,33,40],white=[235,240,247],muted=[141,151,166]; g.rect(0,0,SIZE,SIZE,bg); for(let x=64;x<SIZE;x+=64) g.line(x,0,x,SIZE,grid,1); for(let y=64;y<SIZE;y+=64) g.line(0,y,SIZE,y,grid,1); drawMark(g,94,92); drawText(g,'TOOLSCOUT',166,67,5,white,12); drawText(g,kicker||'EDITORIAL VISUAL',166,117,3,muted,20); drawText(g,headline||'FIND THE SIGNAL',80,205,7,white,22); }
 function labelBox(g,x,y,w,h,label,accent){ const panel=[25,29,36],white=[230,236,244],border=[54,62,74]; g.rect(x,y,x+w,y+h,panel); g.line(x,y,x+w,y,border,2); g.line(x,y+h,x+w,y+h,border,2); g.line(x,y,x,y+h,border,2); g.line(x+w,y,x+w,y+h,border,2); g.rect(x,y,x+8,y+h,accent); drawText(g,label,x+24,y+Math.floor(h/2)-11,3,white,18); }
 
-function renderFilter(g,s){ const blue=[76,160,255],cyan=[92,226,214],muted=[73,82,96],white=[230,236,244]; for(let i=0;i<28;i++){ const x=100+(i%7)*42,y=400+Math.floor(i/7)*52; g.circle(x,y,6,muted,1,true);} drawText(g,s.left||'TOO MANY OPTIONS',92,635,3,white,18); const fx=480,fy=455; g.line(420,390,540,390,blue,5); g.line(540,390,515,560,blue,5); g.line(420,390,445,560,blue,5); g.line(445,560,515,560,cyan,5); drawText(g,s.center||'FIT FILTER',420,610,3,cyan,16); arrow(g,350,490,410,490,muted,4); arrow(g,550,490,640,490,muted,4); [0,1,2].forEach(i=>labelBox(g,660,390+i*105,245,72,(s.right||'SHORTLIST').split('/')[i]||['OPTION A','OPTION B','OPTION C'][i],i===0?cyan:blue)); }
+function renderFilter(g,s){ const blue=[76,160,255],cyan=[92,226,214],muted=[73,82,96],white=[230,236,244]; for(let i=0;i<28;i++){ const x=100+(i%7)*42,y=400+Math.floor(i/7)*52; g.circle(x,y,6,muted,1,true);} drawText(g,s.left||'TOO MANY OPTIONS',92,635,3,white,18); g.line(420,390,540,390,blue,5); g.line(540,390,515,560,blue,5); g.line(420,390,445,560,blue,5); g.line(445,560,515,560,cyan,5); drawText(g,s.center||'FIT FILTER',420,610,3,cyan,16); arrow(g,350,490,410,490,muted,4); arrow(g,550,490,640,490,muted,4); [0,1,2].forEach(i=>labelBox(g,660,390+i*105,245,72,(s.right||'SHORTLIST').split('/')[i]||['OPTION A','OPTION B','OPTION C'][i],i===0?cyan:blue)); }
 function renderCompare(g,s){ const blue=[76,160,255],cyan=[92,226,214],white=[230,236,244],muted=[115,126,142]; labelBox(g,90,390,340,95,s.left||'OPTION A',blue); labelBox(g,594,390,340,95,s.right||'OPTION B',cyan); const criteria=(s.center||'WORKFLOW/FIT/TRADEOFFS').split('/').slice(0,3); criteria.forEach((c,i)=>{ drawText(g,c,385,565+i*90,3,white,14); g.line(240,580+i*90,360,580+i*90,i%2?muted:blue,8); g.line(665,580+i*90,785,580+i*90,i%2?cyan:muted,8); }); drawText(g,'CHOOSE BY FIT - NOT FAME',232,840,4,white,24); }
-function renderWorkflow(g,s){ const blue=[76,160,255],cyan=[92,226,214],white=[230,236,244]; const labels=(s.center||'INPUT/DECIDE/ACT').split('/').slice(0,4); const xs=[90,330,570,810]; labels.forEach((lab,i)=>{ if(i>=labels.length)return; labelBox(g,xs[i],460,150,90,lab,i===labels.length-1?cyan:blue); if(i<labels.length-1) arrow(g,xs[i]+155,505,xs[i+1]-12,505,blue,4); }); drawText(g,s.left||'START WITH THE JOB',90,650,3,white,24); drawText(g,s.right||'END WITH A DECISION',90,710,3,cyan,24); }
+function renderWorkflow(g,s){ const blue=[76,160,255],cyan=[92,226,214],white=[230,236,244]; const labels=(s.center||'INPUT/DECIDE/ACT').split('/').slice(0,4); const xs=[90,330,570,810]; labels.forEach((lab,i)=>{ labelBox(g,xs[i],460,150,90,lab,i===labels.length-1?cyan:blue); if(i<labels.length-1) arrow(g,xs[i]+155,505,xs[i+1]-12,505,blue,4); }); drawText(g,s.left||'START WITH THE JOB',90,650,3,white,24); drawText(g,s.right||'END WITH A DECISION',90,710,3,cyan,24); }
 function renderMatrix(g,s){ const blue=[76,160,255],cyan=[92,226,214],white=[230,236,244],muted=[64,73,86]; g.line(225,420,225,790,muted,4); g.line(225,790,850,790,muted,4); drawText(g,s.left||'LOW FIT',80,745,3,white,12); drawText(g,s.right||'HIGH FIT',700,820,3,cyan,14); const pts=[[340,675],[470,610],[600,520],[735,445]]; pts.forEach((p,i)=>g.circle(p[0],p[1],12,i===pts.length-1?cyan:blue,1,true)); pts.slice(0,-1).forEach((p,i)=>arrow(g,p[0]+18,p[1]-5,pts[i+1][0]-18,pts[i+1][1]+5,blue,3)); drawText(g,s.center||'BETTER MATCH',470,350,3,white,18); }
 
 async function render(variant,spec){ const g=canvas(); base(g,spec.headline,spec.kicker||variant); const concept=(spec.concept||variant||'filter').toLowerCase(); if(concept==='compare'||concept==='comparison') renderCompare(g,spec); else if(concept==='workflow'||concept==='process') renderWorkflow(g,spec); else if(concept==='matrix'||concept==='fit') renderMatrix(g,spec); else renderFilter(g,spec); return encodePng(g.px); }
 
+function specFromUrl(url, variant) {
+  return { concept:url.searchParams.get('concept')||variant, headline:url.searchParams.get('headline')||'', kicker:url.searchParams.get('kicker')||'', left:url.searchParams.get('left')||'', center:url.searchParams.get('center')||'', right:url.searchParams.get('right')||'' };
+}
+function hasSemanticSpec(url) { return ['concept','headline','kicker','left','center','right'].some(k => url.searchParams.has(k)); }
+async function saveSpec(env, variant, spec) {
+  if (!env.DB) return;
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS social_visual_specs (variant TEXT PRIMARY KEY, spec TEXT NOT NULL, updated_at TEXT NOT NULL)').run();
+  await env.DB.prepare('INSERT INTO social_visual_specs (variant, spec, updated_at) VALUES (?1, ?2, ?3) ON CONFLICT(variant) DO UPDATE SET spec=excluded.spec, updated_at=excluded.updated_at').bind(variant, JSON.stringify(spec), new Date().toISOString()).run();
+}
+async function loadSpec(env, variant) {
+  if (!env.DB) return null;
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS social_visual_specs (variant TEXT PRIMARY KEY, spec TEXT NOT NULL, updated_at TEXT NOT NULL)').run();
+  const row = await env.DB.prepare('SELECT spec FROM social_visual_specs WHERE variant=?1').bind(variant).first();
+  if (!row || !row.spec) return null;
+  try { return JSON.parse(row.spec); } catch { return null; }
+}
+
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url=new URL(request.url);
     if(url.pathname==='/health') return json({ok:true,service:'toolscout-social-image',renderer:'semantic-editorial-v2'});
     if(url.pathname!=='/generate') return json({error:'not_found'},404);
     if(!['GET','HEAD'].includes(request.method)) return json({error:'method_not_allowed'},405);
     const variant=String(url.searchParams.get('variant')||'discovery').toLowerCase();
-    const spec={concept:url.searchParams.get('concept')||variant,headline:url.searchParams.get('headline')||'',kicker:url.searchParams.get('kicker')||'',left:url.searchParams.get('left')||'',center:url.searchParams.get('center')||'',right:url.searchParams.get('right')||''};
     if(request.method==='HEAD') return new Response(null,{status:200,headers:imageHeaders(variant)});
+    let spec=specFromUrl(url,variant);
+    try {
+      if(hasSemanticSpec(url)) await saveSpec(env,variant,spec);
+      else spec=(await loadSpec(env,variant)) || spec;
+    } catch {}
     const png=await render(variant,spec);
     return new Response(png,{status:200,headers:imageHeaders(variant)});
   }
