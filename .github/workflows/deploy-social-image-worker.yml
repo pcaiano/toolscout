@@ -38,9 +38,11 @@ jobs:
         run: |
           set -euo pipefail
           sleep 4
+          FONT='https://toolscout-social-image.luxurybuyerintelligence.workers.dev/brand-font'
+          curl --fail -I "$FONT" | grep -qi '^content-type: font/ttf'
           URL='https://toolscout-social-image.luxurybuyerintelligence.workers.dev/compose-smoke?variant=discovery'
           curl --fail --retry 3 --retry-delay 3 -D /tmp/toolscout-headers.txt -o /tmp/toolscout-smoke.jpg "$URL"
-          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v11' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v12' /tmp/toolscout-headers.txt
           grep -qi '^x-toolscout-brand-composer: cloudflare-images-native-text' /tmp/toolscout-headers.txt
           grep -qi '^x-toolscout-image-model: brand-smoke' /tmp/toolscout-headers.txt
           test "$(head -c 2 /tmp/toolscout-smoke.jpg | xxd -p)" = 'ffd8'
