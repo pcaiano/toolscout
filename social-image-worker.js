@@ -76,6 +76,23 @@ function decodeBase64Image(image) {
   return bytes;
 }
 
+async function runFlux(env, model, prompt) {
+  const form = new FormData();
+  form.append('prompt', prompt);
+  form.append('width', '1024');
+  form.append('height', '1024');
+  form.append('guidance', '4');
+  const formResponse = new Response(form);
+  const formStream = formResponse.body;
+  const formContentType = formResponse.headers.get('content-type');
+  return env.AI.run(model, {
+    multipart: {
+      body: formStream,
+      contentType: formContentType
+    }
+  });
+}
+
 async function generate(env, prompt) {
   const attempts = [
     '@cf/black-forest-labs/flux-2-klein-9b',
@@ -85,7 +102,7 @@ async function generate(env, prompt) {
 
   for (const model of attempts) {
     try {
-      const result = await env.AI.run(model, { prompt });
+      const result = await runFlux(env, model, prompt);
       if (result && typeof result.image === 'string' && result.image.length > 100) {
         return { bytes: decodeBase64Image(result.image), model };
       }
