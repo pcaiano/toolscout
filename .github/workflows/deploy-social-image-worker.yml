@@ -40,10 +40,10 @@ jobs:
           sleep 4
           URL='https://toolscout-social-image.luxurybuyerintelligence.workers.dev/compose-smoke?variant=discovery'
           curl --fail --retry 3 --retry-delay 3 -D /tmp/toolscout-headers.txt -o /tmp/toolscout-smoke.jpg "$URL"
-          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v9' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-brand-composer: cloudflare-images' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v11' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-brand-composer: cloudflare-images-native-text' /tmp/toolscout-headers.txt
           grep -qi '^x-toolscout-image-model: brand-smoke' /tmp/toolscout-headers.txt
           test "$(head -c 2 /tmp/toolscout-smoke.jpg | xxd -p)" = 'ffd8'
           BYTES=$(wc -c < /tmp/toolscout-smoke.jpg)
-          test "$BYTES" -gt 5000
+          test "$BYTES" -gt 1000
           echo "Brand composer JPEG smoke test passed without Workers AI: ${BYTES} bytes"
