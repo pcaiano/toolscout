@@ -9,10 +9,10 @@ function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v14',
+    'x-toolscout-renderer': 'flux2-brand-composer-v15',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
-    'x-toolscout-brand-composer': 'cloudflare-images-raster-text'
+    'x-toolscout-brand-composer': 'cloudflare-images-materialized-text'
   };
 }
 
@@ -38,6 +38,10 @@ function decodeBase64Image(image) {
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
   return bytes;
+}
+
+function pngStream(bytes) {
+  return new Blob([bytes], { type: 'image/png' }).stream();
 }
 
 async function runFlux(env, model, prompt) {
@@ -79,8 +83,10 @@ function variantLabel(variant) {
 }
 
 async function rasterText(env, content, size, color) {
-  const handle = env.IMAGES.text(content, { font: BRAND_FONT, color, size });
-  return (await handle.output({ format: 'image/png' })).response();
+  const rendered = (await env.IMAGES
+    .text(content, { font: BRAND_FONT, color, size })
+    .output({ format: 'image/png' })).response();
+  return new Uint8Array(await rendered.arrayBuffer());
 }
 
 async function composeBrand(env, bytes, variant) {
@@ -93,9 +99,9 @@ async function composeBrand(env, bytes, variant) {
   const baseStream = new Blob([bytes], { type: 'image/jpeg' }).stream();
   return (await env.IMAGES
     .input(baseStream)
-    .draw(env.IMAGES.input(label.body), { top: 54, left: 64 })
-    .draw(env.IMAGES.input(brand.body), { bottom: 86, left: 64 })
-    .draw(env.IMAGES.input(tagline.body), { bottom: 48, left: 66 })
+    .draw(env.IMAGES.input(pngStream(label)), { top: 54, left: 64 })
+    .draw(env.IMAGES.input(pngStream(brand)), { bottom: 86, left: 64 })
+    .draw(env.IMAGES.input(pngStream(tagline)), { bottom: 48, left: 66 })
     .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
@@ -106,8 +112,8 @@ async function composeSmoke(env, variant) {
     rasterText(env, variantLabel(variant), 18, '#F5F7FB')
   ]);
   return (await env.IMAGES
-    .input(base.body)
-    .draw(env.IMAGES.input(label.body), { top: 0, left: 0 })
+    .input(pngStream(base))
+    .draw(env.IMAGES.input(pngStream(label)), { top: 0, left: 0 })
     .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
@@ -120,11 +126,11 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v14',
+        renderer: 'flux2-brand-composer-v15',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
-        brandComposer: 'cloudflare-images-raster-text',
+        brandComposer: 'cloudflare-images-materialized-text',
         brandFontHost: 'cdn.jsdelivr.net'
       });
     }
