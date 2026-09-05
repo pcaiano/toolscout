@@ -6,7 +6,7 @@ function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v5',
+    'x-toolscout-renderer': 'flux2-brand-composer-v6',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
     'x-toolscout-brand-composer': 'cloudflare-images'
@@ -27,25 +27,7 @@ function creativeFromUrl(url, variant) {
 
 function buildPrompt(c) {
   const idea = c.scene || c.concept;
-  return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.
-
-CENTRAL IDEA
-${idea}
-
-STRICT TOOLSCOUT ART DIRECTION
-Use the visual language of ToolScout's product: restrained, precise, independent and useful. Contemporary editorial design with quiet charisma. Foundation colours are near-black charcoal #101828, soft off-white #F5F7FB and white, with restrained cool blue and cyan accents. Generous negative space, crisp geometry, subtle depth, refined materials, sophisticated B2B technology art direction. The visual must feel like one coherent brand system, not generic SaaS advertising.
-
-ILLUSTRATION
-Use premium photorealistic CGI or high-end advertising photography to make the central idea immediately understandable. Prefer a single strong metaphor involving software selection, filtering, workflow, comparison, focus, decision-making or reducing choice. Realistic lighting and materials, elegant composition, restrained detail. Keep important subject matter above the lower quarter of the image so a brand panel can be applied there afterwards.
-
-ABSOLUTE TEXT RULE
-THE GENERATED ILLUSTRATION MUST CONTAIN NO WORDS, NO LETTERS, NO NUMBERS, NO LABELS, NO CAPTIONS, NO UI COPY, NO LOGOTYPES AND NO TYPOGRAPHY OF ANY KIND. Leave clean negative space so ToolScout typography can be added separately by a deterministic brand compositor. Do not attempt to spell ToolScout.
-
-AVOID
-No random abstract lines or blobs. No cyberpunk neon, hologram overload, robots, stock-photo smiles, fake software interfaces, fake logos, fake charts, fake data, malformed icons, clip-art, Microsoft Paint aesthetics, distorted anatomy, illegible glyphs, watermarks or generic AI slop.
-
-FORMAT
-1024x1024. No border. No watermark. No text. Premium editorial campaign quality.`;
+  return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.\n\nCENTRAL IDEA\n${idea}\n\nSTRICT TOOLSCOUT ART DIRECTION\nUse the visual language of ToolScout's product: restrained, precise, independent and useful. Contemporary editorial design with quiet charisma. Foundation colours are near-black charcoal #101828, soft off-white #F5F7FB and white, with restrained cool blue and cyan accents. Generous negative space, crisp geometry, subtle depth, refined materials, sophisticated B2B technology art direction. The visual must feel like one coherent brand system, not generic SaaS advertising.\n\nILLUSTRATION\nUse premium photorealistic CGI or high-end advertising photography to make the central idea immediately understandable. Prefer a single strong metaphor involving software selection, filtering, workflow, comparison, focus, decision-making or reducing choice. Realistic lighting and materials, elegant composition, restrained detail. Keep important subject matter above the lower quarter of the image so a brand panel can be applied there afterwards.\n\nABSOLUTE TEXT RULE\nTHE GENERATED ILLUSTRATION MUST CONTAIN NO WORDS, NO LETTERS, NO NUMBERS, NO LABELS, NO CAPTIONS, NO UI COPY, NO LOGOTYPES AND NO TYPOGRAPHY OF ANY KIND. Leave clean negative space so ToolScout typography can be added separately by a deterministic brand compositor. Do not attempt to spell ToolScout.\n\nAVOID\nNo random abstract lines or blobs. No cyberpunk neon, hologram overload, robots, stock-photo smiles, fake software interfaces, fake logos, fake charts, fake data, malformed icons, clip-art, Microsoft Paint aesthetics, distorted anatomy, illegible glyphs, watermarks or generic AI slop.\n\nFORMAT\n1024x1024. No border. No watermark. No text. Premium editorial campaign quality.`;
 }
 
 function decodeBase64Image(image) {
@@ -126,8 +108,7 @@ async function composeBrand(env, bytes, variant) {
     .draw(env.IMAGES.text('ToolScout', { color: '#FFFFFF', size: 58 }), { bottom: 92, left: 64 })
     .draw(env.IMAGES.text('FIND THE RIGHT TOOL. FASTER.', { color: '#D0D5DD', size: 18 }), { bottom: 54, left: 66 });
 
-  const result = await pipeline.output({ format: 'image/jpeg', quality: 90 });
-  return result.response();
+  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
 export default {
@@ -139,7 +120,7 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v5',
+        renderer: 'flux2-brand-composer-v6',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
@@ -151,13 +132,21 @@ export default {
     if (!['GET', 'HEAD'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
     if (request.method === 'HEAD') return new Response(null, { status: 200, headers: responseHeaders(variant) });
 
+    const creative = creativeFromUrl(url, variant);
+    let generated;
     try {
-      const creative = creativeFromUrl(url, variant);
-      const generated = await generate(env, buildPrompt(creative));
-      const branded = await composeBrand(env, generated.bytes, variant);
-      return new Response(branded.body, { status: 200, headers: responseHeaders(variant, generated.model) });
+      generated = await generate(env, buildPrompt(creative));
     } catch (error) {
-      return json({ error: 'image_generation_failed', detail: error?.message || String(error) }, 503);
+      return json({ error: 'flux_generation_failed', stage: 'flux-generation', detail: error?.message || String(error) }, 503);
     }
+
+    let branded;
+    try {
+      branded = await composeBrand(env, generated.bytes, variant);
+    } catch (error) {
+      return json({ error: 'brand_compose_failed', stage: 'brand-compose', model: generated.model, detail: error?.message || String(error) }, 503);
+    }
+
+    return new Response(branded.body, { status: 200, headers: responseHeaders(variant, generated.model) });
   }
 };
