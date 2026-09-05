@@ -2,13 +2,13 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const FONT_URL = 'https://raw.githubusercontent.com/rsms/inter/master/docs/font-files/InterVariable.ttf';
+const FONT_URL = 'https://fonts.gstatic.com/s/inter/v13/UcCo3FwrK3iLTcviYwY.woff2';
 
 function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
-    'x-toolscout-renderer': 'flux2-brand-composer-v8',
+    'x-toolscout-renderer': 'flux2-brand-composer-v9',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
     'x-toolscout-brand-composer': 'cloudflare-images',
@@ -105,7 +105,7 @@ export default {
     const url = new URL(request.url);
     const variant = safe(url.searchParams.get('variant') || 'discovery', 24).toLowerCase();
 
-    if (url.pathname === '/health') return json({ ok: true, service: 'toolscout-social-image', renderer: 'flux2-brand-composer-v8', primary: '@cf/black-forest-labs/flux-2-klein-9b', fallback: '@cf/black-forest-labs/flux-2-klein-4b', textPolicy: 'deterministic-brand-text-only', brandComposer: 'cloudflare-images', font: 'Inter', cache: 'edge-cache-enabled' });
+    if (url.pathname === '/health') return json({ ok: true, service: 'toolscout-social-image', renderer: 'flux2-brand-composer-v9', primary: '@cf/black-forest-labs/flux-2-klein-9b', fallback: '@cf/black-forest-labs/flux-2-klein-4b', textPolicy: 'deterministic-brand-text-only', brandComposer: 'cloudflare-images', font: 'Inter', cache: 'edge-cache-enabled' });
 
     if (url.pathname === '/brand-smoke') {
       try {
