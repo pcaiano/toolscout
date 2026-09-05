@@ -20,5 +20,6 @@
   "tally": {"url": "", "enabled": false, "publicUrl": "https://tally.so/"},
   "ahrefs": {"url": "", "enabled": false, "publicUrl": "https://ahrefs.com/"},
   "se-ranking": {"url": "", "enabled": false, "publicUrl": "https://seranking.com/"},
-  "kit": {"url": "https://partners.kit.com/k3tjs4al3opn", "enabled": true, "publicUrl": "https://kit.com/"}
+  "kit": {"url": "https://partners.kit.com/k3tjs4al3opn", "enabled": true, "publicUrl": "https://kit.com/"},
+  "gorgias": {"url": "https://partner.gorgias.com/tes0ykxnwmqd", "enabled": true, "publicUrl": "https://www.gorgias.com/"}
 }
