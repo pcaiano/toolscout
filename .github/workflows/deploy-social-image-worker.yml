@@ -40,12 +40,12 @@ jobs:
           sleep 4
           ORIGIN='https://toolscout-social-image.luxurybuyerintelligence.workers.dev'
           curl --fail --retry 3 --retry-delay 3 "$ORIGIN/health" -o /tmp/toolscout-health.json
-          grep -q '"renderer":"flux2-brand-composer-v11"' /tmp/toolscout-health.json
-          grep -q '"brandComposer":"raster-overlay"' /tmp/toolscout-health.json
+          grep -q '"renderer":"flux2-brand-composer-v12"' /tmp/toolscout-health.json
+          grep -q '"brandComposer":"two-stage-raster-overlay"' /tmp/toolscout-health.json
           curl --fail --retry 3 --retry-delay 3 -D /tmp/toolscout-headers.txt -o /tmp/toolscout-brand-smoke.jpg "$ORIGIN/brand-smoke"
           grep -qi '^content-type: image/jpeg' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v11' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-brand-composer: raster-overlay' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v12' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-brand-composer: two-stage-raster-overlay' /tmp/toolscout-headers.txt
           test "$(head -c 2 /tmp/toolscout-brand-smoke.jpg | xxd -p)" = 'ffd8'
           BYTES=$(wc -c < /tmp/toolscout-brand-smoke.jpg)
           test "$BYTES" -gt 10000
