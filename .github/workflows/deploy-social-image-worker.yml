@@ -32,3 +32,17 @@ jobs:
         run: npx wrangler deploy --config wrangler.social-image.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Smoke test branded image pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 4
+          URL='https://toolscout-social-image.luxurybuyerintelligence.workers.dev/generate?variant=discovery&concept=filter&scene=Premium%20modern%20workspace%20showing%20many%20software%20choices%20being%20filtered%20through%20clear%20requirements%20into%20a%20small%20focused%20shortlist.'
+          curl --fail --retry 3 --retry-delay 3 -D /tmp/toolscout-headers.txt -o /tmp/toolscout-smoke.jpg "$URL"
+          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v5' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-brand-composer: cloudflare-images' /tmp/toolscout-headers.txt
+          test "$(head -c 2 /tmp/toolscout-smoke.jpg | xxd -p)" = 'ffd8'
+          BYTES=$(wc -c < /tmp/toolscout-smoke.jpg)
+          test "$BYTES" -gt 10000
+          echo "Branded JPEG smoke test passed: ${BYTES} bytes"
