@@ -1,4 +1,6 @@
-const SIZE = 1024;
+const SIZE = 512;
+const LOGICAL_SIZE = 1024;
+const SCALE = SIZE / LOGICAL_SIZE;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
@@ -20,13 +22,21 @@ function chunk(type, data) { const t = new TextEncoder().encode(type); const bod
 
 function canvas() {
   const px = new Uint8Array(SIZE * SIZE * 4);
-  const set = (x, y, c) => { if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) return; const i = (y * SIZE + x) * 4; px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255; };
-  const rect = (x0, y0, x1, y1, c) => { x0 = Math.max(0, Math.floor(x0)); y0 = Math.max(0, Math.floor(y0)); x1 = Math.min(SIZE, Math.ceil(x1)); y1 = Math.min(SIZE, Math.ceil(y1)); for (let y = y0; y < y1; y += 1) { let i = (y * SIZE + x0) * 4; for (let x = x0; x < x1; x += 1) { px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255; i += 4; } } };
+  const set = (x, y, c) => {
+    x = Math.floor(x * SCALE); y = Math.floor(y * SCALE);
+    if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) return;
+    const i = (y * SIZE + x) * 4; px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255;
+  };
+  const rect = (x0, y0, x1, y1, c) => {
+    x0 = Math.max(0, Math.floor(x0 * SCALE)); y0 = Math.max(0, Math.floor(y0 * SCALE));
+    x1 = Math.min(SIZE, Math.ceil(x1 * SCALE)); y1 = Math.min(SIZE, Math.ceil(y1 * SCALE));
+    for (let y = y0; y < y1; y += 1) { let i = (y * SIZE + x0) * 4; for (let x = x0; x < x1; x += 1) { px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255; i += 4; } }
+  };
   const line = (x0, y0, x1, y1, c, w = 1) => {
     if (y0 === y1) { rect(Math.min(x0,x1), y0 - w/2, Math.max(x0,x1) + 1, y0 + w/2 + 1, c); return; }
     if (x0 === x1) { rect(x0 - w/2, Math.min(y0,y1), x0 + w/2 + 1, Math.max(y0,y1) + 1, c); return; }
     const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1; const dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1; let err = dx + dy;
-    while (true) { rect(x0 - w / 2, y0 - w / 2, x0 + w / 2 + 1, y0 + w / 2 + 1, c); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } }
+    while (true) { rect(x0 - w / 2, y0 - w / 2, x0 + w / 2 + 1, y0 + w / 2 + 1, c); if (Math.round(x0) === Math.round(x1) && Math.round(y0) === Math.round(y1)) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } }
   };
   const circle = (cx, cy, r, c, w = 3, fill = false) => { const rr = r * r, inner = Math.max(0, (r - w) * (r - w)); for (let y = cy - r; y <= cy + r; y += 1) for (let x = cx - r; x <= cx + r; x += 1) { const d = (x - cx) ** 2 + (y - cy) ** 2; if (fill ? d <= rr : d <= rr && d >= inner) set(x, y, c); } };
   return { px, set, rect, line, circle };
@@ -43,7 +53,7 @@ function cleanText(s, max = 28) { return String(s || '').normalize('NFKD').repla
 function drawText(g, text, x, y, scale, color, maxChars = 28) { let cx = x; for (const ch of cleanText(text, maxChars)) { const pat = FONT[ch] || FONT[' ']; for (let r = 0; r < 7; r += 1) for (let col = 0; col < 5; col += 1) if (pat[r][col] === '1') g.rect(cx + col * scale, y + r * scale, cx + (col + 1) * scale, y + (r + 1) * scale, color); cx += 6 * scale; } }
 function arrow(g, x1, y1, x2, y2, color, w = 5) { g.line(x1,y1,x2,y2,color,w); const a = Math.atan2(y2-y1,x2-x1); const len=18; g.line(x2,y2,x2-len*Math.cos(a-.55),y2-len*Math.sin(a-.55),color,w); g.line(x2,y2,x2-len*Math.cos(a+.55),y2-len*Math.sin(a+.55),color,w); }
 function drawMark(g, x, y) { const blue=[76,160,255],cyan=[92,226,214]; g.circle(x,y,34,blue,4); g.line(x-56,y,x-20,y,blue,4); g.line(x+20,y,x+56,y,blue,4); g.line(x,y-56,x,y-20,blue,4); g.line(x,y+20,x,y+56,blue,4); g.circle(x,y,7,cyan,1,true); }
-function base(g, headline, kicker) { const bg=[17,19,24],grid=[29,33,40],white=[235,240,247],muted=[141,151,166]; g.rect(0,0,SIZE,SIZE,bg); for(let x=64;x<SIZE;x+=64) g.line(x,0,x,SIZE,grid,1); for(let y=64;y<SIZE;y+=64) g.line(0,y,SIZE,y,grid,1); drawMark(g,94,92); drawText(g,'TOOLSCOUT',166,67,5,white,12); drawText(g,kicker||'EDITORIAL VISUAL',166,117,3,muted,20); drawText(g,headline||'FIND THE SIGNAL',80,205,7,white,22); }
+function base(g, headline, kicker) { const bg=[17,19,24],grid=[29,33,40],white=[235,240,247],muted=[141,151,166]; g.rect(0,0,LOGICAL_SIZE,LOGICAL_SIZE,bg); for(let x=64;x<LOGICAL_SIZE;x+=64) g.line(x,0,x,LOGICAL_SIZE,grid,1); for(let y=64;y<LOGICAL_SIZE;y+=64) g.line(0,y,LOGICAL_SIZE,y,grid,1); drawMark(g,94,92); drawText(g,'TOOLSCOUT',166,67,5,white,12); drawText(g,kicker||'EDITORIAL VISUAL',166,117,3,muted,20); drawText(g,headline||'FIND THE SIGNAL',80,205,7,white,22); }
 function labelBox(g,x,y,w,h,label,accent){ const panel=[25,29,36],white=[230,236,244],border=[54,62,74]; g.rect(x,y,x+w,y+h,panel); g.line(x,y,x+w,y,border,2); g.line(x,y+h,x+w,y+h,border,2); g.line(x,y,x,y+h,border,2); g.line(x+w,y,x+w,y+h,border,2); g.rect(x,y,x+8,y+h,accent); drawText(g,label,x+24,y+Math.floor(h/2)-11,3,white,18); }
 
 function renderFilter(g,s){ const blue=[76,160,255],cyan=[92,226,214],muted=[73,82,96],white=[230,236,244]; for(let i=0;i<28;i++){ const x=100+(i%7)*42,y=400+Math.floor(i/7)*52; g.circle(x,y,6,muted,1,true);} drawText(g,s.left||'TOO MANY OPTIONS',92,635,3,white,18); g.line(420,390,540,390,blue,5); g.line(540,390,515,560,blue,5); g.line(420,390,445,560,blue,5); g.line(445,560,515,560,cyan,5); drawText(g,s.center||'FIT FILTER',420,610,3,cyan,16); arrow(g,350,490,410,490,muted,4); arrow(g,550,490,640,490,muted,4); [0,1,2].forEach(i=>labelBox(g,660,390+i*105,245,72,(s.right||'SHORTLIST').split('/')[i]||['OPTION A','OPTION B','OPTION C'][i],i===0?cyan:blue)); }
@@ -53,14 +63,12 @@ function renderMatrix(g,s){ const blue=[76,160,255],cyan=[92,226,214],white=[230
 
 async function render(variant,spec){ const g=canvas(); base(g,spec.headline,spec.kicker||variant); const concept=(spec.concept||variant||'filter').toLowerCase(); if(concept==='compare'||concept==='comparison') renderCompare(g,spec); else if(concept==='workflow'||concept==='process') renderWorkflow(g,spec); else if(concept==='matrix'||concept==='fit') renderMatrix(g,spec); else renderFilter(g,spec); return encodePng(g.px); }
 
-function specFromUrl(url, variant) {
-  return { concept:url.searchParams.get('concept')||variant, headline:url.searchParams.get('headline')||'', kicker:url.searchParams.get('kicker')||'', left:url.searchParams.get('left')||'', center:url.searchParams.get('center')||'', right:url.searchParams.get('right')||'' };
-}
+function specFromUrl(url, variant) { return { concept:url.searchParams.get('concept')||variant, headline:url.searchParams.get('headline')||'', kicker:url.searchParams.get('kicker')||'', left:url.searchParams.get('left')||'', center:url.searchParams.get('center')||'', right:url.searchParams.get('right')||'' }; }
 
 export default {
   async fetch(request) {
     const url=new URL(request.url);
-    if(url.pathname==='/health') return json({ok:true,service:'toolscout-social-image',renderer:'semantic-editorial-v2'});
+    if(url.pathname==='/health') return json({ok:true,service:'toolscout-social-image',renderer:'semantic-editorial-v2',size:SIZE});
     if(url.pathname!=='/generate') return json({error:'not_found'},404);
     if(!['GET','HEAD'].includes(request.method)) return json({error:'method_not_allowed'},405);
     const variant=String(url.searchParams.get('variant')||'discovery').toLowerCase();
