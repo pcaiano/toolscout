@@ -6,7 +6,7 @@ function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v6',
+    'x-toolscout-renderer': 'flux2-brand-composer-v7',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
     'x-toolscout-brand-composer': 'cloudflare-images'
@@ -95,10 +95,24 @@ function brandOverlaySvg() {
   </svg>`;
 }
 
-async function composeBrand(env, bytes, variant) {
+function smokeBaseSvg() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#101828"/>
+        <stop offset="1" stop-color="#243B53"/>
+      </linearGradient>
+    </defs>
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <circle cx="512" cy="400" r="170" fill="#2AAEFF" fill-opacity="0.18"/>
+    <circle cx="512" cy="400" r="92" fill="none" stroke="#F5F7FB" stroke-opacity="0.28" stroke-width="2"/>
+  </svg>`;
+}
+
+async function composeBrand(env, bytes, variant, mimeType = 'image/jpeg') {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
 
-  const baseStream = new Blob([bytes], { type: 'image/jpeg' }).stream();
+  const baseStream = new Blob([bytes], { type: mimeType }).stream();
   const overlayStream = new Blob([brandOverlaySvg()], { type: 'image/svg+xml' }).stream();
 
   const pipeline = env.IMAGES
@@ -120,12 +134,23 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v6',
+        renderer: 'flux2-brand-composer-v7',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
         brandComposer: 'cloudflare-images'
       });
+    }
+
+    if (url.pathname === '/compose-smoke') {
+      if (!['GET', 'HEAD'].includes(request.method)) return json({ error: 'method_not_allowed' }, 405);
+      if (request.method === 'HEAD') return new Response(null, { status: 200, headers: responseHeaders(variant, 'brand-smoke') });
+      try {
+        const branded = await composeBrand(env, new TextEncoder().encode(smokeBaseSvg()), variant, 'image/svg+xml');
+        return new Response(branded.body, { status: 200, headers: responseHeaders(variant, 'brand-smoke') });
+      } catch (error) {
+        return json({ error: 'brand_compose_failed', stage: 'brand-compose-smoke', detail: error?.message || String(error) }, 503);
+      }
     }
 
     if (url.pathname !== '/generate') return json({ error: 'not_found' }, 404);
@@ -137,7 +162,14 @@ export default {
     try {
       generated = await generate(env, buildPrompt(creative));
     } catch (error) {
-      return json({ error: 'flux_generation_failed', stage: 'flux-generation', detail: error?.message || String(error) }, 503);
+      const detail = error?.message || String(error);
+      const quotaExceeded = detail.includes('daily free allocation of 10,000 neurons');
+      return json({
+        error: quotaExceeded ? 'workers_ai_daily_quota_exceeded' : 'flux_generation_failed',
+        stage: 'flux-generation',
+        retryAfterUtc: quotaExceeded ? '00:00 UTC next day' : null,
+        detail
+      }, quotaExceeded ? 429 : 503);
     }
 
     let branded;
