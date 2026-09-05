@@ -2,15 +2,14 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const WORKER_ORIGIN = 'https://toolscout-social-image.luxurybuyerintelligence.workers.dev';
-const FONT_SOURCE = 'https://raw.githubusercontent.com/google/fonts/master/ofl/basic/Basic-Regular.ttf';
-const BRAND_FONT = { url: `${WORKER_ORIGIN}/brand-font` };
+const FONT_SOURCE = 'https://cdn.jsdelivr.net/gh/google/fonts@master/ofl/basic/Basic-Regular.ttf';
+const BRAND_FONT = { url: FONT_SOURCE };
 
 function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v12',
+    'x-toolscout-renderer': 'flux2-brand-composer-v13',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
     'x-toolscout-brand-composer': 'cloudflare-images-native-text'
@@ -103,36 +102,21 @@ async function composeSmoke(env, variant) {
     .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
-async function serveBrandFont() {
-  const upstream = await fetch(FONT_SOURCE, { cf: { cacheTtl: 86400, cacheEverything: true } });
-  if (!upstream.ok) return json({ error: 'font_upstream_failed', status: upstream.status }, 502);
-  return new Response(upstream.body, {
-    status: 200,
-    headers: {
-      'content-type': 'font/ttf',
-      'access-control-allow-origin': '*',
-      'cache-control': 'public, max-age=604800, immutable'
-    }
-  });
-}
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const variant = safe(url.searchParams.get('variant') || 'discovery', 24).toLowerCase();
 
-    if (url.pathname === '/brand-font') return serveBrandFont();
-
     if (url.pathname === '/health') {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v12',
+        renderer: 'flux2-brand-composer-v13',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
         brandComposer: 'cloudflare-images-native-text',
-        brandFont: '/brand-font'
+        brandFontHost: 'cdn.jsdelivr.net'
       });
     }
 
