@@ -33,19 +33,16 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      - name: Smoke test brand composer without AI quota
+      - name: Smoke test endpoint without Workers AI quota
         shell: bash
         run: |
           set -euo pipefail
           sleep 4
-          FONT='https://toolscout-social-image.luxurybuyerintelligence.workers.dev/brand-font'
-          curl --fail -I "$FONT" | grep -qi '^content-type: font/ttf'
-          URL='https://toolscout-social-image.luxurybuyerintelligence.workers.dev/compose-smoke?variant=discovery'
-          curl --fail --retry 3 --retry-delay 3 -D /tmp/toolscout-headers.txt -o /tmp/toolscout-smoke.jpg "$URL"
-          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v12' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-brand-composer: cloudflare-images-native-text' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-image-model: brand-smoke' /tmp/toolscout-headers.txt
-          test "$(head -c 2 /tmp/toolscout-smoke.jpg | xxd -p)" = 'ffd8'
-          BYTES=$(wc -c < /tmp/toolscout-smoke.jpg)
-          test "$BYTES" -gt 1000
-          echo "Brand composer JPEG smoke test passed without Workers AI: ${BYTES} bytes"
+          ORIGIN='https://toolscout-social-image.luxurybuyerintelligence.workers.dev'
+          curl --fail --retry 3 --retry-delay 3 "$ORIGIN/health" -o /tmp/toolscout-health.json
+          grep -q '"renderer":"flux2-editorial-v4"' /tmp/toolscout-health.json
+          grep -q '"productionPath":"flux-direct"' /tmp/toolscout-health.json
+          curl --fail -I "$ORIGIN/generate?variant=discovery" -D /tmp/toolscout-headers.txt -o /dev/null
+          grep -qi '^content-type: image/jpeg' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-renderer: flux2-editorial-v4' /tmp/toolscout-headers.txt
+          echo "FLUX social image endpoint smoke test passed without consuming Workers AI quota"
