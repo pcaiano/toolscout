@@ -2,7 +2,7 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const RENDERER = 'flux2-brand-composer-v14';
+const RENDERER = 'flux2-brand-composer-v15';
 const FONT_URL = 'https://cdn.jsdelivr.net/npm/inter-font@3.19.0/ttf/Inter-VariableFont_slnt,wght.ttf';
 const PANEL_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGMQkND4DwAB3AFQAV1mkgAAAABJRU5ErkJggg==';
 const BLUE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGPQWvf/PwAFtALX9zL7BgAAAABJRU5ErkJggg==';
@@ -78,11 +78,31 @@ function textHandle(env, text, size, color) {
   return env.IMAGES.text(text, { font: { url: FONT_URL }, size, color });
 }
 
+function smokeBase(env) {
+  const stream = new Blob([decodeBase64(BASE_B64)], { type: 'image/png' }).stream();
+  return env.IMAGES.input(stream).transform({ width: 1024, height: 1024, fit: 'squeeze' });
+}
+
+async function composeRasterOnly(env) {
+  const pipeline = smokeBase(env)
+    .draw(rasterHandle(env, PANEL_B64, 1024, 300), { bottom: 0, left: 0, opacity: 0.92 })
+    .draw(rasterHandle(env, PANEL_B64, 205, 44), { top: 42, left: 46, opacity: 0.84 })
+    .draw(rasterHandle(env, BLUE_B64, 96, 4), { bottom: 232, left: 64 });
+  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
+}
+
+async function composeTextOnly(env) {
+  const pipeline = smokeBase(env)
+    .draw(textHandle(env, 'DISCOVERY', 16, '#F5F7FB'), { top: 55, left: 68 })
+    .draw(textHandle(env, 'ToolScout', 58, '#FFFFFF'), { bottom: 86, left: 64 })
+    .draw(textHandle(env, 'FIND THE RIGHT TOOL. FASTER.', 18, '#D0D5DD'), { bottom: 48, left: 66 });
+  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
+}
+
 async function composeBrand(env, baseStream, variant, smoke = false) {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
   let base = env.IMAGES.input(baseStream);
   if (smoke) base = base.transform({ width: 1024, height: 1024, fit: 'squeeze' });
-
   const pipeline = base
     .draw(rasterHandle(env, PANEL_B64, 1024, 300), { bottom: 0, left: 0, opacity: 0.92 })
     .draw(rasterHandle(env, PANEL_B64, 205, 44), { top: 42, left: 46, opacity: 0.84 })
@@ -90,13 +110,16 @@ async function composeBrand(env, baseStream, variant, smoke = false) {
     .draw(textHandle(env, variantLabel(variant), 16, '#F5F7FB'), { top: 55, left: 68 })
     .draw(textHandle(env, 'ToolScout', 58, '#FFFFFF'), { bottom: 86, left: 64 })
     .draw(textHandle(env, 'FIND THE RIGHT TOOL. FASTER.', 18, '#D0D5DD'), { bottom: 48, left: 66 });
-
   return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
-async function brandSmoke(env) {
-  const base = new Blob([decodeBase64(BASE_B64)], { type: 'image/png' }).stream();
-  return composeBrand(env, base, 'discovery', true);
+async function runSmoke(fn, env, label) {
+  try {
+    const result = await fn(env);
+    return new Response(result.body, { status: 200, headers: headersFor('discovery', label) });
+  } catch (error) {
+    return json({ error: 'brand_compose_failed', stage: label, detail: error?.message || String(error) }, 503);
+  }
 }
 
 export default {
@@ -104,13 +127,13 @@ export default {
     const url = new URL(request.url);
     const variant = safe(url.searchParams.get('variant') || 'discovery', 24).toLowerCase();
 
-    if (url.pathname === '/health') {
-      return json({ ok: true, service: 'toolscout-social-image', renderer: RENDERER, primary: '@cf/black-forest-labs/flux-2-klein-9b', fallback: '@cf/black-forest-labs/flux-2-klein-4b', brandComposer: 'native-raster-text', font: 'Inter via jsDelivr', textPolicy: 'deterministic-brand-text-only', cache: 'edge-cache-enabled' });
-    }
-
+    if (url.pathname === '/health') return json({ ok: true, service: 'toolscout-social-image', renderer: RENDERER, brandComposer: 'native-raster-text', diagnostics: ['brand-smoke-raster','brand-smoke-text'], cache: 'edge-cache-enabled' });
+    if (url.pathname === '/brand-smoke-raster') return runSmoke(composeRasterOnly, env, 'raster-only');
+    if (url.pathname === '/brand-smoke-text') return runSmoke(composeTextOnly, env, 'text-only');
     if (url.pathname === '/brand-smoke') {
+      const base = new Blob([decodeBase64(BASE_B64)], { type: 'image/png' }).stream();
       try {
-        const branded = await brandSmoke(env);
+        const branded = await composeBrand(env, base, 'discovery', true);
         return new Response(branded.body, { status: 200, headers: headersFor('discovery', 'brand-smoke-no-ai') });
       } catch (error) {
         return json({ error: 'brand_compose_failed', stage: 'brand-compose', detail: error?.message || String(error) }, 503);
@@ -137,16 +160,14 @@ export default {
       return json({ error: quotaExceeded ? 'workers_ai_daily_quota_exceeded' : 'flux_generation_failed', stage: 'flux-generation', retryAfterUtc: quotaExceeded ? '00:00 UTC next day' : null, detail }, quotaExceeded ? 429 : 503);
     }
 
-    let branded;
     try {
       const base = new Blob([generated.bytes], { type: 'image/jpeg' }).stream();
-      branded = await composeBrand(env, base, variant, false);
+      const branded = await composeBrand(env, base, variant, false);
+      const response = new Response(branded.body, { status: 200, headers: headersFor(variant, generated.model) });
+      await cache.put(cacheKey, response.clone());
+      return response;
     } catch (error) {
       return json({ error: 'brand_compose_failed', stage: 'brand-compose', model: generated.model, detail: error?.message || String(error) }, 503);
     }
-
-    const response = new Response(branded.body, { status: 200, headers: headersFor(variant, generated.model) });
-    await cache.put(cacheKey, response.clone());
-    return response;
   }
 };
