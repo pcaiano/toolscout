@@ -2,8 +2,9 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const RENDERER = 'flux2-brand-composer-v15';
-const FONT_URL = 'https://cdn.jsdelivr.net/npm/inter-font@3.19.0/ttf/Inter-VariableFont_slnt,wght.ttf';
+const RENDERER = 'flux2-brand-composer-v16';
+const FONT_SOURCE = 'https://cdn.jsdelivr.net/npm/inter-font@3.19.0/ttf/Inter-VariableFont_slnt,wght.ttf';
+const FONT_URL = 'https://toolscout-social-image.luxurybuyerintelligence.workers.dev/font';
 const PANEL_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGMQkND4DwAB3AFQAV1mkgAAAABJRU5ErkJggg==';
 const BLUE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGPQWvf/PwAFtALX9zL7BgAAAABJRU5ErkJggg==';
 const BASE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGOQMPL9DwAClAGXg6uDdgAAAABJRU5ErkJggg==';
@@ -122,12 +123,26 @@ async function runSmoke(fn, env, label) {
   }
 }
 
+async function serveFont() {
+  const upstream = await fetch(FONT_SOURCE, { cf: { cacheTtl: 86400, cacheEverything: true } });
+  if (!upstream.ok || !upstream.body) return new Response('font unavailable', { status: 502 });
+  return new Response(upstream.body, {
+    status: 200,
+    headers: {
+      'content-type': 'font/ttf',
+      'cache-control': 'public, max-age=86400, stale-while-revalidate=604800',
+      'access-control-allow-origin': '*'
+    }
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const variant = safe(url.searchParams.get('variant') || 'discovery', 24).toLowerCase();
 
-    if (url.pathname === '/health') return json({ ok: true, service: 'toolscout-social-image', renderer: RENDERER, brandComposer: 'native-raster-text', diagnostics: ['brand-smoke-raster','brand-smoke-text'], cache: 'edge-cache-enabled' });
+    if (url.pathname === '/font') return serveFont();
+    if (url.pathname === '/health') return json({ ok: true, service: 'toolscout-social-image', renderer: RENDERER, brandComposer: 'native-raster-text', font: 'proxied-inter', diagnostics: ['brand-smoke-raster','brand-smoke-text'], cache: 'edge-cache-enabled' });
     if (url.pathname === '/brand-smoke-raster') return runSmoke(composeRasterOnly, env, 'raster-only');
     if (url.pathname === '/brand-smoke-text') return runSmoke(composeTextOnly, env, 'text-only');
     if (url.pathname === '/brand-smoke') {
