@@ -22,7 +22,12 @@ function canvas() {
   const px = new Uint8Array(SIZE * SIZE * 4);
   const set = (x, y, c) => { if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) return; const i = (y * SIZE + x) * 4; px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255; };
   const rect = (x0, y0, x1, y1, c) => { x0 = Math.max(0, Math.floor(x0)); y0 = Math.max(0, Math.floor(y0)); x1 = Math.min(SIZE, Math.ceil(x1)); y1 = Math.min(SIZE, Math.ceil(y1)); for (let y = y0; y < y1; y += 1) { let i = (y * SIZE + x0) * 4; for (let x = x0; x < x1; x += 1) { px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255; i += 4; } } };
-  const line = (x0, y0, x1, y1, c, w = 1) => { const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1; const dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1; let err = dx + dy; while (true) { rect(x0 - w / 2, y0 - w / 2, x0 + w / 2 + 1, y0 + w / 2 + 1, c); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } } };
+  const line = (x0, y0, x1, y1, c, w = 1) => {
+    if (y0 === y1) { rect(Math.min(x0,x1), y0 - w/2, Math.max(x0,x1) + 1, y0 + w/2 + 1, c); return; }
+    if (x0 === x1) { rect(x0 - w/2, Math.min(y0,y1), x0 + w/2 + 1, Math.max(y0,y1) + 1, c); return; }
+    const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1; const dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1; let err = dx + dy;
+    while (true) { rect(x0 - w / 2, y0 - w / 2, x0 + w / 2 + 1, y0 + w / 2 + 1, c); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } }
+  };
   const circle = (cx, cy, r, c, w = 3, fill = false) => { const rr = r * r, inner = Math.max(0, (r - w) * (r - w)); for (let y = cy - r; y <= cy + r; y += 1) for (let x = cx - r; x <= cx + r; x += 1) { const d = (x - cx) ** 2 + (y - cy) ** 2; if (fill ? d <= rr : d <= rr && d >= inner) set(x, y, c); } };
   return { px, set, rect, line, circle };
 }
