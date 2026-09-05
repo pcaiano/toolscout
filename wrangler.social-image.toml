@@ -6,6 +6,9 @@ workers_dev = true
 [ai]
 binding = "AI"
 
+[images]
+binding = "IMAGES"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "toolscout"
