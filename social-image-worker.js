@@ -79,7 +79,8 @@ export default {
 
     const variant = String(body.variant || url.searchParams.get('variant') || 'discovery').toLowerCase();
     const source = body.prompt || url.searchParams.get('prompt') || '';
-    const explicitSeed = Number(body.seed ?? url.searchParams.get('seed'));
+    const rawSeed = body.seed ?? url.searchParams.get('seed');
+    const explicitSeed = rawSeed === null || rawSeed === undefined || rawSeed === '' ? null : Number(rawSeed);
     const day = new Date().toISOString().slice(0, 10);
     const seed = Number.isInteger(explicitSeed) && explicitSeed >= 0
       ? explicitSeed % 2147483647
