@@ -2,11 +2,13 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
+const BRAND_FONT = { url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz,wght%5D.ttf' };
+
 function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v7',
+    'x-toolscout-renderer': 'flux2-brand-composer-v8',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
     'x-toolscout-brand-composer': 'cloudflare-images'
@@ -118,9 +120,9 @@ async function composeBrand(env, bytes, variant, mimeType = 'image/jpeg') {
   const pipeline = env.IMAGES
     .input(baseStream)
     .draw(env.IMAGES.input(overlayStream), { top: 0, left: 0 })
-    .draw(env.IMAGES.text(variantLabel(variant), { color: '#F5F7FB', size: 16 }), { top: 56, left: 70 })
-    .draw(env.IMAGES.text('ToolScout', { color: '#FFFFFF', size: 58 }), { bottom: 92, left: 64 })
-    .draw(env.IMAGES.text('FIND THE RIGHT TOOL. FASTER.', { color: '#D0D5DD', size: 18 }), { bottom: 54, left: 66 });
+    .draw(env.IMAGES.text(variantLabel(variant), { font: BRAND_FONT, color: '#F5F7FB', size: 16 }), { top: 56, left: 70 })
+    .draw(env.IMAGES.text('ToolScout', { font: BRAND_FONT, color: '#FFFFFF', size: 58 }), { bottom: 92, left: 64 })
+    .draw(env.IMAGES.text('FIND THE RIGHT TOOL. FASTER.', { font: BRAND_FONT, color: '#D0D5DD', size: 18 }), { bottom: 54, left: 66 });
 
   return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
 }
@@ -134,7 +136,7 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v7',
+        renderer: 'flux2-brand-composer-v8',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
