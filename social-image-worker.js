@@ -9,10 +9,10 @@ function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v13',
+    'x-toolscout-renderer': 'flux2-brand-composer-v14',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
-    'x-toolscout-brand-composer': 'cloudflare-images-native-text'
+    'x-toolscout-brand-composer': 'cloudflare-images-raster-text'
   };
 }
 
@@ -78,27 +78,36 @@ function variantLabel(variant) {
   return 'DISCOVERY';
 }
 
-function textHandle(env, content, size, color) {
-  return env.IMAGES.text(content, { font: BRAND_FONT, color, size });
+async function rasterText(env, content, size, color) {
+  const handle = env.IMAGES.text(content, { font: BRAND_FONT, color, size });
+  return (await handle.output({ format: 'image/png' })).response();
 }
 
 async function composeBrand(env, bytes, variant) {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
+  const [label, brand, tagline] = await Promise.all([
+    rasterText(env, variantLabel(variant), 18, '#F5F7FB'),
+    rasterText(env, 'ToolScout', 62, '#FFFFFF'),
+    rasterText(env, 'FIND THE RIGHT TOOL. FASTER.', 19, '#D0D5DD')
+  ]);
   const baseStream = new Blob([bytes], { type: 'image/jpeg' }).stream();
   return (await env.IMAGES
     .input(baseStream)
-    .draw(textHandle(env, variantLabel(variant), 18, '#F5F7FB'), { top: 54, left: 64 })
-    .draw(textHandle(env, 'ToolScout', 62, '#FFFFFF'), { bottom: 86, left: 64 })
-    .draw(textHandle(env, 'FIND THE RIGHT TOOL. FASTER.', 19, '#D0D5DD'), { bottom: 48, left: 66 })
+    .draw(env.IMAGES.input(label.body), { top: 54, left: 64 })
+    .draw(env.IMAGES.input(brand.body), { bottom: 86, left: 64 })
+    .draw(env.IMAGES.input(tagline.body), { bottom: 48, left: 66 })
     .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
 async function composeSmoke(env, variant) {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
-  const first = (await textHandle(env, 'ToolScout', 62, '#FFFFFF').output({ format: 'image/png' })).response();
+  const [base, label] = await Promise.all([
+    rasterText(env, 'ToolScout', 62, '#FFFFFF'),
+    rasterText(env, variantLabel(variant), 18, '#F5F7FB')
+  ]);
   return (await env.IMAGES
-    .input(first.body)
-    .draw(textHandle(env, variantLabel(variant), 18, '#F5F7FB'), { top: 0, left: 0 })
+    .input(base.body)
+    .draw(env.IMAGES.input(label.body), { top: 0, left: 0 })
     .output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
@@ -111,11 +120,11 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v13',
+        renderer: 'flux2-brand-composer-v14',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
-        brandComposer: 'cloudflare-images-native-text',
+        brandComposer: 'cloudflare-images-raster-text',
         brandFontHost: 'cdn.jsdelivr.net'
       });
     }
