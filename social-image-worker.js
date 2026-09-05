@@ -1,14 +1,12 @@
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store'
-    }
-  });
+  return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const RENDERER = 'flux2-brand-composer-v12';
+const RENDERER = 'flux2-brand-composer-v13';
+const FONT_URL = 'https://cdn.jsdelivr.net/npm/inter-font@3.19.0/ttf/Inter-VariableFont_slnt,wght.ttf';
+const PANEL_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGMQkND4DwAB3AFQAV1mkgAAAABJRU5ErkJggg==';
+const BLUE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGPQWvf/PwAFtALX9zL7BgAAAABJRU5ErkJggg==';
+const BASE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGOQMPL9DwAClAGXg6uDdgAAAABJRU5ErkJggg==';
 
 function headersFor(variant, model = 'flux2') {
   return {
@@ -17,17 +15,13 @@ function headersFor(variant, model = 'flux2') {
     'x-toolscout-renderer': RENDERER,
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
-    'x-toolscout-brand-composer': 'two-stage-raster-overlay',
+    'x-toolscout-brand-composer': 'native-raster-text',
     'x-toolscout-text-policy': 'deterministic-brand-text-only'
   };
 }
 
 function safe(value, max = 240) {
-  return String(value || '')
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/[^\p{L}\p{N}\s.,:;!?()&+\-/'’]/gu, '')
-    .trim()
-    .slice(0, max);
+  return String(value || '').replace(/[\r\n]+/g, ' ').replace(/[^\p{L}\p{N}\s.,:;!?()&+\-/'’]/gu, '').trim().slice(0, max);
 }
 
 function variantLabel(variant) {
@@ -36,16 +30,16 @@ function variantLabel(variant) {
   return 'DISCOVERY';
 }
 
-function buildPrompt(scene, concept) {
-  const idea = scene || concept || 'software selection by workflow fit';
-  return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.\n\nCENTRAL IDEA\n${idea}\n\nTOOLSCOUT ART DIRECTION\nRestrained, precise and useful with quiet charisma. Use near-black charcoal #101828, soft off-white #F5F7FB and white, with controlled cool blue/cyan accents. Generous negative space, crisp geometry, subtle depth, refined realistic materials and sophisticated B2B editorial art direction. The result must feel like one coherent ToolScout visual system, not generic SaaS advertising.\n\nILLUSTRATION\nUse premium photorealistic CGI or high-end advertising photography. Make one strong visual metaphor immediately understandable. Keep important subject matter above the lower quarter so a deterministic brand panel can be applied afterwards.\n\nABSOLUTE TEXT RULE\nNO WORDS, LETTERS, NUMBERS, LABELS, CAPTIONS, UI COPY, LOGOTYPES OR TYPOGRAPHY. Do not attempt to spell ToolScout.\n\nAVOID\nNo invented claims, fake software logos, fake UI, fake data, random abstract lines, cyberpunk neon, hologram overload, robots, stock-photo smiles, malformed icons, clip-art, Microsoft Paint aesthetics, watermarks or generic AI slop.\n\nFORMAT\n1024x1024. No border. No watermark. No text. Premium editorial campaign quality.`;
-}
-
-function decodeBase64Image(image) {
-  const binary = atob(image);
+function decodeBase64(value) {
+  const binary = atob(value);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
   return bytes;
+}
+
+function buildPrompt(scene, concept) {
+  const idea = scene || concept || 'software selection by workflow fit';
+  return `Create a premium square editorial campaign illustration for ToolScout, an independent software discovery platform.\n\nCENTRAL IDEA\n${idea}\n\nTOOLSCOUT ART DIRECTION\nRestrained, precise and useful with quiet charisma. Use near-black charcoal #101828, soft off-white #F5F7FB and white, with controlled cool blue/cyan accents. Generous negative space, crisp geometry, subtle depth, refined realistic materials and sophisticated B2B editorial art direction. The result must feel like one coherent ToolScout visual system, not generic SaaS advertising.\n\nILLUSTRATION\nUse premium photorealistic CGI or high-end advertising photography. Make one strong visual metaphor immediately understandable. Keep important subject matter above the lower quarter so a deterministic brand panel can be applied afterwards.\n\nABSOLUTE TEXT RULE\nNO WORDS, LETTERS, NUMBERS, LABELS, CAPTIONS, UI COPY, LOGOTYPES OR TYPOGRAPHY. Do not attempt to spell ToolScout.\n\nAVOID\nNo invented claims, fake software logos, fake UI, fake data, random abstract lines, cyberpunk neon, hologram overload, robots, stock-photo smiles, malformed icons, clip-art, Microsoft Paint aesthetics, watermarks or generic AI slop.\n\nFORMAT\n1024x1024. No border. No watermark. No text. Premium editorial campaign quality.`;
 }
 
 async function runFlux(env, model, prompt) {
@@ -55,26 +49,16 @@ async function runFlux(env, model, prompt) {
   form.append('height', '1024');
   form.append('guidance', '4');
   const serialized = new Response(form);
-  return env.AI.run(model, {
-    multipart: {
-      body: serialized.body,
-      contentType: serialized.headers.get('content-type')
-    }
-  });
+  return env.AI.run(model, { multipart: { body: serialized.body, contentType: serialized.headers.get('content-type') } });
 }
 
 async function generate(env, prompt) {
-  const models = [
-    '@cf/black-forest-labs/flux-2-klein-9b',
-    '@cf/black-forest-labs/flux-2-klein-4b'
-  ];
+  const models = ['@cf/black-forest-labs/flux-2-klein-9b', '@cf/black-forest-labs/flux-2-klein-4b'];
   const errors = [];
   for (const model of models) {
     try {
       const result = await runFlux(env, model, prompt);
-      if (result && typeof result.image === 'string' && result.image.length > 100) {
-        return { bytes: decodeBase64Image(result.image), model };
-      }
+      if (result && typeof result.image === 'string' && result.image.length > 100) return { bytes: decodeBase64(result.image), model };
       errors.push(`${model}: empty image response`);
     } catch (error) {
       const message = error?.message || String(error);
@@ -85,62 +69,39 @@ async function generate(env, prompt) {
   throw new Error(errors.join(' | '));
 }
 
-function brandSvg(variant) {
-  const label = variantLabel(variant);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-    <defs>
-      <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#101828" stop-opacity="0"/>
-        <stop offset="0.22" stop-color="#101828" stop-opacity="0.72"/>
-        <stop offset="1" stop-color="#101828" stop-opacity="0.96"/>
-      </linearGradient>
-    </defs>
-    <rect x="0" y="700" width="1024" height="324" fill="url(#panel)"/>
-    <rect x="64" y="788" width="96" height="4" rx="2" fill="#2AAEFF"/>
-    <rect x="48" y="44" width="190" height="42" rx="21" fill="#101828" fill-opacity="0.82"/>
-    <text x="70" y="70" fill="#F5F7FB" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="1.5">${label}</text>
-    <text x="64" y="910" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">ToolScout</text>
-    <text x="66" y="950" fill="#D0D5DD" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="500" letter-spacing="1">FIND THE RIGHT TOOL. FASTER.</text>
-    <g transform="translate(936 66)" stroke="#F5F7FB" stroke-width="3" fill="none" opacity="0.94">
-      <circle cx="0" cy="0" r="22"/>
-      <circle cx="0" cy="0" r="5" fill="#2AAEFF" stroke="none"/>
-      <path d="M-32 0H-17M17 0H32M0-32V-17M0 17V32"/>
-    </g>
-  </svg>`;
+function rasterHandle(env, b64, width, height) {
+  const stream = new Blob([decodeBase64(b64)], { type: 'image/png' }).stream();
+  return env.IMAGES.input(stream).transform({ width, height, fit: 'fill' });
 }
 
-function smokeSvg() {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-    <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#101828"/><stop offset="1" stop-color="#24445F"/></linearGradient></defs>
-    <rect width="1024" height="1024" fill="url(#bg)"/>
-    <circle cx="512" cy="400" r="180" fill="#F5F7FB" fill-opacity="0.08"/>
-    <circle cx="512" cy="400" r="84" fill="none" stroke="#2AAEFF" stroke-width="10"/>
-  </svg>`;
+function textHandle(env, text, size, color) {
+  return env.IMAGES.text(text, {
+    font: { url: FONT_URL },
+    size,
+    color
+  });
 }
 
-async function rasterizeSvg(env, svg) {
+async function composeBrand(env, baseStream, variant, smoke = false) {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
-  const input = new Blob([svg], { type: 'image/svg+xml' }).stream();
-  const response = (await env.IMAGES.input(input).output({ format: 'image/png' })).response();
-  if (!response.ok) throw new Error(`SVG rasterization failed with ${response.status}`);
-  return new Uint8Array(await response.arrayBuffer());
-}
 
-async function composeBrand(env, baseBytes, baseType, variant) {
-  const overlayPng = await rasterizeSvg(env, brandSvg(variant));
-  const baseStream = new Blob([baseBytes], { type: baseType }).stream();
-  const overlayStream = new Blob([overlayPng], { type: 'image/png' }).stream();
-  const response = (await env.IMAGES
-    .input(baseStream)
-    .draw(env.IMAGES.input(overlayStream), { top: 0, left: 0 })
-    .output({ format: 'image/jpeg', quality: 90 })).response();
-  if (!response.ok) throw new Error(`Brand composition failed with ${response.status}`);
-  return response;
+  let base = env.IMAGES.input(baseStream);
+  if (smoke) base = base.transform({ width: 1024, height: 1024, fit: 'fill' });
+
+  const pipeline = base
+    .draw(rasterHandle(env, PANEL_B64, 1024, 300), { bottom: 0, left: 0, opacity: 0.92 })
+    .draw(rasterHandle(env, PANEL_B64, 205, 44), { top: 42, left: 46, opacity: 0.84 })
+    .draw(rasterHandle(env, BLUE_B64, 96, 4), { bottom: 232, left: 64 })
+    .draw(textHandle(env, variantLabel(variant), 16, '#F5F7FB'), { top: 55, left: 68 })
+    .draw(textHandle(env, 'ToolScout', 58, '#FFFFFF'), { bottom: 86, left: 64 })
+    .draw(textHandle(env, 'FIND THE RIGHT TOOL. FASTER.', 18, '#D0D5DD'), { bottom: 48, left: 66 });
+
+  return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
 }
 
 async function brandSmoke(env) {
-  const basePng = await rasterizeSvg(env, smokeSvg());
-  return composeBrand(env, basePng, 'image/png', 'discovery');
+  const base = new Blob([decodeBase64(BASE_B64)], { type: 'image/png' }).stream();
+  return composeBrand(env, base, 'discovery', true);
 }
 
 export default {
@@ -155,7 +116,8 @@ export default {
         renderer: RENDERER,
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
-        brandComposer: 'two-stage-raster-overlay',
+        brandComposer: 'native-raster-text',
+        font: 'Inter via jsDelivr',
         textPolicy: 'deterministic-brand-text-only',
         cache: 'edge-cache-enabled'
       });
@@ -187,30 +149,18 @@ export default {
     } catch (error) {
       const detail = error?.message || String(error);
       const quotaExceeded = detail.includes('daily free allocation of 10,000 neurons');
-      return json({
-        error: quotaExceeded ? 'workers_ai_daily_quota_exceeded' : 'flux_generation_failed',
-        stage: 'flux-generation',
-        retryAfterUtc: quotaExceeded ? '00:00 UTC next day' : null,
-        detail
-      }, quotaExceeded ? 429 : 503);
+      return json({ error: quotaExceeded ? 'workers_ai_daily_quota_exceeded' : 'flux_generation_failed', stage: 'flux-generation', retryAfterUtc: quotaExceeded ? '00:00 UTC next day' : null, detail }, quotaExceeded ? 429 : 503);
     }
 
     let branded;
     try {
-      branded = await composeBrand(env, generated.bytes, 'image/jpeg', variant);
+      const base = new Blob([generated.bytes], { type: 'image/jpeg' }).stream();
+      branded = await composeBrand(env, base, variant, false);
     } catch (error) {
-      return json({
-        error: 'brand_compose_failed',
-        stage: 'brand-compose',
-        model: generated.model,
-        detail: error?.message || String(error)
-      }, 503);
+      return json({ error: 'brand_compose_failed', stage: 'brand-compose', model: generated.model, detail: error?.message || String(error) }, 503);
     }
 
-    const response = new Response(branded.body, {
-      status: 200,
-      headers: headersFor(variant, generated.model)
-    });
+    const response = new Response(branded.body, { status: 200, headers: headersFor(variant, generated.model) });
     await cache.put(cacheKey, response.clone());
     return response;
   }
