@@ -40,12 +40,12 @@ jobs:
           sleep 4
           ORIGIN='https://toolscout-social-image.luxurybuyerintelligence.workers.dev'
           curl --fail --retry 3 --retry-delay 3 "$ORIGIN/health" -o /tmp/toolscout-health.json
-          grep -q '"renderer":"flux2-brand-composer-v9"' /tmp/toolscout-health.json
-          grep -q '"brandComposer":"cloudflare-images"' /tmp/toolscout-health.json
+          grep -q '"renderer":"flux2-brand-composer-v10"' /tmp/toolscout-health.json
+          grep -q '"brandComposer":"svg-overlay"' /tmp/toolscout-health.json
           curl --fail --retry 3 --retry-delay 3 -D /tmp/toolscout-headers.txt -o /tmp/toolscout-brand-smoke.jpg "$ORIGIN/brand-smoke"
           grep -qi '^content-type: image/jpeg' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v9' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-brand-composer: cloudflare-images' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v10' /tmp/toolscout-headers.txt
+          grep -qi '^x-toolscout-brand-composer: svg-overlay' /tmp/toolscout-headers.txt
           test "$(head -c 2 /tmp/toolscout-brand-smoke.jpg | xxd -p)" = 'ffd8'
           BYTES=$(wc -c < /tmp/toolscout-brand-smoke.jpg)
           test "$BYTES" -gt 10000
