@@ -72,7 +72,7 @@ export default {
       return new Response(image, {
         status: 200,
         headers: {
-          'content-type': 'image/png',
+          'content-type': 'image/jpeg',
           'cache-control': 'no-store',
           'x-toolscout-image-seed': String(seed)
         }
