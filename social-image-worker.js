@@ -2,13 +2,11 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
-const BRAND_FONT = { url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz,wght%5D.ttf' };
-
 function responseHeaders(variant, model = 'flux2') {
   return {
     'content-type': 'image/jpeg',
     'cache-control': 'public, max-age=86400',
-    'x-toolscout-renderer': 'flux2-brand-composer-v8',
+    'x-toolscout-renderer': 'flux2-brand-composer-v9',
     'x-toolscout-image-variant': variant,
     'x-toolscout-image-model': model,
     'x-toolscout-brand-composer': 'cloudflare-images'
@@ -77,7 +75,8 @@ function variantLabel(variant) {
   return 'DISCOVERY';
 }
 
-function brandOverlaySvg() {
+function brandOverlaySvg(variant) {
+  const label = variantLabel(variant);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
     <defs>
       <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
@@ -89,6 +88,9 @@ function brandOverlaySvg() {
     <rect x="0" y="700" width="1024" height="324" fill="url(#panel)"/>
     <rect x="64" y="788" width="96" height="4" rx="2" fill="#2AAEFF"/>
     <rect x="48" y="44" width="176" height="42" rx="21" fill="#101828" fill-opacity="0.78"/>
+    <text x="70" y="71" fill="#F5F7FB" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="1.6">${label}</text>
+    <text x="64" y="932" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">ToolScout</text>
+    <text x="66" y="972" fill="#D0D5DD" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" letter-spacing="1.1">FIND THE RIGHT TOOL. FASTER.</text>
     <g transform="translate(936 66)" stroke="#F5F7FB" stroke-width="3" fill="none" opacity="0.92">
       <circle cx="0" cy="0" r="22"/>
       <circle cx="0" cy="0" r="5" fill="#2AAEFF" stroke="none"/>
@@ -115,14 +117,11 @@ async function composeBrand(env, bytes, variant, mimeType = 'image/jpeg') {
   if (!env.IMAGES) throw new Error('Cloudflare Images binding is unavailable');
 
   const baseStream = new Blob([bytes], { type: mimeType }).stream();
-  const overlayStream = new Blob([brandOverlaySvg()], { type: 'image/svg+xml' }).stream();
+  const overlayStream = new Blob([brandOverlaySvg(variant)], { type: 'image/svg+xml' }).stream();
 
   const pipeline = env.IMAGES
     .input(baseStream)
-    .draw(env.IMAGES.input(overlayStream), { top: 0, left: 0 })
-    .draw(env.IMAGES.text(variantLabel(variant), { font: BRAND_FONT, color: '#F5F7FB', size: 16 }), { top: 56, left: 70 })
-    .draw(env.IMAGES.text('ToolScout', { font: BRAND_FONT, color: '#FFFFFF', size: 58 }), { bottom: 92, left: 64 })
-    .draw(env.IMAGES.text('FIND THE RIGHT TOOL. FASTER.', { font: BRAND_FONT, color: '#D0D5DD', size: 18 }), { bottom: 54, left: 66 });
+    .draw(env.IMAGES.input(overlayStream), { top: 0, left: 0 });
 
   return (await pipeline.output({ format: 'image/jpeg', quality: 90 })).response();
 }
@@ -136,11 +135,11 @@ export default {
       return json({
         ok: true,
         service: 'toolscout-social-image',
-        renderer: 'flux2-brand-composer-v8',
+        renderer: 'flux2-brand-composer-v9',
         primary: '@cf/black-forest-labs/flux-2-klein-9b',
         fallback: '@cf/black-forest-labs/flux-2-klein-4b',
         textPolicy: 'no-generated-text',
-        brandComposer: 'cloudflare-images'
+        brandComposer: 'cloudflare-images-svg-overlay'
       });
     }
 
