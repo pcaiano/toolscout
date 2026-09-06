@@ -40,6 +40,7 @@ for (const [slug, context] of Object.entries(contexts)) {
   const job = String(context.jobToBeDone || 'choose the right tool for the job').trim();
   const constraints = Array.isArray(context.constraints) ? context.constraints.filter(Boolean) : [];
   const questions = Array.isArray(context.decisionQuestions) ? context.decisionQuestions : [];
+  const selectionGuidance = Array.isArray(context.selectionGuidance) ? context.selectionGuidance.filter(Boolean) : [];
 
   if (title) {
     const seoTitle = clip(`${title}: Compare the Best Options | ToolScout`, 62);
@@ -56,7 +57,8 @@ for (const [slug, context] of Object.entries(contexts)) {
 
   const marker = `data-decision-context="${esc(slug)}"`;
   if (!html.includes(marker)) {
-    const decisionSection = `<section class="section" ${marker}><h2>Who this guide is for</h2><p><strong>${esc(persona)}</strong> trying to ${esc(job)}.</p>${constraints.length ? `<h3>Decision constraints</h3><div class="features">${constraints.map(item => `<span>${esc(item)}</span>`).join('')}</div>` : ''}${questions.length ? `<h3>Questions to answer before choosing</h3>${questions.map(question => `<details><summary>${esc(question)}</summary><p>Use this question to narrow the shortlist against your real workflow and constraints rather than choosing by popularity alone.</p></details>`).join('')}` : ''}</section>`;
+    const guidanceHtml = selectionGuidance.length ? `<h3>What to compare</h3>${selectionGuidance.map(item => `<p>${esc(item)}</p>`).join('')}` : '';
+    const decisionSection = `<section class="section" ${marker}><h2>Who this guide is for</h2><p><strong>${esc(persona)}</strong> trying to ${esc(job)}.</p>${constraints.length ? `<h3>Decision constraints</h3><div class="features">${constraints.map(item => `<span>${esc(item)}</span>`).join('')}</div>` : ''}${guidanceHtml}${questions.length ? `<h3>Questions to answer before choosing</h3>${questions.map(question => `<details><summary>${esc(question)}</summary><p>Use this question to narrow the shortlist against your real workflow and constraints rather than choosing by popularity alone.</p></details>`).join('')}` : ''}</section>`;
     const insertionPoint = '<section class="grid">';
     if (html.includes(insertionPoint)) html = html.replace(insertionPoint, `${decisionSection}${insertionPoint}`);
   }
