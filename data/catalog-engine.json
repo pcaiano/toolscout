@@ -46,7 +46,7 @@
     "requireKnownIntentCategory": true,
     "allowTrustedEnrichmentFiles": true,
     "autoAdmitTrustedCandidates": true,
-    "autoAdmitGeneratedCandidates": false
+    "autoAdmitGeneratedCandidates": true
   },
   "trustedCandidateFiles": [
     "data/catalog-wave1-enrichment.json",
