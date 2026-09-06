@@ -7,6 +7,7 @@ on:
       - 'distribution-radar-worker.js'
       - 'distribution-vendor-worker.js'
       - 'distribution-contact-worker.js'
+      - 'distribution-sender-worker.js'
       - 'data/distribution-radar-seeds.json'
       - 'embed/**'
       - 'migrations/0018_distribution_engine.sql'
@@ -33,12 +34,13 @@ jobs:
           node --check distribution-radar-worker.js
           node --check distribution-vendor-worker.js
           node --check distribution-contact-worker.js
+          node --check distribution-sender-worker.js
           node --check embed/toolscout-pick.js
           node --check embed/toolscout-finder.js
           node --check embed/toolscout-compare.js
       - name: Validate worker entrypoint and migrations
         run: |
-          grep -q 'main = "distribution-contact-worker.js"' wrangler.toml
+          grep -q 'main = "distribution-sender-worker.js"' wrangler.toml
           test -s migrations/0018_distribution_engine.sql
           test -s migrations/0019_vendor_amplification.sql
           test -s migrations/0020_vendor_contact_discovery.sql
@@ -53,12 +55,15 @@ jobs:
           grep -q "utm_medium:'distribution'" embed/toolscout-pick.js
           grep -q "utm_medium:'distribution'" embed/toolscout-finder.js
           grep -q "utm_medium:'distribution'" embed/toolscout-compare.js
-      - name: Validate syndication, vendor and contact routes
+      - name: Validate distribution routes and sender guardrails
         run: |
           grep -Fq '/api/distribution/feed.json' distribution-radar-worker.js
           grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
           grep -Fq '/api/distribution/vendor-amplification' distribution-vendor-worker.js
-          grep -Fq '/api/distribution/vendor-amplification/ready' distribution-contact-worker.js
+          grep -Fq '/api/distribution/vendor-amplification/ready' distribution-sender-worker.js
           grep -Fq 'public_role_email' distribution-contact-worker.js
           grep -Fq 'needs_contact_fallback' distribution-contact-worker.js
+          grep -Fq "status='sending'" distribution-sender-worker.js
+          grep -Fq -- "-24 hours" distribution-sender-worker.js
+          grep -Fq 'MAKE_TOKEN_SHA256' distribution-sender-worker.js
           grep -Fq '"/api/distribution/*"' wrangler.toml
