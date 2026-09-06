@@ -1,0 +1,3 @@
+ALTER TABLE distribution_vendor_amplification ADD COLUMN public_dispatch_token TEXT;
+ALTER TABLE distribution_vendor_amplification ADD COLUMN public_dispatch_leased_at TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_vendor_public_dispatch_token ON distribution_vendor_amplification(public_dispatch_token) WHERE public_dispatch_token IS NOT NULL;
