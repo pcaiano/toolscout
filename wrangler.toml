@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "affiliate-workflow-worker.js"
+main = "audience-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
@@ -9,6 +9,7 @@ not_found_handling = "404-page"
 binding = "ASSETS"
 run_worker_first = [
   "/api/stats*",
+  "/api/audience-event*",
   "/go/*",
   "/api/affiliate-workflow*",
   "/affiliate-workflow*",
