@@ -32,7 +32,7 @@ jobs:
 
       - name: Commit snapshot when changed
         run: |
-          if git diff --quiet -- data/audience-learning.json; then
+          if [ -z "$(git status --porcelain -- data/audience-learning.json)" ]; then
             echo "No audience learning changes"
             exit 0
           fi
