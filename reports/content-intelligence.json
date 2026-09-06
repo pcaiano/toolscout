@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T17:40:20.177Z",
+  "generatedAt": "2026-09-06T17:43:31.039Z",
   "engine": "ToolScout Content Intelligence v1",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "baseline",
@@ -8,7 +8,7 @@
     "fiveTo19SocialSessions": "Allow one controlled test only. Change one variable and define one success metric.",
     "twentyPlusSocialSessions": "Measured allocation changes are allowed only when downstream behavior supports them.",
     "editorialIndependence": "Affiliate payout never changes tool ranking or editorial winner.",
-    "searchToSocial": "Use observed search demand as a topic signal, not as proof that a social post will perform.",
+    "searchToSocial": "Only topics with observed Search Console impressions can become search-supported social topic signals. Search demand does not prove social performance.",
     "socialToSearch": "Use repeated high-quality social interest as research input, not an automatic page-creation trigger."
   },
   "search": {
@@ -21,115 +21,115 @@
     },
     "topOpportunities": [
       {
-        "intent": "best-crm-for-consultants",
-        "priorityScore": 69,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
+        "intent": "best-forms-for-small-business",
+        "priorityScore": 48,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 4,
+        "position": 4.5,
         "topTools": [
+          "fillout",
+          "tally",
+          "jotform"
+        ]
+      },
+      {
+        "intent": "best-lead-capture-forms",
+        "priorityScore": 46,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 2,
+        "position": 6.5,
+        "topTools": [
+          "typeform",
+          "paperform",
+          "jotform"
+        ]
+      },
+      {
+        "intent": "best-sales-prospecting-tools",
+        "priorityScore": 47,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 2,
+        "position": 8,
+        "topTools": [
+          "apollo",
+          "lemlist",
+          "instantly"
+        ]
+      },
+      {
+        "intent": "best-email-marketing-tools",
+        "priorityScore": 45,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 2,
+        "position": 8.5,
+        "topTools": [
+          "buffer",
+          "omnisend",
+          "kit"
+        ]
+      },
+      {
+        "intent": "best-ai-research-tools",
+        "priorityScore": 27,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 1,
+        "position": 1,
+        "topTools": [
+          "chatgpt",
+          "gemini",
+          "perplexity"
+        ]
+      },
+      {
+        "intent": "best-cold-email-tools",
+        "priorityScore": 44,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 1,
+        "position": 4,
+        "topTools": [
+          "shopify",
           "hubspot",
-          "close",
-          "pipedrive"
+          "lemlist"
         ]
       },
       {
-        "intent": "best-crm-for-real-estate",
-        "priorityScore": 69,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
+        "intent": "best-keyword-research-tools",
+        "priorityScore": 38,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 1,
+        "position": 5,
         "topTools": [
-          "hubspot",
-          "salesforce",
-          "close"
-        ]
-      },
-      {
-        "intent": "best-marketing-automation-tools",
-        "priorityScore": 68,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
-        "topTools": [
-          "klaviyo",
-          "kit",
-          "omnisend"
-        ]
-      },
-      {
-        "intent": "best-workflow-automation-tools",
-        "priorityScore": 68,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
-        "topTools": [
-          "zapier",
-          "n8n",
-          "make"
-        ]
-      },
-      {
-        "intent": "best-competitor-seo-tools",
-        "priorityScore": 64,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
-        "topTools": [
-          "semrush",
           "surfer",
+          "semrush",
           "ahrefs"
         ]
       },
       {
-        "intent": "best-crm-with-automation",
-        "priorityScore": 64,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
+        "intent": "best-crm-for-small-business",
+        "priorityScore": 43,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 1,
+        "position": 8,
         "topTools": [
-          "hubspot",
-          "salesforce",
-          "close"
-        ]
-      },
-      {
-        "intent": "best-seo-tools",
-        "priorityScore": 64,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
-        "topTools": [
-          "zapier",
-          "github",
-          "buffer"
-        ]
-      },
-      {
-        "intent": "best-affordable-crm",
-        "priorityScore": 63,
-        "lane": "develop-authority",
-        "action": "watch",
-        "reason": "No strong observed-search trigger yet.",
-        "impressions": 0,
-        "position": 0,
-        "topTools": [
-          "attio",
-          "freshsales",
-          "hubspot"
+          "buffer",
+          "chatgpt",
+          "integrately"
         ]
       }
     ]
@@ -186,11 +186,11 @@
   },
   "recommendedInputs": {
     "topicCandidates": [
-      "best-crm-for-consultants",
-      "best-crm-for-real-estate",
-      "best-marketing-automation-tools",
-      "best-workflow-automation-tools",
-      "best-competitor-seo-tools"
+      "best-forms-for-small-business",
+      "best-lead-capture-forms",
+      "best-sales-prospecting-tools",
+      "best-email-marketing-tools",
+      "best-ai-research-tools"
     ],
     "testEligible": false,
     "allocationChangeEligible": false
