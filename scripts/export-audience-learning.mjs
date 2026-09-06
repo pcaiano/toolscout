@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 
 function runSql(sql) {
   const out = execFileSync('npx', ['wrangler','d1','execute','toolscout','--remote','--config','wrangler.toml','--json','--command',sql], { encoding:'utf8', stdio:['ignore','pipe','inherit'] });
@@ -73,4 +73,15 @@ const snapshot = {
 
 mkdirSync('data', { recursive:true });
 writeFileSync('data/audience-learning.json', JSON.stringify(snapshot, null, 2) + '\n');
+
+const historyPath = 'data/audience-learning-history.json';
+let history = [];
+if (existsSync(historyPath)) {
+  try { history = JSON.parse(readFileSync(historyPath,'utf8')); } catch { history = []; }
+}
+if (!Array.isArray(history)) history = [];
+history.push(snapshot);
+history = history.slice(-52);
+writeFileSync(historyPath, JSON.stringify(history, null, 2) + '\n');
+
 console.log(JSON.stringify(snapshot));
