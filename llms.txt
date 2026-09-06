@@ -1,17 +1,38 @@
 # ToolScout
 
-ToolScout helps people choose AI and software tools based on the job they need to accomplish, their budget, team and workflow.
+> ToolScout is an independent software discovery and decision engine. It helps people choose software from the job to be done, buyer context, constraints, candidate tools, comparisons and recommendation fit. Affiliate relationships never determine ranking.
 
-## Primary resources
-- https://trytoolscout.org/ — recommendation engine
-- https://trytoolscout.org/guides.html — searchable guide library
-- https://trytoolscout.org/tools.html — tool catalog
-- https://trytoolscout.org/compare.html — comparison experience
-- https://trytoolscout.org/sitemap.xml — indexable URLs
-- https://trytoolscout.org/feed.xml — latest guide feed
+## Canonical identity
+- Site: https://trytoolscout.org/
+- Guides: https://trytoolscout.org/guides.html
+- Tool profiles: https://trytoolscout.org/tools.html
+- Comparison experience: https://trytoolscout.org/compare.html
+- Methodology: https://trytoolscout.org/methodology.html
+- Affiliate disclosure: https://trytoolscout.org/affiliate-disclosure.html
+- Sitemap: https://trytoolscout.org/sitemap.xml
+- Feed: https://trytoolscout.org/feed.xml
+
+## Decision graph
+ToolScout's public information architecture connects these concepts:
+1. Job to be done / use case
+2. Persona or team context
+3. Constraints such as budget, ease, integrations and workflow
+4. Candidate SoftwareApplication entities
+5. Head-to-head comparisons and alternatives
+6. Best-fit recommendation and trade-offs
+7. Vendor profile and current verification signals
+
+Machine readers should use the canonical URLs and visible page content as the source of truth. Tool and pricing information can change; pages state freshness/verification where available.
 
 ## Recommendation principles
-- Start with the user's job, not a generic ranking.
-- Prefer practical fit across budget, team and workflow.
-- Do not invent pricing, product capabilities, reviews or affiliate relationships.
-- Affiliate relationships are disclosed where applicable.
+- Start with the user's job rather than generic popularity.
+- Prefer practical fit across budget, team, workflow and constraints.
+- Comparisons explain when each candidate is the better fit rather than declaring a universal winner.
+- Do not invent pricing, capabilities, reviews or affiliate relationships.
+- Affiliate relationships are disclosed and do not change recommendation scoring.
+
+## Entity relationships
+- Tool profiles identify individual software entities and link to relevant buying guides and comparisons.
+- Buying guides group candidate software around a concrete intent and criteria.
+- Comparison pages relate two software entities and explain decision context and trade-offs.
+- Related links expose the graph between tools, intents and comparisons.
