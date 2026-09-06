@@ -1,50 +1,202 @@
 {
-  "generatedAt": "2026-09-05T07:51:27.226Z",
+  "generatedAt": "2026-09-06T10:13:31.079Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
-  "startDate": "2026-08-07",
-  "endDate": "2026-09-03",
-  "count": 5,
+  "startDate": "2026-08-08",
+  "endDate": "2026-09-04",
+  "count": 24,
   "items": [
     {
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 29,
+      "impressions": 147,
       "ctr": 0,
-      "position": 76.4828
-    },
-    {
-      "intent": "best-crm-for-sales-teams",
-      "page": "https://trytoolscout.org/best-crm-for-sales-teams.html",
-      "clicks": 0,
-      "impressions": 5,
-      "ctr": 0,
-      "position": 75.8
+      "position": 76.9116
     },
     {
       "intent": "best-no-code-automation-tools",
       "page": "https://trytoolscout.org/best-no-code-automation-tools.html",
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 82,
       "ctr": 0,
-      "position": 71
-    },
-    {
-      "intent": "best-seo-keyword-research-tools",
-      "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
-      "clicks": 0,
-      "impressions": 4,
-      "ctr": 0,
-      "position": 72.75
+      "position": 73.2439
     },
     {
       "intent": "best-funnel-builder",
       "page": "https://trytoolscout.org/best-funnel-builder.html",
       "clicks": 0,
+      "impressions": 34,
+      "ctr": 0,
+      "position": 79.0588
+    },
+    {
+      "intent": "best-seo-keyword-research-tools",
+      "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
+      "clicks": 0,
+      "impressions": 34,
+      "ctr": 0,
+      "position": 71.0882
+    },
+    {
+      "intent": "best-crm-for-sales-teams",
+      "page": "https://trytoolscout.org/best-crm-for-sales-teams.html",
+      "clicks": 0,
+      "impressions": 26,
+      "ctr": 0,
+      "position": 78.0385
+    },
+    {
+      "intent": "best-free-project-management-tools",
+      "page": "https://trytoolscout.org/best-free-project-management-tools.html",
+      "clicks": 0,
+      "impressions": 6,
+      "ctr": 0,
+      "position": 46.8333
+    },
+    {
+      "intent": "best-free-crm",
+      "page": "https://trytoolscout.org/best-free-crm.html",
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 71.6
+    },
+    {
+      "intent": "best-project-management-tools",
+      "page": "https://trytoolscout.org/best-project-management-tools.html",
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 49.6
+    },
+    {
+      "intent": "best-forms-for-small-business",
+      "page": "https://trytoolscout.org/best-forms-for-small-business.html",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 4.5
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
+      "page": "http://trytoolscout.org/best-sales-prospecting-tools",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 8
+    },
+    {
+      "intent": "best-email-marketing-tools",
+      "page": "https://trytoolscout.org/best-email-marketing-tools.html",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 8.5
+    },
+    {
+      "intent": "best-funnel-builder-for-beginners",
+      "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 6.5
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "page": "https://trytoolscout.org/best-lead-capture-forms.html",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 6.5
+    },
+    {
+      "intent": "best-product-analytics-tools",
+      "page": "https://trytoolscout.org/best-product-analytics-tools.html",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 39.5
+    },
+    {
+      "intent": "best-ai-coding-tools",
+      "page": "https://trytoolscout.org/best-ai-coding-tools.html",
+      "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 83
+      "position": 78
+    },
+    {
+      "intent": "best-ai-research-tools",
+      "page": "https://trytoolscout.org/best-ai-research-tools.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "intent": "best-all-in-one-business-tools",
+      "page": "https://trytoolscout.org/best-all-in-one-business-tools",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 87
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "page": "https://trytoolscout.org/best-cold-email-tools.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 4
+    },
+    {
+      "intent": "best-crm-for-small-business",
+      "page": "https://trytoolscout.org/best-crm-for-small-business.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 8
+    },
+    {
+      "intent": "best-crm-for-solopreneurs",
+      "page": "https://trytoolscout.org/best-crm-for-solopreneurs",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
+    },
+    {
+      "intent": "best-developer-tools",
+      "page": "https://trytoolscout.org/best-developer-tools.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 10
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "page": "https://trytoolscout.org/best-keyword-research-tools.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
+    },
+    {
+      "intent": "best-tools-for-agencies",
+      "page": "https://trytoolscout.org/best-tools-for-agencies.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 10
+    },
+    {
+      "intent": "best-video-content-tools",
+      "page": "https://trytoolscout.org/best-video-content-tools.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 10
     }
   ]
 }
