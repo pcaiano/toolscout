@@ -38,12 +38,13 @@ jobs:
           node --check distribution-discovery-worker.js
           node --check distribution-submission-worker.js
           node --check distribution-orchestrator-worker.js
+          node --check distribution-command-worker.js
           node --check embed/toolscout-pick.js
           node --check embed/toolscout-finder.js
           node --check embed/toolscout-compare.js
       - name: Validate worker entrypoint and migrations
         run: |
-          grep -q 'main = "distribution-orchestrator-worker.js"' wrangler.toml
+          grep -q 'main = "distribution-command-worker.js"' wrangler.toml
           test -s migrations/0018_distribution_engine.sql
           test -s migrations/0019_vendor_amplification.sql
           test -s migrations/0020_vendor_contact_discovery.sql
@@ -78,6 +79,14 @@ jobs:
           grep -Fq 'Hacker News / Show HN' distribution-orchestrator-worker.js
           grep -Fq 'Indie Hackers' distribution-orchestrator-worker.js
           grep -Fq 'Relevant Reddit communities' distribution-orchestrator-worker.js
+      - name: Validate final command center observability
+        run: |
+          grep -Fq 'distributionOperations' distribution-command-worker.js
+          grep -Fq 'Distribution Operations' distribution-command-worker.js
+          grep -Fq 'distribution_submissions' distribution-command-worker.js
+          grep -Fq 'distribution_editorial_queue' distribution-command-worker.js
+          grep -Fq 'distribution_asset_state' distribution-command-worker.js
+          grep -Fq 'performance_score' distribution-command-worker.js
       - name: Validate distribution attribution and learning
         run: |
           grep -q "utm_medium:'distribution'" embed/toolscout-pick.js
