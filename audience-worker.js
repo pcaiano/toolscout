@@ -3,8 +3,8 @@ import base from './affiliate-workflow-worker.js';
 const TOOLSCOUT_BLUESKY_DID='did:plc:hjawfnxtifnuqcgidlvmas76';
 const jsonHeaders={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const safeText=(v,n=1000)=>String(v??'').slice(0,n);
-const allowedType=new Set(['outbound_reply','inbound_reply','engagement_suggestion','content_published','profile_snapshot']);
-const allowedStatus=new Set(['published','suggested','skipped','observed']);
+const publicVerifiedType=new Set(['outbound_reply','inbound_reply','content_published']);
+const allowedStatus=new Set(['published','observed']);
 const allowedRisk=new Set(['green','amber','red','none']);
 
 async function verifyToolScoutBlueskyPost(uri){
@@ -29,15 +29,13 @@ async function ingestAudienceEvent(request,env){
   const risk=allowedRisk.has(String(body.risk))?String(body.risk):'none';
   const postUri=safeText(body.post_uri,500);
   if(platform!=='bluesky')return Response.json({error:'unsupported_platform'},{status:422,headers:jsonHeaders});
-  if(!allowedType.has(eventType))return Response.json({error:'unsupported_event_type'},{status:422,headers:jsonHeaders});
-  if(['outbound_reply','inbound_reply','content_published'].includes(eventType)){
-    if(!(await verifyToolScoutBlueskyPost(postUri)))return Response.json({error:'unverified_toolscout_post'},{status:422,headers:jsonHeaders});
-  }
+  if(!publicVerifiedType.has(eventType))return Response.json({error:'unsupported_public_event_type'},{status:422,headers:jsonHeaders});
+  if(!(await verifyToolScoutBlueskyPost(postUri)))return Response.json({error:'unverified_toolscout_post'},{status:422,headers:jsonHeaders});
   const eventId=safeText(body.event_id,120)||`aud_${crypto.randomUUID()}`;
   try{
     await env.DB.prepare(`INSERT INTO audience_events(event_id,platform,event_type,direction,status,actor_handle,post_uri,parent_uri,content_id,context_text,suggestion_text,risk,followers,impressions,reactions,replies,reposts,source,observed_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(event_id) DO NOTHING`)
-      .bind(eventId,platform,eventType,safeText(body.direction,20)||null,status,safeText(body.actor_handle,120)||null,postUri||null,safeText(body.parent_uri,500)||null,safeText(body.content_id,120)||null,safeText(body.context_text,2000)||null,safeText(body.suggestion_text,2000)||null,risk,Number.isFinite(Number(body.followers))?Number(body.followers):null,Number.isFinite(Number(body.impressions))?Number(body.impressions):null,Number.isFinite(Number(body.reactions))?Number(body.reactions):null,Number.isFinite(Number(body.replies))?Number(body.replies):null,Number.isFinite(Number(body.reposts))?Number(body.reposts):null,safeText(body.source,80)||'make',safeText(body.observed_at,80)||new Date().toISOString()).run();
-    return Response.json({ok:true,event_id:eventId},{headers:jsonHeaders});
+      .bind(eventId,platform,eventType,safeText(body.direction,20)||null,status,safeText(body.actor_handle,120)||null,postUri||null,safeText(body.parent_uri,500)||null,safeText(body.content_id,120)||null,safeText(body.context_text,2000)||null,safeText(body.suggestion_text,2000)||null,risk,null,null,null,null,null,safeText(body.source,80)||'make',safeText(body.observed_at,80)||new Date().toISOString()).run();
+    return Response.json({ok:true,event_id:eventId,verified:true},{headers:jsonHeaders});
   }catch(e){return Response.json({error:'audience_event_store_failed',message:String(e?.message||e)},{status:500,headers:jsonHeaders});}
 }
 
