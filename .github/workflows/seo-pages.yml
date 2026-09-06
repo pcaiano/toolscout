@@ -25,6 +25,7 @@ on:
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/import-gsc-signals.mjs'
       - 'scripts/sync-gsc-signals.mjs'
+      - 'scripts/audit-gsc-slugs.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'scripts/validate-public-surface.mjs'
       - 'scripts/validate-commercial-indexability.mjs'
@@ -59,6 +60,9 @@ jobs:
           GSC_PROPERTY: sc-domain:trytoolscout.org
           GSC_LOOKBACK_DAYS: '28'
         run: node scripts/sync-gsc-signals.mjs
+
+      - name: Audit observed GSC slugs
+        run: node scripts/audit-gsc-slugs.mjs
 
       - name: Build growth priority
         run: node scripts/build-growth-priority.mjs
