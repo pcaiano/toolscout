@@ -5,6 +5,7 @@ on:
     paths:
       - 'distribution-*-worker.js'
       - 'data/distribution-radar-seeds.json'
+      - 'data/distribution-discovery-sources.json'
       - 'embed/**'
       - 'migrations/0018_distribution_engine.sql'
       - 'migrations/0019_vendor_amplification.sql'
@@ -31,23 +32,27 @@ jobs:
           node --check distribution-contact-worker.js
           node --check distribution-sender-worker.js
           node --check distribution-learning-worker.js
+          node --check distribution-discovery-worker.js
           node --check embed/toolscout-pick.js
           node --check embed/toolscout-finder.js
           node --check embed/toolscout-compare.js
       - name: Validate worker entrypoint and migrations
         run: |
-          grep -q 'main = "distribution-learning-worker.js"' wrangler.toml
+          grep -q 'main = "distribution-discovery-worker.js"' wrangler.toml
           test -s migrations/0018_distribution_engine.sql
           test -s migrations/0019_vendor_amplification.sql
           test -s migrations/0020_vendor_contact_discovery.sql
           test -s migrations/0021_public_vendor_dispatch.sql
           test -s migrations/0022_distribution_learning.sql
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
-      - name: Validate radar and syndication
+      - name: Validate radar, discovery and syndication
         run: |
           node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1)"
+          node -e "const d=require('./data/distribution-discovery-sources.json'); if(!Array.isArray(d.sources)||d.sources.length<2) process.exit(1)"
           grep -Fq '/api/distribution/feed.json' distribution-radar-worker.js
           grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
+          grep -Fq '/api/distribution/discovery/refresh' distribution-discovery-worker.js
+          grep -Fq 'external_discovery_refresh' distribution-discovery-worker.js
       - name: Validate distribution attribution and learning
         run: |
           grep -q "utm_medium:'distribution'" embed/toolscout-pick.js
