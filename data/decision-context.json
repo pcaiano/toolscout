@@ -1,72 +1,15 @@
 {
-  "best-crm-for-real-estate": {
-    "persona": "real estate professionals",
-    "jobToBeDone": "manage leads, client relationships, pipeline visibility and follow-up in one CRM workflow",
-    "constraints": ["simple day-to-day use", "sales pipeline visibility", "follow-up automation", "useful integrations"],
-    "decisionQuestions": ["Do you need a CRM primarily for lead follow-up or for a broader sales operation?", "How much automation do you need before the workflow becomes too complex?", "Which existing tools must the CRM integrate with?"],
-    "comparisonPairs": ["hubspot-vs-pipedrive"]
-  },
-  "best-crm-for-consultants": {
-    "persona": "independent consultants and advisory businesses",
-    "jobToBeDone": "manage client relationships, opportunities and follow-up without unnecessary enterprise complexity",
-    "constraints": ["simplicity", "lightweight sales management", "automation", "integration fit"],
-    "decisionQuestions": ["Do you need a full sales CRM or mainly a reliable client relationship system?", "Will one person manage the workflow or does it need to support a team?", "Which repetitive follow-up steps are worth automating?"],
-    "comparisonPairs": ["hubspot-vs-pipedrive"]
-  },
-  "best-forms-for-small-business": {
-    "persona": "small businesses",
-    "jobToBeDone": "collect enquiries, leads, surveys or payments and move submissions into the rest of the business workflow",
-    "constraints": ["ease of setup", "affordability", "integrations", "automation"],
-    "decisionQuestions": ["Are you collecting simple enquiries or building a multi-step qualification workflow?", "Do submissions need to trigger CRM, email or automation actions?", "Is a useful free or low-cost entry plan important?"],
-    "comparisonPairs": ["jotform-vs-typeform", "tally-vs-typeform"]
-  },
-  "best-lead-capture-forms": {
-    "persona": "teams that need to capture and qualify prospects",
-    "jobToBeDone": "turn form submissions into usable sales or marketing leads",
-    "constraints": ["lead qualification", "integration depth", "automation", "ease of deployment"],
-    "decisionQuestions": ["How much qualification should happen before a lead reaches your CRM or inbox?", "Which downstream system needs the submission data?", "Do you need branching, scoring or a simple contact form?"],
-    "comparisonPairs": ["jotform-vs-typeform", "tally-vs-typeform"]
-  },
-  "best-sales-prospecting-tools": {
-    "persona": "B2B sales and outbound teams",
-    "jobToBeDone": "find prospects, enrich contact data and support an efficient outbound workflow",
-    "constraints": ["data usefulness", "research capability", "automation", "integration fit"],
-    "decisionQuestions": ["Do you primarily need contact discovery, enrichment or outreach execution?", "How important are CRM and sequencing integrations?", "Will the tool be used by one operator or a larger sales team?"],
-    "comparisonPairs": ["apollo-vs-lemlist"]
-  },
-  "best-email-marketing-tools": {
-    "persona": "businesses and creators running email campaigns",
-    "jobToBeDone": "manage audiences, send campaigns and automate lifecycle communication",
-    "constraints": ["automation depth", "audience management", "integrations", "ease of operation"],
-    "decisionQuestions": ["Are you primarily publishing newsletters or building automated customer journeys?", "How complex does segmentation need to be?", "Which commerce, CRM or form tools must connect to the platform?"],
-    "comparisonPairs": ["beehiiv-vs-kit", "brevo-vs-mailchimp", "activecampaign-vs-mailchimp"]
-  },
-  "best-cold-email-tools": {
-    "persona": "B2B teams and independent operators running outbound email",
-    "jobToBeDone": "run repeatable cold-email outreach with sequencing, personalization and practical deliverability controls",
-    "constraints": ["sequence automation", "personalization", "deliverability workflow", "integration fit"],
-    "decisionQuestions": ["Do you need prospect data as well as outreach execution?", "How much sequencing and personalization does your workflow require?", "Which CRM or prospecting system must the outreach tool connect to?"],
-    "comparisonPairs": ["apollo-vs-lemlist"]
-  },
-  "best-crm-for-small-business": {
-    "persona": "small businesses choosing a practical sales CRM",
-    "jobToBeDone": "organize leads, deals and follow-up without paying for unnecessary enterprise complexity",
-    "constraints": ["affordability", "ease of adoption", "useful automation", "integration fit"],
-    "decisionQuestions": ["How many people need to use the CRM?", "Is a free or low-cost starting plan important?", "Which sales follow-up tasks should the CRM automate?"],
-    "comparisonPairs": ["hubspot-vs-pipedrive"]
-  },
-  "best-keyword-research-tools": {
-    "persona": "marketers, creators and SEO operators planning search content",
-    "jobToBeDone": "discover useful search opportunities and turn keyword research into content priorities",
-    "constraints": ["research depth", "ease of use", "competitive insight", "budget"],
-    "decisionQuestions": ["Do you need broad SEO-suite capabilities or mainly keyword discovery?", "How important is competitor research to your workflow?", "Will one person use the tool or does it need agency/team workflows?"],
-    "comparisonPairs": ["semrush-vs-ahrefs"]
-  },
-  "best-ai-research-tools": {
-    "persona": "knowledge workers using AI for research and source synthesis",
-    "jobToBeDone": "find, synthesize and inspect information faster while keeping source grounding visible",
-    "constraints": ["source grounding", "research depth", "ease of use", "workflow fit"],
-    "decisionQuestions": ["Do you need web research, document research or both?", "How important are visible sources and citations?", "Will research outputs feed writing, analysis or a team knowledge workflow?"],
-    "comparisonPairs": []
-  }
+  "best-crm-for-real-estate": {"persona":"real estate professionals","jobToBeDone":"manage leads, client relationships, pipeline visibility and follow-up in one CRM workflow","constraints":["simple day-to-day use","sales pipeline visibility","follow-up automation","useful integrations"],"decisionQuestions":["Do you need a CRM primarily for lead follow-up or for a broader sales operation?","How much automation do you need before the workflow becomes too complex?","Which existing tools must the CRM integrate with?"],"comparisonPairs":["hubspot-vs-pipedrive"]},
+  "best-crm-for-consultants": {"persona":"independent consultants and advisory businesses","jobToBeDone":"manage client relationships, opportunities and follow-up without unnecessary enterprise complexity","constraints":["simplicity","lightweight sales management","automation","integration fit"],"decisionQuestions":["Do you need a full sales CRM or mainly a reliable client relationship system?","Will one person manage the workflow or does it need to support a team?","Which repetitive follow-up steps are worth automating?"],"comparisonPairs":["hubspot-vs-pipedrive"]},
+  "best-forms-for-small-business": {"persona":"small businesses","jobToBeDone":"collect enquiries, leads, surveys or payments and move submissions into the rest of the business workflow","constraints":["ease of setup","affordability","integrations","automation"],"decisionQuestions":["Are you collecting simple enquiries or building a multi-step qualification workflow?","Do submissions need to trigger CRM, email or automation actions?","Is a useful free or low-cost entry plan important?"],"comparisonPairs":["jotform-vs-typeform","tally-vs-typeform"]},
+  "best-lead-capture-forms": {"persona":"teams that need to capture and qualify prospects","jobToBeDone":"turn form submissions into usable sales or marketing leads","constraints":["lead qualification","integration depth","automation","ease of deployment"],"decisionQuestions":["How much qualification should happen before a lead reaches your CRM or inbox?","Which downstream system needs the submission data?","Do you need branching, scoring or a simple contact form?"],"comparisonPairs":["jotform-vs-typeform","tally-vs-typeform"]},
+  "best-sales-prospecting-tools": {"persona":"B2B sales and outbound teams","jobToBeDone":"find prospects, enrich contact data and support an efficient outbound workflow","constraints":["data usefulness","research capability","automation","integration fit"],"decisionQuestions":["Do you primarily need contact discovery, enrichment or outreach execution?","How important are CRM and sequencing integrations?","Will the tool be used by one operator or a larger sales team?"],"comparisonPairs":["apollo-vs-lemlist"]},
+  "best-email-marketing-tools": {"persona":"businesses and creators running email campaigns","jobToBeDone":"manage audiences, send campaigns and automate lifecycle communication","constraints":["automation depth","audience management","integrations","ease of operation"],"decisionQuestions":["Are you primarily publishing newsletters or building automated customer journeys?","How complex does segmentation need to be?","Which commerce, CRM or form tools must connect to the platform?"],"comparisonPairs":["beehiiv-vs-kit","brevo-vs-mailchimp","activecampaign-vs-mailchimp"]},
+  "best-cold-email-tools": {"persona":"B2B teams and independent operators running outbound email","jobToBeDone":"run repeatable cold-email outreach with sequencing, personalization and practical deliverability controls","constraints":["sequence automation","personalization","deliverability workflow","integration fit"],"decisionQuestions":["Do you need prospect data as well as outreach execution?","How much sequencing and personalization does your workflow require?","Which CRM or prospecting system must the outreach tool connect to?"],"comparisonPairs":["apollo-vs-lemlist"]},
+  "best-crm-for-small-business": {"persona":"small businesses choosing a practical sales CRM","jobToBeDone":"organize leads, deals and follow-up without paying for unnecessary enterprise complexity","constraints":["affordability","ease of adoption","useful automation","integration fit"],"decisionQuestions":["How many people need to use the CRM?","Is a free or low-cost starting plan important?","Which sales follow-up tasks should the CRM automate?"],"comparisonPairs":["hubspot-vs-pipedrive"]},
+  "best-keyword-research-tools": {"persona":"marketers, creators and SEO operators planning search content","jobToBeDone":"discover useful search opportunities and turn keyword research into content priorities","constraints":["research depth","ease of use","competitive insight","budget"],"decisionQuestions":["Do you need broad SEO-suite capabilities or mainly keyword discovery?","How important is competitor research to your workflow?","Will one person use the tool or does it need agency/team workflows?"],"comparisonPairs":["semrush-vs-ahrefs"]},
+  "best-ai-research-tools": {"persona":"knowledge workers using AI for research and source synthesis","jobToBeDone":"find, synthesize and inspect information faster while keeping source grounding visible","constraints":["source grounding","research depth","ease of use","workflow fit"],"decisionQuestions":["Do you need web research, document research or both?","How important are visible sources and citations?","Will research outputs feed writing, analysis or a team knowledge workflow?"],"comparisonPairs":[]},
+  "best-seo-tools-for-agencies": {"persona":"SEO and digital agencies managing work across multiple clients","jobToBeDone":"choose an SEO stack that supports repeatable research, reporting and execution across client accounts","constraints":["multi-client workflows","reporting needs","research depth","budget and team size"],"decisionQuestions":["Do you need one broad SEO suite or a stack split across research, crawling, content and reporting?","How important are multi-client projects and repeatable reporting?","Which workflows need the most depth: keyword research, technical SEO, content, backlinks or reporting?"],"comparisonPairs":["semrush-vs-ahrefs"]},
+  "best-no-code-automation-tools": {"persona":"teams and operators automating workflows without a traditional development project","jobToBeDone":"connect apps and run reliable multi-step workflows with the right balance of ease, flexibility and cost","constraints":["integration coverage","workflow complexity","ease of maintenance","budget"],"decisionQuestions":["Do you need simple app-to-app automation or more complex branching and data handling?","How much setup and maintenance are you comfortable owning?","Which apps and services must the automation platform connect to?"],"comparisonPairs":["make-vs-zapier","n8n-vs-make"]},
+  "best-funnel-builder": {"persona":"small businesses, creators and marketers building digital acquisition or sales funnels","jobToBeDone":"turn traffic into leads or customers using the right mix of landing pages, forms, automation and checkout","constraints":["ease of launch","lead capture","automation depth","payments or checkout needs"],"decisionQuestions":["Do you need an all-in-one funnel platform or only landing pages and lead capture?","Should email automation and checkout live inside the same product?","How important is speed of setup compared with customization and integrations?"],"comparisonPairs":[]}
 }
