@@ -62,36 +62,44 @@ async function accessToken() {
 
 const token = await accessToken();
 const endpoint = `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(property)}/searchAnalytics/query`;
-const response = await fetch(endpoint, {
-  method: 'POST',
-  headers: {
-    authorization: `Bearer ${token}`,
-    'content-type': 'application/json'
-  },
-  body: JSON.stringify({
-    startDate,
-    endDate,
-    dimensions: ['page'],
-    type: 'web',
-    dataState: 'final',
-    rowLimit: 25000
-  })
-});
 
-if (!response.ok) {
-  const detail = await response.text();
-  throw new Error(`Search Console API failed for ${property}: ${response.status} ${detail}`);
+async function querySearchConsole(dimensions) {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      startDate,
+      endDate,
+      dimensions,
+      type: 'web',
+      dataState: 'final',
+      rowLimit: 25000
+    })
+  });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Search Console API failed for ${property}: ${response.status} ${detail}`);
+  }
+  return response.json();
 }
 
-const json = await response.json();
-const byIntent = new Map();
-for (const row of json.rows || []) {
-  const page = String(row.keys?.[0] || '');
+function intentFromPage(page) {
   let url;
-  try { url = new URL(page); } catch { continue; }
-  if (url.hostname !== 'trytoolscout.org' && url.hostname !== 'www.trytoolscout.org') continue;
+  try { url = new URL(page); } catch { return null; }
+  if (url.hostname !== 'trytoolscout.org' && url.hostname !== 'www.trytoolscout.org') return null;
   const intent = path.basename(url.pathname).replace(/\.html$/i, '');
-  if (!/^best-[a-z0-9-]+$/.test(intent)) continue;
+  return /^best-[a-z0-9-]+$/.test(intent) ? intent : null;
+}
+
+const pageJson = await querySearchConsole(['page']);
+const byIntent = new Map();
+for (const row of pageJson.rows || []) {
+  const page = String(row.keys?.[0] || '');
+  const intent = intentFromPage(page);
+  if (!intent) continue;
   const impressions = Number(row.impressions || 0);
   const clicks = Number(row.clicks || 0);
   const ctr = Number(row.ctr || 0) * 100;
@@ -104,13 +112,33 @@ for (const row of json.rows || []) {
   byIntent.set(intent, current);
 }
 
+const queryJson = await querySearchConsole(['page', 'query']);
+const queriesByIntent = new Map();
+for (const row of queryJson.rows || []) {
+  const page = String(row.keys?.[0] || '');
+  const query = String(row.keys?.[1] || '').trim();
+  const intent = intentFromPage(page);
+  if (!intent || !query) continue;
+  const impressions = Number(row.impressions || 0);
+  const clicks = Number(row.clicks || 0);
+  const position = Number(row.position || 0);
+  const rows = queriesByIntent.get(intent) || [];
+  rows.push({ query, clicks, impressions, position: Number(position.toFixed(4)) });
+  queriesByIntent.set(intent, rows);
+}
+
+for (const rows of queriesByIntent.values()) {
+  rows.sort((a, b) => b.impressions - a.impressions || b.clicks - a.clicks || a.position - b.position);
+}
+
 const items = [...byIntent.values()].map(x => ({
   intent: x.intent,
   page: x.page,
   clicks: x.clicks,
   impressions: x.impressions,
   ctr: x.impressions ? Number((x.ctrNumerator / x.impressions).toFixed(4)) : 0,
-  position: x.impressions ? Number((x.positionNumerator / x.impressions).toFixed(4)) : 0
+  position: x.impressions ? Number((x.positionNumerator / x.impressions).toFixed(4)) : 0,
+  topQueries: (queriesByIntent.get(x.intent) || []).slice(0, 10)
 })).sort((a,b) => b.impressions - a.impressions || b.clicks - a.clicks);
 
 fs.mkdirSync('reports', { recursive: true });
@@ -130,5 +158,6 @@ console.log(JSON.stringify({
   startDate,
   endDate,
   impressions: items.reduce((n,x) => n + x.impressions, 0),
-  clicks: items.reduce((n,x) => n + x.clicks, 0)
+  clicks: items.reduce((n,x) => n + x.clicks, 0),
+  queryRows: [...queriesByIntent.values()].reduce((n, rows) => n + rows.length, 0)
 }));
