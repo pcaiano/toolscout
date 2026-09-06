@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-09-06T17:40:19.836Z",
+  "methodology": "Public sitemap URL patterns only. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are treated as market-coverage signals and must pass ToolScout demand and quality gates before any new page is created.",
+  "sources": [
+    {
+      "name": "AlternativeTo",
+      "sitemap": null,
+      "status": "unavailable",
+      "sampledUrls": 0
+    },
+    {
+      "name": "SaaSHub",
+      "sitemap": null,
+      "status": "unavailable",
+      "sampledUrls": 0
+    },
+    {
+      "name": "G2",
+      "sitemap": null,
+      "status": "unavailable",
+      "sampledUrls": 0
+    },
+    {
+      "name": "Capterra",
+      "sitemap": null,
+      "status": "unavailable",
+      "sampledUrls": 0
+    },
+    {
+      "name": "Futurepedia",
+      "sitemap": null,
+      "status": "unavailable",
+      "sampledUrls": 0
+    },
+    {
+      "name": "There's An AI For That",
+      "sitemap": null,
+      "status": "unavailable",
+      "sampledUrls": 0
+    }
+  ],
+  "count": 0,
+  "gaps": []
+}

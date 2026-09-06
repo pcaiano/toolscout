@@ -1,0 +1,198 @@
+{
+  "generatedAt": "2026-09-06T17:40:20.177Z",
+  "engine": "ToolScout Content Intelligence v1",
+  "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
+  "evidenceTier": "baseline",
+  "rules": {
+    "fewerThan5SocialSessions": "Keep Monday discovery, Wednesday comparison and Friday practical balanced.",
+    "fiveTo19SocialSessions": "Allow one controlled test only. Change one variable and define one success metric.",
+    "twentyPlusSocialSessions": "Measured allocation changes are allowed only when downstream behavior supports them.",
+    "editorialIndependence": "Affiliate payout never changes tool ranking or editorial winner.",
+    "searchToSocial": "Use observed search demand as a topic signal, not as proof that a social post will perform.",
+    "socialToSearch": "Use repeated high-quality social interest as research input, not an automatic page-creation trigger."
+  },
+  "search": {
+    "summary": {
+      "observedGscIntents": 24,
+      "firstPageOpportunities": 11,
+      "strikingDistanceOpportunities": 0,
+      "authorityDepthOpportunities": 4,
+      "competitorResearchCandidates": 0
+    },
+    "topOpportunities": [
+      {
+        "intent": "best-crm-for-consultants",
+        "priorityScore": 69,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "hubspot",
+          "close",
+          "pipedrive"
+        ]
+      },
+      {
+        "intent": "best-crm-for-real-estate",
+        "priorityScore": 69,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "hubspot",
+          "salesforce",
+          "close"
+        ]
+      },
+      {
+        "intent": "best-marketing-automation-tools",
+        "priorityScore": 68,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "klaviyo",
+          "kit",
+          "omnisend"
+        ]
+      },
+      {
+        "intent": "best-workflow-automation-tools",
+        "priorityScore": 68,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "zapier",
+          "n8n",
+          "make"
+        ]
+      },
+      {
+        "intent": "best-competitor-seo-tools",
+        "priorityScore": 64,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "semrush",
+          "surfer",
+          "ahrefs"
+        ]
+      },
+      {
+        "intent": "best-crm-with-automation",
+        "priorityScore": 64,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "hubspot",
+          "salesforce",
+          "close"
+        ]
+      },
+      {
+        "intent": "best-seo-tools",
+        "priorityScore": 64,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "zapier",
+          "github",
+          "buffer"
+        ]
+      },
+      {
+        "intent": "best-affordable-crm",
+        "priorityScore": 63,
+        "lane": "develop-authority",
+        "action": "watch",
+        "reason": "No strong observed-search trigger yet.",
+        "impressions": 0,
+        "position": 0,
+        "topTools": [
+          "attio",
+          "freshsales",
+          "hubspot"
+        ]
+      }
+    ]
+  },
+  "social": {
+    "windowDays": 30,
+    "socialHumanSessions": 4,
+    "platforms": [
+      {
+        "platform": "linkedin",
+        "sessions": 4,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0,
+        "monetizedOutbound": 0
+      }
+    ],
+    "content": [
+      {
+        "platform": "linkedin",
+        "contentId": "unlabelled",
+        "sessions": 4,
+        "outboundClicks": 0,
+        "sessionToOutboundRate": 0
+      }
+    ]
+  },
+  "history": {
+    "snapshots": 1,
+    "lastThree": [
+      {
+        "generatedAt": "2026-09-06T17:40:02.825Z",
+        "windowDays": 30,
+        "definition": "Likely-human sessions only. Social attribution uses recorded UTM source first and social referrer hosts as fallback. Downstream actions are counted only after attributed social entry.",
+        "socialHumanSessions": 4,
+        "platforms": [
+          {
+            "platform": "linkedin",
+            "sessions": 4,
+            "recommendationCompletions": 0,
+            "outboundClicks": 0,
+            "monetizedOutbound": 0
+          }
+        ],
+        "content": [
+          {
+            "platform": "linkedin",
+            "contentId": "unlabelled",
+            "sessions": 4,
+            "outboundClicks": 0
+          }
+        ]
+      }
+    ]
+  },
+  "recommendedInputs": {
+    "topicCandidates": [
+      "best-crm-for-consultants",
+      "best-crm-for-real-estate",
+      "best-marketing-automation-tools",
+      "best-workflow-automation-tools",
+      "best-competitor-seo-tools"
+    ],
+    "testEligible": false,
+    "allocationChangeEligible": false
+  }
+}
