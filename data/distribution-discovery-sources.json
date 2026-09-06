@@ -1,0 +1,8 @@
+{
+  "sources": [
+    {"slug":"truvery-ai-directories","name":"AI Tool Directories community registry","type":"registry","url":"https://raw.githubusercontent.com/truery/ai-tool-directories/main/README.md","enabled":true},
+    {"slug":"favors-startup-directories","name":"Favors startup directory guide","type":"editorial_registry","url":"https://favors.dev/startup-launch-directories/","enabled":true},
+    {"slug":"launch-directories","name":"Launch Directories","type":"directory_registry","url":"https://launchdirectories.com/","enabled":true}
+  ],
+  "guardrails":{"max_fetches_per_run":6,"max_candidates_per_source":50,"allowed_protocols":["https:"],"exclude_hosts":["facebook.com","instagram.com","x.com","twitter.com"]}
+}
