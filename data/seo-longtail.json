@@ -15,6 +15,7 @@
     {"slug":"best-no-code-automation-for-small-business","title":"Best No-Code Automation for Small Business","category":"automation","parent":"best-no-code-automation-tools"},
     {"slug":"best-workflow-automation-for-agencies","title":"Best Workflow Automation for Agencies","category":"automation","parent":"best-workflow-automation-tools"},
     {"slug":"best-lead-capture-forms-for-real-estate","title":"Best Lead Capture Forms for Real Estate","category":"forms","parent":"best-lead-capture-forms"},
-    {"slug":"best-free-project-management-for-small-teams","title":"Best Free Project Management for Small Teams","category":"business","parent":"best-free-project-management-tools"}
+    {"slug":"best-free-project-management-for-small-teams","title":"Best Free Project Management for Small Teams","category":"business","parent":"best-free-project-management-tools"},
+    {"slug":"best-all-in-one-business-tools","title":"Best All-in-One Business Tools","description":"All-in-one business platforms for small businesses and creators that want to consolidate CRM, marketing, automation, forms, funnels and sales workflows in fewer tools.","category":"business","parent":"best-tools-for-agencies","weights":{"ease":1.7,"automation":1.6,"integrations":1.6,"marketing":1.3,"sales":1.3,"price":1.2},"keywords":["all in one business software","all in one business tools","small business software suite","business platform","crm marketing automation","business software"]}
   ]
 }
