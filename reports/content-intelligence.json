@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T21:38:35.651Z",
+  "generatedAt": "2026-09-06T21:52:43.890Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "baseline",
@@ -18,6 +18,7 @@
   "search": {
     "summary": {
       "observedGscIntents": 24,
+      "actionableOpportunities": 15,
       "firstPageOpportunities": 11,
       "strikingDistanceOpportunities": 0,
       "authorityDepthOpportunities": 4,

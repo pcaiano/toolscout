@@ -1,17 +1,21 @@
 {
-  "generatedAt": "2026-09-06T21:38:35.600Z",
-  "engine": "ToolScout Organic Growth Engine v1",
-  "objective": "Combine SEO demand, AEO/GEO answer readiness, commercial intent, affiliate readiness and competitor gap signals without allowing affiliate economics or competitor behavior to determine editorial winners.",
+  "generatedAt": "2026-09-06T21:52:43.835Z",
+  "engine": "ToolScout Search & Answer Opportunity Engine v2",
+  "objective": "Convert observed search and answer-engine signals into autonomous SEO/AEO/GEO actions that improve qualified traffic, decision quality and monetization potential while preserving editorial neutrality.",
+  "autonomyDirective": "Automate safe growth actions by default. The Command Center is an observability surface, not a work queue. Escalate only blocked, ambiguous, destructive or policy-sensitive decisions.",
   "dailyDecisionRules": [
+    "Prefer autonomous execution over owner work orders whenever quality gates can make the action safe.",
     "Prefer optimizing existing URLs with observed demand over creating new URLs.",
     "Treat first-page and striking-distance pages as answer/snippet/internal-link opportunities.",
     "Treat high-impression low-rank pages as relevance/authority/depth problems, not CTR problems.",
     "Use competitor scans only to surface research candidates; never copy content and never auto-publish from competitor evidence alone.",
-    "Affiliate readiness can prioritize commercial work but cannot change editorial ranking of tools.",
-    "AEO/GEO requires answer-first copy, explicit decision context, structured entities, comparisons, freshness and crawlable canonical pages."
+    "Affiliate readiness may prioritize commercial work but cannot change editorial ranking of tools.",
+    "AEO/GEO requires answer-first copy, explicit decision context, structured entities, comparisons, freshness and crawlable canonical pages.",
+    "Measure every autonomous intervention so future prioritization can learn from outcomes."
   ],
   "summary": {
     "observedGscIntents": 24,
+    "actionableOpportunities": 15,
     "firstPageOpportunities": 11,
     "strikingDistanceOpportunities": 0,
     "authorityDepthOpportunities": 4,
@@ -24,6 +28,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -38,6 +53,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -52,6 +78,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -66,6 +103,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -80,6 +128,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -94,6 +153,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -108,6 +178,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -122,6 +203,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -136,6 +228,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -150,6 +253,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -164,6 +278,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -178,6 +303,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -192,6 +328,20 @@
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -214,6 +364,20 @@
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -236,6 +400,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -250,6 +425,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -264,6 +450,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": null,
       "topTools": [
@@ -278,6 +475,20 @@
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -300,6 +511,20 @@
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -322,6 +547,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -336,6 +572,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -358,6 +608,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -380,6 +644,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -402,6 +680,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -416,6 +705,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": null,
       "topTools": [
@@ -430,6 +730,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -452,6 +766,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -474,6 +802,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -496,6 +838,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -518,6 +871,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -540,6 +907,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -562,6 +940,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -584,6 +976,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -606,6 +1012,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
@@ -628,6 +1045,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -650,6 +1081,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -672,6 +1114,20 @@
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -694,6 +1150,17 @@
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
@@ -711,6 +1178,278 @@
       ]
     }
   ],
+  "autonomousActionQueue": [
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "priorityScore": 53,
+      "lane": "seo-authority-depth",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "priorityScore": 52,
+      "lane": "seo-authority-depth",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-crm-for-sales-teams",
+      "priorityScore": 49,
+      "lane": "seo-authority-depth",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-funnel-builder",
+      "priorityScore": 49,
+      "lane": "seo-authority-depth",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-forms-for-small-business",
+      "priorityScore": 48,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
+      "priorityScore": 47,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "priorityScore": 46,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-email-marketing-tools",
+      "priorityScore": 45,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "priorityScore": 44,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-crm-for-small-business",
+      "priorityScore": 43,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "priorityScore": 38,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-developer-tools",
+      "priorityScore": 37,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-tools-for-agencies",
+      "priorityScore": 37,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-video-content-tools",
+      "priorityScore": 35,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-ai-research-tools",
+      "priorityScore": 27,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    }
+  ],
   "competitorResearchCandidates": [
     {
       "candidate": "character-ai",
@@ -720,7 +1459,8 @@
         "Futurepedia"
       ],
       "action": "research-only",
-      "publishGate": "Do not auto-publish. Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
+      "autonomy": "auto-research-but-no-auto-publish-from-competitor-evidence-alone",
+      "publishGate": "Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
       "reason": "Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value."
     },
     {
@@ -731,7 +1471,8 @@
         "Futurepedia"
       ],
       "action": "research-only",
-      "publishGate": "Do not auto-publish. Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
+      "autonomy": "auto-research-but-no-auto-publish-from-competitor-evidence-alone",
+      "publishGate": "Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
       "reason": "Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value."
     },
     {
@@ -742,7 +1483,8 @@
         "Futurepedia"
       ],
       "action": "research-only",
-      "publishGate": "Do not auto-publish. Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
+      "autonomy": "auto-research-but-no-auto-publish-from-competitor-evidence-alone",
+      "publishGate": "Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
       "reason": "Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value."
     }
   ]
