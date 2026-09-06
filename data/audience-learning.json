@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-09-06T17:25:10.309Z",
+  "windowDays": 30,
+  "definition": "Likely-human sessions only. Social attribution uses recorded UTM source first and social referrer hosts as fallback. Downstream actions are counted only after attributed social entry.",
+  "socialHumanSessions": 4,
+  "platforms": [
+    {
+      "platform": "linkedin",
+      "sessions": 4,
+      "recommendationCompletions": 0,
+      "outboundClicks": 0,
+      "monetizedOutbound": 0
+    }
+  ],
+  "content": [
+    {
+      "platform": "linkedin",
+      "contentId": "unlabelled",
+      "sessions": 4,
+      "outboundClicks": 0
+    }
+  ]
+}
