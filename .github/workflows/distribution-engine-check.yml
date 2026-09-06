@@ -46,6 +46,6 @@ jobs:
           grep -q "utm_medium:'distribution'" embed/toolscout-compare.js
       - name: Validate syndication routes
         run: |
-          grep -q '/api/distribution/feed.json' distribution-radar-worker.js
-          grep -q '/api/distribution/feed.xml' distribution-radar-worker.js
-          grep -q '"/api/distribution/*"' wrangler.toml
+          grep -Fq '/api/distribution/feed.json' distribution-radar-worker.js
+          grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
+          grep -Fq '"/api/distribution/*"' wrangler.toml
