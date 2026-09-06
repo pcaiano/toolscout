@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-06T17:49:43.521Z",
-  "engine": "ToolScout Content Intelligence v1.1",
+  "generatedAt": "2026-09-06T17:52:49.868Z",
+  "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "baseline",
   "rules": {
@@ -9,11 +9,11 @@
     "twentyPlusSocialSessions": "Measured allocation changes are allowed only when downstream behavior supports them.",
     "postLearningMinimumSessions": 3,
     "familyLearningMinimumSessions": 5,
+    "topicLearningMinimumSessions": 5,
     "editorialIndependence": "Affiliate payout never changes tool ranking or editorial winner.",
     "searchToSocial": "Only topics with observed Search Console impressions can become search-supported social topic signals. Search demand does not prove social performance.",
     "socialToSearch": "Use repeated high-quality social interest as research input, not an automatic page-creation trigger.",
-    "perPostLearning": "Use dated content IDs to compare individual posts. Do not generalize from a post with fewer than 3 likely-human sessions.",
-    "familyLearning": "Use family-level evidence only after at least 5 likely-human sessions in that family."
+    "topicLearning": "Compare topic intent only after at least 5 likely-human sessions for that topic on that platform. Topic evidence can suggest tests but cannot override editorial independence."
   },
   "search": {
     "summary": {
@@ -154,6 +154,7 @@
       {
         "platform": "linkedin",
         "contentId": "unlabelled",
+        "topicIntent": "unlabelled",
         "family": "unlabelled",
         "publishedDate": null,
         "postLevel": false,
@@ -162,10 +163,11 @@
         "resultViews": 0,
         "outboundClicks": 0,
         "monetizedOutbound": 0,
-        "sessionToOutboundRate": 0
+        "sessionToOutboundRate": null
       }
     ],
     "families": [],
+    "topics": [],
     "socialInterestGraph": {}
   },
   "history": {
@@ -207,6 +209,7 @@
     "testEligible": false,
     "allocationChangeEligible": false,
     "postLearningEligible": [],
-    "familyLearningEligible": []
+    "familyLearningEligible": [],
+    "topicLearningEligible": []
   }
 }
