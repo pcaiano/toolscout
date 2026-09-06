@@ -7,7 +7,8 @@
       "Do you need a CRM primarily for lead follow-up or for a broader sales operation?",
       "How much automation do you need before the workflow becomes too complex?",
       "Which existing tools must the CRM integrate with?"
-    ]
+    ],
+    "comparisonPairs": ["hubspot-vs-pipedrive"]
   },
   "best-crm-for-consultants": {
     "persona": "independent consultants and advisory businesses",
@@ -17,7 +18,8 @@
       "Do you need a full sales CRM or mainly a reliable client relationship system?",
       "Will one person manage the workflow or does it need to support a team?",
       "Which repetitive follow-up steps are worth automating?"
-    ]
+    ],
+    "comparisonPairs": ["hubspot-vs-pipedrive"]
   },
   "best-forms-for-small-business": {
     "persona": "small businesses",
@@ -27,7 +29,8 @@
       "Are you collecting simple enquiries or building a multi-step qualification workflow?",
       "Do submissions need to trigger CRM, email or automation actions?",
       "Is a useful free or low-cost entry plan important?"
-    ]
+    ],
+    "comparisonPairs": ["jotform-vs-typeform", "tally-vs-typeform"]
   },
   "best-lead-capture-forms": {
     "persona": "teams that need to capture and qualify prospects",
@@ -37,7 +40,8 @@
       "How much qualification should happen before a lead reaches your CRM or inbox?",
       "Which downstream system needs the submission data?",
       "Do you need branching, scoring or a simple contact form?"
-    ]
+    ],
+    "comparisonPairs": ["jotform-vs-typeform", "tally-vs-typeform"]
   },
   "best-sales-prospecting-tools": {
     "persona": "B2B sales and outbound teams",
@@ -47,7 +51,8 @@
       "Do you primarily need contact discovery, enrichment or outreach execution?",
       "How important are CRM and sequencing integrations?",
       "Will the tool be used by one operator or a larger sales team?"
-    ]
+    ],
+    "comparisonPairs": ["apollo-vs-lemlist"]
   },
   "best-email-marketing-tools": {
     "persona": "businesses and creators running email campaigns",
@@ -57,6 +62,7 @@
       "Are you primarily publishing newsletters or building automated customer journeys?",
       "How complex does segmentation need to be?",
       "Which commerce, CRM or form tools must connect to the platform?"
-    ]
+    ],
+    "comparisonPairs": ["beehiiv-vs-kit", "brevo-vs-mailchimp", "activecampaign-vs-mailchimp"]
   }
 }
