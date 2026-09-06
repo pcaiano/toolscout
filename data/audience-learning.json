@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T17:25:10.309Z",
+  "generatedAt": "2026-09-06T17:40:02.825Z",
   "windowDays": 30,
   "definition": "Likely-human sessions only. Social attribution uses recorded UTM source first and social referrer hosts as fallback. Downstream actions are counted only after attributed social entry.",
   "socialHumanSessions": 4,
