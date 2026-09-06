@@ -42,6 +42,7 @@ function hasVendorTracking(rawUrl, slug) {
     if (slug === 'adcreative-ai' && host === 'free-trial.adcreative.ai' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     if (slug === 'typeform' && host === 'typeform.cello.so' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     if (slug === 'kit' && host === 'partners.kit.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
+    if (slug === 'gorgias' && host === 'partner.gorgias.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     return false;
   } catch {
     return false;
