@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-06T17:52:49.697Z",
-  "methodology": "Public sitemap URL patterns only. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are treated as market-coverage signals and must pass ToolScout demand and quality gates before any new page is created.",
+  "generatedAt": "2026-09-06T19:59:40.771Z",
+  "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery and bounded recursive sitemap-index expansion. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are treated as market-coverage signals and must pass ToolScout demand and quality gates before any new page or catalog item is created.",
   "sources": [
     {
       "name": "AlternativeTo",
-      "sitemap": null,
-      "status": "unavailable",
-      "sampledUrls": 0
+      "sitemap": "https://alternativeto.net/sitemaps-ssl/sitemap-map.xml",
+      "status": "ok",
+      "sampledUrls": 1500
     },
     {
       "name": "SaaSHub",
@@ -22,15 +22,15 @@
     },
     {
       "name": "Capterra",
-      "sitemap": null,
-      "status": "unavailable",
-      "sampledUrls": 0
+      "sitemap": "https://www.capterra.com/sitemaps/sitemap.xml",
+      "status": "ok",
+      "sampledUrls": 1500
     },
     {
       "name": "Futurepedia",
-      "sitemap": null,
-      "status": "unavailable",
-      "sampledUrls": 0
+      "sitemap": "https://www.futurepedia.io/sitemap_tools.xml",
+      "status": "ok",
+      "sampledUrls": 370
     },
     {
       "name": "There's An AI For That",
@@ -39,6 +39,43 @@
       "sampledUrls": 0
     }
   ],
-  "count": 0,
-  "gaps": []
+  "count": 3,
+  "gaps": [
+    {
+      "slug": "character-ai",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "exampleUrls": [
+        "https://alternativeto.net/software/character-ai/",
+        "https://www.futurepedia.io/tool/character-ai"
+      ]
+    },
+    {
+      "slug": "kling-ai",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "exampleUrls": [
+        "https://alternativeto.net/software/kling-ai/",
+        "https://www.futurepedia.io/tool/kling-ai"
+      ]
+    },
+    {
+      "slug": "perplexity-ai",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "exampleUrls": [
+        "https://alternativeto.net/software/perplexity-ai/",
+        "https://www.futurepedia.io/tool/perplexity-ai"
+      ]
+    }
+  ]
 }

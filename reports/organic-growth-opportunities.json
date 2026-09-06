@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T17:52:49.824Z",
+  "generatedAt": "2026-09-06T19:59:40.875Z",
   "engine": "ToolScout Organic Growth Engine v1",
   "objective": "Combine SEO demand, AEO/GEO answer readiness, commercial intent, affiliate readiness and competitor gap signals without allowing affiliate economics or competitor behavior to determine editorial winners.",
   "dailyDecisionRules": [
@@ -15,7 +15,7 @@
     "firstPageOpportunities": 11,
     "strikingDistanceOpportunities": 0,
     "authorityDepthOpportunities": 4,
-    "competitorResearchCandidates": 0
+    "competitorResearchCandidates": 3
   },
   "opportunities": [
     {
@@ -711,5 +711,39 @@
       ]
     }
   ],
-  "competitorResearchCandidates": []
+  "competitorResearchCandidates": [
+    {
+      "candidate": "character-ai",
+      "competitorMentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "action": "research-only",
+      "publishGate": "Do not auto-publish. Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
+      "reason": "Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value."
+    },
+    {
+      "candidate": "kling-ai",
+      "competitorMentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "action": "research-only",
+      "publishGate": "Do not auto-publish. Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
+      "reason": "Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value."
+    },
+    {
+      "candidate": "perplexity-ai",
+      "competitorMentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "action": "research-only",
+      "publishGate": "Do not auto-publish. Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
+      "reason": "Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value."
+    }
+  ]
 }
