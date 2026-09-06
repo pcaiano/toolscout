@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "principles": {
     "catalogMustStayMarketRelevant": true,
     "officialSourcesRequired": true,
@@ -17,23 +17,7 @@
   "coverage": {
     "minimumToolsPerIntentCategory": 5,
     "priorityCategories": [
-      "crm",
-      "marketing",
-      "seo",
-      "automation",
-      "forms",
-      "sales",
-      "support",
-      "social",
-      "website",
-      "analytics",
-      "ai-research",
-      "ai-assistant",
-      "developer",
-      "ecommerce",
-      "design",
-      "content",
-      "business"
+      "crm", "marketing", "seo", "automation", "forms", "sales", "support", "social", "website", "analytics", "ai-research", "ai-assistant", "ai-writing", "developer", "ecommerce", "design", "content", "business"
     ]
   },
   "admission": {
@@ -44,6 +28,9 @@
     "minimumDescriptionLength": 60,
     "requireReachableOfficialSource": true,
     "requireKnownIntentCategory": true,
+    "allowedCatalogCategories": [
+      "crm", "marketing", "seo", "automation", "forms", "sales", "support", "social", "website", "analytics", "ai-research", "ai-assistant", "ai-writing", "developer", "ecommerce", "design", "content", "business"
+    ],
     "allowTrustedEnrichmentFiles": true,
     "autoAdmitTrustedCandidates": true,
     "autoAdmitGeneratedCandidates": true
