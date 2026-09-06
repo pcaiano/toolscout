@@ -32,12 +32,12 @@ jobs:
 
       - name: Commit snapshot when changed
         run: |
-          if [ -z "$(git status --porcelain -- data/audience-learning.json)" ]; then
+          if [ -z "$(git status --porcelain -- data/audience-learning.json data/audience-learning-history.json)" ]; then
             echo "No audience learning changes"
             exit 0
           fi
           git config user.name "toolscout-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/audience-learning.json
+          git add data/audience-learning.json data/audience-learning-history.json
           git commit -m "Update audience learning snapshot"
           git push
