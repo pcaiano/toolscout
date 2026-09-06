@@ -77,6 +77,16 @@ The default growth loop is:
 
 `traffic -> qualified sessions -> recommendations -> outbound clicks -> affiliate conversions -> revenue`
 
+The commercial-intent strategy adopted on 2026-09-06 refines this into:
+
+`Discovery Engine -> Decision Engine -> Commerce Layer`
+
+ToolScout should prioritize specific software decisions over raw page count. The core decision model is:
+
+`Persona -> Job-to-be-done -> Constraints -> Candidates -> Comparison -> Recommendation`
+
+A first implementation pilot is open in PR #10. It adds explicit decision context to six existing high-value intent guides and connects that same context to selected existing A-vs-B comparison URLs. The pilot does not change ranking weights, affiliate routing, canonical URLs, migrations, or infrastructure. Branch workflow runs #152 and #153 completed successfully after the comparison-context changes. Do not treat the pilot as production-live until PR #10 is merged.
+
 Primary business metrics:
 
 - organic impressions;
@@ -166,15 +176,15 @@ Distribution work should normally stay outside Work/Codex.
 
 The 2026-09-01 commercial SEO sprint added crawlable, catalog-backed static profiles for all 100 tools, linked the 38 intent guides and 15 comparison pages bidirectionally through those profiles, centralized the comparison registry, and expanded the static sitemap from 107 to 207 URLs. No editorial ranking, affiliate configuration, distribution state, or speculative intent inventory changed. Full scope and acceptance evidence are recorded in `docs/SEO-COMMERCIAL-SPRINT-2026-09-01.md`.
 
+The 2026-09-06 SEO workflow investigation confirmed GSC sync is functioning: the failed run successfully imported signals for 24 intents and reported 363 impressions over its 28-day window before a separate Gorgias affiliate-validation issue stopped the workflow. The Gorgias tracking format was then added to the public-surface validator, and subsequent generated-asset refresh resumed. Do not continue treating GSC as unavailable without rechecking current repository/run evidence.
+
 The repository currently generates:
 
 - `reports/blog-topics.json`
 - `reports/distribution-queue.json`
 - `reports/growth-priority.json`
 
-A recent generated growth-priority report still showed Google Search Console data as unavailable even after Search Console setup work was performed. Treat this as a known reconciliation item: verify the current Search Console property, sitemap submission/indexing state, and whether the automated acquisition pipeline is actually consuming GSC signals before claiming end-to-end GSC integration is complete.
-
-Do not block traffic work on this integration. Continue distribution, content, catalog expansion, and backlink/listing acquisition while the GSC pipeline issue is resolved.
+Do not block traffic work on any single integration. Continue distribution, content, catalog expansion, and backlink/listing acquisition while acquisition signals are reconciled.
 
 ## Permanent work queues
 
@@ -230,6 +240,12 @@ Typical CODEX queue items:
 - fix production tracking bugs;
 - implement a validated SEO/content batch;
 - run tests, migrations, deploys, or repository-wide updates.
+
+Current CODEX/merge queue:
+
+- review/merge PR #10 after final generated-surface validation;
+- after merge, observe GSC/CTR behavior on the decision-context pilot before scaling the pattern aggressively;
+- then consider generalizing semantic graph selection and adding first-class alternatives only where evidence justifies them.
 
 ## Human-action queue
 
