@@ -67,93 +67,72 @@ Tool profiles already expose best-for, features, pricing, free-plan state, relat
 
 ### 5. SEO/AEO/GEO technical surface
 
-The SEO workflow already treats the public surface as a generated system rather than isolated pages. It includes:
-
-- intent coverage validation;
-- Search Console signal sync step;
-- growth-priority generation;
-- guide generation;
-- comparison generation;
-- tool-profile generation;
-- cross-link enrichment;
-- blog/distribution generation;
-- sitemap generation;
-- multiple indexability/public-surface validation steps;
-- `robots.txt` and `llms.txt` in the workflow inputs/outputs.
+The SEO workflow already treats the public surface as a generated system rather than isolated pages. It includes intent coverage validation, Search Console signal sync, growth-priority generation, guide generation, comparison generation, tool-profile generation, cross-link enrichment, blog/distribution generation, sitemap generation, public-surface validation, commercial indexability checks, `robots.txt`, and `llms.txt`.
 
 This means the right next step is refinement of semantics and decision usefulness, not a parallel replacement SEO stack.
 
+## Pipeline finding
+
+The 2026-09-06 failed SEO workflow was not an SEO-generation failure. Intent validation, GSC sync, growth-priority generation, all guide/comparison/tool-profile generation steps, sitemap generation and SEO validation succeeded. The run failed only at public-surface validation because the Gorgias affiliate link format was not recognized as verified tracking.
+
+That format was subsequently added to `scripts/validate-public-surface.mjs` in commit `f1cfcc85163f3e0280024bd4c5c85fecdda32f8d`, after which the automated SEO refresh proceeded again. Issue #11 was therefore closed as completed.
+
 ## Gaps and priorities
-
-### P0 — Fix/verify the SEO generation pipeline before expanding it
-
-The workflow is the production path for intents, comparisons, tool profiles, blog/distribution assets and sitemap. A failing generation workflow blocks every downstream improvement. Treat current SEO workflow health as a prerequisite for expansion.
-
-Acceptance target:
-
-- generation workflow green on `main`;
-- all existing validation steps green;
-- generated asset commit/push succeeds or cleanly reports no changes;
-- Search Console sync failure, if credentials/signals are unavailable, is explicitly classified rather than confused with page-generation failure.
 
 ### P1 — Introduce explicit decision-context data
 
 Current intents mostly encode title, description, category, weights and keywords. Long-tail seeds often inherit the parent scoring model without adding meaningful constraints.
 
-Add a backward-compatible intent context model such as:
+The pilot now adds a backward-compatible decision-context layer in `data/decision-context.json` with:
 
 - `persona`;
 - `jobToBeDone`;
-- `constraints` (budget, free-plan requirement, team size, ease, integrations, existing stack, deployment type, etc.);
+- `constraints`;
 - `decisionQuestions`;
-- optional `candidateSlugs` or eligibility filters only when evidence supports restricting the candidate set.
+- `comparisonPairs` for explicit contextual graph edges.
 
-Do not replace deterministic ranking with affiliate economics.
+This data is deliberately separate from ranking weights. Affiliate economics remain outside editorial scoring.
 
 ### P1 — Upgrade guide content from ranked list to decision aid
 
-Current guide pages explain the ranking criteria and show top tools, but they do not yet fully express:
+PR #10 now includes `scripts/enrich-decision-context.mjs`, which enriches selected existing guide URLs after normal SEO generation. The pilot adds visible sections explaining who the guide is for, the job-to-be-done, relevant constraints, and questions to answer before choosing.
 
-`Persona -> Job -> Constraints -> Candidates -> Trade-offs -> Recommendation`
+Initial pilot intents:
 
-Add visible sections generated only from structured evidence:
+- CRM for real estate;
+- CRM for consultants;
+- forms for small business;
+- lead-capture forms;
+- sales prospecting;
+- email marketing.
 
-- "Best if..." / "Choose this when...";
-- trade-offs / limitations where catalog evidence exists;
-- comparison links selected because they are relevant to the current decision;
-- who should choose another option;
-- concise answer-first summary suitable for search snippets and AI answer systems.
-
-Avoid unsupported "tested by us", performance statistics, review counts or first-hand claims.
+This preserves the current generator and URLs while testing deeper decision semantics safely.
 
 ### P1 — Make comparisons context-sensitive
 
-Current comparison pages answer a generic A vs B decision. The next layer should connect comparison outcomes to the jobs/constraints represented in the intent graph.
+PR #10 now also includes `scripts/enrich-comparison-context.mjs`. It connects existing A-vs-B pages to decision contexts already represented by ToolScout without generating new indexable variants.
 
-Examples of architecture, not pre-approved claims:
+Initial graph edges include:
 
-- A vs B for a solo consultant;
-- A vs B when a free plan is mandatory;
-- A vs B for automation-heavy workflows;
-- A vs B for small teams.
+- `hubspot-vs-pipedrive` ← CRM for real estate and CRM for consultants;
+- `jotform-vs-typeform` ← forms for small business and lead capture;
+- `tally-vs-typeform` ← forms for small business and lead capture;
+- `apollo-vs-lemlist` ← sales prospecting;
+- `beehiiv-vs-kit` ← email marketing;
+- `brevo-vs-mailchimp` ← email marketing;
+- `activecampaign-vs-mailchimp` ← email marketing.
 
-Do not create separate indexable pages for every combination. Prefer a single strong comparison page with contextual decision blocks unless query/performance evidence justifies a dedicated page.
+The enrichment adds a visible “When this comparison matters” section with persona, workflow constraints, decision questions and a link back to the relevant buying guide. It does not alter scoring, affiliate routing, comparison slugs or canonical URLs.
 
 ### P1 — Strengthen graph relationships
 
-Current related-guide logic is based mainly on category and shared scoring dimensions. Upgrade relationships to include explicit semantic edges:
+The pilot introduces manually curated semantic edges via `comparisonPairs`. This is preferable to immediately replacing current related-content logic because it is auditable, reversible and avoids accidental semantic overreach.
 
-- persona;
-- job-to-be-done;
-- constraint;
-- category;
-- direct alternative/comparison relationships.
-
-This improves human navigation, internal linking, and machine understanding simultaneously.
+If the pilot proves useful, the next implementation should generalize graph selection using explicit persona/job/constraint relationships while retaining manual overrides where needed.
 
 ### P2 — Expand long-tail only from validated decision families
 
-The long-tail file is small and useful, which is preferable to indiscriminate scale. Expand in controlled batches based on one or more of:
+Expand in controlled batches based on one or more of:
 
 - Search Console impressions/queries;
 - likely-human internal search behavior;
@@ -165,32 +144,15 @@ A candidate page should have a clear distinct decision. Do not generate page per
 
 ### P2 — Upgrade structured data conservatively
 
-Current structured data is a solid base. Improve it only when visible content supports the claim. Potential improvements include:
-
-- consistent BreadcrumbList on guides/comparisons;
-- WebPage/Article `about` and `mainEntity` relationships reflecting visible software entities;
-- `dateModified` when a trustworthy generated/verified date exists;
-- Organization/WebSite entity consistency across surfaces.
-
-Do not add Review/AggregateRating unless ToolScout has genuine review evidence meeting schema/search policy requirements.
+Potential improvements include consistent BreadcrumbList on guides/comparisons, clearer WebPage/Article `about` relationships, `dateModified` where trustworthy, and Organization/WebSite entity consistency. Do not add Review/AggregateRating without genuine review evidence.
 
 ### P2 — Commercial-intent analytics segmentation
 
-Revenue Intelligence already has page/intent/tool rankings and monetization coverage. Extend reporting when technically justified to distinguish page families and decision context, for example:
-
-- tool profile;
-- generic intent guide;
-- persona/workflow guide;
-- comparison;
-- alternatives page when introduced.
-
-Desired derived measures include outbound CTR by page family, affiliate-covered outbound by page family, and evidence-backed revenue by landing page/intent family. Do not infer vendor conversions from clicks.
+Revenue Intelligence already has page/intent/tool rankings and monetization coverage. Extend reporting when technically justified to distinguish page families and decision context, including tool profiles, generic intent guides, persona/workflow guides, comparisons, and future alternatives pages.
 
 ### P2 — Alternatives as a first-class relationship
 
-The current graph has comparisons and related guides, but no clearly audited first-class `alternatives` data model in this pass. Introduce an explicit alternatives relationship only after checking existing generators/data for overlap and canonicalization rules.
-
-The goal is not "one alternatives page per tool" by default. It is useful alternative discovery where products genuinely substitute for one another.
+The current graph has comparisons and related guides, but no clearly audited first-class `alternatives` data model in this pass. Introduce explicit alternatives only after checking overlap and canonicalization. The goal is useful substitutability, not one alternatives page per tool by default.
 
 ### P3 — Redesign integration
 
@@ -200,31 +162,19 @@ The approved V5 minimalist redesign should become the visual expression of this 
 - results explain why tools fit;
 - tool pages expose decision-relevant context progressively;
 - comparisons foreground the practical choice rather than feature-table density;
-- related intents/comparisons are discoverable without turning the interface into a directory wall;
-- commercial CTAs remain visually clear but do not dominate editorial reasoning.
+- related intents/comparisons remain discoverable without turning the UI into a directory wall;
+- commercial CTAs stay visually clear but never dominate editorial reasoning.
 
-## Immediate execution queue
+## Immediate next validation
 
-### Connector-safe / documentation and planning now
+Before merging or scaling the pilot:
 
-1. Persist this audit and the Commercial Intent Strategy in GitHub.
-2. Create implementation issues for P0/P1 work.
-3. Use web research to build a validated candidate-intent backlog, keeping evidence/source and decision rationale separate from production data.
-4. Audit current SEO workflow failure before any new page-generation change.
-
-### Work/Codex batch when execution capacity is available
-
-Batch the compatible implementation work:
-
-1. repair/verify SEO generation workflow;
-2. add backward-compatible decision-context fields and validation;
-3. update guide/comparison generators to render evidence-backed context blocks;
-4. upgrade graph/internal-link selection;
-5. extend validators/tests;
-6. regenerate assets;
-7. run smoke/indexability checks;
-8. deploy only after tests pass;
-9. reconcile resulting production state into `docs/COMMAND-CENTER.md` and production documentation.
+1. run the SEO workflow against the branch/PR or equivalent validation path;
+2. confirm the enrichment scripts are idempotent and execute after the corresponding generators;
+3. verify all contextual comparison targets exist in `data/comparisons.json`;
+4. confirm generated guide/comparison pages still pass canonical, disclosure and commercial-indexability validators;
+5. inspect representative generated HTML for layout/semantic regressions;
+6. merge only after the generated surface remains clean.
 
 ## Non-goals
 
