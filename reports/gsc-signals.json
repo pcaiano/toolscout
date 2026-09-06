@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T15:25:28.990Z",
+  "generatedAt": "2026-09-06T15:48:24.254Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "startDate": "2026-08-08",
@@ -12,7 +12,69 @@
       "clicks": 0,
       "impressions": 147,
       "ctr": 0,
-      "position": 76.9116
+      "position": 76.9116,
+      "topQueries": [
+        {
+          "query": "best seo tools for agency",
+          "clicks": 0,
+          "impressions": 41,
+          "position": 73.9268
+        },
+        {
+          "query": "what is the best tool for seo agency",
+          "clicks": 0,
+          "impressions": 26,
+          "position": 77.3846
+        },
+        {
+          "query": "seo tools for agency",
+          "clicks": 0,
+          "impressions": 25,
+          "position": 81.6
+        },
+        {
+          "query": "best seo tool for agencies",
+          "clicks": 0,
+          "impressions": 16,
+          "position": 70.875
+        },
+        {
+          "query": "seo platform for agencies",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 82.8571
+        },
+        {
+          "query": "seo tools for agencies",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 72.1667
+        },
+        {
+          "query": "agency seo tools",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 78
+        },
+        {
+          "query": "best seo tools for agencies",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 80.4
+        },
+        {
+          "query": "seo tool for agencies",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 75.75
+        },
+        {
+          "query": "best seo agency tools",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 81.6667
+        }
+      ]
     },
     {
       "intent": "best-no-code-automation-tools",
@@ -20,7 +82,69 @@
       "clicks": 0,
       "impressions": 82,
       "ctr": 0,
-      "position": 73.2439
+      "position": 73.2439,
+      "topQueries": [
+        {
+          "query": "no code automation tools",
+          "clicks": 0,
+          "impressions": 12,
+          "position": 69.0833
+        },
+        {
+          "query": "no-code automation tools",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 68.8182
+        },
+        {
+          "query": "no code automation",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 79.4
+        },
+        {
+          "query": "no-code automation tool",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 70.8889
+        },
+        {
+          "query": "no code automation tool",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 72
+        },
+        {
+          "query": "no code automation platforms",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 73.2
+        },
+        {
+          "query": "no code automation platform",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 76.2
+        },
+        {
+          "query": "no-code automation platform",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 76.4
+        },
+        {
+          "query": "no-code automation",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 80.8
+        },
+        {
+          "query": "no code workflow automation software",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 72.6667
+        }
+      ]
     },
     {
       "intent": "best-funnel-builder",
@@ -28,7 +152,63 @@
       "clicks": 0,
       "impressions": 34,
       "ctr": 0,
-      "position": 79.0588
+      "position": 79.0588,
+      "topQueries": [
+        {
+          "query": "marketing funnel builder",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 85.3
+        },
+        {
+          "query": "funnel builder",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 93.5
+        },
+        {
+          "query": "best funnel builder",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 67.8
+        },
+        {
+          "query": "seo funnel builder",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 94.3333
+        },
+        {
+          "query": "social media funnel builder",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 30.5
+        },
+        {
+          "query": "funnelbuilder",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 90.5
+        },
+        {
+          "query": "digital marketing funnel builder",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 64
+        },
+        {
+          "query": "online marketing funnel builder",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 66
+        },
+        {
+          "query": "online funnel builder",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 90
+        }
+      ]
     },
     {
       "intent": "best-seo-keyword-research-tools",
@@ -36,7 +216,57 @@
       "clicks": 0,
       "impressions": 34,
       "ctr": 0,
-      "position": 71.0882
+      "position": 71.0882,
+      "topQueries": [
+        {
+          "query": "website research tool",
+          "clicks": 0,
+          "impressions": 18,
+          "position": 62.8333
+        },
+        {
+          "query": "seo search tools",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 80.75
+        },
+        {
+          "query": "seo keyword analysis tool",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 67.6667
+        },
+        {
+          "query": "seo search tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 75.5
+        },
+        {
+          "query": "keyword research seo tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 79.5
+        },
+        {
+          "query": "competitor keyword research tools for seo",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 87
+        },
+        {
+          "query": "best seo keyword research tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 100
+        },
+        {
+          "query": "keyword research tools seo",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 76
+        }
+      ]
     },
     {
       "intent": "best-crm-for-sales-teams",
@@ -44,7 +274,57 @@
       "clicks": 0,
       "impressions": 26,
       "ctr": 0,
-      "position": 78.0385
+      "position": 78.0385,
+      "topQueries": [
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 77
+        },
+        {
+          "query": "best crm for sales team",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 66.4
+        },
+        {
+          "query": "crm for sales team",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 87.4
+        },
+        {
+          "query": "top crm platforms for sales teams",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 76.5
+        },
+        {
+          "query": "best crm for sales teams",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 81
+        },
+        {
+          "query": "sales team crm",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 85.5
+        },
+        {
+          "query": "best crm software for sales teams",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 69
+        },
+        {
+          "query": "best crm for sales people",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 89
+        }
+      ]
     },
     {
       "intent": "best-free-project-management-tools",
@@ -52,7 +332,15 @@
       "clicks": 0,
       "impressions": 6,
       "ctr": 0,
-      "position": 46.8333
+      "position": 46.8333,
+      "topQueries": [
+        {
+          "query": "free online project manager tools",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 66
+        }
+      ]
     },
     {
       "intent": "best-free-crm",
@@ -60,7 +348,27 @@
       "clicks": 0,
       "impressions": 5,
       "ctr": 0,
-      "position": 71.6
+      "position": 71.6,
+      "topQueries": [
+        {
+          "query": "best free crm tools",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 61
+        },
+        {
+          "query": "crm free tools",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 84.5
+        },
+        {
+          "query": "free online crm tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 67
+        }
+      ]
     },
     {
       "intent": "best-project-management-tools",
@@ -68,7 +376,21 @@
       "clicks": 0,
       "impressions": 5,
       "ctr": 0,
-      "position": 49.6
+      "position": 49.6,
+      "topQueries": [
+        {
+          "query": "project automation tools",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 62
+        },
+        {
+          "query": "best project management tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 54
+        }
+      ]
     },
     {
       "intent": "best-forms-for-small-business",
@@ -76,7 +398,8 @@
       "clicks": 0,
       "impressions": 4,
       "ctr": 0,
-      "position": 4.5
+      "position": 4.5,
+      "topQueries": []
     },
     {
       "intent": "best-sales-prospecting-tools",
@@ -84,7 +407,8 @@
       "clicks": 0,
       "impressions": 2,
       "ctr": 0,
-      "position": 8
+      "position": 8,
+      "topQueries": []
     },
     {
       "intent": "best-email-marketing-tools",
@@ -92,7 +416,8 @@
       "clicks": 0,
       "impressions": 2,
       "ctr": 0,
-      "position": 8.5
+      "position": 8.5,
+      "topQueries": []
     },
     {
       "intent": "best-funnel-builder-for-beginners",
@@ -100,7 +425,8 @@
       "clicks": 0,
       "impressions": 2,
       "ctr": 0,
-      "position": 6.5
+      "position": 6.5,
+      "topQueries": []
     },
     {
       "intent": "best-lead-capture-forms",
@@ -108,7 +434,8 @@
       "clicks": 0,
       "impressions": 2,
       "ctr": 0,
-      "position": 6.5
+      "position": 6.5,
+      "topQueries": []
     },
     {
       "intent": "best-product-analytics-tools",
@@ -116,7 +443,15 @@
       "clicks": 0,
       "impressions": 2,
       "ctr": 0,
-      "position": 39.5
+      "position": 39.5,
+      "topQueries": [
+        {
+          "query": "best ai-powered product analytics tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 77
+        }
+      ]
     },
     {
       "intent": "best-ai-coding-tools",
@@ -124,7 +459,15 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 78
+      "position": 78,
+      "topQueries": [
+        {
+          "query": "best ai coding tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 78
+        }
+      ]
     },
     {
       "intent": "best-ai-research-tools",
@@ -132,7 +475,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 1
+      "position": 1,
+      "topQueries": []
     },
     {
       "intent": "best-all-in-one-business-tools",
@@ -140,7 +484,15 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 87
+      "position": 87,
+      "topQueries": [
+        {
+          "query": "all in one business tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 87
+        }
+      ]
     },
     {
       "intent": "best-cold-email-tools",
@@ -148,7 +500,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 4
+      "position": 4,
+      "topQueries": []
     },
     {
       "intent": "best-crm-for-small-business",
@@ -156,7 +509,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 8
+      "position": 8,
+      "topQueries": []
     },
     {
       "intent": "best-crm-for-solopreneurs",
@@ -164,7 +518,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 6
+      "position": 6,
+      "topQueries": []
     },
     {
       "intent": "best-developer-tools",
@@ -172,7 +527,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 10
+      "position": 10,
+      "topQueries": []
     },
     {
       "intent": "best-keyword-research-tools",
@@ -180,7 +536,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 5
+      "position": 5,
+      "topQueries": []
     },
     {
       "intent": "best-tools-for-agencies",
@@ -188,7 +545,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 10
+      "position": 10,
+      "topQueries": []
     },
     {
       "intent": "best-video-content-tools",
@@ -196,7 +554,8 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 10
+      "position": 10,
+      "topQueries": []
     }
   ]
 }
