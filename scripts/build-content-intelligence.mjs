@@ -8,7 +8,18 @@ const organic=fs.existsSync(organicPath)?JSON.parse(fs.readFileSync(organicPath,
 const audience=fs.existsSync(audiencePath)?JSON.parse(fs.readFileSync(audiencePath,'utf8')):{socialHumanSessions:0,platforms:[],content:[]};
 const history=fs.existsSync(historyPath)?JSON.parse(fs.readFileSync(historyPath,'utf8')):[];
 
-const topOrganic=(organic.opportunities||[]).slice(0,8).map(x=>({
+const laneWeight={'seo-aeo-snippet':4,'seo-striking-distance':3,'seo-authority-depth':2,'commercial-intent':1,'develop-authority':0};
+const observed=(organic.opportunities||[])
+  .filter(x=>Number(x.searchSignal?.impressions||0)>0)
+  .sort((a,b)=>{
+    const laneDelta=(laneWeight[b.lane]||0)-(laneWeight[a.lane]||0);
+    if(laneDelta) return laneDelta;
+    const impressionDelta=Number(b.searchSignal?.impressions||0)-Number(a.searchSignal?.impressions||0);
+    if(impressionDelta) return impressionDelta;
+    return Number(a.searchSignal?.position||999)-Number(b.searchSignal?.position||999);
+  });
+
+const topOrganic=observed.slice(0,8).map(x=>({
   intent:x.intent,
   priorityScore:Number(x.priorityScore||0),
   lane:x.lane,
@@ -40,7 +51,7 @@ const payload={
     fiveTo19SocialSessions:'Allow one controlled test only. Change one variable and define one success metric.',
     twentyPlusSocialSessions:'Measured allocation changes are allowed only when downstream behavior supports them.',
     editorialIndependence:'Affiliate payout never changes tool ranking or editorial winner.',
-    searchToSocial:'Use observed search demand as a topic signal, not as proof that a social post will perform.',
+    searchToSocial:'Only topics with observed Search Console impressions can become search-supported social topic signals. Search demand does not prove social performance.',
     socialToSearch:'Use repeated high-quality social interest as research input, not an automatic page-creation trigger.'
   },
   search:{summary:organic.summary||{},topOpportunities:topOrganic},
