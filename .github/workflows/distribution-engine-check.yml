@@ -1,0 +1,40 @@
+name: Distribution Engine Check
+
+on:
+  pull_request:
+    paths:
+      - 'distribution-engine-worker.js'
+      - 'embed/**'
+      - 'migrations/0018_distribution_engine.sql'
+      - 'wrangler.toml'
+      - '.github/workflows/distribution-engine-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check distribution-engine-worker.js
+          node --check embed/toolscout-pick.js
+          node --check embed/toolscout-finder.js
+          node --check embed/toolscout-compare.js
+      - name: Validate worker entrypoint and migration
+        run: |
+          grep -q 'main = "distribution-engine-worker.js"' wrangler.toml
+          test -s migrations/0018_distribution_engine.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS distribution_events' migrations/0018_distribution_engine.sql
+          grep -q 'CREATE TABLE IF NOT EXISTS distribution_embeds' migrations/0018_distribution_engine.sql
+      - name: Validate distribution attribution convention
+        run: |
+          grep -q "utm_medium:'distribution'" embed/toolscout-pick.js
+          grep -q "utm_medium:'distribution'" embed/toolscout-finder.js
+          grep -q "utm_medium:'distribution'" embed/toolscout-compare.js
