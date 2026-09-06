@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "principles": {
+    "commercialIntentBeforeGenericTraffic": true,
+    "recurringRevenueFavoredInMonetizationReadiness": true,
+    "comparisonsAndDecisionPagesHighValue": true,
+    "noAffiliatePayoutEditorialBias": true,
+    "noThinProgrammaticPages": true,
+    "competitorSignalsAreForGapDetectionOnly": true,
+    "copyCompetitorContent": false
+  },
+  "competitors": [
+    {"name":"AlternativeTo","baseUrl":"https://alternativeto.net","sitemapCandidates":["https://alternativeto.net/sitemap.xml","https://alternativeto.net/sitemap_index.xml"]},
+    {"name":"SaaSHub","baseUrl":"https://www.saashub.com","sitemapCandidates":["https://www.saashub.com/sitemap.xml"]},
+    {"name":"G2","baseUrl":"https://www.g2.com","sitemapCandidates":["https://www.g2.com/sitemap.xml"]},
+    {"name":"Capterra","baseUrl":"https://www.capterra.com","sitemapCandidates":["https://www.capterra.com/sitemap.xml"]},
+    {"name":"Futurepedia","baseUrl":"https://www.futurepedia.io","sitemapCandidates":["https://www.futurepedia.io/sitemap.xml"]},
+    {"name":"There's An AI For That","baseUrl":"https://theresanaiforthat.com","sitemapCandidates":["https://theresanaiforthat.com/sitemap.xml"]}
+  ],
+  "opportunityTerms": ["alternative","alternatives","vs","compare","comparison","best","tools","software","crm","seo","automation","marketing","email","sales","forms","project-management","ai","research","coding","analytics"],
+  "thresholds": {
+    "minimumCompetitorMentionsForGap": 2,
+    "maximumCompetitorUrlsPerSource": 1500,
+    "minimumGscImpressionsForCtrAction": 20,
+    "strikingDistanceMaxPosition": 20,
+    "firstPageMaxPosition": 10
+  }
+}
