@@ -1,0 +1,17 @@
+(()=>{
+  const current=document.currentScript;
+  if(!current)return;
+  const slug=(current.dataset.tool||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+  const label=current.dataset.label||'ToolScout Pick';
+  const title=current.dataset.title||slug.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())||'Recommended tool';
+  const reason=current.dataset.reason||'Selected for this workflow by ToolScout.';
+  const host=location.hostname||'embed';
+  const qs=new URLSearchParams({utm_source:host,utm_medium:'distribution',utm_campaign:'embed_pick',utm_content:slug||'toolscout-pick'});
+  const href=`https://trytoolscout.org/${slug?`go/${encodeURIComponent(slug)}`:''}?${qs}`;
+  const root=document.createElement('div');
+  root.setAttribute('data-toolscout-embed','pick');
+  root.style.cssText='font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:520px;border:1px solid #252b33;border-radius:16px;padding:16px;background:#0b0d10;color:#f5f7fa;box-sizing:border-box';
+  root.innerHTML=`<div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#98a2b3;font-weight:800">${escapeHtml(label)}</div><div style="font-size:20px;letter-spacing:-.02em;font-weight:800;margin:7px 0 5px">${escapeHtml(title)}</div><div style="font-size:13px;line-height:1.5;color:#c7ced8">${escapeHtml(reason)}</div><a href="${href}" target="_blank" rel="noopener sponsored" style="display:inline-block;margin-top:13px;color:#f5f7fa;text-decoration:none;font-size:12px;font-weight:800;border-bottom:1px solid #697586">See why on ToolScout ↗</a><div style="margin-top:12px;font-size:10px;color:#667085">Powered by ToolScout · independent software recommendations</div>`;
+  current.insertAdjacentElement('afterend',root);
+  function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+})();

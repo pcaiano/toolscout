@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "audience-worker.js"
+main = "distribution-engine-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
@@ -10,6 +10,7 @@ binding = "ASSETS"
 run_worker_first = [
   "/api/stats*",
   "/api/audience-event*",
+  "/api/distribution-event*",
   "/go/*",
   "/api/affiliate-workflow*",
   "/affiliate-workflow*",
