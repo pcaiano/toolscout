@@ -19,6 +19,7 @@ on:
       - 'scripts/link-static-tool-profiles.mjs'
       - 'scripts/enrich-guide-comparisons.mjs'
       - 'scripts/enrich-decision-context.mjs'
+      - 'scripts/enrich-comparison-context.mjs'
       - 'scripts/generate-blog.mjs'
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
@@ -70,6 +71,9 @@ jobs:
 
       - name: Generate commercial comparisons
         run: node scripts/generate-comparisons.mjs
+
+      - name: Enrich comparisons with decision context
+        run: node scripts/enrich-comparison-context.mjs
 
       - name: Generate indexable tool profiles
         run: node scripts/generate-tool-pages.mjs
