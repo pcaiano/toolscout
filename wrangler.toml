@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "distribution-sender-worker.js"
+main = "distribution-learning-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
