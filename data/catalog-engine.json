@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "principles": {
+    "catalogMustStayMarketRelevant": true,
+    "officialSourcesRequired": true,
+    "affiliateEconomicsNeverAffectEditorialSelection": true,
+    "automaticMutationsRequireQualityGates": true,
+    "brokenOrUnverifiableToolsAreSuppressedAfterRepeatedFailure": true,
+    "commercialRelationshipsAreStoredSeparatelyFromEditorialFit": true
+  },
+  "cadence": {
+    "run": "daily",
+    "freshnessTargetDays": 7,
+    "deepReviewDays": 30,
+    "suppressAfterConfirmedBrokenRuns": 2
+  },
+  "coverage": {
+    "minimumToolsPerIntentCategory": 5,
+    "priorityCategories": [
+      "crm",
+      "marketing",
+      "seo",
+      "automation",
+      "forms",
+      "sales",
+      "support",
+      "social",
+      "website",
+      "analytics",
+      "ai-research",
+      "ai-assistant",
+      "developer",
+      "ecommerce",
+      "design",
+      "content",
+      "business"
+    ]
+  },
+  "admission": {
+    "requiredFields": ["slug","name","category","description","pricing","freePlan","features","bestFor","sourceUrl","scores"],
+    "scoreKeys": ["price","ease","automation","integrations","sales","ai","marketing","seo","research","content","agency"],
+    "minimumFeatures": 3,
+    "minimumBestFor": 2,
+    "minimumDescriptionLength": 60,
+    "requireReachableOfficialSource": true,
+    "requireKnownIntentCategory": true,
+    "allowTrustedEnrichmentFiles": true,
+    "autoAdmitTrustedCandidates": true,
+    "autoAdmitGeneratedCandidates": false
+  },
+  "trustedCandidateFiles": [
+    "data/catalog-wave1-enrichment.json",
+    "data/catalog-wave1-enrichment-final.json",
+    "data/catalog-wave2-enrichment.json",
+    "data/catalog-wave3-enrichment.json"
+  ],
+  "discovery": {
+    "useCompetitiveGapSignals": true,
+    "useAffiliatePipelineOnlyAsVendorRegistry": true,
+    "affiliateStatusOrCommissionCannotIncreaseSelectionScore": true,
+    "minimumIndependentMarketSignals": 2
+  }
+}
