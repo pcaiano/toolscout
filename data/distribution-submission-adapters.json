@@ -1,0 +1,10 @@
+{
+  "adapters": [],
+  "policy": {
+    "automatic_requires_allowlist": true,
+    "automatic_methods": ["POST"],
+    "automatic_content_types": ["application/json"],
+    "max_automatic_per_run": 3,
+    "never_automatic": ["captcha","account_creation","payment","community_post","editorial_pitch","terms_acceptance"]
+  }
+}
