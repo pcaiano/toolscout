@@ -1,0 +1,109 @@
+# ToolScout Content + Audience Engine Evolution
+
+Status: implementation contract
+Date: 2026-09-06
+
+## Objective
+
+Evolve ToolScout from calendar-driven social publishing into an opportunity-driven acquisition and learning system while preserving platform policy, editorial independence and likely-human attribution.
+
+## Core loop
+
+LISTEN -> SCORE OPPORTUNITY -> CREATE -> DISTRIBUTE -> ENGAGE -> ATTRACT -> CONVERT -> MEASURE -> LEARN -> ADAPT
+
+## 1. Opportunity-driven content
+
+The Monday / Wednesday / Friday cadence remains the baseline and controls when content is published, not what the subject must be.
+
+The content strategist should choose the strongest evidence-backed opportunity available from:
+- ToolScout social attribution and downstream commercial behavior;
+- Organic Growth Engine / GSC demand signals;
+- ToolScout comparison, intent and recommendation data;
+- verified product or market changes when supplied by a trusted source;
+- recurring social questions and conversations.
+
+No signal may be invented. Affiliate economics may prioritize monetization operations but must never determine editorial ranking or recommendations.
+
+## 2. Stable content identity
+
+Every published editorial idea must have a stable content family / content_id carried in utm_content. Current baseline families are:
+- monday_discovery
+- wednesday_comparison
+- friday_practical
+
+Future iterations should evolve this into run-specific IDs while retaining a family field so performance can be learned longitudinally.
+
+Learning dimensions:
+platform -> content family -> topic -> hook -> format -> human sessions -> recommendation completions -> outbound clicks -> monetized outbound
+
+## 3. Learning policy
+
+Do not optimize from tiny samples.
+- fewer than 5 attributed social human sessions: preserve balanced baseline;
+- 5-19: directional learning only, one controlled test at a time;
+- 20+: allow allocation changes when downstream behavior supports them;
+- never infer revenue without vendor evidence;
+- never infer causality from correlation alone.
+
+Primary metrics are qualified likely-human sessions and downstream commercial actions. Likes and impressions are diagnostic, not the objective.
+
+## 4. Engagement by platform
+
+### Bluesky
+High autonomy through the official API, with bot/aggregator filtering and GREEN / AMBER / RED risk controls.
+
+### X
+Do not auto-reply to keyword-search discoveries. X prohibits unsolicited automated replies based only on keyword search and requires prior written approval for AI-powered automated reply bots. Use intelligence automation only: discover permitted opportunities -> score -> draft -> Engagement Inbox -> human approval / edit / skip. Do not automate likes or proactive follow/unfollow.
+
+### LinkedIn
+Do not use unauthorized scraping, bots, browser automation, automated comments, likes or shares. Use official publishing/analytics and human-in-the-loop engagement opportunities only.
+
+## 5. Engagement Opportunity Score
+
+Prioritize review candidates using:
+relevance x commercial intent x freshness x ability to help x conversation potential - spam/policy risk
+
+Automatic replies must never contain affiliate links. Preferred path:
+conversation -> profile or relevant ToolScout page -> recommendation/comparison -> tracked outbound.
+
+## 6. Experimentation engine
+
+The weekly learning loop should output one explicit controlled experiment when evidence is sufficient:
+- hypothesis
+- variable being changed
+- baseline/control
+- success metric
+- minimum evidence threshold
+- result / keep / revert decision on a later cycle
+
+Only one material editorial allocation test should run at a time until traffic is large enough for parallel experiments.
+
+## 7. Search and social convergence
+
+Organic Growth Engine and Audience Engine should exchange signals. Search demand may generate social content; successful social questions may generate SEO/AEO/GEO pages; high-commercial-intent ToolScout pages may generate platform-native content.
+
+The canonical model is one evidence object feeding multiple native outputs, not literal cross-posting.
+
+## 8. Near-term implementation order
+
+1. Feed measured social attribution into weekly learning. DONE.
+2. Make M/W/F strategists interpret the directive as opportunity guidance rather than mandatory copy. DONE.
+3. Add explicit evidence thresholds and controlled-experiment instruction to the weekly directive. NEXT.
+4. Add persistent learning history instead of only overwriting State!A1.
+5. Build X and LinkedIn human-review Engagement Inbox feeds using policy-compliant sources.
+6. Introduce run-specific content_id plus family/topic/hook metadata.
+7. Connect Organic Growth Engine opportunity output to Content Intelligence.
+8. Add experiment outcome evaluation after sufficient attributed traffic.
+
+## Guardrails
+
+- likely-human traffic only for optimization;
+- owner/bot/legacy traffic excluded;
+- no fabricated metrics, product claims or personal experience;
+- no affiliate payout influence on editorial recommendation;
+- no unsolicited X automated replies;
+- no unauthorized LinkedIn automation;
+- no mechanical follow/like behavior;
+- no automatic affiliate links in social replies;
+- avoid em dash and en dash in generated social copy;
+- LinkedIn remains plain text with no Markdown asterisks.
