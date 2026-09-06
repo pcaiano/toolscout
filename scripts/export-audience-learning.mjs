@@ -38,9 +38,11 @@ GROUP BY ss.platform ORDER BY sessions DESC;`);
 
 const byContent = runSql(`${cte}
 SELECT ss.platform,COALESCE(ss.content_id,'unlabelled') AS content_id,COUNT(DISTINCT ss.session_id) AS sessions,
+SUM(CASE WHEN f.event_type='recommendation_completed' THEN 1 ELSE 0 END) AS recommendation_completions,
+SUM(CASE WHEN f.event_type='recommendation_result_viewed' THEN 1 ELSE 0 END) AS result_views,
 SUM(CASE WHEN f.event_type='outbound_clicked' THEN 1 ELSE 0 END) AS outbound_clicks
 FROM social_sessions ss LEFT JOIN funnel_events f ON f.session_id=ss.session_id AND f.created_at>=ss.first_social_event
-GROUP BY ss.platform,COALESCE(ss.content_id,'unlabelled') ORDER BY sessions DESC,outbound_clicks DESC LIMIT 30;`);
+GROUP BY ss.platform,COALESCE(ss.content_id,'unlabelled') ORDER BY sessions DESC,outbound_clicks DESC LIMIT 50;`);
 
 const monetized = runSql(`${cte}
 SELECT ss.platform,COUNT(*) AS monetized_clicks
@@ -48,8 +50,56 @@ FROM social_sessions ss JOIN click_events c ON c.session_id=ss.session_id
 WHERE c.created_at>=ss.first_social_event AND c.created_at>=datetime('now','-30 days') AND c.affiliate_active_at_click=1 AND c.source!='internal-test'
 GROUP BY ss.platform;`);
 
+const monetizedByContent = runSql(`${cte}
+SELECT ss.platform,COALESCE(ss.content_id,'unlabelled') AS content_id,COUNT(*) AS monetized_clicks
+FROM social_sessions ss JOIN click_events c ON c.session_id=ss.session_id
+WHERE c.created_at>=ss.first_social_event AND c.created_at>=datetime('now','-30 days') AND c.affiliate_active_at_click=1 AND c.source!='internal-test'
+GROUP BY ss.platform,COALESCE(ss.content_id,'unlabelled');`);
+
 const total = runSql(`${cte} SELECT COUNT(DISTINCT session_id) AS sessions FROM social_sessions;`)[0] || {};
 const monetizedMap = Object.fromEntries(monetized.map(r => [String(r.platform), Number(r.monetized_clicks || 0)]));
+const monetizedContentMap = Object.fromEntries(monetizedByContent.map(r => [`${r.platform}|${r.content_id}`, Number(r.monetized_clicks || 0)]));
+
+function parseContentId(id='') {
+  const value=String(id||'unlabelled');
+  const m=value.match(/^(monday_discovery|wednesday_comparison|friday_practical)_(\d{4}-\d{2}-\d{2})$/);
+  if(m)return {family:m[1],publishedDate:m[2],isPostLevel:true};
+  if(['monday_discovery','wednesday_comparison','friday_practical'].includes(value))return {family:value,publishedDate:null,isPostLevel:false};
+  return {family:'unlabelled',publishedDate:null,isPostLevel:false};
+}
+
+const content = byContent.map(r => {
+  const sessions=Number(r.sessions||0), outboundClicks=Number(r.outbound_clicks||0), contentId=String(r.content_id);
+  const parsed=parseContentId(contentId);
+  return {
+    platform:String(r.platform),
+    contentId,
+    family:parsed.family,
+    publishedDate:parsed.publishedDate,
+    postLevel:parsed.isPostLevel,
+    sessions,
+    recommendationCompletions:Number(r.recommendation_completions||0),
+    resultViews:Number(r.result_views||0),
+    outboundClicks,
+    monetizedOutbound:Number(monetizedContentMap[`${r.platform}|${contentId}`]||0),
+    sessionToOutboundRate:sessions?Number((outboundClicks/sessions*100).toFixed(1)):null
+  };
+});
+
+const familyMap={};
+for(const row of content){
+  const key=`${row.platform}|${row.family}`;
+  familyMap[key] ||= {platform:row.platform,family:row.family,sessions:0,recommendationCompletions:0,outboundClicks:0,monetizedOutbound:0,posts:new Set()};
+  familyMap[key].sessions += row.sessions;
+  familyMap[key].recommendationCompletions += row.recommendationCompletions;
+  familyMap[key].outboundClicks += row.outboundClicks;
+  familyMap[key].monetizedOutbound += row.monetizedOutbound;
+  familyMap[key].posts.add(row.contentId);
+}
+const families=Object.values(familyMap).map(x=>({
+  platform:x.platform,family:x.family,posts:x.posts.size,sessions:x.sessions,recommendationCompletions:x.recommendationCompletions,outboundClicks:x.outboundClicks,monetizedOutbound:x.monetizedOutbound,
+  sessionToOutboundRate:x.sessions?Number((x.outboundClicks/x.sessions*100).toFixed(1)):null
+})).sort((a,b)=>b.sessions-a.sessions);
 
 const snapshot = {
   generatedAt: new Date().toISOString(),
@@ -63,12 +113,17 @@ const snapshot = {
     outboundClicks: Number(r.outbound_clicks || 0),
     monetizedOutbound: Number(monetizedMap[r.platform] || 0)
   })),
-  content: byContent.map(r => ({
-    platform: String(r.platform),
-    contentId: String(r.content_id),
-    sessions: Number(r.sessions || 0),
-    outboundClicks: Number(r.outbound_clicks || 0)
-  }))
+  content,
+  families,
+  socialInterestGraph: {
+    model: 'family -> platform -> post -> likely-human session -> recommendation -> outbound',
+    nodes: {
+      platforms: [...new Set(content.map(x=>x.platform))],
+      families: [...new Set(content.map(x=>x.family))],
+      posts: content.filter(x=>x.postLevel).map(x=>x.contentId)
+    },
+    edges: content.map(x=>({family:x.family,platform:x.platform,contentId:x.contentId,sessions:x.sessions,recommendationCompletions:x.recommendationCompletions,outboundClicks:x.outboundClicks,monetizedOutbound:x.monetizedOutbound}))
+  }
 };
 
 mkdirSync('data', { recursive:true });
