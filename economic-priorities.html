@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ToolScout Economic Priority Engine</title>
+<style>
+:root{--bg:#0b0d10;--card:#14181d;--ink:#f5f7fa;--muted:#98a2b3;--line:#252b33;--good:#32d583;--warn:#f79009;--bad:#f04438}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}.wrap{max-width:1080px;margin:auto;padding:34px 20px 80px}.top{display:flex;justify-content:space-between;gap:18px;align-items:end}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:var(--muted)}h1{font-size:42px;letter-spacing:-.05em;margin:7px 0}.sub,.status,.note{color:var(--muted)}.sub{line-height:1.5;max-width:760px}.status{font-size:12px;margin:18px 0}.button{border:1px solid #3a424d;background:#f5f7fa;color:#101318;padding:11px 15px;border-radius:10px;font-weight:800;cursor:pointer}.button:disabled{opacity:.55;cursor:wait}.section{margin-top:22px}.sectionHead{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:10px}.sectionHead h2{font-size:20px;margin:0}.sectionHead span{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:800}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px}.card small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:800}.card b{display:block;font-size:28px;letter-spacing:-.04em;margin:7px 0}.card span{font-size:12px;color:var(--muted)}.priority{display:grid;grid-template-columns:54px 1fr auto;gap:16px;align-items:start;padding:18px 0;border-top:1px solid var(--line)}.priority:first-child{border-top:0}.rank{font-size:28px;font-weight:900;color:var(--muted)}.name{font-weight:800;font-size:16px}.meta{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}.score{font-weight:900;font-size:20px}.tag{display:inline-block;margin-top:8px;border:1px solid var(--line);border-radius:999px;padding:4px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}@media(max-width:760px){.grid4{grid-template-columns:1fr 1fr}.top{display:block}.button{margin-top:14px}}@media(max-width:520px){.grid4{grid-template-columns:1fr}.priority{grid-template-columns:38px 1fr}.score{grid-column:2}h1{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div><div class="eyebrow">TOOLSCOUT</div><h1>Economic Priority Engine</h1><p class="sub">Ranks the next actions by observed commercial evidence, expected economic impact, speed to value and confidence. Editorial rankings are never influenced by affiliate economics.</p></div><button class="button" id="load">Refresh priorities</button></header>
+<div id="status" class="status">Not loaded. Refresh when you want a current D1-backed decision snapshot.</div>
+<section class="section"><div class="sectionHead"><h2>Economic state</h2><span>Observed only</span></div><div class="grid4" id="state"></div></section>
+<section class="section"><div class="sectionHead"><h2>Priority queue</h2><span>Highest expected value first</span></div><div class="panel" id="queue"><div class="note">Refresh to calculate.</div></div></section>
+<section class="section"><div class="sectionHead"><h2>Stage</h2><span>Business proof ladder</span></div><div class="panel" id="stage"><div class="note">Refresh to calculate.</div></div></section>
+</div>
+<script>
+const API='/api/stats';
+const n=v=>Number(v||0), clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const pct=v=>v==null?'Unknown':`${Number(v).toFixed(1)}%`;
+const card=(l,v,m)=>`<div class="card"><small>${esc(l)}</small><b>${esc(v)}</b><span>${esc(m)}</span></div>`;
+function candidate(id,title,score,evidence,action,kind='growth',confidence='medium'){return{id,title,score:Math.round(clamp(score)),evidence,action,kind,confidence}}
+function buildPriorities(d){
+ const f=d.funnel||{},a=d.audience||{},r=d.revenue||{},c=d.commercial||{},ac=d.affiliateCoverage||{};
+ const human=n(a.likelyHumanSessions??f.sessions), outbound=n(f.outboundClicks);
+ const monRaw=c.totals?.monetizedOutbound??c.monetizedOutbound??ac.monetizedLikelyHumanClicks??ac.monetizedClickBreakdown?.['likely-human'];
+ const mon=monRaw==null?0:n(monRaw), coverage=outbound?mon/outbound*100:0, outRate=human?outbound/human*100:0, ledger=n(r.ledgerRows);
+ const gaps=Array.isArray(c.revenueGaps)?c.revenueGaps:[];
+ const q=[];
+ if(outbound>0&&coverage<50){const severity=(50-coverage)/50;q.push(candidate('coverage','Increase affiliate coverage',78+severity*18,`${outbound-mon} of ${outbound} human outbound clicks are currently unmonetized. Coverage is ${coverage.toFixed(1)}%.`,`Run the Affiliate Coverage Sprint against observed revenue gaps, targeting 35% first and 50% next.`,'monetization','high'))}
+ gaps.slice(0,5).forEach((g,i)=>{const clicks=n(g.outboundClicks??g.clicks), base=n(g.score);q.push(candidate(`gap-${g.slug||g.tool_slug}`,`Monetize ${g.slug||g.tool_slug||'revenue gap'}`,58+clicks*3+Math.min(base/8,18)-i*1.5,`${clicks} observed human outbound clicks with no monetized route at click time.`,`Resolve the affiliate route or document why this demand cannot currently be monetized.`,'monetization',clicks>=5?'high':'medium'))});
+ if(mon>0&&ledger===0)q.push(candidate('revenue-evidence','Connect vendor revenue evidence',86,`${mon} monetized outbound clicks exist but the revenue ledger has no vendor evidence.`,`Prioritize ingestion from the affiliate partners already receiving clicks so conversion rate and revenue per 1,000 human sessions become measurable.`,'measurement','high'));
+ if(human>=100&&outRate>=40)q.push(candidate('commercial-cro','Implement the approved V5 commercial redesign',73+Math.min(outRate/10,10),`${human} likely-human sessions and ${outRate.toFixed(1)}% session-to-outbound behavior show meaningful commercial usage.`,`Implement V5 on the highest-intent discovery, recommendation and comparison surfaces while preserving SEO/AEO/GEO structure.`,'conversion','medium'));
+ const projected=n(d.traffic?.projectedMonth);if(projected>0&&projected<2000)q.push(candidate('growth-2000','Reach 2,000 likely-human sessions per month',64+Math.min(projected/200,10),`Current linear month pace is ${projected.toLocaleString()} likely-human sessions.`,`Let Organic Growth and Audience engines compound, then allocate content work to observed commercial-intent opportunities rather than generic volume.`,'growth','medium'));
+ if(!q.length)q.push(candidate('observe','Collect more economic evidence',55,'Current snapshot does not expose a stronger actionable economic signal.','Keep instrumentation live and reassess after additional likely-human and vendor-side evidence.','measurement','medium'));
+ return {items:q.sort((x,y)=>y.score-x.score).slice(0,7),human,outbound,mon,coverage,outRate,ledger};
+}
+function stage(s){
+ if(s.ledger>0)return {name:'Stage 3 · Unit economics proof',text:'Vendor-side revenue evidence exists. Next objective: establish stable revenue per monetized click and revenue per 1,000 likely-human sessions.'};
+ if(s.mon>0)return {name:'Stage 2 · Monetization proof',text:'ToolScout has observed monetized outbound activity. The next proof is vendor-confirmed conversion and revenue evidence.'};
+ if(s.human>0&&s.outbound>0)return {name:'Stage 1 · Demand proof',text:'Humans are using ToolScout and progressing to tools. Next objective: create monetized outbound activity.'};
+ return {name:'Stage 0 · Instrumentation',text:'Collect reliable likely-human and commercial behavior before making economic claims.'};
+}
+function render(d){const s=buildPriorities(d);document.getElementById('state').innerHTML=card('Likely-human sessions',s.human.toLocaleString(),'Clean observed audience')+card('Human outbound',s.outbound.toLocaleString(),`${pct(s.outRate)} session → outbound`)+card('Monetized outbound',s.mon.toLocaleString(),`${pct(s.coverage)} coverage`)+card('Revenue evidence',s.ledger?`${s.ledger} rows`:'Unknown','Vendor-side ledger only');document.getElementById('queue').innerHTML=s.items.map((x,i)=>`<div class="priority"><div class="rank">${i+1}</div><div><div class="name">${esc(x.title)}</div><div class="meta"><strong>Evidence:</strong> ${esc(x.evidence)}</div><div class="meta"><strong>Action:</strong> ${esc(x.action)}</div><span class="tag">${esc(x.kind)} · ${esc(x.confidence)} confidence</span></div><div class="score">${x.score}</div></div>`).join('');const st=stage(s);document.getElementById('stage').innerHTML=`<div class="name">${esc(st.name)}</div><div class="meta">${esc(st.text)}</div>`;document.getElementById('status').textContent=`Priorities calculated ${new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'})} from the current D1 analytics snapshot.`}
+let loading=false;async function load(){if(loading)return;loading=true;const b=document.getElementById('load');b.disabled=true;document.getElementById('status').textContent='Calculating priorities…';try{document.cookie='toolscout_owner=1; Max-Age=15552000; Path=/; SameSite=Lax; Secure';const res=await fetch(API,{credentials:'same-origin',cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);render(await res.json())}catch(e){document.getElementById('status').textContent=`Unable to calculate priorities: ${e.message}`}finally{loading=false;b.disabled=false}}document.getElementById('load').addEventListener('click',load);
+</script>
+</body>
+</html>
