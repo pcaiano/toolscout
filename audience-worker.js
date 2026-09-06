@@ -6,6 +6,7 @@ const safeText=(v,n=1000)=>String(v??'').slice(0,n);
 const publicVerifiedType=new Set(['outbound_reply','inbound_reply','content_published']);
 const allowedStatus=new Set(['published','observed']);
 const allowedRisk=new Set(['green','amber','red','none']);
+const rows=result=>result?.results||[];
 
 async function verifyToolScoutBlueskyPost(uri){
   if(!uri||!String(uri).startsWith('at://'))return false;
@@ -54,13 +55,88 @@ async function audienceSnapshot(env){
   }catch(e){return {audienceGrowth:{status:'unavailable',reason:String(e?.message||e)},engagement:{status:'unavailable',queue:[]}};}
 }
 
+function platformCase(alias='f'){
+  return `CASE
+    WHEN lower(${alias}.source) LIKE '%utm_source=linkedin%' OR lower(COALESCE(${alias}.referrer_host,'')) LIKE '%linkedin.com%' THEN 'linkedin'
+    WHEN lower(${alias}.source) LIKE '%utm_source=bluesky%' OR lower(COALESCE(${alias}.referrer_host,'')) IN ('bsky.app','bluesky.app') THEN 'bluesky'
+    WHEN lower(${alias}.source) LIKE '%utm_source=x%' OR lower(COALESCE(${alias}.referrer_host,'')) IN ('x.com','twitter.com','t.co') THEN 'x'
+    ELSE NULL END`;
+}
+
+function contentExpr(alias='f'){
+  return `CASE WHEN instr(${alias}.source,'utm_content=')>0 THEN
+    CASE WHEN instr(substr(${alias}.source,instr(${alias}.source,'utm_content=')+12),'&')>0
+      THEN substr(substr(${alias}.source,instr(${alias}.source,'utm_content=')+12),1,instr(substr(${alias}.source,instr(${alias}.source,'utm_content=')+12),'&')-1)
+      ELSE substr(${alias}.source,instr(${alias}.source,'utm_content=')+12) END
+    ELSE NULL END`;
+}
+
+async function socialAttributionSnapshot(env){
+  try{
+    const pc=platformCase('f'), ce=contentExpr('f');
+    const sessionCte=`WITH attributed AS (
+      SELECT f.session_id, ${pc} AS platform, ${ce} AS content_id, f.created_at
+      FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id
+      WHERE f.created_at>=datetime('now','-30 days') AND s.classification='likely-human'
+    ), social_sessions AS (
+      SELECT session_id, platform, MAX(content_id) AS content_id, MIN(created_at) AS first_social_event
+      FROM attributed WHERE platform IS NOT NULL GROUP BY session_id,platform
+    )`;
+    const [byPlatform,byContent,monetized,total]=await Promise.all([
+      env.DB.prepare(`${sessionCte}
+        SELECT ss.platform,COUNT(DISTINCT ss.session_id) AS sessions,
+          SUM(CASE WHEN f.event_type='recommendation_completed' THEN 1 ELSE 0 END) AS recommendation_completions,
+          SUM(CASE WHEN f.event_type='recommendation_result_viewed' THEN 1 ELSE 0 END) AS result_views,
+          SUM(CASE WHEN f.event_type='outbound_clicked' THEN 1 ELSE 0 END) AS outbound_clicks
+        FROM social_sessions ss LEFT JOIN funnel_events f ON f.session_id=ss.session_id AND f.created_at>=ss.first_social_event
+        GROUP BY ss.platform ORDER BY sessions DESC`).all(),
+      env.DB.prepare(`${sessionCte}
+        SELECT ss.platform,COALESCE(ss.content_id,'unlabelled') AS content_id,COUNT(DISTINCT ss.session_id) AS sessions,
+          SUM(CASE WHEN f.event_type='outbound_clicked' THEN 1 ELSE 0 END) AS outbound_clicks
+        FROM social_sessions ss LEFT JOIN funnel_events f ON f.session_id=ss.session_id AND f.created_at>=ss.first_social_event
+        GROUP BY ss.platform,COALESCE(ss.content_id,'unlabelled') ORDER BY sessions DESC,outbound_clicks DESC LIMIT 30`).all(),
+      env.DB.prepare(`${sessionCte}
+        SELECT ss.platform,COUNT(*) AS monetized_clicks
+        FROM social_sessions ss JOIN click_events c ON c.session_id=ss.session_id
+        WHERE c.created_at>=ss.first_social_event AND c.created_at>=datetime('now','-30 days') AND c.affiliate_active_at_click=1 AND c.source!='internal-test'
+        GROUP BY ss.platform`).all(),
+      env.DB.prepare(`${sessionCte}
+        SELECT COUNT(DISTINCT session_id) AS sessions FROM social_sessions`).first()
+    ]);
+    const monetizedMap=Object.fromEntries(rows(monetized).map(x=>[String(x.platform),Number(x.monetized_clicks||0)]));
+    const platforms=rows(byPlatform).map(x=>{
+      const sessions=Number(x.sessions||0),outbound=Number(x.outbound_clicks||0),mon=Number(monetizedMap[x.platform]||0);
+      return {platform:String(x.platform),sessions,recommendationCompletions:Number(x.recommendation_completions||0),resultViews:Number(x.result_views||0),outboundClicks:outbound,monetizedOutbound:mon,sessionToOutboundRate:sessions?Number((outbound/sessions*100).toFixed(1)):null,monetizationCoverage:outbound?Number((mon/outbound*100).toFixed(1)):null};
+    });
+    return {status:'observed',windowDays:30,humanSessions:Number(total?.sessions||0),platforms,byContent:rows(byContent).map(x=>({platform:String(x.platform),contentId:String(x.content_id),sessions:Number(x.sessions||0),outboundClicks:Number(x.outbound_clicks||0)})),definition:'Likely-human sessions only. Attribution uses recorded UTM source first and social referrer hosts as fallback. Downstream recommendation and outbound events are counted only after the attributed social entry event.'};
+  }catch(e){return {status:'unavailable',reason:String(e?.message||e),platforms:[],byContent:[]};}
+}
+
+function injectSocialAttribution(html){
+  if(html.includes('id="socialAttributionSection"'))return html;
+  const section=`<section class="section" id="socialAttributionSection"><div class="sectionHead"><h2>Social attribution</h2><span>Likely-human · 30 days</span></div><div class="grid4" id="socialAttributionMetrics"></div><div class="grid2 section"><div class="panel"><div class="sectionHead"><h2>By network</h2><span>Session → commercial action</span></div><div id="socialByNetwork" class="note">Refresh to load.</div></div><div class="panel"><div class="sectionHead"><h2>By content</h2><span>UTM content</span></div><div id="socialByContent" class="note">Refresh to load.</div></div></section>`;
+  const marker='<section class="section"><div class="sectionHead"><h2>Revenue & coverage</h2>';
+  let out=html.includes(marker)?html.replace(marker,section+marker):html.replace('</body>',section+'</body>');
+  const script=`<script>(function(){
+    function n(v){return Number(v||0).toLocaleString()}
+    function pct(v){return v==null?'—':Number(v).toFixed(1)+'%'}
+    function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
+    function metric(label,value,meta){return '<div class="card"><small>'+esc(label)+'</small><b>'+esc(value)+'</b><span>'+esc(meta)+'</span></div>'}
+    function row(name,value,meta){return '<div class="row"><div><div class="name">'+esc(name)+'</div><div class="meta">'+esc(meta||'')+'</div></div><div class="value">'+esc(value)+'</div></div>'}
+    function renderSocial(d){var s=d&&d.socialAttribution;if(!s||s.status!=='observed')return;var ps=s.platforms||[],sessions=Number(s.humanSessions||0),out=ps.reduce(function(a,x){return a+Number(x.outboundClicks||0)},0),mon=ps.reduce(function(a,x){return a+Number(x.monetizedOutbound||0)},0),rec=ps.reduce(function(a,x){return a+Number(x.recommendationCompletions||0)},0);var m=document.getElementById('socialAttributionMetrics');if(m)m.innerHTML=metric('Social human sessions',n(sessions),'Attributed from UTM/referrer')+metric('Recommendations',n(rec),'Completed after social entry')+metric('Social outbound',n(out),sessions?pct(out/sessions*100)+' session → outbound':'No attributed sessions')+metric('Monetized social outbound',n(mon),out?pct(mon/out*100)+' of social outbound':'No social outbound yet');var bn=document.getElementById('socialByNetwork');if(bn)bn.innerHTML=ps.length?ps.map(function(x){return row(x.platform,n(x.sessions)+' sessions',n(x.outboundClicks)+' outbound · '+n(x.monetizedOutbound)+' monetized · '+pct(x.sessionToOutboundRate)+' session → outbound')}).join(''):'<div class="note">No attributed social sessions in this window.</div>';var bc=document.getElementById('socialByContent');var cs=s.byContent||[];if(bc)bc.innerHTML=cs.length?cs.slice(0,12).map(function(x){return row(x.contentId,n(x.sessions)+' sessions',x.platform+' · '+n(x.outboundClicks)+' outbound')}).join(''):'<div class="note">No UTM-tagged social content has produced a likely-human session yet.</div>';var ag=document.getElementById('audienceGrowthMetrics');if(ag&&d.audienceGrowth){var a=d.audienceGrowth;ag.innerHTML=metric('Social human sessions',n(sessions),'Attributed likely-human traffic')+metric('Autonomous replies',n(a.publishedReplies),'Verified published engagement')+metric('Outbound engagement',n(a.outboundActions),'ToolScout initiated')+metric('Inbound engagement',n(a.inboundActions),'Replies on ToolScout conversations')}}
+    var old=window.fetch;window.fetch=async function(){var r=await old.apply(this,arguments);try{var u=String(arguments[0]&&arguments[0].url||arguments[0]||'');if(u.indexOf('/api/stats')!==-1){var clone=r.clone();clone.json().then(renderSocial).catch(function(){})}}catch(e){}return r};
+  })();</script>`;
+  return out.replace('</body>',script+'</body>');
+}
+
 async function augmentStats(request,env,ctx){
   const upstream=await base.fetch(request,env,ctx);
   if(!upstream.ok)return upstream;
   let data={};
   try{data=await upstream.json();}catch{return upstream;}
-  const audience=await audienceSnapshot(env);
-  return Response.json({...data,...audience},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
+  const [audience,socialAttribution]=await Promise.all([audienceSnapshot(env),socialAttributionSnapshot(env)]);
+  if(audience.audienceGrowth&&socialAttribution.status==='observed')audience.audienceGrowth.humanSessions=socialAttribution.humanSessions;
+  return Response.json({...data,...audience,socialAttribution},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
 }
 
 export default {
@@ -68,6 +144,14 @@ export default {
     const url=new URL(request.url);
     if(url.pathname==='/api/audience-event'&&request.method==='POST')return ingestAudienceEvent(request,env);
     if(url.pathname==='/api/stats'&&request.method==='GET')return augmentStats(request,env,ctx);
+    if(url.pathname==='/analytics.html'&&request.method==='GET'){
+      const response=await base.fetch(request,env,ctx);
+      if(!response.ok)return response;
+      const type=response.headers.get('Content-Type')||'';
+      if(!type.includes('text/html'))return response;
+      const headers=new Headers(response.headers);headers.set('Cache-Control','private, no-store');
+      return new Response(injectSocialAttribution(await response.text()),{status:response.status,headers});
+    }
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){if(base.scheduled)return base.scheduled(event,env,ctx);}
