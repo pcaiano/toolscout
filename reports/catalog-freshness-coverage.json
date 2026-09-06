@@ -1,0 +1,145 @@
+{
+  "generatedAt": "2026-09-06T20:37:46.776Z",
+  "methodology": "Autonomous catalog maintenance using official-source verification, independent market-demand signals, deterministic quality gates and affiliate-neutral selection. Affiliate status and commission never increase editorial admission or ranking.",
+  "summary": {
+    "tools": 100,
+    "changes": 0,
+    "quarantined": 0,
+    "discovered": 0,
+    "coverageGaps": 8,
+    "sourceHealthy": 91,
+    "sourceWarnings": 9
+  },
+  "changes": [],
+  "coverage": [
+    {
+      "category": "ai-assistant",
+      "tools": 3,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 2
+    },
+    {
+      "category": "ai-research",
+      "tools": 2,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 3
+    },
+    {
+      "category": "ai-writing",
+      "tools": 3,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 2
+    },
+    {
+      "category": "analytics",
+      "tools": 6,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 0
+    },
+    {
+      "category": "automation",
+      "tools": 6,
+      "intentSurfaces": 2,
+      "target": 5,
+      "gap": 0
+    },
+    {
+      "category": "business",
+      "tools": 13,
+      "intentSurfaces": 5,
+      "target": 8,
+      "gap": 0
+    },
+    {
+      "category": "content",
+      "tools": 1,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 4
+    },
+    {
+      "category": "crm",
+      "tools": 9,
+      "intentSurfaces": 7,
+      "target": 10,
+      "gap": 1
+    },
+    {
+      "category": "design",
+      "tools": 3,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 2
+    },
+    {
+      "category": "developer",
+      "tools": 7,
+      "intentSurfaces": 2,
+      "target": 5,
+      "gap": 0
+    },
+    {
+      "category": "ecommerce",
+      "tools": 3,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 2
+    },
+    {
+      "category": "forms",
+      "tools": 5,
+      "intentSurfaces": 2,
+      "target": 5,
+      "gap": 0
+    },
+    {
+      "category": "marketing",
+      "tools": 12,
+      "intentSurfaces": 5,
+      "target": 8,
+      "gap": 0
+    },
+    {
+      "category": "sales",
+      "tools": 3,
+      "intentSurfaces": 2,
+      "target": 5,
+      "gap": 2
+    },
+    {
+      "category": "seo",
+      "tools": 8,
+      "intentSurfaces": 4,
+      "target": 7,
+      "gap": 0
+    },
+    {
+      "category": "social",
+      "tools": 5,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 0
+    },
+    {
+      "category": "support",
+      "tools": 6,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 0
+    },
+    {
+      "category": "website",
+      "tools": 5,
+      "intentSurfaces": 1,
+      "target": 5,
+      "gap": 0
+    }
+  ],
+  "discovered": [],
+  "contentChanges": [],
+  "quarantined": []
+}

@@ -1,0 +1,2186 @@
+{
+  "summary": {
+    "tools": 100,
+    "generatedAt": "2026-09-06T20:38:10.738Z",
+    "cadence": {
+      "linkHealth": "daily",
+      "metadataFreshness": "daily age check; weekly review threshold at 7 days",
+      "deepReview": "monthly threshold at 30 days"
+    },
+    "sourceLinks": {
+      "healthy": 92,
+      "confirmedBroken": 0,
+      "warnings": 8
+    },
+    "affiliateLinks": {
+      "active": 10,
+      "healthy": 5,
+      "needsConfirmation": 4,
+      "warnings": 1
+    },
+    "metadata": {
+      "verifiedWithin7Days": 81,
+      "needsWeeklyReview": 19,
+      "overdue30Days": 0,
+      "missingCriticalFields": 0
+    }
+  },
+  "affiliateProbeFailures": [
+    {
+      "slug": "adcreative-ai",
+      "url": "https://free-trial.adcreative.ai/tusb8l6nun5w",
+      "httpStatus": 404,
+      "status": "needs_confirmation"
+    },
+    {
+      "slug": "pipedrive",
+      "url": "https://aff.trypipedrive.com/e5qvcwi1i22u",
+      "httpStatus": 404,
+      "status": "needs_confirmation"
+    },
+    {
+      "slug": "kit",
+      "url": "https://partners.kit.com/k3tjs4al3opn",
+      "httpStatus": 404,
+      "status": "needs_confirmation"
+    },
+    {
+      "slug": "gorgias",
+      "url": "https://partner.gorgias.com/tes0ykxnwmqd",
+      "httpStatus": 404,
+      "status": "needs_confirmation"
+    }
+  ],
+  "tools": [
+    {
+      "slug": "systeme-io",
+      "name": "Systeme.io",
+      "lastVerified": "2026-08-28",
+      "verifiedAgeDays": 9,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://systeme.io/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://systeme.io/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109",
+        "error": null
+      }
+    },
+    {
+      "slug": "beehiiv",
+      "name": "beehiiv",
+      "lastVerified": "2026-08-30",
+      "verifiedAgeDays": 7,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.beehiiv.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.beehiiv.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://www.beehiiv.com/?via=pedro-caiano",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.beehiiv.com/?via=pedro-caiano",
+        "error": null
+      }
+    },
+    {
+      "slug": "hubspot",
+      "name": "HubSpot",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.hubspot.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.hubspot.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "jotform",
+      "name": "Jotform",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.jotform.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.jotform.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.jotform.com/?utm_source=pcaiano&utm_campaign=jf1&rp=%2Fproducts%2Fform-builder%2F",
+        "error": null
+      }
+    },
+    {
+      "slug": "adcreative-ai",
+      "name": "AdCreative.ai",
+      "lastVerified": "2026-08-28",
+      "verifiedAgeDays": 9,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.adcreative.ai/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.adcreative.ai/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://free-trial.adcreative.ai/tusb8l6nun5w",
+        "status": "broken",
+        "httpStatus": 404,
+        "finalUrl": "https://free-trial.adcreative.ai/tusb8l6nun5w",
+        "error": null
+      }
+    },
+    {
+      "slug": "pipedrive",
+      "name": "Pipedrive",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.pipedrive.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.pipedrive.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://aff.trypipedrive.com/e5qvcwi1i22u",
+        "status": "broken",
+        "httpStatus": 404,
+        "finalUrl": "https://aff.trypipedrive.com/e5qvcwi1i22u",
+        "error": null
+      }
+    },
+    {
+      "slug": "semrush",
+      "name": "Semrush",
+      "lastVerified": "2026-08-28",
+      "verifiedAgeDays": 9,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.semrush.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.semrush.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "jasper",
+      "name": "Jasper",
+      "lastVerified": "2026-08-28",
+      "verifiedAgeDays": 9,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.jasper.ai/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.jasper.ai/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "brevo",
+      "name": "Brevo",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.brevo.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.brevo.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "activecampaign",
+      "name": "ActiveCampaign",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.activecampaign.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.activecampaign.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "mailchimp",
+      "name": "Mailchimp",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://mailchimp.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://mailchimp.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "zapier",
+      "name": "Zapier",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://zapier.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://zapier.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "make",
+      "name": "Make",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.make.com/",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://www.make.com/en",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://www.make.com/en/register?pc=toolscout",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://www.make.com/en/register?pc=toolscout",
+        "error": null
+      }
+    },
+    {
+      "slug": "zoho-crm",
+      "name": "Zoho CRM",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.zoho.com/crm/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.zoho.com/en-us/crm/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "monday-crm",
+      "name": "monday CRM",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://monday.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://monday.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "typeform",
+      "name": "Typeform",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.typeform.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.typeform.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://typeform.cello.so/32NCHvHV6ws",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.typeform.com/refer-a-friend/invite?utm_medium=referrerlink&utm_source=typeform&utm_campaign=refer_a_friend_cello&productId=admin.typeform.com&ucc=32NCHvHV6ws",
+        "error": null
+      }
+    },
+    {
+      "slug": "tally",
+      "name": "Tally",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://tally.so/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://tally.so/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "ahrefs",
+      "name": "Ahrefs",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://ahrefs.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://ahrefs.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "se-ranking",
+      "name": "SE Ranking",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://seranking.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://seranking.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "clickup",
+      "name": "ClickUp",
+      "lastVerified": "2026-08-29",
+      "verifiedAgeDays": 8,
+      "needsWeeklyReview": true,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://clickup.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://clickup.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "claude",
+      "name": "Claude",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://claude.ai/",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://claude.ai/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "calendly",
+      "name": "Calendly",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://calendly.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://calendly.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "posthog",
+      "name": "PostHog",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://posthog.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://posthog.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "notion",
+      "name": "Notion",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.notion.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.notion.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "asana",
+      "name": "Asana",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://asana.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://asana.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "trello",
+      "name": "Trello",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://trello.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://trello.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "airtable",
+      "name": "Airtable",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.airtable.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.airtable.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "n8n",
+      "name": "n8n",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://n8n.io/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://n8n.io/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "apollo",
+      "name": "Apollo",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.apollo.io/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.apollo.io/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "lemlist",
+      "name": "lemlist",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.lemlist.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.lemlist.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "intercom",
+      "name": "Intercom",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.intercom.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.intercom.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "zendesk",
+      "name": "Zendesk",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.zendesk.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.zendesk.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "instantly",
+      "name": "Instantly",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://instantly.ai/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://instantly.ai/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "kit",
+      "name": "Kit",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://kit.com/",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://kit.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://partners.kit.com/k3tjs4al3opn",
+        "status": "broken",
+        "httpStatus": 404,
+        "finalUrl": "https://partners.kit.com/k3tjs4al3opn",
+        "error": null
+      }
+    },
+    {
+      "slug": "klaviyo",
+      "name": "Klaviyo",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.klaviyo.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.klaviyo.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "canva",
+      "name": "Canva",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.canva.com/",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://www.canva.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "figma",
+      "name": "Figma",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.figma.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.figma.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "grammarly",
+      "name": "Grammarly",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.grammarly.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.grammarly.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "buffer",
+      "name": "Buffer",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://buffer.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://buffer.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "webflow",
+      "name": "Webflow",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://webflow.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://webflow.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "surfer",
+      "name": "Surfer",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://surferseo.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://surferseo.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "mixpanel",
+      "name": "Mixpanel",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://mixpanel.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://mixpanel.com/home/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "freshdesk",
+      "name": "Freshdesk",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.freshworks.com/freshdesk/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.freshworks.com/freshdesk/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "framer",
+      "name": "Framer",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.framer.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.framer.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "perplexity",
+      "name": "Perplexity",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.perplexity.ai/",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://www.perplexity.ai/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "slack",
+      "name": "Slack",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://slack.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://slack.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "cursor",
+      "name": "Cursor",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://cursor.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://cursor.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "shopify",
+      "name": "Shopify",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.shopify.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.shopify.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=Xw32vEWMexyZUCpXQq3Mt3rxUkr2SAzh0XeJUw0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "error": null
+      }
+    },
+    {
+      "slug": "loom",
+      "name": "Loom",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.loom.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.loom.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "miro",
+      "name": "Miro",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://miro.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://miro.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "hootsuite",
+      "name": "Hootsuite",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.hootsuite.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.hootsuite.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "sprout-social",
+      "name": "Sprout Social",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://sproutsocial.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://sproutsocial.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "later",
+      "name": "Later",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://later.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://later.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "socialbee",
+      "name": "SocialBee",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://socialbee.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://socialbee.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "hotjar",
+      "name": "Hotjar",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.hotjar.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "amplitude",
+      "name": "Amplitude",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://amplitude.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://amplitude.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "plausible",
+      "name": "Plausible Analytics",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://plausible.io/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://plausible.io/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "matomo",
+      "name": "Matomo",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://matomo.org/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://matomo.org/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "github",
+      "name": "GitHub",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://github.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://github.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "gitlab",
+      "name": "GitLab",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://about.gitlab.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://about.gitlab.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "replit",
+      "name": "Replit",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://replit.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://replit.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "vercel",
+      "name": "Vercel",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://vercel.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://vercel.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "netlify",
+      "name": "Netlify",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.netlify.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.netlify.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "sentry",
+      "name": "Sentry",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://sentry.io/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://sentry.io/welcome/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "chatgpt",
+      "name": "ChatGPT",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://chatgpt.com/",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://chatgpt.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "gemini",
+      "name": "Gemini",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://gemini.google.com/",
+        "status": "network_warning",
+        "httpStatus": null,
+        "finalUrl": null,
+        "error": "fetch failed"
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "notebooklm",
+      "name": "NotebookLM",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://notebooklm.google.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S-1927550354:1788727092781660",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "copy-ai",
+      "name": "Copy.ai",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.copy.ai/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.copy.ai/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "moz-pro",
+      "name": "Moz Pro",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://moz.com/products/pro",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://moz.com/products/pro",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "ubersuggest",
+      "name": "Ubersuggest",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://neilpatel.com/ubersuggest/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://neilpatel.com/ubersuggest/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "mangools",
+      "name": "Mangools",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://mangools.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://mangools.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "screaming-frog",
+      "name": "Screaming Frog SEO Spider",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.screamingfrog.co.uk/seo-spider/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.screamingfrog.co.uk/seo-spider/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "wix",
+      "name": "Wix",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.wix.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.wix.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "squarespace",
+      "name": "Squarespace",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.squarespace.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.squarespace.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "wordpress-com",
+      "name": "WordPress.com",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://wordpress.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://wordpress.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "help-scout",
+      "name": "Help Scout",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.helpscout.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.helpscout.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "gorgias",
+      "name": "Gorgias",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.gorgias.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.gorgias.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": true,
+        "url": "https://partner.gorgias.com/tes0ykxnwmqd",
+        "status": "broken",
+        "httpStatus": 404,
+        "finalUrl": "https://partner.gorgias.com/tes0ykxnwmqd",
+        "error": null
+      }
+    },
+    {
+      "slug": "crisp",
+      "name": "Crisp",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://crisp.chat/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://crisp.chat/en/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "salesforce",
+      "name": "Salesforce",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.salesforce.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.salesforce.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "close",
+      "name": "Close",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.close.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://close.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "copper",
+      "name": "Copper",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.copper.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.copper.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "freshsales",
+      "name": "Freshsales",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.freshworks.com/crm/sales/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.freshworks.com/crm/sales/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "attio",
+      "name": "Attio",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://attio.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://attio.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "mailerlite",
+      "name": "MailerLite",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.mailerlite.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.mailerlite.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "getresponse",
+      "name": "GetResponse",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.getresponse.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.getresponse.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "omnisend",
+      "name": "Omnisend",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.omnisend.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.omnisend.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "constant-contact",
+      "name": "Constant Contact",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.constantcontact.com/",
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
+        "finalUrl": "https://www.constantcontact.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "basecamp",
+      "name": "Basecamp",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://basecamp.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://basecamp.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "wrike",
+      "name": "Wrike",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.wrike.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.wrike.com/vbj/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "linear",
+      "name": "Linear",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://linear.app/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://linear.app/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "jira",
+      "name": "Jira",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.atlassian.com/software/jira",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.atlassian.com/software/jira",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "pabbly-connect",
+      "name": "Pabbly Connect",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.pabbly.com/connect/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.pabbly.com/connect/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "integrately",
+      "name": "Integrately",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://integrately.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://integrately.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "workato",
+      "name": "Workato",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.workato.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.workato.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "paperform",
+      "name": "Paperform",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://paperform.co/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://paperform.co/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "fillout",
+      "name": "Fillout",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.fillout.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.fillout.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "bigcommerce",
+      "name": "BigCommerce",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.bigcommerce.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.bigcommerce.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "woocommerce",
+      "name": "WooCommerce",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://woocommerce.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://woocommerce.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "adobe-express",
+      "name": "Adobe Express",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.adobe.com/express/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.adobe.com/express/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "descript",
+      "name": "Descript",
+      "lastVerified": "2026-09-01",
+      "verifiedAgeDays": 5,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.descript.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.descript.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    }
+  ]
+}
