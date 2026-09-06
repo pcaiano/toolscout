@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'distribution-engine-worker.js'
+      - 'distribution-radar-worker.js'
+      - 'data/distribution-radar-seeds.json'
       - 'embed/**'
       - 'migrations/0018_distribution_engine.sql'
       - 'wrangler.toml'
@@ -24,17 +26,26 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check distribution-engine-worker.js
+          node --check distribution-radar-worker.js
           node --check embed/toolscout-pick.js
           node --check embed/toolscout-finder.js
           node --check embed/toolscout-compare.js
       - name: Validate worker entrypoint and migration
         run: |
-          grep -q 'main = "distribution-engine-worker.js"' wrangler.toml
+          grep -q 'main = "distribution-radar-worker.js"' wrangler.toml
           test -s migrations/0018_distribution_engine.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_events' migrations/0018_distribution_engine.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_embeds' migrations/0018_distribution_engine.sql
+      - name: Validate radar seed data
+        run: |
+          node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); for(const s of d.sources){if(!s.slug||!s.name||!s.type)process.exit(1)}"
       - name: Validate distribution attribution convention
         run: |
           grep -q "utm_medium:'distribution'" embed/toolscout-pick.js
           grep -q "utm_medium:'distribution'" embed/toolscout-finder.js
           grep -q "utm_medium:'distribution'" embed/toolscout-compare.js
+      - name: Validate syndication routes
+        run: |
+          grep -q '/api/distribution/feed.json' distribution-radar-worker.js
+          grep -q '/api/distribution/feed.xml' distribution-radar-worker.js
+          grep -q '"/api/distribution/*"' wrangler.toml
