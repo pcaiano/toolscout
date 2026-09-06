@@ -16,10 +16,11 @@ const urls=[BASE+'/',`${BASE}/guides.html`,`${BASE}/blog/`,...CORE_PAGES.filter(
 const files=fs.readdirSync(ROOT).filter(name=>name.endsWith('.html')).filter(name=>!EXCLUDE.test(name)).filter(name=>name!=='index.html').filter(name=>intentSlugs.has(name.replace(/\.html$/i,''))||COMPARISON_RE.test(name)).sort();
 for(const file of files)urls.push(`${BASE}/${file}`);
 const blogDir=path.join(ROOT,'blog');
-if(fs.existsSync(blogDir))for(const file of fs.readdirSync(blogDir).filter(name=>name.endsWith('.html')).sort())urls.push(`${BASE}/blog/${file}`);
+const blogFiles=fs.existsSync(blogDir)?fs.readdirSync(blogDir).filter(name=>name.endsWith('.html')&&name!=='index.html').sort():[];
+for(const file of blogFiles)urls.push(`${BASE}/blog/${file}`);
 const unique=[...new Set(urls)];
 const toolDir=path.join(ROOT,'tools');
 if(fs.existsSync(toolDir))for(const file of fs.readdirSync(toolDir).filter(name=>name.endsWith('.html')).sort())unique.push(`${BASE}/tools/${file}`);
 const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${unique.map(u=>`  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`;
 fs.writeFileSync(path.join(ROOT,'sitemap.xml'),xml,'utf8');
-console.log(JSON.stringify({urls:unique.length,intentAndComparisonPages:files.length,blogPages:fs.existsSync(blogDir)?fs.readdirSync(blogDir).filter(x=>x.endsWith('.html')).length:0}));
+console.log(JSON.stringify({urls:unique.length,intentAndComparisonPages:files.length,blogPages:blogFiles.length}));
