@@ -7,6 +7,7 @@ on:
       - 'data/intent-profiles.json'
       - 'data/tools.json'
       - 'data/comparisons.json'
+      - 'data/decision-context.json'
       - 'data/affiliate.json'
       - 'data/affiliate-pipeline.json'
       - 'data/seo-longtail.json'
@@ -17,6 +18,7 @@ on:
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/link-static-tool-profiles.mjs'
       - 'scripts/enrich-guide-comparisons.mjs'
+      - 'scripts/enrich-decision-context.mjs'
       - 'scripts/generate-blog.mjs'
       - 'scripts/build-blog-topics.mjs'
       - 'scripts/build-growth-priority.mjs'
@@ -62,6 +64,9 @@ jobs:
 
       - name: Generate pages
         run: node scripts/generate-seo-pages.mjs
+
+      - name: Enrich pilot guides with decision context
+        run: node scripts/enrich-decision-context.mjs
 
       - name: Generate commercial comparisons
         run: node scripts/generate-comparisons.mjs
