@@ -13,6 +13,10 @@ function xmlLocs(xml) {
   return [...String(xml).matchAll(/<loc>(.*?)<\/loc>/gsi)].map(m => m[1].trim());
 }
 
+function robotsSitemaps(text) {
+  return String(text).split(/\r?\n/).map(x => x.trim()).filter(x => /^sitemap\s*:/i.test(x)).map(x => x.replace(/^sitemap\s*:\s*/i,'').trim()).filter(Boolean);
+}
+
 function normalizeCandidate(url) {
   try {
     const u = new URL(url);
@@ -34,7 +38,7 @@ async function fetchText(url) {
   const timeout = setTimeout(() => controller.abort(), 12000);
   try {
     const res = await fetch(url, {
-      headers: { 'user-agent': 'ToolScoutOrganicGrowthBot/1.0 (+https://trytoolscout.org)' },
+      headers: { 'user-agent': 'ToolScoutOrganicGrowthBot/1.1 (+https://trytoolscout.org)' },
       redirect: 'follow',
       signal: controller.signal
     });
@@ -47,27 +51,40 @@ async function fetchText(url) {
   }
 }
 
+async function discoverSitemaps(source) {
+  const candidates = [...(source.sitemapCandidates || [])];
+  try {
+    const robots = await fetchText(new URL('/robots.txt', source.baseUrl).toString());
+    if (robots) candidates.push(...robotsSitemaps(robots));
+  } catch {}
+  return [...new Set(candidates)];
+}
+
+async function expandSitemap(url, depth = 0, seen = new Set()) {
+  if (depth > 2 || seen.has(url)) return [];
+  seen.add(url);
+  const text = await fetchText(url);
+  if (!text || !/<loc>/i.test(text)) return [];
+  const locs = xmlLocs(text);
+  const nested = locs.filter(x => /sitemap/i.test(x)).slice(0, 20);
+  if (!nested.length) return locs;
+  const out = [];
+  for (const child of nested) {
+    out.push(...await expandSitemap(child, depth + 1, seen));
+    if (out.length >= maxUrls * 3) break;
+  }
+  return out.length ? out : locs;
+}
+
 async function collectSource(source) {
-  let root = null;
+  const candidates = await discoverSitemaps(source);
   let used = null;
-  for (const candidate of source.sitemapCandidates || []) {
-    const text = await fetchText(candidate);
-    if (text && /<loc>/i.test(text)) { root = text; used = candidate; break; }
+  let urls = [];
+  for (const candidate of candidates) {
+    const expanded = await expandSitemap(candidate);
+    if (expanded.length) { used = candidate; urls = expanded; break; }
   }
-  if (!root) return { name: source.name, sitemap: null, status: 'unavailable', urls: [] };
-
-  let urls = xmlLocs(root);
-  const nested = urls.filter(x => /sitemap/i.test(x)).slice(0, 12);
-  if (nested.length) {
-    const expanded = [];
-    for (const sitemap of nested) {
-      const text = await fetchText(sitemap);
-      if (text) expanded.push(...xmlLocs(text));
-      if (expanded.length >= maxUrls) break;
-    }
-    if (expanded.length) urls = expanded;
-  }
-
+  if (!used) return { name: source.name, sitemap: null, status: 'unavailable', urls: [] };
   urls = [...new Set(urls.filter(interesting))].slice(0, maxUrls);
   return { name: source.name, sitemap: used, status: 'ok', urls };
 }
@@ -96,7 +113,7 @@ const gaps = [...candidateMap.values()]
 fs.mkdirSync('reports', { recursive: true });
 fs.writeFileSync('reports/competitive-gap-signals.json', JSON.stringify({
   generatedAt: new Date().toISOString(),
-  methodology: 'Public sitemap URL patterns only. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are treated as market-coverage signals and must pass ToolScout demand and quality gates before any new page is created.',
+  methodology: 'Public sitemap URL patterns only, with robots.txt sitemap discovery and bounded recursive sitemap-index expansion. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are treated as market-coverage signals and must pass ToolScout demand and quality gates before any new page or catalog item is created.',
   sources: sources.map(x => ({ name: x.name, sitemap: x.sitemap, status: x.status, sampledUrls: x.urls.length })),
   count: gaps.length,
   gaps
