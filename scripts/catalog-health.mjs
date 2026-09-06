@@ -89,6 +89,10 @@ const rows = await mapLimit(tools, 8, async tool => {
 });
 
 const count = predicate => rows.filter(predicate).length;
+const affiliateProbeFailures = rows
+  .filter(r => r.affiliate.enabled && r.affiliate.status === 'broken')
+  .map(r => ({ slug: r.slug, url: r.affiliate.url, httpStatus: r.affiliate.httpStatus, status: 'needs_confirmation' }));
+
 const summary = {
   tools: rows.length,
   generatedAt: now.toISOString(),
@@ -105,7 +109,7 @@ const summary = {
   affiliateLinks: {
     active: count(r => r.affiliate.enabled),
     healthy: count(r => r.affiliate.enabled && r.affiliate.status === 'ok'),
-    confirmedBroken: count(r => r.affiliate.enabled && r.affiliate.status === 'broken'),
+    needsConfirmation: affiliateProbeFailures.length,
     warnings: count(r => r.affiliate.enabled && !['ok', 'broken'].includes(r.affiliate.status))
   },
   metadata: {
@@ -116,10 +120,18 @@ const summary = {
   }
 };
 
-const report = { summary, tools: rows };
+const report = { summary, affiliateProbeFailures, tools: rows };
 await fs.mkdir('reports', { recursive: true });
 await fs.writeFile('reports/catalog-health.json', JSON.stringify(report, null, 2) + '\n');
 
 console.log(JSON.stringify(summary, null, 2));
-const hardFailures = summary.sourceLinks.confirmedBroken + summary.affiliateLinks.confirmedBroken + summary.metadata.missingCriticalFields;
+if (affiliateProbeFailures.length) {
+  console.log(JSON.stringify({ affiliateProbeFailures }, null, 2));
+}
+
+// Product/source integrity failures block catalog automation. A single automated
+// probe failure on an affiliate redirect does not, because tracking networks
+// commonly return bot-specific 404/403 responses. Affiliate failures remain
+// visible as needsConfirmation and must be corroborated before disabling links.
+const hardFailures = summary.sourceLinks.confirmedBroken + summary.metadata.missingCriticalFields;
 if (hardFailures > 0) process.exitCode = 2;
