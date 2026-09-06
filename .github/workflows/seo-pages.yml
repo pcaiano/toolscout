@@ -3,44 +3,8 @@ name: Generate SEO Pages
 on:
   push:
     paths:
-      - 'data/intents.json'
-      - 'data/intent-profiles.json'
-      - 'data/tools.json'
-      - 'data/comparisons.json'
-      - 'data/decision-context.json'
-      - 'data/affiliate.json'
-      - 'data/affiliate-pipeline.json'
-      - 'data/seo-longtail.json'
-      - 'data/seo-consolidations.json'
-      - 'data/organic-growth-engine.json'
-      - 'data/audience-learning.json'
-      - 'data/audience-learning-history.json'
-      - 'reports/gsc-signals.json'
-      - 'scripts/generate-seo-pages.mjs'
-      - 'scripts/generate-comparisons.mjs'
-      - 'scripts/generate-tool-pages.mjs'
-      - 'scripts/link-static-tool-profiles.mjs'
-      - 'scripts/enrich-guide-comparisons.mjs'
-      - 'scripts/enrich-decision-context.mjs'
-      - 'scripts/enrich-comparison-context.mjs'
-      - 'scripts/generate-blog.mjs'
-      - 'scripts/build-blog-topics.mjs'
-      - 'scripts/build-growth-priority.mjs'
-      - 'scripts/build-organic-growth-opportunities.mjs'
-      - 'scripts/build-content-intelligence.mjs'
-      - 'scripts/scan-competitive-gaps.mjs'
-      - 'scripts/import-gsc-signals.mjs'
-      - 'scripts/sync-gsc-signals.mjs'
-      - 'scripts/audit-gsc-slugs.mjs'
-      - 'scripts/validate-aeo-geo-readiness.mjs'
-      - 'scripts/validate-seo-pages.mjs'
-      - 'scripts/validate-public-surface.mjs'
-      - 'scripts/validate-commercial-indexability.mjs'
-      - 'scripts/validate-intent-coverage.mjs'
-      - 'scripts/generate-sitemap.mjs'
-      - 'scripts/generate-distribution.mjs'
-      - 'scripts/build-distribution-index.mjs'
-      - 'scripts/build-distribution-queue.mjs'
+      - 'data/**'
+      - 'scripts/**'
       - 'robots.txt'
       - 'llms.txt'
       - '.github/workflows/seo-pages.yml'
@@ -78,7 +42,7 @@ jobs:
         run: node scripts/build-content-intelligence.mjs
       - name: Generate pages
         run: node scripts/generate-seo-pages.mjs
-      - name: Enrich pilot guides with decision context
+      - name: Enrich guides with decision context
         run: node scripts/enrich-decision-context.mjs
       - name: Generate commercial comparisons
         run: node scripts/generate-comparisons.mjs
@@ -104,6 +68,8 @@ jobs:
         run: node scripts/generate-sitemap.mjs
       - name: Validate AEO GEO readiness
         run: node scripts/validate-aeo-geo-readiness.mjs
+      - name: Validate machine readability
+        run: node scripts/validate-machine-readability.mjs
       - name: Validate SEO pages
         run: node scripts/validate-seo-pages.mjs
       - name: Validate generated public surface
