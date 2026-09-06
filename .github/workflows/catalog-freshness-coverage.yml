@@ -15,6 +15,7 @@ on:
       - 'scripts/catalog-freshness-coverage-engine.mjs'
       - 'scripts/run-catalog-freshness-coverage.mjs'
       - 'scripts/scan-competitive-gaps.mjs'
+      - 'scripts/catalog-health.mjs'
       - '.github/workflows/catalog-freshness-coverage.yml'
 
 permissions:
@@ -80,5 +81,3 @@ jobs:
           git commit -m 'Autonomously refresh ToolScout catalog'
           git pull --rebase origin main
           git push origin HEAD:main
-
-# validation-trigger: 2026-09-06T20:33Z
