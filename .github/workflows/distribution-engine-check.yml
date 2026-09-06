@@ -13,6 +13,7 @@ on:
       - 'migrations/0018_distribution_engine.sql'
       - 'migrations/0019_vendor_amplification.sql'
       - 'migrations/0020_vendor_contact_discovery.sql'
+      - 'migrations/0021_public_vendor_dispatch.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -44,9 +45,11 @@ jobs:
           test -s migrations/0018_distribution_engine.sql
           test -s migrations/0019_vendor_amplification.sql
           test -s migrations/0020_vendor_contact_discovery.sql
+          test -s migrations/0021_public_vendor_dispatch.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_events' migrations/0018_distribution_engine.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_vendor_amplification' migrations/0019_vendor_amplification.sql
           grep -q 'contact_source_url' migrations/0020_vendor_contact_discovery.sql
+          grep -q 'public_dispatch_token' migrations/0021_public_vendor_dispatch.sql
       - name: Validate radar seed data
         run: |
           node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); for(const s of d.sources){if(!s.slug||!s.name||!s.type)process.exit(1)}"
@@ -61,6 +64,9 @@ jobs:
           grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
           grep -Fq '/api/distribution/vendor-amplification' distribution-vendor-worker.js
           grep -Fq '/api/distribution/vendor-amplification/ready' distribution-sender-worker.js
+          grep -Fq '/api/distribution/vendor-amplification/public-candidates' distribution-sender-worker.js
+          grep -Fq '/api/distribution/vendor-amplification/public-status' distribution-sender-worker.js
+          grep -Fq 'dispatch_token' distribution-sender-worker.js
           grep -Fq 'public_role_email' distribution-contact-worker.js
           grep -Fq 'needs_contact_fallback' distribution-contact-worker.js
           grep -Fq "status='sending'" distribution-sender-worker.js
