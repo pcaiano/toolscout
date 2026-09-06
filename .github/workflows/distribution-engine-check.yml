@@ -64,6 +64,6 @@ jobs:
           grep -Fq 'public_role_email' distribution-contact-worker.js
           grep -Fq 'needs_contact_fallback' distribution-contact-worker.js
           grep -Fq "status='sending'" distribution-sender-worker.js
-          grep -Fq "-24 hours" distribution-sender-worker.js
+          grep -Fq -- "-24 hours" distribution-sender-worker.js
           grep -Fq 'MAKE_TOKEN_SHA256' distribution-sender-worker.js
           grep -Fq '"/api/distribution/*"' wrangler.toml
