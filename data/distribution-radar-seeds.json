@@ -15,7 +15,8 @@
       "effort": 28,
       "cost": 0,
       "human_required": true,
-      "next_action": "Prepare editorial tool submission; do not automate without a documented API."
+      "next_action": "Prepare editorial tool submission; do not automate without a documented API.",
+      "status": "human_action_required"
     },
     {
       "slug": "launch-llama",
@@ -32,7 +33,8 @@
       "effort": 22,
       "cost": 0,
       "human_required": true,
-      "next_action": "Use reviewed submission route; keep outside automatic execution until an official API is verified."
+      "next_action": "Use reviewed submission route; keep outside automatic execution until an official API is verified.",
+      "status": "human_action_required"
     },
     {
       "slug": "best-of-ai",
@@ -49,7 +51,8 @@
       "effort": 26,
       "cost": 0,
       "human_required": true,
-      "next_action": "Keep in editorial queue until an official programmatic submission route is verified."
+      "next_action": "Keep in editorial queue until an official programmatic submission route is verified.",
+      "status": "human_action_required"
     },
     {
       "slug": "launched-tools",
@@ -84,7 +87,8 @@
       "effort": 24,
       "cost": 0,
       "human_required": true,
-      "next_action": "Use free/basic review route only; do not automate forms."
+      "next_action": "Use free/basic review route only; do not automate forms.",
+      "status": "human_action_required"
     },
     {
       "slug": "stremit",
@@ -101,7 +105,8 @@
       "effort": 18,
       "cost": 0,
       "human_required": true,
-      "next_action": "Keep manual until a documented API is verified."
+      "next_action": "Keep manual until a documented API is verified.",
+      "status": "human_action_required"
     },
     {
       "slug": "launching-next",
