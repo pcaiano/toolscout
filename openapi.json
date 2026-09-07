@@ -2,13 +2,51 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ToolScout Public Discovery API",
-    "version": "1.0.0",
-    "description": "Public read-only discovery and distribution endpoints for ToolScout. No authentication is required for the endpoints documented here."
+    "version": "1.1.0",
+    "description": "Public read-only discovery, recommendation and distribution endpoints for ToolScout. No authentication is required for the endpoints documented here."
   },
   "servers": [
     {"url": "https://trytoolscout.org"}
   ],
   "paths": {
+    "/api/recommend": {
+      "get": {
+        "summary": "Get ranked software recommendations for a described job or need",
+        "operationId": "recommendTools",
+        "parameters": [
+          {"name":"q","in":"query","required":true,"schema":{"type":"string","minLength":2,"maxLength":300},"description":"Natural-language description of the software need."},
+          {"name":"goal","in":"query","required":false,"schema":{"type":"string"}},
+          {"name":"budget","in":"query","required":false,"schema":{"type":"string","enum":["free","low","mid","high"]}},
+          {"name":"team","in":"query","required":false,"schema":{"type":"string","enum":["solo","small","team","large","agency"]}},
+          {"name":"priority","in":"query","required":false,"schema":{"type":"string","enum":["ease","automation","integrations","features"]}},
+          {"name":"limit","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":5,"default":3}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked ToolScout recommendations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type":"object",
+                  "required":["query","count","recommendations","ranking","affiliate_disclosure"],
+                  "properties": {
+                    "query":{"type":"string"},
+                    "profile":{"type":"object"},
+                    "intent":{"type":["object","null"]},
+                    "count":{"type":"integer"},
+                    "ranking":{"type":"string"},
+                    "affiliate_disclosure":{"type":"string"},
+                    "recommendations":{"type":"array","items":{"type":"object","required":["slug","name","category","match","tool_url"],"properties":{"slug":{"type":"string"},"name":{"type":"string"},"category":{"type":"string"},"description":{"type":"string"},"pricing":{"type":"string"},"free_plan":{"type":"boolean"},"match":{"type":"integer","minimum":0,"maximum":95},"reasons":{"type":"array","items":{"type":"string"}},"best_for":{"type":"array","items":{"type":"string"}},"features":{"type":"array","items":{"type":"string"}},"tool_url":{"type":"string","format":"uri"}}}}
+                  }
+                }
+              }
+            }
+          },
+          "400":{"description":"Missing or invalid query"},
+          "503":{"description":"Recommendation catalog temporarily unavailable"}
+        }
+      }
+    },
     "/api/distribution/feed.json": {
       "get": {
         "summary": "Get recent ToolScout distribution assets",
@@ -49,64 +87,28 @@
       "get": {
         "summary": "Get ToolScout machine-discovery and embed manifest",
         "operationId": "getDistributionManifest",
-        "responses": {
-          "200": {
-            "description": "ToolScout distribution manifest",
-            "content": {
-              "application/json": {
-                "schema": {"type": "object"}
-              }
-            }
-          }
-        }
+        "responses": {"200":{"description":"ToolScout distribution manifest","content":{"application/json":{"schema":{"type":"object"}}}}}
       }
     },
     "/distribution/feed.xml": {
       "get": {
         "summary": "Get ToolScout distribution RSS feed",
         "operationId": "getDistributionRss",
-        "responses": {
-          "200": {
-            "description": "RSS 2.0 distribution feed",
-            "content": {
-              "application/rss+xml": {
-                "schema": {"type": "string"}
-              }
-            }
-          }
-        }
+        "responses": {"200":{"description":"RSS 2.0 distribution feed","content":{"application/rss+xml":{"schema":{"type":"string"}}}}}
       }
     },
     "/embed/toolscout.js": {
       "get": {
         "summary": "Get the generic ToolScout embed script",
         "operationId": "getToolScoutEmbed",
-        "responses": {
-          "200": {
-            "description": "JavaScript embed",
-            "content": {
-              "application/javascript": {
-                "schema": {"type": "string"}
-              }
-            }
-          }
-        }
+        "responses": {"200":{"description":"JavaScript embed","content":{"application/javascript":{"schema":{"type":"string"}}}}}
       }
     },
     "/embed/badge.svg": {
       "get": {
         "summary": "Get the ToolScout embed badge",
         "operationId": "getToolScoutBadge",
-        "responses": {
-          "200": {
-            "description": "ToolScout SVG badge",
-            "content": {
-              "image/svg+xml": {
-                "schema": {"type": "string"}
-              }
-            }
-          }
-        }
+        "responses": {"200":{"description":"ToolScout SVG badge","content":{"image/svg+xml":{"schema":{"type":"string"}}}}}
       }
     }
   }
