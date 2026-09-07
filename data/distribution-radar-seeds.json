@@ -19,6 +19,9 @@
       "slug": "stremit", "name": "Stremit", "type": "software_directory_newsletter", "url": "https://stremit.com/", "action_url": "https://stremit.com/", "audience_fit": 72, "authority": 60, "traffic_potential": 58, "backlink_value": 64, "acceptance_probability": 75, "automation_potential": 20, "effort": 18, "cost": 0, "human_required": true, "next_action": "Keep manual until a documented API is verified."
     },
     {
+      "slug": "launching-next", "name": "Launching Next", "type": "startup_directory_newsletter", "url": "https://www.launchingnext.com/", "action_url": "https://www.launchingnext.com/submit/", "audience_fit": 82, "authority": 70, "traffic_potential": 72, "backlink_value": 68, "acceptance_probability": 70, "automation_potential": 10, "effort": 18, "cost": 0, "human_required": true, "status": "human_action_required", "next_action": "Verified free submission form with manual review and quick-check challenge; no public API verified. Keep in human queue and never automate the form."
+    },
+    {
       "slug": "indexnow", "name": "IndexNow", "type": "search_discovery_api", "url": "https://www.indexnow.org/", "action_url": "https://api.indexnow.org/indexnow", "audience_fit": 100, "authority": 95, "traffic_potential": 72, "backlink_value": 0, "acceptance_probability": 99, "automation_potential": 100, "effort": 5, "cost": 0, "human_required": false, "status": "ready_to_submit", "next_action": "Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements."
     },
     {
