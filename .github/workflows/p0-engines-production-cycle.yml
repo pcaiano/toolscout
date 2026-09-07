@@ -70,14 +70,17 @@ jobs:
           node - "$body" <<'NODE'
           const fs = require('fs');
           const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          const r = data.research || data.discovery || {};
-          const c = data.coverage || data.snapshot || {};
+          const r = data.research || {};
+          const c = data.coverage || {};
           console.log('AFFILIATE_COVERAGE_ENGINE_SUMMARY=' + JSON.stringify({
             ok: data.ok === true,
-            coverage_pct: c.coverage_pct ?? c.coveragePct ?? null,
-            queue_size: data.queue_size ?? c.queue_size ?? null,
-            processed: r.processed ?? r.researched ?? null,
-            programs_found: r.programs_found ?? r.found ?? null,
+            human_outbound: c.human_outbound ?? null,
+            monetized_human_outbound: c.monetized ?? null,
+            unmonetized_human_outbound: c.unmonetized ?? null,
+            weighted_coverage: c.weighted ?? null,
+            queue_size: data.queue_size ?? null,
+            processed: r.processed ?? null,
+            programs_found: r.programs_found ?? null,
             human_actions: r.human_actions ?? null,
             cooldown_skipped: r.cooldown_skipped ?? null,
             cooldown_hours: r.cooldown_hours ?? null,
