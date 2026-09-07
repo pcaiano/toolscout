@@ -13,12 +13,18 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: audience-learning-export
+  cancel-in-progress: false
+
 jobs:
   export:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,4 +46,5 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add data/audience-learning.json data/audience-learning-history.json
           git commit -m "Update audience learning snapshot"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
