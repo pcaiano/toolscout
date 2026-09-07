@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-07T07:44:35.573Z",
+  "generatedAt": "2026-09-07T13:40:51.138Z",
   "windowDays": 30,
   "definition": "Likely-human sessions only. Social attribution uses recorded UTM source first and social referrer hosts as fallback. Topic intent uses ts_topic first and utm_term as fallback. Downstream actions are counted only after attributed social entry.",
-  "socialHumanSessions": 4,
+  "socialHumanSessions": 5,
   "platforms": [
     {
       "platform": "linkedin",
-      "sessions": 4,
+      "sessions": 5,
       "recommendationCompletions": 0,
       "outboundClicks": 0,
       "monetizedOutbound": 0
@@ -20,7 +20,7 @@
       "family": "unlabelled",
       "publishedDate": null,
       "postLevel": false,
-      "sessions": 4,
+      "sessions": 5,
       "recommendationCompletions": 0,
       "resultViews": 0,
       "outboundClicks": 0,
@@ -33,7 +33,7 @@
       "platform": "linkedin",
       "family": "unlabelled",
       "posts": 1,
-      "sessions": 4,
+      "sessions": 5,
       "recommendationCompletions": 0,
       "outboundClicks": 0,
       "monetizedOutbound": 0,
@@ -45,7 +45,7 @@
       "platform": "linkedin",
       "topicIntent": "unlabelled",
       "posts": 1,
-      "sessions": 4,
+      "sessions": 5,
       "recommendationCompletions": 0,
       "outboundClicks": 0,
       "monetizedOutbound": 0,
@@ -72,7 +72,7 @@
         "family": "unlabelled",
         "platform": "linkedin",
         "contentId": "unlabelled",
-        "sessions": 4,
+        "sessions": 5,
         "recommendationCompletions": 0,
         "outboundClicks": 0,
         "monetizedOutbound": 0
