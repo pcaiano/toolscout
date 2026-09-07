@@ -1,0 +1,90 @@
+[
+  {
+    "tool_slug": "systeme-io",
+    "checked_at": "2026-09-07T11:15:03.000Z",
+    "http_status": 302,
+    "location": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109",
+    "source": "https://trytoolscout.org/go/systeme-io",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "beehiiv",
+    "checked_at": "2026-09-07T11:14:58.000Z",
+    "http_status": 302,
+    "location": "https://www.beehiiv.com/?via=pedro-caiano",
+    "source": "https://trytoolscout.org/go/beehiiv",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "jotform",
+    "checked_at": "2026-09-07T11:15:01.000Z",
+    "http_status": 302,
+    "location": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
+    "source": "https://trytoolscout.org/go/jotform",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "pipedrive",
+    "checked_at": "2026-09-07T11:14:54.000Z",
+    "http_status": 302,
+    "location": "https://aff.trypipedrive.com/e5qvcwi1i22u",
+    "source": "https://trytoolscout.org/go/pipedrive",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "make",
+    "checked_at": "2026-09-07T11:13:33.000Z",
+    "http_status": 302,
+    "location": "https://www.make.com/en/register?pc=toolscout",
+    "source": "https://trytoolscout.org/go/make",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "adcreative-ai",
+    "checked_at": "2026-09-07T11:13:29.000Z",
+    "http_status": 302,
+    "location": "https://free-trial.adcreative.ai/tusb8l6nun5w",
+    "source": "https://trytoolscout.org/go/adcreative-ai",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "shopify",
+    "checked_at": "2026-09-07T11:13:26.000Z",
+    "http_status": 302,
+    "location": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
+    "source": "https://trytoolscout.org/go/shopify",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "typeform",
+    "checked_at": "2026-09-07T11:12:56.000Z",
+    "http_status": 302,
+    "location": "https://typeform.cello.so/32NCHvHV6ws",
+    "source": "https://trytoolscout.org/go/typeform",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "kit",
+    "checked_at": "2026-09-07T11:12:54.000Z",
+    "http_status": 302,
+    "location": "https://partners.kit.com/k3tjs4al3opn",
+    "source": "https://trytoolscout.org/go/kit",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "gorgias",
+    "checked_at": "2026-09-07T11:12:35.000Z",
+    "http_status": 302,
+    "location": "https://partner.gorgias.com/tes0ykxnwmqd",
+    "source": "https://trytoolscout.org/go/gorgias",
+    "synthetic": true
+  },
+  {
+    "tool_slug": "mailerlite",
+    "checked_at": "2026-09-07T11:12:28.000Z",
+    "http_status": 302,
+    "location": "https://www.mailerlite.com/?linkId=lp_170762&sourceId=pedro-caiano&tenantId=mailerlite",
+    "source": "https://trytoolscout.org/go/mailerlite",
+    "synthetic": true
+  }
+]

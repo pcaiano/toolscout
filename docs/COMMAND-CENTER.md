@@ -119,6 +119,18 @@ Revenue Gap score is `10 × unmonetized outbound + 2 × human sessions (capped a
 
 ## Affiliate status
 
+### Coverage sprint checkpoint — 2026-09-07
+
+Working source of truth: `data/affiliate-coverage.json`, with generated operational and human queues under `reports/affiliate-*.json`. This checkpoint is not a production deployment claim. Runtime routing remains `data/affiliate.json`.
+
+- Apollo: APPLIED; owner submission confirmed by the authenticated PartnerStack application-received page. Exact submission time is unavailable; do not invent it or repeat the application. Removed from human-action queue.
+- Tally: owner supplied `https://tally.cello.so/TUssLRGiwo3`; APPROVED_NOT_DEPLOYED pending live redirect verification.
+- SE Ranking: owner supplied `https://seranking.com/?ga=5249732&source=link`; APPROVED_NOT_DEPLOYED pending live redirect verification.
+- Brevo: historical rejection conflicts with PartnerStack dashboard Active badge. Inspect program-specific details and link availability before enabling routing; retain both pieces of evidence.
+- Coverage remains incomplete: 24/100 classified records in the working snapshot, 76 unresolved. A zero count of known eligible uncontacted programs is only a lower bound and does not satisfy the sprint completion criterion while eligibility remains unresolved.
+
+The older dated narrative below is retained as historical context and is superseded by newer record-level evidence.
+
 Canonical operational affiliate state is stored in `data/affiliate-pipeline.json` and active redirect configuration in `data/affiliate.json`.
 
 The private Affiliate Workflow is now the catalog-first Affiliate Operations Engine. It resolves all 100 catalog tools to one normalized state and one next action, keeps affiliate opportunity scoring separate from editorial ranking, exposes Human Actions Required first, and reports raw and traffic-weighted monetization coverage. D1 migration `0013_affiliate_operations_engine.sql` adds normalized operational metadata, append-only state history/evidence, and the Direct/Dub/Impact/PartnerStack registry.

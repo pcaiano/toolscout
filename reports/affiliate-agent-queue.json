@@ -1,0 +1,397 @@
+[
+  {
+    "tool_slug": "hubspot",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "semrush",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "jasper",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "brevo",
+    "next_action": "Inspect Brevo program details: dashboard Active label conflicts with rejection email; retrieve valid referral link before changing routing.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "monday-crm",
+    "next_action": "Check existing application/account, open official signup, and complete every authorized step.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "tally",
+    "next_action": "Deploy exact owner-supplied link and verify production redirect.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "se-ranking",
+    "next_action": "Deploy exact owner-supplied link and verify production redirect.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "claude",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "posthog",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "asana",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "trello",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "airtable",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "n8n",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "lemlist",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "intercom",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "zendesk",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "instantly",
+    "next_action": "Check existing application/account, open official signup, and complete every authorized step.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "klaviyo",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "canva",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "figma",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "grammarly",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "buffer",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "surfer",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "mixpanel",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "freshdesk",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "framer",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "perplexity",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "slack",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "cursor",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "loom",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "miro",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "hootsuite",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "sprout-social",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "later",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "socialbee",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "hotjar",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "amplitude",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "plausible",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "matomo",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "github",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "gitlab",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "replit",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "vercel",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "netlify",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "sentry",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "chatgpt",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "gemini",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "notebooklm",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "copy-ai",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "moz-pro",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "ubersuggest",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "mangools",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "screaming-frog",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "wix",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "squarespace",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "wordpress-com",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "help-scout",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "crisp",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "salesforce",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "close",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "copper",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "freshsales",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "attio",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "getresponse",
+    "next_action": "Inspect rejection reason to classify objective eligibility or suitability; do not duplicate application.",
+    "review_due_at": "2026-09-11T11:00:00Z"
+  },
+  {
+    "tool_slug": "omnisend",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "constant-contact",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "basecamp",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "wrike",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "linear",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "jira",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "pabbly-connect",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "integrately",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "workato",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "paperform",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "fillout",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "bigcommerce",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "woocommerce",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "adobe-express",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  },
+  {
+    "tool_slug": "descript",
+    "next_action": "Reconcile existing evidence, then verify official program and execute authorized application.",
+    "review_due_at": "2026-09-07T11:12:00.304Z"
+  }
+]

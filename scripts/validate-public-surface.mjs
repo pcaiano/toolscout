@@ -41,6 +41,9 @@ function hasVendorTracking(rawUrl, slug) {
     if (slug === 'shopify' && host === 'shopify.pxf.io' && /^\/[a-z0-9_-]+\/?$/i.test(url.pathname)) return true;
     if (slug === 'adcreative-ai' && host === 'free-trial.adcreative.ai' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     if (slug === 'typeform' && host === 'typeform.cello.so' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
+    if (slug === 'tally' && host === 'tally.cello.so' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
+    if (slug === 'se-ranking' && host === 'seranking.com' && /^\d+$/.test(url.searchParams.get('ga') || '') && url.searchParams.get('source') === 'link') return true;
+    if (slug === 'mailerlite' && host === 'mailerlite.com' && /^lp_\d+$/.test(url.searchParams.get('linkId') || '') && url.searchParams.get('sourceId') && url.searchParams.get('tenantId') === 'mailerlite') return true;
     if (slug === 'kit' && host === 'partners.kit.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     if (slug === 'gorgias' && host === 'partner.gorgias.com' && /^\/[a-z0-9]+\/?$/i.test(url.pathname)) return true;
     return false;
