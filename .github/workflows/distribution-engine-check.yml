@@ -171,9 +171,12 @@ jobs:
           grep -Fq "'research_required'" distribution-submission-worker.js
           grep -Fq "'setup_required'" distribution-submission-worker.js
           grep -Fq "payload_kind==='agenttool_tool'" distribution-submission-worker.js
+          grep -Fq 'submission_verification_refresh' distribution-submission-worker.js
+          grep -Fq '/api/distribution/submissions/verify' distribution-submission-worker.js
+          grep -Fq 'await verifySubmitted(new Request' distribution-submission-worker.js
           grep -Fq "asset_scope==='product'" distribution-submission-worker.js
           grep -Fq 'indexCooling?max:max-indexRows.length' distribution-submission-worker.js
-          node -e "const d=require('./data/distribution-submission-adapters.json'); const a=d.adapters.find(x=>x.surface_slug==='listed-startups'); if(!a||a.endpoint!=='https://listedstartups.com/api/listings'||a.validation_endpoint!=='https://listedstartups.com/api/listings/validate'||a.auth_env!=='LISTED_STARTUPS_TOKEN'||a.validated_category!=='Software'||a.enabled!==false||a.allow_automatic!==false) process.exit(1); const g=d.adapters.find(x=>x.surface_slug==='agenttool-sh'); if(!g||g.endpoint!=='https://agenttool.sh/api/tools/submit'||g.payload_kind!=='agenttool_tool'||g.asset_scope!=='product'||g.enabled!==true||g.allow_automatic!==true||g.requires_payment!==false) process.exit(1)"
+          node -e "const d=require('./data/distribution-submission-adapters.json'); const a=d.adapters.find(x=>x.surface_slug==='listed-startups'); if(!a||a.endpoint!=='https://listedstartups.com/api/listings'||a.validation_endpoint!=='https://listedstartups.com/api/listings/validate'||a.auth_env!=='LISTED_STARTUPS_TOKEN'||a.validated_category!=='Software'||a.enabled!==false||a.allow_automatic!==false) process.exit(1); const g=d.adapters.find(x=>x.surface_slug==='agenttool-sh'); if(!g||g.endpoint!=='https://agenttool.sh/api/tools/submit'||g.payload_kind!=='agenttool_tool'||g.asset_scope!=='product'||g.enabled!==true||g.allow_automatic!==true||g.requires_payment!==false||g.verification_endpoint!=='https://agenttool.sh/api/tools/toolscout'||g.public_url!=='https://agenttool.sh/tools/toolscout') process.exit(1)"
       - name: Validate event-driven orchestration and community guardrails
         run: |
           grep -Fq '/api/distribution/orchestrate' distribution-orchestrator-worker.js
@@ -207,6 +210,8 @@ jobs:
           grep -Fq 'performance_score' distribution-command-worker.js
           grep -Fq 'Research required' distribution-command-worker.js
           grep -Fq 'researchRequired' distribution-command-worker.js
+          grep -Fq 'Public verified' distribution-command-worker.js
+          grep -Fq 'publicVerified' distribution-command-worker.js
       - name: Validate distribution attribution and learning
         run: |
           grep -Fq '/api/distribution/embed-event' distribution-learning-worker.js
