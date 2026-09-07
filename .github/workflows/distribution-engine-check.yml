@@ -33,6 +33,7 @@ on:
       - 'migrations/0037_sync_verified_human_distribution_routes.sql'
       - 'migrations/0038_close_distribution_research_backlog.sql'
       - 'migrations/0039_add_agenttool_distribution.sql'
+      - 'migrations/0040_add_ora_distribution.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -66,6 +67,7 @@ on:
       - 'migrations/0037_sync_verified_human_distribution_routes.sql'
       - 'migrations/0038_close_distribution_research_backlog.sql'
       - 'migrations/0039_add_agenttool_distribution.sql'
+      - 'migrations/0040_add_ora_distribution.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -117,6 +119,7 @@ jobs:
           test -s migrations/0037_sync_verified_human_distribution_routes.sql
           test -s migrations/0038_close_distribution_research_backlog.sql
           test -s migrations/0039_add_agenttool_distribution.sql
+          test -s migrations/0040_add_ora_distribution.sql
           node -e "const d=require('./data/distribution-publishing-profile.json'); if(d.product?.website!=='https://trytoolscout.org/'||d.product?.name!=='ToolScout'||d.policy?.automatic_paid_distribution!==false||d.policy?.automatic_account_creation!==false||d.policy?.automatic_reciprocal_badges!==false) process.exit(1)"
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_submissions' migrations/0023_distribution_submission.sql
@@ -141,9 +144,10 @@ jobs:
           grep -Fq "manual_submission_route" migrations/0038_close_distribution_research_backlog.sql
           grep -Fq "reciprocal_badge_policy" migrations/0038_close_distribution_research_backlog.sql
           grep -Fq "'agenttool-sh','agenttool.sh'" migrations/0039_add_agenttool_distribution.sql
+          grep -Fq "'ora-ai','Ora'" migrations/0040_add_ora_distribution.sql
       - name: Validate radar, discovery and syndication
         run: |
-          node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const g=d.sources.find(x=>x.slug==='agenttool-sh'); if(!g||g.status!=='ready_to_submit'||g.human_required!==false) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1); for(const s of ['the-rundown-ai-supertools','launch-llama','best-of-ai','nextool-ai','stremit']){const x=d.sources.find(v=>v.slug===s); if(!x||x.status!=='human_action_required'||x.human_required!==true) process.exit(1)}"
+          node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const g=d.sources.find(x=>x.slug==='agenttool-sh'); if(!g||g.status!=='ready_to_submit'||g.human_required!==false) process.exit(1); const o=d.sources.find(x=>x.slug==='ora-ai'); if(!o||o.status!=='ready_to_submit'||o.human_required!==false) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1); for(const s of ['the-rundown-ai-supertools','launch-llama','best-of-ai','nextool-ai','stremit']){const x=d.sources.find(v=>v.slug===s); if(!x||x.status!=='human_action_required'||x.human_required!==true) process.exit(1)}"
           node -e "const d=require('./data/distribution-discovery-sources.json'); if(!Array.isArray(d.sources)||d.sources.length<2) process.exit(1)"
           grep -Fq '/api/distribution/feed.json' distribution-radar-worker.js
           grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
@@ -171,12 +175,14 @@ jobs:
           grep -Fq "'research_required'" distribution-submission-worker.js
           grep -Fq "'setup_required'" distribution-submission-worker.js
           grep -Fq "payload_kind==='agenttool_tool'" distribution-submission-worker.js
+          grep -Fq "payload_kind==='ora_scan'" distribution-submission-worker.js
+          grep -Fq 'function timeoutFor(adapter)' distribution-submission-worker.js
           grep -Fq 'submission_verification_refresh' distribution-submission-worker.js
           grep -Fq '/api/distribution/submissions/verify' distribution-submission-worker.js
           grep -Fq 'await verifySubmitted(new Request' distribution-submission-worker.js
           grep -Fq "asset_scope==='product'" distribution-submission-worker.js
           grep -Fq 'indexCooling?max:max-indexRows.length' distribution-submission-worker.js
-          node -e "const d=require('./data/distribution-submission-adapters.json'); const a=d.adapters.find(x=>x.surface_slug==='listed-startups'); if(!a||a.endpoint!=='https://listedstartups.com/api/listings'||a.validation_endpoint!=='https://listedstartups.com/api/listings/validate'||a.auth_env!=='LISTED_STARTUPS_TOKEN'||a.validated_category!=='Software'||a.enabled!==false||a.allow_automatic!==false) process.exit(1); const g=d.adapters.find(x=>x.surface_slug==='agenttool-sh'); if(!g||g.endpoint!=='https://agenttool.sh/api/tools/submit'||g.payload_kind!=='agenttool_tool'||g.asset_scope!=='product'||g.enabled!==true||g.allow_automatic!==true||g.requires_payment!==false||g.verification_endpoint!=='https://agenttool.sh/api/tools/toolscout'||g.public_url!=='https://agenttool.sh/tools/toolscout') process.exit(1)"
+          node -e "const d=require('./data/distribution-submission-adapters.json'); const a=d.adapters.find(x=>x.surface_slug==='listed-startups'); if(!a||a.endpoint!=='https://listedstartups.com/api/listings'||a.validation_endpoint!=='https://listedstartups.com/api/listings/validate'||a.auth_env!=='LISTED_STARTUPS_TOKEN'||a.validated_category!=='Software'||a.enabled!==false||a.allow_automatic!==false) process.exit(1); const g=d.adapters.find(x=>x.surface_slug==='agenttool-sh'); if(!g||g.endpoint!=='https://agenttool.sh/api/tools/submit'||g.payload_kind!=='agenttool_tool'||g.asset_scope!=='product'||g.enabled!==true||g.allow_automatic!==true||g.requires_payment!==false||g.verification_endpoint!=='https://agenttool.sh/api/tools/toolscout'||g.public_url!=='https://agenttool.sh/tools/toolscout') process.exit(1); const o=d.adapters.find(x=>x.surface_slug==='ora-ai'); if(!o||o.endpoint!=='https://ora.ai/api/scan?include=essentials'||o.payload_kind!=='ora_scan'||o.asset_scope!=='product'||o.enabled!==true||o.allow_automatic!==true||o.requires_payment!==false||o.timeout_ms!==60000||o.verification_endpoint!=='https://ora.ai/score/trytoolscout.org') process.exit(1)"
       - name: Validate event-driven orchestration and community guardrails
         run: |
           grep -Fq '/api/distribution/orchestrate' distribution-orchestrator-worker.js
