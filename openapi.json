@@ -1,0 +1,113 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ToolScout Public Discovery API",
+    "version": "1.0.0",
+    "description": "Public read-only discovery and distribution endpoints for ToolScout. No authentication is required for the endpoints documented here."
+  },
+  "servers": [
+    {"url": "https://trytoolscout.org"}
+  ],
+  "paths": {
+    "/api/distribution/feed.json": {
+      "get": {
+        "summary": "Get recent ToolScout distribution assets",
+        "operationId": "getDistributionFeed",
+        "responses": {
+          "200": {
+            "description": "Recent ToolScout assets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name","home","updated_at","items"],
+                  "properties": {
+                    "name": {"type": "string"},
+                    "home": {"type": "string","format": "uri"},
+                    "updated_at": {"type": "string","format": "date-time"},
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["url"],
+                        "properties": {
+                          "url": {"type": "string","format": "uri"},
+                          "type": {"type": ["string","null"]},
+                          "last_seen_at": {"type": ["string","null"]}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/toolscout-distribution.json": {
+      "get": {
+        "summary": "Get ToolScout machine-discovery and embed manifest",
+        "operationId": "getDistributionManifest",
+        "responses": {
+          "200": {
+            "description": "ToolScout distribution manifest",
+            "content": {
+              "application/json": {
+                "schema": {"type": "object"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/distribution/feed.xml": {
+      "get": {
+        "summary": "Get ToolScout distribution RSS feed",
+        "operationId": "getDistributionRss",
+        "responses": {
+          "200": {
+            "description": "RSS 2.0 distribution feed",
+            "content": {
+              "application/rss+xml": {
+                "schema": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/embed/toolscout.js": {
+      "get": {
+        "summary": "Get the generic ToolScout embed script",
+        "operationId": "getToolScoutEmbed",
+        "responses": {
+          "200": {
+            "description": "JavaScript embed",
+            "content": {
+              "application/javascript": {
+                "schema": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/embed/badge.svg": {
+      "get": {
+        "summary": "Get the ToolScout embed badge",
+        "operationId": "getToolScoutBadge",
+        "responses": {
+          "200": {
+            "description": "ToolScout SVG badge",
+            "content": {
+              "image/svg+xml": {
+                "schema": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
