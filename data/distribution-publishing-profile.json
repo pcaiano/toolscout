@@ -1,0 +1,35 @@
+{
+  "product": {
+    "name": "ToolScout",
+    "slug": "toolscout",
+    "website": "https://trytoolscout.org/",
+    "tagline": "Find the right software for the job — without the noise.",
+    "short_tagline": "Find the right tool. Faster.",
+    "description": "ToolScout is an independent software discovery and recommendation platform that turns a buyer workflow, persona and constraints into a focused shortlist of relevant tools, with transparent comparisons and no pay-to-rank recommendations.",
+    "audience": "Small businesses, consultants, agencies, creators, sales and marketing teams, and software buyers.",
+    "category": "Software",
+    "tinylaunch_category_preference": ["SaaS & Tools", "Startup & Small Business"],
+    "indietool_category_preference": ["Productivity", "Marketing"],
+    "differentiator": "Intent-driven recommendations: affiliate relationships never influence ranking.",
+    "feed_json": "https://trytoolscout.org/api/distribution/feed.json",
+    "feed_rss": "https://trytoolscout.org/distribution/feed.xml",
+    "llms": "https://trytoolscout.org/llms.txt",
+    "agents": "https://trytoolscout.org/agents.md",
+    "manifest": "https://trytoolscout.org/.well-known/toolscout-distribution.json"
+  },
+  "founder": {
+    "name": "Pedro Caiano",
+    "first_name": "Pedro",
+    "last_name": "Caiano",
+    "country": "Portugal",
+    "x_brand": "https://x.com/trytoolscout",
+    "linkedin_company": "https://www.linkedin.com/company/146229906/"
+  },
+  "policy": {
+    "pay_to_rank": false,
+    "affiliate_influences_ranking": false,
+    "automatic_paid_distribution": false,
+    "automatic_account_creation": false,
+    "automatic_reciprocal_badges": false
+  }
+}

@@ -1,16 +1,16 @@
 {
   "summary": {
     "tools": 100,
-    "generatedAt": "2026-09-07T10:16:24.508Z",
+    "generatedAt": "2026-09-07T14:02:22.899Z",
     "cadence": {
       "linkHealth": "daily",
       "metadataFreshness": "daily age check; weekly review threshold at 7 days",
       "deepReview": "monthly threshold at 30 days"
     },
     "sourceLinks": {
-      "healthy": 90,
+      "healthy": 92,
       "confirmedBroken": 0,
-      "warnings": 10
+      "warnings": 8
     },
     "affiliateLinks": {
       "active": 11,
@@ -141,7 +141,7 @@
         "url": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.jotform.com/?utm_source=pcaiano&utm_campaign=jf1&rp=%2Fproducts%2Fform-builder%2F",
+        "finalUrl": "https://www.jotform.com/products/form-builder/?utm_source=pcaiano&utm_campaign=jf1",
         "error": null
       }
     },
@@ -907,7 +907,7 @@
         "url": "https://webflow.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://webflowmarketingmain.com/fr",
+        "finalUrl": "https://webflowmarketingmain.com/de",
         "error": null
       },
       "affiliate": {
@@ -1083,7 +1083,7 @@
         "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.shopify.com/free-trial?irclickid=26T3TzWOtxyZRYiSg7XiwXWhUkr2mDSPyyFn3g0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=Q2Ix3UWLwxyZW-tRt7xbHyTIUkr2jkS2IQsiwA0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
         "error": null
       }
     },
@@ -1477,7 +1477,7 @@
         "url": "https://notebooklm.google.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S2099049406:1788776187066602",
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S1394166295:1788789745092450",
         "error": null
       },
       "affiliate": {
@@ -1922,8 +1922,8 @@
       "missingCritical": [],
       "source": {
         "url": "https://basecamp.com/",
-        "status": "blocked_or_limited",
-        "httpStatus": 403,
+        "status": "ok",
+        "httpStatus": 200,
         "finalUrl": "https://basecamp.com/",
         "error": null
       },
@@ -1985,10 +1985,10 @@
       "missingCritical": [],
       "source": {
         "url": "https://www.atlassian.com/software/jira",
-        "status": "network_warning",
-        "httpStatus": null,
-        "finalUrl": null,
-        "error": "timeout"
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.atlassian.com/software/jira",
+        "error": null
       },
       "affiliate": {
         "enabled": false,

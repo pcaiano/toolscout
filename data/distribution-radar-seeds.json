@@ -1,106 +1,40 @@
 {
   "sources": [
     {
-      "slug": "the-rundown-ai-supertools",
-      "name": "The Rundown AI / Supertools",
-      "type": "newsletter_directory",
-      "url": "https://www.therundown.ai/",
-      "action_url": "https://www.therundown.ai/submit-a-tool",
-      "audience_fit": 92,
-      "authority": 88,
-      "traffic_potential": 90,
-      "backlink_value": 72,
-      "acceptance_probability": 42,
-      "automation_potential": 55,
-      "effort": 28,
-      "cost": 0,
-      "human_required": false,
-      "next_action": "Prepare editorial tool submission and track acceptance/referral performance."
+      "slug": "the-rundown-ai-supertools", "name": "The Rundown AI / Supertools", "type": "newsletter_directory", "url": "https://www.therundown.ai/", "action_url": "https://www.therundown.ai/submit-a-tool", "audience_fit": 92, "authority": 88, "traffic_potential": 90, "backlink_value": 72, "acceptance_probability": 42, "automation_potential": 20, "effort": 28, "cost": 0, "human_required": true, "next_action": "Prepare editorial tool submission; do not automate without a documented API." 
     },
     {
-      "slug": "launch-llama",
-      "name": "Launch Llama",
-      "type": "newsletter_directory",
-      "url": "https://launchllama.com/",
-      "action_url": "https://launchllama.com/",
-      "audience_fit": 82,
-      "authority": 70,
-      "traffic_potential": 78,
-      "backlink_value": 62,
-      "acceptance_probability": 72,
-      "automation_potential": 65,
-      "effort": 22,
-      "cost": 0,
-      "human_required": false,
-      "next_action": "Use the free submission route and measure newsletter/direct referral quality."
+      "slug": "launch-llama", "name": "Launch Llama", "type": "newsletter_directory", "url": "https://launchllama.com/", "action_url": "https://launchllama.com/", "audience_fit": 82, "authority": 70, "traffic_potential": 78, "backlink_value": 62, "acceptance_probability": 72, "automation_potential": 20, "effort": 22, "cost": 0, "human_required": true, "next_action": "Use reviewed submission route; keep outside automatic execution until an official API is verified."
     },
     {
-      "slug": "best-of-ai",
-      "name": "Best of AI",
-      "type": "ai_directory_syndication",
-      "url": "https://bestofai.com/",
-      "action_url": "https://bestofai.com/",
-      "audience_fit": 88,
-      "authority": 73,
-      "traffic_potential": 84,
-      "backlink_value": 78,
-      "acceptance_probability": 58,
-      "automation_potential": 62,
-      "effort": 26,
-      "cost": 0,
-      "human_required": false,
-      "next_action": "Submit once, then verify any directory/newsletter/GitHub distribution actually received."
+      "slug": "best-of-ai", "name": "Best of AI", "type": "ai_directory_syndication", "url": "https://bestofai.com/", "action_url": "https://bestofai.com/", "audience_fit": 88, "authority": 73, "traffic_potential": 84, "backlink_value": 78, "acceptance_probability": 58, "automation_potential": 20, "effort": 26, "cost": 0, "human_required": true, "next_action": "Keep in editorial queue until an official programmatic submission route is verified."
     },
     {
-      "slug": "launched-tools",
-      "name": "launched.tools",
-      "type": "software_directory_newsletter",
-      "url": "https://launched.tools/",
-      "action_url": "https://launched.tools/",
-      "audience_fit": 80,
-      "authority": 66,
-      "traffic_potential": 66,
-      "backlink_value": 78,
-      "acceptance_probability": 70,
-      "automation_potential": 68,
-      "effort": 20,
-      "cost": 0,
-      "human_required": false,
-      "next_action": "Submit through the free reviewed route and record backlinks/newsletter inclusion."
+      "slug": "launched-tools", "name": "launched.tools", "type": "software_directory_newsletter", "url": "https://launched.tools/", "action_url": "https://launched.tools/", "audience_fit": 80, "authority": 66, "traffic_potential": 66, "backlink_value": 78, "acceptance_probability": 70, "automation_potential": 20, "effort": 20, "cost": 0, "human_required": true, "next_action": "Keep in reviewed submission queue until an official API is verified."
     },
     {
-      "slug": "nextool-ai",
-      "name": "Nextool AI",
-      "type": "ai_directory",
-      "url": "https://www.nextool.ai/",
-      "action_url": "https://www.nextool.ai/",
-      "audience_fit": 84,
-      "authority": 72,
-      "traffic_potential": 82,
-      "backlink_value": 68,
-      "acceptance_probability": 61,
-      "automation_potential": 62,
-      "effort": 24,
-      "cost": 0,
-      "human_required": false,
-      "next_action": "Use free/basic review route only; benchmark referral quality before any paid boost."
+      "slug": "nextool-ai", "name": "Nextool AI", "type": "ai_directory", "url": "https://www.nextool.ai/", "action_url": "https://www.nextool.ai/", "audience_fit": 84, "authority": 72, "traffic_potential": 82, "backlink_value": 68, "acceptance_probability": 61, "automation_potential": 20, "effort": 24, "cost": 0, "human_required": true, "next_action": "Use free/basic review route only; do not automate forms."
     },
     {
-      "slug": "stremit",
-      "name": "Stremit",
-      "type": "software_directory_newsletter",
-      "url": "https://stremit.com/",
-      "action_url": "https://stremit.com/",
-      "audience_fit": 72,
-      "authority": 60,
-      "traffic_potential": 58,
-      "backlink_value": 64,
-      "acceptance_probability": 75,
-      "automation_potential": 70,
-      "effort": 18,
-      "cost": 0,
-      "human_required": false,
-      "next_action": "Use standard free listing and track any newsletter/referral lift before considering upgrades."
+      "slug": "stremit", "name": "Stremit", "type": "software_directory_newsletter", "url": "https://stremit.com/", "action_url": "https://stremit.com/", "audience_fit": 72, "authority": 60, "traffic_potential": 58, "backlink_value": 64, "acceptance_probability": 75, "automation_potential": 20, "effort": 18, "cost": 0, "human_required": true, "next_action": "Keep manual until a documented API is verified."
+    },
+    {
+      "slug": "launching-next", "name": "Launching Next", "type": "startup_directory_newsletter", "url": "https://www.launchingnext.com/", "action_url": "https://www.launchingnext.com/submit/", "audience_fit": 82, "authority": 70, "traffic_potential": 72, "backlink_value": 68, "acceptance_probability": 70, "automation_potential": 10, "effort": 18, "cost": 0, "human_required": true, "status": "human_action_required", "next_action": "Verified free submission form with manual review and quick-check challenge; no public API verified. Keep in human queue and never automate the form."
+    },
+    {
+      "slug": "indexnow", "name": "IndexNow", "type": "search_discovery_api", "url": "https://www.indexnow.org/", "action_url": "https://api.indexnow.org/indexnow", "audience_fit": 100, "authority": 95, "traffic_potential": 72, "backlink_value": 0, "acceptance_probability": 99, "automation_potential": 100, "effort": 5, "cost": 0, "human_required": false, "status": "ready_to_submit", "next_action": "Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements."
+    },
+    {
+      "slug": "tinylaunch", "name": "TinyLaunch", "type": "agent_ready_launch_directory", "url": "https://www.tinylaunch.com/", "action_url": "https://www.tinylaunch.com/agents", "audience_fit": 91, "authority": 72, "traffic_potential": 76, "backlink_value": 70, "acceptance_probability": 80, "automation_potential": 95, "effort": 15, "cost": 0, "human_required": false, "status": "needs_info", "next_action": "Official JSON API verified. Setup still requires authorized email OTP authentication, a maker profile, a real category id and a compliant logo asset before automatic submission can be enabled."
+    },
+    {
+      "slug": "listed-startups", "name": "Listed Startups", "type": "agent_ready_startup_directory", "url": "https://listedstartups.com/", "action_url": "https://listedstartups.com/api/listings", "audience_fit": 83, "authority": 60, "traffic_potential": 62, "backlink_value": 75, "acceptance_probability": 95, "automation_potential": 95, "effort": 10, "cost": 0, "human_required": false, "status": "ready_to_submit", "next_action": "REST publishing contract and ToolScout payload are validated. Await explicit authorization to register an agent identity and obtain LISTED_STARTUPS_TOKEN; then allowlist automatic audited publication."
+    },
+    {
+      "slug": "indietool", "name": "IndieTool", "type": "startup_directory_api", "url": "https://www.indietool.io/", "action_url": "https://www.indietool.io/api/v1/apps/submit", "audience_fit": 86, "authority": 65, "traffic_potential": 66, "backlink_value": 80, "acceptance_probability": 90, "automation_potential": 95, "effort": 12, "cost": 1, "human_required": false, "status": "policy_blocked", "next_action": "API submissions consume credits, so keep the API disabled under ToolScout zero-cost policy. IndieTool also offers a free listing route that requires embedding its badge; do not install that reciprocal badge without explicit approval."
+    },
+    {
+      "slug": "startuphub-ai", "name": "StartupHub.ai", "type": "startup_directory_api", "url": "https://www.startuphub.ai/", "action_url": "https://www.startuphub.ai/api/v1/startups/submit", "audience_fit": 88, "authority": 68, "traffic_potential": 70, "backlink_value": 72, "acceptance_probability": 85, "automation_potential": 90, "effort": 18, "cost": 5, "human_required": false, "status": "policy_blocked", "next_action": "Official agent submission API verified but uses credits/authentication; keep disabled under zero-cost policy unless free credits are available."
     }
   ]
 }

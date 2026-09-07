@@ -1,0 +1,41 @@
+name: Command Center Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'analytics.html'
+      - 'distribution-command-worker.js'
+      - 'wrangler.toml'
+      - '.github/workflows/command-center-smoke.yml'
+  schedule:
+    - cron: '35 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PROD_BASE: https://trytoolscout.org
+
+jobs:
+  command-center:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify private analytics bridge
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          body="$(mktemp)"
+          code="$(curl --silent --show-error --dump-header "$headers" --output "$body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE/analytics/api/stats" || true)"
+          echo "HTTP $code"
+          cat "$headers"
+          if [ "$code" != "401" ]; then
+            echo "ERROR: expected the private bridge to reject a request without its Command Center cookie with HTTP 401."
+            echo "A redirect means Cloudflare Access is still intercepting the browser-to-data route; 200 means the route is exposed."
+            cat "$body"
+            exit 1
+          fi
+          grep -F 'application/json' "$headers"
+          grep -F 'command_center_session_expired' "$body"
+          echo 'Private analytics bridge is reachable directly and correctly protected by the Command Center session cookie.'

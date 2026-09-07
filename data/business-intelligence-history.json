@@ -157,5 +157,323 @@
       "monetizationCoverage": 20.8,
       "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
     }
+  },
+  {
+    "generatedAt": "2026-09-07T12:18:38.401Z",
+    "timezone": "Europe/Lisbon",
+    "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+    "traffic": {
+      "today": {
+        "total": 25,
+        "likelyHuman": 12,
+        "bots": 13,
+        "owner": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0
+      },
+      "d7": {
+        "total": 1488,
+        "likelyHuman": 258,
+        "bots": 150,
+        "owner": 37,
+        "synthetic": 0,
+        "unknownLegacy": 1043
+      },
+      "d30": {
+        "total": 1488,
+        "likelyHuman": 258,
+        "bots": 150,
+        "owner": 37,
+        "synthetic": 0,
+        "unknownLegacy": 1043
+      },
+      "dailyLikelyHuman30d": [
+        {
+          "day": "2026-09-01",
+          "sessions": 23
+        },
+        {
+          "day": "2026-09-02",
+          "sessions": 39
+        },
+        {
+          "day": "2026-09-03",
+          "sessions": 99
+        },
+        {
+          "day": "2026-09-04",
+          "sessions": 28
+        },
+        {
+          "day": "2026-09-05",
+          "sessions": 16
+        },
+        {
+          "day": "2026-09-06",
+          "sessions": 41
+        },
+        {
+          "day": "2026-09-07",
+          "sessions": 12
+        }
+      ],
+      "averageDailyLikelyHuman30d": 8.6
+    },
+    "funnel30d": {
+      "recommendationStarted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "recommendationCompleted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "resultViewed": {
+        "events": 4,
+        "sessions": 2
+      },
+      "toolViewed": {
+        "events": 0,
+        "sessions": 0
+      },
+      "outboundClicked": {
+        "events": 183,
+        "sessions": 183
+      },
+      "recommendationCompletionRate": 100
+    },
+    "commercial30d": {
+      "outboundClicks": 183,
+      "sessionsWithOutbound": 183,
+      "monetizedOutbound": 38,
+      "monetizationCoverage": 20.8,
+      "humanSessionToOutboundRate": 70.9
+    },
+    "sources30d": [
+      {
+        "source": "direct",
+        "sessions": 63
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 2
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+        "sessions": 2
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 2
+      },
+      {
+        "source": "ref:producthunt.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:google.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dollarplatoon.com",
+        "sessions": 1
+      }
+    ],
+    "intents30d": [
+      {
+        "intent": "general",
+        "sessions": 184,
+        "recommendationCompletions": 3,
+        "outboundClicks": 183
+      },
+      {
+        "intent": "unlabelled",
+        "sessions": 75,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "best-free-crm",
+        "sessions": 1,
+        "recommendationCompletions": 1,
+        "outboundClicks": 0
+      }
+    ],
+    "revenue90d": {
+      "ledger": [],
+      "verified": [],
+      "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
+    },
+    "projectionInputs": {
+      "humanSessions30d": 258,
+      "humanDailyAverage30d": 8.6,
+      "recommendationCompletionRate": 0.8,
+      "humanSessionToOutboundRate": 70.9,
+      "monetizationCoverage": 20.8,
+      "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
+    }
+  },
+  {
+    "generatedAt": "2026-09-07T18:13:46.937Z",
+    "timezone": "Europe/Lisbon",
+    "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+    "traffic": {
+      "today": {
+        "total": 40,
+        "likelyHuman": 17,
+        "bots": 15,
+        "owner": 0,
+        "synthetic": 0,
+        "unknownLegacy": 8
+      },
+      "d7": {
+        "total": 1503,
+        "likelyHuman": 263,
+        "bots": 152,
+        "owner": 37,
+        "synthetic": 0,
+        "unknownLegacy": 1051
+      },
+      "d30": {
+        "total": 1503,
+        "likelyHuman": 263,
+        "bots": 152,
+        "owner": 37,
+        "synthetic": 0,
+        "unknownLegacy": 1051
+      },
+      "dailyLikelyHuman30d": [
+        {
+          "day": "2026-09-01",
+          "sessions": 23
+        },
+        {
+          "day": "2026-09-02",
+          "sessions": 39
+        },
+        {
+          "day": "2026-09-03",
+          "sessions": 99
+        },
+        {
+          "day": "2026-09-04",
+          "sessions": 28
+        },
+        {
+          "day": "2026-09-05",
+          "sessions": 16
+        },
+        {
+          "day": "2026-09-06",
+          "sessions": 41
+        },
+        {
+          "day": "2026-09-07",
+          "sessions": 17
+        }
+      ],
+      "averageDailyLikelyHuman30d": 8.77
+    },
+    "funnel30d": {
+      "recommendationStarted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "recommendationCompleted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "resultViewed": {
+        "events": 4,
+        "sessions": 2
+      },
+      "toolViewed": {
+        "events": 0,
+        "sessions": 0
+      },
+      "outboundClicked": {
+        "events": 184,
+        "sessions": 184
+      },
+      "recommendationCompletionRate": 100
+    },
+    "commercial30d": {
+      "outboundClicks": 184,
+      "sessionsWithOutbound": 184,
+      "monetizedOutbound": 38,
+      "monetizationCoverage": 20.7,
+      "humanSessionToOutboundRate": 70
+    },
+    "sources30d": [
+      {
+        "source": "direct",
+        "sessions": 65
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+        "sessions": 3
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+        "sessions": 2
+      },
+      {
+        "source": "ref:producthunt.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:google.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dollarplatoon.com",
+        "sessions": 1
+      }
+    ],
+    "intents30d": [
+      {
+        "intent": "general",
+        "sessions": 185,
+        "recommendationCompletions": 3,
+        "outboundClicks": 184
+      },
+      {
+        "intent": "unlabelled",
+        "sessions": 79,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "best-free-crm",
+        "sessions": 1,
+        "recommendationCompletions": 1,
+        "outboundClicks": 0
+      }
+    ],
+    "revenue90d": {
+      "ledger": [],
+      "verified": [],
+      "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
+    },
+    "projectionInputs": {
+      "humanSessions30d": 263,
+      "humanDailyAverage30d": 8.77,
+      "recommendationCompletionRate": 0.8,
+      "humanSessionToOutboundRate": 70,
+      "monetizationCoverage": 20.7,
+      "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
+    }
   }
 ]

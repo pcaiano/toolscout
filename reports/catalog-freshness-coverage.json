@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T10:15:54.441Z",
+  "generatedAt": "2026-09-07T14:01:57.950Z",
   "methodology": "Autonomous catalog maintenance using official-source verification, independent market-demand signals, deterministic quality gates and affiliate-neutral selection. Affiliate status and commission never increase editorial admission or ranking.",
   "summary": {
     "tools": 100,
@@ -7,8 +7,8 @@
     "quarantined": 0,
     "discovered": 0,
     "coverageGaps": 8,
-    "sourceHealthy": 90,
-    "sourceWarnings": 10
+    "sourceHealthy": 91,
+    "sourceWarnings": 9
   },
   "changes": [],
   "coverage": [
@@ -142,19 +142,30 @@
   "discovered": [],
   "contentChanges": [
     {
+      "slug": "beehiiv",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.beehiiv.com/",
+      "fingerprint": "fdea9cfada15ee2b3f08527f",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
+    },
+    {
       "slug": "mailchimp",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://mailchimp.com/",
-      "fingerprint": "d7f7ab69015a9ddf29577fb3",
+      "fingerprint": "5c03317863952d853521b095",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 9
     },
     {
       "slug": "se-ranking",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://seranking.com/",
@@ -165,18 +176,40 @@
     },
     {
       "slug": "airtable",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.airtable.com/",
-      "fingerprint": "2f5b337b1396a6e9900b4eb6",
+      "fingerprint": "47520118150db15075941f0d",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "n8n",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://n8n.io/",
+      "fingerprint": "06b6e910635d890ee29e7976",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "lemlist",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.lemlist.com/",
+      "fingerprint": "48cb2f55ec1a04205af1a3e2",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 6
     },
     {
       "slug": "intercom",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.intercom.com/",
@@ -187,18 +220,18 @@
     },
     {
       "slug": "buffer",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://buffer.com/",
-      "fingerprint": "681e280a561882b156767c33",
+      "fingerprint": "66e148b1e516845cd480a4e3",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 6
     },
     {
       "slug": "surfer",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://surferseo.com/",
@@ -208,63 +241,74 @@
       "factualReviewAgeDays": 6
     },
     {
-      "slug": "framer",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
-      "sourceStatus": "ok",
-      "httpStatus": 200,
-      "finalUrl": "https://www.framer.com/",
-      "fingerprint": "88c84b17c1b65128b40ee795",
-      "contentChanged": true,
-      "brokenConsecutive": 0,
-      "factualReviewAgeDays": 6
-    },
-    {
-      "slug": "miro",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
-      "sourceStatus": "ok",
-      "httpStatus": 200,
-      "finalUrl": "https://miro.com/",
-      "fingerprint": "28cd24bf6b271698ffd0300f",
-      "contentChanged": true,
-      "brokenConsecutive": 0,
-      "factualReviewAgeDays": 6
-    },
-    {
       "slug": "hotjar",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
-      "fingerprint": "d3c84a930d31e50b6be0c9a1",
+      "fingerprint": "bded4227eea84dd7e1034b26",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 6
     },
     {
       "slug": "matomo",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://matomo.org/",
-      "fingerprint": "36cc36962c8222be0b43fa94",
+      "fingerprint": "6871dab287ea8b4696073913",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 6
     },
     {
       "slug": "screaming-frog",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.screamingfrog.co.uk/seo-spider/",
-      "fingerprint": "05c5ea86720658ba4db3c77f",
+      "fingerprint": "64b86d2662c60ff976f6dcea",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "salesforce",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.salesforce.com/?bc=DB",
+      "fingerprint": "f02f798c1454dc3e91158eb5",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "freshsales",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.freshworks.com/crm/sales/",
+      "fingerprint": "ec24da04cda8b46a9b475457",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "wrike",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.wrike.com/vbj/",
+      "fingerprint": "3e953abe68d461c50494fe70",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 6
     },
     {
       "slug": "pabbly-connect",
-      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceCheckedAt": "2026-09-07T14:01:57.950Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.pabbly.com/connect/",

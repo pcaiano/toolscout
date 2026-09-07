@@ -1,0 +1,40 @@
+name: Distribution Live Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/distribution-live-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Execute scheduled Distribution Engine against remote D1
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --test-scheduled --port 8787 --config wrangler.toml > /tmp/wrangler-dev.log 2>&1 &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true; cat /tmp/wrangler-dev.log || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS 'http://127.0.0.1:8787/' >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS 'http://127.0.0.1:8787/__scheduled?cron=15%20*%20*%20*%20*'
+          sleep 3
+          echo '=== DISTRIBUTION SUBMISSION COUNTS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,COUNT(*) AS count FROM distribution_submissions GROUP BY surface_slug,status ORDER BY surface_slug,status;"
+          echo '=== INDEXNOW LATEST ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,asset_url,status,attempts,last_attempt_at,submitted_at,error FROM distribution_submissions WHERE surface_slug='indexnow' ORDER BY updated_at DESC LIMIT 10;"
+          echo '=== SUBMISSION EVENTS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type IN ('submission_packaging_refresh','submission_execution_refresh') ORDER BY created_at DESC LIMIT 10;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

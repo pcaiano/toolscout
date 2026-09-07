@@ -103,5 +103,87 @@
         }
       ]
     }
+  },
+  {
+    "generatedAt": "2026-09-07T13:40:51.138Z",
+    "windowDays": 30,
+    "definition": "Likely-human sessions only. Social attribution uses recorded UTM source first and social referrer hosts as fallback. Topic intent uses ts_topic first and utm_term as fallback. Downstream actions are counted only after attributed social entry.",
+    "socialHumanSessions": 5,
+    "platforms": [
+      {
+        "platform": "linkedin",
+        "sessions": 5,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0,
+        "monetizedOutbound": 0
+      }
+    ],
+    "content": [
+      {
+        "platform": "linkedin",
+        "contentId": "unlabelled",
+        "topicIntent": "unlabelled",
+        "family": "unlabelled",
+        "publishedDate": null,
+        "postLevel": false,
+        "sessions": 5,
+        "recommendationCompletions": 0,
+        "resultViews": 0,
+        "outboundClicks": 0,
+        "monetizedOutbound": 0,
+        "sessionToOutboundRate": 0
+      }
+    ],
+    "families": [
+      {
+        "platform": "linkedin",
+        "family": "unlabelled",
+        "posts": 1,
+        "sessions": 5,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0,
+        "monetizedOutbound": 0,
+        "sessionToOutboundRate": 0
+      }
+    ],
+    "topics": [
+      {
+        "platform": "linkedin",
+        "topicIntent": "unlabelled",
+        "posts": 1,
+        "sessions": 5,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0,
+        "monetizedOutbound": 0,
+        "sessionToOutboundRate": 0
+      }
+    ],
+    "socialInterestGraph": {
+      "model": "topic intent -> family -> platform -> post -> likely-human session -> recommendation -> outbound",
+      "nodes": {
+        "topics": [
+          "unlabelled"
+        ],
+        "platforms": [
+          "linkedin"
+        ],
+        "families": [
+          "unlabelled"
+        ],
+        "posts": []
+      },
+      "edges": [
+        {
+          "topicIntent": "unlabelled",
+          "family": "unlabelled",
+          "platform": "linkedin",
+          "contentId": "unlabelled",
+          "sessions": 5,
+          "recommendationCompletions": 0,
+          "outboundClicks": 0,
+          "monetizedOutbound": 0
+        }
+      ]
+    }
   }
 ]
