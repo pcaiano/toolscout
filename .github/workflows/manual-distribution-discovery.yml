@@ -2,6 +2,10 @@ name: Manual Distribution Discovery
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/manual-distribution-discovery.yml'
 
 permissions:
   contents: read
