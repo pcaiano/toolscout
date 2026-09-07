@@ -1,0 +1,45 @@
+name: API Discovery Production Smoke
+
+on:
+  workflow_run:
+    workflows: ["Deploy ToolScout Worker"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '45 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PROD_BASE: https://trytoolscout.org
+
+jobs:
+  smoke:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate APIs.json
+        run: |
+          set -euo pipefail
+          curl -fsSL "$PROD_BASE/apis.json" -o /tmp/apis.json
+          jq -e '.specificationVersion == "0.19" and .url == "https://trytoolscout.org/apis.json" and (.apis | length > 0)' /tmp/apis.json >/dev/null
+      - name: Validate OpenAPI
+        run: |
+          set -euo pipefail
+          curl -fsSL "$PROD_BASE/openapi.json" -o /tmp/openapi.json
+          jq -e '.openapi == "3.1.0" and .paths["/api/distribution/feed.json"].get and .paths["/.well-known/toolscout-distribution.json"].get' /tmp/openapi.json >/dev/null
+      - name: Validate RFC 9727 catalog
+        run: |
+          set -euo pipefail
+          curl -fsSL -D /tmp/catalog-headers "$PROD_BASE/.well-known/api-catalog" -o /tmp/catalog.json
+          tr -d '\r' </tmp/catalog-headers | grep -Fi 'content-type: application/linkset+json'
+          tr -d '\r' </tmp/catalog-headers | grep -Fi 'rel="api-catalog"'
+          jq -e '.linkset[0].anchor == "https://trytoolscout.org/api/distribution/feed.json" and .linkset[0]["service-desc"][0].href == "https://trytoolscout.org/openapi.json"' /tmp/catalog.json >/dev/null
+          curl -fsSI "$PROD_BASE/.well-known/api-catalog" | tr -d '\r' | grep -Fi 'rel="api-catalog"'
+      - name: Validate discovery manifest links
+        run: |
+          set -euo pipefail
+          curl -fsSL "$PROD_BASE/.well-known/toolscout-distribution.json" -o /tmp/manifest.json
+          jq -e '.machine_discovery.apis_json == "https://trytoolscout.org/apis.json" and .machine_discovery.openapi == "https://trytoolscout.org/openapi.json" and .machine_discovery.api_catalog == "https://trytoolscout.org/.well-known/api-catalog"' /tmp/manifest.json >/dev/null
