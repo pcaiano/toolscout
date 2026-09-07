@@ -1,0 +1,73 @@
+{
+  "aid": "toolscout",
+  "type": "Index",
+  "name": "ToolScout",
+  "description": "Independent software discovery and recommendation platform with public machine-readable distribution and discovery endpoints.",
+  "url": "https://trytoolscout.org/apis.json",
+  "image": "https://trytoolscout.org/embed/badge.svg",
+  "created": "2026-09-07",
+  "modified": "2026-09-07",
+  "specificationVersion": "0.19",
+  "tags": [
+    "Software Discovery",
+    "Software Recommendations",
+    "Decision Support",
+    "API Discovery",
+    "AI Agents",
+    "AEO",
+    "GEO"
+  ],
+  "maintainers": [
+    {
+      "name": "ToolScout"
+    }
+  ],
+  "apis": [
+    {
+      "aid": "toolscout:public-discovery-api",
+      "name": "ToolScout Public Discovery API",
+      "description": "Public read-only endpoints exposing ToolScout distribution assets, machine-discovery metadata and embeddable discovery surfaces.",
+      "image": "https://trytoolscout.org/embed/badge.svg",
+      "humanURL": "https://trytoolscout.org/",
+      "baseURL": "https://trytoolscout.org",
+      "tags": [
+        "Software Discovery",
+        "Distribution",
+        "AI Agents",
+        "Machine Readable"
+      ],
+      "properties": [
+        {
+          "type": "OpenAPI",
+          "url": "https://trytoolscout.org/openapi.json"
+        },
+        {
+          "type": "Documentation",
+          "url": "https://trytoolscout.org/agents.md"
+        },
+        {
+          "type": "JSONFeed",
+          "url": "https://trytoolscout.org/api/distribution/feed.json"
+        },
+        {
+          "type": "RSS",
+          "url": "https://trytoolscout.org/distribution/feed.xml"
+        },
+        {
+          "type": "LLMSTxt",
+          "url": "https://trytoolscout.org/llms.txt"
+        }
+      ]
+    }
+  ],
+  "common": [
+    {
+      "type": "TermsOfService",
+      "url": "https://trytoolscout.org/methodology.html"
+    },
+    {
+      "type": "PrivacyPolicy",
+      "url": "https://trytoolscout.org/privacy.html"
+    }
+  ]
+}
