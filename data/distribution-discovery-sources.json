@@ -1,8 +1,54 @@
 {
   "sources": [
-    {"slug":"truvery-ai-directories","name":"AI Tool Directories community registry","type":"registry","url":"https://raw.githubusercontent.com/truery/ai-tool-directories/main/README.md","enabled":true},
-    {"slug":"favors-startup-directories","name":"Favors startup directory guide","type":"editorial_registry","url":"https://favors.dev/startup-launch-directories/","enabled":true},
-    {"slug":"launch-directories","name":"Launch Directories","type":"directory_registry","url":"https://launchdirectories.com/","enabled":true}
+    {
+      "slug": "truvery-ai-directories",
+      "name": "AI Tool Directories community registry",
+      "type": "registry",
+      "url": "https://raw.githubusercontent.com/truery/ai-tool-directories/main/README.md",
+      "enabled": true
+    },
+    {
+      "slug": "favors-startup-directories",
+      "name": "Favors startup directory guide",
+      "type": "editorial_registry",
+      "url": "https://favors.dev/startup-launch-directories/",
+      "enabled": true
+    },
+    {
+      "slug": "launch-directories",
+      "name": "Launch Directories",
+      "type": "directory_registry",
+      "url": "https://launchdirectories.com/",
+      "enabled": true
+    }
   ],
-  "guardrails":{"max_fetches_per_run":6,"max_candidates_per_source":50,"allowed_protocols":["https:"],"exclude_hosts":["facebook.com","instagram.com","x.com","twitter.com"]}
+  "guardrails": {
+    "max_fetches_per_run": 6,
+    "max_candidates_per_source": 50,
+    "allowed_protocols": [
+      "https:"
+    ],
+    "exclude_hosts": [
+      "facebook.com",
+      "instagram.com",
+      "x.com",
+      "twitter.com",
+      "claude.ai",
+      "gemini.google.com",
+      "perplexity.ai"
+    ],
+    "exclude_source_hosts": true,
+    "canonical_hosts": {
+      "producthunt.com": "product-hunt",
+      "fazier.com": "fazier",
+      "tinylaun.ch": "tinylaunch",
+      "tinylaunch.com": "tinylaunch",
+      "uneed.best": "uneed",
+      "saashub.com": "saas-hub",
+      "alternativeto.net": "alternativeto",
+      "peerlist.io": "peerlist-launchpad",
+      "microlaunch.net": "microlaunch",
+      "betalist.com": "betalist"
+    }
+  }
 }
