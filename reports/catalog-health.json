@@ -1,7 +1,7 @@
 {
   "summary": {
     "tools": 100,
-    "generatedAt": "2026-09-07T14:02:22.899Z",
+    "generatedAt": "2026-09-07T20:34:56.089Z",
     "cadence": {
       "linkHealth": "daily",
       "metadataFreshness": "daily age check; weekly review threshold at 7 days",
@@ -141,7 +141,7 @@
         "url": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.jotform.com/products/form-builder/?utm_source=pcaiano&utm_campaign=jf1",
+        "finalUrl": "https://www.jotform.com/?utm_source=pcaiano&utm_campaign=jf1&rp=%2Fproducts%2Fform-builder%2F",
         "error": null
       }
     },
@@ -907,7 +907,7 @@
         "url": "https://webflow.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://webflowmarketingmain.com/de",
+        "finalUrl": "https://webflow.com/",
         "error": null
       },
       "affiliate": {
@@ -1083,7 +1083,7 @@
         "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.shopify.com/free-trial?irclickid=Q2Ix3UWLwxyZW-tRt7xbHyTIUkr2jkS2IQsiwA0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=RLmTCGWL7xyZUVfzd60HHSkOUkr2gISAM1jE1w0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
         "error": null
       }
     },
@@ -1477,7 +1477,7 @@
         "url": "https://notebooklm.google.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S1394166295:1788789745092450",
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S620813360:1788813298931134",
         "error": null
       },
       "affiliate": {
@@ -1945,7 +1945,7 @@
         "url": "https://www.wrike.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.wrike.com/vbj/",
+        "finalUrl": "https://www.wrike.com/",
         "error": null
       },
       "affiliate": {
