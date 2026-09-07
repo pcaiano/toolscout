@@ -1,0 +1,58 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "ToolScout",
+    "identifier": "did:web:trytoolscout.org",
+    "documentationUrl": "https://trytoolscout.org/agents.md"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:trytoolscout.org:mcp:software-recommendation",
+      "displayName": "ToolScout MCP Software Recommendation Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://trytoolscout.org/mcp",
+      "description": "Read-only software decision capability returning deterministic ToolScout recommendations. Affiliate relationships do not influence ranking.",
+      "tags": ["software", "recommendations", "decision-support", "mcp"],
+      "capabilities": ["recommend_tools"],
+      "representativeQueries": [
+        "Recommend software for my business needs",
+        "Find the best CRM for a small sales team",
+        "Which SEO tool should an agency use?",
+        "Find workflow automation software for a small business"
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "identifier": "urn:air:trytoolscout.org:a2a:software-recommendation-agent",
+      "displayName": "ToolScout Software Recommendation Agent",
+      "type": "application/a2a-agent-card+json",
+      "url": "https://trytoolscout.org/.well-known/agent-card.json",
+      "description": "A2A software recommendation agent for discovering and ranking software from natural-language requirements.",
+      "tags": ["software", "recommendations", "decision-support", "a2a", "agent"],
+      "capabilities": ["recommend_software"],
+      "representativeQueries": [
+        "Help me choose software for a specific job",
+        "Compare software choices for my team and budget",
+        "Recommend an automation tool for my workflow",
+        "What software best fits my requirements?"
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "identifier": "urn:air:trytoolscout.org:openapi:recommendation-api",
+      "displayName": "ToolScout Recommendation API",
+      "type": "application/vnd.oai.openapi+json;version=3.1",
+      "url": "https://trytoolscout.org/openapi.json",
+      "description": "Public read-only API for deterministic software recommendations by job, goal, budget, team and priority.",
+      "tags": ["software", "api", "recommendations", "openapi"],
+      "capabilities": ["recommend_tools", "software_discovery"],
+      "representativeQueries": [
+        "Use an API to recommend software for a user",
+        "Find software programmatically by requirements",
+        "Get ranked software recommendations via API",
+        "Discover tools by budget and team size"
+      ],
+      "version": "1.0.0"
+    }
+  ]
+}
