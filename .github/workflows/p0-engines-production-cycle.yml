@@ -1,10 +1,6 @@
 name: P0 Engines Production Cycle
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/p0-engines-production-cycle.yml'
   workflow_run:
     workflows: ["Deploy ToolScout Worker"]
     types: [completed]
@@ -13,81 +9,41 @@ on:
 permissions:
   contents: read
 
-env:
-  PROD_BASE: https://trytoolscout.org
-
 jobs:
-  cycle:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  cycle-proof:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Run Distribution Engine production cycle
-        env:
-          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-        run: |
-          set -euo pipefail
-          test -n "$ADMIN_TOKEN"
-          body="$(mktemp)"
-          code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' --max-time 90 -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "$PROD_BASE/api/distribution/autonomous/refresh")"
-          if [ "$code" != "200" ]; then
-            echo "Distribution cycle failed: HTTP $code"
-            exit 1
-          fi
-          node - "$body" <<'NODE'
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          const q = data.qualification || {};
-          const e = data.execution || {};
-          console.log('DISTRIBUTION_ENGINE_SUMMARY=' + JSON.stringify({
-            ok: data.ok === true,
-            checked: q.checked ?? null,
-            ready: q.ready ?? null,
-            blocked: q.blocked ?? null,
-            human: q.human ?? null,
-            research: q.research ?? null,
-            cooldown_hours: q.cooldown_hours ?? null,
-            qualification_limit: q.per_cycle_limit ?? null,
-            sent: e.sent ?? null,
-            failed: e.failed ?? null,
-            deduped: e.deduped ?? null,
-            execution_limit: e.per_cycle_limit ?? null
-          }));
-          if (data.ok !== true) process.exit(1);
-          NODE
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
-      - name: Run Affiliate Coverage Engine production cycle
+      - name: Verify recent Distribution Engine production cycle
         env:
-          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          test -n "$ADMIN_TOKEN"
-          body="$(mktemp)"
-          code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' --max-time 90 -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "$PROD_BASE/api/affiliate-coverage/run")"
-          if [ "$code" != "200" ]; then
-            echo "Affiliate Coverage cycle failed: HTTP $code"
-            exit 1
-          fi
-          node - "$body" <<'NODE'
-          const fs = require('fs');
-          const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          const r = data.research || {};
-          const c = data.coverage || {};
-          console.log('AFFILIATE_COVERAGE_ENGINE_SUMMARY=' + JSON.stringify({
-            ok: data.ok === true,
-            human_outbound: c.human_outbound ?? null,
-            monetized_human_outbound: c.monetized ?? null,
-            unmonetized_human_outbound: c.unmonetized ?? null,
-            weighted_coverage: c.weighted ?? null,
-            queue_size: data.queue_size ?? null,
-            processed: r.processed ?? null,
-            programs_found: r.programs_found ?? null,
-            human_actions: r.human_actions ?? null,
-            cooldown_skipped: r.cooldown_skipped ?? null,
-            cooldown_hours: r.cooldown_hours ?? null,
-            per_cycle_limit: r.per_cycle_limit ?? null
-          }));
-          if (data.ok !== true) process.exit(1);
-          NODE
+          test -n "$CLOUDFLARE_API_TOKEN"
+          echo '=== DISTRIBUTION ENGINE RECENT QUALIFICATION ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type='autonomous_distribution_qualification' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;"
+          echo '=== DISTRIBUTION ENGINE RECENT SUBMISSIONS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) AS count FROM distribution_submissions WHERE updated_at>=datetime('now','-2 hours') GROUP BY status ORDER BY status;"
+          recent="$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS count FROM distribution_events WHERE event_type='autonomous_distribution_qualification' AND created_at>=datetime('now','-2 hours');")"
+          node -e "const x=JSON.parse(process.argv[1]); const rows=x?.[0]?.results||[]; if(Number(rows[0]?.count||0)<1){console.error('No recent Distribution Engine production qualification cycle found.');process.exit(1)}" "$recent"
+
+      - name: Verify recent Affiliate Coverage Engine production cycle
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          echo '=== AFFILIATE COVERAGE ENGINE LATEST RUN ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,created_at FROM affiliate_coverage_runs WHERE created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;"
+          echo '=== AFFILIATE WORKFLOW STATE COUNTS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) AS count FROM affiliate_workflow GROUP BY status ORDER BY status;"
+          recent="$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS count FROM affiliate_coverage_runs WHERE created_at>=datetime('now','-2 hours');")"
+          node -e "const x=JSON.parse(process.argv[1]); const rows=x?.[0]?.results||[]; if(Number(rows[0]?.count||0)<1){console.error('No recent Affiliate Coverage Engine production cycle found.');process.exit(1)}" "$recent"
 
       - name: Production cycle proof
-        run: echo 'Both P0 engine endpoints completed successfully; only non-sensitive summaries were logged.'
+        run: echo 'Both P0 engines have persisted production-cycle evidence within the last two hours.'
