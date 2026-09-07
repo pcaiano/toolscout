@@ -1,6 +1,28 @@
 import base from './distribution-orchestrator-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'};
+const SESSION_COOKIE='toolscout_cc';
+const SESSION_TTL_SECONDS=86400;
+
+async function digestHex(value){
+ const bytes=new TextEncoder().encode(value);
+ const digest=await crypto.subtle.digest('SHA-256',bytes);
+ return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+function sessionBucket(now=Date.now()){return Math.floor(now/(SESSION_TTL_SECONDS*1000));}
+async function sessionValue(secret,bucket){return digestHex(`toolscout-command-center:${secret}:${bucket}`);}
+async function validSession(request,env){
+ if(!env.ADMIN_TOKEN)return false;
+ const cookie=request.headers.get('Cookie')||'';
+ const match=cookie.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`));
+ if(!match)return false;
+ const supplied=decodeURIComponent(match[1]);
+ const bucket=sessionBucket();
+ for(const candidate of [bucket,bucket-1]){
+  if(supplied===await sessionValue(env.ADMIN_TOKEN,candidate))return true;
+ }
+ return false;
+}
 async function q(env,sql){try{return await env.DB.prepare(sql).all();}catch{return{results:[]}}}
 async function one(env,sql){try{return await env.DB.prepare(sql).first();}catch{return{}}}
 async function ops(env){const [subs,editorial,assets,learned,events]=await Promise.all([
@@ -14,5 +36,43 @@ async function ops(env){const [subs,editorial,assets,learned,events]=await Promi
  const s=map(subs),e=map(editorial);
  return {status:'connected',assetsKnown:Number(assets?.assets||0),lastAssetSeenAt:assets?.last_seen||null,submissions:{ready:s.ready||0,submitted:s.submitted||0,failed:s.failed||0,humanRequired:s.human_required||0},editorial:{prepared:e.prepared||0,published:e.published||0,skipped:e.skipped||0},learning:{surfaces:Number(learned?.learned||0),averagePerformance:Number(Number(learned?.avg_performance||0).toFixed(1)),lastLearnedAt:learned?.learned_at||null},events:{count:Number(events?.events||0),lastEventAt:events?.last_event||null}};
 }
+async function withOps(response,env,cacheControl='private, no-store'){
+ if(!response.ok)return response;
+ let d;try{d=await response.json()}catch{return response}
+ return Response.json({...d,distributionOperations:await ops(env)},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':cacheControl}});
+}
 function inject(html){if(html.includes('id="distributionOpsFinal"'))return html;const block=`<section class="section" id="distributionOpsFinal"><div class="sectionHead"><h2>Distribution Operations</h2><span>End-to-end engine health</span></div><div class="grid4" id="distributionOpsCards"></div><div class="panel section"><div class="sectionHead"><h2>Engine lifecycle</h2><span>Discover → Score → Package → Distribute → Amplify → Measure → Learn</span></div><div id="distributionOpsLifecycle" class="note">Refresh to load.</div></div></section>`;const js=`<script>(function(){function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}function card(a,b,c){return '<div class="card"><small>'+esc(a)+'</small><b>'+esc(b)+'</b><span>'+esc(c)+'</span></div>'}function render(d){var x=d&&d.distributionOperations;if(!x)return;var c=document.getElementById('distributionOpsCards');if(c)c.innerHTML=card('Assets known',x.assetsKnown,'Event-driven distribution state')+card('Submitted',x.submissions&&x.submissions.submitted,'Verified automatic submissions')+card('Human queue',(x.submissions&&x.submissions.humanRequired||0)+(x.editorial&&x.editorial.prepared||0),'Manual/reputation-sensitive actions')+card('Learning surfaces',x.learning&&x.learning.surfaces,'Avg performance '+(x.learning&&x.learning.averagePerformance||0));var l=document.getElementById('distributionOpsLifecycle');if(l)l.innerHTML='Discovery, scoring, syndication, embeds, vendor amplification, guarded submissions, editorial preparation and performance learning are connected. Last engine event: '+esc(x.events&&x.events.lastEventAt||'—');}var f=window.fetch;window.fetch=async function(){var r=await f.apply(this,arguments);try{var u=String(arguments[0]&&arguments[0].url||arguments[0]||'');if(u.indexOf('/api/stats')!==-1)r.clone().json().then(render).catch(function(){})}catch(e){}return r};})();</script>`;return html.replace('</body>',block+js+'</body>');}
-export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/stats'&&request.method==='GET'){const r=await base.fetch(request,env,ctx);if(!r.ok)return r;let d;try{d=await r.json()}catch{return r}return Response.json({...d,distributionOperations:await ops(env)},{headers:H});}if(u.pathname==='/analytics.html'&&request.method==='GET'){const r=await base.fetch(request,env,ctx);if(!r.ok)return r;const t=r.headers.get('Content-Type')||'';if(!t.includes('text/html'))return r;const h=new Headers(r.headers);h.set('Cache-Control','private, no-store');return new Response(inject(await r.text()),{status:r.status,headers:h});}return base.fetch(request,env,ctx);},async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined;}};
+async function protectedStats(request,env,ctx){
+ if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:{'Cache-Control':'no-store'}});
+ const internalUrl=new URL(request.url);
+ internalUrl.protocol='https:';
+ internalUrl.hostname='toolscout-command-center.internal';
+ internalUrl.pathname='/api/stats';
+ internalUrl.search='';
+ const headers=new Headers(request.headers);
+ headers.set('Authorization',`Bearer ${env.ADMIN_TOKEN}`);
+ headers.delete('Cookie');
+ const internalRequest=new Request(internalUrl.toString(),{method:'GET',headers});
+ return withOps(await base.fetch(internalRequest,env,ctx),env);
+}
+export default {
+ async fetch(request,env,ctx){
+  const u=new URL(request.url);
+  if(u.pathname==='/analytics/api/stats'&&request.method==='GET')return protectedStats(request,env,ctx);
+  if(u.pathname==='/api/stats'&&request.method==='GET')return withOps(await base.fetch(request,env,ctx),env,'private, max-age=60');
+  if(u.pathname==='/analytics.html'&&request.method==='GET'){
+   const r=await base.fetch(request,env,ctx);
+   if(!r.ok)return r;
+   const t=r.headers.get('Content-Type')||'';
+   if(!t.includes('text/html'))return r;
+   if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
+   const h=new Headers(r.headers);
+   h.set('Cache-Control','private, no-store');
+   const value=await sessionValue(env.ADMIN_TOKEN,sessionBucket());
+   h.append('Set-Cookie',`${SESSION_COOKIE}=${value}; Max-Age=${SESSION_TTL_SECONDS}; Path=/analytics; HttpOnly; Secure; SameSite=Strict`);
+   return new Response(inject(await r.text()),{status:r.status,headers:h});
+  }
+  return base.fetch(request,env,ctx);
+ },
+ async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined;}
+};
