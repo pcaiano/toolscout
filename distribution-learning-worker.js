@@ -1,6 +1,7 @@
 import base from './distribution-sender-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 
+// Attribution remains centralized in distribution-impact-worker.js and still enforces classification='likely-human' and confirmed revenue_ledger evidence.
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type'};
 const safe=(v,n=240)=>String(v??'').slice(0,n);
 
