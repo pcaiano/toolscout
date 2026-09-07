@@ -119,6 +119,25 @@
       "verification_endpoint": "https://agenttool.sh/api/tools/toolscout",
       "public_url": "https://agenttool.sh/tools/toolscout",
       "verification_kind": "http_200_profile"
+    },
+    {
+      "surface_slug": "ora-ai",
+      "enabled": true,
+      "allow_automatic": true,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://ora.ai/api/scan?include=essentials",
+      "payload_kind": "ora_scan",
+      "asset_scope": "product",
+      "auth_type": "none",
+      "requires_payment": false,
+      "timeout_ms": 60000,
+      "publishing": "public_score_and_ard_registry",
+      "verification_method": "GET",
+      "verification_endpoint": "https://ora.ai/score/trytoolscout.org",
+      "public_url": "https://ora.ai/score/trytoolscout.org",
+      "verification_kind": "http_200_score_page",
+      "note": "Official Ora API verified 2026-09-07. Public free scan requires only a domain/URL, no signup or PII. Scan data powers Ora product discovery and public score surfaces. include=essentials returns agent-readiness essentials alongside the standard result."
     }
   ],
   "policy": {
