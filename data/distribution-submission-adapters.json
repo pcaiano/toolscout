@@ -114,7 +114,11 @@
       "requires_payment": false,
       "publishing": "scan_then_publish_results",
       "rate_limit_per_day": 10,
-      "note": "Official API/OpenAPI verified 2026-09-07. Public no-auth POST submits a SaaS tool/API for agent-readiness scanning; agenttool.sh evaluates it and publishes the resulting grade. No account, payment or reciprocal badge is required."
+      "note": "Official API/OpenAPI verified 2026-09-07. Public no-auth POST submits a SaaS tool/API for agent-readiness scanning; agenttool.sh evaluates it and publishes the resulting grade. No account, payment or reciprocal badge is required.",
+      "verification_method": "GET",
+      "verification_endpoint": "https://agenttool.sh/api/tools/toolscout",
+      "public_url": "https://agenttool.sh/tools/toolscout",
+      "verification_kind": "http_200_profile"
     }
   ],
   "policy": {
