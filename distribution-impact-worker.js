@@ -14,31 +14,31 @@ function sourceMatchesSurface(source,referrer,row){
   return hosts.some(h=>r===h||r.endsWith(`.${h}`));
 }
 
+export async function distributionSurfaceMetrics(env){
+  const [opportunities,entries,outboundEvents,clicks,revenueRows]=await Promise.all([
+    env.DB.prepare(`SELECT surface_slug,surface_name,action_url,live_url FROM distribution_opportunities WHERE action_url IS NOT NULL OR live_url IS NOT NULL`).all(),
+    env.DB.prepare(`SELECT f.session_id,f.source,f.referrer_host,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') ORDER BY f.created_at`).all(),
+    env.DB.prepare(`SELECT f.session_id,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='outbound_clicked' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+    env.DB.prepare(`SELECT c.session_id,c.created_at,c.affiliate_active_at_click,c.source FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND c.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+    env.DB.prepare(`SELECT session_id,commission,currency,status,created_at FROM revenue_ledger WHERE session_id IS NOT NULL AND status IN ('confirmed','paid') AND created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
+  ]);
+  const surfaces=opportunities.results||[],sessionSurface=new Map(),first=new Map();
+  for(const e of entries.results||[]){const id=String(e.session_id||'');if(!id||sessionSurface.has(id))continue;const row=surfaces.find(o=>sourceMatchesSurface(e.source,e.referrer_host,o));if(row){sessionSurface.set(id,row.surface_slug);first.set(id,String(e.created_at||''));}}
+  const bySurface=new Map();
+  const get=slug=>{if(!bySurface.has(slug))bySurface.set(slug,{surface_slug:slug,surface_name:surfaces.find(x=>x.surface_slug===slug)?.surface_name||slug,human_sessions:0,outbound_clicks:0,monetized_outbound:0,revenue:0,currencies:new Set()});return bySurface.get(slug)};
+  for(const slug of sessionSurface.values())get(slug).human_sessions++;
+  for(const e of outboundEvents.results||[]){const id=String(e.session_id||''),slug=sessionSurface.get(id);if(slug&&String(e.created_at||'')>=String(first.get(id)||''))get(slug).outbound_clicks++;}
+  for(const c of clicks.results||[]){const id=String(c.session_id||''),slug=sessionSurface.get(id);if(slug&&String(c.created_at||'')>=String(first.get(id)||'')&&Number(c.affiliate_active_at_click)===1&&String(c.source||'')!=='internal-test')get(slug).monetized_outbound++;}
+  for(const r of revenueRows.results||[]){const id=String(r.session_id||''),slug=sessionSurface.get(id);if(!slug||String(r.created_at||'')<String(first.get(id)||''))continue;const row=get(slug);row.revenue+=Number(r.commission||0);row.currencies.add(String(r.currency||'EUR'));}
+  return [...bySurface.values()].map(r=>({...r,currency:r.currencies.size===1?[...r.currencies][0]:(r.currencies.size===0?'EUR':null),revenue:r.currencies.size<=1?r.revenue:null,currencies:undefined}));
+}
+
 export async function distributionImpactSnapshot(env,totalHumanSessions){
   try{
-    const [opportunities,entries,outboundEvents,clicks,revenueRows]=await Promise.all([
-      env.DB.prepare(`SELECT surface_slug,surface_name,action_url,live_url FROM distribution_opportunities WHERE action_url IS NOT NULL OR live_url IS NOT NULL`).all(),
-      env.DB.prepare(`SELECT f.session_id,f.source,f.referrer_host,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') ORDER BY f.created_at`).all(),
-      env.DB.prepare(`SELECT f.session_id,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='outbound_clicked' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
-      env.DB.prepare(`SELECT c.session_id,c.created_at,c.affiliate_active_at_click,c.source FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND c.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
-      env.DB.prepare(`SELECT session_id,commission,currency,status,created_at FROM revenue_ledger WHERE session_id IS NOT NULL AND status IN ('confirmed','paid') AND created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
-    ]);
-    const surfaces=opportunities.results||[],sessionSurface=new Map(),first=new Map();
-    for(const e of entries.results||[]){
-      const id=String(e.session_id||'');if(!id||sessionSurface.has(id))continue;
-      const row=surfaces.find(o=>sourceMatchesSurface(e.source,e.referrer_host,o));
-      if(row){sessionSurface.set(id,row.surface_slug);first.set(id,String(e.created_at||''));}
-    }
-    const bySurface=new Map();
-    const get=slug=>{if(!bySurface.has(slug))bySurface.set(slug,{surface_slug:slug,surface_name:surfaces.find(x=>x.surface_slug===slug)?.surface_name||slug,human_sessions:0,outbound_clicks:0,monetized_outbound:0,revenue:0});return bySurface.get(slug)};
-    for(const slug of sessionSurface.values())get(slug).human_sessions++;
-    for(const e of outboundEvents.results||[]){const id=String(e.session_id||''),slug=sessionSurface.get(id);if(slug&&String(e.created_at||'')>=String(first.get(id)||''))get(slug).outbound_clicks++;}
-    for(const c of clicks.results||[]){const id=String(c.session_id||''),slug=sessionSurface.get(id);if(slug&&String(c.created_at||'')>=String(first.get(id)||'')&&Number(c.affiliate_active_at_click)===1&&String(c.source||'')!=='internal-test')get(slug).monetized_outbound++;}
-    const currencies=new Set();
-    for(const r of revenueRows.results||[]){const id=String(r.session_id||''),slug=sessionSurface.get(id);if(!slug||String(r.created_at||'')<String(first.get(id)||''))continue;currencies.add(String(r.currency||'EUR'));get(slug).revenue+=Number(r.commission||0);}
-    const rows=[...bySurface.values()].sort((a,b)=>b.human_sessions-a.human_sessions||b.outbound_clicks-a.outbound_clicks);
+    const rows=(await distributionSurfaceMetrics(env)).sort((a,b)=>b.human_sessions-a.human_sessions||b.outbound_clicks-a.outbound_clicks);
     const humanSessions=rows.reduce((n,x)=>n+x.human_sessions,0),outbound=rows.reduce((n,x)=>n+x.outbound_clicks,0),monetized=rows.reduce((n,x)=>n+x.monetized_outbound,0);
-    const revenue=currencies.size<=1?rows.reduce((n,x)=>n+x.revenue,0):null;
+    const currencies=new Set(rows.map(x=>x.currency).filter(Boolean));
+    const revenue=currencies.size<=1?rows.reduce((n,x)=>n+Number(x.revenue||0),0):null;
     return {
       status:'observed',windowDays:WINDOW_DAYS,
       humanSessions,outboundClicks:outbound,monetizedOutbound:monetized,
