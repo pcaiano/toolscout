@@ -1,0 +1,44 @@
+name: Recursive Discovery Check
+
+on:
+  pull_request:
+    paths:
+      - 'distribution-discovery-worker.js'
+      - 'migrations/0044_recursive_distribution_discovery.sql'
+      - '.well-known/ard.json'
+      - 'robots.txt'
+      - '.github/workflows/recursive-discovery-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'distribution-discovery-worker.js'
+      - 'migrations/0044_recursive_distribution_discovery.sql'
+      - '.well-known/ard.json'
+      - 'robots.txt'
+      - '.github/workflows/recursive-discovery-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate recursive discovery
+        run: |
+          node --check distribution-discovery-worker.js
+          test -s migrations/0044_recursive_distribution_discovery.sql
+          grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_discovery_sources' migrations/0044_recursive_distribution_discovery.sql
+          grep -Fq 'recursive_sources_learned' distribution-discovery-worker.js
+          grep -Fq 'distribution_discovery_sources' distribution-discovery-worker.js
+          grep -Fq 'AbortSignal.timeout(8000)' distribution-discovery-worker.js
+          grep -Fq "h==='localhost'" distribution-discovery-worker.js
+          grep -Fq "^192\\.168\\." distribution-discovery-worker.js
+          grep -Fq "SOURCE_LIKE" distribution-discovery-worker.js
+          grep -Fq "confidence>=60" distribution-discovery-worker.js
+          grep -Fq 'Agentmap: https://trytoolscout.org/.well-known/ard.json' robots.txt
+          node -e "const f=require('fs'); const a=JSON.parse(f.readFileSync('.well-known/ard.json','utf8')); if(a.specVersion!=='1.0'||!Array.isArray(a.entries)||a.entries.length<3) process.exit(1); for(const e of a.entries){if(!Array.isArray(e.representativeQueries)||e.representativeQueries.length<2) process.exit(1)}"
