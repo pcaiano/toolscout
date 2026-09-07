@@ -12,6 +12,15 @@
 - Sitemap: https://trytoolscout.org/sitemap.xml
 - Feed: https://trytoolscout.org/feed.xml
 
+## Machine and agent discovery
+- Agent guidance: https://trytoolscout.org/agents.md
+- Distribution manifest: https://trytoolscout.org/.well-known/toolscout-distribution.json
+- Distribution JSON feed: https://trytoolscout.org/api/distribution/feed.json
+- Distribution RSS feed: https://trytoolscout.org/distribution/feed.xml
+- Embeddable finder: https://trytoolscout.org/embed/toolscout-finder.js
+- Embeddable comparison: https://trytoolscout.org/embed/toolscout-compare.js
+- Embeddable tool pick: https://trytoolscout.org/embed/toolscout-pick.js
+
 ## Decision graph
 ToolScout's public information architecture connects these concepts:
 1. Job to be done / use case
@@ -23,6 +32,13 @@ ToolScout's public information architecture connects these concepts:
 7. Vendor profile and current verification signals
 
 Machine readers should use the canonical URLs and visible page content as the source of truth. Tool and pricing information can change; pages state freshness/verification where available.
+
+## Intended query families
+- Best software for a specific workflow or job
+- Tool A versus Tool B for a specific buyer context
+- Alternatives to a named software product
+- Software for small businesses, consultants, agencies, creators, sales teams and marketing teams
+- Software constrained by price, free plan, automation, integrations, workflow or team size
 
 ## Recommendation principles
 - Start with the user's job rather than generic popularity.
