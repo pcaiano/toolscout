@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T20:37:46.776Z",
+  "generatedAt": "2026-09-07T10:15:54.441Z",
   "methodology": "Autonomous catalog maintenance using official-source verification, independent market-demand signals, deterministic quality gates and affiliate-neutral selection. Affiliate status and commission never increase editorial admission or ranking.",
   "summary": {
     "tools": 100,
@@ -7,8 +7,8 @@
     "quarantined": 0,
     "discovered": 0,
     "coverageGaps": 8,
-    "sourceHealthy": 91,
-    "sourceWarnings": 9
+    "sourceHealthy": 90,
+    "sourceWarnings": 10
   },
   "changes": [],
   "coverage": [
@@ -140,6 +140,139 @@
     }
   ],
   "discovered": [],
-  "contentChanges": [],
+  "contentChanges": [
+    {
+      "slug": "mailchimp",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://mailchimp.com/",
+      "fingerprint": "d7f7ab69015a9ddf29577fb3",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 9
+    },
+    {
+      "slug": "se-ranking",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://seranking.com/",
+      "fingerprint": "7be7579f060e3abe7b532d97",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 9
+    },
+    {
+      "slug": "airtable",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.airtable.com/",
+      "fingerprint": "2f5b337b1396a6e9900b4eb6",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "intercom",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.intercom.com/",
+      "fingerprint": "a798809ff77861f7b971173b",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "buffer",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://buffer.com/",
+      "fingerprint": "681e280a561882b156767c33",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "surfer",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://surferseo.com/",
+      "fingerprint": "bc1d85a8d0c4b2ea342f0a35",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "framer",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.framer.com/",
+      "fingerprint": "88c84b17c1b65128b40ee795",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "miro",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://miro.com/",
+      "fingerprint": "28cd24bf6b271698ffd0300f",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "hotjar",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
+      "fingerprint": "d3c84a930d31e50b6be0c9a1",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "matomo",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://matomo.org/",
+      "fingerprint": "36cc36962c8222be0b43fa94",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "screaming-frog",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.screamingfrog.co.uk/seo-spider/",
+      "fingerprint": "05c5ea86720658ba4db3c77f",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    },
+    {
+      "slug": "pabbly-connect",
+      "sourceCheckedAt": "2026-09-07T10:15:54.441Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.pabbly.com/connect/",
+      "fingerprint": "17b65d07cef21423469fcc1c",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 6
+    }
+  ],
   "quarantined": []
 }
