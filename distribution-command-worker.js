@@ -23,6 +23,9 @@ async function validSession(request,env){
  }
  return false;
 }
+function isAnalyticsPage(pathname){
+ return pathname==='/analytics.html'||pathname==='/analytics'||pathname==='/analytics/';
+}
 async function q(env,sql){try{return await env.DB.prepare(sql).all();}catch{return{results:[]}}}
 async function one(env,sql){try{return await env.DB.prepare(sql).first();}catch{return{}}}
 async function ops(env){const [subs,editorial,assets,learned,events]=await Promise.all([
@@ -41,7 +44,7 @@ async function withOps(response,env,cacheControl='private, no-store'){
  let d;try{d=await response.json()}catch{return response}
  return Response.json({...d,distributionOperations:await ops(env)},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':cacheControl}});
 }
-function inject(html){if(html.includes('id="distributionOpsFinal"'))return html;const block=`<section class="section" id="distributionOpsFinal"><div class="sectionHead"><h2>Distribution Operations</h2><span>End-to-end engine health</span></div><div class="grid4" id="distributionOpsCards"></div><div class="panel section"><div class="sectionHead"><h2>Engine lifecycle</h2><span>Discover → Score → Package → Distribute → Amplify → Measure → Learn</span></div><div id="distributionOpsLifecycle" class="note">Refresh to load.</div></div></section>`;const js=`<script>(function(){function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}function card(a,b,c){return '<div class="card"><small>'+esc(a)+'</small><b>'+esc(b)+'</b><span>'+esc(c)+'</span></div>'}function render(d){var x=d&&d.distributionOperations;if(!x)return;var c=document.getElementById('distributionOpsCards');if(c)c.innerHTML=card('Assets known',x.assetsKnown,'Event-driven distribution state')+card('Submitted',x.submissions&&x.submissions.submitted,'Verified automatic submissions')+card('Human queue',(x.submissions&&x.submissions.humanRequired||0)+(x.editorial&&x.editorial.prepared||0),'Manual/reputation-sensitive actions')+card('Learning surfaces',x.learning&&x.learning.surfaces,'Avg performance '+(x.learning&&x.learning.averagePerformance||0));var l=document.getElementById('distributionOpsLifecycle');if(l)l.innerHTML='Discovery, scoring, syndication, embeds, vendor amplification, guarded submissions, editorial preparation and performance learning are connected. Last engine event: '+esc(x.events&&x.events.lastEventAt||'—');}var f=window.fetch;window.fetch=async function(){var r=await f.apply(this,arguments);try{var u=String(arguments[0]&&arguments[0].url||arguments[0]||'');if(u.indexOf('/api/stats')!==-1)r.clone().json().then(render).catch(function(){})}catch(e){}return r};})();</script>`;return html.replace('</body>',block+js+'</body>');}
+function inject(html){if(html.includes('id="distributionOpsFinal"'))return html;const block=`<section class="section" id="distributionOpsFinal"><div class="sectionHead"><h2>Distribution Operations</h2><span>End-to-end engine health</span></div><div class="grid4" id="distributionOpsCards"></div><div class="panel section"><div class="sectionHead"><h2>Engine lifecycle</h2><span>Discover → Score → Package → Distribute → Amplify → Measure → Learn</span></div><div id="distributionOpsLifecycle" class="note">Refresh to load.</div></div></section>`;const js=`<script>(function(){function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]})}function card(a,b,c){return '<div class="card"><small>'+esc(a)+'</small><b>'+esc(b)+'</b><span>'+esc(c)+'</span></div>'}function render(d){var x=d&&d.distributionOperations;if(!x)return;var c=document.getElementById('distributionOpsCards');if(c)c.innerHTML=card('Assets known',x.assetsKnown,'Event-driven distribution state')+card('Submitted',x.submissions&&x.submissions.submitted,'Verified automatic submissions')+card('Human queue',(x.submissions&&x.submissions.humanRequired||0)+(x.editorial&&x.editorial.prepared||0),'Manual/reputation-sensitive actions')+card('Learning surfaces',x.learning&&x.learning.surfaces,'Avg performance '+(x.learning&&x.learning.averagePerformance||0));var l=document.getElementById('distributionOpsLifecycle');if(l)l.innerHTML='Discovery, scoring, syndication, embeds, vendor amplification, guarded submissions, editorial preparation and performance learning are connected. Last engine event: '+esc(x.events&&x.events.lastEventAt||'—');}var f=window.fetch;window.fetch=async function(){var r=await f.apply(this,arguments);try{var u=String(arguments[0]&&arguments[0].url||arguments[0]||'');if(u.indexOf('/api/stats')!==-1)r.clone().json().then(render).catch(function(){})}catch(e){}return r};})();</script>`;return html.replace('</body>',block+js+'</body>');}
 async function protectedStats(request,env,ctx){
  if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:{'Cache-Control':'no-store'}});
  const internalUrl=new URL(request.url);
@@ -60,8 +63,11 @@ export default {
   const u=new URL(request.url);
   if(u.pathname==='/analytics/api/stats'&&request.method==='GET')return protectedStats(request,env,ctx);
   if(u.pathname==='/api/stats'&&request.method==='GET')return withOps(await base.fetch(request,env,ctx),env,'private, max-age=60');
-  if(u.pathname==='/analytics.html'&&request.method==='GET'){
-   const r=await base.fetch(request,env,ctx);
+  if(isAnalyticsPage(u.pathname)&&request.method==='GET'){
+   const assetUrl=new URL(request.url);
+   assetUrl.pathname='/analytics.html';
+   const assetRequest=new Request(assetUrl.toString(),request);
+   const r=await base.fetch(assetRequest,env,ctx);
    if(!r.ok)return r;
    const t=r.headers.get('Content-Type')||'';
    if(!t.includes('text/html'))return r;
@@ -69,7 +75,7 @@ export default {
    const h=new Headers(r.headers);
    h.set('Cache-Control','private, no-store');
    const value=await sessionValue(env.ADMIN_TOKEN,sessionBucket());
-   h.append('Set-Cookie',`${SESSION_COOKIE}=${value}; Max-Age=${SESSION_TTL_SECONDS}; Path=/analytics; HttpOnly; Secure; SameSite=Strict`);
+   h.append('Set-Cookie',`${SESSION_COOKIE}=${value}; Max-Age=${SESSION_TTL_SECONDS}; Path=/analytics; HttpOnly; Secure; SameSite=Lax`);
    return new Response(inject(await r.text()),{status:r.status,headers:h});
   }
   return base.fetch(request,env,ctx);
