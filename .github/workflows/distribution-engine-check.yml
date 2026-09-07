@@ -103,6 +103,9 @@ jobs:
           grep -Fq 'adapter_not_verified' distribution-submission-worker.js
           grep -Fq 'allow_automatic' distribution-submission-worker.js
           grep -Fq 'packageAutomaticProtocols' distribution-submission-worker.js
+          grep -Fq 'indexNowCoolingDown' distribution-submission-worker.js
+          grep -Fq 'cooldownSurfaces' distribution-submission-worker.js
+          grep -Fq 'automatic protocol surface(s) deferred by rate-limit cooldown' distribution-submission-worker.js
           grep -Fq "'http_json'" distribution-submission-worker.js
           grep -Fq 'listed_startups_listing' distribution-submission-worker.js
           node -e "const d=require('./data/distribution-submission-adapters.json'); const a=d.adapters.find(x=>x.surface_slug==='listed-startups'); if(!a||a.endpoint!=='https://listedstartups.com/api/listings'||a.validation_endpoint!=='https://listedstartups.com/api/listings/validate'||a.auth_env!=='LISTED_STARTUPS_TOKEN'||a.validated_category!=='Software'||a.enabled!==false||a.allow_automatic!==false) process.exit(1)"
