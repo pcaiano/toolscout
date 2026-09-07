@@ -4,7 +4,10 @@ on:
     paths:
       - 'affiliate-coverage-engine.js'
       - 'affiliate-program-discovery.js'
+      - 'affiliate-coverage-cycle-worker.js'
+      - 'affiliate-coverage-entry-worker.js'
       - 'affiliate-operations.js'
+      - 'agent-protocol-worker.js'
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
   push:
@@ -12,7 +15,10 @@ on:
     paths:
       - 'affiliate-coverage-engine.js'
       - 'affiliate-program-discovery.js'
+      - 'affiliate-coverage-cycle-worker.js'
+      - 'affiliate-coverage-entry-worker.js'
       - 'affiliate-operations.js'
+      - 'agent-protocol-worker.js'
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
 jobs:
@@ -28,6 +34,7 @@ jobs:
           node --input-type=module <<'EOF'
           import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
           import {classifyProgramPage,discoverOfficialProgram} from './affiliate-program-discovery.js';
+          import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
           const records=[
             {slug:'a',status:'research_required',approval_probability:.8,commission_score:8,network_friction:2},
             {slug:'b',status:'active'},
@@ -51,5 +58,7 @@ jobs:
           const fakeFetch=async url=>({url,status:url.endsWith('/affiliate-program')?200:404,text:async()=>url.endsWith('/affiliate-program')?'Official affiliate program. Earn commission.':'not found'});
           const found=await discoverOfficialProgram({slug:'x',sourceUrl:'https://example.com/product'},{fetchImpl:fakeFetch,timeoutMs:100});
           if(!found.found||found.status!=='program_exists') throw Error('official discovery failed');
-          console.log(JSON.stringify({coverage:s,discovery:found},null,2));
+          if(typeof runAffiliateCoverageCycle!=='function') throw Error('cycle export missing');
+          await import('./affiliate-coverage-entry-worker.js');
+          console.log(JSON.stringify({coverage:s,discovery:found,cycle:'imported'},null,2));
           EOF
