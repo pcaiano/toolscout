@@ -1,28 +1,140 @@
 {
   "adapters": [
     {
-      "surface_slug": "indexnow", "enabled": true, "allow_automatic": true, "method": "POST", "content_type": "application/json", "endpoint": "https://api.indexnow.org/indexnow", "payload_kind": "indexnow", "key": "81025561f83480545d2e18f4f6f1e4ed", "key_location": "https://trytoolscout.org/81025561f83480545d2e18f4f6f1e4ed.txt"
+      "surface_slug": "indexnow",
+      "enabled": true,
+      "allow_automatic": true,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "payload_kind": "indexnow",
+      "key": "81025561f83480545d2e18f4f6f1e4ed",
+      "key_location": "https://trytoolscout.org/81025561f83480545d2e18f4f6f1e4ed.txt"
     },
     {
-      "surface_slug": "tinylaunch", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.tinylaunch.com/api/v1/startups", "auth_type": "bearer", "auth_env": "TINYLAUNCH_TOKEN", "setup_state": "auth_required", "payload_kind": "tinylaunch_startup", "auth_request_endpoint": "https://www.tinylaunch.com/api/v1/auth/request-code", "auth_verify_endpoint": "https://www.tinylaunch.com/api/v1/auth/verify", "categories_endpoint": "https://www.tinylaunch.com/api/v1/categories", "requires_maker_profile": true, "requires_logo_base64": true, "note": "Official OpenAPI verified. One-time email OTP yields access_token + refresh_token. Startup creation requires maker profile, real category id and <=200KB PNG/JPG/WebP logo encoded as base64."
+      "surface_slug": "tinylaunch",
+      "enabled": false,
+      "allow_automatic": false,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://www.tinylaunch.com/api/v1/startups",
+      "auth_type": "bearer",
+      "auth_env": "TINYLAUNCH_TOKEN",
+      "setup_state": "auth_required",
+      "payload_kind": "tinylaunch_startup",
+      "auth_request_endpoint": "https://www.tinylaunch.com/api/v1/auth/request-code",
+      "auth_verify_endpoint": "https://www.tinylaunch.com/api/v1/auth/verify",
+      "categories_endpoint": "https://www.tinylaunch.com/api/v1/categories",
+      "requires_maker_profile": true,
+      "requires_logo_base64": true,
+      "note": "Official OpenAPI verified. One-time email OTP yields access_token + refresh_token. Startup creation requires maker profile, real category id and <=200KB PNG/JPG/WebP logo encoded as base64.",
+      "asset_scope": "product"
     },
     {
-      "surface_slug": "listed-startups", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://listedstartups.com/api/listings", "validation_endpoint": "https://listedstartups.com/api/listings/validate", "agent_registration_endpoint": "https://listedstartups.com/api/agents/register", "auth_type": "bearer", "auth_env": "LISTED_STARTUPS_TOKEN", "setup_state": "auth_required", "payload_kind": "listed_startups_listing", "supports_rest": true, "supports_mcp": true, "supports_git_pr": true, "publishing": "open_immediate_audited", "validated_category": "Software", "credential_prefix": "ls_agent_", "credential_ttl_days": 90, "required_scope": "startup:submit", "required_fields": ["name","slug","tagline","description","categories"], "note": "Official OpenAPI verified 2026-09-07. POST /api/listings/validate accepted the ToolScout payload with HTTP 200, valid=true, identity_available=true and domain_available=true using category Software. Publishing stays disabled until an explicitly authorized agent identity/token exists."
+      "surface_slug": "listed-startups",
+      "enabled": false,
+      "allow_automatic": false,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://listedstartups.com/api/listings",
+      "validation_endpoint": "https://listedstartups.com/api/listings/validate",
+      "agent_registration_endpoint": "https://listedstartups.com/api/agents/register",
+      "auth_type": "bearer",
+      "auth_env": "LISTED_STARTUPS_TOKEN",
+      "setup_state": "auth_required",
+      "payload_kind": "listed_startups_listing",
+      "supports_rest": true,
+      "supports_mcp": true,
+      "supports_git_pr": true,
+      "publishing": "open_immediate_audited",
+      "validated_category": "Software",
+      "credential_prefix": "ls_agent_",
+      "credential_ttl_days": 90,
+      "required_scope": "startup:submit",
+      "required_fields": [
+        "name",
+        "slug",
+        "tagline",
+        "description",
+        "categories"
+      ],
+      "note": "Official OpenAPI verified 2026-09-07. POST /api/listings/validate accepted the ToolScout payload with HTTP 200, valid=true, identity_available=true and domain_available=true using category Software. Publishing stays disabled until an explicitly authorized agent identity/token exists.",
+      "asset_scope": "product"
     },
     {
-      "surface_slug": "indietool", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.indietool.io/api/v1/apps/submit", "auth_type": "bearer", "auth_env": "INDIETOOL_API_KEY", "requires_payment": true, "setup_state": "policy_blocked", "payload_kind": "indietool_app", "api_key_prefix": "it_live_", "required_fields": ["appName","appUrl","landingPageHeading","landingPageSubHeading","category"], "requires_image_url_or_file": true, "free_route_requires_badge": true, "note": "Official developer API verified 2026-09-07. API submissions consume credits and JSON mode requires Bearer it_live_* plus a public HTTPS imageUrl. IndieTool advertises a separate free listing route that requires embedding its badge; neither paid API use nor reciprocal-badge installation is automatic under ToolScout policy."
+      "surface_slug": "indietool",
+      "enabled": false,
+      "allow_automatic": false,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://www.indietool.io/api/v1/apps/submit",
+      "auth_type": "bearer",
+      "auth_env": "INDIETOOL_API_KEY",
+      "requires_payment": true,
+      "setup_state": "policy_blocked",
+      "payload_kind": "indietool_app",
+      "api_key_prefix": "it_live_",
+      "required_fields": [
+        "appName",
+        "appUrl",
+        "landingPageHeading",
+        "landingPageSubHeading",
+        "category"
+      ],
+      "requires_image_url_or_file": true,
+      "free_route_requires_badge": true,
+      "note": "Official developer API verified 2026-09-07. API submissions consume credits and JSON mode requires Bearer it_live_* plus a public HTTPS imageUrl. IndieTool advertises a separate free listing route that requires embedding its badge; neither paid API use nor reciprocal-badge installation is automatic under ToolScout policy.",
+      "asset_scope": "product"
     },
     {
-      "surface_slug": "startuphub-ai", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.startuphub.ai/api/v1/startups/submit", "auth_type": "bearer", "auth_env": "STARTUPHUB_API_KEY", "requires_payment": true, "setup_state": "policy_blocked", "payload_kind": "startuphub_startup", "note": "Official API verified but costs credits; disabled by ToolScout zero-cost policy."
+      "surface_slug": "startuphub-ai",
+      "enabled": false,
+      "allow_automatic": false,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://www.startuphub.ai/api/v1/startups/submit",
+      "auth_type": "bearer",
+      "auth_env": "STARTUPHUB_API_KEY",
+      "requires_payment": true,
+      "setup_state": "policy_blocked",
+      "payload_kind": "startuphub_startup",
+      "note": "Official API verified but costs credits; disabled by ToolScout zero-cost policy.",
+      "asset_scope": "product"
+    },
+    {
+      "surface_slug": "agenttool-sh",
+      "enabled": true,
+      "allow_automatic": true,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://agenttool.sh/api/tools/submit",
+      "payload_kind": "agenttool_tool",
+      "asset_scope": "product",
+      "auth_type": "none",
+      "requires_payment": false,
+      "publishing": "scan_then_publish_results",
+      "rate_limit_per_day": 10,
+      "note": "Official API/OpenAPI verified 2026-09-07. Public no-auth POST submits a SaaS tool/API for agent-readiness scanning; agenttool.sh evaluates it and publishes the resulting grade. No account, payment or reciprocal badge is required."
     }
   ],
   "policy": {
     "automatic_requires_allowlist": true,
-    "automatic_methods": ["POST"],
-    "automatic_content_types": ["application/json"],
+    "automatic_methods": [
+      "POST"
+    ],
+    "automatic_content_types": [
+      "application/json"
+    ],
     "max_automatic_per_run": 3,
     "max_attempts": 3,
-    "never_automatic": ["captcha","account_creation","payment","community_post","editorial_pitch","terms_acceptance"],
+    "never_automatic": [
+      "captcha",
+      "account_creation",
+      "payment",
+      "community_post",
+      "editorial_pitch",
+      "terms_acceptance"
+    ],
     "zero_cost_only": true
   }
 }
