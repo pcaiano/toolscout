@@ -30,6 +30,7 @@ on:
       - 'migrations/0034_normalize_distribution_setup_rows.sql'
       - 'migrations/0035_prune_distribution_discovery_false_positives.sql'
       - 'migrations/0036_classify_verified_distribution_routes.sql'
+      - 'migrations/0037_sync_verified_human_distribution_routes.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -60,6 +61,7 @@ on:
       - 'migrations/0034_normalize_distribution_setup_rows.sql'
       - 'migrations/0035_prune_distribution_discovery_false_positives.sql'
       - 'migrations/0036_classify_verified_distribution_routes.sql'
+      - 'migrations/0037_sync_verified_human_distribution_routes.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -108,6 +110,7 @@ jobs:
           test -s migrations/0034_normalize_distribution_setup_rows.sql
           test -s migrations/0035_prune_distribution_discovery_false_positives.sql
           test -s migrations/0036_classify_verified_distribution_routes.sql
+          test -s migrations/0037_sync_verified_human_distribution_routes.sql
           node -e "const d=require('./data/distribution-publishing-profile.json'); if(d.product?.website!=='https://trytoolscout.org/'||d.product?.name!=='ToolScout'||d.policy?.automatic_paid_distribution!==false||d.policy?.automatic_account_creation!==false||d.policy?.automatic_reciprocal_badges!==false) process.exit(1)"
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_submissions' migrations/0023_distribution_submission.sql
@@ -128,9 +131,10 @@ jobs:
           grep -Fq "discovery_false_positive_or_duplicate" migrations/0035_prune_distribution_discovery_false_positives.sql
           grep -Fq "reciprocal_badge_policy" migrations/0036_classify_verified_distribution_routes.sql
           grep -Fq "account_creation_required" migrations/0036_classify_verified_distribution_routes.sql
+          grep -Fq "manual_or_editorial_route" migrations/0037_sync_verified_human_distribution_routes.sql
       - name: Validate radar, discovery and syndication
         run: |
-          node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1)"
+          node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1); for(const s of ['the-rundown-ai-supertools','launch-llama','best-of-ai','nextool-ai','stremit']){const x=d.sources.find(v=>v.slug===s); if(!x||x.status!=='human_action_required'||x.human_required!==true) process.exit(1)}"
           node -e "const d=require('./data/distribution-discovery-sources.json'); if(!Array.isArray(d.sources)||d.sources.length<2) process.exit(1)"
           grep -Fq '/api/distribution/feed.json' distribution-radar-worker.js
           grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
