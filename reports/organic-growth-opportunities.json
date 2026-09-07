@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T00:32:26.085Z",
+  "generatedAt": "2026-09-07T07:44:36.468Z",
   "engine": "ToolScout Search & Answer Opportunity Engine v2",
   "objective": "Convert observed search and answer-engine signals into autonomous SEO/AEO/GEO actions that improve qualified traffic, decision quality and monetization potential while preserving editorial neutrality.",
   "autonomyDirective": "Automate safe growth actions by default. The Command Center is an observability surface, not a work queue. Escalate only blocked, ambiguous, destructive or policy-sensitive decisions.",
@@ -15,8 +15,8 @@
   ],
   "summary": {
     "observedGscIntents": 24,
-    "actionableOpportunities": 15,
-    "firstPageOpportunities": 11,
+    "actionableOpportunities": 14,
+    "firstPageOpportunities": 10,
     "strikingDistanceOpportunities": 0,
     "authorityDepthOpportunities": 4,
     "competitorResearchCandidates": 3
@@ -324,7 +324,7 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "priorityScore": 53,
+      "priorityScore": 54,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
@@ -345,12 +345,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 147,
+        "impressions": 203,
         "clicks": 0,
         "ctr": 0,
-        "position": 76.9116,
+        "position": 76.9113,
         "opportunity": "ctr-upside",
-        "opportunityScore": 28
+        "opportunityScore": 29
       },
       "topTools": [
         "semrush",
@@ -360,7 +360,7 @@
     },
     {
       "intent": "best-no-code-automation-tools",
-      "priorityScore": 52,
+      "priorityScore": 53,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
@@ -381,17 +381,53 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 82,
+        "impressions": 111,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.2439,
+        "position": 73.1441,
         "opportunity": "ctr-upside",
-        "opportunityScore": 25
+        "opportunityScore": 26
       },
       "topTools": [
         "zapier",
         "integrately",
         "n8n"
+      ]
+    },
+    {
+      "intent": "best-crm-for-sales-teams",
+      "priorityScore": 51,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 40,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 77.7,
+        "opportunity": "ctr-upside",
+        "opportunityScore": 23
+      },
+      "topTools": [
+        "hubspot",
+        "salesforce",
+        "close"
       ]
     },
     {
@@ -470,42 +506,6 @@
       ]
     },
     {
-      "intent": "best-crm-for-sales-teams",
-      "priorityScore": 49,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "reason": "Meaningful search demand with weak ranking: improve relevance, depth, evidence, comparisons and authority rather than creating a new URL.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 26,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 78.0385,
-        "opportunity": "ctr-upside",
-        "opportunityScore": 21
-      },
-      "topTools": [
-        "hubspot",
-        "salesforce",
-        "close"
-      ]
-    },
-    {
       "intent": "best-funnel-builder",
       "priorityScore": 49,
       "lane": "seo-authority-depth",
@@ -528,10 +528,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 34,
+        "impressions": 39,
         "clicks": 0,
         "ctr": 0,
-        "position": 79.0588,
+        "position": 77.5385,
         "opportunity": "ctr-upside",
         "opportunityScore": 22
       },
@@ -834,6 +834,39 @@
     },
     {
       "intent": "best-free-project-management-tools",
+      "priorityScore": 41,
+      "lane": "develop-authority",
+      "action": "watch",
+      "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 10,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 46.1,
+        "opportunity": "develop",
+        "opportunityScore": 16
+      },
+      "topTools": [
+        "trello",
+        "calendly",
+        "linear"
+      ]
+    },
+    {
+      "intent": "best-project-management-tools",
       "priorityScore": 40,
       "lane": "develop-authority",
       "action": "watch",
@@ -852,81 +885,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 6,
+        "impressions": 10,
         "clicks": 0,
         "ctr": 0,
-        "position": 46.8333,
+        "position": 45.4,
         "opportunity": "develop",
-        "opportunityScore": 15
-      },
-      "topTools": [
-        "trello",
-        "calendly",
-        "linear"
-      ]
-    },
-    {
-      "intent": "best-keyword-research-tools",
-      "priorityScore": 38,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 1,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 5,
-        "opportunity": "striking-distance",
-        "opportunityScore": 17
-      },
-      "topTools": [
-        "surfer",
-        "semrush",
-        "ahrefs"
-      ]
-    },
-    {
-      "intent": "best-project-management-tools",
-      "priorityScore": 38,
-      "lane": "develop-authority",
-      "action": "watch",
-      "reason": "No strong observed-search trigger yet.",
-      "autonomy": "measure-only",
-      "executionPlan": [
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 5,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 49.6,
-        "opportunity": "develop",
-        "opportunityScore": 14
+        "opportunityScore": 16
       },
       "topTools": [
         "airtable",
@@ -1007,6 +971,72 @@
       ]
     },
     {
+      "intent": "best-free-crm",
+      "priorityScore": 37,
+      "lane": "develop-authority",
+      "action": "watch",
+      "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 8,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 70.375,
+        "opportunity": "develop",
+        "opportunityScore": 11
+      },
+      "topTools": [
+        "buffer",
+        "chatgpt",
+        "integrately"
+      ]
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "priorityScore": 37,
+      "lane": "develop-authority",
+      "action": "watch",
+      "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 8,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 61.375,
+        "opportunity": "develop",
+        "opportunityScore": 16
+      },
+      "topTools": [
+        "surfer",
+        "semrush",
+        "ahrefs"
+      ]
+    },
+    {
       "intent": "best-product-analytics-tools",
       "priorityScore": 36,
       "lane": "develop-authority",
@@ -1073,39 +1103,6 @@
         "chatgpt",
         "copy-ai",
         "buffer"
-      ]
-    },
-    {
-      "intent": "best-free-crm",
-      "priorityScore": 35,
-      "lane": "develop-authority",
-      "action": "watch",
-      "reason": "No strong observed-search trigger yet.",
-      "autonomy": "measure-only",
-      "executionPlan": [
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 5,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 71.6,
-        "opportunity": "develop",
-        "opportunityScore": 9
-      },
-      "topTools": [
-        "buffer",
-        "chatgpt",
-        "integrately"
       ]
     },
     {
@@ -1181,7 +1178,7 @@
   "autonomousActionQueue": [
     {
       "intent": "best-seo-tools-for-agencies",
-      "priorityScore": 53,
+      "priorityScore": 54,
       "lane": "seo-authority-depth",
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -1199,7 +1196,7 @@
     },
     {
       "intent": "best-no-code-automation-tools",
-      "priorityScore": 52,
+      "priorityScore": 53,
       "lane": "seo-authority-depth",
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -1217,7 +1214,7 @@
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "priorityScore": 49,
+      "priorityScore": 51,
       "lane": "seo-authority-depth",
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -1344,24 +1341,6 @@
     {
       "intent": "best-crm-for-small-business",
       "priorityScore": 43,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-keyword-research-tools",
-      "priorityScore": 38,
       "lane": "seo-aeo-snippet",
       "executionPlan": [
         "sharpen-answer-first-copy",
