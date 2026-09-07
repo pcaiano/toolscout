@@ -20,6 +20,7 @@ on:
       - 'migrations/0025_normalize_manual_distribution_opportunities.sql'
       - 'migrations/0026_prioritize_distribution_research_surfaces.sql'
       - 'migrations/0027_distribution_embeds.sql'
+      - 'migrations/0028_promote_listed_startups.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -40,6 +41,7 @@ on:
       - 'migrations/0025_normalize_manual_distribution_opportunities.sql'
       - 'migrations/0026_prioritize_distribution_research_surfaces.sql'
       - 'migrations/0027_distribution_embeds.sql'
+      - 'migrations/0028_promote_listed_startups.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -79,10 +81,12 @@ jobs:
           test -s migrations/0023_distribution_submission.sql
           test -s migrations/0024_distribution_orchestration.sql
           test -s migrations/0027_distribution_embeds.sql
+          test -s migrations/0028_promote_listed_startups.sql
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_submissions' migrations/0023_distribution_submission.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_editorial_queue' migrations/0024_distribution_orchestration.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_embed_clicks' migrations/0027_distribution_embeds.sql
+          grep -q "surface_slug='listed-startups'" migrations/0028_promote_listed_startups.sql
       - name: Validate radar, discovery and syndication
         run: |
           node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1)"
