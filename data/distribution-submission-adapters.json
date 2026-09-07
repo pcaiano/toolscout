@@ -1,5 +1,29 @@
 {
-  "adapters": [],
+  "adapters": [
+    {
+      "surface_slug": "indexnow",
+      "enabled": true,
+      "allow_automatic": true,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "payload_kind": "indexnow",
+      "key": "81025561f83480545d2e18f4f6f1e4ed",
+      "key_location": "https://trytoolscout.org/81025561f83480545d2e18f4f6f1e4ed.txt"
+    },
+    {
+      "surface_slug": "tinylaunch",
+      "enabled": false,
+      "allow_automatic": false,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://www.tinylaunch.com/api/v1/startups",
+      "auth_type": "bearer",
+      "auth_env": "TINYLAUNCH_TOKEN",
+      "payload_kind": "tinylaunch_startup",
+      "note": "Official agent API verified; keep disabled until authenticated token, category and truthful logo payload are available."
+    }
+  ],
   "policy": {
     "automatic_requires_allowlist": true,
     "automatic_methods": ["POST"],
