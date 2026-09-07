@@ -42,6 +42,13 @@ jobs:
           for page in make-vs-zapier hubspot-vs-pipedrive beehiiv-vs-kit jotform-vs-typeform semrush-vs-ahrefs; do
             printf '%s\n' "$sitemap" | grep -F "$PROD_BASE/$page.html"
           done
+      - name: Check IndexNow verification key
+        run: |
+          set -e
+          key='81025561f83480545d2e18f4f6f1e4ed'
+          body="$(curl --fail --silent --show-error "$PROD_BASE/$key.txt")"
+          test "$body" = "$key"
+          node -e "const c=require('./data/distribution-submission-adapters.json');const a=c.adapters.find(x=>x.surface_slug==='indexnow');if(!a||!a.enabled||!a.allow_automatic||a.payload_kind!=='indexnow'||a.key!=='$key')process.exit(1)"
       - name: Check core pages
         run: |
           set -e
@@ -105,12 +112,9 @@ jobs:
             expected="$2"
             headers="$(mktemp)"
             curl --silent --show-error --dump-header "$headers" --output /dev/null --max-redirs 0 "$PROD_BASE/go/$slug" 2>/dev/null || true
-            echo "Headers for /go/$slug:"
-            cat "$headers"
             status="$(sed -n 's/^HTTP\/[^ ]* \([0-9][0-9][0-9]\).*/\1/p' "$headers" | tail -1)"
             location="$(sed -n 's/^[Ll]ocation:[[:space:]]*//p' "$headers" | tr -d '\r' | tail -1)"
             rm -f "$headers"
-            echo "Parsed status=$status location=$location"
             test "$status" = "302"
             printf '%s\n' "$location" | grep -Eq "$expected"
           }
@@ -134,40 +138,19 @@ jobs:
               const entry = affiliate[tool.slug] || {};
               const active = Boolean(entry.enabled && entry.url);
               const expected = active ? entry.url : (entry.publicUrl || tool.sourceUrl);
-              if (!expected) {
-                failures.push(`${tool.slug}: no expected external destination`);
-                continue;
-              }
+              if (!expected) { failures.push(`${tool.slug}: no expected external destination`); continue; }
               try {
-                const response = await fetch(`${prod}/go/${encodeURIComponent(tool.slug)}`, {
-                  redirect: 'manual',
-                  headers: {'user-agent': 'ToolScout production smoke/1.0'}
-                });
+                const response = await fetch(`${prod}/go/${encodeURIComponent(tool.slug)}`, {redirect:'manual',headers:{'user-agent':'ToolScout production smoke/1.0'}});
                 const location = response.headers.get('location');
-                if (!redirectStatuses.has(response.status) || !location) {
-                  failures.push(`${tool.slug}: HTTP ${response.status}, missing external redirect`);
-                  continue;
-                }
+                if (!redirectStatuses.has(response.status) || !location) { failures.push(`${tool.slug}: HTTP ${response.status}, missing external redirect`); continue; }
                 const destination = new URL(location, prod);
                 const expectedHost = new URL(expected).hostname;
-                if (destination.hostname === prodHost) {
-                  failures.push(`${tool.slug}: redirected back to ToolScout (${destination.href})`);
-                  continue;
-                }
-                if (destination.hostname !== expectedHost) {
-                  failures.push(`${tool.slug}: expected host ${expectedHost}, got ${destination.hostname}`);
-                  continue;
-                }
+                if (destination.hostname === prodHost) { failures.push(`${tool.slug}: redirected back to ToolScout (${destination.href})`); continue; }
+                if (destination.hostname !== expectedHost) { failures.push(`${tool.slug}: expected host ${expectedHost}, got ${destination.hostname}`); continue; }
                 console.log(`OK ${tool.slug} -> ${destination.hostname}${active ? ' [affiliate]' : ' [public]'}`);
-              } catch (error) {
-                failures.push(`${tool.slug}: ${error.message}`);
-              }
+              } catch (error) { failures.push(`${tool.slug}: ${error.message}`); }
             }
-            if (failures.length) {
-              console.error(`Explore redirect failures (${failures.length}/${tools.length}):`);
-              for (const failure of failures) console.error(`- ${failure}`);
-              process.exit(1);
-            }
+            if (failures.length) { console.error(`Explore redirect failures (${failures.length}/${tools.length}):`); for (const failure of failures) console.error(`- ${failure}`); process.exit(1); }
             console.log(`All ${tools.length} catalog Explore routes redirect to their expected external host.`);
           })();
           NODE
