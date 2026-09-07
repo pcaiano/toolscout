@@ -11,11 +11,17 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: sync-pending-affiliate-tools
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -56,4 +62,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/tools.json
           git commit -m 'Add pending affiliate tools to catalog'
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
