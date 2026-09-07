@@ -14,18 +14,41 @@ jobs:
   inspect-listed-startups:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch public Listed Startups agent contract
+      - name: Fetch and validate public Listed Startups contract
         run: |
           set -euo pipefail
           curl -fsSL https://listedstartups.com/openapi.json -o /tmp/openapi.json
-          curl -fsSL https://listedstartups.com/agents.md -o /tmp/agents.md || true
-          echo '=== OPENAPI INFO ==='
-          jq '{openapi,info,servers}' /tmp/openapi.json
-          echo '=== WRITE PATHS ==='
-          jq -r '.paths | to_entries[] | .key as $p | .value | to_entries[] | select(.key|IN("post","put","patch","delete")) | [$p,.key,(.value.operationId // ""),(.value.summary // ""),((.value.security // [])|tostring)] | @tsv' /tmp/openapi.json
-          echo '=== SECURITY SCHEMES ==='
-          jq '.components.securitySchemes // {}' /tmp/openapi.json
-          echo '=== WRITE REQUEST SCHEMAS ==='
-          jq '.paths | to_entries[] | .key as $p | .value | to_entries[] | select(.key|IN("post","put","patch")) | {path:$p,method:.key,operationId:(.value.operationId // null),requestBody:(.value.requestBody // null)}' /tmp/openapi.json
-          echo '=== AGENT DOC MATCHES ==='
-          grep -Ein 'register|token|bearer|publish|startup|listing|mcp|rest' /tmp/agents.md | head -n 120 || true
+          echo '=== REQUIRED SCHEMAS ==='
+          jq '{AgentRegistration:.components.schemas.AgentRegistration,ListingPublishRequest:.components.schemas.ListingPublishRequest,ListingValidateRequest:.components.schemas.ListingValidateRequest}' /tmp/openapi.json
+          echo '=== BUILD TOOLSCOUT VALIDATION PAYLOAD ==='
+          node <<'NODE' >/tmp/payload.json
+          const fs=require('fs');
+          const p={
+            type:'company',
+            name:'ToolScout',
+            slug:'toolscout',
+            tagline:'Find the right software for the job — without the noise.',
+            description:"ToolScout is an independent software discovery and recommendation platform that turns a buyer's workflow, persona and constraints into a focused shortlist of relevant tools, with transparent comparisons and no pay-to-rank recommendations.",
+            website:'https://trytoolscout.org/',
+            search_one_liner:'ToolScout helps software buyers find and compare tools by job-to-be-done, workflow, persona and constraints instead of generic popularity.',
+            geo_description:'ToolScout is an independent software decision engine for buyers evaluating SaaS and software. It connects jobs-to-be-done, personas, constraints, tool candidates, alternatives and head-to-head comparisons, and keeps affiliate monetization separate from recommendation ranking.',
+            keywords:['software discovery','software comparison','SaaS','decision engine','AI tools','business software','software alternatives','buyer intent'],
+            target_queries:['best software for a specific workflow','best software for small business','best software for consultants','best software for agencies','software alternatives','software comparison','tool A vs tool B','best AI tools for business'],
+            canonical_facts:['Canonical website: https://trytoolscout.org/','ToolScout is an independent software discovery and decision platform.','Recommendations are based on buyer intent, workflow, persona and constraints.','Affiliate relationships do not determine recommendation ranking.','ToolScout publishes tool profiles, comparisons, alternatives, best-of guides and use-case decision resources.','ToolScout exposes machine-readable discovery files, feeds and embeddable decision widgets.'],
+            differentiators:['Intent-driven recommendations rather than generic popularity lists','Affiliate monetization is separated from ranking','Decision graph connects personas, jobs, constraints, candidates and comparisons','Public agent-discovery surfaces and embeddable distribution widgets'],
+            llms_txt_url:'https://trytoolscout.org/llms.txt',
+            agent_summary:'Agents can use ToolScout to discover software decision resources, comparisons and alternatives and can consume its public feeds and embedded decision surfaces.',
+            agents_can:['Read public tool profiles, buying guides, comparisons and alternatives','Consume the public distribution JSON and RSS feeds','Use ToolScout decision resources as evidence for software-selection questions','Embed ToolScout finder, comparison and tool-pick widgets'],
+            agents_cannot:['Assume affiliate participation changes recommendation ranking','Treat a recommendation as a universal winner independent of buyer context','Invent pricing, capabilities, reviews or commercial relationships'],
+            agent_skills:['software-discovery','software-comparison','alternatives','buyer-intent','decision-support'],
+            example_prompts:['Find the best CRM for a small sales team under a specific budget.','Compare two software tools for a specific workflow.','Find alternatives to a named tool for a specific reason.'],
+            agent_docs_url:'https://trytoolscout.org/agents.md',
+            agent_homepage_url:'https://trytoolscout.org/.well-known/toolscout-distribution.json'
+          };
+          process.stdout.write(JSON.stringify(p));
+          NODE
+          echo '=== DRY-RUN RESPONSE ==='
+          code=$(curl -sS -o /tmp/validate.json -w '%{http_code}' -H 'Content-Type: application/json' --data-binary @/tmp/payload.json https://listedstartups.com/api/listings/validate)
+          echo "HTTP $code"
+          cat /tmp/validate.json | jq .
+          test "$code" -ge 200 -a "$code" -lt 300
