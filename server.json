@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.pcaiano/toolscout",
+  "title": "ToolScout Software Recommendation",
+  "description": "Read-only ToolScout software decision server that returns deterministic ranked recommendations for a software job, persona, budget, team and priority. Affiliate relationships do not influence ranking.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/pcaiano/toolscout",
+    "source": "github"
+  },
+  "websiteUrl": "https://trytoolscout.org/",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://trytoolscout.org/mcp"
+    }
+  ]
+}
