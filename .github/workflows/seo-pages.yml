@@ -15,12 +15,18 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: seo-pages
+  cancel-in-progress: false
+
 jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
       - name: Sync Google Search Console signals
@@ -87,4 +93,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports
           git commit -m "Refresh SEO, blog and distribution assets"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
