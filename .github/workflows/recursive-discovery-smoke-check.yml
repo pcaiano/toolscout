@@ -1,0 +1,27 @@
+name: Recursive Discovery Smoke Check
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/recursive-discovery-smoke.yml'
+      - '.github/workflows/recursive-discovery-smoke-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/recursive-discovery-smoke.yml'
+      - '.github/workflows/recursive-discovery-smoke-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate OIDC smoke contract
+        run: |
+          grep -Fq 'id-token: write' .github/workflows/recursive-discovery-smoke.yml
+          grep -Fq 'audience=toolscout-discovery' .github/workflows/recursive-discovery-smoke.yml
+          grep -Fq '/api/distribution/discovery/refresh' .github/workflows/recursive-discovery-smoke.yml
+          grep -Fq 'recursive_sources_learned' .github/workflows/recursive-discovery-smoke.yml

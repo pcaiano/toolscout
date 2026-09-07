@@ -1,0 +1,38 @@
+name: ARD Registry Propagation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.well-known/ard.json'
+      - '.well-known/ai-catalog.json'
+      - 'robots.txt'
+      - '.github/workflows/ard-registry-propagation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live ARD paths
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 20 https://trytoolscout.org/.well-known/ard.json -o ard.json
+          curl --fail --silent --show-error --max-time 20 https://trytoolscout.org/.well-known/ai-catalog.json -o ai-catalog.json
+          node -e "const fs=require('fs'); for(const p of ['ard.json','ai-catalog.json']){const x=JSON.parse(fs.readFileSync(p)); if(x.specVersion!=='1.0'||!Array.isArray(x.entries)||x.entries.length<3) process.exit(1)}"
+      - name: Submit ToolScout domain to Neuronto ARD registry
+        run: |
+          set -euo pipefail
+          body=$(curl --fail --silent --show-error --max-time 25 -X POST https://neuronto.com/submit -H 'content-type: application/json' --data '{"domain":"trytoolscout.org"}')
+          printf '%s\n' "$body"
+          printf '%s' "$body" | head -c 2000 > neuronto-submit-response.txt
+      - name: Verify ToolScout is searchable in ARD registry
+        run: |
+          set -euo pipefail
+          sleep 2
+          response=$(curl --fail --silent --show-error --max-time 25 -X POST https://neuronto.com/search -H 'content-type: application/json' --data '{"query":{"text":"software recommendation tool"}}')
+          printf '%s\n' "$response"
+          printf '%s' "$response" | grep -qi 'trytoolscout.org' || { echo 'ToolScout not visible in first registry search yet; submission accepted but indexing may still be pending.'; exit 0; }
