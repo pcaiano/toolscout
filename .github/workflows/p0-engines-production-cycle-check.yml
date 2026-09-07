@@ -19,18 +19,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate protected P0 production cycle
+      - name: Validate post-deploy P0 production proof
         run: |
           set -euo pipefail
           f=.github/workflows/p0-engines-production-cycle.yml
           test -s "$f"
           grep -Fq 'Deploy ToolScout Worker' "$f"
-          grep -Fq '/api/distribution/autonomous/refresh' "$f"
-          grep -Fq '/api/affiliate-coverage/run' "$f"
-          grep -Fq 'Authorization: Bearer $ADMIN_TOKEN' "$f"
-          grep -Fq 'DISTRIBUTION_ENGINE_SUMMARY=' "$f"
-          grep -Fq 'AFFILIATE_COVERAGE_ENGINE_SUMMARY=' "$f"
-          if grep -Eq 'cat[[:space:]]+"?\$body|set[[:space:]]+-x' "$f"; then
-            echo 'Production workflow must not dump protected response bodies or shell secrets.'
+          grep -Fq 'CLOUDFLARE_API_TOKEN' "$f"
+          grep -Fq 'autonomous_distribution_qualification' "$f"
+          grep -Fq 'affiliate_coverage_runs' "$f"
+          grep -Fq "datetime('now','-2 hours')" "$f"
+          grep -Fq 'Both P0 engines have persisted production-cycle evidence' "$f"
+          if grep -Fq 'ADMIN_TOKEN' "$f"; then
+            echo 'Production proof must not depend on duplicating Worker ADMIN_TOKEN into GitHub secrets.'
+            exit 1
+          fi
+          if grep -Eq '^  push:|/api/distribution/autonomous/refresh|/api/affiliate-coverage/run' "$f"; then
+            echo 'Production proof must run after deploy and inspect persisted production evidence instead of racing the deploy.'
             exit 1
           fi
