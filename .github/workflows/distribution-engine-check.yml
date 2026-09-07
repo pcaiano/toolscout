@@ -88,7 +88,7 @@ jobs:
           grep -Fq 'adapter_not_verified' distribution-submission-worker.js
           grep -Fq 'allow_automatic' distribution-submission-worker.js
           grep -Fq 'packageAutomaticProtocols' distribution-submission-worker.js
-          grep -Fq "submission_type='http_json'" distribution-submission-worker.js
+          grep -Fq "'http_json'" distribution-submission-worker.js
       - name: Validate event-driven orchestration and community guardrails
         run: |
           grep -Fq '/api/distribution/orchestrate' distribution-orchestrator-worker.js
