@@ -1,0 +1,45 @@
+name: Affiliate Coverage Engine Check
+on:
+  pull_request:
+    paths:
+      - 'affiliate-coverage-engine.js'
+      - 'affiliate-operations.js'
+      - 'migrations/0046_affiliate_coverage_engine.sql'
+      - '.github/workflows/affiliate-coverage-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'affiliate-coverage-engine.js'
+      - 'affiliate-operations.js'
+      - 'migrations/0046_affiliate_coverage_engine.sql'
+      - '.github/workflows/affiliate-coverage-check.yml'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate engine invariants
+        run: |
+          node --input-type=module <<'EOF'
+          import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
+          const records=[
+            {slug:'a',status:'research_required',approval_probability:.8,commission_score:8,network_friction:2},
+            {slug:'b',status:'active'},
+            {slug:'c',status:'human_action_required'}
+          ];
+          const clicks=[
+            {tool_slug:'a',affiliate_active_at_click:0,source:'public-redirect',classification:'likely-human',clicks:12},
+            {tool_slug:'b',affiliate_active_at_click:1,source:'public-redirect',classification:'likely-human',clicks:8},
+            {tool_slug:'a',affiliate_active_at_click:0,source:'internal-test',classification:'owner',clicks:99}
+          ];
+          const s=coverageEngineSnapshot(records,clicks);
+          if(s.human_outbound_clicks!==20) throw Error('human outbound mismatch');
+          if(s.monetized_human_outbound_clicks!==8) throw Error('monetized mismatch');
+          if(Math.abs(s.weighted_coverage-.4)>1e-9) throw Error('coverage mismatch');
+          if(s.recoverable_queue[0].slug!=='a') throw Error('leakage priority mismatch');
+          if(automationBoundary(records[2]).mode!=='human') throw Error('human boundary mismatch');
+          console.log(JSON.stringify(s,null,2));
+          EOF
