@@ -1,0 +1,31 @@
+name: Hype Star Contract Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hypestar-contract-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect public Hype Star agent contracts
+        run: |
+          set -euo pipefail
+          for url in \
+            https://hypestar.org/openapi.json \
+            https://hypestar.org/api/openapi.json \
+            https://hypestar.org/.well-known/openapi.json \
+            https://hypestar.org/hypestar-skill/SKILL.md \
+            https://hypestar.org/api/v1/categories; do
+            echo "=== $url ==="
+            curl -sS -L -D /tmp/headers -o /tmp/body -w 'HTTP %{http_code}\n' "$url" || true
+            grep -Ei '^(content-type|location|allow):' /tmp/headers || true
+            head -c 30000 /tmp/body || true
+            echo
+          done
