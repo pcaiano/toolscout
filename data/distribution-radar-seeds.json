@@ -233,6 +233,24 @@
       "human_required": false,
       "status": "ready_to_submit",
       "next_action": "Automatically submit ToolScout once for agent-readiness scanning through the verified no-auth API, then track the published AgentGrade result."
+    },
+    {
+      "slug": "ora-ai",
+      "name": "Ora",
+      "type": "agent_readiness_discovery_api",
+      "url": "https://ora.ai/",
+      "action_url": "https://ora.ai/api/scan?include=essentials",
+      "audience_fit": 96,
+      "authority": 82,
+      "traffic_potential": 78,
+      "backlink_value": 76,
+      "acceptance_probability": 99,
+      "automation_potential": 100,
+      "effort": 5,
+      "cost": 0,
+      "human_required": false,
+      "status": "ready_to_submit",
+      "next_action": "Run one free public Ora scan for ToolScout, publish its agent-readiness surface into Ora discovery, then monitor the verified score and fixes."
     }
   ]
 }
