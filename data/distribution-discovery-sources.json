@@ -49,6 +49,38 @@
       "peerlist.io": "peerlist-launchpad",
       "microlaunch.net": "microlaunch",
       "betalist.com": "betalist"
+    },
+    "host_status_overrides": {
+      "dododirectory.com": {
+        "status": "policy_blocked",
+        "human_required": 0,
+        "next_action": "Free listing requires a permanent reciprocal badge/backlink; blocked by ToolScout no-reciprocal-badge policy."
+      },
+      "alternative.tools": {
+        "status": "policy_blocked",
+        "human_required": 0,
+        "next_action": "Free listing requires a permanent backlink/badge and traffic/DR thresholds; blocked by ToolScout policy."
+      },
+      "toolfio.com": {
+        "status": "policy_blocked",
+        "human_required": 0,
+        "next_action": "Free listing requires a permanent reciprocal badge/backlink; blocked by ToolScout policy."
+      },
+      "twelve.tools": {
+        "status": "policy_blocked",
+        "human_required": 0,
+        "next_action": "Free listing requires a homepage/footer backlink; blocked by ToolScout no-reciprocal-badge policy."
+      },
+      "launched.tools": {
+        "status": "policy_blocked",
+        "human_required": 0,
+        "next_action": "Free listing only goes live after badge verification; blocked by ToolScout no-reciprocal-badge policy."
+      },
+      "startupfa.me": {
+        "status": "human_action_required",
+        "human_required": 1,
+        "next_action": "Free route requires account creation/authentication and listing verification; keep outside automatic execution."
+      }
     }
   }
 }
