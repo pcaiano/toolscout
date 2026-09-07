@@ -1,26 +1,138 @@
 {
-  "systeme-io": {"url": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109", "enabled": true, "publicUrl": "https://systeme.io/", "tracking": {"subId": {"supported": true, "parameter": "tk", "evidenceUrl": "https://help.systeme.io/article/1508-how-to-tag-an-affiliate-link", "verifiedAt": "2026-08-31"}}},
-  "beehiiv": {"url": "https://www.beehiiv.com/?via=pedro-caiano", "enabled": true, "publicUrl": "https://www.beehiiv.com/"},
-  "jotform": {"url": "https://www.jotform.com/products/form-builder/?partner=pcaiano", "enabled": true, "publicUrl": "https://www.jotform.com/", "links": {"form-builder": "https://www.jotform.com/products/form-builder/?partner=pcaiano", "sign": "https://www.jotform.com/products/sign/?partner=pcaiano", "apps": "https://www.jotform.com/products/apps/?partner=pcaiano", "ai-agents": "https://www.jotform.com/ai/agents/?partner=pcaiano", "pricing": "https://www.jotform.com/pricing/?partner=pcaiano", "homepage": "https://www.jotform.com/?partner=pcaiano"}},
-  "hubspot": {"url": "", "enabled": false, "publicUrl": "https://www.hubspot.com/"},
-  "adcreative-ai": {"url": "https://free-trial.adcreative.ai/tusb8l6nun5w", "enabled": true, "publicUrl": "https://www.adcreative.ai/"},
-  "pipedrive": {"url": "https://aff.trypipedrive.com/e5qvcwi1i22u", "enabled": true, "publicUrl": "https://www.pipedrive.com/"},
-  "shopify": {"url": "https://shopify.pxf.io/7699108-link?sharedid=7699108", "enabled": true, "publicUrl": "https://www.shopify.com/"},
-  "semrush": {"url": "", "enabled": false, "publicUrl": "https://www.semrush.com/"},
-  "jasper": {"url": "", "enabled": false, "publicUrl": "https://www.jasper.ai/"},
-  "zapier": {"url": "", "enabled": false, "publicUrl": "https://zapier.com/"},
-  "make": {"url": "https://www.make.com/en/register?pc=toolscout", "enabled": true, "publicUrl": "https://www.make.com/"},
-  "surfer": {"url": "", "enabled": false, "publicUrl": "https://surferseo.com/"},
-  "typeform": {"url": "https://typeform.cello.so/32NCHvHV6ws", "enabled": true, "publicUrl": "https://www.typeform.com/"},
-  "brevo": {"url": "", "enabled": false, "publicUrl": "https://www.brevo.com/"},
-  "activecampaign": {"url": "", "enabled": false, "publicUrl": "https://www.activecampaign.com/"},
-  "mailchimp": {"url": "", "enabled": false, "publicUrl": "https://mailchimp.com/"},
-  "zoho-crm": {"url": "", "enabled": false, "publicUrl": "https://www.zoho.com/crm/"},
-  "monday-crm": {"url": "", "enabled": false, "publicUrl": "https://monday.com/"},
-  "tally": {"url": "", "enabled": false, "publicUrl": "https://tally.so/"},
-  "ahrefs": {"url": "", "enabled": false, "publicUrl": "https://ahrefs.com/"},
-  "se-ranking": {"url": "", "enabled": false, "publicUrl": "https://seranking.com/"},
-  "kit": {"url": "https://partners.kit.com/k3tjs4al3opn", "enabled": true, "publicUrl": "https://kit.com/"},
-  "gorgias": {"url": "https://partner.gorgias.com/tes0ykxnwmqd", "enabled": true, "publicUrl": "https://www.gorgias.com/"},
-  "mailerlite": {"url": "https://www.mailerlite.com/?linkId=lp_170762&sourceId=pedro-caiano&tenantId=mailerlite", "enabled": true, "publicUrl": "https://www.mailerlite.com/"}
+  "systeme-io": {
+    "url": "https://systeme.io/?sa=sa01865850756e283e72f747af10845cc8357b3109",
+    "enabled": true,
+    "publicUrl": "https://systeme.io/",
+    "tracking": {
+      "subId": {
+        "supported": true,
+        "parameter": "tk",
+        "evidenceUrl": "https://help.systeme.io/article/1508-how-to-tag-an-affiliate-link",
+        "verifiedAt": "2026-08-31"
+      }
+    }
+  },
+  "beehiiv": {
+    "url": "https://www.beehiiv.com/?via=pedro-caiano",
+    "enabled": true,
+    "publicUrl": "https://www.beehiiv.com/"
+  },
+  "jotform": {
+    "url": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
+    "enabled": true,
+    "publicUrl": "https://www.jotform.com/",
+    "links": {
+      "form-builder": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
+      "sign": "https://www.jotform.com/products/sign/?partner=pcaiano",
+      "apps": "https://www.jotform.com/products/apps/?partner=pcaiano",
+      "ai-agents": "https://www.jotform.com/ai/agents/?partner=pcaiano",
+      "pricing": "https://www.jotform.com/pricing/?partner=pcaiano",
+      "homepage": "https://www.jotform.com/?partner=pcaiano"
+    }
+  },
+  "hubspot": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://www.hubspot.com/"
+  },
+  "adcreative-ai": {
+    "url": "https://free-trial.adcreative.ai/tusb8l6nun5w",
+    "enabled": true,
+    "publicUrl": "https://www.adcreative.ai/"
+  },
+  "pipedrive": {
+    "url": "https://aff.trypipedrive.com/e5qvcwi1i22u",
+    "enabled": true,
+    "publicUrl": "https://www.pipedrive.com/"
+  },
+  "shopify": {
+    "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
+    "enabled": true,
+    "publicUrl": "https://www.shopify.com/"
+  },
+  "semrush": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://www.semrush.com/"
+  },
+  "jasper": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://www.jasper.ai/"
+  },
+  "zapier": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://zapier.com/"
+  },
+  "make": {
+    "url": "https://www.make.com/en/register?pc=toolscout",
+    "enabled": true,
+    "publicUrl": "https://www.make.com/"
+  },
+  "surfer": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://surferseo.com/"
+  },
+  "typeform": {
+    "url": "https://typeform.cello.so/32NCHvHV6ws",
+    "enabled": true,
+    "publicUrl": "https://www.typeform.com/"
+  },
+  "brevo": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://www.brevo.com/"
+  },
+  "activecampaign": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://www.activecampaign.com/"
+  },
+  "mailchimp": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://mailchimp.com/"
+  },
+  "zoho-crm": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://www.zoho.com/crm/"
+  },
+  "monday-crm": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://monday.com/"
+  },
+  "tally": {
+    "url": "https://tally.cello.so/TUssLRGiwo3",
+    "enabled": true,
+    "publicUrl": "https://tally.so/"
+  },
+  "ahrefs": {
+    "url": "",
+    "enabled": false,
+    "publicUrl": "https://ahrefs.com/"
+  },
+  "se-ranking": {
+    "url": "https://seranking.com/?ga=5249732&source=link",
+    "enabled": true,
+    "publicUrl": "https://seranking.com/"
+  },
+  "kit": {
+    "url": "https://partners.kit.com/k3tjs4al3opn",
+    "enabled": true,
+    "publicUrl": "https://kit.com/"
+  },
+  "gorgias": {
+    "url": "https://partner.gorgias.com/tes0ykxnwmqd",
+    "enabled": true,
+    "publicUrl": "https://www.gorgias.com/"
+  },
+  "mailerlite": {
+    "url": "https://www.mailerlite.com/?linkId=lp_170762&sourceId=pedro-caiano&tenantId=mailerlite",
+    "enabled": true,
+    "publicUrl": "https://www.mailerlite.com/"
+  }
 }
