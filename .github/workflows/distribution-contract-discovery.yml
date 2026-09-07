@@ -1,0 +1,31 @@
+name: Distribution Contract Discovery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/distribution-contract-discovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-listed-startups:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch public Listed Startups agent contract
+        run: |
+          set -euo pipefail
+          curl -fsSL https://listedstartups.com/openapi.json -o /tmp/openapi.json
+          curl -fsSL https://listedstartups.com/agents.md -o /tmp/agents.md || true
+          echo '=== OPENAPI INFO ==='
+          jq '{openapi,info,servers}' /tmp/openapi.json
+          echo '=== WRITE PATHS ==='
+          jq -r '.paths | to_entries[] | .key as $p | .value | to_entries[] | select(.key|IN("post","put","patch","delete")) | [$p,.key,(.value.operationId // ""),(.value.summary // ""),((.value.security // [])|tostring)] | @tsv' /tmp/openapi.json
+          echo '=== SECURITY SCHEMES ==='
+          jq '.components.securitySchemes // {}' /tmp/openapi.json
+          echo '=== WRITE REQUEST SCHEMAS ==='
+          jq '.paths | to_entries[] | .key as $p | .value | to_entries[] | select(.key|IN("post","put","patch")) | {path:$p,method:.key,operationId:(.value.operationId // null),requestBody:(.value.requestBody // null)}' /tmp/openapi.json
+          echo '=== AGENT DOC MATCHES ==='
+          grep -Ein 'register|token|bearer|publish|startup|listing|mcp|rest' /tmp/agents.md | head -n 120 || true
