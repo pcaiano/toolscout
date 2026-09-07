@@ -24,22 +24,31 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsSL "$PROD_BASE/apis.json" -o /tmp/apis.json
-          jq -e '.specificationVersion == "0.19" and .url == "https://trytoolscout.org/apis.json" and (.apis | length > 0)' /tmp/apis.json >/dev/null
+          jq -e '.specificationVersion == "0.19" and .url == "https://trytoolscout.org/apis.json" and (.apis | length > 0) and (.apis[0].properties | any(.type == "RecommendationAPI"))' /tmp/apis.json >/dev/null
       - name: Validate OpenAPI
         run: |
           set -euo pipefail
           curl -fsSL "$PROD_BASE/openapi.json" -o /tmp/openapi.json
-          jq -e '.openapi == "3.1.0" and .paths["/api/distribution/feed.json"].get and .paths["/.well-known/toolscout-distribution.json"].get' /tmp/openapi.json >/dev/null
+          jq -e '.openapi == "3.1.0" and .paths["/api/recommend"].get.operationId == "recommendTools" and .paths["/api/distribution/feed.json"].get and .paths["/.well-known/toolscout-distribution.json"].get' /tmp/openapi.json >/dev/null
+      - name: Validate recommendation API
+        run: |
+          set -euo pipefail
+          curl -fsSL -D /tmp/recommend-headers "$PROD_BASE/api/recommend?q=crm%20for%20a%20small%20sales%20team&budget=low&team=small&limit=3" -o /tmp/recommend.json
+          tr -d '\r' </tmp/recommend-headers | grep -Fi 'access-control-allow-origin: *'
+          jq -e '.query == "crm for a small sales team" and .count == 3 and (.recommendations | length == 3) and .recommendations[0].name and (.recommendations[0].match >= 40) and (.recommendations[0].tool_url | startswith("https://trytoolscout.org/go/")) and (.affiliate_disclosure | length > 20)' /tmp/recommend.json >/dev/null
+          code=$(curl -sS -o /tmp/recommend-error.json -w '%{http_code}' "$PROD_BASE/api/recommend")
+          test "$code" = "400"
+          jq -e '.error == "query_required"' /tmp/recommend-error.json >/dev/null
       - name: Validate RFC 9727 catalog
         run: |
           set -euo pipefail
           curl -fsSL -D /tmp/catalog-headers "$PROD_BASE/.well-known/api-catalog" -o /tmp/catalog.json
           tr -d '\r' </tmp/catalog-headers | grep -Fi 'content-type: application/linkset+json'
           tr -d '\r' </tmp/catalog-headers | grep -Fi 'rel="api-catalog"'
-          jq -e '.linkset[0].anchor == "https://trytoolscout.org/api/distribution/feed.json" and .linkset[0]["service-desc"][0].href == "https://trytoolscout.org/openapi.json"' /tmp/catalog.json >/dev/null
+          jq -e '.linkset[0].anchor == "https://trytoolscout.org/api/recommend" and .linkset[0]["service-desc"][0].href == "https://trytoolscout.org/openapi.json"' /tmp/catalog.json >/dev/null
           curl -fsSI "$PROD_BASE/.well-known/api-catalog" | tr -d '\r' | grep -Fi 'rel="api-catalog"'
       - name: Validate discovery manifest links
         run: |
           set -euo pipefail
           curl -fsSL "$PROD_BASE/.well-known/toolscout-distribution.json" -o /tmp/manifest.json
-          jq -e '.machine_discovery.apis_json == "https://trytoolscout.org/apis.json" and .machine_discovery.openapi == "https://trytoolscout.org/openapi.json" and .machine_discovery.api_catalog == "https://trytoolscout.org/.well-known/api-catalog"' /tmp/manifest.json >/dev/null
+          jq -e '.machine_discovery.apis_json == "https://trytoolscout.org/apis.json" and .machine_discovery.openapi == "https://trytoolscout.org/openapi.json" and .machine_discovery.api_catalog == "https://trytoolscout.org/.well-known/api-catalog" and .machine_discovery.recommendation_api == "https://trytoolscout.org/api/recommend"' /tmp/manifest.json >/dev/null
