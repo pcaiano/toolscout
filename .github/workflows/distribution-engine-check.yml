@@ -27,6 +27,7 @@ on:
       - 'migrations/0031_correct_distribution_setup_states.sql'
       - 'migrations/0032_block_indietool_paid_api.sql'
       - 'migrations/0033_normalize_distribution_research_rows.sql'
+      - 'migrations/0034_normalize_distribution_setup_rows.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -54,6 +55,7 @@ on:
       - 'migrations/0031_correct_distribution_setup_states.sql'
       - 'migrations/0032_block_indietool_paid_api.sql'
       - 'migrations/0033_normalize_distribution_research_rows.sql'
+      - 'migrations/0034_normalize_distribution_setup_rows.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -99,6 +101,7 @@ jobs:
           test -s migrations/0031_correct_distribution_setup_states.sql
           test -s migrations/0032_block_indietool_paid_api.sql
           test -s migrations/0033_normalize_distribution_research_rows.sql
+          test -s migrations/0034_normalize_distribution_setup_rows.sql
           node -e "const d=require('./data/distribution-publishing-profile.json'); if(d.product?.website!=='https://trytoolscout.org/'||d.product?.name!=='ToolScout'||d.policy?.automatic_paid_distribution!==false||d.policy?.automatic_account_creation!==false||d.policy?.automatic_reciprocal_badges!==false) process.exit(1)"
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_submissions' migrations/0023_distribution_submission.sql
@@ -114,6 +117,8 @@ jobs:
           grep -Fq "status='policy_blocked'" migrations/0032_block_indietool_paid_api.sql
           grep -Fq "zero_cost_policy" migrations/0032_block_indietool_paid_api.sql
           grep -Fq "status='research_required'" migrations/0033_normalize_distribution_research_rows.sql
+          grep -Fq "status='setup_required'" migrations/0034_normalize_distribution_setup_rows.sql
+          grep -Fq "o.status='needs_info'" migrations/0034_normalize_distribution_setup_rows.sql
       - name: Validate radar, discovery and syndication
         run: |
           node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1)"
@@ -138,6 +143,7 @@ jobs:
           grep -Fq 'listed_startups_listing' distribution-submission-worker.js
           grep -Fq "WHERE status='ready_to_submit'" distribution-submission-worker.js
           grep -Fq "'research_required'" distribution-submission-worker.js
+          grep -Fq "'setup_required'" distribution-submission-worker.js
           node -e "const d=require('./data/distribution-submission-adapters.json'); const a=d.adapters.find(x=>x.surface_slug==='listed-startups'); if(!a||a.endpoint!=='https://listedstartups.com/api/listings'||a.validation_endpoint!=='https://listedstartups.com/api/listings/validate'||a.auth_env!=='LISTED_STARTUPS_TOKEN'||a.validated_category!=='Software'||a.enabled!==false||a.allow_automatic!==false) process.exit(1)"
       - name: Validate event-driven orchestration and community guardrails
         run: |
