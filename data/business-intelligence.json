@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-09-07T07:41:02.315Z",
+  "generatedAt": "2026-09-07T12:18:38.401Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 19,
-      "likelyHuman": 6,
+      "total": 25,
+      "likelyHuman": 12,
       "bots": 13,
       "owner": 0,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 1482,
-      "likelyHuman": 252,
+      "total": 1488,
+      "likelyHuman": 258,
       "bots": 150,
       "owner": 37,
       "synthetic": 0,
       "unknownLegacy": 1043
     },
     "d30": {
-      "total": 1482,
-      "likelyHuman": 252,
+      "total": 1488,
+      "likelyHuman": 258,
       "bots": 150,
       "owner": 37,
       "synthetic": 0,
@@ -54,10 +54,10 @@
       },
       {
         "day": "2026-09-07",
-        "sessions": 6
+        "sessions": 12
       }
     ],
-    "averageDailyLikelyHuman30d": 8.4
+    "averageDailyLikelyHuman30d": 8.6
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -87,15 +87,19 @@
     "sessionsWithOutbound": 183,
     "monetizedOutbound": 38,
     "monetizationCoverage": 20.8,
-    "humanSessionToOutboundRate": 72.6
+    "humanSessionToOutboundRate": 70.9
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 59
+      "sessions": 63
     },
     {
       "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+      "sessions": 3
+    },
+    {
+      "source": "utm_source=peerlist",
       "sessions": 2
     },
     {
@@ -105,10 +109,6 @@
     {
       "source": "ref:app.partnerstack.com",
       "sessions": 2
-    },
-    {
-      "source": "utm_source=peerlist",
-      "sessions": 1
     },
     {
       "source": "ref:producthunt.com",
@@ -132,7 +132,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 69,
+      "sessions": 75,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -149,10 +149,10 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 252,
-    "humanDailyAverage30d": 8.4,
+    "humanSessions30d": 258,
+    "humanDailyAverage30d": 8.6,
     "recommendationCompletionRate": 0.8,
-    "humanSessionToOutboundRate": 72.6,
+    "humanSessionToOutboundRate": 70.9,
     "monetizationCoverage": 20.8,
     "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
   }
