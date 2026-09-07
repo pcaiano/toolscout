@@ -1,0 +1,56 @@
+name: A2A Production Smoke
+
+on:
+  workflow_run:
+    workflows: ["Deploy ToolScout Worker"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '5 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE: https://trytoolscout.org
+  A2A_VERSION: '1.0'
+
+jobs:
+  smoke:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate public Agent Card
+        run: |
+          set -euo pipefail
+          curl -fsSL "$BASE/.well-known/agent-card.json" -o /tmp/card.json
+          jq -e '.name == "ToolScout Software Recommendation Agent" and .version == "1.0.0" and .capabilities.streaming == false and (.supportedInterfaces | length == 1) and .supportedInterfaces[0].url == "https://trytoolscout.org/a2a" and .supportedInterfaces[0].protocolBinding == "JSONRPC" and .supportedInterfaces[0].protocolVersion == "1.0" and (.skills | map(.id) | index("recommend_software")) != null' /tmp/card.json >/dev/null
+      - name: Send A2A recommendation message
+        run: |
+          set -euo pipefail
+          curl -fsSL "$BASE/a2a" \
+            -H 'Content-Type: application/json' \
+            -H "A2A-Version: $A2A_VERSION" \
+            --data '{"jsonrpc":"2.0","id":"a2a-smoke-1","method":"SendMessage","params":{"message":{"messageId":"msg-smoke-1","role":"ROLE_USER","parts":[{"text":"CRM for a small sales team","mediaType":"text/plain"},{"data":{"budget":"low","team":"small","limit":3},"mediaType":"application/json"}]}}}' \
+            -o /tmp/send.json
+          jq -e '.jsonrpc == "2.0" and .id == "a2a-smoke-1" and .result.message.role == "ROLE_AGENT" and .result.message.contextId and (.result.message.parts | length == 2)' /tmp/send.json >/dev/null
+          jq -e '.result.message.parts[1].data.count == 3 and (.result.message.parts[1].data.recommendations | length == 3) and .result.message.parts[1].data.recommendations[0].name and (.result.message.parts[1].data.recommendations[0].tool_url | startswith("https://trytoolscout.org/go/"))' /tmp/send.json >/dev/null
+      - name: Reject unsupported A2A version
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/version.json -w '%{http_code}' "$BASE/a2a" \
+            -H 'Content-Type: application/json' \
+            -H 'A2A-Version: 0.3' \
+            --data '{"jsonrpc":"2.0","id":2,"method":"SendMessage","params":{"message":{"messageId":"m2","role":"ROLE_USER","parts":[{"text":"seo tools"}]}}}')
+          test "$code" = "400"
+          jq -e '.error.code == -32009' /tmp/version.json >/dev/null
+      - name: Reject unsupported A2A operation
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /tmp/method.json -w '%{http_code}' "$BASE/a2a" \
+            -H 'Content-Type: application/json' \
+            -H "A2A-Version: $A2A_VERSION" \
+            --data '{"jsonrpc":"2.0","id":3,"method":"GetTask","params":{"id":"none"}}')
+          test "$code" = "400"
+          jq -e '.error.code == -32601' /tmp/method.json >/dev/null
