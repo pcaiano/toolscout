@@ -6,7 +6,18 @@ async function cfg(request,env){try{const r=await env.ASSETS.fetch(new Request(n
 async function assets(request,env){try{const r=await env.DB.prepare(`SELECT asset_url url,asset_type title FROM distribution_asset_state WHERE asset_url IS NOT NULL ORDER BY last_seen_at DESC LIMIT 50`).all();const items=(r.results||[]).filter(x=>/^https:\/\/trytoolscout\.org\//.test(String(x.url||'')));if(items.length)return items;}catch{}try{const r=await env.ASSETS.fetch(new Request(new URL('/api/distribution/feed.json',request.url)));if(!r.ok)return[];const d=await r.json();return (d.items||[]).slice(0,50);}catch{return[]}}
 function hash(value){let h=2166136261;for(const ch of String(value||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
 function chooseAsset(surface,items){if(!items.length)return null;const idx=hash(`${surface.surface_slug}:${surface.surface_type||''}`)%items.length;return items[idx];}
-function payloadFor(adapter,chosen){if(adapter?.payload_kind==='indexnow')return {host:'trytoolscout.org',key:String(adapter.key||''),keyLocation:String(adapter.key_location||''),urlList:[chosen.url]};return {name:'ToolScout',url:chosen.url,title:chosen.title,feed:'https://trytoolscout.org/api/distribution/feed.json'};}
+function payloadFor(adapter,chosen){
+  if(adapter?.payload_kind==='indexnow')return {host:'trytoolscout.org',key:String(adapter.key||''),keyLocation:String(adapter.key_location||''),urlList:[chosen.url]};
+  if(adapter?.payload_kind==='listed_startups_listing')return {
+    name:'ToolScout',
+    slug:'toolscout',
+    tagline:'Find the right software for the job — without the noise.',
+    description:'ToolScout is an independent software discovery and recommendation platform that turns a buyer workflow, persona and constraints into a focused shortlist of relevant tools, with transparent comparisons and no pay-to-rank recommendations.',
+    url:'https://trytoolscout.org/',
+    categories:[String(adapter.validated_category||'Software')]
+  };
+  return {name:'ToolScout',url:chosen.url,title:chosen.title,feed:'https://trytoolscout.org/api/distribution/feed.json'};
+}
 function headersFor(adapter,env){const h={'Content-Type':'application/json','User-Agent':'ToolScout Distribution Engine/1.0'};if(adapter?.auth_type==='bearer'&&adapter?.auth_env&&env[adapter.auth_env])h.Authorization=`Bearer ${env[adapter.auth_env]}`;return h;}
 function retryableHttp(status){return status===408||status===425||status===429||status===500||status===502||status===503||status===504||status===520||status===521||status===522||status===523||status===524;}
 function authMissing(adapter,env){return Boolean(adapter?.setup_state==='auth_required'&&((adapter.auth_env&&!env[adapter.auth_env])||adapter.auth_type==='agent_identity'));}
