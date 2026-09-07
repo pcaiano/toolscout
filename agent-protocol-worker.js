@@ -20,6 +20,10 @@ function a2aError(id,code,message,reason,status=400){
 }
 function header(request,name){return request.headers.get(name)||''}
 function requestMeta(body){return body?.params?._meta||{} }
+function cleanMetric(v,n=120){return v==null?null:String(v).replace(/[^A-Za-z0-9._:/ -]/g,'').slice(0,n)||null}
+async function logProtocol(env,protocol,operation,{clientName=null,clientVersion=null,success=true,resultCount=null}={}){
+  try{await env.DB.prepare(`INSERT INTO agent_protocol_events(event_id,protocol,operation,client_name,client_version,success,result_count,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(`ape_${crypto.randomUUID()}`,protocol,cleanMetric(operation,80),cleanMetric(clientName),cleanMetric(clientVersion,60),success?1:0,Number.isFinite(resultCount)?resultCount:null).run();}catch{}
+}
 function validateEnvelope(request,body){
   const version=header(request,'MCP-Protocol-Version');
   const method=header(request,'Mcp-Method');
@@ -78,22 +82,26 @@ async function callRecommend(args,request,env,ctx){
   if(!response.ok)return {error:data?.message||data?.error||'Recommendation unavailable.',status:response.status,data};
   return {data};
 }
+function mcpClient(body){const c=requestMeta(body)['io.modelcontextprotocol/clientInfo']||{};return {clientName:c.name||null,clientVersion:c.version||null}}
 async function handleMcp(request,env,ctx){
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:JSON_HEADERS});
   if(request.method!=='POST')return new Response('Method Not Allowed',{status:405,headers:{...JSON_HEADERS,Allow:'POST, OPTIONS'}});
   let body;try{body=await request.json()}catch{return rpcError(null,-32700,'Parse error',undefined,400)}
   if(!body||body.jsonrpc!=='2.0'||body.id===undefined||typeof body.method!=='string')return rpcError(body?.id??null,-32600,'Invalid Request',undefined,400);
-  const envelopeError=validateEnvelope(request,body);if(envelopeError)return rpcError(body.id,envelopeError.code,envelopeError.message,envelopeError.data,400);
-  if(body.method==='server/discover')return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine. Use recommend_tools for deterministic software recommendations. Affiliate relationships do not influence ranking.',ttlMs:3600000,cacheScope:'public'});
-  if(body.method==='tools/list')return rpc(body.id,{tools:[toolDefinition()],ttlMs:3600000,cacheScope:'public'});
+  const client=mcpClient(body),envelopeError=validateEnvelope(request,body);
+  if(envelopeError){ctx.waitUntil(logProtocol(env,'mcp',body.method,{...client,success:false}));return rpcError(body.id,envelopeError.code,envelopeError.message,envelopeError.data,400)}
+  if(body.method==='server/discover'){ctx.waitUntil(logProtocol(env,'mcp','server/discover',client));return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine. Use recommend_tools for deterministic software recommendations. Affiliate relationships do not influence ranking.',ttlMs:3600000,cacheScope:'public'})}
+  if(body.method==='tools/list'){ctx.waitUntil(logProtocol(env,'mcp','tools/list',client));return rpc(body.id,{tools:[toolDefinition()],ttlMs:3600000,cacheScope:'public'})}
   if(body.method==='tools/call'){
-    if(body?.params?.name!=='recommend_tools')return rpcError(body.id,-32602,'Unknown tool',{name:body?.params?.name||null},400);
+    if(body?.params?.name!=='recommend_tools'){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpcError(body.id,-32602,'Unknown tool',{name:body?.params?.name||null},400)}
     const args=body?.params?.arguments||{},invalid=validArguments(args);
-    if(invalid)return rpc(body.id,{content:[{type:'text',text:invalid}],isError:true});
+    if(invalid){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpc(body.id,{content:[{type:'text',text:invalid}],isError:true})}
     const out=await callRecommend(args,request,env,ctx);
-    if(out.error)return rpc(body.id,{content:[{type:'text',text:out.error}],structuredContent:out.data||{error:out.error},isError:true});
+    if(out.error){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpc(body.id,{content:[{type:'text',text:out.error}],structuredContent:out.data||{error:out.error},isError:true})}
+    ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,resultCount:Number(out.data?.count||0)}));
     return rpc(body.id,{content:[{type:'text',text:JSON.stringify(out.data)}],structuredContent:out.data,isError:false});
   }
+  ctx.waitUntil(logProtocol(env,'mcp',body.method,{...client,success:false}));
   return rpcError(body.id,-32601,'Method not found',{method:body.method},400);
 }
 function agentCard(){
@@ -138,16 +146,17 @@ async function handleA2A(request,env,ctx){
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:A2A_HEADERS});
   if(request.method!=='POST')return new Response('Method Not Allowed',{status:405,headers:{...A2A_HEADERS,Allow:'POST, OPTIONS'}});
   const version=header(request,'A2A-Version');
-  if(version!==A2A_VERSION)return a2aError(null,-32009,'Version not supported','VERSION_NOT_SUPPORTED',400);
+  if(version!==A2A_VERSION){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(null,-32009,'Version not supported','VERSION_NOT_SUPPORTED',400)}
   let body;try{body=await request.json()}catch{return a2aError(null,-32700,'Invalid JSON payload','JSON_PARSE_ERROR',400)}
   if(!body||body.jsonrpc!=='2.0'||body.id===undefined||typeof body.method!=='string')return a2aError(body?.id??null,-32600,'Request payload validation error','INVALID_REQUEST',400);
-  if(body.method!=='SendMessage')return a2aError(body.id,-32601,'Method not found','METHOD_NOT_FOUND',400);
+  if(body.method!=='SendMessage'){ctx.waitUntil(logProtocol(env,'a2a',body.method,{success:false}));return a2aError(body.id,-32601,'Method not found','METHOD_NOT_FOUND',400)}
   const extracted=a2aArgs(body?.params?.message);
-  if(extracted.error)return a2aError(body.id,-32602,'Invalid parameters','INVALID_PARAMS',400);
+  if(extracted.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32602,'Invalid parameters','INVALID_PARAMS',400)}
   const out=await callRecommend(extracted.args,request,env,ctx);
-  if(out.error)return a2aError(body.id,-32603,'Internal error','RECOMMENDATION_UNAVAILABLE',500);
+  if(out.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32603,'Internal error','RECOMMENDATION_UNAVAILABLE',500)}
   const incoming=body.params.message,contextId=incoming.contextId||crypto.randomUUID();
   const message={messageId:crypto.randomUUID(),contextId,role:'ROLE_AGENT',parts:[{text:recommendationText(out.data),mediaType:'text/plain'},{data:out.data,mediaType:'application/json'}]};
+  ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{resultCount:Number(out.data?.count||0)}));
   return Response.json({jsonrpc:'2.0',id:body.id,result:{message}},{headers:A2A_HEADERS});
 }
 
