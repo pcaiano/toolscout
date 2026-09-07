@@ -1,4 +1,4 @@
-import base from './distribution-submission-worker.js';
+import base from './distribution-autonomous-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const safe=(v,n=3000)=>String(v??'').slice(0,n);
