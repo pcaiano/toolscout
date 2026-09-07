@@ -215,6 +215,24 @@
       "human_required": false,
       "status": "policy_blocked",
       "next_action": "Official agent submission API verified but uses credits/authentication; keep disabled under zero-cost policy unless free credits are available."
+    },
+    {
+      "slug": "agenttool-sh",
+      "name": "agenttool.sh",
+      "type": "agent_readiness_directory_api",
+      "url": "https://agenttool.sh/",
+      "action_url": "https://agenttool.sh/api/tools/submit",
+      "audience_fit": 90,
+      "authority": 68,
+      "traffic_potential": 70,
+      "backlink_value": 74,
+      "acceptance_probability": 90,
+      "automation_potential": 100,
+      "effort": 5,
+      "cost": 0,
+      "human_required": false,
+      "status": "ready_to_submit",
+      "next_action": "Automatically submit ToolScout once for agent-readiness scanning through the verified no-auth API, then track the published AgentGrade result."
     }
   ]
 }
