@@ -1,6 +1,3 @@
-import base from './affiliate-workflow-worker.js';
-
-const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const WINDOW_DAYS=30;
 
 function hostOf(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
@@ -17,7 +14,7 @@ function sourceMatchesSurface(source,referrer,row){
   return hosts.some(h=>r===h||r.endsWith(`.${h}`));
 }
 
-async function impactSnapshot(env,totalHumanSessions){
+export async function distributionImpactSnapshot(env,totalHumanSessions){
   try{
     const [opportunities,entries,outboundEvents,clicks,revenueRows]=await Promise.all([
       env.DB.prepare(`SELECT surface_slug,surface_name,action_url,live_url FROM distribution_opportunities WHERE action_url IS NOT NULL OR live_url IS NOT NULL`).all(),
@@ -56,17 +53,3 @@ async function impactSnapshot(env,totalHumanSessions){
     };
   }catch(error){return {status:'unavailable',windowDays:WINDOW_DAYS,reason:`Distribution impact aggregation unavailable: ${String(error?.message||error)}`};}
 }
-
-export default {
-  async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(url.pathname==='/api/stats'&&request.method==='GET'){
-      const response=await base.fetch(request,env,ctx);if(!response.ok)return response;
-      const stats=await response.json();
-      const impact=await impactSnapshot(env,Number(stats?.audience?.likelyHumanSessions??stats?.funnel?.sessions??0));
-      return Response.json({...stats,distributionImpact:impact},{headers:H});
-    }
-    return base.fetch(request,env,ctx);
-  },
-  async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);}
-};
