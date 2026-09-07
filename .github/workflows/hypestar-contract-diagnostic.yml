@@ -14,18 +14,15 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect public Hype Star agent contracts
+      - name: Extract Hype Star listing contract
         run: |
           set -euo pipefail
-          for url in \
-            https://hypestar.org/openapi.json \
-            https://hypestar.org/api/openapi.json \
-            https://hypestar.org/.well-known/openapi.json \
-            https://hypestar.org/hypestar-skill/SKILL.md \
-            https://hypestar.org/api/v1/categories; do
-            echo "=== $url ==="
-            curl -sS -L -D /tmp/headers -o /tmp/body -w 'HTTP %{http_code}\n' "$url" || true
-            grep -Ei '^(content-type|location|allow):' /tmp/headers || true
-            head -c 30000 /tmp/body || true
-            echo
-          done
+          curl -fsSL https://hypestar.org/openapi.json -o /tmp/openapi.json
+          echo '=== SUBMISSION REQUEST ==='
+          jq '.components.schemas.SubmissionRequest' /tmp/openapi.json
+          echo '=== SUBMISSION ENVELOPE ==='
+          jq '.components.schemas.SubmissionEnvelope' /tmp/openapi.json
+          echo '=== LISTING PATH ==='
+          jq '.paths["/listings"].post' /tmp/openapi.json
+          echo '=== CATEGORIES ==='
+          curl -fsSL https://hypestar.org/api/v1/categories | jq '.data.categories[] | {slug,name,description}'
