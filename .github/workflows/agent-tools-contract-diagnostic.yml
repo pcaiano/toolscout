@@ -1,0 +1,33 @@
+name: Agent Tools Contract Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/agent-tools-contract-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect public agent-tools.cloud contracts
+        run: |
+          set -euo pipefail
+          for url in \
+            https://agent-tools.cloud/openapi.json \
+            https://agent-tools.cloud/api/openapi.json \
+            https://agent-tools.cloud/.well-known/agent-tools.json \
+            https://agent-tools.cloud/about; do
+            echo "=== $url ==="
+            curl -sS -L -D /tmp/headers -o /tmp/body -w 'HTTP %{http_code}\n' "$url" || true
+            grep -Ei '^(content-type|location|allow):' /tmp/headers || true
+            head -c 50000 /tmp/body || true
+            echo
+          done
+          echo '=== OPTIONS /api/v1/submit ==='
+          curl -sS -X OPTIONS -D - -o /tmp/options -w 'HTTP %{http_code}\n' https://agent-tools.cloud/api/v1/submit || true
+          head -c 10000 /tmp/options || true
