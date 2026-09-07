@@ -1,0 +1,47 @@
+name: Human Actions Production Smoke
+
+on:
+  workflow_run:
+    workflows: ["Deploy Worker"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PROD_BASE: https://trytoolscout.org
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify human action routes are private
+        run: |
+          set -euo pipefail
+
+          private_headers="$(mktemp)"
+          private_body="$(mktemp)"
+          private_code="$(curl --silent --show-error --dump-header "$private_headers" --output "$private_body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE/analytics/api/human-actions" || true)"
+          echo "private route HTTP $private_code"
+          cat "$private_headers"
+          cat "$private_body"
+          if [ "$private_code" != "401" ]; then
+            echo "ERROR: expected /analytics/api/human-actions to reject requests without a Command Center session with HTTP 401."
+            exit 1
+          fi
+          grep -F 'command_center_session_expired' "$private_body"
+
+          public_headers="$(mktemp)"
+          public_body="$(mktemp)"
+          public_code="$(curl --silent --show-error --dump-header "$public_headers" --output "$public_body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE/api/human-actions" || true)"
+          echo "legacy public route HTTP $public_code"
+          cat "$public_headers"
+          cat "$public_body"
+          if [ "$public_code" = "200" ]; then
+            echo "ERROR: legacy /api/human-actions must not expose the operational queue publicly."
+            exit 1
+          fi
+
+          echo 'Human-action queue is private in production.'
