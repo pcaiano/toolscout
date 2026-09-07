@@ -8,6 +8,20 @@
       "enabled": true
     },
     {
+      "slug": "best-of-ai-directories",
+      "name": "Best of AI directories registry",
+      "type": "registry",
+      "url": "https://raw.githubusercontent.com/best-of-ai/ai-directories/main/README.md",
+      "enabled": true
+    },
+    {
+      "slug": "neuronto-ard-registries",
+      "name": "Public ARD registries comparison",
+      "type": "agent_registry_index",
+      "url": "https://www.neuronto.com/ard-registries",
+      "enabled": true
+    },
+    {
       "slug": "favors-startup-directories",
       "name": "Favors startup directory guide",
       "type": "editorial_registry",
@@ -51,7 +65,10 @@
       "betalist.com": "betalist",
       "peerpush.net": "peerpush-net",
       "peerpush.com": "peerpush-net",
-      "turbo0.com": "turbo0-com"
+      "turbo0.com": "turbo0-com",
+      "ardregistry.org": "ard-registry",
+      "smartbench.ai": "smartbench-ard",
+      "neuronto.com": "neuronto-ard"
     },
     "host_status_overrides": {
       "dododirectory.com": {
