@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'affiliate-coverage-engine.js'
+      - 'affiliate-program-discovery.js'
       - 'affiliate-operations.js'
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
@@ -10,6 +11,7 @@ on:
     branches: [main]
     paths:
       - 'affiliate-coverage-engine.js'
+      - 'affiliate-program-discovery.js'
       - 'affiliate-operations.js'
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
@@ -25,6 +27,7 @@ jobs:
         run: |
           node --input-type=module <<'EOF'
           import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
+          import {classifyProgramPage,discoverOfficialProgram} from './affiliate-program-discovery.js';
           const records=[
             {slug:'a',status:'research_required',approval_probability:.8,commission_score:8,network_friction:2},
             {slug:'b',status:'active'},
@@ -41,5 +44,12 @@ jobs:
           if(Math.abs(s.weighted_coverage-.4)>1e-9) throw Error('coverage mismatch');
           if(s.recoverable_queue[0].slug!=='a') throw Error('leakage priority mismatch');
           if(automationBoundary(records[2]).mode!=='human') throw Error('human boundary mismatch');
-          console.log(JSON.stringify(s,null,2));
+          const direct=classifyProgramPage({url:'https://example.com/affiliates',status:200,body:'Join our affiliate program and earn commission.'});
+          if(!direct.found||direct.network!=='Direct'||direct.automation_mode!=='research') throw Error('direct discovery mismatch');
+          const human=classifyProgramPage({url:'https://example.com/partners',status:200,body:'Partner program. Sign in and accept terms and conditions to apply.'});
+          if(!human.found||human.automation_mode!=='human') throw Error('human boundary discovery mismatch');
+          const fakeFetch=async url=>({url,status:url.endsWith('/affiliate-program')?200:404,text:async()=>url.endsWith('/affiliate-program')?'Official affiliate program. Earn commission.':'not found'});
+          const found=await discoverOfficialProgram({slug:'x',sourceUrl:'https://example.com/product'},{fetchImpl:fakeFetch,timeoutMs:100});
+          if(!found.found||found.status!=='program_exists') throw Error('official discovery failed');
+          console.log(JSON.stringify({coverage:s,discovery:found},null,2));
           EOF
