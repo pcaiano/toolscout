@@ -1,4 +1,4 @@
-import base from './distribution-embed-worker.js';
+import base from './agent-protocol-worker.js';
 import {distributionImpactSnapshot} from './distribution-impact-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
