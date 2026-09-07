@@ -23,7 +23,7 @@
 <section class="grid2 section"><div class="panel"><div class="sectionHead"><h2>Top tools</h2><span>Human outbound</span></div><div id="tools" class="note">Refresh to load.</div></div><div class="panel"><div class="sectionHead"><h2>Audience</h2><span>Classification</span></div><div id="audience" class="note">Refresh to load.</div></div></section>
 </div>
 <script>
-const API='/api/stats';
+const API='/analytics/api/stats';
 const statusEl=document.getElementById('status');
 const btn=document.getElementById('load');
 const n=v=>Number(v||0).toLocaleString();
@@ -58,7 +58,22 @@ function render(d){
  statusEl.textContent=`Snapshot updated ${new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'})}. No automatic refresh is scheduled.`;
 }
 let loading=false;
-async function load(){if(loading)return;loading=true;btn.disabled=true;statusEl.textContent='Refreshing secure analytics…';try{document.cookie='toolscout_owner=1; Max-Age=15552000; Path=/; SameSite=Lax; Secure';const res=await fetch(API,{credentials:'same-origin',cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);render(await res.json())}catch(e){statusEl.textContent=`Unable to load analytics: ${e.message}`}finally{loading=false;btn.disabled=false}}
+async function load(){
+ if(loading)return;
+ loading=true;btn.disabled=true;statusEl.textContent='Refreshing secure analytics…';
+ try{
+  document.cookie='toolscout_owner=1; Max-Age=15552000; Path=/; SameSite=Lax; Secure';
+  const res=await fetch(`${API}?t=${Date.now()}`,{credentials:'same-origin',cache:'no-store'});
+  if(res.status===401){statusEl.textContent='Secure analytics session expired. Reloading…';location.reload();return;}
+  if(!res.ok)throw new Error(`Analytics API returned HTTP ${res.status}`);
+  const type=res.headers.get('content-type')||'';
+  if(!type.includes('application/json'))throw new Error('Analytics API returned an unexpected response');
+  render(await res.json());
+ }catch(e){
+  const message=e instanceof TypeError?'Secure analytics route is unreachable.':' '+e.message;
+  statusEl.textContent=`Unable to load analytics:${message}`;
+ }finally{loading=false;btn.disabled=false}
+}
 btn.addEventListener('click',load);
 </script>
 </body>
