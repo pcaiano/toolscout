@@ -1,2 +1,2 @@
-import base from './affiliate-coverage-entry-worker.js';
+import base from './human-action-entry-worker.js';
 export default base;
