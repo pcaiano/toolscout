@@ -1,0 +1,32 @@
+name: ARD Registry Propagation Check
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ard-registry-propagation.yml'
+      - '.github/workflows/ard-registry-propagation-check.yml'
+      - '.well-known/ard.json'
+      - 'robots.txt'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ard-registry-propagation.yml'
+      - '.github/workflows/ard-registry-propagation-check.yml'
+      - '.well-known/ard.json'
+      - 'robots.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate propagation contract
+        run: |
+          grep -Fq 'https://trytoolscout.org/.well-known/ard.json' .github/workflows/ard-registry-propagation.yml
+          grep -Fq 'https://trytoolscout.org/.well-known/ai-catalog.json' .github/workflows/ard-registry-propagation.yml
+          grep -Fq 'https://neuronto.com/submit' .github/workflows/ard-registry-propagation.yml
+          grep -Fq 'https://neuronto.com/search' .github/workflows/ard-registry-propagation.yml
+          grep -Fq '"domain":"trytoolscout.org"' .github/workflows/ard-registry-propagation.yml
