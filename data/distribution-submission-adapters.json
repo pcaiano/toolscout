@@ -4,16 +4,16 @@
       "surface_slug": "indexnow", "enabled": true, "allow_automatic": true, "method": "POST", "content_type": "application/json", "endpoint": "https://api.indexnow.org/indexnow", "payload_kind": "indexnow", "key": "81025561f83480545d2e18f4f6f1e4ed", "key_location": "https://trytoolscout.org/81025561f83480545d2e18f4f6f1e4ed.txt"
     },
     {
-      "surface_slug": "tinylaunch", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.tinylaunch.com/api/v1/startups", "auth_type": "bearer", "auth_env": "TINYLAUNCH_TOKEN", "payload_kind": "tinylaunch_startup", "note": "Official agent API verified; enable only after OTP authentication and truthful product payload are available."
+      "surface_slug": "tinylaunch", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.tinylaunch.com/api/v1/startups", "auth_type": "bearer", "auth_env": "TINYLAUNCH_TOKEN", "setup_state": "auth_required", "payload_kind": "tinylaunch_startup", "note": "Official agent API verified; enable after one-time OTP authentication and truthful product payload are available."
     },
     {
-      "surface_slug": "listed-startups", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://listedstartups.com/api", "auth_type": "agent_identity", "payload_kind": "startup_listing", "note": "REST/MCP writes verified. Disabled until exact OpenAPI write path and identity token flow are validated."
+      "surface_slug": "listed-startups", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://listedstartups.com/api", "auth_type": "agent_identity", "setup_state": "auth_required", "payload_kind": "startup_listing", "note": "REST/MCP writes verified. Disabled until exact OpenAPI write path and identity token flow are validated."
     },
     {
-      "surface_slug": "indietool", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.indietool.io/api/v1/apps/submit", "auth_type": "bearer", "auth_env": "INDIETOOL_API_KEY", "payload_kind": "indietool_app", "note": "Official submission API verified. Disabled until API key is available."
+      "surface_slug": "indietool", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.indietool.io/api/v1/apps/submit", "auth_type": "bearer", "auth_env": "INDIETOOL_API_KEY", "setup_state": "auth_required", "payload_kind": "indietool_app", "note": "Official submission API verified. Disabled until API key is available."
     },
     {
-      "surface_slug": "startuphub-ai", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.startuphub.ai/api/v1/startups/submit", "auth_type": "bearer", "auth_env": "STARTUPHUB_API_KEY", "payload_kind": "startuphub_startup", "note": "Official API verified but costs credits; disabled by ToolScout zero-cost policy."
+      "surface_slug": "startuphub-ai", "enabled": false, "allow_automatic": false, "method": "POST", "content_type": "application/json", "endpoint": "https://www.startuphub.ai/api/v1/startups/submit", "auth_type": "bearer", "auth_env": "STARTUPHUB_API_KEY", "requires_payment": true, "setup_state": "policy_blocked", "payload_kind": "startuphub_startup", "note": "Official API verified but costs credits; disabled by ToolScout zero-cost policy."
     }
   ],
   "policy": {
