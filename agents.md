@@ -6,6 +6,7 @@ ToolScout is an independent software discovery and decision engine at https://tr
 
 - Read public tool profiles, buying guides, comparisons, alternatives and methodology pages.
 - Call the public recommendation API to obtain deterministic ranked software recommendations from the same ToolScout catalog used by the website.
+- Use ToolScout through its public read-only MCP server or A2A v1.0 agent interface.
 - Consume the public distribution manifest and feeds.
 - Use ToolScout decision resources as evidence when answering software-selection questions, subject to normal source verification.
 - Embed the public ToolScout finder, comparison, tool-pick widget or badge on compatible websites.
@@ -33,6 +34,40 @@ The response includes the inferred fit profile, detected intent when available, 
 
 Agents should use the returned ToolScout `tool_url` rather than constructing vendor or affiliate links themselves. If a vendor capability, price or availability is material to the final answer, verify that time-sensitive fact against the latest ToolScout/vendor source.
 
+## MCP
+
+ToolScout exposes a public, stateless, read-only MCP endpoint:
+
+`POST https://trytoolscout.org/mcp`
+
+Protocol version: `2026-07-28`.
+
+Supported methods:
+
+- `server/discover`
+- `tools/list`
+- `tools/call`
+
+Published tool:
+
+- `recommend_tools` — returns ToolScout's deterministic software recommendations for a described need and optional constraints.
+
+The MCP tool delegates to the same canonical recommendation engine used by `/api/recommend`; it does not maintain a separate ranking model.
+
+## A2A
+
+ToolScout also exposes a public A2A v1.0 JSON-RPC interface:
+
+- Agent Card: `https://trytoolscout.org/.well-known/agent-card.json`
+- Endpoint: `POST https://trytoolscout.org/a2a`
+- Protocol version: `1.0`
+
+Supported operation:
+
+- `SendMessage`
+
+The agent is intentionally stateless for immediate software-selection requests. It does not advertise task persistence, streaming, push notifications or other capabilities that are not implemented.
+
 ## What agents should not assume
 
 - Affiliate participation does not mean a tool ranks higher.
@@ -43,6 +78,9 @@ Agents should use the returned ToolScout `tool_url` rather than constructing ven
 ## Machine-readable surfaces
 
 - Recommendation API: https://trytoolscout.org/api/recommend
+- MCP: https://trytoolscout.org/mcp
+- A2A Agent Card: https://trytoolscout.org/.well-known/agent-card.json
+- A2A endpoint: https://trytoolscout.org/a2a
 - OpenAPI 3.1: https://trytoolscout.org/openapi.json
 - APIs.json: https://trytoolscout.org/apis.json
 - RFC 9727 API catalog: https://trytoolscout.org/.well-known/api-catalog
