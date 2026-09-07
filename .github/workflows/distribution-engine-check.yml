@@ -8,6 +8,7 @@ on:
       - 'data/distribution-radar-seeds.json'
       - 'data/distribution-discovery-sources.json'
       - 'data/distribution-submission-adapters.json'
+      - 'data/distribution-publishing-profile.json'
       - 'embed/**'
       - 'migrations/0018_distribution_engine.sql'
       - 'migrations/0019_vendor_amplification.sql'
@@ -24,6 +25,7 @@ on:
       - 'migrations/0029_upsert_listed_startups.sql'
       - 'migrations/0030_upsert_authenticated_distribution_surfaces.sql'
       - 'migrations/0031_correct_distribution_setup_states.sql'
+      - 'migrations/0032_block_indietool_paid_api.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -32,6 +34,7 @@ on:
       - 'data/distribution-radar-seeds.json'
       - 'data/distribution-discovery-sources.json'
       - 'data/distribution-submission-adapters.json'
+      - 'data/distribution-publishing-profile.json'
       - 'embed/**'
       - 'migrations/0018_distribution_engine.sql'
       - 'migrations/0019_vendor_amplification.sql'
@@ -48,6 +51,7 @@ on:
       - 'migrations/0029_upsert_listed_startups.sql'
       - 'migrations/0030_upsert_authenticated_distribution_surfaces.sql'
       - 'migrations/0031_correct_distribution_setup_states.sql'
+      - 'migrations/0032_block_indietool_paid_api.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -76,7 +80,7 @@ jobs:
           node --check embed/toolscout-pick.js
           node --check embed/toolscout-finder.js
           node --check embed/toolscout-compare.js
-      - name: Validate worker entrypoint and migrations
+      - name: Validate worker entrypoint, migrations and publishing profile
         run: |
           grep -q 'main = "distribution-embed-worker.js"' wrangler.toml
           test -s migrations/0018_distribution_engine.sql
@@ -91,6 +95,8 @@ jobs:
           test -s migrations/0029_upsert_listed_startups.sql
           test -s migrations/0030_upsert_authenticated_distribution_surfaces.sql
           test -s migrations/0031_correct_distribution_setup_states.sql
+          test -s migrations/0032_block_indietool_paid_api.sql
+          node -e "const d=require('./data/distribution-publishing-profile.json'); if(d.product?.website!=='https://trytoolscout.org/'||d.product?.name!=='ToolScout'||d.policy?.automatic_paid_distribution!==false||d.policy?.automatic_account_creation!==false||d.policy?.automatic_reciprocal_badges!==false) process.exit(1)"
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_submissions' migrations/0023_distribution_submission.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_editorial_queue' migrations/0024_distribution_orchestration.sql
@@ -102,9 +108,11 @@ jobs:
           grep -Fq "status='needs_info'" migrations/0031_correct_distribution_setup_states.sql
           grep -Fq "surface_slug='tinylaunch'" migrations/0031_correct_distribution_setup_states.sql
           grep -Fq "surface_slug='indietool'" migrations/0031_correct_distribution_setup_states.sql
+          grep -Fq "status='policy_blocked'" migrations/0032_block_indietool_paid_api.sql
+          grep -Fq "zero_cost_policy" migrations/0032_block_indietool_paid_api.sql
       - name: Validate radar, discovery and syndication
         run: |
-          node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1)"
+          node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1)"
           node -e "const d=require('./data/distribution-discovery-sources.json'); if(!Array.isArray(d.sources)||d.sources.length<2) process.exit(1)"
           grep -Fq '/api/distribution/feed.json' distribution-radar-worker.js
           grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
@@ -112,7 +120,7 @@ jobs:
           grep -Fq 'external_discovery_refresh' distribution-discovery-worker.js
       - name: Validate submission guardrails
         run: |
-          node -e "const d=require('./data/distribution-submission-adapters.json'); if(d.policy?.automatic_requires_allowlist!==true) process.exit(1); if(Number(d.policy?.max_automatic_per_run)>3) process.exit(1)"
+          node -e "const d=require('./data/distribution-submission-adapters.json'); if(d.policy?.automatic_requires_allowlist!==true) process.exit(1); if(Number(d.policy?.max_automatic_per_run)>3) process.exit(1); const i=d.adapters.find(x=>x.surface_slug==='indietool'); if(!i||i.requires_payment!==true||i.setup_state!=='policy_blocked'||i.enabled!==false) process.exit(1)"
           grep -Fq '/api/distribution/submissions/package' distribution-submission-worker.js
           grep -Fq '/api/distribution/submissions/execute' distribution-submission-worker.js
           grep -Fq 'adapter_not_verified' distribution-submission-worker.js
