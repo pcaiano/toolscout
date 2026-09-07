@@ -1,0 +1,38 @@
+name: Manual Distribution Discovery
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger authenticated discovery refresh
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${ADMIN_TOKEN:-}"
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --retry-delay 2 \
+            --connect-timeout 10 \
+            --max-time 90 \
+            -X POST \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+            -H "Accept: application/json" \
+            https://toolscout.luxurybuyerintelligence.workers.dev/api/distribution/discovery/refresh \
+            | tee discovery-result.json
+
+      - name: Validate discovery response
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('discovery-result.json','utf8'));
+          if(d.ok!==true) process.exit(1);
+          for(const k of ['scanned','found','inserted']) if(typeof d[k]!=='number') process.exit(1);
+          console.log(`Discovery complete: scanned=${d.scanned}, found=${d.found}, inserted=${d.inserted}`);
+          NODE
