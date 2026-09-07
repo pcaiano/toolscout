@@ -22,6 +22,8 @@ on:
       - 'migrations/0027_distribution_embeds.sql'
       - 'migrations/0028_promote_listed_startups.sql'
       - 'migrations/0029_upsert_listed_startups.sql'
+      - 'migrations/0030_upsert_authenticated_distribution_surfaces.sql'
+      - 'migrations/0031_correct_distribution_setup_states.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -44,6 +46,8 @@ on:
       - 'migrations/0027_distribution_embeds.sql'
       - 'migrations/0028_promote_listed_startups.sql'
       - 'migrations/0029_upsert_listed_startups.sql'
+      - 'migrations/0030_upsert_authenticated_distribution_surfaces.sql'
+      - 'migrations/0031_correct_distribution_setup_states.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -85,12 +89,19 @@ jobs:
           test -s migrations/0027_distribution_embeds.sql
           test -s migrations/0028_promote_listed_startups.sql
           test -s migrations/0029_upsert_listed_startups.sql
+          test -s migrations/0030_upsert_authenticated_distribution_surfaces.sql
+          test -s migrations/0031_correct_distribution_setup_states.sql
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_submissions' migrations/0023_distribution_submission.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_editorial_queue' migrations/0024_distribution_orchestration.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_embed_clicks' migrations/0027_distribution_embeds.sql
           grep -q "surface_slug='listed-startups'" migrations/0028_promote_listed_startups.sql
           grep -Fq "ON CONFLICT(surface_slug) DO UPDATE SET" migrations/0029_upsert_listed_startups.sql
+          grep -Fq "'tinylaunch','TinyLaunch'" migrations/0030_upsert_authenticated_distribution_surfaces.sql
+          grep -Fq "'indietool','IndieTool'" migrations/0030_upsert_authenticated_distribution_surfaces.sql
+          grep -Fq "status='needs_info'" migrations/0031_correct_distribution_setup_states.sql
+          grep -Fq "surface_slug='tinylaunch'" migrations/0031_correct_distribution_setup_states.sql
+          grep -Fq "surface_slug='indietool'" migrations/0031_correct_distribution_setup_states.sql
       - name: Validate radar, discovery and syndication
         run: |
           node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1)"
