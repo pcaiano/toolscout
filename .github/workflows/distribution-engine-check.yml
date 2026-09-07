@@ -28,6 +28,7 @@ on:
       - 'migrations/0032_block_indietool_paid_api.sql'
       - 'migrations/0033_normalize_distribution_research_rows.sql'
       - 'migrations/0034_normalize_distribution_setup_rows.sql'
+      - 'migrations/0035_prune_distribution_discovery_false_positives.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -56,6 +57,7 @@ on:
       - 'migrations/0032_block_indietool_paid_api.sql'
       - 'migrations/0033_normalize_distribution_research_rows.sql'
       - 'migrations/0034_normalize_distribution_setup_rows.sql'
+      - 'migrations/0035_prune_distribution_discovery_false_positives.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -102,6 +104,7 @@ jobs:
           test -s migrations/0032_block_indietool_paid_api.sql
           test -s migrations/0033_normalize_distribution_research_rows.sql
           test -s migrations/0034_normalize_distribution_setup_rows.sql
+          test -s migrations/0035_prune_distribution_discovery_false_positives.sql
           node -e "const d=require('./data/distribution-publishing-profile.json'); if(d.product?.website!=='https://trytoolscout.org/'||d.product?.name!=='ToolScout'||d.policy?.automatic_paid_distribution!==false||d.policy?.automatic_account_creation!==false||d.policy?.automatic_reciprocal_badges!==false) process.exit(1)"
           grep -q 'performance_score' migrations/0022_distribution_learning.sql
           grep -q 'CREATE TABLE IF NOT EXISTS distribution_submissions' migrations/0023_distribution_submission.sql
@@ -119,6 +122,7 @@ jobs:
           grep -Fq "status='research_required'" migrations/0033_normalize_distribution_research_rows.sql
           grep -Fq "status='setup_required'" migrations/0034_normalize_distribution_setup_rows.sql
           grep -Fq "o.status='needs_info'" migrations/0034_normalize_distribution_setup_rows.sql
+          grep -Fq "discovery_false_positive_or_duplicate" migrations/0035_prune_distribution_discovery_false_positives.sql
       - name: Validate radar, discovery and syndication
         run: |
           node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1)"
@@ -127,6 +131,9 @@ jobs:
           grep -Fq '/api/distribution/feed.xml' distribution-radar-worker.js
           grep -Fq '/api/distribution/discovery/refresh' distribution-discovery-worker.js
           grep -Fq 'external_discovery_refresh' distribution-discovery-worker.js
+          grep -Fq 'canonical_hosts' distribution-discovery-worker.js
+          grep -Fq 'exclude_source_hosts' distribution-discovery-worker.js
+          node -e "const d=require('./data/distribution-discovery-sources.json'); if(d.guardrails?.exclude_source_hosts!==true||d.guardrails?.canonical_hosts?.['producthunt.com']!=='product-hunt'||d.guardrails?.canonical_hosts?.['tinylaun.ch']!=='tinylaunch'||!d.guardrails?.exclude_hosts?.includes('claude.ai')) process.exit(1)"
       - name: Validate submission guardrails
         run: |
           node -e "const d=require('./data/distribution-submission-adapters.json'); if(d.policy?.automatic_requires_allowlist!==true) process.exit(1); if(Number(d.policy?.max_automatic_per_run)>3) process.exit(1); const i=d.adapters.find(x=>x.surface_slug==='indietool'); if(!i||i.requires_payment!==true||i.setup_state!=='policy_blocked'||i.enabled!==false) process.exit(1)"
