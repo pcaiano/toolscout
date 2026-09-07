@@ -1,0 +1,44 @@
+name: Autonomous Distribution Check
+
+on:
+  pull_request:
+    paths:
+      - 'distribution-autonomous-worker.js'
+      - 'distribution-orchestrator-worker.js'
+      - 'migrations/0044_autonomous_distribution_qualification.sql'
+      - '.github/workflows/autonomous-distribution-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'distribution-autonomous-worker.js'
+      - 'distribution-orchestrator-worker.js'
+      - 'migrations/0044_autonomous_distribution_qualification.sql'
+      - '.github/workflows/autonomous-distribution-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate autonomous engine syntax
+        run: |
+          node --check distribution-autonomous-worker.js
+          node --check distribution-orchestrator-worker.js
+      - name: Validate closed-loop architecture
+        run: |
+          test -s migrations/0044_autonomous_distribution_qualification.sql
+          grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_auto_adapters' migrations/0044_autonomous_distribution_qualification.sql
+          grep -Fq "import base from './distribution-autonomous-worker.js'" distribution-orchestrator-worker.js
+          grep -Fq "confidence>=95" distribution-autonomous-worker.js
+          grep -Fq "policy_state='verified'" distribution-autonomous-worker.js
+          grep -Fq 'findOpenApi' distribution-autonomous-worker.js
+          grep -Fq 'policyBlocked' distribution-autonomous-worker.js
+          grep -Fq "submission_type='auto_discovered_json'" distribution-autonomous-worker.js
+          grep -Fq 'BLOCK_RE' distribution-autonomous-worker.js
+          grep -Fq 'sameHostFamily' distribution-autonomous-worker.js
