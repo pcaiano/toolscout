@@ -475,5 +475,164 @@
       "monetizationCoverage": 20.7,
       "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
     }
+  },
+  {
+    "generatedAt": "2026-09-07T21:58:50.030Z",
+    "timezone": "Europe/Lisbon",
+    "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+    "traffic": {
+      "today": {
+        "total": 52,
+        "likelyHuman": 23,
+        "bots": 21,
+        "owner": 0,
+        "synthetic": 0,
+        "unknownLegacy": 8
+      },
+      "d7": {
+        "total": 1515,
+        "likelyHuman": 269,
+        "bots": 158,
+        "owner": 37,
+        "synthetic": 0,
+        "unknownLegacy": 1051
+      },
+      "d30": {
+        "total": 1515,
+        "likelyHuman": 269,
+        "bots": 158,
+        "owner": 37,
+        "synthetic": 0,
+        "unknownLegacy": 1051
+      },
+      "dailyLikelyHuman30d": [
+        {
+          "day": "2026-09-01",
+          "sessions": 23
+        },
+        {
+          "day": "2026-09-02",
+          "sessions": 39
+        },
+        {
+          "day": "2026-09-03",
+          "sessions": 99
+        },
+        {
+          "day": "2026-09-04",
+          "sessions": 28
+        },
+        {
+          "day": "2026-09-05",
+          "sessions": 16
+        },
+        {
+          "day": "2026-09-06",
+          "sessions": 41
+        },
+        {
+          "day": "2026-09-07",
+          "sessions": 23
+        }
+      ],
+      "averageDailyLikelyHuman30d": 8.97
+    },
+    "funnel30d": {
+      "recommendationStarted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "recommendationCompleted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "resultViewed": {
+        "events": 4,
+        "sessions": 2
+      },
+      "toolViewed": {
+        "events": 0,
+        "sessions": 0
+      },
+      "outboundClicked": {
+        "events": 190,
+        "sessions": 190
+      },
+      "recommendationCompletionRate": 100
+    },
+    "commercial30d": {
+      "outboundClicks": 190,
+      "sessionsWithOutbound": 190,
+      "monetizedOutbound": 39,
+      "monetizationCoverage": 20.5,
+      "humanSessionToOutboundRate": 70.6
+    },
+    "sources30d": [
+      {
+        "source": "direct",
+        "sessions": 65
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+        "sessions": 3
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+        "sessions": 2
+      },
+      {
+        "source": "ref:producthunt.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:google.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dollarplatoon.com",
+        "sessions": 1
+      }
+    ],
+    "intents30d": [
+      {
+        "intent": "general",
+        "sessions": 191,
+        "recommendationCompletions": 3,
+        "outboundClicks": 190
+      },
+      {
+        "intent": "unlabelled",
+        "sessions": 79,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "best-free-crm",
+        "sessions": 1,
+        "recommendationCompletions": 1,
+        "outboundClicks": 0
+      }
+    ],
+    "revenue90d": {
+      "ledger": [],
+      "verified": [],
+      "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
+    },
+    "projectionInputs": {
+      "humanSessions30d": 269,
+      "humanDailyAverage30d": 8.97,
+      "recommendationCompletionRate": 0.7,
+      "humanSessionToOutboundRate": 70.6,
+      "monetizationCoverage": 20.5,
+      "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
+    }
   }
 ]

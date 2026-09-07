@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-09-07T18:13:46.937Z",
+  "generatedAt": "2026-09-07T21:58:50.030Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 40,
-      "likelyHuman": 17,
-      "bots": 15,
+      "total": 52,
+      "likelyHuman": 23,
+      "bots": 21,
       "owner": 0,
       "synthetic": 0,
       "unknownLegacy": 8
     },
     "d7": {
-      "total": 1503,
-      "likelyHuman": 263,
-      "bots": 152,
+      "total": 1515,
+      "likelyHuman": 269,
+      "bots": 158,
       "owner": 37,
       "synthetic": 0,
       "unknownLegacy": 1051
     },
     "d30": {
-      "total": 1503,
-      "likelyHuman": 263,
-      "bots": 152,
+      "total": 1515,
+      "likelyHuman": 269,
+      "bots": 158,
       "owner": 37,
       "synthetic": 0,
       "unknownLegacy": 1051
@@ -54,10 +54,10 @@
       },
       {
         "day": "2026-09-07",
-        "sessions": 17
+        "sessions": 23
       }
     ],
-    "averageDailyLikelyHuman30d": 8.77
+    "averageDailyLikelyHuman30d": 8.97
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -77,17 +77,17 @@
       "sessions": 0
     },
     "outboundClicked": {
-      "events": 184,
-      "sessions": 184
+      "events": 190,
+      "sessions": 190
     },
     "recommendationCompletionRate": 100
   },
   "commercial30d": {
-    "outboundClicks": 184,
-    "sessionsWithOutbound": 184,
-    "monetizedOutbound": 38,
-    "monetizationCoverage": 20.7,
-    "humanSessionToOutboundRate": 70
+    "outboundClicks": 190,
+    "sessionsWithOutbound": 190,
+    "monetizedOutbound": 39,
+    "monetizationCoverage": 20.5,
+    "humanSessionToOutboundRate": 70.6
   },
   "sources30d": [
     {
@@ -126,9 +126,9 @@
   "intents30d": [
     {
       "intent": "general",
-      "sessions": 185,
+      "sessions": 191,
       "recommendationCompletions": 3,
-      "outboundClicks": 184
+      "outboundClicks": 190
     },
     {
       "intent": "unlabelled",
@@ -149,11 +149,11 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 263,
-    "humanDailyAverage30d": 8.77,
-    "recommendationCompletionRate": 0.8,
-    "humanSessionToOutboundRate": 70,
-    "monetizationCoverage": 20.7,
+    "humanSessions30d": 269,
+    "humanDailyAverage30d": 8.97,
+    "recommendationCompletionRate": 0.7,
+    "humanSessionToOutboundRate": 70.6,
+    "monetizationCoverage": 20.5,
     "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
   }
 }
