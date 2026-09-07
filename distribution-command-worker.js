@@ -58,26 +58,30 @@ async function protectedStats(request,env,ctx){
  const internalRequest=new Request(internalUrl.toString(),{method:'GET',headers});
  return withOps(await base.fetch(internalRequest,env,ctx),env);
 }
+async function serveCommandCenter(request,env){
+ if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
+ const assetUrl=new URL('/analytics.html',request.url);
+ let r=await env.ASSETS.fetch(new Request(assetUrl.toString(),{method:'GET',headers:{'Accept':'text/html'}}));
+ if(!r.ok){
+  const fallbackUrl=new URL('/analytics',request.url);
+  r=await env.ASSETS.fetch(new Request(fallbackUrl.toString(),{method:'GET',headers:{'Accept':'text/html'}}));
+ }
+ if(!r.ok)return new Response('Command Center asset unavailable',{status:502,headers:{'Cache-Control':'no-store'}});
+ const t=r.headers.get('Content-Type')||'';
+ if(!t.includes('text/html'))return new Response('Command Center asset invalid',{status:502,headers:{'Cache-Control':'no-store'}});
+ const h=new Headers(r.headers);
+ h.set('Cache-Control','private, no-store');
+ h.delete('Location');
+ const value=await sessionValue(env.ADMIN_TOKEN,sessionBucket());
+ h.append('Set-Cookie',`${SESSION_COOKIE}=${value}; Max-Age=${SESSION_TTL_SECONDS}; Path=/analytics; HttpOnly; Secure; SameSite=Lax`);
+ return new Response(inject(await r.text()),{status:200,headers:h});
+}
 export default {
  async fetch(request,env,ctx){
   const u=new URL(request.url);
   if(u.pathname==='/analytics/api/stats'&&request.method==='GET')return protectedStats(request,env,ctx);
   if(u.pathname==='/api/stats'&&request.method==='GET')return withOps(await base.fetch(request,env,ctx),env,'private, max-age=60');
-  if(isAnalyticsPage(u.pathname)&&request.method==='GET'){
-   const assetUrl=new URL(request.url);
-   assetUrl.pathname='/analytics.html';
-   const assetRequest=new Request(assetUrl.toString(),request);
-   const r=await base.fetch(assetRequest,env,ctx);
-   if(!r.ok)return r;
-   const t=r.headers.get('Content-Type')||'';
-   if(!t.includes('text/html'))return r;
-   if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
-   const h=new Headers(r.headers);
-   h.set('Cache-Control','private, no-store');
-   const value=await sessionValue(env.ADMIN_TOKEN,sessionBucket());
-   h.append('Set-Cookie',`${SESSION_COOKIE}=${value}; Max-Age=${SESSION_TTL_SECONDS}; Path=/analytics; HttpOnly; Secure; SameSite=Lax`);
-   return new Response(inject(await r.text()),{status:r.status,headers:h});
-  }
+  if(isAnalyticsPage(u.pathname)&&request.method==='GET')return serveCommandCenter(request,env);
   return base.fetch(request,env,ctx);
  },
  async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined;}
