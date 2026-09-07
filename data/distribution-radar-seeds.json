@@ -101,6 +101,24 @@
       "cost": 0,
       "human_required": false,
       "next_action": "Use standard free listing and track any newsletter/referral lift before considering upgrades."
+    },
+    {
+      "slug": "indexnow",
+      "name": "IndexNow",
+      "type": "search_discovery_api",
+      "url": "https://www.indexnow.org/",
+      "action_url": "https://api.indexnow.org/indexnow",
+      "audience_fit": 100,
+      "authority": 95,
+      "traffic_potential": 72,
+      "backlink_value": 0,
+      "acceptance_probability": 99,
+      "automation_potential": 100,
+      "effort": 5,
+      "cost": 0,
+      "human_required": false,
+      "status": "ready_to_submit",
+      "next_action": "Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements."
     }
   ]
 }
