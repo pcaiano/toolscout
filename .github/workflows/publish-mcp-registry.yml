@@ -1,0 +1,60 @@
+name: Publish ToolScout to MCP Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - server.json
+      - .github/workflows/publish-mcp-registry.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  MCP_URL: https://trytoolscout.org/mcp
+  MCP_VERSION: 2026-07-28
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate remote MCP endpoint
+        run: |
+          set -euo pipefail
+          curl -fsSL "$MCP_URL" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -H "MCP-Protocol-Version: $MCP_VERSION" \
+            -H 'Mcp-Method: tools/list' \
+            --data '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"mcp-registry-publish","version":"1.0.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}' \
+            -o /tmp/tools.json
+          jq -e '.result.tools | map(.name) | index("recommend_tools")' /tmp/tools.json >/dev/null
+
+      - name: Install MCP publisher
+        run: |
+          set -euo pipefail
+          curl -fL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          chmod +x mcp-publisher
+
+      - name: Authenticate with GitHub OIDC
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish remote server
+        run: ./mcp-publisher publish
+
+      - name: Verify Registry listing
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5; do
+            if curl -fsSL 'https://registry.modelcontextprotocol.io/v0/servers?search=io.github.pcaiano%2Ftoolscout' -o /tmp/registry.json && jq -e '.. | strings | select(. == "io.github.pcaiano/toolscout")' /tmp/registry.json >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Registry publication command completed but listing was not yet visible.' >&2
+          exit 1
