@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+Agentmap: https://trytoolscout.org/.well-known/ard.json
 Sitemap: https://trytoolscout.org/sitemap.xml
