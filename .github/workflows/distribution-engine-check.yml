@@ -98,7 +98,7 @@ jobs:
           node --check embed/toolscout-compare.js
       - name: Validate worker entrypoint, migrations and publishing profile
         run: |
-          grep -q 'main = "distribution-embed-worker.js"' wrangler.toml
+          grep -q 'main = "agent-protocol-worker.js"' wrangler.toml
           test -s migrations/0018_distribution_engine.sql
           test -s migrations/0019_vendor_amplification.sql
           test -s migrations/0020_vendor_contact_discovery.sql
