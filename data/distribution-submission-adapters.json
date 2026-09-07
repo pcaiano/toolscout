@@ -51,13 +51,7 @@
       "credential_prefix": "ls_agent_",
       "credential_ttl_days": 90,
       "required_scope": "startup:submit",
-      "required_fields": [
-        "name",
-        "slug",
-        "tagline",
-        "description",
-        "categories"
-      ],
+      "required_fields": ["name","slug","tagline","description","categories"],
       "note": "Official OpenAPI verified 2026-09-07. POST /api/listings/validate accepted the ToolScout payload with HTTP 200, valid=true, identity_available=true and domain_available=true using category Software. Publishing stays disabled until an explicitly authorized agent identity/token exists.",
       "asset_scope": "product"
     },
@@ -74,13 +68,7 @@
       "setup_state": "policy_blocked",
       "payload_kind": "indietool_app",
       "api_key_prefix": "it_live_",
-      "required_fields": [
-        "appName",
-        "appUrl",
-        "landingPageHeading",
-        "landingPageSubHeading",
-        "category"
-      ],
+      "required_fields": ["appName","appUrl","landingPageHeading","landingPageSubHeading","category"],
       "requires_image_url_or_file": true,
       "free_route_requires_badge": true,
       "note": "Official developer API verified 2026-09-07. API submissions consume credits and JSON mode requires Bearer it_live_* plus a public HTTPS imageUrl. IndieTool advertises a separate free listing route that requires embedding its badge; neither paid API use nor reciprocal-badge installation is automatic under ToolScout policy.",
@@ -100,6 +88,25 @@
       "payload_kind": "startuphub_startup",
       "note": "Official API verified but costs credits; disabled by ToolScout zero-cost policy.",
       "asset_scope": "product"
+    },
+    {
+      "surface_slug": "hypestar",
+      "enabled": false,
+      "allow_automatic": false,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://hypestar.org/api/v1/listings",
+      "auth_type": "none",
+      "requires_payment": false,
+      "setup_state": "approval_required",
+      "approval_required": true,
+      "payload_kind": "hypestar_listing",
+      "asset_scope": "product",
+      "validated_kind": "app",
+      "validated_category": "productivity-operations",
+      "supporter_choice": "not_offered",
+      "publishing": "reviewed_permanent_basic_listing",
+      "note": "Official OpenAPI and agent skill verified 2026-09-07. Free permanent reviewed listing requires no account, email, API key, payment or reciprocal badge. Hype Star explicitly requires user confirmation before submission, so this adapter remains disabled and approval-gated until ToolScout receives specific authorization for this surface."
     },
     {
       "surface_slug": "agenttool-sh",
@@ -142,22 +149,11 @@
   ],
   "policy": {
     "automatic_requires_allowlist": true,
-    "automatic_methods": [
-      "POST"
-    ],
-    "automatic_content_types": [
-      "application/json"
-    ],
+    "automatic_methods": ["POST"],
+    "automatic_content_types": ["application/json"],
     "max_automatic_per_run": 3,
     "max_attempts": 3,
-    "never_automatic": [
-      "captcha",
-      "account_creation",
-      "payment",
-      "community_post",
-      "editorial_pitch",
-      "terms_acceptance"
-    ],
+    "never_automatic": ["captcha","account_creation","payment","community_post","editorial_pitch","terms_acceptance","explicit_third_party_approval"],
     "zero_cost_only": true
   }
 }
