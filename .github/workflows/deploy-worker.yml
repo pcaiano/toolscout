@@ -42,7 +42,9 @@ jobs:
           echo '=== DISTRIBUTION ASSETS ==='
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) AS assets FROM distribution_asset_state WHERE asset_url IS NOT NULL;"
           echo '=== PRIORITY SETUP SURFACES ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required,action_url,next_action FROM distribution_opportunities WHERE surface_slug IN ('listed-startups','tinylaunch','indietool','agenttool-sh','ora-ai') ORDER BY surface_slug;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required,action_url,next_action FROM distribution_opportunities WHERE surface_slug IN ('listed-startups','tinylaunch','indietool','agenttool-sh','ora-ai','hypestar') ORDER BY surface_slug;"
+          echo '=== APPROVAL-GATED SURFACES ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required,action_url,next_action FROM distribution_opportunities WHERE status='approval_required' ORDER BY distribution_score DESC;"
           echo '=== STALE ADAPTER-MISSING TAXONOMY ==='
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT ds.surface_slug,ds.status AS submission_status,COALESCE(o.status,'missing_opportunity') AS opportunity_status,COALESCE(o.human_required,-1) AS human_required,o.surface_type,o.next_action FROM distribution_submissions ds LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug WHERE ds.status='adapter_missing' ORDER BY ds.surface_slug;"
           echo '=== DISTRIBUTION SUBMISSION COUNTS ==='
