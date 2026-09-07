@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "distribution-impact-entry-worker.js"
+main = "agent-protocol-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
