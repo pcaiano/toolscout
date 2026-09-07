@@ -1,4 +1,4 @@
-import base from './affiliate-workflow-worker.js';
+import base from './distribution-impact-worker.js';
 
 const SESSION_COOKIE = 'toolscout_cc';
 const SESSION_TTL_SECONDS = 900;
