@@ -1,0 +1,36 @@
+name: P0 Engines Production Cycle Check
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/p0-engines-production-cycle.yml'
+      - '.github/workflows/p0-engines-production-cycle-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/p0-engines-production-cycle.yml'
+      - '.github/workflows/p0-engines-production-cycle-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate protected P0 production cycle
+        run: |
+          set -euo pipefail
+          f=.github/workflows/p0-engines-production-cycle.yml
+          test -s "$f"
+          grep -Fq 'Deploy ToolScout Worker' "$f"
+          grep -Fq '/api/distribution/autonomous/refresh' "$f"
+          grep -Fq '/api/affiliate-coverage/run' "$f"
+          grep -Fq 'Authorization: Bearer $ADMIN_TOKEN' "$f"
+          grep -Fq 'DISTRIBUTION_ENGINE_SUMMARY=' "$f"
+          grep -Fq 'AFFILIATE_COVERAGE_ENGINE_SUMMARY=' "$f"
+          if grep -Eq 'cat[[:space:]]+"?\$body|set[[:space:]]+-x' "$f"; then
+            echo 'Production workflow must not dump protected response bodies or shell secrets.'
+            exit 1
+          fi

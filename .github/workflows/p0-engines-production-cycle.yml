@@ -1,0 +1,93 @@
+name: P0 Engines Production Cycle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/p0-engines-production-cycle.yml'
+  workflow_run:
+    workflows: ["Deploy ToolScout Worker"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PROD_BASE: https://trytoolscout.org
+
+jobs:
+  cycle:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Distribution Engine production cycle
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$ADMIN_TOKEN"
+          body="$(mktemp)"
+          code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' --max-time 90 -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "$PROD_BASE/api/distribution/autonomous/refresh")"
+          if [ "$code" != "200" ]; then
+            echo "Distribution cycle failed: HTTP $code"
+            exit 1
+          fi
+          node - "$body" <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          const q = data.qualification || {};
+          const e = data.execution || {};
+          console.log('DISTRIBUTION_ENGINE_SUMMARY=' + JSON.stringify({
+            ok: data.ok === true,
+            checked: q.checked ?? null,
+            ready: q.ready ?? null,
+            blocked: q.blocked ?? null,
+            human: q.human ?? null,
+            research: q.research ?? null,
+            cooldown_hours: q.cooldown_hours ?? null,
+            qualification_limit: q.per_cycle_limit ?? null,
+            sent: e.sent ?? null,
+            failed: e.failed ?? null,
+            deduped: e.deduped ?? null,
+            execution_limit: e.per_cycle_limit ?? null
+          }));
+          if (data.ok !== true) process.exit(1);
+          NODE
+
+      - name: Run Affiliate Coverage Engine production cycle
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$ADMIN_TOKEN"
+          body="$(mktemp)"
+          code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' --max-time 90 -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "$PROD_BASE/api/affiliate-coverage/run")"
+          if [ "$code" != "200" ]; then
+            echo "Affiliate Coverage cycle failed: HTTP $code"
+            exit 1
+          fi
+          node - "$body" <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          const r = data.research || {};
+          const c = data.coverage || {};
+          console.log('AFFILIATE_COVERAGE_ENGINE_SUMMARY=' + JSON.stringify({
+            ok: data.ok === true,
+            human_outbound: c.human_outbound ?? null,
+            monetized_human_outbound: c.monetized ?? null,
+            unmonetized_human_outbound: c.unmonetized ?? null,
+            weighted_coverage: c.weighted ?? null,
+            queue_size: data.queue_size ?? null,
+            processed: r.processed ?? null,
+            programs_found: r.programs_found ?? null,
+            human_actions: r.human_actions ?? null,
+            cooldown_skipped: r.cooldown_skipped ?? null,
+            cooldown_hours: r.cooldown_hours ?? null,
+            per_cycle_limit: r.per_cycle_limit ?? null
+          }));
+          if (data.ok !== true) process.exit(1);
+          NODE
+
+      - name: Production cycle proof
+        run: echo 'Both P0 engine endpoints completed successfully; only non-sensitive summaries were logged.'
