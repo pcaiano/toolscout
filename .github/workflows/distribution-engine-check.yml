@@ -1,6 +1,23 @@
 name: Distribution Engine Check
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'distribution-*-worker.js'
+      - 'data/distribution-radar-seeds.json'
+      - 'data/distribution-discovery-sources.json'
+      - 'data/distribution-submission-adapters.json'
+      - 'embed/**'
+      - 'migrations/0018_distribution_engine.sql'
+      - 'migrations/0019_vendor_amplification.sql'
+      - 'migrations/0020_vendor_contact_discovery.sql'
+      - 'migrations/0021_public_vendor_dispatch.sql'
+      - 'migrations/0022_distribution_learning.sql'
+      - 'migrations/0023_distribution_submission.sql'
+      - 'migrations/0024_distribution_orchestration.sql'
+      - 'wrangler.toml'
+      - '.github/workflows/distribution-engine-check.yml'
   pull_request:
     paths:
       - 'distribution-*-worker.js'
@@ -70,6 +87,8 @@ jobs:
           grep -Fq '/api/distribution/submissions/execute' distribution-submission-worker.js
           grep -Fq 'adapter_not_verified' distribution-submission-worker.js
           grep -Fq 'allow_automatic' distribution-submission-worker.js
+          grep -Fq 'packageAutomaticProtocols' distribution-submission-worker.js
+          grep -Fq "submission_type='http_json'" distribution-submission-worker.js
       - name: Validate event-driven orchestration and community guardrails
         run: |
           grep -Fq '/api/distribution/orchestrate' distribution-orchestrator-worker.js
@@ -94,6 +113,8 @@ jobs:
           grep -q "utm_medium:'distribution'" embed/toolscout-compare.js
           grep -Fq '/api/distribution/embed-event' distribution-learning-worker.js
           grep -Fq '/api/distribution/learning/refresh' distribution-learning-worker.js
+          grep -Fq "classification='likely-human'" distribution-learning-worker.js
+          grep -Fq 'revenue_ledger' distribution-learning-worker.js
           grep -Fq 'navigator.sendBeacon' embed/toolscout-pick.js
           grep -Fq 'navigator.sendBeacon' embed/toolscout-finder.js
           grep -Fq 'navigator.sendBeacon' embed/toolscout-compare.js
