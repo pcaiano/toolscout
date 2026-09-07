@@ -22,7 +22,11 @@ jobs:
       - name: Validate actionable queue
         run: |
           node --check human-action-entry-worker.js
-          grep -Fq "'/api/human-actions'" human-action-entry-worker.js
+          grep -Fq "'/analytics/api/human-actions'" human-action-entry-worker.js
+          ! grep -Fq "u.pathname==='/api/human-actions'" human-action-entry-worker.js
+          grep -Fq "SESSION_COOKIE='toolscout_cc'" human-action-entry-worker.js
+          grep -Fq "command_center_session_expired" human-action-entry-worker.js
+          grep -Fq "credentials:'same-origin'" human-action-entry-worker.js
           grep -Fq "Open action" human-action-entry-worker.js
           grep -Fq "Copy ChatGPT task" human-action-entry-worker.js
           grep -Fq "CAPTCHA" human-action-entry-worker.js
