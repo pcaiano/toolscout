@@ -1,0 +1,32 @@
+name: Command Center Human Actions Check
+on:
+  pull_request:
+    paths:
+      - 'human-action-entry-worker.js'
+      - 'agent-protocol-worker.js'
+      - '.github/workflows/human-actions-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'human-action-entry-worker.js'
+      - 'agent-protocol-worker.js'
+      - '.github/workflows/human-actions-check.yml'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate actionable queue
+        run: |
+          node --check human-action-entry-worker.js
+          grep -Fq "'/api/human-actions'" human-action-entry-worker.js
+          grep -Fq "Open action" human-action-entry-worker.js
+          grep -Fq "Copy ChatGPT task" human-action-entry-worker.js
+          grep -Fq "CAPTCHA" human-action-entry-worker.js
+          grep -Fq "material legal terms" human-action-entry-worker.js
+          grep -Fq "unmonetized human outbound" human-action-entry-worker.js
+          grep -Fq "distribution score" human-action-entry-worker.js
+          grep -Fq "import base from './human-action-entry-worker.js'" agent-protocol-worker.js
