@@ -167,13 +167,14 @@
       "slug": "tiny-startups",
       "name": "Tiny Startups",
       "type": "startup_directory",
-      "status": "ready_to_submit",
+      "status": "human_action_required",
       "priority": "medium",
       "url": "https://www.tinystartups.com/",
       "action_url": "https://www.tinystartups.com/",
       "requires_signup": true,
       "cost": "Free review queue plus optional paid tiers reported in current 2026 research",
-      "next_action": "Submit through the free review route first; avoid paid placement until referral quality is known."
+      "next_action": "Use the authenticated/free review submission route manually. Keep outside automatic execution unless a verified machine-readable API is later discovered.",
+      "notes": "Authenticated/manual submission route. Do not count as an automation gap."
     },
     {
       "slug": "launching-next",
@@ -208,37 +209,40 @@
       "slug": "pitchwall",
       "name": "PitchWall",
       "type": "launch_platform",
-      "status": "ready_to_submit",
+      "status": "human_action_required",
       "priority": "medium",
       "url": "https://pitchwall.co/",
       "action_url": "https://pitchwall.co/",
       "requires_signup": true,
       "cost": "Free submission reported in current 2026 research",
-      "next_action": "Create/login and submit a concise ToolScout launch profile; record approval/live URL."
+      "next_action": "Use the authenticated submission form manually. Keep outside automatic execution unless a verified machine-readable API is later discovered.",
+      "notes": "Authenticated/manual submission route. Do not count as an automation gap."
     },
     {
       "slug": "indie-hackers",
       "name": "Indie Hackers",
       "type": "community",
-      "status": "ready_to_submit",
+      "status": "human_action_required",
       "priority": "medium",
       "url": "https://www.indiehackers.com/",
       "action_url": "https://www.indiehackers.com/",
       "requires_signup": true,
       "cost": "Free account",
-      "next_action": "Publish a useful founder/product story rather than a directory-style promotional post."
+      "next_action": "Publish a useful founder/product story manually when there is a genuine discussion angle. Human/editorial action is intentional.",
+      "notes": "Manual/editorial surface. Do not count as an automation gap."
     },
     {
       "slug": "hacker-news",
       "name": "Hacker News — Show HN",
       "type": "community_launch",
-      "status": "ready_to_submit",
+      "status": "human_action_required",
       "priority": "medium",
       "url": "https://news.ycombinator.com/",
       "action_url": "https://news.ycombinator.com/submit",
       "requires_signup": true,
       "cost": "Free account",
-      "next_action": "Use only when there is a strong builder story and a product people can try immediately; keep title factual."
+      "next_action": "Prepare a factual Show HN post only when there is a strong builder story and a product people can try immediately. Human/editorial action is intentional.",
+      "notes": "Manual/editorial surface. Do not count as an automation gap."
     },
     {
       "slug": "dev-hunt",
