@@ -4080,5 +4080,44 @@
       "content": 10,
       "agency": 8
     }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "podia",
+    "name": "Podia",
+    "category": "marketing",
+    "description": "Platform for creators to sell online courses, digital downloads, coaching and community memberships, with a website builder and email marketing.",
+    "pricing": "Paid plans with a 30-day free trial. Check current plan pricing and limits with Podia.",
+    "freePlan": false,
+    "features": [
+      "online courses",
+      "digital downloads",
+      "coaching",
+      "community memberships",
+      "website builder",
+      "email marketing",
+      "online store"
+    ],
+    "bestFor": [
+      "course creators",
+      "digital product sellers",
+      "coaches",
+      "solopreneurs"
+    ],
+    "sourceUrl": "https://www.podia.com/",
+    "lastVerified": "2026-09-08",
+    "scores": {
+      "price": 6,
+      "ease": 8,
+      "automation": 6,
+      "integrations": 5,
+      "sales": 8,
+      "ai": 1,
+      "marketing": 7,
+      "seo": 4,
+      "research": 1,
+      "content": 8,
+      "agency": 4
+    }
   }
 ]
