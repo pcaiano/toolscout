@@ -1,2 +1,2 @@
-import base from './affiliate-human-action-entry-worker.js';
+import base from './audience-command-center-entry-worker.js';
 export default base;
