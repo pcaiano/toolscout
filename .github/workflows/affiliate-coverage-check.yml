@@ -10,6 +10,7 @@ on:
       - 'agent-protocol-worker.js'
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - 'migrations/0049_reconcile_stale_affiliate_actions.sql'
+      - 'migrations/0050_persist_affiliate_contact_evidence.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
   push:
     branches: [main]
@@ -22,6 +23,7 @@ on:
       - 'agent-protocol-worker.js'
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - 'migrations/0049_reconcile_stale_affiliate_actions.sql'
+      - 'migrations/0050_persist_affiliate_contact_evidence.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
 jobs:
   check:
@@ -35,12 +37,17 @@ jobs:
         run: |
           node --check affiliate-coverage-entry-worker.js
           test -s migrations/0049_reconcile_stale_affiliate_actions.sql
+          test -s migrations/0050_persist_affiliate_contact_evidence.sql
           grep -Fq "affiliate_coverage_reconciler" affiliate-coverage-entry-worker.js
           grep -Fq "submitted_at" affiliate-coverage-entry-worker.js
           grep -Fq "pending_review" affiliate-coverage-entry-worker.js
           grep -Fq "rejected" affiliate-coverage-entry-worker.js
           grep -Fq "CONTACTED_WORDS" affiliate-coverage-entry-worker.js
           grep -Fq "POST_SUBMIT_HUMAN_WORDS" affiliate-coverage-entry-worker.js
+          grep -Fq "'attio','pending_review'" migrations/0050_persist_affiliate_contact_evidence.sql
+          grep -Fq "'ubersuggest','pending_review'" migrations/0050_persist_affiliate_contact_evidence.sql
+          grep -Fq "'zoho-crm','submitted'" migrations/0050_persist_affiliate_contact_evidence.sql
+          grep -Fq "gmail_owner_outreach" migrations/0050_persist_affiliate_contact_evidence.sql
           node --input-type=module <<'EOF'
           import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
           import {classifyProgramPage,discoverOfficialProgram} from './affiliate-program-discovery.js';
