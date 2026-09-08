@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-09-08T00:11:06.277Z",
+  "generatedAt": "2026-09-08T05:50:48.778Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 3,
-      "likelyHuman": 2,
-      "bots": 1,
+      "total": 12,
+      "likelyHuman": 9,
+      "bots": 3,
       "owner": 0,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 1514,
-      "likelyHuman": 272,
-      "bots": 160,
+      "total": 1507,
+      "likelyHuman": 279,
+      "bots": 162,
       "owner": 33,
       "synthetic": 0,
-      "unknownLegacy": 1049
+      "unknownLegacy": 1033
     },
     "d30": {
-      "total": 1520,
-      "likelyHuman": 272,
-      "bots": 160,
+      "total": 1529,
+      "likelyHuman": 279,
+      "bots": 162,
       "owner": 37,
       "synthetic": 0,
       "unknownLegacy": 1051
@@ -58,10 +58,10 @@
       },
       {
         "day": "2026-09-08",
-        "sessions": 2
+        "sessions": 9
       }
     ],
-    "averageDailyLikelyHuman30d": 9.07
+    "averageDailyLikelyHuman30d": 9.3
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -81,22 +81,22 @@
       "sessions": 0
     },
     "outboundClicked": {
-      "events": 193,
-      "sessions": 193
+      "events": 198,
+      "sessions": 198
     },
     "recommendationCompletionRate": 100
   },
   "commercial30d": {
-    "outboundClicks": 193,
-    "sessionsWithOutbound": 193,
-    "monetizedOutbound": 40,
+    "outboundClicks": 198,
+    "sessionsWithOutbound": 198,
+    "monetizedOutbound": 41,
     "monetizationCoverage": 20.7,
     "humanSessionToOutboundRate": 71
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 65
+      "sessions": 67
     },
     {
       "source": "utm_source=peerlist",
@@ -130,13 +130,13 @@
   "intents30d": [
     {
       "intent": "general",
-      "sessions": 194,
+      "sessions": 199,
       "recommendationCompletions": 3,
-      "outboundClicks": 193
+      "outboundClicks": 198
     },
     {
       "intent": "unlabelled",
-      "sessions": 79,
+      "sessions": 81,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -153,8 +153,8 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 272,
-    "humanDailyAverage30d": 9.07,
+    "humanSessions30d": 279,
+    "humanDailyAverage30d": 9.3,
     "recommendationCompletionRate": 0.7,
     "humanSessionToOutboundRate": 71,
     "monetizationCoverage": 20.7,
