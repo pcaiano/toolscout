@@ -1,20 +1,20 @@
 {
   "summary": {
     "tools": 100,
-    "generatedAt": "2026-09-08T09:40:14.980Z",
+    "generatedAt": "2026-09-08T15:21:51.560Z",
     "cadence": {
       "linkHealth": "daily",
       "metadataFreshness": "daily age check; weekly review threshold at 7 days",
       "deepReview": "monthly threshold at 30 days"
     },
     "sourceLinks": {
-      "healthy": 91,
+      "healthy": 92,
       "confirmedBroken": 0,
-      "warnings": 9
+      "warnings": 8
     },
     "affiliateLinks": {
-      "active": 11,
-      "healthy": 6,
+      "active": 12,
+      "healthy": 7,
       "needsConfirmation": 4,
       "warnings": 1
     },
@@ -141,7 +141,7 @@
         "url": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.jotform.com/?utm_source=pcaiano&utm_campaign=jf1&rp=%2Fproducts%2Fform-builder%2F",
+        "finalUrl": "https://www.jotform.com/products/form-builder/?utm_source=pcaiano&utm_campaign=jf1",
         "error": null
       }
     },
@@ -359,9 +359,12 @@
         "error": null
       },
       "affiliate": {
-        "enabled": false,
-        "url": null,
-        "status": "inactive"
+        "enabled": true,
+        "url": "https://go.zoho.com/6joE",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.zoho.com/",
+        "error": null
       }
     },
     {
@@ -505,7 +508,7 @@
         "url": "https://claude.ai/",
         "status": "blocked_or_limited",
         "httpStatus": 403,
-        "finalUrl": "https://claude.ai/",
+        "finalUrl": "https://claude.ai/login",
         "error": null
       },
       "affiliate": {
@@ -907,7 +910,7 @@
         "url": "https://webflow.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://webflowmarketingmain.com/fr",
+        "finalUrl": "https://webflow.com/",
         "error": null
       },
       "affiliate": {
@@ -1010,8 +1013,8 @@
       "missingCritical": [],
       "source": {
         "url": "https://www.perplexity.ai/",
-        "status": "ok",
-        "httpStatus": 200,
+        "status": "blocked_or_limited",
+        "httpStatus": 403,
         "finalUrl": "https://www.perplexity.ai/",
         "error": null
       },
@@ -1083,7 +1086,7 @@
         "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.shopify.com/free-trial?irclickid=we10agWNJxyZUzzSI4WBl2I7Ukr2it023213zM0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=0ls0UJWPBxyZUIeVtnU3rxoJUkr2Edx3ITrlWg0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
         "error": null
       }
     },
@@ -1412,10 +1415,10 @@
       "missingCritical": [],
       "source": {
         "url": "https://sentry.io/",
-        "status": "network_warning",
-        "httpStatus": null,
-        "finalUrl": null,
-        "error": "timeout"
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://sentry.io/welcome/",
+        "error": null
       },
       "affiliate": {
         "enabled": false,
@@ -1477,7 +1480,7 @@
         "url": "https://notebooklm.google.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S-1777950530:1788860417310297",
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S-1405630915:1788880913778762",
         "error": null
       },
       "affiliate": {
@@ -1685,10 +1688,10 @@
       "missingCritical": [],
       "source": {
         "url": "https://www.gorgias.com/",
-        "status": "network_warning",
-        "httpStatus": null,
-        "finalUrl": null,
-        "error": "fetch failed"
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.gorgias.com/",
+        "error": null
       },
       "affiliate": {
         "enabled": true,
