@@ -34,6 +34,7 @@ on:
       - 'migrations/0038_close_distribution_research_backlog.sql'
       - 'migrations/0039_add_agenttool_distribution.sql'
       - 'migrations/0040_add_ora_distribution.sql'
+      - 'migrations/0052_distribution_effectiveness.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   pull_request:
@@ -68,6 +69,7 @@ on:
       - 'migrations/0038_close_distribution_research_backlog.sql'
       - 'migrations/0039_add_agenttool_distribution.sql'
       - 'migrations/0040_add_ora_distribution.sql'
+      - 'migrations/0052_distribution_effectiveness.sql'
       - 'wrangler.toml'
       - '.github/workflows/distribution-engine-check.yml'
   workflow_dispatch:
@@ -145,6 +147,8 @@ jobs:
           grep -Fq "reciprocal_badge_policy" migrations/0038_close_distribution_research_backlog.sql
           grep -Fq "'agenttool-sh','agenttool.sh'" migrations/0039_add_agenttool_distribution.sql
           grep -Fq "'ora-ai','Ora'" migrations/0040_add_ora_distribution.sql
+          grep -Fq 'verification_endpoint' migrations/0052_distribution_effectiveness.sql
+          grep -Fq "surface_slug IN ('hacker-news','indie-hackers','pitchwall','tiny-startups')" migrations/0052_distribution_effectiveness.sql
       - name: Validate radar, discovery and syndication
         run: |
           node -e "const d=require('./data/distribution-radar-seeds.json'); if(!Array.isArray(d.sources)||d.sources.length<3) process.exit(1); const g=d.sources.find(x=>x.slug==='agenttool-sh'); if(!g||g.status!=='ready_to_submit'||g.human_required!==false) process.exit(1); const o=d.sources.find(x=>x.slug==='ora-ai'); if(!o||o.status!=='ready_to_submit'||o.human_required!==false) process.exit(1); const i=d.sources.find(x=>x.slug==='indietool'); if(!i||i.status!=='policy_blocked') process.exit(1); for(const s of ['the-rundown-ai-supertools','launch-llama','best-of-ai','nextool-ai','stremit']){const x=d.sources.find(v=>v.slug===s); if(!x||x.status!=='human_action_required'||x.human_required!==true) process.exit(1)}"
@@ -169,6 +173,8 @@ jobs:
           grep -Fq 'cooldownSurfaces' distribution-submission-worker.js
           grep -Fq 'automatic protocol surface(s) deferred by rate-limit cooldown' distribution-submission-worker.js
           grep -Fq "if(automatic&&adapter?.payload_kind==='indexnow')continue" distribution-submission-worker.js
+          grep -Fq 'autonomous_submission_verification' distribution-autonomous-worker.js
+          grep -Fq "policyState,'auth_required'" distribution-autonomous-worker.js || grep -Fq "'auth_required'" distribution-autonomous-worker.js
           grep -Fq "'http_json'" distribution-submission-worker.js
           grep -Fq 'listed_startups_listing' distribution-submission-worker.js
           grep -Fq "WHERE status='ready_to_submit'" distribution-submission-worker.js
@@ -181,7 +187,8 @@ jobs:
           grep -Fq '/api/distribution/submissions/verify' distribution-submission-worker.js
           grep -Fq 'await verifySubmitted(new Request' distribution-submission-worker.js
           grep -Fq "asset_scope==='product'" distribution-submission-worker.js
-          grep -Fq 'indexCooling?max:max-indexRows.length' distribution-submission-worker.js
+          grep -Fq 'INDEXNOW_BATCH_LIMIT' distribution-submission-worker.js
+          grep -Fq 'ASSET_SCAN_LIMIT' distribution-submission-worker.js
           node -e "const d=require('./data/distribution-submission-adapters.json'); const a=d.adapters.find(x=>x.surface_slug==='listed-startups'); if(!a||a.endpoint!=='https://listedstartups.com/api/listings'||a.validation_endpoint!=='https://listedstartups.com/api/listings/validate'||a.auth_env!=='LISTED_STARTUPS_TOKEN'||a.validated_category!=='Software'||a.enabled!==false||a.allow_automatic!==false) process.exit(1); const g=d.adapters.find(x=>x.surface_slug==='agenttool-sh'); if(!g||g.endpoint!=='https://agenttool.sh/api/tools/submit'||g.payload_kind!=='agenttool_tool'||g.asset_scope!=='product'||g.enabled!==true||g.allow_automatic!==true||g.requires_payment!==false||g.verification_endpoint!=='https://agenttool.sh/api/tools/toolscout'||g.public_url!=='https://agenttool.sh/tools/toolscout') process.exit(1); const o=d.adapters.find(x=>x.surface_slug==='ora-ai'); if(!o||o.endpoint!=='https://ora.ai/api/scan?include=essentials'||o.payload_kind!=='ora_scan'||o.asset_scope!=='product'||o.enabled!==true||o.allow_automatic!==true||o.requires_payment!==false||o.timeout_ms!==60000||o.verification_endpoint!=='https://ora.ai/score/trytoolscout.org') process.exit(1)"
       - name: Validate event-driven orchestration and community guardrails
         run: |
@@ -218,6 +225,8 @@ jobs:
           grep -Fq 'researchRequired' distribution-command-worker.js
           grep -Fq 'Public verified' distribution-command-worker.js
           grep -Fq 'publicVerified' distribution-command-worker.js
+          grep -Fq 'submittedSurfaces' distribution-command-worker.js
+          grep -Fq 'indexNowSubmitted' distribution-command-worker.js
       - name: Validate distribution attribution and learning
         run: |
           grep -Fq '/api/distribution/embed-event' distribution-learning-worker.js
