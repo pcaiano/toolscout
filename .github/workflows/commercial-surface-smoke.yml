@@ -1,12 +1,6 @@
 name: Commercial Surface Smoke
 
 on:
-  workflow_run:
-    workflows: ["Deploy ToolScout Worker"]
-    types: [completed]
-    branches: [main]
-  schedule:
-    - cron: '35 * * * *'
   workflow_dispatch:
 
 permissions:

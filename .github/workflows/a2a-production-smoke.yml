@@ -1,10 +1,6 @@
 name: A2A Production Smoke
 
 on:
-  workflow_run:
-    workflows: ["Deploy ToolScout Worker"]
-    types: [completed]
-    branches: [main]
   schedule:
     - cron: '5 5 * * *'
   workflow_dispatch:

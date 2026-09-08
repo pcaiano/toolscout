@@ -303,3 +303,11 @@ At the end of any substantial ToolScout execution session, answer these question
 6. What is the single highest-impact next action?
 
 This handoff discipline is mandatory for preventing state fragmentation across multiple chats and execution environments.
+
+## Repository privacy transition
+
+The owner authorized a private repository while preserving GitHub connector editing, public Cloudflare hosting, and growth automations. Keep the free plan as the target; do not claim private Actions usage fits the quota until observed after consolidation.
+
+Production, Command Center and commercial smoke checks share the hourly production job. API/MCP/A2A checks join that job after deployments and retain their daily/manual runs. Credential-bearing discovery and business intelligence export remain independent. Public static publication excludes backend source and selected internal snapshots; catalog responses omit commercial metadata while internal Worker asset reads retain it. GitHub Pages currently remains enabled with a filtered artifact pending the final dependency and account-settings checks.
+
+Repository visibility is still public. The connected GitHub surface cannot change repository administration settings. Final transition requires administration access, confirmation of the Actions budget and Pages dependencies, then a private-repository connector read/write check. Historical public copies cannot be recalled by making the repository private.

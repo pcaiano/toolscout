@@ -9,8 +9,6 @@ on:
       - 'distribution-command-worker.js'
       - 'wrangler.toml'
       - '.github/workflows/command-center-smoke.yml'
-  schedule:
-    - cron: '35 * * * *'
   workflow_dispatch:
 
 permissions:
