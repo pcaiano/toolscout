@@ -223,7 +223,7 @@ jobs:
           grep -Fq 'performance_score' distribution-command-worker.js
           grep -Fq 'Research required' distribution-command-worker.js
           grep -Fq 'researchRequired' distribution-command-worker.js
-          grep -Fq 'Public verified' distribution-command-worker.js
+          grep -Fq 'Public live / verified' distribution-command-worker.js
           grep -Fq 'publicVerified' distribution-command-worker.js
           grep -Fq 'submittedSurfaces' distribution-command-worker.js
           grep -Fq 'indexNowSubmitted' distribution-command-worker.js
