@@ -3,12 +3,14 @@ on:
   pull_request:
     paths:
       - 'human-action-entry-worker.js'
+      - 'affiliate-operations.js'
       - 'agent-protocol-worker.js'
       - '.github/workflows/human-actions-check.yml'
   push:
     branches: [main]
     paths:
       - 'human-action-entry-worker.js'
+      - 'affiliate-operations.js'
       - 'agent-protocol-worker.js'
       - '.github/workflows/human-actions-check.yml'
 jobs:
@@ -21,6 +23,7 @@ jobs:
           node-version: '22'
       - name: Validate actionable queue
         run: |
+          set -euo pipefail
           node --check human-action-entry-worker.js
           grep -Fq "'/analytics/api/human-actions'" human-action-entry-worker.js
           ! grep -Fq "u.pathname==='/api/human-actions'" human-action-entry-worker.js
@@ -33,11 +36,16 @@ jobs:
           grep -Fq "material legal terms" human-action-entry-worker.js
           grep -Fq "unmonetized human outbound" human-action-entry-worker.js
           grep -Fq "distribution score" human-action-entry-worker.js
-          grep -Fq "w.submitted_at IS NULL" human-action-entry-worker.js
-          grep -Fq "w.status='approved_needs_link'" human-action-entry-worker.js
-          ! grep -Fq "w.status IN ('ready_to_apply','human_action_required','approved_needs_link','link_acquired')" human-action-entry-worker.js
-          grep -Fq "NOT LIKE '%rejected%'" human-action-entry-worker.js
-          grep -Fq "NOT LIKE '%declined%'" human-action-entry-worker.js
-          grep -Fq "NOT LIKE '%contacted%'" human-action-entry-worker.js
-          grep -Fq "NOT LIKE '%pending review%'" human-action-entry-worker.js
+          grep -Fq "/data/affiliate-pipeline.json" human-action-entry-worker.js
+          grep -Fq "/data/affiliate.json" human-action-entry-worker.js
+          grep -Fq "normalizeAffiliateState" human-action-entry-worker.js
+          grep -Fq "effectiveStatus" human-action-entry-worker.js
+          grep -Fq "source_of_truth:'canonical_affiliate_state'" human-action-entry-worker.js
+          grep -Fq "affiliate_source_of_truth" human-action-entry-worker.js
+          grep -Fq "status==='ready_to_apply'" human-action-entry-worker.js
+          grep -Fq "status==='human_action_required'" human-action-entry-worker.js
+          grep -Fq "status==='approved_needs_link'" human-action-entry-worker.js
+          grep -Fq "POST_SUBMIT_HUMAN_WORDS" human-action-entry-worker.js
+          grep -Fq "STALE_WORDS" human-action-entry-worker.js
+          ! grep -Fq "function affiliateSql()" human-action-entry-worker.js
           grep -Fq "import base from './human-action-entry-worker.js'" agent-protocol-worker.js
