@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'human-action-entry-worker.js'
+      - 'affiliate-human-action-entry-worker.js'
+      - 'affiliate-human-action-state.js'
       - 'affiliate-operations.js'
       - 'agent-protocol-worker.js'
       - '.github/workflows/human-actions-check.yml'
@@ -10,6 +12,8 @@ on:
     branches: [main]
     paths:
       - 'human-action-entry-worker.js'
+      - 'affiliate-human-action-entry-worker.js'
+      - 'affiliate-human-action-state.js'
       - 'affiliate-operations.js'
       - 'agent-protocol-worker.js'
       - '.github/workflows/human-actions-check.yml'
@@ -25,6 +29,8 @@ jobs:
         run: |
           set -euo pipefail
           node --check human-action-entry-worker.js
+          node --check affiliate-human-action-entry-worker.js
+          node --check affiliate-human-action-state.js
           grep -Fq "'/analytics/api/human-actions'" human-action-entry-worker.js
           ! grep -Fq "u.pathname==='/api/human-actions'" human-action-entry-worker.js
           grep -Fq "SESSION_COOKIE='toolscout_cc'" human-action-entry-worker.js
@@ -48,4 +54,10 @@ jobs:
           grep -Fq "POST_SUBMIT_HUMAN_WORDS" human-action-entry-worker.js
           grep -Fq "STALE_WORDS" human-action-entry-worker.js
           ! grep -Fq "function affiliateSql()" human-action-entry-worker.js
-          grep -Fq "import base from './human-action-entry-worker.js'" agent-protocol-worker.js
+          grep -Fq "'/analytics/api/affiliate-human-action'" affiliate-human-action-entry-worker.js
+          grep -Fq "Record contacted" affiliate-human-action-entry-worker.js
+          grep -Fq "Record submitted" affiliate-human-action-entry-worker.js
+          grep -Fq "command_center_human_action" affiliate-human-action-state.js
+          grep -Fq "contacted:'pending_review'" affiliate-human-action-state.js
+          grep -Fq "submitted:'submitted'" affiliate-human-action-state.js
+          grep -Fq "import base from './affiliate-human-action-entry-worker.js'" agent-protocol-worker.js
