@@ -1,2 +1,2 @@
-import base from './audience-health-entry-worker.js';
+import base from './affiliate-human-action-entry-worker.js';
 export default base;
