@@ -1,2 +1,3 @@
 import base from './affiliate-human-action-entry-worker.js';
-export default base;
+import { withPrivateAssets } from './private-assets.js';
+export default withPrivateAssets(base);

@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event.repository.private == false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -63,10 +64,12 @@ jobs:
         run: node scripts/validate-commercial-indexability.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Stage public files only
+        run: python3 scripts/stage-public-site.py
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: .pages-public
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

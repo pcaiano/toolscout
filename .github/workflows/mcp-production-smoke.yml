@@ -1,10 +1,6 @@
 name: MCP Production Smoke
 
 on:
-  workflow_run:
-    workflows: ["Deploy ToolScout Worker"]
-    types: [completed]
-    branches: [main]
   schedule:
     - cron: '55 4 * * *'
   workflow_dispatch:
