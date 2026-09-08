@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-08T13:39:40.605Z",
-  "checked": 115,
+  "generatedAt": "2026-09-08T18:46:03.722Z",
+  "checked": 116,
   "failures": 0,
   "warnings": 0,
   "methodology": "Machine-readability gate verifies crawlable canonical entities, explicit decision semantics, structured data, breadcrumbs, freshness/trust signals and discovery surfaces. It does not claim rankings or AI citations.",
