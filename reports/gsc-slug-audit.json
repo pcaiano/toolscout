@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-07T07:44:32.347Z",
-  "sourceGeneratedAt": "2026-09-07T07:44:32.306Z",
+  "generatedAt": "2026-09-08T13:39:22.993Z",
+  "sourceGeneratedAt": "2026-09-08T13:39:22.941Z",
   "summary": {
     "canonical": 20,
     "redirected": 3,
@@ -11,73 +11,73 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 203,
+      "impressions": 251,
       "clicks": 0,
-      "position": 76.9113
+      "position": 77.1793
     },
     {
       "slug": "best-no-code-automation-tools",
       "status": "canonical",
       "target": "best-no-code-automation-tools",
-      "impressions": 111,
+      "impressions": 139,
       "clicks": 0,
-      "position": 73.1441
+      "position": 72.9065
     },
     {
       "slug": "best-seo-keyword-research-tools",
       "status": "redirected",
       "target": "best-keyword-research-tools",
-      "impressions": 53,
+      "impressions": 73,
       "clicks": 0,
-      "position": 72.9057
-    },
-    {
-      "slug": "best-crm-for-sales-teams",
-      "status": "canonical",
-      "target": "best-crm-for-sales-teams",
-      "impressions": 40,
-      "clicks": 0,
-      "position": 77.7
+      "position": 73.0822
     },
     {
       "slug": "best-funnel-builder",
       "status": "canonical",
       "target": "best-funnel-builder",
-      "impressions": 39,
+      "impressions": 47,
       "clicks": 0,
-      "position": 77.5385
+      "position": 77.5532
     },
     {
-      "slug": "best-free-project-management-tools",
+      "slug": "best-crm-for-sales-teams",
       "status": "canonical",
-      "target": "best-free-project-management-tools",
-      "impressions": 10,
+      "target": "best-crm-for-sales-teams",
+      "impressions": 43,
       "clicks": 0,
-      "position": 46.1
+      "position": 76.5116
     },
     {
       "slug": "best-project-management-tools",
       "status": "canonical",
       "target": "best-project-management-tools",
-      "impressions": 10,
+      "impressions": 21,
       "clicks": 0,
-      "position": 45.4
+      "position": 44
+    },
+    {
+      "slug": "best-free-project-management-tools",
+      "status": "canonical",
+      "target": "best-free-project-management-tools",
+      "impressions": 18,
+      "clicks": 0,
+      "position": 52.1667
     },
     {
       "slug": "best-free-crm",
       "status": "canonical",
       "target": "best-free-crm",
-      "impressions": 8,
+      "impressions": 15,
       "clicks": 0,
-      "position": 70.375
+      "position": 75.9333
     },
     {
       "slug": "best-keyword-research-tools",
       "status": "canonical",
       "target": "best-keyword-research-tools",
-      "impressions": 8,
+      "impressions": 13,
       "clicks": 0,
-      "position": 61.375
+      "position": 66.5385
     },
     {
       "slug": "best-forms-for-small-business",
@@ -96,6 +96,14 @@
       "position": 33
     },
     {
+      "slug": "best-lead-capture-forms",
+      "status": "canonical",
+      "target": "best-lead-capture-forms",
+      "impressions": 3,
+      "clicks": 0,
+      "position": 34.3333
+    },
+    {
       "slug": "best-sales-prospecting-tools",
       "status": "canonical",
       "target": "best-sales-prospecting-tools",
@@ -110,14 +118,6 @@
       "impressions": 2,
       "clicks": 0,
       "position": 8.5
-    },
-    {
-      "slug": "best-lead-capture-forms",
-      "status": "canonical",
-      "target": "best-lead-capture-forms",
-      "impressions": 2,
-      "clicks": 0,
-      "position": 6.5
     },
     {
       "slug": "best-product-analytics-tools",
