@@ -1,14 +1,14 @@
 {
   "summary": {
-    "tools": 100,
-    "generatedAt": "2026-09-08T15:21:51.560Z",
+    "tools": 101,
+    "generatedAt": "2026-09-08T20:43:44.464Z",
     "cadence": {
       "linkHealth": "daily",
       "metadataFreshness": "daily age check; weekly review threshold at 7 days",
       "deepReview": "monthly threshold at 30 days"
     },
     "sourceLinks": {
-      "healthy": 92,
+      "healthy": 93,
       "confirmedBroken": 0,
       "warnings": 8
     },
@@ -19,7 +19,7 @@
       "warnings": 1
     },
     "metadata": {
-      "verifiedWithin7Days": 80,
+      "verifiedWithin7Days": 81,
       "needsWeeklyReview": 20,
       "overdue30Days": 0,
       "missingCriticalFields": 0
@@ -141,7 +141,7 @@
         "url": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.jotform.com/products/form-builder/?utm_source=pcaiano&utm_campaign=jf1",
+        "finalUrl": "https://www.jotform.com/?utm_source=pcaiano&utm_campaign=jf1&rp=%2Fproducts%2Fform-builder%2F",
         "error": null
       }
     },
@@ -508,7 +508,7 @@
         "url": "https://claude.ai/",
         "status": "blocked_or_limited",
         "httpStatus": 403,
-        "finalUrl": "https://claude.ai/login",
+        "finalUrl": "https://claude.ai/",
         "error": null
       },
       "affiliate": {
@@ -1086,7 +1086,7 @@
         "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.shopify.com/free-trial?irclickid=0ls0UJWPBxyZUIeVtnU3rxoJUkr2Edx3ITrlWg0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=SbISWuWK1xyZUW-xFUVBsUGmUkr2G0UUwROyRs0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
         "error": null
       }
     },
@@ -1480,7 +1480,7 @@
         "url": "https://notebooklm.google.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S-1405630915:1788880913778762",
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S1781950149:1788900226763800",
         "error": null
       },
       "affiliate": {
@@ -2180,6 +2180,27 @@
         "status": "ok",
         "httpStatus": 200,
         "finalUrl": "https://www.descript.com/",
+        "error": null
+      },
+      "affiliate": {
+        "enabled": false,
+        "url": null,
+        "status": "inactive"
+      }
+    },
+    {
+      "slug": "podia",
+      "name": "Podia",
+      "lastVerified": "2026-09-08",
+      "verifiedAgeDays": 0,
+      "needsWeeklyReview": false,
+      "overdue": false,
+      "missingCritical": [],
+      "source": {
+        "url": "https://www.podia.com/",
+        "status": "ok",
+        "httpStatus": 200,
+        "finalUrl": "https://www.podia.com/",
         "error": null
       },
       "affiliate": {
