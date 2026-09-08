@@ -10,7 +10,7 @@ for source in root.rglob('*'):
     relative = source.relative_to(root)
     if any(part in excluded_dirs for part in relative.parts) or not source.is_file():
         continue
-    if source.suffix in {'.toml', '.sql', '.py', '.mjs'} or source.name in {'AGENTS.md', 'README.md'}:
+    if (source.suffix in {'.toml', '.sql', '.py', '.mjs'} or source.name.endswith('.toml.example')) or source.name in {'AGENTS.md', 'README.md'}:
         continue
     if len(relative.parts) == 1 and source.suffix == '.js' and source.name not in {'app.js', 'seo-page.js'}:
         continue
