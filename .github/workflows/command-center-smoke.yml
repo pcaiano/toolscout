@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'analytics.html'
+      - 'affiliate-human-action-entry-worker.js'
       - 'distribution-command-worker.js'
       - 'wrangler.toml'
       - '.github/workflows/command-center-smoke.yml'
@@ -39,3 +40,24 @@ jobs:
           grep -F 'application/json' "$headers"
           grep -F 'command_center_session_expired' "$body"
           echo 'Private analytics bridge is reachable directly and correctly protected by the Command Center session cookie.'
+
+      - name: Verify live Audience data source
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          ok=0
+          for attempt in 1 2 3 4 5 6; do
+            code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' "$PROD_BASE/api/audience-health?t=$(date +%s)" || true)"
+            if [ "$code" = "200" ] && jq -e '.ok == true and (.totals.total | type == "number") and (.totals.published | type == "number") and (.byPlatform | type == "array")' "$body" >/dev/null; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          if [ "$ok" != "1" ]; then
+            echo 'ERROR: live Audience health feed is unavailable or malformed.'
+            cat "$body"
+            exit 1
+          fi
+          jq '{ok, totals, byPlatform, latest}' "$body"
+          echo 'Audience data source is live and queryable by the Command Center.'
