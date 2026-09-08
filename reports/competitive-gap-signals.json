@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T20:34:04.263Z",
+  "generatedAt": "2026-09-08T09:39:45.890Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery and bounded recursive sitemap-index expansion. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are treated as market-coverage signals and must pass ToolScout demand and quality gates before any new page or catalog item is created.",
   "sources": [
     {
@@ -39,7 +39,7 @@
       "sampledUrls": 0
     }
   ],
-  "count": 3,
+  "count": 6,
   "gaps": [
     {
       "slug": "character-ai",
@@ -54,6 +54,18 @@
       ]
     },
     {
+      "slug": "google-ai-studio",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "exampleUrls": [
+        "https://alternativeto.net/software/google-ai-studio/",
+        "https://www.futurepedia.io/tool/google-ai-studio"
+      ]
+    },
+    {
       "slug": "kling-ai",
       "mentions": 2,
       "sources": [
@@ -63,6 +75,30 @@
       "exampleUrls": [
         "https://alternativeto.net/software/kling-ai/",
         "https://www.futurepedia.io/tool/kling-ai"
+      ]
+    },
+    {
+      "slug": "meta-ai",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "exampleUrls": [
+        "https://alternativeto.net/software/meta-ai/",
+        "https://www.futurepedia.io/tool/meta-ai"
+      ]
+    },
+    {
+      "slug": "otter-ai",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "exampleUrls": [
+        "https://alternativeto.net/software/otter-ai/",
+        "https://www.futurepedia.io/tool/otter-ai"
       ]
     },
     {
