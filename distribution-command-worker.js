@@ -14,7 +14,7 @@ async function one(env,sql){try{return await env.DB.prepare(sql).first();}catch{
 async function ops(env){
   const [
     subs,editorial,assets,learned,events,embeds,genericEmbedClicks,
-    researchRequired,preQueueBlocked,setupRequired,approvalRequired,
+    researchRequired,preQueueBlocked,setupRequired,approvalRequired,authRequiredAll,
     publicVerified,machineDiscovery,agentProtocol,submittedSurfaces,
     indexNowSubmitted,pendingReview
   ]=await Promise.all([
@@ -29,6 +29,7 @@ async function ops(env){
     one(env,`SELECT COUNT(*) n FROM distribution_opportunities o WHERE o.status='policy_blocked' AND NOT EXISTS (SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status='policy_blocked')`),
     one(env,`SELECT COUNT(*) n FROM distribution_opportunities o WHERE o.status='needs_info' AND COALESCE(o.human_required,0)=0 AND NOT EXISTS (SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status='setup_required')`),
     one(env,`SELECT COUNT(*) n FROM distribution_opportunities o WHERE o.status='approval_required' AND COALESCE(o.human_required,0)=0`),
+    one(env,`SELECT COUNT(*) n FROM (SELECT surface_slug FROM distribution_opportunities WHERE status='auth_required' UNION SELECT surface_slug FROM distribution_submissions WHERE status='auth_required')`),
     one(env,`SELECT COUNT(*) n FROM distribution_opportunities WHERE status IN ('live','verified') AND surface_type<>'machine_discovery'`),
     one(env,`SELECT COUNT(*) n FROM distribution_opportunities WHERE surface_type='machine_discovery' AND status IN ('live','verified')`),
     q(env,`SELECT protocol,COUNT(*) calls,SUM(CASE WHEN success=1 THEN 1 ELSE 0 END) successful,COALESCE(SUM(result_count),0) recommendations,MAX(created_at) last_seen FROM agent_protocol_events GROUP BY protocol`),
@@ -53,7 +54,7 @@ async function ops(env){
       failed:s.failed||0,
       humanRequired:s.human_required||0,
       adapterMissing:s.adapter_missing||0,
-      authRequired:s.auth_required||0,
+      authRequired:Number(authRequiredAll?.n||0),
       policyBlocked:(s.policy_blocked||0)+Number(preQueueBlocked?.n||0),
       setupRequired:(s.setup_required||0)+Number(setupRequired?.n||0),
       approvalRequired:Number(approvalRequired?.n||0),
