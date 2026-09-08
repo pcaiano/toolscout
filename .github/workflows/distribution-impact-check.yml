@@ -7,6 +7,8 @@ on:
       - 'distribution-impact-entry-worker.js'
       - 'affiliate-coverage-entry-worker.js'
       - 'human-action-entry-worker.js'
+      - 'affiliate-human-action-entry-worker.js'
+      - 'affiliate-human-action-state.js'
       - 'agent-protocol-worker.js'
       - 'agent-protocol-core-worker.js'
       - 'wrangler.toml'
@@ -18,6 +20,8 @@ on:
       - 'distribution-impact-entry-worker.js'
       - 'affiliate-coverage-entry-worker.js'
       - 'human-action-entry-worker.js'
+      - 'affiliate-human-action-entry-worker.js'
+      - 'affiliate-human-action-state.js'
       - 'agent-protocol-worker.js'
       - 'agent-protocol-core-worker.js'
       - 'wrangler.toml'
@@ -39,12 +43,15 @@ jobs:
           node --check distribution-impact-entry-worker.js
           node --check affiliate-coverage-entry-worker.js
           node --check human-action-entry-worker.js
+          node --check affiliate-human-action-entry-worker.js
+          node --check affiliate-human-action-state.js
           node --check agent-protocol-worker.js
           node --check agent-protocol-core-worker.js
       - name: Validate attribution contract and entrypoint
         run: |
           grep -q 'main = "agent-protocol-worker.js"' wrangler.toml
-          grep -Fq "import base from './human-action-entry-worker.js'" agent-protocol-worker.js
+          grep -Fq "import base from './affiliate-human-action-entry-worker.js'" agent-protocol-worker.js
+          grep -Fq "import base from './human-action-entry-worker.js'" affiliate-human-action-entry-worker.js
           grep -Fq "import base from './affiliate-coverage-entry-worker.js'" human-action-entry-worker.js
           grep -Fq "import base from './distribution-impact-entry-worker.js'" affiliate-coverage-entry-worker.js
           grep -Fq "import base from './agent-protocol-core-worker.js'" distribution-impact-entry-worker.js
