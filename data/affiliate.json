@@ -15,7 +15,7 @@
   "brevo": {"url": "", "enabled": false, "publicUrl": "https://www.brevo.com/"},
   "activecampaign": {"url": "", "enabled": false, "publicUrl": "https://www.activecampaign.com/"},
   "mailchimp": {"url": "", "enabled": false, "publicUrl": "https://mailchimp.com/"},
-  "zoho-crm": {"url": "", "enabled": false, "publicUrl": "https://www.zoho.com/crm/"},
+  "zoho-crm": {"url": "https://go.zoho.com/6joE", "enabled": true, "publicUrl": "https://www.zoho.com/crm/"},
   "monday-crm": {"url": "", "enabled": false, "publicUrl": "https://monday.com/"},
   "tally": {"url": "", "enabled": false, "publicUrl": "https://tally.so/"},
   "ahrefs": {"url": "", "enabled": false, "publicUrl": "https://ahrefs.com/"},
