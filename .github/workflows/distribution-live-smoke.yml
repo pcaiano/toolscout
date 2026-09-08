@@ -35,6 +35,10 @@ jobs:
           echo '=== INDEXNOW LATEST ==='
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,asset_url,status,attempts,last_attempt_at,submitted_at,error FROM distribution_submissions WHERE surface_slug='indexnow' ORDER BY updated_at DESC LIMIT 10;"
           echo '=== SUBMISSION EVENTS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type IN ('submission_packaging_refresh','submission_execution_refresh') ORDER BY created_at DESC LIMIT 10;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type IN ('submission_packaging_refresh','submission_execution_refresh','submission_verification_refresh','autonomous_submission_verification','autonomous_distribution_qualification') ORDER BY created_at DESC LIMIT 20;"
+          echo '=== DISTRIBUTION EFFECTIVENESS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT 'submitted_surfaces' metric,COUNT(DISTINCT surface_slug) value FROM distribution_submissions WHERE status='submitted' AND surface_slug<>'indexnow' UNION ALL SELECT 'public_live_verified',COUNT(*) FROM distribution_opportunities WHERE status IN ('live','verified') AND surface_type<>'machine_discovery' UNION ALL SELECT 'pending_review',COUNT(*) FROM distribution_opportunities WHERE status='pending_review' UNION ALL SELECT 'automation_gaps',COUNT(*) FROM distribution_submissions ds WHERE ds.status='adapter_missing' AND NOT EXISTS (SELECT 1 FROM distribution_opportunities o WHERE o.surface_slug=ds.surface_slug AND o.human_required=1) UNION ALL SELECT 'research_required',COUNT(*) FROM distribution_opportunities WHERE status IN ('candidate','discovered','research_required') AND COALESCE(human_required,0)=0;"
+          echo '=== AUTO ADAPTERS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,policy_state,confidence,verification_endpoint,public_url,auth_type,last_checked_at FROM distribution_auto_adapters ORDER BY updated_at DESC LIMIT 20;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
