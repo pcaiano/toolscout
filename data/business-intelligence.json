@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-09-08T11:08:00.950Z",
+  "generatedAt": "2026-09-08T16:33:03.313Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 21,
-      "likelyHuman": 18,
-      "bots": 3,
+      "total": 45,
+      "likelyHuman": 33,
+      "bots": 12,
       "owner": 0,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 1464,
-      "likelyHuman": 288,
-      "bots": 162,
-      "owner": 29,
+      "total": 629,
+      "likelyHuman": 298,
+      "bots": 165,
+      "owner": 27,
       "synthetic": 0,
-      "unknownLegacy": 985
+      "unknownLegacy": 139
     },
     "d30": {
-      "total": 1538,
-      "likelyHuman": 288,
-      "bots": 162,
+      "total": 1562,
+      "likelyHuman": 303,
+      "bots": 171,
       "owner": 37,
       "synthetic": 0,
       "unknownLegacy": 1051
@@ -58,10 +58,10 @@
       },
       {
         "day": "2026-09-08",
-        "sessions": 18
+        "sessions": 33
       }
     ],
-    "averageDailyLikelyHuman30d": 9.6
+    "averageDailyLikelyHuman30d": 10.1
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -81,22 +81,22 @@
       "sessions": 0
     },
     "outboundClicked": {
-      "events": 207,
-      "sessions": 207
+      "events": 220,
+      "sessions": 220
     },
     "recommendationCompletionRate": 100
   },
   "commercial30d": {
-    "outboundClicks": 207,
-    "sessionsWithOutbound": 207,
-    "monetizedOutbound": 43,
-    "monetizationCoverage": 20.8,
-    "humanSessionToOutboundRate": 71.9
+    "outboundClicks": 220,
+    "sessionsWithOutbound": 220,
+    "monetizedOutbound": 44,
+    "monetizationCoverage": 20,
+    "humanSessionToOutboundRate": 72.6
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 67
+      "sessions": 70
     },
     {
       "source": "utm_source=peerlist",
@@ -130,13 +130,19 @@
   "intents30d": [
     {
       "intent": "general",
-      "sessions": 208,
+      "sessions": 220,
       "recommendationCompletions": 3,
-      "outboundClicks": 207
+      "outboundClicks": 219
+    },
+    {
+      "intent": "beehiiv",
+      "sessions": 1,
+      "recommendationCompletions": 0,
+      "outboundClicks": 1
     },
     {
       "intent": "unlabelled",
-      "sessions": 81,
+      "sessions": 84,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -153,11 +159,11 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 288,
-    "humanDailyAverage30d": 9.6,
+    "humanSessions30d": 303,
+    "humanDailyAverage30d": 10.1,
     "recommendationCompletionRate": 0.7,
-    "humanSessionToOutboundRate": 71.9,
-    "monetizationCoverage": 20.8,
+    "humanSessionToOutboundRate": 72.6,
+    "monetizationCoverage": 20,
     "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
   }
 }
