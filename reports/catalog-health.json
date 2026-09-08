@@ -1,16 +1,16 @@
 {
   "summary": {
     "tools": 101,
-    "generatedAt": "2026-09-08T20:43:44.464Z",
+    "generatedAt": "2026-09-08T20:48:15.018Z",
     "cadence": {
       "linkHealth": "daily",
       "metadataFreshness": "daily age check; weekly review threshold at 7 days",
       "deepReview": "monthly threshold at 30 days"
     },
     "sourceLinks": {
-      "healthy": 93,
+      "healthy": 92,
       "confirmedBroken": 0,
-      "warnings": 8
+      "warnings": 9
     },
     "affiliateLinks": {
       "active": 12,
@@ -141,7 +141,7 @@
         "url": "https://www.jotform.com/products/form-builder/?partner=pcaiano",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.jotform.com/?utm_source=pcaiano&utm_campaign=jf1&rp=%2Fproducts%2Fform-builder%2F",
+        "finalUrl": "https://www.jotform.com/products/form-builder/?utm_source=pcaiano&utm_campaign=jf1",
         "error": null
       }
     },
@@ -1086,7 +1086,7 @@
         "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.shopify.com/free-trial?irclickid=SbISWuWK1xyZUW-xFUVBsUGmUkr2G0UUwROyRs0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=R8cUmPWK3xyZUTGTlnVLiwD4Ukr2GxRwcVEazk0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
         "error": null
       }
     },
@@ -1480,7 +1480,7 @@
         "url": "https://notebooklm.google.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S1781950149:1788900226763800",
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S1863486418:1788900497115416",
         "error": null
       },
       "affiliate": {
@@ -1520,10 +1520,10 @@
       "missingCritical": [],
       "source": {
         "url": "https://moz.com/products/pro",
-        "status": "ok",
-        "httpStatus": 200,
-        "finalUrl": "https://moz.com/products/pro",
-        "error": null
+        "status": "network_warning",
+        "httpStatus": null,
+        "finalUrl": null,
+        "error": "timeout"
       },
       "affiliate": {
         "enabled": false,
@@ -1948,7 +1948,7 @@
         "url": "https://www.wrike.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.wrike.com/vbj/",
+        "finalUrl": "https://www.wrike.com/",
         "error": null
       },
       "affiliate": {
