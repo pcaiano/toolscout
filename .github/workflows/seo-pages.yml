@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'data/**'
+      - '!data/affiliate.json'
+      - '!data/affiliate-pipeline.json'
+      - '!data/affiliate-queue.json'
       - 'scripts/**'
       - 'robots.txt'
       - 'llms.txt'
