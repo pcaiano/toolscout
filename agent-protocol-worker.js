@@ -1,2 +1,2 @@
-import base from './audience-command-center-entry-worker.js';
+import base from './audience-health-entry-worker.js';
 export default base;
