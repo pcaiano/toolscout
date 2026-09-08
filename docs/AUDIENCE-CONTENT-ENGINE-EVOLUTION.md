@@ -52,11 +52,17 @@ Primary metrics are qualified likely-human sessions and downstream commercial ac
 ### Bluesky
 High autonomy through the official API, with bot/aggregator filtering and GREEN / AMBER / RED risk controls.
 
+As of 2026-09-08, autonomous outbound replies are forwarded from the active Make scenario to ToolScout's verified audience-event endpoint and stored in `audience_events`. A verified published Bluesky reply was backfilled successfully to prove the ingestion path. The protected Command Center now reads these events through `/analytics/api/stats`, so Audience View no longer bypasses the audience layer.
+
 ### X
 Do not auto-reply to keyword-search discoveries. X prohibits unsolicited automated replies based only on keyword search and requires prior written approval for AI-powered automated reply bots. Use intelligence automation only: discover permitted opportunities -> score -> draft -> Engagement Inbox -> human approval / edit / skip. Do not automate likes or proactive follow/unfollow.
 
+The Command Center human-review surface is implemented: X suggestions can expose Open action, Copy reply, Mark done and Skip controls, with completed/skipped state persisted in D1. Authenticated suggestion intake is available at `/api/audience-suggestion`. A live X discovery source is not yet connected in Make, so no X suggestions may be fabricated until a policy-compliant source is connected.
+
 ### LinkedIn
 Do not use unauthorized scraping, bots, browser automation, automated comments, likes or shares. Use official publishing/analytics and human-in-the-loop engagement opportunities only.
+
+The Command Center human-review surface is implemented with the same actionable controls as X. Authenticated suggestion intake is ready. A live official LinkedIn engagement feed is currently blocked by LinkedIn API permission: the existing Make connection returned HTTP 403 for `partnerApiPostsExternal.FINDER-author.20260501` when attempting to list ToolScout organization posts for comment review. Do not work around this with unauthorized scraping. Resume only when an official permission/source capable of reading eligible interactions is available.
 
 ## 5. Engagement Opportunity Score
 
@@ -90,7 +96,7 @@ The canonical model is one evidence object feeding multiple native outputs, not 
 2. Make M/W/F strategists interpret the directive as opportunity guidance rather than mandatory copy. DONE.
 3. Add explicit evidence thresholds and controlled-experiment instruction to the weekly directive. NEXT.
 4. Add persistent learning history instead of only overwriting State!A1.
-5. Build X and LinkedIn human-review Engagement Inbox feeds using policy-compliant sources.
+5. Build X and LinkedIn human-review Engagement Inbox feeds using policy-compliant sources. COMMAND CENTER ACTION SURFACE + AUTHENTICATED INGEST DONE; LIVE X SOURCE NOT CONNECTED; LINKEDIN SOURCE BLOCKED BY OFFICIAL API PERMISSION.
 6. Introduce run-specific content_id plus family/topic/hook metadata.
 7. Connect Organic Growth Engine opportunity output to Content Intelligence.
 8. Add experiment outcome evaluation after sufficient attributed traffic.
