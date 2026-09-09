@@ -18,22 +18,45 @@ async function hasValidSession(request,env){
   for(const candidate of [bucket,bucket-1])if(supplied===await sessionValue(env.ADMIN_TOKEN,candidate))return true;
   return false;
 }
-function accessJwtEmail(request){
-  const jwt=request.headers.get('Cf-Access-Jwt-Assertion')||request.headers.get('cf-access-jwt-assertion')||'';
-  if(!jwt)return '';
+function cookieValue(request,name){
+  const cookie=request.headers.get('Cookie')||'';
+  const match=cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
+  return match?decodeURIComponent(match[1]):'';
+}
+function jwtPayload(jwt){
   try{
-    const parts=jwt.split('.');
-    if(parts.length!==3)return '';
+    const parts=String(jwt||'').split('.');
+    if(parts.length!==3)return null;
     const body=parts[1].replace(/-/g,'+').replace(/_/g,'/');
     const padded=body+'='.repeat((4-body.length%4)%4);
-    const payload=JSON.parse(atob(padded));
-    return String(payload?.email||payload?.identity?.email||'').toLowerCase();
+    return JSON.parse(atob(padded));
+  }catch{return null}
+}
+function accessIssuer(jwt){
+  try{
+    const iss=String(jwtPayload(jwt)?.iss||'');
+    const url=new URL(iss);
+    if(url.protocol!=='https:'||!url.hostname.toLowerCase().endsWith('.cloudflareaccess.com'))return '';
+    return url.origin;
+  }catch{return ''}
+}
+async function accessIdentityEmail(request){
+  const jwt=request.headers.get('Cf-Access-Jwt-Assertion')||request.headers.get('cf-access-jwt-assertion')||cookieValue(request,'CF_Authorization');
+  if(!jwt)return '';
+  const issuer=accessIssuer(jwt);
+  if(!issuer)return '';
+  try{
+    const response=await fetch(`${issuer}/cdn-cgi/access/get-identity`,{headers:{Cookie:`CF_Authorization=${jwt}`},redirect:'manual'});
+    if(!response.ok)return '';
+    const identity=await response.json();
+    return String(identity?.email||'').toLowerCase();
   }catch{return ''}
 }
 async function requestWithTrustedSession(request,env){
   const headerEmail=String(request.headers.get('Cf-Access-Authenticated-User-Email')||request.headers.get('cf-access-authenticated-user-email')||'').toLowerCase();
-  const jwtEmail=accessJwtEmail(request);
-  const authenticated=headerEmail===OWNER_EMAIL||jwtEmail===OWNER_EMAIL||await hasValidSession(request,env);
+  const sessionValid=await hasValidSession(request,env);
+  const identityEmail=sessionValid?'':await accessIdentityEmail(request);
+  const authenticated=sessionValid||headerEmail===OWNER_EMAIL||identityEmail===OWNER_EMAIL;
   if(!authenticated)return request;
   const headers=new Headers(request.headers);
   headers.set('Cf-Access-Authenticated-User-Email',OWNER_EMAIL);
