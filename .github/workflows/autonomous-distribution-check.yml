@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'distribution-autonomous-worker.js'
+      - 'distribution-throughput-worker.js'
       - 'distribution-orchestrator-worker.js'
       - 'migrations/0044_autonomous_distribution_qualification.sql'
       - '.github/workflows/autonomous-distribution-check.yml'
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - 'distribution-autonomous-worker.js'
+      - 'distribution-throughput-worker.js'
       - 'distribution-orchestrator-worker.js'
       - 'migrations/0044_autonomous_distribution_qualification.sql'
       - '.github/workflows/autonomous-distribution-check.yml'
@@ -29,12 +31,17 @@ jobs:
       - name: Validate autonomous engine syntax
         run: |
           node --check distribution-autonomous-worker.js
+          node --check distribution-throughput-worker.js
           node --check distribution-orchestrator-worker.js
-      - name: Validate closed-loop architecture
+      - name: Validate closed-loop architecture and policy guards
         run: |
           test -s migrations/0044_autonomous_distribution_qualification.sql
           grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_auto_adapters' migrations/0044_autonomous_distribution_qualification.sql
-          grep -Fq "import base from './distribution-autonomous-worker.js'" distribution-orchestrator-worker.js
+          grep -Fq "import base from './distribution-throughput-worker.js'" distribution-orchestrator-worker.js
+          grep -Fq "import base from './distribution-autonomous-worker.js'" distribution-throughput-worker.js
+          grep -Fq 'BACKOFF_HOURS=[1,2,4,8,12]' distribution-throughput-worker.js
+          grep -Fq 'RESEARCH_BUDGET=4' distribution-throughput-worker.js
+          grep -Fq "status='candidate'" distribution-throughput-worker.js
           grep -Fq "confidence>=95" distribution-autonomous-worker.js
           grep -Fq "policy_state='verified'" distribution-autonomous-worker.js
           grep -Fq 'findOpenApi' distribution-autonomous-worker.js
