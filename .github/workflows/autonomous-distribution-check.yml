@@ -63,3 +63,6 @@ jobs:
           grep -Fq "submission_type='auto_discovered_json'" distribution-autonomous-worker.js
           grep -Fq 'BLOCK_RE' distribution-autonomous-worker.js
           grep -Fq 'sameHostFamily' distribution-autonomous-worker.js
+          grep -Fq 'refreshPersistentActionUrls' distribution-autonomous-worker.js
+          grep -Fq "result='external_verification_failed'" distribution-autonomous-worker.js
+          grep -Fq 'action_url_rediscovered' distribution-autonomous-worker.js
