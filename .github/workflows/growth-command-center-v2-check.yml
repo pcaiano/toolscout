@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'growth-command-center-v2-worker.js'
+      - 'command-center-affiliate-table-worker.js'
       - 'analytics-v2.html'
       - 'human-action-entry-worker.js'
       - 'agent-protocol-worker.js'
@@ -15,6 +16,7 @@ on:
     branches: [main]
     paths:
       - 'growth-command-center-v2-worker.js'
+      - 'command-center-affiliate-table-worker.js'
       - 'analytics-v2.html'
       - 'human-action-entry-worker.js'
       - 'agent-protocol-worker.js'
@@ -39,11 +41,14 @@ jobs:
         run: |
           set -euo pipefail
           node --check growth-command-center-v2-worker.js
+          node --check command-center-affiliate-table-worker.js
           node --check human-action-entry-worker.js
           node --check agent-protocol-worker.js
-          grep -Fq "import base from './growth-command-center-v2-worker.js'" agent-protocol-worker.js
+          grep -Fq "import base from './command-center-affiliate-table-worker.js'" agent-protocol-worker.js
+          grep -Fq "import base from './growth-command-center-v2-worker.js'" command-center-affiliate-table-worker.js
           grep -Fq "import base from './affiliate-human-action-entry-worker.js'" growth-command-center-v2-worker.js
           grep -Fxq 'growth-command-center-v2-worker.js' .assetsignore
+          grep -Fxq 'command-center-affiliate-table-worker.js' .assetsignore
           grep -Fq "human_required=1 AND status NOT IN ('policy_blocked'" human-action-entry-worker.js
 
       - name: Validate Chairman Queue contract
@@ -104,6 +109,10 @@ jobs:
           grep -Fq "dailyAverageMTD" analytics-v2.html
           grep -Fq "monthToDate" analytics-v2.html
           ! grep -Fq "setInterval(" analytics-v2.html
+          grep -Fq "Affiliate · Status · Clicks" command-center-affiliate-table-worker.js
+          grep -Fq "affiliateStatusNativeTable" command-center-affiliate-table-worker.js
+          grep -Fq "d.affiliateCoverageStatus" command-center-affiliate-table-worker.js
+          grep -Fq "<th>Affiliate</th><th>Status</th><th>Clicks</th>" command-center-affiliate-table-worker.js
 
       - name: Validate operational documentation
         run: |
