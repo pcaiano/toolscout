@@ -70,7 +70,7 @@ function afterAction(action){
     if(action.status==='approved_needs_link')return 'Affiliate engine records the link-acquisition state; production activation remains gated until the verified referral URL is in the canonical affiliate registry.';
     return 'Affiliate engine removes the task, monitors the existing application/review state and waits for evidence-backed approval or rejection.';
   }
-  return 'Distribution engine removes the human gate, records the submission event and resumes verification/traffic measurement.';
+  return 'Distribution engine removes the human gate, records the submission event and resumes monitoring, attribution and automatic public verification where a machine-verifiable route exists.';
 }
 async function verifyActionUrl(url){
   const safe=safeUrl(url);
@@ -223,7 +223,7 @@ async function distributionHumanAction(request,env){
   const row=await env.DB.prepare(`SELECT surface_slug,status,human_required,action_url FROM distribution_opportunities WHERE surface_slug=?`).bind(slug).first();
   if(!row||!n(row.human_required))return Response.json({ok:false,error:'human_gate_not_active'},{status:409,headers:JSON_H});
   const next=action==='submitted'?'submitted':'skipped';
-  const nextAction=action==='submitted'?'Human submission confirmed. Engine resumes verification, attribution and traffic measurement.':'Owner skipped this opportunity. Reconsider only if new evidence materially changes expected value.';
+  const nextAction=action==='submitted'?'Human submission confirmed. Engine resumes monitoring and attribution; automatic public verification runs where a machine-verifiable route exists.':'Owner skipped this opportunity. Reconsider only if new evidence materially changes expected value.';
   await env.DB.prepare(`UPDATE distribution_opportunities SET status=?,human_required=0,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(next,nextAction,slug).run();
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`human_${crypto.randomUUID()}`,slug,'human_gate_resolved',next,'distribution_engine',nextAction).run();
   return Response.json({ok:true,surface_slug:slug,status:next,resume:'verification_measurement'},{headers:JSON_H});
