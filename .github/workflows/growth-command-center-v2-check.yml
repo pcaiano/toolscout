@@ -1,0 +1,91 @@
+name: Growth Command Center V2 Check
+
+on:
+  pull_request:
+    paths:
+      - 'growth-command-center-v2-worker.js'
+      - 'analytics-v2.html'
+      - 'human-action-entry-worker.js'
+      - 'agent-protocol-worker.js'
+      - '.assetsignore'
+      - 'docs/GROWTH-ENGINES-V2.md'
+      - 'docs/COMMAND-CENTER.md'
+      - '.github/workflows/growth-command-center-v2-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'growth-command-center-v2-worker.js'
+      - 'analytics-v2.html'
+      - 'human-action-entry-worker.js'
+      - 'agent-protocol-worker.js'
+      - '.assetsignore'
+      - 'docs/GROWTH-ENGINES-V2.md'
+      - 'docs/COMMAND-CENTER.md'
+      - '.github/workflows/growth-command-center-v2-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate worker chain and privacy
+        run: |
+          set -euo pipefail
+          node --check growth-command-center-v2-worker.js
+          node --check human-action-entry-worker.js
+          node --check agent-protocol-worker.js
+          grep -Fq "import base from './growth-command-center-v2-worker.js'" agent-protocol-worker.js
+          grep -Fq "import base from './affiliate-human-action-entry-worker.js'" growth-command-center-v2-worker.js
+          grep -Fxq 'growth-command-center-v2-worker.js' .assetsignore
+          grep -Fq "human_required=1 AND status NOT IN ('policy_blocked'" human-action-entry-worker.js
+
+      - name: Validate Chairman Queue contract
+        run: |
+          set -euo pipefail
+          grep -Fq "chairmanQueue" growth-command-center-v2-worker.js
+          grep -Fq "link_verification" growth-command-center-v2-worker.js
+          grep -Fq "estimated_minutes" growth-command-center-v2-worker.js
+          grep -Fq "expected_impact" growth-command-center-v2-worker.js
+          grep -Fq "why_human" growth-command-center-v2-worker.js
+          grep -Fq "after_action" growth-command-center-v2-worker.js
+          grep -Fq "/analytics/api/distribution-human-action" growth-command-center-v2-worker.js
+          grep -Fq "/analytics/api/human-actions" growth-command-center-v2-worker.js
+          grep -Fq "Only current engine states with a reachable HTTPS action URL" growth-command-center-v2-worker.js
+
+      - name: Validate configurable Command Center UI
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('analytics-v2.html').read_text()
+          scripts=re.findall(r'<script>([\s\S]*?)</script>',html)
+          if len(scripts)!=1:
+              raise SystemExit('expected one inline script')
+          Path('/tmp/analytics-v2.js').write_text(scripts[0])
+          PY
+          node --check /tmp/analytics-v2.js
+          for widget in chairman northstar distribution affiliate footprint ledger revenue health; do
+            grep -Fq "data-widget=\"$widget\"" analytics-v2.html
+          done
+          grep -Fq "localStorage.setItem(LAYOUT_KEY" analytics-v2.html
+          grep -Fq "resizeHandle" analytics-v2.html
+          grep -Fq "dragstart" analytics-v2.html
+          grep -Fq "detailFor" analytics-v2.html
+          grep -Fq "Manual snapshot only; no background polling." analytics-v2.html
+          ! grep -Fq "setInterval(" analytics-v2.html
+
+      - name: Validate operational documentation
+        run: |
+          set -euo pipefail
+          grep -Fq "observe/discover -> prioritize -> execute -> verify -> measure -> learn -> repeat" docs/GROWTH-ENGINES-V2.md
+          grep -Fq "Chairman Queue" docs/GROWTH-ENGINES-V2.md
+          grep -Fq "draggable/reorderable and resizable" docs/GROWTH-ENGINES-V2.md
+          grep -Fq "highest development priority" docs/COMMAND-CENTER.md
