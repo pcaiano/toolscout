@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-08T20:47:53.626Z",
+  "generatedAt": "2026-09-09T09:44:29.322Z",
   "methodology": "Autonomous catalog maintenance using official-source verification, independent market-demand signals, deterministic quality gates and affiliate-neutral selection. Affiliate status and commission never increase editorial admission or ranking.",
   "summary": {
     "tools": 101,
@@ -143,91 +143,212 @@
   "contentChanges": [
     {
       "slug": "semrush",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.semrush.com/",
-      "fingerprint": "d63bee5c9e66ce771e63c65a",
+      "fingerprint": "2907072870cc0c277fcd3cf0",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 12
+    },
+    {
+      "slug": "mailchimp",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://mailchimp.com/",
+      "fingerprint": "700a78fe3185a561c6d03894",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 11
     },
     {
-      "slug": "mailchimp",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "slug": "ahrefs",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
-      "finalUrl": "https://mailchimp.com/",
-      "fingerprint": "9cc3d30336592b558cb8e97e",
+      "finalUrl": "https://ahrefs.com/",
+      "fingerprint": "14f031e1e68dd55009de7143",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
+    },
+    {
+      "slug": "se-ranking",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://seranking.com/",
+      "fingerprint": "7be7579f060e3abe7b532d97",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
     },
     {
       "slug": "airtable",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.airtable.com/",
-      "fingerprint": "47520118150db15075941f0d",
+      "fingerprint": "2f5b337b1396a6e9900b4eb6",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 7
+      "factualReviewAgeDays": 8
     },
     {
-      "slug": "intercom",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "slug": "n8n",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
-      "finalUrl": "https://www.intercom.com/",
-      "fingerprint": "053b448b631db0cdb0625f73",
+      "finalUrl": "https://n8n.io/",
+      "fingerprint": "15ec5a3942446de1ff095e14",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 7
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "klaviyo",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.klaviyo.com/",
+      "fingerprint": "4807bda9a1e8dca38c2cb76d",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "buffer",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://buffer.com/",
+      "fingerprint": "1a53c4bb567abd375b39064c",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
     },
     {
       "slug": "surfer",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://surferseo.com/",
-      "fingerprint": "f7a08b1486fa04915dbe432e",
+      "fingerprint": "abe8365c50f2d4ad5bd2c654",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 7
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "plausible",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://plausible.io/",
+      "fingerprint": "11c56f12209fa2cb2fac6045",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "matomo",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://matomo.org/",
+      "fingerprint": "26ff2e56b71fd64903787c3a",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "replit",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://replit.com/",
+      "fingerprint": "c2e7f0838b13ba91c39f71a2",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "netlify",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.netlify.com/",
+      "fingerprint": "9664344e0486f4a3fbc83dfe",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "screaming-frog",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.screamingfrog.co.uk/seo-spider/",
+      "fingerprint": "57fb083b5185bf816bc3231c",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
     },
     {
       "slug": "salesforce",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.salesforce.com/?bc=DB",
-      "fingerprint": "f02f798c1454dc3e91158eb5",
+      "fingerprint": "d26bff5caac91da366cc202e",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 7
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "copper",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.copper.com/",
+      "fingerprint": "97fa23a5f017609fa7d76600",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
+    },
+    {
+      "slug": "omnisend",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.omnisend.com/",
+      "fingerprint": "5d8ee4523d8281163b842092",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 8
     },
     {
       "slug": "wrike",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
-      "finalUrl": "https://www.wrike.com/",
-      "fingerprint": "c7bf7880b24a81d352976c59",
+      "finalUrl": "https://www.wrike.com/vbj/",
+      "fingerprint": "3e953abe68d461c50494fe70",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 7
+      "factualReviewAgeDays": 8
     },
     {
       "slug": "pabbly-connect",
-      "sourceCheckedAt": "2026-09-08T20:47:53.626Z",
+      "sourceCheckedAt": "2026-09-09T09:44:29.322Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.pabbly.com/connect/",
-      "fingerprint": "0d364f792094aeda5016f1db",
+      "fingerprint": "777d97ee32780ec199df3f85",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 7
+      "factualReviewAgeDays": 8
     }
   ],
   "quarantined": []
