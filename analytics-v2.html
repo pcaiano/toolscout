@@ -131,7 +131,7 @@ function taskHtml(x){
     '<div class="taskReason"><b>Expected impact:</b> '+esc(x.expected_impact)+'</div>'+
     '<div class="taskAfter"><b>Then:</b> '+esc(x.after_action)+'</div>'+
     '<div class="taskActions">'+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+
-    (canConfirm?'<button class="btn" data-resolve-task="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'">I submitted it</button>':'')+
+    (canConfirm?'<button class="btn" data-resolve-task="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status)+'">'+(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it')+'</button>':'')+
     (x.engine==='distribution'?'<button class="btn danger" data-resolve-task="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+
     '</div></div>';
 }
@@ -225,12 +225,13 @@ async function load(){
   finally{loading=false;refreshBtn.disabled=false}
 }
 async function resolveTask(button){
-  const engine=button.dataset.engine,id=button.dataset.id,action=button.dataset.resolveTask;
+  const engine=button.dataset.engine,id=button.dataset.id,action=button.dataset.resolveTask,status=button.dataset.status||'';
   if(!engine||!id||!action)return;
   const old=button.textContent;button.disabled=true;button.textContent='Saving…';
   try{
     const endpoint=engine==='distribution'?'/analytics/api/distribution-human-action':'/analytics/api/affiliate-human-action';
-    const body=engine==='distribution'?{surface_slug:id,action}:{tool_slug:id,event:'submitted',evidence:'Confirmed from Command Center V2 Chairman Queue'};
+    const affiliateEvent=status==='human_action_required'?'completed':'submitted';
+    const body=engine==='distribution'?{surface_slug:id,action}:{tool_slug:id,event:affiliateEvent,evidence:'Confirmed from Command Center V2 Chairman Queue'};
     const r=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d=await r.json().catch(()=>({}));
     if(!r.ok||d.ok===false)throw new Error(d.error||'action_update_failed');
