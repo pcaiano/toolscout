@@ -58,6 +58,13 @@ jobs:
           grep -Fq "/analytics/api/distribution-human-action" growth-command-center-v2-worker.js
           grep -Fq "/analytics/api/human-actions" growth-command-center-v2-worker.js
           grep -Fq "Only current engine states with a reachable HTTPS action URL" growth-command-center-v2-worker.js
+          grep -Fq "content-intelligence.json" growth-command-center-v2-worker.js
+          grep -Fq "organic-growth-opportunities.json" growth-command-center-v2-worker.js
+          grep -Fq "aeo-geo-readiness.json" growth-command-center-v2-worker.js
+          grep -Fq "machine-readability.json" growth-command-center-v2-worker.js
+          grep -Fq "content_published" growth-command-center-v2-worker.js
+          grep -Fq "publishing_heartbeat_partial" growth-command-center-v2-worker.js
+          grep -Fq "GET_fallback" growth-command-center-v2-worker.js
           grep -Fq "const input=[...(raw.affiliate||[]),...(raw.distribution||[])];" growth-command-center-v2-worker.js
           grep -Fq ".slice(0,HUMAN_ACTION_LIMIT)" growth-command-center-v2-worker.js
           grep -Fq "h==='localhost'" growth-command-center-v2-worker.js
@@ -84,11 +91,18 @@ jobs:
           grep -Fq "el.draggable=false" analytics-v2.html
           grep -Fq "head.addEventListener('pointerdown'" analytics-v2.html
           grep -Fq "detailFor" analytics-v2.html
+          grep -Fq "Content Engine" analytics-v2.html
+          grep -Fq "Audience Engine" analytics-v2.html
+          grep -Fq "SEO / GEO / AIO" analytics-v2.html
+          grep -Fq "Engine bug" analytics-v2.html
           grep -Fq "Manual snapshot only; no background polling." analytics-v2.html
           grep -Fq "Human sessions · 24h" analytics-v2.html
           grep -Fq "Avg human sessions / day · MTD" analytics-v2.html
+          grep -Fq "Human sessions · MTD" analytics-v2.html
+          grep -Fq "Month projection" analytics-v2.html
           grep -Fq "humanSessionsLast24Hours" analytics-v2.html
           grep -Fq "dailyAverageMTD" analytics-v2.html
+          grep -Fq "monthToDate" analytics-v2.html
           ! grep -Fq "setInterval(" analytics-v2.html
 
       - name: Validate operational documentation
