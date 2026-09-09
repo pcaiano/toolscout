@@ -14,6 +14,63 @@ function host(v){try{return new URL(v).hostname.toLowerCase().replace(/^www\./,'
 function sameHostFamily(a,b){const x=host(a),y=host(b);return x===y||x.endsWith('.'+y)||y.endsWith('.'+x)}
 async function text(url,timeout=8000){try{const r=await fetch(url,{headers:{'User-Agent':'ToolScout-Distribution-Qualifier/1.0','Accept':'text/html,application/json;q=0.9,*/*;q=0.8'},redirect:'follow',signal:AbortSignal.timeout(timeout)});if(!r.ok)return null;return {url:r.url,contentType:r.headers.get('content-type')||'',body:(await r.text()).slice(0,800000)}}catch{return null}}
 function links(html,base){const out=new Set();for(const m of String(html||'').matchAll(/href=["']([^"']+)["']/gi)){try{const u=new URL(m[1],base);if(u.protocol==='https:')out.add(u.href)}catch{}}return [...out]}
+const ACTION_ROUTE_RE=/(submit|submission|add(?:-|_|\/)?(?:tool|startup|product)|new(?:-|_|\/)?(?:tool|startup|product)|register|sign(?:-|_|\/)?up|list(?:-|_|\/)?your)/i;
+async function externalRouteFailureCount(env,surfaceSlug){
+  try{
+    const row=await env.DB.prepare(`SELECT COUNT(*) AS count FROM distribution_qualification_events WHERE surface_slug=? AND result='external_verification_failed' AND created_at>=datetime('now','-72 hours')`).bind(surfaceSlug).first();
+    return Number(row?.count||0);
+  }catch{return 0}
+}
+async function recordExternalRouteFailure(env,row,detail){
+  try{
+    await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,row.surface_slug,row.action_url,'external_verification_failed',safe(detail,1200)).run();
+    await env.DB.prepare(`UPDATE distribution_opportunities SET last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run();
+  }catch{}
+}
+async function rediscoverActionUrl(env,row){
+  if(await externalRouteFailureCount(env,row.surface_slug)<2)return null;
+  const candidates=[];
+  try{
+    const discovered=await env.DB.prepare(`SELECT source_url FROM distribution_discovery_sources WHERE parent_surface_slug=? AND status='active' ORDER BY confidence DESC,updated_at DESC LIMIT 12`).bind(row.surface_slug).all();
+    for(const x of discovered.results||[])if(ACTION_ROUTE_RE.test(String(x.source_url||'')))candidates.push(String(x.source_url));
+  }catch{}
+  try{
+    const current=new URL(row.action_url);
+    const home=await text(current.origin+'/',6000);
+    if(home){
+      for(const u of links(home.body,home.url))if(sameHostFamily(u,home.url)&&ACTION_ROUTE_RE.test(u))candidates.push(u);
+    }
+  }catch{}
+  for(const candidate of [...new Set(candidates)].filter(u=>u&&u!==row.action_url).slice(0,16)){
+    const probe=await text(candidate,6000);
+    if(!probe)continue;
+    try{
+      await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,last_checked_at=datetime('now'),next_action=CASE WHEN status='human_action_required' THEN 'Submission route was re-discovered automatically after repeated external verification failures. Use the refreshed action URL for the required human step.' ELSE next_action END,updated_at=datetime('now') WHERE surface_slug=?`).bind(probe.url,row.surface_slug).run();
+      await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`route_${crypto.randomUUID()}`,row.surface_slug,'action_url_rediscovered','completed',row.action_url,probe.url,'Persistent external verification failures triggered autonomous action-URL re-discovery.').run();
+    }catch{}
+    return {url:probe.url,page:probe};
+  }
+  return null;
+}
+async function refreshPersistentActionUrls(env){
+  let checked=0,recovered=0,externalFailures=0;
+  try{
+    const q=await env.DB.prepare(`SELECT surface_slug,action_url,status,last_checked_at FROM distribution_opportunities WHERE action_url IS NOT NULL AND status IN ('human_action_required','auth_required','research_required') AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-6 hours')) ORDER BY last_checked_at ASC LIMIT 8`).all();
+    for(const row of q.results||[]){
+      checked++;
+      const probe=await text(row.action_url,5000);
+      if(probe){
+        await env.DB.prepare(`UPDATE distribution_opportunities SET last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run();
+        continue;
+      }
+      externalFailures++;
+      await recordExternalRouteFailure(env,row,'action_url_verification_failed');
+      const found=await rediscoverActionUrl(env,row);
+      if(found)recovered++;
+    }
+  }catch{}
+  return {checked,recovered,externalFailures};
+}
 function schemaObject(spec,op){const rb=op?.requestBody?.content?.['application/json']?.schema;if(!rb)return null;if(rb.$ref){const path=rb.$ref.replace(/^#\//,'').split('/');let cur=spec;for(const p of path)cur=cur?.[p];return cur||null}return rb}
 function payloadFromSchema(schema){if(!schema||schema.type!=='object')return null;const props=schema.properties||{},required=schema.required||[];for(const key of required){if(!SAFE_FIELDS.has(key)||/(terms|agree|consent|captcha|password|token|key)/i.test(key))return null}const payload={};for(const key of Object.keys(props)){if(!SAFE_FIELDS.has(key))continue;if(key==='name'||key==='title')payload[key]='ToolScout';else if(['url','website','website_url','homepage','product_url','tool_url'].includes(key))payload[key]='https://trytoolscout.org/';else if(key==='description')payload[key]='ToolScout is an independent software discovery and recommendation platform.';else if(key==='tagline')payload[key]='Find the right software for the job — without the noise.';else if(key==='category')payload[key]='Software';else if(key==='categories')payload[key]=['Software'];else if(key==='slug')payload[key]='toolscout';else if(key==='domain')payload[key]='trytoolscout.org'}for(const key of required)if(payload[key]===undefined)return null;return payload}
 function serverBase(spec,source){try{const s=spec?.servers?.[0]?.url;if(s)return new URL(s,source).toString()}catch{}return new URL(source).origin+'/'}
@@ -91,33 +148,39 @@ async function storeAutoAdapter(env,row,h,adapter,policyState){
     .bind(row.surface_slug,h.url,adapter.endpoint,'POST','application/json',JSON.stringify(adapter.payload),adapter.confidence,policyState,adapter.verification_source,adapter.verification_endpoint||null,adapter.public_url||null,adapter.verification_method||'GET',adapter.auth_required?'openapi_security':null,adapter.auth_detail?JSON.stringify(adapter.auth_detail):null).run();
 }
 async function qualifyOne(env,row){
-  const h=await text(row.action_url);
-  if(!h){await mark(env,row,'research_required','homepage_unreachable');return 'research_required'}
+  let effectiveRow=row;
+  let h=await text(row.action_url);
+  if(!h){
+    await recordExternalRouteFailure(env,row,'homepage_unreachable');
+    const recovered=await rediscoverActionUrl(env,row);
+    if(recovered){effectiveRow={...row,action_url:recovered.url};h=recovered.page}
+  }
+  if(!h){await mark(env,effectiveRow,'research_required','homepage_unreachable');return 'research_required'}
   if(await policyBlocked(h.url,h.body)){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='policy_blocked',next_action='Autonomous policy scan found a blocker requiring non-automatic handling.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run();
-    await mark(env,row,'policy_blocked','policy_or_terms_blocker');
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='policy_blocked',next_action='Autonomous policy scan found a blocker requiring non-automatic handling.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'policy_blocked','policy_or_terms_blocker');
     return 'policy_blocked';
   }
   const adapter=await findOpenApi(h.url,h.body);
   if(adapter){
     if(adapter.auth_required){
-      await storeAutoAdapter(env,row,h,adapter,'auth_required');
-      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,automation_potential=85,acceptance_probability=70,next_action='Verified JSON submission API discovered automatically, but it requires one-time authentication. Configure an authorized credential before execution.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run();
-      await mark(env,row,'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
+      await storeAutoAdapter(env,effectiveRow,h,adapter,'auth_required');
+      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,automation_potential=85,acceptance_probability=70,next_action='Verified JSON submission API discovered automatically, but it requires one-time authentication. Configure an authorized credential before execution.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+      await mark(env,effectiveRow,'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
       return 'auth_required';
     }
-    await storeAutoAdapter(env,row,h,adapter,'verified');
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth JSON submission adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run();
-    await mark(env,row,'ready_to_submit',`verified_auto_adapter:${adapter.endpoint}`);
+    await storeAutoAdapter(env,effectiveRow,h,adapter,'verified');
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth JSON submission adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'ready_to_submit',`verified_auto_adapter:${adapter.endpoint}`);
     return 'ready_to_submit';
   }
   const pageText=h.body.toLowerCase();
   if(/<form\b/i.test(h.body)||/(submit your|add your|list your|submit tool|submit startup)/i.test(pageText)||AUTH_RE.test(pageText)){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run();
-    await mark(env,row,'human_action_required','form_auth_or_manual_route_only');
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'human_action_required','form_auth_or_manual_route_only');
     return 'human_action_required';
   }
-  await mark(env,row,'research_required','no_verified_submission_protocol');
+  await mark(env,effectiveRow,'research_required','no_verified_submission_protocol');
   return 'research_required';
 }
 async function qualify(env){
@@ -222,10 +285,11 @@ async function verifyAutoSubmitted(env){
   return {checked,verified,pending,missingVerification,errors};
 }
 async function cycle(env){
+  const routeRefresh=await refreshPersistentActionUrls(env);
   const qualification=await qualify(env);
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
-  return {ok:true,qualification,execution,verification};
+  return {ok:true,routeRefresh,qualification,execution,verification};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await cycle(env),{headers:H})}return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);ctx.waitUntil(cycle(env).catch(()=>{}))}};
