@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'analytics.html'
+      - 'analytics-v2.html'
+      - 'growth-command-center-v2-worker.js'
+      - 'agent-protocol-worker.js'
       - 'affiliate-human-action-entry-worker.js'
       - 'distribution-command-worker.js'
       - 'wrangler.toml'

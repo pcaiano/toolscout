@@ -6,6 +6,21 @@ This file is the canonical operational memory for ToolScout. It exists to keep p
 
 It is not a replacement for technical source-of-truth files such as `AGENTS.md` or `docs/PRODUCTION-BASELINE.md`. Instead, it is the current operational layer: what is live, what is monetized, what needs human action, what belongs in growth work, and what is worth spending Work/Codex credits on.
 
+## Growth Engines 2.0 priority — 2026-09-09
+
+Distribution Engine 2.0, Affiliate Coverage Engine 2.0 and the redesigned Growth Command Center are the highest development priority. The implementation contract is canonical in `docs/GROWTH-ENGINES-V2.md`.
+
+The immediate operating objective is:
+
+`qualified human traffic -> useful engagement -> monetized outbound -> confirmed revenue`
+
+The Command Center must expose only current, resolvable human exceptions through a Chairman Queue. Human tasks require a concrete action, reachable direct HTTPS link, expected impact, time estimate, reason human action is required and a defined downstream machine step. Completed/stale tasks and engine policy limitations must not remain as owner tasks.
+
+The Command Center 2.0 is user-configurable: every operational block is clickable for drill-down, draggable/reorderable and resizable, with the owner's layout persisted between sessions.
+
+The current implementation branch is `growth-engines-v2-command-center`. It reuses the canonical engine state machines and evidence stores rather than introducing a parallel task database.
+
+
 ## Mandatory startup sequence
 
 Before planning or executing ToolScout work, read in this order:
