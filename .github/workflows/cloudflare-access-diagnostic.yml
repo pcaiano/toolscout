@@ -1,0 +1,52 @@
+name: Cloudflare Access Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cloudflare-access-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect Cloudflare Access configuration
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          api='https://api.cloudflare.com/client/v4'
+          auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json')
+
+          accounts=$(curl -fsS "${auth[@]}" "$api/accounts?per_page=50")
+          account_id=$(echo "$accounts" | jq -r '.result[0].id // empty')
+          if [ -z "$account_id" ]; then
+            echo 'No Cloudflare account visible to deployment token.'
+            echo "$accounts" | jq '{success,errors}'
+            exit 2
+          fi
+          echo "Account ID discovered: ${account_id:0:6}..."
+
+          zones=$(curl -fsS "${auth[@]}" "$api/zones?name=trytoolscout.org&per_page=10")
+          zone_id=$(echo "$zones" | jq -r '.result[0].id // empty')
+          echo "Zone visible: $([ -n "$zone_id" ] && echo yes || echo no)"
+
+          apps=$(curl -sS "${auth[@]}" "$api/accounts/$account_id/access/apps?per_page=100")
+          echo '=== ACCESS API STATUS ==='
+          echo "$apps" | jq '{success,errors}'
+          echo '=== ACCESS APPLICATIONS ==='
+          echo "$apps" | jq '[.result[]? | {id,name,type,domain,session_duration,app_launcher_visible}]'
+
+          echo '=== TOOLSCOUT-RELATED ACCESS POLICIES ==='
+          for app_id in $(echo "$apps" | jq -r '.result[]? | select((.domain // "") | contains("trytoolscout.org")) | .id'); do
+            app_name=$(echo "$apps" | jq -r --arg id "$app_id" '.result[] | select(.id==$id) | .name')
+            app_domain=$(echo "$apps" | jq -r --arg id "$app_id" '.result[] | select(.id==$id) | .domain')
+            echo "APP: $app_name | DOMAIN: $app_domain | ID: ${app_id:0:6}..."
+            policies=$(curl -sS "${auth[@]}" "$api/accounts/$account_id/access/apps/$app_id/policies?per_page=100")
+            echo "$policies" | jq '{success,errors,policies:[.result[]? | {name,decision,precedence,include,exclude,require}]}'
+          done
