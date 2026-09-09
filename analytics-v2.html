@@ -28,7 +28,7 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
 .task{border-top:1px solid var(--line);padding:12px 0}.task:first-of-type{border-top:0}.taskTop{display:flex;justify-content:space-between;gap:12px}.taskTitle{font-weight:850;font-size:13px}.taskMeta{font-size:10px;color:var(--muted);margin-top:3px}.taskReason,.taskAfter{font-size:11px;color:#c5ccd5;line-height:1.45;margin-top:6px}.taskAfter{color:var(--muted)}.taskActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
 .pill{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:4px 7px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:850}.pill.good{color:var(--good);border-color:#245943}.pill.warn{color:var(--warn);border-color:#5d4a22}.pill.bad{color:var(--bad);border-color:#61312e}.pill.info{color:var(--accent);border-color:#31466d}
 .row{display:flex;justify-content:space-between;gap:18px;padding:9px 0;border-top:1px solid var(--line)}.row:first-child{border-top:0}.rowName{font-size:12px;font-weight:750}.rowMeta{font-size:10px;color:var(--muted);line-height:1.4;margin-top:2px}.rowValue{font-size:12px;font-weight:850;text-align:right;white-space:nowrap}
-.note{font-size:11px;color:var(--muted);line-height:1.5}.empty{display:flex;height:100%;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:12px;padding:18px}.bug{border:1px solid #633532;background:#201414;border-radius:11px;padding:10px;margin-top:8px;font-size:11px}.bug b{color:#ffb4ad}
+.note{font-size:11px;color:var(--muted);line-height:1.5}.empty{display:flex;height:100%;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:12px;padding:18px}.bug{border:1px solid #633532;background:#201414;border-radius:11px;padding:10px;margin-top:8px;font-size:11px}.bug b{color:#ffb4ad}.bug.warning{border-color:#5d4a22;background:#1b180f}.bug.warning b{color:var(--warn)}
 .ledgerItem{display:grid;grid-template-columns:92px 86px minmax(0,1fr);gap:9px;border-top:1px solid var(--line);padding:9px 0;font-size:10px;align-items:start}.ledgerItem:first-child{border-top:0}.ledgerTime,.ledgerEngine{color:var(--muted)}.ledgerMain b{display:block;font-size:11px;color:var(--ink);margin-bottom:2px}.ledgerMain span{color:var(--muted);line-height:1.35}
 .progress{height:7px;border-radius:999px;background:#20262e;overflow:hidden;margin:8px 0 4px}.progress>i{display:block;height:100%;background:#e7eaf0;border-radius:999px;width:0}
 .modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.74);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}.modalBackdrop.open{display:flex}.modal{width:min(900px,96vw);max-height:88vh;overflow:auto;background:#11161c;border:1px solid #2a333e;border-radius:19px;padding:20px;box-shadow:0 24px 90px rgba(0,0,0,.55)}.modalTop{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.modal h2{margin:0;font-size:24px;letter-spacing:-.03em}.modalContent{margin-top:16px}
@@ -121,6 +121,7 @@ function renderNorthStar(d){
     metric('Human outbound',num(out),pct(f.sessionToOutboundCtr)+' session → outbound')+
     metric('Monetized outbound',mon===null?'—':num(mon),mon===null?'Unavailable, not zero':pct(out?mon/out*100:0)+' of human outbound')+
     metric('Confirmed revenue',r.confirmedRevenue==null?'Unknown':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'No confirmed vendor evidence')+
+    metric('Human sessions · MTD',num(t.monthToDate),'Total month-to-date')+
     metric('Month projection',num(t.projectedMonth),'Likely-human sessions · current pace')+
   '</div>';
 }
@@ -201,13 +202,18 @@ function renderRevenue(d){
     '<div style="margin-top:9px">'+(gaps.length?gaps.slice(0,6).map(x=>row(x.slug||x.tool_slug,num(x.outboundClicks||x.clicks),'Revenue gap score '+Number(x.score||0).toFixed(1))).join(''):'<div class="note">No current human revenue gaps in the commercial snapshot.</div>')+'</div>';
 }
 function renderHealth(d){
-  const tr=d.tracking||{},g=d.growthOps||{},q=g.chairmanQueue||{},dist=g.engines&&g.engines.distribution||{},aff=g.engines&&g.engines.affiliate||{};
-  const bugs=q.broken_links||[];
+  const tr=d.tracking||{},g=d.growthOps||{},q=g.chairmanQueue||{},dist=g.engines&&g.engines.distribution||{},aff=g.engines&&g.engines.affiliate||{},h=g.health||{};
+  const content=h.content||{},audience=h.audience||{},seo=h.seo_geo_aio||{},issues=h.issues||[];
+  const label=s=>({observed:'Observed',partial:'Partial visibility',warning:'Warning',failed:'Failed',no_evidence:'No evidence'}[s]||s||'No evidence');
+  const broken=(q.broken_links||[]).length;
   let html=row('Tracking',tr.status||'Unavailable',num(tr.humanSessionsLast24Hours)+' human sessions · 24h')+
-    row('Affiliate cycle',aff.last_run_at?'Observed':'No evidence',dt(aff.last_run_at))+
-    row('Distribution activity',dist.last_activity_at?'Observed':'No evidence',dt(dist.last_activity_at))+
-    row('Broken Chairman links',num(bugs.length),bugs.length?'Suppressed from human queue':'None detected');
-  if(bugs.length)html+='<div class="bug"><b>Engine bug:</b> '+esc(bugs.length)+' current human task'+(bugs.length===1?' has':'s have')+' an unreachable direct link and '+(bugs.length===1?'is':'are')+' deliberately hidden from the Chairman Queue.</div>';
+    row('Affiliate Coverage Engine',aff.last_run_at?'Observed':'No evidence',dt(aff.last_run_at))+
+    row('Distribution Engine',dist.last_activity_at?'Observed':'No evidence',dt(dist.last_activity_at))+
+    row('Content Engine',label(content.status),(content.detail||'')+(content.last_event_at?' · '+dt(content.last_event_at):''))+
+    row('Audience Engine',label(audience.status),(audience.detail||'')+(audience.last_event_at?' · '+dt(audience.last_event_at):''))+
+    row('SEO / GEO / AIO',label(seo.status),(seo.detail||'')+(seo.last_event_at?' · '+dt(seo.last_event_at):''))+
+    row('Broken Chairman links',num(broken),broken?'Detailed below; suppressed from action queue':'None detected');
+  if(issues.length)html+=issues.map(x=>'<div class="bug '+(x.severity==='warning'?'warning':'')+'"><b>'+(x.severity==='warning'?'Warning':'Engine bug')+' · '+esc(x.engine)+':</b> '+esc(x.title)+' · '+esc(x.detail)+'</div>').join('');
   document.getElementById('healthBody').innerHTML=html;
 }
 function render(d){
@@ -289,7 +295,7 @@ function detailFor(id){
   if(id==='affiliate'){const x=eng.affiliate||{};modalRows('Affiliate Coverage Engine 2.0','ENGINE DETAIL',stateEntries(x.workflow_status).map(([k,v])=>row(k,num(v),'affiliate state')).join('')+row('Discovery checked',num(x.discovery&&x.discovery.total),dt(x.discovery&&x.discovery.last_checked)));return}
   if(id==='footprint'){const surfaces=f.distribution&&f.distribution.surfaces||[];modalRows('ToolScout Footprint','DISTRIBUTION + SEARCH',row('GSC observed pages',num(f.search&&f.search.observed_pages),f.search&&f.search.note)+row('Sitemap URLs',num(f.search&&f.search.sitemap_urls),'crawlable inventory')+surfaces.map(x=>row(x.name||x.slug,x.status,x.type||'surface')).join(''));return}
   if(id==='ledger'){modalRows('Growth Ledger','EVIDENCE LOG',(g.ledger||[]).map(x=>row((x.engine||'engine')+' · '+(x.subject||''),x.result||'',dt(x.at)+' · '+(x.action||''))).join(''));return}
-  if(id==='health'){const b=g.chairmanQueue&&g.chairmanQueue.broken_links||[];modalRows('Engine & Data Health','FAILURES / GAPS',b.length?b.map(x=>row(x.title||x.id,'Broken action link',x.link_verification&&x.link_verification.reason||'unreachable')).join(''):'<div class="note">No broken Chairman Queue links detected in this snapshot.</div>');return}
+  if(id==='health'){const h=g.health||{},issues=h.issues||[];let html=row('Content Engine',h.content&&h.content.status||'no_evidence',h.content&&h.content.detail||'')+row('Audience Engine',h.audience&&h.audience.status||'no_evidence',h.audience&&h.audience.detail||'')+row('SEO / GEO / AIO',h.seo_geo_aio&&h.seo_geo_aio.status||'no_evidence',h.seo_geo_aio&&h.seo_geo_aio.detail||'');html+=issues.length?issues.map(x=>row((x.engine||'engine')+' · '+(x.title||x.code),x.severity||'issue',x.detail||'')).join(''):'<div class="note">No engine-health issues detected in this snapshot.</div>';modalRows('Engine & Data Health','NO SILENT FAILURES',html);return}
   if(id==='revenue'){const gaps=snapshot.commercial&&snapshot.commercial.revenueGaps||[];modalRows('Revenue & Coverage','COMMERCIAL DETAIL',gaps.length?gaps.map(x=>row(x.slug||x.tool_slug,num(x.outboundClicks||x.clicks),'score '+Number(x.score||0).toFixed(1))).join(''):'<div class="note">No revenue gaps surfaced.</div>');return}
   if(id==='northstar'){modalRows('North Star','ECONOMIC FUNNEL',document.getElementById('northstarBody').innerHTML)}
 }
