@@ -85,6 +85,10 @@ jobs:
           grep -Fq "head.addEventListener('pointerdown'" analytics-v2.html
           grep -Fq "detailFor" analytics-v2.html
           grep -Fq "Manual snapshot only; no background polling." analytics-v2.html
+          grep -Fq "Human sessions · 24h" analytics-v2.html
+          grep -Fq "Avg human sessions / day · MTD" analytics-v2.html
+          grep -Fq "humanSessionsLast24Hours" analytics-v2.html
+          grep -Fq "dailyAverageMTD" analytics-v2.html
           ! grep -Fq "setInterval(" analytics-v2.html
 
       - name: Validate operational documentation
