@@ -4,7 +4,7 @@ const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/an
 const SESSION_COOKIE='toolscout_cc';
 const SESSION_TTL_SECONDS=86400;
 const OWNER_EMAIL='pcaiano@gmail.com';
-const LOCAL_LOGIN_PATH='/analytics/login';
+const LOCAL_LOGIN_PATHS=new Set(['/analytics/login','/analytics/login/']);
 const LOCAL_LOGIN_TOKEN_HASH='3bda9f2e1083279e5d79e7025269f7a66e0cd90046d6692d02103f953c5831b0';
 const LOCAL_LOGIN_EXPIRES_AT=1788972710;
 
@@ -12,19 +12,6 @@ async function digestHex(value){const bytes=new TextEncoder().encode(value);cons
 function sessionBucket(now=Date.now()){return Math.floor(now/(SESSION_TTL_SECONDS*1000))}
 async function sessionValue(secret,bucket){return digestHex(`toolscout-command-center:${secret}:${bucket}`)}
 function safeEqual(a,b){if(a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0}
-async function localOwnerLogin(request,env){
-  if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
-  if(Math.floor(Date.now()/1000)>LOCAL_LOGIN_EXPIRES_AT)return new Response('Login link expired',{status:410,headers:{'Cache-Control':'no-store'}});
-  const url=new URL(request.url);
-  const supplied=await digestHex(url.searchParams.get('token')||'');
-  if(!safeEqual(supplied,LOCAL_LOGIN_TOKEN_HASH))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
-  const session=await sessionValue(env.ADMIN_TOKEN,sessionBucket());
-  const headers=new Headers();
-  headers.set('Location','/analytics/');
-  headers.set('Cache-Control','no-store');
-  headers.set('Set-Cookie',`${SESSION_COOKIE}=${encodeURIComponent(session)}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Lax`);
-  return new Response(null,{status:302,headers});
-}
 async function hasValidSession(request,env){
   if(!env.ADMIN_TOKEN)return false;
   const cookie=request.headers.get('Cookie')||'';
@@ -125,24 +112,40 @@ function bootstrap(){return `<style>
 })();
 </script>`}
 
+async function decoratePage(response){
+  const type=response.headers.get('Content-Type')||'';
+  if(!response.ok||!type.includes('text/html'))return response;
+  let html=await response.text();
+  if(!html.includes('data-widget="affiliate-status"')){
+    const anchor='<section class="widget" data-widget="distribution"';
+    html=html.replace(anchor,affiliateWidget()+'\n\n    '+anchor);
+  }
+  html=html.replace('<strong>Not loaded.</strong> Press Refresh data for a current operational snapshot.','<strong>Loading current data…</strong>');
+  if(!html.includes('bootstrapLoad'))html=html.replace('</body>',bootstrap()+'</body>');
+  const headers=new Headers(response.headers);headers.delete('Content-Length');headers.set('Cache-Control','private, no-store, max-age=0');headers.set('Pragma','no-cache');
+  return new Response(html,{status:response.status,statusText:response.statusText,headers});
+}
+
+async function localOwnerLogin(request,env,ctx){
+  if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
+  if(Math.floor(Date.now()/1000)>LOCAL_LOGIN_EXPIRES_AT)return new Response('Login link expired',{status:410,headers:{'Cache-Control':'no-store'}});
+  const url=new URL(request.url);
+  const supplied=await digestHex(url.searchParams.get('token')||'');
+  if(!safeEqual(supplied,LOCAL_LOGIN_TOKEN_HASH))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+  const target=new URL('/analytics/',request.url);
+  const headers=new Headers(request.headers);
+  headers.set('Cf-Access-Authenticated-User-Email',OWNER_EMAIL);
+  const authenticatedRequest=new Request(target.toString(),{method:'GET',headers});
+  return decoratePage(await base.fetch(authenticatedRequest,env,ctx));
+}
+
 export default {
   ...base,
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname===LOCAL_LOGIN_PATH)return localOwnerLogin(request,env);
+    if(request.method==='GET'&&LOCAL_LOGIN_PATHS.has(url.pathname))return localOwnerLogin(request,env,ctx);
     if(request.method!=='GET'||!ANALYTICS_PATHS.has(url.pathname))return base.fetch(request,env,ctx);
     const trustedRequest=await requestWithTrustedSession(request,env);
-    const response=await base.fetch(trustedRequest,env,ctx);
-    const type=response.headers.get('Content-Type')||'';
-    if(!response.ok||!type.includes('text/html'))return response;
-    let html=await response.text();
-    if(!html.includes('data-widget="affiliate-status"')){
-      const anchor='<section class="widget" data-widget="distribution"';
-      html=html.replace(anchor,affiliateWidget()+'\n\n    '+anchor);
-    }
-    html=html.replace('<strong>Not loaded.</strong> Press Refresh data for a current operational snapshot.','<strong>Loading current data…</strong>');
-    if(!html.includes('bootstrapLoad'))html=html.replace('</body>',bootstrap()+'</body>');
-    const headers=new Headers(response.headers);headers.delete('Content-Length');headers.set('Cache-Control','private, no-store, max-age=0');headers.set('Pragma','no-cache');
-    return new Response(html,{status:response.status,statusText:response.statusText,headers});
+    return decoratePage(await base.fetch(trustedRequest,env,ctx));
   }
 };
