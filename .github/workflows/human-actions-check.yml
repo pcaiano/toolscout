@@ -7,6 +7,8 @@ on:
       - 'affiliate-human-action-state.js'
       - 'affiliate-operations.js'
       - 'agent-protocol-worker.js'
+      - 'growth-command-center-v2-worker.js'
+      - 'analytics-v2.html'
       - '.github/workflows/human-actions-check.yml'
   push:
     branches: [main]
@@ -60,4 +62,8 @@ jobs:
           grep -Fq "command_center_human_action" affiliate-human-action-state.js
           grep -Fq "contacted:'pending_review'" affiliate-human-action-state.js
           grep -Fq "submitted:'submitted'" affiliate-human-action-state.js
-          grep -Fq "import base from './affiliate-human-action-entry-worker.js'" agent-protocol-worker.js
+          node --check growth-command-center-v2-worker.js
+          grep -Fq "import base from './growth-command-center-v2-worker.js'" agent-protocol-worker.js
+          grep -Fq "import base from './affiliate-human-action-entry-worker.js'" growth-command-center-v2-worker.js
+          grep -Fq "chairmanQueue" growth-command-center-v2-worker.js
+          grep -Fq "link_verification" growth-command-center-v2-worker.js
