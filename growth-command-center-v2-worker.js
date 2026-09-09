@@ -53,6 +53,8 @@ async function assetText(request,env,path,fallback=''){
 function n(value){const x=Number(value);return Number.isFinite(x)?x:0}
 function timeMs(value){const t=Date.parse(String(value||'').replace(' ','T')+(String(value||'').includes('T')?'':'Z'));return Number.isFinite(t)?t:0}
 function workflowCounts(rows){const out={};for(const row of rows){const k=String(row.status||'unknown');out[k]=(out[k]||0)+n(row.count)}return out}
+function hoursSince(value){const t=timeMs(value);return t?Math.max(0,(Date.now()-t)/3600000):null}
+function freshWithin(value,hours){const age=hoursSince(value);return age!==null&&age<=hours}
 function estimateMinutes(action){
   if(action.engine==='affiliate'){
     if(action.status==='approved_needs_link')return 2;
@@ -80,12 +82,18 @@ function afterAction(action){
 }
 async function verifyActionUrl(url){
   const safe=safeUrl(url);
-  if(!safe)return {ok:false,http_status:null,checked_at:new Date().toISOString(),reason:'invalid_https_url'};
+  const checkedAt=new Date().toISOString();
+  if(!safe)return {ok:false,http_status:null,checked_at:checkedAt,reason:'invalid_https_url'};
   try{
-    const r=await fetch(safe,{method:'HEAD',redirect:'manual',headers:{'User-Agent':'ToolScout-Chairman-Queue/2.0'},signal:AbortSignal.timeout(3500)});
-    const status=n(r.status);
-    return {ok:status>0&&status<500,http_status:status||null,checked_at:new Date().toISOString(),reason:status>=500?'remote_5xx':null};
-  }catch{return {ok:false,http_status:null,checked_at:new Date().toISOString(),reason:'network_verification_failed'}}
+    const head=await fetch(safe,{method:'HEAD',redirect:'manual',headers:{'User-Agent':'ToolScout-Chairman-Queue/2.0'},signal:AbortSignal.timeout(3500)});
+    const headStatus=n(head.status);
+    if(headStatus>0&&headStatus<500)return {ok:true,http_status:headStatus,checked_at:checkedAt,reason:null,method:'HEAD'};
+  }catch{}
+  try{
+    const get=await fetch(safe,{method:'GET',redirect:'manual',headers:{'User-Agent':'ToolScout-Chairman-Queue/2.0','Accept':'text/html,application/xhtml+xml','Range':'bytes=0-0'},signal:AbortSignal.timeout(5000)});
+    const getStatus=n(get.status);
+    return {ok:getStatus>0&&getStatus<500,http_status:getStatus||null,checked_at:checkedAt,reason:getStatus>=500?'remote_5xx_after_get_fallback':null,method:'GET_fallback'};
+  }catch{return {ok:false,http_status:null,checked_at:checkedAt,reason:'head_and_get_verification_failed',method:'GET_fallback'}}
 }
 async function baseHumanActions(request,env,ctx){
   try{
@@ -119,7 +127,8 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   const [
     affiliateLatest,affiliateWeekOld,affiliateStatuses,affiliateDiscovery,
     distributionStatuses,distribution24,distribution7,deliveryStates,
-    distEvents,affiliateHistory,gsc,sitemap
+    distEvents,affiliateHistory,gsc,sitemap,contentIntel,organicGrowth,aeoGeo,machineReadability,
+    latestAudienceEvent,latestContentPublish
   ]=await Promise.all([
     safeFirst(env,`SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,created_at FROM affiliate_coverage_runs ORDER BY created_at DESC LIMIT 1`),
     safeFirst(env,`SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,created_at FROM affiliate_coverage_runs WHERE created_at<=datetime('now','-7 days') ORDER BY created_at DESC LIMIT 1`),
@@ -132,7 +141,13 @@ async function growthOpsSnapshot(request,env,ctx,stats){
     safeAll(env,`SELECT surface_slug,event_type,status,detail,human_sessions,outbound_clicks,monetized_outbound,revenue,created_at FROM distribution_events ORDER BY created_at DESC LIMIT 30`),
     safeAll(env,`SELECT tool_slug,previous_state,new_state,actor_source,notes,created_at FROM affiliate_workflow_history ORDER BY created_at DESC LIMIT 30`),
     assetJson(request,env,'/reports/gsc-signals.json',{items:[],generatedAt:null}),
-    assetText(request,env,'/sitemap.xml','')
+    assetText(request,env,'/sitemap.xml',''),
+    assetJson(request,env,'/reports/content-intelligence.json',{generatedAt:null}),
+    assetJson(request,env,'/reports/organic-growth-opportunities.json',{generatedAt:null,summary:{}}),
+    assetJson(request,env,'/reports/aeo-geo-readiness.json',{generatedAt:null,failures:null,warnings:null}),
+    assetJson(request,env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null}),
+    safeFirst(env,`SELECT MAX(created_at) AS last_event_at FROM audience_events`),
+    safeFirst(env,`SELECT MAX(created_at) AS last_publish_at,COUNT(*) AS published_30d FROM audience_events WHERE event_type='content_published' AND status='published' AND created_at>=datetime('now','-30 days')`)
   ]);
   const queue=await chairmanQueue(request,env,ctx,{verifyLinks:true});
   const distCounts=workflowCounts(distributionStatuses);
@@ -149,6 +164,40 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   ].sort((a,b)=>timeMs(b.at)-timeMs(a.at)).slice(0,40);
   const latestCoverage=affiliateLatest?.weighted_coverage==null?null:Number(affiliateLatest.weighted_coverage)*100;
   const weekCoverage=affiliateWeekOld?.weighted_coverage==null?null:Number(affiliateWeekOld.weighted_coverage)*100;
+
+  const audienceConnected=stats?.audienceGrowth?.status==='connected'&&stats?.engagement?.status==='connected';
+  const contentReportFresh=freshWithin(contentIntel?.generatedAt,36);
+  const contentPublishFresh=freshWithin(latestContentPublish?.last_publish_at,96);
+  const seoEvidence=[gsc?.generatedAt,organicGrowth?.generatedAt,aeoGeo?.generatedAt,machineReadability?.generatedAt];
+  const seoFresh=seoEvidence.every(x=>freshWithin(x,36));
+  const seoFailures=n(aeoGeo?.failures)+n(machineReadability?.failures);
+  const seoWarnings=n(aeoGeo?.warnings)+n(machineReadability?.warnings);
+  const healthIssues=[
+    ...(queue.broken_links||[]).map(x=>({severity:'bug',engine:x.engine||'unknown',code:'broken_human_action_link',title:x.title||x.id||'Human action',detail:x.link_verification?.reason||'Direct action link could not be verified',url:x.action_url||null})),
+    ...(!contentPublishFresh&&contentReportFresh?[{severity:'warning',engine:'content',code:'publishing_heartbeat_partial',title:'Content Engine publishing heartbeat',detail:'Content Intelligence refreshed successfully, but no recent verified content_published event is available in D1. Publishing visibility is partial rather than silently assumed healthy.',url:null}]:[]),
+    ...(!audienceConnected?[{severity:'bug',engine:'audience',code:'audience_adapter_unavailable',title:'Audience Engine',detail:stats?.audienceGrowth?.reason||stats?.engagement?.reason||'Audience adapter is not reporting connected state.',url:null}]:[]),
+    ...(!seoFresh?[{severity:'warning',engine:'seo-geo-aio',code:'growth_evidence_stale',title:'SEO / GEO / AIO evidence',detail:'One or more daily growth/readiness reports are missing or older than 36 hours.',url:null}]:[]),
+    ...(seoFailures>0?[{severity:'bug',engine:'seo-geo-aio',code:'readiness_failures',title:'SEO / GEO / AIO readiness',detail:`${seoFailures} readiness failure(s) are present in the latest validation reports.`,url:null}]:[])
+  ];
+  const health={
+    content:{
+      status:contentPublishFresh?'observed':(contentReportFresh?'partial':'no_evidence'),
+      last_event_at:latestContentPublish?.last_publish_at||contentIntel?.generatedAt||null,
+      detail:contentPublishFresh?`${n(latestContentPublish?.published_30d)} verified content_published event(s) / 30d`:(contentReportFresh?'Content Intelligence is fresh; publishing heartbeat is only partially observed.':'No fresh Content Engine evidence.')
+    },
+    audience:{
+      status:audienceConnected?'observed':'no_evidence',
+      last_event_at:latestAudienceEvent?.last_event_at||stats?.audienceGrowth?.observedAt||null,
+      detail:audienceConnected?`${n(stats?.audienceGrowth?.publishedReplies)} published replies · ${n(stats?.audienceGrowth?.outboundActions)} outbound actions · ${n(stats?.engagement?.pending)} pending review`:'Audience adapter is not connected.'
+    },
+    seo_geo_aio:{
+      status:seoFailures>0?'failed':(seoFresh?(seoWarnings>0?'warning':'observed'):'no_evidence'),
+      last_event_at:[...seoEvidence].sort((a,b)=>timeMs(b)-timeMs(a))[0]||null,
+      detail:`${n(organicGrowth?.summary?.actionableOpportunities)} actionable search opportunities · ${seoFailures} readiness failures · ${seoWarnings} warnings`,
+      evidence:{gsc:gsc?.generatedAt||null,organic:organicGrowth?.generatedAt||null,aeo_geo:aeoGeo?.generatedAt||null,machine_readability:machineReadability?.generatedAt||null}
+    },
+    issues:healthIssues
+  };
   return {
     chairmanQueue:queue,
     engines:{
@@ -198,6 +247,7 @@ async function growthOpsSnapshot(request,env,ctx,stats){
       }
     },
     ledger,
+    health,
     generated_at:new Date().toISOString()
   };
 }
