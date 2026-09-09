@@ -106,14 +106,15 @@ Primary business metrics:
 
 - organic impressions;
 - organic clicks;
-- genuine sessions;
-- recommendation completions;
+- genuine sessions, including human sessions today, rolling 24h and month-to-date pace;
 - outbound clicks;
 - affiliate-covered outbound clicks;
 - affiliate CTR;
 - vendor conversions;
 - confirmed/paid commission;
 - revenue per 1,000 genuine non-owner sessions when evidence is available.
+
+Command Center KPI decision (2026-09-09): recommendation completions are secondary product-funnel telemetry, not a headline growth KPI. Usage has remained effectively flat, so the redesign should prioritize human sessions, outbound intent, monetized outbound and confirmed revenue instead.
 
 Revenue Intelligence v2 is implemented in the existing protected Command Center. Its 30-day commercial view includes only sessions classified `likely-human`; owner, known bot/crawler, synthetic/test, and unknown/legacy traffic stay outside the primary metrics. Monetized versus unmonetized outbound uses the immutable `affiliate_active_at_click` snapshot introduced by migration `0009`; rows predating that snapshot remain unknown.
 
