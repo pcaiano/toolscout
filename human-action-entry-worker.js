@@ -49,7 +49,7 @@ async function canonicalAffiliateActions(request,env){
 async function snapshot(request,env){
   const [affiliateRows,d]=await Promise.all([
     canonicalAffiliateActions(request,env),
-    q(env,`SELECT surface_slug,surface_name,status,action_url,next_action,human_required,distribution_score,updated_at FROM distribution_opportunities WHERE action_url IS NOT NULL AND (human_required=1 OR status IN ('human_action_required','policy_blocked')) ORDER BY distribution_score DESC,updated_at DESC LIMIT 20`)
+    q(env,`SELECT surface_slug,surface_name,status,action_url,next_action,human_required,distribution_score,updated_at FROM distribution_opportunities WHERE action_url IS NOT NULL AND human_required=1 AND status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale') ORDER BY distribution_score DESC,updated_at DESC LIMIT 20`)
   ]);
   const affiliate=affiliateRows.map(r=>{const url=safeUrl(r.application_url||r.program_url);return url?{engine:'affiliate',id:r.tool_slug,title:r.program_name||r.tool_slug,status:r.status,reason:r.next_action||r.blocker||r.notes||'Human action required',action_url:url,metric:Number(r.unmonetized_clicks_30d||0),metric_label:'unmonetized human outbound · 30d',source_of_truth:r.source_of_truth,chatgpt_prompt:humanPrompt('affiliate',r,url)}:null}).filter(Boolean);
   const distribution=(d.results||[]).map(r=>{const url=safeUrl(r.action_url);return url?{engine:'distribution',id:r.surface_slug,title:r.surface_name||r.surface_slug,status:r.status,reason:r.next_action||'Human action required',action_url:url,metric:Number(r.distribution_score||0),metric_label:'distribution score',chatgpt_prompt:humanPrompt('distribution',r,url)}:null}).filter(Boolean);
