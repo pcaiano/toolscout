@@ -7,7 +7,7 @@ const SESSION_TTL_SECONDS=86400;
 const OWNER_EMAIL='pcaiano@gmail.com';
 const HUMAN_ACTION_LIMIT=12;
 const ACTIVE_AFFILIATE_STATES=new Set(['active','verified','earning']);
-const PENDING_AFFILIATE_STATES=new Set(['submitted','pending_review','approved_needs_link','link_acquired','human_action_required']);
+const PENDING_AFFILIATE_STATES=new Set(['submitted','pending_review']);
 const REJECTED_AFFILIATE_STATES=new Set(['rejected']);
 
 function analyticsPath(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/analytics-v2'||path==='/analytics-v2/'||path==='/analytics-v2.html'}
