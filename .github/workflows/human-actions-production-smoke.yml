@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/human-actions-production-smoke.yml'
   workflow_run:
-    workflows: ["Deploy Worker"]
+    workflows: ["Deploy ToolScout Worker"]
     types: [completed]
   workflow_dispatch:
 
@@ -21,21 +21,35 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Verify human action routes are private
+      - name: Verify Chairman and human action routes are private
         run: |
           set -euo pipefail
 
-          private_headers="$(mktemp)"
-          private_body="$(mktemp)"
-          private_code="$(curl --silent --show-error --dump-header "$private_headers" --output "$private_body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE/analytics/api/human-actions" || true)"
-          echo "private route HTTP $private_code"
-          cat "$private_headers"
-          cat "$private_body"
-          if [ "$private_code" != "401" ]; then
-            echo "ERROR: expected /analytics/api/human-actions to reject requests without a Command Center session with HTTP 401."
-            exit 1
-          fi
-          grep -F 'command_center_session_expired' "$private_body"
+          for route in /analytics/api/human-actions /analytics/api/chairman-queue; do
+            headers="$(mktemp)"
+            body="$(mktemp)"
+            code="$(curl --silent --show-error --dump-header "$headers" --output "$body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE$route" || true)"
+            echo "$route HTTP $code"
+            cat "$headers"
+            cat "$body"
+            if [ "$code" != "401" ]; then
+              echo "ERROR: expected $route to reject requests without a Command Center session with HTTP 401."
+              exit 1
+            fi
+            grep -F 'command_center_session_expired' "$body"
+          done
+
+          for route in /analytics/api/affiliate-human-action /analytics/api/distribution-human-action; do
+            body="$(mktemp)"
+            code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' --max-redirs 0 -X POST -H 'Content-Type: application/json' -d '{}' "$PROD_BASE$route" || true)"
+            echo "$route HTTP $code"
+            cat "$body"
+            if [ "$code" != "401" ]; then
+              echo "ERROR: expected $route to reject unauthenticated state changes with HTTP 401."
+              exit 1
+            fi
+            grep -F 'command_center_session_expired' "$body"
+          done
 
           public_headers="$(mktemp)"
           public_body="$(mktemp)"
@@ -48,4 +62,4 @@ jobs:
             exit 1
           fi
 
-          echo 'Human-action queue is private in production.'
+          echo 'Chairman and human-action routes are private in production.'
