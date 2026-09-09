@@ -58,6 +58,9 @@ jobs:
           grep -Fq "/analytics/api/distribution-human-action" growth-command-center-v2-worker.js
           grep -Fq "/analytics/api/human-actions" growth-command-center-v2-worker.js
           grep -Fq "Only current engine states with a reachable HTTPS action URL" growth-command-center-v2-worker.js
+          grep -Fq "const input=[...(raw.affiliate||[]),...(raw.distribution||[])];" growth-command-center-v2-worker.js
+          grep -Fq ".slice(0,HUMAN_ACTION_LIMIT)" growth-command-center-v2-worker.js
+          grep -Fq "h==='localhost'" growth-command-center-v2-worker.js
 
       - name: Validate configurable Command Center UI
         run: |
@@ -78,6 +81,8 @@ jobs:
           grep -Fq "localStorage.setItem(LAYOUT_KEY" analytics-v2.html
           grep -Fq "resizeHandle" analytics-v2.html
           grep -Fq "dragstart" analytics-v2.html
+          grep -Fq "el.draggable=false" analytics-v2.html
+          grep -Fq "head.addEventListener('pointerdown'" analytics-v2.html
           grep -Fq "detailFor" analytics-v2.html
           grep -Fq "Manual snapshot only; no background polling." analytics-v2.html
           ! grep -Fq "setInterval(" analytics-v2.html
