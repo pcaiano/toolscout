@@ -110,16 +110,17 @@ function safeHttps(v){try{const u=new URL(String(v||''));return u.protocol==='ht
 function first(...vals){for(const v of vals)if(v!==null&&v!==undefined&&Number.isFinite(Number(v)))return Number(v);return null}
 function stateEntries(obj){return Object.entries(obj||{}).sort((a,b)=>b[1]-a[1])}
 function renderNorthStar(d){
-  const f=d.funnel||{},a=d.audience||{},r=d.revenue||{},c=d.commercial||{},ac=d.affiliateCoverage||{};
-  const human=first(a.likelyHumanSessions,f.sessions)||0,out=first(f.outboundClicks,c.totals&&c.totals.outbound)||0;
+  const f=d.funnel||{},a=d.audience||{},r=d.revenue||{},c=d.commercial||{},ac=d.affiliateCoverage||{},tr=d.tracking||{},t=d.traffic||{};
+  const human24h=first(tr.humanSessionsLast24Hours)||0,mtdDailyAverage=first(t.dailyAverageMTD);
+  const out=first(f.outboundClicks,c.totals&&c.totals.outbound)||0;
   const mon=first(c.totals&&c.totals.monetizedOutbound,c.monetizedOutbound,ac.monetizedLikelyHumanClicks);
   document.getElementById('northstarBody').innerHTML='<div class="metricGrid">'+
-    metric('Likely-human sessions',num(human),'Primary clean audience')+
+    metric('Human sessions · 24h',num(human24h),'Rolling last 24 hours')+
+    metric('Avg human sessions / day · MTD',mtdDailyAverage===null?'—':Number(mtdDailyAverage).toFixed(1),'Month-to-date daily average')+
     metric('Recommendation completions',num(f.recommendationCompletions),'Completed recommendation journeys')+
     metric('Human outbound',num(out),pct(f.sessionToOutboundCtr)+' session → outbound')+
     metric('Monetized outbound',mon===null?'—':num(mon),mon===null?'Unavailable, not zero':pct(out?mon/out*100:0)+' of human outbound')+
     metric('Confirmed revenue',r.confirmedRevenue==null?'Unknown':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'No confirmed vendor evidence')+
-    metric('Month projection',num((d.traffic||{}).projectedMonth),'Likely-human sessions · current pace')+
   '</div>';
 }
 function taskHtml(x){
