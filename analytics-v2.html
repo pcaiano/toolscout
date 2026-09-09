@@ -117,7 +117,7 @@ function renderNorthStar(d){
   document.getElementById('northstarBody').innerHTML='<div class="metricGrid">'+
     metric('Human sessions · 24h',num(human24h),'Rolling last 24 hours')+
     metric('Avg human sessions / day · MTD',mtdDailyAverage===null?'—':Number(mtdDailyAverage).toFixed(1),'Month-to-date daily average')+
-    metric('Recommendation completions',num(f.recommendationCompletions),'Completed recommendation journeys')+
+    metric('Human sessions · today',num(t.today),'Likely-human sessions since 00:00 Europe/Lisbon')+
     metric('Human outbound',num(out),pct(f.sessionToOutboundCtr)+' session → outbound')+
     metric('Monetized outbound',mon===null?'—':num(mon),mon===null?'Unavailable, not zero':pct(out?mon/out*100:0)+' of human outbound')+
     metric('Confirmed revenue',r.confirmedRevenue==null?'Unknown':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'No confirmed vendor evidence')+
