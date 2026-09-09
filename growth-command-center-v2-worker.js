@@ -83,17 +83,20 @@ function afterAction(action){
 async function verifyActionUrl(url){
   const safe=safeUrl(url);
   const checkedAt=new Date().toISOString();
-  if(!safe)return {ok:false,http_status:null,checked_at:checkedAt,reason:'invalid_https_url'};
+  if(!safe)return {ok:false,http_status:null,checked_at:checkedAt,reason:'invalid_https_url',failure_scope:'internal'};
+  const reachableStatus=status=>(status>=200&&status<400)||(status>=400&&status<500&&status!==404&&status!==410);
   try{
     const head=await fetch(safe,{method:'HEAD',redirect:'manual',headers:{'User-Agent':'ToolScout-Chairman-Queue/2.0'},signal:AbortSignal.timeout(3500)});
     const headStatus=n(head.status);
-    if(headStatus>0&&headStatus<500)return {ok:true,http_status:headStatus,checked_at:checkedAt,reason:null,method:'HEAD'};
+    if(reachableStatus(headStatus))return {ok:true,http_status:headStatus,checked_at:checkedAt,reason:null,method:'HEAD',failure_scope:null};
   }catch{}
   try{
     const get=await fetch(safe,{method:'GET',redirect:'manual',headers:{'User-Agent':'ToolScout-Chairman-Queue/2.0','Accept':'text/html,application/xhtml+xml','Range':'bytes=0-0'},signal:AbortSignal.timeout(5000)});
     const getStatus=n(get.status);
-    return {ok:getStatus>0&&getStatus<500,http_status:getStatus||null,checked_at:checkedAt,reason:getStatus>=500?'remote_5xx_after_get_fallback':null,method:'GET_fallback'};
-  }catch{return {ok:false,http_status:null,checked_at:checkedAt,reason:'head_and_get_verification_failed',method:'GET_fallback'}}
+    if(reachableStatus(getStatus))return {ok:true,http_status:getStatus||null,checked_at:checkedAt,reason:null,method:'GET_fallback',failure_scope:null};
+    const reason=(getStatus===404||getStatus===410)?'remote_url_not_found':(getStatus>=500?'remote_5xx_after_get_fallback':'remote_verification_unavailable');
+    return {ok:false,http_status:getStatus||null,checked_at:checkedAt,reason,method:'GET_fallback',failure_scope:'external'};
+  }catch{return {ok:false,http_status:null,checked_at:checkedAt,reason:'head_and_get_verification_failed',method:'GET_fallback',failure_scope:'external'}}
 }
 async function baseHumanActions(request,env,ctx){
   try{
@@ -113,14 +116,16 @@ async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
     return {...action,estimated_minutes:minutes,expected_impact:expectedImpact(action),expected_impact_score:Number(impactScore.toFixed(1)),why_human:action.reason||'This step requires owner authentication, judgement or irreversible third-party action.',after_action:afterAction(action),link_verification:verification};
   }));
   const actionable=rows.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,HUMAN_ACTION_LIMIT);
-  const brokenLinks=rows.filter(x=>!x.link_verification?.ok);
+  const brokenLinks=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='internal');
+  const externalVerificationIssues=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='external');
   return {
     status:'connected',
     total:actionable.length,
     estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),
     items:actionable,
     broken_links:brokenLinks,
-    rule:'Only current engine states with a reachable HTTPS action URL enter the Chairman Queue. Resolved/stale states disappear automatically.'
+    external_verification_issues:externalVerificationIssues,
+    rule:'Only current engine states with a reachable HTTPS action URL enter the Chairman Queue. External sites that block or fail automated verification are reported separately from internal ToolScout bugs.'
   };
 }
 async function growthOpsSnapshot(request,env,ctx,stats){
@@ -173,7 +178,8 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   const seoFailures=n(aeoGeo?.failures)+n(machineReadability?.failures);
   const seoWarnings=n(aeoGeo?.warnings)+n(machineReadability?.warnings);
   const healthIssues=[
-    ...(queue.broken_links||[]).map(x=>({severity:'bug',engine:x.engine||'unknown',code:'broken_human_action_link',title:x.title||x.id||'Human action',detail:x.link_verification?.reason||'Direct action link could not be verified',url:x.action_url||null})),
+    ...(queue.broken_links||[]).map(x=>({severity:'bug',engine:x.engine||'unknown',code:'broken_human_action_link',title:x.title||x.id||'Human action',detail:x.link_verification?.reason||'ToolScout produced an invalid human-action URL.',url:x.action_url||null})),
+    ...(queue.external_verification_issues||[]).map(x=>({severity:'warning',engine:x.engine||'unknown',code:'external_action_verification_unavailable',title:x.title||x.id||'Human action',detail:`External destination could not be machine-verified (${x.link_verification?.reason||'unknown external response'}). This is not classified as an internal ToolScout bug; the distribution engine will re-check and re-discover persistent stale routes.`,url:x.action_url||null})),
     ...(!contentPublishFresh&&contentReportFresh?[{severity:'warning',engine:'content',code:'publishing_heartbeat_partial',title:'Content Engine publishing heartbeat',detail:'Content Intelligence refreshed successfully, but no recent verified content_published event is available in D1. Publishing visibility is partial rather than silently assumed healthy.',url:null}]:[]),
     ...(!audienceConnected?[{severity:'bug',engine:'audience',code:'audience_adapter_unavailable',title:'Audience Engine',detail:stats?.audienceGrowth?.reason||stats?.engagement?.reason||'Audience adapter is not reporting connected state.',url:null}]:[]),
     ...(!seoFresh?[{severity:'warning',engine:'seo-geo-aio',code:'growth_evidence_stale',title:'SEO / GEO / AIO evidence',detail:'One or more daily growth/readiness reports are missing or older than 36 hours.',url:null}]:[]),
