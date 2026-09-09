@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-09-09T01:12:04.123Z",
+  "generatedAt": "2026-09-09T07:19:52.730Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 10,
-      "likelyHuman": 4,
-      "bots": 6,
+      "total": 25,
+      "likelyHuman": 11,
+      "bots": 14,
       "owner": 0,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 643,
-      "likelyHuman": 288,
-      "bots": 192,
-      "owner": 25,
+      "total": 646,
+      "likelyHuman": 284,
+      "bots": 200,
+      "owner": 24,
       "synthetic": 0,
       "unknownLegacy": 138
     },
     "d30": {
-      "total": 1640,
-      "likelyHuman": 319,
-      "bots": 231,
+      "total": 1655,
+      "likelyHuman": 326,
+      "bots": 239,
       "owner": 39,
       "synthetic": 0,
       "unknownLegacy": 1051
@@ -62,10 +62,10 @@
       },
       {
         "day": "2026-09-09",
-        "sessions": 4
+        "sessions": 11
       }
     ],
-    "averageDailyLikelyHuman30d": 10.63
+    "averageDailyLikelyHuman30d": 10.87
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -85,22 +85,22 @@
       "sessions": 0
     },
     "outboundClicked": {
-      "events": 232,
-      "sessions": 232
+      "events": 238,
+      "sessions": 238
     },
     "recommendationCompletionRate": 100
   },
   "commercial30d": {
-    "outboundClicks": 232,
-    "sessionsWithOutbound": 232,
-    "monetizedOutbound": 46,
-    "monetizationCoverage": 19.8,
-    "humanSessionToOutboundRate": 72.7
+    "outboundClicks": 238,
+    "sessionsWithOutbound": 238,
+    "monetizedOutbound": 47,
+    "monetizationCoverage": 19.7,
+    "humanSessionToOutboundRate": 73
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 73
+      "sessions": 74
     },
     {
       "source": "ref:app.partnerstack.com",
@@ -134,9 +134,9 @@
   "intents30d": [
     {
       "intent": "general",
-      "sessions": 232,
+      "sessions": 238,
       "recommendationCompletions": 3,
-      "outboundClicks": 231
+      "outboundClicks": 237
     },
     {
       "intent": "beehiiv",
@@ -146,7 +146,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 88,
+      "sessions": 89,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -163,11 +163,11 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 319,
-    "humanDailyAverage30d": 10.63,
+    "humanSessions30d": 326,
+    "humanDailyAverage30d": 10.87,
     "recommendationCompletionRate": 0.6,
-    "humanSessionToOutboundRate": 72.7,
-    "monetizationCoverage": 19.8,
+    "humanSessionToOutboundRate": 73,
+    "monetizationCoverage": 19.7,
     "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
   }
 }
