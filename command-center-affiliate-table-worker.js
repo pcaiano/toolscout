@@ -126,6 +126,22 @@ async function decoratePage(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+async function serveCanonicalPage(request,env,ctx){
+  const trustedRequest=await requestWithTrustedSession(request,env);
+  const trustedEmail=String(trustedRequest.headers.get('Cf-Access-Authenticated-User-Email')||'').toLowerCase();
+  if(trustedEmail!==OWNER_EMAIL)return base.fetch(trustedRequest,env,ctx);
+  if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
+  const assetRequest=new Request(new URL('/analytics-v2',request.url).toString(),{method:'GET',headers:trustedRequest.headers});
+  const asset=await env.ASSETS.fetch(assetRequest);
+  if(!asset.ok)return asset;
+  const headers=new Headers(asset.headers);
+  headers.set('Content-Type','text/html; charset=UTF-8');
+  headers.set('Cache-Control','private, no-store, max-age=0');
+  headers.append('Set-Cookie',`${SESSION_COOKIE}=${await sessionValue(env.ADMIN_TOKEN,sessionBucket())}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+  const response=new Response(await asset.text(),{status:asset.status,statusText:asset.statusText,headers});
+  return decoratePage(response);
+}
+
 async function localOwnerLogin(request,env,ctx){
   if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
   if(Math.floor(Date.now()/1000)>LOCAL_LOGIN_EXPIRES_AT)return new Response('Login link expired',{status:410,headers:{'Cache-Control':'no-store'}});
@@ -136,7 +152,7 @@ async function localOwnerLogin(request,env,ctx){
   const headers=new Headers(request.headers);
   headers.set('Cf-Access-Authenticated-User-Email',OWNER_EMAIL);
   const authenticatedRequest=new Request(target.toString(),{method:'GET',headers});
-  return decoratePage(await base.fetch(authenticatedRequest,env,ctx));
+  return serveCanonicalPage(authenticatedRequest,env,ctx);
 }
 
 export default {
@@ -145,7 +161,6 @@ export default {
     const url=new URL(request.url);
     if(request.method==='GET'&&LOCAL_LOGIN_PATHS.has(url.pathname))return localOwnerLogin(request,env,ctx);
     if(request.method!=='GET'||!ANALYTICS_PATHS.has(url.pathname))return base.fetch(request,env,ctx);
-    const trustedRequest=await requestWithTrustedSession(request,env);
-    return decoratePage(await base.fetch(trustedRequest,env,ctx));
+    return serveCanonicalPage(request,env,ctx);
   }
 };
