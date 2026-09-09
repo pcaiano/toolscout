@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-08T21:35:33.944Z",
+  "generatedAt": "2026-09-09T08:22:50.044Z",
   "engine": "ToolScout Search & Answer Opportunity Engine v2",
   "objective": "Convert observed search and answer-engine signals into autonomous SEO/AEO/GEO actions that improve qualified traffic, decision quality and monetization potential while preserving editorial neutrality.",
   "autonomyDirective": "Automate safe growth actions by default. The Command Center is an observability surface, not a work queue. Escalate only blocked, ambiguous, destructive or policy-sensitive decisions.",
@@ -19,7 +19,7 @@
     "firstPageOpportunities": 9,
     "strikingDistanceOpportunities": 0,
     "authorityDepthOpportunities": 5,
-    "competitorResearchCandidates": 6
+    "competitorResearchCandidates": 5
   },
   "opportunities": [
     {
@@ -1456,18 +1456,6 @@
     },
     {
       "candidate": "kling-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "AlternativeTo",
-        "Futurepedia"
-      ],
-      "action": "research-only",
-      "autonomy": "auto-research-but-no-auto-publish-from-competitor-evidence-alone",
-      "publishGate": "Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.",
-      "reason": "Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value."
-    },
-    {
-      "candidate": "meta-ai",
       "competitorMentions": 2,
       "sources": [
         "AlternativeTo",
