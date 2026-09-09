@@ -109,10 +109,12 @@ jobs:
           grep -Fq "dailyAverageMTD" analytics-v2.html
           grep -Fq "monthToDate" analytics-v2.html
           ! grep -Fq "setInterval(" analytics-v2.html
-          grep -Fq "Affiliate · Status · Clicks" command-center-affiliate-table-worker.js
-          grep -Fq "affiliateStatusNativeTable" command-center-affiliate-table-worker.js
-          grep -Fq "d.affiliateCoverageStatus" command-center-affiliate-table-worker.js
+          grep -Fq "Affiliate Coverage Status" command-center-affiliate-table-worker.js
+          grep -Fq "affiliateCoverageStatusBody" command-center-affiliate-table-worker.js
+          grep -Fq "paintAffiliate(d.affiliateCoverageStatus)" command-center-affiliate-table-worker.js
           grep -Fq "<th>Affiliate</th><th>Status</th><th>Clicks</th>" command-center-affiliate-table-worker.js
+          grep -Fq "Loading affiliate status" command-center-affiliate-table-worker.js
+          grep -Fq "bootstrapLoad" command-center-affiliate-table-worker.js
 
       - name: Validate operational documentation
         run: |
