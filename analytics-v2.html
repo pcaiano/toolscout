@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ToolScout Growth Command Center</title>
+<style>
+:root{
+  --bg:#090b0e;--card:#12161b;--card2:#0f1318;--ink:#f6f8fb;--muted:#98a2b3;--line:#252c35;
+  --good:#32d583;--warn:#fdb022;--bad:#f97066;--accent:#84adff;--radius:18px;
+}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}.top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:16px}
+.eyebrow{font-size:11px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}h1{font-size:42px;letter-spacing:-.05em;margin:6px 0 4px}.sub{max-width:820px;color:var(--muted);font-size:14px;line-height:1.55;margin:0}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.btn{border:1px solid #343d48;background:#1a2028;color:var(--ink);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{background:#222a34}.btn.primary{background:#f5f7fa;color:#101318;border-color:#f5f7fa}.btn.primary:hover{background:#fff}.btn.danger{color:#ffb4ad}.btn:disabled{opacity:.5;cursor:wait}
+.statusbar{display:flex;justify-content:space-between;gap:14px;align-items:center;border:1px solid var(--line);background:#0e1217;border-radius:13px;padding:11px 13px;color:var(--muted);font-size:12px;margin-bottom:16px}
+.statusbar strong{color:var(--ink)}.layoutHint{font-size:11px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:76px;gap:12px;align-items:stretch}
+.widget{grid-column:span var(--w,6);grid-row:span var(--h,4);position:relative;min-height:0;background:linear-gradient(180deg,var(--card),#101419);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.18)}
+.widget[data-dragging="1"]{opacity:.55;outline:1px solid var(--accent)}.widgetHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 17px 10px;cursor:grab;user-select:none}.widgetHead:active{cursor:grabbing}
+.widgetTitle{font-size:16px;font-weight:850;letter-spacing:-.02em}.widgetKicker{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:850;margin-bottom:3px}.widgetMeta{font-size:11px;color:var(--muted);text-align:right}
+.widgetBody{height:calc(100% - 58px);overflow:auto;padding:0 17px 17px;scrollbar-width:thin}.resizeHandle{position:absolute;right:3px;bottom:3px;width:20px;height:20px;cursor:nwse-resize;opacity:.6}
+.resizeHandle:after{content:"";position:absolute;right:4px;bottom:4px;width:9px;height:9px;border-right:2px solid #596474;border-bottom:2px solid #596474}
+.metricGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{background:var(--card2);border:1px solid #202731;border-radius:12px;padding:11px}.metric small{display:block;color:var(--muted);font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.metric b{display:block;font-size:25px;letter-spacing:-.04em;margin:4px 0 2px}.metric span{display:block;color:var(--muted);font-size:10px;line-height:1.35}
+.queueSummary{display:flex;align-items:baseline;gap:8px;margin-bottom:11px}.queueSummary b{font-size:25px;letter-spacing:-.04em}.queueSummary span{font-size:12px;color:var(--muted)}
+.task{border-top:1px solid var(--line);padding:12px 0}.task:first-of-type{border-top:0}.taskTop{display:flex;justify-content:space-between;gap:12px}.taskTitle{font-weight:850;font-size:13px}.taskMeta{font-size:10px;color:var(--muted);margin-top:3px}.taskReason,.taskAfter{font-size:11px;color:#c5ccd5;line-height:1.45;margin-top:6px}.taskAfter{color:var(--muted)}.taskActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.pill{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:4px 7px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:850}.pill.good{color:var(--good);border-color:#245943}.pill.warn{color:var(--warn);border-color:#5d4a22}.pill.bad{color:var(--bad);border-color:#61312e}.pill.info{color:var(--accent);border-color:#31466d}
+.row{display:flex;justify-content:space-between;gap:18px;padding:9px 0;border-top:1px solid var(--line)}.row:first-child{border-top:0}.rowName{font-size:12px;font-weight:750}.rowMeta{font-size:10px;color:var(--muted);line-height:1.4;margin-top:2px}.rowValue{font-size:12px;font-weight:850;text-align:right;white-space:nowrap}
+.note{font-size:11px;color:var(--muted);line-height:1.5}.empty{display:flex;height:100%;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:12px;padding:18px}.bug{border:1px solid #633532;background:#201414;border-radius:11px;padding:10px;margin-top:8px;font-size:11px}.bug b{color:#ffb4ad}
+.ledgerItem{display:grid;grid-template-columns:92px 86px minmax(0,1fr);gap:9px;border-top:1px solid var(--line);padding:9px 0;font-size:10px;align-items:start}.ledgerItem:first-child{border-top:0}.ledgerTime,.ledgerEngine{color:var(--muted)}.ledgerMain b{display:block;font-size:11px;color:var(--ink);margin-bottom:2px}.ledgerMain span{color:var(--muted);line-height:1.35}
+.progress{height:7px;border-radius:999px;background:#20262e;overflow:hidden;margin:8px 0 4px}.progress>i{display:block;height:100%;background:#e7eaf0;border-radius:999px;width:0}
+.modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.74);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}.modalBackdrop.open{display:flex}.modal{width:min(900px,96vw);max-height:88vh;overflow:auto;background:#11161c;border:1px solid #2a333e;border-radius:19px;padding:20px;box-shadow:0 24px 90px rgba(0,0,0,.55)}.modalTop{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.modal h2{margin:0;font-size:24px;letter-spacing:-.03em}.modalContent{margin-top:16px}
+[data-state="good"]{color:var(--good)}[data-state="warn"]{color:var(--warn)}[data-state="bad"]{color:var(--bad)}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(6,minmax(0,1fr))}.widget{grid-column:span min(var(--w,6),6)}}
+@media(max-width:720px){.wrap{padding:22px 14px 60px}.top{display:block}h1{font-size:34px}.controls{justify-content:flex-start;margin-top:14px}.layoutHint{display:none}.grid{display:block}.widget{height:auto;min-height:300px;margin-bottom:12px}.widgetBody{height:auto;max-height:520px}.resizeHandle{display:none}.widgetHead{cursor:default}.metricGrid{grid-template-columns:1fr 1fr}.ledgerItem{grid-template-columns:72px minmax(0,1fr)}.ledgerEngine{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="eyebrow">TOOLSCOUT · GROWTH OPERATIONS</div><h1>Command Center</h1><p class="sub">One operational surface for traffic, distribution and affiliate monetization. Human intervention is treated as an exception; the engines keep the state.</p></div>
+    <div class="controls"><button class="btn" id="resetLayout">Reset layout</button><button class="btn primary" id="refresh">Refresh data</button></div>
+  </header>
+  <div class="statusbar"><div id="status"><strong>Not loaded.</strong> Press Refresh data for a current operational snapshot.</div><div class="layoutHint">Drag · resize · click for detail</div></div>
+
+  <main class="grid" id="grid">
+    <section class="widget" data-widget="chairman" style="--w:8;--h:5">
+      <div class="widgetHead"><div><div class="widgetKicker">Human exceptions only</div><div class="widgetTitle">Chairman Queue</div></div><div class="widgetMeta" id="chairmanMeta">Live state</div></div>
+      <div class="widgetBody" id="chairmanBody"><div class="empty">Refresh to load current human gates.</div></div><div class="resizeHandle"></div>
+    </section>
+
+    <section class="widget" data-widget="northstar" style="--w:4;--h:5">
+      <div class="widgetHead"><div><div class="widgetKicker">Economic funnel</div><div class="widgetTitle">North Star</div></div><div class="widgetMeta">Human only</div></div>
+      <div class="widgetBody" id="northstarBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
+    </section>
+
+    <section class="widget" data-widget="distribution" style="--w:6;--h:5">
+      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Distribution Engine 2.0</div></div><div class="widgetMeta" id="distributionMeta">Closed loop</div></div>
+      <div class="widgetBody" id="distributionBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
+    </section>
+
+    <section class="widget" data-widget="affiliate" style="--w:6;--h:5">
+      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Affiliate Coverage Engine 2.0</div></div><div class="widgetMeta" id="affiliateMeta">Demand weighted</div></div>
+      <div class="widgetBody" id="affiliateBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
+    </section>
+
+    <section class="widget" data-widget="footprint" style="--w:5;--h:5">
+      <div class="widgetHead"><div><div class="widgetKicker">Where ToolScout exists</div><div class="widgetTitle">ToolScout Footprint</div></div><div class="widgetMeta">Verified evidence</div></div>
+      <div class="widgetBody" id="footprintBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
+    </section>
+
+    <section class="widget" data-widget="ledger" style="--w:7;--h:5">
+      <div class="widgetHead"><div><div class="widgetKicker">Actions → outcomes</div><div class="widgetTitle">Growth Ledger</div></div><div class="widgetMeta">Latest evidence</div></div>
+      <div class="widgetBody" id="ledgerBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
+    </section>
+
+    <section class="widget" data-widget="revenue" style="--w:6;--h:4">
+      <div class="widgetHead"><div><div class="widgetKicker">Commercial gaps</div><div class="widgetTitle">Revenue & Coverage</div></div><div class="widgetMeta">Likely-human</div></div>
+      <div class="widgetBody" id="revenueBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
+    </section>
+
+    <section class="widget" data-widget="health" style="--w:6;--h:4">
+      <div class="widgetHead"><div><div class="widgetKicker">No silent failures</div><div class="widgetTitle">Engine & Data Health</div></div><div class="widgetMeta">Operational bugs</div></div>
+      <div class="widgetBody" id="healthBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
+    </section>
+  </main>
+</div>
+
+<div class="modalBackdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal"><div class="modalTop"><div><div class="widgetKicker" id="modalKicker">DETAIL</div><h2 id="modalTitle">Detail</h2></div><button class="btn" id="modalClose">Close</button></div><div class="modalContent" id="modalContent"></div></div>
+</div>
+
+<script>
+const API='/analytics/api/stats';
+const QUEUE_API='/analytics/api/chairman-queue';
+const LAYOUT_KEY='toolscout_command_center_v2_layout';
+const grid=document.getElementById('grid'),refreshBtn=document.getElementById('refresh'),statusEl=document.getElementById('status');
+let snapshot=null,loading=false,resizing=false;
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const num=v=>Number(v||0).toLocaleString();
+const pct=v=>v===null||v===undefined?'—':Number(v).toFixed(1)+'%';
+const money=(v,c)=>{if(v===null||v===undefined)return 'Unknown';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:c||'EUR',maximumFractionDigits:2}).format(Number(v||0))}catch{return String(v)}};
+const dt=v=>v?new Date(String(v).replace(' ','T')+(String(v).includes('T')?'':'Z')).toLocaleString(undefined,{timeZone:'Europe/Lisbon'}):'—';
+const metric=(label,value,meta='')=>'<div class="metric"><small>'+esc(label)+'</small><b>'+esc(value)+'</b><span>'+esc(meta)+'</span></div>';
+const row=(name,value,meta='')=>'<div class="row"><div><div class="rowName">'+esc(name)+'</div>'+(meta?'<div class="rowMeta">'+esc(meta)+'</div>':'')+'</div><div class="rowValue">'+esc(value)+'</div></div>';
+const pill=(text,state='')=>'<span class="pill '+state+'">'+esc(text)+'</span>';
+function safeHttps(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
+function first(...vals){for(const v of vals)if(v!==null&&v!==undefined&&Number.isFinite(Number(v)))return Number(v);return null}
+function stateEntries(obj){return Object.entries(obj||{}).sort((a,b)=>b[1]-a[1])}
+function renderNorthStar(d){
+  const f=d.funnel||{},a=d.audience||{},r=d.revenue||{},c=d.commercial||{},ac=d.affiliateCoverage||{};
+  const human=first(a.likelyHumanSessions,f.sessions)||0,out=first(f.outboundClicks,c.totals&&c.totals.outbound)||0;
+  const mon=first(c.totals&&c.totals.monetizedOutbound,c.monetizedOutbound,ac.monetizedLikelyHumanClicks);
+  document.getElementById('northstarBody').innerHTML='<div class="metricGrid">'+
+    metric('Likely-human sessions',num(human),'Primary clean audience')+
+    metric('Recommendation completions',num(f.recommendationCompletions),'Completed recommendation journeys')+
+    metric('Human outbound',num(out),pct(f.sessionToOutboundCtr)+' session → outbound')+
+    metric('Monetized outbound',mon===null?'—':num(mon),mon===null?'Unavailable, not zero':pct(out?mon/out*100:0)+' of human outbound')+
+    metric('Confirmed revenue',r.confirmedRevenue==null?'Unknown':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'No confirmed vendor evidence')+
+    metric('Month projection',num((d.traffic||{}).projectedMonth),'Likely-human sessions · current pace')+
+  '</div>';
+}
+function taskHtml(x){
+  const url=safeHttps(x.action_url),canConfirm=x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status));
+  return '<div class="task" data-task-engine="'+esc(x.engine)+'" data-task-id="'+esc(x.id)+'">'+
+    '<div class="taskTop"><div><div class="taskTitle">'+esc(x.title)+'</div><div class="taskMeta">'+esc(x.engine)+' · '+esc(x.status)+' · ~'+esc(x.estimated_minutes)+' min</div></div>'+pill(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate','warn')+'</div>'+
+    '<div class="taskReason"><b>Do:</b> '+esc(x.reason)+'</div>'+
+    '<div class="taskReason"><b>Why you:</b> '+esc(x.why_human)+'</div>'+
+    '<div class="taskReason"><b>Expected impact:</b> '+esc(x.expected_impact)+'</div>'+
+    '<div class="taskAfter"><b>Then:</b> '+esc(x.after_action)+'</div>'+
+    '<div class="taskActions">'+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+
+    (canConfirm?'<button class="btn" data-resolve-task="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'">I submitted it</button>':'')+
+    (x.engine==='distribution'?'<button class="btn danger" data-resolve-task="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+
+    '</div></div>';
+}
+function renderChairman(d){
+  const q=d.growthOps&&d.growthOps.chairmanQueue||{items:[],total:0,estimated_minutes:0,broken_links:[]};
+  document.getElementById('chairmanMeta').textContent=q.total?q.total+' current gate'+(q.total===1?'':'s'):'Clear';
+  document.getElementById('chairmanBody').innerHTML=q.items.length?
+    '<div class="queueSummary"><b>'+num(q.total)+'</b><span>actions · ~'+num(q.estimated_minutes)+' min total</span></div>'+q.items.map(taskHtml).join(''):
+    '<div class="empty"><div><b data-state="good">Everything the engines can do is currently unblocked.</b><br><br>No current human action with a verified direct link.</div></div>';
+}
+function renderDistribution(d){
+  const x=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.distribution||{};
+  const success=x.events_24h?x.successful_24h/x.events_24h*100:null;
+  document.getElementById('distributionMeta').textContent=x.last_activity_at?'Active '+dt(x.last_activity_at):'No recent evidence';
+  document.getElementById('distributionBody').innerHTML=
+    '<div class="metricGrid">'+
+      metric('Actions · 24h',num(x.events_24h),pct(success)+' successful')+
+      metric('Failed · 24h',num(x.failed_24h),'Must never fail silently')+
+      metric('Human sessions · 30d',num(x.attributed_human_sessions_30d),'Attributed to distribution')+
+      metric('Monetized outbound · 30d',num(x.attributed_monetized_outbound_30d),num(x.attributed_outbound_30d)+' total outbound')+
+    '</div>'+
+    '<div style="margin-top:10px">'+stateEntries(x.opportunity_status).slice(0,7).map(([k,v])=>row(k,num(v),'distribution opportunities')).join('')+'</div>';
+}
+function renderAffiliate(d){
+  const x=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.affiliate||{};
+  const cov=x.weighted_coverage_pct;
+  document.getElementById('affiliateMeta').textContent=x.last_run_at?'Cycle '+dt(x.last_run_at):'No recent cycle';
+  document.getElementById('affiliateBody').innerHTML=
+    '<div class="metricGrid">'+
+      metric('Weighted coverage',pct(cov),x.coverage_change_7d_pp==null?'7d comparison unavailable':(x.coverage_change_7d_pp>=0?'+':'')+x.coverage_change_7d_pp.toFixed(1)+' pp / 7d')+
+      metric('Monetized outbound · 30d',num(x.monetized_outbound_30d),num(x.human_outbound_30d)+' human outbound')+
+      metric('Revenue leakage · 30d',num(x.unmonetized_outbound_30d),'Human outbound not monetized')+
+      metric('Recoverable queue',num(x.recoverable_queue),'Demand-prioritized candidates')+
+    '</div>'+
+    '<div class="progress"><i style="width:'+Math.max(0,Math.min(100,Number(cov||0)))+'%"></i></div><div class="note">Coverage is weighted by observed human outbound demand, not raw catalogue count.</div>'+
+    '<div style="margin-top:8px">'+stateEntries(x.workflow_status).slice(0,7).map(([k,v])=>row(k,num(v),'affiliate tools')).join('')+'</div>';
+}
+function renderFootprint(d){
+  const f=d.growthOps&&d.growthOps.footprint||{},s=f.search||{},dist=f.distribution||{};
+  document.getElementById('footprintBody').innerHTML=
+    '<div class="metricGrid">'+
+      metric('Google observed pages',num(s.observed_pages),num(s.impressions)+' impressions')+
+      metric('Sitemap URLs',num(s.sitemap_urls),'Published crawlable inventory')+
+      metric('Live / verified surfaces',num(dist.live_verified),'Externally verified distribution')+
+      metric('Submitted / pending',num(dist.submitted_pending),'Awaiting external outcome')+
+    '</div>'+
+    '<div class="note" style="margin-top:9px">'+esc(s.note||'Search visibility evidence is not a complete index count.')+'</div>'+
+    '<div style="margin-top:8px">'+(dist.surfaces||[]).slice(0,8).map(x=>row(x.name||x.slug,x.status,(x.type||'surface')+(x.url?' · URL recorded':''))).join('')+'</div>';
+}
+function renderLedger(d){
+  const items=d.growthOps&&d.growthOps.ledger||[];
+  document.getElementById('ledgerBody').innerHTML=items.length?items.map(x=>
+    '<div class="ledgerItem"><div class="ledgerTime">'+esc(dt(x.at))+'</div><div class="ledgerEngine">'+esc(x.engine)+'</div><div class="ledgerMain"><b>'+esc(x.subject)+' · '+esc(x.action)+'</b><span>'+esc(x.result)+(x.detail?' · '+esc(x.detail):'')+(x.human_sessions!=null?' · '+num(x.human_sessions)+' human sessions':'')+(x.outbound_clicks!=null?' · '+num(x.outbound_clicks)+' outbound':'')+'</span></div></div>'
+  ).join(''):'<div class="empty">No engine ledger evidence available.</div>';
+}
+function renderRevenue(d){
+  const c=d.commercial||{},r=d.revenue||{},gaps=c.revenueGaps||[],ac=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.affiliate||{};
+  document.getElementById('revenueBody').innerHTML=
+    '<div class="metricGrid">'+
+      metric('Weighted coverage',pct(ac.weighted_coverage_pct),'Traffic-demand weighted')+
+      metric('Unmonetized human outbound',num(ac.unmonetized_outbound_30d),'30-day leakage')+
+      metric('Confirmed revenue',r.confirmedRevenue==null?'Unknown':money(r.confirmedRevenue,r.currency),'Vendor-side evidence only')+
+      metric('Ledger evidence',num(r.ledgerRows),'Vendor records')+
+    '</div>'+
+    '<div style="margin-top:9px">'+(gaps.length?gaps.slice(0,6).map(x=>row(x.slug||x.tool_slug,num(x.outboundClicks||x.clicks),'Revenue gap score '+Number(x.score||0).toFixed(1))).join(''):'<div class="note">No current human revenue gaps in the commercial snapshot.</div>')+'</div>';
+}
+function renderHealth(d){
+  const tr=d.tracking||{},g=d.growthOps||{},q=g.chairmanQueue||{},dist=g.engines&&g.engines.distribution||{},aff=g.engines&&g.engines.affiliate||{};
+  const bugs=q.broken_links||[];
+  let html=row('Tracking',tr.status||'Unavailable',num(tr.humanSessionsLast24Hours)+' human sessions · 24h')+
+    row('Affiliate cycle',aff.last_run_at?'Observed':'No evidence',dt(aff.last_run_at))+
+    row('Distribution activity',dist.last_activity_at?'Observed':'No evidence',dt(dist.last_activity_at))+
+    row('Broken Chairman links',num(bugs.length),bugs.length?'Suppressed from human queue':'None detected');
+  if(bugs.length)html+='<div class="bug"><b>Engine bug:</b> '+esc(bugs.length)+' current human task'+(bugs.length===1?' has':'s have')+' an unreachable direct link and '+(bugs.length===1?'is':'are')+' deliberately hidden from the Chairman Queue.</div>';
+  document.getElementById('healthBody').innerHTML=html;
+}
+function render(d){
+  snapshot=d;
+  renderChairman(d);renderNorthStar(d);renderDistribution(d);renderAffiliate(d);renderFootprint(d);renderLedger(d);renderRevenue(d);renderHealth(d);
+  statusEl.innerHTML='<strong>Updated '+esc(new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'}))+'.</strong> Manual snapshot only; no background polling.';
+}
+async function load(){
+  if(loading)return;loading=true;refreshBtn.disabled=true;statusEl.innerHTML='<strong>Refreshing…</strong> Reading current engine state.';
+  try{
+    document.cookie='toolscout_owner=1; Max-Age=15552000; Path=/; SameSite=Lax; Secure';
+    const r=await fetch(API+'?t='+Date.now(),{credentials:'same-origin',cache:'no-store'});
+    if(r.status===401)throw new Error('Secure Command Center session expired. Reload this page.');
+    if(!r.ok)throw new Error('Command Center API returned HTTP '+r.status);
+    render(await r.json());
+  }catch(e){statusEl.innerHTML='<strong data-state="bad">Unable to refresh.</strong> '+esc(e.message||String(e));}
+  finally{loading=false;refreshBtn.disabled=false}
+}
+async function resolveTask(button){
+  const engine=button.dataset.engine,id=button.dataset.id,action=button.dataset.resolveTask;
+  if(!engine||!id||!action)return;
+  const old=button.textContent;button.disabled=true;button.textContent='Saving…';
+  try{
+    const endpoint=engine==='distribution'?'/analytics/api/distribution-human-action':'/analytics/api/affiliate-human-action';
+    const body=engine==='distribution'?{surface_slug:id,action}:{tool_slug:id,event:'submitted',evidence:'Confirmed from Command Center V2 Chairman Queue'};
+    const r=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||d.ok===false)throw new Error(d.error||'action_update_failed');
+    const q=await fetch(QUEUE_API+'?t='+Date.now(),{credentials:'same-origin',cache:'no-store'}).then(x=>x.json());
+    if(snapshot&&snapshot.growthOps){snapshot.growthOps.chairmanQueue=q;renderChairman(snapshot);renderHealth(snapshot)}
+  }catch(e){button.disabled=false;button.textContent='Save failed';setTimeout(()=>button.textContent=old,1600)}
+}
+refreshBtn.addEventListener('click',load);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-resolve-task]');if(b){e.preventDefault();e.stopPropagation();resolveTask(b)}});
+
+function currentLayout(){
+  return [...grid.querySelectorAll('.widget')].map(el=>({id:el.dataset.widget,w:Number(getComputedStyle(el).getPropertyValue('--w'))||Number(el.style.getPropertyValue('--w'))||6,h:Number(getComputedStyle(el).getPropertyValue('--h'))||Number(el.style.getPropertyValue('--h'))||4}));
+}
+function persistLayout(){try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(currentLayout()))}catch{}}
+function restoreLayout(){
+  let saved;try{saved=JSON.parse(localStorage.getItem(LAYOUT_KEY)||'null')}catch{}
+  if(!Array.isArray(saved))return;
+  const map=new Map([...grid.querySelectorAll('.widget')].map(el=>[el.dataset.widget,el]));
+  for(const x of saved){const el=map.get(x.id);if(!el)continue;el.style.setProperty('--w',Math.max(3,Math.min(12,Number(x.w)||6)));el.style.setProperty('--h',Math.max(2,Math.min(9,Number(x.h)||4)));grid.appendChild(el)}
+}
+restoreLayout();
+document.getElementById('resetLayout').addEventListener('click',()=>{try{localStorage.removeItem(LAYOUT_KEY)}catch{}location.reload()});
+
+let dragged=null;
+grid.querySelectorAll('.widget').forEach(el=>{
+  el.draggable=true;
+  const head=el.querySelector('.widgetHead');
+  el.addEventListener('dragstart',e=>{if(resizing||!e.target.closest('.widgetHead')){e.preventDefault();return}dragged=el;el.dataset.dragging='1';e.dataTransfer.effectAllowed='move'});
+  el.addEventListener('dragend',()=>{delete el.dataset.dragging;dragged=null;persistLayout()});
+  el.addEventListener('dragover',e=>{if(!dragged||dragged===el)return;e.preventDefault();const rect=el.getBoundingClientRect(),after=e.clientY>rect.top+rect.height/2;grid.insertBefore(dragged,after?el.nextSibling:el)});
+  head.addEventListener('mousedown',()=>{el.draggable=true});
+});
+grid.querySelectorAll('.resizeHandle').forEach(handle=>{
+  handle.addEventListener('pointerdown',e=>{
+    if(innerWidth<=720)return;e.preventDefault();e.stopPropagation();resizing=true;
+    const el=handle.closest('.widget'),startX=e.clientX,startY=e.clientY,startW=el.getBoundingClientRect().width,startH=el.getBoundingClientRect().height;
+    const gridW=grid.getBoundingClientRect().width,gap=12,col=(gridW-gap*11)/12,row=76;
+    handle.setPointerCapture(e.pointerId);
+    const move=ev=>{const px=Math.max(col*3,startW+ev.clientX-startX),py=Math.max(row*2,startH+ev.clientY-startY);const w=Math.max(3,Math.min(12,Math.round((px+gap)/(col+gap))));const h=Math.max(2,Math.min(9,Math.round((py+gap)/(row+gap))));el.style.setProperty('--w',w);el.style.setProperty('--h',h)};
+    const up=()=>{handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',up);resizing=false;persistLayout()};
+    handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',up);
+  });
+});
+
+const modal=document.getElementById('modalBackdrop'),modalTitle=document.getElementById('modalTitle'),modalContent=document.getElementById('modalContent'),modalKicker=document.getElementById('modalKicker');
+function modalRows(title,kicker,html){modalTitle.textContent=title;modalKicker.textContent=kicker;modalContent.innerHTML=html;modal.classList.add('open');modal.setAttribute('aria-hidden','false')}
+function detailFor(id){
+  if(!snapshot)return;
+  const g=snapshot.growthOps||{},eng=g.engines||{},f=g.footprint||{};
+  if(id==='chairman'){const q=g.chairmanQueue||{};modalRows('Chairman Queue','HUMAN GATES',q.items&&q.items.length?q.items.map(taskHtml).join(''):'<div class="note">No current human gates.</div>');return}
+  if(id==='distribution'){const x=eng.distribution||{};modalRows('Distribution Engine 2.0','ENGINE DETAIL',stateEntries(x.opportunity_status).map(([k,v])=>row(k,num(v),'opportunity state')).join('')+stateEntries(x.delivery_status).map(([k,v])=>row('verification: '+k,num(v),'delivery state')).join(''));return}
+  if(id==='affiliate'){const x=eng.affiliate||{};modalRows('Affiliate Coverage Engine 2.0','ENGINE DETAIL',stateEntries(x.workflow_status).map(([k,v])=>row(k,num(v),'affiliate state')).join('')+row('Discovery checked',num(x.discovery&&x.discovery.total),dt(x.discovery&&x.discovery.last_checked)));return}
+  if(id==='footprint'){const surfaces=f.distribution&&f.distribution.surfaces||[];modalRows('ToolScout Footprint','DISTRIBUTION + SEARCH',row('GSC observed pages',num(f.search&&f.search.observed_pages),f.search&&f.search.note)+row('Sitemap URLs',num(f.search&&f.search.sitemap_urls),'crawlable inventory')+surfaces.map(x=>row(x.name||x.slug,x.status,x.type||'surface')).join(''));return}
+  if(id==='ledger'){modalRows('Growth Ledger','EVIDENCE LOG',(g.ledger||[]).map(x=>row((x.engine||'engine')+' · '+(x.subject||''),x.result||'',dt(x.at)+' · '+(x.action||''))).join(''));return}
+  if(id==='health'){const b=g.chairmanQueue&&g.chairmanQueue.broken_links||[];modalRows('Engine & Data Health','FAILURES / GAPS',b.length?b.map(x=>row(x.title||x.id,'Broken action link',x.link_verification&&x.link_verification.reason||'unreachable')).join(''):'<div class="note">No broken Chairman Queue links detected in this snapshot.</div>');return}
+  if(id==='revenue'){const gaps=snapshot.commercial&&snapshot.commercial.revenueGaps||[];modalRows('Revenue & Coverage','COMMERCIAL DETAIL',gaps.length?gaps.map(x=>row(x.slug||x.tool_slug,num(x.outboundClicks||x.clicks),'score '+Number(x.score||0).toFixed(1))).join(''):'<div class="note">No revenue gaps surfaced.</div>');return}
+  if(id==='northstar'){modalRows('North Star','ECONOMIC FUNNEL',document.getElementById('northstarBody').innerHTML)}
+}
+grid.addEventListener('click',e=>{if(resizing||e.target.closest('a,button,.resizeHandle'))return;const w=e.target.closest('.widget');if(w)detailFor(w.dataset.widget)});
+document.getElementById('modalClose').addEventListener('click',()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true')});
+modal.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('open');modal.setAttribute('aria-hidden','true')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('open')});
+</script>
+</body>
+</html>
