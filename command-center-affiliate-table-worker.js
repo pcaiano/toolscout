@@ -1,7 +1,6 @@
 import base from './growth-command-center-v2-worker.js';
 
 const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
-const ANALYTICS_ALIASES=new Set(['/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const SESSION_COOKIE='toolscout_cc';
 const SESSION_TTL_SECONDS=86400;
 const OWNER_EMAIL='pcaiano@gmail.com';
@@ -75,11 +74,6 @@ export default {
   ...base,
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&ANALYTICS_ALIASES.has(url.pathname)){
-      const canonical=new URL('/analytics/',url);
-      canonical.search=url.search;
-      return Response.redirect(canonical.toString(),302);
-    }
     if(request.method!=='GET'||!ANALYTICS_PATHS.has(url.pathname))return base.fetch(request,env,ctx);
     const trustedRequest=await requestWithTrustedSession(request,env);
     const response=await base.fetch(trustedRequest,env,ctx);
