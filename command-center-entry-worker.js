@@ -65,6 +65,27 @@ async function serveProtectedPage(request, env, ctx) {
   return new Response(asset.body, { status: asset.status, headers });
 }
 
+function applyStableMonthlyProjection(stats) {
+  if (!stats || typeof stats !== 'object' || !stats.traffic || typeof stats.traffic !== 'object') return stats;
+  const tracking24h = Number(stats.tracking?.humanSessionsLast24Hours);
+  const mtdAverage = Number(stats.traffic.dailyAverageMTD);
+  const daysInMonth = Number(stats.traffic.daysInMonth);
+  if (!Number.isFinite(daysInMonth) || daysInMonth <= 0) return stats;
+
+  const hasRolling24h = Number.isFinite(tracking24h) && tracking24h >= 0;
+  const hasMtdAverage = Number.isFinite(mtdAverage) && mtdAverage >= 0;
+  const dailyRate = hasRolling24h ? tracking24h : (hasMtdAverage ? mtdAverage : null);
+  if (dailyRate === null) return stats;
+
+  stats.traffic = {
+    ...stats.traffic,
+    projectedMonth: Math.round(dailyRate * daysInMonth),
+    projectionDailyRate: Number(dailyRate.toFixed(1)),
+    projectionBasis: hasRolling24h ? 'rolling_24h' : 'mtd_daily_average'
+  };
+  return stats;
+}
+
 async function serveProtectedStats(request, env, ctx) {
   if (!(await validSession(request, env))) {
     return Response.json({ error: 'unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
@@ -81,6 +102,18 @@ async function serveProtectedStats(request, env, ctx) {
   const response = await base.fetch(internalRequest, env, ctx);
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set('Cache-Control', 'private, no-store');
+
+  if (response.ok && (response.headers.get('Content-Type') || '').includes('application/json')) {
+    try {
+      const stats = applyStableMonthlyProjection(await response.json());
+      responseHeaders.set('Content-Type', 'application/json; charset=UTF-8');
+      responseHeaders.delete('Content-Length');
+      return Response.json(stats, { status: response.status, headers: responseHeaders });
+    } catch {
+      return new Response('Command Center stats unavailable', { status: 502, headers: { 'Content-Type': 'text/plain; charset=UTF-8', 'Cache-Control': 'no-store' } });
+    }
+  }
+
   return new Response(response.body, { status: response.status, headers: responseHeaders });
 }
 
