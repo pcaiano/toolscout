@@ -2,6 +2,29 @@ import base from './growth-command-center-v2-worker.js';
 
 const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const ANALYTICS_ALIASES=new Set(['/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
+const SESSION_COOKIE='toolscout_cc';
+const SESSION_TTL_SECONDS=86400;
+const OWNER_EMAIL='pcaiano@gmail.com';
+
+async function digestHex(value){const bytes=new TextEncoder().encode(value);const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('')}
+function sessionBucket(now=Date.now()){return Math.floor(now/(SESSION_TTL_SECONDS*1000))}
+async function sessionValue(secret,bucket){return digestHex(`toolscout-command-center:${secret}:${bucket}`)}
+async function hasValidSession(request,env){
+  if(!env.ADMIN_TOKEN)return false;
+  const cookie=request.headers.get('Cookie')||'';
+  const match=cookie.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`));
+  if(!match)return false;
+  const supplied=decodeURIComponent(match[1]);
+  const bucket=sessionBucket();
+  for(const candidate of [bucket,bucket-1])if(supplied===await sessionValue(env.ADMIN_TOKEN,candidate))return true;
+  return false;
+}
+async function requestWithTrustedSession(request,env){
+  if(!(await hasValidSession(request,env)))return request;
+  const headers=new Headers(request.headers);
+  headers.set('Cf-Access-Authenticated-User-Email',OWNER_EMAIL);
+  return new Request(request,{headers});
+}
 
 function affiliateWidget(){return `<section class="widget" data-widget="affiliate-status" style="--w:12;--h:6">
   <div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Likely-human clicks · 30d</div></div>
@@ -58,7 +81,8 @@ export default {
       return Response.redirect(canonical.toString(),302);
     }
     if(request.method!=='GET'||!ANALYTICS_PATHS.has(url.pathname))return base.fetch(request,env,ctx);
-    const response=await base.fetch(request,env,ctx);
+    const trustedRequest=await requestWithTrustedSession(request,env);
+    const response=await base.fetch(trustedRequest,env,ctx);
     const type=response.headers.get('Content-Type')||'';
     if(!response.ok||!type.includes('text/html'))return response;
     let html=await response.text();
