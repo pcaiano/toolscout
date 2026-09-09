@@ -9,7 +9,7 @@ const PENDING_AFFILIATE_STATES = new Set(['submitted', 'pending_review', 'approv
 const REJECTED_AFFILIATE_STATES = new Set(['rejected']);
 
 function commandCenterPage(url) {
-  return url.pathname === '/analytics' || url.pathname === '/analytics/';
+  return ['/analytics', '/analytics/', '/analytics.html', '/analytics-v2.html'].includes(url.pathname);
 }
 
 async function accessAuthenticated(request, ctx) {
@@ -165,29 +165,37 @@ async function affiliateCoverageStatusSnapshot(request, env) {
   }
 }
 
-function affiliateCoverageStatusSection() {
-  return `<style>
-#affiliateCoverageStatusGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.affiliateStatusSummary{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:8px}.affiliateStatusSummary b{font-size:28px;letter-spacing:-.04em}.affiliateStatusSummary span{font-size:11px;color:var(--muted);text-align:right}@media(max-width:850px){#affiliateCoverageStatusGrid{grid-template-columns:1fr}}\n</style>
-<section class="section" id="affiliateCoverageStatusSection"><div class="sectionHead"><h2>Affiliate Coverage Status</h2><span>Likely-human clicks · last 30 days</span></div><div id="affiliateCoverageStatusGrid"><div class="panel"><div class="note">Refresh to load.</div></div></div></section>`;
+function affiliateCoverageV2Widget() {
+  return `<section class="widget" data-widget="affiliate-status" style="--w:12;--h:6">
+      <div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Likely-human clicks · 30d</div></div>
+      <div class="widgetBody" id="affiliateCoverageStatusBody"><div class="empty">Refresh to load affiliate status.</div></div><div class="resizeHandle"></div>
+    </section>`;
 }
 
-function affiliateCoverageStatusScript() {
-  return `<script>
+function affiliateCoverageV2Script() {
+  return `<style>
+.affiliateStatusTable{width:100%;border-collapse:collapse;font-size:12px}.affiliateStatusTable th,.affiliateStatusTable td{padding:9px 8px;border-top:1px solid var(--line);text-align:left}.affiliateStatusTable thead th{border-top:0;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.affiliateStatusTable th:last-child,.affiliateStatusTable td:last-child{text-align:right}.affiliateStatusSummary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.affiliateStatusSummary .pill{font-size:10px}
+</style>
+<script>
 (function(){
  const acEsc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
  const acN=v=>Number(v||0).toLocaleString();
- const labels={active:'Active',pending:'Pending',rejected:'Rejected'};
- const statusLabel=v=>String(v||'').replaceAll('_',' ');
- function renderGroup(key,group){
-   const items=Array.isArray(group?.items)?group.items:[];
-   const rows=items.length?items.map(item=>'<div class="row"><div><div class="name">'+acEsc(item.name)+'</div><div class="meta">'+acEsc(statusLabel(item.status))+'</div></div><div class="value">'+acN(item.clicks30d)+' clicks</div></div>').join(''):'<div class="note">No affiliates in this state.</div>';
-   return '<div class="panel"><div class="affiliateStatusSummary"><div><div class="eyebrow">'+labels[key]+'</div><b>'+acN(group?.count)+'</b></div><span>'+acN(group?.clicks30d)+' clicks</span></div>'+rows+'</div>';
+ const acStatus=v=>String(v||'').replaceAll('_',' ');
+ function rowsFor(group,label){
+   return (Array.isArray(group?.items)?group.items:[]).map(item=>({name:item.name,status:item.status||label,clicks:item.clicks30d||0,group:label}));
  }
  function renderAffiliateCoverageStatus(d){
-   const root=document.getElementById('affiliateCoverageStatusGrid');if(!root)return;
+   const root=document.getElementById('affiliateCoverageStatusBody');if(!root)return;
    const s=d?.affiliateCoverageStatus||{};
-   if(s.status!=='observed'){root.innerHTML='<div class="panel"><div class="note">Affiliate coverage status is temporarily unavailable.</div></div>';return;}
-   root.innerHTML=renderGroup('active',s.active)+renderGroup('pending',s.pending)+renderGroup('rejected',s.rejected);
+   if(s.status!=='observed'){root.innerHTML='<div class="empty">Affiliate coverage status is temporarily unavailable.</div>';return;}
+   const rows=[...rowsFor(s.active,'active'),...rowsFor(s.pending,'pending'),...rowsFor(s.rejected,'rejected')]
+     .sort((a,b)=>{const order={active:0,pending:1,rejected:2};return order[a.group]-order[b.group]||b.clicks-a.clicks||a.name.localeCompare(b.name)});
+   const summary='<div class="affiliateStatusSummary">'+
+     '<span class="pill good">Active '+acN(s.active?.count)+' · '+acN(s.active?.clicks30d)+' clicks</span>'+ 
+     '<span class="pill info">Pending '+acN(s.pending?.count)+' · '+acN(s.pending?.clicks30d)+' clicks</span>'+ 
+     '<span class="pill bad">Rejected '+acN(s.rejected?.count)+' · '+acN(s.rejected?.clicks30d)+' clicks</span></div>';
+   const table=rows.length?'<table class="affiliateStatusTable"><thead><tr><th>Affiliate</th><th>Status</th><th>Clicks</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+acEsc(x.name)+'</td><td>'+acEsc(acStatus(x.status))+'</td><td>'+acN(x.clicks)+'</td></tr>').join('')+'</tbody></table>':'<div class="empty">No active, pending or rejected affiliate programmes found.</div>';
+   root.innerHTML=summary+table;
  }
  const originalRender=window.render;
  if(typeof originalRender==='function')window.render=function(d){originalRender(d);renderAffiliateCoverageStatus(d)};
@@ -202,7 +210,7 @@ async function serveProtectedPage(request, env, ctx) {
   if (!env.ADMIN_TOKEN) {
     return new Response('Command Center unavailable', { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
-  const assetUrl = new URL('/analytics.html', request.url);
+  const assetUrl = new URL('/analytics-v2.html', request.url);
   const asset = await env.ASSETS.fetch(new Request(assetUrl.toString(), request));
   if (!asset.ok) return asset;
   const headers = new Headers(asset.headers);
@@ -212,9 +220,9 @@ async function serveProtectedPage(request, env, ctx) {
   headers.set('Cache-Control', 'private, no-store');
 
   let html = await asset.text();
-  const revenueAnchor = '<section class="section"><div class="sectionHead"><h2>Revenue & coverage</h2>';
-  if (!html.includes('id="affiliateCoverageStatusSection"')) html = html.replace(revenueAnchor, affiliateCoverageStatusSection() + revenueAnchor);
-  if (!html.includes('renderAffiliateCoverageStatus')) html = html.replace('</body>', affiliateCoverageStatusScript() + '</body>');
+  const footprintAnchor = '<section class="widget" data-widget="footprint"';
+  if (!html.includes('data-widget="affiliate-status"')) html = html.replace(footprintAnchor, affiliateCoverageV2Widget() + '\n\n    ' + footprintAnchor);
+  if (!html.includes('renderAffiliateCoverageStatus')) html = html.replace('</body>', affiliateCoverageV2Script() + '</body>');
   headers.delete('Content-Length');
   return new Response(html, { status: asset.status, headers });
 }
