@@ -30,7 +30,13 @@ async function accessAuthenticated(request,ctx){
   }catch{return false}
 }
 function safeUrl(value){
-  try{const u=new URL(String(value||''));return u.protocol==='https:'?u.toString():null}catch{return null}
+  try{
+    const u=new URL(String(value||''));
+    if(u.protocol!=='https:')return null;
+    const h=u.hostname.toLowerCase().replace(/^\[|\]$/g,'');
+    if(h==='localhost'||h==='0.0.0.0'||h==='127.0.0.1'||h==='::1'||h.endsWith('.localhost')||h.endsWith('.local')||/^10\./.test(h)||/^192\.168\./.test(h)||/^169\.254\./.test(h)||/^172\.(1[6-9]|2\d|3[01])\./.test(h))return null;
+    return u.toString();
+  }catch{return null}
 }
 async function safeAll(env,sql){
   try{return (await env.DB.prepare(sql).all()).results||[]}catch{return []}
@@ -91,14 +97,14 @@ async function baseHumanActions(request,env,ctx){
 }
 async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
   const raw=await baseHumanActions(request,env,ctx);
-  const input=[...(raw.affiliate||[]),...(raw.distribution||[])].slice(0,HUMAN_ACTION_LIMIT);
+  const input=[...(raw.affiliate||[]),...(raw.distribution||[])];
   const rows=await Promise.all(input.map(async action=>{
     const minutes=estimateMinutes(action);
     const verification=verifyLinks?await verifyActionUrl(action.action_url):{ok:Boolean(safeUrl(action.action_url)),http_status:null,checked_at:null,reason:null};
     const impactScore=action.engine==='affiliate'?(n(action.metric)*20+40):n(action.metric);
     return {...action,estimated_minutes:minutes,expected_impact:expectedImpact(action),expected_impact_score:Number(impactScore.toFixed(1)),why_human:action.reason||'This step requires owner authentication, judgement or irreversible third-party action.',after_action:afterAction(action),link_verification:verification};
   }));
-  const actionable=rows.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes)));
+  const actionable=rows.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,HUMAN_ACTION_LIMIT);
   const brokenLinks=rows.filter(x=>!x.link_verification?.ok);
   return {
     status:'connected',
