@@ -1,6 +1,6 @@
 import base from './growth-command-center-v2-worker.js';
 
-const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2.html']);
+const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 
 function affiliateWidget(){return `<section class="widget" data-widget="affiliate-status" style="--w:12;--h:6">
   <div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Likely-human clicks · 30d</div></div>
