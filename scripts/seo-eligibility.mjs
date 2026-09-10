@@ -11,7 +11,7 @@ const CAPABILITY_RULES = {
   'best-seo-tools-for-agencies': ['seo','keyword','backlink','search visibility'],
   'best-competitor-seo-tools': ['competitor','competitive research','backlink','seo'],
   'best-workflow-automation-tools': ['workflow automation','automation','integrations'],
-  'best-no-code-automation-tools': ['no code automation','workflow automation','automation','workflow builder'],
+  'best-no-code-automation-tools': ['no code','no-code','visual automation','workflow builder'],
   'best-lead-capture-forms': ['lead capture','form builder','forms','form'],
   'best-forms-for-small-business': ['form builder','forms','form'],
   'best-project-management-tools': ['project management','project planning','task management','projects'],
@@ -31,6 +31,50 @@ const CAPABILITY_RULES = {
   'best-video-content-tools': ['video','screen recording','video editing','podcast editing']
 };
 
+const COMPOUND_CAPABILITY_RULES = {
+  'best-ai-marketing-tools': {
+    groups: [['ai','artificial intelligence','machine learning']],
+    minimumGroups: 1
+  },
+  'best-ai-ad-creative-tools': {
+    groups: [['ai','artificial intelligence','generative ai']],
+    minimumGroups: 1
+  },
+  'best-ai-research-tools': {
+    groups: [['ai','artificial intelligence','llm']],
+    minimumGroups: 1
+  },
+  'best-ai-coding-tools': {
+    groups: [['ai','artificial intelligence','coding agent','code assistant']],
+    minimumGroups: 1
+  },
+  'best-crm-with-automation': {
+    groups: [['automation','workflow automation','sales automation']],
+    minimumGroups: 1
+  },
+  'best-all-in-one-business-tools': {
+    groups: [
+      ['crm','customer relationship','customer platform'],
+      ['marketing','email marketing','campaign'],
+      ['automation','workflow'],
+      ['sales','sales pipeline','deal management','lead management'],
+      ['funnel','forms','landing page']
+    ],
+    minimumGroups: 5
+  }
+};
+
+const ATTRIBUTE_RULES = {
+  'best-free-crm': tool => tool?.freePlan === true,
+  'best-free-project-management-tools': tool => tool?.freePlan === true
+};
+
+function ruleKey(intent, rules) {
+  if (intent?.slug && Object.prototype.hasOwnProperty.call(rules, intent.slug)) return intent.slug;
+  if (intent?.parent && Object.prototype.hasOwnProperty.call(rules, intent.parent)) return intent.parent;
+  return null;
+}
+
 export function toolText(tool) {
   return normalize([tool?.name, tool?.category, tool?.description, ...(tool?.features || []), ...(tool?.bestFor || [])].join(' '));
 }
@@ -47,28 +91,73 @@ export function lexicalRelevance(tool, intent) {
   return score;
 }
 
+export function allowedCategories(intent) {
+  const raw = Array.isArray(intent?.allowedCategories) && intent.allowedCategories.length
+    ? intent.allowedCategories
+    : [intent?.category];
+  return [...new Set(raw.map(normalize).filter(Boolean))];
+}
+
+export function categoryMatch(tool, intent) {
+  return allowedCategories(intent).includes(normalize(tool?.category));
+}
+
 export function capabilityTerms(intent) {
-  const key = intent?.parent && CAPABILITY_RULES[intent.parent] ? intent.parent : intent?.slug;
-  return CAPABILITY_RULES[key] || [];
+  const simpleKey = ruleKey(intent, CAPABILITY_RULES);
+  const compoundKey = ruleKey(intent, COMPOUND_CAPABILITY_RULES);
+  const simple = simpleKey ? CAPABILITY_RULES[simpleKey] : [];
+  const compound = compoundKey ? COMPOUND_CAPABILITY_RULES[compoundKey].groups.flat() : [];
+  return [...new Set([...simple, ...compound])];
+}
+
+export function capabilityAssessment(tool, intent) {
+  const text = toolText(tool);
+  const simpleKey = ruleKey(intent, CAPABILITY_RULES);
+  const simpleTerms = simpleKey ? CAPABILITY_RULES[simpleKey] : [];
+  const simpleMatch = !simpleTerms.length || simpleTerms.some(term => text.includes(normalize(term)));
+
+  const compoundKey = ruleKey(intent, COMPOUND_CAPABILITY_RULES);
+  const compoundRule = compoundKey ? COMPOUND_CAPABILITY_RULES[compoundKey] : null;
+  const groupMatches = compoundRule
+    ? compoundRule.groups.map(group => group.some(term => text.includes(normalize(term))))
+    : [];
+  const matchedGroups = groupMatches.filter(Boolean).length;
+  const compoundMatch = !compoundRule || matchedGroups >= Number(compoundRule.minimumGroups || compoundRule.groups.length);
+
+  return {
+    match: simpleMatch && compoundMatch,
+    simpleMatch,
+    compoundMatch,
+    matchedGroups,
+    minimumGroups: compoundRule ? Number(compoundRule.minimumGroups || compoundRule.groups.length) : 0,
+    groupMatches,
+    requiredCapabilities: capabilityTerms(intent)
+  };
 }
 
 export function capabilityMatch(tool, intent) {
-  const terms = capabilityTerms(intent);
-  if (!terms.length) return true;
-  const text = toolText(tool);
-  return terms.some(term => text.includes(normalize(term)));
+  return capabilityAssessment(tool, intent).match;
+}
+
+export function attributeMatch(tool, intent) {
+  const key = ruleKey(intent, ATTRIBUTE_RULES);
+  return key ? Boolean(ATTRIBUTE_RULES[key](tool)) : true;
 }
 
 export function editorialEligibility(tool, intent, minimumRelevance = 0.75) {
-  const categoryMatch = normalize(tool?.category) === normalize(intent?.category);
+  const category = categoryMatch(tool, intent);
   const relevance = lexicalRelevance(tool, intent);
-  const capability = capabilityMatch(tool, intent);
+  const capability = capabilityAssessment(tool, intent);
+  const attributes = attributeMatch(tool, intent);
   return {
-    eligible: categoryMatch && capability && relevance >= Number(minimumRelevance || 0),
-    categoryMatch,
-    capabilityMatch: capability,
+    eligible: category && capability.match && attributes && relevance >= Number(minimumRelevance || 0),
+    categoryMatch: category,
+    capabilityMatch: capability.match,
+    attributeMatch: attributes,
     relevance,
-    requiredCapabilities: capabilityTerms(intent)
+    allowedCategories: allowedCategories(intent),
+    capabilityAssessment: capability,
+    requiredCapabilities: capability.requiredCapabilities
   };
 }
 
