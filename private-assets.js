@@ -87,6 +87,38 @@ async function withPageEntryTracking(request,env,ctx,response){
   return new HTMLRewriter().on('head',{element(el){el.prepend(browserSessionSync(),{html:true})}}).transform(tracked);
 }
 
+async function guardPageConfirmation(request,env){
+  if(!env.DB||request.method!=='POST')return null;
+  let url;try{url=new URL(request.url)}catch{return null}
+  if(url.pathname!=='/api/events')return null;
+  let body;try{body=await request.clone().json()}catch{return null}
+  if(String(body?.event_type||'')!=='page_confirmed')return null;
+  const reject=(status,error)=>Response.json({ok:false,recorded:false,error},{status,headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}});
+  const origin=request.headers.get('Origin')||'';
+  if(origin&&origin!==url.origin)return reject(403,'confirmation_origin_mismatch');
+  const fetchSite=(request.headers.get('Sec-Fetch-Site')||'').toLowerCase();
+  if(fetchSite&&fetchSite!=='same-origin')return reject(403,'confirmation_not_same_origin');
+  const cookie=cookieSession(request);
+  const session=String(body?.session_id||'');
+  if(!cookie||!UUID.test(session)||cookie!==session)return reject(403,'confirmation_session_mismatch');
+  if(String(body?.event_id||'')!==`confirm_${session}`||String(body?.source||'')!=='browser-confirm')return reject(400,'confirmation_contract_invalid');
+  const classification=classifySessionRequest(request);
+  if(!TRACKABLE_CLASSIFICATIONS.has(classification))return reject(403,'confirmation_request_not_trackable');
+  let established;
+  try{
+    established=await env.DB.prepare(`SELECT s.classification,st.path,
+      EXISTS(SELECT 1 FROM funnel_events conf WHERE conf.session_id=s.session_id AND conf.event_type='page_confirmed') AS already_confirmed
+      FROM sessions s JOIN funnel_events st ON st.session_id=s.session_id AND st.event_type='session_started'
+      WHERE s.session_id=? ORDER BY st.created_at ASC LIMIT 1`).bind(session).first();
+  }catch{
+    return reject(503,'confirmation_state_unavailable');
+  }
+  if(!established||!TRACKABLE_CLASSIFICATIONS.has(String(established.classification||'')))return reject(403,'confirmation_session_not_established');
+  const eventPath=String(body?.path||'');
+  if(!Number(established.already_confirmed||0)&&eventPath!==String(established.path||''))return reject(409,'confirmation_entry_path_mismatch');
+  return null;
+}
+
 async function observedTrafficIntegrity(env){
   const confirmed=await env.DB.prepare(`SELECT
     COUNT(DISTINCT CASE WHEN conf.created_at>=datetime('now','-24 hours') THEN conf.session_id END) human24h,
@@ -143,6 +175,8 @@ export function withPrivateAssets(base) {
         const publicTools = tools.map(({commission, affiliateProgram, affiliateUrl, ...tool}) => tool);
         return Response.json(publicTools, {headers: {'Cache-Control': 'no-store'}});
       }
+      const confirmationRejection=await guardPageConfirmation(request,env);
+      if(confirmationRejection)return confirmationRejection;
       let response=await base.fetch(request,env,ctx);
       if(STATS_PATHS.has(path))response=await patchStats(response,env);
       return withPageEntryTracking(request,env,ctx,response);
