@@ -29,10 +29,29 @@ jobs:
           const byDate=await q({startDate,endDate,dataState:'all',dimensions:['date']});
           const byPage=await q({startDate,endDate,dataState:'all',dimensions:['page']});
           const byQuery=await q({startDate,endDate,dataState:'all',dimensions:['query']});
+          const byQueryPage=await q({startDate,endDate,dataState:'all',dimensions:['query','page']});
           const rows=x=>(x.rows||[]).map(r=>({keys:r.keys,clicks:r.clicks||0,impressions:r.impressions||0,ctr:r.ctr||0,position:r.position||0}));
-          const dateRows=rows(byDate),pageRows=rows(byPage),queryRows=rows(byQuery);
+          const dateRows=rows(byDate),pageRows=rows(byPage),queryRows=rows(byQuery),qpRows=rows(byQueryPage);
+
+          // 2026 small-site GSC benchmark: positions 1-10 exact buckets, 11-20 and 21+ residual buckets.
+          const small={1:.0596,2:.0022,3:.0158,4:.0861,5:.0296,6:.0159,7:.0102,8:.0027,9:.0075,10:.0053};
+          // General page-one benchmark (First Page Sage 2026). Beyond page one we retain the conservative small-site residual rates.
+          const general={1:.398,2:.187,3:.102,4:.072,5:.051,6:.044,7:.030,8:.021,9:.019,10:.016};
+          function rate(pos,curve){const p=Math.max(1,Math.round(pos||100));if(p<=10)return curve[p]||0;if(p<=20)return .0025;return .0004}
+          function expected(curve){return qpRows.reduce((s,r)=>s+r.impressions*rate(r.position,curve),0)}
+          function bucket(pos){if(pos<=3)return '1-3';if(pos<=10)return '4-10';if(pos<=20)return '11-20';if(pos<=50)return '21-50';return '51+'}
+          const buckets={};
+          for(const r of qpRows){const b=bucket(r.position);buckets[b]??={impressions:0,clicks:0,weightedPositionNumerator:0,smallExpected:0,generalExpected:0};const x=buckets[b];x.impressions+=r.impressions;x.clicks+=r.clicks;x.weightedPositionNumerator+=r.position*r.impressions;x.smallExpected+=r.impressions*rate(r.position,small);x.generalExpected+=r.impressions*rate(r.position,general)}
+          for(const x of Object.values(buckets)){x.avgPosition=x.impressions?x.weightedPositionNumerator/x.impressions:0;delete x.weightedPositionNumerator;x.smallExpected=+x.smallExpected.toFixed(3);x.generalExpected=+x.generalExpected.toFixed(3);x.avgPosition=+x.avgPosition.toFixed(2)}
+          const topExpected=qpRows.map(r=>({query:r.keys?.[0]||'',page:r.keys?.[1]||'',impressions:r.impressions,clicks:r.clicks,position:+r.position.toFixed(2),smallExpected:+(r.impressions*rate(r.position,small)).toFixed(3),generalExpected:+(r.impressions*rate(r.position,general)).toFixed(3)})).sort((a,b)=>b.generalExpected-a.generalExpected).slice(0,30);
+          const totals={clicks:dateRows.reduce((s,x)=>s+x.clicks,0),impressions:dateRows.reduce((s,x)=>s+x.impressions,0),queryPageImpressions:qpRows.reduce((s,x)=>s+x.impressions,0),queryPageRows:qpRows.length,smallSiteExpected:+expected(small).toFixed(3),generalExpected:+expected(general).toFixed(3)};
+          totals.actualCtr=totals.impressions?+(totals.clicks/totals.impressions*100).toFixed(4):0;
+          totals.smallExpectedCtr=totals.queryPageImpressions?+(totals.smallSiteExpected/totals.queryPageImpressions*100).toFixed(4):0;
+          totals.generalExpectedCtr=totals.queryPageImpressions?+(totals.generalExpected/totals.queryPageImpressions*100).toFixed(4):0;
           console.log('GSC_LAUNCH_BY_DATE='+JSON.stringify({metadata:byDate.metadata||null,rows:dateRows}));
+          console.log('GSC_POSITION_BUCKETS='+JSON.stringify(buckets));
+          console.log('GSC_EXPECTED_CLICKS='+JSON.stringify(totals));
+          console.log('GSC_TOP_EXPECTED_ROWS='+JSON.stringify(topExpected));
           console.log('GSC_CLICK_PAGES='+JSON.stringify(pageRows.filter(x=>x.clicks>0).sort((a,b)=>b.clicks-a.clicks||b.impressions-a.impressions)));
           console.log('GSC_CLICK_QUERIES='+JSON.stringify(queryRows.filter(x=>x.clicks>0).sort((a,b)=>b.clicks-a.clicks||b.impressions-a.impressions).slice(0,200)));
-          console.log('GSC_TOTALS='+JSON.stringify({clicks:dateRows.reduce((s,x)=>s+x.clicks,0),impressions:dateRows.reduce((s,x)=>s+x.impressions,0)}));
           NODE
