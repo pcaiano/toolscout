@@ -17,8 +17,8 @@ jobs:
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
         run: |
-          node <<'NODE'
-          const crypto = require('node:crypto');
+          node --input-type=module <<'NODE'
+          import crypto from 'node:crypto';
           const raw=process.env.GSC_SERVICE_ACCOUNT_JSON;
           if(!raw) throw new Error('GSC_SERVICE_ACCOUNT_JSON missing');
           const c=JSON.parse(raw);
