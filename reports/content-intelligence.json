@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:32:41.894Z",
+  "generatedAt": "2026-09-10T22:33:22.747Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -20,7 +20,7 @@
       "observedGscIntents": 30,
       "observedGscPages": 75,
       "searchClicks": 1,
-      "searchImpressions": 1647,
+      "searchImpressions": 1661,
       "organicAcquisitionStatus": "early-search-acquisition",
       "actionableOpportunities": 23,
       "firstPageOpportunities": 11,
@@ -39,8 +39,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 422,
-        "position": 77.7441,
+        "impressions": 428,
+        "position": 77.7336,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -67,8 +67,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 92,
-        "position": 77.8696,
+        "impressions": 94,
+        "position": 78.0106,
         "topTools": [
           "kit",
           "getresponse",
@@ -81,8 +81,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 50,
-        "position": 39.86,
+        "impressions": 51,
+        "position": 39.7451,
         "topTools": [
           "asana",
           "wrike",

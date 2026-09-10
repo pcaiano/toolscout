@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-10T22:32:38.088Z",
-  "sourceGeneratedAt": "2026-09-10T22:32:38.033Z",
+  "generatedAt": "2026-09-10T22:33:18.485Z",
+  "sourceGeneratedAt": "2026-09-10T22:33:18.448Z",
   "summary": {
     "canonical": 27,
     "redirected": 3,
@@ -11,9 +11,9 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 422,
+      "impressions": 428,
       "clicks": 0,
-      "position": 77.7441
+      "position": 77.7336
     },
     {
       "slug": "best-no-code-automation-tools",
@@ -27,25 +27,25 @@
       "slug": "best-seo-keyword-research-tools",
       "status": "redirected",
       "target": "best-keyword-research-tools",
-      "impressions": 134,
+      "impressions": 135,
       "clicks": 0,
-      "position": 73.806
+      "position": 73.9556
     },
     {
       "slug": "best-funnel-builder",
       "status": "canonical",
       "target": "best-funnel-builder",
-      "impressions": 92,
+      "impressions": 94,
       "clicks": 0,
-      "position": 77.8696
+      "position": 78.0106
     },
     {
       "slug": "best-project-management-tools",
       "status": "canonical",
       "target": "best-project-management-tools",
-      "impressions": 50,
+      "impressions": 51,
       "clicks": 0,
-      "position": 39.86
+      "position": 39.7451
     },
     {
       "slug": "best-crm-for-sales-teams",

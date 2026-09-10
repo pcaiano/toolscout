@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:32:38.033Z",
+  "generatedAt": "2026-09-10T22:33:18.448Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-10",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1647,
-    "ctr": 0.0607
+    "impressions": 1661,
+    "ctr": 0.0602
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 30,
       "clicks": 0,
-      "impressions": 1095
+      "impressions": 1105
     },
     "home": {
       "pages": 2,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 33,
       "clicks": 0,
-      "impressions": 442
+      "impressions": 446
     }
   },
   "pageCount": 75,
@@ -52,21 +52,21 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 422,
+      "impressions": 428,
       "ctr": 0,
-      "position": 77.7441,
+      "position": 77.7336,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 128,
-          "position": 75.3281
+          "impressions": 130,
+          "position": 75.2769
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 79,
-          "position": 81.6456
+          "impressions": 81,
+          "position": 81.5679
         },
         {
           "query": "what is the best tool for seo agency",
@@ -83,8 +83,8 @@
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 16,
-          "position": 74.4375
+          "impressions": 17,
+          "position": 74.4118
         },
         {
           "query": "best seo tools for agencies",
@@ -101,8 +101,8 @@
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 12,
-          "position": 84.25
+          "impressions": 13,
+          "position": 84.4615
         },
         {
           "query": "agency seo tools",
@@ -247,9 +247,9 @@
       "type": "guide",
       "intent": "best-seo-keyword-research-tools",
       "clicks": 0,
-      "impressions": 134,
+      "impressions": 135,
       "ctr": 0,
-      "position": 73.806,
+      "position": 73.9556,
       "topQueries": [
         {
           "query": "website research tool",
@@ -276,16 +276,16 @@
           "position": 85.375
         },
         {
+          "query": "best seo keyword research tool",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 98
+        },
+        {
           "query": "seo keyword analysis tool",
           "clicks": 0,
           "impressions": 7,
           "position": 71
-        },
-        {
-          "query": "best seo keyword research tool",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 98.5714
         },
         {
           "query": "seo search tool",
@@ -393,9 +393,9 @@
       "type": "guide",
       "intent": "best-funnel-builder",
       "clicks": 0,
-      "impressions": 92,
+      "impressions": 94,
       "ctr": 0,
-      "position": 77.8696,
+      "position": 78.0106,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -406,14 +406,14 @@
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 23,
-          "position": 91.0435
+          "impressions": 24,
+          "position": 90.8333
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 21,
-          "position": 85.7619
+          "impressions": 22,
+          "position": 85.6364
         },
         {
           "query": "online funnel builder",
@@ -466,15 +466,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 83,
+      "impressions": 84,
       "ctr": 0,
-      "position": 58.1205,
+      "position": 58.2024,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 48,
-          "position": 58.4792
+          "impressions": 49,
+          "position": 58.6122
         },
         {
           "query": "klayvio",
@@ -539,15 +539,15 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 50,
+      "impressions": 51,
       "ctr": 0,
-      "position": 39.86,
+      "position": 39.7451,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 45.7692
+          "impressions": 14,
+          "position": 44.9286
         },
         {
           "query": "project workflow tools",
@@ -888,15 +888,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 18,
+      "impressions": 21,
       "ctr": 0,
-      "position": 69.7222,
+      "position": 69.5238,
       "topQueries": [
         {
           "query": "moz pro tools",
           "clicks": 0,
-          "impressions": 7,
-          "position": 70.5714
+          "impressions": 9,
+          "position": 70
         },
         {
           "query": "moz pro overview",
@@ -907,8 +907,8 @@
         {
           "query": "moz free trial",
           "clicks": 0,
-          "impressions": 4,
-          "position": 67
+          "impressions": 5,
+          "position": 67.4
         },
         {
           "query": "what is moz pro",
@@ -1881,21 +1881,21 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 422,
+      "impressions": 428,
       "ctr": 0,
-      "position": 77.7441,
+      "position": 77.7336,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 128,
-          "position": 75.3281
+          "impressions": 130,
+          "position": 75.2769
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 79,
-          "position": 81.6456
+          "impressions": 81,
+          "position": 81.5679
         },
         {
           "query": "what is the best tool for seo agency",
@@ -1912,8 +1912,8 @@
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 16,
-          "position": 74.4375
+          "impressions": 17,
+          "position": 74.4118
         },
         {
           "query": "best seo tools for agencies",
@@ -1930,8 +1930,8 @@
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 12,
-          "position": 84.25
+          "impressions": 13,
+          "position": 84.4615
         },
         {
           "query": "agency seo tools",
@@ -2021,9 +2021,9 @@
       "intent": "best-seo-keyword-research-tools",
       "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 134,
+      "impressions": 135,
       "ctr": 0,
-      "position": 73.806,
+      "position": 73.9556,
       "topQueries": [
         {
           "query": "website research tool",
@@ -2050,16 +2050,16 @@
           "position": 85.375
         },
         {
+          "query": "best seo keyword research tool",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 98
+        },
+        {
           "query": "seo keyword analysis tool",
           "clicks": 0,
           "impressions": 7,
           "position": 71
-        },
-        {
-          "query": "best seo keyword research tool",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 98.5714
         },
         {
           "query": "seo search tool",
@@ -2091,9 +2091,9 @@
       "intent": "best-funnel-builder",
       "page": "https://trytoolscout.org/best-funnel-builder.html",
       "clicks": 0,
-      "impressions": 92,
+      "impressions": 94,
       "ctr": 0,
-      "position": 77.8696,
+      "position": 78.0106,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -2104,14 +2104,14 @@
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 23,
-          "position": 91.0435
+          "impressions": 24,
+          "position": 90.8333
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 21,
-          "position": 85.7619
+          "impressions": 22,
+          "position": 85.6364
         },
         {
           "query": "online funnel builder",
@@ -2161,15 +2161,15 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools.html",
       "clicks": 0,
-      "impressions": 50,
+      "impressions": 51,
       "ctr": 0,
-      "position": 39.86,
+      "position": 39.7451,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 45.7692
+          "impressions": 14,
+          "position": 44.9286
         },
         {
           "query": "project workflow tools",

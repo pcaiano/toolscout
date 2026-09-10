@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-10T22:32:41.824Z",
+  "generatedAt": "2026-09-10T22:33:22.683Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 1647,
-    "ctr": 0.0607,
+    "searchImpressions": 1661,
+    "ctr": 0.0602,
     "gscStartDate": "2026-08-14",
     "gscEndDate": "2026-09-10",
     "gscDataState": "all",
@@ -26,7 +26,7 @@
     "observedGscIntents": 30,
     "observedGscPages": 75,
     "searchClicks": 1,
-    "searchImpressions": 1647,
+    "searchImpressions": 1661,
     "organicAcquisitionStatus": "early-search-acquisition",
     "actionableOpportunities": 23,
     "firstPageOpportunities": 11,
@@ -72,10 +72,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 422,
+        "impressions": 428,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.7441,
+        "position": 77.7336,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -121,10 +121,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 50,
+        "impressions": 51,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.86,
+        "position": 39.7451,
         "opportunity": "authority-gap",
         "opportunityScore": 27,
         "meaningfulSample": true,
@@ -219,10 +219,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 92,
+        "impressions": 94,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.8696,
+        "position": 78.0106,
         "opportunity": "relevance-gap",
         "opportunityScore": 20,
         "meaningfulSample": true,
@@ -2332,21 +2332,21 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 422,
+      "impressions": 428,
       "ctr": 0,
-      "position": 77.7441,
+      "position": 77.7336,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 128,
-          "position": 75.3281
+          "impressions": 130,
+          "position": 75.2769
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 79,
-          "position": 81.6456
+          "impressions": 81,
+          "position": 81.5679
         },
         {
           "query": "what is the best tool for seo agency",
@@ -2363,14 +2363,14 @@
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 16,
-          "position": 74.4375
+          "impressions": 17,
+          "position": 74.4118
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 5.428,
+      "opportunityScore": 5.506,
       "outcome": "visibility-only"
     },
     {
@@ -2470,9 +2470,9 @@
       "pathname": "/best-seo-keyword-research-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 134,
+      "impressions": 135,
       "ctr": 0,
-      "position": 73.806,
+      "position": 73.9556,
       "topQueries": [
         {
           "query": "website research tool",
@@ -2499,16 +2499,16 @@
           "position": 85.375
         },
         {
-          "query": "seo keyword analysis tool",
+          "query": "best seo keyword research tool",
           "clicks": 0,
-          "impressions": 7,
-          "position": 71
+          "impressions": 8,
+          "position": 98
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.816,
+      "opportunityScore": 1.825,
       "outcome": "visibility-only"
     },
     {
@@ -2562,15 +2562,15 @@
       "pathname": "/tools/klaviyo.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 83,
+      "impressions": 84,
       "ctr": 0,
-      "position": 58.1205,
+      "position": 58.2024,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 48,
-          "position": 58.4792
+          "impressions": 49,
+          "position": 58.6122
         },
         {
           "query": "klayvio",
@@ -2600,7 +2600,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.428,
+      "opportunityScore": 1.443,
       "outcome": "visibility-only"
     },
     {
@@ -2608,15 +2608,15 @@
       "pathname": "/best-project-management-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 50,
+      "impressions": 51,
       "ctr": 0,
-      "position": 39.86,
+      "position": 39.7451,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 45.7692
+          "impressions": 14,
+          "position": 44.9286
         },
         {
           "query": "project workflow tools",
@@ -2646,7 +2646,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.254,
+      "opportunityScore": 1.283,
       "outcome": "visibility-only"
     },
     {
@@ -2654,9 +2654,9 @@
       "pathname": "/best-funnel-builder.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 92,
+      "impressions": 94,
       "ctr": 0,
-      "position": 77.8696,
+      "position": 78.0106,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -2667,14 +2667,14 @@
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 23,
-          "position": 91.0435
+          "impressions": 24,
+          "position": 90.8333
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 21,
-          "position": 85.7619
+          "impressions": 22,
+          "position": 85.6364
         },
         {
           "query": "online funnel builder",
@@ -2692,7 +2692,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.181,
+      "opportunityScore": 1.205,
       "outcome": "visibility-only"
     },
     {
