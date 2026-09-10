@@ -32,29 +32,30 @@ jobs:
             return {ok:r.ok&&!j.errors?.length,status:r.status,data:j.data||null,errors:j.errors||null};
           }
           const summaryQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1,filter:$filter){count sum{visits}}}}}`;
-          const pathQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:5000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{clientRequestPath edgeResponseStatus}}}}}`;
-          const uaQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{userAgent}}}}}`;
+          const uaQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:5000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{userAgent}}}}}`;
           const start=new Date('2026-09-03T00:00:00Z');
           const end=new Date('2026-09-11T00:00:00Z');
-          const knownBot=/(bot|crawler|spider|slurp|headless|lighthouse|pagespeed|curl|wget|python|go-http-client|semrush|ahrefs|mj12|dotbot|gptbot|oai-searchbot|chatgpt-user|claude|anthropic|perplexity|bytespider|facebookexternalhit|linkedinbot|twitterbot|whatsapp|bingpreview|petalbot|yandex|duckduckbot)/i;
+          const automation=/(bot|crawler|spider|slurp|headless|lighthouse|pagespeed|curl|wget|python|go-http-client|semrush|ahrefs|mj12|dotbot|gptbot|oai-searchbot|chatgpt-user|claude|anthropic|perplexity|bytespider|facebookexternalhit|linkedinbot|twitterbot|whatsapp|bingpreview|petalbot|yandex|duckduckbot|googleother|builtwith|externalagent|mcpbeat|sentineloracle|saashub|n8n|make\/production|mcpi|spanly|node)/i;
+          const mainstream=/(Chrome\/|CriOS\/|Firefox\/|FxiOS\/|Safari\/|Edg\/|OPR\/)/i;
+          const totals={days:0,totalVisits:0,automationVisits:0,browserCandidateVisits:0,strictBrowserVisits:0,thinBrowserVisits:0,observedD1Starts:60};
           for(let d=new Date(start);d<end;d.setUTCDate(d.getUTCDate()+1)){
             const next=new Date(d);next.setUTCDate(next.getUTCDate()+1);
             const filter={datetime_geq:d.toISOString(),datetime_lt:next.toISOString(),requestSource:'eyeball'};
-            const [s,p,u]=await Promise.all([query(summaryQuery,{zoneTag,filter}),query(pathQuery,{zoneTag,filter}),query(uaQuery,{zoneTag,filter})]);
-            const groups=p.data?.viewer?.zones?.[0]?.g||[];
-            const pageGroups=groups.filter(x=>{const path=String(x.dimensions?.clientRequestPath||'');const status=Number(x.dimensions?.edgeResponseStatus||0);return status>=200&&status<400&&!path.startsWith('/api/')&&!path.startsWith('/analytics/api/')&&!path.startsWith('/go/')&&!path.startsWith('/mcp')&&!path.startsWith('/a2a')&&!path.startsWith('/.well-known/')&&!path.startsWith('/cdn-cgi/')&&!/\.(?:js|css|json|xml|txt|png|jpe?g|webp|svg|ico|woff2?|map)$/i.test(path)});
-            const pageRequests=pageGroups.reduce((a,x)=>a+Number(x.count||0),0);
-            const pageVisits=pageGroups.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
-            const goRequests=groups.filter(x=>String(x.dimensions?.clientRequestPath||'').startsWith('/go/')).reduce((a,x)=>a+Number(x.count||0),0);
-            const topPages=pageGroups.sort((a,b)=>Number(b.count||0)-Number(a.count||0)).slice(0,20).map(x=>({path:x.dimensions.clientRequestPath,status:Number(x.dimensions.edgeResponseStatus||0),requests:Number(x.count||0),visits:Number(x.sum?.visits||0)}));
+            const [s,u]=await Promise.all([query(summaryQuery,{zoneTag,filter}),query(uaQuery,{zoneTag,filter})]);
             const uas=u.data?.viewer?.zones?.[0]?.g||[];
-            const browserRows=uas.filter(x=>/Mozilla\/5\.0/i.test(String(x.dimensions?.userAgent||''))&&!knownBot.test(String(x.dimensions?.userAgent||'')));
-            const botRows=uas.filter(x=>knownBot.test(String(x.dimensions?.userAgent||'')));
-            const browserLikeRequests=browserRows.reduce((a,x)=>a+Number(x.count||0),0);
-            const browserLikeVisits=browserRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
-            const botLikeRequests=botRows.reduce((a,x)=>a+Number(x.count||0),0);
-            const botLikeVisits=botRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
-            const topUserAgents=uas.slice(0,25).map(x=>({ua:String(x.dimensions?.userAgent||'').slice(0,180),requests:Number(x.count||0),visits:Number(x.sum?.visits||0),knownBot:knownBot.test(String(x.dimensions?.userAgent||''))}));
-            console.log('CF_DAY_V2='+JSON.stringify({day:d.toISOString().slice(0,10),totalRequests:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.count||0),totalVisits:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.sum?.visits||0),pageRequests,pageVisits,goRequests,browserLikeRequests,browserLikeVisits,botLikeRequests,botLikeVisits,topPages,topUserAgents,errors:{summary:s.errors,path:p.errors,ua:u.errors}}));
+            const browserRows=uas.filter(x=>{const ua=String(x.dimensions?.userAgent||'');return /Mozilla\/5\.0/i.test(ua)&&mainstream.test(ua)&&!automation.test(ua)});
+            const automationRows=uas.filter(x=>automation.test(String(x.dimensions?.userAgent||'')));
+            const strictRows=browserRows.filter(x=>{const v=Number(x.sum?.visits||0),c=Number(x.count||0);return v>0&&c/v>=3});
+            const thinRows=browserRows.filter(x=>{const v=Number(x.sum?.visits||0),c=Number(x.count||0);return v>0&&c/v<3});
+            const totalVisits=Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.sum?.visits||0);
+            const browserCandidateVisits=browserRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
+            const automationVisits=automationRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
+            const strictBrowserVisits=strictRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
+            const thinBrowserVisits=thinRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
+            totals.days++; totals.totalVisits+=totalVisits; totals.automationVisits+=automationVisits; totals.browserCandidateVisits+=browserCandidateVisits; totals.strictBrowserVisits+=strictBrowserVisits; totals.thinBrowserVisits+=thinBrowserVisits;
+            console.log('CF_HUMAN_BAND='+JSON.stringify({day:d.toISOString().slice(0,10),totalVisits,automationVisits,browserCandidateVisits,strictBrowserVisits,thinBrowserVisits,strictRows:strictRows.map(x=>({ua:String(x.dimensions?.userAgent||'').slice(0,160),requests:Number(x.count||0),visits:Number(x.sum?.visits||0),requestsPerVisit:+(Number(x.count||0)/Math.max(1,Number(x.sum?.visits||0))).toFixed(2)})).sort((a,b)=>b.visits-a.visits).slice(0,30)}));
           }
+          totals.maxUntrackedBrowserCandidates=Math.max(0,totals.browserCandidateVisits-totals.observedD1Starts);
+          totals.maxUntrackedStrictCandidates=Math.max(0,totals.strictBrowserVisits-totals.observedD1Starts);
+          console.log('CF_HUMAN_TOTAL='+JSON.stringify(totals));
           NODE
