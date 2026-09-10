@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:33:22.683Z",
+  "generatedAt": "2026-09-10T22:36:15.087Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
@@ -28,7 +28,7 @@
     "searchClicks": 1,
     "searchImpressions": 1661,
     "organicAcquisitionStatus": "early-search-acquisition",
-    "actionableOpportunities": 23,
+    "actionableOpportunities": 22,
     "firstPageOpportunities": 11,
     "firstPageMeaningful": 0,
     "firstPageLowSample": 11,
@@ -616,7 +616,7 @@
       "topTools": [
         "freshsales",
         "zoho-crm",
-        "hubspot"
+        "attio"
       ]
     },
     {
@@ -947,42 +947,6 @@
       ]
     },
     {
-      "intent": "best-ai-marketing-tools",
-      "priorityScore": 77,
-      "lane": "commercial-intent",
-      "action": "invest-existing",
-      "reason": "High commercial/readiness score without observed search evidence. Improve conservatively and measure.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "none",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "improve-existing-decision-surface",
-        "strengthen-commercial-intent-context",
-        "validate-editorial-neutrality",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": null,
-      "topTools": [
-        "getresponse",
-        "systeme-io",
-        "omnisend"
-      ]
-    },
-    {
       "intent": "best-video-content-tools",
       "priorityScore": 25,
       "lane": "editorial-safety",
@@ -1146,39 +1110,6 @@
       ]
     },
     {
-      "intent": "best-marketing-automation-tools",
-      "priorityScore": 72,
-      "lane": "measure",
-      "action": "measure-and-recheck",
-      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "none",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "measure",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": null,
-      "topTools": [
-        "constant-contact",
-        "activecampaign",
-        "mailerlite"
-      ]
-    },
-    {
       "intent": "best-affordable-crm",
       "priorityScore": 71,
       "lane": "measure",
@@ -1242,6 +1173,39 @@
         "close",
         "monday-crm",
         "hubspot"
+      ]
+    },
+    {
+      "intent": "best-marketing-automation-tools",
+      "priorityScore": 62,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "none",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": null,
+      "topTools": [
+        "constant-contact",
+        "activecampaign",
+        "mailerlite"
       ]
     },
     {
@@ -1341,6 +1305,38 @@
         "intercom",
         "freshdesk",
         "zendesk"
+      ]
+    },
+    {
+      "intent": "best-ai-marketing-tools",
+      "priorityScore": 53,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "none",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": null,
+      "topTools": [
+        "klaviyo",
+        "adcreative-ai"
       ]
     },
     {
@@ -3327,31 +3323,6 @@
       ]
     },
     {
-      "intent": "best-ai-marketing-tools",
-      "priorityScore": 77,
-      "lane": "commercial-intent",
-      "action": "invest-existing",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "improve-existing-decision-surface",
-        "strengthen-commercial-intent-context",
-        "validate-editorial-neutrality",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
       "intent": "best-video-content-tools",
       "priorityScore": 25,
       "lane": "editorial-safety",
@@ -3446,28 +3417,6 @@
       ]
     },
     {
-      "intent": "best-marketing-automation-tools",
-      "priorityScore": 72,
-      "lane": "measure",
-      "action": "measure-and-recheck",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "measure",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
       "intent": "best-affordable-crm",
       "priorityScore": 71,
       "lane": "measure",
@@ -3492,6 +3441,28 @@
     {
       "intent": "best-crm-with-automation",
       "priorityScore": 66,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-marketing-automation-tools",
+      "priorityScore": 62,
       "lane": "measure",
       "action": "measure-and-recheck",
       "ownerActionRequired": false,
@@ -3558,6 +3529,28 @@
     {
       "intent": "best-customer-support-tools",
       "priorityScore": 56,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-ai-marketing-tools",
+      "priorityScore": 53,
       "lane": "measure",
       "action": "measure-and-recheck",
       "ownerActionRequired": false,

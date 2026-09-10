@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:33:22.747Z",
+  "generatedAt": "2026-09-10T22:36:15.145Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -22,7 +22,7 @@
       "searchClicks": 1,
       "searchImpressions": 1661,
       "organicAcquisitionStatus": "early-search-acquisition",
-      "actionableOpportunities": 23,
+      "actionableOpportunities": 22,
       "firstPageOpportunities": 11,
       "firstPageMeaningful": 0,
       "firstPageLowSample": 11,

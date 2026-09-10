@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:33:22.921Z",
+  "generatedAt": "2026-09-10T22:36:15.478Z",
   "count": 3,
   "rule": "Fail closed per page. A blocked intent is removed from the public indexable surface while safe intents continue through the autonomous SEO pipeline.",
   "items": [
@@ -17,7 +17,9 @@
       ],
       "requiredCapabilities": [
         "ad creative",
+        "ad creatives",
         "advertising creative",
+        "advertising creatives",
         "creative generation",
         "ad generation",
         "ai",
@@ -41,6 +43,7 @@
       ],
       "requiredCapabilities": [
         "video",
+        "videos",
         "screen recording",
         "video editing",
         "podcast editing"
@@ -67,15 +70,20 @@
         "marketing",
         "email marketing",
         "campaign",
+        "campaigns",
         "automation",
         "workflow",
+        "workflows",
         "sales",
         "sales pipeline",
         "deal management",
         "lead management",
         "funnel",
+        "funnels",
         "forms",
-        "landing page"
+        "form",
+        "landing page",
+        "landing pages"
       ],
       "reason": "Insufficient verified category, capability, hard-constraint and semantic coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
       "action": "research-catalog-coverage-and-recheck"

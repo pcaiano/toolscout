@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:33:22.634Z",
+  "generatedAt": "2026-09-10T22:36:15.027Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -58,7 +58,9 @@
       "requiredCapabilities": [
         "seo",
         "keyword",
+        "keywords",
         "backlink",
+        "backlinks",
         "search visibility"
       ],
       "editorialEligibility": "eligible",
@@ -70,9 +72,9 @@
       "category": "business",
       "priorityScore": 51,
       "topFit": 8.36,
-      "eligibleToolCount": 7,
+      "eligibleToolCount": 8,
       "minimumEligibleTools": 2,
-      "catalogDepth": 14,
+      "catalogDepth": 16,
       "commercialSignal": 20,
       "affiliateSignal": 0,
       "searchSignal": {
@@ -98,7 +100,8 @@
         "project management",
         "project planning",
         "task management",
-        "projects"
+        "projects",
+        "project"
       ],
       "editorialEligibility": "eligible",
       "action": "repair-existing"
@@ -173,7 +176,8 @@
         "systeme-io"
       ],
       "requiredCapabilities": [
-        "funnel"
+        "funnel",
+        "funnels"
       ],
       "editorialEligibility": "eligible",
       "action": "repair-existing"
@@ -218,9 +222,9 @@
       "category": "business",
       "priorityScore": 42,
       "topFit": 9.13,
-      "eligibleToolCount": 4,
+      "eligibleToolCount": 5,
       "minimumEligibleTools": 2,
-      "catalogDepth": 8,
+      "catalogDepth": 10,
       "commercialSignal": 20,
       "affiliateSignal": 0,
       "searchSignal": {
@@ -246,7 +250,8 @@
         "project management",
         "project planning",
         "task management",
-        "projects"
+        "projects",
+        "project"
       ],
       "editorialEligibility": "eligible",
       "action": "repair-existing"
@@ -318,6 +323,7 @@
       "requiredCapabilities": [
         "keyword research",
         "keyword",
+        "keywords",
         "search volume"
       ],
       "editorialEligibility": "eligible",
@@ -394,7 +400,9 @@
       "requiredCapabilities": [
         "email marketing",
         "newsletter",
-        "email campaign"
+        "newsletters",
+        "email campaign",
+        "email campaigns"
       ],
       "editorialEligibility": "eligible",
       "action": "protect-and-measure"
@@ -438,7 +446,7 @@
       "title": "Best CRM for Small Business",
       "category": "crm",
       "priorityScore": 40,
-      "topFit": 8.62,
+      "topFit": 8.66,
       "eligibleToolCount": 9,
       "minimumEligibleTools": 2,
       "catalogDepth": 18,
@@ -461,7 +469,7 @@
       "topTools": [
         "freshsales",
         "zoho-crm",
-        "hubspot"
+        "attio"
       ],
       "requiredCapabilities": [],
       "editorialEligibility": "eligible",
@@ -499,8 +507,10 @@
       ],
       "requiredCapabilities": [
         "competitor",
+        "competitors",
         "competitive research",
         "backlink",
+        "backlinks",
         "seo"
       ],
       "editorialEligibility": "eligible",
@@ -729,37 +739,11 @@
         "grounded answers",
         "ai",
         "artificial intelligence",
-        "llm"
+        "llm",
+        "large language model"
       ],
       "editorialEligibility": "eligible",
       "action": "protect-and-measure"
-    },
-    {
-      "intent": "best-ai-marketing-tools",
-      "title": "Best AI Marketing Tools",
-      "category": "marketing",
-      "priorityScore": 77,
-      "topFit": 8.76,
-      "eligibleToolCount": 13,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 20,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "getresponse",
-        "systeme-io",
-        "omnisend"
-      ],
-      "requiredCapabilities": [
-        "ai",
-        "artificial intelligence",
-        "machine learning"
-      ],
-      "editorialEligibility": "eligible",
-      "action": "invest-now"
     },
     {
       "intent": "best-crm-for-real-estate",
@@ -781,34 +765,6 @@
         "close"
       ],
       "requiredCapabilities": [],
-      "editorialEligibility": "eligible",
-      "action": "build-next"
-    },
-    {
-      "intent": "best-marketing-automation-tools",
-      "title": "Best Marketing Automation Tools",
-      "category": "marketing",
-      "priorityScore": 72,
-      "topFit": 9.12,
-      "eligibleToolCount": 11,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 20,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "constant-contact",
-        "activecampaign",
-        "mailerlite"
-      ],
-      "requiredCapabilities": [
-        "marketing automation",
-        "lead nurturing",
-        "campaign automation",
-        "automation"
-      ],
       "editorialEligibility": "eligible",
       "action": "build-next"
     },
@@ -858,6 +814,33 @@
         "automation",
         "workflow automation",
         "sales automation"
+      ],
+      "editorialEligibility": "eligible",
+      "action": "build-next"
+    },
+    {
+      "intent": "best-marketing-automation-tools",
+      "title": "Best Marketing Automation Tools",
+      "category": "marketing",
+      "priorityScore": 62,
+      "topFit": 9.12,
+      "eligibleToolCount": 5,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 10,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "constant-contact",
+        "activecampaign",
+        "mailerlite"
+      ],
+      "requiredCapabilities": [
+        "marketing automation",
+        "lead nurturing",
+        "campaign automation"
       ],
       "editorialEligibility": "eligible",
       "action": "build-next"
@@ -919,6 +902,7 @@
       ],
       "requiredCapabilities": [
         "video",
+        "videos",
         "screen recording",
         "video editing",
         "podcast editing"
@@ -956,7 +940,9 @@
       ],
       "requiredCapabilities": [
         "ad creative",
+        "ad creatives",
         "advertising creative",
+        "advertising creatives",
         "creative generation",
         "ad generation",
         "ai",
@@ -999,15 +985,20 @@
         "marketing",
         "email marketing",
         "campaign",
+        "campaigns",
         "automation",
         "workflow",
+        "workflows",
         "sales",
         "sales pipeline",
         "deal management",
         "lead management",
         "funnel",
+        "funnels",
         "forms",
-        "landing page"
+        "form",
+        "landing page",
+        "landing pages"
       ],
       "editorialEligibility": "blocked-insufficient-semantic-coverage",
       "action": "catalog-gap"
@@ -1064,6 +1055,32 @@
       "action": "watch"
     },
     {
+      "intent": "best-ai-marketing-tools",
+      "title": "Best AI Marketing Tools",
+      "category": "marketing",
+      "priorityScore": 53,
+      "topFit": 7.26,
+      "eligibleToolCount": 2,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 4,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "klaviyo",
+        "adcreative-ai"
+      ],
+      "requiredCapabilities": [
+        "ai",
+        "artificial intelligence",
+        "machine learning"
+      ],
+      "editorialEligibility": "eligible",
+      "action": "watch"
+    },
+    {
       "intent": "best-ecommerce-platforms",
       "title": "Best Ecommerce Platforms",
       "category": "ecommerce",
@@ -1115,7 +1132,8 @@
         "website builder",
         "site builder",
         "web design",
-        "website"
+        "website",
+        "websites"
       ],
       "editorialEligibility": "eligible",
       "action": "watch"
@@ -1175,8 +1193,11 @@
       ],
       "requiredCapabilities": [
         "ai assistant",
+        "ai assistants",
         "chatbot",
-        "assistant"
+        "chatbots",
+        "assistant",
+        "assistants"
       ],
       "editorialEligibility": "eligible",
       "action": "watch"
@@ -1204,7 +1225,8 @@
         "design",
         "graphic design",
         "ui design",
-        "prototype"
+        "prototype",
+        "prototyping"
       ],
       "editorialEligibility": "eligible",
       "action": "watch"
@@ -1281,6 +1303,7 @@
       "requiredCapabilities": [
         "product analytics",
         "funnels",
+        "funnel",
         "retention",
         "session replay",
         "user behavior"
@@ -1361,8 +1384,10 @@
         "coding",
         "code editor",
         "code assistant",
+        "code assistants",
         "developer ai",
         "coding agent",
+        "coding agents",
         "ai",
         "artificial intelligence"
       ],
