@@ -1,7 +1,8 @@
 import fs from 'node:fs';
-import { eligibleTools as getEligibleTools, lexicalRelevance, normalize, capabilityTerms } from './seo-eligibility.mjs';
+import { eligibleTools as getEligibleTools, lexicalRelevance, normalize, capabilityTerms, categoryMatch } from './seo-eligibility.mjs';
+import { loadSeoIntents } from './seo-intent-loader.mjs';
 
-const intents = JSON.parse(fs.readFileSync('data/intents.json','utf8'));
+const intents = loadSeoIntents();
 const tools = JSON.parse(fs.readFileSync('data/tools.json','utf8'));
 const affiliate = JSON.parse(fs.readFileSync('data/affiliate.json','utf8'));
 const pipeline = JSON.parse(fs.readFileSync('data/affiliate-pipeline.json','utf8'));
@@ -27,7 +28,7 @@ function scoreTool(tool, intent) {
     const w = Number(raw) || 0;
     if (!w) continue;
     let value = 0;
-    if (key === 'category') value = normalize(tool.category) === normalize(intent.category) ? 10 : 0;
+    if (key === 'category') value = categoryMatch(tool,intent) ? 10 : 0;
     else if (key === 'freePlan') value = tool.freePlan ? 10 : 0;
     else if (key === 'ease' || key === 'simplicity') value = Number(scores.ease || 0);
     else if (key === 'price') value = Number(scores.price || 0);
@@ -103,5 +104,5 @@ rows.sort((a,b)=>{const rank={'optimize-now':7,'repair-existing':6,'protect-and-
 const gscAvailable=gscByIntent.size>0,gscStatus=gscAvailable?'signals-imported':gscFilePresent?'imported-no-matching-intents':'not-imported';
 const gscReason=gscAvailable?`Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below ${MIN_GSC_IMPRESSIONS} impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems.`:gscFilePresent?'A Google Search Console export was imported, but it contains no matching guide intents.':'No reports/gsc-signals.json file exists.';
 fs.mkdirSync('reports',{recursive:true});
-fs.writeFileSync('reports/growth-priority.json',JSON.stringify({generatedAt:new Date().toISOString(),methodology:`Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least ${MIN_GSC_IMPRESSIONS} impressions unless a click is observed. Tool eligibility requires exact category, capability fit where defined, and semantic relevance.`,gsc:{available:gscAvailable,ingestionStatus:gscStatus,intentsWithSignals:gscByIntent.size,minimumImpressionsForHighConfidenceAction:MIN_GSC_IMPRESSIONS,source:gsc.source||null,dataState:gsc.dataState||null,siteTotals:gsc.siteTotals||null,reason:gscReason},editorialGates:{minimumEligibleToolsPerGuide:MIN_TOOLS,maximumRankedToolsPerGuide:MAX_TOOLS,minimumLexicalRelevance:MIN_RELEVANCE,exactCategoryRequired:true,capabilityGateRequired:true},count:rows.length,items:rows},null,2)+'\n');
+fs.writeFileSync('reports/growth-priority.json',JSON.stringify({generatedAt:new Date().toISOString(),methodology:`Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least ${MIN_GSC_IMPRESSIONS} impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.`,gsc:{available:gscAvailable,ingestionStatus:gscStatus,intentsWithSignals:gscByIntent.size,minimumImpressionsForHighConfidenceAction:MIN_GSC_IMPRESSIONS,source:gsc.source||null,dataState:gsc.dataState||null,siteTotals:gsc.siteTotals||null,reason:gscReason},editorialGates:{minimumEligibleToolsPerGuide:MIN_TOOLS,maximumRankedToolsPerGuide:MAX_TOOLS,minimumLexicalRelevance:MIN_RELEVANCE,allowedCategoryRequired:true,capabilityGateRequired:true,hardAttributeGateRequired:true},count:rows.length,items:rows},null,2)+'\n');
 console.log(JSON.stringify({generated:rows.length,blockedCatalogGaps:rows.filter(x=>x.action==='catalog-gap').length,lowSampleStrategic:rows.filter(x=>x.action==='protect-and-measure').length,gsc:{available:gscAvailable,ingestionStatus:gscStatus,intentsWithSignals:gscByIntent.size,siteTotals:gsc.siteTotals||null},top:rows.slice(0,10)},null,2));
