@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-10T22:36:15.087Z",
+  "generatedAt": "2026-09-10T22:43:37.482Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 1661,
-    "ctr": 0.0602,
+    "searchImpressions": 1669,
+    "ctr": 0.0599,
     "gscStartDate": "2026-08-14",
     "gscEndDate": "2026-09-10",
     "gscDataState": "all",
@@ -26,7 +26,7 @@
     "observedGscIntents": 30,
     "observedGscPages": 75,
     "searchClicks": 1,
-    "searchImpressions": 1661,
+    "searchImpressions": 1669,
     "organicAcquisitionStatus": "early-search-acquisition",
     "actionableOpportunities": 22,
     "firstPageOpportunities": 11,
@@ -72,10 +72,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 428,
+        "impressions": 432,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.7336,
+        "position": 77.7083,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -2328,21 +2328,21 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 428,
+      "impressions": 432,
       "ctr": 0,
-      "position": 77.7336,
+      "position": 77.7083,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 130,
-          "position": 75.2769
+          "impressions": 133,
+          "position": 75.2632
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 81,
-          "position": 81.5679
+          "impressions": 82,
+          "position": 81.5
         },
         {
           "query": "what is the best tool for seo agency",
@@ -2366,7 +2366,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 5.506,
+      "opportunityScore": 5.559,
       "outcome": "visibility-only"
     },
     {
@@ -2420,9 +2420,9 @@
       "pathname": "/tools/semrush.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 149,
+      "impressions": 150,
       "ctr": 0,
-      "position": 55.1544,
+      "position": 55.1467,
       "topQueries": [
         {
           "query": "semrush tool",
@@ -2439,8 +2439,8 @@
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 20,
-          "position": 50.9
+          "impressions": 21,
+          "position": 51.0476
         },
         {
           "query": "semrush tools",
@@ -2458,7 +2458,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.702,
+      "opportunityScore": 2.72,
       "outcome": "visibility-only"
     },
     {
@@ -2466,15 +2466,15 @@
       "pathname": "/best-seo-keyword-research-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 135,
+      "impressions": 136,
       "ctr": 0,
-      "position": 73.9556,
+      "position": 73.9044,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 55,
-          "position": 62.2
+          "impressions": 56,
+          "position": 62.2857
         },
         {
           "query": "seo search tools",
@@ -2504,7 +2504,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.825,
+      "opportunityScore": 1.84,
       "outcome": "visibility-only"
     },
     {

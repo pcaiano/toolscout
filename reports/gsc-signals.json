@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:36:11.083Z",
+  "generatedAt": "2026-09-10T22:43:33.279Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-10",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1661,
-    "ctr": 0.0602
+    "impressions": 1669,
+    "ctr": 0.0599
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 30,
       "clicks": 0,
-      "impressions": 1105
+      "impressions": 1110
     },
     "home": {
       "pages": 2,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 33,
       "clicks": 0,
-      "impressions": 446
+      "impressions": 449
     }
   },
   "pageCount": 75,
@@ -52,21 +52,21 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 428,
+      "impressions": 432,
       "ctr": 0,
-      "position": 77.7336,
+      "position": 77.7083,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 130,
-          "position": 75.2769
+          "impressions": 133,
+          "position": 75.2632
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 81,
-          "position": 81.5679
+          "impressions": 82,
+          "position": 81.5
         },
         {
           "query": "what is the best tool for seo agency",
@@ -198,9 +198,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 149,
+      "impressions": 150,
       "ctr": 0,
-      "position": 55.1544,
+      "position": 55.1467,
       "topQueries": [
         {
           "query": "semrush tool",
@@ -217,8 +217,8 @@
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 20,
-          "position": 50.9
+          "impressions": 21,
+          "position": 51.0476
         },
         {
           "query": "semrush tools",
@@ -247,15 +247,15 @@
       "type": "guide",
       "intent": "best-seo-keyword-research-tools",
       "clicks": 0,
-      "impressions": 135,
+      "impressions": 136,
       "ctr": 0,
-      "position": 73.9556,
+      "position": 73.9044,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 55,
-          "position": 62.2
+          "impressions": 56,
+          "position": 62.2857
         },
         {
           "query": "seo search tools",
@@ -888,14 +888,14 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 21,
+      "impressions": 22,
       "ctr": 0,
-      "position": 69.5238,
+      "position": 69.5455,
       "topQueries": [
         {
           "query": "moz pro tools",
           "clicks": 0,
-          "impressions": 9,
+          "impressions": 10,
           "position": 70
         },
         {
@@ -925,9 +925,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 12,
+      "impressions": 13,
       "ctr": 0,
-      "position": 46.0833,
+      "position": 44.4615,
       "topQueries": [
         {
           "query": "tally software",
@@ -938,8 +938,8 @@
         {
           "query": "tally",
           "clicks": 0,
-          "impressions": 2,
-          "position": 49
+          "impressions": 3,
+          "position": 41
         },
         {
           "query": "tallykey",
@@ -1881,21 +1881,21 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 428,
+      "impressions": 432,
       "ctr": 0,
-      "position": 77.7336,
+      "position": 77.7083,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 130,
-          "position": 75.2769
+          "impressions": 133,
+          "position": 75.2632
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 81,
-          "position": 81.5679
+          "impressions": 82,
+          "position": 81.5
         },
         {
           "query": "what is the best tool for seo agency",
@@ -2021,15 +2021,15 @@
       "intent": "best-seo-keyword-research-tools",
       "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 135,
+      "impressions": 136,
       "ctr": 0,
-      "position": 73.9556,
+      "position": 73.9044,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 55,
-          "position": 62.2
+          "impressions": 56,
+          "position": 62.2857
         },
         {
           "query": "seo search tools",

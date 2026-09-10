@@ -1,0 +1,220 @@
+{
+  "generatedAt": "2026-09-10T22:43:37.952Z",
+  "gscGeneratedAt": "2026-09-10T22:43:33.279Z",
+  "minimumImpressionsForHighConfidenceAction": 20,
+  "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
+  "adaptiveApplied": 7,
+  "protectedLowSample": 7,
+  "items": [
+    {
+      "intent": "best-crm-for-real-estate",
+      "impressions": 0,
+      "clicks": 0,
+      "position": 0,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": false,
+      "dominantQuery": null,
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-crm-for-consultants",
+      "impressions": 1,
+      "clicks": 0,
+      "position": 8,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": true,
+      "dominantQuery": null,
+      "action": "protect-first-page-low-sample"
+    },
+    {
+      "intent": "best-forms-for-small-business",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 4.5,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": true,
+      "dominantQuery": null,
+      "action": "protect-first-page-low-sample"
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 47.5,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "best lead capture forms",
+        "impressions": 2,
+        "position": 88.5,
+        "alignment": 1
+      },
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
+      "impressions": 3,
+      "clicks": 0,
+      "position": 7.6667,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": true,
+      "dominantQuery": null,
+      "action": "protect-first-page-low-sample"
+    },
+    {
+      "intent": "best-email-marketing-tools",
+      "impressions": 2,
+      "clicks": 0,
+      "position": 8.5,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": true,
+      "dominantQuery": null,
+      "action": "protect-first-page-low-sample"
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "impressions": 2,
+      "clicks": 0,
+      "position": 6.5,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": true,
+      "dominantQuery": null,
+      "action": "protect-first-page-low-sample"
+    },
+    {
+      "intent": "best-crm-for-small-business",
+      "impressions": 1,
+      "clicks": 0,
+      "position": 8,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": true,
+      "dominantQuery": null,
+      "action": "protect-first-page-low-sample"
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "impressions": 29,
+      "clicks": 0,
+      "position": 76.5862,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": null,
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-ai-research-tools",
+      "impressions": 1,
+      "clicks": 0,
+      "position": 1,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": true,
+      "dominantQuery": null,
+      "action": "protect-first-page-low-sample"
+    },
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "impressions": 432,
+      "clicks": 0,
+      "position": 77.7083,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "best seo tool for agencies",
+        "impressions": 39,
+        "position": 72.5385,
+        "alignment": 1
+      },
+      "action": "deepen-weak-ranking"
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "impressions": 204,
+      "clicks": 0,
+      "position": 73.2353,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "no code automation tools",
+        "impressions": 30,
+        "position": 69.7667,
+        "alignment": 1
+      },
+      "action": "deepen-weak-ranking"
+    },
+    {
+      "intent": "best-funnel-builder",
+      "impressions": 94,
+      "clicks": 0,
+      "position": 78.0106,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "best funnel builder",
+        "impressions": 24,
+        "position": 64.875,
+        "alignment": 1
+      },
+      "action": "deepen-weak-ranking"
+    },
+    {
+      "intent": "best-crm-for-sales-teams",
+      "impressions": 47,
+      "clicks": 0,
+      "position": 75.8511,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "crm for sales teams",
+        "impressions": 14,
+        "position": 75.0714,
+        "alignment": 1
+      },
+      "action": "deepen-weak-ranking"
+    },
+    {
+      "intent": "best-free-crm",
+      "impressions": 33,
+      "clicks": 0,
+      "position": 71.9697,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "best free crm tools",
+        "impressions": 8,
+        "position": 64.25,
+        "alignment": 1
+      },
+      "action": "deepen-weak-ranking"
+    },
+    {
+      "intent": "best-project-management-tools",
+      "impressions": 51,
+      "clicks": 0,
+      "position": 39.7451,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "automated project management tools",
+        "impressions": 7,
+        "position": 36.2857,
+        "alignment": 1
+      },
+      "action": "deepen-weak-ranking"
+    },
+    {
+      "intent": "best-free-project-management-tools",
+      "impressions": 36,
+      "clicks": 0,
+      "position": 52.1944,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "free online project manager tools",
+        "impressions": 13,
+        "position": 66.7692,
+        "alignment": 0.667
+      },
+      "action": "deepen-weak-ranking"
+    }
+  ]
+}

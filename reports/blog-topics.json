@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:36:16.212Z",
+  "generatedAt": "2026-09-10T22:43:38.648Z",
   "policy": "Only distinct informational intents with observed Search Console demand may become indexable blog candidates. Existing commercial guide intents are not duplicated in the blog.",
   "minimumImpressions": 10,
   "count": 2,

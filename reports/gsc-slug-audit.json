@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-10T22:36:11.143Z",
-  "sourceGeneratedAt": "2026-09-10T22:36:11.083Z",
+  "generatedAt": "2026-09-10T22:43:33.333Z",
+  "sourceGeneratedAt": "2026-09-10T22:43:33.279Z",
   "summary": {
     "canonical": 27,
     "redirected": 3,
@@ -11,9 +11,9 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 428,
+      "impressions": 432,
       "clicks": 0,
-      "position": 77.7336
+      "position": 77.7083
     },
     {
       "slug": "best-no-code-automation-tools",
@@ -27,9 +27,9 @@
       "slug": "best-seo-keyword-research-tools",
       "status": "redirected",
       "target": "best-keyword-research-tools",
-      "impressions": 135,
+      "impressions": 136,
       "clicks": 0,
-      "position": 73.9556
+      "position": 73.9044
     },
     {
       "slug": "best-funnel-builder",
