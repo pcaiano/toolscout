@@ -24,9 +24,29 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          sleep 20
           SOURCE="tracking_smoke_${GITHUB_RUN_ID}"
           UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36'
+
+          # Do not assume a fixed deployment duration. The hardened Worker is considered live
+          # only when an unestablished browser-confirmation attempt is rejected with 403.
+          READY=0
+          for ATTEMPT in $(seq 1 30); do
+            PROBE_SESSION=$(node -e "console.log(require('crypto').randomUUID())")
+            PROBE_CODE=$(curl -sS -o /tmp/probe-confirm.json -w '%{http_code}' \
+              -A "$UA" \
+              -H 'Origin: https://trytoolscout.org' \
+              -H 'Sec-Fetch-Site: same-origin' \
+              -H 'Content-Type: application/json' \
+              -H "Cookie: toolscout_session=${PROBE_SESSION}" \
+              --data "{\"event_id\":\"confirm_${PROBE_SESSION}\",\"session_id\":\"${PROBE_SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools.html\",\"source\":\"browser-confirm\"}" \
+              https://trytoolscout.org/api/events || true)
+            if [ "$PROBE_CODE" = '403' ]; then
+              READY=1
+              break
+            fi
+            sleep 4
+          done
+          test "$READY" = '1'
 
           FAKE_SESSION=$(node -e "console.log(require('crypto').randomUUID())")
           FAKE_CODE=$(curl -sS -o /tmp/fake-confirm.json -w '%{http_code}' \
