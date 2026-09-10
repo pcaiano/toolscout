@@ -5,7 +5,7 @@ const STOP = new Set(['best','tool','tools','software','for','with','and','the',
 const CAPABILITY_RULES = {
   'best-email-marketing-tools': ['email marketing','newsletter','email campaign'],
   'best-marketing-automation-tools': ['marketing automation','lead nurturing','campaign automation','automation'],
-  'best-funnel-builder': ['funnel','landing page'],
+  'best-funnel-builder': ['funnel'],
   'best-ai-ad-creative-tools': ['ad creative','advertising creative','creative generation','ad generation'],
   'best-keyword-research-tools': ['keyword research','keyword','search volume'],
   'best-seo-tools-for-agencies': ['seo','keyword','backlink','search visibility'],
