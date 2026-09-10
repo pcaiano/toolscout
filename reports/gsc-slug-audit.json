@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-10T08:23:23.519Z",
-  "sourceGeneratedAt": "2026-09-10T08:23:23.462Z",
+  "generatedAt": "2026-09-10T21:38:09.337Z",
+  "sourceGeneratedAt": "2026-09-10T21:38:08.863Z",
   "summary": {
-    "canonical": 21,
+    "canonical": 26,
     "redirected": 3,
     "orphan": 1
   },
@@ -11,73 +11,81 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 304,
+      "impressions": 422,
       "clicks": 0,
-      "position": 77.4309
+      "position": 77.7441
     },
     {
       "slug": "best-no-code-automation-tools",
       "status": "canonical",
       "target": "best-no-code-automation-tools",
-      "impressions": 169,
+      "impressions": 204,
       "clicks": 0,
-      "position": 72.6272
+      "position": 73.2353
     },
     {
       "slug": "best-seo-keyword-research-tools",
       "status": "redirected",
       "target": "best-keyword-research-tools",
-      "impressions": 93,
+      "impressions": 134,
       "clicks": 0,
-      "position": 74.3656
+      "position": 73.806
     },
     {
       "slug": "best-funnel-builder",
       "status": "canonical",
       "target": "best-funnel-builder",
-      "impressions": 61,
+      "impressions": 92,
       "clicks": 0,
-      "position": 78.8852
-    },
-    {
-      "slug": "best-crm-for-sales-teams",
-      "status": "canonical",
-      "target": "best-crm-for-sales-teams",
-      "impressions": 45,
-      "clicks": 0,
-      "position": 76.1556
+      "position": 77.8696
     },
     {
       "slug": "best-project-management-tools",
       "status": "canonical",
       "target": "best-project-management-tools",
-      "impressions": 31,
+      "impressions": 50,
       "clicks": 0,
-      "position": 42.0323
+      "position": 39.86
+    },
+    {
+      "slug": "best-crm-for-sales-teams",
+      "status": "canonical",
+      "target": "best-crm-for-sales-teams",
+      "impressions": 47,
+      "clicks": 0,
+      "position": 75.8511
     },
     {
       "slug": "best-free-project-management-tools",
       "status": "canonical",
       "target": "best-free-project-management-tools",
-      "impressions": 23,
+      "impressions": 36,
       "clicks": 0,
-      "position": 51.5652
+      "position": 52.1944
     },
     {
       "slug": "best-free-crm",
       "status": "canonical",
       "target": "best-free-crm",
-      "impressions": 20,
+      "impressions": 33,
       "clicks": 0,
-      "position": 78.15
+      "position": 71.9697
     },
     {
       "slug": "best-keyword-research-tools",
       "status": "canonical",
       "target": "best-keyword-research-tools",
-      "impressions": 18,
+      "impressions": 28,
       "clicks": 0,
-      "position": 73.2778
+      "position": 76.0714
+    },
+    {
+      "slug": "best-all-in-one-business-tools",
+      "status": "orphan",
+      "target": null,
+      "impressions": 4,
+      "clicks": 0,
+      "position": 90.75
     },
     {
       "slug": "best-forms-for-small-business",
@@ -88,12 +96,52 @@
       "position": 4.5
     },
     {
+      "slug": "best-lead-capture-forms",
+      "status": "canonical",
+      "target": "best-lead-capture-forms",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 47.5
+    },
+    {
+      "slug": "best-product-analytics-tools",
+      "status": "canonical",
+      "target": "best-product-analytics-tools",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 20.25
+    },
+    {
+      "slug": "best-productivity-tools-for-teams",
+      "status": "canonical",
+      "target": "best-productivity-tools-for-teams",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 38
+    },
+    {
       "slug": "best-sales-prospecting-tools",
       "status": "canonical",
       "target": "best-sales-prospecting-tools",
       "impressions": 3,
       "clicks": 0,
       "position": 7.6667
+    },
+    {
+      "slug": "best-ai-ad-creative-tools",
+      "status": "canonical",
+      "target": "best-ai-ad-creative-tools",
+      "impressions": 3,
+      "clicks": 0,
+      "position": 87.3333
+    },
+    {
+      "slug": "best-developer-tools",
+      "status": "canonical",
+      "target": "best-developer-tools",
+      "impressions": 3,
+      "clicks": 0,
+      "position": 10
     },
     {
       "slug": "best-funnel-builder-for-beginners",
@@ -104,20 +152,20 @@
       "position": 33
     },
     {
-      "slug": "best-lead-capture-forms",
-      "status": "canonical",
-      "target": "best-lead-capture-forms",
-      "impressions": 3,
-      "clicks": 0,
-      "position": 34.3333
-    },
-    {
       "slug": "best-cold-email-tools",
       "status": "canonical",
       "target": "best-cold-email-tools",
       "impressions": 2,
       "clicks": 0,
       "position": 6.5
+    },
+    {
+      "slug": "best-competitor-seo-tools",
+      "status": "canonical",
+      "target": "best-competitor-seo-tools",
+      "impressions": 2,
+      "clicks": 0,
+      "position": 4
     },
     {
       "slug": "best-email-marketing-tools",
@@ -128,12 +176,12 @@
       "position": 8.5
     },
     {
-      "slug": "best-product-analytics-tools",
+      "slug": "best-team-collaboration-tools",
       "status": "canonical",
-      "target": "best-product-analytics-tools",
+      "target": "best-team-collaboration-tools",
       "impressions": 2,
       "clicks": 0,
-      "position": 39.5
+      "position": 8
     },
     {
       "slug": "best-ai-coding-tools",
@@ -150,14 +198,6 @@
       "impressions": 1,
       "clicks": 0,
       "position": 1
-    },
-    {
-      "slug": "best-all-in-one-business-tools",
-      "status": "orphan",
-      "target": null,
-      "impressions": 1,
-      "clicks": 0,
-      "position": 87
     },
     {
       "slug": "best-crm-for-consultants",
@@ -184,12 +224,12 @@
       "position": 6
     },
     {
-      "slug": "best-developer-tools",
+      "slug": "best-social-media-management-tools",
       "status": "canonical",
-      "target": "best-developer-tools",
+      "target": "best-social-media-management-tools",
       "impressions": 1,
       "clicks": 0,
-      "position": 10
+      "position": 57
     },
     {
       "slug": "best-tools-for-agencies",

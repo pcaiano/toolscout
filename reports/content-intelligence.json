@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T08:23:42.811Z",
+  "generatedAt": "2026-09-10T21:38:17.988Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -17,20 +17,24 @@
   },
   "search": {
     "summary": {
-      "observedGscIntents": 25,
-      "actionableOpportunities": 17,
-      "firstPageOpportunities": 10,
+      "observedGscIntents": 30,
+      "observedGscPages": 75,
+      "searchClicks": 1,
+      "searchImpressions": 1645,
+      "organicAcquisitionStatus": "early-search-acquisition",
+      "actionableOpportunities": 21,
+      "firstPageOpportunities": 12,
       "strikingDistanceOpportunities": 0,
-      "authorityDepthOpportunities": 7,
+      "authorityDepthOpportunities": 8,
       "competitorResearchCandidates": 3
     },
     "topOpportunities": [
       {
         "intent": "best-forms-for-small-business",
-        "priorityScore": 48,
+        "priorityScore": 52,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
         "impressions": 4,
         "position": 4.5,
         "topTools": [
@@ -41,10 +45,10 @@
       },
       {
         "intent": "best-sales-prospecting-tools",
-        "priorityScore": 44,
+        "priorityScore": 46,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
         "impressions": 3,
         "position": 7.6667,
         "topTools": [
@@ -54,87 +58,87 @@
         ]
       },
       {
-        "intent": "best-cold-email-tools",
+        "intent": "best-developer-tools",
         "priorityScore": 43,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+        "impressions": 3,
+        "position": 10,
+        "topTools": [
+          "github",
+          "sentry",
+          "cursor"
+        ]
+      },
+      {
+        "intent": "best-competitor-seo-tools",
+        "priorityScore": 50,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+        "impressions": 2,
+        "position": 4,
+        "topTools": [
+          "semrush",
+          "surfer",
+          "ahrefs"
+        ]
+      },
+      {
+        "intent": "best-cold-email-tools",
+        "priorityScore": 45,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
         "impressions": 2,
         "position": 6.5,
         "topTools": [
-          "shopify",
-          "hubspot",
-          "lemlist"
+          "lemlist",
+          "instantly",
+          "apollo"
+        ]
+      },
+      {
+        "intent": "best-team-collaboration-tools",
+        "priorityScore": 46,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+        "impressions": 2,
+        "position": 8,
+        "topTools": [
+          "slack",
+          "airtable",
+          "calendly"
         ]
       },
       {
         "intent": "best-email-marketing-tools",
-        "priorityScore": 45,
+        "priorityScore": 55,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
         "impressions": 2,
         "position": 8.5,
         "topTools": [
-          "buffer",
           "omnisend",
-          "kit"
+          "kit",
+          "klaviyo"
         ]
       },
       {
         "intent": "best-ai-research-tools",
-        "priorityScore": 27,
+        "priorityScore": 31,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
         "impressions": 1,
         "position": 1,
         "topTools": [
           "chatgpt",
           "gemini",
           "perplexity"
-        ]
-      },
-      {
-        "intent": "best-crm-for-consultants",
-        "priorityScore": 45,
-        "lane": "seo-aeo-snippet",
-        "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
-        "impressions": 1,
-        "position": 8,
-        "topTools": [
-          "hubspot",
-          "close",
-          "pipedrive"
-        ]
-      },
-      {
-        "intent": "best-crm-for-small-business",
-        "priorityScore": 43,
-        "lane": "seo-aeo-snippet",
-        "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
-        "impressions": 1,
-        "position": 8,
-        "topTools": [
-          "buffer",
-          "chatgpt",
-          "integrately"
-        ]
-      },
-      {
-        "intent": "best-tools-for-agencies",
-        "priorityScore": 37,
-        "lane": "seo-aeo-snippet",
-        "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
-        "impressions": 1,
-        "position": 10,
-        "topTools": [
-          "zapier",
-          "github",
-          "buffer"
         ]
       }
     ]
@@ -415,9 +419,9 @@
     "topicCandidates": [
       "best-forms-for-small-business",
       "best-sales-prospecting-tools",
-      "best-cold-email-tools",
-      "best-email-marketing-tools",
-      "best-ai-research-tools"
+      "best-developer-tools",
+      "best-competitor-seo-tools",
+      "best-cold-email-tools"
     ],
     "testEligible": true,
     "allocationChangeEligible": false,
