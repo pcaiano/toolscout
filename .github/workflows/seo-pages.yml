@@ -59,6 +59,8 @@ jobs:
         run: node scripts/enrich-comparison-context.mjs
       - name: Generate indexable tool profiles
         run: node scripts/generate-tool-pages.mjs
+      - name: Prune orphan tool profiles
+        run: node scripts/prune-orphan-tool-profiles.mjs
       - name: Link directory to indexable tool profiles
         run: node scripts/link-static-tool-profiles.mjs
       - name: Link guides to relevant comparisons
