@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T21:39:07.315Z",
+  "generatedAt": "2026-09-10T21:40:43.782Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -31,7 +31,7 @@
     "topOpportunities": [
       {
         "intent": "best-forms-for-small-business",
-        "priorityScore": 52,
+        "priorityScore": 37,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -45,7 +45,7 @@
       },
       {
         "intent": "best-sales-prospecting-tools",
-        "priorityScore": 46,
+        "priorityScore": 31,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -59,7 +59,7 @@
       },
       {
         "intent": "best-developer-tools",
-        "priorityScore": 43,
+        "priorityScore": 28,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -73,7 +73,7 @@
       },
       {
         "intent": "best-competitor-seo-tools",
-        "priorityScore": 50,
+        "priorityScore": 35,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -87,7 +87,7 @@
       },
       {
         "intent": "best-cold-email-tools",
-        "priorityScore": 45,
+        "priorityScore": 30,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -101,7 +101,7 @@
       },
       {
         "intent": "best-team-collaboration-tools",
-        "priorityScore": 46,
+        "priorityScore": 31,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -115,7 +115,7 @@
       },
       {
         "intent": "best-email-marketing-tools",
-        "priorityScore": 55,
+        "priorityScore": 40,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -129,7 +129,7 @@
       },
       {
         "intent": "best-ai-research-tools",
-        "priorityScore": 31,
+        "priorityScore": 25,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",

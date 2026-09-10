@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T21:39:07.262Z",
+  "generatedAt": "2026-09-10T21:40:43.721Z",
   "engine": "ToolScout Search & Answer Opportunity Engine v3",
   "objective": "Convert observed search and answer-engine signals into autonomous SEO/AEO/GEO actions that increase qualified human traffic and downstream commercial outcomes while preserving editorial neutrality.",
   "acquisitionTruth": {
@@ -251,44 +251,6 @@
       ]
     },
     {
-      "intent": "best-email-marketing-tools",
-      "priorityScore": 55,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 8.5,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 24
-      },
-      "topTools": [
-        "omnisend",
-        "kit",
-        "klaviyo"
-      ]
-    },
-    {
       "intent": "best-project-management-tools",
       "priorityScore": 53,
       "lane": "seo-authority-depth",
@@ -318,7 +280,8 @@
         "ctr": 0,
         "position": 39.86,
         "opportunity": "authority-gap",
-        "opportunityScore": 27
+        "opportunityScore": 27,
+        "meaningfulSample": true
       },
       "topTools": [
         "airtable",
@@ -353,82 +316,6 @@
       ]
     },
     {
-      "intent": "best-crm-for-consultants",
-      "priorityScore": 52,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 1,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 8,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 23
-      },
-      "topTools": [
-        "hubspot",
-        "close",
-        "pipedrive"
-      ]
-    },
-    {
-      "intent": "best-forms-for-small-business",
-      "priorityScore": 52,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 4,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 4.5,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 26
-      },
-      "topTools": [
-        "fillout",
-        "tally",
-        "jotform"
-      ]
-    },
-    {
       "intent": "best-seo-tools-for-agencies",
       "priorityScore": 52,
       "lane": "seo-authority-depth",
@@ -458,50 +345,13 @@
         "ctr": 0,
         "position": 77.7441,
         "opportunity": "relevance-gap",
-        "opportunityScore": 26
+        "opportunityScore": 26,
+        "meaningfulSample": true
       },
       "topTools": [
         "semrush",
         "ahrefs",
         "surfer"
-      ]
-    },
-    {
-      "intent": "best-crm-for-small-business",
-      "priorityScore": 51,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 1,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 8,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 23
-      },
-      "topTools": [
-        "attio",
-        "hubspot",
-        "freshsales"
       ]
     },
     {
@@ -534,50 +384,13 @@
         "ctr": 0,
         "position": 77.8696,
         "opportunity": "relevance-gap",
-        "opportunityScore": 20
+        "opportunityScore": 20,
+        "meaningfulSample": true
       },
       "topTools": [
         "omnisend",
         "kit",
         "mailerlite"
-      ]
-    },
-    {
-      "intent": "best-competitor-seo-tools",
-      "priorityScore": 50,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 4,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 24
-      },
-      "topTools": [
-        "semrush",
-        "surfer",
-        "ahrefs"
       ]
     },
     {
@@ -610,7 +423,8 @@
         "ctr": 0,
         "position": 73.2353,
         "opportunity": "relevance-gap",
-        "opportunityScore": 23
+        "opportunityScore": 23,
+        "meaningfulSample": true
       },
       "topTools": [
         "zapier",
@@ -648,88 +462,13 @@
         "ctr": 0,
         "position": 52.1944,
         "opportunity": "relevance-gap",
-        "opportunityScore": 20
+        "opportunityScore": 20,
+        "meaningfulSample": true
       },
       "topTools": [
         "trello",
         "calendly",
         "linear"
-      ]
-    },
-    {
-      "intent": "best-sales-prospecting-tools",
-      "priorityScore": 46,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 3,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 7.6667,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 25
-      },
-      "topTools": [
-        "apollo",
-        "lemlist",
-        "instantly"
-      ]
-    },
-    {
-      "intent": "best-team-collaboration-tools",
-      "priorityScore": 46,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 8,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 24
-      },
-      "topTools": [
-        "slack",
-        "airtable",
-        "calendly"
       ]
     },
     {
@@ -762,88 +501,13 @@
         "ctr": 0,
         "position": 75.8511,
         "opportunity": "relevance-gap",
-        "opportunityScore": 17
+        "opportunityScore": 17,
+        "meaningfulSample": true
       },
       "topTools": [
         "hubspot",
         "salesforce",
         "close"
-      ]
-    },
-    {
-      "intent": "best-cold-email-tools",
-      "priorityScore": 45,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 6.5,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 24
-      },
-      "topTools": [
-        "lemlist",
-        "instantly",
-        "apollo"
-      ]
-    },
-    {
-      "intent": "best-tools-for-agencies",
-      "priorityScore": 45,
-      "lane": "seo-aeo-snippet",
-      "action": "optimize-existing",
-      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
-      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 1,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 10,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 23
-      },
-      "topTools": [
-        "airtable",
-        "slack",
-        "notion"
       ]
     },
     {
@@ -876,46 +540,13 @@
         "ctr": 0,
         "position": 71.9697,
         "opportunity": "relevance-gap",
-        "opportunityScore": 16
+        "opportunityScore": 16,
+        "meaningfulSample": true
       },
       "topTools": [
         "attio",
         "hubspot",
         "freshsales"
-      ]
-    },
-    {
-      "intent": "best-productivity-tools-for-teams",
-      "priorityScore": 44,
-      "lane": "develop-authority",
-      "action": "watch",
-      "reason": "No strong observed-search trigger yet.",
-      "autonomy": "measure-only",
-      "executionPlan": [
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 4,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 38,
-        "opportunity": "authority-gap",
-        "opportunityScore": 18
-      },
-      "topTools": [
-        "calendly",
-        "linear",
-        "slack"
       ]
     },
     {
@@ -945,8 +576,8 @@
       ]
     },
     {
-      "intent": "best-developer-tools",
-      "priorityScore": 43,
+      "intent": "best-email-marketing-tools",
+      "priorityScore": 40,
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -966,25 +597,26 @@
         "useful-decision-context",
         "public-surface-validation"
       ],
-      "monetizationReadiness": "needs-affiliate-activation",
+      "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 3,
+        "impressions": 2,
         "clicks": 0,
         "ctr": 0,
-        "position": 10,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 25
+        "position": 8.5,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false
       },
       "topTools": [
-        "github",
-        "sentry",
-        "cursor"
+        "omnisend",
+        "kit",
+        "klaviyo"
       ]
     },
     {
-      "intent": "best-video-content-tools",
-      "priorityScore": 43,
+      "intent": "best-forms-for-small-business",
+      "priorityScore": 37,
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -995,40 +627,6 @@
         "strengthen-comparison-context",
         "strengthen-internal-links",
         "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 1,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 10,
-        "opportunity": "first-page-no-clicks",
-        "opportunityScore": 23
-      },
-      "topTools": [
-        "chatgpt",
-        "copy-ai",
-        "buffer"
-      ]
-    },
-    {
-      "intent": "best-lead-capture-forms",
-      "priorityScore": 38,
-      "lane": "develop-authority",
-      "action": "watch",
-      "reason": "No strong observed-search trigger yet.",
-      "autonomy": "measure-only",
-      "executionPlan": [
-        "measure"
       ],
       "qualityGates": [
         "canonical-safety",
@@ -1044,14 +642,54 @@
         "impressions": 4,
         "clicks": 0,
         "ctr": 0,
-        "position": 47.5,
-        "opportunity": "authority-gap",
-        "opportunityScore": 12
+        "position": 4.5,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 11,
+        "meaningfulSample": false
       },
       "topTools": [
-        "typeform",
-        "paperform",
-        "fillout"
+        "fillout",
+        "tally",
+        "jotform"
+      ]
+    },
+    {
+      "intent": "best-crm-for-consultants",
+      "priorityScore": 37,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 1,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 8,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 8,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "hubspot",
+        "close",
+        "pipedrive"
       ]
     },
     {
@@ -1110,12 +748,52 @@
         "ctr": 0,
         "position": 76.0714,
         "opportunity": "relevance-gap",
-        "opportunityScore": 15
+        "opportunityScore": 15,
+        "meaningfulSample": true
       },
       "topTools": [
         "surfer",
         "semrush",
         "ahrefs"
+      ]
+    },
+    {
+      "intent": "best-crm-for-small-business",
+      "priorityScore": 36,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 1,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 8,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 8,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "attio",
+        "hubspot",
+        "freshsales"
       ]
     },
     {
@@ -1145,8 +823,117 @@
       ]
     },
     {
-      "intent": "best-ai-ad-creative-tools",
+      "intent": "best-productivity-tools-for-teams",
       "priorityScore": 35,
+      "lane": "develop-authority",
+      "action": "watch",
+      "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 4,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 38,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "calendly",
+        "linear",
+        "slack"
+      ]
+    },
+    {
+      "intent": "best-competitor-seo-tools",
+      "priorityScore": 35,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 2,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 4,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "semrush",
+        "surfer",
+        "ahrefs"
+      ]
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "priorityScore": 34,
+      "lane": "develop-authority",
+      "action": "watch",
+      "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 4,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 47.5,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 8,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "typeform",
+        "paperform",
+        "fillout"
+      ]
+    },
+    {
+      "intent": "best-ai-ad-creative-tools",
+      "priorityScore": 34,
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
@@ -1169,8 +956,9 @@
         "clicks": 0,
         "ctr": 0,
         "position": 87.3333,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 7
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 6,
+        "meaningfulSample": false
       },
       "topTools": [
         "adcreative-ai",
@@ -1179,8 +967,242 @@
       ]
     },
     {
+      "intent": "best-sales-prospecting-tools",
+      "priorityScore": 31,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 3,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 7.6667,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 10,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "apollo",
+        "lemlist",
+        "instantly"
+      ]
+    },
+    {
+      "intent": "best-team-collaboration-tools",
+      "priorityScore": 31,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 2,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 8,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "slack",
+        "airtable",
+        "calendly"
+      ]
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "priorityScore": 30,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 2,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 6.5,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "lemlist",
+        "instantly",
+        "apollo"
+      ]
+    },
+    {
+      "intent": "best-tools-for-agencies",
+      "priorityScore": 30,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 1,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 10,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 8,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "airtable",
+        "slack",
+        "notion"
+      ]
+    },
+    {
+      "intent": "best-developer-tools",
+      "priorityScore": 28,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 3,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 10,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 10,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "github",
+        "sentry",
+        "cursor"
+      ]
+    },
+    {
+      "intent": "best-video-content-tools",
+      "priorityScore": 28,
+      "lane": "seo-aeo-snippet",
+      "action": "optimize-existing",
+      "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
+      "autonomy": "auto-execute-through-seo-aeo-geo-pipeline",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 1,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 10,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 8,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "chatgpt",
+        "copy-ai",
+        "buffer"
+      ]
+    },
+    {
       "intent": "best-product-analytics-tools",
-      "priorityScore": 34,
+      "priorityScore": 25,
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
@@ -1203,8 +1225,9 @@
         "clicks": 0,
         "ctr": 0,
         "position": 20.25,
-        "opportunity": "authority-gap",
-        "opportunityScore": 18
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false
       },
       "topTools": [
         "posthog",
@@ -1214,7 +1237,7 @@
     },
     {
       "intent": "best-ai-research-tools",
-      "priorityScore": 31,
+      "priorityScore": 25,
       "lane": "seo-aeo-snippet",
       "action": "optimize-existing",
       "reason": "Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.",
@@ -1241,8 +1264,9 @@
         "clicks": 0,
         "ctr": 0,
         "position": 1,
-        "opportunity": "defend-winner",
-        "opportunityScore": 11
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 5,
+        "meaningfulSample": false
       },
       "topTools": [
         "chatgpt",
@@ -1251,42 +1275,8 @@
       ]
     },
     {
-      "intent": "best-social-media-management-tools",
-      "priorityScore": 25,
-      "lane": "develop-authority",
-      "action": "watch",
-      "reason": "No strong observed-search trigger yet.",
-      "autonomy": "measure-only",
-      "executionPlan": [
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 1,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 57,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 9
-      },
-      "topTools": [
-        "buffer",
-        "hootsuite",
-        "sprout-social"
-      ]
-    },
-    {
       "intent": "best-ai-coding-tools",
-      "priorityScore": 23,
+      "priorityScore": 21,
       "lane": "develop-authority",
       "action": "watch",
       "reason": "No strong observed-search trigger yet.",
@@ -1309,13 +1299,49 @@
         "clicks": 0,
         "ctr": 0,
         "position": 78,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 5
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 3,
+        "meaningfulSample": false
       },
       "topTools": [
         "cursor",
         "github",
         "vercel"
+      ]
+    },
+    {
+      "intent": "best-social-media-management-tools",
+      "priorityScore": 20,
+      "lane": "develop-authority",
+      "action": "watch",
+      "reason": "No strong observed-search trigger yet.",
+      "autonomy": "measure-only",
+      "executionPlan": [
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 1,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 57,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 4,
+        "meaningfulSample": false
+      },
+      "topTools": [
+        "buffer",
+        "hootsuite",
+        "sprout-social"
       ]
     }
   ],
@@ -2423,26 +2449,6 @@
       ]
     },
     {
-      "intent": "best-email-marketing-tools",
-      "priorityScore": 55,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
       "intent": "best-project-management-tools",
       "priorityScore": 53,
       "lane": "seo-authority-depth",
@@ -2450,46 +2456,6 @@
         "deepen-evidence-and-relevance",
         "improve-query-intent-match",
         "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-crm-for-consultants",
-      "priorityScore": 52,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-forms-for-small-business",
-      "priorityScore": 52,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
         "strengthen-internal-links",
         "validate-aeo-geo"
       ],
@@ -2523,26 +2489,6 @@
       ]
     },
     {
-      "intent": "best-crm-for-small-business",
-      "priorityScore": 51,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
       "intent": "best-funnel-builder",
       "priorityScore": 51,
       "lane": "seo-authority-depth",
@@ -2550,26 +2496,6 @@
         "deepen-evidence-and-relevance",
         "improve-query-intent-match",
         "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-competitor-seo-tools",
-      "priorityScore": 50,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
         "strengthen-internal-links",
         "validate-aeo-geo"
       ],
@@ -2623,46 +2549,6 @@
       ]
     },
     {
-      "intent": "best-sales-prospecting-tools",
-      "priorityScore": 46,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-team-collaboration-tools",
-      "priorityScore": 46,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
       "intent": "best-crm-for-sales-teams",
       "priorityScore": 46,
       "lane": "seo-authority-depth",
@@ -2670,46 +2556,6 @@
         "deepen-evidence-and-relevance",
         "improve-query-intent-match",
         "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-cold-email-tools",
-      "priorityScore": 45,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "semantic-tool-fit",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-tools-for-agencies",
-      "priorityScore": 45,
-      "lane": "seo-aeo-snippet",
-      "executionPlan": [
-        "sharpen-answer-first-copy",
-        "strengthen-query-title-alignment",
-        "strengthen-comparison-context",
         "strengthen-internal-links",
         "validate-aeo-geo"
       ],
@@ -2743,8 +2589,8 @@
       ]
     },
     {
-      "intent": "best-developer-tools",
-      "priorityScore": 43,
+      "intent": "best-email-marketing-tools",
+      "priorityScore": 40,
       "lane": "seo-aeo-snippet",
       "executionPlan": [
         "sharpen-answer-first-copy",
@@ -2763,8 +2609,28 @@
       ]
     },
     {
-      "intent": "best-video-content-tools",
-      "priorityScore": 43,
+      "intent": "best-forms-for-small-business",
+      "priorityScore": 37,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-crm-for-consultants",
+      "priorityScore": 37,
       "lane": "seo-aeo-snippet",
       "executionPlan": [
         "sharpen-answer-first-copy",
@@ -2803,8 +2669,168 @@
       ]
     },
     {
-      "intent": "best-ai-research-tools",
+      "intent": "best-crm-for-small-business",
+      "priorityScore": 36,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-competitor-seo-tools",
+      "priorityScore": 35,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
       "priorityScore": 31,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-team-collaboration-tools",
+      "priorityScore": 31,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "priorityScore": 30,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-tools-for-agencies",
+      "priorityScore": 30,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-developer-tools",
+      "priorityScore": 28,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-video-content-tools",
+      "priorityScore": 28,
+      "lane": "seo-aeo-snippet",
+      "executionPlan": [
+        "sharpen-answer-first-copy",
+        "strengthen-query-title-alignment",
+        "strengthen-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "semantic-tool-fit",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-ai-research-tools",
+      "priorityScore": 25,
       "lane": "seo-aeo-snippet",
       "executionPlan": [
         "sharpen-answer-first-copy",
