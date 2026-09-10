@@ -18,7 +18,6 @@ try {
 const property = process.env.GSC_PROPERTY || 'sc-domain:trytoolscout.org';
 const lookbackDays = Math.max(7, Math.min(90, Number(process.env.GSC_LOOKBACK_DAYS || 28)));
 const end = new Date();
-end.setUTCDate(end.getUTCDate() - 2); // Search Console data can lag; use final-ish data.
 const start = new Date(end);
 start.setUTCDate(start.getUTCDate() - lookbackDays + 1);
 const isoDate = d => d.toISOString().slice(0, 10);
@@ -50,7 +49,7 @@ async function accessToken() {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      grant_type: 'urn:ietf:params:oauth2:grant-type:jwt-bearer',
       assertion
     })
   });
@@ -75,7 +74,7 @@ async function querySearchConsole(dimensions) {
       endDate,
       dimensions,
       type: 'web',
-      dataState: 'final',
+      dataState: 'all',
       rowLimit: 25000
     })
   });
@@ -86,50 +85,74 @@ async function querySearchConsole(dimensions) {
   return response.json();
 }
 
-function intentFromPage(page) {
+function pageInfo(page) {
   let url;
   try { url = new URL(page); } catch { return null; }
   if (url.hostname !== 'trytoolscout.org' && url.hostname !== 'www.trytoolscout.org') return null;
-  const intent = path.basename(url.pathname).replace(/\.html$/i, '');
-  return /^best-[a-z0-9-]+$/.test(intent) ? intent : null;
+  const pathname = url.pathname || '/';
+  const base = path.basename(pathname).replace(/\.html$/i, '');
+  let type = 'other';
+  if (pathname === '/' || pathname === '/index.html') type = 'home';
+  else if (pathname.startsWith('/blog/')) type = 'blog';
+  else if (pathname.startsWith('/tools/')) type = 'tool-profile';
+  else if (/^best-[a-z0-9-]+$/.test(base)) type = 'guide';
+  else if (/-vs-/.test(base)) type = 'comparison';
+  else if (/-alternatives$/.test(base)) type = 'alternatives';
+  else if (/^(tools|guides|categories|compare|seo|methodology)$/.test(base)) type = 'directory';
+  return { page: url.toString(), pathname, key: base || 'home', type, intent: type === 'guide' ? base : null };
 }
 
 const pageJson = await querySearchConsole(['page']);
+const pages = [];
 const byIntent = new Map();
 for (const row of pageJson.rows || []) {
   const page = String(row.keys?.[0] || '');
-  const intent = intentFromPage(page);
-  if (!intent) continue;
+  const info = pageInfo(page);
+  if (!info) continue;
   const impressions = Number(row.impressions || 0);
   const clicks = Number(row.clicks || 0);
   const ctr = Number(row.ctr || 0) * 100;
   const position = Number(row.position || 0);
-  const current = byIntent.get(intent) || { intent, page, clicks: 0, impressions: 0, ctrNumerator: 0, positionNumerator: 0 };
+  pages.push({ ...info, clicks, impressions, ctr: Number(ctr.toFixed(4)), position: Number(position.toFixed(4)) });
+  if (!info.intent) continue;
+  const current = byIntent.get(info.intent) || { intent: info.intent, page: info.page, clicks: 0, impressions: 0, ctrNumerator: 0, positionNumerator: 0 };
   current.clicks += clicks;
   current.impressions += impressions;
   current.ctrNumerator += ctr * impressions;
   current.positionNumerator += position * impressions;
-  byIntent.set(intent, current);
+  byIntent.set(info.intent, current);
 }
 
 const queryJson = await querySearchConsole(['page', 'query']);
 const queriesByIntent = new Map();
+const queriesByPage = new Map();
 for (const row of queryJson.rows || []) {
   const page = String(row.keys?.[0] || '');
   const query = String(row.keys?.[1] || '').trim();
-  const intent = intentFromPage(page);
-  if (!intent || !query) continue;
-  const impressions = Number(row.impressions || 0);
-  const clicks = Number(row.clicks || 0);
-  const position = Number(row.position || 0);
-  const rows = queriesByIntent.get(intent) || [];
-  rows.push({ query, clicks, impressions, position: Number(position.toFixed(4)) });
-  queriesByIntent.set(intent, rows);
+  const info = pageInfo(page);
+  if (!info || !query) continue;
+  const item = {
+    query,
+    clicks: Number(row.clicks || 0),
+    impressions: Number(row.impressions || 0),
+    position: Number(Number(row.position || 0).toFixed(4))
+  };
+  const pageRows = queriesByPage.get(info.page) || [];
+  pageRows.push(item);
+  queriesByPage.set(info.page, pageRows);
+  if (info.intent) {
+    const rows = queriesByIntent.get(info.intent) || [];
+    rows.push(item);
+    queriesByIntent.set(info.intent, rows);
+  }
 }
 
-for (const rows of queriesByIntent.values()) {
+for (const rows of [...queriesByPage.values(), ...queriesByIntent.values()]) {
   rows.sort((a, b) => b.impressions - a.impressions || b.clicks - a.clicks || a.position - b.position);
 }
+
+for (const page of pages) page.topQueries = (queriesByPage.get(page.page) || []).slice(0, 10);
+pages.sort((a,b) => b.impressions - a.impressions || b.clicks - a.clicks);
 
 const items = [...byIntent.values()].map(x => ({
   intent: x.intent,
@@ -141,23 +164,41 @@ const items = [...byIntent.values()].map(x => ({
   topQueries: (queriesByIntent.get(x.intent) || []).slice(0, 10)
 })).sort((a,b) => b.impressions - a.impressions || b.clicks - a.clicks);
 
+const siteTotals = {
+  clicks: pages.reduce((n,x) => n + x.clicks, 0),
+  impressions: pages.reduce((n,x) => n + x.impressions, 0)
+};
+siteTotals.ctr = siteTotals.impressions ? Number((siteTotals.clicks / siteTotals.impressions * 100).toFixed(4)) : 0;
+const pageTypeSummary = Object.fromEntries([...new Set(pages.map(x => x.type))].sort().map(type => {
+  const subset = pages.filter(x => x.type === type);
+  return [type, { pages: subset.length, clicks: subset.reduce((n,x) => n + x.clicks, 0), impressions: subset.reduce((n,x) => n + x.impressions, 0) }];
+}));
+
 fs.mkdirSync('reports', { recursive: true });
 fs.writeFileSync('reports/gsc-signals.json', JSON.stringify({
   generatedAt: new Date().toISOString(),
   source: 'Google Search Console Search Analytics API',
   property,
+  dataState: 'all',
+  includesFreshData: true,
   startDate,
   endDate,
+  siteTotals,
+  pageTypeSummary,
+  pageCount: pages.length,
+  pages,
   count: items.length,
   items
 }, null, 2) + '\n');
 
 console.log(JSON.stringify({
-  synced: items.length,
+  syncedGuideIntents: items.length,
+  syncedPages: pages.length,
   property,
   startDate,
   endDate,
-  impressions: items.reduce((n,x) => n + x.impressions, 0),
-  clicks: items.reduce((n,x) => n + x.clicks, 0),
-  queryRows: [...queriesByIntent.values()].reduce((n, rows) => n + rows.length, 0)
+  dataState: 'all',
+  impressions: siteTotals.impressions,
+  clicks: siteTotals.clicks,
+  queryRows: [...queriesByPage.values()].reduce((n, rows) => n + rows.length, 0)
 }));
