@@ -6,7 +6,7 @@ const SESSION_COOKIE='toolscout_cc';
 const SESSION_TTL_SECONDS=86400;
 const POST_SUBMIT_HUMAN_WORDS=/(verify email|email verification|confirm email|activate account|account activation|captcha|identity|tax|payment details|accept terms)/i;
 const STALE_WORDS=/(rejected|declined|application denied|not accepting affiliates|already contacted|contacted|outreach sent|awaiting review|pending review)/i;
-const EVIDENCE_RANK={research_required:0,program_exists:1,ready_to_apply:2,human_action_required:3,submitted:4,pending_review:4,blocked:5,rejected:5,paused:5,no_program_found:5,approved_needs_link:6,link_acquired:7,active:8,verified:9,earning:10};
+const EVIDENCE_RANK={research_required:0,program_exists:1,ready_to_apply:2,human_action_required:3,submitted:4,pending_review:4,blocked:5,rejected:5,paused:5,no_program_found:5,watchlist:5,approved_needs_link:6,link_acquired:7,active:8,verified:9,earning:10};
 function analyticsPath(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'}
 async function digestHex(value){const bytes=new TextEncoder().encode(value);const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('')}
 function sessionBucket(now=Date.now()){return Math.floor(now/(SESSION_TTL_SECONDS*1000))}
@@ -17,7 +17,7 @@ function humanPrompt(kind,row,url){const target=kind==='affiliate'?(row.program_
 async function q(env,sql){try{return await env.DB.prepare(sql).all()}catch{return {results:[]}}}
 async function assetJson(request,env,path,fallback){try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback}catch{return fallback}}
 function timeValue(value){const n=Date.parse(value||'');return Number.isFinite(n)?n:0}
-function effectiveStatus({active,pipelineRow,stateRow}){const persisted=normalizeAffiliateState(stateRow?.status);if(active)return ['verified','earning'].includes(persisted)?persisted:'active';if(!pipelineRow&&!stateRow)return 'research_required';const pipelineState=normalizeAffiliateState(pipelineRow?.status),state=persisted;if(!stateRow)return pipelineState;if(!pipelineRow)return state;if((EVIDENCE_RANK[pipelineState]||0)!==(EVIDENCE_RANK[state]||0))return (EVIDENCE_RANK[pipelineState]||0)>(EVIDENCE_RANK[state]||0)?pipelineState:state;return timeValue(pipelineRow.last_verified)>timeValue(stateRow.updated_at)?pipelineState:state}
+function effectiveStatus({active,pipelineRow,stateRow}){const persisted=normalizeAffiliateState(stateRow?.status);if(active)return ['verified','earning'].includes(persisted)?persisted:'active';if(!pipelineRow&&!stateRow)return 'research_required';const pipelineState=normalizeAffiliateState(pipelineRow?.status),state=persisted;if(!stateRow)return pipelineState;if(!pipelineRow)return state;if(state==='watchlist')return 'watchlist';if((EVIDENCE_RANK[pipelineState]||0)!==(EVIDENCE_RANK[state]||0))return (EVIDENCE_RANK[pipelineState]||0)>(EVIDENCE_RANK[state]||0)?pipelineState:state;return timeValue(pipelineRow.last_verified)>timeValue(stateRow.updated_at)?pipelineState:state}
 function evidenceText(p,s){const pe=Array.isArray(p?.evidence)?p.evidence.join(' '):String(p?.evidence||'');return `${p?.next_action||''} ${pe} ${s?.notes||''} ${s?.blocker||''}`.trim()}
 async function canonicalAffiliateActions(request,env){
   const [pipeline,affiliate,stateRows,clickRows]=await Promise.all([
