@@ -1,9 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadSeoIntents } from './seo-intent-loader.mjs';
 
 const ROOT=process.cwd(),BASE='https://trytoolscout.org';
 const tools=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tools.json'),'utf8'));
-const intents=JSON.parse(fs.readFileSync(path.join(ROOT,'data','intents.json'),'utf8'));
+const intents=loadSeoIntents(ROOT);
 const pairs=JSON.parse(fs.readFileSync(path.join(ROOT,'data','comparisons.json'),'utf8'));
 const holdsPath=path.join(ROOT,'reports','seo-publication-holds.json');
 const holds=fs.existsSync(holdsPath)?JSON.parse(fs.readFileSync(holdsPath,'utf8')):{items:[]};
