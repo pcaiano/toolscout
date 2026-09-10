@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Reconstruct recent HTTP traffic
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_ANALYTICS_TOKEN }}
         run: |
           node --input-type=module <<'NODE'
           const token=process.env.CLOUDFLARE_API_TOKEN;
