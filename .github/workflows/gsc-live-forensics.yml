@@ -1,0 +1,63 @@
+name: GSC Live Forensics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/gsc-live-forensics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query fresh Search Console and URL Inspection
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: |
+          node <<'NODE'
+          const crypto = require('node:crypto');
+          const raw=process.env.GSC_SERVICE_ACCOUNT_JSON;
+          if(!raw) throw new Error('GSC_SERVICE_ACCOUNT_JSON missing');
+          const c=JSON.parse(raw);
+          const b64=v=>Buffer.from(v).toString('base64url');
+          async function token(){
+            const now=Math.floor(Date.now()/1000),h=b64(JSON.stringify({alg:'RS256',typ:'JWT'})),p=b64(JSON.stringify({iss:c.client_email,scope:'https://www.googleapis.com/auth/webmasters.readonly',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600})),u=`${h}.${p}`;
+            const s=crypto.createSign('RSA-SHA256');s.update(u);s.end();const assertion=`${u}.${s.sign(c.private_key,'base64url')}`;
+            const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion})});
+            if(!r.ok) throw new Error(`oauth ${r.status} ${await r.text()}`);return (await r.json()).access_token;
+          }
+          const access=await token();
+          const property='sc-domain:trytoolscout.org';
+          const endpoint=`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(property)}/searchAnalytics/query`;
+          async function q(body){const r=await fetch(endpoint,{method:'POST',headers:{authorization:`Bearer ${access}`,'content-type':'application/json'},body:JSON.stringify({...body,type:'web',rowLimit:25000})});if(!r.ok)throw new Error(`search ${r.status} ${await r.text()}`);return r.json()}
+          const startDate='2026-09-07',endDate='2026-09-10';
+          const byDate=await q({startDate,endDate,dataState:'all',dimensions:['date']});
+          const byDatePage=await q({startDate,endDate,dataState:'all',dimensions:['date','page']});
+          const hourly=await q({startDate:'2026-09-09',endDate:'2026-09-10',dataState:'hourly_all',dimensions:['hour']});
+          const hourlyPage=await q({startDate:'2026-09-09',endDate:'2026-09-10',dataState:'hourly_all',dimensions:['hour','page']});
+          const rows=x=>(x.rows||[]).map(r=>({keys:r.keys,clicks:r.clicks||0,impressions:r.impressions||0,ctr:r.ctr||0,position:r.position||0}));
+          console.log('GSC_BY_DATE='+JSON.stringify({metadata:byDate.metadata||null,rows:rows(byDate)}));
+          console.log('GSC_BY_DATE_PAGE='+JSON.stringify({metadata:byDatePage.metadata||null,rows:rows(byDatePage).sort((a,b)=>String(a.keys[0]).localeCompare(String(b.keys[0]))||b.clicks-a.clicks||b.impressions-a.impressions).slice(0,500)}));
+          console.log('GSC_HOURLY='+JSON.stringify({metadata:hourly.metadata||null,rows:rows(hourly)}));
+          console.log('GSC_HOURLY_PAGE='+JSON.stringify({metadata:hourlyPage.metadata||null,rows:rows(hourlyPage).sort((a,b)=>String(a.keys[0]).localeCompare(String(b.keys[0]))||b.clicks-a.clicks||b.impressions-a.impressions).slice(0,500)}));
+          const inspectUrls=[
+            'https://trytoolscout.org/',
+            'https://trytoolscout.org/best-cold-email-tools.html',
+            'https://trytoolscout.org/best-cold-email-tools',
+            'https://trytoolscout.org/best-sales-prospecting-tools.html',
+            'https://trytoolscout.org/best-sales-prospecting-tools',
+            'https://trytoolscout.org/best-crm-for-consultants.html',
+            'https://trytoolscout.org/best-ai-assistants.html',
+            'https://trytoolscout.org/blog/best-design-tools-guide.html'
+          ];
+          for(const inspectionUrl of inspectUrls){
+            const r=await fetch('https://searchconsole.googleapis.com/v1/urlInspection/index:inspect',{method:'POST',headers:{authorization:`Bearer ${access}`,'content-type':'application/json'},body:JSON.stringify({inspectionUrl,siteUrl:property})});
+            const text=await r.text();
+            if(!r.ok){console.log('INSPECT='+JSON.stringify({inspectionUrl,error:`${r.status} ${text}`}));continue}
+            const j=JSON.parse(text),x=j.inspectionResult?.indexStatusResult||{};
+            console.log('INSPECT='+JSON.stringify({inspectionUrl,verdict:x.verdict||null,coverageState:x.coverageState||null,robotsTxtState:x.robotsTxtState||null,indexingState:x.indexingState||null,lastCrawlTime:x.lastCrawlTime||null,pageFetchState:x.pageFetchState||null,googleCanonical:x.googleCanonical||null,userCanonical:x.userCanonical||null,crawledAs:x.crawledAs||null}));
+          }
+          NODE
