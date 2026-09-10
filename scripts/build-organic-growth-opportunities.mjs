@@ -9,56 +9,78 @@ const trafficTruthPath = 'data/traffic-truth.json';
 const trafficTruth = fs.existsSync(trafficTruthPath) ? JSON.parse(fs.readFileSync(trafficTruthPath,'utf8')) : null;
 
 const threshold = config.thresholds || {};
+const minImpressions = Number(threshold.minimumGscImpressionsForCtrAction || 20);
 const rows = [];
 
 function executionPlan(lane) {
-  if (lane === 'seo-aeo-snippet') return ['sharpen-answer-first-copy','strengthen-query-title-alignment','strengthen-comparison-context','strengthen-internal-links','validate-aeo-geo'];
-  if (lane === 'seo-striking-distance') return ['deepen-decision-context','strengthen-query-title-alignment','strengthen-internal-links','strengthen-entity-context','validate-aeo-geo'];
-  if (lane === 'seo-authority-depth') return ['deepen-evidence-and-relevance','improve-query-intent-match','add-useful-comparison-context','strengthen-internal-links','validate-aeo-geo'];
-  if (lane === 'commercial-intent') return ['improve-existing-decision-surface','strengthen-commercial-intent-context','validate-editorial-neutrality'];
-  return ['measure'];
+  if (lane === 'seo-aeo-snippet') return ['sharpen-answer-first-copy','strengthen-query-title-alignment','strengthen-comparison-context','strengthen-internal-links','validate-aeo-geo','publish','measure'];
+  if (lane === 'seo-striking-distance') return ['deepen-decision-context','strengthen-query-title-alignment','strengthen-internal-links','strengthen-entity-context','validate-aeo-geo','publish','measure'];
+  if (lane === 'seo-authority-depth') return ['deepen-evidence-and-relevance','improve-query-intent-match','add-useful-comparison-context','strengthen-internal-links','validate-aeo-geo','publish','measure'];
+  if (lane === 'commercial-intent') return ['improve-existing-decision-surface','strengthen-commercial-intent-context','validate-editorial-neutrality','publish','measure'];
+  if (lane === 'editorial-safety') return ['hold-publication','research-catalog-coverage','revalidate-eligibility','recheck-automatically'];
+  return ['measure','recheck-automatically'];
 }
 
 for (const item of growth.items || []) {
   const s = item.searchSignal;
-  let lane = 'develop-authority';
-  let action = 'watch';
-  let reason = 'No strong observed-search trigger yet.';
+  const meaningfulSample = Boolean(s?.meaningfulSample ?? (Number(s?.impressions || 0) >= minImpressions || Number(s?.clicks || 0) > 0));
+  let lane = 'measure';
+  let action = 'measure-and-recheck';
+  let reason = 'No strong observed-search trigger yet. Continue automatic measurement.';
 
-  if (s?.impressions > 0 && s.position > 0 && s.position <= Number(threshold.firstPageMaxPosition || 10)) {
-    lane = 'seo-aeo-snippet'; action = 'optimize-existing';
+  if (item.action === 'catalog-gap') {
+    lane = 'editorial-safety';
+    action = 'hold-publication-and-research-catalog';
+    reason = 'The intent lacks enough semantically eligible tools. Do not publish misleading recommendations; improve catalog coverage automatically first.';
+  } else if (meaningfulSample && s?.position > 0 && s.position <= Number(threshold.firstPageMaxPosition || 10)) {
+    lane = 'seo-aeo-snippet';
+    action = 'optimize-existing';
     reason = s.clicks > 0
       ? 'Observed first-page search traffic: protect ranking and improve answer-first copy, query alignment, comparison context and internal links.'
-      : 'Observed first-page visibility without clicks: repair query-to-title/snippet intent alignment before treating this page as an acquisition asset.';
-  } else if (s?.impressions > 0 && s.position <= Number(threshold.strikingDistanceMaxPosition || 20)) {
-    lane = 'seo-striking-distance'; action = 'optimize-existing';
-    reason = 'Observed striking-distance ranking: deepen decision context, improve query alignment and strengthen relevant internal links.';
-  } else if (s?.impressions >= Number(threshold.minimumGscImpressionsForCtrAction || 20) && s.position > 20) {
-    lane = 'seo-authority-depth'; action = 'deepen-existing';
-    reason = 'Meaningful search visibility with weak ranking: improve intent match, relevance, depth, evidence, comparisons and authority. Do not label impressions as traffic.';
-  } else if (item.priorityScore >= 75) {
-    lane = 'commercial-intent'; action = 'invest-existing';
-    reason = 'High internal commercial/readiness score; improve the existing decision surface before expanding URL count.';
+      : 'Meaningful first-page visibility without clicks: repair query-to-title and snippet intent alignment automatically.';
+  } else if (meaningfulSample && s?.position > 0 && s.position <= Number(threshold.strikingDistanceMaxPosition || 20)) {
+    lane = 'seo-striking-distance';
+    action = 'optimize-existing';
+    reason = 'Meaningful striking-distance ranking: deepen decision context, improve query alignment and strengthen relevant internal links automatically.';
+  } else if (meaningfulSample && s?.position > 20) {
+    lane = 'seo-authority-depth';
+    action = 'deepen-existing';
+    reason = 'Meaningful search visibility with weak ranking: improve intent match, relevance, depth, evidence, comparisons and authority. Impressions are not traffic.';
+  } else if (!s && item.priorityScore >= 75) {
+    lane = 'commercial-intent';
+    action = 'invest-existing';
+    reason = 'High internal commercial/readiness score with no observed search sample yet. Improve the existing surface conservatively and measure the result.';
   }
 
   rows.push({
-    intent: item.intent, priorityScore: item.priorityScore, lane, action, reason,
-    autonomy: action === 'watch' ? 'measure-only' : 'auto-execute-through-seo-aeo-geo-pipeline',
+    intent: item.intent,
+    priorityScore: item.priorityScore,
+    lane,
+    action,
+    reason,
+    autonomy: 'fully-autonomous',
+    ownerActionRequired: false,
     executionPlan: executionPlan(lane),
-    qualityGates: ['canonical-safety','non-duplication','semantic-tool-fit','editorial-neutrality','useful-decision-context','public-surface-validation'],
-    monetizationReadiness: item.monetizationReadiness, searchSignal: s || null, topTools: item.topTools || []
+    qualityGates: ['canonical-safety','non-duplication','strict-category-fit','semantic-tool-fit','editorial-neutrality','useful-decision-context','public-surface-validation'],
+    monetizationReadiness: item.monetizationReadiness,
+    searchSignal: s || null,
+    topTools: item.topTools || []
   });
 }
 
 const competitorCandidates = (gaps.gaps || []).slice(0,100).map(gap => ({
-  candidate: gap.slug, competitorMentions: gap.mentions, sources: gap.sources, action: 'research-only',
-  autonomy: 'auto-research-but-no-auto-publish-from-competitor-evidence-alone',
-  publishGate: 'Require evidence of distinct user intent, catalog fit, non-duplication/canonical safety, useful decision context and commercial relevance.',
-  reason: 'Repeated competitor URL pattern suggests a possible coverage gap, not proof of search demand or editorial value.'
+  candidate: gap.slug,
+  competitorMentions: gap.mentions,
+  sources: gap.sources,
+  action: 'auto-research-only',
+  ownerActionRequired: false,
+  publishGate: 'Require distinct user intent, catalog fit, non-duplication, semantic eligibility, useful decision context and commercial relevance before autonomous publication.',
+  reason: 'Repeated competitor URL patterns are research signals, not proof that ToolScout should publish the same page.'
 }));
 
-rows.sort((a,b) => b.priorityScore - a.priorityScore);
-const actionable = rows.filter(x => x.action !== 'watch');
+const actionRank = {'optimize-existing':5,'deepen-existing':5,'invest-existing':4,'hold-publication-and-research-catalog':3,'measure-and-recheck':1};
+rows.sort((a,b) => (actionRank[b.action]||0)-(actionRank[a.action]||0) || b.priorityScore-a.priorityScore || Number(b.searchSignal?.impressions||0)-Number(a.searchSignal?.impressions||0));
+const actionable = rows.filter(x => x.action !== 'measure-and-recheck');
 const firstPage = rows.filter(x => x.lane === 'seo-aeo-snippet').length;
 const striking = rows.filter(x => x.lane === 'seo-striking-distance').length;
 const authority = rows.filter(x => x.lane === 'seo-authority-depth').length;
@@ -85,16 +107,18 @@ const pageOpportunities = pages
     ctr: Number(x.ctr || 0),
     position: Number(x.position || 0),
     topQueries: (x.topQueries || []).slice(0,5),
+    meaningfulSample: Number(x.impressions || 0) >= minImpressions || Number(x.clicks || 0) > 0,
     opportunityScore: Number((Number(x.impressions || 0) * (x.clicks > 0 ? 1.2 : 1) / Math.max(1, Number(x.position || 100))).toFixed(3)),
     outcome: x.clicks > 0 ? 'traffic-observed' : 'visibility-only'
   }))
-  .sort((a,b) => b.opportunityScore - a.opportunityScore || b.impressions - a.impressions)
+  .sort((a,b) => Number(b.meaningfulSample)-Number(a.meaningfulSample) || b.opportunityScore-a.opportunityScore || b.impressions-a.impressions)
   .slice(0,50);
 
 fs.mkdirSync('reports', { recursive: true });
 fs.writeFileSync('reports/organic-growth-opportunities.json', JSON.stringify({
-  generatedAt: new Date().toISOString(), engine: 'ToolScout Search & Answer Opportunity Engine v3',
-  objective: 'Convert observed search and answer-engine signals into autonomous SEO/AEO/GEO actions that increase qualified human traffic and downstream commercial outcomes while preserving editorial neutrality.',
+  generatedAt: new Date().toISOString(),
+  engine: 'ToolScout Search and Answer Opportunity Engine v4',
+  objective: 'Autonomously improve qualified SEO, AEO and GEO performance using observed search data while blocking misleading editorial output.',
   acquisitionTruth: {
     status: organicAcquisitionStatus,
     searchClicks: organicClicks,
@@ -106,24 +130,41 @@ fs.writeFileSync('reports/organic-growth-opportunities.json', JSON.stringify({
     trafficTruthStatus: trafficTruth?.status || 'unavailable',
     rule: 'Impressions are visibility, not traffic. SEO acquisition is validated by Search Console clicks and then by browser-confirmed onsite behavior.'
   },
-  autonomyDirective: 'Automate safe growth actions by default. The Command Center is an observability surface, not a work queue. Escalate only blocked, ambiguous, destructive or policy-sensitive decisions.',
+  autonomyDirective: 'The engine owns observation, prioritization, optimization, validation, publication, measurement and rechecking. The owner is not required to edit content.',
   dailyDecisionRules: [
-    'Measure SEO success first by real Search Console clicks, then by browser-confirmed onsite behavior and downstream outbound or revenue.',
+    'Use real Search Console data for search decisions and browser-confirmed onsite data for traffic outcomes.',
     'Never use impressions alone to validate traffic growth or business projections.',
-    'Prefer autonomous execution over owner work orders whenever quality gates can make the action safe.',
-    'Prefer optimizing existing URLs with observed demand over creating new URLs.',
-    'Treat first-page visibility without clicks as a query, title and snippet alignment problem.',
-    'Treat first-page and striking-distance pages as answer, snippet and internal-link opportunities.',
-    'Treat high-impression low-rank pages as intent-match, relevance, authority and depth problems, not merely CTR problems.',
-    'Use competitor scans only to surface research candidates; never copy content and never auto-publish from competitor evidence alone.',
-    'Affiliate readiness may prioritize commercial work but cannot change editorial ranking of tools.',
-    'AEO/GEO requires answer-first copy, explicit decision context, structured entities, comparisons, freshness and crawlable canonical pages.',
-    'Measure every autonomous intervention so future prioritization can learn from outcomes.'
+    `Require at least ${minImpressions} impressions in the measurement window for automatic CTR or ranking conclusions unless a click is already observed.`,
+    'Never fill a recommendation list with a wrong-category or semantically weak tool.',
+    'Prefer fewer correct recommendations to a fuller but misleading list.',
+    'Prefer optimizing existing URLs with meaningful observed demand over creating new URLs.',
+    'Treat high-impression low-rank pages as relevance, authority and depth problems.',
+    'Use competitor scans for research and opportunity discovery, never as a reason to copy or publish unsupported content.',
+    'Measure every autonomous intervention and re-evaluate it from fresh Search Console data.'
   ],
-  summary: { observedGscIntents: (gsc.items || []).filter(x => Number(x.impressions || 0) > 0).length, observedGscPages: pages.filter(x => Number(x.impressions || 0) > 0).length, searchClicks: organicClicks, searchImpressions: organicImpressions, organicAcquisitionStatus, actionableOpportunities: actionable.length, firstPageOpportunities: firstPage, strikingDistanceOpportunities: striking, authorityDepthOpportunities: authority, competitorResearchCandidates: competitorCandidates.length },
+  summary: {
+    observedGscIntents: (gsc.items || []).filter(x => Number(x.impressions || 0) > 0).length,
+    observedGscPages: pages.filter(x => Number(x.impressions || 0) > 0).length,
+    searchClicks: organicClicks,
+    searchImpressions: organicImpressions,
+    organicAcquisitionStatus,
+    actionableOpportunities: actionable.length,
+    firstPageOpportunities: firstPage,
+    strikingDistanceOpportunities: striking,
+    authorityDepthOpportunities: authority,
+    competitorResearchCandidates: competitorCandidates.length
+  },
   opportunities: rows,
   pageOpportunities,
-  autonomousActionQueue: actionable.map(x => ({ intent:x.intent, priorityScore:x.priorityScore, lane:x.lane, executionPlan:x.executionPlan, qualityGates:x.qualityGates })),
+  autonomousActionQueue: rows.map(x => ({
+    intent:x.intent,
+    priorityScore:x.priorityScore,
+    lane:x.lane,
+    action:x.action,
+    ownerActionRequired:false,
+    executionPlan:x.executionPlan,
+    qualityGates:x.qualityGates
+  })),
   competitorResearchCandidates: competitorCandidates
 }, null, 2) + '\n');
 
