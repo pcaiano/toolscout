@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-09-10T04:26:21.252Z",
+  "generatedAt": "2026-09-10T09:35:47.849Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 1,
-      "likelyHuman": 0,
-      "bots": 1,
+      "total": 13,
+      "likelyHuman": 2,
+      "bots": 11,
       "owner": 0,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 597,
-      "likelyHuman": 276,
-      "bots": 164,
-      "owner": 19,
+      "total": 585,
+      "likelyHuman": 257,
+      "bots": 173,
+      "owner": 17,
       "synthetic": 0,
       "unknownLegacy": 138
     },
     "d30": {
-      "total": 1684,
-      "likelyHuman": 339,
-      "bots": 253,
+      "total": 1696,
+      "likelyHuman": 341,
+      "bots": 263,
       "owner": 41,
       "synthetic": 0,
       "unknownLegacy": 1051
@@ -63,9 +63,13 @@
       {
         "day": "2026-09-09",
         "sessions": 24
+      },
+      {
+        "day": "2026-09-10",
+        "sessions": 2
       }
     ],
-    "averageDailyLikelyHuman30d": 11.3
+    "averageDailyLikelyHuman30d": 11.37
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -85,26 +89,26 @@
       "sessions": 0
     },
     "outboundClicked": {
-      "events": 250,
-      "sessions": 250
+      "events": 251,
+      "sessions": 251
     },
     "recommendationCompletionRate": 100
   },
   "commercial30d": {
-    "outboundClicks": 250,
-    "sessionsWithOutbound": 250,
+    "outboundClicks": 251,
+    "sessionsWithOutbound": 251,
     "monetizedOutbound": 52,
-    "monetizationCoverage": 20.8,
-    "humanSessionToOutboundRate": 73.7
+    "monetizationCoverage": 20.7,
+    "humanSessionToOutboundRate": 73.6
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 75
+      "sessions": 76
     },
     {
       "source": "ref:app.partnerstack.com",
-      "sessions": 4
+      "sessions": 5
     },
     {
       "source": "utm_source=peerlist",
@@ -151,8 +155,14 @@
       "outboundClicks": 1
     },
     {
+      "intent": "best-ai-assistants",
+      "sessions": 1,
+      "recommendationCompletions": 0,
+      "outboundClicks": 1
+    },
+    {
       "intent": "unlabelled",
-      "sessions": 90,
+      "sessions": 92,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -169,11 +179,11 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 339,
-    "humanDailyAverage30d": 11.3,
+    "humanSessions30d": 341,
+    "humanDailyAverage30d": 11.37,
     "recommendationCompletionRate": 0.6,
-    "humanSessionToOutboundRate": 73.7,
-    "monetizationCoverage": 20.8,
+    "humanSessionToOutboundRate": 73.6,
+    "monetizationCoverage": 20.7,
     "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
   }
 }
