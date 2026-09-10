@@ -5,6 +5,7 @@ on:
     paths:
       - 'private-assets.js'
       - 'session-classification.js'
+      - 'funnel-worker.js'
       - '.github/workflows/tracking-integrity-smoke.yml'
   workflow_dispatch:
 
@@ -19,21 +20,55 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Wait for deployment and verify page entry tracking
+      - name: Wait for deployment and verify browser-confirmed tracking
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           sleep 20
-          RUN_ID="tracking-smoke-${GITHUB_RUN_ID}"
           SOURCE="tracking_smoke_${GITHUB_RUN_ID}"
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36'
+
+          FAKE_SESSION=$(node -e "console.log(require('crypto').randomUUID())")
+          FAKE_CODE=$(curl -sS -o /tmp/fake-confirm.json -w '%{http_code}' \
+            -A "$UA" \
+            -H 'Origin: https://trytoolscout.org' \
+            -H 'Sec-Fetch-Site: same-origin' \
+            -H 'Content-Type: application/json' \
+            -H "Cookie: toolscout_session=${FAKE_SESSION}" \
+            --data "{\"event_id\":\"confirm_${FAKE_SESSION}\",\"session_id\":\"${FAKE_SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools.html\",\"source\":\"browser-confirm\"}" \
+            https://trytoolscout.org/api/events)
+          test "$FAKE_CODE" = '403'
+
           curl -fsS --retry 5 --retry-delay 5 \
-            -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36' \
+            -A "$UA" \
             -H 'Cookie: toolscout_owner=1' \
+            -D /tmp/page-headers.txt \
             "https://trytoolscout.org/best-cold-email-tools.html?source=${SOURCE}" >/tmp/page.html
           grep -q 'toolscout_session_v2' /tmp/page.html
+          SESSION=$(grep -i '^set-cookie: toolscout_session=' /tmp/page-headers.txt | tail -1 | sed -E 's/^[^=]+=([^;]+).*/\1/' | tr -d '\r')
+          test -n "$SESSION"
+
+          CONFIRM_CODE=$(curl -sS -o /tmp/valid-confirm.json -w '%{http_code}' \
+            -A "$UA" \
+            -H 'Origin: https://trytoolscout.org' \
+            -H 'Sec-Fetch-Site: same-origin' \
+            -H 'Content-Type: application/json' \
+            -H "Cookie: toolscout_owner=1; toolscout_session=${SESSION}" \
+            --data "{\"event_id\":\"confirm_${SESSION}\",\"session_id\":\"${SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools.html\",\"source\":\"browser-confirm\"}" \
+            https://trytoolscout.org/api/events)
+          test "$CONFIRM_CODE" = '202'
+
           sleep 3
-          RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='session_started' AND f.source='${SOURCE}' AND f.path='/best-cold-email-tools.html' AND s.classification='owner';")
-          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)<1){console.error('page-entry event missing');process.exit(1)}" "$RESULT"
-          RESULT2=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM sessions s WHERE s.classification='likely-human' AND NOT EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=s.session_id AND f.event_type='session_started') AND s.source LIKE 'tracking_smoke_%';")
-          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)!==0){console.error('smoke polluted likely-human traffic');process.exit(1)}" "$RESULT2"
-          echo "Page-entry tracking and owner exclusion verified."
+          START_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='session_started' AND f.source='${SOURCE}' AND f.path='/best-cold-email-tools.html' AND s.classification='owner';")
+          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)<1){console.error('page-entry event missing');process.exit(1)}" "$START_RESULT"
+
+          CONFIRM_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id='${SESSION}' AND f.event_type='page_confirmed' AND f.source='internal-test' AND s.classification='owner';")
+          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)!==1){console.error('valid owner browser confirmation missing');process.exit(1)}" "$CONFIRM_RESULT"
+
+          FAKE_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events WHERE session_id='${FAKE_SESSION}' AND event_type='page_confirmed';")
+          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)!==0){console.error('forged browser confirmation was recorded');process.exit(1)}" "$FAKE_RESULT"
+
+          POLLUTION_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM sessions s WHERE s.classification='likely-human' AND NOT EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=s.session_id AND f.event_type='session_started') AND s.source LIKE 'tracking_smoke_%';")
+          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)!==0){console.error('smoke polluted likely-human traffic');process.exit(1)}" "$POLLUTION_RESULT"
+
+          echo "Page entry, browser confirmation binding, forgery rejection and owner exclusion verified."
