@@ -14,7 +14,14 @@ const growth=fs.existsSync(growthPath)?JSON.parse(fs.readFileSync(growthPath,'ut
 const gscByIntent=new Map((gsc.pages||[]).filter(page=>page?.intent).map(page=>[page.intent,page]));
 const growthByIntent=new Map((growth.items||[]).map(item=>[item.intent,item]));
 const minImpressions=Number(growth?.gsc?.minimumImpressionsForHighConfidenceAction||20);
-const clean=value=>String(value??'').replace(/[—–]/g,'-').replace(/\s+/g,' ').trim();
+const clean=value=>String(value??'')
+  .replace(/[\u2014\u2013]/g,'-')
+  .replace(/verify current pricing before publication/gi,'See vendor for current pricing')
+  .replace(/verify current terms before publication/gi,'See vendor for current terms')
+  .replace(/verify before publication/gi,'See vendor for current details')
+  .replace(/pending verification/gi,'See vendor for current details')
+  .replace(/\s+/g,' ')
+  .trim();
 const esc=value=>clean(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const clip=(value,max)=>{const text=clean(value);if(text.length<=max)return text;const sliced=text.slice(0,Math.max(0,max-3)),boundary=sliced.lastIndexOf(' ');return `${sliced.slice(0,boundary>40?boundary:sliced.length)}...`;};
 const safeQuery=query=>{const q=clean(query).toLowerCase();return q.length>=3&&q.length<=120&&!/["“”]/.test(q)&&!/(^|\s)(?:site|inurl|intitle|filetype):|\s-or-\s|\bor\b\s+site:|reddit\.com/i.test(q);};
@@ -62,7 +69,7 @@ for(const[slug,context]of Object.entries(contexts)){
     }
   }
   adaptiveReport.push({intent:slug,impressions,clicks,position,meaningfulSample:meaningful,lowSampleFirstPage,dominantQuery:dominantQuery?{query:dominantQuery.query,impressions:Number(dominantQuery.impressions||0),position:Number(dominantQuery.position||0),alignment:Number(dominantQuery.alignment.toFixed(3))}:null,action:adaptiveAction});
-  if(/[—–]/.test(html))throw new Error(`${slug}: decision-context enrichment produced a forbidden long dash`);
+  if(/[\u2014\u2013]/.test(html))throw new Error(`${slug}: decision-context enrichment produced a forbidden long dash`);
   fs.writeFileSync(file,html,'utf8');enriched++;
 }
 fs.mkdirSync(path.join(ROOT,'reports'),{recursive:true});
