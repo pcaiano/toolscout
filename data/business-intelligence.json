@@ -1,75 +1,99 @@
 {
-  "generatedAt": "2026-09-10T20:04:47.065Z",
+  "generatedAt": "2026-09-10T20:21:38.252Z",
   "timezone": "Europe/Lisbon",
-  "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+  "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 25,
-      "likelyHuman": 5,
-      "bots": 19,
+      "total": 5,
+      "likelyHuman": 4,
       "owner": 1,
+      "bots": 0,
       "synthetic": 0,
-      "unknownLegacy": 0
+      "unknownLegacy": 0,
+      "rawSessions": {
+        "total": 25,
+        "likelyHuman": 5,
+        "bots": 19,
+        "owner": 1,
+        "synthetic": 0,
+        "unknownLegacy": 0
+      }
     },
     "d7": {
-      "total": 523,
-      "likelyHuman": 188,
-      "bots": 181,
-      "owner": 16,
+      "total": 70,
+      "likelyHuman": 55,
+      "owner": 15,
+      "bots": 0,
       "synthetic": 0,
-      "unknownLegacy": 138
+      "unknownLegacy": 0,
+      "rawSessions": {
+        "total": 522,
+        "likelyHuman": 187,
+        "bots": 181,
+        "owner": 16,
+        "synthetic": 0,
+        "unknownLegacy": 138
+      }
     },
     "d30": {
-      "total": 1708,
-      "likelyHuman": 344,
-      "bots": 271,
-      "owner": 42,
+      "total": 135,
+      "likelyHuman": 94,
+      "owner": 41,
+      "bots": 0,
       "synthetic": 0,
-      "unknownLegacy": 1051
+      "unknownLegacy": 0,
+      "rawSessions": {
+        "total": 1708,
+        "likelyHuman": 344,
+        "bots": 271,
+        "owner": 42,
+        "synthetic": 0,
+        "unknownLegacy": 1051
+      }
     },
     "dailyLikelyHuman30d": [
       {
         "day": "2026-09-01",
-        "sessions": 23
+        "sessions": 10
       },
       {
         "day": "2026-09-02",
-        "sessions": 39
+        "sessions": 24
       },
       {
         "day": "2026-09-03",
-        "sessions": 99
+        "sessions": 6
       },
       {
         "day": "2026-09-04",
-        "sessions": 28
+        "sessions": 15
       },
       {
         "day": "2026-09-05",
-        "sessions": 16
+        "sessions": 5
       },
       {
         "day": "2026-09-06",
-        "sessions": 41
+        "sessions": 5
       },
       {
         "day": "2026-09-07",
-        "sessions": 24
+        "sessions": 14
       },
       {
         "day": "2026-09-08",
-        "sessions": 45
+        "sessions": 9
       },
       {
         "day": "2026-09-09",
-        "sessions": 24
+        "sessions": 2
       },
       {
         "day": "2026-09-10",
-        "sessions": 5
+        "sessions": 4
       }
     ],
-    "averageDailyLikelyHuman30d": 11.47
+    "averageDailyLikelyHuman30d": 3.13
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -89,17 +113,17 @@
       "sessions": 0
     },
     "outboundClicked": {
-      "events": 252,
-      "sessions": 252
+      "events": 2,
+      "sessions": 2
     },
     "recommendationCompletionRate": 100
   },
   "commercial30d": {
-    "outboundClicks": 252,
-    "sessionsWithOutbound": 252,
-    "monetizedOutbound": 52,
-    "monetizationCoverage": 20.6,
-    "humanSessionToOutboundRate": 73.3
+    "outboundClicks": 2,
+    "sessionsWithOutbound": 2,
+    "monetizedOutbound": 1,
+    "monetizationCoverage": 50,
+    "humanSessionToOutboundRate": 2.1
   },
   "sources30d": [
     {
@@ -137,18 +161,6 @@
   ],
   "intents30d": [
     {
-      "intent": "general",
-      "sessions": 249,
-      "recommendationCompletions": 3,
-      "outboundClicks": 248
-    },
-    {
-      "intent": "semrush-vs-ahrefs",
-      "sessions": 2,
-      "recommendationCompletions": 0,
-      "outboundClicks": 2
-    },
-    {
       "intent": "beehiiv",
       "sessions": 1,
       "recommendationCompletions": 0,
@@ -171,95 +183,39 @@
       "sessions": 1,
       "recommendationCompletions": 1,
       "outboundClicks": 0
+    },
+    {
+      "intent": "general",
+      "sessions": 1,
+      "recommendationCompletions": 3,
+      "outboundClicks": 0
     }
   ],
   "forensic": {
+    "definition": "Traffic KPIs count only likely-human sessions with an observed public page-entry event. Redirect-only sessions are excluded from traffic and funnel conversion metrics.",
     "sessionStartsToday": [
       {
         "source": "direct",
         "referrerHost": "none",
+        "path": "/",
         "sessions": 2
       },
       {
         "source": "ref:app.partnerstack.com",
         "referrerHost": "app.partnerstack.com",
+        "path": "/",
         "sessions": 1
       },
       {
         "source": "utm_source=peerlist",
         "referrerHost": "peerlist.io",
+        "path": "/",
         "sessions": 1
       }
     ],
-    "allHumanEventsToday": [
-      {
-        "eventType": "session_started",
-        "source": "direct",
-        "referrerHost": "none",
-        "path": "/",
-        "sessions": 2,
-        "events": 2
-      },
-      {
-        "eventType": "outbound_clicked",
-        "source": "public-redirect",
-        "referrerHost": "none",
-        "path": "/go/close",
-        "sessions": 1,
-        "events": 1
-      },
-      {
-        "eventType": "outbound_clicked",
-        "source": "seo-page",
-        "referrerHost": "trytoolscout.org",
-        "path": "/go/gemini",
-        "sessions": 1,
-        "events": 1
-      },
-      {
-        "eventType": "session_started",
-        "source": "ref:app.partnerstack.com",
-        "referrerHost": "app.partnerstack.com",
-        "path": "/",
-        "sessions": 1,
-        "events": 1
-      },
-      {
-        "eventType": "session_started",
-        "source": "utm_source=peerlist",
-        "referrerHost": "peerlist.io",
-        "path": "/",
-        "sessions": 1,
-        "events": 1
-      }
-    ],
-    "seoPageOutboundToday": [
-      {
-        "intent": "best-ai-assistants",
-        "sessions": 1,
-        "clicks": 1
-      }
-    ],
-    "humanSessionsWithoutStartToday": 1,
-    "humanSessionsWithoutStart30d": 250,
-    "sessionSourceToday": [
-      {
-        "source": "direct",
-        "sessions": 2
-      },
-      {
-        "source": "utm_source=peerlist",
-        "sessions": 1
-      },
-      {
-        "source": "ref:app.partnerstack.com",
-        "sessions": 1
-      },
-      {
-        "source": "public-redirect",
-        "sessions": 1
-      }
-    ]
+    "redirectOnlyToday": 1,
+    "redirectOnly30d": 250,
+    "excludedRedirectClicks30d": 250
   },
   "revenue90d": {
     "ledger": [],
@@ -267,11 +223,11 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 344,
-    "humanDailyAverage30d": 11.47,
-    "recommendationCompletionRate": 0.6,
-    "humanSessionToOutboundRate": 73.3,
-    "monetizationCoverage": 20.6,
-    "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
+    "humanSessions30d": 94,
+    "humanDailyAverage30d": 3.13,
+    "recommendationCompletionRate": 2.1,
+    "humanSessionToOutboundRate": 2.1,
+    "monetizationCoverage": 50,
+    "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
   }
 }
