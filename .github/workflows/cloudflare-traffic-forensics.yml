@@ -34,25 +34,27 @@ jobs:
           const summaryQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1,filter:$filter){count sum{visits}}}}}`;
           const pathQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:5000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{clientRequestPath edgeResponseStatus}}}}}`;
           const uaQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{userAgent}}}}}`;
-          const refQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{clientRefererHost}}}}}`;
           const start=new Date('2026-09-03T00:00:00Z');
           const end=new Date('2026-09-11T00:00:00Z');
-          const knownBot=/(bot|crawler|spider|slurp|headless|lighthouse|pagespeed|curl|wget|python|go-http-client|semrush|ahrefs|mj12|dotbot|gptbot|oai-searchbot|chatgpt-user|claude|anthropic|perplexity|bytespider|facebookexternalhit|linkedinbot|twitterbot|whatsapp)/i;
+          const knownBot=/(bot|crawler|spider|slurp|headless|lighthouse|pagespeed|curl|wget|python|go-http-client|semrush|ahrefs|mj12|dotbot|gptbot|oai-searchbot|chatgpt-user|claude|anthropic|perplexity|bytespider|facebookexternalhit|linkedinbot|twitterbot|whatsapp|bingpreview|petalbot|yandex|duckduckbot)/i;
           for(let d=new Date(start);d<end;d.setUTCDate(d.getUTCDate()+1)){
             const next=new Date(d);next.setUTCDate(next.getUTCDate()+1);
             const filter={datetime_geq:d.toISOString(),datetime_lt:next.toISOString(),requestSource:'eyeball'};
-            const [s,p,u,r]=await Promise.all([query(summaryQuery,{zoneTag,filter}),query(pathQuery,{zoneTag,filter}),query(uaQuery,{zoneTag,filter}),query(refQuery,{zoneTag,filter})]);
+            const [s,p,u]=await Promise.all([query(summaryQuery,{zoneTag,filter}),query(pathQuery,{zoneTag,filter}),query(uaQuery,{zoneTag,filter})]);
             const groups=p.data?.viewer?.zones?.[0]?.g||[];
-            const pageGroups=groups.filter(x=>{const path=String(x.dimensions?.clientRequestPath||'');const status=Number(x.dimensions?.edgeResponseStatus||0);return status>=200&&status<400&&!path.startsWith('/api/')&&!path.startsWith('/go/')&&!path.startsWith('/.well-known/')&&!/\.(?:js|css|json|xml|txt|png|jpe?g|webp|svg|ico|woff2?|map)$/i.test(path)});
+            const pageGroups=groups.filter(x=>{const path=String(x.dimensions?.clientRequestPath||'');const status=Number(x.dimensions?.edgeResponseStatus||0);return status>=200&&status<400&&!path.startsWith('/api/')&&!path.startsWith('/analytics/api/')&&!path.startsWith('/go/')&&!path.startsWith('/mcp')&&!path.startsWith('/a2a')&&!path.startsWith('/.well-known/')&&!path.startsWith('/cdn-cgi/')&&!/\.(?:js|css|json|xml|txt|png|jpe?g|webp|svg|ico|woff2?|map)$/i.test(path)});
             const pageRequests=pageGroups.reduce((a,x)=>a+Number(x.count||0),0);
             const pageVisits=pageGroups.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
             const goRequests=groups.filter(x=>String(x.dimensions?.clientRequestPath||'').startsWith('/go/')).reduce((a,x)=>a+Number(x.count||0),0);
-            const apiRequests=groups.filter(x=>String(x.dimensions?.clientRequestPath||'').startsWith('/api/')).reduce((a,x)=>a+Number(x.count||0),0);
-            const topPages=pageGroups.sort((a,b)=>Number(b.count||0)-Number(a.count||0)).slice(0,30).map(x=>({path:x.dimensions.clientRequestPath,status:Number(x.dimensions.edgeResponseStatus||0),requests:Number(x.count||0),visits:Number(x.sum?.visits||0)}));
+            const topPages=pageGroups.sort((a,b)=>Number(b.count||0)-Number(a.count||0)).slice(0,20).map(x=>({path:x.dimensions.clientRequestPath,status:Number(x.dimensions.edgeResponseStatus||0),requests:Number(x.count||0),visits:Number(x.sum?.visits||0)}));
             const uas=u.data?.viewer?.zones?.[0]?.g||[];
-            const browserLike=uas.filter(x=>/Mozilla\/5\.0/i.test(String(x.dimensions?.userAgent||''))&&!knownBot.test(String(x.dimensions?.userAgent||''))).reduce((a,x)=>a+Number(x.count||0),0);
-            const botLike=uas.filter(x=>knownBot.test(String(x.dimensions?.userAgent||''))).reduce((a,x)=>a+Number(x.count||0),0);
-            const refs=(r.data?.viewer?.zones?.[0]?.g||[]).slice(0,50).map(x=>({host:x.dimensions?.clientRefererHost||'',requests:Number(x.count||0),visits:Number(x.sum?.visits||0)}));
-            console.log('CF_DAY='+JSON.stringify({day:d.toISOString().slice(0,10),summaryOk:s.ok,pathOk:p.ok,uaOk:u.ok,refOk:r.ok,totalRequests:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.count||0),totalVisits:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.sum?.visits||0),pageRequests,pageVisits,goRequests,apiRequests,browserLikeRequests:browserLike,botLikeRequests:botLike,topPages,topReferrers:refs,errors:{summary:s.errors,path:p.errors,ua:u.errors,ref:r.errors}}));
+            const browserRows=uas.filter(x=>/Mozilla\/5\.0/i.test(String(x.dimensions?.userAgent||''))&&!knownBot.test(String(x.dimensions?.userAgent||'')));
+            const botRows=uas.filter(x=>knownBot.test(String(x.dimensions?.userAgent||'')));
+            const browserLikeRequests=browserRows.reduce((a,x)=>a+Number(x.count||0),0);
+            const browserLikeVisits=browserRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
+            const botLikeRequests=botRows.reduce((a,x)=>a+Number(x.count||0),0);
+            const botLikeVisits=botRows.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
+            const topUserAgents=uas.slice(0,25).map(x=>({ua:String(x.dimensions?.userAgent||'').slice(0,180),requests:Number(x.count||0),visits:Number(x.sum?.visits||0),knownBot:knownBot.test(String(x.dimensions?.userAgent||''))}));
+            console.log('CF_DAY_V2='+JSON.stringify({day:d.toISOString().slice(0,10),totalRequests:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.count||0),totalVisits:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.sum?.visits||0),pageRequests,pageVisits,goRequests,browserLikeRequests,browserLikeVisits,botLikeRequests,botLikeVisits,topPages,topUserAgents,errors:{summary:s.errors,path:p.errors,ua:u.errors}}));
           }
           NODE
