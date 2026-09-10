@@ -1,13 +1,13 @@
 export const AFFILIATE_STATES = Object.freeze([
   'research_required','no_program_found','program_exists','ready_to_apply',
   'human_action_required','submitted','pending_review','approved_needs_link',
-  'link_acquired','active','verified','rejected','paused','blocked','earning'
+  'link_acquired','active','verified','rejected','watchlist','paused','blocked','earning'
 ]);
 
 export const AFFILIATE_STATE_SET = new Set(AFFILIATE_STATES);
 export const HUMAN_STATES = new Set(['ready_to_apply','human_action_required','approved_needs_link']);
 export const MONETIZED_STATES = new Set(['active','verified','earning']);
-export const TERMINAL_UNMONETIZABLE_STATES = new Set(['no_program_found','paused']);
+export const TERMINAL_UNMONETIZABLE_STATES = new Set(['no_program_found','watchlist','paused']);
 
 const LEGACY_STATE = Object.freeze({
   no_program:'no_program_found', no_affiliate_program:'no_program_found',
@@ -34,6 +34,7 @@ export function nextActionFor(record) {
   if (state === 'program_exists') return record.blocker ? 'Resolve eligibility or network blocker' : 'Confirm application eligibility';
   if (state === 'blocked') return record.blocker || 'Await network unlock';
   if (state === 'rejected') return record.blocker || 'No action until reapplication criteria are met';
+  if (state === 'watchlist') return 'Monitor for an official public affiliate programme; no owner action required';
   if (state === 'paused') return 'No application while programme is paused';
   if (state === 'no_program_found') return 'No affiliate programme currently available';
   return 'Investigate official direct affiliate programme';
