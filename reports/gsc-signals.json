@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T21:42:32.678Z",
+  "generatedAt": "2026-09-10T22:25:26.321Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-10",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1645,
-    "ctr": 0.0608
+    "impressions": 1647,
+    "ctr": 0.0607
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 30,
       "clicks": 0,
-      "impressions": 1094
+      "impressions": 1095
     },
     "home": {
       "pages": 2,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 33,
       "clicks": 0,
-      "impressions": 441
+      "impressions": 442
     }
   },
   "pageCount": 75,
@@ -820,15 +820,15 @@
       "type": "guide",
       "intent": "best-keyword-research-tools",
       "clicks": 0,
-      "impressions": 28,
+      "impressions": 29,
       "ctr": 0,
-      "position": 76.0714,
+      "position": 76.5862,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 24,
-          "position": 78.8333
+          "impressions": 25,
+          "position": 79.32
         },
         {
           "query": "keyword discovery tools",
@@ -1369,6 +1369,25 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/mixpanel.html",
+      "pathname": "/tools/mixpanel.html",
+      "key": "mixpanel",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0,
+      "position": 87,
+      "topQueries": [
+        {
+          "query": "mixpanel",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 87
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/monday-crm.html",
       "pathname": "/tools/monday-crm.html",
       "key": "monday-crm",
@@ -1569,25 +1588,6 @@
       "ctr": 0,
       "position": 6.5,
       "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/tools/mixpanel.html",
-      "pathname": "/tools/mixpanel.html",
-      "key": "mixpanel",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 86.5,
-      "topQueries": [
-        {
-          "query": "mixpanel",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 86.5
-        }
-      ]
     },
     {
       "page": "http://trytoolscout.org/tool?tool=monday-crm",
@@ -2411,15 +2411,15 @@
       "intent": "best-keyword-research-tools",
       "page": "https://trytoolscout.org/best-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 28,
+      "impressions": 29,
       "ctr": 0,
-      "position": 76.0714,
+      "position": 76.5862,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 24,
-          "position": 78.8333
+          "impressions": 25,
+          "position": 79.32
         },
         {
           "query": "keyword discovery tools",

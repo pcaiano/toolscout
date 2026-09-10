@@ -1,273 +1,30 @@
 {
-  "generatedAt": "2026-09-10T21:42:40.219Z",
-  "source": "aggregated content demand signals",
-  "count": 38,
+  "generatedAt": "2026-09-10T22:25:30.458Z",
+  "policy": "Only distinct informational intents with observed Search Console demand may become indexable blog candidates. Existing commercial guide intents are not duplicated in the blog.",
+  "minimumImpressions": 10,
+  "count": 2,
   "items": [
     {
-      "slug": "best-affordable-crm-guide",
-      "intent": "best-affordable-crm",
-      "title": "Affordable CRM: What Actually Matters Before You Buy",
-      "description": "A practical comparison framework for affordable crm, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
+      "slug": "what-is-airtable",
+      "query": "what is airtable",
+      "sourcePage": "https://trytoolscout.org/tools/airtable.html",
+      "sourcePath": "/tools/airtable.html",
+      "impressions": 18,
+      "clicks": 0,
+      "position": 84.8333,
+      "evidence": "Google Search Console query",
+      "publicationStatus": "candidate-needs-grounded-content"
     },
     {
-      "slug": "best-ai-ad-creative-tools-guide",
-      "intent": "best-ai-ad-creative-tools",
-      "title": "The Shortlist for AI Ad Creative Tools: Features, Trade-offs and Fit",
-      "description": "What to compare when evaluating ai ad creative tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-ai-assistants-guide",
-      "intent": "best-ai-assistants",
-      "title": "AI Assistants Without the Noise: A Practical Buying Guide",
-      "description": "A concise buyer's guide to ai assistants: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-ai-coding-tools-guide",
-      "intent": "best-ai-coding-tools",
-      "title": "Before You Pick a AI Coding Tools Tool, Check These Trade-offs",
-      "description": "A practical comparison framework for ai coding tools, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-ai-marketing-tools-guide",
-      "intent": "best-ai-marketing-tools",
-      "title": "AI Marketing Tools: Where the Best Options Differ",
-      "description": "What to compare when evaluating ai marketing tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-ai-research-tools-guide",
-      "intent": "best-ai-research-tools",
-      "title": "A Better Way to Compare AI Research Tools Tools",
-      "description": "A concise buyer's guide to ai research tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-cold-email-tools-guide",
-      "intent": "best-cold-email-tools",
-      "title": "Cold Email Tools: What Actually Matters Before You Buy",
-      "description": "A practical comparison framework for cold email tools, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-competitor-seo-tools-guide",
-      "intent": "best-competitor-seo-tools",
-      "title": "The Shortlist for Competitor SEO Tools: Features, Trade-offs and Fit",
-      "description": "What to compare when evaluating competitor seo tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-crm-for-consultants-guide",
-      "intent": "best-crm-for-consultants",
-      "title": "CRM For Consultants Without the Noise: A Practical Buying Guide",
-      "description": "A concise buyer's guide to crm for consultants: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-crm-for-real-estate-guide",
-      "intent": "best-crm-for-real-estate",
-      "title": "Before You Pick a CRM For Real Estate Tool, Check These Trade-offs",
-      "description": "A practical comparison framework for crm for real estate, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-crm-for-sales-teams-guide",
-      "intent": "best-crm-for-sales-teams",
-      "title": "CRM For Sales Teams: Where the Best Options Differ",
-      "description": "What to compare when evaluating crm for sales teams, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-crm-for-small-business-guide",
-      "intent": "best-crm-for-small-business",
-      "title": "A Better Way to Compare CRM For Small Business Tools",
-      "description": "A concise buyer's guide to crm for small business: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-crm-with-automation-guide",
-      "intent": "best-crm-with-automation",
-      "title": "CRM With Automation: What Actually Matters Before You Buy",
-      "description": "A practical comparison framework for crm with automation, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-customer-support-tools-guide",
-      "intent": "best-customer-support-tools",
-      "title": "The Shortlist for Customer Support Tools: Features, Trade-offs and Fit",
-      "description": "What to compare when evaluating customer support tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-design-tools-guide",
-      "intent": "best-design-tools",
-      "title": "Design Tools Without the Noise: A Practical Buying Guide",
-      "description": "A concise buyer's guide to design tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-developer-tools-guide",
-      "intent": "best-developer-tools",
-      "title": "Before You Pick a Developer Tools Tool, Check These Trade-offs",
-      "description": "A practical comparison framework for developer tools, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-ecommerce-platforms-guide",
-      "intent": "best-ecommerce-platforms",
-      "title": "Ecommerce Platforms: Where the Best Options Differ",
-      "description": "What to compare when evaluating ecommerce platforms, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-email-marketing-tools-guide",
-      "intent": "best-email-marketing-tools",
-      "title": "A Better Way to Compare Email Marketing Tools Tools",
-      "description": "A concise buyer's guide to email marketing tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-forms-for-small-business-guide",
-      "intent": "best-forms-for-small-business",
-      "title": "Forms For Small Business: What Actually Matters Before You Buy",
-      "description": "A practical comparison framework for forms for small business, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-free-crm-guide",
-      "intent": "best-free-crm",
-      "title": "The Shortlist for Free CRM: Features, Trade-offs and Fit",
-      "description": "What to compare when evaluating free crm, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-free-project-management-tools-guide",
-      "intent": "best-free-project-management-tools",
-      "title": "Free Project Management Tools Without the Noise: A Practical Buying Guide",
-      "description": "A concise buyer's guide to free project management tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-funnel-builder-guide",
-      "intent": "best-funnel-builder",
-      "title": "Before You Pick a Funnel Builder Tool, Check These Trade-offs",
-      "description": "A practical comparison framework for funnel builder, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-keyword-research-tools-guide",
-      "intent": "best-keyword-research-tools",
-      "title": "Keyword Research Tools: Where the Best Options Differ",
-      "description": "What to compare when evaluating keyword research tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-lead-capture-forms-guide",
-      "intent": "best-lead-capture-forms",
-      "title": "A Better Way to Compare Lead Capture Forms Tools",
-      "description": "A concise buyer's guide to lead capture forms: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-marketing-automation-tools-guide",
-      "intent": "best-marketing-automation-tools",
-      "title": "Marketing Automation Tools: What Actually Matters Before You Buy",
-      "description": "A practical comparison framework for marketing automation tools, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-no-code-automation-tools-guide",
-      "intent": "best-no-code-automation-tools",
-      "title": "The Shortlist for No Code Automation Tools: Features, Trade-offs and Fit",
-      "description": "What to compare when evaluating no code automation tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-product-analytics-tools-guide",
-      "intent": "best-product-analytics-tools",
-      "title": "Product Analytics Tools Without the Noise: A Practical Buying Guide",
-      "description": "A concise buyer's guide to product analytics tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-productivity-tools-for-teams-guide",
-      "intent": "best-productivity-tools-for-teams",
-      "title": "Before You Pick a Productivity Tools For Teams Tool, Check These Trade-offs",
-      "description": "A practical comparison framework for productivity tools for teams, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-project-management-tools-guide",
-      "intent": "best-project-management-tools",
-      "title": "Project Management Tools: Where the Best Options Differ",
-      "description": "What to compare when evaluating project management tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-sales-prospecting-tools-guide",
-      "intent": "best-sales-prospecting-tools",
-      "title": "A Better Way to Compare Sales Prospecting Tools Tools",
-      "description": "A concise buyer's guide to sales prospecting tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-seo-tools-guide",
-      "intent": "best-seo-tools",
-      "title": "SEO Tools: What Actually Matters Before You Buy",
-      "description": "A practical comparison framework for seo tools, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-seo-tools-for-agencies-guide",
-      "intent": "best-seo-tools-for-agencies",
-      "title": "The Shortlist for SEO Tools For Agencies: Features, Trade-offs and Fit",
-      "description": "What to compare when evaluating seo tools for agencies, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-social-media-management-tools-guide",
-      "intent": "best-social-media-management-tools",
-      "title": "Social Media Management Tools Without the Noise: A Practical Buying Guide",
-      "description": "A concise buyer's guide to social media management tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-team-collaboration-tools-guide",
-      "intent": "best-team-collaboration-tools",
-      "title": "Before You Pick a Team Collaboration Tools Tool, Check These Trade-offs",
-      "description": "A practical comparison framework for team collaboration tools, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-tools-for-agencies-guide",
-      "intent": "best-tools-for-agencies",
-      "title": "Tools For Agencies: Where the Best Options Differ",
-      "description": "What to compare when evaluating tools for agencies, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
-    },
-    {
-      "slug": "best-video-content-tools-guide",
-      "intent": "best-video-content-tools",
-      "title": "A Better Way to Compare Video Content Tools Tools",
-      "description": "A concise buyer's guide to video content tools: the criteria worth checking, the compromises to expect and how to keep the shortlist useful.",
-      "searches": 0
-    },
-    {
-      "slug": "best-website-builders-guide",
-      "intent": "best-website-builders",
-      "title": "Website Builders: What Actually Matters Before You Buy",
-      "description": "A practical comparison framework for website builders, focused on fit, trade-offs and the differences that affect the buying decision.",
-      "searches": 0
-    },
-    {
-      "slug": "best-workflow-automation-tools-guide",
-      "intent": "best-workflow-automation-tools",
-      "title": "The Shortlist for Workflow Automation Tools: Features, Trade-offs and Fit",
-      "description": "What to compare when evaluating workflow automation tools, with emphasis on workflow fit, price, setup effort and long-term usefulness.",
-      "searches": 0
+      "slug": "what-is-airtable-used-for",
+      "query": "what is airtable used for",
+      "sourcePage": "https://trytoolscout.org/tools/airtable.html",
+      "sourcePath": "/tools/airtable.html",
+      "impressions": 14,
+      "clicks": 0,
+      "position": 89,
+      "evidence": "Google Search Console query",
+      "publicationStatus": "candidate-needs-grounded-content"
     }
   ]
 }
