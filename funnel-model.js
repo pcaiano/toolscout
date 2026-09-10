@@ -1,5 +1,6 @@
 export const FUNNEL_EVENT_TYPES = new Set([
   'session_started',
+  'page_confirmed',
   'recommendation_started',
   'recommendation_completed',
   'recommendation_result_viewed',
@@ -42,4 +43,3 @@ export function rate(numerator, denominator) {
   const n = Number(numerator || 0), d = Number(denominator || 0);
   return d > 0 ? Number((n / d * 100).toFixed(1)) : null;
 }
-
