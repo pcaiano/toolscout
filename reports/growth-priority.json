@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T21:40:43.662Z",
+  "generatedAt": "2026-09-10T21:42:36.479Z",
   "methodology": "Observed Google Search Console signals rank growth work. Search impressions represent visibility, not traffic. Search-triggered automatic optimization requires at least 20 impressions unless a click is observed. CTR work is reserved for meaningful first-page or striking-distance samples; positions beyond page two are treated as relevance or authority gaps. Tool candidates are category-gated whenever the catalog has at least three exact-category options.",
   "gsc": {
     "available": true,
