@@ -1,0 +1,37 @@
+name: D1 Traffic Forensics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/d1-traffic-forensics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Inspect session provenance
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          function q(sql){const out=execFileSync('npx',['wrangler','d1','execute','toolscout','--remote','--config','wrangler.toml','--json','--command',sql],{encoding:'utf8'});const p=JSON.parse(out),b=Array.isArray(p)?p[0]:p;return b?.results||b?.result?.[0]?.results||[]}
+          const queries={
+            daily:`SELECT date(s.first_seen_at,'+1 hour') day,COUNT(*) likely_human,SUM(CASE WHEN EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=s.session_id AND f.event_type='session_started') THEN 1 ELSE 0 END) with_start,SUM(CASE WHEN NOT EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=s.session_id AND f.event_type='session_started') THEN 1 ELSE 0 END) without_start FROM sessions s WHERE s.classification='likely-human' AND date(s.first_seen_at,'+1 hour')>='2026-09-01' GROUP BY day ORDER BY day`,
+            sessionSources:`SELECT date(first_seen_at,'+1 hour') day,COALESCE(NULLIF(source,''),'none') source,COUNT(*) sessions FROM sessions WHERE classification='likely-human' AND date(first_seen_at,'+1 hour')>='2026-09-01' GROUP BY day,COALESCE(NULLIF(source,''),'none') ORDER BY day,sessions DESC`,
+            clickSources:`SELECT date(c.created_at,'+1 hour') day,COALESCE(NULLIF(c.source,''),'none') source,COUNT(*) clicks,COUNT(DISTINCT c.session_id) sessions FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND date(c.created_at,'+1 hour')>='2026-09-01' GROUP BY day,COALESCE(NULLIF(c.source,''),'none') ORDER BY day,clicks DESC`,
+            clickIntents:`SELECT date(c.created_at,'+1 hour') day,COALESCE(NULLIF(c.intent_slug,''),'none') intent,COALESCE(NULLIF(c.source,''),'none') source,COUNT(*) clicks FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND date(c.created_at,'+1 hour')>='2026-09-01' GROUP BY day,COALESCE(NULLIF(c.intent_slug,''),'none'),COALESCE(NULLIF(c.source,''),'none') ORDER BY day,clicks DESC LIMIT 500`,
+            clickTools:`SELECT date(c.created_at,'+1 hour') day,c.tool_slug,COALESCE(NULLIF(c.source,''),'none') source,COUNT(*) clicks FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND date(c.created_at,'+1 hour')>='2026-09-01' GROUP BY day,c.tool_slug,COALESCE(NULLIF(c.source,''),'none') ORDER BY day,clicks DESC LIMIT 500`,
+            bursts:`SELECT substr(c.created_at,1,16) minute,COALESCE(NULLIF(c.source,''),'none') source,COUNT(*) clicks,COUNT(DISTINCT c.session_id) sessions FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND c.created_at>='2026-09-01' GROUP BY minute,COALESCE(NULLIF(c.source,''),'none') HAVING COUNT(*)>=3 ORDER BY clicks DESC,minute DESC LIMIT 200`,
+            startSources:`SELECT date(f.created_at,'+1 hour') day,COALESCE(NULLIF(f.source,''),'direct') source,COALESCE(NULLIF(f.referrer_host,''),'none') referrer_host,COALESCE(NULLIF(f.path,''),'none') path,COUNT(DISTINCT f.session_id) sessions FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='session_started' AND date(f.created_at,'+1 hour')>='2026-09-01' GROUP BY day,COALESCE(NULLIF(f.source,''),'direct'),COALESCE(NULLIF(f.referrer_host,''),'none'),COALESCE(NULLIF(f.path,''),'none') ORDER BY day,sessions DESC`
+          };
+          for(const [name,sql] of Object.entries(queries)) console.log(`D1_${name.toUpperCase()}=`+JSON.stringify(q(sql)));
+          NODE
