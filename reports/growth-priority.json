@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-10T22:32:02.262Z",
-  "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires exact category, capability fit where defined, and semantic relevance.",
+  "generatedAt": "2026-09-10T22:32:41.762Z",
+  "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
     "ingestionStatus": "signals-imported",
@@ -19,10 +19,11 @@
     "minimumEligibleToolsPerGuide": 2,
     "maximumRankedToolsPerGuide": 3,
     "minimumLexicalRelevance": 0.75,
-    "exactCategoryRequired": true,
-    "capabilityGateRequired": true
+    "allowedCategoryRequired": true,
+    "capabilityGateRequired": true,
+    "hardAttributeGateRequired": true
   },
-  "count": 38,
+  "count": 39,
   "items": [
     {
       "intent": "best-seo-tools-for-agencies",
@@ -961,6 +962,52 @@
         "ai",
         "artificial intelligence",
         "generative ai"
+      ],
+      "editorialEligibility": "blocked-insufficient-semantic-coverage",
+      "action": "catalog-gap"
+    },
+    {
+      "intent": "best-all-in-one-business-tools",
+      "title": "Best All-in-One Business Tools",
+      "category": "business",
+      "priorityScore": 13,
+      "topFit": 0,
+      "eligibleToolCount": 0,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 0,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 4,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 90.75,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 7,
+        "meaningfulSample": false,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "low"
+      },
+      "signalBasis": "observed-gsc-low-sample",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [],
+      "requiredCapabilities": [
+        "crm",
+        "customer relationship",
+        "customer platform",
+        "marketing",
+        "email marketing",
+        "campaign",
+        "automation",
+        "workflow",
+        "sales",
+        "sales pipeline",
+        "deal management",
+        "lead management",
+        "funnel",
+        "forms",
+        "landing page"
       ],
       "editorialEligibility": "blocked-insufficient-semantic-coverage",
       "action": "catalog-gap"

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:32:02.332Z",
+  "generatedAt": "2026-09-10T22:32:41.824Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
@@ -28,7 +28,7 @@
     "searchClicks": 1,
     "searchImpressions": 1647,
     "organicAcquisitionStatus": "early-search-acquisition",
-    "actionableOpportunities": 22,
+    "actionableOpportunities": 23,
     "firstPageOpportunities": 11,
     "firstPageMeaningful": 0,
     "firstPageLowSample": 11,
@@ -1069,6 +1069,48 @@
       "topTools": [
         "adcreative-ai"
       ]
+    },
+    {
+      "intent": "best-all-in-one-business-tools",
+      "priorityScore": 13,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "low",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 4,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 90.75,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 7,
+        "meaningfulSample": false,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "low"
+      },
+      "topTools": []
     },
     {
       "intent": "best-crm-for-real-estate",
@@ -3336,6 +3378,30 @@
     {
       "intent": "best-ai-ad-creative-tools",
       "priorityScore": 23,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-all-in-one-business-tools",
+      "priorityScore": 13,
       "lane": "editorial-safety",
       "action": "hold-publication-and-research-catalog",
       "ownerActionRequired": false,

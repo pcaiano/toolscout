@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:32:02.789Z",
+  "generatedAt": "2026-09-10T22:32:42.219Z",
   "count": 3,
   "rule": "Fail closed per page. A blocked intent is removed from the public indexable surface while safe intents continue through the autonomous SEO pipeline.",
   "items": [
@@ -7,6 +7,9 @@
       "intent": "best-ai-ad-creative-tools",
       "title": "Best AI Ad Creative Tools",
       "category": "marketing",
+      "allowedCategories": [
+        "marketing"
+      ],
       "eligibleToolCount": 1,
       "minimumEligibleTools": 2,
       "eligibleTools": [
@@ -21,13 +24,16 @@
         "artificial intelligence",
         "generative ai"
       ],
-      "reason": "Insufficient verified semantic and capability coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
+      "reason": "Insufficient verified category, capability, hard-constraint and semantic coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
       "action": "research-catalog-coverage-and-recheck"
     },
     {
       "intent": "best-video-content-tools",
       "title": "Best Video Content Tools",
       "category": "content",
+      "allowedCategories": [
+        "content"
+      ],
       "eligibleToolCount": 1,
       "minimumEligibleTools": 2,
       "eligibleTools": [
@@ -39,13 +45,18 @@
         "video editing",
         "podcast editing"
       ],
-      "reason": "Insufficient verified semantic and capability coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
+      "reason": "Insufficient verified category, capability, hard-constraint and semantic coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
       "action": "research-catalog-coverage-and-recheck"
     },
     {
       "intent": "best-all-in-one-business-tools",
       "title": "Best All-in-One Business Tools",
       "category": "business",
+      "allowedCategories": [
+        "business",
+        "crm",
+        "marketing"
+      ],
       "eligibleToolCount": 0,
       "minimumEligibleTools": 2,
       "eligibleTools": [],
@@ -66,7 +77,7 @@
         "forms",
         "landing page"
       ],
-      "reason": "Insufficient verified semantic and capability coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
+      "reason": "Insufficient verified category, capability, hard-constraint and semantic coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
       "action": "research-catalog-coverage-and-recheck"
     }
   ]
