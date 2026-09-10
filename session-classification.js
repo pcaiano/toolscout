@@ -10,9 +10,17 @@ const SYNTHETIC_UA = /(?:curl|wget|httpie|postmanruntime|insomnia|uptime|healthc
 const KNOWN_BOT_UA = /(?:googlebot|google-inspectiontool|bingbot|duckduckbot|baiduspider|yandexbot|slurp|applebot|petalbot|bytespider|facebookexternalhit|facebot|linkedinbot|twitterbot|discordbot|telegrambot|whatsapp|semrushbot|ahrefsbot|mj12bot|dotbot|rogerbot|screaming frog|dataforseobot|gptbot|chatgpt-user|oai-searchbot|claudebot|anthropic-ai|perplexitybot|cohere-ai|amazonbot)/i;
 const PLAUSIBLE_BROWSER_UA = /mozilla\/5\.0/i;
 const BROWSER_ENGINE_UA = /(?:chrome|crios|firefox|fxios|safari|edg|opr)\//i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function isOwnerRequest(request) {
   return (request.headers.get('Cookie') || '').split(';').some(part => part.trim() === 'toolscout_owner=1');
+}
+
+export function hasEstablishedSession(request) {
+  const cookie=request.headers.get('Cookie')||'';
+  const match=cookie.match(/(?:^|;\s*)toolscout_session=([^;]+)/);
+  if(!match)return false;
+  try{return UUID.test(decodeURIComponent(match[1]))}catch{return false}
 }
 
 export function classifySessionRequest(request) {
@@ -20,6 +28,9 @@ export function classifySessionRequest(request) {
   const userAgent = request.headers.get('User-Agent') || '';
   if (SYNTHETIC_UA.test(userAgent)) return SESSION_CLASSIFICATIONS.SYNTHETIC;
   if (KNOWN_BOT_UA.test(userAgent)) return SESSION_CLASSIFICATIONS.KNOWN_BOT;
+  let pathname='';
+  try{pathname=new URL(request.url).pathname}catch{}
+  if(pathname.startsWith('/go/')&&!hasEstablishedSession(request))return SESSION_CLASSIFICATIONS.UNKNOWN;
   if (PLAUSIBLE_BROWSER_UA.test(userAgent) && BROWSER_ENGINE_UA.test(userAgent)) return SESSION_CLASSIFICATIONS.LIKELY_HUMAN;
   return SESSION_CLASSIFICATIONS.UNKNOWN;
 }
@@ -41,6 +52,7 @@ export const SESSION_UPSERT_SQL = `INSERT INTO sessions
       WHEN sessions.classification='synthetic/test' THEN 'synthetic/test'
       WHEN excluded.classification='known-bot/crawler' THEN 'known-bot/crawler'
       WHEN sessions.classification='known-bot/crawler' THEN 'known-bot/crawler'
-      WHEN sessions.classification='unknown/legacy' THEN 'unknown/legacy'
-      ELSE excluded.classification
+      WHEN excluded.classification='likely-human' THEN 'likely-human'
+      WHEN sessions.classification='likely-human' THEN 'likely-human'
+      ELSE 'unknown/legacy'
     END`;
