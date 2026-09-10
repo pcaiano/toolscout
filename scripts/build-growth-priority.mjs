@@ -5,6 +5,8 @@ const profiles = JSON.parse(fs.readFileSync('data/intent-profiles.json','utf8'))
 const tools = JSON.parse(fs.readFileSync('data/tools.json','utf8'));
 const affiliate = JSON.parse(fs.readFileSync('data/affiliate.json','utf8'));
 const pipeline = JSON.parse(fs.readFileSync('data/affiliate-pipeline.json','utf8'));
+const organicConfig = JSON.parse(fs.readFileSync('data/organic-growth-engine.json','utf8'));
+const MIN_GSC_IMPRESSIONS = Number(organicConfig?.thresholds?.minimumGscImpressionsForCtrAction || 20);
 const gscPath = 'reports/gsc-signals.json';
 const gscFilePresent = fs.existsSync(gscPath);
 const gsc = gscFilePresent ? JSON.parse(fs.readFileSync(gscPath,'utf8')) : { items: [] };
@@ -50,8 +52,9 @@ function searchOpportunity(observed) {
   const clicks = Number(observed?.clicks || 0);
   const position = Number(observed?.position || 0);
   const ctr = Number(observed?.ctr || 0);
-  if (!impressions) return { score: 0, opportunity: 'unobserved' };
+  if (!impressions) return { score: 0, opportunity: 'unobserved', meaningfulSample: false };
 
+  const meaningfulSample = impressions >= MIN_GSC_IMPRESSIONS || clicks > 0;
   const demand = Math.min(30, Math.log10(impressions + 1) * 9);
   const traffic = Math.min(10, Math.log10(clicks + 1) * 5);
   let rankOpportunity = 2;
@@ -62,17 +65,19 @@ function searchOpportunity(observed) {
   else if (position <= 70) rankOpportunity = 6;
 
   let ctrOpportunity = 0;
-  if (position > 0 && position <= 10 && impressions >= 50 && ctr < 1) ctrOpportunity = 6;
-  else if (position > 0 && position <= 20 && impressions >= 50 && ctr < 2) ctrOpportunity = 3;
+  if (meaningfulSample && position > 0 && position <= 10 && ctr < 1) ctrOpportunity = 6;
+  else if (meaningfulSample && position > 0 && position <= 20 && ctr < 2) ctrOpportunity = 3;
 
-  const score = Math.min(60, Math.round(demand + traffic + rankOpportunity + ctrOpportunity));
+  const samplePenalty = meaningfulSample ? 0 : Math.min(15, rankOpportunity * 0.75);
+  const score = Math.min(60, Math.max(0, Math.round(demand + traffic + rankOpportunity + ctrOpportunity - samplePenalty)));
   let opportunity = 'develop';
-  if (position > 0 && position <= 3) opportunity = 'defend-winner';
+  if (!meaningfulSample) opportunity = 'insufficient-sample';
+  else if (position > 0 && position <= 3) opportunity = 'defend-winner';
   else if (position <= 10) opportunity = clicks > 0 ? 'first-page-growth' : 'first-page-no-clicks';
   else if (position <= 20) opportunity = 'striking-distance';
   else if (position <= 50) opportunity = 'authority-gap';
   else opportunity = 'relevance-gap';
-  return { score, opportunity };
+  return { score, opportunity, meaningfulSample };
 }
 
 const rows = intents.map(intent => {
@@ -100,8 +105,8 @@ const rows = intents.map(intent => {
     : heuristicScore;
   const readiness = affiliateTools > 0 ? 'monetizable' : 'needs-affiliate-activation';
   let action = score >= 75 ? 'invest-now' : score >= 60 ? 'build-next' : 'watch';
-  if (impressions > 0 && ['first-page-growth','first-page-no-clicks','striking-distance'].includes(search.opportunity)) action = 'optimize-now';
-  else if (impressions >= 20 && ['authority-gap','relevance-gap'].includes(search.opportunity)) action = 'repair-existing';
+  if (search.meaningfulSample && ['first-page-growth','first-page-no-clicks','striking-distance'].includes(search.opportunity)) action = 'optimize-now';
+  else if (search.meaningfulSample && ['authority-gap','relevance-gap'].includes(search.opportunity)) action = 'repair-existing';
   return {
     intent: intent.slug,
     title: intent.title,
@@ -111,8 +116,8 @@ const rows = intents.map(intent => {
     catalogDepth,
     commercialSignal: commercial,
     affiliateSignal,
-    searchSignal: impressions > 0 ? { source: 'gsc', impressions, clicks, ctr, position, opportunity: search.opportunity, opportunityScore: search.score } : null,
-    signalBasis: impressions > 0 ? 'observed-gsc-majority' : 'heuristic-only',
+    searchSignal: impressions > 0 ? { source: 'gsc', impressions, clicks, ctr, position, opportunity: search.opportunity, opportunityScore: search.score, meaningfulSample: search.meaningfulSample } : null,
+    signalBasis: impressions > 0 ? (search.meaningfulSample ? 'observed-gsc-majority' : 'observed-gsc-insufficient-sample') : 'heuristic-only',
     monetizationReadiness: readiness,
     topTools: top.map(x => x.tool.slug),
     action
@@ -120,16 +125,16 @@ const rows = intents.map(intent => {
 });
 
 rows.sort((a,b) => {
-  const actionRank = { 'optimize-now': 5, 'repair-existing': 4, 'invest-now': 3, 'build-next': 2, watch: 1 };
-  const aObserved = a.searchSignal ? 1 : 0;
-  const bObserved = b.searchSignal ? 1 : 0;
-  return bObserved - aObserved || (actionRank[b.action] || 0) - (actionRank[a.action] || 0) || b.priorityScore - a.priorityScore || a.title.localeCompare(b.title);
+  const actionRank = { 'optimize-now': 5, 'repair-existing': 5, 'invest-now': 3, 'build-next': 2, watch: 1 };
+  const ar = actionRank[a.action] || 0, br = actionRank[b.action] || 0;
+  const ai = Number(a.searchSignal?.impressions || 0), bi = Number(b.searchSignal?.impressions || 0);
+  return br - ar || b.priorityScore - a.priorityScore || bi - ai || a.title.localeCompare(b.title);
 });
 
 const gscAvailable = gscByIntent.size > 0;
 const gscStatus = gscAvailable ? 'signals-imported' : gscFilePresent ? 'imported-no-matching-intents' : 'not-imported';
 const gscReason = gscAvailable
-  ? 'Google Search Console page signals are present and drive growth prioritization. CTR optimization is limited to pages already near page one; weak rankings are treated as relevance or authority problems.'
+  ? `Google Search Console page signals drive growth prioritization. Automatic search interventions require at least ${MIN_GSC_IMPRESSIONS} impressions in the measurement window unless clicks are already observed. Weak rankings are treated as relevance or authority problems.`
   : gscFilePresent
     ? 'A Google Search Console export was imported, but it contains no matching best-* intent pages.'
     : 'No reports/gsc-signals.json file exists. This describes ToolScout ingestion state only; it does not mean the site is unverified, unindexed, or invisible to Google.';
@@ -137,11 +142,12 @@ const gscReason = gscAvailable
 fs.mkdirSync('reports', { recursive: true });
 fs.writeFileSync('reports/growth-priority.json', JSON.stringify({
   generatedAt: new Date().toISOString(),
-  methodology: 'Observed Google Search Console signals rank ahead of heuristic-only opportunities. Search impressions represent visibility, not traffic. CTR work is reserved for first-page or striking-distance pages; positions beyond page two are treated as relevance or authority gaps. Tool candidates are category-gated whenever the catalog has at least three exact-category options.',
+  methodology: `Observed Google Search Console signals rank growth work. Search impressions represent visibility, not traffic. Search-triggered automatic optimization requires at least ${MIN_GSC_IMPRESSIONS} impressions unless a click is observed. CTR work is reserved for meaningful first-page or striking-distance samples; positions beyond page two are treated as relevance or authority gaps. Tool candidates are category-gated whenever the catalog has at least three exact-category options.`,
   gsc: {
     available: gscAvailable,
     ingestionStatus: gscStatus,
     intentsWithSignals: gscByIntent.size,
+    minimumImpressionsForAutomaticAction: MIN_GSC_IMPRESSIONS,
     source: gsc.source || null,
     dataState: gsc.dataState || null,
     siteTotals: gsc.siteTotals || null,
@@ -151,4 +157,4 @@ fs.writeFileSync('reports/growth-priority.json', JSON.stringify({
   count: rows.length,
   items: rows
 }, null, 2) + '\n');
-console.log(JSON.stringify({ generated: rows.length, gsc: { available: gscAvailable, ingestionStatus: gscStatus, intentsWithSignals: gscByIntent.size, siteTotals:gsc.siteTotals||null }, top: rows.slice(0,10) }, null, 2));
+console.log(JSON.stringify({ generated: rows.length, gsc: { available: gscAvailable, ingestionStatus: gscStatus, intentsWithSignals: gscByIntent.size, minimumImpressionsForAutomaticAction: MIN_GSC_IMPRESSIONS, siteTotals:gsc.siteTotals||null }, top: rows.slice(0,10) }, null, 2));
