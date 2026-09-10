@@ -44,8 +44,22 @@ export function isDuplicateApplication(record) {
   return Boolean(record.submitted_at || record.application_evidence || ['submitted','pending_review','approved_needs_link','link_acquired','active','verified','earning'].includes(normalizeAffiliateState(record.status)));
 }
 
+function hasQualifiedDiscoveryEvidence(record) {
+  if (String(record.source_actor || '') !== 'affiliate_coverage_engine') return true;
+  const state = normalizeAffiliateState(record.status);
+  if (!['ready_to_apply','human_action_required'].includes(state)) return true;
+  if (!record.application_url) return false;
+  try {
+    const evidence = Array.isArray(record.evidence_json) ? record.evidence_json : JSON.parse(record.evidence_json || '[]');
+    return evidence.some(item => item && item.type === 'official_publisher_affiliate_program' && item.url && item.application_url);
+  } catch {
+    return false;
+  }
+}
+
 export function safeHumanAction(record) {
   if (!HUMAN_STATES.has(normalizeAffiliateState(record.status))) return null;
+  if (!hasQualifiedDiscoveryEvidence(record)) return null;
   if (isDuplicateApplication(record) && normalizeAffiliateState(record.status) === 'ready_to_apply') {
     return { ...record, action:'Review / await existing application', duplicate_prevented:true };
   }
