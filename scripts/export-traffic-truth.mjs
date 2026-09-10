@@ -23,7 +23,7 @@ function zonedParts(date, timeZone = TIME_ZONE) {
 
 function zonedMidnightUtc(date, { monthStart = false } = {}) {
   const p = zonedParts(date);
-  const y = Number(p.year), m = monthStart ? 1 + Number(p.month) - Number(p.month) : Number(p.month), d = monthStart ? 1 : Number(p.day);
+  const y = Number(p.year), m = Number(p.month), d = monthStart ? 1 : Number(p.day);
   const guess = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
   const gp = zonedParts(guess);
   const represented = Date.UTC(Number(gp.year), Number(gp.month) - 1, Number(gp.day), Number(gp.hour), Number(gp.minute), Number(gp.second));
