@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-09-10T14:17:11.941Z",
+  "generatedAt": "2026-09-10T18:19:05.689Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 19,
-      "likelyHuman": 4,
-      "bots": 14,
+      "total": 25,
+      "likelyHuman": 5,
+      "bots": 19,
       "owner": 1,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 561,
-      "likelyHuman": 231,
-      "bots": 176,
+      "total": 537,
+      "likelyHuman": 202,
+      "bots": 181,
       "owner": 16,
       "synthetic": 0,
       "unknownLegacy": 138
     },
     "d30": {
-      "total": 1702,
-      "likelyHuman": 343,
-      "bots": 266,
+      "total": 1708,
+      "likelyHuman": 344,
+      "bots": 271,
       "owner": 42,
       "synthetic": 0,
       "unknownLegacy": 1051
@@ -66,10 +66,10 @@
       },
       {
         "day": "2026-09-10",
-        "sessions": 4
+        "sessions": 5
       }
     ],
-    "averageDailyLikelyHuman30d": 11.43
+    "averageDailyLikelyHuman30d": 11.47
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -99,7 +99,7 @@
     "sessionsWithOutbound": 252,
     "monetizedOutbound": 52,
     "monetizationCoverage": 20.6,
-    "humanSessionToOutboundRate": 73.5
+    "humanSessionToOutboundRate": 73.3
   },
   "sources30d": [
     {
@@ -112,7 +112,7 @@
     },
     {
       "source": "utm_source=peerlist",
-      "sessions": 3
+      "sessions": 4
     },
     {
       "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
@@ -162,7 +162,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 93,
+      "sessions": 94,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -179,10 +179,10 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 343,
-    "humanDailyAverage30d": 11.43,
+    "humanSessions30d": 344,
+    "humanDailyAverage30d": 11.47,
     "recommendationCompletionRate": 0.6,
-    "humanSessionToOutboundRate": 73.5,
+    "humanSessionToOutboundRate": 73.3,
     "monetizationCoverage": 20.6,
     "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
   }

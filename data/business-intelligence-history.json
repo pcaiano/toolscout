@@ -3249,5 +3249,194 @@
       "monetizationCoverage": 20.6,
       "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
     }
+  },
+  {
+    "generatedAt": "2026-09-10T18:19:05.689Z",
+    "timezone": "Europe/Lisbon",
+    "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+    "traffic": {
+      "today": {
+        "total": 25,
+        "likelyHuman": 5,
+        "bots": 19,
+        "owner": 1,
+        "synthetic": 0,
+        "unknownLegacy": 0
+      },
+      "d7": {
+        "total": 537,
+        "likelyHuman": 202,
+        "bots": 181,
+        "owner": 16,
+        "synthetic": 0,
+        "unknownLegacy": 138
+      },
+      "d30": {
+        "total": 1708,
+        "likelyHuman": 344,
+        "bots": 271,
+        "owner": 42,
+        "synthetic": 0,
+        "unknownLegacy": 1051
+      },
+      "dailyLikelyHuman30d": [
+        {
+          "day": "2026-09-01",
+          "sessions": 23
+        },
+        {
+          "day": "2026-09-02",
+          "sessions": 39
+        },
+        {
+          "day": "2026-09-03",
+          "sessions": 99
+        },
+        {
+          "day": "2026-09-04",
+          "sessions": 28
+        },
+        {
+          "day": "2026-09-05",
+          "sessions": 16
+        },
+        {
+          "day": "2026-09-06",
+          "sessions": 41
+        },
+        {
+          "day": "2026-09-07",
+          "sessions": 24
+        },
+        {
+          "day": "2026-09-08",
+          "sessions": 45
+        },
+        {
+          "day": "2026-09-09",
+          "sessions": 24
+        },
+        {
+          "day": "2026-09-10",
+          "sessions": 5
+        }
+      ],
+      "averageDailyLikelyHuman30d": 11.47
+    },
+    "funnel30d": {
+      "recommendationStarted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "recommendationCompleted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "resultViewed": {
+        "events": 4,
+        "sessions": 2
+      },
+      "toolViewed": {
+        "events": 0,
+        "sessions": 0
+      },
+      "outboundClicked": {
+        "events": 252,
+        "sessions": 252
+      },
+      "recommendationCompletionRate": 100
+    },
+    "commercial30d": {
+      "outboundClicks": 252,
+      "sessionsWithOutbound": 252,
+      "monetizedOutbound": 52,
+      "monetizationCoverage": 20.6,
+      "humanSessionToOutboundRate": 73.3
+    },
+    "sources30d": [
+      {
+        "source": "direct",
+        "sessions": 77
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 5
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 4
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+        "sessions": 2
+      },
+      {
+        "source": "ref:producthunt.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:google.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dollarplatoon.com",
+        "sessions": 1
+      }
+    ],
+    "intents30d": [
+      {
+        "intent": "general",
+        "sessions": 249,
+        "recommendationCompletions": 3,
+        "outboundClicks": 248
+      },
+      {
+        "intent": "semrush-vs-ahrefs",
+        "sessions": 2,
+        "recommendationCompletions": 0,
+        "outboundClicks": 2
+      },
+      {
+        "intent": "beehiiv",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "best-ai-assistants",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "unlabelled",
+        "sessions": 94,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "best-free-crm",
+        "sessions": 1,
+        "recommendationCompletions": 1,
+        "outboundClicks": 0
+      }
+    ],
+    "revenue90d": {
+      "ledger": [],
+      "verified": [],
+      "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
+    },
+    "projectionInputs": {
+      "humanSessions30d": 344,
+      "humanDailyAverage30d": 11.47,
+      "recommendationCompletionRate": 0.6,
+      "humanSessionToOutboundRate": 73.3,
+      "monetizationCoverage": 20.6,
+      "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
+    }
   }
 ]
