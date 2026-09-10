@@ -1,13 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { loadSeoIntents } from './seo-intent-loader.mjs';
 
 const ROOT=process.cwd();
 const BASE='https://trytoolscout.org';
 const tools=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tools.json'),'utf8'));
-const intents=JSON.parse(fs.readFileSync(path.join(ROOT,'data','intents.json'),'utf8'));
+const intents=loadSeoIntents(ROOT).filter(intent=>intent?.slug&&fs.existsSync(path.join(ROOT,`${intent.slug}.html`)));
 const PAIRS=JSON.parse(fs.readFileSync(path.join(ROOT,'data','comparisons.json'),'utf8'));
 const bySlug=new Map(tools.map(t=>[t.slug,t]));
-const clean=v=>String(v??'').replace(/[—–]/g,'-').replace(/verify current pricing before publication/gi,'See vendor for current pricing').replace(/verify before publication/gi,'See vendor for current details').replace(/pending verification/gi,'See vendor for current details').replace(/\s+/g,' ').trim();
+const clean=v=>String(v??'').replace(/[\u2014\u2013]/g,'-').replace(/verify current pricing before publication/gi,'See vendor for current pricing').replace(/verify before publication/gi,'See vendor for current details').replace(/pending verification/gi,'See vendor for current details').replace(/\s+/g,' ').trim();
 const esc=v=>clean(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const shared=(a,b)=>[...(a||[])].filter(x=>(b||[]).map(v=>String(v).toLowerCase()).includes(String(x).toLowerCase()));
 const stronger=(a,b,key)=>Number(a.scores?.[key]||0)>Number(b.scores?.[key]||0)?a:Number(b.scores?.[key]||0)>Number(a.scores?.[key]||0)?b:null;
@@ -40,4 +41,4 @@ function render(a,b){
 let created=0,refreshed=0,skipped=[];
 for(const[left,right]of PAIRS){const a=bySlug.get(left),b=bySlug.get(right);if(!a||!b){skipped.push(`${left}-vs-${right}`);continue;}const target=path.join(ROOT,`${left}-vs-${right}.html`),html=render(a,b);if(fs.existsSync(target)){if(fs.readFileSync(target,'utf8')!==html){fs.writeFileSync(target,html);refreshed++;}}else{fs.writeFileSync(target,html);created++;}}
 if(skipped.length)throw new Error(`Comparison pairs reference missing tools: ${skipped.join(', ')}`);
-console.log(JSON.stringify({created,refreshed,comparisons:PAIRS.length,editorialIntegrity:'strict'}));
+console.log(JSON.stringify({created,refreshed,comparisons:PAIRS.length,publishedGuideCandidates:intents.length,editorialIntegrity:'strict'}));
