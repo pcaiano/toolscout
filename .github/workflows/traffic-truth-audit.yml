@@ -1,0 +1,72 @@
+name: Traffic Truth Audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/export-traffic-truth.mjs'
+      - 'scripts/sync-gsc-signals.mjs'
+      - 'private-assets.js'
+      - 'funnel-model.js'
+      - '.github/workflows/traffic-truth-audit.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: traffic-truth-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Refresh site-wide Google Search Console signals
+        continue-on-error: true
+        run: node scripts/sync-gsc-signals.mjs
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+
+      - name: Export traffic truth snapshot
+        run: node scripts/export-traffic-truth.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: '16054933850d8af4ba498b772cbe2de9'
+          CLOUDFLARE_RUM_SITE_TAG: '91d03dda89d74bc5b6685a68bbe8ef42'
+
+      - name: Commit truth snapshot when changed
+        run: |
+          if [ -z "$(git status --porcelain -- data/traffic-truth.json reports/gsc-signals.json)" ]; then
+            echo "No traffic truth changes"
+          else
+            git config user.name "toolscout-analytics-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/traffic-truth.json reports/gsc-signals.json
+            git commit -m "Refresh traffic truth snapshot"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Enforce analytics integrity
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('data/traffic-truth.json','utf8'));
+          console.log(JSON.stringify({status:x.status,reconciliation:x.reconciliation,cloudflareSite:x.cloudflareSite,cloudflareRum:x.cloudflareRum?.status,d1:x.d1?.status,gsc:x.googleSearchConsole?.status},null,2));
+          if(x.status==='degraded') process.exit(1);
+          NODE
