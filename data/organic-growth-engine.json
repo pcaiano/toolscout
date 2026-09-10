@@ -1,13 +1,36 @@
 {
-  "version": 1,
+  "version": 2,
   "principles": {
+    "fullyAutonomous": true,
+    "ownerContentInterventionRequired": false,
     "commercialIntentBeforeGenericTraffic": true,
     "recurringRevenueFavoredInMonetizationReadiness": true,
     "comparisonsAndDecisionPagesHighValue": true,
     "noAffiliatePayoutEditorialBias": true,
     "noThinProgrammaticPages": true,
     "competitorSignalsAreForGapDetectionOnly": true,
-    "copyCompetitorContent": false
+    "copyCompetitorContent": false,
+    "realObservedDataBeforeSearchClaims": true,
+    "impressionsAreVisibilityNotTraffic": true,
+    "strictSemanticEligibility": true,
+    "neverFillRankingsWithWrongCategoryTools": true,
+    "fewerCorrectRecommendationsBeatMoreIncorrectRecommendations": true
+  },
+  "autonomy": {
+    "mode": "closed-loop",
+    "ownerRole": "observability-only",
+    "cycle": ["observe","prioritize","optimize","validate","publish","measure","learn"],
+    "publishOnlyAfterQualityGates": true,
+    "insufficientEvidenceAction": "measure-and-recheck-automatically",
+    "target": "continuously improve qualified rankings and search clicks without claiming control over Google positions"
+  },
+  "editorialGates": {
+    "minimumEligibleToolsPerGuide": 2,
+    "maximumRankedToolsPerGuide": 3,
+    "requireExactIntentCategory": true,
+    "minimumLexicalRelevance": 0.75,
+    "blockCrossCategoryFallback": true,
+    "blockPublicationOnEligibilityFailure": true
   },
   "competitors": [
     {"name":"AlternativeTo","baseUrl":"https://alternativeto.net","sitemapCandidates":["https://alternativeto.net/sitemap.xml","https://alternativeto.net/sitemap_index.xml"]},
