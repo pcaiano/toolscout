@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { eligibleTools as getEligibleTools, editorialEligibility } from './seo-eligibility.mjs';
+import { eligibleTools as getEligibleTools, editorialEligibility, termMatch } from './seo-eligibility.mjs';
 import { loadSeoIntentState } from './seo-intent-loader.mjs';
 
 const ROOT=process.cwd();
@@ -12,6 +12,24 @@ const toolBySlug=new Map(tools.map(tool=>[tool.slug,tool]));
 const holdsPath=path.join(ROOT,'reports','seo-publication-holds.json'),holds=fs.existsSync(holdsPath)?JSON.parse(fs.readFileSync(holdsPath,'utf8')):{items:[]},heldSlugs=new Set((holds.items||[]).map(x=>x.intent));
 const failures=[],seenCanonicals=new Set();
 let published=0,withheld=0;
+
+if(termMatch('email marketing automation','ai'))failures.push('regression: capability token ai must not match inside email');
+if(!termMatch('ai marketing platform','ai'))failures.push('regression: standalone ai capability token must match');
+const aiMarketingIntent=intents.find(x=>x.slug==='best-ai-marketing-tools');
+if(aiMarketingIntent){
+  const syntheticEmailTool={name:'Synthetic Email Tool',category:'marketing',description:'Email marketing automation platform for campaigns and newsletters.',features:['email marketing','automation','campaigns'],bestFor:['marketing teams']};
+  if(editorialEligibility(syntheticEmailTool,aiMarketingIntent,MIN_RELEVANCE).eligible)failures.push('regression: email-only marketing tool must not qualify as an AI marketing tool');
+}
+const coldEmailIntent=intents.find(x=>x.slug==='best-cold-email-tools');
+if(coldEmailIntent){
+  const syntheticCommerceTool={name:'Synthetic Commerce Platform',category:'ecommerce',description:'Online store and checkout platform.',features:['ecommerce','checkout','payments'],bestFor:['online stores']};
+  if(editorialEligibility(syntheticCommerceTool,coldEmailIntent,MIN_RELEVANCE).eligible)failures.push('regression: ecommerce platform must not qualify for cold email');
+}
+const allInOneIntent=intents.find(x=>x.slug==='best-all-in-one-business-tools');
+if(allInOneIntent){
+  const syntheticProjectTool={name:'Synthetic Project Tool',category:'business',description:'Project management and collaboration platform.',features:['projects','tasks','workflows'],bestFor:['teams']};
+  if(editorialEligibility(syntheticProjectTool,allInOneIntent,MIN_RELEVANCE).eligible)failures.push('regression: project-management tool must not qualify as all-in-one business software');
+}
 
 for(const intent of intents){
   if(!intent?.slug)continue;
@@ -52,4 +70,4 @@ for(const [source,target] of Object.entries(consolidations)){
   if(fs.existsSync(path.join(ROOT,`${source}.html`)))failures.push(`${source}.html: consolidated page must not remain published`);
 }
 if(failures.length){console.error(failures.join('\n'));process.exit(1);}
-console.log(`SEO validation passed: ${published} published guides and ${withheld} deliberately withheld intents checked against shared category, capability, attribute and semantic gates.`);
+console.log(`SEO validation passed: ${published} published guides and ${withheld} deliberately withheld intents checked against shared category, capability, attribute and semantic gates plus permanent regression tests.`);
