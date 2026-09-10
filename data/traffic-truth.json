@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-09-10T21:31:53.215Z",
+  "timezone": "Europe/Lisbon",
+  "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
+  "primaryMetric": "D1 browser-confirmed public sessions",
+  "rules": [
+    "A server HTML request alone does not count as human traffic.",
+    "A direct /go/ redirect cannot create a human session.",
+    "A browser must confirm a public page entry before its session or outbound activity enters headline human KPIs.",
+    "Cloudflare RUM is an independent browser-side audit, not a replacement for first-party funnel attribution.",
+    "Google Search Console is the source of truth for Google Search clicks and impressions."
+  ],
+  "windowsUtc": {
+    "now": "2026-09-10T21:31:53.215Z",
+    "last24": "2026-09-09T21:31:53.215Z",
+    "today": "2026-09-09T23:00:00.000Z",
+    "month": "2026-08-31T23:00:00.000Z"
+  },
+  "cloudflareSite": {
+    "status": "unavailable",
+    "reason": "Cloudflare API 403: {\"success\":false,\"errors\":[{\"code\":10000,\"message\":\"Authentication error\",\"documentation_url\":\"https://developers.cloudflare.com/api/resources/rum/subresources/site_info/methods/list\"}],\"messages\":[],\"result\":null}\n",
+    "eeaCoverage": "unknown"
+  },
+  "cloudflareRum": {
+    "status": "observed",
+    "excludeBots": true,
+    "dataset": "rumPageloadEventsAdaptiveGroups",
+    "last24": {
+      "pageViews": 8,
+      "visits": 0,
+      "sampleInterval": 2
+    },
+    "today": {
+      "pageViews": 8,
+      "visits": 0,
+      "sampleInterval": 2
+    },
+    "monthToDate": {
+      "pageViews": 816.6666666666666,
+      "visits": 70,
+      "sampleInterval": 11.666666666666666
+    },
+    "topPaths": [
+      {
+        "path": "/",
+        "pageViews": 300,
+        "visits": 30,
+        "sampleInterval": 10
+      },
+      {
+        "path": "/affiliate-disclosure",
+        "pageViews": 400,
+        "visits": 20,
+        "sampleInterval": 20
+      },
+      {
+        "path": "/methodology",
+        "pageViews": 100,
+        "visits": 10,
+        "sampleInterval": 10
+      },
+      {
+        "path": "/asana-vs-clickup",
+        "pageViews": 100,
+        "visits": 10,
+        "sampleInterval": 10
+      }
+    ],
+    "topReferers": [
+      {
+        "referer": "direct",
+        "pageViews": 816.6666666666666,
+        "visits": 70,
+        "sampleInterval": 11.666666666666666
+      }
+    ]
+  },
+  "d1": {
+    "status": "observed",
+    "metric": "browser-confirmed sessions",
+    "last24": 0,
+    "today": 0,
+    "monthToDate": 0,
+    "serverObservedEntries24h": 4,
+    "serverOnlyUnconfirmed24h": 4
+  },
+  "googleSearchConsole": {
+    "status": "observed",
+    "generatedAt": "2026-09-10T08:23:23.462Z",
+    "startDate": "2026-08-12",
+    "endDate": "2026-09-08",
+    "dataState": "legacy-partial",
+    "clicks": 0,
+    "impressions": 792,
+    "pageCount": 25,
+    "coverage": "guide-pages-only"
+  },
+  "reconciliation": {
+    "status": "low-volume-learning",
+    "primary": "d1-browser-confirmed",
+    "audit": "cloudflare-rum",
+    "d1Confirmed24h": 0,
+    "rumVisits24h": 0,
+    "delta": 0,
+    "note": "Volume is too low for a useful percentage divergence alarm."
+  },
+  "status": "observed"
+}
