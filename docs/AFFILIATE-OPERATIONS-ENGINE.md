@@ -1,5 +1,7 @@
 # Affiliate Operations Engine
 
+The owner-facing UI is the Growth Command Center (`/analytics.html`). The former Affiliate Operations page is retired and redirects there; `/affiliate-workflow/api` and its mutation/reconciliation routes remain active.
+
 ## Scope and invariants
 
 `data/tools.json` is the closed 100-tool universe. Affiliate operations never add catalog tools and never feed commission, approval probability, network access, or operational priority into recommendation ranking.

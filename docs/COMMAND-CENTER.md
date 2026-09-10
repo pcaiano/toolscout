@@ -137,7 +137,9 @@ Revenue Gap score is `10 × unmonetized outbound + 2 × human sessions (capped a
 
 Canonical operational affiliate state is stored in `data/affiliate-pipeline.json` and active redirect configuration in `data/affiliate.json`.
 
-The private Affiliate Workflow is now the catalog-first Affiliate Operations Engine. It resolves all 100 catalog tools to one normalized state and one next action, keeps affiliate opportunity scoring separate from editorial ranking, exposes Human Actions Required first, and reports raw and traffic-weighted monetization coverage. D1 migration `0013_affiliate_operations_engine.sql` adds normalized operational metadata, append-only state history/evidence, and the Direct/Dub/Impact/PartnerStack registry.
+The Growth Command Center at `/analytics.html` is the sole owner-facing affiliate operations surface. The redundant Affiliate Operations page was retired on 2026-09-10; `/affiliate-workflow`, `/affiliate-workflow/` and `/affiliate-workflow.html` redirect to the Command Center. The existing affiliate workflow APIs, engine, D1 records and append-only history remain active.
+
+GitHub was classified as `no_program_found` on 2026-09-10 and removed from the Chairman Queue. The official partners page does not establish a public affiliate program suitable for ToolScout; no application was submitted. The source and rationale are stored in D1 history and `data/affiliate-pipeline.json`. Reassess only with new official evidence.
 
 PartnerStack Marketplace remains blocked until ToolScout earns its first commission in an existing partnership. Pipedrive is the primary operational unlock target. Dub Marketplace access is available, but advertiser approval remains program-specific. Buffer's earlier process must not be duplicated; Framer remains creator-gated. Impact decisions are advertiser-specific.
 
