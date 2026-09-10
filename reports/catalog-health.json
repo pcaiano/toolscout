@@ -1,16 +1,16 @@
 {
   "summary": {
     "tools": 101,
-    "generatedAt": "2026-09-10T08:49:01.470Z",
+    "generatedAt": "2026-09-10T09:42:55.174Z",
     "cadence": {
       "linkHealth": "daily",
       "metadataFreshness": "daily age check; weekly review threshold at 7 days",
       "deepReview": "monthly threshold at 30 days"
     },
     "sourceLinks": {
-      "healthy": 93,
+      "healthy": 94,
       "confirmedBroken": 0,
-      "warnings": 8
+      "warnings": 7
     },
     "affiliateLinks": {
       "active": 13,
@@ -1086,7 +1086,7 @@
         "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.shopify.com/free-trial?irclickid=yvFVXsWbYxyZU5bWAA2T3TIRUkr2p7S4gwzXT00&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=02OV5dWb4xyZW9YU-z2MXV6FUkr2uUWxWXPi0g0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
         "error": null
       }
     },
@@ -1436,8 +1436,8 @@
       "missingCritical": [],
       "source": {
         "url": "https://chatgpt.com/",
-        "status": "blocked_or_limited",
-        "httpStatus": 403,
+        "status": "ok",
+        "httpStatus": 200,
         "finalUrl": "https://chatgpt.com/",
         "error": null
       },
@@ -1480,7 +1480,7 @@
         "url": "https://notebooklm.google.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S-201138131:1789030144043581",
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S1762587730:1789033377023877",
         "error": null
       },
       "affiliate": {
