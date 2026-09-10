@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T21:31:53.215Z",
+  "generatedAt": "2026-09-10T21:33:56.217Z",
   "timezone": "Europe/Lisbon",
   "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
   "primaryMetric": "D1 browser-confirmed public sessions",
@@ -8,11 +8,12 @@
     "A direct /go/ redirect cannot create a human session.",
     "A browser must confirm a public page entry before its session or outbound activity enters headline human KPIs.",
     "Cloudflare RUM is an independent browser-side audit, not a replacement for first-party funnel attribution.",
+    "Cloudflare RUM pageViews use the dataset count field directly; sampleInterval is retained only as a diagnostic.",
     "Google Search Console is the source of truth for Google Search clicks and impressions."
   ],
   "windowsUtc": {
-    "now": "2026-09-10T21:31:53.215Z",
-    "last24": "2026-09-09T21:31:53.215Z",
+    "now": "2026-09-10T21:33:56.217Z",
+    "last24": "2026-09-09T21:33:56.217Z",
     "today": "2026-09-09T23:00:00.000Z",
     "month": "2026-08-31T23:00:00.000Z"
   },
@@ -26,42 +27,42 @@
     "excludeBots": true,
     "dataset": "rumPageloadEventsAdaptiveGroups",
     "last24": {
-      "pageViews": 8,
+      "pageViews": 4,
       "visits": 0,
       "sampleInterval": 2
     },
     "today": {
-      "pageViews": 8,
+      "pageViews": 4,
       "visits": 0,
       "sampleInterval": 2
     },
     "monthToDate": {
-      "pageViews": 816.6666666666666,
+      "pageViews": 70,
       "visits": 70,
       "sampleInterval": 11.666666666666666
     },
     "topPaths": [
       {
         "path": "/",
-        "pageViews": 300,
+        "pageViews": 30,
         "visits": 30,
         "sampleInterval": 10
       },
       {
         "path": "/affiliate-disclosure",
-        "pageViews": 400,
+        "pageViews": 20,
         "visits": 20,
         "sampleInterval": 20
       },
       {
         "path": "/methodology",
-        "pageViews": 100,
+        "pageViews": 10,
         "visits": 10,
         "sampleInterval": 10
       },
       {
         "path": "/asana-vs-clickup",
-        "pageViews": 100,
+        "pageViews": 10,
         "visits": 10,
         "sampleInterval": 10
       }
@@ -69,7 +70,7 @@
     "topReferers": [
       {
         "referer": "direct",
-        "pageViews": 816.6666666666666,
+        "pageViews": 70,
         "visits": 70,
         "sampleInterval": 11.666666666666666
       }
@@ -85,7 +86,7 @@
     "serverOnlyUnconfirmed24h": 4
   },
   "googleSearchConsole": {
-    "status": "observed",
+    "status": "partial",
     "generatedAt": "2026-09-10T08:23:23.462Z",
     "startDate": "2026-08-12",
     "endDate": "2026-09-08",
@@ -101,6 +102,8 @@
     "audit": "cloudflare-rum",
     "d1Confirmed24h": 0,
     "rumVisits24h": 0,
+    "rumPageViews24h": 4,
+    "serverObservedEntries24h": 4,
     "delta": 0,
     "note": "Volume is too low for a useful percentage divergence alarm."
   },
