@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T18:19:05.689Z",
+  "generatedAt": "2026-09-10T20:04:47.065Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
@@ -12,8 +12,8 @@
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 537,
-      "likelyHuman": 202,
+      "total": 523,
+      "likelyHuman": 188,
       "bots": 181,
       "owner": 16,
       "synthetic": 0,
@@ -173,6 +173,94 @@
       "outboundClicks": 0
     }
   ],
+  "forensic": {
+    "sessionStartsToday": [
+      {
+        "source": "direct",
+        "referrerHost": "none",
+        "sessions": 2
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "referrerHost": "app.partnerstack.com",
+        "sessions": 1
+      },
+      {
+        "source": "utm_source=peerlist",
+        "referrerHost": "peerlist.io",
+        "sessions": 1
+      }
+    ],
+    "allHumanEventsToday": [
+      {
+        "eventType": "session_started",
+        "source": "direct",
+        "referrerHost": "none",
+        "path": "/",
+        "sessions": 2,
+        "events": 2
+      },
+      {
+        "eventType": "outbound_clicked",
+        "source": "public-redirect",
+        "referrerHost": "none",
+        "path": "/go/close",
+        "sessions": 1,
+        "events": 1
+      },
+      {
+        "eventType": "outbound_clicked",
+        "source": "seo-page",
+        "referrerHost": "trytoolscout.org",
+        "path": "/go/gemini",
+        "sessions": 1,
+        "events": 1
+      },
+      {
+        "eventType": "session_started",
+        "source": "ref:app.partnerstack.com",
+        "referrerHost": "app.partnerstack.com",
+        "path": "/",
+        "sessions": 1,
+        "events": 1
+      },
+      {
+        "eventType": "session_started",
+        "source": "utm_source=peerlist",
+        "referrerHost": "peerlist.io",
+        "path": "/",
+        "sessions": 1,
+        "events": 1
+      }
+    ],
+    "seoPageOutboundToday": [
+      {
+        "intent": "best-ai-assistants",
+        "sessions": 1,
+        "clicks": 1
+      }
+    ],
+    "humanSessionsWithoutStartToday": 1,
+    "humanSessionsWithoutStart30d": 250,
+    "sessionSourceToday": [
+      {
+        "source": "direct",
+        "sessions": 2
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 1
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 1
+      },
+      {
+        "source": "public-redirect",
+        "sessions": 1
+      }
+    ]
+  },
   "revenue90d": {
     "ledger": [],
     "verified": [],
