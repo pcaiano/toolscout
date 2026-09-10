@@ -92,11 +92,10 @@ function rumFilter(from, to) {
 function rumSummary(groups) {
   const row = Array.isArray(groups) && groups.length ? groups[0] : null;
   if (!row) return { pageViews: 0, visits: 0, sampleInterval: 1 };
-  const sampleInterval = Number(row.avg?.sampleInterval || 1);
   return {
-    pageViews: Number(row.count || 0) * sampleInterval,
+    pageViews: Number(row.count || 0),
     visits: Number(row.sum?.visits || 0),
-    sampleInterval
+    sampleInterval: Number(row.avg?.sampleInterval || 1)
   };
 }
 
@@ -116,7 +115,6 @@ async function rumSnapshot() {
     const json = await cloudflareRequest('https://api.cloudflare.com/client/v4/graphql', { method: 'POST', body: JSON.stringify({ query }) });
     const account = json?.data?.viewer?.accounts?.[0];
     if (!account) throw new Error('Cloudflare RUM account result is empty.');
-    const scale = row => Number(row?.count || 0) * Number(row?.avg?.sampleInterval || 1);
     return {
       status: 'observed',
       excludeBots: true,
@@ -124,8 +122,8 @@ async function rumSnapshot() {
       last24: rumSummary(account.last24),
       today: rumSummary(account.today),
       monthToDate: rumSummary(account.mtd),
-      topPaths: (account.topPaths || []).map(row => ({ path: row.dimensions?.requestPath || '/', pageViews: scale(row), visits: Number(row.sum?.visits || 0), sampleInterval: Number(row.avg?.sampleInterval || 1) })),
-      topReferers: (account.topReferers || []).map(row => ({ referer: row.dimensions?.refererHost || 'direct', pageViews: scale(row), visits: Number(row.sum?.visits || 0), sampleInterval: Number(row.avg?.sampleInterval || 1) }))
+      topPaths: (account.topPaths || []).map(row => ({ path: row.dimensions?.requestPath || '/', pageViews: Number(row.count || 0), visits: Number(row.sum?.visits || 0), sampleInterval: Number(row.avg?.sampleInterval || 1) })),
+      topReferers: (account.topReferers || []).map(row => ({ referer: row.dimensions?.refererHost || 'direct', pageViews: Number(row.count || 0), visits: Number(row.sum?.visits || 0), sampleInterval: Number(row.avg?.sampleInterval || 1) }))
     };
   } catch (error) {
     return { status: 'unavailable', reason: String(error?.message || error) };
@@ -187,7 +185,7 @@ function gscSnapshot() {
       impressions: (data.items || []).reduce((n, x) => n + Number(x.impressions || 0), 0)
     };
     return {
-      status: 'observed',
+      status: data.siteTotals ? 'observed' : 'partial',
       generatedAt: data.generatedAt || null,
       startDate: data.startDate || null,
       endDate: data.endDate || null,
@@ -211,10 +209,10 @@ function reconciliationStatus() {
   if (rum.status !== 'observed') return { status: 'degraded', reason: 'Cloudflare RUM audit is unavailable.', primary: 'd1-browser-confirmed' };
   const a = Number(d1.last24 || 0), b = Number(rum.last24?.visits || 0);
   const max = Math.max(a, b), delta = a - b, absoluteDelta = Math.abs(delta);
-  if (max < 10) return { status: 'low-volume-learning', primary: 'd1-browser-confirmed', audit: 'cloudflare-rum', d1Confirmed24h: a, rumVisits24h: b, delta, note: 'Volume is too low for a useful percentage divergence alarm.' };
+  if (max < 10) return { status: 'low-volume-learning', primary: 'd1-browser-confirmed', audit: 'cloudflare-rum', d1Confirmed24h: a, rumVisits24h: b, rumPageViews24h: Number(rum.last24?.pageViews || 0), serverObservedEntries24h: Number(d1.serverObservedEntries24h || 0), delta, note: 'Volume is too low for a useful percentage divergence alarm.' };
   const relativeDelta = max ? absoluteDelta / max : 0;
-  if (absoluteDelta >= 4 && relativeDelta >= 0.5) return { status: 'degraded', primary: 'd1-browser-confirmed', audit: 'cloudflare-rum', d1Confirmed24h: a, rumVisits24h: b, delta, relativeDelta: Number((relativeDelta * 100).toFixed(1)), reason: 'Independent browser traffic sources diverge materially.' };
-  return { status: 'healthy', primary: 'd1-browser-confirmed', audit: 'cloudflare-rum', d1Confirmed24h: a, rumVisits24h: b, delta, relativeDelta: Number((relativeDelta * 100).toFixed(1)) };
+  if (absoluteDelta >= 4 && relativeDelta >= 0.5) return { status: 'degraded', primary: 'd1-browser-confirmed', audit: 'cloudflare-rum', d1Confirmed24h: a, rumVisits24h: b, rumPageViews24h: Number(rum.last24?.pageViews || 0), serverObservedEntries24h: Number(d1.serverObservedEntries24h || 0), delta, relativeDelta: Number((relativeDelta * 100).toFixed(1)), reason: 'Independent browser traffic sources diverge materially.' };
+  return { status: 'healthy', primary: 'd1-browser-confirmed', audit: 'cloudflare-rum', d1Confirmed24h: a, rumVisits24h: b, rumPageViews24h: Number(rum.last24?.pageViews || 0), serverObservedEntries24h: Number(d1.serverObservedEntries24h || 0), delta, relativeDelta: Number((relativeDelta * 100).toFixed(1)) };
 }
 
 const reconciliation = reconciliationStatus();
@@ -229,6 +227,7 @@ const report = {
     'A direct /go/ redirect cannot create a human session.',
     'A browser must confirm a public page entry before its session or outbound activity enters headline human KPIs.',
     'Cloudflare RUM is an independent browser-side audit, not a replacement for first-party funnel attribution.',
+    'Cloudflare RUM pageViews use the dataset count field directly; sampleInterval is retained only as a diagnostic.',
     'Google Search Console is the source of truth for Google Search clicks and impressions.'
   ],
   windowsUtc: bounds,
