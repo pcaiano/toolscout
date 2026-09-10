@@ -77,6 +77,8 @@ jobs:
         run: node scripts/build-distribution-queue.mjs
       - name: Generate sitemap
         run: node scripts/generate-sitemap.mjs
+      - name: Audit controlled SEO surface
+        run: node scripts/audit-controlled-seo-surface.mjs
       - name: Validate AEO GEO readiness
         run: node scripts/validate-aeo-geo-readiness.mjs
       - name: Validate machine readability
