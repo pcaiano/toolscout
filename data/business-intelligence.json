@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-09-09T23:09:39.162Z",
+  "generatedAt": "2026-09-10T04:26:21.252Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 0,
+      "total": 1,
       "likelyHuman": 0,
-      "bots": 0,
+      "bots": 1,
       "owner": 0,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 600,
-      "likelyHuman": 277,
-      "bots": 163,
-      "owner": 22,
+      "total": 597,
+      "likelyHuman": 276,
+      "bots": 164,
+      "owner": 19,
       "synthetic": 0,
       "unknownLegacy": 138
     },
     "d30": {
-      "total": 1683,
+      "total": 1684,
       "likelyHuman": 339,
-      "bots": 252,
+      "bots": 253,
       "owner": 41,
       "synthetic": 0,
       "unknownLegacy": 1051
