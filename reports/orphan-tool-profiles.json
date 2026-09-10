@@ -1,11 +1,6 @@
 {
-  "generatedAt": "2026-09-10T22:25:30.253Z",
+  "generatedAt": "2026-09-10T22:30:46.901Z",
   "catalogTools": 101,
-  "removedCount": 4,
-  "removed": [
-    "frase",
-    "hostinger",
-    "thinkific",
-    "unbounce"
-  ]
+  "removedCount": 0,
+  "removed": []
 }
