@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:30:45.709Z",
+  "generatedAt": "2026-09-10T22:31:26.054Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -58,7 +58,7 @@
         "topTools": [
           "integrately",
           "n8n",
-          "zapier"
+          "make"
         ]
       },
       {
@@ -119,7 +119,7 @@
       },
       {
         "intent": "best-free-crm",
-        "priorityScore": 44,
+        "priorityScore": 40,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",

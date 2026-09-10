@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:30:45.599Z",
+  "generatedAt": "2026-09-10T22:31:25.913Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires exact category, capability fit where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -107,12 +107,12 @@
       "title": "Best No-Code Automation Tools",
       "category": "automation",
       "priorityScore": 47,
-      "topFit": 9.42,
-      "eligibleToolCount": 6,
+      "topFit": 9.29,
+      "eligibleToolCount": 3,
       "minimumEligibleTools": 2,
-      "catalogDepth": 12,
+      "catalogDepth": 6,
       "commercialSignal": 20,
-      "affiliateSignal": 0,
+      "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
         "impressions": 204,
@@ -126,16 +126,16 @@
         "evidenceConfidence": "meaningful"
       },
       "signalBasis": "observed-gsc-meaningful",
-      "monetizationReadiness": "needs-affiliate-activation",
+      "monetizationReadiness": "monetizable",
       "topTools": [
         "integrately",
         "n8n",
-        "zapier"
+        "make"
       ],
       "requiredCapabilities": [
-        "no code automation",
-        "workflow automation",
-        "automation",
+        "no code",
+        "no-code",
+        "visual automation",
         "workflow builder"
       ],
       "editorialEligibility": "eligible",
@@ -212,48 +212,14 @@
       "action": "repair-existing"
     },
     {
-      "intent": "best-free-crm",
-      "title": "Best Free CRM Tools",
-      "category": "crm",
-      "priorityScore": 44,
-      "topFit": 8.81,
-      "eligibleToolCount": 9,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 18,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 33,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 71.9697,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 16,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "signalBasis": "observed-gsc-meaningful",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "attio",
-        "hubspot",
-        "freshsales"
-      ],
-      "requiredCapabilities": [],
-      "editorialEligibility": "eligible",
-      "action": "repair-existing"
-    },
-    {
       "intent": "best-free-project-management-tools",
       "title": "Best Free Project Management Tools",
       "category": "business",
       "priorityScore": 42,
       "topFit": 9.13,
-      "eligibleToolCount": 5,
+      "eligibleToolCount": 4,
       "minimumEligibleTools": 2,
-      "catalogDepth": 10,
+      "catalogDepth": 8,
       "commercialSignal": 20,
       "affiliateSignal": 0,
       "searchSignal": {
@@ -281,6 +247,40 @@
         "task management",
         "projects"
       ],
+      "editorialEligibility": "eligible",
+      "action": "repair-existing"
+    },
+    {
+      "intent": "best-free-crm",
+      "title": "Best Free CRM Tools",
+      "category": "crm",
+      "priorityScore": 40,
+      "topFit": 8.81,
+      "eligibleToolCount": 4,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 8,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 33,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 71.9697,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 16,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "signalBasis": "observed-gsc-meaningful",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "attio",
+        "hubspot",
+        "freshsales"
+      ],
+      "requiredCapabilities": [],
       "editorialEligibility": "eligible",
       "action": "repair-existing"
     },
@@ -725,7 +725,10 @@
         "research",
         "web research",
         "source synthesis",
-        "grounded answers"
+        "grounded answers",
+        "ai",
+        "artificial intelligence",
+        "llm"
       ],
       "editorialEligibility": "eligible",
       "action": "protect-and-measure"
@@ -749,7 +752,11 @@
         "systeme-io",
         "omnisend"
       ],
-      "requiredCapabilities": [],
+      "requiredCapabilities": [
+        "ai",
+        "artificial intelligence",
+        "machine learning"
+      ],
       "editorialEligibility": "eligible",
       "action": "invest-now"
     },
@@ -846,7 +853,11 @@
         "monday-crm",
         "hubspot"
       ],
-      "requiredCapabilities": [],
+      "requiredCapabilities": [
+        "automation",
+        "workflow automation",
+        "sales automation"
+      ],
       "editorialEligibility": "eligible",
       "action": "build-next"
     },
@@ -946,7 +957,10 @@
         "ad creative",
         "advertising creative",
         "creative generation",
-        "ad generation"
+        "ad generation",
+        "ai",
+        "artificial intelligence",
+        "generative ai"
       ],
       "editorialEligibility": "blocked-insufficient-semantic-coverage",
       "action": "catalog-gap"
@@ -1301,7 +1315,9 @@
         "code editor",
         "code assistant",
         "developer ai",
-        "coding agent"
+        "coding agent",
+        "ai",
+        "artificial intelligence"
       ],
       "editorialEligibility": "eligible",
       "action": "watch"

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:30:45.654Z",
+  "generatedAt": "2026-09-10T22:31:25.985Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
@@ -167,7 +167,7 @@
         "useful-decision-context",
         "public-surface-validation"
       ],
-      "monetizationReadiness": "needs-affiliate-activation",
+      "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
         "impressions": 204,
@@ -183,7 +183,7 @@
       "topTools": [
         "integrately",
         "n8n",
-        "zapier"
+        "make"
       ]
     },
     {
@@ -285,55 +285,6 @@
       ]
     },
     {
-      "intent": "best-free-crm",
-      "priorityScore": 44,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 33,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 71.9697,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 16,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "topTools": [
-        "attio",
-        "hubspot",
-        "freshsales"
-      ]
-    },
-    {
       "intent": "best-free-project-management-tools",
       "priorityScore": 42,
       "lane": "seo-authority-depth",
@@ -380,6 +331,55 @@
         "trello",
         "clickup",
         "asana"
+      ]
+    },
+    {
+      "intent": "best-free-crm",
+      "priorityScore": 40,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 33,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 71.9697,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 16,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "topTools": [
+        "attio",
+        "hubspot",
+        "freshsales"
       ]
     },
     {
@@ -2929,8 +2929,8 @@
       ]
     },
     {
-      "intent": "best-free-crm",
-      "priorityScore": 44,
+      "intent": "best-free-project-management-tools",
+      "priorityScore": 42,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
@@ -2956,8 +2956,8 @@
       ]
     },
     {
-      "intent": "best-free-project-management-tools",
-      "priorityScore": 42,
+      "intent": "best-free-crm",
+      "priorityScore": 40,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
