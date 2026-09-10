@@ -10,6 +10,15 @@ const APPLY_WORDS=/(apply|join|sign\s*up|register|become\s+(?:an?\s+)?(?:affilia
 const HUMAN_BLOCKERS=/(captcha|recaptcha|hcaptcha|sign\s*in|log\s*in|create\s+(?:an?\s+)?account|identity|tax\s+(?:id|information)|payment\s+details)/i;
 const PAUSED_WORDS=/(not accepting|closed to new|applications? (?:are )?closed|program(?:me)? (?:is )?paused)/i;
 const NETWORKS=[['PartnerStack',/partnerstack/i],['Impact',/(impact\.com|impact radius)/i],['Dub',/(dub\.co|powered by dub)/i],['Awin',/awin/i],['CJ',/(commission junction|cj\.com)/i],['Rewardful',/rewardful/i],['FirstPromoter',/firstpromoter/i]];
+const PROGRAM_WATCHLIST=Object.freeze({
+  klaviyo:{
+    origin:'https://www.klaviyo.com/',
+    paths:['/affiliate','/affiliates','/affiliate-program','/referral-program'],
+    audience:/(publisher|creator|blogger|influencer|affiliate)/i,
+    reason:'Klaviyo K:Partners is for agency/solution and technology partners. Monitor for the separate public publisher affiliate programme.'
+  }
+});
+const PROTECTED_WATCHLIST_STATES=new Set(['submitted','pending_review','approved_needs_link','link_acquired','active','verified','earning','rejected']);
 
 function publicHttpUrl(value){try{const u=new URL(value);if(!['https:','http:'].includes(u.protocol))return null;const h=u.hostname.toLowerCase();if(h==='localhost'||h.endsWith('.localhost')||h.endsWith('.local')||h==='0.0.0.0'||h==='127.0.0.1'||h==='::1'||/^10\./.test(h)||/^192\.168\./.test(h)||/^169\.254\./.test(h)||/^172\.(1[6-9]|2\d|3[01])\./.test(h))return null;return u}catch{return null}}
 function sameSite(a,b){const x=String(a).replace(/^www\./,'').split('.'),y=String(b).replace(/^www\./,'').split('.');return x.slice(-2).join('.')===y.slice(-2).join('.')}
@@ -36,6 +45,31 @@ async function discoverOfficialProgram(tool){
   return null;
 }
 
+async function discoverWatchlistProgram(config){
+  const home=publicHttpUrl(config.origin);if(!home)return null;
+  for(const path of config.paths){
+    let candidate;try{candidate=new URL(path,home.origin).href}catch{continue}
+    const page=await boundedFetch(candidate);if(!page)continue;
+    const evidence=`${page.url} ${page.text}`;
+    if(!/affiliate/i.test(evidence)||!config.audience.test(page.text)||!APPLY_WORDS.test(page.text))continue;
+    const paused=PAUSED_WORDS.test(page.text),human=HUMAN_BLOCKERS.test(page.text);
+    if(paused)return null;
+    return {official_program_url:page.url,application_url:page.url,network:inferNetwork(evidence),status:human?'human_action_required':'ready_to_apply',automation_mode:'human',confidence:95,blocker:human?'Authentication, CAPTCHA or owner information appears required':null,evidence:[{type:'official_affiliate_watchlist',url:page.url,checked_at:new Date().toISOString()}]};
+  }
+  return null;
+}
+
+async function persistWatchlist(env,slug,config,result=null){
+  if(result){
+    await env.DB.prepare(`INSERT INTO affiliate_program_discovery(tool_slug,status,official_program_url,application_url,network,evidence_json,automation_mode,confidence,blocker,last_checked,updated_at) VALUES(?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status=excluded.status,official_program_url=excluded.official_program_url,application_url=excluded.application_url,network=excluded.network,evidence_json=excluded.evidence_json,automation_mode=excluded.automation_mode,confidence=excluded.confidence,blocker=excluded.blocker,last_checked=datetime('now'),updated_at=datetime('now')`).bind(slug,result.status,result.official_program_url,result.application_url,result.network,JSON.stringify(result.evidence||[]),result.automation_mode,result.confidence,result.blocker).run();
+    await env.DB.prepare(`INSERT INTO affiliate_workflow(tool_slug,status,network,program_url,application_url,blocker,evidence_json,source_actor,last_verified,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status=excluded.status,network=COALESCE(excluded.network,affiliate_workflow.network),program_url=excluded.program_url,application_url=excluded.application_url,blocker=excluded.blocker,evidence_json=excluded.evidence_json,source_actor=excluded.source_actor,last_verified=datetime('now'),updated_at=datetime('now')`).bind(slug,result.status,result.network,result.official_program_url,result.application_url,result.blocker,JSON.stringify(result.evidence||[]),'affiliate_watchlist').run();
+    return;
+  }
+  const evidence=JSON.stringify([{type:'watchlist_policy',reason:config.reason,checked_at:new Date().toISOString()}]);
+  await env.DB.prepare(`INSERT INTO affiliate_program_discovery(tool_slug,status,evidence_json,automation_mode,confidence,blocker,last_checked,updated_at) VALUES(?,'watchlist',?,'monitor',100,?,datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status='watchlist',official_program_url=NULL,application_url=NULL,evidence_json=excluded.evidence_json,automation_mode='monitor',confidence=100,blocker=excluded.blocker,last_checked=datetime('now'),updated_at=datetime('now')`).bind(slug,evidence,config.reason).run();
+  await env.DB.prepare(`INSERT INTO affiliate_workflow(tool_slug,status,network,program_url,application_url,blocker,evidence_json,source_actor,last_verified,updated_at) VALUES(?,'watchlist','Direct',NULL,NULL,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status='watchlist',program_url=NULL,application_url=NULL,blocker=excluded.blocker,evidence_json=excluded.evidence_json,source_actor=excluded.source_actor,last_verified=datetime('now'),updated_at=datetime('now')`).bind(slug,config.reason,evidence,'affiliate_watchlist').run();
+}
+
 async function persistDiscovery(env,slug,result){
   await env.DB.prepare(`INSERT INTO affiliate_program_discovery(tool_slug,status,official_program_url,application_url,network,evidence_json,automation_mode,confidence,blocker,last_checked,updated_at) VALUES(?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status=excluded.status,official_program_url=excluded.official_program_url,application_url=excluded.application_url,network=excluded.network,evidence_json=excluded.evidence_json,automation_mode=excluded.automation_mode,confidence=excluded.confidence,blocker=excluded.blocker,last_checked=datetime('now'),updated_at=datetime('now')`).bind(slug,result.status,result.official_program_url,result.application_url,result.network,JSON.stringify(result.evidence||[]),result.automation_mode,result.confidence,result.blocker).run();
   const existing=await env.DB.prepare('SELECT status FROM affiliate_workflow WHERE tool_slug=?').bind(slug).first(),current=normalizeAffiliateState(existing?.status);
@@ -47,11 +81,23 @@ export async function runAffiliateCoverageCycle(env){
     loadTools(env),safeAll(env,'SELECT * FROM affiliate_workflow'),safeAll(env,"SELECT c.tool_slug,c.affiliate_active_at_click,c.source,COALESCE(s.classification,'unknown/legacy') classification,COUNT(*) clicks FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') GROUP BY c.tool_slug,c.affiliate_active_at_click,c.source,classification"),safeAll(env,'SELECT tool_slug,last_checked,status FROM affiliate_program_discovery')
   ]);
   const states=new Map((workflow.results||[]).map(r=>[r.tool_slug,r])),checked=new Map((discoveries.results||[]).map(r=>[r.tool_slug,r]));
+  let watchlist_checked=0,watchlist_promoted=0;
+  for(const [slug,config] of Object.entries(PROGRAM_WATCHLIST)){
+    const current=normalizeAffiliateState(states.get(slug)?.status);
+    if(PROTECTED_WATCHLIST_STATES.has(current))continue;
+    const prior=checked.get(slug);
+    if(prior&&recentlyChecked(prior.last_checked)&&current==='watchlist')continue;
+    watchlist_checked++;
+    const result=await discoverWatchlistProgram(config);
+    if(result){watchlist_promoted++;await persistWatchlist(env,slug,config,result);states.set(slug,{...(states.get(slug)||{}),status:result.status,network:result.network,program_url:result.official_program_url,application_url:result.application_url,blocker:result.blocker});}
+    else{await persistWatchlist(env,slug,config);states.set(slug,{...(states.get(slug)||{}),status:'watchlist',network:'Direct',program_url:null,application_url:null,blocker:config.reason});}
+  }
   const records=tools.map(t=>{const s=states.get(t.slug)||{};return {...t,status:normalizeAffiliateState(s.status),network:s.network||null,blocker:s.blocker||null,submitted_at:s.submitted_at||null}}),snapshot=coverageEngineSnapshot(records,clicks.results||[]);
   await env.DB.prepare('INSERT INTO affiliate_coverage_runs(human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size) VALUES(?,?,?,?,?)').bind(snapshot.human_outbound_clicks,snapshot.monetized_human_outbound_clicks,snapshot.unmonetized_human_outbound_clicks,snapshot.weighted_coverage,snapshot.recoverable_queue.length).run();
   let researched=0,found=0,human=0,cooldown_skipped=0;
   for(const queued of snapshot.recoverable_queue){
     if(researched>=MAX_TOOLS_PER_CYCLE)break;
+    if(PROGRAM_WATCHLIST[queued.slug])continue;
     const prior=checked.get(queued.slug);if(prior&&recentlyChecked(prior.last_checked)){cooldown_skipped++;continue}
     const tool=tools.find(t=>t.slug===queued.slug);if(!tool||!tool.sourceUrl)continue;
     const boundary=automationBoundary(queued);if(boundary.mode!=='research')continue;
@@ -60,5 +106,5 @@ export async function runAffiliateCoverageCycle(env){
     if(!result){await env.DB.prepare(`INSERT INTO affiliate_program_discovery(tool_slug,status,evidence_json,automation_mode,confidence,last_checked,updated_at) VALUES(?,'research_required','[]','research',0,datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status='research_required',last_checked=datetime('now'),updated_at=datetime('now')`).bind(tool.slug).run();continue}
     found++;if(result.automation_mode==='human')human++;await persistDiscovery(env,tool.slug,result);
   }
-  return {ok:true,coverage:{human_outbound:snapshot.human_outbound_clicks,monetized:snapshot.monetized_human_outbound_clicks,unmonetized:snapshot.unmonetized_human_outbound_clicks,weighted:snapshot.weighted_coverage},queue_size:snapshot.recoverable_queue.length,research:{processed:researched,programs_found:found,human_actions:human,cooldown_skipped,per_cycle_limit:MAX_TOOLS_PER_CYCLE,cooldown_hours:RESEARCH_COOLDOWN_HOURS},guardrail:'No CAPTCHA bypass, legal acceptance, identity/payment submission, or unverified automatic application.'};
+  return {ok:true,coverage:{human_outbound:snapshot.human_outbound_clicks,monetized:snapshot.monetized_human_outbound_clicks,unmonetized:snapshot.unmonetized_human_outbound_clicks,weighted:snapshot.weighted_coverage},queue_size:snapshot.recoverable_queue.length,watchlist:{checked:watchlist_checked,promoted:watchlist_promoted},research:{processed:researched,programs_found:found,human_actions:human,cooldown_skipped,per_cycle_limit:MAX_TOOLS_PER_CYCLE,cooldown_hours:RESEARCH_COOLDOWN_HOURS},guardrail:'No CAPTCHA bypass, legal acceptance, identity/payment submission, or unverified automatic application.'};
 }
