@@ -73,11 +73,14 @@ async function withPageEntryTracking(request,env,ctx,response){
   const ownerFlag=classification===SESSION_CLASSIFICATIONS.OWNER?1:0;
   const path=url.pathname.slice(0,200)||'/';
   const eventId=`start_${session}`;
-  const write=env.DB.batch([
-    env.DB.prepare(SESSION_UPSERT_SQL).bind(session,source,ownerFlag,classification),
-    env.DB.prepare(`INSERT OR IGNORE INTO funnel_events (event_id,session_id,event_type,intent_slug,tool_slug,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))`).bind(eventId,session,'session_started',null,null,path,source,refHost)
-  ]).catch(()=>undefined);
-  if(ctx?.waitUntil)ctx.waitUntil(write);else await write;
+  try{
+    await env.DB.batch([
+      env.DB.prepare(SESSION_UPSERT_SQL).bind(session,source,ownerFlag,classification),
+      env.DB.prepare(`INSERT OR IGNORE INTO funnel_events (event_id,session_id,event_type,intent_slug,tool_slug,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))`).bind(eventId,session,'session_started',null,null,path,source,refHost)
+    ]);
+  }catch{
+    return response;
+  }
   const headers=new Headers(response.headers);
   if(!existing)headers.append('Set-Cookie',`${SESSION_COOKIE}=${encodeURIComponent(session)}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; SameSite=Lax; Secure`);
   const tracked=new Response(response.body,{status:response.status,statusText:response.statusText,headers});
