@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-10T22:31:22.791Z",
-  "sourceGeneratedAt": "2026-09-10T22:31:22.732Z",
+  "generatedAt": "2026-09-10T22:31:59.625Z",
+  "sourceGeneratedAt": "2026-09-10T22:31:59.562Z",
   "summary": {
-    "canonical": 26,
+    "canonical": 27,
     "redirected": 3,
-    "orphan": 1
+    "orphan": 0
   },
   "rows": [
     {
@@ -81,8 +81,8 @@
     },
     {
       "slug": "best-all-in-one-business-tools",
-      "status": "orphan",
-      "target": null,
+      "status": "canonical",
+      "target": "best-all-in-one-business-tools",
       "impressions": 4,
       "clicks": 0,
       "position": 90.75

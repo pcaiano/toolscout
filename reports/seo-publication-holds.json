@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:31:26.380Z",
+  "generatedAt": "2026-09-10T22:32:02.789Z",
   "count": 3,
   "rule": "Fail closed per page. A blocked intent is removed from the public indexable surface while safe intents continue through the autonomous SEO pipeline.",
   "items": [
