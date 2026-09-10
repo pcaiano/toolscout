@@ -1,29 +1,29 @@
 {
-  "generatedAt": "2026-09-10T09:35:47.849Z",
+  "generatedAt": "2026-09-10T14:17:11.941Z",
   "timezone": "Europe/Lisbon",
   "definition": "Business intelligence uses likely-human sessions for growth and funnel KPIs. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 13,
-      "likelyHuman": 2,
-      "bots": 11,
-      "owner": 0,
+      "total": 19,
+      "likelyHuman": 4,
+      "bots": 14,
+      "owner": 1,
       "synthetic": 0,
       "unknownLegacy": 0
     },
     "d7": {
-      "total": 585,
-      "likelyHuman": 257,
-      "bots": 173,
-      "owner": 17,
+      "total": 561,
+      "likelyHuman": 231,
+      "bots": 176,
+      "owner": 16,
       "synthetic": 0,
       "unknownLegacy": 138
     },
     "d30": {
-      "total": 1696,
-      "likelyHuman": 341,
-      "bots": 263,
-      "owner": 41,
+      "total": 1702,
+      "likelyHuman": 343,
+      "bots": 266,
+      "owner": 42,
       "synthetic": 0,
       "unknownLegacy": 1051
     },
@@ -66,10 +66,10 @@
       },
       {
         "day": "2026-09-10",
-        "sessions": 2
+        "sessions": 4
       }
     ],
-    "averageDailyLikelyHuman30d": 11.37
+    "averageDailyLikelyHuman30d": 11.43
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -89,22 +89,22 @@
       "sessions": 0
     },
     "outboundClicked": {
-      "events": 251,
-      "sessions": 251
+      "events": 252,
+      "sessions": 252
     },
     "recommendationCompletionRate": 100
   },
   "commercial30d": {
-    "outboundClicks": 251,
-    "sessionsWithOutbound": 251,
+    "outboundClicks": 252,
+    "sessionsWithOutbound": 252,
     "monetizedOutbound": 52,
-    "monetizationCoverage": 20.7,
-    "humanSessionToOutboundRate": 73.6
+    "monetizationCoverage": 20.6,
+    "humanSessionToOutboundRate": 73.5
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 76
+      "sessions": 77
     },
     {
       "source": "ref:app.partnerstack.com",
@@ -138,9 +138,9 @@
   "intents30d": [
     {
       "intent": "general",
-      "sessions": 248,
+      "sessions": 249,
       "recommendationCompletions": 3,
-      "outboundClicks": 247
+      "outboundClicks": 248
     },
     {
       "intent": "semrush-vs-ahrefs",
@@ -162,7 +162,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 92,
+      "sessions": 93,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -179,11 +179,11 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 341,
-    "humanDailyAverage30d": 11.37,
+    "humanSessions30d": 343,
+    "humanDailyAverage30d": 11.43,
     "recommendationCompletionRate": 0.6,
-    "humanSessionToOutboundRate": 73.6,
-    "monetizationCoverage": 20.7,
+    "humanSessionToOutboundRate": 73.5,
+    "monetizationCoverage": 20.6,
     "note": "These are observed inputs, not a financial forecast. Conversion and commission assumptions must be stated separately unless vendor-confirmed evidence exists."
   }
 }
