@@ -1,0 +1,58 @@
+name: Cloudflare Traffic Forensics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cloudflare-traffic-forensics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reconstruct recent HTTP traffic
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const token=process.env.CLOUDFLARE_API_TOKEN;
+          if(!token) throw new Error('CLOUDFLARE_API_TOKEN missing');
+          const headers={Authorization:`Bearer ${token}`,'Content-Type':'application/json'};
+          const zones=await fetch('https://api.cloudflare.com/client/v4/zones?name=trytoolscout.org&status=active',{headers});
+          const z=await zones.json();
+          if(!zones.ok||!z.success||!z.result?.[0]?.id) throw new Error(`zone lookup failed ${zones.status} ${JSON.stringify(z.errors||z)}`);
+          const zoneTag=z.result[0].id;
+          const gql='https://api.cloudflare.com/client/v4/graphql';
+          async function query(query,variables){
+            const r=await fetch(gql,{method:'POST',headers,body:JSON.stringify({query,variables})});
+            const j=await r.json();
+            return {ok:r.ok&&!j.errors?.length,status:r.status,data:j.data||null,errors:j.errors||null};
+          }
+          const summaryQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1,filter:$filter){count sum{visits}}}}}`;
+          const pathQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:5000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{clientRequestPath edgeResponseStatus}}}}}`;
+          const uaQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{userAgent}}}}}`;
+          const refQuery=`query($zoneTag:String!,$filter:ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!){viewer{zones(filter:{zoneTag:$zoneTag}){g:httpRequestsAdaptiveGroups(limit:1000,orderBy:[count_DESC],filter:$filter){count sum{visits} dimensions{clientRefererHost}}}}}`;
+          const start=new Date('2026-09-03T00:00:00Z');
+          const end=new Date('2026-09-11T00:00:00Z');
+          const knownBot=/(bot|crawler|spider|slurp|headless|lighthouse|pagespeed|curl|wget|python|go-http-client|semrush|ahrefs|mj12|dotbot|gptbot|oai-searchbot|chatgpt-user|claude|anthropic|perplexity|bytespider|facebookexternalhit|linkedinbot|twitterbot|whatsapp)/i;
+          for(let d=new Date(start);d<end;d.setUTCDate(d.getUTCDate()+1)){
+            const next=new Date(d);next.setUTCDate(next.getUTCDate()+1);
+            const filter={datetime_geq:d.toISOString(),datetime_lt:next.toISOString(),requestSource:'eyeball'};
+            const [s,p,u,r]=await Promise.all([query(summaryQuery,{zoneTag,filter}),query(pathQuery,{zoneTag,filter}),query(uaQuery,{zoneTag,filter}),query(refQuery,{zoneTag,filter})]);
+            const groups=p.data?.viewer?.zones?.[0]?.g||[];
+            const pageGroups=groups.filter(x=>{const path=String(x.dimensions?.clientRequestPath||'');const status=Number(x.dimensions?.edgeResponseStatus||0);return status>=200&&status<400&&!path.startsWith('/api/')&&!path.startsWith('/go/')&&!path.startsWith('/.well-known/')&&!/\.(?:js|css|json|xml|txt|png|jpe?g|webp|svg|ico|woff2?|map)$/i.test(path)});
+            const pageRequests=pageGroups.reduce((a,x)=>a+Number(x.count||0),0);
+            const pageVisits=pageGroups.reduce((a,x)=>a+Number(x.sum?.visits||0),0);
+            const goRequests=groups.filter(x=>String(x.dimensions?.clientRequestPath||'').startsWith('/go/')).reduce((a,x)=>a+Number(x.count||0),0);
+            const apiRequests=groups.filter(x=>String(x.dimensions?.clientRequestPath||'').startsWith('/api/')).reduce((a,x)=>a+Number(x.count||0),0);
+            const topPages=pageGroups.sort((a,b)=>Number(b.count||0)-Number(a.count||0)).slice(0,30).map(x=>({path:x.dimensions.clientRequestPath,status:Number(x.dimensions.edgeResponseStatus||0),requests:Number(x.count||0),visits:Number(x.sum?.visits||0)}));
+            const uas=u.data?.viewer?.zones?.[0]?.g||[];
+            const browserLike=uas.filter(x=>/Mozilla\/5\.0/i.test(String(x.dimensions?.userAgent||''))&&!knownBot.test(String(x.dimensions?.userAgent||''))).reduce((a,x)=>a+Number(x.count||0),0);
+            const botLike=uas.filter(x=>knownBot.test(String(x.dimensions?.userAgent||''))).reduce((a,x)=>a+Number(x.count||0),0);
+            const refs=(r.data?.viewer?.zones?.[0]?.g||[]).slice(0,50).map(x=>({host:x.dimensions?.clientRefererHost||'',requests:Number(x.count||0),visits:Number(x.sum?.visits||0)}));
+            console.log('CF_DAY='+JSON.stringify({day:d.toISOString().slice(0,10),summaryOk:s.ok,pathOk:p.ok,uaOk:u.ok,refOk:r.ok,totalRequests:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.count||0),totalVisits:Number(s.data?.viewer?.zones?.[0]?.g?.[0]?.sum?.visits||0),pageRequests,pageVisits,goRequests,apiRequests,browserLikeRequests:browserLike,botLikeRequests:botLike,topPages,topReferrers:refs,errors:{summary:s.errors,path:p.errors,ua:u.errors,ref:r.errors}}));
+          }
+          NODE
