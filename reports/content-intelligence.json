@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09T14:51:11.718Z",
+  "generatedAt": "2026-09-10T08:23:42.811Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -17,12 +17,12 @@
   },
   "search": {
     "summary": {
-      "observedGscIntents": 24,
-      "actionableOpportunities": 14,
-      "firstPageOpportunities": 9,
+      "observedGscIntents": 25,
+      "actionableOpportunities": 17,
+      "firstPageOpportunities": 10,
       "strikingDistanceOpportunities": 0,
-      "authorityDepthOpportunities": 5,
-      "competitorResearchCandidates": 5
+      "authorityDepthOpportunities": 7,
+      "competitorResearchCandidates": 3
     },
     "topOpportunities": [
       {
@@ -41,16 +41,30 @@
       },
       {
         "intent": "best-sales-prospecting-tools",
+        "priorityScore": 44,
+        "lane": "seo-aeo-snippet",
+        "action": "optimize-existing",
+        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
+        "impressions": 3,
+        "position": 7.6667,
+        "topTools": [
+          "apollo",
+          "lemlist",
+          "instantly"
+        ]
+      },
+      {
+        "intent": "best-cold-email-tools",
         "priorityScore": 43,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
         "impressions": 2,
-        "position": 8,
+        "position": 6.5,
         "topTools": [
-          "apollo",
-          "lemlist",
-          "instantly"
+          "shopify",
+          "hubspot",
+          "lemlist"
         ]
       },
       {
@@ -82,17 +96,17 @@
         ]
       },
       {
-        "intent": "best-cold-email-tools",
-        "priorityScore": 42,
+        "intent": "best-crm-for-consultants",
+        "priorityScore": 45,
         "lane": "seo-aeo-snippet",
         "action": "optimize-existing",
         "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
         "impressions": 1,
-        "position": 4,
+        "position": 8,
         "topTools": [
-          "shopify",
           "hubspot",
-          "lemlist"
+          "close",
+          "pipedrive"
         ]
       },
       {
@@ -121,20 +135,6 @@
           "zapier",
           "github",
           "buffer"
-        ]
-      },
-      {
-        "intent": "best-developer-tools",
-        "priorityScore": 35,
-        "lane": "seo-aeo-snippet",
-        "action": "optimize-existing",
-        "reason": "Observed first-page visibility: protect ranking, sharpen answer-first snippet, comparison context and internal links.",
-        "impressions": 1,
-        "position": 10,
-        "topTools": [
-          "chatgpt",
-          "github",
-          "gemini"
         ]
       }
     ]
@@ -415,9 +415,9 @@
     "topicCandidates": [
       "best-forms-for-small-business",
       "best-sales-prospecting-tools",
+      "best-cold-email-tools",
       "best-email-marketing-tools",
-      "best-ai-research-tools",
-      "best-cold-email-tools"
+      "best-ai-research-tools"
     ],
     "testEligible": true,
     "allocationChangeEligible": false,

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-09T14:51:11.607Z",
+  "generatedAt": "2026-09-10T08:23:42.692Z",
   "methodology": "Observed Google Search Console signals rank ahead of heuristic-only opportunities. For observed intents, search demand and ranking opportunity contribute 60 points and commercial/catalog/affiliate readiness contributes 40% of its heuristic score. Positions 4-20 are treated as striking-distance opportunities; low-CTR pages with meaningful impressions receive an optimization bonus.",
   "gsc": {
     "available": true,
     "ingestionStatus": "signals-imported",
-    "intentsWithSignals": 24,
+    "intentsWithSignals": 25,
     "source": "Google Search Console Search Analytics API",
     "reason": "Google Search Console page signals are present and drive growth prioritization, including striking-distance and CTR opportunities.",
     "importCommand": "node scripts/import-gsc-signals.mjs <gsc-pages.csv>"
@@ -39,6 +39,33 @@
       "action": "optimize-now"
     },
     {
+      "intent": "best-crm-for-consultants",
+      "title": "Best CRM for Consultants",
+      "category": "crm",
+      "priorityScore": 45,
+      "topFit": 9.32,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 1,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 8,
+        "opportunity": "striking-distance",
+        "opportunityScore": 17
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "hubspot",
+        "close",
+        "pipedrive"
+      ],
+      "action": "optimize-now"
+    },
+    {
       "intent": "best-email-marketing-tools",
       "title": "Best Email Marketing Tools",
       "category": "marketing",
@@ -66,6 +93,60 @@
       "action": "optimize-now"
     },
     {
+      "intent": "best-sales-prospecting-tools",
+      "title": "Best Sales Prospecting Tools",
+      "category": "sales",
+      "priorityScore": 44,
+      "topFit": 9.11,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 3,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 7.6667,
+        "opportunity": "striking-distance",
+        "opportunityScore": 19
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "apollo",
+        "lemlist",
+        "instantly"
+      ],
+      "action": "optimize-now"
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "title": "Best Cold Email Tools",
+      "category": "sales",
+      "priorityScore": 43,
+      "topFit": 9.38,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 2,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 6.5,
+        "opportunity": "striking-distance",
+        "opportunityScore": 18
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "shopify",
+        "hubspot",
+        "lemlist"
+      ],
+      "action": "optimize-now"
+    },
+    {
       "intent": "best-crm-for-small-business",
       "title": "Best CRM for Small Business",
       "category": "crm",
@@ -89,60 +170,6 @@
         "buffer",
         "chatgpt",
         "integrately"
-      ],
-      "action": "optimize-now"
-    },
-    {
-      "intent": "best-sales-prospecting-tools",
-      "title": "Best Sales Prospecting Tools",
-      "category": "sales",
-      "priorityScore": 43,
-      "topFit": 9.11,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 8,
-        "opportunity": "striking-distance",
-        "opportunityScore": 18
-      },
-      "signalBasis": "observed-gsc-majority",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "apollo",
-        "lemlist",
-        "instantly"
-      ],
-      "action": "optimize-now"
-    },
-    {
-      "intent": "best-cold-email-tools",
-      "title": "Best Cold Email Tools",
-      "category": "sales",
-      "priorityScore": 42,
-      "topFit": 9.38,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 1,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 4,
-        "opportunity": "striking-distance",
-        "opportunityScore": 17
-      },
-      "signalBasis": "observed-gsc-majority",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "shopify",
-        "hubspot",
-        "lemlist"
       ],
       "action": "optimize-now"
     },
@@ -228,6 +255,33 @@
       "action": "optimize-now"
     },
     {
+      "intent": "best-no-code-automation-tools",
+      "title": "Best No-Code Automation Tools",
+      "category": "automation",
+      "priorityScore": 55,
+      "topFit": 9.42,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 169,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 72.6272,
+        "opportunity": "ctr-upside",
+        "opportunityScore": 28
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "zapier",
+        "integrately",
+        "n8n"
+      ],
+      "action": "watch"
+    },
+    {
       "intent": "best-seo-tools-for-agencies",
       "title": "Best SEO Tools for Agencies",
       "category": "seo",
@@ -238,10 +292,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 251,
+        "impressions": 304,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.1793,
+        "position": 77.4309,
         "opportunity": "ctr-upside",
         "opportunityScore": 30
       },
@@ -255,49 +309,22 @@
       "action": "watch"
     },
     {
-      "intent": "best-no-code-automation-tools",
-      "title": "Best No-Code Automation Tools",
-      "category": "automation",
-      "priorityScore": 54,
-      "topFit": 9.42,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 139,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 72.9065,
-        "opportunity": "ctr-upside",
-        "opportunityScore": 27
-      },
-      "signalBasis": "observed-gsc-majority",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "zapier",
-        "integrately",
-        "n8n"
-      ],
-      "action": "watch"
-    },
-    {
       "intent": "best-funnel-builder",
       "title": "Best Funnel Builder",
       "category": "marketing",
-      "priorityScore": 52,
+      "priorityScore": 53,
       "topFit": 9.33,
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 10,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 47,
+        "impressions": 61,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.5532,
+        "position": 78.8852,
         "opportunity": "ctr-upside",
-        "opportunityScore": 23
+        "opportunityScore": 24
       },
       "signalBasis": "observed-gsc-majority",
       "monetizationReadiness": "monetizable",
@@ -319,10 +346,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 43,
+        "impressions": 45,
         "clicks": 0,
         "ctr": 0,
-        "position": 76.5116,
+        "position": 76.1556,
         "opportunity": "ctr-upside",
         "opportunityScore": 23
       },
@@ -339,19 +366,19 @@
       "intent": "best-project-management-tools",
       "title": "Best Project Management Tools",
       "category": "business",
-      "priorityScore": 49,
+      "priorityScore": 51,
       "topFit": 9.14,
       "catalogDepth": 15,
       "commercialSignal": 20,
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 21,
+        "impressions": 31,
         "clicks": 0,
         "ctr": 0,
-        "position": 44,
+        "position": 42.0323,
         "opportunity": "ctr-upside",
-        "opportunityScore": 25
+        "opportunityScore": 27
       },
       "signalBasis": "observed-gsc-majority",
       "monetizationReadiness": "needs-affiliate-activation",
@@ -359,6 +386,60 @@
         "airtable",
         "notion",
         "slack"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-free-project-management-tools",
+      "title": "Best Free Project Management Tools",
+      "category": "business",
+      "priorityScore": 50,
+      "topFit": 9.45,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 23,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 51.5652,
+        "opportunity": "ctr-upside",
+        "opportunityScore": 25
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "trello",
+        "calendly",
+        "linear"
+      ],
+      "action": "watch"
+    },
+    {
+      "intent": "best-free-crm",
+      "title": "Best Free CRM Tools",
+      "category": "crm",
+      "priorityScore": 46,
+      "topFit": 9.47,
+      "catalogDepth": 15,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 20,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 78.15,
+        "opportunity": "ctr-upside",
+        "opportunityScore": 20
+      },
+      "signalBasis": "observed-gsc-majority",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "buffer",
+        "chatgpt",
+        "integrately"
       ],
       "action": "watch"
     },
@@ -390,76 +471,22 @@
       "action": "watch"
     },
     {
-      "intent": "best-free-project-management-tools",
-      "title": "Best Free Project Management Tools",
-      "category": "business",
-      "priorityScore": 44,
-      "topFit": 9.45,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 18,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 52.1667,
-        "opportunity": "develop",
-        "opportunityScore": 19
-      },
-      "signalBasis": "observed-gsc-majority",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "trello",
-        "calendly",
-        "linear"
-      ],
-      "action": "watch"
-    },
-    {
-      "intent": "best-free-crm",
-      "title": "Best Free CRM Tools",
-      "category": "crm",
-      "priorityScore": 39,
-      "topFit": 9.47,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 15,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 75.9333,
-        "opportunity": "develop",
-        "opportunityScore": 13
-      },
-      "signalBasis": "observed-gsc-majority",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "buffer",
-        "chatgpt",
-        "integrately"
-      ],
-      "action": "watch"
-    },
-    {
       "intent": "best-keyword-research-tools",
       "title": "Best Keyword Research Tools",
       "category": "seo",
-      "priorityScore": 38,
+      "priorityScore": 35,
       "topFit": 9.36,
       "catalogDepth": 15,
       "commercialSignal": 8,
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 13,
+        "impressions": 18,
         "clicks": 0,
         "ctr": 0,
-        "position": 66.5385,
+        "position": 73.2778,
         "opportunity": "develop",
-        "opportunityScore": 17
+        "opportunityScore": 14
       },
       "signalBasis": "observed-gsc-majority",
       "monetizationReadiness": "needs-affiliate-activation",
@@ -567,25 +594,6 @@
         "klaviyo",
         "kit",
         "omnisend"
-      ],
-      "action": "build-next"
-    },
-    {
-      "intent": "best-crm-for-consultants",
-      "title": "Best CRM for Consultants",
-      "category": "crm",
-      "priorityScore": 69,
-      "topFit": 9.32,
-      "catalogDepth": 15,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "hubspot",
-        "close",
-        "pipedrive"
       ],
       "action": "build-next"
     },
