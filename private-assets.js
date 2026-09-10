@@ -6,6 +6,7 @@ export const privateAssetPaths = new Set([
   '/data/affiliate-queue.json',
   '/data/business-intelligence.json',
   '/data/business-intelligence-history.json',
+  '/data/traffic-truth.json',
 ]);
 
 const SESSION_COOKIE='toolscout_session';
@@ -57,7 +58,7 @@ function publicHtmlRequest(request,url,response){
 }
 
 function browserSessionSync(){
-  return `<script>(function(){try{var m=document.cookie.match(/(?:^|;\\s*)toolscout_session=([^;]+)/);if(!m)return;var id=decodeURIComponent(m[1]);if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))return;var now=Date.now();localStorage.setItem('toolscout_session_v2',JSON.stringify({id:id,lastSeen:now}));sessionStorage.setItem('toolscout_started_'+id,'1')}catch(e){}})();</script>`;
+  return `<script>(function(){try{var m=document.cookie.match(/(?:^|;\\s*)toolscout_session=([^;]+)/);if(!m)return;var id=decodeURIComponent(m[1]);if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))return;var now=Date.now();localStorage.setItem('toolscout_session_v2',JSON.stringify({id:id,lastSeen:now}));sessionStorage.setItem('toolscout_started_'+id,'1');var payload={event_id:'confirm_'+id,session_id:id,event_type:'page_confirmed',path:location.pathname.slice(0,200)||'/',source:'browser-confirm'};fetch('/api/events',{method:'POST',credentials:'same-origin',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){})}catch(e){}})();</script>`;
 }
 
 async function withPageEntryTracking(request,env,ctx,response){
@@ -84,35 +85,40 @@ async function withPageEntryTracking(request,env,ctx,response){
 }
 
 async function observedTrafficIntegrity(env){
-  const starts=await env.DB.prepare(`SELECT
-    COUNT(DISTINCT CASE WHEN st.created_at>=datetime('now','-24 hours') THEN st.session_id END) human24h,
-    COUNT(DISTINCT CASE WHEN date(st.created_at,'+1 hour')=date('now','+1 hour') THEN st.session_id END) today,
-    COUNT(DISTINCT CASE WHEN strftime('%Y-%m',datetime(st.created_at,'+1 hour'))=strftime('%Y-%m',datetime('now','+1 hour')) THEN st.session_id END) mtd,
-    COUNT(DISTINCT CASE WHEN st.created_at>=datetime('now','-30 days') THEN st.session_id END) d30
+  const confirmed=await env.DB.prepare(`SELECT
+    COUNT(DISTINCT CASE WHEN conf.created_at>=datetime('now','-24 hours') THEN conf.session_id END) human24h,
+    COUNT(DISTINCT CASE WHEN date(conf.created_at,'+1 hour')=date('now','+1 hour') THEN conf.session_id END) today,
+    COUNT(DISTINCT CASE WHEN strftime('%Y-%m',datetime(conf.created_at,'+1 hour'))=strftime('%Y-%m',datetime('now','+1 hour')) THEN conf.session_id END) mtd,
+    COUNT(DISTINCT CASE WHEN conf.created_at>=datetime('now','-30 days') THEN conf.session_id END) d30
+    FROM funnel_events conf JOIN sessions s ON s.session_id=conf.session_id
+    WHERE conf.event_type='page_confirmed' AND s.classification='likely-human'`).first();
+  const server=await env.DB.prepare(`SELECT
+    COUNT(DISTINCT CASE WHEN st.created_at>=datetime('now','-30 days') THEN st.session_id END) server30d,
+    COUNT(DISTINCT CASE WHEN st.created_at>=datetime('now','-30 days') AND NOT EXISTS (SELECT 1 FROM funnel_events conf WHERE conf.session_id=st.session_id AND conf.event_type='page_confirmed') THEN st.session_id END) unconfirmed30d
     FROM funnel_events st JOIN sessions s ON s.session_id=st.session_id
     WHERE st.event_type='session_started' AND s.classification='likely-human'`).first();
   const clicks=await env.DB.prepare(`SELECT COUNT(*) outbound,COUNT(DISTINCT c.session_id) sessions_with_outbound,SUM(CASE WHEN c.affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized
     FROM click_events c JOIN sessions s ON s.session_id=c.session_id
     WHERE s.classification='likely-human' AND c.created_at>=datetime('now','-30 days') AND c.source!='internal-test'
-    AND EXISTS (SELECT 1 FROM funnel_events st WHERE st.session_id=c.session_id AND st.event_type='session_started' AND st.created_at<=c.created_at)`).first();
+    AND EXISTS (SELECT 1 FROM funnel_events conf WHERE conf.session_id=c.session_id AND conf.event_type='page_confirmed' AND conf.created_at<=c.created_at)`).first();
   const calendar=await env.DB.prepare(`SELECT CAST(strftime('%d',datetime('now','+1 hour')) AS INTEGER) day_of_month,CAST(strftime('%d',date(datetime('now','+1 hour'),'start of month','+1 month','-1 day')) AS INTEGER) days_in_month`).first();
-  const today=n(starts?.today),mtd=n(starts?.mtd),d30=n(starts?.d30),human24h=n(starts?.human24h),outbound=n(clicks?.outbound),monetized=n(clicks?.monetized),sessionsWithOutbound=n(clicks?.sessions_with_outbound);
+  const today=n(confirmed?.today),mtd=n(confirmed?.mtd),d30=n(confirmed?.d30),human24h=n(confirmed?.human24h),outbound=n(clicks?.outbound),monetized=n(clicks?.monetized),sessionsWithOutbound=n(clicks?.sessions_with_outbound);
   const day=Math.max(1,n(calendar?.day_of_month)),daysInMonth=Math.max(day,n(calendar?.days_in_month)||30),dailyAverage=mtd/day;
-  return {human24h,today,mtd,d30,outbound,monetized,sessionsWithOutbound,dailyAverage,projectedMonth:Math.round(dailyAverage*daysInMonth)};
+  return {human24h,today,mtd,d30,outbound,monetized,sessionsWithOutbound,dailyAverage,projectedMonth:Math.round(dailyAverage*daysInMonth),server30d:n(server?.server30d),unconfirmed30d:n(server?.unconfirmed30d)};
 }
 
 async function patchStats(response,env){
   if(!response.ok||!env.DB)return response;
   let data;try{data=await response.clone().json()}catch{return response}
   let x;try{x=await observedTrafficIntegrity(env)}catch{return response}
-  const definition='Likely-human traffic requires an observed public page-entry event. Direct /go/ redirect-only sessions are excluded.';
-  data.tracking={...(data.tracking||{}),status:'observed',humanSessionsLast24Hours:x.human24h,definition};
+  const definition='Human traffic requires a browser-confirmed public page entry. Redirect-only and server-only page requests are excluded.';
+  data.tracking={...(data.tracking||{}),status:'browser-confirmed',humanSessionsLast24Hours:x.human24h,definition};
   data.traffic={...(data.traffic||{}),today:x.today,monthToDate:x.mtd,dailyAverageMTD:Number(x.dailyAverage.toFixed(2)),projectedMonth:x.projectedMonth,definition};
   data.funnel={...(data.funnel||{}),sessions:x.d30,outboundClicks:x.outbound,sessionToOutboundCtr:rate(x.sessionsWithOutbound,x.d30),definition};
   data.audience={...(data.audience||{}),likelyHumanSessions:x.d30};
   data.total={...(data.total||{}),sessions:x.d30};
   data.commercial={...(data.commercial||{}),monetizedOutbound:x.monetized,totals:{...(data.commercial?.totals||{}),outbound:x.outbound,monetizedOutbound:x.monetized},trafficDefinition:definition};
-  data.trafficIntegrity={status:'observed',definition,observedHumanSessions30d:x.d30,observedHumanOutbound30d:x.outbound,observedMonetizedOutbound30d:x.monetized};
+  data.trafficIntegrity={status:'browser-confirmed',definition,confirmedHumanSessions30d:x.d30,confirmedHumanOutbound30d:x.outbound,confirmedMonetizedOutbound30d:x.monetized,serverObservedPageEntrySessions30d:x.server30d,serverOnlyUnconfirmedSessions30d:x.unconfirmed30d};
   const headers=new Headers(response.headers);headers.delete('Content-Length');headers.set('Content-Type','application/json; charset=UTF-8');headers.set('Cache-Control','private, no-store');
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }
