@@ -10,7 +10,7 @@ const comparisonFiles=fs.readdirSync(ROOT).filter(name=>/^[a-z0-9-]+-vs-[a-z0-9-
 const toolDir=path.join(ROOT,'tools'),toolFiles=fs.existsSync(toolDir)?fs.readdirSync(toolDir).filter(name=>name.endsWith('.html')).map(name=>path.join(toolDir,name)):[];
 const blogDir=path.join(ROOT,'blog'),blogFiles=fs.existsSync(blogDir)?fs.readdirSync(blogDir).filter(name=>name.endsWith('.html')).map(name=>path.join(blogDir,name)):[];
 const editorialFiles=[...guideFiles,...comparisonFiles,...toolFiles,...blogFiles];
-const isNoindex=html=><meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)||/<meta[^>]+content=["'][^"']*noindex[^"']*["'][^>]+name=["']robots["']/i.test(html);
+const isNoindex=html=>/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)||/<meta[^>]+content=["'][^"']*noindex[^"']*["'][^>]+name=["']robots["']/i.test(html);
 const canonicalOf=html=>html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)?.[1]||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)?.[1]||null;
 const sitemap=fs.existsSync(path.join(ROOT,'sitemap.xml'))?fs.readFileSync(path.join(ROOT,'sitemap.xml'),'utf8'):'';
 
