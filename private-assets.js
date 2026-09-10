@@ -12,6 +12,9 @@ const SESSION_COOKIE='toolscout_session';
 const SESSION_TTL_SECONDS=1800;
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TRACKABLE_CLASSIFICATIONS=new Set([SESSION_CLASSIFICATIONS.LIKELY_HUMAN,SESSION_CLASSIFICATIONS.OWNER]);
+const STATS_PATHS=new Set(['/api/stats','/analytics/api/stats']);
+const n=v=>Number(v||0);
+const rate=(a,b)=>b?Number((a/b*100).toFixed(1)):null;
 
 function cookieSession(request){
   const cookie=request.headers.get('Cookie')||'';
@@ -80,6 +83,40 @@ async function withPageEntryTracking(request,env,ctx,response){
   return new HTMLRewriter().on('head',{element(el){el.prepend(browserSessionSync(),{html:true})}}).transform(tracked);
 }
 
+async function observedTrafficIntegrity(env){
+  const starts=await env.DB.prepare(`SELECT
+    COUNT(DISTINCT CASE WHEN st.created_at>=datetime('now','-24 hours') THEN st.session_id END) human24h,
+    COUNT(DISTINCT CASE WHEN date(st.created_at,'+1 hour')=date('now','+1 hour') THEN st.session_id END) today,
+    COUNT(DISTINCT CASE WHEN strftime('%Y-%m',datetime(st.created_at,'+1 hour'))=strftime('%Y-%m',datetime('now','+1 hour')) THEN st.session_id END) mtd,
+    COUNT(DISTINCT CASE WHEN st.created_at>=datetime('now','-30 days') THEN st.session_id END) d30
+    FROM funnel_events st JOIN sessions s ON s.session_id=st.session_id
+    WHERE st.event_type='session_started' AND s.classification='likely-human'`).first();
+  const clicks=await env.DB.prepare(`SELECT COUNT(*) outbound,COUNT(DISTINCT c.session_id) sessions_with_outbound,SUM(CASE WHEN c.affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized
+    FROM click_events c JOIN sessions s ON s.session_id=c.session_id
+    WHERE s.classification='likely-human' AND c.created_at>=datetime('now','-30 days') AND c.source!='internal-test'
+    AND EXISTS (SELECT 1 FROM funnel_events st WHERE st.session_id=c.session_id AND st.event_type='session_started' AND st.created_at<=c.created_at)`).first();
+  const calendar=await env.DB.prepare(`SELECT CAST(strftime('%d',datetime('now','+1 hour')) AS INTEGER) day_of_month,CAST(strftime('%d',date(datetime('now','+1 hour'),'start of month','+1 month','-1 day')) AS INTEGER) days_in_month`).first();
+  const today=n(starts?.today),mtd=n(starts?.mtd),d30=n(starts?.d30),human24h=n(starts?.human24h),outbound=n(clicks?.outbound),monetized=n(clicks?.monetized),sessionsWithOutbound=n(clicks?.sessions_with_outbound);
+  const day=Math.max(1,n(calendar?.day_of_month)),daysInMonth=Math.max(day,n(calendar?.days_in_month)||30),dailyAverage=mtd/day;
+  return {human24h,today,mtd,d30,outbound,monetized,sessionsWithOutbound,dailyAverage,projectedMonth:Math.round(dailyAverage*daysInMonth)};
+}
+
+async function patchStats(response,env){
+  if(!response.ok||!env.DB)return response;
+  let data;try{data=await response.clone().json()}catch{return response}
+  let x;try{x=await observedTrafficIntegrity(env)}catch{return response}
+  const definition='Likely-human traffic requires an observed public page-entry event. Direct /go/ redirect-only sessions are excluded.';
+  data.tracking={...(data.tracking||{}),status:'observed',humanSessionsLast24Hours:x.human24h,definition};
+  data.traffic={...(data.traffic||{}),today:x.today,monthToDate:x.mtd,dailyAverageMTD:Number(x.dailyAverage.toFixed(2)),projectedMonth:x.projectedMonth,definition};
+  data.funnel={...(data.funnel||{}),sessions:x.d30,outboundClicks:x.outbound,sessionToOutboundCtr:rate(x.sessionsWithOutbound,x.d30),definition};
+  data.audience={...(data.audience||{}),likelyHumanSessions:x.d30};
+  data.total={...(data.total||{}),sessions:x.d30};
+  data.commercial={...(data.commercial||{}),monetizedOutbound:x.monetized,totals:{...(data.commercial?.totals||{}),outbound:x.outbound,monetizedOutbound:x.monetized},trafficDefinition:definition};
+  data.trafficIntegrity={status:'observed',definition,observedHumanSessions30d:x.d30,observedHumanOutbound30d:x.outbound,observedMonetizedOutbound30d:x.monetized};
+  const headers=new Headers(response.headers);headers.delete('Content-Length');headers.set('Content-Type','application/json; charset=UTF-8');headers.set('Cache-Control','private, no-store');
+  return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
+}
+
 export function withPrivateAssets(base) {
   return {
     ...base,
@@ -97,7 +134,8 @@ export function withPrivateAssets(base) {
         const publicTools = tools.map(({commission, affiliateProgram, affiliateUrl, ...tool}) => tool);
         return Response.json(publicTools, {headers: {'Cache-Control': 'no-store'}});
       }
-      const response=await base.fetch(request,env,ctx);
+      let response=await base.fetch(request,env,ctx);
+      if(STATS_PATHS.has(path))response=await patchStats(response,env);
       return withPageEntryTracking(request,env,ctx,response);
     },
   };
