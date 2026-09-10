@@ -35,7 +35,6 @@ jobs:
           node-version: 22
 
       - name: Refresh site-wide Google Search Console signals
-        continue-on-error: true
         run: node scripts/sync-gsc-signals.mjs
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
@@ -69,4 +68,5 @@ jobs:
           const x=JSON.parse(fs.readFileSync('data/traffic-truth.json','utf8'));
           console.log(JSON.stringify({status:x.status,reconciliation:x.reconciliation,cloudflareSite:x.cloudflareSite,cloudflareRum:x.cloudflareRum?.status,d1:x.d1?.status,gsc:x.googleSearchConsole?.status},null,2));
           if(x.status==='degraded') process.exit(1);
+          if(!['observed'].includes(x.googleSearchConsole?.status)) process.exit(1);
           NODE
