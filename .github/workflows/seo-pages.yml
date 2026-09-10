@@ -7,6 +7,7 @@ on:
       - '!data/affiliate.json'
       - '!data/affiliate-pipeline.json'
       - '!data/affiliate-queue.json'
+      - '!data/traffic-truth.json'
       - 'scripts/**'
       - 'robots.txt'
       - 'llms.txt'
@@ -41,7 +42,6 @@ jobs:
       - name: Audit observed GSC slugs
         run: node scripts/audit-gsc-slugs.mjs
       - name: Scan competitive coverage gaps
-        continue-on-error: true
         run: node scripts/scan-competitive-gaps.mjs
       - name: Build growth priority
         run: node scripts/build-growth-priority.mjs
