@@ -1,9 +1,8 @@
 import fs from 'node:fs';
+import { loadSeoIntentState } from './seo-intent-loader.mjs';
 
-// Classify observed Search Console slugs without inventing redirects.
 const signals = JSON.parse(fs.readFileSync('reports/gsc-signals.json', 'utf8'));
-const intents = JSON.parse(fs.readFileSync('data/intents.json', 'utf8'));
-const consolidations = JSON.parse(fs.readFileSync('data/seo-consolidations.json', 'utf8'));
+const { intents, consolidations } = loadSeoIntentState();
 
 const canonical = new Set(intents.map(item => item.slug));
 const rows = (signals.items || []).map(item => {
