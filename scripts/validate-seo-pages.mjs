@@ -44,8 +44,14 @@ for(const intent of intents){
   if(!fs.existsSync(file)){failures.push(`${filename}: missing despite sufficient editorial coverage`);continue;}
   published++;
   const html=fs.readFileSync(file,'utf8');
-  if(!/<title>[^<]+<\/title>/i.test(html))failures.push(`${filename}: missing title`);
-  if(!/<meta[^>]+name=["']description["'][^>]*>/i.test(html))failures.push(`${filename}: missing meta description`);
+  const titleText=html.match(/<title>([^<]+)<\/title>/i)?.[1]||'';
+  const metaDescription=html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["'][^>]*>/i)?.[1]||html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["'][^>]*>/i)?.[1]||'';
+  const leadText=html.match(/<p class=["']lead["']>([\s\S]*?)<\/p>/i)?.[1]?.replace(/<[^>]+>/g,'')||'';
+  if(!titleText)failures.push(`${filename}: missing title`);
+  if(!metaDescription)failures.push(`${filename}: missing meta description`);
+  for(const [field,value] of [['title',titleText],['meta description',metaDescription],['lead',leadText]]){
+    if(value&&/(?:\.\.\.|…)/.test(value))failures.push(`${filename}: ${field} contains truncation ellipsis`);
+  }
   if(/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html))failures.push(`${filename}: eligible guide is unexpectedly noindex`);
   const canonical=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i)?.[1];
   if(!canonical)failures.push(`${filename}: missing canonical`);else if(seenCanonicals.has(canonical))failures.push(`${filename}: duplicate canonical ${canonical}`);else seenCanonicals.add(canonical);
