@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:47:30.243Z",
+  "generatedAt": "2026-09-11T00:14:34.241Z",
   "timezone": "Europe/Lisbon",
   "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
   "primaryMetric": "D1 browser-confirmed public sessions",
@@ -12,9 +12,9 @@
     "Google Search Console is the source of truth for Google Search clicks and impressions."
   ],
   "windowsUtc": {
-    "now": "2026-09-10T22:47:30.243Z",
-    "last24": "2026-09-09T22:47:30.243Z",
-    "today": "2026-09-09T23:00:00.000Z",
+    "now": "2026-09-11T00:14:34.241Z",
+    "last24": "2026-09-10T00:14:34.241Z",
+    "today": "2026-09-10T23:00:00.000Z",
     "month": "2026-08-31T23:00:00.000Z"
   },
   "cloudflareSite": {
@@ -27,14 +27,14 @@
     "excludeBots": true,
     "dataset": "rumPageloadEventsAdaptiveGroups",
     "last24": {
-      "pageViews": 4,
-      "visits": 0,
-      "sampleInterval": 2
+      "pageViews": 5,
+      "visits": 1,
+      "sampleInterval": 1.6666666666666667
     },
     "today": {
-      "pageViews": 4,
-      "visits": 0,
-      "sampleInterval": 2
+      "pageViews": 1,
+      "visits": 1,
+      "sampleInterval": 1
     },
     "monthToDate": {
       "pageViews": 70,
@@ -82,18 +82,18 @@
     "last24": 0,
     "today": 0,
     "monthToDate": 0,
-    "serverObservedEntries24h": 4,
-    "serverOnlyUnconfirmed24h": 4
+    "serverObservedEntries24h": 5,
+    "serverOnlyUnconfirmed24h": 5
   },
   "googleSearchConsole": {
     "status": "observed",
-    "generatedAt": "2026-09-10T22:47:30.192Z",
-    "startDate": "2026-08-14",
-    "endDate": "2026-09-10",
+    "generatedAt": "2026-09-11T00:14:34.191Z",
+    "startDate": "2026-08-15",
+    "endDate": "2026-09-11",
     "dataState": "all",
     "clicks": 1,
-    "impressions": 1669,
-    "pageCount": 75,
+    "impressions": 1710,
+    "pageCount": 76,
     "coverage": "site-wide"
   },
   "reconciliation": {
@@ -101,10 +101,10 @@
     "primary": "d1-browser-confirmed",
     "audit": "cloudflare-rum",
     "d1Confirmed24h": 0,
-    "rumVisits24h": 0,
-    "rumPageViews24h": 4,
-    "serverObservedEntries24h": 4,
-    "delta": 0,
+    "rumVisits24h": 1,
+    "rumPageViews24h": 5,
+    "serverObservedEntries24h": 5,
+    "delta": -1,
     "note": "Volume is too low for a useful percentage divergence alarm."
   },
   "status": "observed"
