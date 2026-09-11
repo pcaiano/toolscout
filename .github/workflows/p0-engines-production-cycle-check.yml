@@ -31,6 +31,11 @@ jobs:
           grep -Fq 'affiliate_coverage_runs' "$f"
           grep -Fq "traffic_truth='browser_confirmed'" "$f"
           grep -Fq "datetime('now','-2 hours')" "$f"
+          grep -Fq 'AFFILIATE COVERAGE STRICT PARITY' "$f"
+          grep -Fq "f.event_type='page_confirmed'" "$f"
+          grep -Fq 'expected_human' "$f"
+          grep -Fq 'expected_monetized' "$f"
+          grep -Fq 'Strict affiliate snapshot does not match browser-confirmed source events.' "$f"
           grep -Fq 'Both P0 engines have persisted production-cycle evidence' "$f"
           if grep -Fq 'Deploy ToolScout Worker' "$f"; then
             echo 'Production-cycle proof must not race an arbitrary deploy. It runs after the real Worker cron instead.'
