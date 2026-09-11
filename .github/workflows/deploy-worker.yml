@@ -67,3 +67,12 @@ jobs:
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type IN ('submission_packaging_refresh','submission_execution_refresh','submission_verification_refresh','distribution_operating_priorities','distribution_economic_learning','indexnow_adaptive_delivery','indexnow_adapter_reconciliation','indexnow_retry_timestamp_normalized') ORDER BY created_at DESC LIMIT 30;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Observe strict affiliate coverage state
+        run: |
+          echo '=== AFFILIATE COVERAGE TRAFFIC TRUTH LINEAGE ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT traffic_truth,COUNT(*) AS runs,MIN(created_at) AS first_run,MAX(created_at) AS latest_run FROM affiliate_coverage_runs GROUP BY traffic_truth ORDER BY traffic_truth;"
+          echo '=== AFFILIATE COVERAGE LATEST STRICT SNAPSHOT ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' ORDER BY created_at DESC LIMIT 1;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
