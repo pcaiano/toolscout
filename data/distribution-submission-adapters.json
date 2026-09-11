@@ -4,6 +4,7 @@
       "surface_slug": "indexnow",
       "enabled": true,
       "allow_automatic": true,
+      "requires_payment": false,
       "method": "POST",
       "content_type": "application/json",
       "endpoint": "https://api.indexnow.org/indexnow",
