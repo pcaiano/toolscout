@@ -120,7 +120,7 @@ async function guardPageConfirmation(request,env){
   try{
     const result=await env.DB.batch([
       env.DB.prepare(`UPDATE sessions SET last_seen_at=datetime('now') WHERE session_id=?`).bind(session),
-      env.DB.prepare(`INSERT OR IGNORE INTO funnel_events (event_id,session_id,event_type,intent_slug,tool_slug,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))`).bind(`confirm_${session}`,session,'page_confirmed',null,null,eventPath,'browser-confirm',null)
+      env.DB.prepare(`INSERT INTO funnel_events (event_id,session_id,event_type,intent_slug,tool_slug,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(event_id) DO NOTHING`).bind(`confirm_${session}`,session,'page_confirmed',null,null,eventPath,'browser-confirm',null)
     ]);
     const recorded=Number(result?.[1]?.meta?.changes||0)>0||Number(established.already_confirmed||0)>0;
     return accept(recorded);
