@@ -45,7 +45,11 @@ jobs:
           grep -Fq "Copy ChatGPT task" human-action-entry-worker.js
           grep -Fq "CAPTCHA" human-action-entry-worker.js
           grep -Fq "material legal terms" human-action-entry-worker.js
-          grep -Fq "unmonetized human outbound" human-action-entry-worker.js
+          grep -Fq "unmonetized browser-confirmed outbound" human-action-entry-worker.js
+          grep -Fq "event_type='page_confirmed'" human-action-entry-worker.js
+          grep -Fq "classification,'unknown/legacy') IN ('likely-human','human')" human-action-entry-worker.js
+          grep -Fq "c.source NOT IN ('internal-test','synthetic','health-check','ci')" human-action-entry-worker.js
+          ! grep -Fq "unmonetized human outbound" human-action-entry-worker.js
           grep -Fq "economic priority" human-action-entry-worker.js
           grep -Fq "(o.human_required=1 OR o.status='approval_required')" human-action-entry-worker.js
           grep -Fq "(o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend')" human-action-entry-worker.js
@@ -54,7 +58,7 @@ jobs:
           grep -Fq "normalizeAffiliateState" human-action-entry-worker.js
           grep -Fq "effectiveStatus" human-action-entry-worker.js
           grep -Fq "source_of_truth:'canonical_affiliate_state'" human-action-entry-worker.js
-          grep -Fq "affiliate_source_of_truth" human-action-entry-worker.js
+          grep -Fq "affiliate_source_of_truth:'canonical affiliate state + browser-confirmed outbound traffic'" human-action-entry-worker.js
           grep -Fq "status==='ready_to_apply'" human-action-entry-worker.js
           grep -Fq "status==='human_action_required'" human-action-entry-worker.js
           grep -Fq "status==='approved_needs_link'" human-action-entry-worker.js
