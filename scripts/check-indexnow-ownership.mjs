@@ -22,6 +22,16 @@ requireText(
   'Generic submission execution must declare adaptive throughput as the IndexNow owner.'
 );
 requireText(
+  submission,
+  "FROM distribution_delivery_state WHERE surface_slug='indexnow' AND retry_after_at>datetime('now')",
+  'IndexNow packaging cooldown must use distribution_delivery_state.retry_after_at as its source of truth.'
+);
+rejectText(
+  submission,
+  "error='retryable:HTTP 429'",
+  'Legacy IndexNow cooldown detection based on an error string must not return.'
+);
+requireText(
   throughput,
   'async function adaptiveIndexNow(env)',
   'Adaptive IndexNow delivery function is missing.'
@@ -62,4 +72,4 @@ requireText(
   'Terminal IndexNow delivery must record the actual network attempt time.'
 );
 
-console.log('IndexNow ownership and timestamp invariants passed.');
+console.log('IndexNow ownership, cooldown and timestamp invariants passed.');
