@@ -51,6 +51,8 @@ jobs:
         run: node scripts/build-content-intelligence.mjs
       - name: Generate pages
         run: node scripts/generate-seo-pages.mjs
+      - name: Prune legacy and held SEO guides
+        run: node scripts/prune-uncontrolled-seo-guides.mjs
       - name: Enrich guides with decision context
         run: node scripts/enrich-decision-context.mjs
       - name: Generate commercial comparisons
