@@ -24,5 +24,6 @@
   "gorgias": {"url": "https://partner.gorgias.com/tes0ykxnwmqd", "enabled": true, "publicUrl": "https://www.gorgias.com/"},
   "mailerlite": {"url": "https://www.mailerlite.com/?linkId=lp_170762&sourceId=pedro-caiano&tenantId=mailerlite", "enabled": true, "publicUrl": "https://www.mailerlite.com/"},
   "podia": {"url": "https://www.podia.com/?via=pedro", "enabled": true, "publicUrl": "https://www.podia.com/"},
-  "lemlist": {"url": "https://get.lemlist.com/hae54bc9pvrl", "enabled": true, "publicUrl": "https://www.lemlist.com/"}
+  "lemlist": {"url": "https://get.lemlist.com/hae54bc9pvrl", "enabled": true, "publicUrl": "https://www.lemlist.com/"},
+  "instantly": {"url": "https://refer.instantly.ai/a4xna1ybm2ie", "enabled": true, "publicUrl": "https://instantly.ai/"}
 }
