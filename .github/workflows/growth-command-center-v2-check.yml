@@ -52,6 +52,22 @@ jobs:
           grep -Fq "(o.human_required=1 OR o.status='approval_required')" human-action-entry-worker.js
           grep -Fq "(o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend')" human-action-entry-worker.js
 
+      - name: Validate strict affiliate traffic truth
+        run: |
+          set -euo pipefail
+          grep -Fq "event_type='page_confirmed'" human-action-entry-worker.js
+          grep -Fq "event_type='page_confirmed'" growth-command-center-v2-worker.js
+          grep -Fq "traffic_truth='browser_confirmed'" growth-command-center-v2-worker.js
+          grep -Fq "traffic_truth:'browser_confirmed'" growth-command-center-v2-worker.js
+          grep -Fq "awaiting_strict_evidence" growth-command-center-v2-worker.js
+          grep -Fq "Browser-confirmed clicks · 30d" growth-command-center-v2-worker.js
+          grep -Fq "Browser-confirmed clicks · 30d" command-center-affiliate-table-worker.js
+          grep -Fq "browser-confirmed unmonetized outbound" growth-command-center-v2-worker.js
+          ! grep -Fq "Likely-human clicks · 30d" growth-command-center-v2-worker.js
+          ! grep -Fq "Likely-human clicks · 30d" command-center-affiliate-table-worker.js
+          ! grep -Fq "FROM affiliate_coverage_runs ORDER BY created_at DESC LIMIT 1" growth-command-center-v2-worker.js
+          ! grep -Fq "FROM affiliate_coverage_runs WHERE created_at<=datetime('now','-7 days')" growth-command-center-v2-worker.js
+
       - name: Validate Chairman Queue contract
         run: |
           set -euo pipefail
