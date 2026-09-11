@@ -4623,5 +4623,240 @@
       "monetizationCoverage": 50,
       "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
     }
+  },
+  {
+    "generatedAt": "2026-09-11T14:17:58.442Z",
+    "timezone": "Europe/Lisbon",
+    "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+    "traffic": {
+      "today": {
+        "total": 46,
+        "likelyHuman": 10,
+        "owner": 36,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 65,
+          "likelyHuman": 10,
+          "bots": 19,
+          "owner": 36,
+          "synthetic": 0,
+          "unknownLegacy": 0
+        }
+      },
+      "d7": {
+        "total": 102,
+        "likelyHuman": 53,
+        "owner": 49,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 427,
+          "likelyHuman": 53,
+          "bots": 198,
+          "owner": 49,
+          "synthetic": 0,
+          "unknownLegacy": 127
+        }
+      },
+      "d30": {
+        "total": 181,
+        "likelyHuman": 104,
+        "owner": 77,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 1773,
+          "likelyHuman": 104,
+          "bots": 290,
+          "owner": 78,
+          "synthetic": 0,
+          "unknownLegacy": 1301
+        }
+      },
+      "dailyLikelyHuman30d": [
+        {
+          "day": "2026-09-01",
+          "sessions": 10
+        },
+        {
+          "day": "2026-09-02",
+          "sessions": 24
+        },
+        {
+          "day": "2026-09-03",
+          "sessions": 6
+        },
+        {
+          "day": "2026-09-04",
+          "sessions": 15
+        },
+        {
+          "day": "2026-09-05",
+          "sessions": 5
+        },
+        {
+          "day": "2026-09-06",
+          "sessions": 5
+        },
+        {
+          "day": "2026-09-07",
+          "sessions": 14
+        },
+        {
+          "day": "2026-09-08",
+          "sessions": 9
+        },
+        {
+          "day": "2026-09-09",
+          "sessions": 2
+        },
+        {
+          "day": "2026-09-10",
+          "sessions": 4
+        },
+        {
+          "day": "2026-09-11",
+          "sessions": 10
+        }
+      ],
+      "averageDailyLikelyHuman30d": 3.47
+    },
+    "funnel30d": {
+      "recommendationStarted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "recommendationCompleted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "resultViewed": {
+        "events": 4,
+        "sessions": 2
+      },
+      "toolViewed": {
+        "events": 0,
+        "sessions": 0
+      },
+      "outboundClicked": {
+        "events": 2,
+        "sessions": 2
+      },
+      "recommendationCompletionRate": 100
+    },
+    "commercial30d": {
+      "outboundClicks": 2,
+      "sessionsWithOutbound": 2,
+      "monetizedOutbound": 1,
+      "monetizationCoverage": 50,
+      "humanSessionToOutboundRate": 1.9
+    },
+    "sources30d": [
+      {
+        "source": "direct",
+        "sessions": 86
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 5
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 4
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+        "sessions": 2
+      },
+      {
+        "source": "ref:producthunt.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:google.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dollarplatoon.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dataindex.pro",
+        "sessions": 1
+      }
+    ],
+    "intents30d": [
+      {
+        "intent": "beehiiv",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "best-ai-assistants",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "unlabelled",
+        "sessions": 104,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "best-free-crm",
+        "sessions": 1,
+        "recommendationCompletions": 1,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "general",
+        "sessions": 1,
+        "recommendationCompletions": 3,
+        "outboundClicks": 0
+      }
+    ],
+    "forensic": {
+      "definition": "Traffic KPIs count only likely-human sessions with an observed public page-entry event. Redirect-only sessions are excluded from traffic and funnel conversion metrics.",
+      "sessionStartsToday": [
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/",
+          "sessions": 9
+        },
+        {
+          "source": "ref:dataindex.pro",
+          "referrerHost": "dataindex.pro",
+          "path": "/",
+          "sessions": 1
+        }
+      ],
+      "redirectOnlyToday": 0,
+      "redirectOnly30d": 0,
+      "excludedRedirectClicks30d": 0
+    },
+    "revenue90d": {
+      "ledger": [],
+      "verified": [],
+      "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
+    },
+    "projectionInputs": {
+      "humanSessions30d": 104,
+      "humanDailyAverage30d": 3.47,
+      "recommendationCompletionRate": 1.9,
+      "humanSessionToOutboundRate": 1.9,
+      "monetizationCoverage": 50,
+      "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
+    }
   }
 ]
