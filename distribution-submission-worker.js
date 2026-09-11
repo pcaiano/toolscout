@@ -5,7 +5,7 @@ const INDEXNOW_BATCH_LIMIT=1000;
 const ASSET_SCAN_LIMIT=500;
 const safe=(v,n=2000)=>String(v??'').slice(0,n);
 async function cfg(request,env){try{const r=await env.ASSETS.fetch(new Request(new URL('/data/distribution-submission-adapters.json',request.url)));return r.ok?await r.json():{adapters:[],policy:{}};}catch{return {adapters:[],policy:{}}}}
-async function publishingProfile(request,env){try{const r=await env.ASSETS.fetch(new Request(new URL('/data/distribution-publishing-profile.json',request.url)));if(r.ok)return await r.json();}catch{}return {product:{name:'ToolScout',slug:'toolscout',website:'https://trytoolscout.org/',tagline:'Find the right software for the job — without the noise.',description:'ToolScout is an independent software discovery and recommendation platform.',category:'Software',feed_json:'https://trytoolscout.org/api/distribution/feed.json'},founder:{name:'Pedro Caiano'}};}
+async function publishingProfile(request,env){try{const r=await env.ASSETS.fetch(new Request(new URL('/data/distribution-publishing-profile.json',request.url)));if(r.ok)return await r.json();}catch{}return {product:{name:'ToolScout',slug:'toolscout',website:'https://trytoolscout.org/',tagline:'Find the right software for the job, without the noise.',description:'ToolScout is an independent software discovery and recommendation platform.',category:'Software',feed_json:'https://trytoolscout.org/api/distribution/feed.json'},founder:{name:'Pedro Caiano'}};}
 async function assets(request,env){try{const r=await env.DB.prepare(`SELECT asset_url url,asset_type title FROM distribution_asset_state WHERE asset_url IS NOT NULL ORDER BY last_seen_at DESC LIMIT ${ASSET_SCAN_LIMIT}`).all();const items=(r.results||[]).filter(x=>/^https:\/\/trytoolscout\.org\//.test(String(x.url||'')));if(items.length)return items;}catch{}try{const r=await env.ASSETS.fetch(new Request(new URL('/api/distribution/feed.json',request.url)));if(!r.ok)return[];const d=await r.json();return (d.items||[]).slice(0,50);}catch{return[]}}
 function hash(value){let h=2166136261;for(const ch of String(value||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
 function chooseAsset(surface,items){if(!items.length)return null;const idx=hash(`${surface.surface_slug}:${surface.surface_type||''}`)%items.length;return items[idx];}
@@ -16,7 +16,7 @@ function payloadFor(adapter,chosen,profile={}){const product=profile.product||{}
   if(adapter?.payload_kind==='listed_startups_listing')return {
     name:String(product.name||'ToolScout'),
     slug:String(product.slug||'toolscout'),
-    tagline:String(product.tagline||'Find the right software for the job — without the noise.'),
+    tagline:String(product.tagline||'Find the right software for the job, without the noise.'),
     description:String(product.description||'ToolScout is an independent software discovery and recommendation platform.'),
     url:String(product.website||'https://trytoolscout.org/'),
     categories:[String(adapter.validated_category||product.category||'Software')]
@@ -24,7 +24,7 @@ function payloadFor(adapter,chosen,profile={}){const product=profile.product||{}
   if(adapter?.payload_kind==='indietool_app')return {
     appName:String(product.name||'ToolScout'),
     appUrl:String(product.website||'https://trytoolscout.org/'),
-    landingPageHeading:String(product.tagline||'Find the right software for the job — without the noise.'),
+    landingPageHeading:String(product.tagline||'Find the right software for the job, without the noise.'),
     landingPageSubHeading:String(product.description||'Independent software discovery and recommendations.'),
     category:String((product.indietool_category_preference||[])[0]||'Productivity'),
     creatorName:String(founder.name||'Pedro Caiano'),
