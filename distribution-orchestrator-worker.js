@@ -1,4 +1,4 @@
-import base from './distribution-throughput-worker.js';
+import base from './distribution-priority-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
