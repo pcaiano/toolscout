@@ -9,7 +9,9 @@ on:
       - 'distribution-priority-worker.js'
       - 'distribution-submission-worker.js'
       - 'distribution-orchestrator-worker.js'
+      - 'data/distribution-publishing-profile.json'
       - 'scripts/check-indexnow-ownership.mjs'
+      - 'scripts/check-distribution-copy.mjs'
       - 'migrations/0044_autonomous_distribution_qualification.sql'
       - 'migrations/0053_distribution_delivery_state.sql'
       - '.github/workflows/autonomous-distribution-check.yml'
@@ -22,7 +24,9 @@ on:
       - 'distribution-priority-worker.js'
       - 'distribution-submission-worker.js'
       - 'distribution-orchestrator-worker.js'
+      - 'data/distribution-publishing-profile.json'
       - 'scripts/check-indexnow-ownership.mjs'
+      - 'scripts/check-distribution-copy.mjs'
       - 'migrations/0044_autonomous_distribution_qualification.sql'
       - 'migrations/0053_distribution_delivery_state.sql'
       - '.github/workflows/autonomous-distribution-check.yml'
@@ -47,8 +51,11 @@ jobs:
           node --check distribution-submission-worker.js
           node --check distribution-orchestrator-worker.js
           node --check scripts/check-indexnow-ownership.mjs
+          node --check scripts/check-distribution-copy.mjs
       - name: Validate IndexNow ownership and retry timestamp invariants
         run: node scripts/check-indexnow-ownership.mjs
+      - name: Validate distribution-facing copy punctuation
+        run: node scripts/check-distribution-copy.mjs
       - name: Validate closed-loop architecture, delivery state and policy guards
         run: |
           test -s migrations/0044_autonomous_distribution_qualification.sql
