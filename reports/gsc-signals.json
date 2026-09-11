@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T10:46:11.414Z",
+  "generatedAt": "2026-09-11T10:46:32.471Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-11",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1771,
-    "ctr": 0.0565
+    "impressions": 1775,
+    "ctr": 0.0563
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,12 +25,12 @@
     "guide": {
       "pages": 31,
       "clicks": 0,
-      "impressions": 1150
+      "impressions": 1152
     },
     "home": {
       "pages": 2,
       "clicks": 1,
-      "impressions": 62
+      "impressions": 63
     },
     "other": {
       "pages": 5,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 33,
       "clicks": 0,
-      "impressions": 502
+      "impressions": 503
     }
   },
   "pageCount": 76,
@@ -52,9 +52,9 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 441,
+      "impressions": 442,
       "ctr": 0,
-      "position": 77.7052,
+      "position": 77.7104,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -71,8 +71,8 @@
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 79,
-          "position": 77.7722
+          "impressions": 80,
+          "position": 77.8
         },
         {
           "query": "best seo tool for agencies",
@@ -198,15 +198,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 169,
+      "impressions": 170,
       "ctr": 0,
-      "position": 55.4438,
+      "position": 55.4588,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 80,
-          "position": 57.0625
+          "impressions": 81,
+          "position": 57.0741
         },
         {
           "query": "semrush software",
@@ -545,15 +545,15 @@
       "type": "home",
       "intent": null,
       "clicks": 1,
-      "impressions": 56,
-      "ctr": 1.7857,
-      "position": 6.6071,
+      "impressions": 57,
+      "ctr": 1.7544,
+      "position": 6.6316,
       "topQueries": [
         {
           "query": "toolscout",
           "clicks": 1,
-          "impressions": 26,
-          "position": 9.1538
+          "impressions": 27,
+          "position": 9.1111
         }
       ]
     },
@@ -564,15 +564,15 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 54,
+      "impressions": 55,
       "ctr": 0,
-      "position": 39.4815,
+      "position": 39.8727,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 14,
-          "position": 44.9286
+          "impressions": 15,
+          "position": 46
         },
         {
           "query": "project workflow tools",
@@ -1924,9 +1924,9 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 441,
+      "impressions": 442,
       "ctr": 0,
-      "position": 77.7052,
+      "position": 77.7104,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -1943,8 +1943,8 @@
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 79,
-          "position": 77.7722
+          "impressions": 80,
+          "position": 77.8
         },
         {
           "query": "best seo tool for agencies",
@@ -2204,15 +2204,15 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools.html",
       "clicks": 0,
-      "impressions": 54,
+      "impressions": 55,
       "ctr": 0,
-      "position": 39.4815,
+      "position": 39.8727,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 14,
-          "position": 44.9286
+          "impressions": 15,
+          "position": 46
         },
         {
           "query": "project workflow tools",

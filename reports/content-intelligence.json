@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T10:46:14.668Z",
+  "generatedAt": "2026-09-11T10:46:35.996Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -20,7 +20,7 @@
       "observedGscIntents": 31,
       "observedGscPages": 76,
       "searchClicks": 1,
-      "searchImpressions": 1771,
+      "searchImpressions": 1775,
       "organicAcquisitionStatus": "early-search-acquisition",
       "actionableOpportunities": 22,
       "firstPageOpportunities": 11,
@@ -39,8 +39,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 441,
-        "position": 77.7052,
+        "impressions": 442,
+        "position": 77.7104,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -80,8 +80,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 54,
-        "position": 39.4815,
+        "impressions": 55,
+        "position": 39.8727,
         "topTools": [
           "asana",
           "wrike",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T10:46:14.537Z",
+  "generatedAt": "2026-09-11T10:46:35.860Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 1,
-      "impressions": 1771,
-      "ctr": 0.0565
+      "impressions": 1775,
+      "ctr": 0.0563
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -38,10 +38,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 441,
+        "impressions": 442,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.7052,
+        "position": 77.7104,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -79,10 +79,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 54,
+        "impressions": 55,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.4815,
+        "position": 39.8727,
         "opportunity": "authority-gap",
         "opportunityScore": 28,
         "meaningfulSample": true,
