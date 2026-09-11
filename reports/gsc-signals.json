@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T18:38:43.026Z",
+  "generatedAt": "2026-09-11T21:46:34.214Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-11",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1846,
-    "ctr": 0.0542
+    "impressions": 1863,
+    "ctr": 0.0537
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,12 +25,12 @@
     "guide": {
       "pages": 31,
       "clicks": 0,
-      "impressions": 1206
+      "impressions": 1216
     },
     "home": {
       "pages": 2,
       "clicks": 1,
-      "impressions": 67
+      "impressions": 70
     },
     "other": {
       "pages": 5,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 33,
       "clicks": 0,
-      "impressions": 516
+      "impressions": 520
     }
   },
   "pageCount": 76,
@@ -52,27 +52,27 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 465,
+      "impressions": 470,
       "ctr": 0,
-      "position": 77.4495,
+      "position": 77.4064,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 144,
-          "position": 74.7153
+          "impressions": 146,
+          "position": 74.6164
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 87,
-          "position": 81.3333
+          "impressions": 89,
+          "position": 81.3258
         },
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 85,
-          "position": 77.6588
+          "impressions": 86,
+          "position": 77.5698
         },
         {
           "query": "best seo tool for agencies",
@@ -198,9 +198,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 173,
+      "impressions": 174,
       "ctr": 0,
-      "position": 55.3642,
+      "position": 55.3448,
       "topQueries": [
         {
           "query": "semrush tool",
@@ -217,8 +217,8 @@
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 24,
-          "position": 51.125
+          "impressions": 25,
+          "position": 51.16
         },
         {
           "query": "semrush tools",
@@ -253,9 +253,9 @@
       "type": "guide",
       "intent": "best-seo-keyword-research-tools",
       "clicks": 0,
-      "impressions": 161,
+      "impressions": 164,
       "ctr": 0,
-      "position": 74.5217,
+      "position": 74.1524,
       "topQueries": [
         {
           "query": "website research tool",
@@ -399,9 +399,9 @@
       "type": "guide",
       "intent": "best-funnel-builder",
       "clicks": 0,
-      "impressions": 107,
+      "impressions": 108,
       "ctr": 0,
-      "position": 77.1776,
+      "position": 77.3056,
       "topQueries": [
         {
           "query": "funnel builder",
@@ -418,8 +418,8 @@
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 24,
-          "position": 85.8333
+          "impressions": 25,
+          "position": 86.04
         },
         {
           "query": "funnelbuilder",
@@ -545,15 +545,15 @@
       "type": "home",
       "intent": null,
       "clicks": 1,
-      "impressions": 61,
-      "ctr": 1.6393,
-      "position": 6.6721,
+      "impressions": 64,
+      "ctr": 1.5625,
+      "position": 6.8125,
       "topQueries": [
         {
           "query": "toolscout",
           "clicks": 1,
-          "impressions": 28,
-          "position": 9.0357
+          "impressions": 31,
+          "position": 9.0968
         },
         {
           "query": "trucscout",
@@ -704,9 +704,9 @@
       "type": "guide",
       "intent": "best-free-project-management-tools",
       "clicks": 0,
-      "impressions": 38,
+      "impressions": 39,
       "ctr": 0,
-      "position": 52.9737,
+      "position": 53.2308,
       "topQueries": [
         {
           "query": "free online project manager tools",
@@ -729,8 +729,8 @@
         {
           "query": "free online tools for project management",
           "clicks": 0,
-          "impressions": 2,
-          "position": 64.5
+          "impressions": 3,
+          "position": 64
         },
         {
           "query": "free online pm tool",
@@ -761,6 +761,55 @@
           "clicks": 0,
           "impressions": 1,
           "position": 78
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/moz-pro.html",
+      "pathname": "/tools/moz-pro.html",
+      "key": "moz-pro",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 36,
+      "ctr": 0,
+      "position": 68.9444,
+      "topQueries": [
+        {
+          "query": "moz pro tools",
+          "clicks": 0,
+          "impressions": 18,
+          "position": 69.6111
+        },
+        {
+          "query": "moz free trial",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 67.625
+        },
+        {
+          "query": "moz pro overview",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 71.5
+        },
+        {
+          "query": "what is moz pro",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 66
+        },
+        {
+          "query": "moz pro free trial",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 61
+        },
+        {
+          "query": "moz pro trial",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 66
         }
       ]
     },
@@ -847,55 +896,6 @@
           "clicks": 0,
           "impressions": 3,
           "position": 77.6667
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/moz-pro.html",
-      "pathname": "/tools/moz-pro.html",
-      "key": "moz-pro",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 33,
-      "ctr": 0,
-      "position": 68.9697,
-      "topQueries": [
-        {
-          "query": "moz pro tools",
-          "clicks": 0,
-          "impressions": 17,
-          "position": 69.4706
-        },
-        {
-          "query": "moz free trial",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 67.8333
-        },
-        {
-          "query": "moz pro overview",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 71.5
-        },
-        {
-          "query": "what is moz pro",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 66
-        },
-        {
-          "query": "moz pro free trial",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 61
-        },
-        {
-          "query": "moz pro trial",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 66
         }
       ]
     },
@@ -1818,7 +1818,14 @@
       "impressions": 1,
       "ctr": 0,
       "position": 71,
-      "topQueries": []
+      "topQueries": [
+        {
+          "query": "+figma trial access best de",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 71
+        }
+      ]
     },
     {
       "page": "https://trytoolscout.org/tools/gemini.html",
@@ -1937,27 +1944,27 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 465,
+      "impressions": 470,
       "ctr": 0,
-      "position": 77.4495,
+      "position": 77.4064,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 144,
-          "position": 74.7153
+          "impressions": 146,
+          "position": 74.6164
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 87,
-          "position": 81.3333
+          "impressions": 89,
+          "position": 81.3258
         },
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 85,
-          "position": 77.6588
+          "impressions": 86,
+          "position": 77.5698
         },
         {
           "query": "best seo tool for agencies",
@@ -2077,9 +2084,9 @@
       "intent": "best-seo-keyword-research-tools",
       "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 161,
+      "impressions": 164,
       "ctr": 0,
-      "position": 74.5217,
+      "position": 74.1524,
       "topQueries": [
         {
           "query": "website research tool",
@@ -2147,9 +2154,9 @@
       "intent": "best-funnel-builder",
       "page": "https://trytoolscout.org/best-funnel-builder.html",
       "clicks": 0,
-      "impressions": 107,
+      "impressions": 108,
       "ctr": 0,
-      "position": 77.1776,
+      "position": 77.3056,
       "topQueries": [
         {
           "query": "funnel builder",
@@ -2166,8 +2173,8 @@
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 24,
-          "position": 85.8333
+          "impressions": 25,
+          "position": 86.04
         },
         {
           "query": "funnelbuilder",
@@ -2345,9 +2352,9 @@
       "intent": "best-free-project-management-tools",
       "page": "https://trytoolscout.org/best-free-project-management-tools.html",
       "clicks": 0,
-      "impressions": 38,
+      "impressions": 39,
       "ctr": 0,
-      "position": 52.9737,
+      "position": 53.2308,
       "topQueries": [
         {
           "query": "free online project manager tools",
@@ -2370,8 +2377,8 @@
         {
           "query": "free online tools for project management",
           "clicks": 0,
-          "impressions": 2,
-          "position": 64.5
+          "impressions": 3,
+          "position": 64
         },
         {
           "query": "free online pm tool",
