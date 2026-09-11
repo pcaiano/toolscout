@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T09:06:44.761Z",
+  "generatedAt": "2026-09-11T09:13:18.709Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
@@ -187,55 +187,6 @@
       ]
     },
     {
-      "intent": "best-funnel-builder",
-      "priorityScore": 45,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 98,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 77.6327,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 20,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "topTools": [
-        "kit",
-        "getresponse",
-        "systeme-io"
-      ]
-    },
-    {
       "intent": "best-crm-for-sales-teams",
       "priorityScore": 45,
       "lane": "seo-authority-depth",
@@ -282,6 +233,54 @@
         "pipedrive",
         "freshsales",
         "close"
+      ]
+    },
+    {
+      "intent": "best-funnel-builder",
+      "priorityScore": 42,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 98,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 77.6327,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 20,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "topTools": [
+        "getresponse",
+        "systeme-io"
       ]
     },
     {
@@ -2913,7 +2912,7 @@
       ]
     },
     {
-      "intent": "best-funnel-builder",
+      "intent": "best-crm-for-sales-teams",
       "priorityScore": 45,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
@@ -2940,8 +2939,8 @@
       ]
     },
     {
-      "intent": "best-crm-for-sales-teams",
-      "priorityScore": 45,
+      "intent": "best-funnel-builder",
+      "priorityScore": 42,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,

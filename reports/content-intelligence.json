@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T09:06:44.831Z",
+  "generatedAt": "2026-09-11T09:13:18.775Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -63,14 +63,13 @@
       },
       {
         "intent": "best-funnel-builder",
-        "priorityScore": 45,
+        "priorityScore": 42,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
         "impressions": 98,
         "position": 77.6327,
         "topTools": [
-          "kit",
           "getresponse",
           "systeme-io"
         ]

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T09:06:44.673Z",
+  "generatedAt": "2026-09-11T09:13:18.634Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -146,43 +146,6 @@
       "action": "repair-existing"
     },
     {
-      "intent": "best-funnel-builder",
-      "title": "Best Funnel Builder",
-      "category": "marketing",
-      "priorityScore": 45,
-      "topFit": 8.84,
-      "eligibleToolCount": 3,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 6,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 98,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 77.6327,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 20,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "signalBasis": "observed-gsc-meaningful",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "kit",
-        "getresponse",
-        "systeme-io"
-      ],
-      "requiredCapabilities": [
-        "funnel",
-        "funnels"
-      ],
-      "editorialEligibility": "eligible",
-      "action": "repair-existing"
-    },
-    {
       "intent": "best-crm-for-sales-teams",
       "title": "Best CRM for Sales Teams",
       "category": "crm",
@@ -213,6 +176,42 @@
         "close"
       ],
       "requiredCapabilities": [],
+      "editorialEligibility": "eligible",
+      "action": "repair-existing"
+    },
+    {
+      "intent": "best-funnel-builder",
+      "title": "Best Funnel Builder",
+      "category": "marketing",
+      "priorityScore": 42,
+      "topFit": 8.66,
+      "eligibleToolCount": 2,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 4,
+      "commercialSignal": 20,
+      "affiliateSignal": 5,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 98,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 77.6327,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 20,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "signalBasis": "observed-gsc-meaningful",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "getresponse",
+        "systeme-io"
+      ],
+      "requiredCapabilities": [
+        "funnel",
+        "funnels"
+      ],
       "editorialEligibility": "eligible",
       "action": "repair-existing"
     },
