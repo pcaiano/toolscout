@@ -6,6 +6,7 @@ on:
       - 'distribution-impact-worker.js'
       - 'distribution-orchestrator-worker.js'
       - 'distribution-priority-worker.js'
+      - 'distribution-command-worker.js'
       - 'human-action-entry-worker.js'
       - 'migrations/0048_distribution_economic_learning.sql'
       - 'migrations/0057_distribution_browser_confirmed_learning.sql'
@@ -17,6 +18,7 @@ on:
       - 'distribution-impact-worker.js'
       - 'distribution-orchestrator-worker.js'
       - 'distribution-priority-worker.js'
+      - 'distribution-command-worker.js'
       - 'human-action-entry-worker.js'
       - 'migrations/0048_distribution_economic_learning.sql'
       - 'migrations/0057_distribution_browser_confirmed_learning.sql'
@@ -39,6 +41,7 @@ jobs:
           node --check distribution-impact-worker.js
           node --check distribution-priority-worker.js
           node --check distribution-orchestrator-worker.js
+          node --check distribution-command-worker.js
           node --check human-action-entry-worker.js
       - name: Validate browser-confirmed economic learning
         run: |
@@ -76,3 +79,10 @@ jobs:
           grep -Fq "operating_decision,'explore'" human-action-entry-worker.js
           grep -Fq "metric_label:'economic priority'" human-action-entry-worker.js
           grep -Fq "operating_decision,'explore')<>'suspend'" human-action-entry-worker.js
+      - name: Validate Command Center operating visibility
+        run: |
+          grep -Fq "operating:{scale:o.scale||0,measure:o.measure||0,explore:o.explore||0,suspend:o.suspend||0}" distribution-command-worker.js
+          grep -Fq "card('Scale'" distribution-command-worker.js
+          grep -Fq "card('Measure'" distribution-command-worker.js
+          grep -Fq "card('Explore'" distribution-command-worker.js
+          grep -Fq "card('Suspend'" distribution-command-worker.js
