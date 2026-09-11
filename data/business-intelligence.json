@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-10T20:21:38.252Z",
+  "generatedAt": "2026-09-11T00:00:49.425Z",
   "timezone": "Europe/Lisbon",
   "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 5,
-      "likelyHuman": 4,
+      "total": 2,
+      "likelyHuman": 1,
       "owner": 1,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 25,
-        "likelyHuman": 5,
-        "bots": 19,
+        "total": 2,
+        "likelyHuman": 1,
+        "bots": 0,
         "owner": 1,
         "synthetic": 0,
         "unknownLegacy": 0
@@ -27,28 +27,28 @@
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 522,
-        "likelyHuman": 187,
-        "bots": 181,
+        "total": 516,
+        "likelyHuman": 55,
+        "bots": 180,
         "owner": 16,
         "synthetic": 0,
-        "unknownLegacy": 138
+        "unknownLegacy": 265
       }
     },
     "d30": {
-      "total": 135,
-      "likelyHuman": 94,
-      "owner": 41,
+      "total": 137,
+      "likelyHuman": 95,
+      "owner": 42,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 1708,
-        "likelyHuman": 344,
+        "total": 1710,
+        "likelyHuman": 95,
         "bots": 271,
-        "owner": 42,
+        "owner": 43,
         "synthetic": 0,
-        "unknownLegacy": 1051
+        "unknownLegacy": 1301
       }
     },
     "dailyLikelyHuman30d": [
@@ -91,9 +91,13 @@
       {
         "day": "2026-09-10",
         "sessions": 4
+      },
+      {
+        "day": "2026-09-11",
+        "sessions": 1
       }
     ],
-    "averageDailyLikelyHuman30d": 3.13
+    "averageDailyLikelyHuman30d": 3.17
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -128,7 +132,7 @@
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 77
+      "sessions": 78
     },
     {
       "source": "ref:app.partnerstack.com",
@@ -174,7 +178,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 94,
+      "sessions": 95,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -198,24 +202,12 @@
         "source": "direct",
         "referrerHost": "none",
         "path": "/",
-        "sessions": 2
-      },
-      {
-        "source": "ref:app.partnerstack.com",
-        "referrerHost": "app.partnerstack.com",
-        "path": "/",
-        "sessions": 1
-      },
-      {
-        "source": "utm_source=peerlist",
-        "referrerHost": "peerlist.io",
-        "path": "/",
         "sessions": 1
       }
     ],
-    "redirectOnlyToday": 1,
-    "redirectOnly30d": 250,
-    "excludedRedirectClicks30d": 250
+    "redirectOnlyToday": 0,
+    "redirectOnly30d": 0,
+    "excludedRedirectClicks30d": 0
   },
   "revenue90d": {
     "ledger": [],
@@ -223,8 +215,8 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 94,
-    "humanDailyAverage30d": 3.13,
+    "humanSessions30d": 95,
+    "humanDailyAverage30d": 3.17,
     "recommendationCompletionRate": 2.1,
     "humanSessionToOutboundRate": 2.1,
     "monetizationCoverage": 50,
