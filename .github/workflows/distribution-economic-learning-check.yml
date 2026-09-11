@@ -5,14 +5,22 @@ on:
     paths:
       - 'distribution-impact-worker.js'
       - 'distribution-orchestrator-worker.js'
+      - 'distribution-priority-worker.js'
+      - 'human-action-entry-worker.js'
       - 'migrations/0048_distribution_economic_learning.sql'
+      - 'migrations/0057_distribution_browser_confirmed_learning.sql'
+      - 'migrations/0058_distribution_operating_decisions.sql'
       - '.github/workflows/distribution-economic-learning-check.yml'
   push:
     branches: [main]
     paths:
       - 'distribution-impact-worker.js'
       - 'distribution-orchestrator-worker.js'
+      - 'distribution-priority-worker.js'
+      - 'human-action-entry-worker.js'
       - 'migrations/0048_distribution_economic_learning.sql'
+      - 'migrations/0057_distribution_browser_confirmed_learning.sql'
+      - 'migrations/0058_distribution_operating_decisions.sql'
       - '.github/workflows/distribution-economic-learning-check.yml'
   workflow_dispatch:
 
@@ -29,14 +37,42 @@ jobs:
       - name: Validate syntax
         run: |
           node --check distribution-impact-worker.js
+          node --check distribution-priority-worker.js
           node --check distribution-orchestrator-worker.js
-      - name: Validate economic learning architecture
+          node --check human-action-entry-worker.js
+      - name: Validate browser-confirmed economic learning
         run: |
           test -s migrations/0048_distribution_economic_learning.sql
+          test -s migrations/0057_distribution_browser_confirmed_learning.sql
+          test -s migrations/0058_distribution_operating_decisions.sql
           grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_economic_learning' migrations/0048_distribution_economic_learning.sql
+          grep -Fq 'browser_confirmed_sessions_30d' migrations/0057_distribution_browser_confirmed_learning.sql
+          grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_surface_costs' migrations/0057_distribution_browser_confirmed_learning.sql
+          grep -Fq "VALUES('uneed',14.99,'USD'" migrations/0057_distribution_browser_confirmed_learning.sql
+          grep -Fq "event_type='page_confirmed'" distribution-impact-worker.js
           grep -Fq 'export async function distributionSurfaceMetrics' distribution-impact-worker.js
           grep -Fq "import {distributionSurfaceMetrics}" distribution-orchestrator-worker.js
           grep -Fq 'function economicBoost' distribution-orchestrator-worker.js
-          grep -Fq "distribution_economic_learning" distribution-orchestrator-worker.js
-          grep -Fq "No surface is penalized for missing data" distribution-orchestrator-worker.js
+          grep -Fq 'function evidenceGrade' distribution-orchestrator-worker.js
+          grep -Fq 'function paidPolicy' distribution-orchestrator-worker.js
+          grep -Fq "evidence_basis:'browser_confirmed'" distribution-orchestrator-worker.js
           grep -Fq "/api/distribution/economic-learning" distribution-orchestrator-worker.js
+      - name: Validate operating priority and no-auto-spend policy
+        run: |
+          grep -Fq 'operating_decision' migrations/0058_distribution_operating_decisions.sql
+          grep -Fq 'priority_weight' migrations/0058_distribution_operating_decisions.sql
+          grep -Fq "import base from './distribution-throughput-worker.js'" distribution-priority-worker.js
+          grep -Fq 'export function operatingDecision' distribution-priority-worker.js
+          grep -Fq 'export function priorityWeight' distribution-priority-worker.js
+          grep -Fq "hold_no_return" distribution-priority-worker.js
+          grep -Fq "status='approval_required'" distribution-priority-worker.js
+          grep -Fq 'Paid distribution is never executed automatically' distribution-priority-worker.js
+          grep -Fq 'exploration_slot' distribution-priority-worker.js
+          grep -Fq "/api/distribution/operating-decisions" distribution-priority-worker.js
+          grep -Fq "import base from './distribution-priority-worker.js'" distribution-orchestrator-worker.js
+      - name: Validate Chairman Queue economic ordering
+        run: |
+          grep -Fq 'LEFT JOIN distribution_economic_learning' human-action-entry-worker.js
+          grep -Fq "operating_decision,'explore'" human-action-entry-worker.js
+          grep -Fq "metric_label:'economic priority'" human-action-entry-worker.js
+          grep -Fq "operating_decision,'explore')<>'suspend'" human-action-entry-worker.js
