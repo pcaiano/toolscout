@@ -63,10 +63,12 @@ jobs:
           grep -Fq "import base from './affiliate-coverage-entry-worker.js'" human-action-entry-worker.js
           grep -Fq "import base from './distribution-impact-entry-worker.js'" affiliate-coverage-entry-worker.js
           grep -Fq "import base from './agent-protocol-core-worker.js'" distribution-impact-entry-worker.js
-          grep -Fq "classification='likely-human'" distribution-impact-worker.js
+          grep -Fq "pc.event_type='page_confirmed'" distribution-impact-worker.js
+          grep -Fq "f.event_type='session_started'" distribution-impact-worker.js
           grep -Fq "affiliate_active_at_click" distribution-impact-worker.js
           grep -Fq "status IN ('confirmed','paid')" distribution-impact-worker.js
           grep -Fq "session_id IS NOT NULL" distribution-impact-worker.js
-          grep -Fq "First-touch likely-human session" distribution-impact-worker.js
+          grep -Fq "First-touch browser-confirmed session" distribution-impact-worker.js
+          grep -Fq "Distribution Engine UTM/source marker" distribution-impact-worker.js
           grep -Fq "distributionImpact" distribution-impact-entry-worker.js
           grep -Fq "Distribution Engine impact" distribution-impact-entry-worker.js
