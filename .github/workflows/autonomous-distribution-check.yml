@@ -5,6 +5,8 @@ on:
     paths:
       - 'distribution-autonomous-worker.js'
       - 'distribution-throughput-worker.js'
+      - 'distribution-throughput-integrity-worker.js'
+      - 'distribution-priority-worker.js'
       - 'distribution-submission-worker.js'
       - 'distribution-orchestrator-worker.js'
       - 'scripts/check-indexnow-ownership.mjs'
@@ -16,6 +18,8 @@ on:
     paths:
       - 'distribution-autonomous-worker.js'
       - 'distribution-throughput-worker.js'
+      - 'distribution-throughput-integrity-worker.js'
+      - 'distribution-priority-worker.js'
       - 'distribution-submission-worker.js'
       - 'distribution-orchestrator-worker.js'
       - 'scripts/check-indexnow-ownership.mjs'
@@ -38,6 +42,8 @@ jobs:
         run: |
           node --check distribution-autonomous-worker.js
           node --check distribution-throughput-worker.js
+          node --check distribution-throughput-integrity-worker.js
+          node --check distribution-priority-worker.js
           node --check distribution-submission-worker.js
           node --check distribution-orchestrator-worker.js
           node --check scripts/check-indexnow-ownership.mjs
@@ -52,7 +58,9 @@ jobs:
           grep -Fq 'retry_after_at' migrations/0053_distribution_delivery_state.sql
           grep -Fq 'verification_state' migrations/0053_distribution_delivery_state.sql
           grep -Fq 'time_to_verify_seconds' migrations/0053_distribution_delivery_state.sql
-          grep -Fq "import base from './distribution-throughput-worker.js'" distribution-orchestrator-worker.js
+          grep -Fq "import base from './distribution-priority-worker.js'" distribution-orchestrator-worker.js
+          grep -Fq "import base from './distribution-throughput-integrity-worker.js'" distribution-priority-worker.js
+          grep -Fq "import base from './distribution-throughput-worker.js'" distribution-throughput-integrity-worker.js
           grep -Fq "import base from './distribution-autonomous-worker.js'" distribution-throughput-worker.js
           grep -Fq 'BACKOFF_HOURS=[1,2,4,8,12]' distribution-throughput-worker.js
           grep -Fq 'RESEARCH_BUDGET=4' distribution-throughput-worker.js
