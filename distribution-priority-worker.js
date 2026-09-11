@@ -1,4 +1,4 @@
-import base from './distribution-throughput-worker.js';
+import base from './distribution-throughput-integrity-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const TERMINAL=new Set(['policy_blocked','rejected','skipped','unavailable_free']);
