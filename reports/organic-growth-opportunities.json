@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-11T10:46:35.922Z",
+  "generatedAt": "2026-09-11T13:49:02.699Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 1775,
+    "searchImpressions": 1776,
     "ctr": 0.0563,
     "gscStartDate": "2026-08-15",
     "gscEndDate": "2026-09-11",
@@ -26,7 +26,7 @@
     "observedGscIntents": 31,
     "observedGscPages": 76,
     "searchClicks": 1,
-    "searchImpressions": 1775,
+    "searchImpressions": 1776,
     "organicAcquisitionStatus": "early-search-acquisition",
     "actionableOpportunities": 22,
     "firstPageOpportunities": 11,
@@ -72,10 +72,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 442,
+        "impressions": 443,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.7104,
+        "position": 77.684,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -1274,39 +1274,6 @@
       ]
     },
     {
-      "intent": "best-customer-support-tools",
-      "priorityScore": 56,
-      "lane": "measure",
-      "action": "measure-and-recheck",
-      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "none",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "measure",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": null,
-      "topTools": [
-        "intercom",
-        "freshdesk",
-        "zendesk"
-      ]
-    },
-    {
       "intent": "best-ai-marketing-tools",
       "priorityScore": 53,
       "lane": "measure",
@@ -1369,6 +1336,39 @@
         "bigcommerce",
         "woocommerce",
         "shopify"
+      ]
+    },
+    {
+      "intent": "best-customer-support-tools",
+      "priorityScore": 51,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "none",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": null,
+      "topTools": [
+        "intercom",
+        "freshdesk",
+        "zendesk"
       ]
     },
     {
@@ -2327,15 +2327,15 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 442,
+      "impressions": 443,
       "ctr": 0,
-      "position": 77.7104,
+      "position": 77.684,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 135,
-          "position": 75.2296
+          "impressions": 136,
+          "position": 75.1618
         },
         {
           "query": "seo tools for agency",
@@ -2365,7 +2365,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 5.688,
+      "opportunityScore": 5.703,
       "outcome": "visibility-only"
     },
     {
@@ -3526,28 +3526,6 @@
       ]
     },
     {
-      "intent": "best-customer-support-tools",
-      "priorityScore": 56,
-      "lane": "measure",
-      "action": "measure-and-recheck",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "measure",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
       "intent": "best-ai-marketing-tools",
       "priorityScore": 53,
       "lane": "measure",
@@ -3572,6 +3550,28 @@
     {
       "intent": "best-ecommerce-platforms",
       "priorityScore": 53,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-customer-support-tools",
+      "priorityScore": 51,
       "lane": "measure",
       "action": "measure-and-recheck",
       "ownerActionRequired": false,

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T10:46:32.471Z",
+  "generatedAt": "2026-09-11T13:48:57.054Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,7 +8,7 @@
   "endDate": "2026-09-11",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1775,
+    "impressions": 1776,
     "ctr": 0.0563
   },
   "pageTypeSummary": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 31,
       "clicks": 0,
-      "impressions": 1152
+      "impressions": 1153
     },
     "home": {
       "pages": 2,
@@ -52,15 +52,15 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 442,
+      "impressions": 443,
       "ctr": 0,
-      "position": 77.7104,
+      "position": 77.684,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 135,
-          "position": 75.2296
+          "impressions": 136,
+          "position": 75.1618
         },
         {
           "query": "seo tools for agency",
@@ -1924,15 +1924,15 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 442,
+      "impressions": 443,
       "ctr": 0,
-      "position": 77.7104,
+      "position": 77.684,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 135,
-          "position": 75.2296
+          "impressions": 136,
+          "position": 75.1618
         },
         {
           "query": "seo tools for agency",

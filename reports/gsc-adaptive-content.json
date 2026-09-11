@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-11T10:46:36.463Z",
-  "gscGeneratedAt": "2026-09-11T10:46:32.471Z",
+  "generatedAt": "2026-09-11T13:49:03.369Z",
+  "gscGeneratedAt": "2026-09-11T13:48:57.054Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 7,
@@ -113,9 +113,9 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 442,
+      "impressions": 443,
       "clicks": 0,
-      "position": 77.7104,
+      "position": 77.684,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
