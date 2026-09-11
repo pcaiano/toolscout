@@ -1,7 +1,7 @@
 {
   "summary": {
     "tools": 101,
-    "generatedAt": "2026-09-11T09:40:50.056Z",
+    "generatedAt": "2026-09-11T12:26:15.504Z",
     "cadence": {
       "linkHealth": "daily",
       "metadataFreshness": "daily age check; weekly review threshold at 7 days",
@@ -514,7 +514,7 @@
         "url": "https://claude.ai/",
         "status": "blocked_or_limited",
         "httpStatus": 403,
-        "finalUrl": "https://claude.ai/",
+        "finalUrl": "https://claude.ai/login",
         "error": null
       },
       "affiliate": {
@@ -1095,7 +1095,7 @@
         "url": "https://shopify.pxf.io/7699108-link?sharedid=7699108",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://www.shopify.com/free-trial?irclickid=Xx8wDoWawxyZRQszCMwI22IXUkr2qBWQYR6Y1o0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
+        "finalUrl": "https://www.shopify.com/free-trial?irclickid=S8qQc2WaDxyZWtsQIH1UjVutUkr2M03IYRMjXQ0&irgwc=1&partner=7699108&affpt=excluded&utm_channel=affiliates&utm_source=7699108-impact&utm_medium=cpa&iradid=1061744",
         "error": null
       }
     },
@@ -1489,7 +1489,7 @@
         "url": "https://notebooklm.google.com/",
         "status": "ok",
         "httpStatus": 200,
-        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S-1190095541:1789119652067287",
+        "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S942924958:1789129578350130",
         "error": null
       },
       "affiliate": {
