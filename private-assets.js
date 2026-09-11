@@ -94,6 +94,7 @@ async function guardPageConfirmation(request,env){
   let body;try{body=await request.clone().json()}catch{return null}
   if(String(body?.event_type||'')!=='page_confirmed')return null;
   const reject=(status,error)=>Response.json({ok:false,recorded:false,error},{status,headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}});
+  const accept=(recorded)=>Response.json({ok:true,recorded},{status:202,headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}});
   const origin=request.headers.get('Origin')||'';
   if(origin&&origin!==url.origin)return reject(403,'confirmation_origin_mismatch');
   const fetchSite=(request.headers.get('Sec-Fetch-Site')||'').toLowerCase();
@@ -116,7 +117,16 @@ async function guardPageConfirmation(request,env){
   if(!established||!TRACKABLE_CLASSIFICATIONS.has(String(established.classification||'')))return reject(403,'confirmation_session_not_established');
   const eventPath=String(body?.path||'');
   if(!Number(established.already_confirmed||0)&&eventPath!==String(established.path||''))return reject(409,'confirmation_entry_path_mismatch');
-  return null;
+  try{
+    const result=await env.DB.batch([
+      env.DB.prepare(`UPDATE sessions SET last_seen_at=datetime('now') WHERE session_id=?`).bind(session),
+      env.DB.prepare(`INSERT OR IGNORE INTO funnel_events (event_id,session_id,event_type,intent_slug,tool_slug,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))`).bind(`confirm_${session}`,session,'page_confirmed',null,null,eventPath,'browser-confirm',null)
+    ]);
+    const recorded=Number(result?.[1]?.meta?.changes||0)>0||Number(established.already_confirmed||0)>0;
+    return accept(recorded);
+  }catch{
+    return reject(503,'confirmation_write_failed');
+  }
 }
 
 async function observedTrafficIntegrity(env){
@@ -175,8 +185,8 @@ export function withPrivateAssets(base) {
         const publicTools = tools.map(({commission, affiliateProgram, affiliateUrl, ...tool}) => tool);
         return Response.json(publicTools, {headers: {'Cache-Control': 'no-store'}});
       }
-      const confirmationRejection=await guardPageConfirmation(request,env);
-      if(confirmationRejection)return confirmationRejection;
+      const confirmationResponse=await guardPageConfirmation(request,env);
+      if(confirmationResponse)return confirmationResponse;
       let response=await base.fetch(request,env,ctx);
       if(STATS_PATHS.has(path))response=await patchStats(response,env);
       return withPageEntryTracking(request,env,ctx,response);
