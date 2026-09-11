@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T13:49:04.033Z",
+  "generatedAt": "2026-09-11T14:23:42.011Z",
   "policy": "Only distinct informational intents with observed Search Console demand may become indexable blog candidates. Existing commercial guide intents are not duplicated in the blog.",
   "minimumImpressions": 10,
   "count": 2,
@@ -9,9 +9,9 @@
       "query": "what is airtable",
       "sourcePage": "https://trytoolscout.org/tools/airtable.html",
       "sourcePath": "/tools/airtable.html",
-      "impressions": 22,
+      "impressions": 23,
       "clicks": 0,
-      "position": 85,
+      "position": 85.0435,
       "evidence": "Google Search Console query",
       "publicationStatus": "candidate-needs-grounded-content"
     },

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-11T13:49:03.369Z",
-  "gscGeneratedAt": "2026-09-11T13:48:57.054Z",
+  "generatedAt": "2026-09-11T14:23:41.201Z",
+  "gscGeneratedAt": "2026-09-11T14:23:36.764Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 7,
@@ -93,9 +93,9 @@
     },
     {
       "intent": "best-keyword-research-tools",
-      "impressions": 30,
+      "impressions": 31,
       "clicks": 0,
-      "position": 76.5,
+      "position": 75.7419,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": null,
@@ -113,9 +113,9 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 443,
+      "impressions": 444,
       "clicks": 0,
-      "position": 77.684,
+      "position": 77.6689,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -128,15 +128,15 @@
     },
     {
       "intent": "best-no-code-automation-tools",
-      "impressions": 208,
+      "impressions": 209,
       "clicks": 0,
-      "position": 73.351,
+      "position": 73.3828,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "no code automation tools",
-        "impressions": 31,
-        "position": 70.0645,
+        "impressions": 32,
+        "position": 70.375,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"

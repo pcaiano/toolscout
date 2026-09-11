@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-11T13:49:02.699Z",
+  "generatedAt": "2026-09-11T14:23:40.647Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 1776,
-    "ctr": 0.0563,
+    "searchImpressions": 1790,
+    "ctr": 0.0559,
     "gscStartDate": "2026-08-15",
     "gscEndDate": "2026-09-11",
     "gscDataState": "all",
@@ -26,7 +26,7 @@
     "observedGscIntents": 31,
     "observedGscPages": 76,
     "searchClicks": 1,
-    "searchImpressions": 1776,
+    "searchImpressions": 1790,
     "organicAcquisitionStatus": "early-search-acquisition",
     "actionableOpportunities": 22,
     "firstPageOpportunities": 11,
@@ -72,10 +72,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 443,
+        "impressions": 444,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.684,
+        "position": 77.6689,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -170,10 +170,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 208,
+        "impressions": 209,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.351,
+        "position": 73.3828,
         "opportunity": "relevance-gap",
         "opportunityScore": 23,
         "meaningfulSample": true,
@@ -383,7 +383,7 @@
     },
     {
       "intent": "best-keyword-research-tools",
-      "priorityScore": 35,
+      "priorityScore": 36,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -414,12 +414,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 30,
+        "impressions": 31,
         "clicks": 0,
         "ctr": 0,
-        "position": 76.5,
+        "position": 75.7419,
         "opportunity": "relevance-gap",
-        "opportunityScore": 15,
+        "opportunityScore": 16,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -1697,9 +1697,9 @@
       "pathname": "/",
       "type": "home",
       "clicks": 1,
-      "impressions": 57,
-      "ctr": 1.7544,
-      "position": 6.6316,
+      "impressions": 58,
+      "ctr": 1.7241,
+      "position": 6.6724,
       "topQueries": [
         {
           "query": "toolscout",
@@ -1711,7 +1711,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": true,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 10.314,
+      "opportunityScore": 10.431,
       "outcome": "traffic-observed"
     },
     {
@@ -2327,9 +2327,9 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 443,
+      "impressions": 444,
       "ctr": 0,
-      "position": 77.684,
+      "position": 77.6689,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -2346,8 +2346,8 @@
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 80,
-          "position": 77.8
+          "impressions": 81,
+          "position": 77.716
         },
         {
           "query": "best seo tool for agencies",
@@ -2365,7 +2365,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 5.703,
+      "opportunityScore": 5.717,
       "outcome": "visibility-only"
     },
     {
@@ -2373,9 +2373,9 @@
       "pathname": "/tools/semrush.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 170,
+      "impressions": 171,
       "ctr": 0,
-      "position": 55.4588,
+      "position": 55.3977,
       "topQueries": [
         {
           "query": "semrush tool",
@@ -2392,8 +2392,8 @@
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 22,
-          "position": 51.2273
+          "impressions": 23,
+          "position": 50.9565
         },
         {
           "query": "semrush tools",
@@ -2411,7 +2411,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.065,
+      "opportunityScore": 3.087,
       "outcome": "visibility-only"
     },
     {
@@ -2419,15 +2419,15 @@
       "pathname": "/best-no-code-automation-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 208,
+      "impressions": 209,
       "ctr": 0,
-      "position": 73.351,
+      "position": 73.3828,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 31,
-          "position": 70.0645
+          "impressions": 32,
+          "position": 70.375
         },
         {
           "query": "no-code automation tools",
@@ -2457,7 +2457,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.836,
+      "opportunityScore": 2.848,
       "outcome": "visibility-only"
     },
     {
@@ -2465,21 +2465,21 @@
       "pathname": "/best-seo-keyword-research-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 144,
+      "impressions": 150,
       "ctr": 0,
-      "position": 74.4306,
+      "position": 74.46,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 56,
-          "position": 62.2857
+          "impressions": 59,
+          "position": 62.5932
         },
         {
           "query": "seo search tools",
           "clicks": 0,
-          "impressions": 14,
-          "position": 78.3571
+          "impressions": 15,
+          "position": 78
         },
         {
           "query": "competitor keyword research tools for seo",
@@ -2488,22 +2488,22 @@
           "position": 84.4615
         },
         {
+          "query": "seo search tool",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 69.375
+        },
+        {
           "query": "keyword research seo tool",
           "clicks": 0,
           "impressions": 8,
           "position": 85.375
-        },
-        {
-          "query": "best seo keyword research tool",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 98
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.935,
+      "opportunityScore": 2.015,
       "outcome": "visibility-only"
     },
     {
@@ -2511,9 +2511,9 @@
       "pathname": "/tools/airtable.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 129,
+      "impressions": 130,
       "ctr": 0,
-      "position": 73.0775,
+      "position": 73.1769,
       "topQueries": [
         {
           "query": "airtable",
@@ -2524,8 +2524,8 @@
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 22,
-          "position": 85
+          "impressions": 23,
+          "position": 85.0435
         },
         {
           "query": "what is airtable used for",
@@ -2549,7 +2549,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.765,
+      "opportunityScore": 1.777,
       "outcome": "visibility-only"
     },
     {
@@ -3021,7 +3021,7 @@
     },
     {
       "intent": "best-keyword-research-tools",
-      "priorityScore": 35,
+      "priorityScore": 36,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,

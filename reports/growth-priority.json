@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T13:49:02.639Z",
+  "generatedAt": "2026-09-11T14:23:40.586Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 1,
-      "impressions": 1776,
-      "ctr": 0.0563
+      "impressions": 1790,
+      "ctr": 0.0559
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -38,10 +38,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 443,
+        "impressions": 444,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.684,
+        "position": 77.6689,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -119,10 +119,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 208,
+        "impressions": 209,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.351,
+        "position": 73.3828,
         "opportunity": "relevance-gap",
         "opportunityScore": 23,
         "meaningfulSample": true,
@@ -293,7 +293,7 @@
       "intent": "best-keyword-research-tools",
       "title": "Best Keyword Research Tools",
       "category": "seo",
-      "priorityScore": 35,
+      "priorityScore": 36,
       "topFit": 9.32,
       "eligibleToolCount": 7,
       "minimumEligibleTools": 2,
@@ -302,12 +302,12 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 30,
+        "impressions": 31,
         "clicks": 0,
         "ctr": 0,
-        "position": 76.5,
+        "position": 75.7419,
         "opportunity": "relevance-gap",
-        "opportunityScore": 15,
+        "opportunityScore": 16,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"

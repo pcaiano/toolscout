@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-11T13:48:57.110Z",
-  "sourceGeneratedAt": "2026-09-11T13:48:57.054Z",
+  "generatedAt": "2026-09-11T14:23:36.829Z",
+  "sourceGeneratedAt": "2026-09-11T14:23:36.764Z",
   "summary": {
     "canonical": 27,
     "redirected": 3,
@@ -11,25 +11,25 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 443,
+      "impressions": 444,
       "clicks": 0,
-      "position": 77.684
+      "position": 77.6689
     },
     {
       "slug": "best-no-code-automation-tools",
       "status": "canonical",
       "target": "best-no-code-automation-tools",
-      "impressions": 208,
+      "impressions": 209,
       "clicks": 0,
-      "position": 73.351
+      "position": 73.3828
     },
     {
       "slug": "best-seo-keyword-research-tools",
       "status": "redirected",
       "target": "best-keyword-research-tools",
-      "impressions": 144,
+      "impressions": 150,
       "clicks": 0,
-      "position": 74.4306
+      "position": 74.46
     },
     {
       "slug": "best-funnel-builder",
@@ -75,9 +75,9 @@
       "slug": "best-keyword-research-tools",
       "status": "canonical",
       "target": "best-keyword-research-tools",
-      "impressions": 30,
+      "impressions": 31,
       "clicks": 0,
-      "position": 76.5
+      "position": 75.7419
     },
     {
       "slug": "best-all-in-one-business-tools",
