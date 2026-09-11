@@ -1,9 +1,8 @@
 name: P0 Engines Production Cycle
 
 on:
-  workflow_run:
-    workflows: ["Deploy ToolScout Worker"]
-    types: [completed]
+  schedule:
+    - cron: '25 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -11,7 +10,6 @@ permissions:
 
 jobs:
   cycle-proof:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
