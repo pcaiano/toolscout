@@ -18,7 +18,8 @@ export function coverageEngineSnapshot(records, clickRows = []) {
   const valid = clickRows.filter(r => {
     const source = String(r.source || '').toLowerCase();
     const classification = String(r.classification || '').toLowerCase();
-    return !EXCLUDED_SOURCES.has(source) && (HUMAN_CLASSIFICATIONS.has(classification) || (!classification.includes('bot') && !classification.includes('synthetic') && classification !== 'owner' && classification !== 'unknown/legacy'));
+    const browserConfirmed = Number(r.browser_confirmed || 0) === 1;
+    return browserConfirmed && !EXCLUDED_SOURCES.has(source) && HUMAN_CLASSIFICATIONS.has(classification);
   });
   const total = valid.reduce((n,r)=>n+Number(r.clicks||0),0);
   const monetized = valid.filter(r=>Number(r.affiliate_active_at_click)===1).reduce((n,r)=>n+Number(r.clicks||0),0);
@@ -37,7 +38,7 @@ export function coverageEngineSnapshot(records, clickRows = []) {
     item.leakage_score=leakageScore(item);
     return item;
   }).filter(r=>!MONETIZED_STATES.has(normalizeAffiliateState(r.status)) && !TERMINAL_UNMONETIZABLE_STATES.has(normalizeAffiliateState(r.status))).sort((a,b)=>b.leakage_score-a.leakage_score||b.unmonetized_clicks_30d-a.unmonetized_clicks_30d);
-  return {window_days:30,human_outbound_clicks:total,monetized_human_outbound_clicks:monetized,unmonetized_human_outbound_clicks:unmonetized,weighted_coverage:total?monetized/total:null,recoverable_queue:queue.slice(0,25)};
+  return {window_days:30,human_outbound_clicks:total,monetized_human_outbound_clicks:monetized,unmonetized_human_outbound_clicks:unmonetized,weighted_coverage:total?monetized/total:null,recoverable_queue:queue.slice(0,25),traffic_truth:'browser_confirmed'};
 }
 
 export function automationBoundary(record) {
