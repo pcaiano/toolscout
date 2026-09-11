@@ -5093,5 +5093,240 @@
       "monetizationCoverage": 50,
       "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
     }
+  },
+  {
+    "generatedAt": "2026-09-11T21:40:45.768Z",
+    "timezone": "Europe/Lisbon",
+    "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+    "traffic": {
+      "today": {
+        "total": 68,
+        "likelyHuman": 32,
+        "owner": 36,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 96,
+          "likelyHuman": 32,
+          "bots": 27,
+          "owner": 36,
+          "synthetic": 0,
+          "unknownLegacy": 1
+        }
+      },
+      "d7": {
+        "total": 118,
+        "likelyHuman": 71,
+        "owner": 47,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 447,
+          "likelyHuman": 71,
+          "bots": 204,
+          "owner": 47,
+          "synthetic": 0,
+          "unknownLegacy": 125
+        }
+      },
+      "d30": {
+        "total": 203,
+        "likelyHuman": 126,
+        "owner": 77,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 1804,
+          "likelyHuman": 126,
+          "bots": 298,
+          "owner": 78,
+          "synthetic": 0,
+          "unknownLegacy": 1302
+        }
+      },
+      "dailyLikelyHuman30d": [
+        {
+          "day": "2026-09-01",
+          "sessions": 10
+        },
+        {
+          "day": "2026-09-02",
+          "sessions": 24
+        },
+        {
+          "day": "2026-09-03",
+          "sessions": 6
+        },
+        {
+          "day": "2026-09-04",
+          "sessions": 15
+        },
+        {
+          "day": "2026-09-05",
+          "sessions": 5
+        },
+        {
+          "day": "2026-09-06",
+          "sessions": 5
+        },
+        {
+          "day": "2026-09-07",
+          "sessions": 14
+        },
+        {
+          "day": "2026-09-08",
+          "sessions": 9
+        },
+        {
+          "day": "2026-09-09",
+          "sessions": 2
+        },
+        {
+          "day": "2026-09-10",
+          "sessions": 4
+        },
+        {
+          "day": "2026-09-11",
+          "sessions": 32
+        }
+      ],
+      "averageDailyLikelyHuman30d": 4.2
+    },
+    "funnel30d": {
+      "recommendationStarted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "recommendationCompleted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "resultViewed": {
+        "events": 4,
+        "sessions": 2
+      },
+      "toolViewed": {
+        "events": 0,
+        "sessions": 0
+      },
+      "outboundClicked": {
+        "events": 21,
+        "sessions": 3
+      },
+      "recommendationCompletionRate": 100
+    },
+    "commercial30d": {
+      "outboundClicks": 21,
+      "sessionsWithOutbound": 3,
+      "monetizedOutbound": 4,
+      "monetizationCoverage": 19,
+      "humanSessionToOutboundRate": 2.4
+    },
+    "sources30d": [
+      {
+        "source": "direct",
+        "sessions": 108
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 5
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 4
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+        "sessions": 2
+      },
+      {
+        "source": "ref:producthunt.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:google.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dollarplatoon.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dataindex.pro",
+        "sessions": 1
+      }
+    ],
+    "intents30d": [
+      {
+        "intent": "general",
+        "sessions": 2,
+        "recommendationCompletions": 3,
+        "outboundClicks": 19
+      },
+      {
+        "intent": "beehiiv",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "best-ai-assistants",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "unlabelled",
+        "sessions": 126,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "best-free-crm",
+        "sessions": 1,
+        "recommendationCompletions": 1,
+        "outboundClicks": 0
+      }
+    ],
+    "forensic": {
+      "definition": "Traffic KPIs count only likely-human sessions with an observed public page-entry event. Redirect-only sessions are excluded from traffic and funnel conversion metrics.",
+      "sessionStartsToday": [
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/",
+          "sessions": 31
+        },
+        {
+          "source": "ref:dataindex.pro",
+          "referrerHost": "dataindex.pro",
+          "path": "/",
+          "sessions": 1
+        }
+      ],
+      "redirectOnlyToday": 0,
+      "redirectOnly30d": 0,
+      "excludedRedirectClicks30d": 0
+    },
+    "revenue90d": {
+      "ledger": [],
+      "verified": [],
+      "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
+    },
+    "projectionInputs": {
+      "humanSessions30d": 126,
+      "humanDailyAverage30d": 4.2,
+      "recommendationCompletionRate": 1.6,
+      "humanSessionToOutboundRate": 2.4,
+      "monetizationCoverage": 19,
+      "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
+    }
   }
 ]
