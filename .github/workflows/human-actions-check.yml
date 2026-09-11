@@ -46,7 +46,9 @@ jobs:
           grep -Fq "CAPTCHA" human-action-entry-worker.js
           grep -Fq "material legal terms" human-action-entry-worker.js
           grep -Fq "unmonetized human outbound" human-action-entry-worker.js
-          grep -Fq "distribution score" human-action-entry-worker.js
+          grep -Fq "economic priority" human-action-entry-worker.js
+          grep -Fq "(o.human_required=1 OR o.status='approval_required')" human-action-entry-worker.js
+          grep -Fq "(o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend')" human-action-entry-worker.js
           grep -Fq "/data/affiliate-pipeline.json" human-action-entry-worker.js
           grep -Fq "/data/affiliate.json" human-action-entry-worker.js
           grep -Fq "normalizeAffiliateState" human-action-entry-worker.js
