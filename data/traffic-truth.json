@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T00:14:34.241Z",
+  "generatedAt": "2026-09-11T04:50:16.466Z",
   "timezone": "Europe/Lisbon",
   "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
   "primaryMetric": "D1 browser-confirmed public sessions",
@@ -12,8 +12,8 @@
     "Google Search Console is the source of truth for Google Search clicks and impressions."
   ],
   "windowsUtc": {
-    "now": "2026-09-11T00:14:34.241Z",
-    "last24": "2026-09-10T00:14:34.241Z",
+    "now": "2026-09-11T04:50:16.466Z",
+    "last24": "2026-09-10T04:50:16.466Z",
     "today": "2026-09-10T23:00:00.000Z",
     "month": "2026-08-31T23:00:00.000Z"
   },
@@ -82,17 +82,17 @@
     "last24": 0,
     "today": 0,
     "monthToDate": 0,
-    "serverObservedEntries24h": 5,
-    "serverOnlyUnconfirmed24h": 5
+    "serverObservedEntries24h": 6,
+    "serverOnlyUnconfirmed24h": 6
   },
   "googleSearchConsole": {
     "status": "observed",
-    "generatedAt": "2026-09-11T00:14:34.191Z",
+    "generatedAt": "2026-09-11T04:50:16.413Z",
     "startDate": "2026-08-15",
     "endDate": "2026-09-11",
     "dataState": "all",
     "clicks": 1,
-    "impressions": 1710,
+    "impressions": 1739,
     "pageCount": 76,
     "coverage": "site-wide"
   },
@@ -103,7 +103,7 @@
     "d1Confirmed24h": 0,
     "rumVisits24h": 1,
     "rumPageViews24h": 5,
-    "serverObservedEntries24h": 5,
+    "serverObservedEntries24h": 6,
     "delta": -1,
     "note": "Volume is too low for a useful percentage divergence alarm."
   },
