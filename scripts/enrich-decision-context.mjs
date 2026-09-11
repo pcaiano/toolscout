@@ -23,7 +23,7 @@ const clean=value=>String(value??'')
   .replace(/\s+/g,' ')
   .trim();
 const esc=value=>clean(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
-const clip=(value,max)=>{const text=clean(value);if(text.length<=max)return text;const sliced=text.slice(0,Math.max(0,max-3)),boundary=sliced.lastIndexOf(' ');return `${sliced.slice(0,boundary>40?boundary:sliced.length)}...`;};
+const firstComplete=(candidates,max)=>{const values=candidates.map(clean).filter(Boolean);return values.find(value=>value.length<=max)||values.at(-1)||'';};
 const safeQuery=query=>{const q=clean(query).toLowerCase();return q.length>=3&&q.length<=120&&!/["“”]/.test(q)&&!/(^|\s)(?:site|inurl|intitle|filetype):|\s-or-\s|\bor\b\s+site:|reddit\.com/i.test(q);};
 const STOP=new Set(['best','tool','tools','software','platform','platforms','for','with','and','the','a','an','to','of','what','is','are','which']);
 const tokens=value=>new Set(clean(value).toLowerCase().replace(/[^a-z0-9]+/g,' ').split(/\s+/).filter(token=>token.length>=3&&!STOP.has(token)));
@@ -41,9 +41,14 @@ for(const[slug,context]of Object.entries(contexts)){
   const topQueries=(pageSignal?.topQueries||[]).filter(row=>safeQuery(row.query)).map(row=>({...row,alignment:queryAlignment(row.query,title)})).filter(row=>row.alignment>=0.6).sort((a,b)=>Number(b.impressions||0)-Number(a.impressions||0));
   const dominantQuery=topQueries[0]||null;
   if(title){
-    const seoTitle=clip(`${title}: Compare the Best Options | ToolScout`,62),constraintText=constraints.slice(0,3).join(', ');
-    const meta=clip(`${title} for ${persona}. Compare options that help you ${job}${constraintText?`, focusing on ${constraintText}`:''}.`,158);
-    const answer=clip(`${title} depends on the workflow. For ${persona}, start by matching tools to ${constraints.slice(0,3).join(', ')||'your practical constraints'} rather than choosing by popularity alone.`,240);
+    const seoTitle=firstComplete([`${title}: Compare Options | ToolScout`,`${title} | ToolScout`,title],62),constraintText=constraints.slice(0,3).join(', ');
+    const meta=firstComplete([
+      `${title} for ${persona}. Compare options that help you ${job}${constraintText?`, with attention to ${constraintText}`:''}.`,
+      `Compare ${title.toLowerCase()} for ${persona}. Match options to your workflow, constraints, and documented capabilities.`,
+      `${title} for ${persona}. Compare documented capabilities, workflow fit, and practical constraints.`,
+      `Compare ${title.toLowerCase()} by workflow fit, practical constraints, and documented capabilities.`
+    ],158);
+    const answer=`${title} depends on the workflow. For ${persona}, start by matching tools to ${constraints.slice(0,3).join(', ')||'your practical constraints'} rather than choosing by popularity alone.`;
     html=html.replace(/<title>.*?<\/title>/i,`<title>${esc(seoTitle)}</title>`).replace(/<meta name="description" content="[^"]*">/i,`<meta name="description" content="${esc(meta)}">`).replace(/<meta property="og:title" content="[^"]*">/i,`<meta property="og:title" content="${esc(seoTitle)}">`).replace(/<meta property="og:description" content="[^"]*">/i,`<meta property="og:description" content="${esc(meta)}">`).replace(/<p class="lead">.*?<\/p>/i,`<p class="lead">${esc(answer)}</p>`);
   }
   const marker=`data-decision-context="${esc(slug)}"`;
