@@ -11,6 +11,8 @@ on:
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - 'migrations/0049_reconcile_stale_affiliate_actions.sql'
       - 'migrations/0050_persist_affiliate_contact_evidence.sql'
+      - 'migrations/0063_affiliate_coverage_traffic_truth.sql'
+      - 'migrations/0064_affiliate_coverage_browser_confirmed_default.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
   push:
     branches: [main]
@@ -24,6 +26,8 @@ on:
       - 'migrations/0046_affiliate_coverage_engine.sql'
       - 'migrations/0049_reconcile_stale_affiliate_actions.sql'
       - 'migrations/0050_persist_affiliate_contact_evidence.sql'
+      - 'migrations/0063_affiliate_coverage_traffic_truth.sql'
+      - 'migrations/0064_affiliate_coverage_browser_confirmed_default.sql'
       - '.github/workflows/affiliate-coverage-check.yml'
 jobs:
   check:
@@ -40,6 +44,8 @@ jobs:
           node --check affiliate-coverage-entry-worker.js
           test -s migrations/0049_reconcile_stale_affiliate_actions.sql
           test -s migrations/0050_persist_affiliate_contact_evidence.sql
+          test -s migrations/0063_affiliate_coverage_traffic_truth.sql
+          test -s migrations/0064_affiliate_coverage_browser_confirmed_default.sql
           grep -Fq "affiliate_coverage_reconciler" affiliate-coverage-entry-worker.js
           grep -Fq "submitted_at" affiliate-coverage-entry-worker.js
           grep -Fq "pending_review" affiliate-coverage-entry-worker.js
@@ -54,6 +60,9 @@ jobs:
           grep -Fq "browser_confirmed" affiliate-coverage-cycle-worker.js
           grep -Fq "browserConfirmed" affiliate-coverage-engine.js
           grep -Fq "traffic_truth:'browser_confirmed'" affiliate-coverage-engine.js
+          grep -Fq "DEFAULT 'legacy_session_classification'" migrations/0063_affiliate_coverage_traffic_truth.sql
+          grep -Fq "DEFAULT 'browser_confirmed'" migrations/0064_affiliate_coverage_browser_confirmed_default.sql
+          grep -Fq "traffic_truth IN ('legacy_session_classification','browser_confirmed')" migrations/0064_affiliate_coverage_browser_confirmed_default.sql
           node --input-type=module <<'EOF'
           import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
           import {classifyProgramPage,discoverOfficialProgram} from './affiliate-program-discovery.js';
