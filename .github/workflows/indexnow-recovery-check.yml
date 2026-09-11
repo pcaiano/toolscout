@@ -1,0 +1,48 @@
+name: IndexNow Recovery Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'distribution-submission-worker.js'
+      - 'data/distribution-submission-adapters.json'
+      - 'migrations/0061_recover_indexnow_legacy_adapter_gaps.sql'
+      - '.github/workflows/indexnow-recovery-check.yml'
+  pull_request:
+    paths:
+      - 'distribution-submission-worker.js'
+      - 'data/distribution-submission-adapters.json'
+      - 'migrations/0061_recover_indexnow_legacy_adapter_gaps.sql'
+      - '.github/workflows/indexnow-recovery-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate automatic recovery contract
+        run: |
+          set -euo pipefail
+          node --check distribution-submission-worker.js
+          test -s migrations/0061_recover_indexnow_legacy_adapter_gaps.sql
+          grep -Fq "distribution_submission_reconciliation_audit" migrations/0061_recover_indexnow_legacy_adapter_gaps.sql
+          grep -Fq "indexnow_verified_adapter_recovery_2026_09_11" migrations/0061_recover_indexnow_legacy_adapter_gaps.sql
+          grep -Fq "const stale=['human_required','adapter_missing','auth_required','setup_required','policy_blocked','research_required'].includes(prior.status)" distribution-submission-worker.js
+          grep -Fq "await reclassify(env,prior,'ready','http_json',adapter.endpoint,payload,0)" distribution-submission-worker.js
+          grep -Fq "reclassified=protocol.reclassified||0" distribution-submission-worker.js
+          node - <<'NODE'
+          const d=require('./data/distribution-submission-adapters.json');
+          const a=(d.adapters||[]).find(x=>x.surface_slug==='indexnow');
+          if(!a) throw new Error('IndexNow adapter missing');
+          if(a.enabled!==true||a.allow_automatic!==true||a.requires_payment!==false) throw new Error('IndexNow automatic zero-cost contract broken');
+          if(a.method!=='POST'||a.content_type!=='application/json'||a.payload_kind!=='indexnow') throw new Error('IndexNow protocol contract broken');
+          if(a.endpoint!=='https://api.indexnow.org/indexnow') throw new Error('Unexpected IndexNow endpoint');
+          if(!a.key||!a.key_location) throw new Error('IndexNow key contract incomplete');
+          NODE
