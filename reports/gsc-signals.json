@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T14:29:56.638Z",
+  "generatedAt": "2026-09-11T18:38:43.026Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-11",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1790,
-    "ctr": 0.0559
+    "impressions": 1846,
+    "ctr": 0.0542
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,12 +25,12 @@
     "guide": {
       "pages": 31,
       "clicks": 0,
-      "impressions": 1162
+      "impressions": 1206
     },
     "home": {
       "pages": 2,
       "clicks": 1,
-      "impressions": 64
+      "impressions": 67
     },
     "other": {
       "pages": 5,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 33,
       "clicks": 0,
-      "impressions": 507
+      "impressions": 516
     }
   },
   "pageCount": 76,
@@ -52,33 +52,33 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 444,
+      "impressions": 465,
       "ctr": 0,
-      "position": 77.6689,
+      "position": 77.4495,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 136,
-          "position": 75.1618
+          "impressions": 144,
+          "position": 74.7153
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 82,
-          "position": 81.5
+          "impressions": 87,
+          "position": 81.3333
         },
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 81,
-          "position": 77.716
+          "impressions": 85,
+          "position": 77.6588
         },
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 40,
-          "position": 72.625
+          "impressions": 43,
+          "position": 72.4651
         },
         {
           "query": "seo tools for agencies",
@@ -101,8 +101,8 @@
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 13,
-          "position": 84.4615
+          "impressions": 14,
+          "position": 84.2857
         },
         {
           "query": "agency seo tools",
@@ -125,9 +125,9 @@
       "type": "guide",
       "intent": "best-no-code-automation-tools",
       "clicks": 0,
-      "impressions": 209,
+      "impressions": 212,
       "ctr": 0,
-      "position": 73.3828,
+      "position": 73.4434,
       "topQueries": [
         {
           "query": "no code automation tools",
@@ -160,16 +160,22 @@
           "position": 70.2857
         },
         {
+          "query": "no-code automation tool",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 70.9286
+        },
+        {
           "query": "no-code automation",
           "clicks": 0,
           "impressions": 14,
           "position": 79.8571
         },
         {
-          "query": "no-code automation tool",
+          "query": "which workflow automation tools are the most popular for no-code platforms?",
           "clicks": 0,
-          "impressions": 13,
-          "position": 70.6154
+          "impressions": 11,
+          "position": 74.1818
         },
         {
           "query": "no code automation platforms",
@@ -182,12 +188,6 @@
           "clicks": 0,
           "impressions": 9,
           "position": 72.1111
-        },
-        {
-          "query": "which workflow automation tools are the most popular for no-code platforms?",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 73.1111
         }
       ]
     },
@@ -198,9 +198,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 171,
+      "impressions": 173,
       "ctr": 0,
-      "position": 55.3977,
+      "position": 55.3642,
       "topQueries": [
         {
           "query": "semrush tool",
@@ -217,14 +217,14 @@
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 23,
-          "position": 50.9565
+          "impressions": 24,
+          "position": 51.125
         },
         {
           "query": "semrush tools",
           "clicks": 0,
-          "impressions": 8,
-          "position": 53.375
+          "impressions": 9,
+          "position": 53
         },
         {
           "query": "semrush seo software",
@@ -253,15 +253,15 @@
       "type": "guide",
       "intent": "best-seo-keyword-research-tools",
       "clicks": 0,
-      "impressions": 150,
+      "impressions": 161,
       "ctr": 0,
-      "position": 74.46,
+      "position": 74.5217,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 59,
-          "position": 62.5932
+          "impressions": 65,
+          "position": 62.8923
         },
         {
           "query": "seo search tools",
@@ -272,14 +272,20 @@
         {
           "query": "competitor keyword research tools for seo",
           "clicks": 0,
-          "impressions": 13,
-          "position": 84.4615
+          "impressions": 15,
+          "position": 84.5333
         },
         {
           "query": "seo search tool",
           "clicks": 0,
           "impressions": 8,
           "position": 69.375
+        },
+        {
+          "query": "seo keyword analysis tool",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 72.5
         },
         {
           "query": "keyword research seo tool",
@@ -294,12 +300,6 @@
           "position": 98
         },
         {
-          "query": "seo keyword analysis tool",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 71
-        },
-        {
           "query": "keyword research tools seo",
           "clicks": 0,
           "impressions": 5,
@@ -312,10 +312,10 @@
           "position": 86.25
         },
         {
-          "query": "seo keyword research tools",
+          "query": "keyword discovery tool",
           "clicks": 0,
           "impressions": 4,
-          "position": 94.5
+          "position": 92.5
         }
       ]
     },
@@ -326,9 +326,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 130,
+      "impressions": 132,
       "ctr": 0,
-      "position": 73.1769,
+      "position": 73.5,
       "topQueries": [
         {
           "query": "airtable",
@@ -363,8 +363,8 @@
         {
           "query": "what is airtable and how it works",
           "clicks": 0,
-          "impressions": 7,
-          "position": 90.8571
+          "impressions": 9,
+          "position": 91.6667
         },
         {
           "query": "airtabel",
@@ -399,10 +399,16 @@
       "type": "guide",
       "intent": "best-funnel-builder",
       "clicks": 0,
-      "impressions": 103,
+      "impressions": 107,
       "ctr": 0,
-      "position": 77.9903,
+      "position": 77.1776,
       "topQueries": [
+        {
+          "query": "funnel builder",
+          "clicks": 0,
+          "impressions": 27,
+          "position": 90.3704
+        },
         {
           "query": "best funnel builder",
           "clicks": 0,
@@ -410,16 +416,10 @@
           "position": 64.8846
         },
         {
-          "query": "funnel builder",
-          "clicks": 0,
-          "impressions": 26,
-          "position": 90.4615
-        },
-        {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 23,
-          "position": 85.8696
+          "impressions": 24,
+          "position": 85.8333
         },
         {
           "query": "funnelbuilder",
@@ -452,16 +452,16 @@
           "position": 94.3333
         },
         {
+          "query": "segmentation funnel builder",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 26
+        },
+        {
           "query": "social media funnel builder",
           "clicks": 0,
           "impressions": 2,
           "position": 30.5
-        },
-        {
-          "query": "what is the best marketing funnel builder?",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 57
         }
       ]
     },
@@ -545,15 +545,21 @@
       "type": "home",
       "intent": null,
       "clicks": 1,
-      "impressions": 58,
-      "ctr": 1.7241,
-      "position": 6.6724,
+      "impressions": 61,
+      "ctr": 1.6393,
+      "position": 6.6721,
       "topQueries": [
         {
           "query": "toolscout",
           "clicks": 1,
-          "impressions": 27,
-          "position": 9.1111
+          "impressions": 28,
+          "position": 9.0357
+        },
+        {
+          "query": "trucscout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 7
         }
       ]
     },
@@ -564,21 +570,21 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 55,
+      "impressions": 57,
       "ctr": 0,
-      "position": 39.8727,
+      "position": 39.807,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 15,
-          "position": 46
+          "impressions": 16,
+          "position": 45.125
         },
         {
           "query": "project workflow tools",
           "clicks": 0,
-          "impressions": 9,
-          "position": 42.1111
+          "impressions": 10,
+          "position": 42.3
         },
         {
           "query": "project management workflow tools",
@@ -826,15 +832,15 @@
       "type": "guide",
       "intent": "best-keyword-research-tools",
       "clicks": 0,
-      "impressions": 31,
+      "impressions": 33,
       "ctr": 0,
-      "position": 75.7419,
+      "position": 75.1818,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 27,
-          "position": 78.1481
+          "impressions": 29,
+          "position": 77.3448
         },
         {
           "query": "keyword discovery tools",
@@ -851,27 +857,27 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 28,
+      "impressions": 33,
       "ctr": 0,
-      "position": 69.1071,
+      "position": 68.9697,
       "topQueries": [
         {
           "query": "moz pro tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 70
+          "impressions": 17,
+          "position": 69.4706
+        },
+        {
+          "query": "moz free trial",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 67.8333
         },
         {
           "query": "moz pro overview",
           "clicks": 0,
           "impressions": 6,
           "position": 71.5
-        },
-        {
-          "query": "moz free trial",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 67.4
         },
         {
           "query": "what is moz pro",
@@ -1371,6 +1377,25 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
+      "pathname": "/best-competitor-seo-tools.html",
+      "key": "best-competitor-seo-tools",
+      "type": "guide",
+      "intent": "best-competitor-seo-tools",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0,
+      "position": 36,
+      "topQueries": [
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 100
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-developer-tools.html",
       "pathname": "/best-developer-tools.html",
       "key": "best-developer-tools",
@@ -1508,18 +1533,6 @@
       "impressions": 2,
       "ctr": 0,
       "position": 6.5,
-      "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
-      "pathname": "/best-competitor-seo-tools.html",
-      "key": "best-competitor-seo-tools",
-      "type": "guide",
-      "intent": "best-competitor-seo-tools",
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 4,
       "topQueries": []
     },
     {
@@ -1924,33 +1937,33 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 444,
+      "impressions": 465,
       "ctr": 0,
-      "position": 77.6689,
+      "position": 77.4495,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 136,
-          "position": 75.1618
+          "impressions": 144,
+          "position": 74.7153
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 82,
-          "position": 81.5
+          "impressions": 87,
+          "position": 81.3333
         },
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 81,
-          "position": 77.716
+          "impressions": 85,
+          "position": 77.6588
         },
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 40,
-          "position": 72.625
+          "impressions": 43,
+          "position": 72.4651
         },
         {
           "query": "seo tools for agencies",
@@ -1973,8 +1986,8 @@
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 13,
-          "position": 84.4615
+          "impressions": 14,
+          "position": 84.2857
         },
         {
           "query": "agency seo tools",
@@ -1994,9 +2007,9 @@
       "intent": "best-no-code-automation-tools",
       "page": "https://trytoolscout.org/best-no-code-automation-tools.html",
       "clicks": 0,
-      "impressions": 209,
+      "impressions": 212,
       "ctr": 0,
-      "position": 73.3828,
+      "position": 73.4434,
       "topQueries": [
         {
           "query": "no code automation tools",
@@ -2029,16 +2042,22 @@
           "position": 70.2857
         },
         {
+          "query": "no-code automation tool",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 70.9286
+        },
+        {
           "query": "no-code automation",
           "clicks": 0,
           "impressions": 14,
           "position": 79.8571
         },
         {
-          "query": "no-code automation tool",
+          "query": "which workflow automation tools are the most popular for no-code platforms?",
           "clicks": 0,
-          "impressions": 13,
-          "position": 70.6154
+          "impressions": 11,
+          "position": 74.1818
         },
         {
           "query": "no code automation platforms",
@@ -2051,12 +2070,6 @@
           "clicks": 0,
           "impressions": 9,
           "position": 72.1111
-        },
-        {
-          "query": "which workflow automation tools are the most popular for no-code platforms?",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 73.1111
         }
       ]
     },
@@ -2064,15 +2077,15 @@
       "intent": "best-seo-keyword-research-tools",
       "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 150,
+      "impressions": 161,
       "ctr": 0,
-      "position": 74.46,
+      "position": 74.5217,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 59,
-          "position": 62.5932
+          "impressions": 65,
+          "position": 62.8923
         },
         {
           "query": "seo search tools",
@@ -2083,14 +2096,20 @@
         {
           "query": "competitor keyword research tools for seo",
           "clicks": 0,
-          "impressions": 13,
-          "position": 84.4615
+          "impressions": 15,
+          "position": 84.5333
         },
         {
           "query": "seo search tool",
           "clicks": 0,
           "impressions": 8,
           "position": 69.375
+        },
+        {
+          "query": "seo keyword analysis tool",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 72.5
         },
         {
           "query": "keyword research seo tool",
@@ -2105,12 +2124,6 @@
           "position": 98
         },
         {
-          "query": "seo keyword analysis tool",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 71
-        },
-        {
           "query": "keyword research tools seo",
           "clicks": 0,
           "impressions": 5,
@@ -2123,10 +2136,10 @@
           "position": 86.25
         },
         {
-          "query": "seo keyword research tools",
+          "query": "keyword discovery tool",
           "clicks": 0,
           "impressions": 4,
-          "position": 94.5
+          "position": 92.5
         }
       ]
     },
@@ -2134,10 +2147,16 @@
       "intent": "best-funnel-builder",
       "page": "https://trytoolscout.org/best-funnel-builder.html",
       "clicks": 0,
-      "impressions": 103,
+      "impressions": 107,
       "ctr": 0,
-      "position": 77.9903,
+      "position": 77.1776,
       "topQueries": [
+        {
+          "query": "funnel builder",
+          "clicks": 0,
+          "impressions": 27,
+          "position": 90.3704
+        },
         {
           "query": "best funnel builder",
           "clicks": 0,
@@ -2145,16 +2164,10 @@
           "position": 64.8846
         },
         {
-          "query": "funnel builder",
-          "clicks": 0,
-          "impressions": 26,
-          "position": 90.4615
-        },
-        {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 23,
-          "position": 85.8696
+          "impressions": 24,
+          "position": 85.8333
         },
         {
           "query": "funnelbuilder",
@@ -2187,16 +2200,16 @@
           "position": 94.3333
         },
         {
+          "query": "segmentation funnel builder",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 26
+        },
+        {
           "query": "social media funnel builder",
           "clicks": 0,
           "impressions": 2,
           "position": 30.5
-        },
-        {
-          "query": "what is the best marketing funnel builder?",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 57
         }
       ]
     },
@@ -2204,21 +2217,21 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools.html",
       "clicks": 0,
-      "impressions": 55,
+      "impressions": 57,
       "ctr": 0,
-      "position": 39.8727,
+      "position": 39.807,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 15,
-          "position": 46
+          "impressions": 16,
+          "position": 45.125
         },
         {
           "query": "project workflow tools",
           "clicks": 0,
-          "impressions": 9,
-          "position": 42.1111
+          "impressions": 10,
+          "position": 42.3
         },
         {
           "query": "project management workflow tools",
@@ -2454,15 +2467,15 @@
       "intent": "best-keyword-research-tools",
       "page": "https://trytoolscout.org/best-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 31,
+      "impressions": 33,
       "ctr": 0,
-      "position": 75.7419,
+      "position": 75.1818,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 27,
-          "position": 78.1481
+          "impressions": 29,
+          "position": 77.3448
         },
         {
           "query": "keyword discovery tools",
@@ -2577,6 +2590,22 @@
       ]
     },
     {
+      "intent": "best-competitor-seo-tools",
+      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0,
+      "position": 36,
+      "topQueries": [
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 100
+        }
+      ]
+    },
+    {
       "intent": "best-developer-tools",
       "page": "https://trytoolscout.org/best-developer-tools.html",
       "clicks": 0,
@@ -2601,15 +2630,6 @@
       "impressions": 2,
       "ctr": 0,
       "position": 6.5,
-      "topQueries": []
-    },
-    {
-      "intent": "best-competitor-seo-tools",
-      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 4,
       "topQueries": []
     },
     {
