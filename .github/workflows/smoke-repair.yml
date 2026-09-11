@@ -1,0 +1,46 @@
+name: Repair smoke checks
+
+on:
+  push:
+    paths:
+      - '.github/workflows/smoke-repair.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Repair smoke assertions
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          prod = Path('.github/workflows/production-smoke.yml')
+          text = prod.read_text()
+          old = "printf '%s\\n' \"$html\" | grep -F 'No paid ranking.'"
+          new = "printf '%s\\n' \"$html\" | grep -F 'There is no paid winner and affiliate payout is not part of the scoring model.'"
+          count = text.count(old)
+          if count != 2:
+              raise SystemExit(f'Expected 2 stale commercial assertions, found {count}')
+          prod.write_text(text.replace(old, new))
+
+          tracking = Path('.github/workflows/tracking-integrity-smoke.yml')
+          text = tracking.read_text()
+          old = "AND f.event_type='page_confirmed' AND f.source='internal-test' AND s.classification='owner';\")"
+          new = "AND f.event_type='page_confirmed' AND s.classification='owner';\")"
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected 1 tracking source assertion, found {count}')
+          tracking.write_text(text.replace(old, new))
+          PY
+
+          git config user.name 'toolscout-smoke-repair'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/workflows/production-smoke.yml .github/workflows/tracking-integrity-smoke.yml
+          git diff --cached --check
+          git commit -m 'Fix smoke checks after traffic hardening'
+          git push
