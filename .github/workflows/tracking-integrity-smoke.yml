@@ -6,6 +6,7 @@ on:
       - 'private-assets.js'
       - 'session-classification.js'
       - 'funnel-worker.js'
+      - 'wrangler.toml'
       - '.github/workflows/tracking-integrity-smoke.yml'
   workflow_dispatch:
 
@@ -28,8 +29,6 @@ jobs:
           SOURCE="tracking_smoke_${GITHUB_RUN_ID}"
           UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36'
 
-          # Do not assume a fixed deployment duration. The hardened Worker is considered live
-          # only when an unestablished browser-confirmation attempt is rejected with 403.
           READY=0
           for ATTEMPT in $(seq 1 30); do
             PROBE_SESSION=$(node -e "console.log(require('crypto').randomUUID())")
@@ -39,16 +38,25 @@ jobs:
               -H 'Sec-Fetch-Site: same-origin' \
               -H 'Content-Type: application/json' \
               -H "Cookie: toolscout_session=${PROBE_SESSION}" \
-              --data "{\"event_id\":\"confirm_${PROBE_SESSION}\",\"session_id\":\"${PROBE_SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools.html\",\"source\":\"browser-confirm\"}" \
+              --data "{\"event_id\":\"confirm_${PROBE_SESSION}\",\"session_id\":\"${PROBE_SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools\",\"source\":\"browser-confirm\"}" \
               https://trytoolscout.org/api/events || true)
-            if [ "$PROBE_CODE" = '403' ]; then
+
+            EFFECTIVE_URL=$(curl -LsS -o /dev/null -w '%{url_effective}' \
+              -A "$UA" \
+              -H 'Cookie: toolscout_owner=1' \
+              'https://trytoolscout.org/best-cold-email-tools.html')
+            TARGET_BASE="${EFFECTIVE_URL%%\?*}"
+            curl -fsSL -A "$UA" -H 'Cookie: toolscout_owner=1' \
+              "${TARGET_BASE}?source=${SOURCE}" >/tmp/readiness-page.html || true
+
+            if [ "$PROBE_CODE" = '403' ] && grep -q 'toolscout_session_v2' /tmp/readiness-page.html; then
               READY=1
               break
             fi
             sleep 4
           done
           if [ "$READY" != '1' ]; then
-            echo "Hardened browser-confirmation endpoint never became ready. Last probe HTTP: ${PROBE_CODE}"
+            echo "Tracking route never became ready. Last confirmation probe HTTP: ${PROBE_CODE}; bootstrap present: $(grep -q 'toolscout_session_v2' /tmp/readiness-page.html && echo yes || echo no)"
             exit 1
           fi
 
@@ -59,15 +67,13 @@ jobs:
             -H 'Sec-Fetch-Site: same-origin' \
             -H 'Content-Type: application/json' \
             -H "Cookie: toolscout_session=${FAKE_SESSION}" \
-            --data "{\"event_id\":\"confirm_${FAKE_SESSION}\",\"session_id\":\"${FAKE_SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools.html\",\"source\":\"browser-confirm\"}" \
+            --data "{\"event_id\":\"confirm_${FAKE_SESSION}\",\"session_id\":\"${FAKE_SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools\",\"source\":\"browser-confirm\"}" \
             https://trytoolscout.org/api/events)
           if [ "$FAKE_CODE" != '403' ]; then
             echo "Forged confirmation was not rejected. HTTP: ${FAKE_CODE}"
             exit 1
           fi
 
-          # Resolve Cloudflare's canonical HTML URL first. auto-trailing-slash may redirect
-          # /file.html to /file, and the tracking contract must use the path the browser sees.
           EFFECTIVE_URL=$(curl -LsS -o /dev/null -w '%{url_effective}' \
             -A "$UA" \
             -H 'Cookie: toolscout_owner=1' \
