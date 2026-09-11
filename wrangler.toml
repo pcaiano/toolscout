@@ -25,6 +25,7 @@ run_worker_first = [
   "/data/*",
   "/analytics*",
   "/api/stats*",
+  "/api/events*",
   "/api/audience-event*",
   "/api/distribution-event*",
   "/api/distribution/*",
