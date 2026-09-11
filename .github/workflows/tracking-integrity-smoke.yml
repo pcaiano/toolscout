@@ -24,6 +24,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
+          set -euo pipefail
           SOURCE="tracking_smoke_${GITHUB_RUN_ID}"
           UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36'
 
@@ -46,7 +47,10 @@ jobs:
             fi
             sleep 4
           done
-          test "$READY" = '1'
+          if [ "$READY" != '1' ]; then
+            echo "Hardened browser-confirmation endpoint never became ready. Last probe HTTP: ${PROBE_CODE}"
+            exit 1
+          fi
 
           FAKE_SESSION=$(node -e "console.log(require('crypto').randomUUID())")
           FAKE_CODE=$(curl -sS -o /tmp/fake-confirm.json -w '%{http_code}' \
@@ -57,16 +61,32 @@ jobs:
             -H "Cookie: toolscout_session=${FAKE_SESSION}" \
             --data "{\"event_id\":\"confirm_${FAKE_SESSION}\",\"session_id\":\"${FAKE_SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools.html\",\"source\":\"browser-confirm\"}" \
             https://trytoolscout.org/api/events)
-          test "$FAKE_CODE" = '403'
+          if [ "$FAKE_CODE" != '403' ]; then
+            echo "Forged confirmation was not rejected. HTTP: ${FAKE_CODE}"
+            exit 1
+          fi
 
-          curl -fsS --retry 5 --retry-delay 5 \
+          # Resolve Cloudflare's canonical HTML URL first. auto-trailing-slash may redirect
+          # /file.html to /file, and the tracking contract must use the path the browser sees.
+          EFFECTIVE_URL=$(curl -LsS -o /dev/null -w '%{url_effective}' \
+            -A "$UA" \
+            -H 'Cookie: toolscout_owner=1' \
+            'https://trytoolscout.org/best-cold-email-tools.html')
+          TARGET_BASE="${EFFECTIVE_URL%%\?*}"
+          PAGE_PATH=$(node -e "console.log(new URL(process.argv[1]).pathname)" "$TARGET_BASE")
+          echo "Testing canonical public path: ${PAGE_PATH}"
+
+          curl -fsSL --retry 5 --retry-delay 5 \
             -A "$UA" \
             -H 'Cookie: toolscout_owner=1' \
             -D /tmp/page-headers.txt \
-            "https://trytoolscout.org/best-cold-email-tools.html?source=${SOURCE}" >/tmp/page.html
-          grep -q 'toolscout_session_v2' /tmp/page.html
+            "${TARGET_BASE}?source=${SOURCE}" >/tmp/page.html
+          grep -q 'toolscout_session_v2' /tmp/page.html || { echo 'Tracking bootstrap missing from canonical HTML response'; exit 1; }
           SESSION=$(grep -i '^set-cookie: toolscout_session=' /tmp/page-headers.txt | tail -1 | sed -E 's/^[^=]+=([^;]+).*/\1/' | tr -d '\r')
-          test -n "$SESSION"
+          if [ -z "$SESSION" ]; then
+            echo 'Tracking session cookie missing from canonical HTML response'
+            exit 1
+          fi
 
           CONFIRM_CODE=$(curl -sS -o /tmp/valid-confirm.json -w '%{http_code}' \
             -A "$UA" \
@@ -74,12 +94,16 @@ jobs:
             -H 'Sec-Fetch-Site: same-origin' \
             -H 'Content-Type: application/json' \
             -H "Cookie: toolscout_owner=1; toolscout_session=${SESSION}" \
-            --data "{\"event_id\":\"confirm_${SESSION}\",\"session_id\":\"${SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"/best-cold-email-tools.html\",\"source\":\"browser-confirm\"}" \
+            --data "{\"event_id\":\"confirm_${SESSION}\",\"session_id\":\"${SESSION}\",\"event_type\":\"page_confirmed\",\"path\":\"${PAGE_PATH}\",\"source\":\"browser-confirm\"}" \
             https://trytoolscout.org/api/events)
-          test "$CONFIRM_CODE" = '202'
+          if [ "$CONFIRM_CODE" != '202' ]; then
+            echo "Valid browser confirmation rejected. HTTP: ${CONFIRM_CODE}"
+            cat /tmp/valid-confirm.json || true
+            exit 1
+          fi
 
           sleep 3
-          START_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='session_started' AND f.source='${SOURCE}' AND f.path='/best-cold-email-tools.html' AND s.classification='owner';")
+          START_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='session_started' AND f.source='${SOURCE}' AND f.path='${PAGE_PATH}' AND s.classification='owner';")
           node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)<1){console.error('page-entry event missing');process.exit(1)}" "$START_RESULT"
 
           CONFIRM_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id='${SESSION}' AND f.event_type='page_confirmed' AND f.source='internal-test' AND s.classification='owner';")
