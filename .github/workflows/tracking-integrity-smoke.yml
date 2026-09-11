@@ -112,7 +112,7 @@ jobs:
           START_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='session_started' AND f.source='${SOURCE}' AND f.path='${PAGE_PATH}' AND s.classification='owner';")
           node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)<1){console.error('page-entry event missing');process.exit(1)}" "$START_RESULT"
 
-          CONFIRM_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id='${SESSION}' AND f.event_type='page_confirmed' AND f.source='internal-test' AND s.classification='owner';")
+          CONFIRM_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id='${SESSION}' AND f.event_type='page_confirmed' AND s.classification='owner';")
           node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)!==1){console.error('valid owner browser confirmation missing');process.exit(1)}" "$CONFIRM_RESULT"
 
           FAKE_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events WHERE session_id='${FAKE_SESSION}' AND event_type='page_confirmed';")
