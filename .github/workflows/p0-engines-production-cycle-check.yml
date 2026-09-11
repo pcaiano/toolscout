@@ -5,11 +5,13 @@ on:
     paths:
       - '.github/workflows/p0-engines-production-cycle.yml'
       - '.github/workflows/p0-engines-production-cycle-check.yml'
+      - 'wrangler.toml'
   push:
     branches: [main]
     paths:
       - '.github/workflows/p0-engines-production-cycle.yml'
       - '.github/workflows/p0-engines-production-cycle-check.yml'
+      - 'wrangler.toml'
 
 permissions:
   contents: read
@@ -24,6 +26,8 @@ jobs:
           set -euo pipefail
           f=.github/workflows/p0-engines-production-cycle.yml
           test -s "$f"
+          test -s wrangler.toml
+          grep -Fq '"15 * * * *"' wrangler.toml
           grep -Fq "cron: '25 * * * *'" "$f"
           grep -Fq 'workflow_dispatch:' "$f"
           grep -Fq 'CLOUDFLARE_API_TOKEN' "$f"
