@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-10T22:50:15.024Z",
+  "generatedAt": "2026-09-11T09:06:44.761Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 1669,
-    "ctr": 0.0599,
-    "gscStartDate": "2026-08-14",
-    "gscEndDate": "2026-09-10",
+    "searchImpressions": 1751,
+    "ctr": 0.0571,
+    "gscStartDate": "2026-08-15",
+    "gscEndDate": "2026-09-11",
     "gscDataState": "all",
     "trafficTruthStatus": "observed",
     "rule": "Impressions are visibility, not traffic. Every first-page signal is a strategic opportunity. Confidence controls intervention intensity, not whether the opportunity exists."
@@ -23,10 +23,10 @@
     "Measure every intervention and re-evaluate from fresh Search Console and browser-confirmed traffic data."
   ],
   "summary": {
-    "observedGscIntents": 30,
-    "observedGscPages": 75,
+    "observedGscIntents": 31,
+    "observedGscPages": 76,
     "searchClicks": 1,
-    "searchImpressions": 1669,
+    "searchImpressions": 1751,
     "organicAcquisitionStatus": "early-search-acquisition",
     "actionableOpportunities": 22,
     "firstPageOpportunities": 11,
@@ -72,10 +72,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 432,
+        "impressions": 441,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.7083,
+        "position": 77.7052,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -90,7 +90,7 @@
     },
     {
       "intent": "best-project-management-tools",
-      "priorityScore": 51,
+      "priorityScore": 52,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -121,12 +121,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 51,
+        "impressions": 53,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.7451,
+        "position": 39.6038,
         "opportunity": "authority-gap",
-        "opportunityScore": 27,
+        "opportunityScore": 28,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -170,10 +170,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 204,
+        "impressions": 206,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.2353,
+        "position": 73.301,
         "opportunity": "relevance-gap",
         "opportunityScore": 23,
         "meaningfulSample": true,
@@ -219,10 +219,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 94,
+        "impressions": 98,
         "clicks": 0,
         "ctr": 0,
-        "position": 78.0106,
+        "position": 77.6327,
         "opportunity": "relevance-gap",
         "opportunityScore": 20,
         "meaningfulSample": true,
@@ -317,10 +317,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 36,
+        "impressions": 38,
         "clicks": 0,
         "ctr": 0,
-        "position": 52.1944,
+        "position": 52.9737,
         "opportunity": "relevance-gap",
         "opportunityScore": 20,
         "meaningfulSample": true,
@@ -366,10 +366,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 33,
+        "impressions": 35,
         "clicks": 0,
         "ctr": 0,
-        "position": 71.9697,
+        "position": 72.0571,
         "opportunity": "relevance-gap",
         "opportunityScore": 16,
         "meaningfulSample": true,
@@ -415,10 +415,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 29,
+        "impressions": 30,
         "clicks": 0,
         "ctr": 0,
-        "position": 76.5862,
+        "position": 76.5,
         "opportunity": "relevance-gap",
         "opportunityScore": 15,
         "meaningfulSample": true,
@@ -1698,21 +1698,21 @@
       "pathname": "/",
       "type": "home",
       "clicks": 1,
-      "impressions": 49,
-      "ctr": 2.0408,
-      "position": 6.6122,
+      "impressions": 55,
+      "ctr": 1.8182,
+      "position": 6.5818,
       "topQueries": [
         {
           "query": "toolscout",
           "clicks": 1,
-          "impressions": 23,
-          "position": 9.1739
+          "impressions": 26,
+          "position": 9.1538
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": true,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 8.893,
+      "opportunityScore": 10.028,
       "outcome": "traffic-observed"
     },
     {
@@ -2328,15 +2328,15 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 432,
+      "impressions": 441,
       "ctr": 0,
-      "position": 77.7083,
+      "position": 77.7052,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 133,
-          "position": 75.2632
+          "impressions": 135,
+          "position": 75.2296
         },
         {
           "query": "seo tools for agency",
@@ -2347,14 +2347,14 @@
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 75,
-          "position": 77.7733
+          "impressions": 79,
+          "position": 77.7722
         },
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 39,
-          "position": 72.5385
+          "impressions": 40,
+          "position": 72.625
         },
         {
           "query": "seo tools for agencies",
@@ -2366,7 +2366,53 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 5.559,
+      "opportunityScore": 5.675,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/semrush.html",
+      "pathname": "/tools/semrush.html",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 164,
+      "ctr": 0,
+      "position": 55.3476,
+      "topQueries": [
+        {
+          "query": "semrush tool",
+          "clicks": 0,
+          "impressions": 80,
+          "position": 57.0625
+        },
+        {
+          "query": "semrush software",
+          "clicks": 0,
+          "impressions": 47,
+          "position": 56
+        },
+        {
+          "query": "tool semrush",
+          "clicks": 0,
+          "impressions": 22,
+          "position": 51.2273
+        },
+        {
+          "query": "semrush tools",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 53.375
+        },
+        {
+          "query": "semrush seo software",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 72
+        }
+      ],
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 2.963,
       "outcome": "visibility-only"
     },
     {
@@ -2374,9 +2420,9 @@
       "pathname": "/best-no-code-automation-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 204,
+      "impressions": 206,
       "ctr": 0,
-      "position": 73.2353,
+      "position": 73.301,
       "topQueries": [
         {
           "query": "no code automation tools",
@@ -2387,8 +2433,8 @@
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 24,
-          "position": 69.75
+          "impressions": 25,
+          "position": 70.12
         },
         {
           "query": "no code automation",
@@ -2412,53 +2458,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.786,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/semrush.html",
-      "pathname": "/tools/semrush.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 150,
-      "ctr": 0,
-      "position": 55.1467,
-      "topQueries": [
-        {
-          "query": "semrush tool",
-          "clicks": 0,
-          "impressions": 70,
-          "position": 57.1143
-        },
-        {
-          "query": "semrush software",
-          "clicks": 0,
-          "impressions": 45,
-          "position": 56.1556
-        },
-        {
-          "query": "tool semrush",
-          "clicks": 0,
-          "impressions": 21,
-          "position": 51.0476
-        },
-        {
-          "query": "semrush tools",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 53.375
-        },
-        {
-          "query": "semrush seo software",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 72
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.72,
+      "opportunityScore": 2.81,
       "outcome": "visibility-only"
     },
     {
@@ -2466,9 +2466,9 @@
       "pathname": "/best-seo-keyword-research-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 136,
+      "impressions": 144,
       "ctr": 0,
-      "position": 73.9044,
+      "position": 74.4306,
       "topQueries": [
         {
           "query": "website research tool",
@@ -2479,8 +2479,8 @@
         {
           "query": "seo search tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 77.6923
+          "impressions": 14,
+          "position": 78.3571
         },
         {
           "query": "competitor keyword research tools for seo",
@@ -2504,7 +2504,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.84,
+      "opportunityScore": 1.935,
       "outcome": "visibility-only"
     },
     {
@@ -2512,45 +2512,45 @@
       "pathname": "/tools/airtable.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 113,
+      "impressions": 125,
       "ctr": 0,
-      "position": 72.7434,
+      "position": 72.824,
       "topQueries": [
         {
           "query": "airtable",
           "clicks": 0,
-          "impressions": 21,
-          "position": 62.7619
+          "impressions": 25,
+          "position": 62.76
         },
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 18,
-          "position": 84.8333
+          "impressions": 21,
+          "position": 84.9524
         },
         {
           "query": "what is airtable used for",
           "clicks": 0,
-          "impressions": 14,
-          "position": 89
+          "impressions": 15,
+          "position": 89.2667
         },
         {
           "query": "airtable software",
           "clicks": 0,
-          "impressions": 12,
-          "position": 66.3333
+          "impressions": 13,
+          "position": 66.2308
         },
         {
           "query": "airtable ticketing system",
           "clicks": 0,
-          "impressions": 8,
-          "position": 61.5
+          "impressions": 9,
+          "position": 61.5556
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.553,
+      "opportunityScore": 1.716,
       "outcome": "visibility-only"
     },
     {
@@ -2558,21 +2558,21 @@
       "pathname": "/tools/klaviyo.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 84,
+      "impressions": 89,
       "ctr": 0,
-      "position": 58.2024,
+      "position": 58.4494,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 49,
-          "position": 58.6122
+          "impressions": 52,
+          "position": 58.8269
         },
         {
           "query": "klayvio",
           "clicks": 0,
-          "impressions": 9,
-          "position": 61.3333
+          "impressions": 10,
+          "position": 61.5
         },
         {
           "query": "what is klaviyo",
@@ -2581,22 +2581,22 @@
           "position": 77.1667
         },
         {
+          "query": "kalviyo",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 60.6667
+        },
+        {
           "query": "clavio",
           "clicks": 0,
           "impressions": 2,
           "position": 58
-        },
-        {
-          "query": "kalviyo",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 59.5
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.443,
+      "opportunityScore": 1.523,
       "outcome": "visibility-only"
     },
     {
@@ -2604,9 +2604,9 @@
       "pathname": "/best-project-management-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 51,
+      "impressions": 53,
       "ctr": 0,
-      "position": 39.7451,
+      "position": 39.6038,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -2617,20 +2617,20 @@
         {
           "query": "project workflow tools",
           "clicks": 0,
-          "impressions": 8,
-          "position": 42
+          "impressions": 9,
+          "position": 42.1111
+        },
+        {
+          "query": "project management workflow tools",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 33.2857
         },
         {
           "query": "automated project management tools",
           "clicks": 0,
           "impressions": 7,
           "position": 36.2857
-        },
-        {
-          "query": "project management workflow tools",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 34
         },
         {
           "query": "project management workflow tool",
@@ -2642,7 +2642,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.283,
+      "opportunityScore": 1.338,
       "outcome": "visibility-only"
     },
     {
@@ -2650,15 +2650,15 @@
       "pathname": "/best-funnel-builder.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 94,
+      "impressions": 98,
       "ctr": 0,
-      "position": 78.0106,
+      "position": 77.6327,
       "topQueries": [
         {
           "query": "best funnel builder",
           "clicks": 0,
-          "impressions": 24,
-          "position": 64.875
+          "impressions": 26,
+          "position": 64.8846
         },
         {
           "query": "funnel builder",
@@ -2688,7 +2688,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.205,
+      "opportunityScore": 1.262,
       "outcome": "visibility-only"
     },
     {
@@ -2696,15 +2696,15 @@
       "pathname": "/best-free-project-management-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 36,
+      "impressions": 38,
       "ctr": 0,
-      "position": 52.1944,
+      "position": 52.9737,
       "topQueries": [
         {
           "query": "free online project manager tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 66.7692
+          "impressions": 15,
+          "position": 66.8
         },
         {
           "query": "best free tools for project management",
@@ -2734,7 +2734,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.69,
+      "opportunityScore": 0.717,
       "outcome": "visibility-only"
     },
     {
@@ -2788,21 +2788,21 @@
       "pathname": "/best-free-crm.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 33,
+      "impressions": 35,
       "ctr": 0,
-      "position": 71.9697,
+      "position": 72.0571,
       "topQueries": [
         {
           "query": "best free crm tools",
           "clicks": 0,
-          "impressions": 8,
-          "position": 64.25
+          "impressions": 9,
+          "position": 64.3333
         },
         {
           "query": "crm free tools",
           "clicks": 0,
-          "impressions": 7,
-          "position": 82.5714
+          "impressions": 8,
+          "position": 82.5
         },
         {
           "query": "free crm tools",
@@ -2826,7 +2826,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.459,
+      "opportunityScore": 0.486,
       "outcome": "visibility-only"
     }
   ],
@@ -2860,7 +2860,7 @@
     },
     {
       "intent": "best-project-management-tools",
-      "priorityScore": 51,
+      "priorityScore": 52,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,

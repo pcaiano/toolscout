@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-09-11T09:06:45.250Z",
+  "rule": "Root SEO guides are public only when they belong to the canonical registry, are not held and are not consolidation sources.",
+  "removed": [
+    {
+      "slug": "best-ai-copywriting-tools",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-ai-tools-for-social-media-marketing",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-crm-for-agencies",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-crm-for-startups",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-free-funnel-builder",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-free-sales-funnel-software",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-funnel-builders",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-lead-capture-form-tools",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-online-form-builders",
+      "reason": "outside-canonical-registry"
+    },
+    {
+      "slug": "best-sales-funnel-software",
+      "reason": "outside-canonical-registry"
+    }
+  ]
+}

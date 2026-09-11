@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-10T22:50:15.396Z",
-  "gscGeneratedAt": "2026-09-10T22:50:10.037Z",
+  "generatedAt": "2026-09-11T09:06:45.320Z",
+  "gscGeneratedAt": "2026-09-11T09:06:39.078Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 7,
@@ -93,9 +93,9 @@
     },
     {
       "intent": "best-keyword-research-tools",
-      "impressions": 29,
+      "impressions": 30,
       "clicks": 0,
-      "position": 76.5862,
+      "position": 76.5,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": null,
@@ -113,24 +113,24 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 432,
+      "impressions": 441,
       "clicks": 0,
-      "position": 77.7083,
+      "position": 77.7052,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best seo tool for agencies",
-        "impressions": 39,
-        "position": 72.5385,
+        "impressions": 40,
+        "position": 72.625,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"
     },
     {
       "intent": "best-no-code-automation-tools",
-      "impressions": 204,
+      "impressions": 206,
       "clicks": 0,
-      "position": 73.2353,
+      "position": 73.301,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -143,15 +143,15 @@
     },
     {
       "intent": "best-funnel-builder",
-      "impressions": 94,
+      "impressions": 98,
       "clicks": 0,
-      "position": 78.0106,
+      "position": 77.6327,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best funnel builder",
-        "impressions": 24,
-        "position": 64.875,
+        "impressions": 26,
+        "position": 64.8846,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"
@@ -173,45 +173,45 @@
     },
     {
       "intent": "best-free-crm",
-      "impressions": 33,
+      "impressions": 35,
       "clicks": 0,
-      "position": 71.9697,
+      "position": 72.0571,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best free crm tools",
-        "impressions": 8,
-        "position": 64.25,
+        "impressions": 9,
+        "position": 64.3333,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"
     },
     {
       "intent": "best-project-management-tools",
-      "impressions": 51,
+      "impressions": 53,
       "clicks": 0,
-      "position": 39.7451,
+      "position": 39.6038,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
-        "query": "automated project management tools",
+        "query": "project management workflow tools",
         "impressions": 7,
-        "position": 36.2857,
+        "position": 33.2857,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"
     },
     {
       "intent": "best-free-project-management-tools",
-      "impressions": 36,
+      "impressions": 38,
       "clicks": 0,
-      "position": 52.1944,
+      "position": 52.9737,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "free online project manager tools",
-        "impressions": 13,
-        "position": 66.7692,
+        "impressions": 15,
+        "position": 66.8,
         "alignment": 0.667
       },
       "action": "deepen-weak-ranking"

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T22:50:15.089Z",
+  "generatedAt": "2026-09-11T09:06:44.831Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -17,10 +17,10 @@
   },
   "search": {
     "summary": {
-      "observedGscIntents": 30,
-      "observedGscPages": 75,
+      "observedGscIntents": 31,
+      "observedGscPages": 76,
       "searchClicks": 1,
-      "searchImpressions": 1669,
+      "searchImpressions": 1751,
       "organicAcquisitionStatus": "early-search-acquisition",
       "actionableOpportunities": 22,
       "firstPageOpportunities": 11,
@@ -39,8 +39,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 432,
-        "position": 77.7083,
+        "impressions": 441,
+        "position": 77.7052,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -53,8 +53,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 204,
-        "position": 73.2353,
+        "impressions": 206,
+        "position": 73.301,
         "topTools": [
           "integrately",
           "n8n",
@@ -67,8 +67,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 94,
-        "position": 78.0106,
+        "impressions": 98,
+        "position": 77.6327,
         "topTools": [
           "kit",
           "getresponse",
@@ -77,12 +77,12 @@
       },
       {
         "intent": "best-project-management-tools",
-        "priorityScore": 51,
+        "priorityScore": 52,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 51,
-        "position": 39.7451,
+        "impressions": 53,
+        "position": 39.6038,
         "topTools": [
           "asana",
           "wrike",
@@ -109,8 +109,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 36,
-        "position": 52.1944,
+        "impressions": 38,
+        "position": 52.9737,
         "topTools": [
           "trello",
           "clickup",
@@ -123,8 +123,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 33,
-        "position": 71.9697,
+        "impressions": 35,
+        "position": 72.0571,
         "topTools": [
           "attio",
           "hubspot",
@@ -137,8 +137,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 29,
-        "position": 76.5862,
+        "impressions": 30,
+        "position": 76.5,
         "topTools": [
           "surfer",
           "ahrefs",
