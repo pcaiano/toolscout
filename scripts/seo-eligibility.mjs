@@ -31,6 +31,10 @@ const CAPABILITY_RULES = {
   'best-video-content-tools': ['video','videos','screen recording','video editing','podcast editing']
 };
 
+const STRUCTURED_CAPABILITY_INTENTS = new Set([
+  'best-funnel-builder'
+]);
+
 const COMPOUND_CAPABILITY_RULES = {
   'best-ai-marketing-tools': {
     groups: [['ai','artificial intelligence','machine learning']],
@@ -85,6 +89,10 @@ export function toolText(tool) {
   return normalize([tool?.name, tool?.category, tool?.description, ...(tool?.features || []), ...(tool?.bestFor || [])].join(' '));
 }
 
+export function structuredCapabilityText(tool) {
+  return normalize([...(tool?.features || []), ...(tool?.bestFor || [])].join(' '));
+}
+
 export function lexicalRelevance(tool, intent) {
   const text = toolText(tool);
   const slugWords = String(intent?.slug || '').replace(/^best-/, '').replace(/-/g, ' ');
@@ -118,9 +126,11 @@ export function capabilityTerms(intent) {
 
 export function capabilityAssessment(tool, intent) {
   const text = toolText(tool);
+  const structuredText = structuredCapabilityText(tool);
   const simpleKey = ruleKey(intent, CAPABILITY_RULES);
   const simpleTerms = simpleKey ? CAPABILITY_RULES[simpleKey] : [];
-  const simpleMatch = !simpleTerms.length || simpleTerms.some(term => termMatch(text, term));
+  const simpleEvidence = simpleKey && STRUCTURED_CAPABILITY_INTENTS.has(simpleKey) ? structuredText : text;
+  const simpleMatch = !simpleTerms.length || simpleTerms.some(term => termMatch(simpleEvidence, term));
 
   const compoundKey = ruleKey(intent, COMPOUND_CAPABILITY_RULES);
   const compoundRule = compoundKey ? COMPOUND_CAPABILITY_RULES[compoundKey] : null;
