@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T09:14:40.392Z",
+  "generatedAt": "2026-09-11T09:49:33.748Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-11",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1751,
-    "ctr": 0.0571
+    "impressions": 1771,
+    "ctr": 0.0565
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,12 +25,12 @@
     "guide": {
       "pages": 31,
       "clicks": 0,
-      "impressions": 1141
+      "impressions": 1150
     },
     "home": {
       "pages": 2,
       "clicks": 1,
-      "impressions": 61
+      "impressions": 62
     },
     "other": {
       "pages": 5,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 33,
       "clicks": 0,
-      "impressions": 492
+      "impressions": 502
     }
   },
   "pageCount": 76,
@@ -125,21 +125,21 @@
       "type": "guide",
       "intent": "best-no-code-automation-tools",
       "clicks": 0,
-      "impressions": 206,
+      "impressions": 208,
       "ctr": 0,
-      "position": 73.301,
+      "position": 73.351,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 30,
-          "position": 69.7667
+          "impressions": 31,
+          "position": 70.0645
         },
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 25,
-          "position": 70.12
+          "impressions": 26,
+          "position": 70.4231
         },
         {
           "query": "no code automation",
@@ -198,9 +198,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 164,
+      "impressions": 169,
       "ctr": 0,
-      "position": 55.3476,
+      "position": 55.4438,
       "topQueries": [
         {
           "query": "semrush tool",
@@ -211,8 +211,8 @@
         {
           "query": "semrush software",
           "clicks": 0,
-          "impressions": 47,
-          "position": 56
+          "impressions": 52,
+          "position": 56.25
         },
         {
           "query": "tool semrush",
@@ -326,9 +326,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 125,
+      "impressions": 129,
       "ctr": 0,
-      "position": 72.824,
+      "position": 73.0775,
       "topQueries": [
         {
           "query": "airtable",
@@ -339,14 +339,14 @@
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 21,
-          "position": 84.9524
+          "impressions": 22,
+          "position": 85
         },
         {
           "query": "what is airtable used for",
           "clicks": 0,
-          "impressions": 15,
-          "position": 89.2667
+          "impressions": 17,
+          "position": 89.2941
         },
         {
           "query": "airtable software",
@@ -367,16 +367,16 @@
           "position": 90.8571
         },
         {
+          "query": "airtabel",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 64.1667
+        },
+        {
           "query": "what is air table",
           "clicks": 0,
           "impressions": 6,
           "position": 69
-        },
-        {
-          "query": "airtabel",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 65.2
         },
         {
           "query": "airtbale",
@@ -399,9 +399,9 @@
       "type": "guide",
       "intent": "best-funnel-builder",
       "clicks": 0,
-      "impressions": 98,
+      "impressions": 103,
       "ctr": 0,
-      "position": 77.6327,
+      "position": 77.9903,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -412,14 +412,20 @@
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 24,
-          "position": 90.8333
+          "impressions": 26,
+          "position": 90.4615
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 22,
-          "position": 85.6364
+          "impressions": 23,
+          "position": 85.8696
+        },
+        {
+          "query": "funnelbuilder",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 85.75
         },
         {
           "query": "online funnel builder",
@@ -450,12 +456,6 @@
           "clicks": 0,
           "impressions": 2,
           "position": 30.5
-        },
-        {
-          "query": "funnelbuilder",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 90.5
         },
         {
           "query": "what is the best marketing funnel builder?",
@@ -545,9 +545,9 @@
       "type": "home",
       "intent": null,
       "clicks": 1,
-      "impressions": 55,
-      "ctr": 1.8182,
-      "position": 6.5818,
+      "impressions": 56,
+      "ctr": 1.7857,
+      "position": 6.6071,
       "topQueries": [
         {
           "query": "toolscout",
@@ -564,9 +564,9 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 53,
+      "impressions": 54,
       "ctr": 0,
-      "position": 39.6038,
+      "position": 39.4815,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -583,8 +583,8 @@
         {
           "query": "project management workflow tools",
           "clicks": 0,
-          "impressions": 7,
-          "position": 33.2857
+          "impressions": 8,
+          "position": 33.25
         },
         {
           "query": "automated project management tools",
@@ -637,9 +637,9 @@
       "type": "guide",
       "intent": "best-crm-for-sales-teams",
       "clicks": 0,
-      "impressions": 47,
+      "impressions": 48,
       "ctr": 0,
-      "position": 75.8511,
+      "position": 75.9583,
       "topQueries": [
         {
           "query": "crm for sales teams",
@@ -650,8 +650,8 @@
         {
           "query": "crm for sales team",
           "clicks": 0,
-          "impressions": 11,
-          "position": 79.8182
+          "impressions": 12,
+          "position": 79.9167
         },
         {
           "query": "best crm for sales teams",
@@ -1309,6 +1309,25 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/netlify.html",
+      "pathname": "/tools/netlify.html",
+      "key": "netlify",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 40.25,
+      "topQueries": [
+        {
+          "query": "is netlify app free",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 74
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/perplexity.html",
       "pathname": "/tools/perplexity.html",
       "key": "perplexity",
@@ -1433,25 +1452,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 69
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/netlify.html",
-      "pathname": "/tools/netlify.html",
-      "key": "netlify",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 3,
-      "ctr": 0,
-      "position": 29,
-      "topQueries": [
-        {
-          "query": "is netlify app free",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 74
         }
       ]
     },
@@ -1994,21 +1994,21 @@
       "intent": "best-no-code-automation-tools",
       "page": "https://trytoolscout.org/best-no-code-automation-tools.html",
       "clicks": 0,
-      "impressions": 206,
+      "impressions": 208,
       "ctr": 0,
-      "position": 73.301,
+      "position": 73.351,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 30,
-          "position": 69.7667
+          "impressions": 31,
+          "position": 70.0645
         },
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 25,
-          "position": 70.12
+          "impressions": 26,
+          "position": 70.4231
         },
         {
           "query": "no code automation",
@@ -2134,9 +2134,9 @@
       "intent": "best-funnel-builder",
       "page": "https://trytoolscout.org/best-funnel-builder.html",
       "clicks": 0,
-      "impressions": 98,
+      "impressions": 103,
       "ctr": 0,
-      "position": 77.6327,
+      "position": 77.9903,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -2147,14 +2147,20 @@
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 24,
-          "position": 90.8333
+          "impressions": 26,
+          "position": 90.4615
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 22,
-          "position": 85.6364
+          "impressions": 23,
+          "position": 85.8696
+        },
+        {
+          "query": "funnelbuilder",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 85.75
         },
         {
           "query": "online funnel builder",
@@ -2187,12 +2193,6 @@
           "position": 30.5
         },
         {
-          "query": "funnelbuilder",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 90.5
-        },
-        {
           "query": "what is the best marketing funnel builder?",
           "clicks": 0,
           "impressions": 1,
@@ -2204,9 +2204,9 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools.html",
       "clicks": 0,
-      "impressions": 53,
+      "impressions": 54,
       "ctr": 0,
-      "position": 39.6038,
+      "position": 39.4815,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -2223,8 +2223,8 @@
         {
           "query": "project management workflow tools",
           "clicks": 0,
-          "impressions": 7,
-          "position": 33.2857
+          "impressions": 8,
+          "position": 33.25
         },
         {
           "query": "automated project management tools",
@@ -2274,9 +2274,9 @@
       "intent": "best-crm-for-sales-teams",
       "page": "https://trytoolscout.org/best-crm-for-sales-teams.html",
       "clicks": 0,
-      "impressions": 47,
+      "impressions": 48,
       "ctr": 0,
-      "position": 75.8511,
+      "position": 75.9583,
       "topQueries": [
         {
           "query": "crm for sales teams",
@@ -2287,8 +2287,8 @@
         {
           "query": "crm for sales team",
           "clicks": 0,
-          "impressions": 11,
-          "position": 79.8182
+          "impressions": 12,
+          "position": 79.9167
         },
         {
           "query": "best crm for sales teams",
