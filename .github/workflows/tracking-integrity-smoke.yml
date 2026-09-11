@@ -108,12 +108,28 @@ jobs:
             exit 1
           fi
 
-          sleep 3
-          START_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='session_started' AND f.source='${SOURCE}' AND f.path='${PAGE_PATH}' AND s.classification='owner';")
-          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)<1){console.error('page-entry event missing');process.exit(1)}" "$START_RESULT"
+          D1_OK=0
+          for READ_ATTEMPT in $(seq 1 8); do
+            START_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='session_started' AND f.source='${SOURCE}' AND f.path='${PAGE_PATH}' AND s.classification='owner';")
+            CONFIRM_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id='${SESSION}' AND f.event_type='page_confirmed' AND s.classification='owner';")
+            START_COUNT=$(node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];process.stdout.write(String(Number(rows[0]?.count||0)))" "$START_RESULT")
+            CONFIRM_COUNT=$(node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];process.stdout.write(String(Number(rows[0]?.count||0)))" "$CONFIRM_RESULT")
+            echo "D1 verification attempt ${READ_ATTEMPT}: page entry=${START_COUNT}, browser confirmation=${CONFIRM_COUNT}"
+            if [ "$START_COUNT" -ge 1 ] && [ "$CONFIRM_COUNT" -eq 1 ]; then
+              D1_OK=1
+              break
+            fi
+            sleep 5
+          done
 
-          CONFIRM_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id='${SESSION}' AND f.event_type='page_confirmed' AND s.classification='owner';")
-          node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)!==1){console.error('valid owner browser confirmation missing');process.exit(1)}" "$CONFIRM_RESULT"
+          if [ "$D1_OK" != '1' ]; then
+            echo 'D1 verification did not converge. Session diagnostics follow.'
+            npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT f.event_id,f.session_id,f.event_type,f.source,f.path,f.created_at,s.classification,s.first_seen_at,s.last_seen_at FROM funnel_events f LEFT JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id='${SESSION}' ORDER BY f.created_at;" || true
+            npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT session_id,source,referrer_host,classification,first_seen_at,last_seen_at FROM sessions WHERE session_id='${SESSION}';" || true
+            echo "Last page-entry result: ${START_RESULT}"
+            echo "Last browser-confirmation result: ${CONFIRM_RESULT}"
+            exit 1
+          fi
 
           FAKE_RESULT=$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) count FROM funnel_events WHERE session_id='${FAKE_SESSION}' AND event_type='page_confirmed';")
           node -e "const p=JSON.parse(process.argv[1]);const b=Array.isArray(p)?p[0]:p;const rows=b?.results||b?.result?.[0]?.results||[];if(Number(rows[0]?.count||0)!==0){console.error('forged browser confirmation was recorded');process.exit(1)}" "$FAKE_RESULT"
