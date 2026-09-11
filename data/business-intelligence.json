@@ -1,51 +1,51 @@
 {
-  "generatedAt": "2026-09-11T00:00:49.425Z",
+  "generatedAt": "2026-09-11T04:25:39.131Z",
   "timezone": "Europe/Lisbon",
   "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 2,
-      "likelyHuman": 1,
+      "total": 3,
+      "likelyHuman": 2,
       "owner": 1,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 2,
-        "likelyHuman": 1,
-        "bots": 0,
+        "total": 14,
+        "likelyHuman": 2,
+        "bots": 11,
         "owner": 1,
         "synthetic": 0,
         "unknownLegacy": 0
       }
     },
     "d7": {
-      "total": 70,
-      "likelyHuman": 55,
+      "total": 71,
+      "likelyHuman": 56,
       "owner": 15,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 516,
-        "likelyHuman": 55,
-        "bots": 180,
+        "total": 523,
+        "likelyHuman": 56,
+        "bots": 190,
         "owner": 16,
         "synthetic": 0,
-        "unknownLegacy": 265
+        "unknownLegacy": 261
       }
     },
     "d30": {
-      "total": 137,
-      "likelyHuman": 95,
+      "total": 138,
+      "likelyHuman": 96,
       "owner": 42,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 1710,
-        "likelyHuman": 95,
-        "bots": 271,
+        "total": 1722,
+        "likelyHuman": 96,
+        "bots": 282,
         "owner": 43,
         "synthetic": 0,
         "unknownLegacy": 1301
@@ -94,10 +94,10 @@
       },
       {
         "day": "2026-09-11",
-        "sessions": 1
+        "sessions": 2
       }
     ],
-    "averageDailyLikelyHuman30d": 3.17
+    "averageDailyLikelyHuman30d": 3.2
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -132,7 +132,7 @@
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 78
+      "sessions": 79
     },
     {
       "source": "ref:app.partnerstack.com",
@@ -178,7 +178,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 95,
+      "sessions": 96,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -202,7 +202,7 @@
         "source": "direct",
         "referrerHost": "none",
         "path": "/",
-        "sessions": 1
+        "sessions": 2
       }
     ],
     "redirectOnlyToday": 0,
@@ -215,8 +215,8 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 95,
-    "humanDailyAverage30d": 3.17,
+    "humanSessions30d": 96,
+    "humanDailyAverage30d": 3.2,
     "recommendationCompletionRate": 2.1,
     "humanSessionToOutboundRate": 2.1,
     "monetizationCoverage": 50,
