@@ -38,12 +38,14 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
-          echo '=== AFFILIATE COVERAGE ENGINE LATEST RUN ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,created_at FROM affiliate_coverage_runs WHERE created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;"
+          echo '=== AFFILIATE COVERAGE TRAFFIC TRUTH LINEAGE ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT traffic_truth,COUNT(*) AS runs,MIN(created_at) AS first_run,MAX(created_at) AS latest_run FROM affiliate_coverage_runs GROUP BY traffic_truth ORDER BY traffic_truth;"
+          echo '=== AFFILIATE COVERAGE ENGINE LATEST STRICT RUN ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;"
           echo '=== AFFILIATE WORKFLOW STATE COUNTS ==='
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) AS count FROM affiliate_workflow GROUP BY status ORDER BY status;"
-          recent="$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS count FROM affiliate_coverage_runs WHERE created_at>=datetime('now','-2 hours');")"
-          node -e "const x=JSON.parse(process.argv[1]); const rows=x?.[0]?.results||[]; if(Number(rows[0]?.count||0)<1){console.error('No recent Affiliate Coverage Engine production cycle found.');process.exit(1)}" "$recent"
+          recent="$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS count FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at>=datetime('now','-2 hours');")"
+          node -e "const x=JSON.parse(process.argv[1]); const rows=x?.[0]?.results||[]; if(Number(rows[0]?.count||0)<1){console.error('No recent browser-confirmed Affiliate Coverage Engine production cycle found.');process.exit(1)}" "$recent"
 
       - name: Production cycle proof
-        run: echo 'Both P0 engines have persisted production-cycle evidence within the last two hours.'
+        run: echo 'Both P0 engines have persisted production-cycle evidence within the last two hours, and Affiliate Coverage evidence is browser-confirmed.'
