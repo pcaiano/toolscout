@@ -8,9 +8,12 @@ on:
     branches: [main]
     paths:
       - 'scripts/export-traffic-truth.mjs'
+      - 'scripts/export-traffic-truth-dual-token.mjs'
       - 'scripts/sync-gsc-signals.mjs'
       - 'private-assets.js'
+      - 'session-classification.js'
       - 'funnel-model.js'
+      - 'wrangler.toml'
       - '.github/workflows/traffic-truth-audit.yml'
 
 permissions:
@@ -42,24 +45,12 @@ jobs:
           GSC_LOOKBACK_DAYS: '28'
 
       - name: Export traffic truth snapshot
-        run: node scripts/export-traffic-truth.mjs
+        run: node scripts/export-traffic-truth-dual-token.mjs
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_ANALYTICS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_ANALYTICS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: '16054933850d8af4ba498b772cbe2de9'
           CLOUDFLARE_RUM_SITE_TAG: '91d03dda89d74bc5b6685a68bbe8ef42'
-
-      - name: Commit truth snapshot when changed
-        run: |
-          if [ -z "$(git status --porcelain -- data/traffic-truth.json reports/gsc-signals.json)" ]; then
-            echo "No traffic truth changes"
-          else
-            git config user.name "toolscout-analytics-bot"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data/traffic-truth.json reports/gsc-signals.json
-            git commit -m "Refresh traffic truth snapshot"
-            git pull --rebase origin main
-            git push origin HEAD:main
-          fi
 
       - name: Enforce analytics integrity
         run: |
@@ -68,5 +59,29 @@ jobs:
           const x=JSON.parse(fs.readFileSync('data/traffic-truth.json','utf8'));
           console.log(JSON.stringify({status:x.status,reconciliation:x.reconciliation,cloudflareSite:x.cloudflareSite,cloudflareRum:x.cloudflareRum?.status,d1:x.d1?.status,gsc:x.googleSearchConsole?.status},null,2));
           if(x.status==='degraded') process.exit(1);
-          if(!['observed'].includes(x.googleSearchConsole?.status)) process.exit(1);
+          if(x.cloudflareRum?.status!=='observed') process.exit(1);
+          if(x.d1?.status!=='observed') process.exit(1);
+          if(x.googleSearchConsole?.status!=='observed') process.exit(1);
           NODE
+
+      - name: Commit truth snapshot when changed
+        run: |
+          if [ -z "$(git status --porcelain -- data/traffic-truth.json reports/gsc-signals.json)" ]; then
+            echo "No traffic truth changes"
+            exit 0
+          fi
+          cp data/traffic-truth.json /tmp/traffic-truth.json
+          cp reports/gsc-signals.json /tmp/gsc-signals.json
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/traffic-truth.json data/traffic-truth.json
+          cp /tmp/gsc-signals.json reports/gsc-signals.json
+          git config user.name "toolscout-analytics-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/traffic-truth.json reports/gsc-signals.json
+          if git diff --cached --quiet; then
+            echo "No traffic truth changes after refreshing main"
+            exit 0
+          fi
+          git commit -m "Refresh traffic truth snapshot"
+          git push origin HEAD:main
