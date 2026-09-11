@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T09:14:21.284Z",
+  "generatedAt": "2026-09-11T10:46:14.537Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 1,
-      "impressions": 1751,
-      "ctr": 0.0571
+      "impressions": 1771,
+      "ctr": 0.0565
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -79,10 +79,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 53,
+        "impressions": 54,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.6038,
+        "position": 39.4815,
         "opportunity": "authority-gap",
         "opportunityScore": 28,
         "meaningfulSample": true,
@@ -119,10 +119,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 206,
+        "impressions": 208,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.301,
+        "position": 73.351,
         "opportunity": "relevance-gap",
         "opportunityScore": 23,
         "meaningfulSample": true,
@@ -158,10 +158,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 47,
+        "impressions": 48,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.8511,
+        "position": 75.9583,
         "opportunity": "relevance-gap",
         "opportunityScore": 17,
         "meaningfulSample": true,
@@ -192,10 +192,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 98,
+        "impressions": 103,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.6327,
+        "position": 77.9903,
         "opportunity": "relevance-gap",
         "opportunityScore": 20,
         "meaningfulSample": true,

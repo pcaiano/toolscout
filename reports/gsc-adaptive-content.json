@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-11T09:14:21.928Z",
-  "gscGeneratedAt": "2026-09-11T09:14:18.391Z",
+  "generatedAt": "2026-09-11T10:46:15.178Z",
+  "gscGeneratedAt": "2026-09-11T10:46:11.414Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 7,
@@ -128,24 +128,24 @@
     },
     {
       "intent": "best-no-code-automation-tools",
-      "impressions": 206,
+      "impressions": 208,
       "clicks": 0,
-      "position": 73.301,
+      "position": 73.351,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "no code automation tools",
-        "impressions": 30,
-        "position": 69.7667,
+        "impressions": 31,
+        "position": 70.0645,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"
     },
     {
       "intent": "best-funnel-builder",
-      "impressions": 98,
+      "impressions": 103,
       "clicks": 0,
-      "position": 77.6327,
+      "position": 77.9903,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -158,9 +158,9 @@
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "impressions": 47,
+      "impressions": 48,
       "clicks": 0,
-      "position": 75.8511,
+      "position": 75.9583,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -188,15 +188,15 @@
     },
     {
       "intent": "best-project-management-tools",
-      "impressions": 53,
+      "impressions": 54,
       "clicks": 0,
-      "position": 39.6038,
+      "position": 39.4815,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "project management workflow tools",
-        "impressions": 7,
-        "position": 33.2857,
+        "impressions": 8,
+        "position": 33.25,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"

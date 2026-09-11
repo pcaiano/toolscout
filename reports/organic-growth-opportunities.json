@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-11T09:14:21.352Z",
+  "generatedAt": "2026-09-11T10:46:14.601Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 1751,
-    "ctr": 0.0571,
+    "searchImpressions": 1771,
+    "ctr": 0.0565,
     "gscStartDate": "2026-08-15",
     "gscEndDate": "2026-09-11",
     "gscDataState": "all",
@@ -26,7 +26,7 @@
     "observedGscIntents": 31,
     "observedGscPages": 76,
     "searchClicks": 1,
-    "searchImpressions": 1751,
+    "searchImpressions": 1771,
     "organicAcquisitionStatus": "early-search-acquisition",
     "actionableOpportunities": 22,
     "firstPageOpportunities": 11,
@@ -121,10 +121,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 53,
+        "impressions": 54,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.6038,
+        "position": 39.4815,
         "opportunity": "authority-gap",
         "opportunityScore": 28,
         "meaningfulSample": true,
@@ -170,10 +170,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 206,
+        "impressions": 208,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.301,
+        "position": 73.351,
         "opportunity": "relevance-gap",
         "opportunityScore": 23,
         "meaningfulSample": true,
@@ -219,10 +219,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 47,
+        "impressions": 48,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.8511,
+        "position": 75.9583,
         "opportunity": "relevance-gap",
         "opportunityScore": 17,
         "meaningfulSample": true,
@@ -268,10 +268,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 98,
+        "impressions": 103,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.6327,
+        "position": 77.9903,
         "opportunity": "relevance-gap",
         "opportunityScore": 20,
         "meaningfulSample": true,
@@ -1697,9 +1697,9 @@
       "pathname": "/",
       "type": "home",
       "clicks": 1,
-      "impressions": 55,
-      "ctr": 1.8182,
-      "position": 6.5818,
+      "impressions": 56,
+      "ctr": 1.7857,
+      "position": 6.6071,
       "topQueries": [
         {
           "query": "toolscout",
@@ -1711,7 +1711,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": true,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 10.028,
+      "opportunityScore": 10.171,
       "outcome": "traffic-observed"
     },
     {
@@ -2373,9 +2373,9 @@
       "pathname": "/tools/semrush.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 164,
+      "impressions": 169,
       "ctr": 0,
-      "position": 55.3476,
+      "position": 55.4438,
       "topQueries": [
         {
           "query": "semrush tool",
@@ -2386,8 +2386,8 @@
         {
           "query": "semrush software",
           "clicks": 0,
-          "impressions": 47,
-          "position": 56
+          "impressions": 52,
+          "position": 56.25
         },
         {
           "query": "tool semrush",
@@ -2411,7 +2411,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.963,
+      "opportunityScore": 3.048,
       "outcome": "visibility-only"
     },
     {
@@ -2419,21 +2419,21 @@
       "pathname": "/best-no-code-automation-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 206,
+      "impressions": 208,
       "ctr": 0,
-      "position": 73.301,
+      "position": 73.351,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 30,
-          "position": 69.7667
+          "impressions": 31,
+          "position": 70.0645
         },
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 25,
-          "position": 70.12
+          "impressions": 26,
+          "position": 70.4231
         },
         {
           "query": "no code automation",
@@ -2457,7 +2457,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.81,
+      "opportunityScore": 2.836,
       "outcome": "visibility-only"
     },
     {
@@ -2511,9 +2511,9 @@
       "pathname": "/tools/airtable.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 125,
+      "impressions": 129,
       "ctr": 0,
-      "position": 72.824,
+      "position": 73.0775,
       "topQueries": [
         {
           "query": "airtable",
@@ -2524,14 +2524,14 @@
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 21,
-          "position": 84.9524
+          "impressions": 22,
+          "position": 85
         },
         {
           "query": "what is airtable used for",
           "clicks": 0,
-          "impressions": 15,
-          "position": 89.2667
+          "impressions": 17,
+          "position": 89.2941
         },
         {
           "query": "airtable software",
@@ -2549,7 +2549,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.716,
+      "opportunityScore": 1.765,
       "outcome": "visibility-only"
     },
     {
@@ -2603,9 +2603,9 @@
       "pathname": "/best-project-management-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 53,
+      "impressions": 54,
       "ctr": 0,
-      "position": 39.6038,
+      "position": 39.4815,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -2622,8 +2622,8 @@
         {
           "query": "project management workflow tools",
           "clicks": 0,
-          "impressions": 7,
-          "position": 33.2857
+          "impressions": 8,
+          "position": 33.25
         },
         {
           "query": "automated project management tools",
@@ -2641,7 +2641,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.338,
+      "opportunityScore": 1.368,
       "outcome": "visibility-only"
     },
     {
@@ -2649,9 +2649,9 @@
       "pathname": "/best-funnel-builder.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 98,
+      "impressions": 103,
       "ctr": 0,
-      "position": 77.6327,
+      "position": 77.9903,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -2662,32 +2662,32 @@
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 24,
-          "position": 90.8333
+          "impressions": 26,
+          "position": 90.4615
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 22,
-          "position": 85.6364
+          "impressions": 23,
+          "position": 85.8696
+        },
+        {
+          "query": "funnelbuilder",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 85.75
         },
         {
           "query": "online funnel builder",
           "clicks": 0,
           "impressions": 4,
           "position": 87
-        },
-        {
-          "query": "best sales funnel builder",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 67
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.262,
+      "opportunityScore": 1.321,
       "outcome": "visibility-only"
     },
     {
@@ -2741,9 +2741,9 @@
       "pathname": "/best-crm-for-sales-teams.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 47,
+      "impressions": 48,
       "ctr": 0,
-      "position": 75.8511,
+      "position": 75.9583,
       "topQueries": [
         {
           "query": "crm for sales teams",
@@ -2754,8 +2754,8 @@
         {
           "query": "crm for sales team",
           "clicks": 0,
-          "impressions": 11,
-          "position": 79.8182
+          "impressions": 12,
+          "position": 79.9167
         },
         {
           "query": "best crm for sales teams",
@@ -2779,7 +2779,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.62,
+      "opportunityScore": 0.632,
       "outcome": "visibility-only"
     },
     {
