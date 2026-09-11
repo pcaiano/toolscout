@@ -11,6 +11,7 @@ on:
       - 'migrations/0048_distribution_economic_learning.sql'
       - 'migrations/0057_distribution_browser_confirmed_learning.sql'
       - 'migrations/0058_distribution_operating_decisions.sql'
+      - 'migrations/0059_distribution_operating_bootstrap.sql'
       - '.github/workflows/distribution-economic-learning-check.yml'
   push:
     branches: [main]
@@ -23,6 +24,7 @@ on:
       - 'migrations/0048_distribution_economic_learning.sql'
       - 'migrations/0057_distribution_browser_confirmed_learning.sql'
       - 'migrations/0058_distribution_operating_decisions.sql'
+      - 'migrations/0059_distribution_operating_bootstrap.sql'
       - '.github/workflows/distribution-economic-learning-check.yml'
   workflow_dispatch:
 
@@ -48,6 +50,7 @@ jobs:
           test -s migrations/0048_distribution_economic_learning.sql
           test -s migrations/0057_distribution_browser_confirmed_learning.sql
           test -s migrations/0058_distribution_operating_decisions.sql
+          test -s migrations/0059_distribution_operating_bootstrap.sql
           grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_economic_learning' migrations/0048_distribution_economic_learning.sql
           grep -Fq 'browser_confirmed_sessions_30d' migrations/0057_distribution_browser_confirmed_learning.sql
           grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_surface_costs' migrations/0057_distribution_browser_confirmed_learning.sql
@@ -64,6 +67,9 @@ jobs:
         run: |
           grep -Fq 'operating_decision' migrations/0058_distribution_operating_decisions.sql
           grep -Fq 'priority_weight' migrations/0058_distribution_operating_decisions.sql
+          grep -Fq 'Reserved as the bounded exploration slot' migrations/0059_distribution_operating_bootstrap.sql
+          grep -Fq "status='approval_required'" migrations/0059_distribution_operating_bootstrap.sql
+          grep -Fq 'Paid distribution is never executed automatically' migrations/0059_distribution_operating_bootstrap.sql
           grep -Fq "import base from './distribution-throughput-worker.js'" distribution-priority-worker.js
           grep -Fq 'export function operatingDecision' distribution-priority-worker.js
           grep -Fq 'export function priorityWeight' distribution-priority-worker.js
