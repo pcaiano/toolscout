@@ -1,0 +1,110 @@
+name: Strict Affiliate Traffic Patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/strict-affiliate-traffic-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch strict browser-confirmed affiliate metrics
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path, old, new, expected=1):
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != expected:
+                  raise SystemExit(f'{path}: expected {expected} occurrence(s), found {count}: {old[:120]}')
+              p.write_text(text.replace(old, new))
+
+          replace_exact(
+              'human-action-entry-worker.js',
+              "q(env,\"SELECT c.tool_slug,COUNT(*) unmonetized_clicks_30d FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND c.affiliate_active_at_click=0 AND COALESCE(s.classification,'unknown/legacy')='likely-human' GROUP BY c.tool_slug\")",
+              "q(env,\"SELECT c.tool_slug,COUNT(*) unmonetized_clicks_30d FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND c.affiliate_active_at_click=0 AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human') AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed') GROUP BY c.tool_slug\")"
+          )
+          replace_exact(
+              'human-action-entry-worker.js',
+              "metric_label:'unmonetized human outbound · 30d'",
+              "metric_label:'unmonetized browser-confirmed outbound · 30d'"
+          )
+          replace_exact(
+              'human-action-entry-worker.js',
+              "affiliate_source_of_truth:'canonical affiliate state: verified pipeline + persisted workflow + active affiliate routing'",
+              "affiliate_source_of_truth:'canonical affiliate state + browser-confirmed outbound traffic'"
+          )
+
+          replace_exact(
+              'growth-command-center-v2-worker.js',
+              "safeAll(env,`SELECT c.tool_slug,COUNT(*) clicks FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND s.classification='likely-human' AND c.source!='internal-test' GROUP BY c.tool_slug`)",
+              "safeAll(env,`SELECT c.tool_slug,COUNT(*) clicks FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND s.classification IN ('likely-human','human') AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed') GROUP BY c.tool_slug`)"
+          )
+          replace_exact(
+              'growth-command-center-v2-worker.js',
+              "clickDefinition:'Likely-human outbound clicks only; internal-test traffic excluded.'",
+              "clickDefinition:'Browser-confirmed outbound clicks only; internal and synthetic traffic excluded.'"
+          )
+          replace_exact(
+              'growth-command-center-v2-worker.js',
+              "<div class=\"widgetMeta\">Likely-human clicks · 30d</div>",
+              "<div class=\"widgetMeta\">Browser-confirmed clicks · 30d</div>"
+          )
+          replace_exact(
+              'growth-command-center-v2-worker.js',
+              "`Recover monetization on ${clicks} observed unmonetized human outbound click${clicks===1?'':'s'} / 30d`",
+              "`Recover monetization on ${clicks} browser-confirmed unmonetized outbound click${clicks===1?'':'s'} / 30d`"
+          )
+          replace_exact(
+              'growth-command-center-v2-worker.js',
+              "safeFirst(env,`SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,created_at FROM affiliate_coverage_runs ORDER BY created_at DESC LIMIT 1`)",
+              "safeFirst(env,`SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' ORDER BY created_at DESC LIMIT 1`)"
+          )
+          replace_exact(
+              'growth-command-center-v2-worker.js',
+              "safeFirst(env,`SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,created_at FROM affiliate_coverage_runs WHERE created_at<=datetime('now','-7 days') ORDER BY created_at DESC LIMIT 1`)",
+              "safeFirst(env,`SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at<=datetime('now','-7 days') ORDER BY created_at DESC LIMIT 1`)"
+          )
+          replace_exact(
+              'growth-command-center-v2-worker.js',
+              "engines:{affiliate:{status:'running',last_run_at:affiliateLatest?.created_at||affiliateDiscovery?.last_checked||null,",
+              "engines:{affiliate:{status:affiliateLatest?'running':'awaiting_strict_evidence',last_run_at:affiliateLatest?.created_at||null,traffic_truth:'browser_confirmed',"
+          )
+
+          replace_exact(
+              'command-center-affiliate-table-worker.js',
+              "<div class=\"widgetMeta\">Likely-human clicks · 30d</div>",
+              "<div class=\"widgetMeta\">Browser-confirmed clicks · 30d</div>"
+          )
+
+          PY
+
+          node --check human-action-entry-worker.js
+          node --check growth-command-center-v2-worker.js
+          node --check command-center-affiliate-table-worker.js
+          grep -Fq "event_type='page_confirmed'" human-action-entry-worker.js
+          grep -Fq "event_type='page_confirmed'" growth-command-center-v2-worker.js
+          grep -Fq "traffic_truth='browser_confirmed'" growth-command-center-v2-worker.js
+          grep -Fq "awaiting_strict_evidence" growth-command-center-v2-worker.js
+          grep -Fq "Browser-confirmed clicks · 30d" command-center-affiliate-table-worker.js
+          git diff --check
+
+      - name: Commit strict traffic patch
+        run: |
+          git config user.name "ToolScout CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add human-action-entry-worker.js growth-command-center-v2-worker.js command-center-affiliate-table-worker.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Use browser-confirmed affiliate traffic across command center"
+          git push origin HEAD:main
