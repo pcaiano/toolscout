@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-12T05:55:07.738Z",
+  "generatedAt": "2026-09-12T10:56:45.669Z",
   "timezone": "Europe/Lisbon",
   "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
   "primaryMetric": "D1 browser-confirmed public sessions",
@@ -12,8 +12,8 @@
     "Google Search Console is the source of truth for Google Search clicks and impressions."
   ],
   "windowsUtc": {
-    "now": "2026-09-12T05:54:51.572Z",
-    "last24": "2026-09-11T05:54:51.572Z",
+    "now": "2026-09-12T10:56:29.490Z",
+    "last24": "2026-09-11T10:56:29.490Z",
     "today": "2026-09-11T23:00:00.000Z",
     "month": "2026-08-31T23:00:00.000Z"
   },
@@ -27,8 +27,8 @@
     "excludeBots": true,
     "dataset": "rumPageloadEventsAdaptiveGroups",
     "last24": {
-      "pageViews": 3,
-      "visits": 3,
+      "pageViews": 2,
+      "visits": 2,
       "sampleInterval": 1
     },
     "today": {
@@ -88,17 +88,17 @@
     "last24": 2,
     "today": 2,
     "monthToDate": 2,
-    "serverObservedEntries24h": 49,
-    "serverOnlyUnconfirmed24h": 47
+    "serverObservedEntries24h": 60,
+    "serverOnlyUnconfirmed24h": 58
   },
   "googleSearchConsole": {
     "status": "observed",
-    "generatedAt": "2026-09-12T05:54:51.489Z",
+    "generatedAt": "2026-09-12T10:56:29.423Z",
     "startDate": "2026-08-16",
     "endDate": "2026-09-12",
     "dataState": "all",
     "clicks": 1,
-    "impressions": 1872,
+    "impressions": 1926,
     "pageCount": 77,
     "coverage": "site-wide"
   },
@@ -107,10 +107,10 @@
     "primary": "d1-browser-confirmed",
     "audit": "cloudflare-rum",
     "d1Confirmed24h": 2,
-    "rumVisits24h": 3,
-    "rumPageViews24h": 3,
-    "serverObservedEntries24h": 49,
-    "delta": -1,
+    "rumVisits24h": 2,
+    "rumPageViews24h": 2,
+    "serverObservedEntries24h": 60,
+    "delta": 0,
     "note": "Volume is too low for a useful percentage divergence alarm."
   },
   "status": "observed"
