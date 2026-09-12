@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   inspect:
@@ -24,6 +24,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import {execFileSync} from 'node:child_process';
+          import {writeFileSync} from 'node:fs';
           function q(sql){const out=execFileSync('npx',['wrangler','d1','execute','toolscout','--remote','--config','wrangler.toml','--json','--command',sql],{encoding:'utf8'});const p=JSON.parse(out),b=Array.isArray(p)?p[0]:p;return b?.results||b?.result?.[0]?.results||[]}
           const queries={
             classificationTotals:`SELECT classification,COUNT(*) sessions FROM sessions GROUP BY classification ORDER BY sessions DESC`,
@@ -42,5 +43,23 @@ jobs:
             chairmanDistribution:`SELECT o.surface_slug,o.surface_name,o.status,o.action_url,o.next_action,o.human_required,ROUND(COALESCE(l.priority_weight,o.distribution_score,0),2) economic_priority,COALESCE(l.operating_decision,'explore') operating_decision,COALESCE(l.evidence_grade,'none') evidence_grade,COALESCE(l.paid_policy_decision,'free_default') paid_policy_decision,l.observed_cost,l.observed_cost_currency FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug WHERE o.action_url IS NOT NULL AND (o.human_required=1 OR o.status='approval_required') AND o.status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale') AND (o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend') ORDER BY CASE WHEN o.status='approval_required' THEN 0 ELSE 1 END,CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 WHEN 'explore' THEN 2 ELSE 3 END,COALESCE(l.priority_weight,o.distribution_score,0) DESC,o.updated_at DESC LIMIT 20`,
             researchBacklog:`SELECT surface_slug,surface_name,status,ROUND(distribution_score,2) score,action_url,last_checked_at,next_action FROM distribution_opportunities WHERE status IN ('candidate','discovered','research_required') AND COALESCE(human_required,0)=0 ORDER BY distribution_score DESC,last_checked_at ASC LIMIT 20`
           };
-          for(const [name,sql] of Object.entries(queries)) console.log(`D1_${name.toUpperCase()}=`+JSON.stringify(q(sql)));
+          const snapshot={generated_at:new Date().toISOString()};
+          for(const [name,sql] of Object.entries(queries)) {
+            snapshot[name]=q(sql);
+            console.log(`D1_${name.toUpperCase()}=`+JSON.stringify(snapshot[name]));
+          }
+          writeFileSync('/tmp/d1-traffic-forensics-latest.json',JSON.stringify(snapshot,null,2)+'\n');
           NODE
+      - name: Persist diagnostic snapshot
+        run: |
+          mkdir -p data/diagnostics
+          cp /tmp/d1-traffic-forensics-latest.json data/diagnostics/d1-traffic-forensics-latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/diagnostics/d1-traffic-forensics-latest.json
+          if git diff --cached --quiet; then
+            echo "No diagnostic changes"
+            exit 0
+          fi
+          git commit -m "Update D1 traffic forensics snapshot"
+          git push
