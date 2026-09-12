@@ -3,6 +3,9 @@ name: Deploy ToolScout Worker
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'data/**'
+      - 'reports/**'
   workflow_dispatch:
 
 permissions:
@@ -34,45 +37,5 @@ jobs:
 
       - name: Deploy Worker
         run: npx wrangler deploy --config wrangler.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Verify distribution submission state
-        run: |
-          echo '=== DISTRIBUTION ASSETS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) AS assets FROM distribution_asset_state WHERE asset_url IS NOT NULL;"
-          echo '=== DISTRIBUTION OPERATING DECISIONS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT l.surface_slug,o.status,l.operating_decision,ROUND(l.priority_weight,2) AS priority_weight,l.evidence_grade,l.paid_policy_decision,l.browser_confirmed_sessions_30d,l.monetized_outbound_30d,l.observed_cost,l.observed_cost_currency,l.observed_roi,l.chairman_required FROM distribution_economic_learning l LEFT JOIN distribution_opportunities o ON o.surface_slug=l.surface_slug ORDER BY CASE l.operating_decision WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 WHEN 'explore' THEN 2 ELSE 3 END,l.priority_weight DESC,l.surface_slug LIMIT 40;"
-          echo '=== OPERATING DECISION COUNTS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT operating_decision,COUNT(*) AS surfaces FROM distribution_economic_learning GROUP BY operating_decision ORDER BY operating_decision;"
-          echo '=== PAID DISTRIBUTION GUARD ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT o.surface_slug,o.status,o.human_required,l.paid_policy_decision,l.operating_decision,l.observed_cost,l.observed_cost_currency FROM distribution_opportunities o JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug WHERE COALESCE(l.observed_cost,0)>0 ORDER BY o.surface_slug;"
-          echo '=== PRIORITY SETUP SURFACES ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required,action_url,next_action FROM distribution_opportunities WHERE surface_slug IN ('listed-startups','tinylaunch','indietool','agenttool-sh','ora-ai','hypestar') ORDER BY surface_slug;"
-          echo '=== APPROVAL-GATED SURFACES ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required,action_url,next_action FROM distribution_opportunities WHERE status='approval_required' ORDER BY distribution_score DESC;"
-          echo '=== STALE ADAPTER-MISSING TAXONOMY ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT ds.surface_slug,ds.status AS submission_status,COALESCE(o.status,'missing_opportunity') AS opportunity_status,COALESCE(o.human_required,-1) AS human_required,o.surface_type,o.next_action FROM distribution_submissions ds LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug WHERE ds.status='adapter_missing' ORDER BY ds.surface_slug;"
-          echo '=== DISTRIBUTION SUBMISSION COUNTS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,COUNT(*) AS count FROM distribution_submissions GROUP BY surface_slug,status ORDER BY surface_slug,status;"
-          echo '=== AUTOMATIC SURFACE STATE ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT o.surface_slug,o.status AS opportunity_status,ds.status AS submission_status,ds.attempts,ds.submitted_at,ds.response_url,ds.error FROM distribution_opportunities o LEFT JOIN distribution_submissions ds ON ds.surface_slug=o.surface_slug WHERE o.surface_slug IN ('agenttool-sh','ora-ai','indexnow') ORDER BY o.surface_slug,ds.updated_at DESC;"
-          echo '=== INDEXNOW LATEST ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT ds.surface_slug,ds.asset_url,ds.status,ds.attempts,ds.last_attempt_at,st.last_network_attempt_at,st.retry_after_at,st.retry_count,st.rate_limit_count,st.last_retry_delay_seconds,st.last_http_status,ds.submitted_at,ds.error FROM distribution_submissions ds LEFT JOIN distribution_delivery_state st ON st.submission_id=ds.submission_id WHERE ds.surface_slug='indexnow' ORDER BY ds.updated_at DESC LIMIT 10;"
-          echo '=== INDEXNOW ADAPTIVE DELIVERY STATE ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) AS backlog,COALESCE(SUM(CASE WHEN ds.status='failed' AND ds.error LIKE 'retryable:indexnow_%' THEN 1 ELSE 0 END),0) AS retry_deferred,COALESCE(SUM(CASE WHEN st.retry_after_at>datetime('now') THEN 1 ELSE 0 END),0) AS actively_deferred,MAX(st.retry_after_at) AS retry_after_at,MAX(st.last_network_attempt_at) AS last_network_attempt_at,MAX(st.rate_limit_count) AS max_rate_limit_count,MAX(st.retry_count) AS max_retry_count,MAX(st.last_http_status) AS last_http_status FROM distribution_submissions ds LEFT JOIN distribution_delivery_state st ON st.submission_id=ds.submission_id WHERE ds.surface_slug='indexnow' AND ds.status IN ('ready','failed');"
-          echo '=== INDEXNOW TIMESTAMP INTEGRITY ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) AS mismatched_rows FROM distribution_submissions ds JOIN distribution_delivery_state st ON st.submission_id=ds.submission_id WHERE ds.surface_slug='indexnow' AND ds.error LIKE 'retryable:indexnow_%' AND COALESCE(ds.last_attempt_at,'')<>COALESCE(st.last_network_attempt_at,'');"
-          echo '=== DISTRIBUTION ENGINE EVENTS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type IN ('submission_packaging_refresh','submission_execution_refresh','submission_verification_refresh','distribution_operating_priorities','distribution_economic_learning','indexnow_adaptive_delivery','indexnow_adapter_reconciliation','indexnow_retry_timestamp_normalized') ORDER BY created_at DESC LIMIT 30;"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Observe strict affiliate coverage state
-        run: |
-          echo '=== AFFILIATE COVERAGE TRAFFIC TRUTH LINEAGE ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT traffic_truth,COUNT(*) AS runs,MIN(created_at) AS first_run,MAX(created_at) AS latest_run FROM affiliate_coverage_runs GROUP BY traffic_truth ORDER BY traffic_truth;"
-          echo '=== AFFILIATE COVERAGE LATEST STRICT SNAPSHOT ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' ORDER BY created_at DESC LIMIT 1;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

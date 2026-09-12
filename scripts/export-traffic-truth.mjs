@@ -130,38 +130,57 @@ async function rumSnapshot() {
   }
 }
 
-function wranglerRows(parsed) {
-  if (Array.isArray(parsed)) {
-    for (const item of parsed) if (Array.isArray(item?.results)) return item.results;
-  }
-  if (Array.isArray(parsed?.results)) return parsed.results;
-  return [];
+function wranglerBlock(parsed) {
+  if (Array.isArray(parsed)) return parsed.find(item => item && (Array.isArray(item.results) || item.meta)) || {};
+  if (Array.isArray(parsed?.result)) return parsed.result.find(item => item && (Array.isArray(item.results) || item.meta)) || {};
+  return parsed || {};
 }
 
 function sqlTime(value) { return String(value).replace('T', ' ').replace(/\.\d{3}Z$/, ''); }
 
 function d1Snapshot() {
   try {
-    const sql = `SELECT
-      COUNT(DISTINCT CASE WHEN conf.created_at >= '${sqlTime(bounds.last24)}' THEN conf.session_id END) AS confirmed_24h,
-      COUNT(DISTINCT CASE WHEN conf.created_at >= '${sqlTime(bounds.today)}' THEN conf.session_id END) AS confirmed_today,
-      COUNT(DISTINCT CASE WHEN conf.created_at >= '${sqlTime(bounds.month)}' THEN conf.session_id END) AS confirmed_mtd,
-      COUNT(DISTINCT CASE WHEN st.created_at >= '${sqlTime(bounds.last24)}' THEN st.session_id END) AS server_entries_24h,
-      COUNT(DISTINCT CASE WHEN st.created_at >= '${sqlTime(bounds.last24)}' AND NOT EXISTS (
-        SELECT 1 FROM funnel_events c2 WHERE c2.session_id=st.session_id AND c2.event_type='page_confirmed'
-      ) THEN st.session_id END) AS server_only_24h
-    FROM sessions s
-    LEFT JOIN funnel_events conf ON conf.session_id=s.session_id AND conf.event_type='page_confirmed'
-    LEFT JOIN funnel_events st ON st.session_id=s.session_id AND st.event_type='session_started'
-    WHERE s.classification='likely-human';`;
+    const sql = `WITH
+      likely AS (
+        SELECT session_id
+        FROM sessions
+        WHERE classification='likely-human'
+      ),
+      confirmed AS (
+        SELECT f.session_id, MIN(f.created_at) AS created_at
+        FROM funnel_events f
+        JOIN likely l ON l.session_id=f.session_id
+        WHERE f.event_type='page_confirmed'
+          AND f.created_at >= '${sqlTime(bounds.month)}'
+        GROUP BY f.session_id
+      ),
+      started AS (
+        SELECT f.session_id, MIN(f.created_at) AS created_at
+        FROM funnel_events f
+        JOIN likely l ON l.session_id=f.session_id
+        WHERE f.event_type='session_started'
+          AND f.created_at >= '${sqlTime(bounds.last24)}'
+        GROUP BY f.session_id
+      )
+      SELECT
+        COALESCE(SUM(CASE WHEN confirmed.created_at >= '${sqlTime(bounds.last24)}' THEN 1 ELSE 0 END),0) AS confirmed_24h,
+        COALESCE(SUM(CASE WHEN confirmed.created_at >= '${sqlTime(bounds.today)}' THEN 1 ELSE 0 END),0) AS confirmed_today,
+        COUNT(confirmed.session_id) AS confirmed_mtd,
+        (SELECT COUNT(*) FROM started) AS server_entries_24h,
+        (SELECT COUNT(*) FROM started st WHERE NOT EXISTS (
+          SELECT 1 FROM funnel_events c2
+          WHERE c2.session_id=st.session_id AND c2.event_type='page_confirmed'
+        )) AS server_only_24h
+      FROM confirmed;`;
     const stdout = execFileSync('npx', ['--yes', 'wrangler@4', 'd1', 'execute', 'toolscout', '--remote', '--command', sql, '--json'], {
       encoding: 'utf8',
       env: { ...process.env, CLOUDFLARE_ACCOUNT_ID: ACCOUNT_ID },
       stdio: ['ignore', 'pipe', 'pipe'],
       maxBuffer: 5 * 1024 * 1024
     });
-    const rows = wranglerRows(JSON.parse(stdout));
-    const row = rows[0] || {};
+    const block = wranglerBlock(JSON.parse(stdout));
+    const row = (block.results || [])[0] || {};
+    const meta = block.meta || {};
     return {
       status: 'observed',
       metric: 'browser-confirmed sessions',
@@ -169,7 +188,10 @@ function d1Snapshot() {
       today: Number(row.confirmed_today || 0),
       monthToDate: Number(row.confirmed_mtd || 0),
       serverObservedEntries24h: Number(row.server_entries_24h || 0),
-      serverOnlyUnconfirmed24h: Number(row.server_only_24h || 0)
+      serverOnlyUnconfirmed24h: Number(row.server_only_24h || 0),
+      queryRowsRead: Number(meta.rows_read ?? meta.rowsRead ?? 0),
+      queryRowsWritten: Number(meta.rows_written ?? meta.rowsWritten ?? 0),
+      queryDurationMs: Number(meta.duration ?? 0)
     };
   } catch (error) {
     return { status: 'unavailable', reason: String(error?.stderr || error?.message || error).slice(0, 1600) };
@@ -241,6 +263,6 @@ const report = {
 
 fs.mkdirSync('data', { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(report, null, 2) + '\n');
-console.log(JSON.stringify({ status: report.status, reconciliation, cloudflareRum: rum.status, d1: d1.status, gsc: gsc.status, eeaCoverage }, null, 2));
+console.log(JSON.stringify({ status: report.status, reconciliation, cloudflareRum: rum.status, d1, gsc: gsc.status, eeaCoverage }, null, 2));
 
 if (process.env.TRAFFIC_TRUTH_STRICT === '1' && reconciliation.status === 'degraded') process.exitCode = 2;
