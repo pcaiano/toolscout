@@ -34,6 +34,9 @@ jobs:
       - name: Apply canonical public navigation
         run: node scripts/unify-public-nav.mjs
 
+      # This one-off path intentionally skips D1 migrations because the only
+      # pending migration adds read-efficiency indexes and the daily D1 read
+      # quota is already exhausted. The Worker code does not depend on it.
       - name: Deploy Worker without D1 migrations
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
