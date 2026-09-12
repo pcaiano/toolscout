@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T08:03:30.496Z",
+  "generated_at": "2026-09-12T09:07:15.462Z",
   "classificationTotals": [
     {
       "classification": "unknown/legacy",
@@ -7,11 +7,11 @@
     },
     {
       "classification": "known-bot/crawler",
-      "sessions": 305
+      "sessions": 306
     },
     {
       "classification": "likely-human",
-      "sessions": 153
+      "sessions": 154
     },
     {
       "classification": "owner",
@@ -232,8 +232,8 @@
     },
     {
       "day": "2026-09-12",
-      "likely_human": 27,
-      "with_start": 27,
+      "likely_human": 28,
+      "with_start": 28,
       "without_start": 0
     }
   ],
@@ -366,7 +366,7 @@
     {
       "day": "2026-09-12",
       "source": "direct",
-      "sessions": 27
+      "sessions": 28
     }
   ],
   "clickSources": [
@@ -751,7 +751,7 @@
       "source": "direct",
       "referrer_host": "none",
       "path": "/",
-      "sessions": 27
+      "sessions": 28
     }
   ],
   "distributionStatus": [
@@ -761,15 +761,19 @@
     },
     {
       "status": "research_required",
-      "surfaces": 27
-    },
-    {
-      "status": "human_action_required",
-      "surfaces": 17
+      "surfaces": 19
     },
     {
       "status": "skipped",
-      "surfaces": 9
+      "surfaces": 17
+    },
+    {
+      "status": "human_action_required",
+      "surfaces": 13
+    },
+    {
+      "status": "deferred",
+      "surfaces": 5
     },
     {
       "status": "live",
@@ -789,10 +793,6 @@
     },
     {
       "status": "approval_required",
-      "surfaces": 1
-    },
-    {
-      "status": "deferred",
       "surfaces": 1
     },
     {
@@ -890,6 +890,20 @@
       "observed_cost_currency": null
     },
     {
+      "surface_slug": "indie-hackers",
+      "surface_name": "Indie Hackers",
+      "status": "human_action_required",
+      "action_url": "https://www.indiehackers.com/",
+      "next_action": "Publish a useful founder/product story manually when there is a genuine discussion angle. Human/editorial action is intentional.",
+      "human_required": 1,
+      "economic_priority": 42.22,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
       "surface_slug": "hacker-news",
       "surface_name": "Hacker News — Show HN",
       "status": "human_action_required",
@@ -909,20 +923,6 @@
       "status": "human_action_required",
       "action_url": "https://pitchwall.co/",
       "next_action": "Use the authenticated submission form manually. Keep outside automatic execution unless a verified machine-readable API is later discovered.",
-      "human_required": 1,
-      "economic_priority": 42.22,
-      "operating_decision": "explore",
-      "evidence_grade": "none",
-      "paid_policy_decision": "free_default",
-      "observed_cost": null,
-      "observed_cost_currency": null
-    },
-    {
-      "surface_slug": "indie-hackers",
-      "surface_name": "Indie Hackers",
-      "status": "human_action_required",
-      "action_url": "https://www.indiehackers.com/",
-      "next_action": "Publish a useful founder/product story manually when there is a genuine discussion angle. Human/editorial action is intentional.",
       "human_required": 1,
       "economic_priority": 42.22,
       "operating_decision": "explore",
@@ -953,62 +953,6 @@
       "next_action": "Use the authenticated/free review submission route manually. Keep outside automatic execution unless a verified machine-readable API is later discovered.",
       "human_required": 1,
       "economic_priority": 41.59,
-      "operating_decision": "explore",
-      "evidence_grade": "none",
-      "paid_policy_decision": "free_default",
-      "observed_cost": null,
-      "observed_cost_currency": null
-    },
-    {
-      "surface_slug": "bedfit-app",
-      "surface_name": "bedfit.app",
-      "status": "human_action_required",
-      "action_url": "https://bedfit.app/",
-      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
-      "human_required": 1,
-      "economic_priority": 41.02,
-      "operating_decision": "explore",
-      "evidence_grade": "none",
-      "paid_policy_decision": "free_default",
-      "observed_cost": null,
-      "observed_cost_currency": null
-    },
-    {
-      "surface_slug": "myastrid-ai",
-      "surface_name": "myastrid.ai",
-      "status": "human_action_required",
-      "action_url": "https://myastrid.ai/",
-      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
-      "human_required": 1,
-      "economic_priority": 41.02,
-      "operating_decision": "explore",
-      "evidence_grade": "none",
-      "paid_policy_decision": "free_default",
-      "observed_cost": null,
-      "observed_cost_currency": null
-    },
-    {
-      "surface_slug": "mejorarcalidaddeimagen-ai",
-      "surface_name": "mejorarcalidaddeimagen.ai",
-      "status": "human_action_required",
-      "action_url": "https://mejorarcalidaddeimagen.ai/",
-      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
-      "human_required": 1,
-      "economic_priority": 41.02,
-      "operating_decision": "explore",
-      "evidence_grade": "none",
-      "paid_policy_decision": "free_default",
-      "observed_cost": null,
-      "observed_cost_currency": null
-    },
-    {
-      "surface_slug": "aifordevelopers-org",
-      "surface_name": "aifordevelopers.org",
-      "status": "human_action_required",
-      "action_url": "https://aifordevelopers.org/",
-      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
-      "human_required": 1,
-      "economic_priority": 41.02,
       "operating_decision": "explore",
       "evidence_grade": "none",
       "paid_policy_decision": "free_default",
@@ -1096,114 +1040,6 @@
       "next_action": "Defer until category fit and review acquisition justify signup. Account for the 2026 G2 Digital Markets ownership/integration when revisiting."
     },
     {
-      "surface_slug": "aitoollist-org",
-      "surface_name": "aitoollist.org",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://www.aitoollist.org/",
-      "last_checked_at": "2026-09-12 02:16:22",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "falakdigital-notion-site",
-      "surface_name": "falakdigital.notion.site",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://falakdigital.notion.site/",
-      "last_checked_at": "2026-09-12 02:16:22",
-      "next_action": "Verify opportunity discovered via recursive-fazier-com-launches-launchdirectories-com; classify submission path before execution."
-    },
-    {
-      "surface_slug": "fatemaster-ai",
-      "surface_name": "fatemaster.ai",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://www.fatemaster.ai/",
-      "last_checked_at": "2026-09-12 02:16:23",
-      "next_action": "Verify opportunity discovered via recursive-fazier-com-launches-launchdirectories-com; classify submission path before execution."
-    },
-    {
-      "surface_slug": "cdn-sanity-io",
-      "surface_name": "cdn.sanity.io",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://cdn.sanity.io/",
-      "last_checked_at": "2026-09-12 02:16:23",
-      "next_action": "Verify opportunity discovered via recursive-turbo0-com-item-launchdirectories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "ai-sites-net",
-      "surface_name": "ai-sites.net",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://ai-sites.net/",
-      "last_checked_at": "2026-09-12 05:17:28",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "aipediahub-com",
-      "surface_name": "aipediahub.com",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://aipediahub.com/",
-      "last_checked_at": "2026-09-12 05:17:29",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "aeotools-space",
-      "surface_name": "aeotools.space",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://www.aeotools.space/",
-      "last_checked_at": "2026-09-12 05:18:21",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "aiex-me",
-      "surface_name": "aiex.me",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://aiex.me/",
-      "last_checked_at": "2026-09-12 05:18:22",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "aitoolz-net",
-      "surface_name": "aitoolz.net",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://aitoolz.net/",
-      "last_checked_at": "2026-09-12 05:18:38",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "aitoolsforme-com",
-      "surface_name": "aitoolsforme.com",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://aitoolsforme.com/",
-      "last_checked_at": "2026-09-12 05:18:39",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "allthingsai-com",
-      "surface_name": "allthingsai.com",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://allthingsai.com/",
-      "last_checked_at": "2026-09-12 05:18:47",
-      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
-    },
-    {
-      "surface_slug": "sln-startupfa-me",
-      "surface_name": "sln.startupfa.me",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://sln.startupfa.me/",
-      "last_checked_at": "2026-09-12 06:18:53",
-      "next_action": "Verify opportunity discovered via recursive-startupfa-me-s-launchdirectories; classify submission path before execution. Family-learning boost 0.00 from 0 proven surface(s); unseen families retain their full baseline score."
-    },
-    {
       "surface_slug": "aidir-wiki",
       "surface_name": "aidir.wiki",
       "status": "research_required",
@@ -1222,15 +1058,6 @@
       "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
     },
     {
-      "surface_slug": "fazier-production-s3-amazonaws-com",
-      "surface_name": "fazier-production.s3.amazonaws.com",
-      "status": "research_required",
-      "score": 41.02,
-      "action_url": "https://fazier-production.s3.amazonaws.com/",
-      "last_checked_at": "2026-09-12 06:19:00",
-      "next_action": "Verify opportunity discovered via recursive-fazier-com-launches-launchdirectories-com; classify submission path before execution."
-    },
-    {
       "surface_slug": "feedmyapp-com",
       "surface_name": "feedmyapp.com",
       "status": "research_required",
@@ -1238,6 +1065,114 @@
       "action_url": "https://www.feedmyapp.com/",
       "last_checked_at": "2026-09-12 07:18:30",
       "next_action": "Verify opportunity discovered via recursive-favors-dev-startup-launch-directories-feedmyapp; classify submission path before execution. Family-learning boost 0.00 from 0 proven surface(s); unseen families retain their full baseline score."
+    },
+    {
+      "surface_slug": "aiscout-net",
+      "surface_name": "aiscout.net",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aiscout.net/",
+      "last_checked_at": "2026-09-12 07:18:41",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "alltheaitools-com",
+      "surface_name": "alltheaitools.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://alltheaitools.com/",
+      "last_checked_at": "2026-09-12 07:18:44",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "g2-com",
+      "surface_name": "g2.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://www.g2.com/",
+      "last_checked_at": "2026-09-12 07:18:45",
+      "next_action": "Verify opportunity discovered via recursive-favors-dev-startup-launch-directories-g2; classify submission path before execution. Family-learning boost 0.00 from 0 proven surface(s); unseen families retain their full baseline score."
+    },
+    {
+      "surface_slug": "static-peerpush-com",
+      "surface_name": "static.peerpush.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://static.peerpush.com/",
+      "last_checked_at": "2026-09-12 07:52:21",
+      "next_action": "Verify opportunity discovered via recursive-peerpush-net-p-launchdirectories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aiagentsbase-com",
+      "surface_name": "aiagentsbase.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aiagentsbase.com/",
+      "last_checked_at": "2026-09-12 07:52:22",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "fonts-googleapis-com",
+      "surface_name": "fonts.googleapis.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://fonts.googleapis.com/",
+      "last_checked_at": "2026-09-12 07:52:24",
+      "next_action": "Verify opportunity discovered via neuronto-ard-registries; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aitoolguru-com",
+      "surface_name": "aitoolguru.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aitoolguru.com/",
+      "last_checked_at": "2026-09-12 07:52:39",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aitoollist-org",
+      "surface_name": "aitoollist.org",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://www.aitoollist.org/",
+      "last_checked_at": "2026-09-12 08:18:00",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "fatemaster-ai",
+      "surface_name": "fatemaster.ai",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://www.fatemaster.ai/",
+      "last_checked_at": "2026-09-12 08:18:01",
+      "next_action": "Verify opportunity discovered via recursive-fazier-com-launches-launchdirectories-com; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aitoolz-net",
+      "surface_name": "aitoolz.net",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aitoolz.net/",
+      "last_checked_at": "2026-09-12 08:18:03",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aitoolsforme-com",
+      "surface_name": "aitoolsforme.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aitoolsforme.com/",
+      "last_checked_at": "2026-09-12 08:18:05",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "allthingsai-com",
+      "surface_name": "allthingsai.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://allthingsai.com/",
+      "last_checked_at": "2026-09-12 08:18:14",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
     }
   ]
 }
