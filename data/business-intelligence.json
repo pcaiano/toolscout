@@ -1,54 +1,54 @@
 {
-  "generatedAt": "2026-09-12T05:38:19.401Z",
+  "generatedAt": "2026-09-12T10:37:14.251Z",
   "timezone": "Europe/Lisbon",
   "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "traffic": {
     "today": {
-      "total": 19,
-      "likelyHuman": 19,
+      "total": 32,
+      "likelyHuman": 32,
       "owner": 0,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 24,
-        "likelyHuman": 19,
-        "bots": 3,
+        "total": 43,
+        "likelyHuman": 32,
+        "bots": 7,
         "owner": 0,
         "synthetic": 0,
-        "unknownLegacy": 2
+        "unknownLegacy": 4
       }
     },
     "d7": {
-      "total": 130,
-      "likelyHuman": 85,
+      "total": 143,
+      "likelyHuman": 98,
       "owner": 45,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 464,
-        "likelyHuman": 85,
-        "bots": 209,
+        "total": 477,
+        "likelyHuman": 98,
+        "bots": 207,
         "owner": 45,
         "synthetic": 0,
-        "unknownLegacy": 125
+        "unknownLegacy": 127
       }
     },
     "d30": {
-      "total": 222,
-      "likelyHuman": 145,
+      "total": 235,
+      "likelyHuman": 158,
       "owner": 77,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 1830,
-        "likelyHuman": 145,
-        "bots": 303,
+        "total": 1849,
+        "likelyHuman": 158,
+        "bots": 307,
         "owner": 78,
         "synthetic": 0,
-        "unknownLegacy": 1304
+        "unknownLegacy": 1306
       }
     },
     "dailyLikelyHuman30d": [
@@ -98,10 +98,10 @@
       },
       {
         "day": "2026-09-12",
-        "sessions": 19
+        "sessions": 32
       }
     ],
-    "averageDailyLikelyHuman30d": 4.83
+    "averageDailyLikelyHuman30d": 5.27
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -131,12 +131,12 @@
     "sessionsWithOutbound": 3,
     "monetizedOutbound": 4,
     "monetizationCoverage": 19,
-    "humanSessionToOutboundRate": 2.1
+    "humanSessionToOutboundRate": 1.9
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 127
+      "sessions": 140
     },
     {
       "source": "ref:app.partnerstack.com",
@@ -192,7 +192,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 145,
+      "sessions": 158,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -210,7 +210,7 @@
         "source": "direct",
         "referrerHost": "none",
         "path": "/",
-        "sessions": 19
+        "sessions": 32
       }
     ],
     "redirectOnlyToday": 0,
@@ -223,10 +223,10 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 145,
-    "humanDailyAverage30d": 4.83,
-    "recommendationCompletionRate": 1.4,
-    "humanSessionToOutboundRate": 2.1,
+    "humanSessions30d": 158,
+    "humanDailyAverage30d": 5.27,
+    "recommendationCompletionRate": 1.3,
+    "humanSessionToOutboundRate": 1.9,
     "monetizationCoverage": 19,
     "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
   }
