@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-12T10:56:45.669Z",
+  "generatedAt": "2026-09-12T14:13:47.576Z",
   "timezone": "Europe/Lisbon",
   "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
   "primaryMetric": "D1 browser-confirmed public sessions",
@@ -12,8 +12,8 @@
     "Google Search Console is the source of truth for Google Search clicks and impressions."
   ],
   "windowsUtc": {
-    "now": "2026-09-12T10:56:29.490Z",
-    "last24": "2026-09-11T10:56:29.490Z",
+    "now": "2026-09-12T14:13:32.979Z",
+    "last24": "2026-09-11T14:13:32.979Z",
     "today": "2026-09-11T23:00:00.000Z",
     "month": "2026-08-31T23:00:00.000Z"
   },
@@ -89,17 +89,20 @@
     "today": 2,
     "monthToDate": 2,
     "serverObservedEntries24h": 60,
-    "serverOnlyUnconfirmed24h": 58
+    "serverOnlyUnconfirmed24h": 58,
+    "queryRowsRead": 548,
+    "queryRowsWritten": 0,
+    "queryDurationMs": 2.7168
   },
   "googleSearchConsole": {
     "status": "observed",
-    "generatedAt": "2026-09-12T10:56:29.423Z",
+    "generatedAt": "2026-09-12T14:13:32.888Z",
     "startDate": "2026-08-16",
     "endDate": "2026-09-12",
     "dataState": "all",
     "clicks": 1,
-    "impressions": 1926,
-    "pageCount": 77,
+    "impressions": 1982,
+    "pageCount": 78,
     "coverage": "site-wide"
   },
   "reconciliation": {
