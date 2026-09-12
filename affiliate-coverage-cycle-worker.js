@@ -112,7 +112,20 @@ async function downgradeUnqualifiedHumanDiscovery(env,row,reason){
 
 export async function runAffiliateCoverageCycle(env){
   const [tools,workflow,clicks,discoveries]=await Promise.all([
-    loadTools(env),safeAll(env,'SELECT * FROM affiliate_workflow'),safeAll(env,"SELECT c.tool_slug,c.affiliate_active_at_click,c.source,COALESCE(s.classification,'unknown/legacy') classification,CASE WHEN EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed') THEN 1 ELSE 0 END browser_confirmed,COUNT(*) clicks FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') GROUP BY c.tool_slug,c.affiliate_active_at_click,c.source,classification,browser_confirmed"),safeAll(env,'SELECT tool_slug,last_checked,status FROM affiliate_program_discovery')
+    loadTools(env),
+    safeAll(env,'SELECT * FROM affiliate_workflow'),
+    safeAll(env,`WITH confirmed_sessions AS (
+      SELECT DISTINCT session_id
+      FROM funnel_events
+      WHERE event_type='page_confirmed'
+    )
+    SELECT c.tool_slug,c.affiliate_active_at_click,c.source,COALESCE(s.classification,'unknown/legacy') classification,1 browser_confirmed,COUNT(*) clicks
+    FROM click_events c
+    JOIN confirmed_sessions confirmed ON confirmed.session_id=c.session_id
+    LEFT JOIN sessions s ON s.session_id=c.session_id
+    WHERE c.created_at>=datetime('now','-30 days')
+    GROUP BY c.tool_slug,c.affiliate_active_at_click,c.source,classification`),
+    safeAll(env,'SELECT tool_slug,last_checked,status FROM affiliate_program_discovery')
   ]);
   const states=new Map((workflow.results||[]).map(r=>[r.tool_slug,r])),checked=new Map((discoveries.results||[]).map(r=>[r.tool_slug,r]));
   let watchlist_checked=0,watchlist_promoted=0;
