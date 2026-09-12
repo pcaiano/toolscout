@@ -17,38 +17,45 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Verify recent Distribution Engine production cycle
+      - name: Verify recent P0 production cycles with bounded D1 reads
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
-          echo '=== DISTRIBUTION ENGINE RECENT QUALIFICATION ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type='autonomous_distribution_qualification' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;"
-          echo '=== DISTRIBUTION ENGINE RECENT SUBMISSIONS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) AS count FROM distribution_submissions WHERE updated_at>=datetime('now','-2 hours') GROUP BY status ORDER BY status;"
-          recent="$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS count FROM distribution_events WHERE event_type='autonomous_distribution_qualification' AND created_at>=datetime('now','-2 hours');")"
-          node -e "const x=JSON.parse(process.argv[1]); const rows=x?.[0]?.results||[]; if(Number(rows[0]?.count||0)<1){console.error('No recent Distribution Engine production qualification cycle found.');process.exit(1)}" "$recent"
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
 
-      - name: Verify recent Affiliate Coverage Engine production cycle
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
-          echo '=== AFFILIATE COVERAGE TRAFFIC TRUTH LINEAGE ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT traffic_truth,COUNT(*) AS runs,MIN(created_at) AS first_run,MAX(created_at) AS latest_run FROM affiliate_coverage_runs GROUP BY traffic_truth ORDER BY traffic_truth;"
-          echo '=== AFFILIATE COVERAGE ENGINE LATEST STRICT RUN ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;"
-          echo '=== AFFILIATE WORKFLOW STATE COUNTS ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) AS count FROM affiliate_workflow GROUP BY status ORDER BY status;"
-          recent="$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS count FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at>=datetime('now','-2 hours');")"
-          node -e "const x=JSON.parse(process.argv[1]); const rows=x?.[0]?.results||[]; if(Number(rows[0]?.count||0)<1){console.error('No recent browser-confirmed Affiliate Coverage Engine production cycle found.');process.exit(1)}" "$recent"
+          const usage=[];
+          function q(label,sql){
+            const out=execFileSync('npx',['wrangler','d1','execute','toolscout','--remote','--config','wrangler.toml','--json','--command',sql],{encoding:'utf8'});
+            const parsed=JSON.parse(out);
+            const block=Array.isArray(parsed)?parsed[0]:(Array.isArray(parsed?.result)?parsed.result[0]:parsed);
+            const rows=block?.results||[];
+            const meta=block?.meta||{};
+            usage.push({label,rowsRead:Number(meta.rows_read??meta.rowsRead??0),rowsWritten:Number(meta.rows_written??meta.rowsWritten??0),durationMs:Number(meta.duration??0)});
+            return rows;
+          }
 
-          echo '=== AFFILIATE COVERAGE STRICT PARITY ==='
-          parity="$(npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "WITH latest AS (SELECT id,human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1), truth AS (SELECT l.id,l.created_at,COALESCE(SUM(CASE WHEN s.classification IN ('likely-human','human') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed' AND f.created_at<=l.created_at) THEN 1 ELSE 0 END),0) AS expected_human,COALESCE(SUM(CASE WHEN s.classification IN ('likely-human','human') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND COALESCE(c.affiliate_active_at_click,0)=1 AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed' AND f.created_at<=l.created_at) THEN 1 ELSE 0 END),0) AS expected_monetized FROM latest l LEFT JOIN click_events c ON c.created_at>=datetime(l.created_at,'-30 days') AND c.created_at<=l.created_at LEFT JOIN sessions s ON s.session_id=c.session_id GROUP BY l.id,l.created_at) SELECT l.id,l.human_outbound_clicks,l.monetized_human_outbound_clicks,l.unmonetized_human_outbound_clicks,l.weighted_coverage,l.created_at,t.expected_human,t.expected_monetized,(t.expected_human-t.expected_monetized) AS expected_unmonetized FROM latest l JOIN truth t ON t.id=l.id;")"
-          echo "$parity"
-          node -e "const x=JSON.parse(process.argv[1]); const r=x?.[0]?.results?.[0]; if(!r){console.error('No strict affiliate snapshot available for parity proof.');process.exit(1)} const h=Number(r.human_outbound_clicks||0),m=Number(r.monetized_human_outbound_clicks||0),u=Number(r.unmonetized_human_outbound_clicks||0),eh=Number(r.expected_human||0),em=Number(r.expected_monetized||0),eu=Number(r.expected_unmonetized||0); const wc=r.weighted_coverage==null?null:Number(r.weighted_coverage),ew=eh?em/eh:null; if(h!==eh||m!==em||u!==eu||(wc===null)!==(ew===null)||(wc!==null&&Math.abs(wc-ew)>1e-9)){console.error('Strict affiliate snapshot does not match browser-confirmed source events.',r);process.exit(1)}" "$parity"
+          const distribution=q('distribution_recent_qualification',`SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type='autonomous_distribution_qualification' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;`);
+          if(distribution.length<1)throw new Error('No recent Distribution Engine production qualification cycle found.');
+
+          const submissions=q('distribution_recent_submissions',`SELECT status,COUNT(*) AS count FROM distribution_submissions WHERE updated_at>=datetime('now','-2 hours') GROUP BY status ORDER BY status;`);
+
+          const affiliate=q('affiliate_latest_browser_confirmed_run',`SELECT id,human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;`);
+          const a=affiliate[0];
+          if(!a)throw new Error('No recent browser-confirmed Affiliate Coverage Engine production cycle found.');
+          const h=Number(a.human_outbound_clicks||0),m=Number(a.monetized_human_outbound_clicks||0),u=Number(a.unmonetized_human_outbound_clicks||0);
+          const wc=a.weighted_coverage==null?null:Number(a.weighted_coverage),expected=h?m/h:null;
+          if(h!==m+u)throw new Error(`Affiliate snapshot arithmetic mismatch: human=${h}, monetized=${m}, unmonetized=${u}`);
+          if((wc===null)!==(expected===null)||(wc!==null&&Math.abs(wc-expected)>1e-9))throw new Error(`Affiliate weighted coverage mismatch: observed=${wc}, expected=${expected}`);
+
+          const totalRowsRead=usage.reduce((sum,x)=>sum+x.rowsRead,0);
+          console.log('DISTRIBUTION_RECENT='+JSON.stringify(distribution[0]));
+          console.log('DISTRIBUTION_SUBMISSIONS='+JSON.stringify(submissions));
+          console.log('AFFILIATE_RECENT='+JSON.stringify(a));
+          console.log('D1_USAGE='+JSON.stringify({totalRowsRead,queries:usage}));
+          NODE
 
       - name: Production cycle proof
-        run: echo 'Both P0 engines have persisted production-cycle evidence within the last two hours, and Affiliate Coverage evidence is browser-confirmed and source-event consistent.'
+        run: echo 'Both P0 engines have persisted production-cycle evidence within the last two hours. The proof uses bounded recent-state queries and does not rescan historical click events.'
