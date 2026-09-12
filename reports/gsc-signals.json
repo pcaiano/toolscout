@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-11T21:46:34.214Z",
+  "generatedAt": "2026-09-12T00:22:23.534Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
   "includesFreshData": true,
-  "startDate": "2026-08-15",
-  "endDate": "2026-09-11",
+  "startDate": "2026-08-16",
+  "endDate": "2026-09-12",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 1863,
-    "ctr": 0.0537
+    "impressions": 1872,
+    "ctr": 0.0534
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 31,
       "clicks": 0,
-      "impressions": 1216
+      "impressions": 1220
     },
     "home": {
       "pages": 2,
@@ -38,12 +38,12 @@
       "impressions": 14
     },
     "tool-profile": {
-      "pages": 33,
+      "pages": 34,
       "clicks": 0,
-      "impressions": 520
+      "impressions": 525
     }
   },
-  "pageCount": 76,
+  "pageCount": 77,
   "pages": [
     {
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
@@ -52,15 +52,15 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 470,
+      "impressions": 473,
       "ctr": 0,
-      "position": 77.4064,
+      "position": 77.3636,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 146,
-          "position": 74.6164
+          "impressions": 147,
+          "position": 74.5646
         },
         {
           "query": "seo tools for agency",
@@ -71,8 +71,8 @@
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 86,
-          "position": 77.5698
+          "impressions": 87,
+          "position": 77.5632
         },
         {
           "query": "best seo tool for agencies",
@@ -83,8 +83,8 @@
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 17,
-          "position": 74.4118
+          "impressions": 18,
+          "position": 74.0556
         },
         {
           "query": "best seo tools for agencies",
@@ -472,21 +472,21 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 89,
+      "impressions": 93,
       "ctr": 0,
-      "position": 58.4494,
+      "position": 58.7634,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 52,
-          "position": 58.8269
+          "impressions": 55,
+          "position": 59.2727
         },
         {
           "query": "klayvio",
           "clicks": 0,
-          "impressions": 10,
-          "position": 61.5
+          "impressions": 11,
+          "position": 61.5455
         },
         {
           "query": "what is klaviyo",
@@ -704,9 +704,9 @@
       "type": "guide",
       "intent": "best-free-project-management-tools",
       "clicks": 0,
-      "impressions": 39,
+      "impressions": 40,
       "ctr": 0,
-      "position": 53.2308,
+      "position": 53.45,
       "topQueries": [
         {
           "query": "free online project manager tools",
@@ -717,8 +717,8 @@
         {
           "query": "best free tools for project management",
           "clicks": 0,
-          "impressions": 9,
-          "position": 22
+          "impressions": 10,
+          "position": 26
         },
         {
           "query": "free online project managers",
@@ -1840,6 +1840,18 @@
       "topQueries": []
     },
     {
+      "page": "https://trytoolscout.org/tools/gorgias.html",
+      "pathname": "/tools/gorgias.html",
+      "key": "gorgias",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 59,
+      "topQueries": []
+    },
+    {
       "page": "https://trytoolscout.org/tools/hotjar.html",
       "pathname": "/tools/hotjar.html",
       "key": "hotjar",
@@ -1944,15 +1956,15 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 470,
+      "impressions": 473,
       "ctr": 0,
-      "position": 77.4064,
+      "position": 77.3636,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 146,
-          "position": 74.6164
+          "impressions": 147,
+          "position": 74.5646
         },
         {
           "query": "seo tools for agency",
@@ -1963,8 +1975,8 @@
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 86,
-          "position": 77.5698
+          "impressions": 87,
+          "position": 77.5632
         },
         {
           "query": "best seo tool for agencies",
@@ -1975,8 +1987,8 @@
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 17,
-          "position": 74.4118
+          "impressions": 18,
+          "position": 74.0556
         },
         {
           "query": "best seo tools for agencies",
@@ -2352,9 +2364,9 @@
       "intent": "best-free-project-management-tools",
       "page": "https://trytoolscout.org/best-free-project-management-tools.html",
       "clicks": 0,
-      "impressions": 39,
+      "impressions": 40,
       "ctr": 0,
-      "position": 53.2308,
+      "position": 53.45,
       "topQueries": [
         {
           "query": "free online project manager tools",
@@ -2365,8 +2377,8 @@
         {
           "query": "best free tools for project management",
           "clicks": 0,
-          "impressions": 9,
-          "position": 22
+          "impressions": 10,
+          "position": 26
         },
         {
           "query": "free online project managers",
