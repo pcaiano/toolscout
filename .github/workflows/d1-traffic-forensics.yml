@@ -1,5 +1,5 @@
 name: D1 Traffic Forensics
-# Diagnostic rerun trigger: 2026-09-12
+# Diagnostic rerun trigger: 2026-09-12 post-cleanup
 
 on:
   push:
