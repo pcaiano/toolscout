@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T12:25:34.672Z",
+  "generatedAt": "2026-09-12T09:20:40.037Z",
   "methodology": "Autonomous catalog maintenance using official-source verification, independent market-demand signals, deterministic quality gates and affiliate-neutral selection. Affiliate status and commission never increase editorial admission or ranking.",
   "summary": {
     "tools": 101,
@@ -142,136 +142,224 @@
   "discovered": [],
   "contentChanges": [
     {
+      "slug": "beehiiv",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.beehiiv.com/",
+      "fingerprint": "fdea9cfada15ee2b3f08527f",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 13
+    },
+    {
       "slug": "semrush",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.semrush.com/",
-      "fingerprint": "d63bee5c9e66ce771e63c65a",
+      "fingerprint": "2907072870cc0c277fcd3cf0",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 15
+    },
+    {
+      "slug": "jasper",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.jasper.ai/",
+      "fingerprint": "ace35dd8b153d39e266ac34f",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 15
+    },
+    {
+      "slug": "mailchimp",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://mailchimp.com/",
+      "fingerprint": "700a78fe3185a561c6d03894",
       "contentChanged": true,
       "brokenConsecutive": 0,
       "factualReviewAgeDays": 14
     },
     {
-      "slug": "mailchimp",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
-      "sourceStatus": "ok",
-      "httpStatus": 200,
-      "finalUrl": "https://mailchimp.com/",
-      "fingerprint": "4101bb65b2e9a2093a8ce5da",
-      "contentChanged": true,
-      "brokenConsecutive": 0,
-      "factualReviewAgeDays": 13
-    },
-    {
       "slug": "ahrefs",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://ahrefs.com/",
-      "fingerprint": "30668de243d268f8758fb992",
+      "fingerprint": "f8ec17752ceabb907b868698",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 13
+      "factualReviewAgeDays": 14
     },
     {
       "slug": "se-ranking",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://seranking.com/",
-      "fingerprint": "d425ecbea62cc5bb0574567c",
+      "fingerprint": "f2264c7639f8e5ac6b7ed3b5",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 13
+      "factualReviewAgeDays": 14
+    },
+    {
+      "slug": "posthog",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://posthog.com/",
+      "fingerprint": "5bef9b3113e2638106d0f201",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
+    },
+    {
+      "slug": "asana",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://asana.com/",
+      "fingerprint": "e873822278cf58c7c814484d",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
+    },
+    {
+      "slug": "n8n",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://n8n.io/",
+      "fingerprint": "1502022be5b9ba7fa8346b5e",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
     },
     {
       "slug": "intercom",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.intercom.com/",
-      "fingerprint": "053b448b631db0cdb0625f73",
+      "fingerprint": "bfc0012f32016bce426cf82c",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
-    },
-    {
-      "slug": "grammarly",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
-      "sourceStatus": "ok",
-      "httpStatus": 200,
-      "finalUrl": "https://www.grammarly.com/",
-      "fingerprint": "893f9a59c6290eb7dff61198",
-      "contentChanged": true,
-      "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
     },
     {
       "slug": "buffer",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://buffer.com/",
-      "fingerprint": "915e2db3724a319c2b90d2f5",
+      "fingerprint": "8924253390eeb5f869d8163d",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
     },
     {
       "slug": "surfer",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://surferseo.com/",
-      "fingerprint": "737d77f2364990e4977b2726",
+      "fingerprint": "22e2f19a08c269fe7b25c7ce",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
+    },
+    {
+      "slug": "slack",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://slack.com/",
+      "fingerprint": "d147a3b5b8f4020c0b34fb5d",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
     },
     {
       "slug": "cursor",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://cursor.com/",
-      "fingerprint": "38b5f037e8cb93e5317f24ee",
+      "fingerprint": "44b5bd745bf6c5fb7a25029f",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
     },
     {
-      "slug": "miro",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "slug": "hotjar",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
-      "finalUrl": "https://miro.com/",
-      "fingerprint": "abdd043d04bf5c9b105c169d",
+      "finalUrl": "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
+      "fingerprint": "5ce5095eb55bc0d60b65ada2",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
     },
     {
       "slug": "matomo",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://matomo.org/",
-      "fingerprint": "9fd34aa69e4d76ee76b8590b",
+      "fingerprint": "2f22be6df728a9792c8d2b3f",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
     },
     {
-      "slug": "wrike",
-      "sourceCheckedAt": "2026-09-11T12:25:34.672Z",
+      "slug": "github",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
-      "finalUrl": "https://www.wrike.com/",
-      "fingerprint": "151abb1a89b0bb7022a4dd44",
+      "finalUrl": "https://github.com/",
+      "fingerprint": "bf18142d425f4238d27fd4e3",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 10
+      "factualReviewAgeDays": 11
+    },
+    {
+      "slug": "salesforce",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.salesforce.com/?bc=DB",
+      "fingerprint": "ca51aabf4cbb0ab585f4925b",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
+    },
+    {
+      "slug": "freshsales",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.freshworks.com/crm/sales/",
+      "fingerprint": "ec24da04cda8b46a9b475457",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
+    },
+    {
+      "slug": "pabbly-connect",
+      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceStatus": "ok",
+      "httpStatus": 200,
+      "finalUrl": "https://www.pabbly.com/connect/",
+      "fingerprint": "c4e47d7092476e5869581f16",
+      "contentChanged": true,
+      "brokenConsecutive": 0,
+      "factualReviewAgeDays": 11
     }
   ],
   "quarantined": []
