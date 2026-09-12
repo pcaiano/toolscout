@@ -49,7 +49,11 @@
       "twitter.com",
       "claude.ai",
       "gemini.google.com",
-      "perplexity.ai"
+      "perplexity.ai",
+      "cdn.sanity.io",
+      "fazier-production.s3.amazonaws.com",
+      "sln.startupfa.me",
+      "falakdigital.notion.site"
     ],
     "exclude_source_hosts": true,
     "canonical_hosts": {
