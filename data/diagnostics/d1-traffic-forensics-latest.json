@@ -1,0 +1,1243 @@
+{
+  "generated_at": "2026-09-12T08:03:30.496Z",
+  "classificationTotals": [
+    {
+      "classification": "unknown/legacy",
+      "sessions": 1306
+    },
+    {
+      "classification": "known-bot/crawler",
+      "sessions": 305
+    },
+    {
+      "classification": "likely-human",
+      "sessions": 153
+    },
+    {
+      "classification": "owner",
+      "sessions": 78
+    }
+  ],
+  "legacyRedirectOnly": [
+    {
+      "day": "2026-09-01",
+      "source": "affiliate-redirect",
+      "sessions": 578
+    },
+    {
+      "day": "2026-09-01",
+      "source": "public-redirect",
+      "sessions": 327
+    },
+    {
+      "day": "2026-09-02",
+      "source": "affiliate-redirect",
+      "sessions": 10
+    },
+    {
+      "day": "2026-09-02",
+      "source": "public-redirect",
+      "sessions": 5
+    },
+    {
+      "day": "2026-09-03",
+      "source": "public-redirect",
+      "sessions": 47
+    },
+    {
+      "day": "2026-09-03",
+      "source": "affiliate-redirect",
+      "sessions": 46
+    },
+    {
+      "day": "2026-09-04",
+      "source": "affiliate-redirect",
+      "sessions": 80
+    },
+    {
+      "day": "2026-09-04",
+      "source": "public-redirect",
+      "sessions": 63
+    },
+    {
+      "day": "2026-09-05",
+      "source": "public-redirect",
+      "sessions": 7
+    },
+    {
+      "day": "2026-09-05",
+      "source": "affiliate-redirect",
+      "sessions": 4
+    },
+    {
+      "day": "2026-09-06",
+      "source": "public-redirect",
+      "sessions": 34
+    },
+    {
+      "day": "2026-09-06",
+      "source": "affiliate-redirect",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-07",
+      "source": "public-redirect",
+      "sessions": 7
+    },
+    {
+      "day": "2026-09-07",
+      "source": "affiliate-redirect",
+      "sessions": 6
+    },
+    {
+      "day": "2026-09-07",
+      "source": "seo-page",
+      "sessions": 3
+    },
+    {
+      "day": "2026-09-08",
+      "source": "public-redirect",
+      "sessions": 23
+    },
+    {
+      "day": "2026-09-08",
+      "source": "affiliate-redirect",
+      "sessions": 13
+    },
+    {
+      "day": "2026-09-09",
+      "source": "affiliate-redirect",
+      "sessions": 12
+    },
+    {
+      "day": "2026-09-09",
+      "source": "public-redirect",
+      "sessions": 8
+    },
+    {
+      "day": "2026-09-09",
+      "source": "seo-page",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-10",
+      "source": "public-redirect",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-11",
+      "source": "public-redirect",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-12",
+      "source": "public-redirect",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-12",
+      "source": "affiliate-redirect",
+      "sessions": 1
+    }
+  ],
+  "legacyRedirectTotal": [
+    {
+      "sessions": 1282
+    }
+  ],
+  "confirmedDaily": [
+    {
+      "day": "2026-09-12",
+      "confirmed_sessions": 2
+    }
+  ],
+  "confirmedToday": [
+    {
+      "created_at": "2026-09-12 01:16:16",
+      "source": "direct",
+      "path": "/"
+    },
+    {
+      "created_at": "2026-09-12 01:16:09",
+      "source": "direct",
+      "path": "/"
+    }
+  ],
+  "daily": [
+    {
+      "day": "2026-09-01",
+      "likely_human": 10,
+      "with_start": 10,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-02",
+      "likely_human": 24,
+      "with_start": 24,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-03",
+      "likely_human": 6,
+      "with_start": 6,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-04",
+      "likely_human": 15,
+      "with_start": 15,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-05",
+      "likely_human": 5,
+      "with_start": 5,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-06",
+      "likely_human": 5,
+      "with_start": 5,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-07",
+      "likely_human": 14,
+      "with_start": 14,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-08",
+      "likely_human": 9,
+      "with_start": 9,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-09",
+      "likely_human": 2,
+      "with_start": 2,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-10",
+      "likely_human": 4,
+      "with_start": 4,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-11",
+      "likely_human": 32,
+      "with_start": 32,
+      "without_start": 0
+    },
+    {
+      "day": "2026-09-12",
+      "likely_human": 27,
+      "with_start": 27,
+      "without_start": 0
+    }
+  ],
+  "sessionSources": [
+    {
+      "day": "2026-09-01",
+      "source": "direct",
+      "sessions": 8
+    },
+    {
+      "day": "2026-09-01",
+      "source": "ref:producthunt.com",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-01",
+      "source": "ref:google.com",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-02",
+      "source": "direct",
+      "sessions": 22
+    },
+    {
+      "day": "2026-09-02",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-03",
+      "source": "direct",
+      "sessions": 5
+    },
+    {
+      "day": "2026-09-03",
+      "source": "ref:dollarplatoon.com",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-04",
+      "source": "direct",
+      "sessions": 12
+    },
+    {
+      "day": "2026-09-04",
+      "source": "ref:app.partnerstack.com",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-04",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-05",
+      "source": "direct",
+      "sessions": 4
+    },
+    {
+      "day": "2026-09-05",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-06",
+      "source": "direct",
+      "sessions": 5
+    },
+    {
+      "day": "2026-09-07",
+      "source": "direct",
+      "sessions": 9
+    },
+    {
+      "day": "2026-09-07",
+      "source": "utm_source=peerlist",
+      "sessions": 3
+    },
+    {
+      "day": "2026-09-07",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-07",
+      "source": "ref:app.partnerstack.com",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-08",
+      "source": "direct",
+      "sessions": 8
+    },
+    {
+      "day": "2026-09-08",
+      "source": "ref:app.partnerstack.com",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-09",
+      "source": "direct",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-10",
+      "source": "direct",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-10",
+      "source": "utm_source=peerlist",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-10",
+      "source": "ref:app.partnerstack.com",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-11",
+      "source": "direct",
+      "sessions": 31
+    },
+    {
+      "day": "2026-09-11",
+      "source": "ref:dataindex.pro",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-12",
+      "source": "direct",
+      "sessions": 27
+    }
+  ],
+  "clickSources": [
+    {
+      "day": "2026-09-08",
+      "source": "seo-page",
+      "clicks": 1,
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-10",
+      "source": "seo-page",
+      "clicks": 1,
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-11",
+      "source": "public-redirect",
+      "clicks": 12,
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-11",
+      "source": "affiliate-redirect",
+      "clicks": 7,
+      "sessions": 1
+    }
+  ],
+  "clickIntents": [
+    {
+      "day": "2026-09-08",
+      "intent": "beehiiv",
+      "source": "seo-page",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-10",
+      "intent": "best-ai-assistants",
+      "source": "seo-page",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "intent": "general",
+      "source": "public-redirect",
+      "clicks": 12
+    },
+    {
+      "day": "2026-09-11",
+      "intent": "general",
+      "source": "affiliate-redirect",
+      "clicks": 7
+    }
+  ],
+  "clickTools": [
+    {
+      "day": "2026-09-08",
+      "tool_slug": "beehiiv",
+      "source": "seo-page",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-10",
+      "tool_slug": "gemini",
+      "source": "seo-page",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "ahrefs",
+      "source": "affiliate-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "chatgpt",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "claude",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "close",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "cursor",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "gemini",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "github",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "hubspot",
+      "source": "affiliate-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "instantly",
+      "source": "affiliate-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "kit",
+      "source": "affiliate-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "klaviyo",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "lemlist",
+      "source": "affiliate-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "notebooklm",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "omnisend",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "perplexity",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "replit",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "salesforce",
+      "source": "public-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "se-ranking",
+      "source": "affiliate-redirect",
+      "clicks": 1
+    },
+    {
+      "day": "2026-09-11",
+      "tool_slug": "semrush",
+      "source": "affiliate-redirect",
+      "clicks": 1
+    }
+  ],
+  "bursts": [
+    {
+      "minute": "2026-09-11 20:40",
+      "source": "public-redirect",
+      "clicks": 12,
+      "sessions": 1
+    },
+    {
+      "minute": "2026-09-11 20:40",
+      "source": "affiliate-redirect",
+      "clicks": 7,
+      "sessions": 1
+    }
+  ],
+  "startSources": [
+    {
+      "day": "2026-09-01",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 8
+    },
+    {
+      "day": "2026-09-01",
+      "source": "ref:google.com",
+      "referrer_host": "google.com",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-01",
+      "source": "ref:producthunt.com",
+      "referrer_host": "producthunt.com",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-02",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 22
+    },
+    {
+      "day": "2026-09-02",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-03",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 5
+    },
+    {
+      "day": "2026-09-03",
+      "source": "ref:dollarplatoon.com",
+      "referrer_host": "dollarplatoon.com",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-04",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 12
+    },
+    {
+      "day": "2026-09-04",
+      "source": "ref:app.partnerstack.com",
+      "referrer_host": "app.partnerstack.com",
+      "path": "/",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-04",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-05",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 4
+    },
+    {
+      "day": "2026-09-05",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-06",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 5
+    },
+    {
+      "day": "2026-09-07",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 9
+    },
+    {
+      "day": "2026-09-07",
+      "source": "utm_source=peerlist",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-07",
+      "source": "ref:app.partnerstack.com",
+      "referrer_host": "app.partnerstack.com",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-07",
+      "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-07",
+      "source": "utm_source=peerlist",
+      "referrer_host": "peerlist.io",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-08",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 8
+    },
+    {
+      "day": "2026-09-08",
+      "source": "ref:app.partnerstack.com",
+      "referrer_host": "app.partnerstack.com",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-09",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-10",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 2
+    },
+    {
+      "day": "2026-09-10",
+      "source": "ref:app.partnerstack.com",
+      "referrer_host": "app.partnerstack.com",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-10",
+      "source": "utm_source=peerlist",
+      "referrer_host": "peerlist.io",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-11",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 31
+    },
+    {
+      "day": "2026-09-11",
+      "source": "ref:dataindex.pro",
+      "referrer_host": "dataindex.pro",
+      "path": "/",
+      "sessions": 1
+    },
+    {
+      "day": "2026-09-12",
+      "source": "direct",
+      "referrer_host": "none",
+      "path": "/",
+      "sessions": 27
+    }
+  ],
+  "distributionStatus": [
+    {
+      "status": "policy_blocked",
+      "surfaces": 60
+    },
+    {
+      "status": "research_required",
+      "surfaces": 27
+    },
+    {
+      "status": "human_action_required",
+      "surfaces": 17
+    },
+    {
+      "status": "skipped",
+      "surfaces": 9
+    },
+    {
+      "status": "live",
+      "surfaces": 4
+    },
+    {
+      "status": "ready_to_submit",
+      "surfaces": 3
+    },
+    {
+      "status": "scheduled",
+      "surfaces": 2
+    },
+    {
+      "status": "verified",
+      "surfaces": 2
+    },
+    {
+      "status": "approval_required",
+      "surfaces": 1
+    },
+    {
+      "status": "deferred",
+      "surfaces": 1
+    },
+    {
+      "status": "pending_review",
+      "surfaces": 1
+    },
+    {
+      "status": "unavailable_free",
+      "surfaces": 1
+    }
+  ],
+  "chairmanDistribution": [
+    {
+      "surface_slug": "hypestar",
+      "surface_name": "Hype Star",
+      "status": "approval_required",
+      "action_url": "https://hypestar.org/api/v1/listings",
+      "next_action": "Official free no-auth API contract is verified. ToolScout payload is ready as app / productivity-operations / supporterChoice not_offered. Submit only after explicit Hype Star-specific approval, as required by the provider agent policy.",
+      "human_required": 0,
+      "economic_priority": 46.34,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "best-of-ai",
+      "surface_name": "Best of AI",
+      "status": "human_action_required",
+      "action_url": "https://bestofai.com/",
+      "next_action": "Keep in editorial queue until an official programmatic submission route is verified.",
+      "human_required": 1,
+      "economic_priority": 44.23,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "the-rundown-ai-supertools",
+      "surface_name": "The Rundown AI / Supertools",
+      "status": "human_action_required",
+      "action_url": "https://www.therundown.ai/submit-a-tool",
+      "next_action": "Prepare editorial tool submission; do not automate without a documented API.",
+      "human_required": 1,
+      "economic_priority": 44.23,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "launch-llama",
+      "surface_name": "Launch Llama",
+      "status": "human_action_required",
+      "action_url": "https://launchllama.com/",
+      "next_action": "Use reviewed submission route; keep outside automatic execution until an official API is verified.",
+      "human_required": 1,
+      "economic_priority": 43.91,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "nextool-ai",
+      "surface_name": "Nextool AI",
+      "status": "human_action_required",
+      "action_url": "https://www.nextool.ai/",
+      "next_action": "Use free/basic review route only; do not automate forms.",
+      "human_required": 1,
+      "economic_priority": 43.87,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "stremit",
+      "surface_name": "Stremit",
+      "status": "human_action_required",
+      "action_url": "https://stremit.com/",
+      "next_action": "Keep manual until a documented API is verified.",
+      "human_required": 1,
+      "economic_priority": 42.79,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "hacker-news",
+      "surface_name": "Hacker News — Show HN",
+      "status": "human_action_required",
+      "action_url": "https://news.ycombinator.com/submit",
+      "next_action": "Prepare a factual Show HN post only when there is a strong builder story and a product people can try immediately. Human/editorial action is intentional.",
+      "human_required": 1,
+      "economic_priority": 42.22,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "pitchwall",
+      "surface_name": "PitchWall",
+      "status": "human_action_required",
+      "action_url": "https://pitchwall.co/",
+      "next_action": "Use the authenticated submission form manually. Keep outside automatic execution unless a verified machine-readable API is later discovered.",
+      "human_required": 1,
+      "economic_priority": 42.22,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "indie-hackers",
+      "surface_name": "Indie Hackers",
+      "status": "human_action_required",
+      "action_url": "https://www.indiehackers.com/",
+      "next_action": "Publish a useful founder/product story manually when there is a genuine discussion angle. Human/editorial action is intentional.",
+      "human_required": 1,
+      "economic_priority": 42.22,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "launching-next",
+      "surface_name": "Launching Next",
+      "status": "human_action_required",
+      "action_url": "https://www.launchingnext.com/submit/",
+      "next_action": "Verified free submission form with manual review and quick-check challenge; no public API verified. Keep in human queue and never automate the form.",
+      "human_required": 1,
+      "economic_priority": 41.59,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "tiny-startups",
+      "surface_name": "Tiny Startups",
+      "status": "human_action_required",
+      "action_url": "https://www.tinystartups.com/",
+      "next_action": "Use the authenticated/free review submission route manually. Keep outside automatic execution unless a verified machine-readable API is later discovered.",
+      "human_required": 1,
+      "economic_priority": 41.59,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "bedfit-app",
+      "surface_name": "bedfit.app",
+      "status": "human_action_required",
+      "action_url": "https://bedfit.app/",
+      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
+      "human_required": 1,
+      "economic_priority": 41.02,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "myastrid-ai",
+      "surface_name": "myastrid.ai",
+      "status": "human_action_required",
+      "action_url": "https://myastrid.ai/",
+      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
+      "human_required": 1,
+      "economic_priority": 41.02,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "mejorarcalidaddeimagen-ai",
+      "surface_name": "mejorarcalidaddeimagen.ai",
+      "status": "human_action_required",
+      "action_url": "https://mejorarcalidaddeimagen.ai/",
+      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
+      "human_required": 1,
+      "economic_priority": 41.02,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "aifordevelopers-org",
+      "surface_name": "aifordevelopers.org",
+      "status": "human_action_required",
+      "action_url": "https://aifordevelopers.org/",
+      "next_action": "Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.",
+      "human_required": 1,
+      "economic_priority": 41.02,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "peerpush-net",
+      "surface_name": "peerpush.net",
+      "status": "human_action_required",
+      "action_url": "https://peerpush.net/",
+      "next_action": "PeerPush public API and MCP are read-only for discovery. Free product submission remains an authenticated/form workflow; keep outside automatic execution.",
+      "human_required": 1,
+      "economic_priority": 41.02,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "startupfa-me",
+      "surface_name": "startupfa.me",
+      "status": "human_action_required",
+      "action_url": "https://startupfa.me/",
+      "next_action": "Free route requires account creation/authentication and a submission flow. Keep outside automatic execution.",
+      "human_required": 1,
+      "economic_priority": 41.02,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    },
+    {
+      "surface_slug": "betalist",
+      "surface_name": "BetaList",
+      "status": "human_action_required",
+      "action_url": "https://betalist.com/sign_in",
+      "next_action": "Owner authenticates; automation verifies current free eligibility for an already-live product before submitting.",
+      "human_required": 1,
+      "economic_priority": 40.94,
+      "operating_decision": "explore",
+      "evidence_grade": "none",
+      "paid_policy_decision": "free_default",
+      "observed_cost": null,
+      "observed_cost_currency": null
+    }
+  ],
+  "researchBacklog": [
+    {
+      "surface_slug": "sourceforge",
+      "surface_name": "SourceForge",
+      "status": "research_required",
+      "score": 42.03,
+      "action_url": "https://sourceforge.net/software/vendors/new",
+      "last_checked_at": "2026-09-12 06:18:35",
+      "next_action": "Validate whether ToolScout qualifies cleanly as a software product/service before vendor submission; high authority makes this worth checking."
+    },
+    {
+      "surface_slug": "dev-hunt",
+      "surface_name": "DevHunt",
+      "status": "research_required",
+      "score": 41.61,
+      "action_url": "https://devhunt.org/",
+      "last_checked_at": "2026-09-12 03:18:26",
+      "next_action": "Validate whether ToolScout is sufficiently developer-focused before using time on submission."
+    },
+    {
+      "surface_slug": "g2",
+      "surface_name": "G2",
+      "status": "research_required",
+      "score": 41.51,
+      "action_url": "https://www.g2.com/products/new",
+      "last_checked_at": "2026-09-12 06:18:36",
+      "next_action": "Defer until ToolScout has users/reviews and a clear G2 category. Revisit when review acquisition is realistic."
+    },
+    {
+      "surface_slug": "capterra",
+      "surface_name": "Capterra / G2 Digital Markets",
+      "status": "research_required",
+      "score": 41.51,
+      "action_url": "https://www.capterra.com/vendors/sign-up",
+      "last_checked_at": "2026-09-12 06:18:37",
+      "next_action": "Defer until category fit and review acquisition justify signup. Account for the 2026 G2 Digital Markets ownership/integration when revisiting."
+    },
+    {
+      "surface_slug": "aitoollist-org",
+      "surface_name": "aitoollist.org",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://www.aitoollist.org/",
+      "last_checked_at": "2026-09-12 02:16:22",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "falakdigital-notion-site",
+      "surface_name": "falakdigital.notion.site",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://falakdigital.notion.site/",
+      "last_checked_at": "2026-09-12 02:16:22",
+      "next_action": "Verify opportunity discovered via recursive-fazier-com-launches-launchdirectories-com; classify submission path before execution."
+    },
+    {
+      "surface_slug": "fatemaster-ai",
+      "surface_name": "fatemaster.ai",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://www.fatemaster.ai/",
+      "last_checked_at": "2026-09-12 02:16:23",
+      "next_action": "Verify opportunity discovered via recursive-fazier-com-launches-launchdirectories-com; classify submission path before execution."
+    },
+    {
+      "surface_slug": "cdn-sanity-io",
+      "surface_name": "cdn.sanity.io",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://cdn.sanity.io/",
+      "last_checked_at": "2026-09-12 02:16:23",
+      "next_action": "Verify opportunity discovered via recursive-turbo0-com-item-launchdirectories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "ai-sites-net",
+      "surface_name": "ai-sites.net",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://ai-sites.net/",
+      "last_checked_at": "2026-09-12 05:17:28",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aipediahub-com",
+      "surface_name": "aipediahub.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aipediahub.com/",
+      "last_checked_at": "2026-09-12 05:17:29",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aeotools-space",
+      "surface_name": "aeotools.space",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://www.aeotools.space/",
+      "last_checked_at": "2026-09-12 05:18:21",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aiex-me",
+      "surface_name": "aiex.me",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aiex.me/",
+      "last_checked_at": "2026-09-12 05:18:22",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aitoolz-net",
+      "surface_name": "aitoolz.net",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aitoolz.net/",
+      "last_checked_at": "2026-09-12 05:18:38",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aitoolsforme-com",
+      "surface_name": "aitoolsforme.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aitoolsforme.com/",
+      "last_checked_at": "2026-09-12 05:18:39",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "allthingsai-com",
+      "surface_name": "allthingsai.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://allthingsai.com/",
+      "last_checked_at": "2026-09-12 05:18:47",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "sln-startupfa-me",
+      "surface_name": "sln.startupfa.me",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://sln.startupfa.me/",
+      "last_checked_at": "2026-09-12 06:18:53",
+      "next_action": "Verify opportunity discovered via recursive-startupfa-me-s-launchdirectories; classify submission path before execution. Family-learning boost 0.00 from 0 proven surface(s); unseen families retain their full baseline score."
+    },
+    {
+      "surface_slug": "aidir-wiki",
+      "surface_name": "aidir.wiki",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aidir.wiki/",
+      "last_checked_at": "2026-09-12 06:18:56",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "aitools-love",
+      "surface_name": "aitools.love",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://aitools.love/",
+      "last_checked_at": "2026-09-12 06:18:57",
+      "next_action": "Verify opportunity discovered via best-of-ai-directories; classify submission path before execution."
+    },
+    {
+      "surface_slug": "fazier-production-s3-amazonaws-com",
+      "surface_name": "fazier-production.s3.amazonaws.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://fazier-production.s3.amazonaws.com/",
+      "last_checked_at": "2026-09-12 06:19:00",
+      "next_action": "Verify opportunity discovered via recursive-fazier-com-launches-launchdirectories-com; classify submission path before execution."
+    },
+    {
+      "surface_slug": "feedmyapp-com",
+      "surface_name": "feedmyapp.com",
+      "status": "research_required",
+      "score": 41.02,
+      "action_url": "https://www.feedmyapp.com/",
+      "last_checked_at": "2026-09-12 07:18:30",
+      "next_action": "Verify opportunity discovered via recursive-favors-dev-startup-launch-directories-feedmyapp; classify submission path before execution. Family-learning boost 0.00 from 0 proven surface(s); unseen families retain their full baseline score."
+    }
+  ]
+}
