@@ -1,0 +1,33 @@
+name: AgentReady Production Trigger
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/agentready-now.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Trigger production daily cron logic once
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --test-scheduled --port 8787 --config wrangler.toml > /tmp/agentready-now.log 2>&1 &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true; cat /tmp/agentready-now.log || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS 'http://127.0.0.1:8787/' >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS 'http://127.0.0.1:8787/__scheduled?cron=15%203%20*%20*%20*'
+          sleep 4
