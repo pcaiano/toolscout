@@ -6027,5 +6027,395 @@
       "monetizationCoverage": 19,
       "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
     }
+  },
+  {
+    "generatedAt": "2026-09-13T04:38:59.698Z",
+    "timezone": "Europe/Lisbon",
+    "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
+    "d1Usage": {
+      "queryCount": 16,
+      "totalRowsRead": 418758,
+      "totalRowsWritten": 0,
+      "queries": [
+        {
+          "query": 1,
+          "label": "SELECT COUNT(DISTINCT CASE WHEN s.classification='likely-human' THEN st.session_id END) likely_human,COUNT(DISTINCT CASE WHEN s.classificati",
+          "rowsRead": 353,
+          "rowsWritten": 0,
+          "durationMs": 1.8608
+        },
+        {
+          "query": 2,
+          "label": "SELECT COUNT(*) total,SUM(classification='likely-human') likely_human,SUM(classification='known-bot/crawler') bots,SUM(classification='owner",
+          "rowsRead": 1913,
+          "rowsWritten": 0,
+          "durationMs": 1.5933
+        },
+        {
+          "query": 3,
+          "label": "SELECT COUNT(DISTINCT CASE WHEN s.classification='likely-human' THEN st.session_id END) likely_human,COUNT(DISTINCT CASE WHEN s.classificati",
+          "rowsRead": 392,
+          "rowsWritten": 0,
+          "durationMs": 3.4523
+        },
+        {
+          "query": 4,
+          "label": "SELECT COUNT(*) total,SUM(classification='likely-human') likely_human,SUM(classification='known-bot/crawler') bots,SUM(classification='owner",
+          "rowsRead": 497,
+          "rowsWritten": 0,
+          "durationMs": 0.648
+        },
+        {
+          "query": 5,
+          "label": "SELECT COUNT(DISTINCT CASE WHEN s.classification='likely-human' THEN st.session_id END) likely_human,COUNT(DISTINCT CASE WHEN s.classificati",
+          "rowsRead": 672,
+          "rowsWritten": 0,
+          "durationMs": 4.0744
+        },
+        {
+          "query": 6,
+          "label": "SELECT COUNT(*) total,SUM(classification='likely-human') likely_human,SUM(classification='known-bot/crawler') bots,SUM(classification='owner",
+          "rowsRead": 1913,
+          "rowsWritten": 0,
+          "durationMs": 2.9544
+        },
+        {
+          "query": 7,
+          "label": "SELECT date(st.created_at,'+1 hour') day,COUNT(DISTINCT st.session_id) sessions FROM funnel_events st JOIN sessions s ON s.session_id=st.ses",
+          "rowsRead": 881,
+          "rowsWritten": 0,
+          "durationMs": 0.7302
+        },
+        {
+          "query": 8,
+          "label": "SELECT f.event_type,COUNT(*) events,COUNT(DISTINCT f.session_id) sessions FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id ",
+          "rowsRead": 49354,
+          "rowsWritten": 0,
+          "durationMs": 8.9871
+        },
+        {
+          "query": 9,
+          "label": "SELECT COUNT(*) clicks,COUNT(DISTINCT c.session_id) sessions,SUM(CASE WHEN c.affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM c",
+          "rowsRead": 131183,
+          "rowsWritten": 0,
+          "durationMs": 21.3149
+        },
+        {
+          "query": 10,
+          "label": "SELECT COALESCE(NULLIF(st.source,''),'direct') source,COUNT(DISTINCT st.session_id) sessions FROM funnel_events st JOIN sessions s ON s.sess",
+          "rowsRead": 891,
+          "rowsWritten": 0,
+          "durationMs": 0.9283
+        },
+        {
+          "query": 11,
+          "label": "SELECT COALESCE(f.intent_slug,'unlabelled') intent,COUNT(DISTINCT f.session_id) sessions,SUM(CASE WHEN f.event_type='recommendation_complete",
+          "rowsRead": 49359,
+          "rowsWritten": 0,
+          "durationMs": 6.6431
+        },
+        {
+          "query": 12,
+          "label": "SELECT currency,status,attribution_status,COUNT(*) conversions,SUM(commission) commission,SUM(amount) amount FROM revenue_ledger WHERE creat",
+          "rowsRead": 3,
+          "rowsWritten": 0,
+          "durationMs": 0.1521
+        },
+        {
+          "query": 13,
+          "label": "SELECT COALESCE(NULLIF(f.source,''),'direct') source,COALESCE(NULLIF(f.referrer_host,''),'none') referrer_host,COALESCE(NULLIF(f.path,''),'n",
+          "rowsRead": 376,
+          "rowsWritten": 0,
+          "durationMs": 0.4043
+        },
+        {
+          "query": 14,
+          "label": "SELECT COUNT(*) sessions FROM sessions s WHERE s.classification='likely-human' AND date(s.first_seen_at,'+1 hour')=date('now','+1 hour') AND",
+          "rowsRead": 5779,
+          "rowsWritten": 0,
+          "durationMs": 1.0892
+        },
+        {
+          "query": 15,
+          "label": "SELECT COUNT(*) sessions FROM sessions s WHERE s.classification='likely-human' AND s.first_seen_at>=datetime('now','-30 days') AND NOT EXIST",
+          "rowsRead": 41091,
+          "rowsWritten": 0,
+          "durationMs": 6.4666
+        },
+        {
+          "query": 16,
+          "label": "SELECT COUNT(*) clicks FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND c.created_",
+          "rowsRead": 134101,
+          "rowsWritten": 0,
+          "durationMs": 19.2733
+        }
+      ]
+    },
+    "traffic": {
+      "today": {
+        "total": 17,
+        "likelyHuman": 17,
+        "owner": 0,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 24,
+          "likelyHuman": 17,
+          "bots": 2,
+          "owner": 0,
+          "synthetic": 0,
+          "unknownLegacy": 5
+        }
+      },
+      "d7": {
+        "total": 183,
+        "likelyHuman": 140,
+        "owner": 43,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 497,
+          "likelyHuman": 140,
+          "bots": 185,
+          "owner": 43,
+          "synthetic": 0,
+          "unknownLegacy": 129
+        }
+      },
+      "d30": {
+        "total": 279,
+        "likelyHuman": 202,
+        "owner": 77,
+        "bots": 0,
+        "synthetic": 0,
+        "unknownLegacy": 0,
+        "rawSessions": {
+          "total": 1913,
+          "likelyHuman": 202,
+          "bots": 312,
+          "owner": 78,
+          "synthetic": 0,
+          "unknownLegacy": 1321
+        }
+      },
+      "dailyLikelyHuman30d": [
+        {
+          "day": "2026-09-01",
+          "sessions": 10
+        },
+        {
+          "day": "2026-09-02",
+          "sessions": 24
+        },
+        {
+          "day": "2026-09-03",
+          "sessions": 6
+        },
+        {
+          "day": "2026-09-04",
+          "sessions": 15
+        },
+        {
+          "day": "2026-09-05",
+          "sessions": 5
+        },
+        {
+          "day": "2026-09-06",
+          "sessions": 5
+        },
+        {
+          "day": "2026-09-07",
+          "sessions": 14
+        },
+        {
+          "day": "2026-09-08",
+          "sessions": 9
+        },
+        {
+          "day": "2026-09-09",
+          "sessions": 2
+        },
+        {
+          "day": "2026-09-10",
+          "sessions": 4
+        },
+        {
+          "day": "2026-09-11",
+          "sessions": 32
+        },
+        {
+          "day": "2026-09-12",
+          "sessions": 59
+        },
+        {
+          "day": "2026-09-13",
+          "sessions": 17
+        }
+      ],
+      "averageDailyLikelyHuman30d": 6.73
+    },
+    "funnel30d": {
+      "recommendationStarted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "recommendationCompleted": {
+        "events": 4,
+        "sessions": 2
+      },
+      "resultViewed": {
+        "events": 4,
+        "sessions": 2
+      },
+      "toolViewed": {
+        "events": 0,
+        "sessions": 0
+      },
+      "outboundClicked": {
+        "events": 21,
+        "sessions": 3
+      },
+      "recommendationCompletionRate": 100
+    },
+    "commercial30d": {
+      "outboundClicks": 21,
+      "sessionsWithOutbound": 3,
+      "monetizedOutbound": 4,
+      "monetizationCoverage": 19,
+      "humanSessionToOutboundRate": 1.5
+    },
+    "sources30d": [
+      {
+        "source": "direct",
+        "sessions": 182
+      },
+      {
+        "source": "ref:app.partnerstack.com",
+        "sessions": 5
+      },
+      {
+        "source": "utm_source=peerlist",
+        "sessions": 4
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v2",
+        "sessions": 3
+      },
+      {
+        "source": "utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v1",
+        "sessions": 2
+      },
+      {
+        "source": "ref:google.com",
+        "sessions": 2
+      },
+      {
+        "source": "ref:producthunt.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dollarplatoon.com",
+        "sessions": 1
+      },
+      {
+        "source": "ref:dataindex.pro",
+        "sessions": 1
+      },
+      {
+        "source": "ref:bing.com",
+        "sessions": 1
+      }
+    ],
+    "intents30d": [
+      {
+        "intent": "general",
+        "sessions": 2,
+        "recommendationCompletions": 3,
+        "outboundClicks": 19
+      },
+      {
+        "intent": "beehiiv",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "best-ai-assistants",
+        "sessions": 1,
+        "recommendationCompletions": 0,
+        "outboundClicks": 1
+      },
+      {
+        "intent": "unlabelled",
+        "sessions": 202,
+        "recommendationCompletions": 0,
+        "outboundClicks": 0
+      },
+      {
+        "intent": "best-free-crm",
+        "sessions": 1,
+        "recommendationCompletions": 1,
+        "outboundClicks": 0
+      }
+    ],
+    "forensic": {
+      "definition": "Traffic KPIs count only likely-human sessions with an observed public page-entry event. Redirect-only sessions are excluded from traffic and funnel conversion metrics.",
+      "sessionStartsToday": [
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/",
+          "sessions": 9
+        },
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/tools/jira",
+          "sessions": 4
+        },
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/tools/figma",
+          "sessions": 1
+        },
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/tools/grammarly",
+          "sessions": 1
+        },
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/tools/salesforce",
+          "sessions": 1
+        },
+        {
+          "source": "direct",
+          "referrerHost": "none",
+          "path": "/tools/zendesk",
+          "sessions": 1
+        }
+      ],
+      "redirectOnlyToday": 0,
+      "redirectOnly30d": 0,
+      "excludedRedirectClicks30d": 0
+    },
+    "revenue90d": {
+      "ledger": [],
+      "verified": [],
+      "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
+    },
+    "projectionInputs": {
+      "humanSessions30d": 202,
+      "humanDailyAverage30d": 6.73,
+      "recommendationCompletionRate": 1,
+      "humanSessionToOutboundRate": 1.5,
+      "monetizationCoverage": 19,
+      "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
+    }
   }
 ]
