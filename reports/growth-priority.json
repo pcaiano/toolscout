@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T14:23:40.586Z",
+  "generatedAt": "2026-09-13T10:07:59.441Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 1,
-      "impressions": 1790,
-      "ctr": 0.0559
+      "impressions": 2207,
+      "ctr": 0.0453
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -29,7 +29,7 @@
       "intent": "best-seo-tools-for-agencies",
       "title": "Best SEO Tools for Agencies",
       "category": "seo",
-      "priorityScore": 52,
+      "priorityScore": 53,
       "topFit": 9.08,
       "eligibleToolCount": 8,
       "minimumEligibleTools": 2,
@@ -38,12 +38,12 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 444,
+        "impressions": 533,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.6689,
+        "position": 77.0694,
         "opportunity": "relevance-gap",
-        "opportunityScore": 26,
+        "opportunityScore": 27,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -79,10 +79,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 55,
+        "impressions": 65,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.8727,
+        "position": 39.9231,
         "opportunity": "authority-gap",
         "opportunityScore": 28,
         "meaningfulSample": true,
@@ -119,10 +119,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 209,
+        "impressions": 228,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.3828,
+        "position": 73.7018,
         "opportunity": "relevance-gap",
         "opportunityScore": 23,
         "meaningfulSample": true,
@@ -158,10 +158,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 48,
+        "impressions": 50,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.9583,
+        "position": 75.52,
         "opportunity": "relevance-gap",
         "opportunityScore": 17,
         "meaningfulSample": true,
@@ -183,7 +183,7 @@
       "intent": "best-funnel-builder",
       "title": "Best Funnel Builder",
       "category": "marketing",
-      "priorityScore": 42,
+      "priorityScore": 43,
       "topFit": 8.66,
       "eligibleToolCount": 2,
       "minimumEligibleTools": 2,
@@ -192,12 +192,12 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 103,
+        "impressions": 126,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.9903,
+        "position": 77.0397,
         "opportunity": "relevance-gap",
-        "opportunityScore": 20,
+        "opportunityScore": 21,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -219,7 +219,7 @@
       "intent": "best-free-project-management-tools",
       "title": "Best Free Project Management Tools",
       "category": "business",
-      "priorityScore": 42,
+      "priorityScore": 43,
       "topFit": 9.13,
       "eligibleToolCount": 5,
       "minimumEligibleTools": 2,
@@ -228,12 +228,12 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 38,
+        "impressions": 47,
         "clicks": 0,
         "ctr": 0,
-        "position": 52.9737,
+        "position": 55.383,
         "opportunity": "relevance-gap",
-        "opportunityScore": 20,
+        "opportunityScore": 21,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -259,7 +259,7 @@
       "intent": "best-free-crm",
       "title": "Best Free CRM Tools",
       "category": "crm",
-      "priorityScore": 40,
+      "priorityScore": 41,
       "topFit": 8.81,
       "eligibleToolCount": 4,
       "minimumEligibleTools": 2,
@@ -268,12 +268,12 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 35,
+        "impressions": 42,
         "clicks": 0,
         "ctr": 0,
-        "position": 72.0571,
+        "position": 73.0952,
         "opportunity": "relevance-gap",
-        "opportunityScore": 16,
+        "opportunityScore": 17,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -293,7 +293,7 @@
       "intent": "best-keyword-research-tools",
       "title": "Best Keyword Research Tools",
       "category": "seo",
-      "priorityScore": 36,
+      "priorityScore": 37,
       "topFit": 9.32,
       "eligibleToolCount": 7,
       "minimumEligibleTools": 2,
@@ -302,12 +302,12 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 31,
+        "impressions": 42,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.7419,
+        "position": 74.3095,
         "opportunity": "relevance-gap",
-        "opportunityScore": 16,
+        "opportunityScore": 17,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -475,57 +475,16 @@
       "action": "protect-and-measure"
     },
     {
-      "intent": "best-competitor-seo-tools",
-      "title": "Best Competitor SEO Tools",
-      "category": "seo",
-      "priorityScore": 39,
-      "topFit": 9.16,
-      "eligibleToolCount": 8,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 16,
-      "commercialSignal": 20,
-      "affiliateSignal": 0,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 4,
-        "opportunity": "first-page-low-sample",
-        "opportunityScore": 13,
-        "meaningfulSample": false,
-        "strategicOpportunity": true,
-        "evidenceConfidence": "low"
-      },
-      "signalBasis": "observed-gsc-low-sample",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "ahrefs",
-        "se-ranking",
-        "semrush"
-      ],
-      "requiredCapabilities": [
-        "competitor",
-        "competitors",
-        "competitive research",
-        "backlink",
-        "backlinks",
-        "seo"
-      ],
-      "editorialEligibility": "eligible",
-      "action": "protect-and-measure"
-    },
-    {
       "intent": "best-sales-prospecting-tools",
       "title": "Best Sales Prospecting Tools",
       "category": "sales",
-      "priorityScore": 35,
+      "priorityScore": 37,
       "topFit": 9.11,
       "eligibleToolCount": 3,
       "minimumEligibleTools": 2,
       "catalogDepth": 6,
       "commercialSignal": 20,
-      "affiliateSignal": 5,
+      "affiliateSignal": 10,
       "searchSignal": {
         "source": "gsc",
         "impressions": 3,
@@ -551,6 +510,45 @@
         "lead database",
         "b2b leads",
         "sales intelligence"
+      ],
+      "editorialEligibility": "eligible",
+      "action": "protect-and-measure"
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "title": "Best Cold Email Tools",
+      "category": "sales",
+      "priorityScore": 35,
+      "topFit": 9.23,
+      "eligibleToolCount": 2,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 4,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 2,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 6.5,
+        "opportunity": "first-page-low-sample",
+        "opportunityScore": 13,
+        "meaningfulSample": false,
+        "strategicOpportunity": true,
+        "evidenceConfidence": "low"
+      },
+      "signalBasis": "observed-gsc-low-sample",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "lemlist",
+        "instantly"
+      ],
+      "requiredCapabilities": [
+        "cold email",
+        "email outreach",
+        "sales engagement",
+        "outbound email",
+        "email sequences"
       ],
       "editorialEligibility": "eligible",
       "action": "protect-and-measure"
@@ -620,45 +618,6 @@
         "airtable"
       ],
       "requiredCapabilities": [],
-      "editorialEligibility": "eligible",
-      "action": "protect-and-measure"
-    },
-    {
-      "intent": "best-cold-email-tools",
-      "title": "Best Cold Email Tools",
-      "category": "sales",
-      "priorityScore": 33,
-      "topFit": 9.23,
-      "eligibleToolCount": 2,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 4,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 6.5,
-        "opportunity": "first-page-low-sample",
-        "opportunityScore": 13,
-        "meaningfulSample": false,
-        "strategicOpportunity": true,
-        "evidenceConfidence": "low"
-      },
-      "signalBasis": "observed-gsc-low-sample",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "lemlist",
-        "instantly"
-      ],
-      "requiredCapabilities": [
-        "cold email",
-        "email outreach",
-        "sales engagement",
-        "outbound email",
-        "email sequences"
-      ],
       "editorialEligibility": "eligible",
       "action": "protect-and-measure"
     },
@@ -913,7 +872,7 @@
       "intent": "best-ai-ad-creative-tools",
       "title": "Best AI Ad Creative Tools",
       "category": "marketing",
-      "priorityScore": 23,
+      "priorityScore": 24,
       "topFit": 9.22,
       "eligibleToolCount": 1,
       "minimumEligibleTools": 2,
@@ -922,12 +881,12 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 3,
+        "impressions": 4,
         "clicks": 0,
         "ctr": 0,
-        "position": 87.3333,
+        "position": 84.25,
         "opportunity": "insufficient-sample",
-        "opportunityScore": 6,
+        "opportunityScore": 7,
         "meaningfulSample": false,
         "strategicOpportunity": false,
         "evidenceConfidence": "low"
@@ -1226,6 +1185,47 @@
         "ui design",
         "prototype",
         "prototyping"
+      ],
+      "editorialEligibility": "eligible",
+      "action": "watch"
+    },
+    {
+      "intent": "best-competitor-seo-tools",
+      "title": "Best Competitor SEO Tools",
+      "category": "seo",
+      "priorityScore": 35,
+      "topFit": 9.16,
+      "eligibleToolCount": 8,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 16,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 4,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 51,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "low"
+      },
+      "signalBasis": "observed-gsc-low-sample",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "ahrefs",
+        "se-ranking",
+        "semrush"
+      ],
+      "requiredCapabilities": [
+        "competitor",
+        "competitors",
+        "competitive research",
+        "backlink",
+        "backlinks",
+        "seo"
       ],
       "editorialEligibility": "eligible",
       "action": "watch"

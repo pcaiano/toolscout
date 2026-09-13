@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-11T14:23:36.829Z",
-  "sourceGeneratedAt": "2026-09-11T14:23:36.764Z",
+  "generatedAt": "2026-09-13T10:07:55.900Z",
+  "sourceGeneratedAt": "2026-09-13T10:07:55.840Z",
   "summary": {
     "canonical": 27,
     "redirected": 3,
@@ -11,73 +11,81 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 444,
+      "impressions": 533,
       "clicks": 0,
-      "position": 77.6689
+      "position": 77.0694
     },
     {
       "slug": "best-no-code-automation-tools",
       "status": "canonical",
       "target": "best-no-code-automation-tools",
-      "impressions": 209,
+      "impressions": 228,
       "clicks": 0,
-      "position": 73.3828
+      "position": 73.7018
     },
     {
       "slug": "best-seo-keyword-research-tools",
       "status": "redirected",
       "target": "best-keyword-research-tools",
-      "impressions": 150,
+      "impressions": 199,
       "clicks": 0,
-      "position": 74.46
+      "position": 74.7889
     },
     {
       "slug": "best-funnel-builder",
       "status": "canonical",
       "target": "best-funnel-builder",
-      "impressions": 103,
+      "impressions": 126,
       "clicks": 0,
-      "position": 77.9903
+      "position": 77.0397
     },
     {
       "slug": "best-project-management-tools",
       "status": "canonical",
       "target": "best-project-management-tools",
-      "impressions": 55,
+      "impressions": 65,
       "clicks": 0,
-      "position": 39.8727
+      "position": 39.9231
     },
     {
       "slug": "best-crm-for-sales-teams",
       "status": "canonical",
       "target": "best-crm-for-sales-teams",
-      "impressions": 48,
+      "impressions": 50,
       "clicks": 0,
-      "position": 75.9583
+      "position": 75.52
     },
     {
       "slug": "best-free-project-management-tools",
       "status": "canonical",
       "target": "best-free-project-management-tools",
-      "impressions": 38,
+      "impressions": 47,
       "clicks": 0,
-      "position": 52.9737
+      "position": 55.383
     },
     {
       "slug": "best-free-crm",
       "status": "canonical",
       "target": "best-free-crm",
-      "impressions": 35,
+      "impressions": 42,
       "clicks": 0,
-      "position": 72.0571
+      "position": 73.0952
     },
     {
       "slug": "best-keyword-research-tools",
       "status": "canonical",
       "target": "best-keyword-research-tools",
-      "impressions": 31,
+      "impressions": 42,
       "clicks": 0,
-      "position": 75.7419
+      "position": 74.3095
+    },
+    {
+      "slug": "best-ai-ad-creative-tools",
+      "status": "canonical",
+      "target": "best-ai-ad-creative-tools",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 84.25
     },
     {
       "slug": "best-all-in-one-business-tools",
@@ -86,6 +94,14 @@
       "impressions": 4,
       "clicks": 0,
       "position": 90.75
+    },
+    {
+      "slug": "best-competitor-seo-tools",
+      "status": "canonical",
+      "target": "best-competitor-seo-tools",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 51
     },
     {
       "slug": "best-forms-for-small-business",
@@ -128,14 +144,6 @@
       "position": 7.6667
     },
     {
-      "slug": "best-ai-ad-creative-tools",
-      "status": "canonical",
-      "target": "best-ai-ad-creative-tools",
-      "impressions": 3,
-      "clicks": 0,
-      "position": 87.3333
-    },
-    {
       "slug": "best-developer-tools",
       "status": "canonical",
       "target": "best-developer-tools",
@@ -158,14 +166,6 @@
       "impressions": 2,
       "clicks": 0,
       "position": 6.5
-    },
-    {
-      "slug": "best-competitor-seo-tools",
-      "status": "canonical",
-      "target": "best-competitor-seo-tools",
-      "impressions": 2,
-      "clicks": 0,
-      "position": 4
     },
     {
       "slug": "best-email-marketing-tools",

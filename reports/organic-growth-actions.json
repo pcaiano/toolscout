@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-09-13T10:07:59.605Z",
+  "engine": "ToolScout Organic Growth Engine v3",
+  "newInterventions": [
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "variant": "decision-depth-v1",
+      "lane": "seo-authority-depth",
+      "priorityScore": 53,
+      "impressions": 533,
+      "position": 77.0694
+    },
+    {
+      "intent": "best-project-management-tools",
+      "variant": "decision-depth-v1",
+      "lane": "seo-authority-depth",
+      "priorityScore": 52,
+      "impressions": 65,
+      "position": 39.9231
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "variant": "decision-depth-v1",
+      "lane": "seo-authority-depth",
+      "priorityScore": 47,
+      "impressions": 228,
+      "position": 73.7018
+    }
+  ],
+  "activeOptimizations": [
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "latest": {
+        "clicks": 0,
+        "impressions": 533,
+        "ctr": 0,
+        "position": 77.0694
+      },
+      "lastSeenAt": "2026-09-13T10:07:59.605Z",
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-09-13T10:07:59.605Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 533,
+        "ctr": 0,
+        "position": 77.0694
+      }
+    },
+    {
+      "intent": "best-project-management-tools",
+      "latest": {
+        "clicks": 0,
+        "impressions": 65,
+        "ctr": 0,
+        "position": 39.9231
+      },
+      "lastSeenAt": "2026-09-13T10:07:59.605Z",
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-09-13T10:07:59.605Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 65,
+        "ctr": 0,
+        "position": 39.9231
+      }
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "latest": {
+        "clicks": 0,
+        "impressions": 228,
+        "ctr": 0,
+        "position": 73.7018
+      },
+      "lastSeenAt": "2026-09-13T10:07:59.605Z",
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-09-13T10:07:59.605Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 228,
+        "ctr": 0,
+        "position": 73.7018
+      }
+    }
+  ],
+  "evaluations": [],
+  "rollbacks": [],
+  "ownerActionRequired": false
+}

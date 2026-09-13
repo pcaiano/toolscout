@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-11T14:23:40.647Z",
+  "generatedAt": "2026-09-13T10:07:59.523Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 1790,
-    "ctr": 0.0559,
-    "gscStartDate": "2026-08-15",
-    "gscEndDate": "2026-09-11",
+    "searchImpressions": 2207,
+    "ctr": 0.0453,
+    "gscStartDate": "2026-08-17",
+    "gscEndDate": "2026-09-13",
     "gscDataState": "all",
     "trafficTruthStatus": "observed",
     "rule": "Impressions are visibility, not traffic. Every first-page signal is a strategic opportunity. Confidence controls intervention intensity, not whether the opportunity exists."
@@ -24,24 +24,24 @@
   ],
   "summary": {
     "observedGscIntents": 31,
-    "observedGscPages": 76,
+    "observedGscPages": 79,
     "searchClicks": 1,
-    "searchImpressions": 1790,
+    "searchImpressions": 2207,
     "organicAcquisitionStatus": "early-search-acquisition",
-    "actionableOpportunities": 22,
-    "firstPageOpportunities": 11,
+    "actionableOpportunities": 21,
+    "firstPageOpportunities": 10,
     "firstPageMeaningful": 0,
-    "firstPageLowSample": 11,
+    "firstPageLowSample": 10,
     "strikingDistanceOpportunities": 0,
     "strikingMeaningful": 0,
     "strikingLowSample": 0,
     "authorityDepthOpportunities": 8,
-    "competitorResearchCandidates": 3
+    "competitorResearchCandidates": 5
   },
   "opportunities": [
     {
       "intent": "best-seo-tools-for-agencies",
-      "priorityScore": 52,
+      "priorityScore": 53,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -72,12 +72,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 444,
+        "impressions": 533,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.6689,
+        "position": 77.0694,
         "opportunity": "relevance-gap",
-        "opportunityScore": 26,
+        "opportunityScore": 27,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -121,10 +121,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 55,
+        "impressions": 65,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.8727,
+        "position": 39.9231,
         "opportunity": "authority-gap",
         "opportunityScore": 28,
         "meaningfulSample": true,
@@ -170,10 +170,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 209,
+        "impressions": 228,
         "clicks": 0,
         "ctr": 0,
-        "position": 73.3828,
+        "position": 73.7018,
         "opportunity": "relevance-gap",
         "opportunityScore": 23,
         "meaningfulSample": true,
@@ -219,10 +219,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 48,
+        "impressions": 50,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.9583,
+        "position": 75.52,
         "opportunity": "relevance-gap",
         "opportunityScore": 17,
         "meaningfulSample": true,
@@ -237,7 +237,7 @@
     },
     {
       "intent": "best-funnel-builder",
-      "priorityScore": 42,
+      "priorityScore": 43,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -268,12 +268,12 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 103,
+        "impressions": 126,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.9903,
+        "position": 77.0397,
         "opportunity": "relevance-gap",
-        "opportunityScore": 20,
+        "opportunityScore": 21,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -285,7 +285,7 @@
     },
     {
       "intent": "best-free-project-management-tools",
-      "priorityScore": 42,
+      "priorityScore": 43,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -316,12 +316,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 38,
+        "impressions": 47,
         "clicks": 0,
         "ctr": 0,
-        "position": 52.9737,
+        "position": 55.383,
         "opportunity": "relevance-gap",
-        "opportunityScore": 20,
+        "opportunityScore": 21,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -334,7 +334,7 @@
     },
     {
       "intent": "best-free-crm",
-      "priorityScore": 40,
+      "priorityScore": 41,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -365,12 +365,12 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 35,
+        "impressions": 42,
         "clicks": 0,
         "ctr": 0,
-        "position": 72.0571,
+        "position": 73.0952,
         "opportunity": "relevance-gap",
-        "opportunityScore": 16,
+        "opportunityScore": 17,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -383,7 +383,7 @@
     },
     {
       "intent": "best-keyword-research-tools",
-      "priorityScore": 36,
+      "priorityScore": 37,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -414,12 +414,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 31,
+        "impressions": 42,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.7419,
+        "position": 74.3095,
         "opportunity": "relevance-gap",
-        "opportunityScore": 16,
+        "opportunityScore": 17,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -619,55 +619,8 @@
       ]
     },
     {
-      "intent": "best-competitor-seo-tools",
-      "priorityScore": 39,
-      "lane": "seo-first-page-observation",
-      "action": "protect-and-measure",
-      "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "preserve-current-url",
-        "validate-editorial-quality",
-        "verify-query-title-alignment",
-        "monitor-ranking-and-impressions",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 4,
-        "opportunity": "first-page-low-sample",
-        "opportunityScore": 13,
-        "meaningfulSample": false,
-        "strategicOpportunity": true,
-        "evidenceConfidence": "low"
-      },
-      "topTools": [
-        "ahrefs",
-        "se-ranking",
-        "semrush"
-      ]
-    },
-    {
       "intent": "best-sales-prospecting-tools",
-      "priorityScore": 35,
+      "priorityScore": 37,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
@@ -710,6 +663,52 @@
         "instantly",
         "apollo",
         "lemlist"
+      ]
+    },
+    {
+      "intent": "best-cold-email-tools",
+      "priorityScore": 35,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 2,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 6.5,
+        "opportunity": "first-page-low-sample",
+        "opportunityScore": 13,
+        "meaningfulSample": false,
+        "strategicOpportunity": true,
+        "evidenceConfidence": "low"
+      },
+      "topTools": [
+        "lemlist",
+        "instantly"
       ]
     },
     {
@@ -804,52 +803,6 @@
         "wrike",
         "asana",
         "airtable"
-      ]
-    },
-    {
-      "intent": "best-cold-email-tools",
-      "priorityScore": 33,
-      "lane": "seo-first-page-observation",
-      "action": "protect-and-measure",
-      "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "preserve-current-url",
-        "validate-editorial-quality",
-        "verify-query-title-alignment",
-        "monitor-ranking-and-impressions",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 2,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 6.5,
-        "opportunity": "first-page-low-sample",
-        "opportunityScore": 13,
-        "meaningfulSample": false,
-        "strategicOpportunity": true,
-        "evidenceConfidence": "low"
-      },
-      "topTools": [
-        "lemlist",
-        "instantly"
       ]
     },
     {
@@ -991,7 +944,7 @@
     },
     {
       "intent": "best-ai-ad-creative-tools",
-      "priorityScore": 23,
+      "priorityScore": 24,
       "lane": "editorial-safety",
       "action": "hold-publication-and-research-catalog",
       "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
@@ -1019,12 +972,12 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 3,
+        "impressions": 4,
         "clicks": 0,
         "ctr": 0,
-        "position": 87.3333,
+        "position": 84.25,
         "opportunity": "insufficient-sample",
-        "opportunityScore": 6,
+        "opportunityScore": 7,
         "meaningfulSample": false,
         "strategicOpportunity": false,
         "evidenceConfidence": "low"
@@ -1515,6 +1468,50 @@
       ]
     },
     {
+      "intent": "best-competitor-seo-tools",
+      "priorityScore": 35,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "low",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 4,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 51,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 9,
+        "meaningfulSample": false,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "low"
+      },
+      "topTools": [
+        "ahrefs",
+        "se-ranking",
+        "semrush"
+      ]
+    },
+    {
       "intent": "best-lead-capture-forms",
       "priorityScore": 35,
       "lane": "measure",
@@ -1697,21 +1694,27 @@
       "pathname": "/",
       "type": "home",
       "clicks": 1,
-      "impressions": 58,
-      "ctr": 1.7241,
-      "position": 6.6724,
+      "impressions": 69,
+      "ctr": 1.4493,
+      "position": 6.942,
       "topQueries": [
         {
           "query": "toolscout",
           "clicks": 1,
-          "impressions": 27,
-          "position": 9.1111
+          "impressions": 33,
+          "position": 9.0909
+        },
+        {
+          "query": "trucscout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 7
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": true,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 10.431,
+      "opportunityScore": 11.927,
       "outcome": "traffic-observed"
     },
     {
@@ -1955,21 +1958,6 @@
       "impressions": 3,
       "ctr": 0,
       "position": 6,
-      "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.5,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
-      "pathname": "/best-competitor-seo-tools.html",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 4,
       "topQueries": [],
       "meaningfulSample": false,
       "strategicOpportunity": true,
@@ -2327,45 +2315,45 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 444,
+      "impressions": 533,
       "ctr": 0,
-      "position": 77.6689,
+      "position": 77.0694,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 136,
-          "position": 75.1618
+          "impressions": 161,
+          "position": 73.9876
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 82,
-          "position": 81.5
+          "impressions": 102,
+          "position": 81.0588
         },
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 81,
-          "position": 77.716
+          "impressions": 99,
+          "position": 77.5152
         },
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 40,
-          "position": 72.625
+          "impressions": 50,
+          "position": 72.18
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 17,
-          "position": 74.4118
+          "impressions": 20,
+          "position": 73.45
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 5.717,
+      "opportunityScore": 6.916,
       "outcome": "visibility-only"
     },
     {
@@ -2373,33 +2361,33 @@
       "pathname": "/tools/semrush.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 171,
+      "impressions": 215,
       "ctr": 0,
-      "position": 55.3977,
+      "position": 55.4558,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 81,
-          "position": 57.0741
+          "impressions": 102,
+          "position": 56.7941
         },
         {
           "query": "semrush software",
           "clicks": 0,
-          "impressions": 52,
-          "position": 56.25
+          "impressions": 67,
+          "position": 56.5821
         },
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 23,
-          "position": 50.9565
+          "impressions": 28,
+          "position": 51.3214
         },
         {
           "query": "semrush tools",
           "clicks": 0,
-          "impressions": 8,
-          "position": 53.375
+          "impressions": 11,
+          "position": 52.3636
         },
         {
           "query": "semrush seo software",
@@ -2411,7 +2399,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.087,
+      "opportunityScore": 3.877,
       "outcome": "visibility-only"
     },
     {
@@ -2419,21 +2407,21 @@
       "pathname": "/best-no-code-automation-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 209,
+      "impressions": 228,
       "ctr": 0,
-      "position": 73.3828,
+      "position": 73.7018,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 32,
-          "position": 70.375
+          "impressions": 41,
+          "position": 71.4878
         },
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 26,
-          "position": 70.4231
+          "impressions": 30,
+          "position": 71.6
         },
         {
           "query": "no code automation",
@@ -2450,14 +2438,14 @@
         {
           "query": "no code automation tool",
           "clicks": 0,
-          "impressions": 14,
-          "position": 70.2857
+          "impressions": 15,
+          "position": 70.6
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.848,
+      "opportunityScore": 3.094,
       "outcome": "visibility-only"
     },
     {
@@ -2465,45 +2453,45 @@
       "pathname": "/best-seo-keyword-research-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 150,
+      "impressions": 199,
       "ctr": 0,
-      "position": 74.46,
+      "position": 74.7889,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 59,
-          "position": 62.5932
+          "impressions": 75,
+          "position": 64
         },
         {
           "query": "seo search tools",
           "clicks": 0,
-          "impressions": 15,
-          "position": 78
+          "impressions": 18,
+          "position": 78.1667
         },
         {
           "query": "competitor keyword research tools for seo",
           "clicks": 0,
-          "impressions": 13,
-          "position": 84.4615
+          "impressions": 17,
+          "position": 84.5294
         },
         {
           "query": "seo search tool",
           "clicks": 0,
-          "impressions": 8,
-          "position": 69.375
+          "impressions": 15,
+          "position": 70.8
         },
         {
-          "query": "keyword research seo tool",
+          "query": "best seo keyword research tool",
           "clicks": 0,
-          "impressions": 8,
-          "position": 85.375
+          "impressions": 10,
+          "position": 97.7
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.015,
+      "opportunityScore": 2.661,
       "outcome": "visibility-only"
     },
     {
@@ -2511,45 +2499,45 @@
       "pathname": "/tools/airtable.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 130,
+      "impressions": 164,
       "ctr": 0,
-      "position": 73.1769,
+      "position": 73.0671,
       "topQueries": [
         {
           "query": "airtable",
           "clicks": 0,
-          "impressions": 25,
-          "position": 62.76
+          "impressions": 34,
+          "position": 62.1471
         },
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 23,
-          "position": 85.0435
+          "impressions": 26,
+          "position": 85.5
         },
         {
           "query": "what is airtable used for",
           "clicks": 0,
-          "impressions": 17,
-          "position": 89.2941
+          "impressions": 20,
+          "position": 89
         },
         {
           "query": "airtable software",
           "clicks": 0,
-          "impressions": 13,
-          "position": 66.2308
+          "impressions": 16,
+          "position": 66
         },
         {
           "query": "airtable ticketing system",
           "clicks": 0,
-          "impressions": 9,
-          "position": 61.5556
+          "impressions": 11,
+          "position": 61.8182
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.777,
+      "opportunityScore": 2.245,
       "outcome": "visibility-only"
     },
     {
@@ -2557,21 +2545,21 @@
       "pathname": "/tools/klaviyo.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 89,
+      "impressions": 127,
       "ctr": 0,
-      "position": 58.4494,
+      "position": 60.2205,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 52,
-          "position": 58.8269
+          "impressions": 63,
+          "position": 59.5079
         },
         {
           "query": "klayvio",
           "clicks": 0,
-          "impressions": 10,
-          "position": 61.5
+          "impressions": 13,
+          "position": 62.2308
         },
         {
           "query": "what is klaviyo",
@@ -2586,62 +2574,16 @@
           "position": 60.6667
         },
         {
-          "query": "clavio",
+          "query": "klavyio",
           "clicks": 0,
-          "impressions": 2,
-          "position": 58
+          "impressions": 3,
+          "position": 61.3333
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.523,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-project-management-tools.html",
-      "pathname": "/best-project-management-tools.html",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 55,
-      "ctr": 0,
-      "position": 39.8727,
-      "topQueries": [
-        {
-          "query": "project automation tools",
-          "clicks": 0,
-          "impressions": 15,
-          "position": 46
-        },
-        {
-          "query": "project workflow tools",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 42.1111
-        },
-        {
-          "query": "project management workflow tools",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 33.25
-        },
-        {
-          "query": "automated project management tools",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 36.2857
-        },
-        {
-          "query": "project management workflow tool",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 28.75
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.379,
+      "opportunityScore": 2.109,
       "outcome": "visibility-only"
     },
     {
@@ -2649,45 +2591,91 @@
       "pathname": "/best-funnel-builder.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 103,
+      "impressions": 126,
       "ctr": 0,
-      "position": 77.9903,
+      "position": 77.0397,
       "topQueries": [
         {
           "query": "best funnel builder",
           "clicks": 0,
-          "impressions": 26,
-          "position": 64.8846
+          "impressions": 31,
+          "position": 65.5484
         },
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 26,
-          "position": 90.4615
+          "impressions": 31,
+          "position": 89.3226
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 23,
-          "position": 85.8696
+          "impressions": 28,
+          "position": 85.6786
+        },
+        {
+          "query": "best sales funnel builder",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 69.3333
         },
         {
           "query": "funnelbuilder",
           "clicks": 0,
-          "impressions": 4,
-          "position": 85.75
-        },
-        {
-          "query": "online funnel builder",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 87
+          "impressions": 6,
+          "position": 84.1667
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.321,
+      "opportunityScore": 1.636,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/best-project-management-tools.html",
+      "pathname": "/best-project-management-tools.html",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 65,
+      "ctr": 0,
+      "position": 39.9231,
+      "topQueries": [
+        {
+          "query": "project automation tools",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 44.5294
+        },
+        {
+          "query": "project management workflow tools",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 32.7
+        },
+        {
+          "query": "automated project management tools",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 35.7
+        },
+        {
+          "query": "project workflow tools",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 42.3
+        },
+        {
+          "query": "best project management tool to manage workflow",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 48
+        }
+      ],
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 1.628,
       "outcome": "visibility-only"
     },
     {
@@ -2695,21 +2683,21 @@
       "pathname": "/best-free-project-management-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 38,
+      "impressions": 47,
       "ctr": 0,
-      "position": 52.9737,
+      "position": 55.383,
       "topQueries": [
         {
           "query": "free online project manager tools",
           "clicks": 0,
-          "impressions": 15,
-          "position": 66.8
+          "impressions": 19,
+          "position": 66.8421
         },
         {
           "query": "best free tools for project management",
           "clicks": 0,
-          "impressions": 9,
-          "position": 22
+          "impressions": 11,
+          "position": 29.1818
         },
         {
           "query": "free online project managers",
@@ -2720,8 +2708,8 @@
         {
           "query": "free online tools for project management",
           "clicks": 0,
-          "impressions": 2,
-          "position": 64.5
+          "impressions": 3,
+          "position": 64
         },
         {
           "query": "free online pm tool",
@@ -2733,7 +2721,53 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.717,
+      "opportunityScore": 0.849,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/moz-pro.html",
+      "pathname": "/tools/moz-pro.html",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 53,
+      "ctr": 0,
+      "position": 69.5094,
+      "topQueries": [
+        {
+          "query": "moz pro tools",
+          "clicks": 0,
+          "impressions": 24,
+          "position": 69.4583
+        },
+        {
+          "query": "moz free trial",
+          "clicks": 0,
+          "impressions": 12,
+          "position": 67.4167
+        },
+        {
+          "query": "moz pro overview",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 72.5
+        },
+        {
+          "query": "what is moz pro",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 66.3333
+        },
+        {
+          "query": "moz pro free trial",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 61
+        }
+      ],
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 0.762,
       "outcome": "visibility-only"
     },
     {
@@ -2741,15 +2775,15 @@
       "pathname": "/best-crm-for-sales-teams.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 48,
+      "impressions": 50,
       "ctr": 0,
-      "position": 75.9583,
+      "position": 75.52,
       "topQueries": [
         {
           "query": "crm for sales teams",
           "clicks": 0,
-          "impressions": 14,
-          "position": 75.0714
+          "impressions": 15,
+          "position": 74.6667
         },
         {
           "query": "crm for sales team",
@@ -2760,8 +2794,8 @@
         {
           "query": "best crm for sales teams",
           "clicks": 0,
-          "impressions": 8,
-          "position": 77
+          "impressions": 9,
+          "position": 75.2222
         },
         {
           "query": "best crm for sales team",
@@ -2779,60 +2813,60 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.632,
+      "opportunityScore": 0.662,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-free-crm.html",
-      "pathname": "/best-free-crm.html",
-      "type": "guide",
+      "page": "https://trytoolscout.org/tools/tally.html",
+      "pathname": "/tools/tally.html",
+      "type": "tool-profile",
       "clicks": 0,
-      "impressions": 35,
+      "impressions": 26,
       "ctr": 0,
-      "position": 72.0571,
+      "position": 39.9615,
       "topQueries": [
         {
-          "query": "best free crm tools",
+          "query": "tally software",
           "clicks": 0,
-          "impressions": 9,
-          "position": 64.3333
+          "impressions": 10,
+          "position": 39.8
         },
         {
-          "query": "crm free tools",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 82.5
-        },
-        {
-          "query": "free crm tools",
+          "query": "tally",
           "clicks": 0,
           "impressions": 5,
-          "position": 83.6
+          "position": 44.4
         },
         {
-          "query": "free crm tool",
+          "query": "tallykey",
           "clicks": 0,
-          "impressions": 5,
-          "position": 85.2
+          "impressions": 4,
+          "position": 15.5
         },
         {
-          "query": "free online crm tools",
+          "query": "what is tally",
           "clicks": 0,
-          "impressions": 2,
-          "position": 69.5
+          "impressions": 3,
+          "position": 38.3333
+        },
+        {
+          "query": "tally program",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 31
         }
       ],
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.486,
+      "opportunityScore": 0.651,
       "outcome": "visibility-only"
     }
   ],
   "autonomousActionQueue": [
     {
       "intent": "best-seo-tools-for-agencies",
-      "priorityScore": 52,
+      "priorityScore": 53,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
@@ -2940,7 +2974,7 @@
     },
     {
       "intent": "best-funnel-builder",
-      "priorityScore": 42,
+      "priorityScore": 43,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
@@ -2967,7 +3001,7 @@
     },
     {
       "intent": "best-free-project-management-tools",
-      "priorityScore": 42,
+      "priorityScore": 43,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
@@ -2994,7 +3028,7 @@
     },
     {
       "intent": "best-free-crm",
-      "priorityScore": 40,
+      "priorityScore": 41,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
@@ -3021,7 +3055,7 @@
     },
     {
       "intent": "best-keyword-research-tools",
-      "priorityScore": 36,
+      "priorityScore": 37,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
@@ -3147,8 +3181,8 @@
       ]
     },
     {
-      "intent": "best-competitor-seo-tools",
-      "priorityScore": 39,
+      "intent": "best-sales-prospecting-tools",
+      "priorityScore": 37,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
       "ownerActionRequired": false,
@@ -3172,7 +3206,7 @@
       ]
     },
     {
-      "intent": "best-sales-prospecting-tools",
+      "intent": "best-cold-email-tools",
       "priorityScore": 35,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
@@ -3224,31 +3258,6 @@
     {
       "intent": "best-tools-for-agencies",
       "priorityScore": 34,
-      "lane": "seo-first-page-observation",
-      "action": "protect-and-measure",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "preserve-current-url",
-        "validate-editorial-quality",
-        "verify-query-title-alignment",
-        "monitor-ranking-and-impressions",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-cold-email-tools",
-      "priorityScore": 33,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
       "ownerActionRequired": false,
@@ -3347,7 +3356,7 @@
     },
     {
       "intent": "best-ai-ad-creative-tools",
-      "priorityScore": 23,
+      "priorityScore": 24,
       "lane": "editorial-safety",
       "action": "hold-publication-and-research-catalog",
       "ownerActionRequired": false,
@@ -3680,6 +3689,28 @@
       ]
     },
     {
+      "intent": "best-competitor-seo-tools",
+      "priorityScore": 35,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
       "intent": "best-lead-capture-forms",
       "priorityScore": 35,
       "lane": "measure",
@@ -3782,7 +3813,31 @@
       "reason": "Competitor patterns are research signals, not publication evidence."
     },
     {
+      "candidate": "google-ai-studio",
+      "competitorMentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "action": "auto-research-only",
+      "ownerActionRequired": false,
+      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
+      "reason": "Competitor patterns are research signals, not publication evidence."
+    },
+    {
       "candidate": "kling-ai",
+      "competitorMentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Futurepedia"
+      ],
+      "action": "auto-research-only",
+      "ownerActionRequired": false,
+      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
+      "reason": "Competitor patterns are research signals, not publication evidence."
+    },
+    {
+      "candidate": "otter-ai",
       "competitorMentions": 2,
       "sources": [
         "AlternativeTo",
