@@ -3,6 +3,7 @@ import { parseFunnelEvent, rate } from './funnel-model.js';
 import { classifySessionRequest, isSyntheticRequest, SESSION_CLASSIFICATIONS, SESSION_UPSERT_SQL } from './session-classification.js';
 
 const BASE = 'https://trytoolscout.org';
+const TIME_ZONE = 'Europe/Lisbon';
 const rows = result => result?.results || [];
 
 function eventHeaders(request) {
@@ -10,6 +11,27 @@ function eventHeaders(request) {
   const origin = request.headers.get('Origin');
   if (origin === BASE) headers['Access-Control-Allow-Origin'] = origin;
   return headers;
+}
+
+function zonedDayKey(value, timeZone = TIME_ZONE) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year:'numeric', month:'2-digit', day:'2-digit'
+  }).formatToParts(value instanceof Date ? value : new Date(value));
+  const map = Object.fromEntries(parts.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+function shiftDayKey(dayKey, days) {
+  const [y,m,d] = String(dayKey).split('-').map(Number);
+  return zonedDayKey(new Date(Date.UTC(y,m-1,d+days,12,0,0)));
+}
+
+function parseSqliteUtc(value) {
+  const text=String(value||'').trim();
+  if(!text)return null;
+  const date=new Date(text.includes('T')?text:(text.replace(' ','T')+'Z'));
+  return Number.isFinite(date.getTime())?date:null;
 }
 
 export async function ingest(request, env) {
@@ -38,15 +60,25 @@ export async function ingest(request, env) {
 
 async function funnelSnapshot(env) {
   const window = "created_at >= datetime('now','-30 days')";
-  const likelyHuman = "session_id IN (SELECT session_id FROM sessions WHERE classification='likely-human')";
+  const browserConfirmed = `session_id IN (
+    SELECT s.session_id
+    FROM sessions s
+    WHERE s.classification='likely-human'
+      AND EXISTS (
+        SELECT 1 FROM funnel_events c
+        WHERE c.session_id=s.session_id
+          AND c.event_type='page_confirmed'
+          AND c.created_at >= datetime('now','-30 days')
+      )
+  )`;
   const [eventCounts, sessionCount, byIntent, byTool, bySource, bySourceSessions, daily, audience] = await Promise.all([
-    env.DB.prepare(`SELECT event_type,COUNT(*) AS events,COUNT(DISTINCT session_id) AS sessions FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY event_type`).all(),
-    env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE first_seen_at >= datetime('now','-30 days') AND classification='likely-human'`).first(),
-    env.DB.prepare(`SELECT COALESCE(intent_slug,'general') AS intent_slug,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} AND intent_slug IS NOT NULL GROUP BY intent_slug,event_type ORDER BY events DESC LIMIT 100`).all(),
-    env.DB.prepare(`SELECT tool_slug,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} AND tool_slug IS NOT NULL GROUP BY tool_slug,event_type ORDER BY events DESC LIMIT 100`).all(),
-    env.DB.prepare(`SELECT source,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY source,event_type ORDER BY events DESC LIMIT 100`).all(),
-    env.DB.prepare(`SELECT source,COUNT(DISTINCT session_id) AS sessions FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY source ORDER BY sessions DESC LIMIT 100`).all(),
-    env.DB.prepare(`SELECT substr(created_at,1,10) AS day,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${likelyHuman} GROUP BY day,event_type ORDER BY day`).all(),
+    env.DB.prepare(`SELECT event_type,COUNT(*) AS events,COUNT(DISTINCT session_id) AS sessions FROM funnel_events WHERE ${window} AND ${browserConfirmed} GROUP BY event_type`).all(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT f.session_id) AS sessions FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND f.created_at >= datetime('now','-30 days') AND s.classification='likely-human'`).first(),
+    env.DB.prepare(`SELECT COALESCE(intent_slug,'general') AS intent_slug,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${browserConfirmed} AND intent_slug IS NOT NULL GROUP BY intent_slug,event_type ORDER BY events DESC LIMIT 100`).all(),
+    env.DB.prepare(`SELECT tool_slug,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${browserConfirmed} AND tool_slug IS NOT NULL GROUP BY tool_slug,event_type ORDER BY events DESC LIMIT 100`).all(),
+    env.DB.prepare(`SELECT source,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${browserConfirmed} GROUP BY source,event_type ORDER BY events DESC LIMIT 100`).all(),
+    env.DB.prepare(`SELECT source,COUNT(DISTINCT session_id) AS sessions FROM funnel_events WHERE ${window} AND ${browserConfirmed} GROUP BY source ORDER BY sessions DESC LIMIT 100`).all(),
+    env.DB.prepare(`SELECT substr(created_at,1,10) AS day,event_type,COUNT(*) AS events FROM funnel_events WHERE ${window} AND ${browserConfirmed} GROUP BY day,event_type ORDER BY day`).all(),
     env.DB.prepare(`SELECT classification,COUNT(*) AS sessions FROM sessions WHERE first_seen_at >= datetime('now','-30 days') GROUP BY classification`).all()
   ]);
   const counts = Object.fromEntries(rows(eventCounts).map(row => [row.event_type, Number(row.events || 0)]));
@@ -59,6 +91,7 @@ async function funnelSnapshot(env) {
   return {
     windowDays:30,
     status:'observed',
+    trafficTruth:'browser_confirmed',
     sessions,
     recommendationStarts:starts,
     recommendationCompletions:completions,
@@ -78,24 +111,51 @@ async function funnelSnapshot(env) {
 }
 
 async function trafficSnapshot(env) {
-  const [dailyResult, monthRow, todayRow, yesterdayRow] = await Promise.all([
-    env.DB.prepare(`SELECT substr(first_seen_at,1,10) AS day,COUNT(*) AS sessions
-      FROM sessions
-      WHERE classification='likely-human' AND first_seen_at >= datetime('now','-60 days')
-      GROUP BY substr(first_seen_at,1,10) ORDER BY day`).all(),
-    env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions
-      WHERE classification='likely-human' AND strftime('%Y-%m',first_seen_at)=strftime('%Y-%m','now')`).first(),
-    env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions
-      WHERE classification='likely-human' AND date(first_seen_at)=date('now')`).first(),
-    env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions
-      WHERE classification='likely-human' AND date(first_seen_at)=date('now','-1 day')`).first()
-  ]);
+  const result=await env.DB.prepare(`SELECT f.session_id,MIN(f.created_at) AS confirmed_at
+    FROM funnel_events f
+    JOIN sessions s ON s.session_id=f.session_id
+    WHERE s.classification='likely-human'
+      AND f.event_type='page_confirmed'
+      AND f.created_at >= datetime('now','-65 days')
+    GROUP BY f.session_id
+    ORDER BY confirmed_at`).all();
+  const confirmed=rows(result).map(row=>({session_id:row.session_id,at:parseSqliteUtc(row.confirmed_at)})).filter(row=>row.at);
+  const now=new Date();
+  const nowMs=now.getTime();
+  const todayKey=zonedDayKey(now);
+  const yesterdayKey=shiftDayKey(todayKey,-1);
+  const monthPrefix=todayKey.slice(0,7);
+  const dailyMap=new Map();
+  for(const row of confirmed){
+    const day=zonedDayKey(row.at);
+    dailyMap.set(day,(dailyMap.get(day)||0)+1);
+  }
+  const daily=[];
+  for(let offset=-59;offset<=0;offset++){
+    const day=shiftDayKey(todayKey,offset);
+    daily.push({day,sessions:dailyMap.get(day)||0});
+  }
+  const last24=confirmed.reduce((sum,row)=>sum+(row.at.getTime()>=nowMs-86400000?1:0),0);
+  const today=dailyMap.get(todayKey)||0;
+  const yesterday=dailyMap.get(yesterdayKey)||0;
+  const monthToDate=[...dailyMap.entries()].reduce((sum,[day,count])=>sum+(day.startsWith(monthPrefix)?count:0),0);
+  const dayOfMonth=Number(todayKey.slice(8,10))||1;
+  const [year,month]=todayKey.split('-').map(Number);
+  const daysInMonth=new Date(Date.UTC(year,month,0)).getUTCDate();
+  const dailyAverageMTD=monthToDate/dayOfMonth;
+  const projectedMonth=Math.round(dailyAverageMTD*daysInMonth);
   return {
-    timezone:'UTC',
-    today:Number(todayRow?.sessions||0),
-    yesterday:Number(yesterdayRow?.sessions||0),
-    monthToDate:Number(monthRow?.sessions||0),
-    daily:rows(dailyResult).map(row=>({day:String(row.day),sessions:Number(row.sessions||0)}))
+    status:'observed',
+    metric:'browser-confirmed public sessions',
+    trafficTruth:'browser_confirmed',
+    timezone:TIME_ZONE,
+    last24,
+    today,
+    yesterday,
+    monthToDate,
+    dailyAverageMTD,
+    projectedMonth,
+    daily
   };
 }
 
@@ -104,24 +164,22 @@ function injectTrafficDashboard(html) {
   const css = `<style>
 #trafficTimeSection .trafficLive{display:inline-flex;align-items:center;gap:7px}.trafficDot{width:7px;height:7px;border-radius:999px;background:#067647;display:inline-block}.trafficBars .row{align-items:center}.trafficBars .bar{min-width:140px}.trafficTrend{font-weight:850}.trafficTrend.up{color:#067647}.trafficTrend.down{color:#b42318}
 </style>`;
-  const section = `<section class="section live" id="trafficTimeSection"><div class="sectionHead"><h2>Traffic over time</h2><span class="trafficLive"><i class="trafficDot"></i> auto-updates every 15s · UTC</span></div><div class="grid4" id="trafficTimeMetrics"></div><div class="grid2 section"><div class="panel"><div class="sectionHead"><h2>Daily visits</h2><span>Last 14 days · likely-human</span></div><div id="trafficDaily" class="trafficBars"></div></div><div class="panel"><div class="sectionHead"><h2>Momentum</h2><span>Temporal signals</span></div><div id="trafficMomentum"></div></div></div></section>`;
+  const section = `<section class="section live" id="trafficTimeSection"><div class="sectionHead"><h2>Traffic over time</h2><span class="trafficLive"><i class="trafficDot"></i> auto-updates every 15s · Europe/Lisbon</span></div><div class="grid4" id="trafficTimeMetrics"></div><div class="grid2 section"><div class="panel"><div class="sectionHead"><h2>Daily visits</h2><span>Last 14 days · browser-confirmed</span></div><div id="trafficDaily" class="trafficBars"></div></div><div class="panel"><div class="sectionHead"><h2>Momentum</h2><span>Temporal signals</span></div><div id="trafficMomentum"></div></div></div></section>`;
   const script = `<script>
 (function(){
   function fmt(v,d){return Number(v||0).toLocaleString(undefined,d?{maximumFractionDigits:d}:undefined)}
   function pctDelta(current,previous){if(!previous)return current?null:0;return (current-previous)/previous*100}
-  function isoDay(offset){var d=new Date();d.setUTCDate(d.getUTCDate()+offset);return d.toISOString().slice(0,10)}
-  function fillDays(rows,count){var map=new Map((rows||[]).map(function(x){return [x.day,Number(x.sessions||0)]}));var out=[];for(var i=-(count-1);i<=0;i++){var day=isoDay(i);out.push({day:day,sessions:map.get(day)||0})}return out}
+  function fillDays(rows,count){var source=(rows||[]).slice(-count);return source}
   function metric(label,value,meta){return '<div class="card"><small>'+label+'</small><b>'+value+'</b><span>'+meta+'</span></div>'}
   function renderTraffic(t){
     if(!t)return;
     var days60=fillDays(t.daily||[],60), days30=days60.slice(-30), days14=days60.slice(-14), last7=days60.slice(-7), prior7=days60.slice(-14,-7);
     var sum=function(a){return a.reduce(function(s,x){return s+x.sessions},0)};
     var last7Total=sum(last7), prior7Total=sum(prior7), rolling30=sum(days30), delta=pctDelta(last7Total,prior7Total);
-    var now=new Date(), dayOfMonth=now.getUTCDate(), daysInMonth=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()+1,0)).getUTCDate();
-    var dailyAvg=dayOfMonth?Number(t.monthToDate||0)/dayOfMonth:0, projection=Math.round(dailyAvg*daysInMonth);
+    var dailyAvg=Number(t.dailyAverageMTD||0), projection=Number(t.projectedMonth||0);
     var best=days30.reduce(function(a,b){return b.sessions>a.sessions?b:a},{day:'—',sessions:0});
     document.getElementById('trafficTimeMetrics').innerHTML=
-      metric('Today',fmt(t.today),'Likely-human sessions')+
+      metric('Today',fmt(t.today),'Browser-confirmed sessions')+
       metric('This month',fmt(t.monthToDate),'Month-to-date')+
       metric('Daily average',fmt(dailyAvg,1),'Current month')+
       metric('Monthly pace',fmt(projection),'Projection at current average');
@@ -130,12 +188,12 @@ function injectTrafficDashboard(html) {
     var deltaText=delta===null?'New traffic':((delta>=0?'+':'')+delta.toFixed(1)+'%');
     var deltaClass=delta===null||delta>=0?'up':'down';
     document.getElementById('trafficMomentum').innerHTML=
-      '<div class="row"><div><div class="name">Last 7 days</div><div class="meta">Likely-human sessions</div></div><div class="value">'+fmt(last7Total)+'</div></div>'+
+      '<div class="row"><div><div class="name">Last 7 days</div><div class="meta">Browser-confirmed sessions</div></div><div class="value">'+fmt(last7Total)+'</div></div>'+
       '<div class="row"><div><div class="name">Previous 7 days</div><div class="meta">Comparison window</div></div><div class="value">'+fmt(prior7Total)+'</div></div>'+
       '<div class="row"><div><div class="name">7-day change</div><div class="meta">Current vs previous seven days</div></div><div class="value trafficTrend '+deltaClass+'">'+deltaText+'</div></div>'+
-      '<div class="row"><div><div class="name">Yesterday</div><div class="meta">UTC day</div></div><div class="value">'+fmt(t.yesterday)+'</div></div>'+
+      '<div class="row"><div><div class="name">Yesterday</div><div class="meta">Europe/Lisbon day</div></div><div class="value">'+fmt(t.yesterday)+'</div></div>'+
       '<div class="row"><div><div class="name">Best day · 30d</div><div class="meta">'+best.day+'</div></div><div class="value">'+fmt(best.sessions)+'</div></div>'+
-      '<div class="row"><div><div class="name">Rolling 30 days</div><div class="meta">Clean likely-human traffic</div></div><div class="value">'+fmt(rolling30)+'</div></div>';
+      '<div class="row"><div><div class="name">Rolling 30 days</div><div class="meta">Browser-confirmed traffic</div></div><div class="value">'+fmt(rolling30)+'</div></div>';
   }
   async function refreshTraffic(){try{var res=await fetch('/api/stats?live='+Date.now(),{credentials:'same-origin',cache:'no-store'});if(res.ok){var d=await res.json();renderTraffic(d.traffic)}}catch(e){}}
   refreshTraffic();
@@ -172,9 +230,10 @@ export default {
         const [funnel,traffic]=await Promise.all([funnelSnapshot(env),trafficSnapshot(env)]);
         const counts=funnel.audience||{};
         const observedExternalSessions=Object.entries(counts).filter(([key])=>key!==SESSION_CLASSIFICATIONS.OWNER).reduce((sum,[,value])=>sum+Number(value||0),0);
-        const audience={...(stats.audience||{}),likelyHumanSessions:funnel.sessions,observedExternalSessions,knownBotCrawlerSessions:Number(counts[SESSION_CLASSIFICATIONS.KNOWN_BOT]||0),syntheticTestSessions:Number(counts[SESSION_CLASSIFICATIONS.SYNTHETIC]||0),ownerSessions:Number(counts[SESSION_CLASSIFICATIONS.OWNER]||0),unknownLegacySessions:Number(counts[SESSION_CLASSIFICATIONS.UNKNOWN]||0),otherClicks:funnel.outboundClicks,classificationNote:'Likely-human requires a plausible browser user agent. Owner, known crawler and synthetic traffic are excluded. Historical rows remain unknown/legacy and are never promoted to human.'};
+        const audience={...(stats.audience||{}),likelyHumanSessions:funnel.sessions,browserConfirmedSessions:funnel.sessions,observedExternalSessions,knownBotCrawlerSessions:Number(counts[SESSION_CLASSIFICATIONS.KNOWN_BOT]||0),syntheticTestSessions:Number(counts[SESSION_CLASSIFICATIONS.SYNTHETIC]||0),ownerSessions:Number(counts[SESSION_CLASSIFICATIONS.OWNER]||0),unknownLegacySessions:Number(counts[SESSION_CLASSIFICATIONS.UNKNOWN]||0),otherClicks:funnel.outboundClicks,trafficTruth:'browser_confirmed',classificationNote:'Headline human KPIs require a browser page_confirmed event. Plausible browser user agents without confirmation remain diagnostic traffic only.'};
         const total={...(stats.total||{}),sessions:funnel.sessions};
-        return Response.json({...stats,total,audience,funnel,traffic}, {headers:{'Cache-Control':'private, no-store','Content-Type':'application/json; charset=UTF-8'}});
+        const tracking={...(stats.tracking||{}),status:'observed',humanSessionsLast24Hours:traffic.last24,trafficTruth:'browser_confirmed',timezone:TIME_ZONE};
+        return Response.json({...stats,total,audience,funnel,traffic,tracking}, {headers:{'Cache-Control':'private, no-store','Content-Type':'application/json; charset=UTF-8'}});
       }
       catch { return Response.json({...stats, funnel:{status:'unavailable', reason:'Funnel migration is not available.'}}, {headers:{'Cache-Control':'private, no-store'}}); }
     }
