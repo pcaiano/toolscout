@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-12T22:23:51.948Z",
+  "generatedAt": "2026-09-13T01:08:19.024Z",
   "timezone": "Europe/Lisbon",
   "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
   "primaryMetric": "D1 browser-confirmed public sessions",
@@ -12,9 +12,9 @@
     "Google Search Console is the source of truth for Google Search clicks and impressions."
   ],
   "windowsUtc": {
-    "now": "2026-09-12T22:23:32.772Z",
-    "last24": "2026-09-11T22:23:32.772Z",
-    "today": "2026-09-11T23:00:00.000Z",
+    "now": "2026-09-13T01:08:01.425Z",
+    "last24": "2026-09-12T01:08:01.425Z",
+    "today": "2026-09-12T23:00:00.000Z",
     "month": "2026-08-31T23:00:00.000Z"
   },
   "cloudflareSite": {
@@ -32,8 +32,8 @@
       "sampleInterval": 1
     },
     "today": {
-      "pageViews": 4,
-      "visits": 4,
+      "pageViews": 0,
+      "visits": 0,
       "sampleInterval": 1
     },
     "monthToDate": {
@@ -86,22 +86,22 @@
     "status": "observed",
     "metric": "browser-confirmed sessions",
     "last24": 2,
-    "today": 2,
+    "today": 0,
     "monthToDate": 2,
-    "serverObservedEntries24h": 58,
-    "serverOnlyUnconfirmed24h": 56,
-    "queryRowsRead": 530,
+    "serverObservedEntries24h": 60,
+    "serverOnlyUnconfirmed24h": 58,
+    "queryRowsRead": 548,
     "queryRowsWritten": 0,
-    "queryDurationMs": 1.4782
+    "queryDurationMs": 3.6652
   },
   "googleSearchConsole": {
     "status": "observed",
-    "generatedAt": "2026-09-12T22:23:32.691Z",
-    "startDate": "2026-08-16",
-    "endDate": "2026-09-12",
+    "generatedAt": "2026-09-13T01:08:01.348Z",
+    "startDate": "2026-08-17",
+    "endDate": "2026-09-13",
     "dataState": "all",
     "clicks": 1,
-    "impressions": 2083,
+    "impressions": 2118,
     "pageCount": 79,
     "coverage": "site-wide"
   },
@@ -112,7 +112,7 @@
     "d1Confirmed24h": 2,
     "rumVisits24h": 4,
     "rumPageViews24h": 4,
-    "serverObservedEntries24h": 58,
+    "serverObservedEntries24h": 60,
     "delta": -2,
     "note": "Volume is too low for a useful percentage divergence alarm."
   },
