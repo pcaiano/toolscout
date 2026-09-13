@@ -91,6 +91,14 @@ jobs:
         run: node scripts/validate-machine-readability.mjs
       - name: Validate SEO pages
         run: node scripts/validate-seo-pages.mjs
+      - name: Capture public surface diagnostics
+        run: node scripts/validate-public-surface.mjs > reports/public-surface-validation.log 2>&1 || true
+      - name: Upload public surface diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-surface-validation
+          path: reports/public-surface-validation.log
+          retention-days: 1
       - name: Validate generated public surface
         run: node scripts/validate-public-surface.mjs
       - name: Validate commercial indexability and links
