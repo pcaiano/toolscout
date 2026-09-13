@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T01:08:01.348Z",
+  "generatedAt": "2026-09-13T06:18:02.954Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-13",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 2118,
-    "ctr": 0.0472
+    "impressions": 2156,
+    "ctr": 0.0464
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 31,
       "clicks": 0,
-      "impressions": 1356
+      "impressions": 1368
     },
     "home": {
       "pages": 2,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 35,
       "clicks": 0,
-      "impressions": 627
+      "impressions": 653
     }
   },
   "pageCount": 79,
@@ -52,21 +52,21 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 520,
+      "impressions": 526,
       "ctr": 0,
-      "position": 77.1481,
+      "position": 77.0837,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 158,
-          "position": 74.1139
+          "impressions": 160,
+          "position": 74.0375
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 99,
-          "position": 81.101
+          "impressions": 101,
+          "position": 81.0693
         },
         {
           "query": "what is the best tool for seo agency",
@@ -77,14 +77,14 @@
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 49,
-          "position": 72.2857
+          "impressions": 50,
+          "position": 72.18
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 19,
-          "position": 73.7895
+          "impressions": 20,
+          "position": 73.45
         },
         {
           "query": "best seo tools for agencies",
@@ -198,15 +198,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 204,
+      "impressions": 205,
       "ctr": 0,
-      "position": 55.3333,
+      "position": 55.3512,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 99,
-          "position": 56.7475
+          "impressions": 100,
+          "position": 56.77
         },
         {
           "query": "semrush software",
@@ -253,15 +253,15 @@
       "type": "guide",
       "intent": "best-seo-keyword-research-tools",
       "clicks": 0,
-      "impressions": 193,
+      "impressions": 195,
       "ctr": 0,
-      "position": 74.7668,
+      "position": 74.7538,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 73,
-          "position": 63.7397
+          "impressions": 75,
+          "position": 64
         },
         {
           "query": "seo search tools",
@@ -326,15 +326,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 157,
+      "impressions": 159,
       "ctr": 0,
-      "position": 73.3631,
+      "position": 73.1887,
       "topQueries": [
         {
           "query": "airtable",
           "clicks": 0,
-          "impressions": 31,
-          "position": 62.7742
+          "impressions": 33,
+          "position": 62.5758
         },
         {
           "query": "what is airtable",
@@ -472,21 +472,21 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 103,
+      "impressions": 120,
       "ctr": 0,
-      "position": 58.9417,
+      "position": 60.05,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 60,
-          "position": 59.5333
+          "impressions": 61,
+          "position": 59.6557
         },
         {
           "query": "klayvio",
           "clicks": 0,
-          "impressions": 12,
-          "position": 61.5833
+          "impressions": 13,
+          "position": 62.2308
         },
         {
           "query": "what is klaviyo",
@@ -499,6 +499,12 @@
           "clicks": 0,
           "impressions": 3,
           "position": 60.6667
+        },
+        {
+          "query": "klavyio",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 61.3333
         },
         {
           "query": "klaviy",
@@ -519,22 +525,16 @@
           "position": 60.5
         },
         {
-          "query": "klavyio",
+          "query": "klavio",
           "clicks": 0,
           "impressions": 2,
-          "position": 60.5
+          "position": 65
         },
         {
-          "query": "what does klaviyo do",
+          "query": "klaviyo inc. software",
           "clicks": 0,
           "impressions": 2,
-          "position": 69
-        },
-        {
-          "query": "klaviyo services",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 47
+          "position": 66
         }
       ]
     },
@@ -637,6 +637,61 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/moz-pro.html",
+      "pathname": "/tools/moz-pro.html",
+      "key": "moz-pro",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 52,
+      "ctr": 0,
+      "position": 69.6154,
+      "topQueries": [
+        {
+          "query": "moz pro tools",
+          "clicks": 0,
+          "impressions": 24,
+          "position": 69.4583
+        },
+        {
+          "query": "moz free trial",
+          "clicks": 0,
+          "impressions": 12,
+          "position": 67.4167
+        },
+        {
+          "query": "moz pro overview",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 72.5
+        },
+        {
+          "query": "what is moz pro",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 66.3333
+        },
+        {
+          "query": "moz pro free trial",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 61
+        },
+        {
+          "query": "moz pro trial",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 66
+        },
+        {
+          "query": "what are moz pro social visits",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 93
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-crm-for-sales-teams.html",
       "pathname": "/best-crm-for-sales-teams.html",
       "key": "best-crm-for-sales-teams",
@@ -698,70 +753,15 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tools/moz-pro.html",
-      "pathname": "/tools/moz-pro.html",
-      "key": "moz-pro",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 50,
-      "ctr": 0,
-      "position": 69.54,
-      "topQueries": [
-        {
-          "query": "moz pro tools",
-          "clicks": 0,
-          "impressions": 24,
-          "position": 69.4583
-        },
-        {
-          "query": "moz free trial",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 67.3636
-        },
-        {
-          "query": "moz pro overview",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 72.2222
-        },
-        {
-          "query": "what is moz pro",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 66.3333
-        },
-        {
-          "query": "moz pro free trial",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 61
-        },
-        {
-          "query": "moz pro trial",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 66
-        },
-        {
-          "query": "what are moz pro social visits",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 93
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/best-free-project-management-tools.html",
       "pathname": "/best-free-project-management-tools.html",
       "key": "best-free-project-management-tools",
       "type": "guide",
       "intent": "best-free-project-management-tools",
       "clicks": 0,
-      "impressions": 46,
+      "impressions": 47,
       "ctr": 0,
-      "position": 55.2391,
+      "position": 55.383,
       "topQueries": [
         {
           "query": "free online project manager tools",
@@ -832,15 +832,15 @@
       "type": "guide",
       "intent": "best-free-crm",
       "clicks": 0,
-      "impressions": 41,
+      "impressions": 42,
       "ctr": 0,
-      "position": 73.0488,
+      "position": 73.0952,
       "topQueries": [
         {
           "query": "best free crm tools",
           "clicks": 0,
-          "impressions": 10,
-          "position": 65.3
+          "impressions": 11,
+          "position": 66.1818
         },
         {
           "query": "crm free tools",
@@ -893,15 +893,15 @@
       "type": "guide",
       "intent": "best-keyword-research-tools",
       "clicks": 0,
-      "impressions": 39,
+      "impressions": 41,
       "ctr": 0,
-      "position": 74.0256,
+      "position": 74.3171,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 34,
-          "position": 75.7059
+          "impressions": 36,
+          "position": 75.9444
         },
         {
           "query": "keyword discovery tools",
@@ -1029,6 +1029,55 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/netlify.html",
+      "pathname": "/tools/netlify.html",
+      "key": "netlify",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 9,
+      "ctr": 0,
+      "position": 55.7778,
+      "topQueries": [
+        {
+          "query": "what is netlify",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 70
+        },
+        {
+          "query": "netlify",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 58
+        },
+        {
+          "query": "netlify free",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 71
+        },
+        {
+          "query": "netlify plans",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 72
+        },
+        {
+          "query": "is netlify app free",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 74
+        },
+        {
+          "query": "is netlify cms free",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 74
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/mixpanel.html",
       "pathname": "/tools/mixpanel.html",
       "key": "mixpanel",
@@ -1122,6 +1171,43 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/gorgias.html",
+      "pathname": "/tools/gorgias.html",
+      "key": "gorgias",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 7,
+      "ctr": 0,
+      "position": 61.7143,
+      "topQueries": [
+        {
+          "query": "gorgias",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 62
+        },
+        {
+          "query": "gotgias",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 57
+        },
+        {
+          "query": "gorgias.",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 65
+        },
+        {
+          "query": "what is gorgias",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 65
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/make.html",
       "pathname": "/tools/make.html",
       "key": "make",
@@ -1132,43 +1218,6 @@
       "ctr": 0,
       "position": 5.7143,
       "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/tools/netlify.html",
-      "pathname": "/tools/netlify.html",
-      "key": "netlify",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 7,
-      "ctr": 0,
-      "position": 51.2857,
-      "topQueries": [
-        {
-          "query": "what is netlify",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 70
-        },
-        {
-          "query": "netlify",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 58
-        },
-        {
-          "query": "is netlify app free",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 74
-        },
-        {
-          "query": "is netlify cms free",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 74
-        }
-      ]
     },
     {
       "page": "https://trytoolscout.org/tools/surfer.html",
@@ -1256,37 +1305,6 @@
       "ctr": 0,
       "position": 4.2,
       "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/tools/gorgias.html",
-      "pathname": "/tools/gorgias.html",
-      "key": "gorgias",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 5,
-      "ctr": 0,
-      "position": 61.4,
-      "topQueries": [
-        {
-          "query": "gorgias",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 63
-        },
-        {
-          "query": "gotgias",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 57
-        },
-        {
-          "query": "what is gorgias",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 65
-        }
-      ]
     },
     {
       "page": "https://trytoolscout.org/best-all-in-one-business-tools",
@@ -2061,21 +2079,21 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 520,
+      "impressions": 526,
       "ctr": 0,
-      "position": 77.1481,
+      "position": 77.0837,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 158,
-          "position": 74.1139
+          "impressions": 160,
+          "position": 74.0375
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 99,
-          "position": 81.101
+          "impressions": 101,
+          "position": 81.0693
         },
         {
           "query": "what is the best tool for seo agency",
@@ -2086,14 +2104,14 @@
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 49,
-          "position": 72.2857
+          "impressions": 50,
+          "position": 72.18
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 19,
-          "position": 73.7895
+          "impressions": 20,
+          "position": 73.45
         },
         {
           "query": "best seo tools for agencies",
@@ -2201,15 +2219,15 @@
       "intent": "best-seo-keyword-research-tools",
       "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 193,
+      "impressions": 195,
       "ctr": 0,
-      "position": 74.7668,
+      "position": 74.7538,
       "topQueries": [
         {
           "query": "website research tool",
           "clicks": 0,
-          "impressions": 73,
-          "position": 63.7397
+          "impressions": 75,
+          "position": 64
         },
         {
           "query": "seo search tools",
@@ -2469,9 +2487,9 @@
       "intent": "best-free-project-management-tools",
       "page": "https://trytoolscout.org/best-free-project-management-tools.html",
       "clicks": 0,
-      "impressions": 46,
+      "impressions": 47,
       "ctr": 0,
-      "position": 55.2391,
+      "position": 55.383,
       "topQueries": [
         {
           "query": "free online project manager tools",
@@ -2539,15 +2557,15 @@
       "intent": "best-free-crm",
       "page": "https://trytoolscout.org/best-free-crm.html",
       "clicks": 0,
-      "impressions": 41,
+      "impressions": 42,
       "ctr": 0,
-      "position": 73.0488,
+      "position": 73.0952,
       "topQueries": [
         {
           "query": "best free crm tools",
           "clicks": 0,
-          "impressions": 10,
-          "position": 65.3
+          "impressions": 11,
+          "position": 66.1818
         },
         {
           "query": "crm free tools",
@@ -2597,15 +2615,15 @@
       "intent": "best-keyword-research-tools",
       "page": "https://trytoolscout.org/best-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 39,
+      "impressions": 41,
       "ctr": 0,
-      "position": 74.0256,
+      "position": 74.3171,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 34,
-          "position": 75.7059
+          "impressions": 36,
+          "position": 75.9444
         },
         {
           "query": "keyword discovery tools",
