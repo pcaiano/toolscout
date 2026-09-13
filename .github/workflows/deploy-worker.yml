@@ -1,3 +1,4 @@
+# Deploys the Worker and current static assets from main.
 name: Deploy ToolScout Worker
 
 on:
