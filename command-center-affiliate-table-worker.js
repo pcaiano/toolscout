@@ -116,6 +116,8 @@ async function decoratePage(response){
   const type=response.headers.get('Content-Type')||'';
   if(!response.ok||!type.includes('text/html'))return response;
   let html=await response.text();
+  html=html.replaceAll('Likely-human','Browser-confirmed').replaceAll('likely-human','browser-confirmed');
+  html=html.replace('<div class="widgetMeta">Human only</div>','<div class="widgetMeta">Browser-confirmed</div>');
   if(!html.includes('data-widget="affiliate-status"')){
     const anchor='<section class="widget" data-widget="distribution"';
     html=html.replace(anchor,affiliateWidget()+'\n\n    '+anchor);
