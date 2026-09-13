@@ -58,6 +58,7 @@ function hasVendorTracking(rawUrl,slug){
     if(slug==='kit'&&host==='partners.kit.com'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='gorgias'&&host==='partner.gorgias.com'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='lemlist'&&host==='get.lemlist.com'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
+    if(slug==='instantly'&&host==='refer.instantly.ai'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='zoho-crm'&&host==='go.zoho.com'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='mailerlite'&&host==='mailerlite.com'&&Boolean(url.searchParams.get('linkId'))&&Boolean(url.searchParams.get('sourceId'))&&Boolean(url.searchParams.get('tenantId')))return true;
     return false;
