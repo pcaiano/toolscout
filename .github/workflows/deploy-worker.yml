@@ -34,6 +34,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Validate ToolScout copy guard
+        run: node scripts/check-distribution-copy.mjs
+
       - name: Apply canonical public navigation
         run: node scripts/unify-public-nav.mjs
 
