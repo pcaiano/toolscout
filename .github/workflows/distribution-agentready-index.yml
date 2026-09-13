@@ -1,0 +1,49 @@
+name: Distribution AgentReady Index
+
+on:
+  push:
+    paths:
+      - '.github/workflows/distribution-agentready-index.yml'
+  schedule:
+    - cron: '35 5 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Refresh ToolScout in AgentReady
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --max-time 90 \
+            -X POST 'https://www.agentready.it.com/api/mcp' \
+            -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"refresh_site","arguments":{"domain":"trytoolscout.org"}}}' \
+            -o /tmp/agentready.json
+          cat /tmp/agentready.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const body=JSON.parse(fs.readFileSync('/tmp/agentready.json','utf8'));
+          if(body?.error) throw new Error(`AgentReady JSON-RPC error: ${JSON.stringify(body.error)}`);
+          if(!body?.result) throw new Error(`AgentReady returned no result: ${JSON.stringify(body)}`);
+          console.log('AgentReady accepted ToolScout refresh/index request.');
+          NODE
+
+      - name: Record verified automatic surface in Distribution Engine
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "INSERT INTO distribution_opportunities(surface_slug,surface_name,surface_type,audience_fit,authority,traffic_potential,backlink_value,acceptance_probability,automation_potential,effort_cost,distribution_score,status,action_url,live_url,human_required,last_checked_at,next_action,created_at,updated_at) VALUES('agentready-index','AgentReady','agent_discovery_index_api',94,72,76,70,99,100,5,88,'verified','https://www.agentready.it.com/api/mcp','https://www.agentready.it.com/directory',0,datetime('now'),'Automatically refresh weekly within the free quota and monitor machine-discovery value.',datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET status='verified',action_url=excluded.action_url,live_url=excluded.live_url,human_required=0,last_checked_at=datetime('now'),next_action=excluded.next_action,updated_at=datetime('now'); INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,source_url,destination_url,detail,observed_at,created_at) VALUES('agentready_'||lower(hex(randomblob(16))),'agentready-index','automatic_index_refresh','completed','product','https://trytoolscout.org/','https://www.agentready.it.com/directory','AgentReady accepted an automatic ToolScout index refresh through its public no-auth MCP endpoint.',datetime('now'),datetime('now'));"
+
+      - name: AgentReady indexing proof
+        run: echo 'ToolScout was accepted for automatic AgentReady indexing and the verified surface was persisted in Distribution Engine state.'
