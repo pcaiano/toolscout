@@ -47,6 +47,8 @@ jobs:
         run: node scripts/build-growth-priority.mjs
       - name: Build organic growth opportunities
         run: node scripts/build-organic-growth-opportunities.mjs
+      - name: Run closed-loop organic growth controller
+        run: node scripts/run-organic-growth-controller.mjs
       - name: Build cross-channel content intelligence
         run: node scripts/build-content-intelligence.mjs
       - name: Generate pages
@@ -67,6 +69,8 @@ jobs:
         run: node scripts/link-static-tool-profiles.mjs
       - name: Link guides to relevant comparisons
         run: node scripts/enrich-guide-comparisons.mjs
+      - name: Apply closed-loop organic growth actions
+        run: node scripts/apply-organic-growth-actions.mjs
       - name: Generate blog topics
         run: node scripts/build-blog-topics.mjs
       - name: Generate blog
