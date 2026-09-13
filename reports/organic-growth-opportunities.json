@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-13T10:07:59.523Z",
+  "generatedAt": "2026-09-13T12:15:28.003Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v5",
   "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 2207,
-    "ctr": 0.0453,
+    "searchImpressions": 2215,
+    "ctr": 0.0451,
     "gscStartDate": "2026-08-17",
     "gscEndDate": "2026-09-13",
     "gscDataState": "all",
@@ -26,7 +26,7 @@
     "observedGscIntents": 31,
     "observedGscPages": 79,
     "searchClicks": 1,
-    "searchImpressions": 2207,
+    "searchImpressions": 2215,
     "organicAcquisitionStatus": "early-search-acquisition",
     "actionableOpportunities": 21,
     "firstPageOpportunities": 10,
@@ -35,7 +35,7 @@
     "strikingDistanceOpportunities": 0,
     "strikingMeaningful": 0,
     "strikingLowSample": 0,
-    "authorityDepthOpportunities": 8,
+    "authorityDepthOpportunities": 7,
     "competitorResearchCandidates": 5
   },
   "opportunities": [
@@ -72,10 +72,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 533,
+        "impressions": 535,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.0694,
+        "position": 77.0355,
         "opportunity": "relevance-gap",
         "opportunityScore": 27,
         "meaningfulSample": true,
@@ -90,7 +90,7 @@
     },
     {
       "intent": "best-project-management-tools",
-      "priorityScore": 52,
+      "priorityScore": 46,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -121,12 +121,12 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 65,
+        "impressions": 67,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.9231,
+        "position": 40.0448,
         "opportunity": "authority-gap",
-        "opportunityScore": 28,
+        "opportunityScore": 22,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -135,55 +135,6 @@
         "asana",
         "wrike",
         "basecamp"
-      ]
-    },
-    {
-      "intent": "best-no-code-automation-tools",
-      "priorityScore": 47,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 228,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 73.7018,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 23,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "topTools": [
-        "integrately",
-        "n8n",
-        "make"
       ]
     },
     {
@@ -268,10 +219,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 126,
+        "impressions": 127,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.0397,
+        "position": 77.1024,
         "opportunity": "relevance-gap",
         "opportunityScore": 21,
         "meaningfulSample": true,
@@ -899,6 +850,50 @@
       ]
     },
     {
+      "intent": "best-no-code-automation-tools",
+      "priorityScore": 43,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 228,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 73.7018,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 23,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "topTools": [
+        "n8n"
+      ]
+    },
+    {
       "intent": "best-video-content-tools",
       "priorityScore": 25,
       "lane": "editorial-safety",
@@ -1293,7 +1288,7 @@
     },
     {
       "intent": "best-customer-support-tools",
-      "priorityScore": 51,
+      "priorityScore": 49,
       "lane": "measure",
       "action": "measure-and-recheck",
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
@@ -1601,7 +1596,7 @@
     },
     {
       "intent": "best-social-media-management-tools",
-      "priorityScore": 21,
+      "priorityScore": 20,
       "lane": "measure",
       "action": "measure-and-recheck",
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
@@ -2315,15 +2310,15 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 533,
+      "impressions": 535,
       "ctr": 0,
-      "position": 77.0694,
+      "position": 77.0355,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 161,
-          "position": 73.9876
+          "impressions": 162,
+          "position": 73.9506
         },
         {
           "query": "seo tools for agency",
@@ -2340,8 +2335,8 @@
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 50,
-          "position": 72.18
+          "impressions": 51,
+          "position": 72.098
         },
         {
           "query": "seo tools for agencies",
@@ -2353,7 +2348,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 6.916,
+      "opportunityScore": 6.945,
       "outcome": "visibility-only"
     },
     {
@@ -2587,13 +2582,59 @@
       "outcome": "visibility-only"
     },
     {
+      "page": "https://trytoolscout.org/best-project-management-tools.html",
+      "pathname": "/best-project-management-tools.html",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 67,
+      "ctr": 0,
+      "position": 40.0448,
+      "topQueries": [
+        {
+          "query": "project automation tools",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 44.5294
+        },
+        {
+          "query": "project workflow tools",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 41.8182
+        },
+        {
+          "query": "project management workflow tools",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 32.7
+        },
+        {
+          "query": "automated project management tools",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 35.7
+        },
+        {
+          "query": "best project management tool to manage workflow",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 48
+        }
+      ],
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 1.673,
+      "outcome": "visibility-only"
+    },
+    {
       "page": "https://trytoolscout.org/best-funnel-builder.html",
       "pathname": "/best-funnel-builder.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 126,
+      "impressions": 127,
       "ctr": 0,
-      "position": 77.0397,
+      "position": 77.1024,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -2610,8 +2651,8 @@
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 28,
-          "position": 85.6786
+          "impressions": 29,
+          "position": 85.6552
         },
         {
           "query": "best sales funnel builder",
@@ -2629,53 +2670,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.636,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-project-management-tools.html",
-      "pathname": "/best-project-management-tools.html",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 65,
-      "ctr": 0,
-      "position": 39.9231,
-      "topQueries": [
-        {
-          "query": "project automation tools",
-          "clicks": 0,
-          "impressions": 17,
-          "position": 44.5294
-        },
-        {
-          "query": "project management workflow tools",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 32.7
-        },
-        {
-          "query": "automated project management tools",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 35.7
-        },
-        {
-          "query": "project workflow tools",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 42.3
-        },
-        {
-          "query": "best project management tool to manage workflow",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 48
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.628,
+      "opportunityScore": 1.647,
       "outcome": "visibility-only"
     },
     {
@@ -2729,9 +2724,9 @@
       "pathname": "/tools/moz-pro.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 53,
+      "impressions": 55,
       "ctr": 0,
-      "position": 69.5094,
+      "position": 69.4,
       "topQueries": [
         {
           "query": "moz pro tools",
@@ -2742,8 +2737,8 @@
         {
           "query": "moz free trial",
           "clicks": 0,
-          "impressions": 12,
-          "position": 67.4167
+          "impressions": 14,
+          "position": 67.2857
         },
         {
           "query": "moz pro overview",
@@ -2767,7 +2762,53 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.762,
+      "opportunityScore": 0.793,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/tally.html",
+      "pathname": "/tools/tally.html",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 27,
+      "ctr": 0,
+      "position": 40.1481,
+      "topQueries": [
+        {
+          "query": "tally software",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 39.8
+        },
+        {
+          "query": "tally",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 44.5
+        },
+        {
+          "query": "tallykey",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 15.5
+        },
+        {
+          "query": "what is tally",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 38.3333
+        },
+        {
+          "query": "tally program",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 31
+        }
+      ],
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 0.673,
       "outcome": "visibility-only"
     },
     {
@@ -2815,52 +2856,6 @@
       "evidenceConfidence": "meaningful",
       "opportunityScore": 0.662,
       "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/tally.html",
-      "pathname": "/tools/tally.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 26,
-      "ctr": 0,
-      "position": 39.9615,
-      "topQueries": [
-        {
-          "query": "tally software",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 39.8
-        },
-        {
-          "query": "tally",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 44.4
-        },
-        {
-          "query": "tallykey",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 15.5
-        },
-        {
-          "query": "what is tally",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 38.3333
-        },
-        {
-          "query": "tally program",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 31
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.651,
-      "outcome": "visibility-only"
     }
   ],
   "autonomousActionQueue": [
@@ -2893,34 +2888,7 @@
     },
     {
       "intent": "best-project-management-tools",
-      "priorityScore": 52,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-no-code-automation-tools",
-      "priorityScore": 47,
+      "priorityScore": 46,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "ownerActionRequired": false,
@@ -3331,6 +3299,30 @@
       ]
     },
     {
+      "intent": "best-no-code-automation-tools",
+      "priorityScore": 43,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
       "intent": "best-video-content-tools",
       "priorityScore": 25,
       "lane": "editorial-safety",
@@ -3580,7 +3572,7 @@
     },
     {
       "intent": "best-customer-support-tools",
-      "priorityScore": 51,
+      "priorityScore": 49,
       "lane": "measure",
       "action": "measure-and-recheck",
       "ownerActionRequired": false,
@@ -3756,7 +3748,7 @@
     },
     {
       "intent": "best-social-media-management-tools",
-      "priorityScore": 21,
+      "priorityScore": 20,
       "lane": "measure",
       "action": "measure-and-recheck",
       "ownerActionRequired": false,

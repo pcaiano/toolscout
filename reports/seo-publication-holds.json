@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-13T10:08:00.363Z",
-  "count": 3,
+  "generatedAt": "2026-09-13T12:15:28.469Z",
+  "count": 4,
   "rule": "Fail closed per page. A blocked intent is removed from the public indexable surface while safe intents continue through the autonomous SEO pipeline.",
   "items": [
     {
@@ -25,6 +25,27 @@
         "ai",
         "artificial intelligence",
         "generative ai"
+      ],
+      "reason": "Insufficient verified category, capability, hard-constraint and semantic coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
+      "action": "research-catalog-coverage-and-recheck"
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "title": "Best No-Code Automation Tools",
+      "category": "automation",
+      "allowedCategories": [
+        "automation"
+      ],
+      "eligibleToolCount": 1,
+      "minimumEligibleTools": 2,
+      "eligibleTools": [
+        "n8n"
+      ],
+      "requiredCapabilities": [
+        "no code",
+        "no-code",
+        "visual automation",
+        "workflow builder"
       ],
       "reason": "Insufficient verified category, capability, hard-constraint and semantic coverage. Publication withheld automatically rather than filling the ranking with weak recommendations.",
       "action": "research-catalog-coverage-and-recheck"

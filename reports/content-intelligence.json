@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T10:07:59.668Z",
+  "generatedAt": "2026-09-13T12:15:28.119Z",
   "engine": "ToolScout Content Intelligence v1.2",
   "objective": "Choose and test content opportunities using observed search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -20,7 +20,7 @@
       "observedGscIntents": 31,
       "observedGscPages": 79,
       "searchClicks": 1,
-      "searchImpressions": 2207,
+      "searchImpressions": 2215,
       "organicAcquisitionStatus": "early-search-acquisition",
       "actionableOpportunities": 21,
       "firstPageOpportunities": 10,
@@ -29,7 +29,7 @@
       "strikingDistanceOpportunities": 0,
       "strikingMeaningful": 0,
       "strikingLowSample": 0,
-      "authorityDepthOpportunities": 8,
+      "authorityDepthOpportunities": 7,
       "competitorResearchCandidates": 5
     },
     "topOpportunities": [
@@ -39,26 +39,12 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 533,
-        "position": 77.0694,
+        "impressions": 535,
+        "position": 77.0355,
         "topTools": [
           "semrush",
           "ahrefs",
           "surfer"
-        ]
-      },
-      {
-        "intent": "best-no-code-automation-tools",
-        "priorityScore": 47,
-        "lane": "seo-authority-depth",
-        "action": "deepen-existing",
-        "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 228,
-        "position": 73.7018,
-        "topTools": [
-          "integrately",
-          "n8n",
-          "make"
         ]
       },
       {
@@ -67,8 +53,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 126,
-        "position": 77.0397,
+        "impressions": 127,
+        "position": 77.1024,
         "topTools": [
           "getresponse",
           "systeme-io"
@@ -76,12 +62,12 @@
       },
       {
         "intent": "best-project-management-tools",
-        "priorityScore": 52,
+        "priorityScore": 46,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 65,
-        "position": 39.9231,
+        "impressions": 67,
+        "position": 40.0448,
         "topTools": [
           "asana",
           "wrike",
@@ -142,6 +128,18 @@
           "surfer",
           "ahrefs",
           "moz-pro"
+        ]
+      },
+      {
+        "intent": "best-no-code-automation-tools",
+        "priorityScore": 43,
+        "lane": "editorial-safety",
+        "action": "hold-publication-and-research-catalog",
+        "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
+        "impressions": 228,
+        "position": 73.7018,
+        "topTools": [
+          "n8n"
         ]
       }
     ]
@@ -421,10 +419,10 @@
   "recommendedInputs": {
     "topicCandidates": [
       "best-seo-tools-for-agencies",
-      "best-no-code-automation-tools",
       "best-funnel-builder",
       "best-project-management-tools",
-      "best-crm-for-sales-teams"
+      "best-crm-for-sales-teams",
+      "best-free-project-management-tools"
     ],
     "testEligible": true,
     "allocationChangeEligible": false,

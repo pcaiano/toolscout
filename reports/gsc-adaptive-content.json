@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-09-13T10:08:00.523Z",
-  "gscGeneratedAt": "2026-09-13T10:07:55.840Z",
+  "generatedAt": "2026-09-13T12:15:28.579Z",
+  "gscGeneratedAt": "2026-09-13T12:15:25.035Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
-  "adaptiveApplied": 7,
+  "adaptiveApplied": 6,
   "protectedLowSample": 7,
   "items": [
     {
@@ -113,39 +113,24 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 533,
+      "impressions": 535,
       "clicks": 0,
-      "position": 77.0694,
+      "position": 77.0355,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best seo tool for agencies",
-        "impressions": 50,
-        "position": 72.18,
-        "alignment": 1
-      },
-      "action": "deepen-weak-ranking"
-    },
-    {
-      "intent": "best-no-code-automation-tools",
-      "impressions": 228,
-      "clicks": 0,
-      "position": 73.7018,
-      "meaningfulSample": true,
-      "lowSampleFirstPage": false,
-      "dominantQuery": {
-        "query": "no code automation tools",
-        "impressions": 41,
-        "position": 71.4878,
+        "impressions": 51,
+        "position": 72.098,
         "alignment": 1
       },
       "action": "deepen-weak-ranking"
     },
     {
       "intent": "best-funnel-builder",
-      "impressions": 126,
+      "impressions": 127,
       "clicks": 0,
-      "position": 77.0397,
+      "position": 77.1024,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -188,9 +173,9 @@
     },
     {
       "intent": "best-project-management-tools",
-      "impressions": 65,
+      "impressions": 67,
       "clicks": 0,
-      "position": 39.9231,
+      "position": 40.0448,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {

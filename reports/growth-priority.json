@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T10:07:59.441Z",
+  "generatedAt": "2026-09-13T12:15:27.939Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 1,
-      "impressions": 2207,
-      "ctr": 0.0453
+      "impressions": 2215,
+      "ctr": 0.0451
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -38,10 +38,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 533,
+        "impressions": 535,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.0694,
+        "position": 77.0355,
         "opportunity": "relevance-gap",
         "opportunityScore": 27,
         "meaningfulSample": true,
@@ -70,21 +70,21 @@
       "intent": "best-project-management-tools",
       "title": "Best Project Management Tools",
       "category": "business",
-      "priorityScore": 52,
+      "priorityScore": 46,
       "topFit": 8.36,
-      "eligibleToolCount": 8,
+      "eligibleToolCount": 7,
       "minimumEligibleTools": 2,
-      "catalogDepth": 16,
+      "catalogDepth": 14,
       "commercialSignal": 20,
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 65,
+        "impressions": 67,
         "clicks": 0,
         "ctr": 0,
-        "position": 39.9231,
+        "position": 40.0448,
         "opportunity": "authority-gap",
-        "opportunityScore": 28,
+        "opportunityScore": 22,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
@@ -102,45 +102,6 @@
         "task management",
         "projects",
         "project"
-      ],
-      "editorialEligibility": "eligible",
-      "action": "repair-existing"
-    },
-    {
-      "intent": "best-no-code-automation-tools",
-      "title": "Best No-Code Automation Tools",
-      "category": "automation",
-      "priorityScore": 47,
-      "topFit": 9.29,
-      "eligibleToolCount": 3,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 6,
-      "commercialSignal": 20,
-      "affiliateSignal": 5,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 228,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 73.7018,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 23,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "signalBasis": "observed-gsc-meaningful",
-      "monetizationReadiness": "monetizable",
-      "topTools": [
-        "integrately",
-        "n8n",
-        "make"
-      ],
-      "requiredCapabilities": [
-        "no code",
-        "no-code",
-        "visual automation",
-        "workflow builder"
       ],
       "editorialEligibility": "eligible",
       "action": "repair-existing"
@@ -192,10 +153,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 126,
+        "impressions": 127,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.0397,
+        "position": 77.1024,
         "opportunity": "relevance-gap",
         "opportunityScore": 21,
         "meaningfulSample": true,
@@ -221,9 +182,9 @@
       "category": "business",
       "priorityScore": 43,
       "topFit": 9.13,
-      "eligibleToolCount": 5,
+      "eligibleToolCount": 4,
       "minimumEligibleTools": 2,
-      "catalogDepth": 10,
+      "catalogDepth": 8,
       "commercialSignal": 20,
       "affiliateSignal": 0,
       "searchSignal": {
@@ -831,6 +792,43 @@
       "action": "build-next"
     },
     {
+      "intent": "best-no-code-automation-tools",
+      "title": "Best No-Code Automation Tools",
+      "category": "automation",
+      "priorityScore": 43,
+      "topFit": 9.32,
+      "eligibleToolCount": 1,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 2,
+      "commercialSignal": 20,
+      "affiliateSignal": 0,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 228,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 73.7018,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 23,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "signalBasis": "observed-gsc-meaningful",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "n8n"
+      ],
+      "requiredCapabilities": [
+        "no code",
+        "no-code",
+        "visual automation",
+        "workflow builder"
+      ],
+      "editorialEligibility": "blocked-insufficient-semantic-coverage",
+      "action": "catalog-gap"
+    },
+    {
       "intent": "best-video-content-tools",
       "title": "Best Video Content Tools",
       "category": "content",
@@ -1043,11 +1041,11 @@
       "intent": "best-customer-support-tools",
       "title": "Best Customer Support Tools",
       "category": "support",
-      "priorityScore": 51,
+      "priorityScore": 49,
       "topFit": 9.51,
-      "eligibleToolCount": 5,
+      "eligibleToolCount": 4,
       "minimumEligibleTools": 2,
-      "catalogDepth": 10,
+      "catalogDepth": 8,
       "commercialSignal": 8,
       "affiliateSignal": 10,
       "searchSignal": null,
@@ -1314,11 +1312,11 @@
       "intent": "best-social-media-management-tools",
       "title": "Best Social Media Management Tools",
       "category": "social",
-      "priorityScore": 21,
+      "priorityScore": 20,
       "topFit": 9.11,
-      "eligibleToolCount": 5,
+      "eligibleToolCount": 4,
       "minimumEligibleTools": 2,
-      "catalogDepth": 10,
+      "catalogDepth": 8,
       "commercialSignal": 8,
       "affiliateSignal": 0,
       "searchSignal": {

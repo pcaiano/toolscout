@@ -1,0 +1,375 @@
+{
+  "version": 1,
+  "editions": [
+    {
+      "version": 1,
+      "edition": "2026-09",
+      "editionLabel": "September 2026",
+      "publishedAt": "2026-09-13T12:15:29.334Z",
+      "scope": "ToolScout first-party observations. This is not a measure of global market share, vendor revenue or industry-wide popularity.",
+      "methodology": {
+        "catalog": "Named tools are included only when their ToolScout factual record is within 45 days, their official HTTPS source is currently healthy, and that source was checked within 10 days.",
+        "search": "Search-demand figures come from the Google Search Console Search Analytics data already ingested by ToolScout. Impressions are visibility, not visits or market demand estimates.",
+        "shortlist": "Shortlist frequency counts appearances in current ToolScout guide shortlists after category, structured capability, hard attribute, relevance and trust gates. It is an editorial coverage measure, not user popularity.",
+        "independence": "Affiliate status, commission and payout do not increase editorial eligibility, shortlist frequency or ranking."
+      },
+      "sourceState": {
+        "catalogRecords": 101,
+        "verifiedCurrentTools": 92,
+        "excludedFromNamedAnalysis": 9,
+        "categoriesRepresented": 17,
+        "freePlanRecorded": 60,
+        "gscAvailable": true,
+        "gscSource": "Google Search Console Search Analytics API"
+      },
+      "searchVisibility": {
+        "clicks": 1,
+        "impressions": 2215,
+        "ctr": 0.0451,
+        "intentsWithSignals": 31
+      },
+      "observedDemand": [
+        {
+          "intent": "best-seo-tools-for-agencies",
+          "title": "Best SEO Tools for Agencies",
+          "url": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
+          "impressions": 535,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 77.0355,
+          "evidenceConfidence": "meaningful"
+        },
+        {
+          "intent": "best-funnel-builder",
+          "title": "Best Funnel Builder",
+          "url": "https://trytoolscout.org/best-funnel-builder.html",
+          "impressions": 127,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 77.1024,
+          "evidenceConfidence": "meaningful"
+        },
+        {
+          "intent": "best-project-management-tools",
+          "title": "Best Project Management Tools",
+          "url": "https://trytoolscout.org/best-project-management-tools.html",
+          "impressions": 67,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 40.0448,
+          "evidenceConfidence": "meaningful"
+        },
+        {
+          "intent": "best-crm-for-sales-teams",
+          "title": "Best CRM for Sales Teams",
+          "url": "https://trytoolscout.org/best-crm-for-sales-teams.html",
+          "impressions": 50,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 75.52,
+          "evidenceConfidence": "meaningful"
+        },
+        {
+          "intent": "best-free-project-management-tools",
+          "title": "Best Free Project Management Tools",
+          "url": "https://trytoolscout.org/best-free-project-management-tools.html",
+          "impressions": 47,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 55.383,
+          "evidenceConfidence": "meaningful"
+        },
+        {
+          "intent": "best-free-crm",
+          "title": "Best Free CRM Tools",
+          "url": "https://trytoolscout.org/best-free-crm.html",
+          "impressions": 42,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 73.0952,
+          "evidenceConfidence": "meaningful"
+        },
+        {
+          "intent": "best-keyword-research-tools",
+          "title": "Best Keyword Research Tools",
+          "url": "https://trytoolscout.org/best-keyword-research-tools.html",
+          "impressions": 42,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 74.3095,
+          "evidenceConfidence": "meaningful"
+        },
+        {
+          "intent": "best-forms-for-small-business",
+          "title": "Best Forms for Small Business",
+          "url": "https://trytoolscout.org/best-forms-for-small-business.html",
+          "impressions": 4,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 4.5,
+          "evidenceConfidence": "low"
+        },
+        {
+          "intent": "best-product-analytics-tools",
+          "title": "Best Product Analytics Tools",
+          "url": "https://trytoolscout.org/best-product-analytics-tools.html",
+          "impressions": 4,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 20.25,
+          "evidenceConfidence": "low"
+        },
+        {
+          "intent": "best-productivity-tools-for-teams",
+          "title": "Best Productivity Tools for Teams",
+          "url": "https://trytoolscout.org/best-productivity-tools-for-teams.html",
+          "impressions": 4,
+          "clicks": 0,
+          "ctr": 0,
+          "position": 38,
+          "evidenceConfidence": "low"
+        }
+      ],
+      "categoryCoverage": [
+        {
+          "category": "business",
+          "count": 13
+        },
+        {
+          "category": "marketing",
+          "count": 11
+        },
+        {
+          "category": "crm",
+          "count": 9
+        },
+        {
+          "category": "developer",
+          "count": 7
+        },
+        {
+          "category": "seo",
+          "count": 7
+        },
+        {
+          "category": "analytics",
+          "count": 6
+        },
+        {
+          "category": "support",
+          "count": 6
+        },
+        {
+          "category": "automation",
+          "count": 5
+        },
+        {
+          "category": "forms",
+          "count": 5
+        },
+        {
+          "category": "social",
+          "count": 5
+        },
+        {
+          "category": "website",
+          "count": 5
+        },
+        {
+          "category": "ai-writing",
+          "count": 3
+        },
+        {
+          "category": "ecommerce",
+          "count": 3
+        },
+        {
+          "category": "sales",
+          "count": 3
+        },
+        {
+          "category": "design",
+          "count": 2
+        },
+        {
+          "category": "ai-research",
+          "count": 1
+        },
+        {
+          "category": "content",
+          "count": 1
+        }
+      ],
+      "shortlistLeaders": [
+        {
+          "slug": "asana",
+          "name": "Asana",
+          "category": "business",
+          "guideAppearances": 4,
+          "eligibleGuides": [
+            "best-free-project-management-tools",
+            "best-productivity-tools-for-teams",
+            "best-project-management-tools",
+            "best-tools-for-agencies"
+          ],
+          "sourceUrl": "https://asana.com/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "close",
+          "name": "Close",
+          "category": "crm",
+          "guideAppearances": 4,
+          "eligibleGuides": [
+            "best-crm-for-consultants",
+            "best-crm-for-real-estate",
+            "best-crm-for-sales-teams",
+            "best-crm-with-automation"
+          ],
+          "sourceUrl": "https://www.close.com/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "freshsales",
+          "name": "Freshsales",
+          "category": "crm",
+          "guideAppearances": 4,
+          "eligibleGuides": [
+            "best-affordable-crm",
+            "best-crm-for-sales-teams",
+            "best-crm-for-small-business",
+            "best-free-crm"
+          ],
+          "sourceUrl": "https://www.freshworks.com/crm/sales/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "hubspot",
+          "name": "HubSpot",
+          "category": "crm",
+          "guideAppearances": 4,
+          "eligibleGuides": [
+            "best-affordable-crm",
+            "best-crm-for-real-estate",
+            "best-crm-with-automation",
+            "best-free-crm"
+          ],
+          "sourceUrl": "https://www.hubspot.com/",
+          "factualReviewDate": "2026-08-29",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "ahrefs",
+          "name": "Ahrefs",
+          "category": "seo",
+          "guideAppearances": 3,
+          "eligibleGuides": [
+            "best-competitor-seo-tools",
+            "best-keyword-research-tools",
+            "best-seo-tools-for-agencies"
+          ],
+          "sourceUrl": "https://ahrefs.com/",
+          "factualReviewDate": "2026-08-29",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "attio",
+          "name": "Attio",
+          "category": "crm",
+          "guideAppearances": 3,
+          "eligibleGuides": [
+            "best-affordable-crm",
+            "best-crm-for-small-business",
+            "best-free-crm"
+          ],
+          "sourceUrl": "https://attio.com/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "semrush",
+          "name": "Semrush",
+          "category": "seo",
+          "guideAppearances": 3,
+          "eligibleGuides": [
+            "best-competitor-seo-tools",
+            "best-seo-tools",
+            "best-seo-tools-for-agencies"
+          ],
+          "sourceUrl": "https://www.semrush.com/",
+          "factualReviewDate": "2026-08-28",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "surfer",
+          "name": "Surfer",
+          "category": "seo",
+          "guideAppearances": 3,
+          "eligibleGuides": [
+            "best-keyword-research-tools",
+            "best-seo-tools",
+            "best-seo-tools-for-agencies"
+          ],
+          "sourceUrl": "https://surferseo.com/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "basecamp",
+          "name": "Basecamp",
+          "category": "business",
+          "guideAppearances": 2,
+          "eligibleGuides": [
+            "best-project-management-tools",
+            "best-team-collaboration-tools"
+          ],
+          "sourceUrl": "https://basecamp.com/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "clickup",
+          "name": "ClickUp",
+          "category": "business",
+          "guideAppearances": 2,
+          "eligibleGuides": [
+            "best-free-project-management-tools",
+            "best-productivity-tools-for-teams"
+          ],
+          "sourceUrl": "https://clickup.com/",
+          "factualReviewDate": "2026-08-29",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "cursor",
+          "name": "Cursor",
+          "category": "developer",
+          "guideAppearances": 2,
+          "eligibleGuides": [
+            "best-ai-coding-tools",
+            "best-developer-tools"
+          ],
+          "sourceUrl": "https://cursor.com/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        },
+        {
+          "slug": "fillout",
+          "name": "Fillout",
+          "category": "forms",
+          "guideAppearances": 2,
+          "eligibleGuides": [
+            "best-forms-for-small-business",
+            "best-lead-capture-forms"
+          ],
+          "sourceUrl": "https://www.fillout.com/",
+          "factualReviewDate": "2026-09-01",
+          "sourceCheckedAt": "2026-09-13T10:16:46.773Z"
+        }
+      ]
+    }
+  ]
+}

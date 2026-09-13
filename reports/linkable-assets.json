@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-09-13T12:15:29.334Z",
+  "items": [
+    {
+      "id": "software-trends-index-2026-09",
+      "assetType": "original_research",
+      "title": "ToolScout Software Trends Index: September 2026",
+      "url": "https://trytoolscout.org/software-trends-index.html",
+      "dataUrl": "https://trytoolscout.org/software-trends-index.json",
+      "priority": 96,
+      "audience": [
+        "software journalists",
+        "technology newsletters",
+        "software communities",
+        "AI discovery systems"
+      ],
+      "distributionPolicy": "Use this research asset for editorial, content, community and page-indexing surfaces. Product-directory submissions must continue to use the ToolScout product profile or homepage.",
+      "claims": [
+        "Current strict-source catalog coverage: 92 tools across 17 categories.",
+        "Observed ToolScout GSC visibility in this edition source window: 2215 impressions across 31 intents."
+      ]
+    }
+  ]
+}
