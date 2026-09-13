@@ -18,6 +18,7 @@ const esc = value => String(value ?? '')
 
 const pairContexts = new Map();
 for (const [intentSlug, context] of Object.entries(contexts)) {
+  if (!fs.existsSync(path.join(ROOT, `${intentSlug}.html`))) continue;
   for (const pair of context.comparisonPairs || []) {
     if (!pairContexts.has(pair)) pairContexts.set(pair, []);
     pairContexts.get(pair).push({ intentSlug, ...context });
@@ -46,6 +47,11 @@ for (const [pair, relevant] of pairContexts.entries()) {
     const constraints = Array.isArray(context.constraints) ? context.constraints.slice(0, 4) : [];
     return `<article class="decision" data-intent="${esc(context.intentSlug)}"><div class="meta">Decision context</div><h3>${esc(context.persona || 'Software buyers')}</h3><p>If your goal is to ${esc(context.jobToBeDone || 'choose the right tool for this workflow')}, compare these products against your actual operating constraints rather than overall popularity.</p>${constraints.length ? `<div class="chips">${constraints.map(item => `<span>${esc(item)}</span>`).join('')}</div>` : ''}${questions.length ? `<ul>${questions.map(q => `<li>${esc(q)}</li>`).join('')}</ul>` : ''}<p><a href="/${esc(context.intentSlug)}.html">View the related buying guide →</a></p></article>`;
   }).join('');
+
+  if (!cards) {
+    skipped++;
+    continue;
+  }
 
   const section = `<section class="section" ${marker}><h2>When this comparison matters</h2><p class="common">The same two products can be a better or worse fit depending on the job, team and constraints. These contexts connect this head-to-head comparison to real buying decisions already covered by ToolScout.</p><div class="decisions">${cards}</div></section>`;
   const insertionPoint = '<section class="section"><h2>How this comparison works</h2>';

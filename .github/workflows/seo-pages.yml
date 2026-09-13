@@ -71,6 +71,10 @@ jobs:
         run: node scripts/enrich-guide-comparisons.mjs
       - name: Apply closed-loop organic growth actions
         run: node scripts/apply-organic-growth-actions.mjs
+      - name: Generate Software Trends Index
+        run: node scripts/generate-software-trends-index.mjs
+      - name: Validate ToolScout copy guard
+        run: node scripts/check-distribution-copy.mjs
       - name: Generate blog topics
         run: node scripts/build-blog-topics.mjs
       - name: Generate blog
@@ -91,6 +95,8 @@ jobs:
         run: node scripts/validate-machine-readability.mjs
       - name: Validate SEO pages
         run: node scripts/validate-seo-pages.mjs
+      - name: Validate editorial trust
+        run: node scripts/validate-editorial-trust.mjs
       - name: Validate generated public surface
         run: node scripts/validate-public-surface.mjs
       - name: Validate commercial indexability and links
@@ -98,13 +104,13 @@ jobs:
       - name: Commit generated SEO assets
         if: github.ref == 'refs/heads/main'
         run: |
-          if [ -z "$(git status --porcelain -- '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json')" ]; then
+          if [ -z "$(git status --porcelain -- '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports
-          git commit -m "Refresh SEO, blog and distribution assets"
+          git add -- '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
+          git commit -m "Refresh SEO, research, blog and distribution assets"
           git pull --rebase origin main
           git push origin HEAD:main

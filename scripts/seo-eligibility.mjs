@@ -1,3 +1,5 @@
+import { editorialTrust } from './editorial-trust.mjs';
+
 const normalize = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 const STOP = new Set(['best','tool','tools','software','for','with','and','the','a','an','to','of','platform','platforms','small','business','team','teams','agency','agencies','consultant','consultants','real','estate','free','affordable']);
@@ -31,31 +33,12 @@ const CAPABILITY_RULES = {
   'best-video-content-tools': ['video','videos','screen recording','video editing','podcast editing']
 };
 
-const STRUCTURED_CAPABILITY_INTENTS = new Set([
-  'best-funnel-builder'
-]);
-
 const COMPOUND_CAPABILITY_RULES = {
-  'best-ai-marketing-tools': {
-    groups: [['ai','artificial intelligence','machine learning']],
-    minimumGroups: 1
-  },
-  'best-ai-ad-creative-tools': {
-    groups: [['ai','artificial intelligence','generative ai']],
-    minimumGroups: 1
-  },
-  'best-ai-research-tools': {
-    groups: [['ai','artificial intelligence','llm','large language model']],
-    minimumGroups: 1
-  },
-  'best-ai-coding-tools': {
-    groups: [['ai','artificial intelligence','coding agent','code assistant']],
-    minimumGroups: 1
-  },
-  'best-crm-with-automation': {
-    groups: [['automation','workflow automation','sales automation']],
-    minimumGroups: 1
-  },
+  'best-ai-marketing-tools': { groups: [['ai','artificial intelligence','machine learning']], minimumGroups: 1 },
+  'best-ai-ad-creative-tools': { groups: [['ai','artificial intelligence','generative ai']], minimumGroups: 1 },
+  'best-ai-research-tools': { groups: [['ai','artificial intelligence','llm','large language model']], minimumGroups: 1 },
+  'best-ai-coding-tools': { groups: [['ai','artificial intelligence','coding agent','code assistant']], minimumGroups: 1 },
+  'best-crm-with-automation': { groups: [['automation','workflow automation','sales automation']], minimumGroups: 1 },
   'best-all-in-one-business-tools': {
     groups: [
       ['crm','customer relationship','customer platform'],
@@ -90,7 +73,7 @@ export function toolText(tool) {
 }
 
 export function structuredCapabilityText(tool) {
-  return normalize([...(tool?.features || []), ...(tool?.bestFor || [])].join(' '));
+  return normalize([...(tool?.features || [])].join(' '));
 }
 
 export function lexicalRelevance(tool, intent) {
@@ -106,9 +89,7 @@ export function lexicalRelevance(tool, intent) {
 }
 
 export function allowedCategories(intent) {
-  const raw = Array.isArray(intent?.allowedCategories) && intent.allowedCategories.length
-    ? intent.allowedCategories
-    : [intent?.category];
+  const raw = Array.isArray(intent?.allowedCategories) && intent.allowedCategories.length ? intent.allowedCategories : [intent?.category];
   return [...new Set(raw.map(normalize).filter(Boolean))];
 }
 
@@ -125,18 +106,14 @@ export function capabilityTerms(intent) {
 }
 
 export function capabilityAssessment(tool, intent) {
-  const text = toolText(tool);
-  const structuredText = structuredCapabilityText(tool);
+  const evidence = structuredCapabilityText(tool);
   const simpleKey = ruleKey(intent, CAPABILITY_RULES);
   const simpleTerms = simpleKey ? CAPABILITY_RULES[simpleKey] : [];
-  const simpleEvidence = simpleKey && STRUCTURED_CAPABILITY_INTENTS.has(simpleKey) ? structuredText : text;
-  const simpleMatch = !simpleTerms.length || simpleTerms.some(term => termMatch(simpleEvidence, term));
+  const simpleMatch = !simpleTerms.length || simpleTerms.some(term => termMatch(evidence, term));
 
   const compoundKey = ruleKey(intent, COMPOUND_CAPABILITY_RULES);
   const compoundRule = compoundKey ? COMPOUND_CAPABILITY_RULES[compoundKey] : null;
-  const groupMatches = compoundRule
-    ? compoundRule.groups.map(group => group.some(term => termMatch(text, term)))
-    : [];
+  const groupMatches = compoundRule ? compoundRule.groups.map(group => group.some(term => termMatch(evidence, term))) : [];
   const matchedGroups = groupMatches.filter(Boolean).length;
   const compoundMatch = !compoundRule || matchedGroups >= Number(compoundRule.minimumGroups || compoundRule.groups.length);
 
@@ -147,13 +124,12 @@ export function capabilityAssessment(tool, intent) {
     matchedGroups,
     minimumGroups: compoundRule ? Number(compoundRule.minimumGroups || compoundRule.groups.length) : 0,
     groupMatches,
-    requiredCapabilities: capabilityTerms(intent)
+    requiredCapabilities: capabilityTerms(intent),
+    evidenceSource: 'structured_features_only'
   };
 }
 
-export function capabilityMatch(tool, intent) {
-  return capabilityAssessment(tool, intent).match;
-}
+export function capabilityMatch(tool, intent) { return capabilityAssessment(tool, intent).match; }
 
 export function attributeMatch(tool, intent) {
   const key = ruleKey(intent, ATTRIBUTE_RULES);
@@ -161,12 +137,15 @@ export function attributeMatch(tool, intent) {
 }
 
 export function editorialEligibility(tool, intent, minimumRelevance = 0.75) {
+  const trust = editorialTrust(tool, null, { maxFactualAgeDays:45, strictSource:false });
   const category = categoryMatch(tool, intent);
   const relevance = lexicalRelevance(tool, intent);
   const capability = capabilityAssessment(tool, intent);
   const attributes = attributeMatch(tool, intent);
   return {
-    eligible: category && capability.match && attributes && relevance >= Number(minimumRelevance || 0),
+    eligible: trust.trusted && category && capability.match && attributes && relevance >= Number(minimumRelevance || 0),
+    trusted: trust.trusted,
+    trustReasons: trust.reasons,
     categoryMatch: category,
     capabilityMatch: capability.match,
     attributeMatch: attributes,

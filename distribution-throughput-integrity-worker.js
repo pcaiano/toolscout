@@ -1,4 +1,4 @@
-import base from './distribution-throughput-worker.js';
+import base from './distribution-linkable-assets-worker.js';
 
 async function normalizeIndexNowAttemptTimestamps(env){
   try{

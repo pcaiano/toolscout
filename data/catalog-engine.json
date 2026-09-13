@@ -1,12 +1,14 @@
 {
-  "version": 2,
+  "version": 3,
   "principles": {
     "catalogMustStayMarketRelevant": true,
     "officialSourcesRequired": true,
     "affiliateEconomicsNeverAffectEditorialSelection": true,
     "automaticMutationsRequireQualityGates": true,
     "brokenOrUnverifiableToolsAreSuppressedAfterRepeatedFailure": true,
-    "commercialRelationshipsAreStoredSeparatelyFromEditorialFit": true
+    "commercialRelationshipsAreStoredSeparatelyFromEditorialFit": true,
+    "unsupportedClaimsMustNeverEnterEditorialRanking": true,
+    "genericCategoryProfilesCannotCreateEditorialFacts": true
   },
   "cadence": {
     "run": "daily",
@@ -33,7 +35,9 @@
     ],
     "allowTrustedEnrichmentFiles": true,
     "autoAdmitTrustedCandidates": true,
-    "autoAdmitGeneratedCandidates": true
+    "autoAdmitGeneratedCandidates": false,
+    "rejectGenericSyntheticEditorialProfiles": true,
+    "maximumFactualReviewAgeDays": 45
   },
   "trustedCandidateFiles": [
     "data/catalog-wave1-enrichment.json",

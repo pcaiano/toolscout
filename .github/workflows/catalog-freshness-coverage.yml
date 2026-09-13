@@ -16,6 +16,8 @@ on:
       - 'scripts/run-catalog-freshness-coverage.mjs'
       - 'scripts/scan-competitive-gaps.mjs'
       - 'scripts/catalog-health.mjs'
+      - 'scripts/editorial-trust.mjs'
+      - 'scripts/validate-editorial-trust.mjs'
       - '.github/workflows/catalog-freshness-coverage.yml'
 
 permissions:
@@ -49,6 +51,11 @@ jobs:
       - name: Run catalog health gate
         run: node scripts/catalog-health.mjs
 
+      - name: Run catalog editorial trust gate
+        env:
+          EDITORIAL_TRUST_CATALOG_ONLY: '1'
+        run: node scripts/validate-editorial-trust.mjs
+
       - name: Publish engine summary
         shell: bash
         run: |
@@ -65,19 +72,19 @@ jobs:
           console.log(`- Discovered vendor candidates: **${r.summary.discovered}**`);
           console.log(`- Quarantined after repeated confirmed breakage: **${r.summary.quarantined}**`);
           console.log('');
-          console.log('Affiliate economics are excluded from catalog admission and ranking.');
+          console.log('Affiliate economics are excluded from catalog admission and ranking. Unsupported synthetic editorial profiles are blocked.');
           NODE
 
       - name: Commit autonomous catalog maintenance
         if: github.ref == 'refs/heads/main'
         run: |
-          if [ -z "$(git status --porcelain -- data/tools.json data/catalog-freshness-state.json data/catalog-quarantine.json reports/catalog-freshness-coverage.json reports/catalog-health.json reports/competitive-gap-signals.json)" ]; then
+          if [ -z "$(git status --porcelain -- data/tools.json data/catalog-freshness-state.json data/catalog-quarantine.json reports/catalog-freshness-coverage.json reports/catalog-health.json reports/competitive-gap-signals.json reports/editorial-trust-audit.json)" ]; then
             echo 'No catalog changes to commit.'
             exit 0
           fi
           git config user.name 'toolscout-catalog-bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/tools.json data/catalog-freshness-state.json data/catalog-quarantine.json reports/catalog-freshness-coverage.json reports/catalog-health.json reports/competitive-gap-signals.json
+          git add data/tools.json data/catalog-freshness-state.json data/catalog-quarantine.json reports/catalog-freshness-coverage.json reports/catalog-health.json reports/competitive-gap-signals.json reports/editorial-trust-audit.json
           git commit -m 'Autonomously refresh ToolScout catalog'
           git pull --rebase origin main
           git push origin HEAD:main
