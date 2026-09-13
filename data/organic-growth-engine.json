@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "principles": {
     "fullyAutonomous": true,
     "ownerContentInterventionRequired": false,
@@ -14,15 +14,29 @@
     "impressionsAreVisibilityNotTraffic": true,
     "strictSemanticEligibility": true,
     "neverFillRankingsWithWrongCategoryTools": true,
-    "fewerCorrectRecommendationsBeatMoreIncorrectRecommendations": true
+    "fewerCorrectRecommendationsBeatMoreIncorrectRecommendations": true,
+    "boundedInterventions": true,
+    "reversibleExperiments": true,
+    "demandLedOptimization": true
   },
   "autonomy": {
     "mode": "closed-loop",
     "ownerRole": "observability-only",
-    "cycle": ["observe","prioritize","optimize","validate","publish","measure","learn"],
+    "cycle": ["observe","prioritize","optimize","validate","publish","distribute","measure","learn"],
     "publishOnlyAfterQualityGates": true,
     "insufficientEvidenceAction": "measure-and-recheck-automatically",
     "target": "continuously improve qualified rankings and search clicks without claiming control over Google positions"
+  },
+  "closedLoop": {
+    "maxNewInterventionsPerCycle": 3,
+    "minimumDaysBetweenInterventions": 7,
+    "minimumEvaluationAgeDays": 14,
+    "minimumImpressionsForIntervention": 40,
+    "minimumImpressionsForRollback": 100,
+    "minimumPositionImprovementForWin": 5,
+    "minimumPositionWorseningForRollback": 10,
+    "persistActiveVariantUntilMeasured": true,
+    "automaticRollbackOnClearLoss": true
   },
   "editorialGates": {
     "minimumEligibleToolsPerGuide": 2,
