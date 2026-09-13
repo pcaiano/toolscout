@@ -1,3 +1,5 @@
+import { editorialTrust } from './editorial-trust.mjs';
+
 const normalize = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 const STOP = new Set(['best','tool','tools','software','for','with','and','the','a','an','to','of','platform','platforms','small','business','team','teams','agency','agencies','consultant','consultants','real','estate','free','affordable']);
@@ -135,12 +137,15 @@ export function attributeMatch(tool, intent) {
 }
 
 export function editorialEligibility(tool, intent, minimumRelevance = 0.75) {
+  const trust = editorialTrust(tool, null, { maxFactualAgeDays:45, strictSource:false });
   const category = categoryMatch(tool, intent);
   const relevance = lexicalRelevance(tool, intent);
   const capability = capabilityAssessment(tool, intent);
   const attributes = attributeMatch(tool, intent);
   return {
-    eligible: category && capability.match && attributes && relevance >= Number(minimumRelevance || 0),
+    eligible: trust.trusted && category && capability.match && attributes && relevance >= Number(minimumRelevance || 0),
+    trusted: trust.trusted,
+    trustReasons: trust.reasons,
     categoryMatch: category,
     capabilityMatch: capability.match,
     attributeMatch: attributes,
