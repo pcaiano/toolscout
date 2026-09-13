@@ -28,7 +28,9 @@ for(const tool of tools){
 }
 
 if(!catalogOnly){
-  for(const intent of loadSeoIntents(ROOT)){
+  const intents=loadSeoIntents(ROOT);
+  const intentBySlug=new Map(intents.map(x=>[x.slug,x]));
+  for(const intent of intents){
     if(!intent?.slug)continue;
     const file=path.join(ROOT,`${intent.slug}.html`);
     if(!fs.existsSync(file))continue;
@@ -64,13 +66,14 @@ if(!catalogOnly){
   if(fs.existsSync(trendsPath)){
     const trends=read('software-trends-index.json',{});
     if(!/ToolScout first-party observations/i.test(String(trends.scope||'')))error('trends_scope_disclaimer_missing','software-trends-index.json');
+    if(!/not a measure of global market share/i.test(String(trends.scope||'')))error('trends_market_scope_limit_missing','software-trends-index.json');
     for(const row of trends.shortlistLeaders||[]){
       const tool=toolBySlug.get(row.slug);
       if(!tool){error('trends_named_tool_missing',row.slug);continue;}
       const t=trust(tool,{strict:true});
       if(!t.trusted)error('trends_named_tool_failed_strict_gate',`${row.slug}:${t.reasons.join(',')}`);
       for(const intentSlug of row.eligibleGuides||[]){
-        const intent=loadSeoIntents(ROOT).find(x=>x.slug===intentSlug);
+        const intent=intentBySlug.get(intentSlug);
         if(!intent||!editorialEligibility(tool,intent,minRelevance).eligible)error('trends_shortlist_claim_not_reproducible',`${row.slug}:${intentSlug}`);
       }
     }
@@ -78,8 +81,15 @@ if(!catalogOnly){
   }
   if(fs.existsSync(trendsHtmlPath)){
     const html=fs.readFileSync(trendsHtmlPath,'utf8');
-    const unsupported=[/market share/i,/fastest[- ]growing/i,/market leader/i,/most popular software/i,/industry[- ]wide popularity/i,/global software market/i];
-    for(const pattern of unsupported)if(pattern.test(html))error('unsupported_market_claim',String(pattern));
+    const positiveUnsupported=[
+      /\b(?:has|holds|commands|captures|leads with)\b[^.]{0,90}\bmarket share\b/i,
+      /\bfastest[- ]growing\b/i,
+      /\b(?:is|are|remains?|became)\s+(?:the\s+)?market leader\b/i,
+      /\bmost popular software\b/i,
+      /\bindustry[- ]wide popularity ranking\b/i,
+      /\bglobal software market (?:leader|share|ranking)\b/i
+    ];
+    for(const pattern of positiveUnsupported)if(pattern.test(html))error('unsupported_market_claim',String(pattern));
     if(/[\u2013\u2014]/.test(html))error('forbidden_long_dash','software-trends-index.html');
   }
 }
