@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T06:18:18.875Z",
+  "generatedAt": "2026-09-13T12:06:24.964Z",
   "timezone": "Europe/Lisbon",
   "objective": "Maintain a faithful traffic picture by separating browser-confirmed first-party sessions from server-only requests and auditing them against Cloudflare RUM and Google Search Console.",
   "primaryMetric": "D1 browser-confirmed public sessions",
@@ -12,8 +12,8 @@
     "Google Search Console is the source of truth for Google Search clicks and impressions."
   ],
   "windowsUtc": {
-    "now": "2026-09-13T06:18:03.039Z",
-    "last24": "2026-09-12T06:18:03.039Z",
+    "now": "2026-09-13T12:06:07.805Z",
+    "last24": "2026-09-12T12:06:07.805Z",
     "today": "2026-09-12T23:00:00.000Z",
     "month": "2026-08-31T23:00:00.000Z"
   },
@@ -27,13 +27,13 @@
     "excludeBots": true,
     "dataset": "rumPageloadEventsAdaptiveGroups",
     "last24": {
-      "pageViews": 3,
-      "visits": 3,
+      "pageViews": 7,
+      "visits": 7,
       "sampleInterval": 1
     },
     "today": {
-      "pageViews": 1,
-      "visits": 1,
+      "pageViews": 5,
+      "visits": 5,
       "sampleInterval": 1
     },
     "monthToDate": {
@@ -85,23 +85,23 @@
   "d1": {
     "status": "observed",
     "metric": "browser-confirmed sessions",
-    "last24": 1,
-    "today": 1,
-    "monthToDate": 3,
-    "serverObservedEntries24h": 62,
-    "serverOnlyUnconfirmed24h": 61,
-    "queryRowsRead": 631,
+    "last24": 4,
+    "today": 4,
+    "monthToDate": 6,
+    "serverObservedEntries24h": 68,
+    "serverOnlyUnconfirmed24h": 64,
+    "queryRowsRead": 365,
     "queryRowsWritten": 0,
-    "queryDurationMs": 0.5255
+    "queryDurationMs": 1.3037
   },
   "googleSearchConsole": {
     "status": "observed",
-    "generatedAt": "2026-09-13T06:18:02.954Z",
+    "generatedAt": "2026-09-13T12:06:07.725Z",
     "startDate": "2026-08-17",
     "endDate": "2026-09-13",
     "dataState": "all",
     "clicks": 1,
-    "impressions": 2156,
+    "impressions": 2215,
     "pageCount": 79,
     "coverage": "site-wide"
   },
@@ -109,11 +109,11 @@
     "status": "low-volume-learning",
     "primary": "d1-browser-confirmed",
     "audit": "cloudflare-rum",
-    "d1Confirmed24h": 1,
-    "rumVisits24h": 3,
-    "rumPageViews24h": 3,
-    "serverObservedEntries24h": 62,
-    "delta": -2,
+    "d1Confirmed24h": 4,
+    "rumVisits24h": 7,
+    "rumPageViews24h": 7,
+    "serverObservedEntries24h": 68,
+    "delta": -3,
     "note": "Volume is too low for a useful percentage divergence alarm."
   },
   "status": "observed"
