@@ -1,91 +1,14 @@
-name: Autonomous Distribution Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  pull_request:
-    paths:
-      - 'distribution-autonomous-worker.js'
-      - 'distribution-throughput-worker.js'
-      - 'distribution-throughput-integrity-worker.js'
-      - 'distribution-priority-worker.js'
-      - 'distribution-submission-worker.js'
-      - 'distribution-orchestrator-worker.js'
-      - 'data/distribution-publishing-profile.json'
-      - 'scripts/check-indexnow-ownership.mjs'
-      - 'scripts/check-distribution-copy.mjs'
-      - 'migrations/0044_autonomous_distribution_qualification.sql'
-      - 'migrations/0053_distribution_delivery_state.sql'
-      - '.github/workflows/autonomous-distribution-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'distribution-autonomous-worker.js'
-      - 'distribution-throughput-worker.js'
-      - 'distribution-throughput-integrity-worker.js'
-      - 'distribution-priority-worker.js'
-      - 'distribution-submission-worker.js'
-      - 'distribution-orchestrator-worker.js'
-      - 'data/distribution-publishing-profile.json'
-      - 'scripts/check-indexnow-ownership.mjs'
-      - 'scripts/check-distribution-copy.mjs'
-      - 'migrations/0044_autonomous_distribution_qualification.sql'
-      - 'migrations/0053_distribution_delivery_state.sql'
-      - '.github/workflows/autonomous-distribution-check.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: {node-version: '22'}
-      - name: Validate autonomous engine syntax
-        run: |
-          node --check distribution-autonomous-worker.js
-          node --check distribution-throughput-worker.js
-          node --check distribution-throughput-integrity-worker.js
-          node --check distribution-priority-worker.js
-          node --check distribution-submission-worker.js
-          node --check distribution-orchestrator-worker.js
-          node --check scripts/check-indexnow-ownership.mjs
-          node --check scripts/check-distribution-copy.mjs
-      - name: Validate IndexNow ownership and retry timestamp invariants
-        run: node scripts/check-indexnow-ownership.mjs
-      - name: Validate distribution-facing copy punctuation
-        run: node scripts/check-distribution-copy.mjs
-      - name: Validate closed-loop architecture, delivery state and policy guards
-        run: |
-          test -s migrations/0044_autonomous_distribution_qualification.sql
-          test -s migrations/0053_distribution_delivery_state.sql
-          grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_auto_adapters' migrations/0044_autonomous_distribution_qualification.sql
-          grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_delivery_state' migrations/0053_distribution_delivery_state.sql
-          grep -Fq 'retry_after_at' migrations/0053_distribution_delivery_state.sql
-          grep -Fq 'verification_state' migrations/0053_distribution_delivery_state.sql
-          grep -Fq 'time_to_verify_seconds' migrations/0053_distribution_delivery_state.sql
-          grep -Fq "import base from './distribution-priority-worker.js'" distribution-orchestrator-worker.js
-          grep -Fq "import base from './distribution-throughput-integrity-worker.js'" distribution-priority-worker.js
-          grep -Fq "import base from './distribution-throughput-worker.js'" distribution-throughput-integrity-worker.js
-          grep -Fq "import base from './distribution-autonomous-worker.js'" distribution-throughput-worker.js
-          grep -Fq 'BACKOFF_HOURS=[1,2,4,8,12]' distribution-throughput-worker.js
-          grep -Fq 'RESEARCH_BUDGET=4' distribution-throughput-worker.js
-          grep -Fq "status='candidate'" distribution-throughput-worker.js
-          grep -Fq 'retryAfterSeconds' distribution-throughput-worker.js
-          grep -Fq 'jitterSeconds' distribution-throughput-worker.js
-          grep -Fq "headers?.get('Retry-After')" distribution-throughput-worker.js
-          grep -Fq 'indexnow_adaptive_delivery' distribution-throughput-worker.js
-          grep -Fq 'distribution_verification_lifecycle' distribution-throughput-worker.js
-          grep -Fq "verification_state:'stale'" distribution-throughput-worker.js
-          grep -Fq "verification_state:'rejected'" distribution-throughput-worker.js
-          grep -Fq "confidence>=95" distribution-autonomous-worker.js
-          grep -Fq "policy_state='verified'" distribution-autonomous-worker.js
-          grep -Fq 'findOpenApi' distribution-autonomous-worker.js
-          grep -Fq 'policyBlocked' distribution-autonomous-worker.js
-          grep -Fq "submission_type='auto_discovered_json'" distribution-autonomous-worker.js
-          grep -Fq 'BLOCK_RE' distribution-autonomous-worker.js
-          grep -Fq 'sameHostFamily' distribution-autonomous-worker.js
-          grep -Fq 'refreshPersistentActionUrls' distribution-autonomous-worker.js
-          grep -Fq "result='external_verification_failed'" distribution-autonomous-worker.js
-          grep -Fq 'action_url_rediscovered' distribution-autonomous-worker.js
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

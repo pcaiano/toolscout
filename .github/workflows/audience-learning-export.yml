@@ -1,50 +1,14 @@
-name: Export Audience Learning Snapshot
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '40 7 * * 1'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/audience-learning-export.yml'
-      - 'scripts/export-audience-learning.mjs'
 
 permissions:
-  contents: write
-
-concurrency:
-  group: audience-learning-export
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  export:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Export audience learning snapshot
-        run: node scripts/export-audience-learning.mjs
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Commit snapshot when changed
-        run: |
-          if [ -z "$(git status --porcelain -- data/audience-learning.json data/audience-learning-history.json)" ]; then
-            echo "No audience learning changes"
-            exit 0
-          fi
-          git config user.name "toolscout-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add data/audience-learning.json data/audience-learning-history.json
-          git commit -m "Update audience learning snapshot"
-          git pull --rebase origin main
-          git push origin HEAD:main
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

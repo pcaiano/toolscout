@@ -1,75 +1,14 @@
-name: Deploy ToolScout to GitHub Pages
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '30 3 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
-  deploy:
-    if: github.event.repository.private == false
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Generate SEO pages
-        run: node scripts/generate-seo-pages.mjs
-      - name: Generate commercial comparisons and tool profiles
-        run: |
-          node scripts/generate-comparisons.mjs
-          node scripts/generate-tool-pages.mjs
-          node scripts/link-static-tool-profiles.mjs
-      - name: Validate tool profile branding
-        run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const tools = require('./data/tools.json');
-          const failures = [];
-          for (const tool of tools) {
-            const file = `tools/${tool.slug}.html`;
-            const html = fs.readFileSync(file, 'utf8');
-            if (!html.includes('class="toolLogo"') || !html.includes(`${tool.name} logo`)) failures.push(file);
-          }
-          if (failures.length) {
-            console.error('Tool profiles missing brand logo markup:', failures.join(', '));
-            process.exit(1);
-          }
-          console.log(`Validated brand logo markup in ${tools.length} tool profiles.`);
-          NODE
-      - name: Generate acquisition content
-        run: node scripts/generate-acquisition-content.mjs
-      - name: Generate acquisition priority
-        run: node scripts/generate-acquisition-priority.mjs
-      - name: Apply canonical public navigation
-        run: node scripts/unify-public-nav.mjs
-      - name: Generate sitemap
-        run: node scripts/generate-sitemap.mjs
-      - name: Guard public hostname
-        run: node scripts/check-public-host.mjs
-      - name: Validate commercial indexability
-        run: node scripts/validate-commercial-indexability.mjs
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Stage public files only
-        run: python3 scripts/stage-public-site.py
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .pages-public
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

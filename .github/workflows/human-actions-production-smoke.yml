@@ -1,65 +1,14 @@
-name: Human Actions Production Smoke
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/human-actions-production-smoke.yml'
-  workflow_run:
-    workflows: ["Deploy ToolScout Worker"]
-    types: [completed]
   workflow_dispatch:
 
 permissions:
   contents: read
 
-env:
-  PROD_BASE: https://trytoolscout.org
-
 jobs:
-  smoke:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Chairman and human action routes are private
-        run: |
-          set -euo pipefail
-
-          for route in /analytics/api/human-actions /analytics/api/chairman-queue; do
-            headers="$(mktemp)"
-            body="$(mktemp)"
-            code="$(curl --silent --show-error --dump-header "$headers" --output "$body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE$route" || true)"
-            echo "$route HTTP $code"
-            cat "$headers"
-            cat "$body"
-            if [ "$code" != "401" ]; then
-              echo "ERROR: expected $route to reject requests without a Command Center session with HTTP 401."
-              exit 1
-            fi
-            grep -F 'command_center_session_expired' "$body"
-          done
-
-          for route in /analytics/api/affiliate-human-action /analytics/api/distribution-human-action; do
-            body="$(mktemp)"
-            code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' --max-redirs 0 -X POST -H 'Content-Type: application/json' -d '{}' "$PROD_BASE$route" || true)"
-            echo "$route HTTP $code"
-            cat "$body"
-            if [ "$code" != "401" ]; then
-              echo "ERROR: expected $route to reject unauthenticated state changes with HTTP 401."
-              exit 1
-            fi
-            grep -F 'command_center_session_expired' "$body"
-          done
-
-          public_headers="$(mktemp)"
-          public_body="$(mktemp)"
-          public_code="$(curl --silent --show-error --dump-header "$public_headers" --output "$public_body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE/api/human-actions" || true)"
-          echo "legacy public route HTTP $public_code"
-          cat "$public_headers"
-          cat "$public_body"
-          if [ "$public_code" = "200" ]; then
-            echo "ERROR: legacy /api/human-actions must not expose the operational queue publicly."
-            exit 1
-          fi
-
-          echo 'Chairman and human-action routes are private in production.'
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

@@ -1,142 +1,14 @@
-name: Growth Command Center V2 Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  pull_request:
-    paths:
-      - 'growth-command-center-v2-worker.js'
-      - 'command-center-affiliate-table-worker.js'
-      - 'analytics-v2.html'
-      - 'human-action-entry-worker.js'
-      - 'agent-protocol-worker.js'
-      - '.assetsignore'
-      - 'docs/GROWTH-ENGINES-V2.md'
-      - 'docs/COMMAND-CENTER.md'
-      - '.github/workflows/growth-command-center-v2-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'growth-command-center-v2-worker.js'
-      - 'command-center-affiliate-table-worker.js'
-      - 'analytics-v2.html'
-      - 'human-action-entry-worker.js'
-      - 'agent-protocol-worker.js'
-      - '.assetsignore'
-      - 'docs/GROWTH-ENGINES-V2.md'
-      - 'docs/COMMAND-CENTER.md'
-      - '.github/workflows/growth-command-center-v2-check.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Validate worker chain and privacy
-        run: |
-          set -euo pipefail
-          node --check growth-command-center-v2-worker.js
-          node --check command-center-affiliate-table-worker.js
-          node --check human-action-entry-worker.js
-          node --check agent-protocol-worker.js
-          grep -Fq "import base from './command-center-affiliate-table-worker.js'" agent-protocol-worker.js
-          grep -Fq "import base from './growth-command-center-v2-worker.js'" command-center-affiliate-table-worker.js
-          grep -Fq "import base from './affiliate-human-action-entry-worker.js'" growth-command-center-v2-worker.js
-          grep -Fxq 'growth-command-center-v2-worker.js' .assetsignore
-          grep -Fxq 'command-center-affiliate-table-worker.js' .assetsignore
-          grep -Fq "(o.human_required=1 OR o.status='approval_required')" human-action-entry-worker.js
-          grep -Fq "(o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend')" human-action-entry-worker.js
-
-      - name: Validate strict affiliate traffic truth
-        run: |
-          set -euo pipefail
-          grep -Fq "event_type='page_confirmed'" human-action-entry-worker.js
-          grep -Fq "event_type='page_confirmed'" growth-command-center-v2-worker.js
-          grep -Fq "traffic_truth='browser_confirmed'" growth-command-center-v2-worker.js
-          grep -Fq "traffic_truth:'browser_confirmed'" growth-command-center-v2-worker.js
-          grep -Fq "awaiting_strict_evidence" growth-command-center-v2-worker.js
-          grep -Fq "Browser-confirmed clicks · 30d" growth-command-center-v2-worker.js
-          grep -Fq "Browser-confirmed clicks · 30d" command-center-affiliate-table-worker.js
-          grep -Fq "browser-confirmed unmonetized outbound" growth-command-center-v2-worker.js
-          ! grep -Fq "Likely-human clicks · 30d" growth-command-center-v2-worker.js
-          ! grep -Fq "Likely-human clicks · 30d" command-center-affiliate-table-worker.js
-          ! grep -Fq "FROM affiliate_coverage_runs ORDER BY created_at DESC LIMIT 1" growth-command-center-v2-worker.js
-          ! grep -Fq "FROM affiliate_coverage_runs WHERE created_at<=datetime('now','-7 days')" growth-command-center-v2-worker.js
-
-      - name: Validate Chairman Queue contract
-        run: |
-          set -euo pipefail
-          grep -Fq "chairmanQueue" growth-command-center-v2-worker.js
-          grep -Fq "link_verification" growth-command-center-v2-worker.js
-          grep -Fq "estimated_minutes" growth-command-center-v2-worker.js
-          grep -Fq "expected_impact" growth-command-center-v2-worker.js
-          grep -Fq "why_human" growth-command-center-v2-worker.js
-          grep -Fq "after_action" growth-command-center-v2-worker.js
-          grep -Fq "/analytics/api/distribution-human-action" growth-command-center-v2-worker.js
-          grep -Fq "/analytics/api/human-actions" growth-command-center-v2-worker.js
-          grep -Fq "Only current engine states with a reachable HTTPS action URL" growth-command-center-v2-worker.js
-          grep -Fq "content-intelligence.json" growth-command-center-v2-worker.js
-          grep -Fq "organic-growth-opportunities.json" growth-command-center-v2-worker.js
-          grep -Fq "aeo-geo-readiness.json" growth-command-center-v2-worker.js
-          grep -Fq "machine-readability.json" growth-command-center-v2-worker.js
-          grep -Fq "content_published" growth-command-center-v2-worker.js
-          grep -Fq "publishing_heartbeat_partial" growth-command-center-v2-worker.js
-          grep -Fq "GET_fallback" growth-command-center-v2-worker.js
-          grep -Fq "const input=[...(raw.affiliate||[]),...(raw.distribution||[])];" growth-command-center-v2-worker.js
-          grep -Fq ".slice(0,HUMAN_ACTION_LIMIT)" growth-command-center-v2-worker.js
-          grep -Fq "h==='localhost'" growth-command-center-v2-worker.js
-
-      - name: Validate configurable Command Center UI
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          html=Path('analytics-v2.html').read_text()
-          scripts=re.findall(r'<script>([\s\S]*?)</script>',html)
-          if len(scripts)!=1:
-              raise SystemExit('expected one inline script')
-          Path('/tmp/analytics-v2.js').write_text(scripts[0])
-          PY
-          node --check /tmp/analytics-v2.js
-          for widget in chairman northstar distribution affiliate footprint ledger revenue health; do
-            grep -Fq "data-widget=\"$widget\"" analytics-v2.html
-          done
-          grep -Fq "localStorage.setItem(LAYOUT_KEY" analytics-v2.html
-          grep -Fq "resizeHandle" analytics-v2.html
-          grep -Fq "dragstart" analytics-v2.html
-          grep -Fq "el.draggable=false" analytics-v2.html
-          grep -Fq "head.addEventListener('pointerdown'" analytics-v2.html
-          grep -Fq "detailFor" analytics-v2.html
-          grep -Fq "Content Engine" analytics-v2.html
-          grep -Fq "Audience Engine" analytics-v2.html
-          grep -Fq "SEO / GEO / AIO" analytics-v2.html
-          grep -Fq "Engine bug" analytics-v2.html
-          grep -Fq "Manual snapshot only; no background polling." analytics-v2.html
-          grep -Fq "Human sessions · 24h" analytics-v2.html
-          grep -Fq "Avg human sessions / day · MTD" analytics-v2.html
-          grep -Fq "Human sessions · MTD" analytics-v2.html
-          grep -Fq "Month projection" analytics-v2.html
-          grep -Fq "humanSessionsLast24Hours" analytics-v2.html
-          grep -Fq "dailyAverageMTD" analytics-v2.html
-          grep -Fq "monthToDate" analytics-v2.html
-          ! grep -Fq "setInterval(" analytics-v2.html
-          grep -Fq "Affiliate Coverage Status" command-center-affiliate-table-worker.js
-          grep -Fq "affiliateCoverageStatusBody" command-center-affiliate-table-worker.js
-          grep -Fq "paintAffiliate(d.affiliateCoverageStatus)" command-center-affiliate-table-worker.js
-          grep -Fq "<th>Affiliate</th><th>Status</th><th>Clicks</th>" command-center-affiliate-table-worker.js
-          grep -Fq "Loading affiliate status" command-center-affiliate-table-worker.js
-          grep -Fq "bootstrapLoad" command-center-affiliate-table-worker.js
-
-      - name: Validate operational documentation
-        run: |
-          set -euo pipefail
-          grep -Fq "observe/discover -> prioritize -> execute -> verify -> measure -> learn -> repeat" docs/GROWTH-ENGINES-V2.md
-          grep -Fq "Chairman Queue" docs/GROWTH-ENGINES-V2.md
-          grep -Fq "draggable/reorderable and resizable" docs/GROWTH-ENGINES-V2.md
-          grep -Fq "highest development priority" docs/COMMAND-CENTER.md
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

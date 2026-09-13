@@ -1,44 +1,14 @@
-name: Sync Affiliate Pipeline Coverage
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'data/affiliate.json'
-      - 'scripts/sync-affiliate-pipeline.mjs'
-      - '.github/workflows/affiliate-pipeline-sync.yml'
 
 permissions:
-  contents: write
-
-concurrency:
-  group: affiliate-pipeline-sync
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  sync:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Sync pipeline with production affiliate coverage
-        run: node scripts/sync-affiliate-pipeline.mjs
-      - name: Commit pipeline when changed
-        run: |
-          if [ -z "$(git status --porcelain -- data/affiliate-pipeline.json)" ]; then
-            echo "Affiliate pipeline already synchronized"
-            exit 0
-          fi
-          git config user.name "toolscout-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add data/affiliate-pipeline.json
-          git commit -m "Sync affiliate pipeline with production coverage"
-          git pull --rebase origin main
-          git push origin HEAD:main
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

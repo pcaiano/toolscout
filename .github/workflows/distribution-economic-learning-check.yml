@@ -1,107 +1,14 @@
-name: Distribution Economic Learning Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  pull_request:
-    paths:
-      - 'distribution-impact-worker.js'
-      - 'distribution-orchestrator-worker.js'
-      - 'distribution-priority-worker.js'
-      - 'distribution-command-worker.js'
-      - 'human-action-entry-worker.js'
-      - 'migrations/0048_distribution_economic_learning.sql'
-      - 'migrations/0057_distribution_browser_confirmed_learning.sql'
-      - 'migrations/0058_distribution_operating_decisions.sql'
-      - 'migrations/0059_distribution_operating_bootstrap.sql'
-      - 'migrations/0060_distribution_operating_state_fix.sql'
-      - '.github/workflows/distribution-economic-learning-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'distribution-impact-worker.js'
-      - 'distribution-orchestrator-worker.js'
-      - 'distribution-priority-worker.js'
-      - 'distribution-command-worker.js'
-      - 'human-action-entry-worker.js'
-      - 'migrations/0048_distribution_economic_learning.sql'
-      - 'migrations/0057_distribution_browser_confirmed_learning.sql'
-      - 'migrations/0058_distribution_operating_decisions.sql'
-      - 'migrations/0059_distribution_operating_bootstrap.sql'
-      - 'migrations/0060_distribution_operating_state_fix.sql'
-      - '.github/workflows/distribution-economic-learning-check.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: {node-version: '22'}
-      - name: Validate syntax
-        run: |
-          node --check distribution-impact-worker.js
-          node --check distribution-priority-worker.js
-          node --check distribution-orchestrator-worker.js
-          node --check distribution-command-worker.js
-          node --check human-action-entry-worker.js
-      - name: Validate browser-confirmed economic learning
-        run: |
-          test -s migrations/0048_distribution_economic_learning.sql
-          test -s migrations/0057_distribution_browser_confirmed_learning.sql
-          test -s migrations/0058_distribution_operating_decisions.sql
-          test -s migrations/0059_distribution_operating_bootstrap.sql
-          test -s migrations/0060_distribution_operating_state_fix.sql
-          grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_economic_learning' migrations/0048_distribution_economic_learning.sql
-          grep -Fq 'browser_confirmed_sessions_30d' migrations/0057_distribution_browser_confirmed_learning.sql
-          grep -Fq 'CREATE TABLE IF NOT EXISTS distribution_surface_costs' migrations/0057_distribution_browser_confirmed_learning.sql
-          grep -Fq "VALUES('uneed',14.99,'USD'" migrations/0057_distribution_browser_confirmed_learning.sql
-          grep -Fq "event_type='page_confirmed'" distribution-impact-worker.js
-          grep -Fq 'export async function distributionSurfaceMetrics' distribution-impact-worker.js
-          grep -Fq "import {distributionSurfaceMetrics}" distribution-orchestrator-worker.js
-          grep -Fq 'function economicBoost' distribution-orchestrator-worker.js
-          grep -Fq 'function evidenceGrade' distribution-orchestrator-worker.js
-          grep -Fq 'function paidPolicy' distribution-orchestrator-worker.js
-          grep -Fq "evidence_basis:'browser_confirmed'" distribution-orchestrator-worker.js
-          grep -Fq "/api/distribution/economic-learning" distribution-orchestrator-worker.js
-      - name: Validate operating priority and no-auto-spend policy
-        run: |
-          grep -Fq 'operating_decision' migrations/0058_distribution_operating_decisions.sql
-          grep -Fq 'priority_weight' migrations/0058_distribution_operating_decisions.sql
-          grep -Fq 'Reserved as the bounded exploration slot' migrations/0059_distribution_operating_bootstrap.sql
-          grep -Fq "status='approval_required'" migrations/0059_distribution_operating_bootstrap.sql
-          grep -Fq 'Paid distribution is never executed automatically' migrations/0059_distribution_operating_bootstrap.sql
-          grep -Fq "o.status IN ('live','verified','submitted','pending_review','scheduled')" migrations/0060_distribution_operating_state_fix.sql
-          grep -Fq "o.surface_slug<>'indexnow'" migrations/0060_distribution_operating_state_fix.sql
-          grep -Fq "ds.status='submitted'" migrations/0060_distribution_operating_state_fix.sql
-          grep -Fq "o.status='approval_required'" migrations/0060_distribution_operating_state_fix.sql
-          grep -Fq "import base from './distribution-throughput-worker.js'" distribution-priority-worker.js
-          grep -Fq "ACTIVE_MEASUREMENT=new Set(['live','verified','submitted','pending_review','scheduled'])" distribution-priority-worker.js
-          grep -Fq 'function eligibleForExploration' distribution-priority-worker.js
-          grep -Fq "row.surface_slug!=='indexnow'" distribution-priority-worker.js
-          grep -Fq 'number(row.already_submitted)===0' distribution-priority-worker.js
-          grep -Fq 'number(row.submission_blocked)===0' distribution-priority-worker.js
-          grep -Fq 'export function operatingDecision' distribution-priority-worker.js
-          grep -Fq 'export function priorityWeight' distribution-priority-worker.js
-          grep -Fq "hold_no_return" distribution-priority-worker.js
-          grep -Fq "status='approval_required'" distribution-priority-worker.js
-          grep -Fq 'Paid distribution is never executed automatically' distribution-priority-worker.js
-          grep -Fq 'exploration_slot' distribution-priority-worker.js
-          grep -Fq "/api/distribution/operating-decisions" distribution-priority-worker.js
-          grep -Fq "import base from './distribution-priority-worker.js'" distribution-orchestrator-worker.js
-      - name: Validate Chairman Queue economic ordering
-        run: |
-          grep -Fq 'LEFT JOIN distribution_economic_learning' human-action-entry-worker.js
-          grep -Fq "operating_decision,'explore'" human-action-entry-worker.js
-          grep -Fq "metric_label:'economic priority'" human-action-entry-worker.js
-          grep -Fq "o.human_required=1 OR o.status='approval_required'" human-action-entry-worker.js
-          grep -Fq "operating_decision,'explore')<>'suspend'" human-action-entry-worker.js
-      - name: Validate Command Center operating visibility
-        run: |
-          grep -Fq "operating:{scale:o.scale||0,measure:o.measure||0,explore:o.explore||0,suspend:o.suspend||0}" distribution-command-worker.js
-          grep -Fq "card('Scale'" distribution-command-worker.js
-          grep -Fq "card('Measure'" distribution-command-worker.js
-          grep -Fq "card('Explore'" distribution-command-worker.js
-          grep -Fq "card('Suspend'" distribution-command-worker.js
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

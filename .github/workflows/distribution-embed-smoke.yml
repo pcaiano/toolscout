@@ -1,32 +1,14 @@
-name: Distribution Embed Smoke
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'distribution-embed-worker.js'
-      - 'distribution-command-worker.js'
-      - 'embed/**'
-      - 'wrangler.toml'
-      - '.github/workflows/distribution-embed-smoke.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  smoke:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Check embedded distribution endpoints
-        run: |
-          set -euo pipefail
-          curl -fsSL https://trytoolscout.org/embed/toolscout.js | grep -Fq '/go/embed'
-          curl -fsSL https://trytoolscout.org/embed/toolscout-pick.js | grep -Fq 'embed_pick'
-          curl -fsSL https://trytoolscout.org/embed/toolscout-finder.js | grep -Fq 'embed_finder'
-          curl -fsSL https://trytoolscout.org/embed/toolscout-compare.js | grep -Fq 'embed_compare'
-          curl -fsSL https://trytoolscout.org/embed/badge.svg | grep -Fq 'Powered by ToolScout'
-          curl -fsSL https://trytoolscout.org/api/distribution/feed.json | grep -Fq 'ToolScout Distribution Feed'
-          curl -fsSL https://trytoolscout.org/distribution/feed.xml | grep -Fq '<rss version="2.0">'
-          curl -fsSL https://trytoolscout.org/.well-known/toolscout-distribution.json | grep -Fq 'toolscout-finder.js'
-          curl -fsSL https://trytoolscout.org/.well-known/toolscout-distribution.json | grep -Fq 'toolscout-compare.js'
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

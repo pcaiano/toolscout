@@ -1,49 +1,14 @@
-name: ToolScout health check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '17 6 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Validate database
-        run: node scripts/validate-data.mjs
-      - name: Check source URLs
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const tools = JSON.parse(fs.readFileSync('data/tools.json', 'utf8'));
-          const urls = [...new Set(tools.map(t => t.sourceUrl).filter(Boolean))];
-          (async () => {
-            let failed = 0;
-            for (const url of urls) {
-              try {
-                const parsed = new URL(url);
-                if (!/^https?:$/.test(parsed.protocol)) {
-                  console.error(`INVALID ${url}`);
-                  failed++;
-                  continue;
-                }
-                const r = await fetch(url, {redirect: 'follow', headers: {'user-agent': 'ToolScout healthcheck/1.0'}});
-                console.log(`${r.status} ${url}`);
-                // External vendors commonly return 403/429 or transient network failures to automation.
-                // Hard-fail only on a confirmed vendor 5xx; URL structure is validated separately above.
-                if (r.status >= 500) failed++;
-              } catch (e) {
-                console.warn(`WARN ${url}: ${e.message}`);
-              }
-            }
-            if (failed) process.exit(1);
-          })();
-          NODE
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

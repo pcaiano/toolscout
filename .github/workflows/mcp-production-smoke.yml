@@ -1,65 +1,14 @@
-name: MCP Production Smoke
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  schedule:
-    - cron: '55 4 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
-env:
-  MCP_URL: https://trytoolscout.org/mcp
-  MCP_VERSION: 2026-07-28
-
 jobs:
-  smoke:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Discover stateless MCP server
-        run: |
-          set -euo pipefail
-          curl -fsSL "$MCP_URL" \
-            -H 'Content-Type: application/json' \
-            -H 'Accept: application/json' \
-            -H "MCP-Protocol-Version: $MCP_VERSION" \
-            -H 'Mcp-Method: server/discover' \
-            --data '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"toolscout-smoke","version":"1.0.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}' \
-            -o /tmp/discover.json
-          jq -e '.jsonrpc == "2.0" and .id == 1 and (.result.supportedVersions | index("2026-07-28")) != null and .result.capabilities.tools and .result.ttlMs == 3600000 and .result.cacheScope == "public" and .result._meta["io.modelcontextprotocol/serverInfo"].name == "ToolScout"' /tmp/discover.json >/dev/null
-      - name: List ToolScout MCP tools
-        run: |
-          set -euo pipefail
-          curl -fsSL "$MCP_URL" \
-            -H 'Content-Type: application/json' \
-            -H 'Accept: application/json' \
-            -H "MCP-Protocol-Version: $MCP_VERSION" \
-            -H 'Mcp-Method: tools/list' \
-            --data '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"toolscout-smoke","version":"1.0.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}' \
-            -o /tmp/tools.json
-          jq -e '.result.tools | length == 1' /tmp/tools.json >/dev/null
-          jq -e '.result.tools[0].name == "recommend_tools" and .result.tools[0].annotations.readOnlyHint == true and (.result.tools[0].inputSchema.required | index("q")) != null' /tmp/tools.json >/dev/null
-      - name: Call recommendation tool
-        run: |
-          set -euo pipefail
-          curl -fsSL "$MCP_URL" \
-            -H 'Content-Type: application/json' \
-            -H 'Accept: application/json' \
-            -H "MCP-Protocol-Version: $MCP_VERSION" \
-            -H 'Mcp-Method: tools/call' \
-            -H 'Mcp-Name: recommend_tools' \
-            --data '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"recommend_tools","arguments":{"q":"crm for a small sales team","budget":"low","team":"small","limit":3},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"toolscout-smoke","version":"1.0.0"},"io.modelcontextprotocol/clientCapabilities":{}}}}' \
-            -o /tmp/call.json
-          jq -e '.result.isError == false and .result.structuredContent.count == 3 and (.result.structuredContent.recommendations | length == 3) and .result.structuredContent.recommendations[0].name and (.result.structuredContent.recommendations[0].tool_url | startswith("https://trytoolscout.org/go/"))' /tmp/call.json >/dev/null
-      - name: Reject mismatched MCP routing headers
-        run: |
-          set -euo pipefail
-          code=$(curl -sS -o /tmp/mismatch.json -w '%{http_code}' "$MCP_URL" \
-            -H 'Content-Type: application/json' \
-            -H "MCP-Protocol-Version: $MCP_VERSION" \
-            -H 'Mcp-Method: tools/list' \
-            -H 'Mcp-Name: wrong_tool' \
-            --data '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"recommend_tools","arguments":{"q":"seo tools"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28"}}}')
-          test "$code" = "400"
-          jq -e '.error.code == -32020 and .error.message == "HeaderMismatch"' /tmp/mismatch.json >/dev/null
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

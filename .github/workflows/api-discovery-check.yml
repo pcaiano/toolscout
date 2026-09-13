@@ -1,40 +1,14 @@
-name: API Discovery Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apis.json'
-      - 'openapi.json'
-      - 'distribution-embed-worker.js'
-      - '.github/workflows/api-discovery-check.yml'
-  pull_request:
-    paths:
-      - 'apis.json'
-      - 'openapi.json'
-      - 'distribution-embed-worker.js'
-      - '.github/workflows/api-discovery-check.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Validate API discovery artifacts
-        run: |
-          set -euo pipefail
-          node --check distribution-embed-worker.js
-          node -e "const d=require('./apis.json'); if(d.specificationVersion!=='0.19'||d.url!=='https://trytoolscout.org/apis.json'||!Array.isArray(d.apis)||!d.apis.length) process.exit(1)"
-          node -e "const d=require('./openapi.json'); if(d.openapi!=='3.1.0'||!d.paths['/api/distribution/feed.json']||!d.paths['/.well-known/toolscout-distribution.json']) process.exit(1)"
-          grep -Fq "application/linkset+json" distribution-embed-worker.js
-          grep -Fq "https://www.rfc-editor.org/info/rfc9727" distribution-embed-worker.js
-          grep -Fq "u.pathname==='/.well-known/api-catalog'" distribution-embed-worker.js
-          grep -Fq "apis_json:'https://trytoolscout.org/apis.json'" distribution-embed-worker.js
-          grep -Fq "openapi:'https://trytoolscout.org/openapi.json'" distribution-embed-worker.js
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

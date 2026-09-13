@@ -1,61 +1,14 @@
-name: P0 Engines Production Cycle
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  schedule:
-    - cron: '25 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  cycle-proof:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Verify recent P0 production cycles with bounded D1 reads
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
-          node --input-type=module <<'NODE'
-          import { execFileSync } from 'node:child_process';
-
-          const usage=[];
-          function q(label,sql){
-            const out=execFileSync('npx',['wrangler','d1','execute','toolscout','--remote','--config','wrangler.toml','--json','--command',sql],{encoding:'utf8'});
-            const parsed=JSON.parse(out);
-            const block=Array.isArray(parsed)?parsed[0]:(Array.isArray(parsed?.result)?parsed.result[0]:parsed);
-            const rows=block?.results||[];
-            const meta=block?.meta||{};
-            usage.push({label,rowsRead:Number(meta.rows_read??meta.rowsRead??0),rowsWritten:Number(meta.rows_written??meta.rowsWritten??0),durationMs:Number(meta.duration??0)});
-            return rows;
-          }
-
-          const distribution=q('distribution_recent_qualification',`SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type='autonomous_distribution_qualification' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;`);
-          if(distribution.length<1)throw new Error('No recent Distribution Engine production qualification cycle found.');
-
-          const submissions=q('distribution_recent_submissions',`SELECT status,COUNT(*) AS count FROM distribution_submissions WHERE updated_at>=datetime('now','-2 hours') GROUP BY status ORDER BY status;`);
-
-          const affiliate=q('affiliate_latest_browser_confirmed_run',`SELECT id,human_outbound_clicks,monetized_human_outbound_clicks,unmonetized_human_outbound_clicks,weighted_coverage,queue_size,traffic_truth,created_at FROM affiliate_coverage_runs WHERE traffic_truth='browser_confirmed' AND created_at>=datetime('now','-2 hours') ORDER BY created_at DESC LIMIT 1;`);
-          const a=affiliate[0];
-          if(!a)throw new Error('No recent browser-confirmed Affiliate Coverage Engine production cycle found.');
-          const h=Number(a.human_outbound_clicks||0),m=Number(a.monetized_human_outbound_clicks||0),u=Number(a.unmonetized_human_outbound_clicks||0);
-          const wc=a.weighted_coverage==null?null:Number(a.weighted_coverage),expected=h?m/h:null;
-          if(h!==m+u)throw new Error(`Affiliate snapshot arithmetic mismatch: human=${h}, monetized=${m}, unmonetized=${u}`);
-          if((wc===null)!==(expected===null)||(wc!==null&&Math.abs(wc-expected)>1e-9))throw new Error(`Affiliate weighted coverage mismatch: observed=${wc}, expected=${expected}`);
-
-          const totalRowsRead=usage.reduce((sum,x)=>sum+x.rowsRead,0);
-          console.log('DISTRIBUTION_RECENT='+JSON.stringify(distribution[0]));
-          console.log('DISTRIBUTION_SUBMISSIONS='+JSON.stringify(submissions));
-          console.log('AFFILIATE_RECENT='+JSON.stringify(a));
-          console.log('D1_USAGE='+JSON.stringify({totalRowsRead,queries:usage}));
-          NODE
-
-      - name: Production cycle proof
-        run: echo 'Both P0 engines have persisted production-cycle evidence within the last two hours. The proof uses bounded recent-state queries and does not rescan historical click events.'
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

@@ -1,40 +1,14 @@
-name: ARD Catalog Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  pull_request:
-    paths:
-      - '.well-known/ai-catalog.json'
-      - '.github/workflows/ard-catalog-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - '.well-known/ai-catalog.json'
-      - '.github/workflows/ard-catalog-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Validate ARD catalog contract
-        run: |
-          node <<'NODE'
-          const fs=require('fs');
-          const p='.well-known/ai-catalog.json';
-          const c=JSON.parse(fs.readFileSync(p,'utf8'));
-          if(c.specVersion!=='1.0') throw new Error('ARD specVersion must be 1.0');
-          if(!Array.isArray(c.entries)||c.entries.length<3) throw new Error('Expected MCP, A2A and OpenAPI entries');
-          const ids=new Set();
-          for(const e of c.entries){
-            if(!/^urn:air:trytoolscout\.org:/.test(e.identifier||'')) throw new Error('Entry identifier must be domain anchored');
-            if(ids.has(e.identifier)) throw new Error('Duplicate ARD identifier'); ids.add(e.identifier);
-            if(!e.displayName||!e.type||!/^https:\/\/trytoolscout\.org\//.test(e.url||'')) throw new Error('Invalid ToolScout ARD entry');
-            if(!Array.isArray(e.representativeQueries)||e.representativeQueries.length<2||e.representativeQueries.length>5) throw new Error('Each entry needs 2-5 representativeQueries');
-          }
-          const types=c.entries.map(e=>e.type).join('\n');
-          for(const required of ['application/mcp-server-card+json','application/a2a-agent-card+json','application/vnd.oai.openapi+json;version=3.1']) if(!types.includes(required)) throw new Error(`Missing ${required}`);
-          console.log(`ARD catalog valid: ${c.entries.length} ToolScout capabilities`);
-          NODE
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

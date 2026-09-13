@@ -1,52 +1,14 @@
-name: Deploy ToolScout Social Image Worker
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "social-image-worker.js"
-      - "wrangler.social-image.toml"
-      - ".github/workflows/deploy-social-image-worker.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-social-image-production
-  cancel-in-progress: true
-
 jobs:
-  deploy:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Deploy social image Worker
-        run: npx wrangler deploy --config wrangler.social-image.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Smoke test Brand Composer without Workers AI quota
-        shell: bash
-        run: |
-          set -euo pipefail
-          sleep 4
-          ORIGIN='https://toolscout-social-image.luxurybuyerintelligence.workers.dev'
-          curl --fail --retry 3 --retry-delay 3 "$ORIGIN/health" -o /tmp/toolscout-health.json
-          grep -q '"renderer":"flux2-brand-composer-v18"' /tmp/toolscout-health.json
-          grep -q '"brandComposer":"raster-brand-assets"' /tmp/toolscout-health.json
-          curl --fail --retry 3 --retry-delay 3 -D /tmp/toolscout-headers.txt -o /tmp/toolscout-brand-smoke.jpg "$ORIGIN/brand-smoke"
-          grep -qi '^content-type: image/jpeg' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-renderer: flux2-brand-composer-v18' /tmp/toolscout-headers.txt
-          grep -qi '^x-toolscout-brand-composer: raster-brand-assets' /tmp/toolscout-headers.txt
-          test "$(head -c 2 /tmp/toolscout-brand-smoke.jpg | xxd -p)" = 'ffd8'
-          BYTES=$(wc -c < /tmp/toolscout-brand-smoke.jpg)
-          test "$BYTES" -gt 5000
-          echo "Quota-free Brand Composer smoke test passed: ${BYTES} bytes"
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

@@ -1,55 +1,14 @@
-name: P0 Engines Production Cycle Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/p0-engines-production-cycle.yml'
-      - '.github/workflows/p0-engines-production-cycle-check.yml'
-      - 'wrangler.toml'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/p0-engines-production-cycle.yml'
-      - '.github/workflows/p0-engines-production-cycle-check.yml'
-      - 'wrangler.toml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Validate cron-aligned P0 production proof
-        run: |
-          set -euo pipefail
-          f=.github/workflows/p0-engines-production-cycle.yml
-          test -s "$f"
-          test -s wrangler.toml
-          grep -Fq '"15 * * * *"' wrangler.toml
-          grep -Fq "cron: '25 * * * *'" "$f"
-          grep -Fq 'workflow_dispatch:' "$f"
-          grep -Fq 'CLOUDFLARE_API_TOKEN' "$f"
-          grep -Fq 'autonomous_distribution_qualification' "$f"
-          grep -Fq 'affiliate_coverage_runs' "$f"
-          grep -Fq "traffic_truth='browser_confirmed'" "$f"
-          grep -Fq "datetime('now','-2 hours')" "$f"
-          grep -Fq 'AFFILIATE COVERAGE STRICT PARITY' "$f"
-          grep -Fq "f.event_type='page_confirmed'" "$f"
-          grep -Fq 'expected_human' "$f"
-          grep -Fq 'expected_monetized' "$f"
-          grep -Fq 'Strict affiliate snapshot does not match browser-confirmed source events.' "$f"
-          grep -Fq 'Both P0 engines have persisted production-cycle evidence' "$f"
-          if grep -Fq 'Deploy ToolScout Worker' "$f"; then
-            echo 'Production-cycle proof must not race an arbitrary deploy. It runs after the real Worker cron instead.'
-            exit 1
-          fi
-          if grep -Fq 'ADMIN_TOKEN' "$f"; then
-            echo 'Production proof must not depend on duplicating Worker ADMIN_TOKEN into GitHub secrets.'
-            exit 1
-          fi
-          if grep -Eq '^  push:|/api/distribution/autonomous/refresh|/api/affiliate-coverage/run' "$f"; then
-            echo 'Production proof must inspect persisted evidence from the real scheduled engines, not manufacture a cycle through HTTP refresh endpoints.'
-            exit 1
-          fi
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

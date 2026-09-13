@@ -1,53 +1,14 @@
-name: Manual Distribution Discovery
-# Diagnostic acquisition refresh: 2026-09-12
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/manual-distribution-discovery.yml'
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  discover:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Request GitHub OIDC token
-        id: oidc
-        run: |
-          set -euo pipefail
-          RESPONSE=$(curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=toolscout-discovery")
-          TOKEN=$(printf '%s' "$RESPONSE" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);if(!j.value)process.exit(1);process.stdout.write(j.value)})")
-          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
-
-      - name: Trigger authenticated discovery refresh
-        env:
-          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
-        run: |
-          set -euo pipefail
-          curl --fail-with-body --silent --show-error \
-            --retry 2 \
-            --retry-delay 2 \
-            --connect-timeout 10 \
-            --max-time 90 \
-            -X POST \
-            -H "Authorization: Bearer ${OIDC_TOKEN}" \
-            -H "Accept: application/json" \
-            https://toolscout.luxurybuyerintelligence.workers.dev/api/distribution/discovery/refresh \
-            | tee discovery-result.json
-
-      - name: Validate discovery response
-        run: |
-          node - <<'NODE'
-          const fs=require('fs');
-          const d=JSON.parse(fs.readFileSync('discovery-result.json','utf8'));
-          if(d.ok!==true) process.exit(1);
-          for(const k of ['scanned','found','inserted']) if(typeof d[k]!=='number') process.exit(1);
-          console.log(`Discovery complete: scanned=${d.scanned}, found=${d.found}, inserted=${d.inserted}`);
-          NODE
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

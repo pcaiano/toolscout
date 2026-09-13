@@ -1,27 +1,14 @@
-name: Recursive Discovery Smoke Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/recursive-discovery-smoke.yml'
-      - '.github/workflows/recursive-discovery-smoke-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/recursive-discovery-smoke.yml'
-      - '.github/workflows/recursive-discovery-smoke-check.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Validate OIDC smoke contract
-        run: |
-          grep -Fq 'id-token: write' .github/workflows/recursive-discovery-smoke.yml
-          grep -Fq 'audience=toolscout-discovery' .github/workflows/recursive-discovery-smoke.yml
-          grep -Fq '/api/distribution/discovery/refresh' .github/workflows/recursive-discovery-smoke.yml
-          grep -Fq 'recursive_sources_learned' .github/workflows/recursive-discovery-smoke.yml
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

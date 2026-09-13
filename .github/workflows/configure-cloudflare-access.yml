@@ -1,105 +1,14 @@
-name: Configure Cloudflare Access
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/configure-cloudflare-access.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  configure:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Bootstrap Access and protect ToolScout Command Center
-        shell: bash
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          api='https://api.cloudflare.com/client/v4'
-          auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json')
-          owner='pcaiano@gmail.com'
-          domain='trytoolscout.org/analytics*'
-
-          accounts=$(curl -fsS "${auth[@]}" "$api/accounts?per_page=50")
-          account_id=$(echo "$accounts" | jq -r '.result[0].id // empty')
-          test -n "$account_id"
-
-          idps=$(curl -sS "${auth[@]}" "$api/accounts/$account_id/access/identity_providers")
-          echo '=== ACCESS IDENTITY PROVIDERS BEFORE ==='
-          echo "$idps" | jq '{success,errors,providers:[.result[]? | {name,type,id}]}'
-          if [ "$(echo "$idps" | jq -r '.success')" != 'true' ]; then
-            echo 'Unable to read Access identity providers.'
-            exit 3
-          fi
-
-          otp_id=$(echo "$idps" | jq -r '.result[]? | select(.type=="onetimepin") | .id' | head -n1)
-          if [ -z "$otp_id" ]; then
-            otp_payload='{"name":"One-time PIN login","type":"onetimepin","config":{}}'
-            created_idp=$(curl -sS -X POST "${auth[@]}" --data "$otp_payload" "$api/accounts/$account_id/access/identity_providers")
-            echo '=== CREATE ONE-TIME PIN IDENTITY PROVIDER ==='
-            echo "$created_idp" | jq '{success,errors,result:{id:.result.id,name:.result.name,type:.result.type}}'
-            if [ "$(echo "$created_idp" | jq -r '.success')" != 'true' ]; then exit 4; fi
-            otp_id=$(echo "$created_idp" | jq -r '.result.id')
-          else
-            echo "Existing one-time PIN provider found: ${otp_id:0:6}..."
-          fi
-
-          apps=$(curl -fsS "${auth[@]}" "$api/accounts/$account_id/access/apps?per_page=100")
-          app_id=$(echo "$apps" | jq -r --arg domain "$domain" '.result[]? | select(.domain==$domain) | .id' | head -n1)
-
-          if [ -z "$app_id" ]; then
-            payload=$(jq -nc --arg domain "$domain" --arg otp "$otp_id" '{name:"ToolScout Command Center",domain:$domain,type:"self_hosted",session_duration:"24h",app_launcher_visible:false,skip_interstitial:true,allowed_idps:[$otp]}')
-            created=$(curl -sS -X POST "${auth[@]}" --data "$payload" "$api/accounts/$account_id/access/apps")
-            echo '=== CREATE ACCESS APPLICATION ==='
-            echo "$created" | jq '{success,errors,result:{id:.result.id,name:.result.name,domain:.result.domain,type:.result.type,allowed_idps:.result.allowed_idps}}'
-            if [ "$(echo "$created" | jq -r '.success')" != 'true' ]; then exit 5; fi
-            app_id=$(echo "$created" | jq -r '.result.id')
-          else
-            echo "Existing Command Center Access app found: ${app_id:0:6}..."
-          fi
-
-          policies=$(curl -fsS "${auth[@]}" "$api/accounts/$account_id/access/apps/$app_id/policies?per_page=100")
-          policy_id=$(echo "$policies" | jq -r --arg owner "$owner" '.result[]? | select(.decision=="allow") | select(any(.include[]?; .email.email==$owner)) | .id' | head -n1)
-
-          if [ -z "$policy_id" ]; then
-            policy_payload=$(jq -nc --arg owner "$owner" '{name:"Allow ToolScout owner",decision:"allow",precedence:1,include:[{email:{email:$owner}}],exclude:[],require:[]}')
-            created_policy=$(curl -sS -X POST "${auth[@]}" --data "$policy_payload" "$api/accounts/$account_id/access/apps/$app_id/policies")
-            echo '=== CREATE OWNER POLICY ==='
-            echo "$created_policy" | jq '{success,errors,result:{id:.result.id,name:.result.name,decision:.result.decision,precedence:.result.precedence,include:.result.include}}'
-            if [ "$(echo "$created_policy" | jq -r '.success')" != 'true' ]; then exit 6; fi
-          else
-            echo "Existing owner allow policy found: ${policy_id:0:6}..."
-          fi
-
-          final_idps=$(curl -fsS "${auth[@]}" "$api/accounts/$account_id/access/identity_providers")
-          final_app=$(curl -fsS "${auth[@]}" "$api/accounts/$account_id/access/apps/$app_id")
-          final_policies=$(curl -fsS "${auth[@]}" "$api/accounts/$account_id/access/apps/$app_id/policies?per_page=100")
-          echo '=== FINAL ACCESS STATE ==='
-          echo "$final_idps" | jq '{success,providers:[.result[]? | {name,type,id}]}'
-          echo "$final_app" | jq '{success,application:{id:.result.id,name:.result.name,domain:.result.domain,type:.result.type,session_duration:.result.session_duration,allowed_idps:.result.allowed_idps}}'
-          echo "$final_policies" | jq '{success,policies:[.result[]? | {name,decision,precedence,include}]}'
-
-          echo '=== EDGE ACCESS SMOKE ==='
-          headers=$(mktemp)
-          body=$(mktemp)
-          set +e
-          curl -sS -o "$body" -D "$headers" --max-redirs 0 'https://trytoolscout.org/analytics/'
-          curl_rc=$?
-          set -e
-          status=$(awk 'NR==1{print $2}' "$headers")
-          location=$(awk 'BEGIN{IGNORECASE=1}/^location:/{sub(/\r$/,"",$0);print substr($0,11)}' "$headers" | head -n1)
-          echo "curl_rc=$curl_rc"
-          echo "status=$status"
-          echo "location_host=$(printf '%s' "$location" | sed -E 's#https?://([^/]+).*#\1#')"
-          if [ "$status" != '302' ] && [ "$status" != '303' ]; then
-            echo 'Expected Cloudflare Access redirect at edge.'
-            head -c 300 "$body" || true
-            exit 7
-          fi
-          echo "$location" | grep -qi 'cloudflareaccess.com' || { echo 'Redirect did not target Cloudflare Access.'; exit 8; }
-          echo 'Cloudflare Access is intercepting /analytics/ at the edge.'
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

@@ -1,98 +1,14 @@
-name: Affiliate Coverage Engine Check
+name: ToolScout GitHub Actions Conservation Mode
+
 on:
-  pull_request:
-    paths:
-      - 'affiliate-coverage-engine.js'
-      - 'affiliate-program-discovery.js'
-      - 'affiliate-coverage-cycle-worker.js'
-      - 'affiliate-coverage-entry-worker.js'
-      - 'affiliate-operations.js'
-      - 'agent-protocol-worker.js'
-      - 'migrations/0046_affiliate_coverage_engine.sql'
-      - 'migrations/0049_reconcile_stale_affiliate_actions.sql'
-      - 'migrations/0050_persist_affiliate_contact_evidence.sql'
-      - 'migrations/0063_affiliate_coverage_traffic_truth.sql'
-      - 'migrations/0064_affiliate_coverage_browser_confirmed_default.sql'
-      - '.github/workflows/affiliate-coverage-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'affiliate-coverage-engine.js'
-      - 'affiliate-program-discovery.js'
-      - 'affiliate-coverage-cycle-worker.js'
-      - 'affiliate-coverage-entry-worker.js'
-      - 'affiliate-operations.js'
-      - 'agent-protocol-worker.js'
-      - 'migrations/0046_affiliate_coverage_engine.sql'
-      - 'migrations/0049_reconcile_stale_affiliate_actions.sql'
-      - 'migrations/0050_persist_affiliate_contact_evidence.sql'
-      - 'migrations/0063_affiliate_coverage_traffic_truth.sql'
-      - 'migrations/0064_affiliate_coverage_browser_confirmed_default.sql'
-      - '.github/workflows/affiliate-coverage-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  check:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Validate engine invariants
-        run: |
-          node --check affiliate-coverage-engine.js
-          node --check affiliate-coverage-cycle-worker.js
-          node --check affiliate-coverage-entry-worker.js
-          test -s migrations/0049_reconcile_stale_affiliate_actions.sql
-          test -s migrations/0050_persist_affiliate_contact_evidence.sql
-          test -s migrations/0063_affiliate_coverage_traffic_truth.sql
-          test -s migrations/0064_affiliate_coverage_browser_confirmed_default.sql
-          grep -Fq "affiliate_coverage_reconciler" affiliate-coverage-entry-worker.js
-          grep -Fq "submitted_at" affiliate-coverage-entry-worker.js
-          grep -Fq "pending_review" affiliate-coverage-entry-worker.js
-          grep -Fq "rejected" affiliate-coverage-entry-worker.js
-          grep -Fq "CONTACTED_WORDS" affiliate-coverage-entry-worker.js
-          grep -Fq "POST_SUBMIT_HUMAN_WORDS" affiliate-coverage-entry-worker.js
-          grep -Fq "'attio','pending_review'" migrations/0050_persist_affiliate_contact_evidence.sql
-          grep -Fq "'ubersuggest','pending_review'" migrations/0050_persist_affiliate_contact_evidence.sql
-          grep -Fq "'zoho-crm','submitted'" migrations/0050_persist_affiliate_contact_evidence.sql
-          grep -Fq "gmail_owner_outreach" migrations/0050_persist_affiliate_contact_evidence.sql
-          grep -Fq "event_type='page_confirmed'" affiliate-coverage-cycle-worker.js
-          grep -Fq "browser_confirmed" affiliate-coverage-cycle-worker.js
-          grep -Fq "browserConfirmed" affiliate-coverage-engine.js
-          grep -Fq "traffic_truth:'browser_confirmed'" affiliate-coverage-engine.js
-          grep -Fq "DEFAULT 'legacy_session_classification'" migrations/0063_affiliate_coverage_traffic_truth.sql
-          grep -Fq "DEFAULT 'browser_confirmed'" migrations/0064_affiliate_coverage_browser_confirmed_default.sql
-          grep -Fq "traffic_truth IN ('legacy_session_classification','browser_confirmed')" migrations/0064_affiliate_coverage_browser_confirmed_default.sql
-          node --input-type=module <<'EOF'
-          import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
-          import {classifyProgramPage,discoverOfficialProgram} from './affiliate-program-discovery.js';
-          import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
-          const records=[
-            {slug:'a',status:'research_required',approval_probability:.8,commission_score:8,network_friction:2},
-            {slug:'b',status:'active'},
-            {slug:'c',status:'human_action_required'}
-          ];
-          const clicks=[
-            {tool_slug:'a',affiliate_active_at_click:0,source:'public-redirect',classification:'likely-human',browser_confirmed:1,clicks:12},
-            {tool_slug:'b',affiliate_active_at_click:1,source:'public-redirect',classification:'likely-human',browser_confirmed:1,clicks:8},
-            {tool_slug:'a',affiliate_active_at_click:0,source:'public-redirect',classification:'likely-human',browser_confirmed:0,clicks:50},
-            {tool_slug:'a',affiliate_active_at_click:0,source:'internal-test',classification:'owner',browser_confirmed:1,clicks:99}
-          ];
-          const s=coverageEngineSnapshot(records,clicks);
-          if(s.human_outbound_clicks!==20) throw Error('browser-confirmed human outbound mismatch');
-          if(s.monetized_human_outbound_clicks!==8) throw Error('browser-confirmed monetized mismatch');
-          if(Math.abs(s.weighted_coverage-.4)>1e-9) throw Error('browser-confirmed coverage mismatch');
-          if(s.traffic_truth!=='browser_confirmed') throw Error('traffic truth marker mismatch');
-          if(s.recoverable_queue[0].slug!=='a') throw Error('leakage priority mismatch');
-          if(automationBoundary(records[2]).mode!=='human') throw Error('human boundary mismatch');
-          const direct=classifyProgramPage({url:'https://example.com/affiliates',status:200,body:'Join our affiliate program and earn commission.'});
-          if(!direct.found||direct.network!=='Direct'||direct.automation_mode!=='research') throw Error('direct discovery mismatch');
-          const human=classifyProgramPage({url:'https://example.com/partners',status:200,body:'Partner program. Sign in and accept terms and conditions to apply.'});
-          if(!human.found||human.automation_mode!=='human') throw Error('human boundary discovery mismatch');
-          const fakeFetch=async url=>({url,status:url.endsWith('/affiliate-program')?200:404,text:async()=>url.endsWith('/affiliate-program')?'Official affiliate program. Earn commission.':'not found'});
-          const found=await discoverOfficialProgram({slug:'x',sourceUrl:'https://example.com/product'},{fetchImpl:fakeFetch,timeoutMs:100});
-          if(!found.found||found.status!=='program_exists') throw Error('official discovery failed');
-          if(typeof runAffiliateCoverageCycle!=='function') throw Error('cycle export missing');
-          await import('./affiliate-coverage-entry-worker.js');
-          console.log(JSON.stringify({coverage:s,discovery:found,cycle:'imported'},null,2));
-          EOF
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

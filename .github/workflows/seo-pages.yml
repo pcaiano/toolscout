@@ -1,116 +1,14 @@
-name: Generate SEO Pages
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    paths:
-      - 'data/**'
-      - '!data/affiliate.json'
-      - '!data/affiliate-pipeline.json'
-      - '!data/affiliate-queue.json'
-      - '!data/traffic-truth.json'
-      - 'scripts/**'
-      - 'robots.txt'
-      - 'llms.txt'
-      - '.github/workflows/seo-pages.yml'
-  schedule:
-    - cron: '45 3,9,15,21 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: seo-pages
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  generate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Validate intent coverage
-        run: node scripts/validate-intent-coverage.mjs
-      - name: Sync Google Search Console signals
-        env:
-          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
-          GSC_PROPERTY: sc-domain:trytoolscout.org
-          GSC_LOOKBACK_DAYS: '28'
-        run: node scripts/sync-gsc-signals.mjs
-      - name: Audit observed GSC slugs
-        run: node scripts/audit-gsc-slugs.mjs
-      - name: Scan competitive coverage gaps
-        run: node scripts/scan-competitive-gaps.mjs
-      - name: Build growth priority
-        run: node scripts/build-growth-priority.mjs
-      - name: Build organic growth opportunities
-        run: node scripts/build-organic-growth-opportunities.mjs
-      - name: Run closed-loop organic growth controller
-        run: node scripts/run-organic-growth-controller.mjs
-      - name: Build cross-channel content intelligence
-        run: node scripts/build-content-intelligence.mjs
-      - name: Generate pages
-        run: node scripts/generate-seo-pages.mjs
-      - name: Prune legacy and held SEO guides
-        run: node scripts/prune-uncontrolled-seo-guides.mjs
-      - name: Enrich guides with decision context
-        run: node scripts/enrich-decision-context.mjs
-      - name: Generate commercial comparisons
-        run: node scripts/generate-comparisons.mjs
-      - name: Enrich comparisons with decision context
-        run: node scripts/enrich-comparison-context.mjs
-      - name: Generate indexable tool profiles
-        run: node scripts/generate-tool-pages.mjs
-      - name: Prune orphan tool profiles
-        run: node scripts/prune-orphan-tool-profiles.mjs
-      - name: Link directory to indexable tool profiles
-        run: node scripts/link-static-tool-profiles.mjs
-      - name: Link guides to relevant comparisons
-        run: node scripts/enrich-guide-comparisons.mjs
-      - name: Apply closed-loop organic growth actions
-        run: node scripts/apply-organic-growth-actions.mjs
-      - name: Generate Software Trends Index
-        run: node scripts/generate-software-trends-index.mjs
-      - name: Validate ToolScout copy guard
-        run: node scripts/check-distribution-copy.mjs
-      - name: Generate blog topics
-        run: node scripts/build-blog-topics.mjs
-      - name: Generate blog
-        run: node scripts/generate-blog.mjs
-      - name: Generate distribution assets
-        run: node scripts/generate-distribution.mjs
-      - name: Build clean guide index
-        run: node scripts/build-distribution-index.mjs
-      - name: Build distribution queue
-        run: node scripts/build-distribution-queue.mjs
-      - name: Generate sitemap
-        run: node scripts/generate-sitemap.mjs
-      - name: Audit controlled SEO surface
-        run: node scripts/audit-controlled-seo-surface.mjs
-      - name: Validate AEO GEO readiness
-        run: node scripts/validate-aeo-geo-readiness.mjs
-      - name: Validate machine readability
-        run: node scripts/validate-machine-readability.mjs
-      - name: Validate SEO pages
-        run: node scripts/validate-seo-pages.mjs
-      - name: Validate editorial trust
-        run: node scripts/validate-editorial-trust.mjs
-      - name: Validate generated public surface
-        run: node scripts/validate-public-surface.mjs
-      - name: Validate commercial indexability and links
-        run: node scripts/validate-commercial-indexability.mjs
-      - name: Commit generated SEO assets
-        if: github.ref == 'refs/heads/main'
-        run: |
-          if [ -z "$(git status --porcelain -- '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
-            echo "No SEO/distribution asset changes to commit."
-            exit 0
-          fi
-          git config user.name "toolscout-seo-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
-          git commit -m "Refresh SEO, research, blog and distribution assets"
-          git pull --rebase origin main
-          git push origin HEAD:main
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

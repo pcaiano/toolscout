@@ -1,50 +1,14 @@
-name: Hype Star Integration Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'data/distribution-submission-adapters.json'
-      - 'distribution-command-worker.js'
-      - 'migrations/0041_add_hypestar_approval_route.sql'
-      - '.github/workflows/hypestar-integration-check.yml'
-  pull_request:
-    paths:
-      - 'data/distribution-submission-adapters.json'
-      - 'distribution-command-worker.js'
-      - 'migrations/0041_add_hypestar_approval_route.sql'
-      - '.github/workflows/hypestar-integration-check.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Validate approval-gated Hype Star route
-        run: |
-          set -euo pipefail
-          node --check distribution-command-worker.js
-          node - <<'NODE'
-          const fs=require('fs');
-          const d=JSON.parse(fs.readFileSync('data/distribution-submission-adapters.json','utf8'));
-          const a=d.adapters.find(x=>x.surface_slug==='hypestar');
-          if(!a) throw new Error('missing hypestar adapter');
-          if(a.endpoint!=='https://hypestar.org/api/v1/listings') throw new Error('wrong endpoint');
-          if(a.enabled!==false||a.allow_automatic!==false) throw new Error('hypestar must remain disabled');
-          if(a.setup_state!=='approval_required'||a.approval_required!==true) throw new Error('approval gate missing');
-          if(a.validated_kind!=='app'||a.validated_category!=='productivity-operations') throw new Error('validated taxonomy mismatch');
-          if(a.supporter_choice!=='not_offered') throw new Error('supporter badge must not be inferred');
-          if(!d.policy.never_automatic.includes('explicit_third_party_approval')) throw new Error('policy guard missing');
-          NODE
-          test -s migrations/0041_add_hypestar_approval_route.sql
-          grep -Fq "'hypestar','Hype Star'" migrations/0041_add_hypestar_approval_route.sql
-          grep -Fq "'approval_required'" migrations/0041_add_hypestar_approval_route.sql
-          grep -Fq "Approval required" distribution-command-worker.js
-          grep -Fq "o.status='approval_required'" distribution-command-worker.js
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

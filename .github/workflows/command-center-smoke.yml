@@ -1,63 +1,14 @@
-name: Command Center Smoke
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'analytics-v2.html'
-      - 'growth-command-center-v2-worker.js'
-      - 'agent-protocol-worker.js'
-      - 'affiliate-human-action-entry-worker.js'
-      - 'distribution-command-worker.js'
-      - 'wrangler.toml'
-      - '.github/workflows/command-center-smoke.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
-env:
-  PROD_BASE: https://trytoolscout.org
-
 jobs:
-  command-center:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify private analytics bridge
-        run: |
-          set -euo pipefail
-          headers="$(mktemp)"
-          body="$(mktemp)"
-          code="$(curl --silent --show-error --dump-header "$headers" --output "$body" --write-out '%{http_code}' --max-redirs 0 "$PROD_BASE/analytics/api/stats" || true)"
-          echo "HTTP $code"
-          cat "$headers"
-          if [ "$code" != "401" ]; then
-            echo "ERROR: expected the private bridge to reject a request without its Command Center cookie with HTTP 401."
-            echo "A redirect means Cloudflare Access is still intercepting the browser-to-data route; 200 means the route is exposed."
-            cat "$body"
-            exit 1
-          fi
-          grep -F 'application/json' "$headers"
-          grep -F 'command_center_session_expired' "$body"
-          echo 'Private analytics bridge is reachable directly and correctly protected by the Command Center session cookie.'
-
-      - name: Verify live Audience data source
-        run: |
-          set -euo pipefail
-          body="$(mktemp)"
-          ok=0
-          for attempt in 1 2 3 4 5 6; do
-            code="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' "$PROD_BASE/api/audience-health?t=$(date +%s)" || true)"
-            if [ "$code" = "200" ] && jq -e '.ok == true and (.totals.total | type == "number") and (.totals.published | type == "number") and (.byPlatform | type == "array")' "$body" >/dev/null; then
-              ok=1
-              break
-            fi
-            sleep 5
-          done
-          if [ "$ok" != "1" ]; then
-            echo 'ERROR: live Audience health feed is unavailable or malformed.'
-            cat "$body"
-            exit 1
-          fi
-          jq '{ok, totals, byPlatform, latest}' "$body"
-          echo 'Audience data source is live and queryable by the Command Center.'
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

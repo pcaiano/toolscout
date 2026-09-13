@@ -1,38 +1,14 @@
-name: Machine Discovery Integration Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'distribution-command-worker.js'
-      - 'migrations/0042_add_machine_discovery_surface.sql'
-      - '.github/workflows/machine-discovery-integration-check.yml'
-  pull_request:
-    paths:
-      - 'distribution-command-worker.js'
-      - 'migrations/0042_add_machine_discovery_surface.sql'
-      - '.github/workflows/machine-discovery-integration-check.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Validate machine discovery state
-        run: |
-          set -euo pipefail
-          node --check distribution-command-worker.js
-          test -s migrations/0042_add_machine_discovery_surface.sql
-          grep -Fq "'toolscout-machine-discovery','ToolScout Machine Discovery','machine_discovery'" migrations/0042_add_machine_discovery_surface.sql
-          grep -Fq "'live','https://trytoolscout.org/apis.json'" migrations/0042_add_machine_discovery_surface.sql
-          grep -Fq "surface_type='machine_discovery'" distribution-command-worker.js
-          grep -Fq "surface_type<>'machine_discovery'" distribution-command-worker.js
-          grep -Fq "card('Machine discovery',s.machineDiscovery" distribution-command-worker.js
-          grep -Fq "Confirmed third-party public destinations" distribution-command-worker.js
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

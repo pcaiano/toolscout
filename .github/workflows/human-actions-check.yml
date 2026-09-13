@@ -1,80 +1,14 @@
-name: Command Center Human Actions Check
+name: ToolScout GitHub Actions Conservation Mode
+
 on:
-  pull_request:
-    paths:
-      - 'human-action-entry-worker.js'
-      - 'affiliate-human-action-entry-worker.js'
-      - 'affiliate-human-action-state.js'
-      - 'affiliate-operations.js'
-      - 'agent-protocol-worker.js'
-      - 'command-center-affiliate-table-worker.js'
-      - 'growth-command-center-v2-worker.js'
-      - 'analytics-v2.html'
-      - '.github/workflows/human-actions-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'human-action-entry-worker.js'
-      - 'affiliate-human-action-entry-worker.js'
-      - 'affiliate-human-action-state.js'
-      - 'affiliate-operations.js'
-      - 'agent-protocol-worker.js'
-      - 'command-center-affiliate-table-worker.js'
-      - 'growth-command-center-v2-worker.js'
-      - '.github/workflows/human-actions-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  check:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Validate actionable queue
-        run: |
-          set -euo pipefail
-          node --check human-action-entry-worker.js
-          node --check affiliate-human-action-entry-worker.js
-          node --check affiliate-human-action-state.js
-          grep -Fq "'/analytics/api/human-actions'" human-action-entry-worker.js
-          ! grep -Fq "u.pathname==='/api/human-actions'" human-action-entry-worker.js
-          grep -Fq "SESSION_COOKIE='toolscout_cc'" human-action-entry-worker.js
-          grep -Fq "command_center_session_expired" human-action-entry-worker.js
-          grep -Fq "credentials:'same-origin'" human-action-entry-worker.js
-          grep -Fq "Open action" human-action-entry-worker.js
-          grep -Fq "Copy ChatGPT task" human-action-entry-worker.js
-          grep -Fq "CAPTCHA" human-action-entry-worker.js
-          grep -Fq "material legal terms" human-action-entry-worker.js
-          grep -Fq "unmonetized browser-confirmed outbound" human-action-entry-worker.js
-          grep -Fq "event_type='page_confirmed'" human-action-entry-worker.js
-          grep -Fq "classification,'unknown/legacy') IN ('likely-human','human')" human-action-entry-worker.js
-          grep -Fq "c.source NOT IN ('internal-test','synthetic','health-check','ci')" human-action-entry-worker.js
-          ! grep -Fq "unmonetized human outbound" human-action-entry-worker.js
-          grep -Fq "economic priority" human-action-entry-worker.js
-          grep -Fq "(o.human_required=1 OR o.status='approval_required')" human-action-entry-worker.js
-          grep -Fq "(o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend')" human-action-entry-worker.js
-          grep -Fq "/data/affiliate-pipeline.json" human-action-entry-worker.js
-          grep -Fq "/data/affiliate.json" human-action-entry-worker.js
-          grep -Fq "normalizeAffiliateState" human-action-entry-worker.js
-          grep -Fq "effectiveStatus" human-action-entry-worker.js
-          grep -Fq "source_of_truth:'canonical_affiliate_state'" human-action-entry-worker.js
-          grep -Fq "affiliate_source_of_truth:'canonical affiliate state + browser-confirmed outbound traffic'" human-action-entry-worker.js
-          grep -Fq "status==='ready_to_apply'" human-action-entry-worker.js
-          grep -Fq "status==='human_action_required'" human-action-entry-worker.js
-          grep -Fq "status==='approved_needs_link'" human-action-entry-worker.js
-          grep -Fq "POST_SUBMIT_HUMAN_WORDS" human-action-entry-worker.js
-          grep -Fq "STALE_WORDS" human-action-entry-worker.js
-          ! grep -Fq "function affiliateSql()" human-action-entry-worker.js
-          grep -Fq "'/analytics/api/affiliate-human-action'" affiliate-human-action-entry-worker.js
-          grep -Fq "Record contacted" affiliate-human-action-entry-worker.js
-          grep -Fq "Record submitted" affiliate-human-action-entry-worker.js
-          grep -Fq "command_center_human_action" affiliate-human-action-state.js
-          grep -Fq "contacted:'pending_review'" affiliate-human-action-state.js
-          grep -Fq "submitted:'submitted'" affiliate-human-action-state.js
-          node --check growth-command-center-v2-worker.js
-          node --check command-center-affiliate-table-worker.js
-          grep -Fq "import base from './command-center-affiliate-table-worker.js'" agent-protocol-worker.js
-          grep -Fq "import base from './growth-command-center-v2-worker.js'" command-center-affiliate-table-worker.js
-          grep -Fq "import base from './affiliate-human-action-entry-worker.js'" growth-command-center-v2-worker.js
-          grep -Fq "chairmanQueue" growth-command-center-v2-worker.js
-          grep -Fq "link_verification" growth-command-center-v2-worker.js
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'

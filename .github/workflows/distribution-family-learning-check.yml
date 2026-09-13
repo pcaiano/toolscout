@@ -1,47 +1,14 @@
-name: Distribution Family Learning Check
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  pull_request:
-    paths:
-      - 'distribution-discovery-worker.js'
-      - 'distribution-learning-worker.js'
-      - 'distribution-orchestrator-worker.js'
-      - '.github/workflows/distribution-family-learning-check.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'distribution-discovery-worker.js'
-      - 'distribution-learning-worker.js'
-      - 'distribution-orchestrator-worker.js'
-      - '.github/workflows/distribution-family-learning-check.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: {node-version: '22'}
-      - name: Validate syntax
-        run: |
-          node --check distribution-discovery-worker.js
-          node --check distribution-learning-worker.js
-          node --check distribution-orchestrator-worker.js
-      - name: Validate single learning owner
-        run: |
-          grep -Fq "score_mutation:false" distribution-learning-worker.js
-          grep -Fq "scores are owned exclusively by the economic learning loop" distribution-learning-worker.js
-          ! grep -Fq "UPDATE distribution_opportunities SET observed_human_sessions" distribution-learning-worker.js
-          grep -Fq "distribution_economic_learning" distribution-orchestrator-worker.js
-      - name: Validate positive-only family exploration
-        run: |
-          grep -Fq "FAMILY_BOOST_CAP=10" distribution-discovery-worker.js
-          grep -Fq "familySignals" distribution-discovery-worker.js
-          grep -Fq "economic_boost" distribution-discovery-worker.js
-          grep -Fq "parent_economic_boost" distribution-discovery-worker.js
-          grep -Fq "unseen families retain their full baseline score" distribution-discovery-worker.js
-          grep -Fq "family_boosted" distribution-discovery-worker.js
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
