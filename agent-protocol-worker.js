@@ -5,6 +5,10 @@ const WATCHLIST_QUEUE_BLOCK=new Set(['airtable','klaviyo']);
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const HUMAN_DISCOVERY_STATES=new Set(['ready_to_apply','human_action_required']);
 const QUALIFIED_EVIDENCE=/(official_publisher_affiliate_program|official_affiliate_watchlist)/i;
+const AGENTREADY_SURFACE='agentready-index';
+const AGENTREADY_MCP='https://www.agentready.it.com/api/mcp';
+const AGENTREADY_DIRECTORY='https://www.agentready.it.com/directory';
+const AGENTREADY_CRON='15 3 * * *';
 
 function slugOf(item){return String(item?.id||item?.tool_slug||'').trim().toLowerCase()}
 function normalizedUrl(value){try{const u=new URL(String(value||''));if(u.protocol!=='https:')return '';u.hash='';return u.toString().replace(/\/$/,'')}catch{return ''}}
@@ -91,6 +95,39 @@ async function filteredChairmanQueue(request,env,ctx){
   return Response.json(filterChairmanQueue(data,state),{headers:JSON_H});
 }
 
+async function agentReadyDue(env){
+  try{
+    const row=await env.DB.prepare(`SELECT COUNT(*) AS recent FROM distribution_events WHERE surface_slug=?1 AND event_type='automatic_index_refresh' AND status='completed' AND created_at>=datetime('now','-7 days')`).bind(AGENTREADY_SURFACE).first();
+    return Number(row?.recent||0)===0;
+  }catch{return false}
+}
+
+async function recordAgentReady(env,status,detail){
+  const eventId=`agentready_${crypto.randomUUID()}`;
+  if(status==='completed'){
+    await env.DB.batch([
+      env.DB.prepare(`INSERT INTO distribution_opportunities(surface_slug,surface_name,surface_type,audience_fit,authority,traffic_potential,backlink_value,acceptance_probability,automation_potential,effort_cost,distribution_score,status,action_url,live_url,human_required,last_checked_at,next_action,created_at,updated_at) VALUES(?1,'AgentReady','agent_discovery_index_api',94,72,76,70,99,100,5,88,'verified',?2,?3,0,datetime('now'),'Refresh automatically every seven days within the free quota and measure machine discovery value.',datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET status='verified',action_url=excluded.action_url,live_url=excluded.live_url,human_required=0,last_checked_at=datetime('now'),next_action=excluded.next_action,updated_at=datetime('now')`).bind(AGENTREADY_SURFACE,AGENTREADY_MCP,AGENTREADY_DIRECTORY),
+      env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,source_url,destination_url,detail,observed_at,created_at) VALUES(?1,?2,'automatic_index_refresh',?3,'product','https://trytoolscout.org/',?4,?5,datetime('now'),datetime('now'))`).bind(eventId,AGENTREADY_SURFACE,status,AGENTREADY_DIRECTORY,String(detail||'AgentReady accepted the automatic ToolScout index refresh.').slice(0,1000))
+    ]);
+    return;
+  }
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,source_url,destination_url,detail,observed_at,created_at) VALUES(?1,?2,'automatic_index_refresh',?3,'product','https://trytoolscout.org/',?4,?5,datetime('now'),datetime('now'))`).bind(eventId,AGENTREADY_SURFACE,status,AGENTREADY_DIRECTORY,String(detail||'AgentReady refresh failed.').slice(0,1000)).run();
+}
+
+async function refreshAgentReady(env){
+  if(!env?.DB||!(await agentReadyDue(env)))return;
+  try{
+    const response=await fetch(AGENTREADY_MCP,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'refresh_site',arguments:{domain:'trytoolscout.org'}}})});
+    const text=await response.text();
+    let payload=null;try{payload=JSON.parse(text)}catch{}
+    if(!response.ok||payload?.error||payload?.result?.isError)throw new Error(`AgentReady ${response.status}: ${text.slice(0,600)}`);
+    const detail=payload?.result?.content?.map(item=>item?.text).filter(Boolean).join(' ')||'AgentReady accepted the automatic ToolScout index refresh.';
+    await recordAgentReady(env,'completed',detail);
+  }catch(error){
+    try{await recordAgentReady(env,'failed',String(error?.message||error))}catch{}
+  }
+}
+
 const filteredBase={
   async fetch(request,env,ctx){
     const url=new URL(request.url);
@@ -99,7 +136,11 @@ const filteredBase={
     if(request.method==='GET'&&url.pathname==='/analytics/api/chairman-queue')return filteredChairmanQueue(request,env,ctx);
     return base.fetch(request,env,ctx);
   },
-  async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined;}
+  async scheduled(event,env,ctx){
+    const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
+    if(event?.cron===AGENTREADY_CRON)ctx.waitUntil(refreshAgentReady(env));
+    return result;
+  }
 };
 
 export default withPrivateAssets(filteredBase);
