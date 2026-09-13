@@ -2,7 +2,8 @@ name: Patch ToolScout Copy
 
 on:
   push:
-    branches: [software-trends-index]
+    branches:
+      - software-trends-index
     paths:
       - '.github/workflows/patch-toolscout-copy.yml'
 
@@ -13,43 +14,49 @@ jobs:
   patch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout branch
+        uses: actions/checkout@v4
         with:
           ref: software-trends-index
           fetch-depth: 0
-      - name: Remove forbidden distribution copy and extend guard
+
+      - name: Patch copy and guard
+        shell: bash
         run: |
-          node <<'NODE'
-          const fs=require('fs');
-          const worker='distribution-autonomous-worker.js';
-          let src=fs.readFileSync(worker,'utf8');
-          const longDash=String.fromCharCode(0x2014);
-          src=src.replace(`Find the right software for the job ${longDash} without the noise.`,`Find the right software for the job without the noise.`);
-          fs.writeFileSync(worker,src);
-          const guard=`import { readFileSync } from 'node:fs';
+          python3 - <<'PY'
+          from pathlib import Path
 
-const targets = [
-  'data/distribution-publishing-profile.json',
-  'distribution-submission-worker.js',
-  'distribution-autonomous-worker.js',
-  'distribution-linkable-assets-worker.js',
-  'scripts/generate-software-trends-index.mjs'
-].map(path => [path, readFileSync(path, 'utf8')]);
+          worker = Path('distribution-autonomous-worker.js')
+          text = worker.read_text()
+          text = text.replace('Find the right software for the job \u2014 without the noise.', 'Find the right software for the job without the noise.')
+          worker.write_text(text)
 
-const forbidden = /[\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015\\u2212]/u;
+          guard = '''import { readFileSync } from 'node:fs';
 
-for (const [path, text] of targets) {
-  if (forbidden.test(text)) {
-    throw new Error(\`${'${path}'} contains a forbidden Unicode dash in ToolScout-facing copy.\`);
-  }
-}
+          const targets = [
+            'data/distribution-publishing-profile.json',
+            'distribution-submission-worker.js',
+            'distribution-autonomous-worker.js',
+            'distribution-linkable-assets-worker.js',
+            'scripts/generate-software-trends-index.mjs'
+          ].map(path => [path, readFileSync(path, 'utf8')]);
 
-console.log('ToolScout distribution and research copy contains no forbidden Unicode dashes.');
-`;
-          fs.writeFileSync('scripts/check-distribution-copy.mjs',guard);
-          NODE
+          const forbidden = /[\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015\\u2212]/u;
+
+          for (const [path, text] of targets) {
+            if (forbidden.test(text)) {
+              throw new Error(`${path} contains a forbidden Unicode dash in ToolScout-facing copy.`);
+            }
+          }
+
+          console.log('ToolScout distribution and research copy contains no forbidden Unicode dashes.');
+          '''
+          Path('scripts/check-distribution-copy.mjs').write_text(guard)
+          PY
           node scripts/check-distribution-copy.mjs
+
       - name: Commit patch
+        shell: bash
         run: |
           if [ -z "$(git status --porcelain -- distribution-autonomous-worker.js scripts/check-distribution-copy.mjs)" ]; then
             echo 'Nothing to patch.'
