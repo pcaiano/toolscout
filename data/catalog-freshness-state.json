@@ -1,1016 +1,1016 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-12T09:20:40.037Z",
+  "generatedAt": "2026-09-13T10:16:46.773Z",
   "tools": {
     "systeme-io": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://systeme.io/",
       "fingerprint": "303df4986dd3bbf520690024",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 15
+      "factualReviewAgeDays": 16
     },
     "beehiiv": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.beehiiv.com/",
-      "fingerprint": "fdea9cfada15ee2b3f08527f",
+      "fingerprint": "12d08ba1e3229b2d808ce03d",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 13
+      "factualReviewAgeDays": 14
     },
     "hubspot": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.hubspot.com/",
       "fingerprint": "c87d598dfa311c80a2dc14cc",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "jotform": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.jotform.com/",
       "fingerprint": "d916d2b79935f86c0d063059",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "adcreative-ai": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.adcreative.ai/",
       "fingerprint": "c82fc94e5f24bb87250bb648",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 15
+      "factualReviewAgeDays": 16
     },
     "pipedrive": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.pipedrive.com/",
       "fingerprint": "8a574d57168112fa1681754b",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "semrush": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.semrush.com/",
-      "fingerprint": "2907072870cc0c277fcd3cf0",
+      "fingerprint": "d63bee5c9e66ce771e63c65a",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 15
+      "factualReviewAgeDays": 16
     },
     "jasper": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.jasper.ai/",
       "fingerprint": "ace35dd8b153d39e266ac34f",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 15
+      "factualReviewAgeDays": 16
     },
     "brevo": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.brevo.com/",
       "fingerprint": "a1b951fa70583d310cc10510",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "activecampaign": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.activecampaign.com/",
       "fingerprint": "b855c390e4b811b17deaf2c1",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "mailchimp": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://mailchimp.com/",
-      "fingerprint": "700a78fe3185a561c6d03894",
+      "fingerprint": "17392da1fd8d82552c1afd0a",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "zapier": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://zapier.com/",
       "fingerprint": "97090af57639da3eca5ca95d",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "make": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://www.make.com/en",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "zoho-crm": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.zoho.com/en-us/crm/",
       "fingerprint": "f820b32464f7a9fff875e6ba",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "monday-crm": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://monday.com/",
       "fingerprint": "90114af345bf8e64b5523db4",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "typeform": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.typeform.com/",
       "fingerprint": "a40ccc20b95fb3b60572856f",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "tally": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://tally.so/",
       "fingerprint": "d7e82a0e0ce4314618c8ab95",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "ahrefs": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://ahrefs.com/",
       "fingerprint": "f8ec17752ceabb907b868698",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "se-ranking": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://seranking.com/",
       "fingerprint": "f2264c7639f8e5ac6b7ed3b5",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "clickup": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://clickup.com/",
       "fingerprint": "5e09cc8b045e76e610847176",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 14
+      "factualReviewAgeDays": 15
     },
     "claude": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://claude.ai/",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "calendly": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://calendly.com/",
       "fingerprint": "064cf2d17b90d7c22195f4b7",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "posthog": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://posthog.com/",
       "fingerprint": "5bef9b3113e2638106d0f201",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "notion": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.notion.com/",
       "fingerprint": "635dd786207d9a4c46e81b29",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "asana": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://asana.com/",
       "fingerprint": "e873822278cf58c7c814484d",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "trello": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://trello.com/",
       "fingerprint": "514259e5571bd4ace1640637",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "airtable": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.airtable.com/",
       "fingerprint": "2f5b337b1396a6e9900b4eb6",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "n8n": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://n8n.io/",
       "fingerprint": "1502022be5b9ba7fa8346b5e",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "apollo": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.apollo.io/",
       "fingerprint": "b87c14de0f83b46a4a5deafd",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "lemlist": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.lemlist.com/",
       "fingerprint": "48cb2f55ec1a04205af1a3e2",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "intercom": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.intercom.com/",
-      "fingerprint": "bfc0012f32016bce426cf82c",
+      "fingerprint": "9f2c8a34a528d76f741c4e47",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "zendesk": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.zendesk.com/",
       "fingerprint": "8aea972705eecc82a3ba6e1b",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "instantly": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://instantly.ai/",
       "fingerprint": "7c3610fc0434642452c1c8b6",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "kit": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://kit.com/",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "klaviyo": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.klaviyo.com/",
       "fingerprint": "4807bda9a1e8dca38c2cb76d",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "canva": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://www.canva.com/",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "figma": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.figma.com/",
       "fingerprint": "31878e4d69d9a62e7032afe4",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "grammarly": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.grammarly.com/",
       "fingerprint": "893f9a59c6290eb7dff61198",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "buffer": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://buffer.com/",
-      "fingerprint": "8924253390eeb5f869d8163d",
+      "fingerprint": "8b0fdbcba7a65985bb2d78e4",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "webflow": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://webflow.com/",
       "fingerprint": "c7a4db2b183e98688e6add8c",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "surfer": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://surferseo.com/",
-      "fingerprint": "22e2f19a08c269fe7b25c7ce",
+      "fingerprint": "737d77f2364990e4977b2726",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "mixpanel": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://mixpanel.com/home/",
       "fingerprint": "3fed90ac77aee4674823e777",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "freshdesk": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.freshworks.com/freshdesk/",
       "fingerprint": "0a3375ce4b6bb8114be0ec72",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "framer": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.framer.com/",
       "fingerprint": "cbb6fd9e871d4a39ba84b2e9",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "perplexity": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://www.perplexity.ai/",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "slack": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://slack.com/",
       "fingerprint": "d147a3b5b8f4020c0b34fb5d",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "cursor": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://cursor.com/",
-      "fingerprint": "44b5bd745bf6c5fb7a25029f",
+      "fingerprint": "38b5f037e8cb93e5317f24ee",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "shopify": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.shopify.com/",
       "fingerprint": "55308e82ac5c5b3f5170674d",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "loom": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.loom.com/",
       "fingerprint": "f62ee1e2b5865f4f74022a0a",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "miro": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://miro.com/",
       "fingerprint": "abdd043d04bf5c9b105c169d",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "hootsuite": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.hootsuite.com/",
       "fingerprint": "ca8e52f985bacdb600a43e36",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "sprout-social": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://sproutsocial.com/",
       "fingerprint": "cd1aaf16d7c0080b149a7249",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "later": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://later.com/",
       "fingerprint": "857cbae38dce17f5e35e00df",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "socialbee": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://socialbee.com/",
       "fingerprint": "576b90621cf7fb36fdfa741a",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "hotjar": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
       "fingerprint": "5ce5095eb55bc0d60b65ada2",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "amplitude": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://amplitude.com/",
       "fingerprint": "9306808dffa77fe0bd8e498f",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "plausible": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://plausible.io/",
       "fingerprint": "36a949aa3247598a38e17933",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "matomo": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://matomo.org/",
-      "fingerprint": "2f22be6df728a9792c8d2b3f",
+      "fingerprint": "6871dab287ea8b4696073913",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "github": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://github.com/",
       "fingerprint": "bf18142d425f4238d27fd4e3",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "gitlab": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://about.gitlab.com/",
       "fingerprint": "d202917191f58d3fdc3be94a",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "replit": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://replit.com/",
       "fingerprint": "1a434adb8af731a5cca6a2dc",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "vercel": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://vercel.com/",
       "fingerprint": "eeb48815419671f6c44d5153",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "netlify": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.netlify.com/",
       "fingerprint": "75eb9e4f60a836366ee9812e",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "sentry": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://sentry.io/welcome/",
       "fingerprint": "f606f4bd569ea4c993d039e2",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "chatgpt": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://chatgpt.com/",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "gemini": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "network_warning",
       "httpStatus": null,
       "finalUrl": null,
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "notebooklm": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
-      "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S2067303273:1789204852935875",
+      "finalUrl": "https://accounts.google.com/v3/signin/identifier?continue=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&followup=https://notebook.google.com/login?continue%3Dhttps://notebook.google.com/&osid=1&passive=1209600&flowName=WebLiteSignIn&flowEntry=ServiceLogin&dsh=S-667737858:1789294622727483",
       "fingerprint": "0f7900c3e6f57f4c44d74021",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "copy-ai": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.copy.ai/",
       "fingerprint": "b87c915b85eb10a194f5fb62",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "moz-pro": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://moz.com/products/pro",
       "fingerprint": "7bf70231a1c87d4cb3845939",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "ubersuggest": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://neilpatel.com/ubersuggest/",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "mangools": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://mangools.com/",
       "fingerprint": "dd844a1620ec1ab1fd3cfe65",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "screaming-frog": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.screamingfrog.co.uk/seo-spider/",
       "fingerprint": "57fb083b5185bf816bc3231c",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "wix": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.wix.com/",
       "fingerprint": "6e665697e9e597b79b0542c0",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "squarespace": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.squarespace.com/",
       "fingerprint": "667b4b094e1c95a8285428c4",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "wordpress-com": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://wordpress.com/",
       "fingerprint": "eb8a49e7be3b5c4604862187",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "help-scout": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.helpscout.com/",
       "fingerprint": "9ba849d08a16b07cac569140",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "gorgias": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.gorgias.com/",
       "fingerprint": "ac40a0bf7249e66b5d3a3c0b",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "crisp": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://crisp.chat/en/",
       "fingerprint": "bf6b1f665b32c407643427f3",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "salesforce": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.salesforce.com/?bc=DB",
-      "fingerprint": "ca51aabf4cbb0ab585f4925b",
+      "fingerprint": "4feb7f174f250c66537b7f14",
       "contentChanged": true,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "close": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://close.com/",
       "fingerprint": "c8236e0b36486fa5e73fce63",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "copper": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.copper.com/",
       "fingerprint": "97fa23a5f017609fa7d76600",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "freshsales": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.freshworks.com/crm/sales/",
       "fingerprint": "ec24da04cda8b46a9b475457",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "attio": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://attio.com/",
       "fingerprint": "ab6356aa8976f062d0564bbc",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "mailerlite": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.mailerlite.com/",
       "fingerprint": "729f73b7b428063251cda030",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "getresponse": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.getresponse.com/",
       "fingerprint": "54c37a3cdb6d8af99330fb0b",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "omnisend": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.omnisend.com/",
       "fingerprint": "5d8ee4523d8281163b842092",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "constant-contact": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "blocked_or_limited",
       "httpStatus": 403,
       "finalUrl": "https://www.constantcontact.com/",
       "fingerprint": null,
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "basecamp": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://basecamp.com/",
       "fingerprint": "871e73f985102ff7ba6c2399",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "wrike": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.wrike.com/",
       "fingerprint": "151abb1a89b0bb7022a4dd44",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "linear": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://linear.app/",
       "fingerprint": "e9e9ee5ec1b912db9932c4cd",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "jira": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.atlassian.com/software/jira",
       "fingerprint": "417b01e74a8ab23b0871eb50",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "pabbly-connect": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.pabbly.com/connect/",
       "fingerprint": "c4e47d7092476e5869581f16",
-      "contentChanged": true,
+      "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "integrately": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://integrately.com/",
       "fingerprint": "86e9fccd83ad7c0e986f476f",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "workato": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.workato.com/",
       "fingerprint": "77305b1bce385c9cc7b05856",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "paperform": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://paperform.co/",
       "fingerprint": "ac924b70ebbd7ff047c25887",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "fillout": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.fillout.com/",
       "fingerprint": "699baa081fa7d805006d85b9",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "bigcommerce": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.bigcommerce.com/",
       "fingerprint": "c85d6a3d5215a3aa61d4d05a",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "woocommerce": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://woocommerce.com/",
       "fingerprint": "a6fbfaa604a80b0f5f1d333f",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "adobe-express": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.adobe.com/express/",
       "fingerprint": "90b94d8315948856b2c507d2",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "descript": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.descript.com/",
       "fingerprint": "f8fdf41e958d18c9d5ad25c7",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 11
+      "factualReviewAgeDays": 12
     },
     "podia": {
-      "sourceCheckedAt": "2026-09-12T09:20:40.037Z",
+      "sourceCheckedAt": "2026-09-13T10:16:46.773Z",
       "sourceStatus": "ok",
       "httpStatus": 200,
       "finalUrl": "https://www.podia.com/",
       "fingerprint": "d849394db9f2171b79d2bf8e",
       "contentChanged": false,
       "brokenConsecutive": 0,
-      "factualReviewAgeDays": 4
+      "factualReviewAgeDays": 5
     }
   }
 }
