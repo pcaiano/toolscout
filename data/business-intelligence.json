@@ -1,145 +1,145 @@
 {
-  "generatedAt": "2026-09-13T08:41:09.456Z",
+  "generatedAt": "2026-09-13T11:42:24.075Z",
   "timezone": "Europe/Lisbon",
   "definition": "Growth and funnel KPIs use observed likely-human public page entries. Redirect-only sessions are excluded. Revenue is reported only from revenue_ledger evidence and is never inferred from clicks.",
   "d1Usage": {
     "queryCount": 12,
-    "totalRowsRead": 8629,
+    "totalRowsRead": 8952,
     "totalRowsWritten": 0,
     "queries": [
       {
         "query": 1,
         "label": "SELECT COUNT(DISTINCT CASE WHEN s.classification='likely-human' THEN st.session_id END) likely_human,COUNT(DISTINCT CASE WHEN s.classificati",
-        "rowsRead": 60,
+        "rowsRead": 80,
         "rowsWritten": 0,
-        "durationMs": 0.3258
+        "durationMs": 2.426
       },
       {
         "query": 2,
         "label": "SELECT COUNT(*) total,SUM(classification='likely-human') likely_human,SUM(classification='known-bot/crawler') bots,SUM(classification='owner",
-        "rowsRead": 53,
+        "rowsRead": 77,
         "rowsWritten": 0,
-        "durationMs": 0.2287
+        "durationMs": 0.4308
       },
       {
         "query": 3,
         "label": "SELECT COUNT(DISTINCT CASE WHEN s.classification='likely-human' THEN st.session_id END) likely_human,COUNT(DISTINCT CASE WHEN s.classificati",
-        "rowsRead": 418,
+        "rowsRead": 430,
         "rowsWritten": 0,
-        "durationMs": 0.625
+        "durationMs": 3.0563
       },
       {
         "query": 4,
         "label": "SELECT COUNT(*) total,SUM(classification='likely-human') likely_human,SUM(classification='known-bot/crawler') bots,SUM(classification='owner",
-        "rowsRead": 521,
+        "rowsRead": 538,
         "rowsWritten": 0,
-        "durationMs": 0.7603
+        "durationMs": 0.5489
       },
       {
         "query": 5,
         "label": "SELECT COUNT(DISTINCT CASE WHEN s.classification='likely-human' THEN st.session_id END) likely_human,COUNT(DISTINCT CASE WHEN s.classificati",
-        "rowsRead": 698,
+        "rowsRead": 718,
         "rowsWritten": 0,
-        "durationMs": 0.6693
+        "durationMs": 1.5882
       },
       {
         "query": 6,
         "label": "SELECT COUNT(*) total,SUM(classification='likely-human') likely_human,SUM(classification='known-bot/crawler') bots,SUM(classification='owner",
-        "rowsRead": 1942,
+        "rowsRead": 1966,
         "rowsWritten": 0,
-        "durationMs": 1.0856
+        "durationMs": 2.221
       },
       {
         "query": 7,
         "label": "SELECT date(st.created_at,'+1 hour') day,COUNT(DISTINCT st.session_id) sessions FROM funnel_events st JOIN sessions s ON s.session_id=st.ses",
-        "rowsRead": 920,
+        "rowsRead": 950,
         "rowsWritten": 0,
-        "durationMs": 0.6501
+        "durationMs": 0.7473
       },
       {
         "query": 8,
         "label": "WITH started AS (SELECT session_id,MIN(created_at) started_at FROM funnel_events WHERE event_type='session_started' GROUP BY session_id) SEL",
-        "rowsRead": 1815,
+        "rowsRead": 1885,
         "rowsWritten": 0,
-        "durationMs": 1.5835
+        "durationMs": 2.9458
       },
       {
         "query": 9,
         "label": "WITH started AS (SELECT session_id,MIN(created_at) started_at FROM funnel_events WHERE event_type='session_started' GROUP BY session_id), re",
-        "rowsRead": 1167,
+        "rowsRead": 1207,
         "rowsWritten": 0,
-        "durationMs": 0.7266
+        "durationMs": 3.1326
       },
       {
         "query": 10,
         "label": "SELECT COALESCE(NULLIF(st.source,''),'direct') source,COUNT(DISTINCT st.session_id) sessions FROM funnel_events st JOIN sessions s ON s.sess",
-        "rowsRead": 930,
+        "rowsRead": 960,
         "rowsWritten": 0,
-        "durationMs": 1.0241
+        "durationMs": 1.2551
       },
       {
         "query": 11,
         "label": "SELECT currency,status,attribution_status,COUNT(*) conversions,SUM(commission) commission,SUM(amount) amount FROM revenue_ledger WHERE creat",
         "rowsRead": 3,
         "rowsWritten": 0,
-        "durationMs": 0.2235
+        "durationMs": 0.2328
       },
       {
         "query": 12,
         "label": "SELECT COALESCE(NULLIF(f.source,''),'direct') source,COALESCE(NULLIF(f.referrer_host,''),'none') referrer_host,COALESCE(NULLIF(f.path,''),'n",
-        "rowsRead": 102,
+        "rowsRead": 138,
         "rowsWritten": 0,
-        "durationMs": 0.3867
+        "durationMs": 0.6574
       }
     ]
   },
   "traffic": {
     "today": {
-      "total": 30,
-      "likelyHuman": 30,
+      "total": 40,
+      "likelyHuman": 40,
       "owner": 0,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 53,
-        "likelyHuman": 30,
+        "total": 77,
+        "likelyHuman": 40,
         "bots": 8,
         "owner": 0,
         "synthetic": 0,
-        "unknownLegacy": 15
+        "unknownLegacy": 29
       }
     },
     "d7": {
-      "total": 196,
-      "likelyHuman": 153,
-      "owner": 43,
+      "total": 204,
+      "likelyHuman": 162,
+      "owner": 42,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 521,
-        "likelyHuman": 153,
-        "bots": 190,
-        "owner": 43,
+        "total": 538,
+        "likelyHuman": 162,
+        "bots": 187,
+        "owner": 42,
         "synthetic": 0,
-        "unknownLegacy": 135
+        "unknownLegacy": 147
       }
     },
     "d30": {
-      "total": 292,
-      "likelyHuman": 215,
+      "total": 302,
+      "likelyHuman": 225,
       "owner": 77,
       "bots": 0,
       "synthetic": 0,
       "unknownLegacy": 0,
       "rawSessions": {
-        "total": 1942,
-        "likelyHuman": 215,
+        "total": 1966,
+        "likelyHuman": 225,
         "bots": 318,
         "owner": 78,
         "synthetic": 0,
-        "unknownLegacy": 1331
+        "unknownLegacy": 1345
       }
     },
     "dailyLikelyHuman30d": [
@@ -193,10 +193,10 @@
       },
       {
         "day": "2026-09-13",
-        "sessions": 30
+        "sessions": 40
       }
     ],
-    "averageDailyLikelyHuman30d": 7.17
+    "averageDailyLikelyHuman30d": 7.5
   },
   "funnel30d": {
     "recommendationStarted": {
@@ -226,12 +226,12 @@
     "sessionsWithOutbound": 3,
     "monetizedOutbound": 4,
     "monetizationCoverage": 19,
-    "humanSessionToOutboundRate": 1.4
+    "humanSessionToOutboundRate": 1.3
   },
   "sources30d": [
     {
       "source": "direct",
-      "sessions": 194
+      "sessions": 204
     },
     {
       "source": "utm_source=peerlist",
@@ -291,7 +291,7 @@
     },
     {
       "intent": "unlabelled",
-      "sessions": 215,
+      "sessions": 225,
       "recommendationCompletions": 0,
       "outboundClicks": 0
     },
@@ -309,7 +309,7 @@
         "source": "direct",
         "referrerHost": "none",
         "path": "/",
-        "sessions": 16
+        "sessions": 20
       },
       {
         "source": "direct",
@@ -320,7 +320,19 @@
       {
         "source": "direct",
         "referrerHost": "none",
+        "path": "/tools/airtable",
+        "sessions": 1
+      },
+      {
+        "source": "direct",
+        "referrerHost": "none",
         "path": "/tools/buffer",
+        "sessions": 1
+      },
+      {
+        "source": "direct",
+        "referrerHost": "none",
+        "path": "/tools/descript",
         "sessions": 1
       },
       {
@@ -345,6 +357,30 @@
         "source": "direct",
         "referrerHost": "none",
         "path": "/tools/hubspot",
+        "sessions": 1
+      },
+      {
+        "source": "direct",
+        "referrerHost": "none",
+        "path": "/tools/jotform",
+        "sessions": 1
+      },
+      {
+        "source": "direct",
+        "referrerHost": "none",
+        "path": "/tools/lemlist",
+        "sessions": 1
+      },
+      {
+        "source": "direct",
+        "referrerHost": "none",
+        "path": "/tools/mailchimp",
+        "sessions": 1
+      },
+      {
+        "source": "direct",
+        "referrerHost": "none",
+        "path": "/tools/make",
         "sessions": 1
       },
       {
@@ -388,10 +424,10 @@
     "knownRevenueStatus": "no-vendor-confirmed-revenue-recorded"
   },
   "projectionInputs": {
-    "humanSessions30d": 215,
-    "humanDailyAverage30d": 7.17,
+    "humanSessions30d": 225,
+    "humanDailyAverage30d": 7.5,
     "recommendationCompletionRate": 0.9,
-    "humanSessionToOutboundRate": 1.4,
+    "humanSessionToOutboundRate": 1.3,
     "monetizationCoverage": 19,
     "note": "Observed page-entry sessions only. Historical static-page landings that never emitted a session_started event cannot be reconstructed from D1."
   }
