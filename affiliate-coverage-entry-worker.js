@@ -2,7 +2,7 @@ import base from './distribution-impact-entry-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
-const FIRECRAWL_INGEST_TOKEN_SHA256='af5a8adb72a596ba3d08ca3c125d7e8616100369f7164eb3c8b3581a8f60b9be';
+const FIRECRAWL_INGEST_TOKEN_SHA256='7e6ba4679c32cdc72b1f8fe3e7d4a6e117dda3eaaff5d438ad11de147cd8bcd6';
 const FIRECRAWL_MONITORS=new Set(['01a0a0c1-f903-77af-abb4-ad5933198b0e','01a0a0c2-85be-713e-b00f-511186642d2e']);
 const FIRECRAWL_HOSTS=new Map([['apollo.io','apollo'],['lemlist.com','lemlist'],['unbounce.com','unbounce'],['hostinger.com','hostinger'],['klaviyo.com','klaviyo'],['airtable.com','airtable']]);
 const FIRECRAWL_PROTECTED=new Set(['submitted','pending_review','approved_needs_link','link_acquired','active','verified','earning','rejected']);
