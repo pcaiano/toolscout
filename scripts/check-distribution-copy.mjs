@@ -5,7 +5,9 @@ const targets = [
   'distribution-submission-worker.js',
   'distribution-autonomous-worker.js',
   'distribution-linkable-assets-worker.js',
-  'scripts/generate-software-trends-index.mjs'
+  'scripts/generate-distribution.mjs',
+  'scripts/generate-software-trends-index.mjs',
+  'feed.xml'
 ].map(path => [path, readFileSync(path, 'utf8')]);
 
 const forbidden = /[\u2010\u2011\u2012\u2013\u2014\u2015\u2212]/u;

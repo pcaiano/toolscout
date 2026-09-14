@@ -1,0 +1,88 @@
+INSERT INTO distribution_opportunities (
+  surface_slug,
+  surface_name,
+  surface_type,
+  audience_fit,
+  authority,
+  traffic_potential,
+  backlink_value,
+  acceptance_probability,
+  automation_potential,
+  effort_cost,
+  distribution_score,
+  status,
+  action_url,
+  live_url,
+  human_required,
+  last_checked_at,
+  next_action,
+  created_at,
+  updated_at
+) VALUES (
+  'rss',
+  'ToolScout RSS',
+  'syndication',
+  70,
+  45,
+  50,
+  40,
+  100,
+  100,
+  5,
+  68,
+  'live',
+  'https://trytoolscout.org/feed.xml',
+  'https://trytoolscout.org/feed.xml',
+  0,
+  datetime('now'),
+  'Keep feed.xml current, expose eligible new assets automatically and measure browser-confirmed visits with utm_source=toolscout_rss and utm_medium=distribution.',
+  datetime('now'),
+  datetime('now')
+)
+ON CONFLICT(surface_slug) DO UPDATE SET
+  surface_name=excluded.surface_name,
+  surface_type=excluded.surface_type,
+  audience_fit=excluded.audience_fit,
+  authority=excluded.authority,
+  traffic_potential=excluded.traffic_potential,
+  backlink_value=excluded.backlink_value,
+  acceptance_probability=excluded.acceptance_probability,
+  automation_potential=excluded.automation_potential,
+  effort_cost=excluded.effort_cost,
+  distribution_score=excluded.distribution_score,
+  status='live',
+  action_url=excluded.action_url,
+  live_url=excluded.live_url,
+  human_required=0,
+  last_checked_at=datetime('now'),
+  next_action=excluded.next_action,
+  updated_at=datetime('now');
+
+INSERT INTO distribution_events (
+  event_id,
+  surface_slug,
+  event_type,
+  status,
+  asset_type,
+  asset_id,
+  source_url,
+  destination_url,
+  detail,
+  observed_at,
+  created_at
+)
+SELECT
+  'rss_surface_enabled_v1',
+  'rss',
+  'surface_verified',
+  'live',
+  'syndication',
+  'feed.xml',
+  'https://trytoolscout.org/feed.xml',
+  'https://trytoolscout.org/feed.xml',
+  'RSS syndication surface enabled with Distribution Engine attribution on feed item links.',
+  datetime('now'),
+  datetime('now')
+WHERE NOT EXISTS (
+  SELECT 1 FROM distribution_events WHERE event_id='rss_surface_enabled_v1'
+);

@@ -12,7 +12,8 @@
     "indietool_category_preference": ["Productivity", "Marketing"],
     "differentiator": "Intent-driven recommendations: affiliate relationships never influence ranking.",
     "feed_json": "https://trytoolscout.org/api/distribution/feed.json",
-    "feed_rss": "https://trytoolscout.org/distribution/feed.xml",
+    "feed_rss": "https://trytoolscout.org/feed.xml",
+    "feed_rss_tracking": "utm_source=toolscout_rss&utm_medium=distribution&utm_campaign=syndication",
     "llms": "https://trytoolscout.org/llms.txt",
     "agents": "https://trytoolscout.org/agents.md",
     "manifest": "https://trytoolscout.org/.well-known/toolscout-distribution.json"
