@@ -23,6 +23,7 @@ run_worker_first = [
   "/categories*",
   "/crm-tools*",
   "/seo-tools*",
+  "/software-trends-index*",
   "/data/*",
   "/analytics*",
   "/api/stats*",
