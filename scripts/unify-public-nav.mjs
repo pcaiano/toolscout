@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { withGa4 } from '../ga4-html.js';
 
 const ROOT=process.cwd();
 const SKIP=new Set(['analytics.html','analytics-v2.html','affiliate-workflow.html','distribution-workflow.html','admin.html','click.html']);
@@ -49,6 +50,8 @@ for(const file of publicHtml(ROOT)){
   if(SKIP.has(rel)){skipped++;continue;}
   let html=fs.readFileSync(file,'utf8');
   if(!/<body\b/i.test(html)||!/<\/head>/i.test(html)){skipped++;continue;}
+  // Apply on every deployment, after generators have rebuilt public pages.
+  if (!rel.startsWith('embed/')) html = withGa4(html);
   const beforeUrls=html;
   html=cleanPublicUrls(html);
   if(html!==beforeUrls)cleanedUrls++;
