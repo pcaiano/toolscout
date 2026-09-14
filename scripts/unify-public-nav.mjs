@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT=process.cwd();
+const GA_MEASUREMENT_ID='G-9VR80SYYH7';
 const SKIP=new Set(['analytics.html','analytics-v2.html','affiliate-workflow.html','distribution-workflow.html','admin.html','click.html']);
 const NAV='<nav class="ts-global-nav" aria-label="Primary"><a href="/guides">Guides</a><a href="/blog/">Blog</a><a href="/tools">Tools</a><a href="/compare">Compare</a><a href="/methodology">Methodology</a></nav>';
 const LINKS='<div class="links"><a href="/guides">Guides</a><a href="/blog/">Blog</a><a href="/tools">Tools</a><a href="/compare">Compare</a><a href="/methodology">Methodology</a></div>';
@@ -73,4 +74,4 @@ for(const file of publicHtml(ROOT)){
   else html=html.replace(/<body([^>]*)>/i,`<body$1>${NAV}`);
   fs.writeFileSync(file,html,'utf8');updated++;injected++;
 }
-console.log(JSON.stringify({updated,skipped,existing,upgraded,injected,cleanedUrls,removedBrokenLinks,toolIndexUpdated,faviconAdded}));
+console.log(JSON.stringify({updated,skipped,existing,upgraded,injected,cleanedUrls,removedBrokenLinks,toolIndexUpdated,faviconAdded,gaMeasurementId:GA_MEASUREMENT_ID}));
