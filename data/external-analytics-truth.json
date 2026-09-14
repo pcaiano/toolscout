@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-14T15:38:00Z",
+  "timezone": "Europe/Lisbon",
+  "siteUrl": "sc-domain:trytoolscout.org",
+  "source": "GSC Wizard connectors",
+  "ga4": {
+    "status": "warming_up",
+    "propertyId": "properties/554080029",
+    "measurementId": "G-9VR80SYYH7",
+    "linked": true,
+    "consentBased": true,
+    "installedAt": "2026-09-14T15:15:08Z",
+    "today": {
+      "date": "2026-09-14",
+      "sessions": 0,
+      "activeUsers": 0,
+      "engagementRate": 0,
+      "keyEvents": 0,
+      "googleOrganicSessions": 0
+    },
+    "settled28d": {
+      "startDate": "2026-08-15",
+      "endDate": "2026-09-11",
+      "sessions": 0,
+      "activeUsers": 0,
+      "engagementRate": 0,
+      "keyEvents": 0,
+      "googleOrganicSessions": 0
+    },
+    "llmTraffic": {
+      "sessions": 0,
+      "status": "no_data_yet"
+    },
+    "note": "GA4 was installed after the current settled reporting window. Zero settled sessions are expected and must not be treated as a tracking failure."
+  },
+  "gsc": {
+    "status": "observed",
+    "startDate": "2026-08-15",
+    "endDate": "2026-09-11",
+    "settledThrough": "2026-09-12",
+    "clicks": 1,
+    "impressions": 1877,
+    "ctr": 0.0005327650506126798,
+    "position": 67.38092701118806,
+    "source": "gsc-api"
+  },
+  "definitions": {
+    "d1": "First-party browser-confirmed ToolScout activity. Primary operational truth for likely-human sessions and outbound monetization.",
+    "ga4": "Consent-based acquisition and engagement audit. Counts are expected to be lower than first-party D1 and should not replace it.",
+    "gsc": "Google Search source of truth for clicks, impressions, CTR and average position."
+  }
+}
