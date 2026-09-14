@@ -22,7 +22,6 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return augmentStats(await base.fetch(request,env,ctx),env);
-    if(request.method==='GET'&&url.pathname==='/analytics/api/behavior')return Response.json(await behaviorSnapshot(env),{headers:JSON_H});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorateBehaviorPage(response);
     return response;
