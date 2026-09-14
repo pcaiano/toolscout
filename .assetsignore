@@ -56,3 +56,6 @@ affiliate-workflow-worker.js
 private-assets.js
 growth-command-center-v2-worker.js
 command-center-affiliate-table-worker.js
+analytics-consent.js
+machine-discovery-extension.js
+traffic-truth-extension.js
