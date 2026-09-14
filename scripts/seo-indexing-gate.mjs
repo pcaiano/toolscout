@@ -22,6 +22,7 @@ fs.writeFileSync(outputPath, JSON.stringify({
   generatedAt: new Date().toISOString(),
   sourceGeneratedAt: indexing.generatedAt || null,
   blockedCount: blocked.length,
+  trackedCount: items.length,
   items
 }, null, 2) + '\n');
 
