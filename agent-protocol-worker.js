@@ -1,6 +1,7 @@
 import base from './command-center-affiliate-table-worker.js';
 import { withPrivateAssets } from './private-assets.js';
 import { augmentMachineDiscoveryStats, decorateMachineDiscoveryPage, syncAgentReadyVerified } from './machine-discovery-extension.js';
+import { augmentTrafficTruthStats, decorateTrafficTruthPage } from './traffic-truth-extension.js';
 import { analyticsConsentResponse, decoratePublicAnalytics } from './analytics-consent.js';
 
 const WATCHLIST_QUEUE_BLOCK=new Set(['airtable','klaviyo']);
@@ -65,13 +66,6 @@ function filterChairmanQueue(queue,state){
   return {...queue,items,broken_links:broken,external_verification_issues:external,total:items.length,estimated_minutes:items.reduce((sum,item)=>sum+Number(item.estimated_minutes||0),0),rule:'Affiliate human actions require qualified publisher-affiliate evidence, high-confidence discovery and an exact validated application URL. Watchlist, no-program, rejected and paused states are excluded.'};
 }
 
-async function trafficTruth(request,env){
-  try{
-    const response=await env.ASSETS.fetch(new Request(new URL('/data/traffic-truth.json',request.url)));
-    return response.ok?await response.json():{status:'unavailable',reason:`traffic truth asset ${response.status}`};
-  }catch(error){return {status:'unavailable',reason:String(error?.message||error)}}
-}
-
 async function filteredHumanActions(request,env,ctx){
   const upstream=await base.fetch(request,env,ctx);
   if(!upstream.ok)return upstream;
@@ -84,11 +78,11 @@ async function filteredStats(request,env,ctx){
   const upstream=await base.fetch(request,env,ctx);
   if(!upstream.ok)return upstream;
   let data;try{data=await upstream.json()}catch{return upstream}
-  const [state,truth]=await Promise.all([affiliateAdmissionState(env),trafficTruth(request,env)]);
+  const state=await affiliateAdmissionState(env);
   if(data?.growthOps?.chairmanQueue){
     data={...data,growthOps:{...data.growthOps,chairmanQueue:filterChairmanQueue(data.growthOps.chairmanQueue,state)}};
   }
-  data={...data,trafficTruth:truth,trafficIntegrity:{...(data.trafficIntegrity||{}),crossSourceStatus:truth?.reconciliation?.status||truth?.status||'unavailable',cloudflareRumStatus:truth?.cloudflareRum?.status||'unavailable',googleSearchConsoleStatus:truth?.googleSearchConsole?.status||'unavailable',truthGeneratedAt:truth?.generatedAt||null}};
+  data=await augmentTrafficTruthStats(data,request,env);
   data=await augmentMachineDiscoveryStats(data,env);
   return Response.json(data,{headers:JSON_H});
 }
@@ -102,7 +96,9 @@ async function filteredChairmanQueue(request,env,ctx){
 }
 
 async function decoratedAnalytics(request,env,ctx){
-  return decorateMachineDiscoveryPage(await base.fetch(request,env,ctx));
+  let response=await base.fetch(request,env,ctx);
+  response=await decorateMachineDiscoveryPage(response);
+  return decorateTrafficTruthPage(response);
 }
 
 const filteredBase={
