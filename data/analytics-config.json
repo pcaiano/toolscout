@@ -1,11 +1,28 @@
 {
-  "version": 1,
-  "provider": "google-analytics-4",
-  "propertyId": "554080029",
-  "measurementId": "G-9VR80SYYH7",
+  "version": 2,
+  "providers": {
+    "ga4": {
+      "propertyId": "554080029",
+      "measurementId": "G-9VR80SYYH7",
+      "linkedInGscWizard": true
+    },
+    "posthog": {
+      "projectId": 274385,
+      "region": "EU",
+      "apiHost": "https://eu.i.posthog.com",
+      "consentRequired": true,
+      "autocapture": false,
+      "sessionRecording": false,
+      "heatmaps": false,
+      "pageviews": true,
+      "pageleave": true,
+      "errorTracking": true,
+      "performance": true,
+      "personProfiles": "identified_only"
+    }
+  },
   "siteUrl": "https://trytoolscout.org",
   "gscWizardSiteUrl": "sc-domain:trytoolscout.org",
-  "linkedInGscWizard": true,
   "consentRequired": true,
   "defaultAnalyticsStorage": "denied",
   "publicOnly": true,
@@ -24,5 +41,6 @@
   "plannedEvents": [
     "monetized_outbound"
   ],
-  "launchedAt": "2026-09-14"
+  "ga4LaunchedAt": "2026-09-14",
+  "posthogLaunchedAt": "2026-09-14"
 }
