@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "enabled": true,
+  "sitemapUrl": "https://trytoolscout.org/sitemap.xml",
+  "maxUrlsPerCycle": 500,
+  "inspectionConcurrency": 4,
+  "minimumHoursBetweenInspections": 5,
+  "barrierStatuses": [
+    "canonical-alternate",
+    "crawled-not-indexed",
+    "discovered-not-indexed",
+    "blocked",
+    "redirected",
+    "error"
+  ],
+  "unknownStatusBehavior": "preserve-existing-behavior"
+}
