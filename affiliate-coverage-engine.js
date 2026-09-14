@@ -3,10 +3,17 @@ import { normalizeAffiliateState, MONETIZED_STATES, TERMINAL_UNMONETIZABLE_STATE
 const HUMAN_CLASSIFICATIONS = new Set(['likely-human','human']);
 const EXCLUDED_SOURCES = new Set(['internal-test','synthetic','health-check','ci']);
 
+export function behaviorDemandSignal(record) {
+  const unmonetized = Math.max(0, Number(record.unmonetized_clicks_30d || 0));
+  const outbound = Math.max(0, Number(record.outbound_clicks_30d || 0));
+  const core = Math.min(50, unmonetized * 4);
+  const confirmation = Math.min(5, outbound * 0.5);
+  return Math.round(Math.min(55, core + confirmation) * 10) / 10;
+}
+
 export function leakageScore(record) {
   if (MONETIZED_STATES.has(normalizeAffiliateState(record.status))) return 0;
-  const clicks = Math.max(0, Number(record.unmonetized_clicks_30d || 0));
-  const demand = Math.min(50, clicks * 4);
+  const demand = behaviorDemandSignal(record);
   const approval = Math.max(0, Math.min(20, Number(record.approval_probability ?? 0.5) * 20));
   const economics = Math.max(0, Math.min(20, Number(record.commission_score ?? 5) * 2));
   const friction = Math.max(0, Math.min(15, Number(record.network_friction ?? 5)));
@@ -35,10 +42,11 @@ export function coverageEngineSnapshot(records, clickRows = []) {
   const queue=records.map(r=>{
     const clicks=byTool.get(r.slug)||{outbound:0,monetized:0};
     const item={...r,outbound_clicks_30d:clicks.outbound,monetized_clicks_30d:clicks.monetized,unmonetized_clicks_30d:Math.max(0,clicks.outbound-clicks.monetized)};
+    item.behavior_demand_signal=behaviorDemandSignal(item);
     item.leakage_score=leakageScore(item);
     return item;
   }).filter(r=>!MONETIZED_STATES.has(normalizeAffiliateState(r.status)) && !TERMINAL_UNMONETIZABLE_STATES.has(normalizeAffiliateState(r.status))).sort((a,b)=>b.leakage_score-a.leakage_score||b.unmonetized_clicks_30d-a.unmonetized_clicks_30d);
-  return {window_days:30,human_outbound_clicks:total,monetized_human_outbound_clicks:monetized,unmonetized_human_outbound_clicks:unmonetized,weighted_coverage:total?monetized/total:null,recoverable_queue:queue.slice(0,25),traffic_truth:'browser_confirmed'};
+  return {window_days:30,human_outbound_clicks:total,monetized_human_outbound_clicks:monetized,unmonetized_human_outbound_clicks:unmonetized,weighted_coverage:total?monetized/total:null,recoverable_queue:queue.slice(0,25),traffic_truth:'browser_confirmed',behavior_model:'canonical_outbound_mirrored_to_posthog',behavior_guardrail:'Affiliate prioritization uses first-party browser-confirmed outbound behavior. PostHog validates the consented subset and does not determine monetization state.'};
 }
 
 export function automationBoundary(record) {
