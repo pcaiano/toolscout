@@ -7,10 +7,15 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const HUMAN_DISCOVERY_STATES=new Set(['ready_to_apply','human_action_required']);
 const QUALIFIED_EVIDENCE=/(official_publisher_affiliate_program|official_affiliate_watchlist)/i;
 const AGENTREADY_CRON='15 3 * * *';
+const PUBLIC_BASE='https://trytoolscout.org';
 
 function slugOf(item){return String(item?.id||item?.tool_slug||'').trim().toLowerCase()}
 function normalizedUrl(value){try{const u=new URL(String(value||''));if(u.protocol!=='https:')return '';u.hash='';return u.toString().replace(/\/$/,'')}catch{return ''}}
 function analyticsPath(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/analytics-v2'||path==='/analytics-v2/'||path==='/analytics-v2.html'}
+function cleanPublicMarkup(value){return String(value||'').replace(/https:\/\/trytoolscout\.org(\/[^"'<>\s?#]*)\.html(?=([?#"'<>\s]|$))/g,`${PUBLIC_BASE}$1`).replace(/(["'])(\/[^"'<>\s?#]*)\.html(?=([?#]|["']))/g,'$1$2').replace(/(["'])(\.\/[^"'<>\s?#]*)\.html(?=([?#]|["']))/g,'$1$2')}
+function rebuiltResponse(response,body,contentType){const headers=new Headers(response.headers);if(contentType)headers.set('Content-Type',contentType);headers.delete('Content-Length');headers.delete('Content-Encoding');headers.delete('ETag');return new Response(body,{status:response.status,statusText:response.statusText,headers})}
+async function cleanSitemap(request,env){try{const response=await env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url)));if(!response.ok)return response;const xml=(await response.text()).replace(/\.html(?=<\/loc>)/g,'');return rebuiltResponse(response,xml,'application/xml; charset=UTF-8')}catch{return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://trytoolscout.org/</loc></url></urlset>',{status:200,headers:{'Content-Type':'application/xml; charset=UTF-8','Cache-Control':'public, max-age=3600'}})}}
+async function cleanPublicHtml(response){const type=String(response.headers.get('Content-Type')||'').toLowerCase();if(!response.ok||!type.includes('text/html'))return response;const html=cleanPublicMarkup(await response.text());return rebuiltResponse(response,html,response.headers.get('Content-Type')||'text/html; charset=UTF-8')}
 
 async function affiliateAdmissionState(env){
   const blocked=new Set(WATCHLIST_QUEUE_BLOCK),qualified=new Map(),approvedNeedsLink=new Set();
@@ -102,11 +107,14 @@ async function decoratedAnalytics(request,env,ctx){
 const filteredBase={
   async fetch(request,env,ctx){
     const url=new URL(request.url);
+    if(request.method==='GET'&&url.pathname==='/sitemap.xml')return cleanSitemap(request,env);
     if(request.method==='GET'&&url.pathname==='/analytics/api/human-actions')return filteredHumanActions(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return filteredStats(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/chairman-queue')return filteredChairmanQueue(request,env,ctx);
     if(request.method==='GET'&&analyticsPath(url.pathname))return decoratedAnalytics(request,env,ctx);
-    return base.fetch(request,env,ctx);
+    const upstream=await base.fetch(request,env,ctx);
+    if(request.method==='GET'&&!analyticsPath(url.pathname))return cleanPublicHtml(upstream);
+    return upstream;
   },
   async scheduled(event,env,ctx){
     const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
