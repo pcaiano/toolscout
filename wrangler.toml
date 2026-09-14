@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "agent-protocol-worker.js"
+main = "posthog-behavior-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
