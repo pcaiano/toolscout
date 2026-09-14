@@ -7,6 +7,7 @@ const NAV='<nav class="ts-global-nav" aria-label="Primary"><a href="/guides">Gui
 const LINKS='<div class="links"><a href="/guides">Guides</a><a href="/blog/">Blog</a><a href="/tools">Tools</a><a href="/compare">Compare</a><a href="/methodology">Methodology</a></div>';
 const CSS='<style id="ts-global-nav-style">.ts-global-nav{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 32px}.ts-global-nav a{color:#667085;text-decoration:none;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500}.ts-global-nav a:hover{background:#fff;color:#101828;box-shadow:0 5px 18px rgba(16,24,40,.06)}@media(max-width:700px){.ts-global-nav{justify-content:flex-start;gap:2px;margin-bottom:24px}.ts-global-nav a{padding:8px 9px}}</style>';
 const TOOL_INDEX_CSS='<style id="ts-tool-profile-index-style">.tool-profile-index{margin-top:44px;padding:28px;background:rgba(255,255,255,.82);border:1px solid #e2e7ed;border-radius:22px}.tool-profile-index h2{margin:0 0 8px;font-size:28px;letter-spacing:-.03em}.tool-profile-index>p{margin:0 0 22px;color:#667085}.tool-profile-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px}.tool-profile-group h3{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#667085}.tool-profile-links{display:flex;flex-wrap:wrap;gap:8px 12px}.tool-profile-links a{font-size:13px;color:#344054;text-decoration:none}.tool-profile-links a:hover{text-decoration:underline}</style>';
+const FAVICON_LINK='<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate icon" href="/favicon.svg">';
 const CANONICAL_LABELS=['Guides','Blog','Tools','Compare','Methodology'];
 const BROKEN_LOCAL_SLUGS=['best-ai-ad-creative-tools','best-no-code-automation-tools'];
 const PUBLIC_HTML_URL_RE=/(["'])((?:https:\/\/trytoolscout\.org)?\/[^"'<>?#\s]+)\.html([?#][^"']*)?\1/g;
@@ -17,6 +18,7 @@ function hasCanonicalNav(html){return navBlocks(html).some(nav=>CANONICAL_LABELS
 function upgradeBrandedNav(html){return html.replace(/<nav>([\s\S]*?<a class="brand"[\s\S]*?<\/a>)[\s\S]*?<div class="links">[\s\S]*?<\/div><\/nav>/i,`<nav>$1${LINKS}</nav>`);}
 function cleanPublicUrls(html){return html.replace(PUBLIC_HTML_URL_RE,(_m,q,url,suffix='')=>`${q}${url}${suffix||''}${q}`);}
 function removeKnownBrokenLinks(html){for(const slug of BROKEN_LOCAL_SLUGS){const re=new RegExp(`<a\\b[^>]*\\bhref=["']\\/${slug}(?:\\.html)?["'][^>]*>([\\s\\S]*?)<\\/a>`,'gi');html=html.replace(re,'$1');}return html;}
+function ensureFavicon(html){if(/<link\b[^>]*\brel=["'][^"']*icon[^"']*["'][^>]*>/i.test(html))return html;return html.replace(/<\/head>/i,`${FAVICON_LINK}</head>`);}
 function readJson(rel,fallback=[]){try{return JSON.parse(fs.readFileSync(path.join(ROOT,rel),'utf8'));}catch{return fallback;}}
 function esc(value){return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');}
 function toolProfileIndex(){
@@ -41,7 +43,7 @@ function injectToolProfileIndex(html,rel){
   return html.replace(/<\/body>/i,`${index}</body>`);
 }
 
-let updated=0,skipped=0,existing=0,upgraded=0,injected=0,cleanedUrls=0,removedBrokenLinks=0,toolIndexUpdated=0;
+let updated=0,skipped=0,existing=0,upgraded=0,injected=0,cleanedUrls=0,removedBrokenLinks=0,toolIndexUpdated=0,faviconAdded=0;
 for(const file of publicHtml(ROOT)){
   const rel=path.relative(ROOT,file).replaceAll('\\','/');
   if(SKIP.has(rel)){skipped++;continue;}
@@ -56,6 +58,9 @@ for(const file of publicHtml(ROOT)){
   const beforeIndex=html;
   html=injectToolProfileIndex(html,rel);
   if(html!==beforeIndex)toolIndexUpdated++;
+  const beforeFavicon=html;
+  html=ensureFavicon(html);
+  if(html!==beforeFavicon)faviconAdded++;
   html=html.replace(/<nav class="ts-global-nav"[\s\S]*?<\/nav>/gi,'').replace(/<style id="ts-global-nav-style">[\s\S]*?<\/style>/gi,'');
   if(/<a class="brand"[\s\S]*?>ToolScout<\/a>/i.test(html)){
     const next=upgradeBrandedNav(html);
@@ -68,4 +73,4 @@ for(const file of publicHtml(ROOT)){
   else html=html.replace(/<body([^>]*)>/i,`<body$1>${NAV}`);
   fs.writeFileSync(file,html,'utf8');updated++;injected++;
 }
-console.log(JSON.stringify({updated,skipped,existing,upgraded,injected,cleanedUrls,removedBrokenLinks,toolIndexUpdated}));
+console.log(JSON.stringify({updated,skipped,existing,upgraded,injected,cleanedUrls,removedBrokenLinks,toolIndexUpdated,faviconAdded}));
