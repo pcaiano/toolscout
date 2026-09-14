@@ -124,6 +124,10 @@ Revenue Gap score is `10 × unmonetized outbound + 2 × human sessions (capped a
 
 ## Current production state
 
+### GA4 installation prepared — 2026-09-14
+
+The owner created ToolScout Web for `https://trytoolscout.org`, Web Stream ID `15775395660`, Measurement ID `G-9VR80SYYH7`, and confirmed Enhanced Measurement is active. The consent-gated tag integration is prepared with public-page coverage and automated tests; it is not yet production-verified. Deployment is blocked by unavailable direct Cloudflare authentication while GitHub deployment workflows remain in conservation mode. See `docs/GA4.md` for the release procedure and receipt checks. Property time zone/currency and GA4 data receipt remain unverified.
+
 - Public domain: `trytoolscout.org`
 - Repository: `pcaiano/toolscout`
 - Worker: `toolscout`
