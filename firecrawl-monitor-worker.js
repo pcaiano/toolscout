@@ -1,5 +1,3 @@
-import base from './posthog-behavior-worker.js';
-
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MONITORS=new Set([
   '01a0a0c1-f903-77af-abb4-ad5933198b0e',
@@ -67,17 +65,8 @@ async function recordEvidence(env,slug,event){
     env.DB.prepare('SELECT status,network,program_url,application_url,blocker,evidence_json FROM affiliate_workflow WHERE tool_slug=?').bind(slug).first()
   ]);
   const evidence=parseEvidence(discovery?.evidence_json);
-  evidence.push({
-    type:'firecrawl_monitor',
-    monitor_id:event.monitorId,
-    check_id:event.checkId,
-    url:event.url,
-    page_status:event.pageStatus,
-    meaningful:event.meaningful,
-    judgment:event.judgment,
-    diff:event.diff,
-    observed_at:new Date().toISOString()
-  });
+  const entry={type:'firecrawl_monitor',monitor_id:event.monitorId,check_id:event.checkId,url:event.url,page_status:event.pageStatus,meaningful:event.meaningful,judgment:event.judgment,diff:event.diff,observed_at:new Date().toISOString()};
+  evidence.push(entry);
   const trimmed=evidence.slice(-20),current=String(workflow?.status||discovery?.status||'research_required').toLowerCase();
   const changed=['changed','new','removed'].includes(event.pageStatus)&&event.meaningful;
   const protectedState=PROTECTED_STATES.has(current);
@@ -89,7 +78,7 @@ async function recordEvidence(env,slug,event){
     ON CONFLICT(tool_slug) DO UPDATE SET status=excluded.status,official_program_url=COALESCE(excluded.official_program_url,affiliate_program_discovery.official_program_url),application_url=COALESCE(affiliate_program_discovery.application_url,excluded.application_url),network=COALESCE(affiliate_program_discovery.network,excluded.network),evidence_json=excluded.evidence_json,automation_mode=excluded.automation_mode,confidence=MAX(affiliate_program_discovery.confidence,excluded.confidence),blocker=excluded.blocker,last_checked=datetime('now'),updated_at=datetime('now')`)
     .bind(slug,nextStatus,officialUrl,discovery?.application_url||workflow?.application_url||null,discovery?.network||workflow?.network||'Direct',JSON.stringify(trimmed),changed&&!protectedState?'research':(discovery?.automation_mode||'monitor'),Math.max(Number(discovery?.confidence||0),changed?80:0),blocker).run();
   if(changed&&!protectedState){
-    const workflowEvidence=parseEvidence(workflow?.evidence_json);workflowEvidence.push(trimmed[trimmed.length-1]);
+    const workflowEvidence=parseEvidence(workflow?.evidence_json);workflowEvidence.push(entry);
     await env.DB.prepare(`INSERT INTO affiliate_workflow(tool_slug,status,network,program_url,application_url,blocker,evidence_json,source_actor,last_verified,updated_at)
       VALUES(?,'research_required',?,?,?,?,?,'firecrawl_monitor',datetime('now'),datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET status='research_required',network=COALESCE(affiliate_workflow.network,excluded.network),program_url=COALESCE(excluded.program_url,affiliate_workflow.program_url),application_url=COALESCE(affiliate_workflow.application_url,excluded.application_url),blocker=excluded.blocker,evidence_json=excluded.evidence_json,source_actor='firecrawl_monitor',last_verified=datetime('now'),updated_at=datetime('now')`)
@@ -97,7 +86,8 @@ async function recordEvidence(env,slug,event){
   }
   return {slug,changed,protected:protectedState,status:changed&&!protectedState?'research_required':current};
 }
-async function handleWebhook(request,env){
+
+export async function handleFirecrawlWebhook(request,env){
   if(!env.FIRECRAWL_WEBHOOK_SECRET)return reply({ok:false,error:'firecrawl_webhook_not_configured'},503);
   const size=Number(request.headers.get('content-length')||0);if(size>262144)return reply({ok:false,error:'payload_too_large'},413);
   const raw=await request.text();
@@ -114,15 +104,3 @@ async function handleWebhook(request,env){
   }
   return reply({ok:true,processed:results.filter(x=>x.slug&&!x.error).length,results},200);
 }
-
-export default {
-  async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(url.pathname==='/webhooks/firecrawl'){
-      if(request.method!=='POST')return reply({ok:false,error:'method_not_allowed'},405);
-      return handleWebhook(request,env);
-    }
-    return base.fetch(request,env,ctx);
-  },
-  async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined}
-};
