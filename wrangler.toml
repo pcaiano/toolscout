@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "command-center-chart-top-worker.js"
+main = "command-center-autoload-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
@@ -37,7 +37,6 @@ run_worker_first = [
   "/api/discovery-attribution-health*",
   "/api/command-center-truth-health*",
   "/api/command-center-autoload-health*",
-  "/api/command-center-chart-health*",
   "/mcp*",
   "/a2a*",
   "/embed*",
