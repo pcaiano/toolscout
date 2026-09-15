@@ -1,0 +1,79 @@
+name: Enable Global Cloudflare Web Analytics
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/cloudflare-global-analytics-trigger'
+
+permissions:
+  contents: read
+
+jobs:
+  enable-global-rum:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable global Cloudflare Web Analytics
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          api='https://api.cloudflare.com/client/v4'
+          auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json')
+
+          accounts=$(curl -fsS "${auth[@]}" "$api/accounts?per_page=50")
+          account_id=$(echo "$accounts" | jq -r '.result[0].id // empty')
+          if [ -z "$account_id" ]; then
+            echo 'No Cloudflare account visible to token.'
+            echo "$accounts" | jq '{success,errors}'
+            exit 2
+          fi
+
+          sites=$(curl -fsS "${auth[@]}" "$api/accounts/$account_id/rum/site_info/list")
+          echo '=== WEB ANALYTICS SITES ==='
+          echo "$sites" | jq '[.result[]? | {site_tag,host,auto_install,lite,ruleset}]'
+
+          site=$(echo "$sites" | jq -c '.result[]? | select((.host // "") == "trytoolscout.org" or (.ruleset.zone_name // "") == "trytoolscout.org")' | head -n1)
+          if [ -z "$site" ]; then
+            echo 'ToolScout Web Analytics site not found.'
+            exit 3
+          fi
+
+          site_id=$(echo "$site" | jq -r '.site_tag // empty')
+          zone_tag=$(echo "$site" | jq -r '.ruleset.zone_tag // empty')
+          host=$(echo "$site" | jq -r '.host // empty')
+          if [ -z "$site_id" ]; then
+            echo 'ToolScout site_tag missing.'
+            exit 4
+          fi
+
+          echo '=== BEFORE ==='
+          echo "$site" | jq '{site_tag,host,auto_install,lite,ruleset}'
+
+          payload=$(jq -n --arg host "$host" --arg zone_tag "$zone_tag" '
+            {auto_install:true,enabled:true,lite:false}
+            + (if $host != "" then {host:$host} else {} end)
+            + (if $zone_tag != "" then {zone_tag:$zone_tag} else {} end)')
+
+          updated=$(curl -fsS "${auth[@]}" -X PUT "$api/accounts/$account_id/rum/site_info/$site_id" -d "$payload")
+          echo '=== UPDATE RESPONSE ==='
+          echo "$updated" | jq '{success,errors,result:{site_tag:.result.site_tag,host:.result.host,auto_install:.result.auto_install,lite:.result.lite,ruleset:.result.ruleset}}'
+
+          success=$(echo "$updated" | jq -r '.success // false')
+          if [ "$success" != "true" ]; then
+            exit 5
+          fi
+
+          verified=$(curl -fsS "${auth[@]}" "$api/accounts/$account_id/rum/site_info/$site_id")
+          echo '=== VERIFIED ==='
+          echo "$verified" | jq '{success,errors,result:{site_tag:.result.site_tag,host:.result.host,auto_install:.result.auto_install,lite:.result.lite,ruleset:.result.ruleset}}'
+
+          auto_install=$(echo "$verified" | jq -r '.result.auto_install // false')
+          lite=$(echo "$verified" | jq -r '.result.lite // false')
+          if [ "$auto_install" != "true" ] || [ "$lite" != "false" ]; then
+            echo 'Global RUM verification failed.'
+            exit 6
+          fi
+
+          echo 'Cloudflare Web Analytics is globally enabled for ToolScout: auto_install=true, lite=false.'
