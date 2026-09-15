@@ -5,6 +5,7 @@ const targets = [
   'distribution-submission-worker.js',
   'distribution-autonomous-worker.js',
   'distribution-linkable-assets-worker.js',
+  'lemlist-profile-correction-worker.js',
   'scripts/generate-distribution.mjs',
   'scripts/generate-software-trends-index.mjs',
   'feed.xml'
