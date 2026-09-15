@@ -144,7 +144,7 @@ export default {
       return Response.json(await publishRssIfChanged(env,{force:true,reason:'manual'}),{headers:JSON_H});
     }
     const response=await base.fetch(request,env,ctx);
-    if(request.method==='GET'&&url.pathname==='/feed.xml')return decorateFeed(response);
+    if((request.method==='GET'||request.method==='HEAD')&&url.pathname==='/feed.xml')return decorateFeed(response);
     if(request.method==='GET'&&isHtml(response)&&shouldAdvertiseRss(url.pathname))return decorateHtml(response,url);
     if(request.method==='GET'&&url.pathname===PROFILE_PATH)return decorateHtml(response,url);
     return response;
