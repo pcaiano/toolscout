@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "visitor-dashboard-metrics-worker.js"
+main = "lemlist-profile-correction-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
