@@ -57,7 +57,7 @@ async function augmentStats(response,env){
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }
 
-function autoloadScript(){return `<script data-toolscout-command-autoload="3">(function(){
+function autoloadScript(){return `<style data-toolscout-traffic-priority="1">#trafficTruthBody .metricGrid{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:900px){#trafficTruthBody .metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){#trafficTruthBody .metricGrid{grid-template-columns:1fr}}</style><script data-toolscout-command-autoload="3">(function(){
 if(window.__toolscoutCommandAutoloadInstalled)return;
 window.__toolscoutCommandAutoloadInstalled=true;
 var running=false;
