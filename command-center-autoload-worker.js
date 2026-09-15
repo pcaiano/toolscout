@@ -4,10 +4,19 @@ const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/an
 
 function isHtml(response){return (response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
 
-function autoloadScript(){return `<script data-toolscout-command-autoload="1">(function(){
+function autoloadScript(){return `<script data-toolscout-command-autoload="2">(function(){
 if(window.__toolscoutCommandAutoloadInstalled)return;
 window.__toolscoutCommandAutoloadInstalled=true;
 var running=false;
+function ensureCompatibilitySinks(){
+  if(!document.getElementById('northstarBody')){
+    var sink=document.createElement('div');
+    sink.id='northstarBody';
+    sink.hidden=true;
+    sink.setAttribute('aria-hidden','true');
+    document.body.appendChild(sink);
+  }
+}
 function needsLoad(){
   var status=document.getElementById('status');
   if(status&&/Updated\s/i.test(status.textContent||''))return false;
@@ -21,6 +30,7 @@ async function loadCommandCenter(){
     if(status)status.innerHTML='<strong>Refreshing...</strong> Reading current engine state.';
     if(button)button.disabled=true;
     document.cookie='toolscout_owner=1; Max-Age=15552000; Path=/; SameSite=Lax; Secure';
+    ensureCompatibilitySinks();
     var response=await fetch('/analytics/api/stats?t='+Date.now(),{credentials:'same-origin',cache:'no-store'});
     if(response.status===401)throw new Error('Secure Command Center session expired. Reload this page.');
     if(!response.ok)throw new Error('Command Center API returned HTTP '+response.status);
@@ -33,14 +43,15 @@ async function loadCommandCenter(){
     running=false;if(button)button.disabled=false;
   }
 }
-function start(){setTimeout(function(){if(needsLoad())loadCommandCenter()},300)}
+function start(){ensureCompatibilitySinks();setTimeout(function(){if(needsLoad())loadCommandCenter()},300)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();</script>`}
 
 async function decorate(response){
   if(!response.ok||!isHtml(response))return response;
   let html=await response.text();
-  if(!html.includes('data-toolscout-command-autoload="1"'))html=html.replace(/<\/body>/i,autoloadScript()+'</body>');
+  html=html.replace(/<script data-toolscout-command-autoload="1">[\s\S]*?<\/script>/i,'');
+  if(!html.includes('data-toolscout-command-autoload="2"'))html=html.replace(/<\/body>/i,autoloadScript()+'</body>');
   const headers=new Headers(response.headers);
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
@@ -51,7 +62,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-autoload-health')return Response.json({ok:true,service:'toolscout-command-center-autoload',version:1,autoload:true},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-autoload-health')return Response.json({ok:true,service:'toolscout-command-center-autoload',version:2,autoload:true,northStarCompatibilitySink:true},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
