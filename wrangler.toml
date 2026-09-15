@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "discovery-attribution-health-worker.js"
+main = "command-center-truth-consolidation-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
@@ -35,6 +35,7 @@ run_worker_first = [
   "/api/distribution/*",
   "/api/recommend*",
   "/api/discovery-attribution-health*",
+  "/api/command-center-truth-health*",
   "/mcp*",
   "/a2a*",
   "/embed*",
