@@ -4,11 +4,12 @@ import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const FIRECRAWL_INGEST_TOKEN_SHA256='e0888dacab143e3b7c9a29e83f1e95263e8ad8ff0f4d58d026d73f56c04b7c0e';
 const FIRECRAWL_MONITORS=new Set(['01a0a0c1-f903-77af-abb4-ad5933198b0e','01a0a0c2-85be-713e-b00f-511186642d2e']);
+const FIRECRAWL_MONITOR_NAMES=new Set(['ToolScout Affiliate Program Watch','ToolScout Affiliate Watchlist Discovery']);
 const FIRECRAWL_HOSTS=new Map([['apollo.io','apollo'],['lemlist.com','lemlist'],['unbounce.com','unbounce'],['hostinger.com','hostinger'],['klaviyo.com','klaviyo'],['airtable.com','airtable']]);
 const FIRECRAWL_PROTECTED=new Set(['submitted','pending_review','approved_needs_link','link_acquired','active','verified','earning','rejected']);
 function authorized(request,env){const token=request.headers.get('Authorization')||'';return Boolean(env.ADMIN_TOKEN&&token===`Bearer ${env.ADMIN_TOKEN}`)}
 async function digestHex(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-async function firecrawlAuthorized(request){const token=String(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(token)&&await digestHex(token)===FIRECRAWL_INGEST_TOKEN_SHA256}
+async function firecrawlAuthorized(request){let token=String(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');try{if(!token)token=String(new URL(request.url).searchParams.get('key')||'')}catch{}return Boolean(token)&&await digestHex(token)===FIRECRAWL_INGEST_TOKEN_SHA256}
 function firecrawlTool(url){try{const host=new URL(String(url||'')).hostname.toLowerCase().replace(/^www\./,'');for(const [domain,slug] of FIRECRAWL_HOSTS.entries())if(host===domain||host.endsWith(`.${domain}`))return slug}catch{}return null}
 function evidence(value){try{const data=JSON.parse(String(value||'[]'));return Array.isArray(data)?data:[]}catch{return[]}}
 
@@ -22,8 +23,8 @@ async function ingestFirecrawl(request,env){
   if(String(payload?.type||'')!=='monitor.page')return Response.json({ok:true,ignored:true},{status:202,headers:JSON_H});
   const items=Array.isArray(payload?.data)?payload.data:(payload?.data?[payload.data]:[]),results=[];
   for(const item of items){
-    const monitorId=String(item?.monitorId||payload?.monitorId||payload?.metadata?.monitorId||'');
-    if(!FIRECRAWL_MONITORS.has(monitorId)){results.push({ignored:'unknown_monitor'});continue}
+    const monitorId=String(item?.monitorId||payload?.monitorId||payload?.metadata?.monitorId||''),monitorName=String(item?.monitorName||payload?.metadata?.monitorName||'');
+    if(!FIRECRAWL_MONITORS.has(monitorId)&&!FIRECRAWL_MONITOR_NAMES.has(monitorName)){results.push({ignored:'unknown_monitor'});continue}
     const status=String(item?.status||'').toLowerCase(),meaningful=item?.isMeaningful===true||item?.judgment?.meaningful===true,url=String(item?.url||item?.sourceUrl||'');
     if(status==='same'||(status==='changed'&&!meaningful)){results.push({ignored:'no_meaningful_change',url});continue}
     const slug=firecrawlTool(url);if(!slug){results.push({ignored:'unmapped_vendor',url});continue}
