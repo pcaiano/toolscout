@@ -138,14 +138,16 @@ export function attributeMatch(tool, intent) {
 
 export function editorialEligibility(tool, intent, minimumRelevance = 0.75) {
   const trust = editorialTrust(tool, null, { maxFactualAgeDays:45, strictSource:false });
+  const rankingEligible = tool?.rankingEligible !== false;
   const category = categoryMatch(tool, intent);
   const relevance = lexicalRelevance(tool, intent);
   const capability = capabilityAssessment(tool, intent);
   const attributes = attributeMatch(tool, intent);
   return {
-    eligible: trust.trusted && category && capability.match && attributes && relevance >= Number(minimumRelevance || 0),
+    eligible: trust.trusted && rankingEligible && category && capability.match && attributes && relevance >= Number(minimumRelevance || 0),
     trusted: trust.trusted,
     trustReasons: trust.reasons,
+    rankingEligible,
     categoryMatch: category,
     capabilityMatch: capability.match,
     attributeMatch: attributes,
