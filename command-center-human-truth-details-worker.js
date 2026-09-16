@@ -114,6 +114,7 @@ async function decorate(response){
   html=html.replace(/<section class="widget" data-widget="product-behavior"[\s\S]*?<\/section>\s*/i,'');
   html=html.replace(/<section class="widget" data-widget="ledger"[\s\S]*?<\/section>\s*/i,'');
   html=html.replace(/<script>\(function\(\)\{function drawBehavior\(d\)\{[\s\S]*?<\/script>/i,'');
+  html=html.replace("document.getElementById('ledgerBody').innerHTML=","const ledgerBody=document.getElementById('ledgerBody');if(!ledgerBody)return;ledgerBody.innerHTML=");
   if(!html.includes('data-toolscout-human-truth-details="1"'))html=html.replace(/<\/body>/i,detailsScript()+'</body>');
   const headers=new Headers(response.headers);
   headers.delete('Content-Length');
@@ -125,7 +126,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:5,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:6,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
