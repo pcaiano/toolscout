@@ -4,7 +4,7 @@ const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/an
 
 function isHtml(response){return (response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
 
-function chartScript(){return `<script data-toolscout-human-truth-chart="1">(function(){
+function chartScript(){return `<script data-toolscout-human-truth-chart="2">(function(){
 if(window.__toolscoutHumanTruthChartInstalled)return;
 window.__toolscoutHumanTruthChartInstalled=true;
 var latest=null;
@@ -32,9 +32,34 @@ function renderChart(d){
   var legend='<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)"><span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:18px;border-top:3px solid var(--accent)"></span>Browser sessions</span><span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:18px;border-top:3px solid var(--warn, #f59e0b)"></span>Outbound clicks</span><span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:18px;border-top:3px dashed var(--good, #22c55e)"></span>Monetized outbound</span></div>';
   card.innerHTML='<div class="rowName">Traffic evolution, last 30 days</div><div class="rowMeta">Browser sessions on the left axis. Outbound clicks on the right axis.</div>'+legend+'<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="240" role="img" aria-label="Daily browser sessions on the left axis, outbound clicks and monetized outbound clicks on the right axis over the last 30 days" style="display:block;margin-top:8px;overflow:visible;color:var(--muted)"><line x1="'+l+'" y1="'+(t+ih)+'" x2="'+(w-r)+'" y2="'+(t+ih)+'" stroke="currentColor" opacity="0.18"/><line x1="'+l+'" y1="'+t+'" x2="'+l+'" y2="'+(t+ih)+'" stroke="currentColor" opacity="0.18"/><line x1="'+(w-r)+'" y1="'+t+'" x2="'+(w-r)+'" y2="'+(t+ih)+'" stroke="currentColor" opacity="0.18"/><text x="4" y="'+(t+5)+'" fill="currentColor" opacity="0.65" font-size="10">'+leftMax+'</text><text x="14" y="'+(t+ih+4)+'" fill="currentColor" opacity="0.55" font-size="10">0</text><text x="'+(w-4)+'" y="'+(t+5)+'" text-anchor="end" fill="currentColor" opacity="0.65" font-size="10">'+rightMax+'</text><text x="'+(w-14)+'" y="'+(t+ih+4)+'" text-anchor="end" fill="currentColor" opacity="0.55" font-size="10">0</text><polyline points="'+line(sessionCoords)+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+circles(sessionCoords,'sessions','var(--accent)','browser sessions')+'<polyline points="'+line(outCoords)+'" fill="none" stroke="var(--warn, #f59e0b)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+circles(outCoords,'outboundClicks','var(--warn, #f59e0b)','outbound clicks')+'<polyline points="'+line(moneyCoords)+'" fill="none" stroke="var(--good, #22c55e)" stroke-width="2.5" stroke-dasharray="7 5" stroke-linecap="round" stroke-linejoin="round"/>'+squares(moneyCoords,'monetizedOutboundClicks','var(--good, #22c55e)','monetized outbound clicks')+labels+'</svg>';
 }
+function tsDt(v){return v?new Date(String(v).replace(' ','T')+(String(v).includes('T')?'':'Z')).toLocaleString(undefined,{timeZone:'Europe/Lisbon'}):'Not available'}
+function healthRow(name,value,meta){return '<div class="row"><div><div class="rowName">'+name+'</div><div class="rowMeta">'+meta+'</div></div><div class="rowValue">'+value+'</div></div>'}
+function stateName(v){var s=String(v||'').toLowerCase();if(s==='running')return 'Running';if(s==='awaiting_strict_evidence')return 'Waiting';if(s==='failed')return 'Failed';if(s==='warning')return 'Warning';if(s==='observed')return 'Observed';return s?'Unknown':'Unknown'}
+function evidenceName(v){var s=String(v||'').toLowerCase();if(s==='observed')return 'Verified';if(s==='partial')return 'Partial';if(s==='warning')return 'Partial';if(s==='failed')return 'Verified failure';if(s==='no_evidence')return 'Limited';return 'Limited'}
+function renderHealthClarity(d){
+  latest=d||latest;if(!latest)return;
+  var root=document.getElementById('healthBody');if(!root)return;
+  var widget=root.closest('.widget[data-widget="health"]'),tr=latest.tracking||{},g=latest.growthOps||{},q=g.chairmanQueue||{},eng=g.engines||{},aff=eng.affiliate||{},dist=eng.distribution||{},h=g.health||{},content=h.content||{},audience=h.audience||{},seo=h.seo_geo_aio||{},issues=Array.isArray(h.issues)?h.issues:[],res=latest.resilientCommandCenter||{};
+  if(widget){var kicker=widget.querySelector('.widgetKicker'),meta=widget.querySelector('.widgetMeta');if(kicker)kicker.textContent='ENGINE STATE + OBSERVABILITY';if(meta)meta.textContent='Execution + evidence'}
+  var affEvidence=aff.last_run_at?'Verified':'Partial',distEvidence=dist.last_activity_at?'Verified':'Partial';
+  var contentState=content.status==='failed'?'Failed':content.status==='observed'?'Observed':'Unknown';
+  var audienceState=audience.status==='failed'?'Failed':audience.status==='observed'?'Observed':'Unknown';
+  var seoState=seo.status==='failed'?'Failed':'Unknown';
+  var html='';
+  html+=healthRow('Tracking','Observed · Verified',n(tr.humanSessionsLast24Hours)+' human sessions · 24h');
+  html+=healthRow('Affiliate Coverage Engine',stateName(aff.status)+' · '+affEvidence,aff.last_run_at?'Last verified '+tsDt(aff.last_run_at):'Engine state reports running. Execution heartbeat is not exposed by the resilient read.');
+  html+=healthRow('Distribution Engine',stateName(dist.status)+' · '+distEvidence,dist.last_activity_at?'Last verified '+tsDt(dist.last_activity_at):'Engine state is available, but no recent execution event is exposed.');
+  html+=healthRow('Content Engine',contentState+' · '+evidenceName(content.status),(content.detail||'No execution heartbeat is available.')+(res.active&&content.status==='no_evidence'?' This is limited observability, not a failure signal.':'')+(content.last_event_at?' Last evidence '+tsDt(content.last_event_at):''));
+  html+=healthRow('Audience Engine',audienceState+' · '+evidenceName(audience.status),(audience.detail||'No execution heartbeat is available.')+(res.active&&audience.status==='no_evidence'?' This is limited observability, not a failure signal.':'')+(audience.last_event_at?' Last evidence '+tsDt(audience.last_event_at):''));
+  html+=healthRow('SEO / GEO / AIO',seoState+' · '+evidenceName(seo.status),(seo.detail||'No readiness evidence is available.')+(seo.last_event_at?' Last evidence '+tsDt(seo.last_event_at):''));
+  var broken=(q.broken_links||[]).length;
+  html+=healthRow('Broken Chairman links',String(broken),broken?'Detailed below. These are internal ToolScout action link failures.':'None detected');
+  if(issues.length)html+=issues.map(function(x){return '<div class="bug '+(x.severity==='warning'?'warning':'')+'"><b>'+(x.severity==='warning'?'Warning':'Engine bug')+' · '+String(x.engine||'unknown')+':</b> '+String(x.title||'')+' · '+String(x.detail||'')+'</div>'}).join('');
+  root.innerHTML=html;
+}
 var previous=window.render;
-if(typeof previous==='function')window.render=function(d){latest=d;var result=previous(d);setTimeout(function(){renderChart(d)},0);return result};
-function retry(){renderChart(latest);setTimeout(function(){renderChart(latest)},350);setTimeout(function(){renderChart(latest)},900)}
+if(typeof previous==='function')window.render=function(d){latest=d;var result=previous(d);setTimeout(function(){renderChart(d);renderHealthClarity(d)},0);return result};
+function retry(){renderChart(latest);renderHealthClarity(latest);setTimeout(function(){renderChart(latest);renderHealthClarity(latest)},350);setTimeout(function(){renderChart(latest);renderHealthClarity(latest)},900)}
 document.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('[data-ts-window]'))setTimeout(retry,0)},true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',retry,{once:true});else retry();
 })();</script>`}
@@ -42,7 +67,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 async function decorate(response){
   if(!response.ok||!isHtml(response))return response;
   let html=await response.text();
-  if(!html.includes('data-toolscout-human-truth-chart="1"'))html=html.replace(/<\/body>/i,chartScript()+'</body>');
+  html=html.replace(/<script data-toolscout-human-truth-chart="1">[\s\S]*?<\/script>/gi,'');
+  if(!html.includes('data-toolscout-human-truth-chart="2"'))html=html.replace(/<\/body>/i,chartScript()+'</body>');
   const headers=new Headers(response.headers);
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
@@ -53,7 +79,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-chart-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-chart',version:1,chart:'human-visitors-top',series:3,dualAxis:true,monetizedSeries:'dashed-square-markers'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-chart-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-chart',version:2,chart:'human-visitors-top',series:3,dualAxis:true,monetizedSeries:'dashed-square-markers',healthSemantics:'engine-state-plus-observability',noAmbiguousNoEvidence:true},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
