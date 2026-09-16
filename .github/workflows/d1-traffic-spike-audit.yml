@@ -33,3 +33,4 @@ jobs:
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COALESCE(f.referrer_host,'(none)') AS referrer, COUNT(DISTINCT f.session_id) AS sessions FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') AND f.created_at>=datetime('now','-8 hours') GROUP BY 1 ORDER BY sessions DESC LIMIT 20;"
           echo '=== EVENT_SANITY_8H ==='
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) AS page_confirmed_events, COUNT(DISTINCT f.session_id) AS distinct_sessions, MIN(f.created_at) AS first_at, MAX(f.created_at) AS last_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') AND f.created_at>=datetime('now','-8 hours');"
+# audit trigger
