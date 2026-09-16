@@ -1,0 +1,77 @@
+name: Homepage V2 Deploy Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/homepage-v2-deploy-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate outbound enforcement script
+        run: node --check scripts/enforce-outbound-ux.mjs
+
+      - name: Confirm D1 is available after quota reset
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler d1 execute toolscout --remote --command "SELECT 1 AS ok;" --json > /tmp/d1-reset.json
+
+      - name: Apply outbound UX rule
+        run: |
+          node scripts/enforce-outbound-ux.mjs --fix
+          node scripts/enforce-outbound-ux.mjs
+
+      - name: Confirm Command Center files are untouched
+        run: |
+          if git status --porcelain | grep -E 'command-center-|analytics'; then
+            echo "Command Center file change detected. Refusing to continue."
+            exit 1
+          fi
+
+      - name: Commit outbound UX updates
+        run: |
+          if [ -z "$(git status --porcelain -- app.js '*.html' 'tools/*.html')" ]; then
+            echo "No outbound UX file changes to commit."
+            exit 0
+          fi
+          git config user.name "toolscout-release-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js -- '*.html' 'tools/*.html'
+          git commit -m "Open vendor outbounds in new tabs"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Deploy Worker and static assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify Homepage V2 production
+        run: |
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -sS -o /tmp/home.html -w '%{http_code}' https://trytoolscout.org/ || true)
+            if [ "$code" = "200" ] && grep -q 'Compare software directly' /tmp/home.html && grep -q 'softwareUpdates' /tmp/home.html; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Homepage V2 verification failed"
+          exit 1
+
+      - name: Verify updates feed and outbound new-tab rule
+        run: |
+          curl -fsS https://trytoolscout.org/data/software-updates.json -o /tmp/updates.json
+          grep -q 'notion-3-7-agent-skills' /tmp/updates.json
+          curl -fsS https://trytoolscout.org/make-vs-zapier.html -o /tmp/comparison.html
+          grep -q 'href="/go/make"' /tmp/comparison.html
+          grep -q 'target="_blank"' /tmp/comparison.html
+          grep -q 'rel="nofollow sponsored noopener"' /tmp/comparison.html
