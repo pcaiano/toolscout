@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "principles": {
     "catalogMustStayMarketRelevant": true,
     "officialSourcesRequired": true,
@@ -8,7 +8,9 @@
     "brokenOrUnverifiableToolsAreSuppressedAfterRepeatedFailure": true,
     "commercialRelationshipsAreStoredSeparatelyFromEditorialFit": true,
     "unsupportedClaimsMustNeverEnterEditorialRanking": true,
-    "genericCategoryProfilesCannotCreateEditorialFacts": true
+    "genericCategoryProfilesCannotCreateEditorialFacts": true,
+    "catalogBreadthIsSeparateFromRankingEligibility": true,
+    "catalogEntryDoesNotImplyRecommendation": true
   },
   "cadence": {
     "run": "daily",
@@ -38,6 +40,20 @@
     "autoAdmitGeneratedCandidates": false,
     "rejectGenericSyntheticEditorialProfiles": true,
     "maximumFactualReviewAgeDays": 45
+  },
+  "coverageAdmission": {
+    "autoPromoteVerifiedCompetitiveGapProfiles": true,
+    "maxPromotionsPerCycle": 5,
+    "minimumIndependentMarketSignals": 2,
+    "minimumVerifiedCapabilities": 3,
+    "minimumDescriptionLength": 60,
+    "requireReachableOfficialSource": true,
+    "requireKnownCategory": true,
+    "rankingEligibleOnAdmission": false,
+    "comparisonEligibleOnAdmission": false,
+    "requirePricingForCatalogEntry": false,
+    "requireToolSpecificScoresForCatalogEntry": false,
+    "upgradeToEditorialRequiresSeparateEvidence": true
   },
   "trustedCandidateFiles": [
     "data/catalog-wave1-enrichment.json",
