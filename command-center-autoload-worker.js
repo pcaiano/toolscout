@@ -22,27 +22,58 @@ function trendDayKeys(days=30){
   return [...new Set(out)];
 }
 async function trafficTrendSnapshot(env){
-  if(!env.DB)return {status:'unavailable',metric:'browser-confirmed sessions',points:[]};
+  if(!env.DB)return {status:'unavailable',metric:'browser-confirmed sessions and outbound clicks',points:[]};
   try{
-    const result=await env.DB.prepare(`SELECT conf.session_id,conf.created_at
-      FROM funnel_events conf
-      JOIN sessions s ON s.session_id=conf.session_id
-      WHERE conf.event_type='page_confirmed'
-        AND s.classification='likely-human'
-        AND conf.created_at>=datetime('now','-35 days')
-      ORDER BY conf.created_at ASC`).all();
-    const byDay=new Map();
-    for(const row of result?.results||[]){
+    const [sessionResult,clickResult]=await Promise.all([
+      env.DB.prepare(`SELECT conf.session_id,conf.created_at
+        FROM funnel_events conf
+        JOIN sessions s ON s.session_id=conf.session_id
+        WHERE conf.event_type='page_confirmed'
+          AND s.classification='likely-human'
+          AND conf.created_at>=datetime('now','-35 days')
+        ORDER BY conf.created_at ASC`).all(),
+      env.DB.prepare(`WITH confirmed_sessions AS (
+          SELECT DISTINCT session_id FROM funnel_events WHERE event_type='page_confirmed'
+        )
+        SELECT c.created_at,c.affiliate_active_at_click
+        FROM click_events c
+        JOIN confirmed_sessions confirmed ON confirmed.session_id=c.session_id
+        LEFT JOIN sessions s ON s.session_id=c.session_id
+        WHERE c.created_at>=datetime('now','-35 days')
+          AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human')
+          AND c.source NOT IN ('internal-test','synthetic','health-check','ci')
+        ORDER BY c.created_at ASC`).all()
+    ]);
+    const sessionsByDay=new Map(),outboundByDay=new Map(),monetizedByDay=new Map();
+    for(const row of sessionResult?.results||[]){
       const at=parseSqliteUtc(row.created_at),id=String(row.session_id||'');
       if(!at||!id)continue;
       const key=dayKey(at);
-      if(!byDay.has(key))byDay.set(key,new Set());
-      byDay.get(key).add(id);
+      if(!sessionsByDay.has(key))sessionsByDay.set(key,new Set());
+      sessionsByDay.get(key).add(id);
+    }
+    for(const row of clickResult?.results||[]){
+      const at=parseSqliteUtc(row.created_at);
+      if(!at)continue;
+      const key=dayKey(at);
+      outboundByDay.set(key,(outboundByDay.get(key)||0)+1);
+      if(Number(row.affiliate_active_at_click||0)===1)monetizedByDay.set(key,(monetizedByDay.get(key)||0)+1);
     }
     const keys=trendDayKeys(30);
-    return {status:'observed',metric:'browser-confirmed sessions',windowDays:keys.length,points:keys.map(day=>({day,sessions:byDay.get(day)?.size||0})),generatedAt:new Date().toISOString()};
+    return {
+      status:'observed',
+      metric:'browser-confirmed sessions and outbound clicks',
+      windowDays:keys.length,
+      points:keys.map(day=>({
+        day,
+        sessions:sessionsByDay.get(day)?.size||0,
+        outboundClicks:outboundByDay.get(day)||0,
+        monetizedOutboundClicks:monetizedByDay.get(day)||0
+      })),
+      generatedAt:new Date().toISOString()
+    };
   }catch(error){
-    return {status:'unavailable',metric:'browser-confirmed sessions',points:[],reason:String(error?.message||error)};
+    return {status:'unavailable',metric:'browser-confirmed sessions and outbound clicks',points:[],reason:String(error?.message||error)};
   }
 }
 async function augmentStats(response,env){
@@ -57,7 +88,7 @@ async function augmentStats(response,env){
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }
 
-function autoloadScript(){return `<style data-toolscout-traffic-priority="1">#trafficTruthBody .metricGrid{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:900px){#trafficTruthBody .metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){#trafficTruthBody .metricGrid{grid-template-columns:1fr}}</style><script data-toolscout-command-autoload="3">(function(){
+function autoloadScript(){return `<style data-toolscout-traffic-priority="1">#trafficTruthBody .metricGrid{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:900px){#trafficTruthBody .metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){#trafficTruthBody .metricGrid{grid-template-columns:1fr}}</style><script data-toolscout-command-autoload="4">(function(){
 if(window.__toolscoutCommandAutoloadInstalled)return;
 window.__toolscoutCommandAutoloadInstalled=true;
 var running=false;
@@ -79,15 +110,21 @@ function placePriorityCards(){
 }
 function chartSvg(points){
   if(!Array.isArray(points)||!points.length)return '<div class="note">Traffic trend is not available yet.</div>';
-  var w=760,h=220,padL=36,padR=14,padT=18,padB=34,max=Math.max.apply(null,points.map(function(x){return Number(x.sessions||0)}).concat([1]));
-  var innerW=w-padL-padR,innerH=h-padT-padB;
-  var coords=points.map(function(x,i){var px=padL+(points.length===1?innerW/2:i*innerW/(points.length-1));var py=padT+innerH-(Number(x.sessions||0)/max)*innerH;return [px,py]});
-  var line=coords.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ');
+  var w=760,h=220,padL=36,padR=14,padT=18,padB=34,series=[
+    {key:'sessions',label:'Browser sessions',stroke:'var(--accent)'},
+    {key:'outboundClicks',label:'Outbound clicks',stroke:'var(--warn, #f59e0b)'},
+    {key:'monetizedOutboundClicks',label:'Monetized outbound',stroke:'var(--good, #22c55e)'}
+  ],values=[];
+  series.forEach(function(s){points.forEach(function(x){values.push(Number(x[s.key]||0))})});
+  var max=Math.max.apply(null,values.concat([1])),innerW=w-padL-padR,innerH=h-padT-padB;
+  var xPositions=points.map(function(x,i){return padL+(points.length===1?innerW/2:i*innerW/(points.length-1))});
+  function coordsFor(key){return points.map(function(x,i){var px=xPositions[i],py=padT+innerH-(Number(x[key]||0)/max)*innerH;return [px,py]})}
   var mid=Math.floor((points.length-1)/2),labels=[0,mid,points.length-1].filter(function(v,i,a){return a.indexOf(v)===i});
   function shortDay(v){var s=String(v||'');return s.slice(8,10)+'/'+s.slice(5,7)}
-  var labelSvg=labels.map(function(i){return '<text x="'+coords[i][0].toFixed(1)+'" y="210" text-anchor="middle" fill="currentColor" opacity="0.55" font-size="10">'+shortDay(points[i].day)+'</text>'}).join('');
-  var dots=coords.map(function(p,i){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.6" fill="var(--accent)"><title>'+shortDay(points[i].day)+': '+Number(points[i].sessions||0)+' sessions</title></circle>'}).join('');
-  return '<div style="margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--card2)"><div class="rowName">Traffic evolution, last 30 days</div><div class="rowMeta">Browser confirmed sessions, comparable historical series</div><svg viewBox="0 0 '+w+' '+h+'" width="100%" height="220" role="img" aria-label="Traffic evolution over the last 30 days" style="display:block;margin-top:8px;overflow:visible;color:var(--muted)"><line x1="'+padL+'" y1="'+(padT+innerH)+'" x2="'+(w-padR)+'" y2="'+(padT+innerH)+'" stroke="currentColor" opacity="0.18"/><line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+innerH)+'" stroke="currentColor" opacity="0.18"/><text x="4" y="'+(padT+5)+'" fill="currentColor" opacity="0.55" font-size="10">'+max+'</text><text x="14" y="'+(padT+innerH+4)+'" fill="currentColor" opacity="0.55" font-size="10">0</text><polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+labelSvg+'</svg></div>';
+  var labelSvg=labels.map(function(i){return '<text x="'+xPositions[i].toFixed(1)+'" y="210" text-anchor="middle" fill="currentColor" opacity="0.55" font-size="10">'+shortDay(points[i].day)+'</text>'}).join('');
+  var lines=series.map(function(s){var coords=coordsFor(s.key),line=coords.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' '),dots=coords.map(function(p,i){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.5" fill="'+s.stroke+'"><title>'+shortDay(points[i].day)+': '+Number(points[i][s.key]||0)+' '+s.label.toLowerCase()+'</title></circle>'}).join('');return '<polyline points="'+line+'" fill="none" stroke="'+s.stroke+'" stroke-width="'+(s.key==='sessions'?'3':'2.5')+'" stroke-linecap="round" stroke-linejoin="round"/>'+dots}).join('');
+  var legend='<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)">'+series.map(function(s){return '<span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:18px;border-top:3px solid '+s.stroke+'"></span>'+s.label+'</span>'}).join('')+'</div>';
+  return '<div style="margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--card2)"><div class="rowName">Traffic and outbound evolution, last 30 days</div><div class="rowMeta">Daily D1 browser-confirmed traffic and commercial actions</div>'+legend+'<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="220" role="img" aria-label="Daily browser sessions, outbound clicks and monetized outbound clicks over the last 30 days" style="display:block;margin-top:8px;overflow:visible;color:var(--muted)"><line x1="'+padL+'" y1="'+(padT+innerH)+'" x2="'+(w-padR)+'" y2="'+(padT+innerH)+'" stroke="currentColor" opacity="0.18"/><line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+innerH)+'" stroke="currentColor" opacity="0.18"/><text x="4" y="'+(padT+5)+'" fill="currentColor" opacity="0.55" font-size="10">'+max+'</text><text x="14" y="'+(padT+innerH+4)+'" fill="currentColor" opacity="0.55" font-size="10">0</text>'+lines+labelSvg+'</svg></div>';
 }
 function renderPriorityTraffic(d){
   var root=document.getElementById('trafficTruthBody');if(!root)return;
@@ -119,7 +156,7 @@ function installPriorityRender(){
 }
 function needsLoad(){
   var status=document.getElementById('status');
-  if(status&&/Updated\s/i.test(status.textContent||''))return false;
+  if(status&&/Updated\\s/i.test(status.textContent||''))return false;
   var bodies=[].slice.call(document.querySelectorAll('.widgetBody'));
   return bodies.some(function(el){return /Refresh to load|Loading current data|Refresh to reconcile|Refresh to load current/i.test(el.textContent||'')})||!bodies.length;
 }
@@ -152,8 +189,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 async function decorate(response){
   if(!response.ok||!isHtml(response))return response;
   let html=await response.text();
-  html=html.replace(/<script data-toolscout-command-autoload="[12]">[\s\S]*?<\/script>/gi,'');
-  if(!html.includes('data-toolscout-command-autoload="3"'))html=html.replace(/<\/body>/i,autoloadScript()+'</body>');
+  html=html.replace(/<script data-toolscout-command-autoload="[123]">[\\s\\S]*?<\\/script>/gi,'');
+  if(!html.includes('data-toolscout-command-autoload="4"'))html=html.replace(/<\\/body>/i,autoloadScript()+'</body>');
   const headers=new Headers(response.headers);
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
@@ -164,7 +201,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-autoload-health')return Response.json({ok:true,service:'toolscout-command-center-autoload',version:3,autoload:true,northStarCompatibilitySink:true,trafficTruthFirst:true,chairmanSecond:true,trafficTrend:true},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-autoload-health')return Response.json({ok:true,service:'toolscout-command-center-autoload',version:4,autoload:true,northStarCompatibilitySink:true,trafficTruthFirst:true,chairmanSecond:true,trafficTrend:true,trafficTrendSeries:3},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentStats(response,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
