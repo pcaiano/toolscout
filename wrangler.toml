@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "command-center-human-truth-final-worker.js"
+main = "command-center-human-truth-details-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
@@ -40,6 +40,7 @@ run_worker_first = [
   "/api/command-center-resilient-health*",
   "/api/command-center-human-truth-health*",
   "/api/command-center-human-truth-final-health*",
+  "/api/command-center-human-truth-details-health*",
   "/mcp*",
   "/a2a*",
   "/embed*",
