@@ -7,11 +7,11 @@ const readJson = async (file, fallback) => {
 const now = new Date();
 const nowIso = now.toISOString();
 const today = nowIso.slice(0, 10);
-const DAY = 86400000;
 const config = await readJson('data/catalog-engine.json', {});
 const policy = config.qualityControl || {};
 let tools = await readJson('data/tools.json', []);
 const previous = await readJson('data/catalog-quality-state.json', {version:1,tools:{}});
+const curatedAssets = await readJson('data/tool-assets-curated.json', {assets:{}});
 const timeoutMs = 15000;
 
 const strip = html => String(html || '')
@@ -140,7 +140,7 @@ function observedFeatures(tool, text) {
 function arraysEqual(a,b) { return JSON.stringify(a || []) === JSON.stringify(b || []); }
 
 const nextState = {version:1,generatedAt:nowIso,tools:{}};
-const assets = {};
+const assets = {...(curatedAssets.assets || {})};
 const findings = [];
 const corrections = [];
 
@@ -212,7 +212,9 @@ for (let i=0;i<tools.length;i++) {
   }
 
   let asset = null;
-  if (policy.validateVisualAssets !== false) {
+  const curatedAsset = curatedAssets.assets?.[tool.slug] || null;
+  if (curatedAsset?.url) asset = await probeImage(curatedAsset);
+  if (!asset && policy.validateVisualAssets !== false) {
     for (const candidate of iconCandidates(source)) {
       asset = await probeImage(candidate);
       if (asset) break;
@@ -226,7 +228,7 @@ for (let i=0;i<tools.length;i++) {
       asset = await probeImage(google);
     }
   }
-  if (asset) assets[tool.slug] = {...asset,checkedAt:nowIso};
+  if (asset) assets[tool.slug] = {...curatedAsset,...asset,checkedAt:nowIso};
   else if (policy.reportUnresolvedVisualAssetFailures !== false) findings.push({slug:tool.slug,severity:'low',type:'visual_asset_unresolved',sourceUrl:source.url});
 
   nextState.tools[tool.slug] = snapshot;
