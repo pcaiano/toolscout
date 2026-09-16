@@ -1,0 +1,44 @@
+name: Deploy D1 Read Fix Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-d1-read-fix-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate worker syntax
+        run: |
+          node --check distribution-submission-worker.js
+          node --check command-center-resilient-worker.js
+
+      - name: Deploy Worker and assets
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Verify deployment
+        run: |
+          set -euo pipefail
+          URL='https://trytoolscout.org/api/command-center-resilient-health'
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsSL "$URL" -o /tmp/health; then break; fi
+            sleep 5
+          done
+          cat /tmp/health
+          grep -q '"ok":true' /tmp/health
+          grep -q '"statsMode":"direct-d1-resilient"' /tmp/health
