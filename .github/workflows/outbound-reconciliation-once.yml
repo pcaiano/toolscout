@@ -104,9 +104,17 @@ jobs:
         run: |
           node <<'NODE'
           const fs=require('fs');
-          const path=require('path');
+          function parseWrangler(file){
+            const text=fs.readFileSync(file,'utf8').trim();
+            for(let i=0;i<text.length;i++){
+              const ch=text[i];
+              if(ch!=='['&&ch!=='{') continue;
+              try{return JSON.parse(text.slice(i).trim())}catch{}
+            }
+            throw new Error(`No JSON payload found in ${file}`);
+          }
           function load(file){
-            const raw=JSON.parse(fs.readFileSync(file,'utf8'));
+            const raw=parseWrangler(file);
             const blocks=Array.isArray(raw)?raw:[raw];
             const rows=[]; const meta=[];
             for(const block of blocks){
