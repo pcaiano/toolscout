@@ -1,4 +1,5 @@
 import base from './traffic-integrity-worker.js';
+import { classifySessionRequest, SESSION_CLASSIFICATIONS } from './session-classification.js';
 
 const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const SESSION_COOKIE='toolscout_cc';
@@ -31,40 +32,55 @@ function ownerCookie(){return `toolscout_owner=1; Max-Age=${OWNER_MAX_AGE}; Path
 async function ownerStatus(request,env){
   if(!await validSession(request,env))return Response.json({ok:false,excluded:false,reason:'unauthorized'},{status:401,headers:{'Cache-Control':'no-store'}});
   const wasPresent=hasOwnerCookie(request);
+  const classification=classifySessionRequest(request);
+  const verifiedOwner=classification===SESSION_CLASSIFICATIONS.OWNER;
   const headers=new Headers({'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'});
   headers.append('Set-Cookie',ownerCookie());
   return new Response(JSON.stringify({
     ok:true,
     excluded:true,
     cookiePresentBefore:wasPresent,
-    classification:'owner',
+    classification,
+    verifiedOwner,
     scope:'this browser on this device',
     persistentDays:365,
-    canonicalHumanTrafficExcluded:true,
+    canonicalHumanTrafficExcluded:verifiedOwner,
     verifiedAt:new Date().toISOString()
   }),{status:200,headers});
 }
 
 function ownerScript(){return `<script data-toolscout-owner-exclusion="1">(function(){
 if(window.__toolscoutOwnerExclusion)return;window.__toolscoutOwnerExclusion=true;
-function row(state){
+var ownerState=null,observer=null,attachTimer=null;
+function localCookie(){return document.cookie.split(';').some(function(part){return part.trim()==='toolscout_owner=1'})}
+function activeState(state){return !!(state&&state.ok&&state.excluded&&state.verifiedOwner===true&&state.canonicalHumanTrafficExcluded===true&&localCookie())}
+function renderOwnerRow(){
+  if(!ownerState)return false;
   var root=document.getElementById('healthBody');if(!root)return false;
-  var old=document.getElementById('ownerExclusionRow');if(old)old.remove();
+  if(document.getElementById('ownerExclusionRow'))return true;
   var div=document.createElement('div');div.id='ownerExclusionRow';div.className='row';
-  var active=state&&state.ok&&state.excluded&&state.cookiePresentBefore===true;
+  var active=activeState(ownerState);
   var label=active?'Owner exclusion active on this browser':'Owner exclusion verification pending';
-  var meta=active?'Persistent for 365 days. D1 classifies this browser as owner and excludes it from canonical human traffic.':'The Command Center is registering this browser as owner.';
+  var meta=active?'Persistent for 365 days. D1 classifies this browser as owner and excludes it from canonical human traffic.':'The Command Center is registering and verifying this browser as owner.';
   div.innerHTML='<div><div class="rowName">'+label+'</div><div class="rowMeta">'+meta+'</div></div><div class="rowValue">'+(active?'Active':'Pending')+'</div>';
   root.prepend(div);return true;
 }
-function show(state,n){if(row(state))return;if((n||0)<8)setTimeout(function(){show(state,(n||0)+1)},250)}
+function attachObserver(n){
+  var root=document.getElementById('healthBody');
+  if(!root){if((n||0)<20)attachTimer=setTimeout(function(){attachObserver((n||0)+1)},250);return}
+  if(observer)observer.disconnect();
+  observer=new MutationObserver(function(){if(ownerState&&!document.getElementById('ownerExclusionRow'))renderOwnerRow()});
+  observer.observe(root,{childList:true});
+  renderOwnerRow();
+}
+function setState(state){ownerState=state;renderOwnerRow();attachObserver(0)}
 function verify(){
   fetch('/analytics/api/owner-exclusion',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(first){
-    if(!first||!first.ok){show(first,0);return}
-    setTimeout(function(){fetch('/analytics/api/owner-exclusion',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(second){show(second,0)}).catch(function(){show(first,0)})},80)
-  }).catch(function(){show({ok:false},0)})
+    if(!first||!first.ok){setState(first||{ok:false});return}
+    setTimeout(function(){fetch('/analytics/api/owner-exclusion',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(setState).catch(function(){setState(first)})},100)
+  }).catch(function(){setState({ok:false})})
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',verify,{once:true});else verify();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){attachObserver(0);verify()},{once:true});else{attachObserver(0);verify()}
 })();</script>`}
 
 async function decorate(response){
