@@ -1,0 +1,72 @@
+name: Software Card Favicons Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/software-card-favicons-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rollout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate script
+        run: node --check scripts/enrich-software-card-favicons.mjs
+
+      - name: Add software favicons to cards
+        run: |
+          node scripts/enrich-software-card-favicons.mjs --fix
+          node scripts/enrich-software-card-favicons.mjs
+
+      - name: Validate public surface
+        run: |
+          node scripts/validate-seo-pages.mjs
+          node scripts/validate-public-surface.mjs
+          node scripts/validate-commercial-indexability.mjs
+
+      - name: Confirm Command Center files are untouched
+        run: |
+          changed=$(git status --porcelain | awk '{print $2}')
+          if printf '%s\n' "$changed" | grep -E '(^|/)(command-center-|analytics)'; then
+            echo "Command Center file change detected. Refusing to continue."
+            exit 1
+          fi
+
+      - name: Commit software card favicons
+        run: |
+          if [ -z "$(git status --porcelain -- '*.html' 'tools/*.html' 'blog/*.html')" ]; then
+            echo "No software card favicon changes to commit."
+          else
+            git config user.name "toolscout-release-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -- '*.html' 'tools/*.html' 'blog/*.html'
+            git commit -m "Show favicons on software cards"
+            git restore -- reports || true
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Deploy Worker and static assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify live guide and comparison cards
+        run: |
+          for i in 1 2 3 4 5 6; do
+            curl -fsS "https://trytoolscout.org/best-workflow-automation-tools.html?favicon_rollout=1" -o /tmp/guide.html || true
+            curl -fsS "https://trytoolscout.org/make-vs-zapier.html?favicon_rollout=1" -o /tmp/comparison.html || true
+            if grep -q 'data-software-favicon="1"' /tmp/guide.html && grep -q 'data-software-favicon="1"' /tmp/comparison.html; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Live software card favicon verification failed"
+          exit 1
