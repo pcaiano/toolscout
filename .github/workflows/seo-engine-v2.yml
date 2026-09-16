@@ -68,6 +68,8 @@ jobs:
         run: node scripts/build-blog-topics.mjs
       - name: Generate blog
         run: node scripts/generate-blog.mjs
+      - name: Enrich comparison links with favicons
+        run: node scripts/enrich-comparison-favicons.mjs --fix
       - name: Enforce outbound UX
         run: node scripts/enforce-outbound-ux.mjs --fix
       - name: Generate distribution assets
