@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "enabled": true,
+  "statsUrl": "https://trytoolscout.org/api/stats",
+  "lookbackDays": 30,
+  "minimumPairViewsForPromotion": 3,
+  "maxNewPairsPerCycle": 3,
+  "requireComparisonEligible": true,
+  "requireEditorialTrust": true,
+  "policy": "Observed user comparison demand can create a new indexable comparison only when both tools pass comparison and editorial trust gates. Affiliate economics never affect pair promotion."
+}
