@@ -9,9 +9,10 @@ for(const name of fs.readdirSync(ROOT)){
   if(/^analytics(?:-|\.|$)/i.test(name))continue;
   htmlTargets.push(path.join(ROOT,name));
 }
-const toolsDir=path.join(ROOT,'tools');
-if(fs.existsSync(toolsDir)){
-  for(const name of fs.readdirSync(toolsDir))if(name.endsWith('.html'))htmlTargets.push(path.join(toolsDir,name));
+for(const directory of ['tools','blog']){
+  const dir=path.join(ROOT,directory);
+  if(!fs.existsSync(dir))continue;
+  for(const name of fs.readdirSync(dir))if(name.endsWith('.html'))htmlTargets.push(path.join(dir,name));
 }
 
 function normalizeOutboundAnchor(full,attrs,body){
@@ -47,7 +48,7 @@ for(const file of htmlTargets){
 const appPath=path.join(ROOT,'app.js');
 if(fs.existsSync(appPath)){
   const before=fs.readFileSync(appPath,'utf8');
-  let after=before.replace(/\s+noreferrer\b/g,'').replace(/[\u2013\u2014]/g,'-').replace(/Explore \$\{t\.name\}/g,'Visit ${t.name}');
+  const after=before.replace(/\s+noreferrer\b/g,'').replace(/[\u2013\u2014]/g,'-').replace(/Explore \$\{t\.name\}/g,'Visit ${t.name}');
   checked++;
   if(after!==before){
     if(fix){fs.writeFileSync(appPath,after);changed++;}
