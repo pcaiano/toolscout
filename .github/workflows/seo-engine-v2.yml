@@ -22,7 +22,15 @@ jobs:
           fetch-depth: 0
       - name: Restore daily cadence after conservation window
         if: github.event_name == 'schedule'
-        run: node scripts/restore-seo-schedule-after-conservation.mjs
+        run: |
+          node scripts/restore-seo-schedule-after-conservation.mjs
+          if ! git diff --quiet -- .github/workflows/seo-engine-v2.yml; then
+            git config user.name "toolscout-seo-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/workflows/seo-engine-v2.yml
+            git commit -m "Restore daily SEO engine cadence after conservation"
+            git push origin HEAD:main
+          fi
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
       - name: Sync Google Search Console performance signals
@@ -114,13 +122,13 @@ jobs:
       - name: Commit generated SEO assets
         if: github.ref == 'refs/heads/main'
         run: |
-          if [ -z "$(git status --porcelain -- .github/workflows/seo-engine-v2.yml data/competitive-gap-profiles.json data/seo-longtail.json '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
+          if [ -z "$(git status --porcelain -- data/competitive-gap-profiles.json data/seo-longtail.json '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- .github/workflows/seo-engine-v2.yml data/competitive-gap-profiles.json data/seo-longtail.json '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
+          git add -- data/competitive-gap-profiles.json data/seo-longtail.json '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
           git commit -m "Refresh SEO, indexing, research, blog and distribution assets"
           git pull --rebase origin main
           git push origin HEAD:main
