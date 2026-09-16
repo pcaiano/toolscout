@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "principles": {
     "catalogMustStayMarketRelevant": true,
     "officialSourcesRequired": true,
@@ -10,7 +10,9 @@
     "unsupportedClaimsMustNeverEnterEditorialRanking": true,
     "genericCategoryProfilesCannotCreateEditorialFacts": true,
     "catalogBreadthIsSeparateFromRankingEligibility": true,
-    "catalogEntryDoesNotImplyRecommendation": true
+    "catalogEntryDoesNotImplyRecommendation": true,
+    "volatileFactsRequireFieldLevelFreshness": true,
+    "visualAssetsArePartOfCatalogQuality": true
   },
   "cadence": {
     "run": "daily",
@@ -54,6 +56,21 @@
     "requirePricingForCatalogEntry": false,
     "requireToolSpecificScoresForCatalogEntry": false,
     "upgradeToEditorialRequiresSeparateEvidence": true
+  },
+  "qualityControl": {
+    "enabled": true,
+    "volatileFieldReviewDays": 7,
+    "stableFieldReviewDays": 30,
+    "maxSameOriginEvidencePages": 2,
+    "trackFields": ["pricing", "freePlan", "trial", "features"],
+    "preferFirstPartyVisualAssets": true,
+    "validateVisualAssets": true,
+    "autoCorrectExplicitFreePlanContradictions": true,
+    "autoCorrectInferredFreePlanContradictions": false,
+    "pricingChangesRequireEvidenceReview": true,
+    "featureChangesRequireEvidenceReview": true,
+    "highSeverityFacts": ["freePlan", "trial", "pricing"],
+    "reportUnresolvedVisualAssetFailures": true
   },
   "trustedCandidateFiles": [
     "data/catalog-wave1-enrichment.json",
