@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-16T08:01:47.172Z",
+  "generated_at": "2026-09-16T08:03:16.093Z",
   "mode": "read-only D1 reconciliation",
   "window_days": 30,
   "definitions": {
@@ -9,29 +9,175 @@
     "monetized": "affiliate_active_at_click = 1 at click time"
   },
   "totals": {
-    "Total queries executed": 1,
-    "Rows read": 6183,
-    "Rows written": 0,
-    "Database size (MB)": "9.73"
+    "raw_public_clicks_30d": 2127,
+    "classified_human_clicks_30d": 21,
+    "started_human_clicks_30d": 21,
+    "canonical_human_clicks_30d": 0,
+    "raw_monetized_clicks_30d": 334,
+    "classified_human_monetized_clicks_30d": 4,
+    "canonical_monetized_clicks_30d": 0,
+    "human_clicks_missing_page_confirmed_30d": 21,
+    "clicks_without_session_row_30d": 253,
+    "unknown_legacy_clicks_30d": 1697
   },
   "diagnosis": {
-    "canonical_gap": 0,
-    "canonical_monetization_gap": 0
+    "canonical_gap": 21,
+    "canonical_monetization_gap": 4
   },
   "by_source": [
     {
-      "Total queries executed": 1,
-      "Rows read": 8290,
-      "Rows written": 0,
-      "Database size (MB)": "9.73"
+      "source": "affiliate-redirect",
+      "raw_clicks": 1102,
+      "classified_human_clicks": 7,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 332,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "source": "public-redirect",
+      "raw_clicks": 922,
+      "classified_human_clicks": 12,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 0,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "source": "seo-page",
+      "raw_clicks": 100,
+      "classified_human_clicks": 2,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 2,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "source": "recommendation",
+      "raw_clicks": 3,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 0,
+      "canonical_monetized_clicks": 0
     }
   ],
   "daily_last_14d": [
     {
-      "Total queries executed": 1,
-      "Rows read": 2776,
-      "Rows written": 0,
-      "Database size (MB)": "9.73"
+      "day": "2026-09-16",
+      "raw_clicks": 68,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 12,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-15",
+      "raw_clicks": 48,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 20,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-14",
+      "raw_clicks": 12,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 2,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-13",
+      "raw_clicks": 68,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 7,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-12",
+      "raw_clicks": 24,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 7,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-11",
+      "raw_clicks": 47,
+      "classified_human_clicks": 19,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 11,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-10",
+      "raw_clicks": 20,
+      "classified_human_clicks": 1,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 4,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-09",
+      "raw_clicks": 44,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 11,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-08",
+      "raw_clicks": 105,
+      "classified_human_clicks": 1,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 20,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-07",
+      "raw_clicks": 41,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 18,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-06",
+      "raw_clicks": 45,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 4,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-05",
+      "raw_clicks": 42,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 10,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-04",
+      "raw_clicks": 143,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 24,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-03",
+      "raw_clicks": 97,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 20,
+      "canonical_monetized_clicks": 0
+    },
+    {
+      "day": "2026-09-02",
+      "raw_clicks": 91,
+      "classified_human_clicks": 0,
+      "canonical_human_clicks": 0,
+      "raw_monetized_clicks": 3,
+      "canonical_monetized_clicks": 0
     }
   ],
   "d1_meta": {
@@ -42,16 +188,15 @@
         "served_by_colo": "LIS",
         "served_by_primary": true,
         "timings": {
-          "sql_duration_ms": 5.8218
+          "sql_duration_ms": 2.9813
         },
-        "duration": 5.8218,
-        "changes": 1,
+        "duration": 2.9813,
+        "changes": 0,
         "last_row_id": 0,
-        "changed_db": true,
+        "changed_db": false,
         "size_after": 9728000,
         "rows_read": 6183,
         "rows_written": 0,
-        "num_tables": 37,
         "total_attempts": 1
       }
     ],
@@ -62,16 +207,15 @@
         "served_by_colo": "LIS",
         "served_by_primary": true,
         "timings": {
-          "sql_duration_ms": 4.3699
+          "sql_duration_ms": 2.7973
         },
-        "duration": 4.3699,
-        "changes": 1,
+        "duration": 2.7973,
+        "changes": 0,
         "last_row_id": 0,
-        "changed_db": true,
+        "changed_db": false,
         "size_after": 9728000,
-        "rows_read": 8290,
+        "rows_read": 8293,
         "rows_written": 0,
-        "num_tables": 37,
         "total_attempts": 1
       }
     ],
@@ -82,16 +226,15 @@
         "served_by_colo": "LIS",
         "served_by_primary": true,
         "timings": {
-          "sql_duration_ms": 3.4046
+          "sql_duration_ms": 1.7691
         },
-        "duration": 3.4046,
-        "changes": 1,
+        "duration": 1.7691,
+        "changes": 0,
         "last_row_id": 0,
-        "changed_db": true,
+        "changed_db": false,
         "size_after": 9728000,
-        "rows_read": 2776,
+        "rows_read": 3602,
         "rows_written": 0,
-        "num_tables": 37,
         "total_attempts": 1
       }
     ]
