@@ -28,12 +28,14 @@ function renderDetails(d){
   var root=document.getElementById('trafficTruthBody');if(!root)return;
   var forecast=root.querySelector('.tsTruthForecast');if(!forecast)return;
   var old=root.querySelector('.tsTrafficDetail');if(old)old.remove();
-  var v=latest.visitors||{},traffic=latest.traffic||{},tracking=latest.tracking||{};
-  var html='<div class="tsTrafficDetail"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Supporting first-party visitor and browser-session metrics. Human Visitors remains the canonical headline metric.</span></div><div class="tsDetailGrid">'+
+  var v=latest.visitors||{},traffic=latest.traffic||{},tracking=latest.tracking||{},commercial=latest.canonicalCommercialTruth||{};
+  var html='<div class="tsTrafficDetail"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Supporting first-party visitor, browser-session and commercial click metrics. Human Visitors remains the canonical headline metric.</span></div><div class="tsDetailGrid">'+
     card('Human visitors, last 24h',fmt(v.last24),visitorWindowMeta(v,'last24'))+
     card('Human visitors today',fmt(v.today),visitorWindowMeta(v,'today'))+
     card('Human visitors this month',fmt(v.monthToDate),visitorWindowMeta(v,'month'))+
     card('Human visitors since tracking',fmt(v.sinceTracking),'Unique first-party human browser IDs observed since exact tracking began')+
+    card('Outbound clicks, 30d',fmt(commercial.humanOutbound),'Browser-confirmed human outbound clicks')+
+    card('Monetized outbound clicks, 30d',fmt(commercial.monetizedOutbound),'Human outbound clicks routed through active monetized affiliate paths')+
     card('Browser sessions, last 24h',fmt(tracking.humanSessionsLast24Hours),'Browser-confirmed likely-human sessions')+
     card('Browser sessions this month',fmt(traffic.monthToDate),'Comparable month-to-date behavior metric')+
     card('Average sessions per day MTD',fmt(traffic.dailyAverageMTD,1),'Browser-confirmed sessions per calendar day')+
@@ -66,7 +68,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:1,canonicalMetric:'human visitors',supportingTrafficMetrics:true,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:2,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
