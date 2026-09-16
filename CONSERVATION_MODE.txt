@@ -1,3 +1,6 @@
 GitHub Actions conservation mode active until 2026-10-01.
 Original workflows are preserved on branch pre-conservation-2026-09-13.
 Do not restore scheduled workflows before the monthly Actions minutes reset unless required for a production emergency.
+
+Traffic integrity note, 2026-09-16:
+Canonical browser-confirmed visitor truth and Worker-native D1 heartbeat are implemented in main via traffic-integrity-worker.js and migration 0071. The repository is ready for deployment, but this change must not be described as production-live until the Cloudflare Worker deployment is independently verified. The new health path is /api/traffic-integrity-health and does not require GitHub Actions once deployed.
