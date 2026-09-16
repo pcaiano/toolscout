@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "principles": {
     "fullyAutonomous": true,
     "ownerContentInterventionRequired": false,
@@ -37,6 +37,14 @@
     "minimumPositionWorseningForRollback": 10,
     "persistActiveVariantUntilMeasured": true,
     "automaticRollbackOnClearLoss": true
+  },
+  "competitiveGapLoop": {
+    "maxNewContentIntentsPerCycle": 2,
+    "minimumEligibleToolsForNewContentIntent": 3,
+    "minimumParentMatchScore": 3,
+    "minimumParentMatchMargin": 1,
+    "autoPromoteBestIntentOnly": true,
+    "retryHeldCandidatesAutomatically": true
   },
   "editorialGates": {
     "minimumEligibleToolsPerGuide": 2,
