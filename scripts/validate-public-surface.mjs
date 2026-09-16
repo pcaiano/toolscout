@@ -61,6 +61,7 @@ function hasVendorTracking(rawUrl,slug){
     if(slug==='instantly'&&host==='refer.instantly.ai'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='zoho-crm'&&host==='go.zoho.com'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='mailerlite'&&host==='mailerlite.com'&&Boolean(url.searchParams.get('linkId'))&&Boolean(url.searchParams.get('sourceId'))&&Boolean(url.searchParams.get('tenantId')))return true;
+    if(slug==='se-ranking'&&host==='seranking.com'&&Boolean(url.searchParams.get('ga')))return true;
     return false;
   }catch{return false;}
 }
