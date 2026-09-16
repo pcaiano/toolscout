@@ -156,7 +156,7 @@ function installPriorityRender(){
 }
 function needsLoad(){
   var status=document.getElementById('status');
-  if(status&&/Updated\\s/i.test(status.textContent||''))return false;
+  if(status&&/Updated\s/i.test(status.textContent||''))return false;
   var bodies=[].slice.call(document.querySelectorAll('.widgetBody'));
   return bodies.some(function(el){return /Refresh to load|Loading current data|Refresh to reconcile|Refresh to load current/i.test(el.textContent||'')})||!bodies.length;
 }
@@ -189,8 +189,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 async function decorate(response){
   if(!response.ok||!isHtml(response))return response;
   let html=await response.text();
-  html=html.replace(/<script data-toolscout-command-autoload="[123]">[\\s\\S]*?<\\/script>/gi,'');
-  if(!html.includes('data-toolscout-command-autoload="4"'))html=html.replace(/<\\/body>/i,autoloadScript()+'</body>');
+  html=html.replace(/<script data-toolscout-command-autoload="[123]">[\s\S]*?<\/script>/gi,'');
+  if(!html.includes('data-toolscout-command-autoload="4"'))html=html.replace(/<\/body>/i,autoloadScript()+'</body>');
   const headers=new Headers(response.headers);
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
