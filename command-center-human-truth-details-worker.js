@@ -68,6 +68,7 @@ function detailsScript(){return `<style data-toolscout-human-truth-details="1">
 #trafficTruthBody .tsDetailCard small{display:block;color:var(--muted);font-size:8.5px;font-weight:850;letter-spacing:.075em;text-transform:uppercase;line-height:1.35}
 #trafficTruthBody .tsDetailCard b{display:block;font-size:25px;letter-spacing:-.04em;line-height:1.05;margin-top:6px}
 #trafficTruthBody .tsDetailCard span{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-top:5px}
+#trafficTruthBody .tsVisitorMaturity{margin-top:9px;color:var(--muted);font-size:9.5px;line-height:1.4}
 @media(max-width:430px){#trafficTruthBody .tsDetailGrid{grid-template-columns:1fr 1fr;gap:8px}#trafficTruthBody .tsDetailCard{padding:11px}#trafficTruthBody .tsDetailCard b{font-size:23px}}
 </style><script data-toolscout-human-truth-details="1">(function(){
 if(window.__toolscoutHumanTruthDetailsInstalled)return;
@@ -76,25 +77,25 @@ var latest=null,wrapped=false;
 function n(v){var x=Number(v);return Number.isFinite(x)?x:0}
 function fmt(v,digits){var x=n(v);return digits==null?x.toLocaleString():x.toFixed(digits)}
 function card(label,value,meta){return '<div class="tsDetailCard"><small>'+label+'</small><b>'+value+'</b><span>'+meta+'</span></div>'}
-function visitorWindowMeta(v,key){var c=v&&v.coverage||{},ok=key==='last24'?!!c.last24Complete:key==='today'?!!c.todayComplete:!!c.monthToDateComplete;return ok?'Complete exact measurement window':'Exact count for covered period only'}
+function visitorComplete(v,key){var c=v&&v.coverage||{};return key==='last24'?!!c.last24Complete:key==='today'?!!c.todayComplete:!!c.monthToDateComplete}
+function visitorWindowMeta(v,key){return visitorComplete(v,key)?'Complete exact measurement window':'Partial exact tracking window'}
 function renderDetails(d){
   latest=d||latest;if(!latest)return;
   var root=document.getElementById('trafficTruthBody');if(!root)return;
   var forecast=root.querySelector('.tsTruthForecast');if(!forecast)return;
   var old=root.querySelector('.tsTrafficDetail');if(old)old.remove();
-  var v=latest.visitors||{},traffic=latest.traffic||{},tracking=latest.tracking||{},commercial=latest.canonicalCommercialTruth||{};
-  var html='<div class="tsTrafficDetail"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Supporting first-party visitor, browser-session and commercial click metrics. Human Visitors remains the canonical headline metric.</span></div><div class="tsDetailGrid">'+
-    card('Human visitors, last 24h',fmt(v.last24),visitorWindowMeta(v,'last24'))+
-    card('Human visitors today',fmt(v.today),visitorWindowMeta(v,'today'))+
-    card('Human visitors this month',fmt(v.monthToDate),visitorWindowMeta(v,'month'))+
-    card('Human visitors since tracking',fmt(v.sinceTracking),'Unique first-party human browser IDs observed since exact tracking began')+
+  var v=latest.visitors||{},traffic=latest.traffic||{},commercial=latest.canonicalCommercialTruth||{};
+  var mature=visitorComplete(v,'last24');
+  var html='<div class="tsTrafficDetail"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Human Sessions is the canonical headline metric. Unique Human Visitors remains secondary while its exact tracking window is partial.</span></div><div class="tsDetailGrid">'+
+    card('Unique human visitors, last 24h',fmt(v.last24),visitorWindowMeta(v,'last24'))+
+    card('Unique human visitors today',fmt(v.today),visitorWindowMeta(v,'today'))+
+    card('Unique human visitors this month',fmt(v.monthToDate),visitorWindowMeta(v,'month'))+
+    card('Unique visitors since exact tracking',fmt(v.sinceTracking),'First-party human browser IDs observed since exact visitor tracking began')+
     card('Outbound clicks, 30d',fmt(commercial.humanOutbound),'Browser-confirmed human outbound clicks')+
     card('Monetized outbound clicks, 30d',fmt(commercial.monetizedOutbound),'Human outbound clicks routed through active monetized affiliate paths')+
-    card('Browser sessions, last 24h',fmt(tracking.humanSessionsLast24Hours),'Browser-confirmed likely-human sessions')+
-    card('Browser sessions this month',fmt(traffic.monthToDate),'Comparable month-to-date behavior metric')+
+    card('Browser sessions this month',fmt(traffic.monthToDate),'Canonical browser-confirmed month-to-date sessions')+
     card('Average sessions per day MTD',fmt(traffic.dailyAverageMTD,1),'Browser-confirmed sessions per calendar day')+
-    card('Projected browser sessions this month',fmt(traffic.projectedMonth),'Behavior forecast only, separate from the human-visitor forecast')+
-    '</div></div>';
+    '</div>'+(mature?'':'<div class="tsVisitorMaturity">Unique visitor projection is hidden until at least 24 hours of exact visitor tracking are complete. Historical sessions are not converted into unique visitors.</div>')+'</div>';
   forecast.insertAdjacentHTML('afterend',html);
 }
 function install(){
@@ -126,7 +127,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:6,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:7,canonicalMetric:'human sessions',supportingUniqueVisitorMetric:true,visitorProjectionRequiresComplete24h:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human session forecast'},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
