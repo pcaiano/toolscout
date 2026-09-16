@@ -1,0 +1,99 @@
+{
+  "generated_at": "2026-09-16T08:01:47.172Z",
+  "mode": "read-only D1 reconciliation",
+  "window_days": 30,
+  "definitions": {
+    "raw_public": "click_events in the last 30 days excluding internal-test, synthetic, health-check and ci sources",
+    "classified_human": "raw public clicks whose sessions classification is likely-human or human",
+    "canonical_command_center": "classified human clicks whose session also has a page_confirmed funnel event",
+    "monetized": "affiliate_active_at_click = 1 at click time"
+  },
+  "totals": {
+    "Total queries executed": 1,
+    "Rows read": 6183,
+    "Rows written": 0,
+    "Database size (MB)": "9.73"
+  },
+  "diagnosis": {
+    "canonical_gap": 0,
+    "canonical_monetization_gap": 0
+  },
+  "by_source": [
+    {
+      "Total queries executed": 1,
+      "Rows read": 8290,
+      "Rows written": 0,
+      "Database size (MB)": "9.73"
+    }
+  ],
+  "daily_last_14d": [
+    {
+      "Total queries executed": 1,
+      "Rows read": 2776,
+      "Rows written": 0,
+      "Database size (MB)": "9.73"
+    }
+  ],
+  "d1_meta": {
+    "main": [
+      {
+        "served_by": "v3-prod",
+        "served_by_region": "WEUR",
+        "served_by_colo": "LIS",
+        "served_by_primary": true,
+        "timings": {
+          "sql_duration_ms": 5.8218
+        },
+        "duration": 5.8218,
+        "changes": 1,
+        "last_row_id": 0,
+        "changed_db": true,
+        "size_after": 9728000,
+        "rows_read": 6183,
+        "rows_written": 0,
+        "num_tables": 37,
+        "total_attempts": 1
+      }
+    ],
+    "by_source": [
+      {
+        "served_by": "v3-prod",
+        "served_by_region": "WEUR",
+        "served_by_colo": "LIS",
+        "served_by_primary": true,
+        "timings": {
+          "sql_duration_ms": 4.3699
+        },
+        "duration": 4.3699,
+        "changes": 1,
+        "last_row_id": 0,
+        "changed_db": true,
+        "size_after": 9728000,
+        "rows_read": 8290,
+        "rows_written": 0,
+        "num_tables": 37,
+        "total_attempts": 1
+      }
+    ],
+    "daily": [
+      {
+        "served_by": "v3-prod",
+        "served_by_region": "WEUR",
+        "served_by_colo": "LIS",
+        "served_by_primary": true,
+        "timings": {
+          "sql_duration_ms": 3.4046
+        },
+        "duration": 3.4046,
+        "changes": 1,
+        "last_row_id": 0,
+        "changed_db": true,
+        "size_after": 9728000,
+        "rows_read": 2776,
+        "rows_written": 0,
+        "num_tables": 37,
+        "total_attempts": 1
+      }
+    ]
+  }
+}
