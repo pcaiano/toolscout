@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "owner-exclusion-worker.js"
+main = "traffic-integrity-guard-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
