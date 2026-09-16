@@ -26,5 +26,9 @@
   "podia": {"url": "https://www.podia.com/?via=pedro", "enabled": true, "publicUrl": "https://www.podia.com/"},
   "lemlist": {"url": "https://get.lemlist.com/hae54bc9pvrl", "enabled": true, "publicUrl": "https://www.lemlist.com/"},
   "instantly": {"url": "https://refer.instantly.ai/a4xna1ybm2ie", "enabled": true, "publicUrl": "https://instantly.ai/"},
-  "apollo": {"url": "https://get.apollo.io/frt8skmdteml", "enabled": true, "publicUrl": "https://www.apollo.io/"}
+  "apollo": {
+    "url": "https://get.apollo.io/frt8skmdteml",
+    "enabled": true,
+    "publicUrl": "https://www.apollo.io/"
+  }
 }
