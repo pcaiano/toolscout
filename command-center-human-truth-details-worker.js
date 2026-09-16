@@ -48,6 +48,7 @@ async function affiliateCoverageStatusSnapshot(request,env){
 async function augmentAffiliateStatus(response,request,env){
   if(!response.ok)return response;
   let data;try{data=await response.json()}catch{return response}
+  if(Array.isArray(data?.growthOps?.health?.issues))data.growthOps.health.issues=data.growthOps.health.issues.filter(issue=>!(issue?.engine==='command-center'&&issue?.title==='Resilient snapshot active'));
   if(data?.affiliateCoverageStatus?.status!=='observed')data.affiliateCoverageStatus=await affiliateCoverageStatusSnapshot(request,env);
   const headers=new Headers(response.headers);
   headers.set('Content-Type','application/json; charset=UTF-8');
@@ -124,7 +125,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:4,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:5,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
