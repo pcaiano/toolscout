@@ -20,22 +20,14 @@ function finalTruthScript(){return `<style data-toolscout-human-truth-final="1">
 </style><script data-toolscout-human-truth-final="1">(function(){
 if(window.__toolscoutHumanTruthFinalBootstrap)return;
 window.__toolscoutHumanTruthFinalBootstrap=true;
-var KEY='toolscout_human_visitor_window',selected='last24',latest=null,installed=false;
+var KEY='toolscout_human_session_window',selected='last24',latest=null,installed=false;
 try{var saved=localStorage.getItem(KEY);if(saved==='today'||saved==='last24'||saved==='month')selected=saved}catch(e){}
 function n(v){var x=Number(v);return Number.isFinite(x)?x:0}
 function fmt(v){return n(v).toLocaleString()}
-function parts(value){var a=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(value instanceof Date?value:new Date(value)),o={};a.forEach(function(p){if(p.type!=='literal')o[p.type]=p.value});return o}
-function complete(v,key){var c=v&&v.coverage||{};return key==='today'?!!c.todayComplete:key==='month'?!!c.monthToDateComplete:!!c.last24Complete}
-function value(v,key){return key==='today'?n(v&&v.today):key==='month'?n(v&&v.monthToDate):n(v&&v.last24)}
-function label(key){return key==='today'?'Human visitors today':key==='month'?'Human visitors this month':'Human visitors, last 24 hours'}
-function projection(v){
-  if(!v||!v.trackingSince)return null;
-  var now=new Date(),p=parts(now),y=Number(p.year),m=Number(p.month),day=Number(p.day),days=new Date(Date.UTC(y,m,0)).getUTCDate(),start=new Date(v.trackingSince);
-  if(!Number.isFinite(start.getTime()))return null;
-  var sp=parts(start),observedDays=day;
-  if(Number(sp.year)===y&&Number(sp.month)===m)observedDays=Math.max(1,day-Number(sp.day)+1);
-  return Math.round(n(v.monthToDate)/Math.max(1,observedDays)*days);
-}
+function rawSessionValue(d,key){var traffic=d&&d.traffic||{},tracking=d&&d.tracking||{};return key==='today'?traffic.today:key==='month'?traffic.monthToDate:tracking.humanSessionsLast24Hours}
+function sessionValue(d,key){return n(rawSessionValue(d,key))}
+function sessionAvailable(d,key){return Number.isFinite(Number(rawSessionValue(d,key)))}
+function label(key){return key==='today'?'Human sessions today':key==='month'?'Human sessions this month':'Human sessions, last 24 hours'}
 function shortDay(v){var s=String(v||'');return s.slice(8,10)+'/'+s.slice(5,7)}
 function chart(points){
   if(!Array.isArray(points)||!points.length)return '<div class="note">Traffic trend is not available yet.</div>';
@@ -46,15 +38,15 @@ function chart(points){
   var dots=c.map(function(p,i){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.6" fill="var(--accent)"><title>'+shortDay(points[i].day)+': '+n(points[i].sessions)+' sessions</title></circle>'}).join('');
   return '<div style="border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--card2)"><div class="rowName">Traffic evolution, last 30 days</div><div class="rowMeta">Browser confirmed sessions, comparable historical series</div><svg viewBox="0 0 '+w+' '+h+'" width="100%" height="220" role="img" aria-label="Traffic evolution over the last 30 days" style="display:block;margin-top:8px;overflow:visible;color:var(--muted)"><line x1="'+l+'" y1="'+(t+ih)+'" x2="'+(w-r)+'" y2="'+(t+ih)+'" stroke="currentColor" opacity="0.18"/><line x1="'+l+'" y1="'+t+'" x2="'+l+'" y2="'+(t+ih)+'" stroke="currentColor" opacity="0.18"/><text x="4" y="'+(t+5)+'" fill="currentColor" opacity="0.55" font-size="10">'+max+'</text><text x="14" y="'+(t+ih+4)+'" fill="currentColor" opacity="0.55" font-size="10">0</text><polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+labels+'</svg></div>';
 }
-function pill(ok){return '<span class="pill '+(ok?'good':'warn')+'">'+(ok?'verified':'partial window')+'</span>'}
+function pill(ok){return '<span class="pill '+(ok?'good':'warn')+'">'+(ok?'verified':'unavailable')+'</span>'}
 function renderFinal(d){
   latest=d||latest;if(!latest)return;
   var root=document.getElementById('trafficTruthBody');if(!root)return;
-  var widget=root.closest('.widget[data-widget="traffic-truth"]'),v=latest.visitors||{},trend=latest.trafficTrend||{},ok=!!(v.status==='observed'&&v.trackingSince&&complete(v,selected)),proj=projection(v);
-  if(widget){var k=widget.querySelector('.widgetKicker'),title=widget.querySelector('.widgetTitle');if(k)k.textContent='FIRST-PARTY HUMAN TRUTH';if(title)title.textContent='Human Visitors'}
+  var widget=root.closest('.widget[data-widget="traffic-truth"]'),trend=latest.trafficTrend||{},traffic=latest.traffic||{},ok=sessionAvailable(latest,selected),proj=Number.isFinite(Number(traffic.projectedMonth))?n(traffic.projectedMonth):null;
+  if(widget){var k=widget.querySelector('.widgetKicker'),title=widget.querySelector('.widgetTitle');if(k)k.textContent='FIRST-PARTY HUMAN TRUTH';if(title)title.textContent='Human Sessions'}
   var meta=document.getElementById('trafficTruthMeta');if(meta)meta.innerHTML=pill(ok);
-  var tabs='<div class="tsTruthTabs" role="group" aria-label="Human visitor reporting window"><button type="button" class="tsTruthTab" data-ts-window="last24" aria-pressed="'+(selected==='last24')+'">Last 24h</button><button type="button" class="tsTruthTab" data-ts-window="today" aria-pressed="'+(selected==='today')+'">Today</button><button type="button" class="tsTruthTab" data-ts-window="month" aria-pressed="'+(selected==='month')+'">This month</button></div>';
-  root.innerHTML=chart(trend.points||[])+tabs+'<div class="tsTruthHero"><div><small>'+label(selected)+'</small><b>'+fmt(value(v,selected))+'</b><span>'+(ok?'Complete exact measurement window':'Exact count for the covered period only')+'</span></div><div>'+pill(ok)+'</div></div><div class="tsTruthForecast"><small>Projected human visitors this month</small><b>'+(proj==null?'Unavailable':fmt(proj))+'</b><span>Projected from the first-party unique human visitor pace since exact tracking began</span></div><div class="note" style="margin-top:10px"><strong>Canonical definition:</strong> one anonymous first-party browser ID, counted once in the selected window, only when classified as likely human. Owner, known bots and synthetic traffic are excluded.'+(selected==='month'&&!complete(v,'month')?'<br><br>This month is a partial measurement window because exact visitor tracking began after the month started. The observed count is not backfilled or estimated.':'')+'</div>';
+  var tabs='<div class="tsTruthTabs" role="group" aria-label="Human session reporting window"><button type="button" class="tsTruthTab" data-ts-window="last24" aria-pressed="'+(selected==='last24')+'">Last 24h</button><button type="button" class="tsTruthTab" data-ts-window="today" aria-pressed="'+(selected==='today')+'">Today</button><button type="button" class="tsTruthTab" data-ts-window="month" aria-pressed="'+(selected==='month')+'">This month</button></div>';
+  root.innerHTML=chart(trend.points||[])+tabs+'<div class="tsTruthHero"><div><small>'+label(selected)+'</small><b>'+fmt(sessionValue(latest,selected))+'</b><span>Browser-confirmed likely-human sessions</span></div><div>'+pill(ok)+'</div></div><div class="tsTruthForecast"><small>Projected human sessions this month</small><b>'+(proj==null?'Unavailable':fmt(proj))+'</b><span>Projected from the browser-confirmed month-to-date session pace</span></div><div class="note" style="margin-top:10px"><strong>Canonical definition:</strong> one browser-confirmed session with page_confirmed, classified as likely human. Owner, known bots, synthetic and unknown traffic are excluded.</div>';
 }
 function install(){
   if(installed)return;installed=true;
@@ -81,7 +73,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-final-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-final',version:2,canonicalVisitorSource:'D1 first-party visitor IDs',defaultWindow:'last24',chartPosition:'top',singleHumanVisitorValue:true,forecastMetric:'unique human visitors'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-final-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-final',version:3,canonicalMetric:'human sessions',canonicalSource:'D1 page_confirmed + likely-human',defaultWindow:'last24',chartPosition:'top',forecastMetric:'human sessions',uniqueVisitorsRole:'secondary until exact visitor coverage matures'},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
