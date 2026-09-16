@@ -100,3 +100,6 @@ jobs:
           done
           echo "Live comparison favicon verification failed"
           exit 1
+
+      - name: Verification marker
+        run: echo "SEO readability and favicon pass complete"
