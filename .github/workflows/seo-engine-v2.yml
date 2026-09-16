@@ -72,6 +72,10 @@ jobs:
         run: node scripts/enrich-comparison-favicons.mjs --fix
       - name: Enrich software cards with favicons
         run: node scripts/enrich-software-card-favicons.mjs --fix
+      - name: Enforce SEO hygiene and internal linking
+        run: |
+          node scripts/enforce-seo-hygiene.mjs --fix
+          node scripts/enforce-seo-hygiene.mjs
       - name: Enforce outbound UX
         run: node scripts/enforce-outbound-ux.mjs --fix
       - name: Generate distribution assets
