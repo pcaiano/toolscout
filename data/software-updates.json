@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-16T06:35:00Z",
+  "updatedAt": "2026-09-16T08:52:00Z",
   "editorialPolicy": "Updates are selected for product relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
     {
@@ -39,8 +39,8 @@
       "toolSlug": null,
       "toolName": "ToolScout",
       "label": "ToolScout research",
-      "title": "September software trends index is live",
-      "summary": "A first-party snapshot of current search visibility, catalog coverage and shortlist patterns across ToolScout.",
+      "title": "September software trends brief is live",
+      "summary": "A buyer focused look at public product releases and recurring software themes from official vendor sources.",
       "sourceName": "ToolScout Software Trends",
       "sourceUrl": "/software-trends-index.html",
       "profileUrl": "/software-trends-index.html",

@@ -9,6 +9,7 @@ workers/
 docs/
 scripts/
 .github/
+reports/
 
 # Server source and operational files are never public static assets.
 migrations/
