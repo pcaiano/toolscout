@@ -49,6 +49,10 @@
     "useCompetitiveGapSignals": true,
     "useAffiliatePipelineOnlyAsVendorRegistry": true,
     "affiliateStatusOrCommissionCannotIncreaseSelectionScore": true,
-    "minimumIndependentMarketSignals": 2
+    "minimumIndependentMarketSignals": 2,
+    "maxCompetitiveGapProfilesPerCycle": 3,
+    "minimumVerifiedCapabilitiesForGapProfile": 2,
+    "competitiveGapProfilesAreNonRanking": true,
+    "competitiveGapEditorialFactsRequireFirstPartySource": true
   }
 }
