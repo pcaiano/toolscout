@@ -3,6 +3,59 @@ import base from './command-center-human-truth-final-worker.js';
 const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 
 function isHtml(response){return (response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
+function n(value){const x=Number(value);return Number.isFinite(x)?x:0}
+async function safeAll(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return []}}
+async function assetJson(request,env,path,fallback){try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback}catch{return fallback}}
+
+async function affiliateCoverageStatusSnapshot(request,env){
+  try{
+    const [tools,pipeline,affiliate,workflowRows,clickRows]=await Promise.all([
+      assetJson(request,env,'/data/tools.json',[]),
+      assetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
+      assetJson(request,env,'/data/affiliate.json',{}),
+      safeAll(env,`SELECT tool_slug,status,updated_at FROM affiliate_workflow`),
+      safeAll(env,`SELECT c.tool_slug,COUNT(*) clicks,SUM(CASE WHEN c.affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human') AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed') GROUP BY c.tool_slug`)
+    ]);
+    const pipelineMap=new Map((pipeline?.verified_programs||[]).map(x=>[String(x.slug||''),x]));
+    const workflowMap=new Map((workflowRows||[]).map(x=>[String(x.tool_slug||''),x]));
+    const clickMap=new Map((clickRows||[]).map(x=>[String(x.tool_slug||''),{clicks:n(x.clicks),monetized:n(x.monetized)}]));
+    const activeStates=new Set(['active','verified','earning']);
+    const pendingStates=new Set(['submitted','pending_review','pending','under_review','applied','application_submitted']);
+    const rejectedStates=new Set(['rejected','declined']);
+    const norm=v=>String(v||'').trim().toLowerCase().replace(/[\s-]+/g,'_');
+    const groups={active:[],pending:[],rejected:[]};
+    for(const tool of tools||[]){
+      const slug=String(tool?.slug||'');if(!slug)continue;
+      const route=affiliate?.[slug]||{};
+      const routeActive=Boolean(route.enabled&&route.url);
+      const workflow=workflowMap.get(slug)||{};
+      const pipelineRow=pipelineMap.get(slug)||{};
+      const status=routeActive?'active':norm(workflow.status||pipelineRow.status);
+      let group=null;
+      if(routeActive||activeStates.has(status))group='active';
+      else if(pendingStates.has(status))group='pending';
+      else if(rejectedStates.has(status))group='rejected';
+      if(!group)continue;
+      const clicks=clickMap.get(slug)||{clicks:0,monetized:0};
+      groups[group].push({slug,name:tool.name||slug,status,clicks30d:clicks.clicks,monetizedClicks30d:clicks.monetized});
+    }
+    for(const items of Object.values(groups))items.sort((a,b)=>b.clicks30d-a.clicks30d||a.name.localeCompare(b.name));
+    const summarize=items=>({count:items.length,clicks30d:items.reduce((s,x)=>s+n(x.clicks30d),0),monetizedClicks30d:items.reduce((s,x)=>s+n(x.monetizedClicks30d),0),items});
+    return {status:'observed',windowDays:30,trafficTruth:'browser_confirmed',clickDefinition:'Browser-confirmed outbound clicks only; internal and synthetic traffic excluded.',active:summarize(groups.active),pending:summarize(groups.pending),rejected:summarize(groups.rejected)};
+  }catch(error){return {status:'unavailable',reason:String(error?.message||error)}}
+}
+
+async function augmentAffiliateStatus(response,request,env){
+  if(!response.ok)return response;
+  let data;try{data=await response.json()}catch{return response}
+  if(data?.affiliateCoverageStatus?.status!=='observed')data.affiliateCoverageStatus=await affiliateCoverageStatusSnapshot(request,env);
+  const headers=new Headers(response.headers);
+  headers.set('Content-Type','application/json; charset=UTF-8');
+  headers.set('Cache-Control','private, no-store');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
+}
 
 function detailsScript(){return `<style data-toolscout-human-truth-details="1">
 #trafficTruthBody .tsTrafficDetail{margin-top:12px}
@@ -57,6 +110,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 async function decorate(response){
   if(!response.ok||!isHtml(response))return response;
   let html=await response.text();
+  html=html.replace(/<section class="widget" data-widget="product-behavior"[\s\S]*?<\/section>\s*/i,'');
+  html=html.replace(/<script>\(function\(\)\{function drawBehavior\(d\)\{[\s\S]*?<\/script>/i,'');
   if(!html.includes('data-toolscout-human-truth-details="1"'))html=html.replace(/<\/body>/i,detailsScript()+'</body>');
   const headers=new Headers(response.headers);
   headers.delete('Content-Length');
@@ -68,9 +123,10 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:2,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
-    const response=await base.fetch(request,env,ctx);
-    if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:3,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
+    let response=await base.fetch(request,env,ctx);
+    if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
+    if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
     return response;
   },
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
