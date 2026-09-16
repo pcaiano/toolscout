@@ -5,6 +5,8 @@ export const FUNNEL_EVENT_TYPES = new Set([
   'recommendation_completed',
   'recommendation_result_viewed',
   'tool_viewed',
+  'comparison_started',
+  'comparison_viewed',
   'outbound_clicked'
 ]);
 
@@ -36,6 +38,7 @@ export function parseFunnelEvent(value) {
   if (!SOURCE.test(event.source)) return null;
   if (event.referrer_host !== null && !HOST.test(event.referrer_host)) return null;
   if (event.event_type === 'outbound_clicked' && !event.tool_slug) return null;
+  if ((event.event_type === 'comparison_started' || event.event_type === 'comparison_viewed') && !event.intent_slug) return null;
   return event;
 }
 
