@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-16T06:35:00Z",
+  "editorialPolicy": "Updates are selected for product relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
+  "items": [
+    {
+      "id": "notion-3-7-agent-skills",
+      "publishedAt": "2026-09-15",
+      "toolSlug": "notion",
+      "toolName": "Notion",
+      "label": "Official release",
+      "title": "Notion 3.7 adds shared Agent skills",
+      "summary": "Notion now lets teams create reusable AI skills, keep them in a shared library and run them from Agent conversations.",
+      "sourceName": "Notion release notes",
+      "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15",
+      "profileUrl": "/tools/notion.html",
+      "outboundUrl": "/go/notion",
+      "outboundLabel": "Visit Notion",
+      "partnerUpdate": false
+    },
+    {
+      "id": "hubspot-mcp-server-update",
+      "publishedAt": "2026-09-15",
+      "toolSlug": "hubspot",
+      "toolName": "HubSpot",
+      "label": "Official product update",
+      "title": "HubSpot publishes new MCP server updates",
+      "summary": "HubSpot has published an update covering its MCP server and related AI integration tooling.",
+      "sourceName": "HubSpot Releases and Updates",
+      "sourceUrl": "https://community.hubspot.com/c/resources/releases-and-updates/134",
+      "profileUrl": "/tools/hubspot.html",
+      "outboundUrl": "/go/hubspot",
+      "outboundLabel": "Visit HubSpot",
+      "partnerUpdate": false
+    },
+    {
+      "id": "toolscout-software-trends-2026-09",
+      "publishedAt": "2026-09-13",
+      "toolSlug": null,
+      "toolName": "ToolScout",
+      "label": "ToolScout research",
+      "title": "September software trends index is live",
+      "summary": "A first-party snapshot of current search visibility, catalog coverage and shortlist patterns across ToolScout.",
+      "sourceName": "ToolScout Software Trends",
+      "sourceUrl": "/software-trends-index.html",
+      "profileUrl": "/software-trends-index.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    }
+  ]
+}
