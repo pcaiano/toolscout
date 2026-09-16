@@ -1,0 +1,27 @@
+name: Command Center Growth Ledger Removal Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cc-growth-ledger-remove-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Syntax check
+        run: node --check command-center-human-truth-details-worker.js
+      - name: Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Verify health
+        run: |
+          set -euo pipefail
+          curl -fsSL https://trytoolscout.org/api/command-center-human-truth-details-health | grep -q '"growthLedgerCard":false'
+          curl -fsSL https://trytoolscout.org/api/command-center-human-truth-details-health | grep -q '"productBehaviourCard":false'
