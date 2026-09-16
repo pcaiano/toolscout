@@ -6,10 +6,46 @@ const fix=process.argv.includes('--fix');
 const tools=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tools.json'),'utf8'));
 const bySlug=new Map(tools.map(tool=>[tool.slug,tool]));
 const categoryHubs=['crm-tools','seo-tools','marketing-tools','automation-tools','forms-tools','productivity-tools','agency-tools'];
+const profileTools=tools.filter(tool=>tool?.slug&&fs.existsSync(path.join(ROOT,'tools',`${tool.slug}.html`)));
+const relatedBySlug=new Map(profileTools.map(tool=>[tool.slug,[]]));
 
 const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const strip=value=>String(value??'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
 const favicon=tool=>{try{return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tool.sourceUrl).hostname)}&sz=128`;}catch{return ''}};
+const normalizedSet=values=>new Set((values||[]).map(value=>String(value).toLowerCase().trim()).filter(Boolean));
+const overlap=(a,b)=>{const right=normalizedSet(b);return [...normalizedSet(a)].filter(value=>right.has(value)).length;};
+
+function addRelated(from,to){
+  if(!from||!to||from.slug===to.slug)return;
+  const list=relatedBySlug.get(from.slug);
+  if(!list||list.some(item=>item.slug===to.slug))return;
+  list.push(to);
+}
+
+const categories=new Map();
+for(const tool of profileTools){
+  const key=String(tool.category||'software');
+  if(!categories.has(key))categories.set(key,[]);
+  categories.get(key).push(tool);
+}
+for(const group of categories.values()){
+  group.sort((a,b)=>a.slug.localeCompare(b.slug));
+  if(group.length>1){
+    for(let index=0;index<group.length;index++){
+      for(let offset=1;offset<group.length&&offset<=4;offset++)addRelated(group[index],group[(index+offset)%group.length]);
+    }
+    continue;
+  }
+  const singleton=group[0];
+  const peers=profileTools.filter(candidate=>candidate.slug!==singleton.slug).map(candidate=>({
+    candidate,
+    score:overlap(singleton.features,candidate.features)*4+overlap(singleton.bestFor,candidate.bestFor)*3+overlap(Object.keys(singleton.scores||{}).filter(key=>Number(singleton.scores?.[key]||0)>=8),Object.keys(candidate.scores||{}).filter(key=>Number(candidate.scores?.[key]||0)>=8))
+  })).sort((a,b)=>b.score-a.score||a.candidate.name.localeCompare(b.candidate.name)).slice(0,4).map(item=>item.candidate);
+  for(const peer of peers){
+    addRelated(singleton,peer);
+    addRelated(peer,singleton);
+  }
+}
 
 function collectHtml(dir){
   const files=[];
@@ -58,18 +94,13 @@ function optimizeTitle(html,rel){
 }
 
 function relatedToolSection(tool){
-  const same=tools.filter(candidate=>candidate.slug!==tool.slug&&candidate.category===tool.category&&fs.existsSync(path.join(ROOT,'tools',`${candidate.slug}.html`))).sort((a,b)=>a.slug.localeCompare(b.slug));
-  if(!same.length)return '';
-  const all=[tool,...same].sort((a,b)=>a.slug.localeCompare(b.slug));
-  const idx=all.findIndex(candidate=>candidate.slug===tool.slug);
-  const peers=[];
-  for(let i=1;i<all.length&&peers.length<4;i++)peers.push(all[(idx+i)%all.length]);
+  const peers=(relatedBySlug.get(tool.slug)||[]).slice(0,5);
   if(!peers.length)return '';
   const cards=peers.map(peer=>{
     const logo=favicon(peer);
     return `<a href="/tools/${encodeURIComponent(peer.slug)}" style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e4e7ec;border-radius:14px;padding:14px;text-decoration:none;color:#101828"><img src="${esc(logo)}" alt="" width="28" height="28" loading="lazy" decoding="async" aria-hidden="true" style="width:28px;height:28px;object-fit:contain;border-radius:7px;background:#fff;border:1px solid #e4e7ec"><span><strong style="display:block">${esc(peer.name)}</strong><small style="color:#667085">${esc(peer.category)} software</small></span></a>`;
   }).join('');
-  return `<!-- TOOLSCOUT_RELATED_TOOLS_START --><section class="section" data-toolscout-related-tools="1"><h2>Related ${esc(tool.category)} tools</h2><p class="small">Explore other software in the same category.</p><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">${cards}</div></section><!-- TOOLSCOUT_RELATED_TOOLS_END -->`;
+  return `<!-- TOOLSCOUT_RELATED_TOOLS_START --><section class="section" data-toolscout-related-tools="1"><h2>Related software</h2><p class="small">Explore nearby options based on category and catalog fit.</p><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">${cards}</div></section><!-- TOOLSCOUT_RELATED_TOOLS_END -->`;
 }
 
 function enrichToolProfile(html,rel){
