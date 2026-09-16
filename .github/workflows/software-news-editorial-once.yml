@@ -1,0 +1,227 @@
+name: ToolScout Software News Editorial Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/software-news-editorial-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify ToolScout target
+        run: |
+          set -euo pipefail
+          grep -q '^name = "toolscout"$' wrangler.toml
+          grep -q 'database_id = "cac6bc3c-d838-4edd-ba29-597030afb397"' wrangler.toml
+          grep -q '^main = "command-center-human-truth-details-worker.js"$' wrangler.toml
+
+      - name: Build editorial news surface
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re, glob
+
+          root=Path('.')
+
+          updates={
+            "version":2,
+            "updatedAt":"2026-09-16T09:10:00Z",
+            "editorialPolicy":"Software news is selected for buyer relevance and factual significance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
+            "researchPolicy":"Primary sources come first. ToolScout publishes only material releases, product changes and platform developments that can affect a software buying or adoption decision.",
+            "items":[
+              {
+                "id":"notion-3-7-agent-skills",
+                "publishedAt":"2026-09-15",
+                "toolSlug":"notion",
+                "toolName":"Notion",
+                "label":"Official release",
+                "title":"Notion 3.7 turns team prompts into reusable Agent skills",
+                "summary":"Notion 3.7 adds reusable team skills, a shared skills library and portability to external AI coding agents.",
+                "sourceName":"Notion release notes",
+                "sourceUrl":"https://www.notion.com/en-gb/releases/2026-09-15",
+                "articleUrl":"/news/notion-3-7-agent-skills.html",
+                "profileUrl":"/news/notion-3-7-agent-skills.html",
+                "toolProfileUrl":"/tools/notion.html",
+                "outboundUrl":None,
+                "outboundLabel":None,
+                "partnerUpdate":False,
+                "article":{
+                  "dek":"Notion is turning repeatable prompting and workflow instructions into shared team infrastructure, with a library that can also travel into external AI coding tools.",
+                  "sections":[
+                    {"title":"What changed","paragraphs":["Notion 3.7 introduces reusable Agent skills that teams can create once and run again from Notion Agent. Skills can live in a shared library, which gives teams a central place to maintain recurring instructions instead of leaving useful prompts scattered across private chats and documents.","Notion also says skills can be downloaded as SKILL.md packages for use with tools including Claude Code, Codex, Cursor, Gemini and Grok. The same release expands Custom MCP connections so Notion Agent can connect to services such as GitHub and Amplitude, with confirmations before connected tools make changes."]},
+                    {"title":"Why it matters","paragraphs":["The interesting shift is not another AI writing feature. It is the move from individual prompting to reusable, governed operating instructions. For teams evaluating Notion as a broader work platform, that makes AI workflow consistency and portability part of the product decision."]},
+                    {"title":"Buyer takeaway","paragraphs":["Teams already standardising recurring research, review, onboarding or planning workflows have a stronger reason to evaluate Notion's agent layer. Buyers should still check plan availability, governance requirements and how well the exported skill format fits the other agents in their stack."]}
+                  ]
+                }
+              },
+              {
+                "id":"hubspot-mcp-server-updates",
+                "publishedAt":"2026-09-15",
+                "toolSlug":"hubspot",
+                "toolName":"HubSpot",
+                "label":"Official product update",
+                "title":"HubSpot expands its MCP server from insight to action",
+                "summary":"HubSpot is broadening what teams can do with CRM data and actions from AI conversations through its MCP server and Claude connector.",
+                "sourceName":"HubSpot Releases and Updates",
+                "sourceUrl":"https://community.hubspot.com/t/spotlight-feature-hubspot-mcp-server-updates/156456",
+                "articleUrl":"/news/hubspot-mcp-server-updates.html",
+                "profileUrl":"/news/hubspot-mcp-server-updates.html",
+                "toolProfileUrl":"/tools/hubspot.html",
+                "outboundUrl":None,
+                "outboundLabel":None,
+                "partnerUpdate":False,
+                "article":{
+                  "dek":"HubSpot is pushing its MCP integration beyond answering questions about CRM data and towards completing more operational work inside an AI conversation.",
+                  "sections":[
+                    {"title":"What changed","paragraphs":["HubSpot's September update frames its Claude connector and remote MCP server around a wider set of real CRM actions. The goal is to reduce the gap between asking an AI system about pipeline, marketing or customer data and then switching back to HubSpot to complete the work.","Recent MCP additions described by HubSpot include broader access to sales and marketing records and more ways for connected AI tools to work with HubSpot data and actions. HubSpot is positioning the server as an integration layer for AI assistants rather than a read only reporting connection."]},
+                    {"title":"Why it matters","paragraphs":["For CRM buyers, MCP support is becoming a practical interoperability question. The value is less about whether a CRM has an AI assistant and more about whether the CRM can safely participate in the AI tools a team already uses, with enough context and action support to remove manual handoffs."]},
+                    {"title":"Buyer takeaway","paragraphs":["Teams comparing HubSpot with other CRM platforms should now include agent interoperability, permission controls and supported actions in their evaluation. The useful test is whether the integration can complete the workflows that matter without weakening governance or forcing constant context switching."]}
+                  ]
+                }
+              }
+            ]
+          }
+          (root/'data/software-updates.json').write_text(json.dumps(updates,indent=2)+"\n",encoding='utf-8')
+
+          generator=r'''import fs from 'node:fs';
+import path from 'node:path';
+const ROOT=process.cwd();
+const BASE='https://trytoolscout.org';
+const data=JSON.parse(fs.readFileSync(path.join(ROOT,'data','software-updates.json'),'utf8'));
+const items=(data.items||[]).filter(x=>x.articleUrl&&x.article).sort((a,b)=>String(b.publishedAt).localeCompare(String(a.publishedAt)));
+const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+const dateLabel=v=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(v+'T00:00:00Z'));
+const css=`:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#101828;background:#f5f7fb;line-height:1.55}*{box-sizing:border-box}body{margin:0;background:#f5f7fb}.wrap{max-width:1000px;margin:auto;padding:26px 22px 84px}.brand{font-weight:850;font-size:23px;letter-spacing:-.045em;color:#101828;text-decoration:none}.top{display:flex;justify-content:space-between;align-items:center;gap:16px}.top nav{display:flex;gap:12px;flex-wrap:wrap}.top nav a{font-size:13px;color:#667085;text-decoration:none}.hero{padding:70px 0 38px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#667085;font-weight:800}h1{font-size:clamp(42px,7vw,72px);line-height:1;letter-spacing:-.055em;margin:14px 0 18px}.lead{font-size:19px;color:#667085;line-height:1.65;max-width:780px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:#fff;border:1px solid #e4e7ec;border-radius:20px;padding:22px;color:#101828;text-decoration:none;box-shadow:0 10px 28px rgba(16,24,40,.05)}.card:hover{border-color:#cfd6df}.meta{font-size:11px;color:#98a2b3;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.card h2{font-size:24px;line-height:1.15;letter-spacing:-.035em;margin:12px 0 10px}.card p{color:#667085;margin:0 0 18px}.more{font-size:13px;font-weight:800}.policy{margin-top:36px;padding:20px;background:#fff;border:1px solid #e4e7ec;border-radius:18px;color:#667085}.article{max-width:790px}.article .hero{padding-bottom:22px}.article h2{font-size:28px;letter-spacing:-.035em;margin-top:38px}.article p{font-size:17px;color:#475467;line-height:1.75}.articleActions{display:flex;gap:10px;flex-wrap:wrap;margin:34px 0}.btn{display:inline-flex;padding:11px 14px;border-radius:11px;text-decoration:none;font-weight:800;font-size:13px;background:#101828;color:#fff}.btn.secondary{background:#fff;color:#101828;border:1px solid #dfe4ea}.source{margin-top:42px;padding-top:24px;border-top:1px solid #e4e7ec;color:#667085;font-size:13px}.source a{color:#344054;font-weight:750}.back{display:inline-block;margin-top:34px;color:#475467;text-decoration:none;font-weight:750}@media(max-width:700px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}`;
+fs.mkdirSync(path.join(ROOT,'news'),{recursive:true});
+for(const item of items){
+  const canonical=BASE+item.articleUrl;
+  const schema={'@context':'https://schema.org','@type':'NewsArticle',headline:item.title,description:item.summary,datePublished:item.publishedAt,dateModified:item.publishedAt,mainEntityOfPage:canonical,publisher:{'@type':'Organization',name:'ToolScout',url:BASE},about:{'@type':'SoftwareApplication',name:item.toolName,url:BASE+(item.toolProfileUrl||'')}};
+  const sections=(item.article.sections||[]).map(s=>`<section><h2>${esc(s.title)}</h2>${(s.paragraphs||[]).map(p=>`<p>${esc(p)}</p>`).join('')}</section>`).join('');
+  const html=`<!doctype html><html lang="en"><head><link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(item.title)} | ToolScout</title><meta name="description" content="${esc(item.summary)}"><link rel="canonical" href="${canonical}"><meta name="robots" content="index,follow"><meta property="og:type" content="article"><meta property="og:site_name" content="ToolScout"><meta property="og:title" content="${esc(item.title)}"><meta property="og:description" content="${esc(item.summary)}"><meta property="og:url" content="${canonical}"><script type="application/ld+json">${JSON.stringify(schema).replaceAll('<','\\u003c')}</script><style>${css}</style></head><body><div class="wrap article"><div class="top"><a class="brand" href="/">ToolScout</a><nav><a href="/whats-new.html">What's new</a><a href="/compare.html">Compare</a><a href="/guides.html">Guides</a><a href="/tools.html">Tools</a></nav></div><main><header class="hero"><div class="eyebrow">${esc(item.label)} · ${esc(dateLabel(item.publishedAt))}</div><h1>${esc(item.title)}</h1><p class="lead">${esc(item.article.dek||item.summary)}</p></header>${sections}<div class="articleActions"><a class="btn secondary" href="${esc(item.toolProfileUrl||'/tools.html')}">${esc(item.toolName)} profile</a><a class="btn" href="/go/${encodeURIComponent(item.toolSlug)}?source=software-news" target="_blank" rel="nofollow sponsored noopener">Visit ${esc(item.toolName)}</a></div><div class="source">Primary source: <a href="${esc(item.sourceUrl)}" target="_blank" rel="noopener">${esc(item.sourceName)}</a>. ToolScout writes independent summaries and analysis. Affiliate relationships do not determine coverage.</div><a class="back" href="/whats-new.html">← More software news</a></main></div></body></html>`;
+  fs.writeFileSync(path.join(ROOT,item.articleUrl.replace(/^\//,'')),html,'utf8');
+}
+const cards=items.map(item=>`<a class="card" href="${esc(item.articleUrl)}"><div class="meta">${esc(item.label)} · ${esc(dateLabel(item.publishedAt))}</div><h2>${esc(item.title)}</h2><p>${esc(item.summary)}</p><span class="more">Read article →</span></a>`).join('');
+const itemList=items.map((item,index)=>({'@type':'ListItem',position:index+1,url:BASE+item.articleUrl,name:item.title}));
+const collection={'@context':'https://schema.org','@type':'CollectionPage',name:"What's new in software | ToolScout",url:BASE+'/whats-new.html',description:'Curated software news, product releases and platform changes selected for buyer relevance.',mainEntity:{'@type':'ItemList',itemListElement:itemList}};
+const index=`<!doctype html><html lang="en"><head><link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What's New in Software | ToolScout</title><meta name="description" content="Curated software news, releases and product changes selected for buyer relevance by ToolScout."><link rel="canonical" href="${BASE}/whats-new.html"><meta name="robots" content="index,follow"><meta property="og:type" content="website"><meta property="og:site_name" content="ToolScout"><meta property="og:title" content="What's New in Software | ToolScout"><meta property="og:description" content="Curated software news, releases and product changes selected for buyer relevance."><meta property="og:url" content="${BASE}/whats-new.html"><script type="application/ld+json">${JSON.stringify(collection).replaceAll('<','\\u003c')}</script><style>${css}</style></head><body><div class="wrap"><div class="top"><a class="brand" href="/">ToolScout</a><nav><a href="/compare.html">Compare</a><a href="/guides.html">Guides</a><a href="/tools.html">Tools</a><a href="/software-trends-index.html">Software trends</a></nav></div><main><header class="hero"><div class="eyebrow">Curated software news</div><h1>What's new in software.</h1><p class="lead">Material releases, platform changes and product developments selected for people making software decisions. Primary sources come first, and affiliate relationships never determine coverage.</p></header><section class="grid">${cards}</section><div class="policy"><strong>Editorial bar:</strong> ToolScout skips routine marketing, rumours, thin announcements and duplicate stories. Coverage focuses on changes that can affect product fit, workflow, interoperability, pricing, governance or adoption.</div></main></div></body></html>`;
+fs.writeFileSync(path.join(ROOT,'whats-new.html'),index,'utf8');
+console.log(JSON.stringify({articles:items.length,index:'whats-new.html'}));
+'''
+          (root/'scripts/generate-software-news.mjs').write_text(generator,encoding='utf-8')
+
+          index=(root/'index.html').read_text(encoding='utf-8')
+          index=index.replace('<a href="#updates">What\'s new</a>','<a href="./whats-new.html">What\'s new</a>')
+          index=index.replace('Relevant releases, product changes and ToolScout research. Partner relationships never determine inclusion or placement.','Relevant releases, product changes and software news, selected for buyer relevance. Partner relationships never determine inclusion or placement.')
+          index=re.sub(r'<a class="textLink" href="\.\/software-trends-index\.html">[^<]*<\/a>','<a class="textLink" href="./whats-new.html">Browse all software news →</a>',index)
+          if '>Bluesky</a>' not in index:
+            index=re.sub(r'(<a href="https://x\.com/trytoolscout"[^>]*>X / Twitter</a>)',r'\1<a href="https://bsky.app/profile/trytoolscout.bsky.social" rel="me noopener" target="_blank">Bluesky</a>',index,count=1)
+          if 'https://bsky.app/profile/trytoolscout.bsky.social' not in index:
+            index=index.replace('"https://x.com/trytoolscout"]','"https://x.com/trytoolscout","https://bsky.app/profile/trytoolscout.bsky.social"]')
+          (root/'index.html').write_text(index,encoding='utf-8')
+
+          compare=(root/'compare.html').read_text(encoding='utf-8')
+          old='const opts=tools.map(t=>`<option value="${t.slug}">${t.name}</option>`).join(\'\');'
+          new='const labelCategory=s=>String(s||\'Other\').replace(/(^|[-\\s])\\w/g,m=>m.toUpperCase());const categories=new Map();for(const t of [...tools].sort((x,y)=>String(x.category||\'other\').localeCompare(String(y.category||\'other\'))||String(x.name).localeCompare(String(y.name)))){const key=String(t.category||\'other\');if(!categories.has(key))categories.set(key,[]);categories.get(key).push(t)}const opts=[...categories.entries()].map(([category,items])=>`<optgroup label="${labelCategory(category)}">${items.map(t=>`<option value="${t.slug}">${t.name}</option>`).join(\'\')}</optgroup>`).join(\'\');'
+          if old not in compare:
+            raise SystemExit('compare option builder marker not found')
+          compare=compare.replace(old,new)
+          (root/'compare.html').write_text(compare,encoding='utf-8')
+
+          trends='''<!doctype html><html lang="en"><head><link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Software Trends Worth Watching | ToolScout</title><meta name="description" content="ToolScout editorial analysis of public software product trends, based on material releases and primary vendor sources."><link rel="canonical" href="https://trytoolscout.org/software-trends-index.html"><meta name="robots" content="index,follow"><meta property="og:type" content="article"><meta property="og:site_name" content="ToolScout"><meta property="og:title" content="Software Trends Worth Watching | ToolScout"><meta property="og:description" content="Editorial analysis of public software trends without exposing internal ToolScout analytics or operating data."><meta property="og:url" content="https://trytoolscout.org/software-trends-index.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Software trends worth watching","description":"ToolScout editorial analysis of public software product trends based on material releases and primary vendor sources.","mainEntityOfPage":"https://trytoolscout.org/software-trends-index.html","publisher":{"@type":"Organization","name":"ToolScout","url":"https://trytoolscout.org/"}}</script><style>:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#101828;background:#f5f7fb;line-height:1.6}*{box-sizing:border-box}body{margin:0}.wrap{max-width:940px;margin:auto;padding:28px 22px 84px}.brand{font-size:23px;font-weight:850;color:#101828;text-decoration:none}.hero{padding:72px 0 30px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#667085;font-weight:800}h1{font-size:clamp(44px,7vw,72px);line-height:1;letter-spacing:-.055em;margin:14px 0 18px}.lead{font-size:19px;color:#667085;max-width:780px}.trend{margin-top:18px;background:#fff;border:1px solid #e4e7ec;border-radius:20px;padding:24px}.trend h2{font-size:27px;letter-spacing:-.035em;margin:0 0 10px}.trend p{color:#667085;margin:0 0 14px}.trend a{color:#344054;font-weight:800}.method{margin-top:44px;padding-top:28px;border-top:1px solid #e4e7ec;color:#667085}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.links a{color:#344054;font-weight:800;text-decoration:none}</style></head><body><div class="wrap"><a class="brand" href="/">ToolScout</a><main><header class="hero"><div class="eyebrow">Public product signals only</div><h1>Software trends worth watching.</h1><p class="lead">A buyer focused editorial view of recurring product shifts visible in public software releases. This page deliberately excludes ToolScout traffic, Search Console performance, internal scoring, engine rules and operational data.</p></header><section class="trend"><h2>AI workflows are becoming reusable team infrastructure</h2><p>Notion's new Agent skills turn repeatable instructions into shared assets instead of one off prompts. That points to a broader buying criterion: whether an AI feature can preserve team process, governance and repeatability.</p><a href="/news/notion-3-7-agent-skills.html">Read the Notion analysis →</a></section><section class="trend"><h2>MCP is moving closer to operational work</h2><p>HubSpot is expanding its MCP server around CRM context and actions inside AI conversations. For buyers, interoperability now means more than data access. The practical question is whether an agent can safely complete meaningful work across the stack.</p><a href="/news/hubspot-mcp-server-updates.html">Read the HubSpot analysis →</a></section><section class="trend"><h2>Portability and governance are becoming buying criteria</h2><p>As software vendors connect agents, data and actions across products, teams need to evaluate permissions, portability, confirmation controls and ownership of reusable instructions alongside features and price.</p><a href="/whats-new.html">Browse the latest software news →</a></section><section class="method"><h2>How ToolScout selects trends</h2><p>ToolScout starts with material product releases and primary vendor sources, then looks for repeated changes that can affect software selection, adoption or workflow design. Affiliate status never determines inclusion or prominence. Internal ToolScout analytics and operational intelligence are not published here.</p><div class="links"><a href="/methodology.html">Methodology</a><a href="/whats-new.html">What's new</a><a href="/compare.html">Compare software</a></div></section></main></div></body></html>'''
+          (root/'software-trends-index.html').write_text(trends,encoding='utf-8')
+          for p in [root/'software-trends-index.json']:
+            if p.exists(): p.unlink()
+          for name in glob.glob('reports/*software-trends*.json'):
+            Path(name).unlink(missing_ok=True)
+          (root/'scripts/generate-software-trends-index.mjs').unlink(missing_ok=True)
+
+          out=(root/'scripts/enforce-outbound-ux.mjs').read_text(encoding='utf-8')
+          out=out.replace("for(const directory of ['tools','blog'])","for(const directory of ['tools','blog','news'])")
+          (root/'scripts/enforce-outbound-ux.mjs').write_text(out,encoding='utf-8')
+
+          sitemap=(root/'scripts/generate-sitemap.mjs').read_text(encoding='utf-8')
+          sitemap=sitemap.replace("'software-trends-index.html'];","'software-trends-index.html','whats-new.html'];")
+          marker="for(const file of blogFiles)urls.push(`${BASE}/blog/${cleanFile(file)}`);"
+          if "const newsDir=" not in sitemap:
+            sitemap=sitemap.replace(marker,marker+"\nconst newsDir=path.join(ROOT,'news');\nconst newsFiles=fs.existsSync(newsDir)?fs.readdirSync(newsDir).filter(name=>name.endsWith('.html')).filter(name=>isIndexable(path.join(newsDir,name))).sort():[];\nfor(const file of newsFiles)urls.push(`${BASE}/news/${cleanFile(file)}`);")
+          (root/'scripts/generate-sitemap.mjs').write_text(sitemap,encoding='utf-8')
+
+          seo=(root/'.github/workflows/seo-engine-v2.yml').read_text(encoding='utf-8')
+          seo=seo.replace("      - name: Generate Software Trends Index\n        run: node scripts/generate-software-trends-index.mjs\n","      - name: Generate software news pages\n        run: node scripts/generate-software-news.mjs\n")
+          seo=seo.replace("'blog/*.html' 'reports/*.json' 'software-trends-index.json'","'blog/*.html' 'news/*.html' 'reports/*.json'")
+          seo=seo.replace("git add -- '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json","git add -- '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog news reports")
+          (root/'.github/workflows/seo-engine-v2.yml').write_text(seo,encoding='utf-8')
+
+          ignore=(root/'.assetsignore').read_text(encoding='utf-8')
+          for line in ['software-trends-index.json','reports/*software-trends*.json']:
+            if line not in ignore.splitlines(): ignore += '\n'+line
+          (root/'.assetsignore').write_text(ignore.rstrip()+"\n",encoding='utf-8')
+
+          wr=(root/'wrangler.toml').read_text(encoding='utf-8')
+          if '  "/news/*",' not in wr:
+            wr=wr.replace('  "/blog/*",','  "/blog/*",\n  "/news/*",\n  "/whats-new*",')
+          (root/'wrangler.toml').write_text(wr,encoding='utf-8')
+
+          doc=(root/'docs/COMMAND-CENTER.md').read_text(encoding='utf-8')
+          note='''\n## Software news editorial surface - 2026-09-16\n\nToolScout now treats software news as a first class public editorial surface. `/whats-new.html` is the index, individual stories live under `/news/`, and homepage update cards link to ToolScout articles rather than directly to vendor profiles. Vendor and primary source links belong inside the articles and external links open in a new browser tab. Affiliate routes keep `/go/<slug>` tracking and do not influence story selection.\n\nA daily `Software News Desk` automation researches current software releases and product changes, prioritises primary sources, rejects thin marketing and duplicate stories, and publishes only material developments that can affect a software buying or adoption decision. If nothing clears the editorial bar, nothing is published.\n\n`software-trends-index.html` is now a public, buyer facing editorial trends page based only on public product signals. The former public dataset and trends report files were removed so GSC performance, internal scoring, freshness rules, shortlist mechanics and other operational intelligence are not exposed through that surface.\n'''
+          if '## Software news editorial surface - 2026-09-16' not in doc:
+            doc += note
+          (root/'docs/COMMAND-CENTER.md').write_text(doc,encoding='utf-8')
+          PY
+
+          node scripts/generate-software-news.mjs
+          node scripts/enforce-outbound-ux.mjs --fix
+          node scripts/generate-sitemap.mjs
+
+      - name: Validate editorial rules
+        run: |
+          set -euo pipefail
+          grep -q '<optgroup label=' compare.html
+          grep -q '/whats-new.html' index.html
+          grep -q '>Bluesky</a>' index.html
+          grep -q 'articleUrl' data/software-updates.json
+          grep -q 'nofollow sponsored noopener' news/notion-3-7-agent-skills.html
+          grep -q 'target="_blank" rel="noopener"' news/notion-3-7-agent-skills.html
+          grep -q 'Public product signals only' software-trends-index.html
+          ! grep -qi 'Google Search Console\|GSC impressions\|average position\|shortlist frequency' software-trends-index.html
+          test ! -e software-trends-index.json
+          test ! -e scripts/generate-software-trends-index.mjs
+          if grep -P '[\x{2013}\x{2014}]' index.html compare.html whats-new.html software-trends-index.html news/*.html data/software-updates.json; then exit 1; fi
+          changed=$(git status --porcelain | awk '{print $2}')
+          if printf '%s\n' "$changed" | grep -E '^command-center-.*\.js$|^analytics(?:-|\.|/|$)'; then echo 'Frozen Command Center scope touched'; exit 1; fi
+
+      - name: Commit editorial changes
+        run: |
+          set -euo pipefail
+          git config user.name "toolscout-editorial-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Build software news editorial surface"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Deploy ToolScout
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify production
+        run: |
+          set -euo pipefail
+          curl -fsSL https://trytoolscout.org/whats-new.html | grep -q "What's new in software"
+          curl -fsSL https://trytoolscout.org/news/notion-3-7-agent-skills.html | grep -q 'Visit Notion'
+          curl -fsSL https://trytoolscout.org/news/hubspot-mcp-server-updates.html | grep -q 'Visit HubSpot'
+          curl -fsSL https://trytoolscout.org/compare.html | grep -q '<optgroup label='
+          curl -fsSL https://trytoolscout.org/software-trends-index.html | grep -q 'Public product signals only'
+          curl -fsSL https://trytoolscout.org/ | grep -q 'bsky.app/profile/trytoolscout.bsky.social'
+          code=$(curl -sS -o /dev/null -w '%{http_code}' https://trytoolscout.org/software-trends-index.json)
+          test "$code" != "200"
