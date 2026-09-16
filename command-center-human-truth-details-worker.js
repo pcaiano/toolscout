@@ -111,6 +111,7 @@ async function decorate(response){
   if(!response.ok||!isHtml(response))return response;
   let html=await response.text();
   html=html.replace(/<section class="widget" data-widget="product-behavior"[\s\S]*?<\/section>\s*/i,'');
+  html=html.replace(/<section class="widget" data-widget="ledger"[\s\S]*?<\/section>\s*/i,'');
   html=html.replace(/<script>\(function\(\)\{function drawBehavior\(d\)\{[\s\S]*?<\/script>/i,'');
   if(!html.includes('data-toolscout-human-truth-details="1"'))html=html.replace(/<\/body>/i,detailsScript()+'</body>');
   const headers=new Headers(response.headers);
@@ -123,7 +124,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:3,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:4,canonicalMetric:'human visitors',supportingTrafficMetrics:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,detailsPosition:'below human visitor forecast'},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
