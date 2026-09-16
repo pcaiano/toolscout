@@ -62,6 +62,8 @@ jobs:
         run: node scripts/apply-organic-growth-actions.mjs
       - name: Generate Software Trends Index
         run: node scripts/generate-software-trends-index.mjs
+      - name: Enforce outbound UX
+        run: node scripts/enforce-outbound-ux.mjs --fix
       - name: Validate ToolScout copy guard
         run: node scripts/check-distribution-copy.mjs
       - name: Generate blog topics
