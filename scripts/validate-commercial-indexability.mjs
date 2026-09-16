@@ -15,10 +15,11 @@ const heldTools=new Set((toolHolds.items||[]).map(x=>x.slug).filter(Boolean));
 const sitemap=fs.readFileSync(path.join(ROOT,'sitemap.xml'),'utf8');
 const errors=[];
 const check=(ok,message)=>{if(!ok)errors.push(message)};
+const publicUrl=rel=>`${BASE}/${String(rel).replace(/\.html$/i,'')}`;
 let publishedProfiles=0,publishedGuides=0;
 
 for(const tool of tools){
-  const rel=`tools/${tool.slug}.html`,file=path.join(ROOT,rel),canonical=`${BASE}/${rel}`;
+  const rel=`tools/${tool.slug}.html`,file=path.join(ROOT,rel),canonical=publicUrl(rel);
   if(heldTools.has(tool.slug)){
     check(!fs.existsSync(file),`${rel}: held profile is still published`);
     check(!sitemap.includes(`<loc>${canonical}</loc>`),`${rel}: held profile is still in sitemap`);
@@ -37,7 +38,7 @@ for(const tool of tools){
 }
 
 for(const intent of intents){
-  const rel=`${intent.slug}.html`,file=path.join(ROOT,rel),canonical=`${BASE}/${rel}`;
+  const rel=`${intent.slug}.html`,file=path.join(ROOT,rel),canonical=publicUrl(rel);
   if(heldIntents.has(intent.slug)){
     check(!fs.existsSync(file),`${rel}: held guide is still published`);
     check(!sitemap.includes(`<loc>${canonical}</loc>`),`${rel}: held guide is still in sitemap`);
@@ -52,11 +53,11 @@ for(const intent of intents){
 }
 
 for(const [a,b] of pairs){
-  const rel=`${a}-vs-${b}.html`,file=path.join(ROOT,rel),canonical=`${BASE}/${rel}`;
+  const rel=`${a}-vs-${b}.html`,file=path.join(ROOT,rel),canonical=publicUrl(rel);
   check(fs.existsSync(file),`${rel}: missing comparison`);
   if(!fs.existsSync(file))continue;
   const html=fs.readFileSync(file,'utf8');
-  check(html.includes(`/tools/${a}.html`)&&html.includes(`/tools/${b}.html`),`${rel}: comparison/profile links incomplete`);
+  check(html.includes(`/tools/${a}`)&&html.includes(`/tools/${b}`),`${rel}: comparison/profile links incomplete`);
   check(sitemap.includes(`<loc>${canonical}</loc>`),`${rel}: comparison absent from sitemap`);
 }
 
