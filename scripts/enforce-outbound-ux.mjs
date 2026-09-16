@@ -9,7 +9,7 @@ for(const name of fs.readdirSync(ROOT)){
   if(/^analytics(?:-|\.|$)/i.test(name))continue;
   htmlTargets.push(path.join(ROOT,name));
 }
-for(const directory of ['tools','blog']){
+for(const directory of ['tools','blog','news']){
   const dir=path.join(ROOT,directory);
   if(!fs.existsSync(dir))continue;
   for(const name of fs.readdirSync(dir))if(name.endsWith('.html'))htmlTargets.push(path.join(dir,name));
@@ -24,7 +24,11 @@ function normalizeOutboundAnchor(full,attrs,body){
     nextAttrs=nextAttrs.replace(relMatch[0],'');
   }
   for(const token of ['nofollow','sponsored','noopener'])if(!rel.some(x=>x.toLowerCase()===token))rel.push(token);
-  const nextBody=body.replace(/^([\s\S]*?)Explore\s+/i,(m,prefix)=>`${prefix}Visit `);
+  const hrefMatch=nextAttrs.match(/\bhref=(?:"([^"]*)"|'([^']*)')/i);
+  const href=String(hrefMatch?.[1]??hrefMatch?.[2]??'');
+  const isMake=/^\/go\/make(?:[?#]|$)/i.test(href);
+  let nextBody=body.replace(/^([\s\S]*?)Explore\s+/i,(m,prefix)=>`${prefix}Visit `);
+  if(isMake)nextBody=nextBody.replace(/\b(?:Visit|Explore)\s+Make\b/i,'Start with Make');
   return `<a${nextAttrs} target="_blank" rel="${rel.join(' ')}">${nextBody}</a>`;
 }
 
@@ -48,7 +52,11 @@ for(const file of htmlTargets){
 const appPath=path.join(ROOT,'app.js');
 if(fs.existsSync(appPath)){
   const before=fs.readFileSync(appPath,'utf8');
-  const after=before.replace(/\s+noreferrer\b/g,'').replace(/[\u2013\u2014]/g,'-').replace(/Explore \$\{t\.name\}/g,'Visit ${t.name}');
+  const after=before
+    .replace(/\s+noreferrer\b/g,'')
+    .replace(/[\u2013\u2014]/g,'-')
+    .replace(/Explore \$\{t\.name\}/g,'Visit ${t.name}')
+    .replace(/Visit \$\{t\.name\}/g,"${t.slug==='make'?'Start with Make':'Visit '+t.name}");
   checked++;
   if(after!==before){
     if(fix){fs.writeFileSync(appPath,after);changed++;}
