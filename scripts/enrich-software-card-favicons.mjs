@@ -5,9 +5,12 @@ const ROOT=process.cwd();
 const fix=process.argv.includes('--fix');
 const tools=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tools.json'),'utf8'));
 const bySlug=new Map(tools.map(tool=>[tool.slug,tool]));
+let assetMap={};
+try{assetMap=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tool-assets.json'),'utf8'))?.assets||{};}catch{}
 
 const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
-const favicon=tool=>{try{return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tool.sourceUrl).hostname)}&sz=128`;}catch{return ''}};
+const googleFavicon=tool=>{try{return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tool.sourceUrl).hostname)}&sz=128`;}catch{return ''}};
+const favicon=tool=>assetMap?.[tool.slug]?.url||googleFavicon(tool);
 
 function collectHtml(dir){
   const files=[];
@@ -39,7 +42,7 @@ function toolFromBody(body){
 function iconMarkup(tool){
   const src=favicon(tool);
   if(!src)return '';
-  return `<span data-software-favicon="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:10px"><img src="${esc(src)}" alt="" width="30" height="30" loading="lazy" decoding="async" style="width:30px;height:30px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid #e4e7ec"></span>`;
+  return `<span data-software-favicon="1" data-favicon-source="${esc(assetMap?.[tool.slug]?.provenance||'google-favicon-fallback')}" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:10px"><img src="${esc(src)}" alt="" width="30" height="30" loading="lazy" decoding="async" style="width:30px;height:30px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid #e4e7ec" onerror="this.style.display='none'"></span>`;
 }
 
 function enrichArticle(full,attrs,body){
@@ -55,7 +58,7 @@ function enrichArticle(full,attrs,body){
 }
 
 const targets=collectHtml(ROOT);
-let changed=0,cards=0,withFavicons=0;
+let changed=0,cards=0,withFavicons=0,verifiedAssets=0;
 const violations=[];
 for(const file of targets){
   const before=fs.readFileSync(file,'utf8');
@@ -63,7 +66,8 @@ for(const file of targets){
   for(const match of before.matchAll(/<article\b([^>]*)>([\s\S]*?)<\/article>/gi)){
     const classes=classTokens(match[1]);
     if(!classes.has('card')&&!classes.has('tool')&&!classes.has('result-card')&&!classes.has('software-card'))continue;
-    if(toolFromBody(match[2]))candidates++;
+    const tool=toolFromBody(match[2]);
+    if(tool){candidates++;if(assetMap?.[tool.slug]?.url)verifiedAssets++;}
   }
   cards+=candidates;
   const after=before.replace(/<article\b([^>]*)>([\s\S]*?)<\/article>/gi,enrichArticle);
@@ -75,7 +79,7 @@ for(const file of targets){
 }
 
 if(!fix&&violations.length){
-  console.error(JSON.stringify({ok:false,checked:targets.length,cards,withFavicons,violations},null,2));
+  console.error(JSON.stringify({ok:false,checked:targets.length,cards,withFavicons,verifiedAssets,violations},null,2));
   process.exit(1);
 }
-console.log(JSON.stringify({ok:true,mode:fix?'fix':'check',checked:targets.length,changed,cards,withFavicons}));
+console.log(JSON.stringify({ok:true,mode:fix?'fix':'check',checked:targets.length,changed,cards,withFavicons,verifiedAssets}));
