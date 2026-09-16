@@ -32,7 +32,8 @@ jobs:
 
       - name: Confirm Command Center files are untouched
         run: |
-          if git status --porcelain | grep -E 'command-center-|analytics'; then
+          changed=$(git status --porcelain | awk '{print $2}')
+          if printf '%s\n' "$changed" | grep -E '^(command-center-|analytics)'; then
             echo "Command Center file change detected. Refusing to continue."
             exit 1
           fi
