@@ -49,6 +49,8 @@ jobs:
         run: node scripts/close-competitive-gap-loop.mjs
       - name: Promote verified gap profiles into catalog
         run: node scripts/promote-verified-gap-profiles-to-catalog.mjs
+      - name: Run field-level catalog quality control
+        run: node scripts/catalog-quality-control.mjs
       - name: Promote governed competitive content gaps
         run: node scripts/promote-competitive-content-gaps.mjs
       - name: Build growth priority
@@ -124,13 +126,13 @@ jobs:
       - name: Commit generated SEO assets
         if: github.ref == 'refs/heads/main'
         run: |
-          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
+          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
-          git commit -m "Refresh SEO, catalog, indexing, research, blog and distribution assets"
+          git add -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
+          git commit -m "Refresh SEO, catalog quality, indexing, research, blog and distribution assets"
           git pull --rebase origin main
           git push origin HEAD:main
