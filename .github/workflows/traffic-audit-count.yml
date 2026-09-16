@@ -1,0 +1,28 @@
+name: One-off D1 traffic audit count
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/traffic-audit-count.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Count canonical D1 sessions
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          echo '=== ORIGINAL_36_SUBSET_SINCE_1630_PT ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(DISTINCT f.session_id) AS sessions FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') AND f.created_at >= '2026-09-15 15:30:00' AND f.created_at <= '2026-09-16 14:51:37';"
+          echo '=== SINCE_1630_PT_TO_NOW ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(DISTINCT f.session_id) AS sessions FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') AND f.created_at >= '2026-09-15 15:30:00';"
+          echo '=== HOURLY_SINCE_1630_PT ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT strftime('%Y-%m-%d %H:00', f.created_at) AS hour_utc, COUNT(DISTINCT f.session_id) AS sessions FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') AND f.created_at >= '2026-09-15 15:30:00' GROUP BY hour_utc ORDER BY hour_utc;"
