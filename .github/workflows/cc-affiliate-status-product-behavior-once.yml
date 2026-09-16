@@ -1,0 +1,132 @@
+name: Command Center Affiliate Status Repair Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/cc-affiliate-status-product-behavior-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Repair Affiliate Coverage Status
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const file='command-center-resilient-worker.js';
+          let text=fs.readFileSync(file,'utf8');
+          if(!text.includes('async function affiliateCoverageStatusSnapshot(request,env){')){
+            const marker='async function resilientSnapshot(request,env,ctx){';
+            if(!text.includes(marker))throw new Error('resilientSnapshot marker missing');
+            const helper=`async function affiliateCoverageStatusSnapshot(request,env){
+  try{
+    const [tools,pipeline,affiliate,workflowRows,clickRows]=await Promise.all([
+      assetJson(request,env,'/data/tools.json',[]),
+      assetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
+      assetJson(request,env,'/data/affiliate.json',{}),
+      safeAll(env,\`SELECT tool_slug,status,updated_at FROM affiliate_workflow\`),
+      safeAll(env,\`SELECT c.tool_slug,COUNT(*) clicks,SUM(CASE WHEN c.affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human') AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed') GROUP BY c.tool_slug\`)
+    ]);
+    const pipelineMap=new Map((pipeline?.verified_programs||[]).map(x=>[String(x.slug||''),x]));
+    const workflowMap=new Map((workflowRows||[]).map(x=>[String(x.tool_slug||''),x]));
+    const clickMap=new Map((clickRows||[]).map(x=>[String(x.tool_slug||''),{clicks:n(x.clicks),monetized:n(x.monetized)}]));
+    const activeStates=new Set(['active','verified','earning']);
+    const pendingStates=new Set(['submitted','pending_review','pending','under_review','applied','application_submitted']);
+    const rejectedStates=new Set(['rejected','declined']);
+    const norm=v=>String(v||'').trim().toLowerCase().replace(/[\\s-]+/g,'_');
+    const groups={active:[],pending:[],rejected:[]};
+    for(const tool of tools||[]){
+      const slug=String(tool?.slug||'');if(!slug)continue;
+      const route=affiliate?.[slug]||{};
+      const routeActive=Boolean(route.enabled&&route.url);
+      const workflow=workflowMap.get(slug)||{};
+      const pipelineRow=pipelineMap.get(slug)||{};
+      const status=routeActive?'active':norm(workflow.status||pipelineRow.status);
+      let group=null;
+      if(routeActive||activeStates.has(status))group='active';
+      else if(pendingStates.has(status))group='pending';
+      else if(rejectedStates.has(status))group='rejected';
+      if(!group)continue;
+      const clicks=clickMap.get(slug)||{clicks:0,monetized:0};
+      groups[group].push({slug,name:tool.name||slug,status,clicks30d:clicks.clicks,monetizedClicks30d:clicks.monetized});
+    }
+    for(const items of Object.values(groups))items.sort((a,b)=>b.clicks30d-a.clicks30d||a.name.localeCompare(b.name));
+    const summarize=items=>({count:items.length,clicks30d:items.reduce((s,x)=>s+n(x.clicks30d),0),monetizedClicks30d:items.reduce((s,x)=>s+n(x.monetizedClicks30d),0),items});
+    return {status:'observed',windowDays:30,trafficTruth:'browser_confirmed',clickDefinition:'Browser-confirmed outbound clicks only; internal and synthetic traffic excluded.',active:summarize(groups.active),pending:summarize(groups.pending),rejected:summarize(groups.rejected)};
+  }catch(error){return {status:'unavailable',reason:String(error?.message||error)}}
+}
+`;
+            text=text.replace(marker,helper+'\n'+marker);
+          }
+          if(!text.includes('sitemap,queue,affiliateCoverageStatus]=await Promise.all([')){
+            text=text.replace('sitemap,queue]=await Promise.all([','sitemap,queue,affiliateCoverageStatus]=await Promise.all([');
+          }
+          if(!text.includes('affiliateCoverageStatusSnapshot(request,env)')){
+            throw new Error('Affiliate helper insertion failed');
+          }
+          const queueTail='    lightweightQueue(request,env,ctx)\n  ]);';
+          if(text.includes(queueTail)){
+            text=text.replace(queueTail,"    lightweightQueue(request,env,ctx),\n    affiliateCoverageStatusSnapshot(request,env)\n  ]);");
+          }
+          const coverageLine="    affiliateCoverage:{humanOutboundClicks:outbound,monetizedLikelyHumanClicks:monetized,unmonetizedLikelyHumanClicks:unmonetized,weightedCoverage,trafficTruth:'browser_confirmed'},";
+          if(!text.includes('    affiliateCoverageStatus,\n    canonicalCommercialTruth,')){
+            if(!text.includes(coverageLine))throw new Error('affiliateCoverage return marker missing');
+            text=text.replace(coverageLine,coverageLine+'\n    affiliateCoverageStatus,');
+          }
+          fs.writeFileSync(file,text);
+          NODE
+          node --check command-center-resilient-worker.js
+          grep -q 'affiliateCoverageStatusSnapshot(request,env)' command-center-resilient-worker.js
+          grep -q 'affiliateCoverageStatus,' command-center-resilient-worker.js
+
+      - name: Remove Product Behaviour card
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const file='posthog-behavior-worker.js';
+          let text=fs.readFileSync(file,'utf8');
+          const re=/async function decorateBehaviorPage\(response\)\{[\s\S]*?\n\}\nasync function augmentStats/;
+          if(!re.test(text))throw new Error('decorateBehaviorPage block not found');
+          text=text.replace(re,"async function decorateBehaviorPage(response){return response}\nasync function augmentStats");
+          fs.writeFileSync(file,text);
+          NODE
+          node --check posthog-behavior-worker.js
+          grep -q 'async function decorateBehaviorPage(response){return response}' posthog-behavior-worker.js
+
+      - name: Guard scope
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only)
+          printf '%s\n' "$changed"
+          test "$(printf '%s\n' "$changed" | sort | tr '\n' ' ')" = "command-center-resilient-worker.js posthog-behavior-worker.js "
+
+      - name: Commit repair
+        run: |
+          set -euo pipefail
+          git config user.name "toolscout-command-center-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add command-center-resilient-worker.js posthog-behavior-worker.js
+          git commit -m "Repair affiliate status and remove Product Behaviour"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify deployed worker
+        run: |
+          set -euo pipefail
+          curl -fsSL https://trytoolscout.org/api/command-center-resilient-health | grep -q 'direct-d1-resilient'
+          curl -fsSL https://trytoolscout.org/api/command-center-human-truth-health | grep -q 'toolscout-command-center-human-truth'
+          grep -q "status:'observed'.*windowDays:30" command-center-resilient-worker.js
+          ! grep -q "if(!html.includes('data-widget=\\\"product-behavior\\\"'))" posthog-behavior-worker.js
