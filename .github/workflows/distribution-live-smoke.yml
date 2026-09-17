@@ -1,14 +1,35 @@
-name: ToolScout GitHub Actions Conservation Mode
+name: One-off Nextool Chairman Queue Sync
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/distribution-live-smoke.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  conservation-notice:
+  sync:
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - name: Conservation mode notice
-        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy current static assets and Worker
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Update Nextool opportunity in remote D1
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='research_required', action_url='https://nextool.ai/submit-a-tool/', human_required=0, last_checked_at=datetime('now'), next_action='Suppress from Chairman Queue while the free-review frontend is unstable. Radar should recheck the canonical free route later and only return it to Human Required after a consistently usable browser path is verified. Do not buy the $45, $145 or $600 promotion packages.', updated_at=datetime('now') WHERE surface_slug='nextool-ai';"
+      - name: Verify Nextool state and Chairman Queue exclusion
+        run: |
+          set -euo pipefail
+          echo '=== NEXTOOL ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='nextool-ai';"
+          echo '=== CHAIRMAN QUEUE MATCH ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required FROM distribution_opportunities WHERE surface_slug='nextool-ai' AND action_url IS NOT NULL AND (human_required=1 OR status='approval_required') AND status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale');"
