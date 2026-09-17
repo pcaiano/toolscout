@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-16T09:20:00Z",
+  "updatedAt": "2026-09-17T09:46:00Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "github-ai-scan-codeql-setup",
+      "publishedAt": "2026-09-16",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub removes a setup barrier for AI Scan in pull requests",
+      "summary": "GitHub AI Scan can now check pull requests without requiring CodeQL default setup first, reducing configuration friction for eligible GitHub Advanced Security customers.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-16-code-scanning-ai-scan-no-longer-requires-codeql-default-setup/",
+      "articleUrl": "/news/github-ai-scan-codeql-setup.html",
+      "profileUrl": "/news/github-ai-scan-codeql-setup.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "notion-3-7-agent-skills",
       "publishedAt": "2026-09-15",
