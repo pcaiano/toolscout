@@ -104,8 +104,8 @@
       "slug": "stremit",
       "name": "Stremit",
       "type": "software_directory_newsletter",
-      "url": "https://stremit.com/",
-      "action_url": "https://stremit.com/",
+      "url": "https://stremit.io/",
+      "action_url": "https://stremit.io/submit-tool",
       "audience_fit": 72,
       "authority": 60,
       "traffic_potential": 58,
@@ -115,8 +115,11 @@
       "effort": 18,
       "cost": 0,
       "human_required": true,
-      "next_action": "Keep manual until a documented API is verified.",
-      "status": "human_action_required"
+      "next_action": "Use the verified free Standard listing route at https://stremit.io/submit-tool. Submit only the free listing. Do not purchase paid placement. If authentication is required, sign in and continue with the free route.",
+      "status": "human_action_required",
+      "verified_at": "2026-09-17",
+      "verification_status": "free_submission_route_verified",
+      "evidence": "The old stremit.com domain is not the current AI directory. The active Stremit AI Builders Network is on stremit.io, and its submit page explicitly offers a free Standard listing with no placement boost."
     },
     {
       "slug": "launching-next",
