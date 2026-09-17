@@ -5,6 +5,7 @@ const MAKE_TOKEN_SHA256='2f9522abe5fb3d87a045b86940f6b5338cc5c9fc3f51ecbc5f5fc31
 
 async function sha256(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function integrationOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!t)return false;if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return (await sha256(t))===MAKE_TOKEN_SHA256}
+function html(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function displayToolName(row){
   const subject=String(row?.suggested_subject||'').trim();
   const match=subject.match(/^(.*?)\s+featured on ToolScout$/i);
@@ -14,7 +15,8 @@ function displayToolName(row){
 function cordialOutreach(row){
   const name=displayToolName(row);
   const subject=`${name} featured on ToolScout`;
-  const body=`Hello,\n\nI hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${name} in one of our software buying pages for people comparing tools for a specific job to be done.\n\nI wanted to share the page with you in case it is useful to your team or audience:\n${row.asset_url}\n\nIf you find it relevant, you're very welcome to share or reference it. For context, ToolScout rankings are based on product fit and editorial criteria, and placements are not sold.\n\nBest regards,\nPedro Caiano\nToolScout\nhttps://trytoolscout.org`;
+  const asset=String(row?.asset_url||'https://trytoolscout.org');
+  const body=`<p>Hello,</p><p>I hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${html(name)} in one of our software buying pages for people comparing tools for a specific job to be done.</p><p>I wanted to share the page with you in case it is useful to your team or audience:<br><a href="${html(asset)}">${html(asset)}</a></p><p>If you find it relevant, you're very welcome to share or reference it. For context, ToolScout rankings are based on product fit and editorial criteria, and placements are not sold.</p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
   return {...row,suggested_subject:subject,suggested_body:body};
 }
 
