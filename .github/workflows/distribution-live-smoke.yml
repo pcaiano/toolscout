@@ -1,14 +1,90 @@
-name: ToolScout GitHub Actions Conservation Mode
+name: One-off Launching Next and Stremit Sync
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  conservation-notice:
+  sync:
+    if: github.event.head_commit.message == 'One-off reconcile Launching Next and Stremit'
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - name: Conservation mode notice
-        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Update persistent distribution state
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          radar_path = Path('data/distribution-radar-seeds.json')
+          radar = json.loads(radar_path.read_text())
+          for item in radar['sources']:
+              if item.get('slug') == 'launching-next':
+                  item.update({
+                      'status': 'pending_review',
+                      'human_required': False,
+                      'submitted_at': '2026-09-17T10:53:05Z',
+                      'verified_at': '2026-09-17',
+                      'verification_status': 'owner_confirmed_pending_review',
+                      'evidence': 'Launching Next confirmed the free submission is in queue with an estimated wait of about 4 months. A $99 Fast-Track option was offered for 1-business-day review, but it is not authorized under ToolScout free-by-default distribution policy.',
+                      'next_action': 'Wait for the free editorial review. Do not buy the $99 Fast-Track. Verify the public Launching Next listing after approval before marking live.'
+                  })
+              if item.get('slug') == 'stremit':
+                  item.update({
+                      'status': 'live',
+                      'human_required': False,
+                      'action_url': 'https://stremit.io/ai-tool/toolscout',
+                      'canonical_submission_url': 'https://stremit.io/ai-tool/toolscout',
+                      'verified_at': '2026-09-17',
+                      'verification_status': 'approval_email_confirmed_live',
+                      'evidence': 'Stremit emailed confirmation that ToolScout was approved and is now live and discoverable by the Stremit community. The approval email links to the public ToolScout profile.',
+                      'next_action': 'Listing approved and live. Monitor attributed sessions, outbound activity and backlink value. Claiming the page is optional and should only be surfaced if owner editing becomes useful.'
+                  })
+          radar_path.write_text(json.dumps(radar, indent=2, ensure_ascii=False) + '\n')
+
+          workflow_path = Path('data/distribution-workflow.json')
+          workflow = json.loads(workflow_path.read_text())
+          for item in workflow['items']:
+              if item.get('slug') == 'launching-next':
+                  item.update({
+                      'status': 'pending_review',
+                      'action_url': 'https://www.launchingnext.com/',
+                      'cost': 'Free submission used; $99 Fast-Track explicitly declined',
+                      'free_paid_status': 'eligible_free',
+                      'submitted_at': '2026-09-17T10:53:05Z',
+                      'verified_at': '2026-09-17T10:53:05Z',
+                      'verification_status': 'owner_confirmed_pending_review',
+                      'evidence': 'Launching Next confirmation screen shows Submitted, Status: In Queue, and an estimated wait of 4 months. The $99 Fast-Track upsell is optional.',
+                      'blocker': 'Free editorial queue currently estimates about 4 months. Fast-Track is not justified by measured ToolScout economics.',
+                      'next_action': 'Wait for the free editorial review. Do not buy the $99 Fast-Track. Verify public visibility after approval before marking live.',
+                      'notes': 'Submission completed via the free route. Remove from Chairman Queue while under review.'
+                  })
+          workflow_path.write_text(json.dumps(workflow, indent=2, ensure_ascii=False) + '\n')
+          PY
+          git config user.name 'ToolScout Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/distribution-radar-seeds.json data/distribution-workflow.json
+          git commit -m 'Record Launching Next review and Stremit approval'
+          git push origin main
+      - name: Deploy current distribution state
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Update remote D1
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='pending_review', human_required=0, action_url='https://www.launchingnext.com/', last_checked_at=datetime('now'), next_action='Wait for the free editorial review. Do not buy Fast-Track. Verify public visibility after approval before marking live.', updated_at=datetime('now') WHERE surface_slug='launching-next';"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='live', human_required=0, action_url='https://stremit.io/ai-tool/toolscout', last_checked_at=datetime('now'), next_action='Listing approved and live. Monitor attributed sessions, outbound activity and backlink value.', updated_at=datetime('now') WHERE surface_slug='stremit';"
+      - name: Verify production states and Chairman Queue exclusion
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug IN ('launching-next','stremit') ORDER BY surface_slug;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT o.surface_slug,o.surface_name,o.status,o.action_url,o.next_action,o.human_required FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug WHERE o.surface_slug IN ('launching-next','stremit') AND o.action_url IS NOT NULL AND (o.human_required=1 OR o.status='approval_required') AND o.status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale') AND (o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend');"
