@@ -50,10 +50,11 @@
       "acceptance_probability": 58,
       "automation_potential": 20,
       "effort": 26,
-      "cost": 0,
+      "cost": null,
       "human_required": true,
-      "next_action": "Keep in editorial queue until an official programmatic submission route is verified.",
-      "status": "human_action_required"
+      "next_action": "Open the homepage, choose Sign In (or Join Free if no account), then Add Tool. Direct /tool/add returns HTTP 401 and 'You must be logged in' to anonymous visitors, using a 404 illustration. Listing form and free submission eligibility remain unverified after sign-in. Do not pay or assume publication.",
+      "status": "auth_required",
+      "verified_at": "2026-09-17"
     },
     {
       "slug": "launched-tools",
