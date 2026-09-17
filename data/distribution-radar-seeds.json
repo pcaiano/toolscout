@@ -24,7 +24,8 @@
       "name": "Launch Llama",
       "type": "newsletter_directory",
       "url": "https://tools.launchllama.co/",
-      "action_url": "https://tools.launchllama.co/submit",
+      "action_url": "https://tools.launchllama.co/products/toolscout",
+      "canonical_submission_url": "https://tools.launchllama.co/products/toolscout",
       "audience_fit": 82,
       "authority": 70,
       "traffic_potential": 78,
@@ -33,10 +34,13 @@
       "automation_potential": 80,
       "effort": 12,
       "cost": 0,
-      "human_required": true,
-      "next_action": "Official free submission route verified on 2026-09-17. Use https://tools.launchllama.co/submit. Launch Llama also exposes an official anonymous REST/MCP draft API, but final draft completion still requires the founder in the browser; keep the final step in Chairman Queue and do not auto-publish.",
-      "status": "human_action_required",
-      "verified_at": "2026-09-17"
+      "human_required": false,
+      "status": "pending_review",
+      "submitted_at": "2026-09-17T09:04:45Z",
+      "verified_at": "2026-09-17",
+      "verification_status": "submission_accepted_pending_review",
+      "evidence": "Launch Llama confirmed that the ToolScout listing was submitted successfully and is under manual review. The confirmation states that the listing goes live after review and that the owner will be notified by email.",
+      "next_action": "Submission completed and badge verified. Wait for Launch Llama manual review, then verify https://tools.launchllama.co/products/toolscout is publicly live before marking the opportunity live. Do not resubmit."
     },
     {
       "slug": "best-of-ai",
