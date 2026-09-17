@@ -1,4 +1,4 @@
-name: One-off PeerPush Queue Sync
+name: One-off PeerPush D1 Fix
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - '.github/workflows/distribution-live-smoke.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   sync:
@@ -16,96 +16,15 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Update persistent PeerPush state
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          workflow_path = Path('data/distribution-workflow.json')
-          workflow = json.loads(workflow_path.read_text())
-          item = {
-            'slug': 'peerpush',
-            'name': 'PeerPush',
-            'type': 'product_discovery_launch_platform',
-            'status': 'pending_review',
-            'priority': 'medium',
-            'url': 'https://peerpush.com/',
-            'action_url': 'https://peerpush.com/',
-            'requires_signup': True,
-            'cost': 'Free submission used',
-            'free_paid_status': 'eligible_free',
-            'submitted_at': '2026-09-17T11:09:15Z',
-            'verified_at': '2026-09-17T11:09:15Z',
-            'verification_status': 'owner_confirmed_queued',
-            'queue_position': 3166,
-            'evidence': 'PeerPush confirmed ToolScout was added to the publishing queue at position #3166 with an estimated wait of about 1 month and 23 days. PeerPush will email when the product goes live.',
-            'next_action': 'Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit.',
-            'notes': 'Submission completed. Remove from Chairman Queue while awaiting publication.'
-          }
-          replaced = False
-          for i, existing in enumerate(workflow.get('items', [])):
-              if existing.get('slug') == 'peerpush':
-                  workflow['items'][i] = item
-                  replaced = True
-                  break
-          if not replaced:
-              workflow.setdefault('items', []).append(item)
-          workflow_path.write_text(json.dumps(workflow, indent=2, ensure_ascii=False) + '\n')
-
-          radar_path = Path('data/distribution-radar-seeds.json')
-          radar = json.loads(radar_path.read_text())
-          radar_item = {
-            'slug': 'peerpush',
-            'name': 'PeerPush',
-            'type': 'product_discovery_launch_platform',
-            'url': 'https://peerpush.com/',
-            'action_url': 'https://peerpush.com/',
-            'audience_fit': 86,
-            'authority': 70,
-            'traffic_potential': 76,
-            'backlink_value': 72,
-            'acceptance_probability': 80,
-            'automation_potential': 20,
-            'effort': 12,
-            'cost': 0,
-            'human_required': False,
-            'status': 'pending_review',
-            'submitted_at': '2026-09-17T11:09:15Z',
-            'verified_at': '2026-09-17',
-            'verification_status': 'owner_confirmed_queued',
-            'evidence': 'PeerPush confirmed ToolScout was added to the publishing queue at position #3166 with an estimated wait of about 1 month and 23 days. PeerPush will email when the product goes live.',
-            'next_action': 'Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit.'
-          }
-          replaced = False
-          for i, existing in enumerate(radar.get('sources', [])):
-              if existing.get('slug') == 'peerpush':
-                  radar['sources'][i] = radar_item
-                  replaced = True
-                  break
-          if not replaced:
-              radar.setdefault('sources', []).append(radar_item)
-          radar_path.write_text(json.dumps(radar, indent=2, ensure_ascii=False) + '\n')
-          PY
-          git config user.name 'ToolScout Automation'
-          git config user.email 'actions@users.noreply.github.com'
-          git add data/distribution-workflow.json data/distribution-radar-seeds.json
-          git commit -m 'Record PeerPush queued submission' || true
-          git push origin main
-      - name: Deploy current distribution state
-        run: npx wrangler deploy --config wrangler.toml --latest
-      - name: Upsert PeerPush in remote D1
+      - name: Upsert PeerPush in remote D1 with complete schema
         run: |
           set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "INSERT OR IGNORE INTO distribution_opportunities (surface_slug,surface_name,status,action_url,human_required,next_action,last_checked_at,updated_at) VALUES ('peerpush','PeerPush','pending_review','https://peerpush.com/',0,'Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit.',datetime('now'),datetime('now'));"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET surface_name='PeerPush',status='pending_review',action_url='https://peerpush.com/',human_required=0,last_checked_at=datetime('now'),next_action='Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit.',updated_at=datetime('now') WHERE surface_slug='peerpush';"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "INSERT INTO distribution_opportunities (surface_slug,surface_name,surface_type,audience_fit,authority,traffic_potential,backlink_value,acceptance_probability,automation_potential,effort_cost,distribution_score,status,action_url,human_required,next_action,last_checked_at,created_at,updated_at) VALUES ('peerpush','PeerPush','product_discovery_launch_platform',86,70,76,72,80,20,12,72,'pending_review','https://peerpush.com/',0,'Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit.',datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET surface_name=excluded.surface_name,surface_type=excluded.surface_type,audience_fit=excluded.audience_fit,authority=excluded.authority,traffic_potential=excluded.traffic_potential,backlink_value=excluded.backlink_value,acceptance_probability=excluded.acceptance_probability,automation_potential=excluded.automation_potential,effort_cost=excluded.effort_cost,distribution_score=excluded.distribution_score,status='pending_review',action_url=excluded.action_url,human_required=0,next_action=excluded.next_action,last_checked_at=datetime('now'),updated_at=datetime('now');"
       - name: Verify PeerPush state and Chairman Queue exclusion
         run: |
           set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='peerpush';"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,surface_type,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='peerpush';"
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT o.surface_slug,o.surface_name,o.status,o.action_url,o.next_action,o.human_required FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug WHERE o.surface_slug='peerpush' AND o.action_url IS NOT NULL AND (o.human_required=1 OR o.status='approval_required') AND o.status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale') AND (o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend');"
