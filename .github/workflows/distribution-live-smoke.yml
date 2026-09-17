@@ -1,30 +1,14 @@
-name: One-off PeerPush D1 Fix
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/distribution-live-smoke.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  sync:
+  conservation-notice:
     runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Upsert PeerPush in remote D1 with complete schema
-        run: |
-          set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "INSERT INTO distribution_opportunities (surface_slug,surface_name,surface_type,audience_fit,authority,traffic_potential,backlink_value,acceptance_probability,automation_potential,effort_cost,distribution_score,status,action_url,human_required,next_action,last_checked_at,created_at,updated_at) VALUES ('peerpush','PeerPush','product_discovery_launch_platform',86,70,76,72,80,20,12,72,'pending_review','https://peerpush.com/',0,'Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit.',datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET surface_name=excluded.surface_name,surface_type=excluded.surface_type,audience_fit=excluded.audience_fit,authority=excluded.authority,traffic_potential=excluded.traffic_potential,backlink_value=excluded.backlink_value,acceptance_probability=excluded.acceptance_probability,automation_potential=excluded.automation_potential,effort_cost=excluded.effort_cost,distribution_score=excluded.distribution_score,status='pending_review',action_url=excluded.action_url,human_required=0,next_action=excluded.next_action,last_checked_at=datetime('now'),updated_at=datetime('now');"
-      - name: Verify PeerPush state and Chairman Queue exclusion
-        run: |
-          set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,surface_type,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='peerpush';"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT o.surface_slug,o.surface_name,o.status,o.action_url,o.next_action,o.human_required FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug WHERE o.surface_slug='peerpush' AND o.action_url IS NOT NULL AND (o.human_required=1 OR o.status='approval_required') AND o.status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale') AND (o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend');"
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
