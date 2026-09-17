@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "outbound-integrity-worker.js"
+main = "visitor-audit-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
