@@ -5,7 +5,7 @@
       "name": "The Rundown AI / Supertools",
       "type": "newsletter_directory",
       "url": "https://www.therundown.ai/",
-      "action_url": "https://www.therundown.ai/submit-a-tool",
+      "action_url": "https://www.therundown.ai/tools",
       "audience_fit": 92,
       "authority": 88,
       "traffic_potential": 90,
@@ -13,10 +13,11 @@
       "acceptance_probability": 42,
       "automation_potential": 20,
       "effort": 28,
-      "cost": 0,
-      "human_required": true,
-      "next_action": "Prepare editorial tool submission; do not automate without a documented API.",
-      "status": "human_action_required"
+      "cost": null,
+      "human_required": false,
+      "next_action": "Excluded from Chairman Queue: /submit-a-tool returned 404 on 2026-09-17. No free submission route verified on the tools directory. Advertising route is paid and is not authorized. Reopen only when a valid free submission route is evidenced.",
+      "status": "skipped",
+      "verified_at": "2026-09-17"
     },
     {
       "slug": "launch-llama",
