@@ -5,16 +5,21 @@ const HEALTH_PATH='/api/traffic-integrity-health';
 async function first(env,sql,bindings=[]){
   try{return await env.DB.prepare(sql).bind(...bindings).first()}catch(error){return {error:String(error?.message||error)}}
 }
+async function all(env,sql,bindings=[]){
+  try{return (await env.DB.prepare(sql).bind(...bindings).all()).results||[]}catch(error){return [{error:String(error?.message||error)}]}
+}
 
 async function outboundDiagnostic(env){
   if(!env.DB)return {status:'unavailable',reason:'D1 unavailable'};
-  const [raw,human,pageConfirmed,guard,qualified,funnel]=await Promise.all([
+  const [raw,human,pageConfirmed,guard,qualified,funnel,bySource,recentHuman]=await Promise.all([
     first(env,`SELECT COUNT(*) clicks30d,SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,MAX(created_at) last_at FROM click_events WHERE created_at>=datetime('now','-30 days') AND COALESCE(source,'') NOT IN ('internal-test','synthetic','health-check','ci')`),
     first(env,`SELECT COUNT(*) clicks30d,SUM(CASE WHEN c.created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,MAX(c.created_at) last_at FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND s.classification IN ('likely-human','human')`),
     first(env,`SELECT COUNT(*) clicks30d,SUM(CASE WHEN c.created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,MAX(c.created_at) last_at FROM click_events c WHERE c.created_at>=datetime('now','-30 days') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed')`),
     first(env,`SELECT COUNT(*) clicks7d,SUM(CASE WHEN c.created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,MAX(c.created_at) last_at FROM click_events c WHERE c.created_at>=datetime('now','-7 days') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM traffic_guard_events g WHERE g.session_id=c.session_id AND g.decision='allowed')`),
     first(env,`SELECT COUNT(*) clicks30d,SUM(CASE WHEN c.created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,SUM(CASE WHEN c.affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized30d,MAX(c.created_at) last_at FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND s.classification IN ('likely-human','human') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed')`),
-    first(env,`SELECT COUNT(*) events30d,SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) events24h,MAX(created_at) last_at FROM funnel_events WHERE event_type='outbound_clicked' AND created_at>=datetime('now','-30 days')`)
+    first(env,`SELECT COUNT(*) events30d,SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) events24h,MAX(created_at) last_at FROM funnel_events WHERE event_type='outbound_clicked' AND created_at>=datetime('now','-30 days')`),
+    all(env,`SELECT COALESCE(c.source,'(null)') source,COALESCE(s.classification,'no-session') classification,COUNT(*) clicks30d,SUM(CASE WHEN c.created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') GROUP BY COALESCE(c.source,'(null)'),COALESCE(s.classification,'no-session') ORDER BY clicks30d DESC LIMIT 20`),
+    all(env,`SELECT c.tool_slug,c.source,s.classification,c.affiliate_active_at_click,c.created_at FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND s.classification IN ('likely-human','human') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') ORDER BY c.created_at DESC LIMIT 40`)
   ]);
   return {
     status:'observed',
@@ -26,7 +31,9 @@ async function outboundDiagnostic(env){
     guardAllowedLinked:{windowDays:7,...guard},
     commandCenterQualified:{windowDays:30,...qualified},
     funnelOutboundEvents:{windowDays:30,...funnel},
-    interpretation:'Compare rawClickEvents with commandCenterQualified. A gap means click events exist but are being filtered from the Command Center outbound metric.'
+    bySourceAndClassification:bySource,
+    recentHumanClassifiedClicks:recentHuman,
+    interpretation:'Compare rawClickEvents with humanSessionClassified and commandCenterQualified. A gap between humanSessionClassified and commandCenterQualified means browser-session clicks exist but the legacy page_confirmed gate is filtering them out.'
   };
 }
 
