@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ToolScout"><rect width="64" height="64" rx="14" fill="#101828"/><path d="M16 18h32v8H36v22h-8V26H16z" fill="#ffffff"/><circle cx="44" cy="44" r="6" fill="#ffffff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" role="img" aria-label="ToolScout">
+  <rect width="1254" height="1254" fill="#111214"/>
+  <g fill="none" stroke="#C3F309" stroke-width="68" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M473 304H354C313 304 280 337 280 378V498"/>
+    <path d="M780 304H900C941 304 974 337 974 378V498"/>
+    <path d="M280 786V906C280 947 313 984 354 984H473"/>
+    <path d="M974 786V906C974 947 941 984 900 984H780"/>
+  </g>
+  <circle cx="626.5" cy="641.5" r="98" fill="#C3F309"/>
+</svg>
