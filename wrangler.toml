@@ -9,11 +9,14 @@ not_found_handling = "404-page"
 binding = "ASSETS"
 run_worker_first = [
   "/",
+  "/*.html",
   "/sitemap.xml",
   "/feed.xml*",
   "/best-*",
   "/*-vs-*",
   "/blog/*",
+  "/news/*",
+  "/whats-new*",
   "/tools",
   "/tools/*",
   "/guides*",
