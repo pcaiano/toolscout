@@ -174,6 +174,8 @@ PartnerStack marketplace access is currently constrained by a network-profile li
 
 Current known distribution state:
 
+- Hype Star (2026-09-17): owner authorized submission. Source facts reviewed; App / Productivity & Operations selected. The submission attempt was blocked by the mandatory public badge check, so no accepted submission or listing is confirmed. Badge prepared in `methodology.html` on branch `hypestar-listing-badge`. Deployment remains blocked by `CONSERVATION_MODE.txt`; do not restore Actions for this non-emergency. After an authorized deployment, verify `/methodology` and resubmit with that exact supporter page URL. Evidence and next action are in `data/distribution-workflow.json`.
+
 - Product Hunt: ToolScout product page exists and must remain monitored for launch/listing status and resulting traffic.
 - Uneed: submission/payment completed; launch scheduled for 2026-09-15.
 - SaaSHub: an existing TryToolScout submission was reconciled on 2026-09-01 without duplication. The authenticated management page shows `Pending approval` with an estimate of up to 32 days. The free queue is being used; the $75 Priority+ upsell is prohibited.
