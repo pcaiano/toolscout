@@ -42,4 +42,15 @@ The BEARING repository is `pcaiano/luxury-buyer-intelligence-portugal`. Its exac
 
 ### Execution rule
 
-Before a risky infrastructure operation, the agent should be able to state: **current project → target resource → verified name/ID → intended operation**. If that chain cannot be established, do not execute the operation.
+Before a risky infrastructure operation, the agent should be able to state: **current project -> target resource -> verified name/ID -> intended operation**. If that chain cannot be established, do not execute the operation.
+
+## What's New software article contract
+
+Every software article published under `news/*.html` must preserve the ToolScout conversion path used by the established Notion and HubSpot articles.
+
+1. Include a visible internal CTA to the matching ToolScout profile: `/tools/<slug>.html`.
+2. Include a visible outbound CTA to the matching vendor route: `/go/<slug>?source=software-news`.
+3. The `<slug>` used by the profile CTA and vendor CTA must match.
+4. If the matching ToolScout profile does not exist, do not publish the news article until the profile exists and has been verified.
+5. Before committing or publishing a software news article, run `node scripts/validate-software-news-ctas.mjs` and resolve every failure.
+6. Do not remove these CTAs when refreshing, rewriting, or regenerating an existing software news article.
