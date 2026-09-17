@@ -1,0 +1,28 @@
+name: ToolScout deploy manual Command Center refresh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-manual-command-center-refresh.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate worker
+        run: |
+          node --check traffic-integrity-live-worker.js
+          grep -q 'main = "traffic-integrity-live-worker.js"' wrangler.toml
+          if grep -q 'setInterval(refresh,60000)' traffic-integrity-live-worker.js; then exit 1; fi
+      - name: Deploy Cloudflare Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml
