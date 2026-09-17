@@ -44,6 +44,17 @@ The BEARING repository is `pcaiano/luxury-buyer-intelligence-portugal`. Its exac
 
 Before a risky infrastructure operation, the agent should be able to state: **current project -> target resource -> verified name/ID -> intended operation**. If that chain cannot be established, do not execute the operation.
 
+## Deployment during GitHub Actions conservation
+
+GitHub Actions conservation mode is not a development or production deployment freeze for ToolScout.
+
+1. Normal ToolScout development may continue on `main` while GitHub Actions workflows are paused or reduced for quota conservation.
+2. Cloudflare Workers Builds is the primary deployment path during conservation and can build and deploy commits from `pcaiano/toolscout` independently of GitHub Actions.
+3. Do not defer a safe site change merely because GitHub Actions is in conservation mode. Commit the change to `main`, then verify the Cloudflare build/deployment and production smoke test.
+4. GitHub Actions conservation affects workflows that specifically depend on Actions compute, such as scheduled SEO/catalog jobs or CI tasks. It does not by itself block Cloudflare deployment of repository changes.
+5. The Make Cloudflare Deploy Version scenario is a fallback for promoting an already-uploaded Cloudflare Worker version. It does not replace the source build/upload step unless a separate Cloudflare build trigger is invoked.
+6. Before assuming deployment is blocked, inspect the current Cloudflare Workers Build/deployment state. Treat Cloudflare as the deployment source of truth during conservation.
+
 ## What's New software article contract
 
 Every software article published under `news/*.html` must preserve the ToolScout conversion path used by the established Notion and HubSpot articles.
