@@ -1,50 +1,14 @@
-name: Reconcile Rundown Chairman Queue
+name: ToolScout GitHub Actions Conservation Mode
+
 on:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/d1-quota-safe-worker-deploy.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
-  reconcile:
-    if: github.event.head_commit.message == 'Reconcile invalid Rundown Chairman Queue'
+  conservation-notice:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Verify remote ToolScout identity
-        run: |
-          npx wrangler d1 info toolscout --config wrangler.toml --json > /tmp/ts-d1.json
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import assert from 'node:assert/strict';
-          const d=JSON.parse(fs.readFileSync('/tmp/ts-d1.json','utf8'));
-          assert.equal(d.uuid ?? d.id,'cac6bc3c-d838-4edd-ba29-597030afb397');
-          assert.equal(d.name,'toolscout');
-          NODE
-      - name: Reconcile only Rundown production state
-        run: |
-          cat > /tmp/rundown.sql <<'SQL'
-          UPDATE distribution_opportunities SET status='skipped',human_required=0,last_checked_at=datetime('now'),next_action='No verified free submission route: /submit-a-tool returned 404 on 2026-09-17; official directory has no submission link and advertising is paid. No owner action. Reopen only with verified free route.',updated_at=datetime('now') WHERE surface_slug='the-rundown-ai-supertools' AND status NOT IN ('live','verified','submitted','pending_review');
-          UPDATE distribution_submissions SET status='policy_blocked',human_required=0,error='no_verified_free_submission_route_2026_09_17',updated_at=datetime('now') WHERE surface_slug='the-rundown-ai-supertools' AND status NOT IN ('submitted','live','verified');
-          UPDATE distribution_economic_learning SET chairman_required=0,operating_decision='suspend',decision_reason='No verified free submission route; obsolete submit URL returns 404. Paid advertising is not an approved action.',decided_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug='the-rundown-ai-supertools';
-          SQL
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --file /tmp/rundown.sql
-      - name: Verify Rundown no longer requires owner action
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT surface_slug,status,human_required,next_action FROM distribution_opportunities WHERE surface_slug='the-rundown-ai-supertools'" > /tmp/ts-queue.json
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import assert from 'node:assert/strict';
-          const data=JSON.parse(fs.readFileSync('/tmp/ts-queue.json','utf8'));
-          const rows=data.flatMap(x=>x.results||[]);
-          assert.equal(rows.length,1);
-          assert.ok(['skipped','pending_review','submitted','live','verified'].includes(rows[0].status));
-          assert.equal(rows[0].human_required,0);
-          console.log(JSON.stringify(rows));
-          NODE
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
