@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "command-center-integrity-worker.js"
+main = "mission-integrity-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
@@ -36,6 +36,7 @@ run_worker_first = [
   "/api/confirmed-visitor*",
   "/api/traffic-integrity-health*",
   "/api/audience-event*",
+  "/api/engine-evidence*",
   "/api/distribution-event*",
   "/api/distribution/*",
   "/api/recommend*",
