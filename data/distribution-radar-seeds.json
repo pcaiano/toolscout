@@ -270,6 +270,28 @@
       "human_required": false,
       "status": "ready_to_submit",
       "next_action": "Run one free public Ora scan for ToolScout, publish its agent-readiness surface into Ora discovery, then monitor the verified score and fixes."
+    },
+    {
+      "slug": "peerpush",
+      "name": "PeerPush",
+      "type": "product_discovery_launch_platform",
+      "url": "https://peerpush.com/",
+      "action_url": "https://peerpush.com/",
+      "audience_fit": 86,
+      "authority": 70,
+      "traffic_potential": 76,
+      "backlink_value": 72,
+      "acceptance_probability": 80,
+      "automation_potential": 20,
+      "effort": 12,
+      "cost": 0,
+      "human_required": false,
+      "status": "pending_review",
+      "submitted_at": "2026-09-17T11:09:15Z",
+      "verified_at": "2026-09-17",
+      "verification_status": "owner_confirmed_queued",
+      "evidence": "PeerPush confirmed ToolScout was added to the publishing queue at position #3166 with an estimated wait of about 1 month and 23 days. PeerPush will email when the product goes live.",
+      "next_action": "Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit."
     }
   ]
 }

@@ -328,6 +328,25 @@
       "canonical_submission_url": "https://hypestar.org/project/toolscout",
       "supporter_page_url": "https://trytoolscout.org/methodology",
       "notes": "Owner authorized one-off deployment. PR #75 merged; deployment run 35204093998 succeeded after remote ToolScout identity verification. No D1 migrations applied. Conservation workflow restored at commit ad5c988e0d6e11768f72998c2548236306e14429."
+    },
+    {
+      "slug": "peerpush",
+      "name": "PeerPush",
+      "type": "product_discovery_launch_platform",
+      "status": "pending_review",
+      "priority": "medium",
+      "url": "https://peerpush.com/",
+      "action_url": "https://peerpush.com/",
+      "requires_signup": true,
+      "cost": "Free submission used",
+      "free_paid_status": "eligible_free",
+      "submitted_at": "2026-09-17T11:09:15Z",
+      "verified_at": "2026-09-17T11:09:15Z",
+      "verification_status": "owner_confirmed_queued",
+      "queue_position": 3166,
+      "evidence": "PeerPush confirmed ToolScout was added to the publishing queue at position #3166 with an estimated wait of about 1 month and 23 days. PeerPush will email when the product goes live.",
+      "next_action": "Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit.",
+      "notes": "Submission completed. Remove from Chairman Queue while awaiting publication."
     }
   ],
   "submission_pack": {
