@@ -1,14 +1,32 @@
-name: ToolScout GitHub Actions Conservation Mode
+name: One-off Stremit Chairman Queue Sync
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/distribution-live-smoke.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  conservation-notice:
+  sync:
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - name: Conservation mode notice
-        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy corrected radar seed
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Update Stremit opportunity in remote D1
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='human_action_required', action_url='https://stremit.io/submit-tool', human_required=1, last_checked_at=datetime('now'), next_action='Use the verified free Standard listing route at https://stremit.io/submit-tool. Submit only the free listing. Do not purchase paid placement. If authentication is required, sign in and continue with the free route.', updated_at=datetime('now') WHERE surface_slug='stremit';"
+      - name: Verify Stremit Chairman Queue route
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='stremit';"
