@@ -167,14 +167,18 @@
       "slug": "tiny-startups",
       "name": "Tiny Startups",
       "type": "startup_directory",
-      "status": "human_action_required",
+      "status": "live",
       "priority": "medium",
       "url": "https://www.tinystartups.com/",
       "action_url": "https://www.tinystartups.com/",
       "requires_signup": true,
-      "cost": "Free review queue plus optional paid tiers reported in current 2026 research",
-      "next_action": "Use the authenticated/free review submission route manually. Keep outside automatic execution unless a verified machine-readable API is later discovered.",
-      "notes": "Authenticated/manual submission route. Do not count as an automation gap."
+      "cost": "Free listing live; paid DR 71+ backlink upgrade explicitly declined",
+      "next_action": "Listing is live. Monitor attributed sessions, upvotes and backlink value. Revenue verification is optional and should only be used with accurate public revenue data. Do not buy the paid backlink upgrade without measured evidence.",
+      "notes": "ToolScout is live on Tiny Startups. Remove from Chairman Queue.",
+      "free_paid_status": "eligible_free",
+      "verified_at": "2026-09-17T10:56:45Z",
+      "verification_status": "owner_confirmed_live_homepage_latest_launches",
+      "evidence": "Tiny Startups emailed confirmation that ToolScout is live in Latest launches on the homepage. The email separately offers optional revenue verification and a paid DR 71+ do-follow backlink upgrade."
     },
     {
       "slug": "launching-next",
