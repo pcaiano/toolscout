@@ -292,6 +292,27 @@
       "verification_status": "owner_confirmed_queued",
       "evidence": "PeerPush confirmed ToolScout was added to the publishing queue at position #3166 with an estimated wait of about 1 month and 23 days. PeerPush will email when the product goes live.",
       "next_action": "Wait for the PeerPush publication email, then verify the public ToolScout listing before marking live. Do not resubmit."
+    },
+    {
+      "slug": "startup-fame",
+      "name": "Startup Fame",
+      "type": "startup_directory",
+      "url": "https://startupfa.me/",
+      "action_url": "https://startupfa.me/dashboard/trytoolscout.org-853",
+      "audience_fit": 80,
+      "authority": 68,
+      "traffic_potential": 66,
+      "backlink_value": 74,
+      "acceptance_probability": 85,
+      "automation_potential": 15,
+      "effort": 12,
+      "cost": 0,
+      "human_required": true,
+      "status": "verification_required",
+      "verified_at": "2026-09-17",
+      "verification_status": "badge_authorized_deploying",
+      "evidence": "Owner completed the profile and supplied the official verification badge for the free verification route.",
+      "next_action": "After the badge is live, click Verify in Startup Fame. Do not buy paid promotion."
     }
   ]
 }
