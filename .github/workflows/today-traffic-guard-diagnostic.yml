@@ -1,0 +1,33 @@
+name: ToolScout today traffic guard diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/today-traffic-guard-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  query:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Query today guard state
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== GUARD TODAY LISBON ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT decision,COALESCE(reason,'') reason,COUNT(*) events,COUNT(DISTINCT session_id) sessions,COUNT(DISTINCT fingerprint) fingerprints,MIN(created_at) first_at,MAX(created_at) last_at FROM traffic_guard_events WHERE created_at>='2026-09-16 23:00:00' GROUP BY decision,COALESCE(reason,'') ORDER BY events DESC;"
+          echo '=== FUNNEL TODAY LISBON ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,source,COUNT(DISTINCT session_id) sessions,COUNT(*) events,MIN(created_at) first_at,MAX(created_at) last_at FROM funnel_events WHERE created_at>='2026-09-16 23:00:00' GROUP BY event_type,source ORDER BY events DESC;"
+          echo '=== SESSION CLASSIFICATIONS TODAY TOUCHED ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT classification,COUNT(DISTINCT s.session_id) sessions FROM sessions s WHERE EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=s.session_id AND f.created_at>='2026-09-16 23:00:00') GROUP BY classification ORDER BY sessions DESC;"
+          echo '=== CONFIRMED VISITORS TODAY ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT source,COALESCE(referrer_host,'') referrer_host,COUNT(DISTINCT visitor_id) visitors,COUNT(DISTINCT session_id) sessions,MIN(created_at) first_at,MAX(created_at) last_at FROM confirmed_visitor_events WHERE created_at>='2026-09-16 23:00:00' GROUP BY source,COALESCE(referrer_host,'') ORDER BY sessions DESC;"
