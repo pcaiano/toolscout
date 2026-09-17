@@ -292,6 +292,22 @@
       "requires_signup": true,
       "cost": "Free listing route; paid buyer-acquisition options exist",
       "next_action": "Defer until category fit and review acquisition justify signup. Account for the 2026 G2 Digital Markets ownership/integration when revisiting."
+    },
+    {
+      "slug": "hypestar",
+      "name": "Hype Star",
+      "type": "reviewed_project_directory_api",
+      "status": "prepared",
+      "priority": "high",
+      "url": "https://hypestar.org/agents",
+      "action_url": "https://hypestar.org/submit",
+      "requires_signup": false,
+      "cost": "Free permanent basic listing after approval",
+      "verified_at": "2026-09-17",
+      "verification_status": "blocked_missing_public_badge",
+      "evidence": "Owner explicitly requested submission on 2026-09-17. Hype Star recognized ToolScout source facts; App / Productivity & Operations selected. One Verify badge & submit attempt failed because no badge was found on the homepage or common pages. No accepted submission or public listing confirmed.",
+      "blocker": "Required badge is prepared on branch hypestar-listing-badge in methodology.html but not deployed. CONSERVATION_MODE.txt suspends GitHub Actions until 2026-10-01.",
+      "next_action": "Deploy the prepared badge through an authorized deployment path, verify https://trytoolscout.org/methodology, then resubmit with supporterChoice verify and supporterPageUrl https://trytoolscout.org/methodology. Confirm acceptance and save returned listing/status URL. Do not count as submitted or live."
     }
   ],
   "submission_pack": {
