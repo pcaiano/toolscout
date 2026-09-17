@@ -174,7 +174,7 @@ PartnerStack marketplace access is currently constrained by a network-profile li
 
 Current known distribution state:
 
-- Hype Star (2026-09-17): owner authorized submission. Source facts reviewed; App / Productivity & Operations selected. The submission attempt was blocked by the mandatory public badge check, so no accepted submission or listing is confirmed. Badge prepared in `methodology.html` on branch `hypestar-listing-badge`. Deployment remains blocked by `CONSERVATION_MODE.txt`; do not restore Actions for this non-emergency. After an authorized deployment, verify `/methodology` and resubmit with that exact supporter page URL. Evidence and next action are in `data/distribution-workflow.json`.
+- Hype Star (2026-09-17): submission accepted, pending editorial review. Owner authorized the one-off badge deployment; PR #75 merged and deploy run 35204093998 succeeded with verified ToolScout resource identity and no database migrations. Official badge verified live at `https://trytoolscout.org/methodology`; Hype Star confirmed badge verification and submission without account creation. App / Productivity & Operations. Proposed profile: `https://hypestar.org/project/toolscout`, not yet confirmed public. Conservation mode restored immediately after the deployment trigger. Do not resubmit; verify publication before marking live.
 
 - Product Hunt: ToolScout product page exists and must remain monitored for launch/listing status and resulting traffic.
 - Uneed: submission/payment completed; launch scheduled for 2026-09-15.
