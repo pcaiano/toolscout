@@ -105,7 +105,7 @@
       "name": "Stremit",
       "type": "software_directory_newsletter",
       "url": "https://stremit.io/",
-      "action_url": "https://stremit.io/submit-tool",
+      "action_url": "https://stremit.io/ai-tool/toolscout",
       "audience_fit": 72,
       "authority": 60,
       "traffic_potential": 58,
@@ -115,12 +115,13 @@
       "effort": 18,
       "cost": 0,
       "human_required": false,
-      "status": "pending_review",
+      "status": "live",
       "submitted_at": "2026-09-17T10:33:56Z",
       "verified_at": "2026-09-17",
-      "verification_status": "submission_accepted_pending_review",
-      "evidence": "Stremit confirmed that ToolScout was submitted to the editor team and is in the review queue. A confirmation email was sent to the ToolScout owner, with a second email promised after editorial review stating whether the listing is live or why it was not approved.",
-      "next_action": "Submission completed and required Stremit badge is live on ToolScout. Wait for editorial review, then verify the public Stremit listing before marking the opportunity live. Do not resubmit."
+      "verification_status": "approval_email_confirmed_live",
+      "evidence": "Stremit emailed confirmation that ToolScout was approved and is now live and discoverable by the Stremit community. The approval email links to the public ToolScout profile.",
+      "next_action": "Listing approved and live. Monitor attributed sessions, outbound activity and backlink value. Claiming the page is optional and should only be surfaced if owner editing becomes useful.",
+      "canonical_submission_url": "https://stremit.io/ai-tool/toolscout"
     },
     {
       "slug": "launching-next",
@@ -136,9 +137,13 @@
       "automation_potential": 10,
       "effort": 18,
       "cost": 0,
-      "human_required": true,
-      "status": "human_action_required",
-      "next_action": "Verified free submission form with manual review and quick-check challenge; no public API verified. Keep in human queue and never automate the form."
+      "human_required": false,
+      "status": "pending_review",
+      "next_action": "Wait for the free editorial review. Do not buy the $99 Fast-Track. Verify the public Launching Next listing after approval before marking live.",
+      "submitted_at": "2026-09-17T10:53:05Z",
+      "verified_at": "2026-09-17",
+      "verification_status": "owner_confirmed_pending_review",
+      "evidence": "Launching Next confirmed the free submission is in queue with an estimated wait of about 4 months. A $99 Fast-Track option was offered for 1-business-day review, but it is not authorized under ToolScout free-by-default distribution policy."
     },
     {
       "slug": "indexnow",
