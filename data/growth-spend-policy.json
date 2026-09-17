@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "mode": "free_by_default",
+  "globalPaidAcquisitionAllowed": false,
+  "principles": {
+    "freeDistributionFirst": true,
+    "confirmedRevenueRequiredForPaidExpansion": true,
+    "clicksNeverCountAsRevenue": true,
+    "expectedValueMustExceedCost": true,
+    "ownerApprovalRequiredForAnyNewPaidSpend": true,
+    "affiliateEconomicsNeverAffectEditorialRanking": true
+  },
+  "unitEconomicsGate": {
+    "requireConfirmedVendorRevenue": true,
+    "requireMeasuredEarningsPerMonetizedClick": true,
+    "requireMeasuredRevenuePerHumanSession": true,
+    "requireExpectedValueAboveCost": true,
+    "requireExplicitOwnerApproval": true,
+    "defaultDecisionWhenEvidenceMissing": "decline_or_hold"
+  },
+  "historicalExperiments": [
+    {
+      "slug": "uneed",
+      "experiment": "fast-track-launch-2026-09-15",
+      "status": "already_paid_historical_experiment",
+      "costUsdApprox": 14.99,
+      "decisionRule": "Measure attributed likely-human sessions, human outbound, monetized outbound, confirmed revenue and durable backlink value at 24h, 7d and 30d. Do not use this purchase as precedent for another paid listing."
+    }
+  ],
+  "blockedWithoutFreshApproval": [
+    "paid directory upgrades",
+    "paid priority review",
+    "paid fast track",
+    "paid featured placement",
+    "paid backlinks",
+    "paid launch promotion"
+  ]
+}
