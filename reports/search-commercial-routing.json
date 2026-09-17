@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-09-17T13:10:00Z",
+  "engine": "ToolScout Search Commercial Routing v1",
+  "source": "Google Search Console settled through 2026-09-14 plus current affiliate routes",
+  "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
+  "rules": {
+    "editorialIndependence": "Affiliate status can add measurement and distribution urgency but never changes tool ranking or recommendation eligibility.",
+    "positions1to15": "Protect ranking and optimize qualified click capture.",
+    "positions16to30": "Prioritize authority, internal links and selective distribution.",
+    "positions31to70": "Deepen the existing page before expanding the content surface.",
+    "weakRankingWithDemand": "Improve relevance and authority instead of creating duplicate pages."
+  },
+  "summary": {"pages": 10, "monetizedPages": 4, "ctrAndSnippet": 0, "authorityAndDistribution": 0, "editorialDepth": 5},
+  "priorities": [
+    {"page":"https://trytoolscout.org/best-seo-tools-for-agencies","pathname":"/best-seo-tools-for-agencies","type":"guide","clicks":0,"impressions":651,"position":76.275,"monetized":true,"monetizedSlugs":["se-ranking"],"lane":"relevance-and-authority","priorityScore":133.18,"actions":["improve-query-intent-match","deepen-evidence","strengthen-internal-authority","test-selective-distribution","measure-monetized-outbound-and-revenue"]},
+    {"page":"https://trytoolscout.org/best-seo-keyword-research-tools","pathname":"/best-seo-keyword-research-tools","type":"guide","clicks":0,"impressions":254,"position":75.5827,"monetized":true,"monetizedSlugs":["se-ranking"],"lane":"relevance-and-authority","priorityScore":116.93,"actions":["improve-query-intent-match","deepen-evidence","strengthen-internal-authority","test-selective-distribution","measure-monetized-outbound-and-revenue"]},
+    {"page":"https://trytoolscout.org/best-no-code-automation-tools","pathname":"/best-no-code-automation-tools","type":"guide","clicks":0,"impressions":243,"position":73.9053,"monetized":true,"monetizedSlugs":["make"],"lane":"relevance-and-authority","priorityScore":116.17,"actions":["improve-query-intent-match","deepen-evidence","strengthen-internal-authority","test-selective-distribution","measure-monetized-outbound-and-revenue"]},
+    {"page":"https://trytoolscout.org/best-funnel-builder","pathname":"/best-funnel-builder","type":"guide","clicks":0,"impressions":152,"position":76.8553,"monetized":true,"monetizedSlugs":["systeme-io"],"lane":"relevance-and-authority","priorityScore":108.09,"actions":["improve-query-intent-match","deepen-evidence","strengthen-internal-authority","test-selective-distribution","measure-monetized-outbound-and-revenue"]},
+    {"page":"https://trytoolscout.org/tools/semrush","pathname":"/tools/semrush","type":"tool-profile","clicks":0,"impressions":265,"position":55.8302,"monetized":false,"monetizedSlugs":[],"lane":"editorial-depth","priorityScore":96.66,"actions":["deepen-decision-context","align-copy-to-observed-queries","strengthen-internal-links","prioritize-page-distribution"]},
+    {"page":"https://trytoolscout.org/best-project-management-tools","pathname":"/best-project-management-tools","type":"guide","clicks":0,"impressions":86,"position":38.9884,"monetized":false,"monetizedSlugs":[],"lane":"editorial-depth","priorityScore":94.93,"actions":["deepen-decision-context","align-copy-to-observed-queries","strengthen-internal-links","prioritize-page-distribution"]},
+    {"page":"https://trytoolscout.org/tools/airtable","pathname":"/tools/airtable","type":"tool-profile","clicks":0,"impressions":203,"position":73.5616,"monetized":false,"monetizedSlugs":[],"lane":"relevance-and-authority","priorityScore":92.07,"actions":["improve-query-intent-match","deepen-evidence","strengthen-internal-authority","test-selective-distribution"]},
+    {"page":"https://trytoolscout.org/tools/klaviyo","pathname":"/tools/klaviyo","type":"tool-profile","clicks":0,"impressions":148,"position":60.777,"monetized":false,"monetizedSlugs":[],"lane":"editorial-depth","priorityScore":86.63,"actions":["deepen-decision-context","align-copy-to-observed-queries","strengthen-internal-links","prioritize-page-distribution"]},
+    {"page":"https://trytoolscout.org/tools/tally","pathname":"/tools/tally","type":"tool-profile","clicks":0,"impressions":34,"position":39.7941,"monetized":false,"monetizedSlugs":[],"lane":"editorial-depth","priorityScore":78.28,"actions":["deepen-decision-context","align-copy-to-observed-queries","strengthen-internal-links","prioritize-page-distribution"]},
+    {"page":"https://trytoolscout.org/best-free-project-management-tools","pathname":"/best-free-project-management-tools","type":"guide","clicks":0,"impressions":59,"position":57.5593,"monetized":false,"monetizedSlugs":[],"lane":"editorial-depth","priorityScore":70.88,"actions":["deepen-decision-context","align-copy-to-observed-queries","strengthen-internal-links","prioritize-page-distribution"]}
+  ]
+}
