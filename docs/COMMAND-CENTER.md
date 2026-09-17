@@ -198,6 +198,9 @@ Distribution work should normally stay outside Work/Codex.
 
 ## SEO and acquisition status
 
+Editorial authority update (2026-09-17): the software catalog now uses a hybrid structured-plus-editorial presentation. Tool cards retain catalog/search structure but replace the badge-heavy reading experience with a factual summary plus a short ToolScout view. All registered A-vs-B comparisons are being updated with a prose ToolScout conclusion grounded in the existing score and catalog evidence. The comparison generator preserves the same rule for future refreshes. Schema, crawlable links, pricing context and other machine-readable signals remain intact.
+
+
 The 2026-09-01 commercial SEO sprint added crawlable, catalog-backed static profiles for all 100 tools, linked the 38 intent guides and 15 comparison pages bidirectionally through those profiles, centralized the comparison registry, and expanded the static sitemap from 107 to 207 URLs. No editorial ranking, affiliate configuration, distribution state, or speculative intent inventory changed. Full scope and acceptance evidence are recorded in `docs/SEO-COMMERCIAL-SPRINT-2026-09-01.md`.
 
 The 2026-09-06 SEO workflow investigation confirmed GSC sync is functioning: the failed run successfully imported signals for 24 intents and reported 363 impressions over its 28-day window before a separate Gorgias affiliate-validation issue stopped the workflow. The Gorgias tracking format was then added to the public-surface validator, and subsequent generated-asset refresh resumed. Do not continue treating GSC as unavailable without rechecking current repository/run evidence.
