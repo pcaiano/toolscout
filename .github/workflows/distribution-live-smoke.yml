@@ -20,12 +20,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Deploy current static assets and Worker
-        run: npx wrangler deploy --config wrangler.toml --latest
       - name: Update Nextool opportunity in remote D1
         run: |
           set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='research_required', action_url='https://nextool.ai/submit-a-tool/', human_required=0, last_checked_at=datetime('now'), next_action='Suppress from Chairman Queue while the free-review frontend is unstable. Radar should recheck the canonical free route later and only return it to Human Required after a consistently usable browser path is verified. Do not buy the $45, $145 or $600 promotion packages.', updated_at=datetime('now') WHERE surface_slug='nextool-ai';"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='research_required', action_url='https://nextool.ai/submit-a-tool/', human_required=0, last_checked_at=datetime('now'), next_action='Suppress from Chairman Queue while the free-review frontend is unstable. Radar should recheck the canonical free route later and only return it to Human Required after a consistently usable browser path is verified. Do not buy paid promotion packages.', updated_at=datetime('now') WHERE surface_slug='nextool-ai';"
       - name: Verify Nextool state and Chairman Queue exclusion
         run: |
           set -euo pipefail
