@@ -55,6 +55,8 @@ jobs:
         run: node scripts/promote-competitive-content-gaps.mjs
       - name: Build growth priority
         run: node scripts/build-growth-priority.mjs
+      - name: Build GSC commercial routing
+        run: node scripts/build-search-commercial-routing.mjs
       - name: Build indexing-aware organic opportunities
         run: node scripts/build-organic-growth-opportunities-v6.mjs
       - name: Run indexing-aware closed loop controller
@@ -103,6 +105,8 @@ jobs:
           node scripts/enforce-seo-hygiene.mjs
       - name: Enforce outbound UX
         run: node scripts/enforce-outbound-ux.mjs --fix
+      - name: Validate free first growth spend policy
+        run: node scripts/validate-growth-spend-policy.mjs
       - name: Generate distribution assets
         run: node scripts/generate-distribution.mjs
       - name: Build clean guide index
@@ -128,13 +132,13 @@ jobs:
       - name: Commit generated SEO assets
         if: github.ref == 'refs/heads/main'
         run: |
-          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
+          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
+          git add -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json '*.html' 'tools/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
           git commit -m "Refresh SEO, catalog quality, comparisons, indexing, research, blog and distribution assets"
           git pull --rebase origin main
           git push origin HEAD:main
