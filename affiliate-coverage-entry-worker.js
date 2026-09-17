@@ -1,5 +1,6 @@
 import base from './distribution-impact-entry-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
+import {runWithLedger} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const FIRECRAWL_INGEST_TOKEN_SHA256='e0888dacab143e3b7c9a29e83f1e95263e8ad8ff0f4d58d026d73f56c04b7c0e';
@@ -39,7 +40,8 @@ async function ingestFirecrawl(request,env){
 }
 
 async function reconcileAffiliateWorkflow(env){
-  let rows=[];try{const q=await env.DB.prepare(`SELECT tool_slug,status,submitted_at,notes,blocker FROM affiliate_workflow WHERE status IN ('research_required','program_exists','ready_to_apply','human_action_required')`).all();rows=q.results||[]}catch{return{checked:0,changed:0}}
+  const q=await env.DB.prepare(`SELECT tool_slug,status,submitted_at,notes,blocker FROM affiliate_workflow WHERE status IN ('research_required','program_exists','ready_to_apply','human_action_required')`).all();
+  const rows=q.results||[];
   let changed=0;
   for(const row of rows){
     const text=`${row.notes||''} ${row.blocker||''}`.trim();
@@ -48,7 +50,8 @@ async function reconcileAffiliateWorkflow(env){
     else if(row.submitted_at&&!POST_SUBMIT_HUMAN_WORDS.test(text))next='pending_review';
     else if(!row.submitted_at&&CONTACTED_WORDS.test(text))next='pending_review';
     if(!next||next===row.status)continue;
-    try{await env.DB.prepare(`UPDATE affiliate_workflow SET status=?,source_actor='affiliate_coverage_reconciler',updated_at=datetime('now') WHERE tool_slug=? AND status=?`).bind(next,row.tool_slug,row.status).run();changed++}catch{}
+    await env.DB.prepare(`UPDATE affiliate_workflow SET status=?,source_actor='affiliate_coverage_reconciler',updated_at=datetime('now') WHERE tool_slug=? AND status=?`).bind(next,row.tool_slug,row.status).run();
+    changed++;
   }
   return{checked:rows.length,changed};
 }
@@ -57,6 +60,10 @@ async function runCycle(env){
   const reconciliation=await reconcileAffiliateWorkflow(env);
   const result=await runAffiliateCoverageCycle(env);
   return {...result,reconciliation};
+}
+
+function runAuditedCycle(env,triggerName){
+  return runWithLedger(env,{engine:'affiliate',mission:'coverage_cycle',triggerName},()=>runCycle(env));
 }
 
 export default {
@@ -69,12 +76,12 @@ export default {
     if(u.pathname==='/api/affiliate-coverage/run'){
       if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await runCycle(env),{headers:JSON_H});
+      return Response.json(await runAuditedCycle(env,'manual_api'),{headers:JSON_H});
     }
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
     if(base.scheduled)await base.scheduled(event,env,ctx);
-    ctx.waitUntil(runCycle(env).catch(()=>undefined));
+    ctx.waitUntil(runAuditedCycle(env,event?.cron||'scheduled'));
   }
 };
