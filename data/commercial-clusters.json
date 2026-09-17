@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-09-17T13:18:00Z",
+  "policy": "Commercial clusters strengthen navigation around tools with active production affiliate routes. Cluster membership never changes ranking, recommendation eligibility, scores or comparison outcomes.",
+  "clusters": {
+    "systeme-io": ["/best-funnel-builder", "/best-marketing-automation-tools", "/best-email-marketing-tools"],
+    "beehiiv": ["/beehiiv-vs-kit", "/best-email-marketing-tools", "/best-funnel-builder"],
+    "jotform": ["/best-forms-for-small-business", "/best-lead-capture-forms"],
+    "adcreative-ai": ["/best-ai-marketing-tools"],
+    "pipedrive": ["/hubspot-vs-pipedrive", "/best-crm-for-sales-teams", "/best-crm-for-small-business", "/best-affordable-crm"],
+    "shopify": ["/shopify-vs-webflow", "/best-ecommerce-platforms"],
+    "make": ["/make-vs-zapier", "/n8n-vs-make", "/best-no-code-automation-tools", "/best-workflow-automation-tools"],
+    "typeform": ["/tally-vs-typeform", "/best-forms-for-small-business", "/best-lead-capture-forms"],
+    "zoho-crm": ["/best-crm-for-sales-teams", "/best-crm-for-small-business", "/best-affordable-crm"],
+    "se-ranking": ["/best-seo-tools", "/best-seo-tools-for-agencies", "/best-seo-keyword-research-tools"],
+    "kit": ["/beehiiv-vs-kit", "/best-email-marketing-tools", "/best-marketing-automation-tools"],
+    "gorgias": ["/best-customer-support-tools", "/best-ecommerce-platforms"],
+    "mailerlite": ["/best-email-marketing-tools", "/best-marketing-automation-tools"],
+    "podia": ["/best-funnel-builder", "/best-email-marketing-tools"],
+    "lemlist": ["/apollo-vs-lemlist", "/best-cold-email-tools", "/best-sales-prospecting-tools"],
+    "instantly": ["/best-cold-email-tools", "/best-sales-prospecting-tools"],
+    "apollo": ["/apollo-vs-lemlist", "/best-sales-prospecting-tools", "/best-cold-email-tools"]
+  }
+}
