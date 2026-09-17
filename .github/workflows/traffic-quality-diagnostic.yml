@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/traffic-quality-diagnostic.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,10 +13,8 @@ jobs:
   query:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout current main
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Verify ToolScout D1 target
@@ -25,30 +22,13 @@ jobs:
         run: |
           grep -q 'database_name = "toolscout"' wrangler.toml
           grep -q 'database_id = "cac6bc3c-d838-4edd-ba29-597030afb397"' wrangler.toml
-          echo 'Verified ToolScout D1 target'
-      - name: Query Google traffic quality
+      - name: Query settled-day Google referrer sessions
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          query_day () {
-            LABEL="$1"; START="$2"; END="$3"
-            echo "=== ${LABEL} GOOGLE QUALITY SUMMARY ==="
-            npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH cohort AS (SELECT DISTINCT s.session_id FROM sessions s JOIN funnel_events f ON f.session_id=s.session_id WHERE s.classification IN ('likely-human','human') AND s.source='ref:google.com' AND f.event_type='page_confirmed' AND f.created_at >= '${START}' AND f.created_at < '${END}'), per_session AS (SELECT c.session_id, COUNT(e.event_id) event_count, COUNT(DISTINCT COALESCE(e.path,'')) distinct_paths, SUM(CASE WHEN e.event_type NOT IN ('session_started','page_confirmed') THEN 1 ELSE 0 END) meaningful_events, MAX(CASE WHEN e.event_type='recommendation_started' THEN 1 ELSE 0 END) recommendation_started, MAX(CASE WHEN e.event_type='recommendation_completed' THEN 1 ELSE 0 END) recommendation_completed, MAX(CASE WHEN e.event_type='recommendation_result_viewed' THEN 1 ELSE 0 END) recommendation_result_viewed, MAX(CASE WHEN e.event_type='tool_viewed' THEN 1 ELSE 0 END) tool_viewed, MAX(CASE WHEN e.event_type='outbound_clicked' THEN 1 ELSE 0 END) outbound_clicked, CAST((julianday(MAX(e.created_at))-julianday(MIN(e.created_at)))*86400 AS INTEGER) duration_seconds FROM cohort c JOIN funnel_events e ON e.session_id=c.session_id GROUP BY c.session_id) SELECT COUNT(*) sessions, SUM(CASE WHEN meaningful_events>0 THEN 1 ELSE 0 END) engaged_sessions, ROUND(100.0*SUM(CASE WHEN meaningful_events>0 THEN 1 ELSE 0 END)/COUNT(*),1) engaged_pct, SUM(recommendation_started) recommendation_started_sessions, SUM(recommendation_completed) recommendation_completed_sessions, SUM(recommendation_result_viewed) recommendation_result_viewed_sessions, SUM(tool_viewed) tool_viewed_sessions, SUM(outbound_clicked) outbound_sessions, ROUND(100.0*SUM(outbound_clicked)/COUNT(*),1) outbound_session_pct, ROUND(AVG(event_count),2) avg_events, ROUND(AVG(distinct_paths),2) avg_paths, ROUND(AVG(duration_seconds),1) avg_duration_seconds, SUM(CASE WHEN duration_seconds>=10 THEN 1 ELSE 0 END) sessions_10s_plus, SUM(CASE WHEN duration_seconds>=30 THEN 1 ELSE 0 END) sessions_30s_plus, SUM(CASE WHEN event_count<=2 AND duration_seconds<=5 THEN 1 ELSE 0 END) minimal_fast_sessions FROM per_session;"
-
-            echo "=== ${LABEL} GOOGLE PER-SESSION QUALITY ==="
-            npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH cohort AS (SELECT DISTINCT s.session_id FROM sessions s JOIN funnel_events f ON f.session_id=s.session_id WHERE s.classification IN ('likely-human','human') AND s.source='ref:google.com' AND f.event_type='page_confirmed' AND f.created_at >= '${START}' AND f.created_at < '${END}'), per_session AS (SELECT c.session_id, MIN(e.created_at) first_at, MAX(e.created_at) last_at, COUNT(e.event_id) event_count, COUNT(DISTINCT COALESCE(e.path,'')) distinct_paths, GROUP_CONCAT(DISTINCT e.event_type) event_types, CAST((julianday(MAX(e.created_at))-julianday(MIN(e.created_at)))*86400 AS INTEGER) duration_seconds FROM cohort c JOIN funnel_events e ON e.session_id=c.session_id GROUP BY c.session_id) SELECT substr(session_id,1,8) session_prefix, first_at, last_at, event_count, distinct_paths, duration_seconds, event_types FROM per_session ORDER BY first_at;"
-
-            echo "=== ${LABEL} GOOGLE LANDING PATHS ==="
-            npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH cohort AS (SELECT DISTINCT s.session_id FROM sessions s JOIN funnel_events f ON f.session_id=s.session_id WHERE s.classification IN ('likely-human','human') AND s.source='ref:google.com' AND f.event_type='page_confirmed' AND f.created_at >= '${START}' AND f.created_at < '${END}'), starts AS (SELECT e.session_id, MIN(e.created_at) first_at FROM funnel_events e JOIN cohort c ON c.session_id=e.session_id GROUP BY e.session_id) SELECT COALESCE(e.path,'') path, COUNT(DISTINCT e.session_id) sessions FROM funnel_events e JOIN starts x ON x.session_id=e.session_id AND x.first_at=e.created_at GROUP BY COALESCE(e.path,'') ORDER BY sessions DESC,path;"
-
-            echo "=== ${LABEL} GOOGLE START-MINUTE CLUSTERING ==="
-            npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH cohort AS (SELECT DISTINCT s.session_id FROM sessions s JOIN funnel_events f ON f.session_id=s.session_id WHERE s.classification IN ('likely-human','human') AND s.source='ref:google.com' AND f.event_type='page_confirmed' AND f.created_at >= '${START}' AND f.created_at < '${END}'), starts AS (SELECT e.session_id, MIN(e.created_at) first_at FROM funnel_events e JOIN cohort c ON c.session_id=e.session_id GROUP BY e.session_id) SELECT substr(first_at,1,16) minute_utc, COUNT(*) sessions FROM starts GROUP BY substr(first_at,1,16) ORDER BY minute_utc;"
-          }
-
-          query_day '2026-09-15 Lisbon' '2026-09-14 23:00:00' '2026-09-15 23:00:00'
-          query_day '2026-09-16 Lisbon' '2026-09-15 23:00:00' '2026-09-16 23:00:00'
-
-          echo '=== SEP 16 GOOGLE TRAFFIC GUARD COVERAGE ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH cohort AS (SELECT DISTINCT s.session_id FROM sessions s JOIN funnel_events f ON f.session_id=s.session_id WHERE s.classification IN ('likely-human','human') AND s.source='ref:google.com' AND f.event_type='page_confirmed' AND f.created_at >= '2026-09-15 23:00:00' AND f.created_at < '2026-09-16 23:00:00') SELECT COUNT(DISTINCT c.session_id) cohort_sessions, COUNT(DISTINCT g.session_id) guard_observed_sessions, COUNT(DISTINCT g.fingerprint) fingerprints, COUNT(DISTINCT CASE WHEN g.decision='blocked' THEN g.session_id END) blocked, COUNT(DISTINCT CASE WHEN g.decision='allowed' THEN g.session_id END) allowed FROM cohort c LEFT JOIN traffic_guard_events g ON g.session_id=c.session_id;"
+          echo '=== 2026-09-14 Lisbon D1 GOOGLE REFERRER SUMMARY ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH cohort AS (SELECT DISTINCT s.session_id FROM sessions s JOIN funnel_events f ON f.session_id=s.session_id WHERE s.classification IN ('likely-human','human') AND s.source='ref:google.com' AND f.event_type='page_confirmed' AND f.created_at >= '2026-09-13 23:00:00' AND f.created_at < '2026-09-14 23:00:00'), per_session AS (SELECT c.session_id, COUNT(e.event_id) event_count, SUM(CASE WHEN e.event_type NOT IN ('session_started','page_confirmed') THEN 1 ELSE 0 END) meaningful_events, CAST((julianday(MAX(e.created_at))-julianday(MIN(e.created_at)))*86400 AS INTEGER) duration_seconds FROM cohort c JOIN funnel_events e ON e.session_id=c.session_id GROUP BY c.session_id) SELECT COUNT(*) sessions, SUM(CASE WHEN meaningful_events>0 THEN 1 ELSE 0 END) engaged_sessions, SUM(CASE WHEN event_count<=2 AND duration_seconds<=5 THEN 1 ELSE 0 END) minimal_fast_sessions, ROUND(AVG(duration_seconds),1) avg_duration_seconds FROM per_session;"
+          echo '=== 2026-09-14 Lisbon D1 GOOGLE LANDINGS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH cohort AS (SELECT DISTINCT s.session_id FROM sessions s JOIN funnel_events f ON f.session_id=s.session_id WHERE s.classification IN ('likely-human','human') AND s.source='ref:google.com' AND f.event_type='page_confirmed' AND f.created_at >= '2026-09-13 23:00:00' AND f.created_at < '2026-09-14 23:00:00'), starts AS (SELECT e.session_id,MIN(e.created_at) first_at FROM funnel_events e JOIN cohort c ON c.session_id=e.session_id GROUP BY e.session_id) SELECT e.path,COUNT(DISTINCT e.session_id) sessions FROM funnel_events e JOIN starts x ON x.session_id=e.session_id AND x.first_at=e.created_at GROUP BY e.path ORDER BY sessions DESC,e.path;"
