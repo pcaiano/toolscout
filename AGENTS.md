@@ -54,3 +54,14 @@ Every software article published under `news/*.html` must preserve the ToolScout
 4. If the matching ToolScout profile does not exist, do not publish the news article until the profile exists and has been verified.
 5. Before committing or publishing a software news article, run `node scripts/validate-software-news-ctas.mjs` and resolve every failure.
 6. Do not remove these CTAs when refreshing, rewriting, or regenerating an existing software news article.
+
+## Vendor amplification sender contract
+
+ToolScout vendor amplification is autonomous and does not require owner approval for each email.
+
+1. Send only to a public role email already verified for the vendor domain and recorded by the Distribution Engine.
+2. Send from the verified Gmail send-as address `ToolScout <pedro@trytoolscout.org>`.
+3. Never fall back to a personal sender address if that send-as address is unavailable.
+4. Keep the scheduled batch limit at a maximum of 3 vendor emails per execution unless the owner explicitly changes it.
+5. Record successful sends back into the Distribution Engine so duplicate outreach is not repeated.
+6. Vendor outreach must remain informational and independent. Affiliate status or outreach must never change ToolScout rankings, scores, comparison outcomes, or recommendation eligibility.
