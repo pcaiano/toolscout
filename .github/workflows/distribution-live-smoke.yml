@@ -1,126 +1,14 @@
-name: One-off Startup Fame Badge Deploy
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/distribution-live-smoke.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  deploy:
+  conservation-notice:
     runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Add Startup Fame badge and persistent state
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          index_path = Path('index.html')
-          html = index_path.read_text()
-          badge = '<a href="https://startupfa.me/s/trytoolscout.org-853?utm_source=trytoolscout.org" target="_blank"><img src="https://startupfa.me/badges/featured-badge.webp" alt="ToolScout - Featured on Startup Fame" width="171" height="54" /></a>'
-          if 'startupfa.me/badges/featured-badge.webp' not in html:
-              marker = '<a href="https://stremit.io" target="_blank" rel="noopener"><img src="https://stremit.io/static/img/badges/featured-on-stremit.png" alt="Featured on Stremit" width="240" height="89" loading="lazy" decoding="async" /></a>'
-              if marker not in html:
-                  raise SystemExit('Stremit footer badge marker not found')
-              html = html.replace(marker, marker + badge, 1)
-              index_path.write_text(html)
-
-          workflow_path = Path('data/distribution-workflow.json')
-          workflow = json.loads(workflow_path.read_text())
-          item = {
-            'slug': 'startup-fame',
-            'name': 'Startup Fame',
-            'type': 'startup_directory',
-            'status': 'verification_required',
-            'priority': 'medium',
-            'url': 'https://startupfa.me/',
-            'action_url': 'https://startupfa.me/dashboard/trytoolscout.org-853',
-            'canonical_submission_url': 'https://startupfa.me/s/trytoolscout.org-853',
-            'requires_signup': True,
-            'cost': 'Free verified listing requires reciprocal verification badge',
-            'free_paid_status': 'eligible_free_badge_required',
-            'verified_at': '2026-09-17T11:25:12Z',
-            'verification_status': 'badge_authorized_deploying',
-            'evidence': 'Owner completed the Startup Fame profile and supplied the official verification badge required before using Verify.',
-            'next_action': 'After the badge is live on the ToolScout homepage, click Verify in Startup Fame. Do not buy Highlight or Spotlight.',
-            'notes': 'Owner explicitly approved the Startup Fame verification badge for the free listing route.'
-          }
-          items = workflow.setdefault('items', [])
-          for i, existing in enumerate(items):
-              if existing.get('slug') == 'startup-fame':
-                  items[i] = item
-                  break
-          else:
-              items.append(item)
-          workflow_path.write_text(json.dumps(workflow, indent=2, ensure_ascii=False) + '\n')
-
-          radar_path = Path('data/distribution-radar-seeds.json')
-          radar = json.loads(radar_path.read_text())
-          radar_item = {
-            'slug': 'startup-fame',
-            'name': 'Startup Fame',
-            'type': 'startup_directory',
-            'url': 'https://startupfa.me/',
-            'action_url': 'https://startupfa.me/dashboard/trytoolscout.org-853',
-            'audience_fit': 80,
-            'authority': 68,
-            'traffic_potential': 66,
-            'backlink_value': 74,
-            'acceptance_probability': 85,
-            'automation_potential': 15,
-            'effort': 12,
-            'cost': 0,
-            'human_required': True,
-            'status': 'verification_required',
-            'verified_at': '2026-09-17',
-            'verification_status': 'badge_authorized_deploying',
-            'evidence': 'Owner completed the profile and supplied the official verification badge for the free verification route.',
-            'next_action': 'After the badge is live, click Verify in Startup Fame. Do not buy paid promotion.'
-          }
-          sources = radar.setdefault('sources', [])
-          for i, existing in enumerate(sources):
-              if existing.get('slug') == 'startup-fame':
-                  sources[i] = radar_item
-                  break
-          else:
-              sources.append(radar_item)
-          radar_path.write_text(json.dumps(radar, indent=2, ensure_ascii=False) + '\n')
-          PY
-          git config user.name 'ToolScout Automation'
-          git config user.email 'actions@users.noreply.github.com'
-          git add index.html data/distribution-workflow.json data/distribution-radar-seeds.json
-          git commit -m 'Add Startup Fame verification badge' || true
-          git push origin main
-      - name: Deploy ToolScout
-        run: npx wrangler deploy --config wrangler.toml --latest
-      - name: Upsert Startup Fame in remote D1
-        run: |
-          set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "INSERT INTO distribution_opportunities (surface_slug,surface_name,surface_type,audience_fit,authority,traffic_potential,backlink_value,acceptance_probability,automation_potential,effort_cost,distribution_score,status,action_url,human_required,next_action,last_checked_at,created_at,updated_at) VALUES ('startup-fame','Startup Fame','startup_directory',80,68,66,74,85,15,12,71,'verification_required','https://startupfa.me/dashboard/trytoolscout.org-853',1,'Badge deployed. Owner must click Verify in Startup Fame. Do not buy paid promotion.',datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET surface_name=excluded.surface_name,surface_type=excluded.surface_type,audience_fit=excluded.audience_fit,authority=excluded.authority,traffic_potential=excluded.traffic_potential,backlink_value=excluded.backlink_value,acceptance_probability=excluded.acceptance_probability,automation_potential=excluded.automation_potential,effort_cost=excluded.effort_cost,distribution_score=excluded.distribution_score,status='verification_required',action_url=excluded.action_url,human_required=1,next_action=excluded.next_action,last_checked_at=datetime('now'),updated_at=datetime('now');"
-      - name: Verify badge and state
-        run: |
-          set -euo pipefail
-          for i in 1 2 3 4 5 6; do
-            if curl -fsSL https://trytoolscout.org/ | grep -q 'startupfa.me/badges/featured-badge.webp'; then
-              echo 'Startup Fame badge is live on homepage.'
-              break
-            fi
-            if [ "$i" = 6 ]; then
-              echo 'Badge not visible after retries.' >&2
-              exit 1
-            fi
-            sleep 10
-          done
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='startup-fame';"
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
