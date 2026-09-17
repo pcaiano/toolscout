@@ -1,14 +1,59 @@
-name: ToolScout GitHub Actions Conservation Mode
+name: One-off Tiny Startups Live Sync
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  conservation-notice:
+  sync:
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - name: Conservation mode notice
-        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Update persistent Tiny Startups state
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('data/distribution-workflow.json')
+          d = json.loads(p.read_text())
+          for item in d['items']:
+              if item.get('slug') == 'tiny-startups':
+                  item.update({
+                      'status': 'live',
+                      'action_url': 'https://www.tinystartups.com/',
+                      'cost': 'Free listing live; paid DR 71+ backlink upgrade explicitly declined',
+                      'free_paid_status': 'eligible_free',
+                      'verified_at': '2026-09-17T10:56:45Z',
+                      'verification_status': 'owner_confirmed_live_homepage_latest_launches',
+                      'evidence': 'Tiny Startups emailed confirmation that ToolScout is live in Latest launches on the homepage. The email separately offers optional revenue verification and a paid DR 71+ do-follow backlink upgrade.',
+                      'next_action': 'Listing is live. Monitor attributed sessions, upvotes and backlink value. Revenue verification is optional and should only be used with accurate public revenue data. Do not buy the paid backlink upgrade without measured evidence.',
+                      'notes': 'ToolScout is live on Tiny Startups. Remove from Chairman Queue.'
+                  })
+          p.write_text(json.dumps(d, indent=2, ensure_ascii=False) + '\n')
+          PY
+          git config user.name 'ToolScout Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/distribution-workflow.json
+          git commit -m 'Record Tiny Startups live listing' || true
+          git push origin main
+      - name: Deploy current distribution state
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Update Tiny Startups in remote D1
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='live', human_required=0, action_url='https://www.tinystartups.com/', last_checked_at=datetime('now'), next_action='Listing is live. Monitor attributed sessions, upvotes and backlink value. Revenue verification is optional and should only use accurate public revenue data. Do not buy the paid backlink upgrade without measured evidence.', updated_at=datetime('now') WHERE surface_slug='tiny-startups';"
+      - name: Verify Tiny Startups state and Chairman Queue exclusion
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='tiny-startups';"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT o.surface_slug,o.surface_name,o.status,o.action_url,o.next_action,o.human_required FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug WHERE o.surface_slug='tiny-startups' AND o.action_url IS NOT NULL AND (o.human_required=1 OR o.status='approval_required') AND o.status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale') AND (o.status='approval_required' OR COALESCE(l.operating_decision,'explore')<>'suspend');"
