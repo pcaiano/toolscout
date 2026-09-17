@@ -77,6 +77,17 @@ Every software article published under `news/*.html` must preserve the ToolScout
 5. Before committing or publishing a software news article, run `node scripts/validate-software-news-ctas.mjs` and resolve every failure.
 6. Do not remove these CTAs when refreshing, rewriting, or regenerating an existing software news article.
 
+## Editorial software surface contract
+
+ToolScout software discovery pages must combine machine-readable structure with concise original editorial interpretation.
+
+1. Tool cards must not read as a list of badges or raw attributes alone. Preserve structured catalog facts, but pair the factual summary with a short ToolScout view that explains practical fit using only supported catalog evidence.
+2. Tool profile generation must preserve the same editorial layer while keeping pricing, category, capabilities, best-for fields, schema markup, crawlable links and other machine-readable structure intact.
+3. Every A-vs-B comparison must retain structured facts and scored criteria, then include a concise ToolScout conclusion in prose that synthesizes the practical trade-offs. Do not declare a universal winner when the evidence only supports criterion-specific differences.
+4. Editorial conclusions must be grounded in catalog evidence, scoring dimensions, documented audiences and verified product facts. Do not invent feature depth, pricing, performance, market position or user sentiment.
+5. Generators and refresh scripts must preserve this contract so regenerated pages do not fall back to thin, badge-heavy or database-like presentation.
+6. ToolScout editorial copy is English only. Do not add translations. Do not use em dashes or en dashes in ToolScout content.
+
 ## Vendor amplification sender contract
 
 ToolScout vendor amplification is autonomous and does not require owner approval for each email.
