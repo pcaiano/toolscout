@@ -13,6 +13,8 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,5 +31,3 @@ jobs:
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,status,action_url,human_required,next_action,updated_at FROM distribution_opportunities WHERE surface_slug='launch-llama';"
           echo '=== CHAIRMAN QUEUE MATCH ==='
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required FROM distribution_opportunities WHERE surface_slug='launch-llama' AND action_url IS NOT NULL AND (human_required=1 OR status='approval_required') AND status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale');"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
