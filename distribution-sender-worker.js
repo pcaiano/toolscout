@@ -5,15 +5,27 @@ const MAKE_TOKEN_SHA256='2f9522abe5fb3d87a045b86940f6b5338cc5c9fc3f51ecbc5f5fc31
 
 async function sha256(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function integrationOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!t)return false;if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return (await sha256(t))===MAKE_TOKEN_SHA256}
+function displayToolName(row){
+  const subject=String(row?.suggested_subject||'').trim();
+  const match=subject.match(/^(.*?)\s+featured on ToolScout$/i);
+  if(match?.[1])return match[1].trim();
+  return String(row?.tool_slug||'Tool').split('-').filter(Boolean).map(part=>part.length<=3?part.toUpperCase():part.charAt(0).toUpperCase()+part.slice(1)).join(' ');
+}
+function cordialOutreach(row){
+  const name=displayToolName(row);
+  const subject=`${name} featured on ToolScout`;
+  const body=`Hello,\n\nI hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${name} in one of our software buying pages for people comparing tools for a specific job to be done.\n\nI wanted to share the page with you in case it is useful to your team or audience:\n${row.asset_url}\n\nIf you find it relevant, you're very welcome to share or reference it. For context, ToolScout rankings are based on product fit and editorial criteria, and placements are not sold.\n\nBest regards,\nPedro Caiano\nToolScout\nhttps://trytoolscout.org`;
+  return {...row,suggested_subject:subject,suggested_body:body};
+}
 
 async function leaseQueue(env,limit=3){
   await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='contact_found',updated_at=datetime('now') WHERE status='sending' AND last_attempt_at < datetime('now','-24 hours')`).run();
   const n=Math.max(1,Math.min(3,Number(limit)||3));
   const r=await env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_email,contact_name,contact_source_url,contact_method,suggested_subject,suggested_body FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all();
-  const items=r.results||[];
-  for(const x of items){await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='sending',last_attempt_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=? AND status='contact_found'`).bind(x.tool_slug,x.asset_url).run()}
-  if(items.length)await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vlease_${crypto.randomUUID()}`,'vendor_outreach_leased','ready','vendor_amplification',`${items.length} vendor outreach item(s) leased to the private sender.`).run();
-  return {status:'connected',leaseHours:24,items};
+  const raw=r.results||[];
+  for(const x of raw){await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='sending',last_attempt_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=? AND status='contact_found'`).bind(x.tool_slug,x.asset_url).run()}
+  if(raw.length)await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vlease_${crypto.randomUUID()}`,'vendor_outreach_leased','ready','vendor_amplification',`${raw.length} vendor outreach item(s) leased to the private sender.`).run();
+  return {status:'connected',leaseHours:24,items:raw.map(cordialOutreach)};
 }
 
 async function publicCandidates(env,limit=3){
@@ -23,7 +35,8 @@ async function publicCandidates(env,limit=3){
   for(const row of r.results||[]){
     const token=row.public_dispatch_token||crypto.randomUUID();
     if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
-    items.push({tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:row.suggested_body,dispatch_token:token});
+    const copy=cordialOutreach(row);
+    items.push({tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
   }
   return {status:'connected',limit:n,items};
 }
