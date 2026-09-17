@@ -17,17 +17,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Query today guard state
+      - name: Query missing guard-approved sessions
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          echo '=== GUARD TODAY LISBON ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT decision,COALESCE(reason,'') reason,COUNT(*) events,COUNT(DISTINCT session_id) sessions,COUNT(DISTINCT fingerprint) fingerprints,MIN(created_at) first_at,MAX(created_at) last_at FROM traffic_guard_events WHERE created_at>='2026-09-16 23:00:00' GROUP BY decision,COALESCE(reason,'') ORDER BY events DESC;"
-          echo '=== FUNNEL TODAY LISBON ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,source,COUNT(DISTINCT session_id) sessions,COUNT(*) events,MIN(created_at) first_at,MAX(created_at) last_at FROM funnel_events WHERE created_at>='2026-09-16 23:00:00' GROUP BY event_type,source ORDER BY events DESC;"
-          echo '=== SESSION CLASSIFICATIONS TODAY TOUCHED ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT classification,COUNT(DISTINCT s.session_id) sessions FROM sessions s WHERE EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=s.session_id AND f.created_at>='2026-09-16 23:00:00') GROUP BY classification ORDER BY sessions DESC;"
-          echo '=== CONFIRMED VISITORS TODAY ==='
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT source,COALESCE(referrer_host,'') referrer_host,COUNT(DISTINCT visitor_id) visitors,COUNT(DISTINCT session_id) sessions,MIN(created_at) first_at,MAX(created_at) last_at FROM confirmed_visitor_events WHERE created_at>='2026-09-16 23:00:00' GROUP BY source,COALESCE(referrer_host,'') ORDER BY sessions DESC;"
+          echo '=== ALLOWED GUARD SESSIONS TODAY ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT substr(g.session_id,1,8) session_prefix,g.path,g.created_at,COALESCE(s.classification,'missing') classification,CASE WHEN EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=g.session_id AND f.event_type='page_confirmed') THEN 1 ELSE 0 END has_page_confirmed,CASE WHEN EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=g.session_id AND f.event_type='session_started') THEN 1 ELSE 0 END has_session_started FROM traffic_guard_events g LEFT JOIN sessions s ON s.session_id=g.session_id WHERE g.decision='allowed' AND g.created_at>='2026-09-16 23:00:00' GROUP BY g.session_id,g.path,g.created_at,s.classification ORDER BY g.created_at;"
+          echo '=== MISSING SUMMARY ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COALESCE(s.classification,'missing') classification,COUNT(DISTINCT g.session_id) sessions,COUNT(DISTINCT g.fingerprint) fingerprints FROM traffic_guard_events g LEFT JOIN sessions s ON s.session_id=g.session_id WHERE g.decision='allowed' AND g.created_at>='2026-09-16 23:00:00' AND NOT EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=g.session_id AND f.event_type='page_confirmed') GROUP BY COALESCE(s.classification,'missing') ORDER BY sessions DESC;"
