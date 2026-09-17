@@ -2,6 +2,7 @@ import base from './traffic-integrity-guard-worker.js';
 import { classifySessionRequest, SESSION_CLASSIFICATIONS } from './session-classification.js';
 import { applySeoUplift } from './seo-uplift-overrides.js';
 import { applyCommercialCluster } from './commercial-cluster-overrides.js';
+import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 
 const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const TIME_ZONE='Europe/Lisbon';
@@ -108,6 +109,8 @@ export default {
     const url=new URL(request.url);
     const canonical=canonicalHtmlRedirect(request,url);
     if(canonical)return canonical;
+    if(request.method==='GET'&&url.pathname==='/api/distribution/feed.json')return prioritizedDistributionFeed(request,env,'json');
+    if(request.method==='GET'&&url.pathname==='/api/distribution/feed.xml')return prioritizedDistributionFeed(request,env,'xml');
     if(url.pathname==='/api/events'){const gated=await pageConfirmationGate(request);if(gated)return gated}
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentStats(response,env);
