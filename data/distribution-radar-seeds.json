@@ -83,8 +83,8 @@
       "slug": "nextool-ai",
       "name": "Nextool AI",
       "type": "ai_directory",
-      "url": "https://www.nextool.ai/",
-      "action_url": "https://www.nextool.ai/",
+      "url": "https://nextool.ai/",
+      "action_url": "https://nextool.ai/submit-a-tool/",
       "audience_fit": 84,
       "authority": 72,
       "traffic_potential": 82,
@@ -93,9 +93,12 @@
       "automation_potential": 20,
       "effort": 24,
       "cost": 0,
-      "human_required": true,
-      "next_action": "Use free/basic review route only; do not automate forms.",
-      "status": "human_action_required"
+      "human_required": false,
+      "status": "research_required",
+      "verified_at": "2026-09-17",
+      "verification_status": "free_form_present_frontend_unstable",
+      "evidence": "The canonical free-review route returns HTTP 200 and exposes the free submission fields, but the owner encountered a client-side DOM exception ('Failed to execute removeChild on Node') on 2026-09-17. Independent rendering did not reproduce the error, so the route is live but not consistently usable. No machine-readable free submission endpoint was verified.",
+      "next_action": "Suppress from Chairman Queue while the free-review frontend is unstable. Radar should recheck the canonical free route later and only return it to Human Required after a consistently usable browser path is verified. Do not buy the $45, $145 or $600 promotion packages."
     },
     {
       "slug": "stremit",
