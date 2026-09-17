@@ -55,6 +55,17 @@ GitHub Actions conservation mode is not a development or production deployment f
 5. The Make Cloudflare Deploy Version scenario is a fallback for promoting an already-uploaded Cloudflare Worker version. It does not replace the source build/upload step unless a separate Cloudflare build trigger is invoked.
 6. Before assuming deployment is blocked, inspect the current Cloudflare Workers Build/deployment state. Treat Cloudflare as the deployment source of truth during conservation.
 
+## Traffic analysis source-of-truth contract
+
+When the owner asks to analyse ToolScout traffic, traffic performance, visitors, sessions, sources, outbound activity, or current traffic health, use the D1 Traffic Truth data and the definitions implemented by the Command Center as the primary source of truth.
+
+1. D1 and the Command Center definitions are authoritative for likely-human sessions, owner exclusion, bot and synthetic exclusion, outbound clicks, monetized outbound clicks and related traffic KPIs.
+2. Google Analytics and PostHog are consent-dependent and may undercount traffic. Do not use either as the headline source for ToolScout traffic totals or as a substitute for D1 Traffic Truth.
+3. GA4 and PostHog may be used only as secondary diagnostic or corroborating sources, clearly labelled as consent-dependent and non-canonical.
+4. Google Search Console remains authoritative for Google Search visibility metrics such as impressions, clicks, CTR, queries, landing pages and average position. It is complementary to D1 traffic, not a replacement for it.
+5. If D1 Traffic Truth cannot be read or verified, report the traffic KPI as unavailable or stale and state the observability blocker. Do not promote a GA4 or PostHog count to canonical traffic merely because D1 is temporarily inaccessible.
+6. When reporting traffic, preserve the Command Center population definitions and time windows exactly unless the owner explicitly asks for a different cohort or period.
+
 ## What's New software article contract
 
 Every software article published under `news/*.html` must preserve the ToolScout conversion path used by the established Notion and HubSpot articles.
