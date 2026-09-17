@@ -114,12 +114,13 @@
       "automation_potential": 20,
       "effort": 18,
       "cost": 0,
-      "human_required": true,
-      "next_action": "Use the verified free Standard listing route at https://stremit.io/submit-tool. Submit only the free listing. Do not purchase paid placement. If authentication is required, sign in and continue with the free route.",
-      "status": "human_action_required",
+      "human_required": false,
+      "status": "pending_review",
+      "submitted_at": "2026-09-17T10:33:56Z",
       "verified_at": "2026-09-17",
-      "verification_status": "free_submission_route_verified",
-      "evidence": "The old stremit.com domain is not the current AI directory. The active Stremit AI Builders Network is on stremit.io, and its submit page explicitly offers a free Standard listing with no placement boost."
+      "verification_status": "submission_accepted_pending_review",
+      "evidence": "Stremit confirmed that ToolScout was submitted to the editor team and is in the review queue. A confirmation email was sent to the ToolScout owner, with a second email promised after editorial review stating whether the listing is live or why it was not approved.",
+      "next_action": "Submission completed and required Stremit badge is live on ToolScout. Wait for editorial review, then verify the public Stremit listing before marking the opportunity live. Do not resubmit."
     },
     {
       "slug": "launching-next",
