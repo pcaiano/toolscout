@@ -297,17 +297,20 @@
       "slug": "hypestar",
       "name": "Hype Star",
       "type": "reviewed_project_directory_api",
-      "status": "prepared",
+      "status": "pending_review",
       "priority": "high",
       "url": "https://hypestar.org/agents",
       "action_url": "https://hypestar.org/submit",
       "requires_signup": false,
       "cost": "Free permanent basic listing after approval",
       "verified_at": "2026-09-17",
-      "verification_status": "blocked_missing_public_badge",
-      "evidence": "Owner explicitly requested submission on 2026-09-17. Hype Star recognized ToolScout source facts; App / Productivity & Operations selected. One Verify badge & submit attempt failed because no badge was found on the homepage or common pages. No accepted submission or public listing confirmed.",
-      "blocker": "Required badge is prepared on branch hypestar-listing-badge in methodology.html but not deployed. CONSERVATION_MODE.txt suspends GitHub Actions until 2026-10-01.",
-      "next_action": "Deploy the prepared badge through an authorized deployment path, verify https://trytoolscout.org/methodology, then resubmit with supporterChoice verify and supporterPageUrl https://trytoolscout.org/methodology. Confirm acceptance and save returned listing/status URL. Do not count as submitted or live."
+      "verification_status": "submission_accepted_badge_verified",
+      "evidence": "Submission confirmation: no account created; badge verified on the site; permanent basic inclusion begins if the reviewed listing is approved. ToolScout submitted as App / Productivity & Operations. Proposed profile URL is not confirmed live.",
+      "next_action": "Check editorial review outcome and verify https://hypestar.org/project/toolscout is public before marking live. Do not submit again or purchase placement.",
+      "submitted_at": "2026-09-17T09:16:00Z",
+      "canonical_submission_url": "https://hypestar.org/project/toolscout",
+      "supporter_page_url": "https://trytoolscout.org/methodology",
+      "notes": "Owner authorized one-off deployment. PR #75 merged; deployment run 35204093998 succeeded after remote ToolScout identity verification. No D1 migrations applied. Conservation workflow restored at commit ad5c988e0d6e11768f72998c2548236306e14429."
     }
   ],
   "submission_pack": {
