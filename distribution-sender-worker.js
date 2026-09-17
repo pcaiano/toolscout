@@ -18,12 +18,12 @@ async function leaseQueue(env,limit=3){
 
 async function publicCandidates(env,limit=3){
   const n=Math.max(1,Math.min(3,Number(limit)||3));
-  const r=await env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all();
+  const r=await env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all();
   const items=[];
   for(const row of r.results||[]){
     const token=row.public_dispatch_token||crypto.randomUUID();
     if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
-    items.push({tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:row.suggested_body,dispatch_token:token});
+    items.push({tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:row.suggested_body,dispatch_token:token});
   }
   return {status:'connected',limit:n,items};
 }
