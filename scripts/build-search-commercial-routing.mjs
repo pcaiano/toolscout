@@ -87,5 +87,8 @@ const payload={
   priorities:rows.slice(0,50)
 };
 fs.mkdirSync(path.join(ROOT,'reports'),{recursive:true});
-fs.writeFileSync(path.join(ROOT,'reports','search-commercial-routing.json'),JSON.stringify(payload,null,2)+'\n');
+fs.mkdirSync(path.join(ROOT,'data'),{recursive:true});
+const serialized=JSON.stringify(payload,null,2)+'\n';
+fs.writeFileSync(path.join(ROOT,'reports','search-commercial-routing.json'),serialized);
+fs.writeFileSync(path.join(ROOT,'data','search-commercial-routing.json'),serialized);
 console.log(JSON.stringify({summary:payload.summary,top:payload.priorities.slice(0,10).map(x=>({pathname:x.pathname,score:x.priorityScore,lane:x.lane,monetized:x.monetized}))},null,2));
