@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-09-17T12:52:00Z",
+  "source": "Google Search Console settled through 2026-09-14",
+  "objective": "Concentrate editorial improvement on pages already receiving meaningful Google impressions before expanding the content surface.",
+  "scoring": "opportunityScore = impressions * (101 - capped average position) / 100. Selection also preserves meaningful commercial and decision intent.",
+  "pages": [
+    {
+      "rank": 1,
+      "path": "/best-seo-tools-for-agencies",
+      "clicks": 0,
+      "impressions": 651,
+      "position": 76.275,
+      "opportunityScore": 160.96,
+      "focus": ["agency workflow fit", "client reporting", "multi site management", "auditing", "rank tracking", "competitor research"]
+    },
+    {
+      "rank": 2,
+      "path": "/tools/semrush",
+      "clicks": 0,
+      "impressions": 265,
+      "position": 55.8302,
+      "opportunityScore": 119.7,
+      "focus": ["what Semrush is", "core SEO jobs", "keyword research", "competitor research", "site auditing", "suite fit"]
+    },
+    {
+      "rank": 3,
+      "path": "/best-no-code-automation-tools",
+      "clicks": 0,
+      "impressions": 243,
+      "position": 73.9053,
+      "opportunityScore": 65.84,
+      "focus": ["connector coverage", "workflow complexity", "error handling", "run limits", "governance", "maintainability"]
+    },
+    {
+      "rank": 4,
+      "path": "/best-seo-keyword-research-tools",
+      "clicks": 0,
+      "impressions": 254,
+      "position": 75.5827,
+      "opportunityScore": 64.56,
+      "focus": ["keyword discovery", "search intent", "difficulty", "competitor gaps", "SERP context", "export and workflow fit"]
+    },
+    {
+      "rank": 5,
+      "path": "/tools/klaviyo",
+      "clicks": 0,
+      "impressions": 148,
+      "position": 60.777,
+      "opportunityScore": 59.53,
+      "focus": ["ecommerce messaging", "segmentation", "flows", "email and SMS", "integrations", "cost at scale"]
+    },
+    {
+      "rank": 6,
+      "path": "/tools/airtable",
+      "clicks": 0,
+      "impressions": 203,
+      "position": 73.5616,
+      "opportunityScore": 55.7,
+      "focus": ["what Airtable is", "database style workflows", "interfaces", "automations", "collaboration", "scale limits"]
+    },
+    {
+      "rank": 7,
+      "path": "/best-project-management-tools",
+      "clicks": 0,
+      "impressions": 86,
+      "position": 38.9884,
+      "opportunityScore": 53.33,
+      "focus": ["task tracking versus project planning", "dependencies", "team adoption", "views", "automation", "reporting"]
+    },
+    {
+      "rank": 8,
+      "path": "/best-funnel-builder",
+      "clicks": 0,
+      "impressions": 152,
+      "position": 76.8553,
+      "opportunityScore": 36.7,
+      "focus": ["landing pages", "checkout", "email", "automation", "payments", "analytics"]
+    },
+    {
+      "rank": 9,
+      "path": "/best-free-project-management-tools",
+      "clicks": 0,
+      "impressions": 59,
+      "position": 57.5593,
+      "opportunityScore": 25.63,
+      "focus": ["real free plan limits", "seat limits", "history", "automation caps", "integrations", "export"]
+    },
+    {
+      "rank": 10,
+      "path": "/tools/tally",
+      "clicks": 0,
+      "impressions": 34,
+      "position": 39.7941,
+      "opportunityScore": 20.81,
+      "focus": ["form building", "logic", "payments", "integrations", "free plan fit", "when to use a fuller form platform"]
+    }
+  ]
+}
