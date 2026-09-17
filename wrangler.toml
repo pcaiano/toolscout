@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "visitor-integrity-worker.js"
+main = "command-center-integrity-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
