@@ -48,7 +48,21 @@ async function ensureSchema(env){
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_created_at ON confirmed_visitor_countries(created_at)`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_country ON confirmed_visitor_countries(country)`),
       env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
-      env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('visitor_guard_linking_started_at',datetime('now'))`)
+      env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('visitor_guard_linking_started_at',datetime('now'))`),
+      env.DB.prepare(`DELETE FROM confirmed_visitor_countries
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM confirmed_visitor_events e
+          WHERE e.session_id=confirmed_visitor_countries.session_id
+            AND e.visitor_id=confirmed_visitor_countries.visitor_id
+            AND e.id=(SELECT MIN(e2.id) FROM confirmed_visitor_events e2 WHERE e2.session_id=e.session_id)
+        )`),
+      env.DB.prepare(`DELETE FROM confirmed_visitor_events
+        WHERE id NOT IN (SELECT MIN(id) FROM confirmed_visitor_events GROUP BY session_id)`),
+      env.DB.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS uq_confirmed_visitor_events_session_id ON confirmed_visitor_events(session_id)`),
+      env.DB.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS uq_confirmed_visitor_countries_session_id ON confirmed_visitor_countries(session_id)`),
+      env.DB.prepare(`INSERT INTO traffic_integrity_meta(key,value) VALUES('session_identity_rule','one_session_one_visitor_first_valid_link_wins')
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value`)
     ]);
   })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
@@ -64,12 +78,16 @@ async function linkVisitor(env,{visitor,session,path='/',source='direct',referre
   if(!UUID.test(String(visitor||''))||!UUID.test(String(session||'')))return false;
   if(!await guardAllowed(env,session))return false;
   await ensureSchema(env);
+  const existing=await env.DB.prepare(`SELECT visitor_id FROM confirmed_visitor_events WHERE session_id=? ORDER BY id ASC LIMIT 1`).bind(session).first().catch(()=>null);
+  if(existing?.visitor_id&&String(existing.visitor_id)!==String(visitor))return false;
   await env.DB.prepare(`INSERT OR IGNORE INTO confirmed_visitor_events(visitor_id,session_id,path,source,referrer_host,created_at) VALUES(?,?,?,?,?,datetime('now'))`)
     .bind(visitor,session,String(path||'/').slice(0,200),String(source||'direct').slice(0,100),referrerHost?String(referrerHost).slice(0,120):null).run();
+  const canonical=await env.DB.prepare(`SELECT visitor_id FROM confirmed_visitor_events WHERE session_id=? ORDER BY id ASC LIMIT 1`).bind(session).first().catch(()=>null);
+  if(!canonical?.visitor_id||String(canonical.visitor_id)!==String(visitor))return false;
   const geo=await env.DB.prepare(`SELECT country FROM traffic_guard_events WHERE session_id=? AND decision='allowed' AND country IS NOT NULL AND country!='' ORDER BY created_at ASC LIMIT 1`).bind(session).first().catch(()=>null);
   const country=String(geo?.country||'').trim().toUpperCase();
   if(/^[A-Z]{2}$/.test(country)){
-    await env.DB.prepare(`INSERT INTO confirmed_visitor_countries(visitor_id,session_id,country,created_at) VALUES(?,?,?,datetime('now')) ON CONFLICT(visitor_id,session_id) DO UPDATE SET country=excluded.country`).bind(visitor,session,country).run();
+    await env.DB.prepare(`INSERT INTO confirmed_visitor_countries(visitor_id,session_id,country,created_at) VALUES(?,?,?,datetime('now')) ON CONFLICT(session_id) DO UPDATE SET country=excluded.country WHERE confirmed_visitor_countries.visitor_id=excluded.visitor_id`).bind(String(canonical.visitor_id),session,country).run();
     await env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('country_tracking_started_at',datetime('now'))`).run();
   }
   return true;
