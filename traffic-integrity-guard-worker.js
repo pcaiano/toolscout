@@ -8,6 +8,7 @@ const FP_SESSION_LIMIT_10M=4;
 const FP_PATH_LIMIT_10M=6;
 const GLOBAL_SESSION_LIMIT_1M=8;
 const GLOBAL_PATH_LIMIT_1M=5;
+let guardSchemaReady=null;
 
 function isHtml(response){return (response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
 function jsonHeaders(){return {'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}}
@@ -17,6 +18,8 @@ async function digestHex(value){
   return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 async function ensureGuardSchema(env){
+  if(guardSchemaReady)return guardSchemaReady;
+  guardSchemaReady=(async()=>{
   await env.DB.batch([
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_guard_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
