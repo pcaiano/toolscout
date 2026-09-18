@@ -62,11 +62,24 @@ function outreachCopy(row){
 async function refreshCandidates(env){
   await ensureSchema(env);
   const [opps,vendors]=await Promise.all([
-    env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status FROM distribution_opportunities WHERE action_url IS NOT NULL AND status NOT IN ('policy_blocked','rejected','skipped','unavailable_free') ORDER BY distribution_score DESC LIMIT 120`).all(),
+    env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.action_url,o.distribution_score,o.status,
+      n.surface_slug AS network_existing,n.status AS network_status,n.source_url AS network_source_url,n.updated_at AS network_updated_at
+      FROM distribution_opportunities o
+      LEFT JOIN distribution_network_outreach n ON n.surface_slug=o.surface_slug
+      WHERE o.action_url IS NOT NULL
+        AND o.status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')
+        AND (
+          n.surface_slug IS NULL
+          OR n.status!='suppressed_no_contact'
+          OR n.source_url!=o.action_url
+          OR n.updated_at<=datetime('now','-30 days')
+        )
+      ORDER BY CASE WHEN n.surface_slug IS NULL THEN 0 ELSE 1 END,o.distribution_score DESC
+      LIMIT 120`).all(),
     env.DB.prepare(`SELECT DISTINCT lower(vendor_domain) domain FROM distribution_vendor_amplification WHERE vendor_domain IS NOT NULL`).all().catch(()=>({results:[]}))
   ]);
   const vendorDomains=new Set((vendors.results||[]).map(x=>String(x.domain||'').replace(/^www\./,'')));
-  let considered=0,queued=0;
+  let considered=0,queued=0,newQueued=0,reopened=0;
   for(const row of opps.results||[]){
     if(considered>=MAX_CANDIDATES_PER_CYCLE)break;
     if(!NETWORK_TYPES.test(String(row.surface_type||'')))continue;
@@ -84,12 +97,39 @@ async function refreshCandidates(env){
         priority_score=excluded.priority_score,
         suggested_subject=excluded.suggested_subject,
         suggested_body=excluded.suggested_body,
-        status=CASE WHEN distribution_network_outreach.status IN ('contact_found','sent','adopted') THEN distribution_network_outreach.status ELSE 'queued' END,
-        updated_at=datetime('now')`)
+        status=CASE
+          WHEN distribution_network_outreach.status IN ('contact_found','sent','adopted') THEN distribution_network_outreach.status
+          WHEN distribution_network_outreach.status='suppressed_no_contact'
+            AND distribution_network_outreach.source_url=excluded.source_url
+            AND distribution_network_outreach.updated_at>datetime('now','-30 days')
+            THEN 'suppressed_no_contact'
+          ELSE 'queued'
+        END,
+        discovery_attempts=CASE
+          WHEN distribution_network_outreach.status='suppressed_no_contact'
+            AND (distribution_network_outreach.source_url!=excluded.source_url OR distribution_network_outreach.updated_at<=datetime('now','-30 days'))
+            THEN 0
+          ELSE distribution_network_outreach.discovery_attempts
+        END,
+        contact_checked_at=CASE
+          WHEN distribution_network_outreach.status='suppressed_no_contact'
+            AND (distribution_network_outreach.source_url!=excluded.source_url OR distribution_network_outreach.updated_at<=datetime('now','-30 days'))
+            THEN NULL
+          ELSE distribution_network_outreach.contact_checked_at
+        END,
+        updated_at=CASE
+          WHEN distribution_network_outreach.status='suppressed_no_contact'
+            AND distribution_network_outreach.source_url=excluded.source_url
+            AND distribution_network_outreach.updated_at>datetime('now','-30 days')
+            THEN distribution_network_outreach.updated_at
+          ELSE datetime('now')
+        END`)
       .bind(row.surface_slug,safe(row.surface_name||domain,200),safe(row.surface_type,80),domain,String(row.action_url),Number(row.distribution_score||0),copy.subject,copy.body).run();
     if(Number(r?.meta?.changes||r?.changes||0)>0)queued++;
+    if(!row.network_existing)newQueued++;
+    else if(row.network_status==='suppressed_no_contact'&&(row.network_source_url!==row.action_url||String(row.network_updated_at||'')<=new Date(Date.now()-30*86400000).toISOString().replace('T',' ').slice(0,19)))reopened++;
   }
-  return {considered,queued};
+  return {considered,queued,newQueued,reopened};
 }
 
 async function scanContact(row,env){
@@ -116,6 +156,11 @@ async function scanContact(row,env){
   const attempts=Number(row.discovery_attempts||0)+1;
   const status=attempts>=3?'suppressed_no_contact':'queued';
   await env.DB.prepare(`UPDATE distribution_network_outreach SET contact_checked_at=datetime('now'),discovery_attempts=?,status=?,updated_at=datetime('now') WHERE surface_slug=?`).bind(attempts,status,row.surface_slug).run();
+  if(status==='suppressed_no_contact'){
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,detail,observed_at,created_at)
+      VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`netsuppress_${crypto.randomUUID()}`,row.surface_slug,'publisher_contact_suppressed','completed','distribution_network',`Publisher suppressed after ${attempts} autonomous contact-discovery attempts. Reopen only if the route changes or after a 30-day cool-off.`).run().catch(()=>{});
+  }
   return {found:false,status};
 }
 
@@ -161,7 +206,7 @@ async function cycle(env){
   const candidates=await refreshCandidates(env);
   const contacts=await discoverContacts(env);
   const adoption=await verifyAdoption(env);
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1: ${candidates.considered} publisher candidates considered, ${contacts.found} contacts found, ${adoption.adopted} new adoptions verified.`).run().catch(()=>{});
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1: ${candidates.considered} publisher candidates considered, ${candidates.newQueued} newly queued, ${candidates.reopened} reopened after route/cool-off change, ${contacts.found} contacts found, ${contacts.suppressed} suppressed after repeated misses, ${adoption.adopted} new adoptions verified.`).run().catch(()=>{});
   return {ok:true,candidates,contacts,adoption};
 }
 
