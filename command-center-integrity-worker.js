@@ -79,9 +79,11 @@ async function canonicalSnapshot(env,upstream){
   const issues=Object.entries(queryMap).filter(([,q])=>!q.ok).map(([metric,q])=>({metric,severity:'error',reason:q.error||'query_failed'}));
   const dayNumber=Number(today.slice(8,10))||1,daysInMonth=new Date(Date.UTC(Number(today.slice(0,4)),Number(today.slice(5,7)),0)).getUTCDate();
   const sessionRow=sessions.ok?sessions.value||{}:null,mtd=sessionRow?finiteOrNull(sessionRow.monthToDate):null;
-  const linkedTodaySessions=todayVisitors.ok?new Set((todayVisitors.value||[]).map(row=>String(row.session_id||'')).filter(Boolean)).size:null;
+  const linkedTodaySessions=todayVisitors.ok?(todayVisitors.value||[]).length:null;
+  const distinctTodaySessionIds=todayVisitors.ok?new Set((todayVisitors.value||[]).map(row=>String(row.session_id||'')).filter(Boolean)).size:null;
   const uniqueTodayVisitors=todayVisitors.ok?new Set((todayVisitors.value||[]).map(row=>String(row.visitor_id||'')).filter(Boolean)).size:null;
   const canonicalToday=linkedTodaySessions==null?(sessionRow?finiteOrNull(sessionRow.today):null):linkedTodaySessions;
+  if(linkedTodaySessions!=null&&distinctTodaySessionIds!=null&&distinctTodaySessionIds<linkedTodaySessions)issues.push({metric:'today_session_identity',severity:'warning',reason:'multiple_visitor_session_links_share_a_session_id'});
   if(linkedTodaySessions!=null&&uniqueTodayVisitors!=null&&uniqueTodayVisitors>linkedTodaySessions)issues.push({metric:'today_population_alignment',severity:'error',reason:'unique_visitors_exceed_linked_sessions'});
   const dailyAverage=mtd==null?null:mtd/dayNumber,projectedMonth=dailyAverage==null?null:Math.round(dailyAverage*daysInMonth);
 
@@ -103,7 +105,7 @@ async function canonicalSnapshot(env,upstream){
     status:issues.some(x=>x.severity==='error')?'degraded':issues.length?'warning':'healthy',
     generatedAt:now.toISOString(),timezone:TIME_ZONE,issues,
     sources:{d1_guard:sessions.ok?'available':'unavailable',verified_outbound:outbound.ok?'available':'unavailable',confirmed_visitors:todayVisitors.ok&&last24Visitors.ok?'available':'unavailable',engine_runs:runsResult.ok?'available':'unavailable',gsc:gscFreshness,ga4:ga4Freshness},
-    sessions:sessions.ok?{status:'observed',last24:finiteOrNull(sessionRow.last24),today:canonicalToday,monthToDate:mtd,dailyAverageMTD:dailyAverage,projectedMonth,lastAllowedAt:sessionRow.lastAllowedAt||null,todayPopulation:'confirmed_visitor_events session linkage in the Europe/Lisbon today window',todayPopulationAligned:true}: {status:'unavailable',last24:null,today:null,monthToDate:null,dailyAverageMTD:null,projectedMonth:null,reason:sessions.error,todayPopulationAligned:false},
+    sessions:sessions.ok?{status:'observed',last24:finiteOrNull(sessionRow.last24),today:canonicalToday,monthToDate:mtd,dailyAverageMTD:dailyAverage,projectedMonth,lastAllowedAt:sessionRow.lastAllowedAt||null,todayPopulation:'confirmed_visitor_events visitor-session links in the Europe/Lisbon today window',todayDistinctSessionIds:distinctTodaySessionIds,todayUniqueVisitors:uniqueTodayVisitors,todayPopulationAligned:true}: {status:'unavailable',last24:null,today:null,monthToDate:null,dailyAverageMTD:null,projectedMonth:null,reason:sessions.error,todayPopulationAligned:false},
     trafficTrend:{status:trend.ok?'observed':'unavailable',metric:'Browser Guard allowed sessions; current Lisbon day aligned to confirmed visitor-linked sessions',windowDays:30,points,generatedAt:now.toISOString(),reason:trend.ok?null:trend.error},
     outbound:outbound.ok?{status:'observed',windowDays:30,humanOutbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,lastOutboundAt:outRow.lastOutboundAt||null}: {status:'unavailable',windowDays:30,humanOutbound:null,monetizedOutbound:null,unmonetizedOutbound:null,weightedCoverage:null,reason:outbound.error},
     outboundByTool:byTool.ok?byTool.value.map(row=>({tool_slug:row.tool_slug,humanOutbound:finiteOrNull(row.humanOutbound),monetizedOutbound:finiteOrNull(row.monetizedOutbound),lastOutboundAt:row.lastOutboundAt||null})):null,
