@@ -142,6 +142,14 @@ function targets(slug){
     bluesky:`${base}?utm_source=bluesky&${common}`
   };
 }
+function editorialTargets(family){
+  const content=encodeURIComponent(family);
+  return {
+    linkedin:`https://trytoolscout.org/?utm_source=linkedin&utm_medium=organic_social&utm_campaign=content_engine_v21&utm_content=${content}`,
+    x:`https://trytoolscout.org/?utm_source=x&utm_medium=organic_social&utm_campaign=content_engine_v21&utm_content=${content}`,
+    bluesky:`https://trytoolscout.org/?utm_source=bluesky&utm_medium=organic_social&utm_campaign=content_engine_v21&utm_content=${content}`
+  };
+}
 async function buildBrief(env,family){
   await ensureSchema(env);
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
@@ -155,7 +163,7 @@ async function buildBrief(env,family){
   const commercialAllowed=family==='friday_practical'&&eligible.length>0;
   const selected=commercialAllowed?eligible[pickIndex('commercial'+date,eligible.length)]:null;
   const mode=selected?'affiliate_social_verified':'editorial';
-  const t=selected?targets(selected.tool_slug):{linkedin:'https://trytoolscout.org/',x:'https://trytoolscout.org/',bluesky:'https://trytoolscout.org/'};
+  const t=selected?targets(selected.tool_slug):editorialTargets(family);
   const briefId=`brief_${crypto.randomUUID()}`;
   const prompt=[
     `CONTENT ENGINE INTELLIGENCE BRIEF (${family})`,
