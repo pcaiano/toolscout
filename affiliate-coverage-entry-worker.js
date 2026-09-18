@@ -5,6 +5,7 @@ import {runWithLedger} from './engine-run-ledger.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const FIRECRAWL_INGEST_TOKEN_SHA256='e0888dacab143e3b7c9a29e83f1e95263e8ad8ff0f4d58d026d73f56c04b7c0e';
 const AFFILIATE_REPLY_INGEST_TOKEN_SHA256='3ef12f65f47d9b27fa7d757a58eb27d2bcc966488c9611a89bd8f2165e11a310';
+const AFFILIATE_REPLY_ACCEPT_AFTER='2026-09-18T23:07:00.000Z';
 const FIRECRAWL_MONITORS=new Set(['01a0a488-7701-75eb-99a9-4f292034e251','01a0a489-270e-714b-b512-fc31e50b4249']);
 const FIRECRAWL_HOSTS=new Map([['apollo.io','apollo'],['lemlist.com','lemlist'],['unbounce.com','unbounce'],['hostinger.com','hostinger'],['klaviyo.com','klaviyo'],['airtable.com','airtable']]);
 const FIRECRAWL_PROTECTED=new Set(['submitted','pending_review','approved_needs_link','link_acquired','active','verified','earning','rejected']);
@@ -88,6 +89,8 @@ async function ingestAffiliateReply(request,env){
   if(!await affiliateReplyAuthorized(request))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
   let payload={};try{payload=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_H})}
   const messageId=String(payload.message_id||payload.id||'').slice(0,300);if(!messageId)return Response.json({error:'message_id_required'},{status:422,headers:JSON_H});
+  const receivedMs=Date.parse(String(payload.received_at||''));const cutoffMs=Date.parse(AFFILIATE_REPLY_ACCEPT_AFTER);
+  if(!Number.isFinite(receivedMs)||receivedMs<cutoffMs)return Response.json({ok:true,ignored:true,reason:'historic_or_unparseable_message',cutoff:AFFILIATE_REPLY_ACCEPT_AFTER},{status:202,headers:JSON_H});
   await ensureAffiliateReplySchema(env);
   const exists=await env.DB.prepare('SELECT message_id,status FROM affiliate_reply_events WHERE message_id=?').bind(messageId).first();
   if(exists)return Response.json({ok:true,duplicate:true,status:exists.status},{headers:JSON_H});
