@@ -85,19 +85,56 @@ function firstTouchBuckets(rows){
   return {total:first.size,buckets:Object.entries(buckets).filter(([,visitors])=>visitors>0).map(([key,visitors])=>({key,visitors}))};
 }
 function queueItem(action){
-  const affiliate=action.engine==='affiliate',metric=n(action.metric);
-  const minutes=affiliate?(action.status==='approved_needs_link'?2:5):(/hacker-news|indie-hackers/i.test(action.id||'')?8:5);
+  const affiliate=action.engine==='affiliate',editorial=Boolean(action.editorial_queue_id),metric=n(action.metric);
+  const minutes=editorial?6:(affiliate?(action.status==='approved_needs_link'?2:5):(/hacker-news|indie-hackers/i.test(action.id||'')?8:5));
   const impactScore=affiliate?(metric*20+40):metric;
-  return {...action,estimated_minutes:minutes,expected_impact_score:Number(impactScore.toFixed(1)),why_human:action.reason||'This step requires owner authentication, judgement or a third-party action.',expected_impact:affiliate?(metric?`Recover monetization on ${metric} browser-confirmed unmonetized outbound click${metric===1?'':'s'} / 30d`:'Expand monetized affiliate coverage'):(metric?`Distribution opportunity score ${Math.round(metric)}/100`:'Unlock a blocked distribution surface'),after_action:affiliate?'Affiliate Coverage Engine resumes the canonical workflow and waits for evidence-backed approval or activation.':'Distribution Engine resumes verification, attribution and measurement after the human gate is recorded.'};
+  const whyHuman=editorial?'Publication requires an authenticated community account and a final human review before a public post or Stack goes live.':(action.reason||'This step requires owner authentication, judgement or a third-party action.');
+  const after=editorial?'Mark it published in the Chairman Queue. The Distribution Engine then removes the task and continues attribution and performance measurement.':(affiliate?'Affiliate Coverage Engine resumes the canonical workflow and waits for evidence-backed approval or activation.':'Distribution Engine resumes verification, attribution and measurement after the human gate is recorded.');
+  return {...action,estimated_minutes:minutes,expected_impact_score:Number(impactScore.toFixed(1)),why_human:whyHuman,expected_impact:affiliate?(metric?`Recover monetization on ${metric} browser-confirmed unmonetized outbound click${metric===1?'':'s'} / 30d`:'Expand monetized affiliate coverage'):(editorial?'Publish a prepared community contribution and begin measuring attributable referral quality.':(metric?`Distribution opportunity score ${Math.round(metric)}/100`:'Unlock a blocked distribution surface')),after_action:after};
+}
+async function editorialQueueRows(env){
+  return safeAll(env,`SELECT queue_id,asset_url,channel_type,target_name,target_url,angle,suggested_title,suggested_body,status,updated_at
+    FROM distribution_editorial_queue
+    WHERE human_required=1 AND status='prepared' AND target_url IS NOT NULL
+    ORDER BY CASE WHEN target_name='Stremit' THEN 0 ELSE 1 END, updated_at DESC
+    LIMIT 20`);
+}
+function editorialAction(row){
+  const target=String(row.target_name||'Community'),publicationType=row.channel_type==='community_stack'?'Stack':'Post',isStremit=target==='Stremit';
+  const instructions=isStremit&&publicationType==='Stack'
+    ?'Open the New stack page. Paste the prepared title and description. Add ToolScout, ChatGPT, Make and GitHub in that order. Use each Role line in the prepared content as the use case for that tool. Review the Stack, then publish it. Do not buy promotion.'
+    :isStremit
+      ?'Open the Stremit composer. Paste the prepared title and content, verify the ToolScout link, then publish if it fits the community context.'
+      :'Open the community destination. Review the prepared title and content against current rules, then publish if appropriate.';
+  return {
+    engine:'distribution',
+    id:`editorial:${row.queue_id}`,
+    editorial_queue_id:row.queue_id,
+    title:`${target}: ${row.suggested_title||'Prepared community contribution'}`,
+    status:'prepared',
+    reason:row.angle||'Prepared community distribution action requiring human review.',
+    action_url:row.target_url,
+    metric:isStremit?72:45,
+    metric_label:'editorial priority',
+    source_of_truth:'distribution_editorial_queue',
+    publication_type:publicationType,
+    prepared_title:row.suggested_title||'',
+    prepared_body:row.suggested_body||'',
+    instructions,
+    source_asset_url:row.asset_url||null
+  };
 }
 async function lightweightQueue(request,env,ctx){
   try{
-    const url=new URL('/analytics/api/human-actions',request.url);
-    const r=await base.fetch(new Request(url.toString(),{method:'GET',headers:request.headers}),env,ctx);
-    if(!r.ok)return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:`human_actions_http_${r.status}`};
-    const raw=await r.json();
-    const items=[...(raw.affiliate||[]),...(raw.distribution||[])].map(queueItem).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,12);
-    return {status:'connected',total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],rule:'Current canonical engine states with safe HTTPS action URLs. External reachability checks are kept out of the dashboard read path so third-party sites cannot take down Command Center.'};
+    const [rawResponse,editorialRows]=await Promise.all([
+      base.fetch(new Request(new URL('/analytics/api/human-actions',request.url).toString(),{method:'GET',headers:request.headers}),env,ctx),
+      editorialQueueRows(env)
+    ]);
+    const raw=rawResponse.ok?await rawResponse.json():{affiliate:[],distribution:[]};
+    const nonEditorial=[...(raw.affiliate||[]),...(raw.distribution||[])].filter(x=>!x.editorial_queue_id&&!String(x.id||'').startsWith('editorial:'));
+    const editorial=editorialRows.map(editorialAction);
+    const items=[...nonEditorial,...editorial].map(queueItem).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,12);
+    return {status:'connected',total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-editorial-v3',rule:'Current canonical engine states plus prepared editorial actions read directly from D1. Editorial tasks include publication type, exact instructions, title and prepared content.'};
   }catch(error){return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:String(error?.message||error)}}
 }
 async function resilientSnapshot(request,env,ctx){
@@ -163,7 +200,7 @@ async function resilientSnapshot(request,env,ctx){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health')return Response.json({ok:true,service:'toolscout-command-center-resilient',version:1,statsMode:'direct-d1-resilient',externalLinkVerificationInStats:false},{headers:PUBLIC_H});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:3,statsMode:'direct-d1-resilient',externalLinkVerificationInStats:false,chairmanPayloadVersion:'chairman-editorial-v3',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
     if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/analytics/api/chairman-queue')){
       if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
       if(url.pathname==='/analytics/api/chairman-queue')return Response.json(await lightweightQueue(request,env,ctx),{headers:JSON_H});
