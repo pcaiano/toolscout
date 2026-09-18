@@ -299,7 +299,7 @@ function chairmanPayloadEnhancer(){
 async function servePage(request,env,ctx){
   if(!(await accessAuthenticated(request,ctx)))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
   if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
-  const asset=await env.ASSETS.fetch(new Request(new URL('/analytics-v2/',request.url).toString(),request));
+  const asset=await env.ASSETS.fetch(new Request(new URL('/analytics-v2',request.url).toString(),request));
   if(!asset.ok)return asset;
   const headers=new Headers(asset.headers);headers.set('Content-Type','text/html; charset=UTF-8');headers.set('Cache-Control','private, no-store');headers.append('Set-Cookie',`${SESSION_COOKIE}=${await sessionValue(env.ADMIN_TOKEN,sessionBucket())}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Strict`);
   let html=await asset.text();
