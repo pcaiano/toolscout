@@ -230,6 +230,33 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   const health={content:{status:contentPublishFresh?'observed':(contentReportFresh?'partial':'no_evidence'),last_event_at:latestContentPublish?.last_publish_at||contentIntel?.generatedAt||null,detail:contentPublishFresh?`${n(latestContentPublish?.published_30d)} verified content_published event(s) / 30d`:(contentReportFresh?'Content Intelligence is fresh; publishing heartbeat is only partially observed.':'No fresh Content Engine evidence.')},audience:{status:audienceConnected?'observed':'no_evidence',last_event_at:latestAudienceEvent?.last_event_at||stats?.audienceGrowth?.observedAt||null,detail:audienceConnected?`${n(stats?.audienceGrowth?.publishedReplies)} published replies · ${n(stats?.audienceGrowth?.outboundActions)} outbound actions · ${n(stats?.engagement?.pending)} pending review`:'Audience adapter is not connected.'},seo_geo_aio:{status:seoFailures>0?'failed':(seoFresh?(seoWarnings>0?'warning':'observed'):'no_evidence'),last_event_at:[...seoEvidence].sort((a,b)=>timeMs(b)-timeMs(a))[0]||null,detail:`${n(organicGrowth?.summary?.actionableOpportunities)} actionable search opportunities · ${seoFailures} readiness failures · ${seoWarnings} warnings`,evidence:{gsc:gsc?.generatedAt||null,organic:organicGrowth?.generatedAt||null,aeo_geo:aeoGeo?.generatedAt||null,machine_readability:machineReadability?.generatedAt||null}},issues:healthIssues};
   return {chairmanQueue:queue,engines:{affiliate:{status:affiliateLatest?'running':'awaiting_strict_evidence',last_run_at:affiliateLatest?.created_at||null,traffic_truth:'browser_confirmed',human_outbound_30d:n(affiliateLatest?.human_outbound_clicks),monetized_outbound_30d:n(affiliateLatest?.monetized_human_outbound_clicks),unmonetized_outbound_30d:n(affiliateLatest?.unmonetized_human_outbound_clicks),weighted_coverage_pct:latestCoverage,coverage_change_7d_pp:latestCoverage!=null&&weekCoverage!=null?Number((latestCoverage-weekCoverage).toFixed(1)):null,recoverable_queue:n(affiliateLatest?.queue_size),workflow_status:affCounts,discovery:{total:n(affiliateDiscovery?.total),qualified:n(affiliateDiscovery?.qualified),human:n(affiliateDiscovery?.human),last_checked:affiliateDiscovery?.last_checked||null}},distribution:{status:'running',last_activity_at:distribution24?.last_event_at||distribution7?.last_event_at||null,events_24h:n(distribution24?.events),successful_24h:n(distribution24?.successful),failed_24h:n(distribution24?.failed),events_7d:n(distribution7?.events),successful_7d:n(distribution7?.successful),failed_7d:n(distribution7?.failed),opportunity_status:distCounts,delivery_status:deliveryCounts,attributed_human_sessions_30d:n(stats?.distributionImpact?.humanSessions),attributed_outbound_30d:n(stats?.distributionImpact?.outboundClicks),attributed_monetized_outbound_30d:n(stats?.distributionImpact?.monetizedOutbound)}},footprint:{search:{source:'Google Search Console Search Analytics API',observed_pages:indexedItems.length,impressions:gscImpressions,clicks:gscClicks,generated_at:gsc.generatedAt||null,sitemap_urls:sitemapUrls,note:'Observed pages are URLs with Search Console impressions in the imported window; this is evidence of search visibility, not a complete Google index count.'},distribution:{live_verified:n(distCounts.live)+n(distCounts.verified),submitted_pending:n(distCounts.submitted)+n(distCounts.pending_review)+n(distCounts.scheduled),human_gates:n(distCounts.human_action_required),surfaces:liveSurfaces.map(x=>({slug:x.surface_slug,name:x.surface_name,type:x.surface_type,status:x.status,url:x.live_url||x.action_url||null,score:n(x.distribution_score),updated_at:x.updated_at||null}))}},ledger,health,generated_at:new Date().toISOString()};
 }
+function chairmanPayloadEnhancer(){
+  return `<script data-chairman-payload-renderer="v3">(function(){
+    if(typeof taskHtml!=='function'||window.__toolscoutChairmanPayloadV3)return;
+    window.__toolscoutChairmanPayloadV3=true;
+    const originalTaskHtml=taskHtml;
+    const localEsc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    const copyButton=(label,value)=>value?'<button class="btn" type="button" data-chairman-copy="'+encodeURIComponent(String(value))+'">'+localEsc(label)+'</button>':'';
+    taskHtml=function(x){
+      let html=originalTaskHtml(x);
+      if(!x||!x.editorial_queue_id||html.includes('Publication payload'))return html;
+      const payload='<details open style="margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card2)"><summary style="cursor:pointer;font-weight:800">Publication payload · '+localEsc(x.publication_type||'Post')+'</summary>'+
+        '<div class="taskReason" style="margin-top:10px"><b>Steps:</b><div style="white-space:pre-wrap;margin-top:5px">'+localEsc(x.instructions||'')+'</div>'+copyButton('Copy steps',x.instructions)+'</div>'+
+        '<div class="taskReason" style="margin-top:10px"><b>Title:</b><div style="white-space:pre-wrap;margin-top:5px">'+localEsc(x.prepared_title||'')+'</div>'+copyButton('Copy title',x.prepared_title)+'</div>'+
+        '<div class="taskReason" style="margin-top:10px"><b>Content:</b><div style="white-space:pre-wrap;margin-top:5px;max-height:340px;overflow:auto;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card)">'+localEsc(x.prepared_body||'')+'</div>'+copyButton('Copy content',x.prepared_body)+'</div>'+
+        '</details>';
+      return html.replace('<div class="taskActions">',payload+'<div class="taskActions">');
+    };
+    document.addEventListener('click',function(e){
+      const b=e.target.closest('[data-chairman-copy]');
+      if(!b)return;
+      e.preventDefault();e.stopPropagation();
+      const value=decodeURIComponent(b.getAttribute('data-chairman-copy')||''),old=b.textContent;
+      navigator.clipboard.writeText(value).then(()=>{b.textContent='Copied';setTimeout(()=>b.textContent=old,1200)}).catch(()=>{b.textContent='Copy failed';setTimeout(()=>b.textContent=old,1600)});
+    });
+    try{if(typeof snapshot!=='undefined'&&snapshot&&typeof renderChairman==='function')renderChairman(snapshot)}catch{}
+  })();</script>`;
+}
 async function servePage(request,env,ctx){
   if(!(await accessAuthenticated(request,ctx)))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
   if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
@@ -240,6 +267,7 @@ async function servePage(request,env,ctx){
   const footprintAnchor='<section class="widget" data-widget="footprint"';
   if(!html.includes('data-widget="affiliate-status"'))html=html.replace(footprintAnchor,affiliateCoverageWidget()+'\n\n    '+footprintAnchor);
   if(!html.includes('renderAffiliateCoverageStatus'))html=html.replace('</body>',affiliateCoverageScript()+'</body>');
+  if(!html.includes('data-chairman-payload-renderer="v3"'))html=html.replace('</body>',chairmanPayloadEnhancer()+'</body>');
   headers.delete('Content-Length');
   return new Response(html,{status:asset.status,headers});
 }
