@@ -49,10 +49,28 @@ async function ingestEvidence(request,env){
   return Response.json({ok:true,verified:effectiveStatus==='completed',evidence_id:evidenceId,mission_id:missionId,stage,status:effectiveStatus,external_id:externalId},{headers:JSON_H});
 }
 
+async function contentSocialIntelligenceHealth(env){
+  try{
+    const [event,profiles,policies,briefs]=await Promise.all([
+      env.DB.prepare(`SELECT status,detail,created_at FROM distribution_events WHERE event_type='content_social_intelligence_refresh' ORDER BY created_at DESC LIMIT 1`).first(),
+      env.DB.prepare(`SELECT SUM(CASE WHEN status='verified' THEN 1 ELSE 0 END) verified,COUNT(*) total,MAX(last_checked_at) last_checked FROM content_social_profiles`).first(),
+      env.DB.prepare(`SELECT SUM(CASE WHEN policy_status='verified_social_allowed' THEN 1 ELSE 0 END) social_allowed,SUM(CASE WHEN policy_status='blocked' THEN 1 ELSE 0 END) blocked,COUNT(*) total,MAX(last_checked_at) last_checked FROM affiliate_social_policy`).first(),
+      env.DB.prepare(`SELECT COUNT(*) briefs,MAX(created_at) last_brief FROM content_engine_briefs WHERE created_at>=datetime('now','-30 days')`).first()
+    ]);
+    const age=event?.created_at?ageMinutes(event.created_at):null;
+    let status='healthy';
+    if(!event)status='pending';
+    else if(event.status==='failed')status='failed';
+    else if(age!=null&&age>180)status='stale';
+    return {status,last_refresh_at:event?.created_at||null,age_minutes:age,detail:event?.detail||null,verified_profiles:Number(profiles?.verified||0),profiles_total:Number(profiles?.total||0),verified_social_affiliate_programs:Number(policies?.social_allowed||0),blocked_social_affiliate_programs:Number(policies?.blocked||0),policies_total:Number(policies?.total||0),briefs_30d:Number(briefs?.briefs||0),last_brief_at:briefs?.last_brief||null,proof:'content_social_profiles + affiliate_social_policy + distribution_events'};
+  }catch(error){return {status:'unavailable',reason:String(error?.message||error),proof:'content social intelligence tables'};}
+}
+
 export async function contentMissionHealth(env){
   await ensureSchema(env);
+  const intelligence=await contentSocialIntelligenceHealth(env);
   const latest=await env.DB.prepare(`SELECT mission_id,MIN(observed_at) first_at,MAX(observed_at) last_at FROM external_engine_evidence WHERE engine='content' GROUP BY mission_id ORDER BY MAX(observed_at) DESC LIMIT 1`).first();
-  if(!latest?.mission_id)return{status:'partial',last_run_at:null,mission_id:null,completed_stages:[],missing_stages:['linkedin','bluesky','x'],proof:'No multi-channel content mission has completed since mission evidence was enabled.'};
+  if(!latest?.mission_id)return{status:intelligence.status==='failed'?'failed':'partial',last_run_at:null,mission_id:null,completed_stages:[],missing_stages:['linkedin','bluesky','x'],social_intelligence:intelligence,proof:'No multi-channel content mission has completed since mission evidence was enabled.'};
   const q=await env.DB.prepare(`SELECT stage,status,external_id,observed_at,created_at FROM external_engine_evidence WHERE engine='content' AND mission_id=? ORDER BY created_at ASC`).bind(latest.mission_id).all();
   const rows=q.results||[],completed=new Set(rows.filter(r=>r.status==='completed'&&r.external_id).map(r=>r.stage)),failed=rows.filter(r=>r.status==='failed'),missing=[...CONTENT_STAGES].filter(s=>!completed.has(s));
   const queued=rows.filter(r=>r.status==='queued');
@@ -61,7 +79,9 @@ export async function contentMissionHealth(env){
   if(failed.length)status='failed';
   else if(missing.length===0)status=age!=null&&age>80*60?'stale':'healthy';
   else if(age!=null&&age>120)status='degraded';
-  return{status,last_run_at:latest.first_at||null,last_completed_at:missing.length===0?lastAt:null,mission_id:latest.mission_id,completed_stages:[...completed],missing_stages:missing,failed_stages:failed.map(r=>r.stage),queued_stages:queued.map(r=>r.stage),age_minutes:age,proof:'external_engine_evidence with required external publication IDs; Buffer acceptance remains queued until a public X status URL is verified'};
+  if(intelligence.status==='failed'&&status!=='failed')status='degraded';
+  else if(['stale','unavailable'].includes(intelligence.status)&&status==='healthy')status='degraded';
+  return{status,last_run_at:latest.first_at||null,last_completed_at:missing.length===0?lastAt:null,mission_id:latest.mission_id,completed_stages:[...completed],missing_stages:missing,failed_stages:failed.map(r=>r.stage),queued_stages:queued.map(r=>r.stage),age_minutes:age,social_intelligence:intelligence,proof:'external_engine_evidence with required external publication IDs; Buffer acceptance remains queued until a public X status URL is verified; content social intelligence health is surfaced explicitly'};
 }
 
 function applyContentHealth(data,health){
