@@ -1,4 +1,5 @@
 import base from './command-center-final-integrity-worker.js';
+import resilientFallback from './command-center-resilient-worker.js';
 
 const ANALYTICS_PATHS = new Set([
   '/analytics',
@@ -190,14 +191,19 @@ function ensure(){
   var current=root.querySelector('.tsTrafficDetail[data-repair="1"]');
   if(!current)render(latest);
 }
+function installRenderHook(){
+  if(window.__toolscoutTrafficDetailRenderHook)return;
+  var previous=window.render;
+  if(typeof previous!=='function')return;
+  window.__toolscoutTrafficDetailRenderHook=true;
+  window.render=function(d){var result=previous(d);latest=d;setTimeout(function(){render(d)},0);return result};
+}
 function boot(){
-  refresh();
-  setTimeout(refresh,1200);
-  setInterval(refresh,15000);
+  installRenderHook();
+  setTimeout(installRenderHook,150);
+  setTimeout(function(){if(!latest)refresh()},900);
   var root=document.getElementById('trafficTruthBody');
   if(root)new MutationObserver(function(){setTimeout(ensure,0)}).observe(root,{childList:true,subtree:false});
-  document.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('[data-ts-window],.btn'))setTimeout(refresh,120)},true);
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();</script>`;
@@ -231,10 +237,35 @@ async function applyLightTheme(response) {
   });
 }
 
+async function resilientStatsResponse(request, env, ctx) {
+  let primary = null;
+  try {
+    primary = await base.fetch(request, env, ctx);
+    if (primary.status < 500) return primary;
+  } catch {}
+  try {
+    const fallback = await resilientFallback.fetch(request, env, ctx);
+    if (!fallback.ok) return fallback;
+    const headers = new Headers(fallback.headers);
+    headers.set('X-ToolScout-Stats-Mode', 'resilient-fallback');
+    headers.set('Cache-Control', 'private, no-store');
+    return new Response(fallback.body, {status:fallback.status,statusText:fallback.statusText,headers});
+  } catch (error) {
+    if (primary) return primary;
+    return Response.json(
+      {error:'command_center_stats_unavailable',message:String(error&&error.message||error)},
+      {status:503,headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'}}
+    );
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const response = await base.fetch(request, env, ctx);
+    const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
+    const response = isStats
+      ? await resilientStatsResponse(request, env, ctx)
+      : await base.fetch(request, env, ctx);
     if (request.method === 'GET' && ANALYTICS_PATHS.has(url.pathname)) {
       return applyLightTheme(response);
     }
