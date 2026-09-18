@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "mode": "bounded_autonomy",
+  "objective": "Continuously audit ToolScout for evidence-backed growth and monetization opportunities, then instantiate low-risk experiments using existing approved primitives.",
+  "autonomousPrimitives": [
+    "content_amplification",
+    "distribution_amplification",
+    "vendor_amplification",
+    "search_update_angle",
+    "search_measurement",
+    "catalog_impact_review",
+    "discover_candidates",
+    "verify_first_party",
+    "admit_coverage_only",
+    "prepare_application",
+    "capture_link",
+    "activate_route",
+    "verify_route",
+    "measure_search_lift",
+    "audit_human_gates",
+    "convert_machine_resolvable_gates"
+  ],
+  "hardGates": [
+    "arbitrary_code_change",
+    "new_paid_spend",
+    "credential_or_secret_change",
+    "legal_or_contractual_acceptance",
+    "identity_tax_or_payment_submission",
+    "irreversible_third_party_action",
+    "editorial_ranking_change_based_on_affiliate_economics"
+  ],
+  "resourcePolicy": {
+    "freeFirst": true,
+    "d1HeavyStrategicAuditCadence": "daily",
+    "maxNewExperimentsPerAudit": 5,
+    "evidenceRequiredBeforeScaling": true,
+    "missingEvidenceMeansZeroImpact": false
+  }
+}

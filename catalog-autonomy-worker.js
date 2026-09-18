@@ -16,6 +16,21 @@ async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(n
 function publicHttps(value){try{const u=new URL(String(value||''));return u.protocol==='https:'?u:null}catch{return null}}
 function stripHtml(html){return String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim()}
 function meta(html,name){const a=new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,'i'),b=new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,'i');return (String(html).match(a)?.[1]||String(html).match(b)?.[1]||'').trim()}
+function releaseLinks(html,base){
+  const out=[];try{
+    const root=new URL(base),re=/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;let m;
+    while((m=re.exec(String(html||'')))){
+      const label=stripHtml(m[2]).toLowerCase(),href=String(m[1]||'');
+      if(!/(changelog|release notes|releases|what.?s new|product updates|updates)/i.test(label+' '+href))continue;
+      let u;try{u=new URL(href,root)}catch{continue}
+      if(u.protocol!=='https:')continue;
+      const rh=root.hostname.replace(/^www\./,''),uh=u.hostname.replace(/^www\./,'');
+      if(!(uh===rh||uh.endsWith('.'+rh)))continue;
+      out.push(u.toString());
+    }
+  }catch{}
+  return [...new Set(out)].slice(0,4);
+}
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
 async function fetchOfficial(url){
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
@@ -26,7 +41,7 @@ async function fetchOfficial(url){
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
-    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description};
+    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,releaseLinks:releaseLinks(html,r.url||u.href)};
   }catch(e){return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:e?.name==='AbortError'?'timeout':'network_error'}}
   finally{clearTimeout(timer)}
 }
@@ -77,9 +92,69 @@ async function ensureSchema(env){
       evidence_json TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_events_created ON catalog_runtime_events(created_at DESC)`)
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_events_created ON catalog_runtime_events(created_at DESC)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS software_news_candidates(
+      candidate_id TEXT PRIMARY KEY,
+      tool_slug TEXT NOT NULL,
+      source_url TEXT NOT NULL,
+      title TEXT,
+      summary TEXT,
+      status TEXT NOT NULL DEFAULT 'candidate',
+      materiality_score REAL NOT NULL DEFAULT 0,
+      detected_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_software_news_status ON software_news_candidates(status,materiality_score DESC,updated_at DESC)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS software_news_sources(
+      source_url TEXT PRIMARY KEY,
+      tool_slug TEXT NOT NULL,
+      fingerprint TEXT,
+      title TEXT,
+      summary TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
+      last_checked_at TEXT,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_software_news_sources_checked ON software_news_sources(status,last_checked_at)`)
   ]).catch(error=>{schemaReady=null;throw error});
   return schemaReady;
+}
+function newsMateriality(result,sourceUrl){
+  const text=`${result?.title||''} ${result?.description||''}`.toLowerCase(),path=(()=>{try{return new URL(sourceUrl).pathname.toLowerCase()}catch{return''}})();
+  let score=0;
+  if(/changelog|release|releases|updates|what.?s-new|product-updates/.test(path))score+=35;
+  for(const re of [/\blaunch(?:ed|es)?\b/,/\brelease(?:d|s)?\b/,/\bnew\b/,/\bnow available\b/,/\bgeneral availability\b/,/\bpricing\b/,/\bplan\b/,/\bintegration\b/,/\bsecurity\b/,/\bai\b/,/\bautomation\b/,/\bapi\b/])if(re.test(text))score+=7;
+  return Math.max(0,Math.min(100,score));
+}
+async function rememberReleaseSources(env,slug,links){
+  let n=0;for(const url of Array.isArray(links)?links:[]){
+    await env.DB.prepare(`INSERT INTO software_news_sources(source_url,tool_slug,status,updated_at) VALUES(?,?,'active',datetime('now'))
+      ON CONFLICT(source_url) DO UPDATE SET tool_slug=excluded.tool_slug,status='active',updated_at=datetime('now')`).bind(url,slug).run().catch(()=>{});n++;
+  }return n;
+}
+async function verifyNewsSources(env){
+  await ensureSchema(env);
+  const q=await env.DB.prepare(`SELECT source_url,tool_slug,fingerprint,last_checked_at FROM software_news_sources WHERE status='active' ORDER BY COALESCE(last_checked_at,'1970-01-01') ASC LIMIT 6`).all();
+  let checked=0,changed=0,baselined=0,warnings=0;
+  for(const row of q.results||[]){
+    const result=await fetchOfficial(row.source_url);checked++;
+    if(result.status!=='ok'){warnings++;await env.DB.prepare(`UPDATE software_news_sources SET last_checked_at=datetime('now'),updated_at=datetime('now') WHERE source_url=?`).bind(row.source_url).run();continue}
+    if(!row.fingerprint){baselined++;await env.DB.prepare(`UPDATE software_news_sources SET fingerprint=?,title=?,summary=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE source_url=?`).bind(result.fingerprint,safeText(result.title,500),safeText(result.description,1800),row.source_url).run();continue}
+    if(result.fingerprint!==row.fingerprint){
+      const candidate=await upsertNewsCandidate(env,row.tool_slug,row.source_url,result);changed++;
+      await logEvent(env,row.tool_slug,'software_news_change_detected','completed','Official release/update source changed and created a bounded What\'s New candidate for the shared growth brain.',{source_url:row.source_url,candidate_id:candidate?.candidate_id||null,materiality_score:candidate?.materiality_score??null});
+    }
+    await env.DB.prepare(`UPDATE software_news_sources SET fingerprint=?,title=?,summary=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE source_url=?`).bind(result.fingerprint,safeText(result.title,500),safeText(result.description,1800),row.source_url).run();
+  }
+  return{ok:true,checked,changed,baselined,warnings,limit:6};
+}
+async function upsertNewsCandidate(env,slug,sourceUrl,result){
+  const score=newsMateriality(result,sourceUrl),id=`runtime-${slug}-${result?.fingerprint||Date.now()}`;
+  await env.DB.prepare(`INSERT INTO software_news_candidates(candidate_id,tool_slug,source_url,title,summary,status,materiality_score,detected_at,updated_at)
+    VALUES(?,?,?,?,?,'candidate',?,datetime('now'),datetime('now'))
+    ON CONFLICT(candidate_id) DO UPDATE SET title=excluded.title,summary=excluded.summary,materiality_score=excluded.materiality_score,updated_at=datetime('now')`)
+    .bind(id,slug,sourceUrl,safeText(result?.title,500)||null,safeText(result?.description,1800)||null,score).run();
+  return {candidate_id:id,materiality_score:score};
 }
 async function logEvent(env,slug,type,status,detail,evidence=null){
   await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
@@ -123,6 +198,7 @@ async function verifyBatch(env){
   for(const tool of chosen){
     const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},result=await fetchOfficial(tool.sourceUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     checked++;
+    if(result.status==='ok'&&Array.isArray(result.releaseLinks)&&result.releaseLinks.length)await rememberReleaseSources(env,slug,result.releaseLinks);
     const reviewedSinceChange=Boolean(prior.last_change_at&&prior.static_last_verified&&staticVerified&&staticVerified!==prior.static_last_verified);
     const fingerprintChanged=result.status==='ok'&&prior.fingerprint&&result.fingerprint&&result.fingerprint!==prior.fingerprint;
     const broken=result.status==='broken'?Number(prior.broken_consecutive||0)+1:0;
@@ -134,7 +210,8 @@ async function verifyBatch(env){
       if(pendingFingerprint&&pendingFingerprint===result.fingerprint)confirmations+=1;else{pendingFingerprint=result.fingerprint;confirmations=1}
       if(confirmations>=2){
         canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='change_detected';contentChanged=1;lastChange=new Date().toISOString().replace('T',' ').slice(0,19);changed++;
-        await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:tool.sourceUrl,http_status:result.httpStatus});
+        const newsCandidate=await upsertNewsCandidate(env,slug,result.finalUrl||tool.sourceUrl,result).catch(()=>null);
+        await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:tool.sourceUrl,http_status:result.httpStatus,news_candidate_id:newsCandidate?.candidate_id||null,news_materiality_score:newsCandidate?.materiality_score??null});
       }
     }else if(result.status==='ok'&&result.fingerprint===prior.fingerprint){
       pendingFingerprint=null;confirmations=0;if(!prior.last_change_at){quality='healthy';contentChanged=0;healthy++}
@@ -220,13 +297,15 @@ async function mergedSitemap(response,env){
 }
 async function status(env){
   await ensureSchema(env);
-  const [states,candidates,gaps,events]=await Promise.all([
+  const [states,candidates,gaps,events,newsSources,newsCandidates]=await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status='admitted_coverage'`).first(),
     env.DB.prepare(`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`).first(),
-    env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_events WHERE created_at>=datetime('now','-7 days')`).first()
+    env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_events WHERE created_at>=datetime('now','-7 days')`).first(),
+    env.DB.prepare(`SELECT COUNT(*) total,MAX(last_checked_at) last_checked_at FROM software_news_sources WHERE status='active'`).first(),
+    env.DB.prepare(`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`).first()
   ]);
-  return{ok:true,version:'1.0',state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Number(candidates?.total||0),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),rule:'Official-source verification is required. Ambiguous factual changes are flagged, not silently rewritten. Affiliate economics never affect catalog admission or ranking.'};
+  return{ok:true,version:'1.1',state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Number(candidates?.total||0),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Official-source verification is required. Ambiguous factual changes are flagged, not silently rewritten. Affiliate economics never affect catalog admission or ranking.'};
 }
 
 export default {
@@ -253,6 +332,6 @@ export default {
     if(base.scheduled)await base.scheduled(event,env,ctx);
     const trigger=event?.cron||'scheduled';
     ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyBatch(env)).catch(()=>{}));
-    if(event?.cron==='15 3 * * *')ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));
+    if(event?.cron==='15 3 * * *'){ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env)).catch(()=>{}));}
   }
 };

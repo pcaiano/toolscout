@@ -8,12 +8,13 @@
     "commandCenterComposition": "canonical-growth-v2",
     "affiliateEngine": "2.1",
     "catalogGrowth": "1.0",
-    "minimumBuildContract": "2026-09-18.4"
+    "minimumBuildContract": "2026-09-18.5"
   },
   "unlockProcedure": [
-    "Review every mutating generator in seo-engine-v2 against current runtime catalog and growth contracts.",
+    "Keep enabled=false until the shared brain search-directive endpoint is live and validated.",
     "Run the full workflow on a non-main branch and inspect the generated diff.",
-    "Verify no Worker/runtime source, affiliate state, catalog neutrality rule, or Command Center contract regresses.",
+    "Verify SEO execution consumes runtime-growth-directives and cannot initiate interventions outside shared-growth-v3 authorization.",
+    "Verify no Worker/runtime source, affiliate state, catalog neutrality rule, What's New policy, or Command Center contract regresses.",
     "Set enabled=true only in a reviewed pull request."
   ],
   "reviewedAt": null,

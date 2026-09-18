@@ -197,7 +197,7 @@ function editorialTargets(family){
 async function buildBrief(env,family){
   await ensureSchema(env);
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
-  const growth=await env.DB.prepare(`SELECT subject_key,priority_score,opportunity_key FROM growth_opportunity_state WHERE status='active' AND subject_type='tool' ORDER BY priority_score DESC LIMIT 50`).all().catch(()=>({results:[]}));
+  const growth=await env.DB.prepare(`SELECT subject_type,subject_key,priority_score,opportunity_key FROM growth_opportunity_state WHERE status='active' AND subject_type IN ('tool','news_update') ORDER BY priority_score DESC LIMIT 80`).all().catch(()=>({results:[]}));
   const commercial=await env.DB.prepare(`SELECT a.tool_slug,COALESCE(p.tool_name,a.tool_slug) tool_name,p.x_handle,p.bluesky_handle,p.linkedin_url,a.policy_status,a.redirect_allowed,w.affiliate_url
     FROM affiliate_social_policy a
     JOIN affiliate_workflow w ON w.tool_slug=a.tool_slug
@@ -209,7 +209,7 @@ async function buildBrief(env,family){
     ORDER BY COALESCE(p.tool_name,a.tool_slug)`).all();
   const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=commercial.results||[],briefId=`brief_${crypto.randomUUID()}`;
   const profileBySlug=new Map(all.map(x=>[x.tool_slug,x]));
-  const growthTools=growth.results||[],growthRank=new Map(growthTools.map((x,i)=>[x.subject_key,{rank:i,score:Number(x.priority_score||0),key:x.opportunity_key}]));
+  const growthTools=[],growthRank=new Map();for(const x of growth.results||[]){if(!x.subject_key||growthRank.has(x.subject_key))continue;const row={...x,rank:growthTools.length};growthTools.push(row);growthRank.set(x.subject_key,{rank:row.rank,score:Number(x.priority_score||0),key:x.opportunity_key,type:x.subject_type});}
   const topGrowthProfile=growthTools.map(x=>profileBySlug.get(x.subject_key)).find(Boolean)||null;
   const comparisonPairs=[
     ['make','zapier'],['hubspot','pipedrive'],['beehiiv','kit'],['jotform','typeform'],['semrush','ahrefs'],

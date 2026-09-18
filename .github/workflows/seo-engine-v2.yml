@@ -61,6 +61,8 @@ jobs:
         run: node scripts/build-search-commercial-routing.mjs
       - name: Build indexing-aware organic opportunities
         run: node scripts/build-organic-growth-opportunities-v6.mjs
+      - name: Fetch shared autonomous growth directives
+        run: node scripts/fetch-shared-growth-directives.mjs
       - name: Run indexing-aware closed loop controller
         run: node scripts/run-organic-growth-controller-v4.mjs
       - name: Build cross-channel content intelligence

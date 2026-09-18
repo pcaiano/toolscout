@@ -6,6 +6,7 @@ const ROOT=process.cwd();
 const actionsPath=path.join(ROOT,'reports','organic-growth-actions.json');
 if(!fs.existsSync(actionsPath))process.exit(0);
 const actions=JSON.parse(fs.readFileSync(actionsPath,'utf8'));
+if(actions?.brain!=='shared-growth-v3')throw new Error('organic_growth_actions_not_authorized_by_shared_brain');
 const active=new Map((actions.activeOptimizations||[]).map(x=>[x.intent,x]));
 const { intents }=loadSeoIntentState(ROOT);
 const START='<!-- organic-growth:start -->';
