@@ -108,6 +108,100 @@ a{color:inherit}
 }
 </style>`;
 
+
+const TRAFFIC_DETAIL_REPAIR = `<style id="toolscout-traffic-detail-repair-style">
+#trafficTruthBody .tsTrafficDetail[data-repair="1"]{margin-top:12px}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsTrafficDetailHead{margin-bottom:9px}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsTrafficDetailHead strong{display:block;font-size:12px;letter-spacing:.02em}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsTrafficDetailHead span{display:block;color:var(--muted);font-size:10px;line-height:1.4;margin-top:3px}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsDetailGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsDetailCard{border:1px solid var(--line);background:var(--card2);border-radius:14px;padding:12px 13px;min-width:0}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsDetailCard small{display:block;color:var(--muted);font-size:8.5px;font-weight:850;letter-spacing:.075em;text-transform:uppercase;line-height:1.35}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsDetailCard b{display:block;font-size:25px;letter-spacing:-.04em;line-height:1.05;margin-top:6px}
+#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsDetailCard span{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-top:5px}
+#trafficTruthBody .tsCountryBlock[data-ts-country-bars="1"]{margin-top:12px;border:1px solid var(--line);background:var(--card2);border-radius:14px;padding:12px 13px}
+#trafficTruthBody .tsCountryBlock[data-ts-country-bars="1"] .tsCountryHead strong{display:block;font-size:12px}
+#trafficTruthBody .tsCountryBlock[data-ts-country-bars="1"] .tsCountryHead span{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-top:3px}
+#trafficTruthBody .tsCountryGridRepair{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+#trafficTruthBody .tsCountryColRepair{min-width:0;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:11px}
+#trafficTruthBody .tsCountryLabelRepair{font-size:9px;font-weight:850;letter-spacing:.075em;text-transform:uppercase;color:var(--muted)}
+#trafficTruthBody .tsCountrySummaryRepair{font-size:9px;color:var(--muted);line-height:1.4;margin-top:3px;margin-bottom:9px}
+#trafficTruthBody .tsCountryBarRowRepair{margin-top:9px}
+#trafficTruthBody .tsCountryBarTopRepair{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10px;line-height:1.25}
+#trafficTruthBody .tsCountryBarTopRepair span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#trafficTruthBody .tsCountryBarTopRepair b{font-size:10px;white-space:nowrap}
+#trafficTruthBody .tsCountryBarTrackRepair{height:7px;margin-top:5px;background:var(--line);border-radius:999px;overflow:hidden}
+#trafficTruthBody .tsCountryBarFillRepair{display:block;height:100%;background:var(--accent);border-radius:999px}
+#trafficTruthBody .tsCountryMoreRepair{margin-top:8px;font-size:9px;color:var(--muted)}
+@media(max-width:900px){#trafficTruthBody .tsCountryGridRepair{grid-template-columns:1fr}}
+@media(max-width:430px){#trafficTruthBody .tsTrafficDetail[data-repair="1"] .tsDetailGrid{grid-template-columns:1fr 1fr;gap:8px}}
+</style><script id="toolscout-traffic-detail-repair">(function(){
+if(window.__toolscoutTrafficDetailRepair)return;
+window.__toolscoutTrafficDetailRepair=true;
+var latest=null,busy=false;
+function num(v){var x=Number(v);return Number.isFinite(x)?x:0}
+function fmt(v,d){var x=num(v);return d==null?x.toLocaleString():x.toFixed(d)}
+function escHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})}
+function region(code){try{var dn=new Intl.DisplayNames([document.documentElement.lang||'en'],{type:'region'});return dn.of(code)||code}catch(e){return code}}
+function card(label,value,meta){return '<div class="tsDetailCard"><small>'+escHtml(label)+'</small><b>'+escHtml(value)+'</b><span>'+escHtml(meta)+'</span></div>'}
+function windowMeta(v,key){var c=v&&v.coverage||{};var ok=key==='last24'?!!c.last24Complete:key==='today'?!!c.todayComplete:!!c.monthToDateComplete;return ok?'Complete exact measurement window':'Partial exact tracking window'}
+function countryColumn(label,data){
+  if(!data)return '<div class="tsCountryColRepair"><div class="tsCountryLabelRepair">'+escHtml(label)+'</div><div class="tsCountrySummaryRepair">Unavailable</div></div>';
+  var all=Array.isArray(data.countries)?data.countries:[],rows=all.slice(0,6),total=num(data.total),unknown=num(data.unknown),dominant=rows[0]||null;
+  var dominantPct=dominant&&total?Math.round(num(dominant.visitors)/total*100):0;
+  var cov=data.coverage==null?null:Math.round(Number(data.coverage)*100);
+  var summary=total?all.length+' '+(all.length===1?'country':'countries')+(dominant?' · '+region(String(dominant.country||''))+' '+dominantPct+'%':'')+(cov==null?'':' · '+cov+'% located'):'No visitors yet';
+  var body=rows.map(function(x){var pct=total?Math.round(num(x.visitors)/total*100):0;return '<div class="tsCountryBarRowRepair"><div class="tsCountryBarTopRepair"><span>'+escHtml(region(String(x.country||'')))+'</span><b>'+fmt(x.visitors)+' · '+pct+'%</b></div><div class="tsCountryBarTrackRepair"><i class="tsCountryBarFillRepair" style="width:'+Math.max(0,Math.min(100,pct))+'%"></i></div></div>'}).join('');
+  if(unknown){var upct=total?Math.round(unknown/total*100):0;body+='<div class="tsCountryBarRowRepair"><div class="tsCountryBarTopRepair"><span>Country unavailable</span><b>'+fmt(unknown)+' · '+upct+'%</b></div><div class="tsCountryBarTrackRepair"><i class="tsCountryBarFillRepair" style="width:'+Math.max(0,Math.min(100,upct))+'%;opacity:.35"></i></div></div>'}
+  if(!body)body='<div class="tsCountryMoreRepair">No country data yet.</div>';
+  if(all.length>rows.length)body+='<div class="tsCountryMoreRepair">+'+fmt(all.length-rows.length)+' more</div>';
+  return '<div class="tsCountryColRepair"><div class="tsCountryLabelRepair">'+escHtml(label)+'</div><div class="tsCountrySummaryRepair">'+escHtml(summary)+'</div>'+body+'</div>';
+}
+function countriesBlock(c){
+  if(!c||c.status!=='observed')return '<div class="tsCountryBlock" data-ts-country-bars="1"><div class="tsCountryHead"><strong>Visitor countries</strong><span>Country data is currently unavailable.</span></div></div>';
+  return '<div class="tsCountryBlock" data-ts-country-bars="1"><div class="tsCountryHead"><strong>Visitor countries</strong><span>Country share among browser-confirmed human visitors. Cloudflare network location is used. Raw IP is not stored. VPNs or proxies can affect the reported country.</span></div><div class="tsCountryGridRepair">'+countryColumn('Today',c.today)+countryColumn('Last 24h',c.last24)+countryColumn('MTD',c.monthToDate)+'</div></div>';
+}
+function render(d){
+  latest=d||latest;if(!latest)return;
+  var root=document.getElementById('trafficTruthBody');if(!root)return;
+  var forecast=root.querySelector('.tsTruthForecast');if(!forecast)return;
+  var v=latest.visitors||{},t=latest.traffic||{},commercial=latest.canonicalCommercialTruth||{},countries=latest.trafficCountries||{};
+  var html='<div class="tsTrafficDetail" data-repair="1"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Human Sessions is the canonical headline metric. Unique Human Visitors remains a supporting exact first-party metric.</span></div><div class="tsDetailGrid">'+
+    card('Unique human visitors, last 24h',fmt(v.last24),windowMeta(v,'last24'))+
+    card('Unique human visitors today',fmt(v.today),windowMeta(v,'today'))+
+    card('Unique human visitors this month',fmt(v.monthToDate),windowMeta(v,'month'))+
+    card('Unique visitors since exact tracking',fmt(v.sinceTracking),'First-party human browser IDs observed since exact visitor tracking began')+
+    card('Verified outbound clicks',fmt(commercial.humanOutbound),'First-party verified outbound clicks')+
+    card('Monetized outbound clicks, 30d',fmt(commercial.monetizedOutbound),'Human outbound clicks routed through active monetized affiliate paths')+
+    card('Browser sessions this month',fmt(t.monthToDate),'Canonical browser-confirmed month-to-date sessions')+
+    card('Average sessions per day MTD',fmt(t.dailyAverageMTD,1),'Browser-confirmed sessions per calendar day')+
+    '</div>'+countriesBlock(countries)+'</div>';
+  var old=root.querySelector('.tsTrafficDetail');
+  if(old)old.remove();
+  forecast.insertAdjacentHTML('afterend',html);
+}
+async function refresh(){
+  if(busy||document.hidden)return;busy=true;
+  try{var r=await fetch('/analytics/api/stats',{cache:'no-store'});if(r.ok){var d=await r.json();render(d)}}catch(e){}finally{busy=false}
+}
+function ensure(){
+  var root=document.getElementById('trafficTruthBody');
+  if(!root||!latest)return;
+  var current=root.querySelector('.tsTrafficDetail[data-repair="1"]');
+  if(!current)render(latest);
+}
+function boot(){
+  refresh();
+  setTimeout(refresh,1200);
+  setInterval(refresh,15000);
+  var root=document.getElementById('trafficTruthBody');
+  if(root)new MutationObserver(function(){setTimeout(ensure,0)}).observe(root,{childList:true,subtree:false});
+  document.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('[data-ts-window],.btn'))setTimeout(refresh,120)},true);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)refresh()});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();</script>`;
+
 function isHtml(response) {
   return (response.headers.get('Content-Type') || '').toLowerCase().includes('text/html');
 }
@@ -119,6 +213,11 @@ async function applyLightTheme(response) {
     html = html.includes('</body>')
       ? html.replace('</body>', LIGHT_THEME + '</body>')
       : html + LIGHT_THEME;
+  }
+  if (!html.includes('id="toolscout-traffic-detail-repair"')) {
+    html = html.includes('</body>')
+      ? html.replace('</body>', TRAFFIC_DETAIL_REPAIR + '</body>')
+      : html + TRAFFIC_DETAIL_REPAIR;
   }
   const headers = new Headers(response.headers);
   headers.set('Content-Type', 'text/html; charset=UTF-8');
