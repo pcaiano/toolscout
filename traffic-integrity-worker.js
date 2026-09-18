@@ -8,6 +8,7 @@ const SAFE_SOURCE=/^[A-Za-z0-9][A-Za-z0-9._:&=/-]{0,99}$/;
 const SAFE_HOST=/^(?=.{1,120}$)[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$/;
 const SAFE_PATH=/^\/[A-Za-z0-9._~!$&'()*+,;=:@%/?-]{0,199}$/;
 const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
+let integritySchemaReady=null;
 
 function isHtml(response){return (response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
 function parseSqliteUtc(value){
@@ -27,6 +28,8 @@ function minutesOld(value,now=Date.now()){
 }
 
 async function ensureIntegritySchema(env){
+  if(integritySchemaReady)return integritySchemaReady;
+  integritySchemaReady=(async()=>{
   await env.DB.batch([
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,11 +96,15 @@ async function recordConfirmedVisitor(request,env){
   await ensureIntegritySchema(env);
   const confirmed=await env.DB.prepare(`SELECT 1 ok FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id=? AND f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') LIMIT 1`).bind(sessionId).first();
   if(!confirmed?.ok)return Response.json({ok:true,recorded:false,reason:'page_not_confirmed_yet'},{status:409,headers});
+  const existing=await env.DB.prepare(`SELECT visitor_id FROM confirmed_visitor_events WHERE session_id=? ORDER BY id ASC LIMIT 1`).bind(sessionId).first().catch(()=>null);
+  if(existing?.visitor_id&&String(existing.visitor_id)!==visitorId)return Response.json({ok:true,recorded:false,reason:'session_identity_locked'},{status:202,headers});
   await env.DB.prepare(`INSERT OR IGNORE INTO confirmed_visitor_events (visitor_id,session_id,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,datetime('now'))`).bind(visitorId,sessionId,path,source,referrer).run();
+  await env.DB.prepare(`INSERT INTO confirmed_visitor_registry(visitor_id,first_seen_at,last_seen_at) VALUES(?,datetime('now'),datetime('now'))
+    ON CONFLICT(visitor_id) DO UPDATE SET last_seen_at=excluded.last_seen_at`).bind(visitorId).run();
   const countryRaw=String(request.cf?.country||'').trim().toUpperCase();
   const country=/^[A-Z]{2}$/.test(countryRaw)?countryRaw:null;
   if(country){
-    await env.DB.prepare(`INSERT INTO confirmed_visitor_countries (visitor_id,session_id,country,created_at) VALUES (?,?,?,datetime('now')) ON CONFLICT(visitor_id,session_id) DO UPDATE SET country=excluded.country`).bind(visitorId,sessionId,country).run();
+    await env.DB.prepare(`INSERT INTO confirmed_visitor_countries (visitor_id,session_id,country,created_at) VALUES (?,?,?,datetime('now')) ON CONFLICT(session_id) DO UPDATE SET country=excluded.country WHERE confirmed_visitor_countries.visitor_id=excluded.visitor_id`).bind(visitorId,sessionId,country).run();
     await env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta (key,value) VALUES ('country_tracking_started_at',datetime('now'))`).run();
   }
   return Response.json({ok:true,recorded:true,canonical:'d1-browser-confirmed',countryRecorded:Boolean(country)},{status:202,headers});
