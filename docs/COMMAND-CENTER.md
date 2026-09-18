@@ -188,6 +188,26 @@ Programs previously identified as existing but not yet confirmed active include 
 
 PartnerStack marketplace access is currently constrained by a network-profile limitation. Existing partnerships are unaffected, but new marketplace programs may require reapplication/profile correction or alternative direct program routes. Treat this as a distribution/affiliate constraint, not a coding problem.
 
+## Autonomous Growth loop - 2026-09-18
+
+ToolScout now coordinates growth work across Distribution, Content, Search/GEO/AEO and Affiliate systems instead of treating them as independent queues.
+
+- Distribution Network 2.1 uses explicit publisher lifecycle states. Repeated no-contact candidates are suppressed instead of recycled indefinitely, and are reopened only when the route changes or after the configured cool-off.
+- Publisher contact discovery now records public role emails plus alternate public routes such as contact/submission forms, LinkedIn company pages, X, Bluesky and GitHub. Missing email is no longer treated as missing route.
+- `growth_opportunity_state` is the shared priority layer. It combines distribution economics, publisher adoption state, vendor amplification, verified social profiles, affiliate-social permissions and current Search/GEO/AEO opportunity evidence.
+- Search opportunities from the organic growth report become first-class growth subjects. Their observed priority can provide a bounded boost to relevant tool/vendor opportunities so content, outreach, SEO and monetization reinforce the same themes.
+- Content Engine briefs prefer current growth opportunities, retain verified-handle guardrails, and attach exact `ts_action` and `ts_growth` markers to ToolScout-owned targets. Direct vendor affiliate links remain unmodified when programme rules require direct linking.
+- Vendor and publisher outreach now creates measurable growth actions. Vendor outreach includes the featured decision asset, the ToolScout tool profile and the free publisher/embed kit while preserving editorial independence.
+- Growth attribution counts only likely-human sessions that become browser-confirmed and carry a known exact action marker. Outbound and monetized outbound are counted only after that attributed entry. Missing markers are never inferred as traffic.
+- The protected Command Center includes an Autonomous Growth view covering active opportunities, autonomous actions, human interventions, Chairman Queue size, contact routes, placements, backlinks, attributed human sessions, outbound and monetized outbound.
+- Human intervention remains an exception. Paid actions, authentication, CAPTCHA, terms acceptance and genuinely irreversible third-party gates still require owner action. Machine-resolvable work must remain outside the Chairman Queue.
+
+The operating loop is now:
+
+`observe -> prioritize -> act -> verify -> attribute -> learn -> scale/suppress -> repeat`
+
+The next acceptance criterion is not candidate volume. It is repeated evidence of `new opportunity -> autonomous action -> verified external presence or outreach -> browser-confirmed human session`.
+
 ## Distribution status
 
 Current known distribution state:
