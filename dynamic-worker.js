@@ -36,13 +36,19 @@ async function d1AffiliateRoute(env,tool){
   }catch{}
   return null;
 }
+async function d1CatalogPublicRoute(env,tool){
+  try{
+    const row=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status='admitted_coverage' LIMIT 1").bind(tool).first();
+    if(!row)return null;const profile=JSON.parse(row.profile_json||'{}'),url=safeAffiliateUrl(profile?.sourceUrl);return url||null;
+  }catch{return null}
+}
 async function trackedRedirect(request,env,tool){
   try{
     const config=await (await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url)))).json();
-    const staticEntry=config[tool]||null,d1Route=await d1AffiliateRoute(env,tool);
+    const staticEntry=config[tool]||null,[d1Route,catalogPublic]=await Promise.all([d1AffiliateRoute(env,tool),d1CatalogPublicRoute(env,tool)]);
     const routeEntry=d1Route?{...(staticEntry||{}),enabled:true,url:d1Route.affiliate_url}:staticEntry;
     const affiliateActive=Boolean(routeEntry?.enabled&&safeAffiliateUrl(routeEntry?.url));
-    const baseDestination=affiliateActive?routeEntry.url:staticEntry?.publicUrl;
+    const baseDestination=affiliateActive?routeEntry.url:(staticEntry?.publicUrl||catalogPublic);
     if(!baseDestination)return null;
     const healthCheck=request.headers.get('X-ToolScout-Health-Check')==='affiliate-route';
     const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';
