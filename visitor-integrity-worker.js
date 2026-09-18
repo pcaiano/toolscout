@@ -117,6 +117,23 @@ async function linkAfterRequest(request,env,url,response,event){
   }
 }
 
+async function sessionIdentityHealth(env){
+  await ensureSchema(env);
+  const [duplicates,orphanCountries]=await Promise.all([
+    env.DB.prepare(`SELECT COUNT(*) count FROM (SELECT session_id FROM confirmed_visitor_events GROUP BY session_id HAVING COUNT(*)>1)`).first(),
+    env.DB.prepare(`SELECT COUNT(*) count FROM confirmed_visitor_countries c WHERE NOT EXISTS (SELECT 1 FROM confirmed_visitor_events e WHERE e.session_id=c.session_id AND e.visitor_id=c.visitor_id)`).first()
+  ]);
+  return Response.json({
+    ok:Number(duplicates?.count||0)===0&&Number(orphanCountries?.count||0)===0,
+    service:'toolscout-visitor-session-identity',
+    version:1,
+    rule:'one_session_one_visitor_first_valid_link_wins',
+    duplicateSessionIds:Number(duplicates?.count||0),
+    orphanCountryLinks:Number(orphanCountries?.count||0),
+    repair:'preserve earliest valid visitor-session link and reject later conflicting visitor IDs'
+  },{headers:{'Cache-Control':'no-store'}});
+}
+
 async function visitorSnapshot(env){
   await ensureSchema(env);
   const meta=await env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='visitor_guard_linking_started_at' LIMIT 1`).first();
@@ -174,6 +191,7 @@ async function augmentHealth(response,env){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url),event=url.pathname==='/api/events'?await eventContext(request):null;
+    if(request.method==='GET'&&url.pathname==='/api/visitor-session-identity-health')return sessionIdentityHealth(env);
     let response=await base.fetch(request,env,ctx);
     try{await linkAfterRequest(request,env,url,response,event)}catch{}
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentStats(response,env);
