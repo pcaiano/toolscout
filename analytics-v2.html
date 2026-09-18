@@ -161,10 +161,16 @@ function renderDistribution(d){
     '<div class="metricGrid">'+
       metric('Actions · 24h',num(x.events_24h),pct(success)+' successful')+
       metric('Failed · 24h',num(x.failed_24h),'Must never fail silently')+
+      metric('Publisher network',num(x.network_candidates),num(x.network_queued)+' queued · '+num(x.network_adopted)+' adopted')+
+      metric('Contacts / outreach',num(x.network_contact_found)+' / '+num(x.network_sent),'Verified contacts / sent')+
+      metric('Verified footprint',num(x.verified_placements),num(x.verified_backlinks)+' backlinks')+
       metric('Human sessions · 30d',num(x.attributed_human_sessions_30d),'Attributed to distribution')+
       metric('Monetized outbound · 30d',num(x.attributed_monetized_outbound_30d),num(x.attributed_outbound_30d)+' total outbound')+
     '</div>'+
-    '<div style="margin-top:10px">'+stateEntries(x.opportunity_status).slice(0,7).map(([k,v])=>row(k,num(v),'distribution opportunities')).join('')+'</div>';
+    '<div style="margin-top:10px">'+
+      stateEntries(x.network_status).slice(0,5).map(([k,v])=>row('network · '+k,num(v),'Distribution Network 2.1')).join('')+
+      stateEntries(x.opportunity_status).slice(0,7).map(([k,v])=>row(k,num(v),'distribution opportunities')).join('')+
+    '</div>';
 }
 function renderAffiliate(d){
   const x=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.affiliate||{};
@@ -309,7 +315,13 @@ function detailFor(id){
   if(!snapshot)return;
   const g=snapshot.growthOps||{},eng=g.engines||{},f=g.footprint||{};
   if(id==='chairman'){const q=g.chairmanQueue||{};modalRows('Chairman Queue','HUMAN GATES',q.items&&q.items.length?q.items.map(taskHtml).join(''):'<div class="note">No current human gates.</div>');return}
-  if(id==='distribution'){const x=eng.distribution||{};modalRows('Distribution Engine 2.1','ENGINE DETAIL',stateEntries(x.opportunity_status).map(([k,v])=>row(k,num(v),'opportunity state')).join('')+stateEntries(x.delivery_status).map(([k,v])=>row('verification: '+k,num(v),'delivery state')).join(''));return}
+  if(id==='distribution'){const x=eng.distribution||{};modalRows('Distribution Engine 2.1','ENGINE DETAIL',
+    row('Publisher network',num(x.network_candidates),num(x.network_queued)+' queued · '+num(x.network_adopted)+' adopted')+
+    row('Contacts / outreach',num(x.network_contact_found)+' / '+num(x.network_sent),'verified contacts / sent')+
+    row('Verified footprint',num(x.verified_placements),num(x.verified_backlinks)+' backlinks')+
+    stateEntries(x.network_status).map(([k,v])=>row('network: '+k,num(v),'Distribution Network 2.1')).join('')+
+    stateEntries(x.opportunity_status).map(([k,v])=>row(k,num(v),'opportunity state')).join('')+
+    stateEntries(x.delivery_status).map(([k,v])=>row('verification: '+k,num(v),'delivery state')).join(''));return}
   if(id==='affiliate'){const x=eng.affiliate||{};modalRows('Affiliate Coverage Engine 2.0','ENGINE DETAIL',stateEntries(x.workflow_status).map(([k,v])=>row(k,num(v),'affiliate state')).join('')+row('Discovery checked',num(x.discovery&&x.discovery.total),dt(x.discovery&&x.discovery.last_checked)));return}
   if(id==='footprint'){const surfaces=f.distribution&&f.distribution.surfaces||[];modalRows('ToolScout Footprint','DISTRIBUTION + SEARCH',row('GSC observed pages',num(f.search&&f.search.observed_pages),f.search&&f.search.note)+row('Sitemap URLs',num(f.search&&f.search.sitemap_urls),'crawlable inventory')+surfaces.map(x=>row(x.name||x.slug,x.status,x.type||'surface')).join(''));return}
   if(id==='ledger'){modalRows('Growth Ledger','EVIDENCE LOG',(g.ledger||[]).map(x=>row((x.engine||'engine')+' · '+(x.subject||''),x.result||'',dt(x.at)+' · '+(x.action||''))).join(''));return}
