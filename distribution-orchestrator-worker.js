@@ -50,7 +50,7 @@ async function growthRows(env,sql){try{return (await env.DB.prepare(sql).all()).
 async function growthAssetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 async function coordinateGrowthOpportunities(env){
   await ensureGrowthSchema(env);
-  const [surfaces,tools,affiliateRows,organicGrowth,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools]=await Promise.all([
+  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,organicGrowth,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
       n.status network_status,n.adoption_kind
@@ -79,6 +79,9 @@ async function coordinateGrowthOpportunities(env){
       AND c.session_id IN (SELECT session_id FROM confirmed_sessions)
     LEFT JOIN sessions s ON s.session_id=c.session_id
     GROUP BY w.tool_slug,w.status,w.network,w.blocker,w.application_url,w.program_url,w.affiliate_url,w.updated_at`),
+    growthRows(env,`SELECT tool_slug,source_status,http_status,content_changed,broken_consecutive,quality_status,last_checked_at,last_change_at FROM catalog_runtime_state`),
+    growthRows(env,`SELECT tool_slug,status,source_status,verified_at FROM catalog_runtime_candidates`),
+    growthRows(env,`SELECT tool_slug,signals,sources_json,status,updated_at FROM catalog_market_gaps`),
     growthAssetJson(env,'/reports/organic-growth-opportunities.json',{generatedAt:null,opportunities:[],summary:{}}),
     growthAssetJson(env,'/reports/aeo-geo-readiness.json',{generatedAt:null,failures:null,warnings:null}),
     growthAssetJson(env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null}),
@@ -157,12 +160,15 @@ async function coordinateGrowthOpportunities(env){
     active++;affiliateCount++;
   }
 
+  const runtimeStateBySlug=new Map((catalogRuntime||[]).map(x=>[String(x.tool_slug||'').toLowerCase(),x]));
+  const runtimeCandidateSet=new Set((catalogCandidates||[]).filter(x=>x.status==='admitted_coverage').map(x=>String(x.tool_slug||'').toLowerCase()));
+  const runtimeGapMap=new Map((catalogGaps||[]).map(x=>[String(x.tool_slug||'').toLowerCase(),x]));
   const catalogBySlug=new Map((Array.isArray(catalogTools)?catalogTools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
   const changed=new Map((Array.isArray(catalogFreshness?.contentChanges)?catalogFreshness.contentChanges:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
   const quarantined=new Map((Array.isArray(catalogFreshness?.quarantined)?catalogFreshness.quarantined:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
   const healthBySlug=new Map((Array.isArray(catalogHealth?.tools)?catalogHealth.tools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
   const heldBySlug=new Map((Array.isArray(toolProfileHolds?.items)?toolProfileHolds.items:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
-  const catalogSlugs=new Set([...changed.keys(),...quarantined.keys(),...heldBySlug.keys()]);
+  const catalogSlugs=new Set([...changed.keys(),...quarantined.keys(),...heldBySlug.keys(),...runtimeStateBySlug.keys(),...runtimeCandidateSet]);
   for(const [slug,h] of healthBySlug){
     if(h?.needsWeeklyReview||h?.overdue||Array.isArray(h?.missingCritical)&&h.missingCritical.length)catalogSlugs.add(slug);
   }
@@ -178,7 +184,8 @@ async function coordinateGrowthOpportunities(env){
     if(hold){score+=18;actions.push('resolve_profile_evidence_hold');}
     if(quarantine){score+=55;actions.push('confirm_source_breakage','suppress_unverifiable_profile');}
     score=Math.min(100,score+searchBoost);
-    const signals={tool_name:tool?.name||h?.name||slug,category:tool?.category||null,content_changed:Boolean(change),quarantined:Boolean(quarantine),needs_weekly_review:Boolean(h?.needsWeeklyReview),overdue:Boolean(h?.overdue),missing_critical:Array.isArray(h?.missingCritical)?h.missingCritical:[],profile_hold:hold?.reason||null,source_status:h?.source?.status||change?.sourceStatus||null,source_http_status:h?.source?.httpStatus||change?.httpStatus||null,search_priority_boost:Number(searchBoost.toFixed(2)),freshness_report_generated_at:catalogFreshness?.generatedAt||null,catalog_health_generated_at:catalogHealth?.summary?.generatedAt||null};
+    const runtime=runtimeStateBySlug.get(slug)||null;if(runtime?.quality_status==='change_detected'){score+=34;actions.push('verify_changed_catalog_facts','refresh_profile_if_confirmed')}if(runtime?.quality_status==='confirmed_broken'){score+=45;actions.push('suppress_unverifiable_profile')}if(runtimeCandidateSet.has(slug)){score+=8;actions.push('monitor_runtime_coverage_profile')}
+    const signals={tool_name:tool?.name||h?.name||slug,category:tool?.category||null,content_changed:Boolean(change)||runtime?.quality_status==='change_detected',quarantined:Boolean(quarantine)||runtime?.quality_status==='confirmed_broken',needs_weekly_review:Boolean(h?.needsWeeklyReview),overdue:Boolean(h?.overdue),missing_critical:Array.isArray(h?.missingCritical)?h.missingCritical:[],profile_hold:hold?.reason||null,source_status:runtime?.source_status||h?.source?.status||change?.sourceStatus||null,source_http_status:runtime?.http_status||h?.source?.httpStatus||change?.httpStatus||null,runtime_quality_status:runtime?.quality_status||null,runtime_last_checked_at:runtime?.last_checked_at||null,runtime_candidate:runtimeCandidateSet.has(slug),search_priority_boost:Number(searchBoost.toFixed(2)),freshness_report_generated_at:catalogFreshness?.generatedAt||null,catalog_health_generated_at:catalogHealth?.summary?.generatedAt||null};
     await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
@@ -196,6 +203,18 @@ async function coordinateGrowthOpportunities(env){
       .bind(`catalog-category:${category}`,'catalog_category',category,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
     active++;catalogCount++;
   }
+  for(const [slug,gap] of runtimeGapMap){
+    if(!slug||String(gap?.status||'')!=='research_required')continue;
+    const signalsCount=Math.max(0,Number(gap?.signals||0)),score=Math.min(100,28+signalsCount*10);
+    let sources=[];try{sources=JSON.parse(gap?.sources_json||'[]')}catch{}
+    const signals={market_signals:signalsCount,market_sources:sources,first_party_profile_required:true,affiliate_neutral:true,updated_at:gap?.updated_at||null};
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(`catalog-gap:${slug}`,'catalog_gap',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(['research_first_party_candidate_profile','verify_official_source','admit_only_after_quality_gates'])).run();
+    active++;catalogCount++;
+  }
+
   const freshnessDays=Number(catalogEngine?.cadence?.freshnessTargetDays||7),reportMs=Date.parse(catalogFreshness?.generatedAt||'');
   const reportAgeDays=Number.isFinite(reportMs)?Math.floor((Date.now()-reportMs)/86400000):999;
   if(reportAgeDays>=freshnessDays){
