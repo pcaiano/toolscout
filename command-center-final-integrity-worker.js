@@ -11,10 +11,58 @@ function normalizeStats(data){
   data.tracking={...(data.tracking||{}),status:sessions.status,humanSessionsLast24Hours:sessions.last24,definition};
   data.funnel={...(data.funnel||{}),outboundClicks:out.humanOutbound,sessionToOutboundCtr:null,definition};
   data.commercial={...(data.commercial||{}),monetizedOutbound:out.monetizedOutbound,totals:{...(data.commercial?.totals||{}),outbound:out.humanOutbound,monetizedOutbound:out.monetizedOutbound},trafficDefinition:definition};
+
   const gsc=audit.sources?.gsc||{status:'unknown',generated_at:null},ga4=audit.sources?.ga4||{status:'unknown',generated_at:null};
-  data.growthOps=data.growthOps||{};data.growthOps.health=data.growthOps.health||{};
-  data.growthOps.health.seo_geo_aio={status:statusFromSource(gsc),last_event_at:gsc.generated_at||null,detail:`GSC source is ${gsc.status||'unknown'}${gsc.age_minutes!=null?` (${Math.round(gsc.age_minutes/60)}h old)`:''}. GA4 source is ${ga4.status||'unknown'}${ga4.age_minutes!=null?` (${Math.round(ga4.age_minutes/60)}h old)`:''}.`};
-  if(data.growthOps.footprint?.search){const s=data.growthOps.footprint.search;s.freshness=gsc.status||'unknown';s.generated_at=gsc.generated_at||s.generated_at||null;s.note=`${s.note||''} Snapshot freshness: ${gsc.status||'unknown'}${gsc.generated_at?` (${gsc.generated_at})`:''}.`.trim()}
+  data.growthOps=data.growthOps||{};
+  data.growthOps.engines=data.growthOps.engines||{};
+  data.growthOps.health=data.growthOps.health||{};
+
+  const canonicalEngines=data.commandCenterIntegrity?.engines||audit.engines||{};
+  for(const key of ['distribution','affiliate']){
+    if(canonicalEngines[key])data.growthOps.engines[key]={...(data.growthOps.engines[key]||{}),...canonicalEngines[key]};
+  }
+  for(const key of ['content','audience']){
+    if(canonicalEngines[key])data.growthOps.health[key]={...(data.growthOps.health[key]||{}),...canonicalEngines[key]};
+  }
+
+  const gscHours=gsc.age_minutes!=null?Math.round(gsc.age_minutes/60):null,ga4Hours=ga4.age_minutes!=null?Math.round(ga4.age_minutes/60):null;
+  data.growthOps.health.seo_geo_aio={
+    status:statusFromSource(gsc),
+    last_event_at:gsc.generated_at||null,
+    detail:`GSC: ${gsc.status||'unknown'}${gscHours!=null?` (${gscHours}h old)`:''}. GA4: ${ga4.status||'unknown'}${ga4Hours!=null?` (${ga4Hours}h old)`:''}.`
+  };
+
+  const rawIssues=[...((data.growthOps.health.issues)||[])];
+  const normalized=[];
+  const seen=new Set();
+  for(const issue of rawIssues){
+    if(!issue||typeof issue!=='object')continue;
+    const metric=String(issue.metric||'').trim(),engine=String(issue.engine||'').trim(),reason=String(issue.reason||'').trim(),detail=String(issue.detail||'').trim(),title=String(issue.title||issue.code||'').trim();
+    let item=null;
+    if(metric==='gsc'){
+      item={engine:'SEO / GEO / AIO',metric,title:'GSC data refresh overdue',detail:gscHours!=null?`Imported GSC evidence is ${gscHours}h old. Refresh the GSC snapshot before treating search visibility as current.`:'Current GSC freshness evidence is unavailable.',severity:'warning',reason:reason||gsc.status||'stale'};
+    }else if(metric==='ga4'){
+      item={engine:'SEO / GEO / AIO',metric,title:'GA4 freshness unavailable',detail:ga4Hours!=null?`Imported GA4 evidence is ${ga4Hours}h old.`:'No current GA4 freshness evidence is available.',severity:'warning',reason:reason||ga4.status||'unknown'};
+    }else if(metric.startsWith('engine:')){
+      const key=metric.slice(7),health=canonicalEngines[key]||{},label=key==='content'?'Content Engine':key==='audience'?'Audience Engine':key==='affiliate'?'Affiliate Coverage Engine':key==='distribution'?'Distribution Engine':key;
+      const missing=Array.isArray(health.missing_stages)&&health.missing_stages.length?` Missing: ${health.missing_stages.join(', ')}.`:'';
+      item={engine:label,metric,title:`${label} ${health.status||reason||'warning'}`,detail:`${health.detail||health.proof||'Operational evidence requires attention.'}${missing}`.trim(),severity:issue.severity||'warning',reason:reason||health.status||'warning'};
+    }else if(engine||metric||title||reason||detail){
+      item={...issue,engine:engine||metric||'System',title:title||reason||'Operational warning',detail:detail||reason||'No additional detail supplied.'};
+    }
+    if(!item)continue;
+    const key=[item.engine,item.metric,item.title,item.detail,item.severity].join('|');
+    if(seen.has(key))continue;
+    seen.add(key);normalized.push(item);
+  }
+  data.growthOps.health.issues=normalized;
+
+  if(data.growthOps.footprint?.search){
+    const s=data.growthOps.footprint.search;
+    s.freshness=gsc.status||'unknown';
+    s.generated_at=gsc.generated_at||s.generated_at||null;
+    s.note=`${s.note||''} Snapshot freshness: ${gsc.status||'unknown'}${gsc.generated_at?` (${gsc.generated_at})`:''}.`.trim();
+  }
   return data;
 }
 
@@ -23,9 +71,10 @@ const UI_INTEGRITY=`<script>
   const fmtCount=v=>v===null||v===undefined||v===''?'Unavailable':Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable';
   const statusLabel=s=>({healthy:'Healthy',running:'Running',completed:'Completed',observed:'Observed',partial:'Partial',degraded:'Degraded',failed:'Failed',stale:'Stale',unknown:'Unknown',unavailable:'Unavailable',warning:'Warning',no_evidence:'No evidence'}[String(s||'').toLowerCase()]||s||'Unknown');
   const when=x=>x&&x.last_completed_at||x&&x.last_run_at||x&&x.last_event_at||x&&x.last_activity_at||null;
-  const proof=x=>{if(!x)return'';const bits=[];if(x.proof)bits.push(x.proof);else if(x.detail)bits.push(x.detail);if(Array.isArray(x.missing_stages)&&x.missing_stages.length)bits.push('Missing: '+x.missing_stages.join(', '));if(when(x))bits.push(dt(when(x)));return bits.join(' | ')};
-  const auditIssues=d=>{const h=d.growthOps&&d.growthOps.health||{};return Array.isArray(h.issues)?h.issues:[]};
-  const issueHtml=x=>{const sev=x.severity==='warning'?'warning':'',name=x.engine||x.metric||'system',title=x.title||x.code||x.reason||'issue',detail=x.detail||x.reason||'';return '<div class="bug '+sev+'"><b>'+(x.severity==='warning'?'Warning':'Engine bug')+' | '+esc(name)+':</b> '+esc(title)+(detail&&detail!==title?' | '+esc(detail):'')+'</div>'};
+  const proof=x=>{if(!x)return'';const bits=[];if(x.detail)bits.push(x.detail);else if(x.proof)bits.push(x.proof);if(Array.isArray(x.missing_stages)&&x.missing_stages.length)bits.push('Missing: '+x.missing_stages.join(', '));if(when(x))bits.push('Last evidence '+dt(when(x)));return bits.join(' | ')};
+  const auditIssues=d=>{const h=d.growthOps&&d.growthOps.health||{};return Array.isArray(h.issues)?h.issues.filter(x=>x&&(x.engine||x.metric||x.title||x.reason||x.detail)):[]};
+  const healthRow=(name,value,meta='')=>'<div class="row"><div><div class="rowName">'+esc(name)+'</div>'+(meta?'<div class="rowMeta">'+esc(meta)+'</div>':'')+'</div><div class="rowValue">'+esc(value)+'</div></div>';
+  const issueHtml=x=>{const sev=x.severity==='warning'?'warning':'',name=x.engine||x.metric||'System',title=x.title||x.code||x.reason||'Operational warning',detail=x.detail||x.reason||'No additional detail supplied.';return '<div class="bug '+sev+'"><b>'+(x.severity==='warning'?'Warning':'Engine bug')+' | '+esc(name)+':</b> '+esc(title)+(detail&&detail!==title?' | '+esc(detail):'')+'</div>'};
 
   renderNorthStar=function(d){
     const r=d.revenue||{},ac=d.affiliateCoverage||{},tr=d.tracking||{},t=d.traffic||{},canon=d.canonicalCommercialTruth||{},out=canon.humanOutbound??ac.humanOutboundClicks??null,mon=canon.monetizedOutbound??ac.monetizedLikelyHumanClicks??null;
@@ -77,13 +126,13 @@ const UI_INTEGRITY=`<script>
   renderHealth=function(d){
     const tr=d.tracking||{},g=d.growthOps||{},q=g.chairmanQueue||{},eng=g.engines||{},h=g.health||{},issues=auditIssues(d),broken=(q.broken_links||[]).length;
     const dist=eng.distribution||{},aff=eng.affiliate||{},content=h.content||{},audience=h.audience||{},seo=h.seo_geo_aio||{};
-    let html=row('Tracking',statusLabel(tr.status),fmtCount(tr.humanSessionsLast24Hours)+' human sessions | 24h')+
-      row('Affiliate Coverage Engine',statusLabel(aff.status),proof(aff))+
-      row('Distribution Engine',statusLabel(dist.status),proof(dist))+
-      row('Content Engine',statusLabel(content.status),proof(content))+
-      row('Audience Engine',statusLabel(audience.status),proof(audience))+
-      row('SEO / GEO / AIO',statusLabel(seo.status),(seo.detail||'')+(seo.last_event_at?' | '+dt(seo.last_event_at):''))+
-      row('Broken Chairman links',fmtCount(broken),broken?'Detailed below; suppressed from action queue':'None detected');
+    let html=healthRow('Tracking',statusLabel(tr.status),fmtCount(tr.humanSessionsLast24Hours)+' human sessions | 24h')+
+      healthRow('Affiliate Coverage Engine',statusLabel(aff.status),proof(aff)||'No canonical engine evidence recorded.')+
+      healthRow('Distribution Engine',statusLabel(dist.status),proof(dist)||'No canonical engine evidence recorded.')+
+      healthRow('Content Engine',statusLabel(content.status),proof(content)||'No canonical publication heartbeat recorded.')+
+      healthRow('Audience Engine',statusLabel(audience.status),proof(audience)||'No canonical audience heartbeat recorded.')+
+      healthRow('SEO / GEO / AIO',statusLabel(seo.status),(seo.detail||'No current search analytics freshness evidence.')+(seo.last_event_at?' | Last evidence '+dt(seo.last_event_at):''))+
+      healthRow('Broken Chairman links',fmtCount(broken),broken?'Detailed below; suppressed from action queue':'None detected');
     if(issues.length)html+=issues.map(issueHtml).join('');
     document.getElementById('healthBody').innerHTML=html;
   };
@@ -93,13 +142,13 @@ const UI_INTEGRITY=`<script>
     if(id!=='health')return priorDetailFor(id);
     if(!snapshot)return;
     const g=snapshot.growthOps||{},h=g.health||{},eng=g.engines||{},issues=auditIssues(snapshot),content=h.content||{},audience=h.audience||{},seo=h.seo_geo_aio||{};
-    let html=row('Affiliate Coverage Engine',statusLabel(eng.affiliate&&eng.affiliate.status),proof(eng.affiliate||{}))+row('Distribution Engine',statusLabel(eng.distribution&&eng.distribution.status),proof(eng.distribution||{}))+row('Content Engine',statusLabel(content.status),proof(content))+row('Audience Engine',statusLabel(audience.status),proof(audience))+row('SEO / GEO / AIO',statusLabel(seo.status),seo.detail||'');
-    html+=issues.length?issues.map(x=>row(x.engine||x.metric||'system',x.severity||'issue',x.detail||x.reason||x.title||x.code||'')).join(''):'<div class="note">No engine-health issues detected in this snapshot.</div>';
+    let html=healthRow('Affiliate Coverage Engine',statusLabel(eng.affiliate&&eng.affiliate.status),proof(eng.affiliate||{}))+healthRow('Distribution Engine',statusLabel(eng.distribution&&eng.distribution.status),proof(eng.distribution||{}))+healthRow('Content Engine',statusLabel(content.status),proof(content))+healthRow('Audience Engine',statusLabel(audience.status),proof(audience))+healthRow('SEO / GEO / AIO',statusLabel(seo.status),seo.detail||'');
+    html+=issues.length?issues.map(x=>healthRow(x.engine||x.metric||'System',x.severity||'issue',x.detail||x.reason||x.title||x.code||'')).join(''):'<div class="note">No engine-health issues detected in this snapshot.</div>';
     modalRows('Engine & Data Health','NO SILENT FAILURES',html);
   };
 
   const priorRender=render;
-  render=function(d){priorRender(d);const a=d.measurementAudit||{},state=statusLabel(a.status||'unknown');statusEl.innerHTML='<strong>Updated '+esc(new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'}))+'.</strong> Integrity: '+esc(state)+'. Values marked Unavailable are not zero.';};
+  render=function(d){priorRender(d);renderHealth(d);const a=d.measurementAudit||{},state=statusLabel(a.status||'unknown');statusEl.innerHTML='<strong>Updated '+esc(new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'}))+'.</strong> Integrity: '+esc(state)+'. Values marked Unavailable are not zero.';};
 })();
 </script>`;
 
