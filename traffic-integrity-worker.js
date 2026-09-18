@@ -41,6 +41,16 @@ async function ensureIntegritySchema(env){
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_at ON confirmed_visitor_events(created_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_visitor_id ON confirmed_visitor_events(visitor_id)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_session_id ON confirmed_visitor_events(session_id)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_countries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      visitor_id TEXT NOT NULL,
+      session_id TEXT NOT NULL,
+      country TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(visitor_id,session_id)
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_created_at ON confirmed_visitor_countries(created_at)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_country ON confirmed_visitor_countries(country)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
@@ -81,7 +91,13 @@ async function recordConfirmedVisitor(request,env){
   const confirmed=await env.DB.prepare(`SELECT 1 ok FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.session_id=? AND f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') LIMIT 1`).bind(sessionId).first();
   if(!confirmed?.ok)return Response.json({ok:true,recorded:false,reason:'page_not_confirmed_yet'},{status:409,headers});
   await env.DB.prepare(`INSERT OR IGNORE INTO confirmed_visitor_events (visitor_id,session_id,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,datetime('now'))`).bind(visitorId,sessionId,path,source,referrer).run();
-  return Response.json({ok:true,recorded:true,canonical:'d1-browser-confirmed'},{status:202,headers});
+  const countryRaw=String(request.cf?.country||'').trim().toUpperCase();
+  const country=/^[A-Z]{2}$/.test(countryRaw)?countryRaw:null;
+  if(country){
+    await env.DB.prepare(`INSERT INTO confirmed_visitor_countries (visitor_id,session_id,country,created_at) VALUES (?,?,?,datetime('now')) ON CONFLICT(visitor_id,session_id) DO UPDATE SET country=excluded.country`).bind(visitorId,sessionId,country).run();
+    await env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta (key,value) VALUES ('country_tracking_started_at',datetime('now'))`).run();
+  }
+  return Response.json({ok:true,recorded:true,canonical:'d1-browser-confirmed',countryRecorded:Boolean(country)},{status:202,headers});
 }
 
 async function confirmedVisitorSnapshot(env){
