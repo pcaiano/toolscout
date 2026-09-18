@@ -79,17 +79,15 @@ function editorialDimensions(tool){
 }
 function editorialView(tool){
   const audience=(tool.bestFor||[]).slice(0,3);
-  const capabilities=(tool.features||[]).slice(0,4);
-  const rawDescription=clean(tool.description||'').replace(/\.$/,'');
-  const description=rawDescription?rawDescription.charAt(0).toLowerCase()+rawDescription.slice(1):'a software product whose fit depends on the workflow around it';
+  const capabilities=(tool.features||[]).slice(0,3);
   const {strongest,weakest}=editorialDimensions(tool);
   const strongestLabels=strongest.map(x=>scoreLabels[x.key]||x.key);
-  const scoreSentence=strongestLabels.length?`In the current ToolScout scoring model, ${listPhrase(strongestLabels)} stand out as its strongest recorded dimensions.`:'';
   const topScore=strongest[0]?.score??0;
-  const weakSentence=weakest&&topScore-weakest.score>=2&&!strongest.some(x=>x.key===weakest.key)?` The weaker recorded area is ${scoreLabels[weakest.key]||weakest.key}, so buyers for whom that requirement is central should compare nearby alternatives rather than assume the overall fit carries across every use case.`:'';
-  const fitSentence=audience.length?`The practical fit is strongest for ${listPhrase(audience)}, especially when ${listPhrase(capabilities.length?capabilities:['the core workflow'])} need to sit in the same working setup.`:`The practical fit depends on whether ${listPhrase(capabilities.length?capabilities:['the core workflow'])} match the job to be done.`;
-  const commercial=tool.freePlanKnown===false?'The current free-plan position is not yet verified, so pricing should be checked directly with the vendor before a decision is made.':tool.freePlan?'A recorded free plan lowers the barrier to testing the product against a real workflow before committing to a paid tier.':'The catalog records the product as paid, which makes it more important to validate the use case and current plan limits before committing.';
-  return clean(`${tool.name} is best understood as ${description}. ${fitSentence} ${scoreSentence}${weakSentence} ${commercial} The point of this profile is not to restate the vendor feature list, but to show where the product fits and where a nearby alternative may deserve a closer look. Shortlist ${tool.name} when the priorities above match the job to be done, then check current limits, integrations and plan details before purchase.`);
+  const fit=audience.length?`${tool.name} is a practical fit for ${listPhrase(audience)}, especially when ${listPhrase(capabilities.length?capabilities:['the core workflow'])} matter most.`:`${tool.name} is most relevant when ${listPhrase(capabilities.length?capabilities:['the core workflow'])} match the job to be done.`;
+  const strengths=strongestLabels.length?`In ToolScout's current scoring, ${listPhrase(strongestLabels)} are its strongest recorded dimensions.`:'';
+  const tradeoff=weakest&&topScore-weakest.score>=2&&!strongest.some(x=>x.key===weakest.key)?` ${scoreLabels[weakest.key]||weakest.key} is the clearest recorded trade-off, so compare alternatives if that requirement is critical.`:'';
+  const commercial=tool.freePlanKnown===false?'The current free-plan position is not yet verified.':tool.freePlan?'A recorded free plan makes it easier to test before committing.':'It is recorded as a paid product, so validate the use case before committing.';
+  return clean(`${fit} ${strengths}${tradeoff} ${commercial} Shortlist ${tool.name} when those priorities match your workflow, then verify current limits, integrations and pricing.`);
 }
 function render(tool){
   const url=`${BASE}/tools/${tool.slug}`,pageTitle=`${tool.name} Tool Profile: Features, Pricing and Best For`,description=`ToolScout profile for ${tool.name}, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.`,brandLogo=logoUrl(tool);
