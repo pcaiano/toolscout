@@ -40,6 +40,8 @@ async function ensureSchema(env){
       http_status INTEGER,
       final_url TEXT,
       fingerprint TEXT,
+      pending_fingerprint TEXT,
+      change_confirmations INTEGER NOT NULL DEFAULT 0,
       content_changed INTEGER NOT NULL DEFAULT 0,
       broken_consecutive INTEGER NOT NULL DEFAULT 0,
       quality_status TEXT NOT NULL DEFAULT 'unverified',
@@ -111,7 +113,7 @@ async function verifyBatch(env){
   const staticTools=await assetJson(env,'/data/tools.json',[]);
   const candidates=await runtimeCandidates(env);
   const all=[...(Array.isArray(staticTools)?staticTools:[]),...candidates];
-  const states=await env.DB.prepare(`SELECT tool_slug,source_status,fingerprint,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at FROM catalog_runtime_state`).all();
+  const states=await env.DB.prepare(`SELECT tool_slug,source_status,fingerprint,pending_fingerprint,change_confirmations,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at FROM catalog_runtime_state`).all();
   const smap=new Map((states.results||[]).map(x=>[x.tool_slug,x]));
   const chosen=all.filter(x=>x?.slug&&x?.sourceUrl).sort((a,b)=>{
     const aa=Date.parse(String(smap.get(a.slug)?.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0,bb=Date.parse(String(smap.get(b.slug)?.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0;
@@ -125,16 +127,24 @@ async function verifyBatch(env){
     const fingerprintChanged=result.status==='ok'&&prior.fingerprint&&result.fingerprint&&result.fingerprint!==prior.fingerprint;
     const broken=result.status==='broken'?Number(prior.broken_consecutive||0)+1:0;
     let quality=String(prior.quality_status||'unverified'),contentChanged=Number(prior.content_changed||0),lastChange=prior.last_change_at||null;
-    if(reviewedSinceChange){quality='healthy';contentChanged=0;lastChange=null}
-    if(fingerprintChanged&&!reviewedSinceChange){quality='change_detected';contentChanged=1;lastChange=new Date().toISOString().replace('T',' ').slice(0,19);changed++}
-    if(result.status==='ok'&&!fingerprintChanged&&!prior.last_change_at){quality='healthy';contentChanged=0;healthy++}
-    if(broken>=2){quality='confirmed_broken';contentChanged=0;suppressed++;await logEvent(env,slug,'catalog_tool_suppressed','completed','Official source returned a confirmed 404/410 on two consecutive runtime checks.',{source_url:tool.sourceUrl,http_status:result.httpStatus})}
+    let canonicalFingerprint=prior.fingerprint||result.fingerprint||null,pendingFingerprint=prior.pending_fingerprint||null,confirmations=Number(prior.change_confirmations||0);
+    if(reviewedSinceChange){quality='healthy';contentChanged=0;lastChange=null;canonicalFingerprint=result.fingerprint||canonicalFingerprint;pendingFingerprint=null;confirmations=0}
+    if(result.status==='ok'&&!prior.fingerprint){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;healthy++}
+    else if(fingerprintChanged&&!reviewedSinceChange){
+      if(pendingFingerprint&&pendingFingerprint===result.fingerprint)confirmations+=1;else{pendingFingerprint=result.fingerprint;confirmations=1}
+      if(confirmations>=2){
+        canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='change_detected';contentChanged=1;lastChange=new Date().toISOString().replace('T',' ').slice(0,19);changed++;
+        await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:tool.sourceUrl,http_status:result.httpStatus});
+      }
+    }else if(result.status==='ok'&&result.fingerprint===prior.fingerprint){
+      pendingFingerprint=null;confirmations=0;if(!prior.last_change_at){quality='healthy';contentChanged=0;healthy++}
+    }
+    if(broken>=2){quality='confirmed_broken';contentChanged=0;pendingFingerprint=null;confirmations=0;suppressed++;await logEvent(env,slug,'catalog_tool_suppressed','completed','Official source returned a confirmed 404/410 on two consecutive runtime checks.',{source_url:tool.sourceUrl,http_status:result.httpStatus})}
     else if(result.status!=='ok'&&result.status!=='broken'){warnings++;if(quality==='unverified')quality='source_warning'}
-    if(fingerprintChanged)await logEvent(env,slug,'catalog_source_change_detected','completed','Official source content fingerprint changed. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:tool.sourceUrl,http_status:result.httpStatus});
-    await env.DB.prepare(`INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,fingerprint,content_changed,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at,updated_at)
-      VALUES(?,?,?,?,?,?,?,?,?,?,datetime('now'),?,datetime('now'))
-      ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status=excluded.source_status,http_status=excluded.http_status,final_url=excluded.final_url,fingerprint=COALESCE(excluded.fingerprint,catalog_runtime_state.fingerprint),content_changed=excluded.content_changed,broken_consecutive=excluded.broken_consecutive,quality_status=excluded.quality_status,static_last_verified=excluded.static_last_verified,last_checked_at=datetime('now'),last_change_at=excluded.last_change_at,updated_at=datetime('now')`)
-      .bind(slug,tool.sourceUrl,result.status,result.httpStatus,result.finalUrl,result.fingerprint,contentChanged,broken,quality,staticVerified,lastChange).run();
+    await env.DB.prepare(`INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,fingerprint,pending_fingerprint,change_confirmations,content_changed,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,datetime('now'))
+      ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status=excluded.source_status,http_status=excluded.http_status,final_url=excluded.final_url,fingerprint=COALESCE(excluded.fingerprint,catalog_runtime_state.fingerprint),pending_fingerprint=excluded.pending_fingerprint,change_confirmations=excluded.change_confirmations,content_changed=excluded.content_changed,broken_consecutive=excluded.broken_consecutive,quality_status=excluded.quality_status,static_last_verified=excluded.static_last_verified,last_checked_at=datetime('now'),last_change_at=excluded.last_change_at,updated_at=datetime('now')`)
+      .bind(slug,tool.sourceUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   }
   runtimeCache.at=0;
   return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,evidence:'official_source_runtime'};
