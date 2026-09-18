@@ -48,7 +48,6 @@ run_worker_first = [
   "/api/command-center-human-truth-final-health*",
   "/api/command-center-human-truth-details-health*",
   "/api/command-center-human-truth-chart-health*",
-  "/api/visitor-session-identity-health*",
   "/mcp*",
   "/a2a*",
   "/embed*",
