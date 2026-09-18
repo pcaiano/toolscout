@@ -10,6 +10,10 @@ const TIME_ZONE='Europe/Lisbon';
 function isHtml(response){return (response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
 function parseUtc(value){const text=String(value||'').trim();if(!text)return null;const d=new Date(text.includes('T')?text:(text.replace(' ','T')+'Z'));return Number.isFinite(d.getTime())?d:null}
 function dayKey(value){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(value instanceof Date?value:new Date(value));const map=Object.fromEntries(parts.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));return `${map.year}-${map.month}-${map.day}`}
+function zonedParts(value,timeZone=TIME_ZONE){const parts=new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(value instanceof Date?value:new Date(value));return Object.fromEntries(parts.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]))}
+function offsetMs(value,timeZone=TIME_ZONE){const d=value instanceof Date?value:new Date(value),p=zonedParts(d,timeZone);return Date.UTC(Number(p.year),Number(p.month)-1,Number(p.day),Number(p.hour),Number(p.minute),Number(p.second))-Math.floor(d.getTime()/1000)*1000}
+function zonedMidnight(key,timeZone=TIME_ZONE){const [y,m,d]=String(key).split('-').map(Number),localUtc=Date.UTC(y,m-1,d,0,0,0);let guess=localUtc;for(let i=0;i<3;i++)guess=localUtc-offsetMs(new Date(guess),timeZone);return new Date(guess)}
+function sqliteUtc(date){return date.toISOString().replace('T',' ').slice(0,19)}
 
 function canonicalHtmlRedirect(request,url){
   if(request.method!=='GET'&&request.method!=='HEAD')return null;
@@ -45,10 +49,13 @@ async function pageConfirmationGate(request){
 
 async function guardTruth(env){
   if(!env.DB)return {today:0,last24:0};
-  const result=await env.DB.prepare(`SELECT session_id,created_at FROM traffic_guard_events WHERE decision='allowed' AND created_at>=datetime('now','-36 hours') ORDER BY created_at`).all();
-  const now=new Date(),todayKey=dayKey(now),cutoff=Date.now()-86400000,today=new Set(),last24=new Set();
-  for(const row of result?.results||[]){const at=parseUtc(row.created_at),sid=String(row.session_id||'');if(!at||!sid)continue;if(dayKey(at)===todayKey)today.add(sid);if(at.getTime()>=cutoff)last24.add(sid)}
-  return {today:today.size,last24:last24.size,generatedAt:new Date().toISOString(),metric:'browser-guard verified sessions'};
+  const now=new Date(),todayKey=dayKey(now),todayStart=sqliteUtc(zonedMidnight(todayKey)),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<todayStart?last24Start:todayStart;
+  const row=await env.DB.prepare(`SELECT
+    COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) last24,
+    COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) today
+    FROM traffic_guard_events
+    WHERE decision='allowed' AND created_at>=?`).bind(last24Start,todayStart,scanStart).first();
+  return {today:Number(row?.today||0),last24:Number(row?.last24||0),generatedAt:new Date().toISOString(),metric:'browser-guard verified sessions'};
 }
 
 async function monetizationProof(env){
