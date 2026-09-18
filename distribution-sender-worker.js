@@ -41,16 +41,41 @@ async function ensureNetworkSchema(env){
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_action_events(
+      action_id TEXT PRIMARY KEY,
+      opportunity_key TEXT,
+      engine TEXT NOT NULL,
+      channel TEXT,
+      target_url TEXT,
+      status TEXT NOT NULL DEFAULT 'prepared',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_action_events_opportunity ON growth_action_events(opportunity_key,status)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_network_status_priority ON distribution_network_outreach(status,priority_score DESC)`)
   ]).catch(error=>{networkSchemaReady=null;throw error});
   return networkSchemaReady;
 }
+function taggedOwned(value,{source,campaign,action,growth}){
+  try{
+    const u=new URL(String(value||''),'https://trytoolscout.org');
+    if(u.hostname!=='trytoolscout.org')return String(value||'');
+    if(source)u.searchParams.set('utm_source',source);
+    u.searchParams.set('utm_medium','distribution');
+    if(campaign)u.searchParams.set('utm_campaign',campaign);
+    if(action)u.searchParams.set('ts_action',action);
+    if(growth)u.searchParams.set('ts_growth',growth);
+    return u.toString();
+  }catch{return String(value||'')}
+}
 function cordialOutreach(row){
-  const name=displayToolName(row);
-  const subject=`${name} featured on ToolScout`;
-  const asset=String(row?.asset_url||'https://trytoolscout.org');
-  const body=`<p>Hello,</p><p>I hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${html(name)} in one of our software buying pages for people comparing tools for a specific job to be done.</p><p>I wanted to share the page with you in case it is useful to your team or audience:<br><a href="${html(asset)}">${html(asset)}</a></p><p>If you find it relevant, you're very welcome to share or reference it. For context, ToolScout rankings are based on product fit and editorial criteria, and placements are not sold.</p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
-  return {...row,suggested_subject:subject,suggested_body:body};
+  const name=displayToolName(row),slug=String(row?.tool_slug||'').toLowerCase();
+  const subject=`${name} featured on ToolScout`,action=`vendor:${slug}`,growth=`tool:${slug}`;
+  const asset=taggedOwned(row?.asset_url||'https://trytoolscout.org',{source:'vendor_outreach',campaign:'vendor_amplification_v21',action,growth});
+  const profile=taggedOwned(`https://trytoolscout.org/tools/${encodeURIComponent(slug)}.html`,{source:'vendor_outreach',campaign:'vendor_amplification_v21',action,growth});
+  const publisherKit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:'vendor_outreach',campaign:'vendor_amplification_v21',action,growth});
+  const body=`<p>Hello,</p><p>I hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${html(name)} in one of our software buying pages for people comparing tools for a specific job to be done.</p><p>Featured page:<br><a href="${html(asset)}">${html(asset)}</a></p><p>Your ToolScout profile:<br><a href="${html(profile)}">${html(profile)}</a></p><p>If either resource is useful to your team or audience, you're very welcome to share or reference it. If your team also publishes software resources, our free feed and embed kit is here:<br><a href="${html(publisherKit)}">${html(publisherKit)}</a></p><p>ToolScout rankings are based on product fit and editorial criteria. Placements are not sold, and affiliate relationships do not change ranking or recommendation eligibility.</p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
+  return {...row,suggested_subject:subject,suggested_body:body,growth_action_id:action,growth_opportunity_key:growth,tracked_asset_url:asset};
 }
 
 async function leaseQueue(env,limit=3){
@@ -58,7 +83,12 @@ async function leaseQueue(env,limit=3){
   const n=Math.max(1,Math.min(3,Number(limit)||3));
   const r=await env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_email,contact_name,contact_source_url,contact_method,suggested_subject,suggested_body FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all();
   const raw=r.results||[];
-  for(const x of raw){await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='sending',last_attempt_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=? AND status='contact_found'`).bind(x.tool_slug,x.asset_url).run()}
+  for(const x of raw){
+    await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='sending',last_attempt_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=? AND status='contact_found'`).bind(x.tool_slug,x.asset_url).run();
+    const copy=cordialOutreach(x);
+    await ensureNetworkSchema(env);
+    await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now')) ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`).bind(copy.growth_action_id,copy.growth_opportunity_key,'vendor_amplification','email',copy.tracked_asset_url).run().catch(()=>{});
+  }
   if(raw.length)await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vlease_${crypto.randomUUID()}`,'vendor_outreach_leased','ready','vendor_amplification',`${raw.length} vendor outreach item(s) leased to the private sender.`).run();
   return {status:'connected',leaseHours:24,items:raw.map(cordialOutreach)};
 }
@@ -84,12 +114,18 @@ async function publicCandidates(env,limit=3){
       const row=item.row,token=row.public_dispatch_token||crypto.randomUUID();
       if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
       const copy=cordialOutreach(row);
+      await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now')) ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`).bind(copy.growth_action_id,copy.growth_opportunity_key,'vendor_amplification','email',copy.tracked_asset_url).run().catch(()=>{});
       items.push({kind:'vendor',tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
       continue;
     }
     const row=item.row,token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
     if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_network_outreach SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(token,row.surface_slug).run();
-    items.push({kind:'network',tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:row.suggested_body,dispatch_token:token});
+    const action=`network:${row.surface_slug}`,growth=`surface:${row.surface_slug}`;
+    const kit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
+    const feed=taggedOwned('https://trytoolscout.org/api/distribution/feed.json',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
+    const body=String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit).replaceAll('https://trytoolscout.org/api/distribution/feed.json',feed);
+    await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now')) ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`).bind(action,growth,'distribution_network','email',kit).run().catch(()=>{});
+    items.push({kind:'network',tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:body,dispatch_token:token});
   }
   return {status:'connected',limit:n,items};
 }
@@ -104,6 +140,7 @@ async function publicStatus(request,env){
     if(row.status==='sent')return Response.json({ok:true,idempotent:true,kind:'vendor'},{headers:JSON_HEADERS});
     await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status=?,attempts=attempts+1,last_attempt_at=datetime('now'),outreach_sent_at=CASE WHEN ? THEN datetime('now') ELSE outreach_sent_at END,outreach_error=?,updated_at=datetime('now') WHERE public_dispatch_token=?`).bind(ok?'sent':'send_failed',ok?1:0,ok?null:String(b.error||'make_public_dispatch_failed').slice(0,1000),token).run();
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vpub_${crypto.randomUUID()}`,ok?'vendor_outreach_sent':'vendor_outreach_failed',ok?'completed':'failed','vendor_amplification',row.tool_slug,row.asset_url,ok?'Vendor amplification outreach sent by Make public handoff.':String(b.error||'Vendor outreach failed in Make public handoff.').slice(0,1000)).run();
+    await env.DB.prepare(`UPDATE growth_action_events SET status=?,updated_at=datetime('now') WHERE action_id=?`).bind(ok?'sent':'failed',`vendor:${row.tool_slug}`).run().catch(()=>{});
     return Response.json({ok:true,kind:'vendor'},{headers:JSON_HEADERS});
   }
   await ensureNetworkSchema(env);
@@ -112,6 +149,7 @@ async function publicStatus(request,env){
   if(network.status==='sent'||network.status==='adopted')return Response.json({ok:true,idempotent:true,kind:'network'},{headers:JSON_HEADERS});
   await env.DB.prepare(`UPDATE distribution_network_outreach SET status=?,attempts=attempts+1,outreach_sent_at=CASE WHEN ? THEN datetime('now') ELSE outreach_sent_at END,outreach_error=?,updated_at=datetime('now') WHERE public_dispatch_token=?`).bind(ok?'sent':'send_failed',ok?1:0,ok?null:String(b.error||'make_network_dispatch_failed').slice(0,1000),token).run();
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netpub_${crypto.randomUUID()}`,network.surface_slug,ok?'publisher_network_outreach_sent':'publisher_network_outreach_failed',ok?'completed':'failed','distribution_network',network.source_url,ok?'Publisher syndication invitation sent automatically.':String(b.error||'Publisher outreach failed in Make public handoff.').slice(0,1000)).run();
+  await env.DB.prepare(`UPDATE growth_action_events SET status=?,updated_at=datetime('now') WHERE action_id=?`).bind(ok?'sent':'failed',`network:${network.surface_slug}`).run().catch(()=>{});
   return Response.json({ok:true,kind:'network'},{headers:JSON_HEADERS});
 }
 
