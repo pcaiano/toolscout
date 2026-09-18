@@ -34,6 +34,9 @@ async function ensureGuardSchema(env){
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_created ON traffic_guard_events(created_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_fingerprint_created ON traffic_guard_events(fingerprint,created_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_decision_created ON traffic_guard_events(decision,created_at)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_decision_created_session ON traffic_guard_events(decision,created_at,session_id)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_session_decision_created ON traffic_guard_events(session_id,decision,created_at)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_suspicious_created ON traffic_guard_events(suspicious_direct,created_at)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_quarantine_sessions (
       session_id TEXT PRIMARY KEY,
       reason TEXT NOT NULL,
