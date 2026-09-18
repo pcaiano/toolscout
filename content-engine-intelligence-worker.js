@@ -158,16 +158,34 @@ async function buildBrief(env,family){
     WHERE p.status='verified' AND a.organic_social_allowed=1 AND a.direct_affiliate_link_allowed=1 AND a.redirect_allowed=1 AND a.policy_status='verified_social_allowed'
     ORDER BY p.tool_name`).all();
   const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=commercial.results||[];
-  const mentionStart=pickIndex(family+date,Math.max(1,all.length));
-  const mentions=all.length?[all[mentionStart],all[(mentionStart+1)%all.length]].filter((x,i,a)=>x&&a.findIndex(y=>y.tool_slug===x.tool_slug)===i).map(x=>({tool_slug:x.tool_slug,name:x.tool_name,x_handle:x.x_handle?('@'+x.x_handle):null,bluesky_handle:x.bluesky_handle?('@'+x.bluesky_handle):null,linkedin_url:x.linkedin_url||null,verified_from_official_site:true})):[];
+  const profileBySlug=new Map(all.map(x=>[x.tool_slug,x]));
+  const comparisonPairs=[
+    ['make','zapier'],['hubspot','pipedrive'],['beehiiv','kit'],['jotform','typeform'],['semrush','ahrefs'],
+    ['notion','clickup'],['asana','clickup'],['airtable','notion'],['n8n','make'],['tally','typeform'],
+    ['brevo','mailchimp'],['activecampaign','mailchimp'],['webflow','framer'],['shopify','webflow'],['apollo','lemlist']
+  ];
   const commercialAllowed=family==='friday_practical'&&eligible.length>0;
   const selected=commercialAllowed?eligible[pickIndex('commercial'+date,eligible.length)]:null;
+  const comparison=family==='wednesday_comparison'?comparisonPairs[pickIndex('comparison'+date,comparisonPairs.length)]:null;
+  let mentionRows=[];
+  if(selected)mentionRows=[profileBySlug.get(selected.tool_slug)].filter(Boolean);
+  else if(comparison)mentionRows=comparison.map(slug=>profileBySlug.get(slug)).filter(Boolean);
+  else if(all.length){const start=pickIndex(family+date,all.length);mentionRows=[all[start],all[(start+1)%all.length]].filter((x,i,a)=>x&&a.findIndex(y=>y.tool_slug===x.tool_slug)===i);}
+  const mentions=mentionRows.map(x=>({tool_slug:x.tool_slug,name:x.tool_name,x_handle:x.x_handle?('@'+x.x_handle):null,bluesky_handle:x.bluesky_handle?('@'+x.bluesky_handle):null,linkedin_url:x.linkedin_url||null,verified_from_official_site:true}));
   const mode=selected?'affiliate_social_verified':'editorial';
-  const t=selected?targets(selected.tool_slug):editorialTargets(family);
+  let t=selected?targets(selected.tool_slug):editorialTargets(family);
+  let comparisonContext=null;
+  if(comparison){
+    const slug=`${comparison[0]}-vs-${comparison[1]}`;
+    comparisonContext={slug,tool_a:comparison[0],tool_b:comparison[1]};
+    const base=`https://trytoolscout.org/${slug}.html`,common='utm_medium=organic_social&utm_campaign=content_engine_v21&utm_content=wednesday_comparison';
+    t={linkedin:`${base}?utm_source=linkedin&${common}`,x:`${base}?utm_source=x&${common}`,bluesky:`${base}?utm_source=bluesky&${common}`};
+  }
   const briefId=`brief_${crypto.randomUUID()}`;
   const prompt=[
     `CONTENT ENGINE INTELLIGENCE BRIEF (${family})`,
     `Commercial mode: ${mode}.`,
+    comparisonContext?`Comparison selected for this run: ${comparisonContext.tool_a} vs ${comparisonContext.tool_b}. Use this exact comparison pair and the exact platform URL supplied below. Present practical tradeoffs, never a universal winner.`:null,
     selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Its official affiliate programme material explicitly permits organic-social affiliate/referral-link promotion and no redirect/cloaking prohibition was detected in the checked material. Use the exact platform target supplied below and include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
     mentions.length?`Verified manufacturer/profile candidates discovered from links on their official websites: ${mentions.map(m=>`${m.name} | X ${m.x_handle||'none'} | Bluesky ${m.bluesky_handle||'none'} | LinkedIn company URL ${m.linkedin_url||'none'}`).join(' ; ')}. Mention only when genuinely relevant to the topic. Never invent or guess a handle.`:'No verified social handles are currently available. Do not invent mentions.',
     'Mention guardrail: maximum 2 relevant manufacturers in an editorial post and maximum 1 in a commercial affiliate post. Never tag unrelated people or companies. No engagement bait.',
@@ -175,9 +193,9 @@ async function buildBrief(env,family){
     `LinkedIn target: ${t.linkedin}`,
     `X target: ${t.x}`,
     `Bluesky target: ${t.bluesky}`
-  ].join('\n');
+  ].filter(Boolean).join('\n');
   await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||null,JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
-  return {brief_id:briefId,family,commercial_mode:mode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,mentions,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
+  return {brief_id:briefId,family,commercial_mode:mode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
 async function metrics(env){
