@@ -239,13 +239,14 @@ async function augmentEntrypointHealth(response) {
   let data;
   try { data = await response.json(); } catch { return response; }
   data.entrypoint = 'command-center-light-theme-worker';
-  data.entrypointVersion = 5;
+  data.entrypointVersion = 6;
   data.commandCenterComposition = 'canonical-growth-v2';
   data.autonomousGrowthBrain = 'shared-growth-v3';
   data.affiliateEngineVersion = '2.1';
   data.catalogGrowthVersion = '1.0';
   data.catalogRuntimeAutonomy = true;
   data.affiliateReplyReconciliation = true;
+  data.affiliateReplyPayloadEncoding = 'base64-v1';
   data.commandCenterCompositionOwner = 'growth-command-center-v2-worker';
   data.runtimeVersionCards = true;
   data.autonomousGrowthSurface = true;
@@ -312,7 +313,7 @@ async function resilientStatsResponse(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health')return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,commandCenterComposition:'canonical-growth-v2',buildContract:'2026-09-18.2'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health')return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',buildContract:'2026-09-18.3'},{headers:{'Cache-Control':'no-store'}});
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
       ? await cachedStatsResponse(request, env, ctx)
