@@ -1,7 +1,7 @@
 import base from './distribution-autonomous-worker.js';
 
 const RESEARCH_SCAN_LIMIT=48;
-const RESEARCH_BUDGET=4;
+const RESEARCH_BUDGET=8;
 const BACKOFF_HOURS=[1,2,4,8,12];
 const INDEXNOW_BATCH_LIMIT=1000;
 const VERIFY_LIMIT=40;
