@@ -127,14 +127,22 @@ function renderNorthStar(d){
 }
 function taskHtml(x){
   const url=safeHttps(x.action_url),canConfirm=x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status));
+  const isEditorial=Boolean(x.editorial_queue_id),publishLabel=isEditorial?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
+  const copyButton=(label,value)=>value?'<button class="btn" data-copy-value="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
+  const payload=isEditorial?'<details open style="margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card2)"><summary style="cursor:pointer;font-weight:800">Publication payload · '+esc(x.publication_type||'Post')+'</summary>'+
+    '<div class="taskReason" style="margin-top:10px"><b>Steps:</b><div style="white-space:pre-wrap;margin-top:5px">'+esc(x.instructions||'')+'</div>'+copyButton('Copy steps',x.instructions)+'</div>'+
+    '<div class="taskReason" style="margin-top:10px"><b>Title:</b><div style="white-space:pre-wrap;margin-top:5px">'+esc(x.prepared_title||'')+'</div>'+copyButton('Copy title',x.prepared_title)+'</div>'+
+    '<div class="taskReason" style="margin-top:10px"><b>Content:</b><div style="white-space:pre-wrap;margin-top:5px;max-height:340px;overflow:auto;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card)">'+esc(x.prepared_body||'')+'</div>'+copyButton('Copy content',x.prepared_body)+'</div>'+
+    '</details>':'';
   return '<div class="task" data-task-engine="'+esc(x.engine)+'" data-task-id="'+esc(x.id)+'">'+
     '<div class="taskTop"><div><div class="taskTitle">'+esc(x.title)+'</div><div class="taskMeta">'+esc(x.engine)+' · '+esc(x.status)+' · ~'+esc(x.estimated_minutes)+' min</div></div>'+pill(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate','warn')+'</div>'+
     '<div class="taskReason"><b>Do:</b> '+esc(x.reason)+'</div>'+
     '<div class="taskReason"><b>Why you:</b> '+esc(x.why_human)+'</div>'+
     '<div class="taskReason"><b>Expected impact:</b> '+esc(x.expected_impact)+'</div>'+
     '<div class="taskAfter"><b>Then:</b> '+esc(x.after_action)+'</div>'+
+    payload+
     '<div class="taskActions">'+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+
-    (canConfirm?'<button class="btn" data-resolve-task="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status)+'">'+(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it')+'</button>':'')+
+    (canConfirm?'<button class="btn" data-resolve-task="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status)+'">'+publishLabel+'</button>':'')+
     (x.engine==='distribution'?'<button class="btn danger" data-resolve-task="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+
     '</div></div>';
 }
@@ -248,7 +256,17 @@ async function resolveTask(button){
   }catch(e){button.disabled=false;button.textContent='Save failed';setTimeout(()=>button.textContent=old,1600)}
 }
 refreshBtn.addEventListener('click',load);
-document.addEventListener('click',e=>{const b=e.target.closest('[data-resolve-task]');if(b){e.preventDefault();e.stopPropagation();resolveTask(b)}});
+document.addEventListener('click',e=>{
+  const copy=e.target.closest('[data-copy-value]');
+  if(copy){
+    e.preventDefault();e.stopPropagation();
+    const value=decodeURIComponent(copy.getAttribute('data-copy-value')||''),old=copy.textContent;
+    navigator.clipboard.writeText(value).then(()=>{copy.textContent='Copied';setTimeout(()=>copy.textContent=old,1200)}).catch(()=>{copy.textContent='Copy failed';setTimeout(()=>copy.textContent=old,1600)});
+    return;
+  }
+  const b=e.target.closest('[data-resolve-task]');
+  if(b){e.preventDefault();e.stopPropagation();resolveTask(b)}
+});
 
 function currentLayout(){
   return [...grid.querySelectorAll('.widget')].map(el=>({id:el.dataset.widget,w:Number(getComputedStyle(el).getPropertyValue('--w'))||Number(el.style.getPropertyValue('--w'))||6,h:Number(getComputedStyle(el).getPropertyValue('--h'))||Number(el.style.getPropertyValue('--h'))||4}));
