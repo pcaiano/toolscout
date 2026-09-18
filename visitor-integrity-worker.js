@@ -37,6 +37,7 @@ async function ensureSchema(env){
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_at ON confirmed_visitor_events(created_at)`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_visitor_id ON confirmed_visitor_events(visitor_id)`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_session_id ON confirmed_visitor_events(session_id)`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_session_visitor ON confirmed_visitor_events(created_at,session_id,visitor_id)`),
       env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_countries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         visitor_id TEXT NOT NULL,
@@ -47,6 +48,7 @@ async function ensureSchema(env){
       )`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_created_at ON confirmed_visitor_countries(created_at)`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_country ON confirmed_visitor_countries(country)`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_session_country ON confirmed_visitor_countries(session_id,country)`),
       env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
       env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('visitor_guard_linking_started_at',datetime('now'))`),
       env.DB.prepare(`DELETE FROM confirmed_visitor_countries
