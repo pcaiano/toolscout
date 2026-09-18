@@ -69,6 +69,16 @@ function detailsScript(){return `<style data-toolscout-human-truth-details="1">
 #trafficTruthBody .tsDetailCard b{display:block;font-size:25px;letter-spacing:-.04em;line-height:1.05;margin-top:6px}
 #trafficTruthBody .tsDetailCard span{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-top:5px}
 #trafficTruthBody .tsVisitorMaturity{margin-top:9px;color:var(--muted);font-size:9.5px;line-height:1.4}
+#trafficTruthBody .tsCountryBlock{margin-top:12px;border:1px solid var(--line);background:var(--card2);border-radius:14px;padding:12px 13px}
+#trafficTruthBody .tsCountryHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+#trafficTruthBody .tsCountryHead strong{display:block;font-size:12px}
+#trafficTruthBody .tsCountryHead span{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-top:3px}
+#trafficTruthBody .tsCountryGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#trafficTruthBody .tsCountryCol{min-width:0}
+#trafficTruthBody .tsCountryLabel{font-size:9px;font-weight:850;letter-spacing:.075em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+#trafficTruthBody .tsCountryRow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:10px}
+#trafficTruthBody .tsCountryRow:first-of-type{border-top:0}
+#trafficTruthBody .tsCountryRow b{font-size:11px}
 @media(max-width:430px){#trafficTruthBody .tsDetailGrid{grid-template-columns:1fr 1fr;gap:8px}#trafficTruthBody .tsDetailCard{padding:11px}#trafficTruthBody .tsDetailCard b{font-size:23px}}
 </style><script data-toolscout-human-truth-details="1">(function(){
 if(window.__toolscoutHumanTruthDetailsInstalled)return;
@@ -79,12 +89,26 @@ function fmt(v,digits){var x=n(v);return digits==null?x.toLocaleString():x.toFix
 function card(label,value,meta){return '<div class="tsDetailCard"><small>'+label+'</small><b>'+value+'</b><span>'+meta+'</span></div>'}
 function visitorComplete(v,key){var c=v&&v.coverage||{};return key==='last24'?!!c.last24Complete:key==='today'?!!c.todayComplete:!!c.monthToDateComplete}
 function visitorWindowMeta(v,key){return visitorComplete(v,key)?'Complete exact measurement window':'Partial exact tracking window'}
+function countryName(code){try{var dn=new Intl.DisplayNames([document.documentElement.lang||'en'],{type:'region'});return dn.of(code)||code}catch(e){return code}}
+function countryColumn(label,data){
+  if(!data)return '<div class="tsCountryCol"><div class="tsCountryLabel">'+label+'</div><div class="tsCountryRow"><span>Unavailable</span><b>0</b></div></div>';
+  var rows=Array.isArray(data.countries)?data.countries.slice(0,6):[];
+  var body=rows.map(function(x){return '<div class="tsCountryRow"><span>'+esc(countryName(String(x.country||'')))+'</span><b>'+fmt(x.visitors)+'</b></div>'}).join('');
+  if(data.unknown)body+='<div class="tsCountryRow"><span>Country unavailable</span><b>'+fmt(data.unknown)+'</b></div>';
+  if(!body)body='<div class="tsCountryRow"><span>No country data yet</span><b>0</b></div>';
+  var cov=data.coverage==null?'':Math.round(Number(data.coverage)*100)+'% country coverage';
+  return '<div class="tsCountryCol"><div class="tsCountryLabel">'+label+(cov?' · '+cov:'')+'</div>'+body+'</div>';
+}
+function countryBlock(countries){
+  if(!countries||countries.status!=='observed')return '<div class="tsCountryBlock"><div class="tsCountryHead"><div><strong>Visitor countries</strong><span>Country data is currently unavailable.</span></div></div></div>';
+  return '<div class="tsCountryBlock"><div class="tsCountryHead"><div><strong>Visitor countries</strong><span>Cloudflare network-location country for browser-confirmed human visitors. Raw IP is not stored. VPNs and proxies can affect the reported country.</span></div></div><div class="tsCountryGrid">'+countryColumn('Today',countries.today)+countryColumn('Last 24h',countries.last24)+'</div></div>';
+}
 function renderDetails(d){
   latest=d||latest;if(!latest)return;
   var root=document.getElementById('trafficTruthBody');if(!root)return;
   var forecast=root.querySelector('.tsTruthForecast');if(!forecast)return;
   var old=root.querySelector('.tsTrafficDetail');if(old)old.remove();
-  var v=latest.visitors||{},traffic=latest.traffic||{},commercial=latest.canonicalCommercialTruth||{};
+  var v=latest.visitors||{},traffic=latest.traffic||{},commercial=latest.canonicalCommercialTruth||{},countries=latest.trafficCountries||{};
   var mature=visitorComplete(v,'last24');
   var html='<div class="tsTrafficDetail"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Human Sessions is the canonical headline metric. Unique Human Visitors remains secondary while its exact tracking window is partial.</span></div><div class="tsDetailGrid">'+
     card('Unique human visitors, last 24h',fmt(v.last24),visitorWindowMeta(v,'last24'))+
@@ -95,7 +119,7 @@ function renderDetails(d){
     card('Monetized outbound clicks, 30d',fmt(commercial.monetizedOutbound),'Human outbound clicks routed through active monetized affiliate paths')+
     card('Browser sessions this month',fmt(traffic.monthToDate),'Canonical browser-confirmed month-to-date sessions')+
     card('Average sessions per day MTD',fmt(traffic.dailyAverageMTD,1),'Browser-confirmed sessions per calendar day')+
-    '</div>'+(mature?'':'<div class="tsVisitorMaturity">Unique visitor projection is hidden until at least 24 hours of exact visitor tracking are complete. Historical sessions are not converted into unique visitors.</div>')+'</div>';
+    '</div>'+countryBlock(countries)+(mature?'':'<div class="tsVisitorMaturity">Unique visitor projection is hidden until at least 24 hours of exact visitor tracking are complete. Historical sessions are not converted into unique visitors.</div>')+'</div>';
   forecast.insertAdjacentHTML('afterend',html);
 }
 function install(){
@@ -127,7 +151,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:7,canonicalMetric:'human sessions',supportingUniqueVisitorMetric:true,visitorProjectionRequiresComplete24h:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human session forecast'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:8,canonicalMetric:'human sessions',supportingUniqueVisitorMetric:true,visitorCountries:true,visitorCountrySource:'Cloudflare request country on Browser Guard allowed sessions',visitorProjectionRequiresComplete24h:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human session forecast'},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
