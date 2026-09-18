@@ -41,6 +41,9 @@ async function ensureIntegritySchema(env){
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_at ON confirmed_visitor_events(created_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_visitor_id ON confirmed_visitor_events(visitor_id)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_session_id ON confirmed_visitor_events(session_id)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_visitor ON confirmed_visitor_events(created_at,visitor_id)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_funnel_event_type_created_session ON funnel_events(event_type,created_at,session_id)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_sessions_classification_session ON sessions(classification,session_id)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_countries (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       visitor_id TEXT NOT NULL,
@@ -152,10 +155,12 @@ async function confirmedVisitorSnapshot(env){
 
 async function trafficHealth(env){
   await ensureIntegritySchema(env);
-  const [confirmed,heartbeat]=await Promise.all([
-    env.DB.prepare(`SELECT MAX(f.created_at) last_confirmed_at,COUNT(DISTINCT CASE WHEN f.created_at>=datetime('now','-24 hours') THEN f.session_id END) sessions_24h FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human')`).first(),
-    env.DB.prepare(`SELECT MAX(created_at) last_heartbeat_at FROM traffic_integrity_heartbeat`).first()
+  const [latestConfirmed,recent,heartbeat]=await Promise.all([
+    env.DB.prepare(`SELECT f.created_at last_confirmed_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') ORDER BY f.created_at DESC LIMIT 1`).first(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT f.session_id) sessions_24h FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND f.created_at>=datetime('now','-24 hours') AND s.classification IN ('likely-human','human')`).first(),
+    env.DB.prepare(`SELECT created_at last_heartbeat_at FROM traffic_integrity_heartbeat ORDER BY created_at DESC LIMIT 1`).first()
   ]);
+  const confirmed={last_confirmed_at:latestConfirmed?.last_confirmed_at||null,sessions_24h:Number(recent?.sessions_24h||0)};
   const now=Date.now(),humanAge=minutesOld(confirmed?.last_confirmed_at,now),heartbeatAge=minutesOld(heartbeat?.last_heartbeat_at,now);
   let status='healthy';
   if(heartbeatAge===null||heartbeatAge>95)status='warning';
@@ -179,14 +184,11 @@ async function augmentStats(response,env){
   if(!response.ok)return response;
   let data;
   try{data=await response.json()}catch{return response}
-  const [visitors,health]=await Promise.all([confirmedVisitorSnapshot(env),trafficHealth(env)]);
-  data.visitors=visitors;
-  data.trafficIntegrity={...(data.trafficIntegrity||{}),canonicalHumanPopulation:'D1 page_confirmed + likely-human',visitorMetric:'browser-confirmed unique likely-human visitors',d1Ingestion:health};
+  const health=await trafficHealth(env);
+  data.trafficIntegrity={...(data.trafficIntegrity||{}),d1Ingestion:health,legacyVisitorHistoryScanDisabled:true};
   if(data.trafficTruth){
-    data.trafficTruth={...data.trafficTruth,primaryMetric:'D1 browser-confirmed unique likely-human visitors'};
-    data.trafficTruth.d1={...(data.trafficTruth.d1||{}),metric:visitors.metric,last24:visitors.last24,today:visitors.today,monthToDate:visitors.monthToDate,dailyAverageMTD:visitors.dailyAverageMTD,projectedMonth:visitors.projectedMonth,trackingSince:visitors.trackingSince,coverage:visitors.coverage,canonicalPopulation:visitors.canonicalPopulation};
     const rec=data.trafficTruth.reconciliation||{};
-    data.trafficTruth.reconciliation={...rec,checks:[...(rec.checks||[]).filter(x=>x.id!=='d1-primary'&&x.id!=='d1-ingestion'),{id:'d1-primary',state:'healthy',label:'D1 canonical human truth',detail:'Visitor counts require both a likely-human D1 session and page_confirmed browser evidence.'},{id:'d1-ingestion',state:health.status,label:'D1 live ingestion',detail:health.note}]};
+    data.trafficTruth.reconciliation={...rec,checks:[...(rec.checks||[]).filter(x=>x.id!=='d1-ingestion'),{id:'d1-ingestion',state:health.status,label:'D1 live ingestion',detail:health.note}]};
   }
   const headers=new Headers(response.headers);
   headers.set('Content-Type','application/json; charset=UTF-8');
