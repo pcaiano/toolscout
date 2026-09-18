@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-17T09:46:00Z",
+  "updatedAt": "2026-09-18T09:43:00Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "github-actions-workflow-execution-protections-ga",
+      "publishedAt": "2026-09-17",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub Actions adds stronger controls over who can run workflows",
+      "summary": "GitHub Actions workflow execution protections are now generally available, adding workflow-specific targeting, policy insights, REST APIs and safer defaults for public repositories.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-17-workflow-execution-protections-in-github-actions-generally-available/",
+      "articleUrl": "/news/github-actions-workflow-execution-protections-ga.html",
+      "profileUrl": "/news/github-actions-workflow-execution-protections-ga.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "github-ai-scan-codeql-setup",
       "publishedAt": "2026-09-16",
