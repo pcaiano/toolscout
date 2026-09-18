@@ -45,6 +45,7 @@ async function ingestFirecrawl(request,env){
 const APPROVAL_WORDS=/(approved|accepted|welcome to (?:the )?(?:affiliate|partner)|application (?:has been )?approved|you(?:'|’)re approved)/i;
 const NEEDS_INFO_WORDS=/(more information|additional information|complete your profile|action required|verify your email|tax information|payment details|identity verification)/i;
 const PENDING_WORDS=/(application received|under review|reviewing your application|pending review|thanks for applying)/i;
+function decodeBase64Utf8(value){try{const raw=atob(String(value||'')),bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}catch{return''}}
 function cleanMail(value){return String(value||'').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/\s+/g,' ').slice(0,120000)}
 function urlHost(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
 function extractReferralUrl(text){
@@ -87,6 +88,7 @@ async function matchAffiliateTool(env,payload,text){
 async function ingestAffiliateReply(request,env){
   if(!await affiliateReplyAuthorized(request))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
   let payload={};try{payload=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_H})}
+  payload={...payload,from:payload.from||decodeBase64Utf8(payload.from_b64),subject:payload.subject||decodeBase64Utf8(payload.subject_b64),body:payload.body||decodeBase64Utf8(payload.body_b64)};
   const messageId=String(payload.message_id||payload.id||'').slice(0,300);if(!messageId)return Response.json({error:'message_id_required'},{status:422,headers:JSON_H});
   await ensureAffiliateReplySchema(env);
   const exists=await env.DB.prepare('SELECT message_id,status FROM affiliate_reply_events WHERE message_id=?').bind(messageId).first();
