@@ -20,6 +20,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Enforce post-conservation compatibility interlock
+        run: node scripts/validate-actions-resume-safety.mjs
       - name: Restore daily cadence after conservation window
         if: github.event_name == 'schedule'
         run: |
