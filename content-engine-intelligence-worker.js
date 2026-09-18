@@ -54,6 +54,12 @@ async function ensureSchema(env){
       disclosure_required INTEGER NOT NULL DEFAULT 1,policy_status TEXT NOT NULL DEFAULT 'unknown',evidence_url TEXT,evidence_detail TEXT,
       last_checked_at TEXT,created_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS social_affiliate_redirects(
+      redirect_id TEXT PRIMARY KEY,tool_slug TEXT NOT NULL,platform TEXT,utm_campaign TEXT,user_agent_hash TEXT,country TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_social_affiliate_redirects_created ON social_affiliate_redirects(created_at)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_social_affiliate_redirects_tool_created ON social_affiliate_redirects(tool_slug,created_at)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS content_engine_briefs(
       brief_id TEXT PRIMARY KEY,family TEXT NOT NULL,commercial_mode TEXT NOT NULL,selected_tool_slug TEXT,mention_json TEXT,target_json TEXT,
       policy_status TEXT,created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -168,12 +174,13 @@ async function buildBrief(env,family){
 
 async function metrics(env){
   await ensureSchema(env);
-  const [profiles,policies,briefs]=await Promise.all([
+  const [profiles,policies,briefs,socialRedirects]=await Promise.all([
     env.DB.prepare(`SELECT status,COUNT(*) n FROM content_social_profiles GROUP BY status`).all(),
     env.DB.prepare(`SELECT policy_status,COUNT(*) n FROM affiliate_social_policy GROUP BY policy_status`).all(),
-    env.DB.prepare(`SELECT commercial_mode,COUNT(*) n,MAX(created_at) last_created_at FROM content_engine_briefs WHERE created_at>=datetime('now','-30 days') GROUP BY commercial_mode`).all()
+    env.DB.prepare(`SELECT commercial_mode,COUNT(*) n,MAX(created_at) last_created_at FROM content_engine_briefs WHERE created_at>=datetime('now','-30 days') GROUP BY commercial_mode`).all(),
+    env.DB.prepare(`SELECT platform,COUNT(*) n,MAX(created_at) last_created_at FROM social_affiliate_redirects WHERE created_at>=datetime('now','-30 days') GROUP BY platform`).all()
   ]);
-  return {profiles:Object.fromEntries((profiles.results||[]).map(x=>[x.status,Number(x.n||0)])),affiliateSocialPolicies:Object.fromEntries((policies.results||[]).map(x=>[x.policy_status,Number(x.n||0)])),briefs:Object.fromEntries((briefs.results||[]).map(x=>[x.commercial_mode,{count:Number(x.n||0),lastCreatedAt:x.last_created_at||null}]))};
+  return {profiles:Object.fromEntries((profiles.results||[]).map(x=>[x.status,Number(x.n||0)])),affiliateSocialPolicies:Object.fromEntries((policies.results||[]).map(x=>[x.policy_status,Number(x.n||0)])),briefs:Object.fromEntries((briefs.results||[]).map(x=>[x.commercial_mode,{count:Number(x.n||0),lastCreatedAt:x.last_created_at||null}])),socialAffiliateRedirects:Object.fromEntries((socialRedirects.results||[]).map(x=>[x.platform||'unknown',{count:Number(x.n||0),lastCreatedAt:x.last_created_at||null}]))};
 }
 
 async function cycle(env){
@@ -182,6 +189,16 @@ async function cycle(env){
   return {ok:true,profiles,policies};
 }
 
+async function sha256(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'')));return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function recordSocialAffiliateRedirect(request,env,u,response){
+  if(request.method!=='GET'||!u.pathname.startsWith('/go/')||u.searchParams.get('ts_affiliate')!=='1'||response.status<300||response.status>=400||!response.headers.get('Location'))return;
+  const platform=lower(u.searchParams.get('utm_source')||'unknown').replace(/[^a-z0-9_-]/g,'').slice(0,40),tool=u.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if(!tool)return;
+  await ensureSchema(env);
+  const ua=request.headers.get('User-Agent')||'',hash=await sha256(ua),bucket=Math.floor(Date.now()/300000);
+  const id=await sha256(`${tool}|${platform}|${hash}|${bucket}`);
+  await env.DB.prepare(`INSERT OR IGNORE INTO social_affiliate_redirects(redirect_id,tool_slug,platform,utm_campaign,user_agent_hash,country,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`).bind(id,tool,platform,safe(u.searchParams.get('utm_campaign'),120)||null,hash,String(request.cf?.country||'').slice(0,8)||null).run();
+}
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
@@ -192,7 +209,9 @@ export default {
     if(u.pathname==='/api/content-engine/intelligence/metrics'&&request.method==='GET'){
       try{return Response.json(await metrics(env),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_metrics_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
     }
-    return base.fetch(request,env,ctx);
+    const response=await base.fetch(request,env,ctx);
+    if(u.pathname.startsWith('/go/')&&u.searchParams.get('ts_affiliate')==='1'){try{await recordSocialAffiliateRedirect(request,env,u,response)}catch{}}
+    return response;
   },
   async scheduled(event,env,ctx){
     const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
