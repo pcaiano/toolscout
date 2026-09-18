@@ -1,0 +1,136 @@
+{
+  "source": "Authenticated production D1 via Make 7424429",
+  "execution_id": "655e15c740cc407f9bc6c180703708ba",
+  "coverage": "Partial collection. No complete-week or full-MTD comparison. First retained event is not evidence of earlier collection.",
+  "metrics": [
+    {
+      "section": "report_metadata",
+      "generated_at_utc": "2026-09-18 11:21:15",
+      "current_start_utc": "2026-09-11 11:21:15",
+      "previous_start_utc": "2026-09-04 11:21:15",
+      "reporting_boundary": "UTC rolling weeks; MTD boundary supplied by Europe/Lisbon calendar"
+    },
+    {
+      "section": "weekly_sessions",
+      "period": "last7",
+      "sessions": 60,
+      "first_event": "2026-09-16 20:52:47",
+      "last_event": "2026-09-18 09:45:28"
+    },
+    {
+      "section": "mtd_sessions",
+      "sessions": 60,
+      "daily_average_calendar_days_including_today": 3.33,
+      "first_event": "2026-09-16 20:52:47",
+      "last_event": "2026-09-18 09:45:28"
+    },
+    {
+      "section": "daily_sessions",
+      "day": "2026-09-16",
+      "sessions": 2
+    },
+    {
+      "section": "daily_sessions",
+      "day": "2026-09-17",
+      "sessions": 48
+    },
+    {
+      "section": "daily_sessions",
+      "day": "2026-09-18",
+      "sessions": 10
+    },
+    {
+      "section": "tracking_metadata",
+      "key": "tracking_started_at",
+      "value": "2026-09-17 17:08:17"
+    },
+    {
+      "section": "engine_run_summary",
+      "engine": "affiliate",
+      "status": "completed",
+      "runs": 14,
+      "latest_completion": "2026-09-18 11:18:41"
+    },
+    {
+      "section": "engine_run_summary",
+      "engine": "affiliate",
+      "status": "running",
+      "runs": 2,
+      "latest_completion": null
+    },
+    {
+      "section": "engine_run_summary",
+      "engine": "distribution",
+      "status": "completed",
+      "runs": 19,
+      "latest_completion": "2026-09-18 11:17:09"
+    },
+    {
+      "section": "engine_run_summary",
+      "engine": "distribution",
+      "status": "running",
+      "runs": 1,
+      "latest_completion": null
+    },
+    {
+      "section": "measurement_coverage",
+      "table_name": "traffic_guard_events",
+      "first_retained_event": "2026-09-16 20:52:47",
+      "last_retained_event": "2026-09-18 09:45:28",
+      "retained_events": 65
+    },
+    {
+      "section": "measurement_coverage",
+      "table_name": "verified_outbound_events",
+      "first_retained_event": null,
+      "last_retained_event": null,
+      "retained_events": 0
+    },
+    {
+      "section": "outbound_tracking_coverage",
+      "key": "tracking_started_at",
+      "value": "2026-09-17 17:08:17"
+    }
+  ],
+  "uneed_legacy_browser_confirmed_cohort": {
+    "section": "distribution_economics",
+    "surface_slug": "uneed",
+    "baseline_score": 78,
+    "learned_score": 85.5,
+    "human_sessions_30d": 6,
+    "outbound_clicks_30d": 0,
+    "monetized_outbound_30d": 0,
+    "confirmed_revenue_30d": 0,
+    "currency": "EUR",
+    "economic_boost": 7.5,
+    "last_observed_at": "2026-09-18 11:15:17",
+    "created_at": "2026-09-07 23:15:41",
+    "updated_at": "2026-09-18 11:18:39",
+    "browser_confirmed_sessions_30d": 6,
+    "session_to_outbound_rate": 0,
+    "monetization_rate": 0,
+    "evidence_grade": "emerging",
+    "paid_policy_decision": "experiment_measuring",
+    "observed_cost": 14.99,
+    "observed_cost_currency": "USD",
+    "observed_roi": null,
+    "operating_decision": "measure",
+    "priority_weight": 76.25,
+    "decision_reason": "Paid experiment is already committed and remains measurement-only. No additional spend is authorized.",
+    "chairman_required": 1,
+    "decided_at": "2026-09-18 11:17:10"
+  },
+  "costs": [
+    {
+      "section": "distribution_costs",
+      "surface_slug": "uneed",
+      "cost_amount": 14.99,
+      "currency": "USD",
+      "cost_type": "one_time",
+      "evidence_source": "User-confirmed Uneed Fast-track acquisition experiment",
+      "incurred_at": "2026-09-08",
+      "created_at": "2026-09-11 12:54:56",
+      "updated_at": "2026-09-11 12:54:56"
+    }
+  ]
+}

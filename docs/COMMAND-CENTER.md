@@ -1,5 +1,19 @@
 # ToolScout Command Center
 
+## Operational repair, 18 September 2026
+
+Authenticated read-only reporting is restored through Make scenario 7424429 (team 2510626, eu1.make.com). The fixed SELECT-only query is versioned in scripts/reporting/weekly-d1-read.sql and tested against production D1 with zero database writes. It uses Make date interpolation for Europe/Lisbon MTD. Detail limits are explicit: use aggregate event totals and retrieve any remaining details before claiming a complete output ledger. Weekly Progress now references this helper and the existing Cloudflare deployment read helpers.
+
+Preserved baseline: reports/measurement-baseline-2026-09-18.json. At 07:48:51 UTC there were 54 allowed sessions since the first retained Browser Guard event on 16 September at 20:52:47 UTC. Verified outbound tracking started 17 September at 17:08:17 UTC, with no events at that reading. Earlier weekly/MTD coverage is incomplete, not zero traffic. Do not splice older likely-human estimates or legacy distribution attribution into this cohort.
+
+Live HEAD checks verified Apollo, Instantly and SE Ranking /go/ routes return 302 to their configured affiliate destinations. Apollo's stale submitted state is now active; SE Ranking has an explicit pipeline record. Approval alone never establishes active coverage.
+
+Content schedules 7197357, 7197359 and 7197361 now bound Bluesky/X text, preserve tracked links and empty-draft fallback. Configured maximum lengths are 255 and 249. No extra social posts were sent for testing. Buffer acceptance is queued; X completion requires a public X status URL. Command Center exposes queued stages and withholds mission completion until every required stage is verified. Replay cannot downgrade completed to queued or overwrite newer evidence. Run node tests/mission-publication-evidence.mjs for authentication, queue, completion and failure checks.
+
+Historical Wednesday receipt: LinkedIn published urn:li:share:7505948666910695425; Bluesky rejected 378 graphemes against a 300 limit; X draft was empty. Empty-draft fallbacks were already added on 17 September. Next scheduled receipts must confirm the new length safeguards end to end.
+
+Uneed remains measurement-only: six legacy browser-confirmed sessions, zero recorded outbound, monetized outbound or confirmed revenue, against the existing USD 14.99 one-time experiment at the first 18 September reading. No additional spend is authorized. GitHub Actions conservation remains intact; production deploy uses Cloudflare Builds.
+
 ## Purpose
 
 This file is the canonical operational memory for ToolScout. It exists to keep project state coherent across ChatGPT chats, Work, Codex, GitHub sessions, and human actions.

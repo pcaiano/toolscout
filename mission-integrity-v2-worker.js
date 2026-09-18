@@ -23,16 +23,19 @@ async function ingestEvidence(request,env){
   const engine=safe(body?.engine,40).toLowerCase(),missionId=safe(body?.mission_id,160),stage=safe(body?.stage,40).toLowerCase(),status=safe(body?.status,40).toLowerCase(),externalId=safe(body?.external_id,500),detail=safe(body?.detail,2000),observedAt=safe(body?.observed_at,80)||new Date().toISOString();
   if(engine!=='content')return Response.json({error:'unsupported_engine'},{status:422,headers:JSON_H});
   if(!missionId||!CONTENT_STAGES.has(stage))return Response.json({error:'invalid_mission_or_stage'},{status:422,headers:JSON_H});
-  if(!['completed','failed'].includes(status))return Response.json({error:'invalid_status'},{status:422,headers:JSON_H});
-  if(status==='completed'&&!externalId)return Response.json({error:'completed_stage_requires_external_id'},{status:422,headers:JSON_H});
+  if(!['completed','failed','queued'].includes(status))return Response.json({error:'invalid_status'},{status:422,headers:JSON_H});
+  if(['completed','queued'].includes(status)&&!externalId)return Response.json({error:'completed_stage_requires_external_id'},{status:422,headers:JSON_H});
+  // Buffer acceptance is not a vendor-confirmed X publication.
+  const effectiveStatus=stage==='x'&&status==='completed'&&!/^https:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+(?:[?#].*)?$/.test(externalId)?'queued':status;
   const when=parseUtc(observedAt);if(!when)return Response.json({error:'invalid_observed_at'},{status:422,headers:JSON_H});
   await ensureSchema(env);
   const evidenceId=`content:${missionId}:${stage}`;
-  await env.DB.prepare(`INSERT INTO external_engine_evidence(evidence_id,engine,mission_id,stage,status,external_id,detail,observed_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(evidence_id) DO UPDATE SET status=excluded.status,external_id=excluded.external_id,detail=excluded.detail,observed_at=excluded.observed_at,updated_at=datetime('now')`).bind(evidenceId,engine,missionId,stage,status,externalId||null,detail||null,when.toISOString()).run();
-  return Response.json({ok:true,verified:true,evidence_id:evidenceId,mission_id:missionId,stage,status,external_id:externalId},{headers:JSON_H});
+  await env.DB.prepare(`INSERT INTO external_engine_evidence(evidence_id,engine,mission_id,stage,status,external_id,detail,observed_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(evidence_id) DO UPDATE SET status=excluded.status,external_id=excluded.external_id,detail=excluded.detail,observed_at=excluded.observed_at,updated_at=datetime('now') WHERE excluded.observed_at>=external_engine_evidence.observed_at AND NOT (external_engine_evidence.status='completed' AND excluded.status='queued')`).bind(evidenceId,engine,missionId,stage,effectiveStatus,externalId||null,detail||null,when.toISOString()).run();
+  return Response.json({ok:true,verified:effectiveStatus==='completed',evidence_id:evidenceId,mission_id:missionId,stage,status:effectiveStatus,external_id:externalId},{headers:JSON_H});
 }
 
 export default {
   async fetch(request,env,ctx){const url=new URL(request.url);if(url.pathname==='/api/engine-evidence'&&request.method==='POST')return ingestEvidence(request,env);return base.fetch(request,env,ctx)},
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
+

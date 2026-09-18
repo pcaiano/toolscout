@@ -37,28 +37,31 @@ async function ingestEvidence(request,env){
   const engine=safe(body?.engine,40).toLowerCase(),missionId=safe(body?.mission_id,160),stage=safe(body?.stage,40).toLowerCase(),status=safe(body?.status,40).toLowerCase(),externalId=safe(body?.external_id,500),detail=safe(body?.detail,2000),observedAt=safe(body?.observed_at,80)||new Date().toISOString();
   if(engine!=='content')return Response.json({error:'unsupported_engine'},{status:422,headers:JSON_H});
   if(!missionId||!CONTENT_STAGES.has(stage))return Response.json({error:'invalid_mission_or_stage'},{status:422,headers:JSON_H});
-  if(!['completed','failed'].includes(status))return Response.json({error:'invalid_status'},{status:422,headers:JSON_H});
-  if(status==='completed'&&!externalId)return Response.json({error:'completed_stage_requires_external_id'},{status:422,headers:JSON_H});
+  if(!['completed','failed','queued'].includes(status))return Response.json({error:'invalid_status'},{status:422,headers:JSON_H});
+  if(['completed','queued'].includes(status)&&!externalId)return Response.json({error:'completed_stage_requires_external_id'},{status:422,headers:JSON_H});
+  // Buffer acceptance is not a vendor-confirmed X publication.
+  const effectiveStatus=stage==='x'&&status==='completed'&&!/^https:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+(?:[?#].*)?$/.test(externalId)?'queued':status;
   const when=parseUtc(observedAt);if(!when)return Response.json({error:'invalid_observed_at'},{status:422,headers:JSON_H});
   await ensureSchema(env);
   const evidenceId=`content:${missionId}:${stage}`;
-  await env.DB.prepare(`INSERT INTO external_engine_evidence(evidence_id,engine,mission_id,stage,status,external_id,detail,observed_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(evidence_id) DO UPDATE SET status=excluded.status,external_id=excluded.external_id,detail=excluded.detail,observed_at=excluded.observed_at,updated_at=datetime('now')`)
-    .bind(evidenceId,engine,missionId,stage,status,externalId||null,detail||null,when.toISOString()).run();
-  return Response.json({ok:true,verified:true,evidence_id:evidenceId,mission_id:missionId,stage,status,external_id:externalId},{headers:JSON_H});
+  await env.DB.prepare(`INSERT INTO external_engine_evidence(evidence_id,engine,mission_id,stage,status,external_id,detail,observed_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(evidence_id) DO UPDATE SET status=excluded.status,external_id=excluded.external_id,detail=excluded.detail,observed_at=excluded.observed_at,updated_at=datetime('now') WHERE excluded.observed_at>=external_engine_evidence.observed_at AND NOT (external_engine_evidence.status='completed' AND excluded.status='queued')`)
+    .bind(evidenceId,engine,missionId,stage,effectiveStatus,externalId||null,detail||null,when.toISOString()).run();
+  return Response.json({ok:true,verified:effectiveStatus==='completed',evidence_id:evidenceId,mission_id:missionId,stage,status:effectiveStatus,external_id:externalId},{headers:JSON_H});
 }
 
-async function contentMissionHealth(env){
+export async function contentMissionHealth(env){
   await ensureSchema(env);
-  const latest=await env.DB.prepare(`SELECT mission_id,MIN(created_at) first_at,MAX(created_at) last_at FROM external_engine_evidence WHERE engine='content' GROUP BY mission_id ORDER BY MAX(created_at) DESC LIMIT 1`).first();
+  const latest=await env.DB.prepare(`SELECT mission_id,MIN(observed_at) first_at,MAX(observed_at) last_at FROM external_engine_evidence WHERE engine='content' GROUP BY mission_id ORDER BY MAX(observed_at) DESC LIMIT 1`).first();
   if(!latest?.mission_id)return{status:'partial',last_run_at:null,mission_id:null,completed_stages:[],missing_stages:['linkedin','bluesky','x'],proof:'No multi-channel content mission has completed since mission evidence was enabled.'};
   const q=await env.DB.prepare(`SELECT stage,status,external_id,observed_at,created_at FROM external_engine_evidence WHERE engine='content' AND mission_id=? ORDER BY created_at ASC`).bind(latest.mission_id).all();
   const rows=q.results||[],completed=new Set(rows.filter(r=>r.status==='completed'&&r.external_id).map(r=>r.stage)),failed=rows.filter(r=>r.status==='failed'),missing=[...CONTENT_STAGES].filter(s=>!completed.has(s));
+  const queued=rows.filter(r=>r.status==='queued');
   const lastAt=latest.last_at||rows.at(-1)?.created_at||null,age=ageMinutes(lastAt);
   let status='running';
   if(failed.length)status='failed';
   else if(missing.length===0)status=age!=null&&age>80*60?'stale':'healthy';
   else if(age!=null&&age>120)status='degraded';
-  return{status,last_run_at:latest.first_at||null,last_completed_at:lastAt,mission_id:latest.mission_id,completed_stages:[...completed],missing_stages:missing,failed_stages:failed.map(r=>r.stage),age_minutes:age,proof:'external_engine_evidence with required external publication IDs'};
+  return{status,last_run_at:latest.first_at||null,last_completed_at:missing.length===0?lastAt:null,mission_id:latest.mission_id,completed_stages:[...completed],missing_stages:missing,failed_stages:failed.map(r=>r.stage),queued_stages:queued.map(r=>r.stage),age_minutes:age,proof:'external_engine_evidence with required external publication IDs; Buffer acceptance remains queued until a public X status URL is verified'};
 }
 
 function applyContentHealth(data,health){
@@ -86,3 +89,4 @@ export default {
   },
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
+
