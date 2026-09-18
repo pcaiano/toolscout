@@ -57,12 +57,12 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
     </section>
 
     <section class="widget" data-widget="distribution" style="--w:6;--h:5">
-      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Distribution Engine 2.1</div></div><div class="widgetMeta" id="distributionMeta">Closed loop</div></div>
+      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Distribution Engine</div></div><div class="widgetMeta" id="distributionMeta">Runtime state</div></div>
       <div class="widgetBody" id="distributionBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
     <section class="widget" data-widget="affiliate" style="--w:6;--h:5">
-      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Affiliate Coverage Engine 2.0</div></div><div class="widgetMeta" id="affiliateMeta">Demand weighted</div></div>
+      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Affiliate Coverage Engine</div></div><div class="widgetMeta" id="affiliateMeta">Runtime state</div></div>
       <div class="widgetBody" id="affiliateBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
@@ -156,7 +156,7 @@ function renderChairman(d){
 function renderDistribution(d){
   const x=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.distribution||{};
   const success=x.events_24h?x.successful_24h/x.events_24h*100:null;
-  document.getElementById('distributionMeta').textContent=x.last_activity_at?'Active '+dt(x.last_activity_at):'No recent evidence';
+  document.getElementById('distributionMeta').textContent=(x.version?'v'+x.version+' · ':'')+(x.last_activity_at?'Active '+dt(x.last_activity_at):'No recent evidence');
   document.getElementById('distributionBody').innerHTML=
     '<div class="metricGrid">'+
       metric('Actions · 24h',num(x.events_24h),pct(success)+' successful')+
@@ -175,7 +175,7 @@ function renderDistribution(d){
 function renderAffiliate(d){
   const x=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.affiliate||{};
   const cov=x.weighted_coverage_pct;
-  document.getElementById('affiliateMeta').textContent=x.last_run_at?'Cycle '+dt(x.last_run_at):'No recent cycle';
+  document.getElementById('affiliateMeta').textContent=(x.version?'v'+x.version+' · ':'')+(x.last_run_at?'Cycle '+dt(x.last_run_at):'No recent cycle');
   document.getElementById('affiliateBody').innerHTML=
     '<div class="metricGrid">'+
       metric('Weighted coverage',pct(cov),x.coverage_change_7d_pp==null?'7d comparison unavailable':(x.coverage_change_7d_pp>=0?'+':'')+x.coverage_change_7d_pp.toFixed(1)+' pp / 7d')+
@@ -315,14 +315,14 @@ function detailFor(id){
   if(!snapshot)return;
   const g=snapshot.growthOps||{},eng=g.engines||{},f=g.footprint||{};
   if(id==='chairman'){const q=g.chairmanQueue||{};modalRows('Chairman Queue','HUMAN GATES',q.items&&q.items.length?q.items.map(taskHtml).join(''):'<div class="note">No current human gates.</div>');return}
-  if(id==='distribution'){const x=eng.distribution||{};modalRows('Distribution Engine 2.1','ENGINE DETAIL',
+  if(id==='distribution'){const x=eng.distribution||{};modalRows('Distribution Engine'+(x.version?' v'+x.version:''),'ENGINE DETAIL',
     row('Publisher network',num(x.network_candidates),num(x.network_queued)+' queued · '+num(x.network_adopted)+' adopted')+
     row('Contacts / outreach',num(x.network_contact_found)+' / '+num(x.network_sent),'verified contacts / sent')+
     row('Verified footprint',num(x.verified_placements),num(x.verified_backlinks)+' backlinks')+
     stateEntries(x.network_status).map(([k,v])=>row('network: '+k,num(v),'Distribution Network 2.1')).join('')+
     stateEntries(x.opportunity_status).map(([k,v])=>row(k,num(v),'opportunity state')).join('')+
     stateEntries(x.delivery_status).map(([k,v])=>row('verification: '+k,num(v),'delivery state')).join(''));return}
-  if(id==='affiliate'){const x=eng.affiliate||{};modalRows('Affiliate Coverage Engine 2.0','ENGINE DETAIL',stateEntries(x.workflow_status).map(([k,v])=>row(k,num(v),'affiliate state')).join('')+row('Discovery checked',num(x.discovery&&x.discovery.total),dt(x.discovery&&x.discovery.last_checked)));return}
+  if(id==='affiliate'){const x=eng.affiliate||{};modalRows('Affiliate Coverage Engine'+(x.version?' v'+x.version:''),'ENGINE DETAIL',stateEntries(x.workflow_status).map(([k,v])=>row(k,num(v),'affiliate state')).join('')+row('Discovery checked',num(x.discovery&&x.discovery.total),dt(x.discovery&&x.discovery.last_checked)));return}
   if(id==='footprint'){const surfaces=f.distribution&&f.distribution.surfaces||[];modalRows('ToolScout Footprint','DISTRIBUTION + SEARCH',row('GSC observed pages',num(f.search&&f.search.observed_pages),f.search&&f.search.note)+row('Sitemap URLs',num(f.search&&f.search.sitemap_urls),'crawlable inventory')+surfaces.map(x=>row(x.name||x.slug,x.status,x.type||'surface')).join(''));return}
   if(id==='ledger'){modalRows('Growth Ledger','EVIDENCE LOG',(g.ledger||[]).map(x=>row((x.engine||'engine')+' · '+(x.subject||''),x.result||'',dt(x.at)+' · '+(x.action||''))).join(''));return}
   if(id==='health'){const h=g.health||{},issues=h.issues||[];let html=row('Content Engine',h.content&&h.content.status||'no_evidence',h.content&&h.content.detail||'')+row('Audience Engine',h.audience&&h.audience.status||'no_evidence',h.audience&&h.audience.detail||'')+row('SEO / GEO / AIO',h.seo_geo_aio&&h.seo_geo_aio.status||'no_evidence',h.seo_geo_aio&&h.seo_geo_aio.detail||'');html+=issues.length?issues.map(x=>row((x.engine||'engine')+' · '+(x.title||x.code),x.severity||'issue',x.detail||'')).join(''):'<div class="note">No engine-health issues detected in this snapshot.</div>';modalRows('Engine & Data Health','NO SILENT FAILURES',html);return}

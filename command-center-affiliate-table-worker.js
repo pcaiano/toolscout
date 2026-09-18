@@ -133,17 +133,12 @@ async function serveCanonicalPage(request,env,ctx){
   const trustedEmail=String(trustedRequest.headers.get('Cf-Access-Authenticated-User-Email')||'').toLowerCase();
   if(trustedEmail!==OWNER_EMAIL)return base.fetch(trustedRequest,env,ctx);
   if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
-  const assetRequest=new Request(new URL('/analytics-v2',request.url).toString(),{method:'GET',headers:trustedRequest.headers});
-  const asset=await env.ASSETS.fetch(assetRequest);
-  if(!asset.ok)return asset;
-  const headers=new Headers(asset.headers);
-  headers.set('Content-Type','text/html; charset=UTF-8');
-  headers.set('Cache-Control','private, no-store, max-age=0');
-  headers.append('Set-Cookie',`${SESSION_COOKIE}=${await sessionValue(env.ADMIN_TOKEN,sessionBucket())}; Max-Age=${SESSION_TTL_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Strict`);
-  const response=new Response(await asset.text(),{status:asset.status,statusText:asset.statusText,headers});
-  return decoratePage(response);
+  // The inner Growth Command Center is the single owner of page composition.
+  // Outer layers may decorate it, but must not rebuild the page from the raw static asset.
+  // This prevents new engine widgets and tracking surfaces from silently disappearing.
+  const canonical=await base.fetch(trustedRequest,env,ctx);
+  return decoratePage(canonical);
 }
-
 async function localOwnerLogin(request,env,ctx){
   if(!env.ADMIN_TOKEN)return new Response('Command Center unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
   if(Math.floor(Date.now()/1000)>LOCAL_LOGIN_EXPIRES_AT)return new Response('Login link expired',{status:410,headers:{'Cache-Control':'no-store'}});

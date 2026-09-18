@@ -239,7 +239,11 @@ async function augmentEntrypointHealth(response) {
   let data;
   try { data = await response.json(); } catch { return response; }
   data.entrypoint = 'command-center-light-theme-worker';
-  data.entrypointVersion = 3;
+  data.entrypointVersion = 4;
+  data.commandCenterComposition = 'canonical-growth-v2';
+  data.commandCenterCompositionOwner = 'growth-command-center-v2-worker';
+  data.runtimeVersionCards = true;
+  data.autonomousGrowthSurface = true;
   data.stats503Fallback = true;
   data.statsSnapshotCacheSeconds = STATS_CACHE_TTL_SECONDS;
   data.trafficDetailBackgroundPolling = false;

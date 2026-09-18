@@ -188,6 +188,17 @@ Programs previously identified as existing but not yet confirmed active include 
 
 PartnerStack marketplace access is currently constrained by a network-profile limitation. Existing partnerships are unaffected, but new marketplace programs may require reapplication/profile correction or alternative direct program routes. Treat this as a distribution/affiliate constraint, not a coding problem.
 
+## Command Center composition contract - 2026-09-18
+
+The Growth Command Center is the single owner of owner-facing page composition.
+
+- `growth-command-center-v2-worker.js` owns the canonical Command Center page composition and engine-surface injection.
+- Outer Worker layers may decorate the canonical response, add styling, add telemetry or add compatibility behavior. They must not rebuild `/analytics` directly from `analytics-v2.html`.
+- Engine card names must not hardcode version numbers. Runtime engine versions come from the protected stats payload so an engine upgrade cannot leave a stale card title behind.
+- A new engine, tracking surface or autonomous-growth capability is not considered operationally complete until it is visible through the canonical Command Center or explicitly classified as backend-only.
+- The resilient health endpoint exposes the current composition owner/version so production drift can be detected without relying on visual inspection.
+- Any future wrapper that fetches the raw analytics asset instead of delegating to the canonical base is a regression.
+
 ## Autonomous Growth loop - 2026-09-18
 
 ToolScout now coordinates growth work across Distribution, Content, Search/GEO/AEO and Affiliate systems instead of treating them as independent queues.
