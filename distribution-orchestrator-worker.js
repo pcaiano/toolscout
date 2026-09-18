@@ -317,6 +317,9 @@ async function publicSearchDirectives(env){
 }
 async function runGrowthRndAudit(env){
   await ensureGrowthSchema(env);
+  const policy=await growthAssetJson(env,'/data/growth-rnd-policy.json',{mode:'locked',autonomousPrimitives:[],resourcePolicy:{maxNewExperimentsPerAudit:0}});
+  const allowed=new Set(Array.isArray(policy?.autonomousPrimitives)?policy.autonomousPrimitives:[]);
+  const maxExperiments=Math.max(0,Math.min(10,Number(policy?.resourcePolicy?.maxNewExperimentsPerAudit||0)));
   const [types,human,actions]=await Promise.all([
     growthRows(env,`SELECT subject_type,COUNT(*) n,MAX(priority_score) max_score FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`),
     growthRows(env,`SELECT event_type,COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved') GROUP BY event_type`),
@@ -331,14 +334,16 @@ async function runGrowthRndAudit(env){
   if((counts.catalog_category?.count||0)>0||(counts.catalog_gap?.count||0)>0)add('rnd:catalog-expansion','catalog_expansion','catalog','Coverage gaps can create new searchable and monetizable decision surfaces when official-source quality gates pass.',['discover_candidates','verify_first_party','admit_coverage_only'],'qualified_catalog_coverage');
   const humanCount=human.reduce((s,x)=>s+Number(x.n||0),0);
   if(humanCount>=3)add('rnd:human-gate-reduction','automation_gap_reduction','operations','Repeated human gates are candidates for automation when identity, legal and paid-action boundaries are not involved.',['audit_human_gates','convert_machine_resolvable_gates'],'owner_minutes_reduced');
-  let upserted=0;
-  for(const x of experiments){
+  let upserted=0,blocked=0;
+  for(const x of experiments.slice(0,maxExperiments)){
+    const permitted=policy?.mode==='bounded_autonomy'&&x.steps.every(step=>allowed.has(step));
+    if(!permitted){blocked++;continue}
     await env.DB.prepare(`INSERT INTO growth_rnd_experiments(experiment_key,experiment_type,subject_key,hypothesis,action_json,status,risk_class,expected_signal,created_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,'active','bounded',?,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(experiment_key) DO UPDATE SET hypothesis=excluded.hypothesis,action_json=excluded.action_json,status='active',expected_signal=excluded.expected_signal,last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
       .bind(x.key,x.type,x.subject,x.hypothesis,JSON.stringify(x.steps),x.signal).run();upserted++;
   }
-  return {ok:true,active_experiments:upserted,opportunity_types:counts,human_gates_7d:humanCount,observed_action_engines:actions,guardrail:'Growth R&D may instantiate only pre-approved bounded action classes. Arbitrary code changes, new paid spend, credentials, legal commitments and irreversible third-party actions remain gated.'};
+  return {ok:true,policy_mode:policy?.mode||'locked',active_experiments:upserted,blocked_by_policy:blocked,opportunity_types:counts,human_gates_7d:humanCount,observed_action_engines:actions,guardrail:'Growth R&D may instantiate only pre-approved bounded action classes. Arbitrary code changes, new paid spend, credentials, legal commitments and irreversible third-party actions remain gated.'};
 }
 
 function paidPolicy(metric,cost){
