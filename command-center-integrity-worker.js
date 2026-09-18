@@ -101,14 +101,14 @@ async function canonicalSnapshot(env,upstream){
   const linkedTodaySessions=todayVisitors.ok?(todayVisitors.value||[]).length:null;
   const distinctTodaySessionIds=todayVisitors.ok?new Set((todayVisitors.value||[]).map(row=>String(row.session_id||'')).filter(Boolean)).size:null;
   const uniqueTodayVisitors=todayVisitors.ok?new Set((todayVisitors.value||[]).map(row=>String(row.visitor_id||'')).filter(Boolean)).size:null;
-  const canonicalToday=linkedTodaySessions==null?(sessionRow?finiteOrNull(sessionRow.today):null):linkedTodaySessions;
+  const canonicalToday=distinctTodaySessionIds==null?(sessionRow?finiteOrNull(sessionRow.today):null):distinctTodaySessionIds;
   if(linkedTodaySessions!=null&&distinctTodaySessionIds!=null&&distinctTodaySessionIds<linkedTodaySessions)issues.push({metric:'today_session_identity',severity:'warning',reason:'multiple_visitor_session_links_share_a_session_id'});
-  if(linkedTodaySessions!=null&&uniqueTodayVisitors!=null&&uniqueTodayVisitors>linkedTodaySessions)issues.push({metric:'today_population_alignment',severity:'error',reason:'unique_visitors_exceed_linked_sessions'});
+  if(distinctTodaySessionIds!=null&&uniqueTodayVisitors!=null&&uniqueTodayVisitors>distinctTodaySessionIds)issues.push({metric:'today_population_alignment',severity:'error',reason:'unique_visitors_exceed_distinct_sessions'});
   const dailyAverage=mtd==null?null:mtd/dayNumber,projectedMonth=dailyAverage==null?null:Math.round(dailyAverage*daysInMonth);
 
   const trendMap=new Map();
   if(trend.ok)for(const row of trend.value){const at=parseUtc(row.created_at),sid=String(row.session_id||'');if(!at||!sid)continue;const key=dayKey(at);if(!trendMap.has(key))trendMap.set(key,new Set());trendMap.get(key).add(sid)}
-  const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),key=dayKey(d);const historical=trend.ok?(trendMap.get(key)?.size||0):null;points.push({day:key,sessions:key===today&&linkedTodaySessions!=null?linkedTodaySessions:historical})}
+  const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),key=dayKey(d);const historical=trend.ok?(trendMap.get(key)?.size||0):null;points.push({day:key,sessions:key===today&&canonicalToday!=null?canonicalToday:historical})}
 
   const countryMonth=countryRows.ok?countryBuckets(countryRows.value):null;
   const countryLast24=countryRows.ok?countryBuckets((countryRows.value||[]).filter(row=>String(row.created_at||'')>=last24Start)):null;
@@ -127,7 +127,7 @@ async function canonicalSnapshot(env,upstream){
     status:issues.some(x=>x.severity==='error')?'degraded':issues.length?'warning':'healthy',
     generatedAt:now.toISOString(),timezone:TIME_ZONE,issues,
     sources:{d1_guard:sessions.ok?'available':'unavailable',verified_outbound:outbound.ok?'available':'unavailable',confirmed_visitors:todayVisitors.ok&&last24Visitors.ok?'available':'unavailable',visitor_countries:countryRows.ok?'available':'unavailable',engine_runs:runsResult.ok?'available':'unavailable',gsc:gscFreshness,ga4:ga4Freshness},
-    sessions:sessions.ok?{status:'observed',last24:finiteOrNull(sessionRow.last24),today:canonicalToday,monthToDate:mtd,dailyAverageMTD:dailyAverage,projectedMonth,lastAllowedAt:sessionRow.lastAllowedAt||null,todayPopulation:'confirmed_visitor_events visitor-session links in the Europe/Lisbon today window',todayDistinctSessionIds:distinctTodaySessionIds,todayUniqueVisitors:uniqueTodayVisitors,todayPopulationAligned:true}: {status:'unavailable',last24:null,today:null,monthToDate:null,dailyAverageMTD:null,projectedMonth:null,reason:sessions.error,todayPopulationAligned:false},
+    sessions:sessions.ok?{status:'observed',last24:finiteOrNull(sessionRow.last24),today:canonicalToday,monthToDate:mtd,dailyAverageMTD:dailyAverage,projectedMonth,lastAllowedAt:sessionRow.lastAllowedAt||null,todayPopulation:'distinct confirmed visitor-linked session IDs in the Europe/Lisbon today window',todayLinkRows:linkedTodaySessions,todayDistinctSessionIds:distinctTodaySessionIds,todayUniqueVisitors:uniqueTodayVisitors,todayPopulationAligned:linkedTodaySessions===distinctTodaySessionIds&&uniqueTodayVisitors<=distinctTodaySessionIds}: {status:'unavailable',last24:null,today:null,monthToDate:null,dailyAverageMTD:null,projectedMonth:null,reason:sessions.error,todayPopulationAligned:false},
     trafficTrend:{status:trend.ok?'observed':'unavailable',metric:'Browser Guard allowed sessions; current Lisbon day aligned to confirmed visitor-linked sessions',windowDays:30,points,generatedAt:now.toISOString(),reason:trend.ok?null:trend.error},
     outbound:outbound.ok?{status:'observed',windowDays:30,humanOutbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,lastOutboundAt:outRow.lastOutboundAt||null}: {status:'unavailable',windowDays:30,humanOutbound:null,monetizedOutbound:null,unmonetizedOutbound:null,weightedCoverage:null,reason:outbound.error},
     outboundByTool:byTool.ok?byTool.value.map(row=>({tool_slug:row.tool_slug,humanOutbound:finiteOrNull(row.humanOutbound),monetizedOutbound:finiteOrNull(row.monetizedOutbound),lastOutboundAt:row.lastOutboundAt||null})):null,
