@@ -1,0 +1,49 @@
+name: One off real Chairman payload deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/real-chairman-payload-oneoff.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-worker-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate changed code
+        run: |
+          node --check growth-command-center-v2-worker.js
+          node <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('analytics-v2.html','utf8');
+          const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
+          if(!scripts.length) throw new Error('No inline scripts found');
+          for(const [i,src] of scripts.entries()) new Function(src);
+          console.log('analytics-v2 inline scripts parse ok:',scripts.length);
+          NODE
+
+      - name: Apply canonical public navigation
+        run: node scripts/unify-public-nav.mjs
+
+      - name: Deploy Worker and static assets
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
