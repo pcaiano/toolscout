@@ -48,6 +48,8 @@ async function ensureGuardSchema(env){
       quarantined_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`)
   ]);
+  })().catch(error=>{guardSchemaReady=null;throw error});
+  return guardSchemaReady;
 }
 function safePath(value){
   const text=String(value||'/').slice(0,200);
