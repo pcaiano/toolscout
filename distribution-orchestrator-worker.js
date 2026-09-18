@@ -201,7 +201,7 @@ async function coordinateGrowthOpportunities(env){
   if(reportAgeDays>=freshnessDays){
     const signals={report_age_days:reportAgeDays,target_days:freshnessDays,catalog_tools:Number(catalogFreshness?.summary?.tools||catalogTools?.length||0),reason:'Catalog verification evidence is older than the configured freshness target.'};
     await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
-      VALUES('catalog:quality-refresh','catalog_system','quality-refresh',?,?,?,?, 'active',datetime('now'),datetime('now'),datetime('now'))
+      VALUES('catalog:quality-refresh','catalog_system','quality-refresh',?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
       .bind(Math.min(100,60+(reportAgeDays-freshnessDays)*4),JSON.stringify(signals),JSON.stringify(['run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles'])).run();
     active++;catalogCount++;
