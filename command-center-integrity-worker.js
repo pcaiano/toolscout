@@ -2,6 +2,7 @@ import base from './visitor-integrity-worker.js';
 import {latestEngineRuns} from './engine-run-ledger.js';
 
 const TIME_ZONE='Europe/Lisbon';
+let optimizationReady=null;
 
 function parseUtc(value){const text=String(value||'').trim();if(!text)return null;const d=new Date(text.includes('T')?text:(text.replace(' ','T')+'Z'));return Number.isFinite(d.getTime())?d:null}
 function zonedParts(value,timeZone=TIME_ZONE){const parts=new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(value instanceof Date?value:new Date(value));return Object.fromEntries(parts.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]))}
@@ -32,6 +33,61 @@ function countryBuckets(rows){
 
 async function first(env,sql,bindings=[]){try{return{ok:true,value:await env.DB.prepare(sql).bind(...bindings).first()}}catch(error){return{ok:false,error:String(error?.message||error)}}}
 async function all(env,sql,bindings=[]){try{return{ok:true,value:(await env.DB.prepare(sql).bind(...bindings).all()).results||[]}}catch(error){return{ok:false,error:String(error?.message||error),value:[]}}}
+
+async function ensureOptimizationSchema(env){
+  if(optimizationReady)return optimizationReady;
+  optimizationReady=(async()=>{
+    await env.DB.batch([
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS command_center_daily_metrics (
+        day TEXT PRIMARY KEY,
+        human_sessions INTEGER NOT NULL DEFAULT 0,
+        unique_visitors INTEGER NOT NULL DEFAULT 0,
+        outbound_clicks INTEGER NOT NULL DEFAULT 0,
+        monetized_outbound INTEGER NOT NULL DEFAULT 0,
+        unmonetized_outbound INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_command_center_daily_updated ON command_center_daily_metrics(updated_at)`)
+    ]);
+  })().catch(error=>{optimizationReady=null;throw error});
+  return optimizationReady;
+}
+
+function dayBounds(key){
+  const start=zonedMidnight(key);
+  const probe=new Date(start.getTime()+36*60*60*1000);
+  const end=zonedMidnight(dayKey(probe));
+  return {start:sqliteUtc(start),end:sqliteUtc(end)};
+}
+
+async function refreshDailyMetrics(env,daysBack=2){
+  await ensureOptimizationSchema(env);
+  const now=new Date(),statements=[];
+  for(let offset=0;offset<Math.max(1,daysBack);offset++){
+    const key=dayKey(new Date(now.getTime()-offset*86400000)),b=dayBounds(key);
+    statements.push(env.DB.prepare(`
+      INSERT INTO command_center_daily_metrics(
+        day,human_sessions,unique_visitors,outbound_clicks,monetized_outbound,unmonetized_outbound,updated_at
+      ) VALUES(
+        ?,
+        (SELECT COUNT(DISTINCT session_id) FROM traffic_guard_events WHERE decision='allowed' AND created_at>=? AND created_at<?),
+        (SELECT COUNT(DISTINCT visitor_id) FROM confirmed_visitor_events WHERE created_at>=? AND created_at<?),
+        (SELECT COUNT(*) FROM verified_outbound_events WHERE created_at>=? AND created_at<?),
+        (SELECT COUNT(*) FROM verified_outbound_events WHERE affiliate_active_at_click=1 AND created_at>=? AND created_at<?),
+        (SELECT COUNT(*) FROM verified_outbound_events WHERE (affiliate_active_at_click!=1 OR affiliate_active_at_click IS NULL) AND created_at>=? AND created_at<?),
+        datetime('now')
+      )
+      ON CONFLICT(day) DO UPDATE SET
+        human_sessions=excluded.human_sessions,
+        unique_visitors=excluded.unique_visitors,
+        outbound_clicks=excluded.outbound_clicks,
+        monetized_outbound=excluded.monetized_outbound,
+        unmonetized_outbound=excluded.unmonetized_outbound,
+        updated_at=excluded.updated_at
+    `).bind(key,b.start,b.end,b.start,b.end,b.start,b.end,b.start,b.end,b.start,b.end));
+  }
+  if(statements.length)await env.DB.batch(statements);
+}
 
 function firstTouchBuckets(rows){
   const firstByVisitor=new Map();
@@ -80,10 +136,12 @@ function sourceFreshness(source,defaultSlaMinutes=4320){
 }
 
 async function canonicalSnapshot(env,upstream){
-  const now=new Date(),today=dayKey(now),month=today.slice(0,7),todayStart=sqliteUtc(zonedMidnight(today)),monthStart=sqliteUtc(zonedMidnight(`${month}-01`)),last24Start=sqliteUtc(new Date(now.getTime()-86400000));
+  await ensureOptimizationSchema(env);
+  const now=new Date(),today=dayKey(now),month=today.slice(0,7),todayStart=sqliteUtc(zonedMidnight(today)),monthStart=sqliteUtc(zonedMidnight(`${month}-01`)),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<monthStart?last24Start:monthStart;
+  const trendStart=dayKey(new Date(now.getTime()-29*86400000));
   const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,runsResult]=await Promise.all([
-    first(env,`SELECT COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) monthToDate,MAX(created_at) lastAllowedAt FROM traffic_guard_events WHERE decision='allowed'`,[last24Start,todayStart,monthStart]),
-    all(env,`SELECT session_id,created_at FROM traffic_guard_events WHERE decision='allowed' AND created_at>=datetime('now','-31 days') ORDER BY created_at ASC`),
+    first(env,`SELECT COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) monthToDate,MAX(created_at) lastAllowedAt FROM traffic_guard_events WHERE decision='allowed' AND created_at>=?`,[last24Start,todayStart,monthStart,scanStart]),
+    all(env,`SELECT day,human_sessions sessions FROM command_center_daily_metrics WHERE day>=? ORDER BY day ASC`,[trendStart]),
     first(env,`SELECT COUNT(*) humanOutbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetizedOutbound,SUM(CASE WHEN affiliate_active_at_click!=1 OR affiliate_active_at_click IS NULL THEN 1 ELSE 0 END) unmonetizedOutbound,MAX(created_at) lastOutboundAt FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days')`),
     all(env,`SELECT tool_slug,COUNT(*) humanOutbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetizedOutbound,MAX(created_at) lastOutboundAt FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug ORDER BY humanOutbound DESC,tool_slug ASC`),
     all(env,`SELECT visitor_id,session_id,path,source,referrer_host,created_at FROM confirmed_visitor_events WHERE created_at>=? ORDER BY created_at ASC`,[todayStart]),
@@ -107,8 +165,8 @@ async function canonicalSnapshot(env,upstream){
   const dailyAverage=mtd==null?null:mtd/dayNumber,projectedMonth=dailyAverage==null?null:Math.round(dailyAverage*daysInMonth);
 
   const trendMap=new Map();
-  if(trend.ok)for(const row of trend.value){const at=parseUtc(row.created_at),sid=String(row.session_id||'');if(!at||!sid)continue;const key=dayKey(at);if(!trendMap.has(key))trendMap.set(key,new Set());trendMap.get(key).add(sid)}
-  const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),key=dayKey(d);const historical=trend.ok?(trendMap.get(key)?.size||0):null;points.push({day:key,sessions:key===today&&canonicalToday!=null?canonicalToday:historical})}
+  if(trend.ok)for(const row of trend.value||[]){const key=String(row.day||'');if(key)trendMap.set(key,finiteOrNull(row.sessions)||0)}
+  const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),key=dayKey(d);const historical=trend.ok?(trendMap.has(key)?trendMap.get(key):null):null;points.push({day:key,sessions:key===today&&canonicalToday!=null?canonicalToday:historical})}
 
   const countryMonth=countryRows.ok?countryBuckets(countryRows.value):null;
   const countryLast24=countryRows.ok?countryBuckets((countryRows.value||[]).filter(row=>String(row.created_at||'')>=last24Start)):null;
@@ -126,9 +184,9 @@ async function canonicalSnapshot(env,upstream){
   return {
     status:issues.some(x=>x.severity==='error')?'degraded':issues.length?'warning':'healthy',
     generatedAt:now.toISOString(),timezone:TIME_ZONE,issues,
-    sources:{d1_guard:sessions.ok?'available':'unavailable',verified_outbound:outbound.ok?'available':'unavailable',confirmed_visitors:todayVisitors.ok&&last24Visitors.ok?'available':'unavailable',visitor_countries:countryRows.ok?'available':'unavailable',engine_runs:runsResult.ok?'available':'unavailable',gsc:gscFreshness,ga4:ga4Freshness},
+    sources:{d1_guard:sessions.ok?'available':'unavailable',daily_metrics:trend.ok?'available':'unavailable',verified_outbound:outbound.ok?'available':'unavailable',confirmed_visitors:todayVisitors.ok&&last24Visitors.ok?'available':'unavailable',visitor_countries:countryRows.ok?'available':'unavailable',engine_runs:runsResult.ok?'available':'unavailable',gsc:gscFreshness,ga4:ga4Freshness},
     sessions:sessions.ok?{status:'observed',last24:finiteOrNull(sessionRow.last24),today:canonicalToday,monthToDate:mtd,dailyAverageMTD:dailyAverage,projectedMonth,lastAllowedAt:sessionRow.lastAllowedAt||null,todayPopulation:'distinct confirmed visitor-linked session IDs in the Europe/Lisbon today window',todayLinkRows:linkedTodaySessions,todayDistinctSessionIds:distinctTodaySessionIds,todayUniqueVisitors:uniqueTodayVisitors,todayPopulationAligned:linkedTodaySessions===distinctTodaySessionIds&&uniqueTodayVisitors<=distinctTodaySessionIds}: {status:'unavailable',last24:null,today:null,monthToDate:null,dailyAverageMTD:null,projectedMonth:null,reason:sessions.error,todayPopulationAligned:false},
-    trafficTrend:{status:trend.ok?'observed':'unavailable',metric:'Browser Guard allowed sessions; current Lisbon day aligned to confirmed visitor-linked sessions',windowDays:30,points,generatedAt:now.toISOString(),reason:trend.ok?null:trend.error},
+    trafficTrend:{status:trend.ok?'observed':'unavailable',metric:'Persisted daily Browser Guard session aggregates; current Lisbon day aligned to live confirmed visitor-linked sessions',windowDays:30,points,generatedAt:now.toISOString(),storage:'command_center_daily_metrics',reason:trend.ok?null:trend.error},
     outbound:outbound.ok?{status:'observed',windowDays:30,humanOutbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,lastOutboundAt:outRow.lastOutboundAt||null}: {status:'unavailable',windowDays:30,humanOutbound:null,monetizedOutbound:null,unmonetizedOutbound:null,weightedCoverage:null,reason:outbound.error},
     outboundByTool:byTool.ok?byTool.value.map(row=>({tool_slug:row.tool_slug,humanOutbound:finiteOrNull(row.humanOutbound),monetizedOutbound:finiteOrNull(row.monetizedOutbound),lastOutboundAt:row.lastOutboundAt||null})):null,
     attribution:{status:todayVisitors.ok&&last24Visitors.ok?'observed':'unavailable',definition:'First-touch buckets are calculated only from visitor IDs whose sessions were accepted by Browser Guard.',today:todayVisitors.ok?firstTouchBuckets(todayVisitors.value):null,last24:last24Visitors.ok?firstTouchBuckets(last24Visitors.value):null,generatedAt:now.toISOString()},
@@ -171,10 +229,16 @@ async function augmentHealth(response,env){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
+    if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/api/stats'||url.pathname==='/api/traffic-integrity-health')){
+      try{await ensureOptimizationSchema(env);ctx.waitUntil(refreshDailyMetrics(env,2))}catch{}
+    }
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/api/stats'))return augmentStats(response,env);
     if(request.method==='GET'&&url.pathname==='/api/traffic-integrity-health')return augmentHealth(response,env);
     return response;
   },
-  async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
+  async scheduled(event,env,ctx){
+    if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
+    try{await refreshDailyMetrics(env,event?.cron==='15 3 * * *'?8:2)}catch{}
+  }
 };
