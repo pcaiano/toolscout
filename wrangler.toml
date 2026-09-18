@@ -48,6 +48,7 @@ run_worker_first = [
   "/api/command-center-truth-health*",
   "/api/command-center-autoload-health*",
   "/api/command-center-resilient-health*",
+  "/api/autonomous-growth-health*",
   "/api/command-center-human-truth-health*",
   "/api/command-center-human-truth-final-health*",
   "/api/command-center-human-truth-details-health*",
