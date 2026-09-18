@@ -50,7 +50,7 @@ async function growthRows(env,sql){try{return (await env.DB.prepare(sql).all()).
 async function growthAssetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 async function coordinateGrowthOpportunities(env){
   await ensureGrowthSchema(env);
-  const [surfaces,tools,organicGrowth,aeoGeo,machineReadability]=await Promise.all([
+  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,organicGrowth,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
       n.status network_status,n.adoption_kind
@@ -64,9 +64,32 @@ async function coordinateGrowthOpportunities(env){
       LEFT JOIN content_social_profiles p ON p.tool_slug=v.tool_slug
       LEFT JOIN affiliate_social_policy a ON a.tool_slug=v.tool_slug
       WHERE v.tool_slug IS NOT NULL`),
+    growthRows(env,`WITH confirmed_sessions AS (
+      SELECT DISTINCT session_id FROM funnel_events WHERE event_type='page_confirmed'
+    )
+    SELECT w.tool_slug,w.status,w.network,w.blocker,w.application_url,w.program_url,w.affiliate_url,w.updated_at,
+      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human')
+        AND c.source NOT IN ('internal-test','synthetic','health-check','ci') THEN 1 ELSE 0 END) outbound_30d,
+      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human')
+        AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND COALESCE(c.affiliate_active_at_click,0)=0 THEN 1 ELSE 0 END) unmonetized_30d,
+      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human')
+        AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND COALESCE(c.affiliate_active_at_click,0)=1 THEN 1 ELSE 0 END) monetized_30d
+    FROM affiliate_workflow w
+    LEFT JOIN click_events c ON c.tool_slug=w.tool_slug AND c.created_at>=datetime('now','-30 days')
+      AND c.session_id IN (SELECT session_id FROM confirmed_sessions)
+    LEFT JOIN sessions s ON s.session_id=c.session_id
+    GROUP BY w.tool_slug,w.status,w.network,w.blocker,w.application_url,w.program_url,w.affiliate_url,w.updated_at`),
+    growthRows(env,`SELECT tool_slug,source_status,http_status,content_changed,broken_consecutive,quality_status,last_checked_at,last_change_at FROM catalog_runtime_state`),
+    growthRows(env,`SELECT tool_slug,status,source_status,verified_at FROM catalog_runtime_candidates`),
+    growthRows(env,`SELECT tool_slug,signals,sources_json,status,updated_at FROM catalog_market_gaps`),
     growthAssetJson(env,'/reports/organic-growth-opportunities.json',{generatedAt:null,opportunities:[],summary:{}}),
     growthAssetJson(env,'/reports/aeo-geo-readiness.json',{generatedAt:null,failures:null,warnings:null}),
-    growthAssetJson(env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null})
+    growthAssetJson(env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null}),
+    growthAssetJson(env,'/reports/catalog-freshness-coverage.json',{generatedAt:null,summary:{},coverage:[],contentChanges:[],quarantined:[]}),
+    growthAssetJson(env,'/reports/catalog-health.json',{summary:{},tools:[]}),
+    growthAssetJson(env,'/reports/tool-profile-holds.json',{generatedAt:null,count:0,items:[]}),
+    growthAssetJson(env,'/data/catalog-engine.json',{cadence:{freshnessTargetDays:7},coverage:{minimumToolsPerIntentCategory:5}}),
+    growthAssetJson(env,'/data/tools.json',[])
   ]);
   const searchOpportunities=Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
   const searchBoostByTool=new Map();
@@ -78,7 +101,7 @@ async function coordinateGrowthOpportunities(env){
     }
   }
   await env.DB.prepare(`UPDATE growth_opportunity_state SET status='dormant',updated_at=datetime('now') WHERE status='active'`).run().catch(()=>{});
-  let active=0,toolCount=0,surfaceCount=0,searchCount=0;
+  let active=0,toolCount=0,surfaceCount=0,searchCount=0,affiliateCount=0,catalogCount=0;
   for(const row of surfaces){
     const evidence=String(row.evidence_grade||'none');
     const network=String(row.network_status||'');
@@ -113,6 +136,96 @@ async function coordinateGrowthOpportunities(env){
       .bind(`tool:${row.tool_slug}`,'tool',row.tool_slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
     active++;toolCount++;
   }
+  const affiliateStateWeight={research_required:18,program_exists:28,ready_to_apply:42,human_action_required:46,submitted:24,pending_review:24,approved_needs_link:72,link_acquired:88,active:52,verified:8,earning:4,rejected:2,watchlist:3,paused:2,blocked:18,no_program_found:1};
+  for(const row of affiliateRows){
+    const slug=String(row.tool_slug||'').toLowerCase();if(!slug)continue;
+    const state=String(row.status||'research_required'),unmonetized=Math.max(0,Number(row.unmonetized_30d||0)),outbound=Math.max(0,Number(row.outbound_30d||0)),monetized=Math.max(0,Number(row.monetized_30d||0));
+    const searchBoost=Number(searchBoostByTool.get(slug)||0);
+    const leakageBoost=Math.min(40,unmonetized*8+Math.max(0,outbound-monetized)*2);
+    const score=Math.min(100,Math.max(0,Number(affiliateStateWeight[state]||10)+leakageBoost+searchBoost));
+    const actions=[];
+    if(state==='research_required'||state==='program_exists')actions.push('discover_and_qualify_affiliate_program');
+    if(state==='ready_to_apply'||state==='human_action_required')actions.push('prepare_affiliate_application_pack','surface_only_true_human_gate');
+    if(state==='submitted'||state==='pending_review')actions.push('monitor_affiliate_decision');
+    if(state==='approved_needs_link')actions.push('capture_approved_referral_link');
+    if(state==='link_acquired')actions.push('activate_affiliate_route');
+    if(state==='active')actions.push('production_verify_affiliate_route');
+    if(state==='verified'||state==='earning')actions.push('measure_affiliate_yield');
+    if(state==='blocked'||state==='rejected'||state==='paused')actions.push('monitor_retry_evidence');
+    const signals={affiliate_status:state,network:row.network||null,blocker:row.blocker||null,outbound_30d:outbound,unmonetized_outbound_30d:unmonetized,monetized_outbound_30d:monetized,search_priority_boost:Number(searchBoost.toFixed(2)),application_url:row.application_url||null,affiliate_url_present:Boolean(row.affiliate_url),updated_at:row.updated_at||null};
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(`affiliate:${slug}`,'affiliate',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
+    active++;affiliateCount++;
+  }
+
+  const runtimeStateBySlug=new Map((catalogRuntime||[]).map(x=>[String(x.tool_slug||'').toLowerCase(),x]));
+  const runtimeCandidateSet=new Set((catalogCandidates||[]).filter(x=>x.status==='admitted_coverage').map(x=>String(x.tool_slug||'').toLowerCase()));
+  const runtimeGapMap=new Map((catalogGaps||[]).map(x=>[String(x.tool_slug||'').toLowerCase(),x]));
+  const catalogBySlug=new Map((Array.isArray(catalogTools)?catalogTools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const changed=new Map((Array.isArray(catalogFreshness?.contentChanges)?catalogFreshness.contentChanges:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const quarantined=new Map((Array.isArray(catalogFreshness?.quarantined)?catalogFreshness.quarantined:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const healthBySlug=new Map((Array.isArray(catalogHealth?.tools)?catalogHealth.tools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const heldBySlug=new Map((Array.isArray(toolProfileHolds?.items)?toolProfileHolds.items:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const catalogSlugs=new Set([...changed.keys(),...quarantined.keys(),...heldBySlug.keys(),...runtimeStateBySlug.keys(),...runtimeCandidateSet]);
+  for(const [slug,h] of healthBySlug){
+    if(h?.needsWeeklyReview||h?.overdue||Array.isArray(h?.missingCritical)&&h.missingCritical.length)catalogSlugs.add(slug);
+  }
+  for(const slug of catalogSlugs){
+    if(!slug)continue;
+    const tool=catalogBySlug.get(slug)||{},h=healthBySlug.get(slug)||{},change=changed.get(slug)||null,quarantine=quarantined.get(slug)||null,hold=heldBySlug.get(slug)||null;
+    const searchBoost=Number(searchBoostByTool.get(slug)||0);
+    let score=30,actions=[];
+    if(change){score+=32;actions.push('verify_changed_catalog_facts','refresh_profile_if_confirmed');}
+    if(h?.needsWeeklyReview){score+=12;actions.push('refresh_volatile_catalog_facts');}
+    if(h?.overdue){score+=22;actions.push('deep_catalog_review');}
+    if(Array.isArray(h?.missingCritical)&&h.missingCritical.length){score+=28;actions.push('resolve_missing_critical_catalog_fields');}
+    if(hold){score+=18;actions.push('resolve_profile_evidence_hold');}
+    if(quarantine){score+=55;actions.push('confirm_source_breakage','suppress_unverifiable_profile');}
+    score=Math.min(100,score+searchBoost);
+    const runtime=runtimeStateBySlug.get(slug)||null;if(runtime?.quality_status==='change_detected'){score+=34;actions.push('verify_changed_catalog_facts','refresh_profile_if_confirmed')}if(runtime?.quality_status==='confirmed_broken'){score+=45;actions.push('suppress_unverifiable_profile')}if(runtimeCandidateSet.has(slug)){score+=8;actions.push('monitor_runtime_coverage_profile')}
+    const signals={tool_name:tool?.name||h?.name||slug,category:tool?.category||null,content_changed:Boolean(change)||runtime?.quality_status==='change_detected',quarantined:Boolean(quarantine)||runtime?.quality_status==='confirmed_broken',needs_weekly_review:Boolean(h?.needsWeeklyReview),overdue:Boolean(h?.overdue),missing_critical:Array.isArray(h?.missingCritical)?h.missingCritical:[],profile_hold:hold?.reason||null,source_status:runtime?.source_status||h?.source?.status||change?.sourceStatus||null,source_http_status:runtime?.http_status||h?.source?.httpStatus||change?.httpStatus||null,runtime_quality_status:runtime?.quality_status||null,runtime_last_checked_at:runtime?.last_checked_at||null,runtime_candidate:runtimeCandidateSet.has(slug),search_priority_boost:Number(searchBoost.toFixed(2)),freshness_report_generated_at:catalogFreshness?.generatedAt||null,catalog_health_generated_at:catalogHealth?.summary?.generatedAt||null};
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(`catalog-tool:${slug}`,'catalog_tool',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify([...new Set(actions)])).run();
+    active++;catalogCount++;
+  }
+  for(const gap of Array.isArray(catalogFreshness?.coverage)?catalogFreshness.coverage:[]){
+    const category=String(gap?.category||'').trim();const missing=Math.max(0,Number(gap?.gap||0));if(!category||missing<=0)continue;
+    const score=Math.min(100,35+missing*9+Math.min(15,Number(gap?.intentSurfaces||0)*1.5));
+    const signals={category,current_tools:Number(gap?.tools||0),target:Number(gap?.target||0),gap:missing,intent_surfaces:Number(gap?.intentSurfaces||0),catalog_entry_does_not_imply_ranking:true,affiliate_neutral:true,freshness_report_generated_at:catalogFreshness?.generatedAt||null};
+    const actions=['discover_catalog_candidates','verify_first_party_sources','admit_only_after_quality_gates'];
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(`catalog-category:${category}`,'catalog_category',category,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
+    active++;catalogCount++;
+  }
+  for(const [slug,gap] of runtimeGapMap){
+    if(!slug||String(gap?.status||'')!=='research_required')continue;
+    const signalsCount=Math.max(0,Number(gap?.signals||0)),score=Math.min(100,28+signalsCount*10);
+    let sources=[];try{sources=JSON.parse(gap?.sources_json||'[]')}catch{}
+    const signals={market_signals:signalsCount,market_sources:sources,first_party_profile_required:true,affiliate_neutral:true,updated_at:gap?.updated_at||null};
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(`catalog-gap:${slug}`,'catalog_gap',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(['research_first_party_candidate_profile','verify_official_source','admit_only_after_quality_gates'])).run();
+    active++;catalogCount++;
+  }
+
+  const freshnessDays=Number(catalogEngine?.cadence?.freshnessTargetDays||7),reportMs=Date.parse(catalogFreshness?.generatedAt||'');
+  const reportAgeDays=Number.isFinite(reportMs)?Math.floor((Date.now()-reportMs)/86400000):999;
+  if(reportAgeDays>=freshnessDays){
+    const signals={report_age_days:reportAgeDays,target_days:freshnessDays,catalog_tools:Number(catalogFreshness?.summary?.tools||catalogTools?.length||0),reason:'Catalog verification evidence is older than the configured freshness target.'};
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES('catalog:quality-refresh','catalog_system','quality-refresh',?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(Math.min(100,60+(reportAgeDays-freshnessDays)*4),JSON.stringify(signals),JSON.stringify(['run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles'])).run();
+    active++;catalogCount++;
+  }
+
   for(const op of searchOpportunities.slice(0,40)){
     const intent=String(op?.intent||'').trim();if(!intent)continue;
     const priority=Math.max(0,Math.min(100,Number(op?.priorityScore||0)));
@@ -141,8 +254,8 @@ async function coordinateGrowthOpportunities(env){
     active++;searchCount++;
   }
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
-    .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor opportunities and ${searchCount} Search/GEO/AEO opportunities. Tool priorities inherit bounded boosts from observed search opportunities so Distribution, Content, SEO/GEO/AEO and Affiliate effort can converge on the same subjects.`).run().catch(()=>{});
-  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null};
+    .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor, ${affiliateCount} affiliate, ${catalogCount} catalog/quality and ${searchCount} Search/GEO/AEO opportunities. One shared priority state now coordinates acquisition, monetization, catalog growth and factual quality while keeping affiliate economics separate from editorial ranking.`).run().catch(()=>{});
+  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null};
 }
 
 function paidPolicy(metric,cost){

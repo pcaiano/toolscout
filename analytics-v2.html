@@ -182,6 +182,8 @@ function renderAffiliate(d){
       metric('Monetized outbound · 30d',num(x.monetized_outbound_30d),num(x.human_outbound_30d)+' human outbound')+
       metric('Revenue leakage · 30d',num(x.unmonetized_outbound_30d),'Human outbound not monetized')+
       metric('Recoverable queue',num(x.recoverable_queue),'Demand-prioritized candidates')+
+      metric('Application packs',num(x.application_packs&&x.application_packs.prepared),'Prepared automatically')+
+      metric('Production verified routes',num(x.routes&&x.routes.verified),num(x.routes&&x.routes.failed)+' route verification failures')+
     '</div>'+
     '<div class="progress"><i style="width:'+Math.max(0,Math.min(100,Number(cov||0)))+'%"></i></div><div class="note">Coverage is weighted by observed human outbound demand, not raw catalogue count.</div>'+
     '<div style="margin-top:8px">'+stateEntries(x.workflow_status).slice(0,7).map(([k,v])=>row(k,num(v),'affiliate tools')).join('')+'</div>';

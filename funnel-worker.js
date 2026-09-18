@@ -1,4 +1,4 @@
-import base from './dynamic-worker.js';
+import base from './catalog-autonomy-worker.js';
 import { parseFunnelEvent, rate } from './funnel-model.js';
 import { classifySessionRequest, isSyntheticRequest, SESSION_CLASSIFICATIONS, SESSION_UPSERT_SQL } from './session-classification.js';
 
