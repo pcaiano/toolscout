@@ -11,7 +11,10 @@ const files={
   growth:fs.readFileSync('distribution-orchestrator-worker.js','utf8'),
   affiliate:fs.readFileSync('affiliate-coverage-cycle-worker.js','utf8'),
   catalog:fs.readFileSync('catalog-autonomy-worker.js','utf8'),
-  funnel:fs.readFileSync('funnel-worker.js','utf8')
+  funnel:fs.readFileSync('funnel-worker.js','utf8'),
+  seoController:fs.readFileSync('scripts/run-organic-growth-controller-v4.mjs','utf8'),
+  seoApply:fs.readFileSync('scripts/apply-organic-growth-actions.mjs','utf8'),
+  seoWorkflow:fs.readFileSync('.github/workflows/seo-engine-v2.yml','utf8')
 };
 const required=policy.required||{};
 if(required.autonomousGrowthBrain&&!files.light.includes(`autonomousGrowthBrain = '${required.autonomousGrowthBrain}'`)&&!files.light.includes(`brain:'${required.autonomousGrowthBrain}'`))fail('shared growth brain contract mismatch');
@@ -23,5 +26,8 @@ if(!files.funnel.includes("import base from './catalog-autonomy-worker.js'"))fai
 if(!files.growth.includes("'affiliate'")||!files.growth.includes("'catalog_tool'"))fail('Affiliate/Catalog are no longer first-class shared growth opportunities');
 if(!files.affiliate.includes('affiliate_application_packs')||!files.affiliate.includes('affiliate_route_verification'))fail('Affiliate 2.1 autonomy contract is missing');
 if(!files.catalog.includes('rankingEligible:false')||!files.catalog.includes('comparisonEligible:false'))fail('Catalog editorial-neutrality gate is missing');
+if(!files.growth.includes('/api/growth/search-directives'))fail('Shared Search directive endpoint is missing');
+if(!files.seoController.includes('shared_growth_directives_required')||!files.seoApply.includes('organic_growth_actions_not_authorized_by_shared_brain'))fail('SEO execution is not gated by the shared growth brain');
+if(!files.seoWorkflow.includes('fetch-shared-growth-directives.mjs'))fail('SEO workflow does not fetch runtime shared-brain directives');
 
 console.log('PASS: mutating GitHub Actions may run against the reviewed shared-growth-v3 contract.');
