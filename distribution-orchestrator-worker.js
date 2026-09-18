@@ -47,9 +47,10 @@ async function ensureGrowthSchema(env){
   return growthSchemaReady;
 }
 async function growthRows(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
+async function growthAssetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 async function coordinateGrowthOpportunities(env){
   await ensureGrowthSchema(env);
-  const [surfaces,tools]=await Promise.all([
+  const [surfaces,tools,organicGrowth,aeoGeo,machineReadability]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
       n.status network_status,n.adoption_kind
@@ -62,10 +63,22 @@ async function coordinateGrowthOpportunities(env){
       FROM distribution_vendor_amplification v
       LEFT JOIN content_social_profiles p ON p.tool_slug=v.tool_slug
       LEFT JOIN affiliate_social_policy a ON a.tool_slug=v.tool_slug
-      WHERE v.tool_slug IS NOT NULL`)
+      WHERE v.tool_slug IS NOT NULL`),
+    growthAssetJson(env,'/reports/organic-growth-opportunities.json',{generatedAt:null,opportunities:[],summary:{}}),
+    growthAssetJson(env,'/reports/aeo-geo-readiness.json',{generatedAt:null,failures:null,warnings:null}),
+    growthAssetJson(env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null})
   ]);
+  const searchOpportunities=Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
+  const searchBoostByTool=new Map();
+  for(const op of searchOpportunities){
+    const score=Math.max(0,Math.min(100,Number(op?.priorityScore||0)));
+    for(const tool of Array.isArray(op?.topTools)?op.topTools:[]){
+      const slug=String(tool||'').toLowerCase();if(!slug)continue;
+      searchBoostByTool.set(slug,Math.max(searchBoostByTool.get(slug)||0,Math.min(15,score*0.2)));
+    }
+  }
   await env.DB.prepare(`UPDATE growth_opportunity_state SET status='dormant',updated_at=datetime('now') WHERE status='active'`).run().catch(()=>{});
-  let active=0,toolCount=0,surfaceCount=0;
+  let active=0,toolCount=0,surfaceCount=0,searchCount=0;
   for(const row of surfaces){
     const evidence=String(row.evidence_grade||'none');
     const network=String(row.network_status||'');
@@ -88,20 +101,48 @@ async function coordinateGrowthOpportunities(env){
     const profile=String(row.profile_status||'')==='verified';
     const affiliate=Number(row.organic_social_allowed)===1&&Number(row.direct_affiliate_link_allowed)===1;
     const vendor=String(row.vendor_status||'');
-    const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)));
+    const searchBoost=Number(searchBoostByTool.get(String(row.tool_slug||'').toLowerCase())||0);
+    const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)+searchBoost));
     const actions=['vendor_amplification'];
     if(profile)actions.push('content_mention');
     if(affiliate)actions.push('affiliate_social');
-    const signals={vendor_status:vendor,verified_social_profile:profile,affiliate_social_allowed:affiliate,asset_url:row.asset_url||null,policy_status:row.policy_status||null};
+    const signals={vendor_status:vendor,verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null};
     await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
       .bind(`tool:${row.tool_slug}`,'tool',row.tool_slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
     active++;toolCount++;
   }
+  for(const op of searchOpportunities.slice(0,40)){
+    const intent=String(op?.intent||'').trim();if(!intent)continue;
+    const priority=Math.max(0,Math.min(100,Number(op?.priorityScore||0)));
+    const execution=Array.isArray(op?.executionPlan)?op.executionPlan:[];
+    const actions=[...new Set([...execution,'content_amplification','distribution_amplification','search_measurement'])];
+    const signals={
+      lane:op?.lane||null,
+      action:op?.action||null,
+      evidence_confidence:op?.evidenceConfidence||null,
+      monetization_readiness:op?.monetizationReadiness||null,
+      impressions:Number(op?.searchSignal?.impressions||0),
+      clicks:Number(op?.searchSignal?.clicks||0),
+      ctr:Number(op?.searchSignal?.ctr||0),
+      position:Number(op?.searchSignal?.position||0),
+      top_tools:Array.isArray(op?.topTools)?op.topTools.slice(0,5):[],
+      aeo_geo_failures:Number(aeoGeo?.failures||0),
+      aeo_geo_warnings:Number(aeoGeo?.warnings||0),
+      machine_readability_failures:Number(machineReadability?.failures||0),
+      machine_readability_warnings:Number(machineReadability?.warnings||0),
+      organic_report_generated_at:organicGrowth?.generatedAt||null
+    };
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(`search:${intent}`,'search',intent,Number(priority.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
+    active++;searchCount++;
+  }
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
-    .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces and ${toolCount} tool/vendor opportunities. Priority is evidence-led and concentrates Distribution, Content and Affiliate actions on the same subjects.`).run().catch(()=>{});
-  return {ok:true,active,surfaces:surfaceCount,tools:toolCount};
+    .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor opportunities and ${searchCount} Search/GEO/AEO opportunities. Tool priorities inherit bounded boosts from observed search opportunities so Distribution, Content, SEO/GEO/AEO and Affiliate effort can converge on the same subjects.`).run().catch(()=>{});
+  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null};
 }
 
 function paidPolicy(metric,cost){
