@@ -6,6 +6,8 @@ const MAX_VERIFY_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=3;
 const FETCH_TIMEOUT_MS=6000;
 let schemaReady=null;
+let runtimeCache={at:0,candidates:[],candidateMap:new Map(),stateMap:new Map(),suppressed:new Set()};
+const RUNTIME_CACHE_MS=60000;
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const safeText=(v,n=4000)=>String(v??'').slice(0,n);
@@ -81,16 +83,20 @@ async function logEvent(env,slug,type,status,detail,evidence=null){
   await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
     .bind(`cat_${crypto.randomUUID()}`,slug||null,type,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run().catch(()=>{});
 }
-async function runtimeCandidates(env){
+async function runtimeSnapshot(env,{force=false}={}){
+  if(!force&&Date.now()-runtimeCache.at<RUNTIME_CACHE_MS)return runtimeCache;
   await ensureSchema(env);
-  const q=await env.DB.prepare(`SELECT tool_slug,profile_json,status,source_status,verified_at FROM catalog_runtime_candidates WHERE status='admitted_coverage' ORDER BY verified_at DESC`).all();
-  return (q.results||[]).map(row=>{try{return JSON.parse(row.profile_json)}catch{return null}}).filter(Boolean);
+  const [states,candidates]=await Promise.all([
+    env.DB.prepare(`SELECT * FROM catalog_runtime_state`).all(),
+    env.DB.prepare(`SELECT tool_slug,profile_json,status,source_status,verified_at FROM catalog_runtime_candidates WHERE status='admitted_coverage' ORDER BY verified_at DESC`).all()
+  ]);
+  const stateMap=new Map((states.results||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
+  for(const row of candidates.results||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
+  runtimeCache={at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k))};
+  return runtimeCache;
 }
-async function suppressedSlugs(env){
-  await ensureSchema(env);
-  const q=await env.DB.prepare(`SELECT tool_slug FROM catalog_runtime_state WHERE quality_status='confirmed_broken'`).all();
-  return new Set((q.results||[]).map(x=>String(x.tool_slug)));
-}
+async function runtimeCandidates(env){return (await runtimeSnapshot(env)).candidates}
+async function suppressedSlugs(env){return (await runtimeSnapshot(env)).suppressed}
 async function mergedTools(env){
   const [staticTools,candidates,suppressed]=await Promise.all([assetJson(env,'/data/tools.json',[]),runtimeCandidates(env),suppressedSlugs(env)]);
   const out=[],seen=new Set();
@@ -130,6 +136,7 @@ async function verifyBatch(env){
       ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status=excluded.source_status,http_status=excluded.http_status,final_url=excluded.final_url,fingerprint=COALESCE(excluded.fingerprint,catalog_runtime_state.fingerprint),content_changed=excluded.content_changed,broken_consecutive=excluded.broken_consecutive,quality_status=excluded.quality_status,static_last_verified=excluded.static_last_verified,last_checked_at=datetime('now'),last_change_at=excluded.last_change_at,updated_at=datetime('now')`)
       .bind(slug,tool.sourceUrl,result.status,result.httpStatus,result.finalUrl,result.fingerprint,contentChanged,broken,quality,staticVerified,lastChange).run();
   }
+  runtimeCache.at=0;
   return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,evidence:'official_source_runtime'};
 }
 function validCandidate(candidate,config){
@@ -181,6 +188,7 @@ async function admitTrustedCandidates(env){
     if(admitted>=MAX_ADMIT_PER_DAY)break;
   }
   const market_gaps=await syncMarketGaps(env);
+  runtimeCache.at=0;
   return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,rule:'Affiliate economics cannot increase catalog admission or ranking eligibility.'};
 }
 function candidatePage(tool){
@@ -192,8 +200,8 @@ function injectPendingReview(html,state){
   const warning=`<div data-catalog-runtime-warning="1" style="background:#fff4e5;border-bottom:1px solid #fdb022;color:#7a2e0e;padding:10px 18px;font:600 13px/1.45 Inter,system-ui,sans-serif;text-align:center">ToolScout detected a change on this vendor's official source after the last factual review. Pricing, free-plan details or capabilities shown below may be pending re-verification.</div>`;
   return html.includes('<body')?html.replace(/(<body[^>]*>)/i,'$1'+warning):warning+html;
 }
-async function toolState(env,slug){await ensureSchema(env);return env.DB.prepare(`SELECT * FROM catalog_runtime_state WHERE tool_slug=?`).bind(slug).first()}
-async function runtimeCandidate(env,slug){await ensureSchema(env);const r=await env.DB.prepare(`SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status='admitted_coverage'`).bind(slug).first();if(!r)return null;try{return JSON.parse(r.profile_json)}catch{return null}}
+async function toolState(env,slug){return (await runtimeSnapshot(env)).stateMap.get(slug)||null}
+async function runtimeCandidate(env,slug){return (await runtimeSnapshot(env)).candidateMap.get(slug)||null}
 function toolSlug(path){const m=String(path).match(/^\/tools\/([a-z0-9][a-z0-9-]*)(?:\.html)?\/?$/i);return m?m[1].toLowerCase():null}
 async function mergedSitemap(response,env){
   if(!response.ok)return response;let xml=await response.text();
