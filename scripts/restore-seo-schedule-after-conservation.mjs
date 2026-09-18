@@ -1,6 +1,12 @@
 import fs from 'node:fs';
 
 const workflowPath='.github/workflows/seo-engine-v2.yml';
+const resumePolicyPath='data/github-actions-resume-policy.json';
+const resumePolicy=fs.existsSync(resumePolicyPath)?JSON.parse(fs.readFileSync(resumePolicyPath,'utf8')):null;
+if(resumePolicy?.enabled!==true){
+  console.log(JSON.stringify({changed:false,reason:'actions-resume-interlock-locked',policy:resumePolicyPath}));
+  process.exit(0);
+}
 const now=new Date();
 const unlockAt=new Date('2026-10-01T00:00:00Z');
 if(now<unlockAt){
