@@ -110,6 +110,61 @@ Rules:
 
 The runtime Catalog Autonomy layer exists so freshness and coverage learning continue even while repository CI is in conservation mode.
 
+## Search / GEO / AEO execution under the shared brain
+
+Search intelligence and Search execution no longer operate as independent strategy layers.
+
+The runtime growth coordinator publishes sanitized Search directives from `growth_opportunity_state` at `/api/growth/search-directives`.
+
+When the repository SEO workflow is eventually unlocked, it must:
+
+1. fetch the current runtime directives;
+2. verify that the source brain is `shared-growth-v3` and fresh;
+3. refuse to start a new intervention for an intent that is not authorized by the shared brain;
+4. write the brain opportunity and actions into the organic-growth action record;
+5. refuse to apply generated SEO actions that lack the shared-brain authorization marker.
+
+The GitHub Actions hard interlock remains closed until this brain-gated pipeline is reviewed on a non-main branch.
+
+## What's New under the shared brain
+
+`What's New` is a growth input, not a separate editorial island.
+
+- existing verified software updates become `news_update` opportunities;
+- recent verified updates can boost the priority of the related tool;
+- Content Engine may select a `news_update` opportunity through the same priority state as normal tool opportunities;
+- Catalog Runtime discovers official changelog / release-note / product-update sources from first-party vendor pages;
+- tracked official update sources are checked on the low-cost daily cadence;
+- a changed official update source creates a bounded candidate, not an automatic factual rewrite;
+- news opportunities can trigger catalog impact review, Search angle evaluation, Content amplification and Distribution amplification;
+- affiliate status never determines whether a product update is covered.
+
+## Growth R&D bounded autonomy
+
+The shared brain audits its own opportunity mix and recent outcomes once per day.
+
+It may autonomously instantiate experiments only from the primitives allowlisted in `data/growth-rnd-policy.json`.
+
+Examples include:
+
+- reinforce an observed Search opportunity through Content + Distribution;
+- compound a verified software update through Search, Content, Catalog and Vendor Amplification;
+- prioritize recoverable affiliate leakage;
+- explore evidence-backed catalog coverage gaps;
+- reduce machine-resolvable Human Gates.
+
+The brain must not autonomously:
+
+- modify arbitrary application code;
+- authorize new paid spend;
+- change credentials or secrets;
+- accept legal or contractual terms;
+- submit identity, tax or payment information;
+- perform an irreversible third-party action;
+- change editorial ranking because of affiliate economics.
+
+This makes the system proactive without making it unconstrained or self-modifying.
+
 ## Growth Command Center 2.0
 
 The Command Center is an operational surface, not an activity dashboard.
