@@ -48,6 +48,8 @@ async function ensureSchema(env){
       )`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_created ON verified_outbound_events(created_at)`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_session ON verified_outbound_events(session_id,created_at)`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_created_affiliate ON verified_outbound_events(created_at,affiliate_active_at_click)`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_tool_created ON verified_outbound_events(tool_slug,created_at)`),
       env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
       env.DB.prepare(`INSERT OR IGNORE INTO outbound_integrity_meta(key,value) VALUES('tracking_started_at',datetime('now'))`)
     ]);
