@@ -68,6 +68,8 @@ async function ensureIntegritySchema(env){
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_integrity_heartbeat_created_at ON traffic_integrity_heartbeat(created_at)`)
   ]);
+  })().catch(error=>{integritySchemaReady=null;throw error});
+  return integritySchemaReady;
 }
 
 function jsonHeaders(){return {'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','Access-Control-Allow-Origin':BASE,'Vary':'Origin'}}
