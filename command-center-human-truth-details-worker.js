@@ -73,19 +73,12 @@ function detailsScript(){return `<style data-toolscout-human-truth-details="1">
 #trafficTruthBody .tsCountryHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
 #trafficTruthBody .tsCountryHead strong{display:block;font-size:12px}
 #trafficTruthBody .tsCountryHead span{display:block;color:var(--muted);font-size:9px;line-height:1.35;margin-top:3px}
-#trafficTruthBody .tsCountryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-#trafficTruthBody .tsCountryCol{min-width:0;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:11px}
-#trafficTruthBody .tsCountryLabel{font-size:9px;font-weight:850;letter-spacing:.075em;text-transform:uppercase;color:var(--muted)}
-#trafficTruthBody .tsCountrySummary{font-size:9px;color:var(--muted);line-height:1.4;margin-top:3px;margin-bottom:9px}
-#trafficTruthBody .tsCountrySummary strong{color:var(--ink);font-size:9px}
-#trafficTruthBody .tsCountryBarRow{margin-top:9px}
-#trafficTruthBody .tsCountryBarTop{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10px;line-height:1.25}
-#trafficTruthBody .tsCountryBarTop span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#trafficTruthBody .tsCountryBarTop b{font-size:10px;white-space:nowrap}
-#trafficTruthBody .tsCountryBarTrack{height:7px;margin-top:5px;background:var(--line);border-radius:999px;overflow:hidden}
-#trafficTruthBody .tsCountryBarFill{display:block;height:100%;background:var(--accent);border-radius:999px}
-#trafficTruthBody .tsCountryMore{margin-top:8px;font-size:9px;color:var(--muted)}
-@media(max-width:900px){#trafficTruthBody .tsCountryGrid{grid-template-columns:1fr}}
+#trafficTruthBody .tsCountryGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#trafficTruthBody .tsCountryCol{min-width:0}
+#trafficTruthBody .tsCountryLabel{font-size:9px;font-weight:850;letter-spacing:.075em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+#trafficTruthBody .tsCountryRow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:10px}
+#trafficTruthBody .tsCountryRow:first-of-type{border-top:0}
+#trafficTruthBody .tsCountryRow b{font-size:11px}
 @media(max-width:430px){#trafficTruthBody .tsDetailGrid{grid-template-columns:1fr 1fr;gap:8px}#trafficTruthBody .tsDetailCard{padding:11px}#trafficTruthBody .tsDetailCard b{font-size:23px}}
 </style><script data-toolscout-human-truth-details="1">(function(){
 if(window.__toolscoutHumanTruthDetailsInstalled)return;
@@ -98,19 +91,17 @@ function visitorComplete(v,key){var c=v&&v.coverage||{};return key==='last24'?!!
 function visitorWindowMeta(v,key){return visitorComplete(v,key)?'Complete exact measurement window':'Partial exact tracking window'}
 function countryName(code){try{var dn=new Intl.DisplayNames([document.documentElement.lang||'en'],{type:'region'});return dn.of(code)||code}catch(e){return code}}
 function countryColumn(label,data){
-  if(!data)return '<div class="tsCountryCol"><div class="tsCountryLabel">'+label+'</div><div class="tsCountrySummary">Unavailable</div></div>';
-  var all=Array.isArray(data.countries)?data.countries:[],rows=all.slice(0,6),total=n(data.total),unknown=n(data.unknown),dominant=rows[0]||null;
-  var dominantPct=dominant&&total?Math.round(n(dominant.visitors)/total*100):0,cov=data.coverage==null?null:Math.round(Number(data.coverage)*100);
-  var summary=total?('<strong>'+fmt(all.length)+'</strong> countr'+(all.length===1?'y':'ies')+' · '+(dominant?esc(countryName(String(dominant.country||'')))+' '+dominantPct+'%':'no located country')+(cov==null?'':' · '+cov+'% located'):'No visitors yet';
-  var body=rows.map(function(x){var pct=total?Math.round(n(x.visitors)/total*100):0;return '<div class="tsCountryBarRow"><div class="tsCountryBarTop"><span>'+esc(countryName(String(x.country||'')))+'</span><b>'+fmt(x.visitors)+' · '+pct+'%</b></div><div class="tsCountryBarTrack"><i class="tsCountryBarFill" style="width:'+Math.max(0,Math.min(100,pct))+'%"></i></div></div>'}).join('');
-  if(unknown){var upct=total?Math.round(unknown/total*100):0;body+='<div class="tsCountryBarRow"><div class="tsCountryBarTop"><span>Country unavailable</span><b>'+fmt(unknown)+' · '+upct+'%</b></div><div class="tsCountryBarTrack"><i class="tsCountryBarFill" style="width:'+Math.max(0,Math.min(100,upct))+'%;opacity:.35"></i></div></div>'}
-  if(!body)body='<div class="tsCountryMore">No country data yet.</div>';
-  if(all.length>rows.length)body+='<div class="tsCountryMore">+'+fmt(all.length-rows.length)+' more countr'+(all.length-rows.length===1?'y':'ies')+'</div>';
-  return '<div class="tsCountryCol"><div class="tsCountryLabel">'+label+'</div><div class="tsCountrySummary">'+summary+'</div>'+body+'</div>';
+  if(!data)return '<div class="tsCountryCol"><div class="tsCountryLabel">'+label+'</div><div class="tsCountryRow"><span>Unavailable</span><b>0</b></div></div>';
+  var rows=Array.isArray(data.countries)?data.countries.slice(0,6):[];
+  var body=rows.map(function(x){return '<div class="tsCountryRow"><span>'+esc(countryName(String(x.country||'')))+'</span><b>'+fmt(x.visitors)+'</b></div>'}).join('');
+  if(data.unknown)body+='<div class="tsCountryRow"><span>Country unavailable</span><b>'+fmt(data.unknown)+'</b></div>';
+  if(!body)body='<div class="tsCountryRow"><span>No country data yet</span><b>0</b></div>';
+  var cov=data.coverage==null?'':Math.round(Number(data.coverage)*100)+'% country coverage';
+  return '<div class="tsCountryCol"><div class="tsCountryLabel">'+label+(cov?' · '+cov:'')+'</div>'+body+'</div>';
 }
 function countryBlock(countries){
   if(!countries||countries.status!=='observed')return '<div class="tsCountryBlock"><div class="tsCountryHead"><div><strong>Visitor countries</strong><span>Country data is currently unavailable.</span></div></div></div>';
-  return '<div class="tsCountryBlock"><div class="tsCountryHead"><div><strong>Visitor countries</strong><span>Country share among browser-confirmed human visitors. Cloudflare network location is used, raw IP is not stored, and VPNs or proxies can affect the reported country. MTD covers the exact tracked cohort and does not invent earlier geography.</span></div></div><div class="tsCountryGrid">'+countryColumn('Today',countries.today)+countryColumn('Last 24h',countries.last24)+countryColumn('MTD',countries.monthToDate)+'</div></div>';
+  return '<div class="tsCountryBlock"><div class="tsCountryHead"><div><strong>Visitor countries</strong><span>Cloudflare network-location country for browser-confirmed human visitors. Raw IP is not stored. VPNs and proxies can affect the reported country.</span></div></div><div class="tsCountryGrid">'+countryColumn('Today',countries.today)+countryColumn('Last 24h',countries.last24)+'</div></div>';
 }
 function renderDetails(d){
   latest=d||latest;if(!latest)return;
@@ -160,7 +151,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:9,canonicalMetric:'human sessions',supportingUniqueVisitorMetric:true,visitorCountries:true,countryVisualization:'bars_today_24h_mtd',visitorCountrySource:'Cloudflare request country on Browser Guard allowed sessions',visitorProjectionRequiresComplete24h:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human session forecast'},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:8,canonicalMetric:'human sessions',supportingUniqueVisitorMetric:true,visitorCountries:true,visitorCountrySource:'Cloudflare request country on Browser Guard allowed sessions',visitorProjectionRequiresComplete24h:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human session forecast'},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
