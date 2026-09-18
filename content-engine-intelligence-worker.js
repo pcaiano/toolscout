@@ -34,6 +34,16 @@ function termsLinks(html,base){
   }
   return [...new Set(out)].slice(0,2);
 }
+function affiliateProgramLinks(html,base){
+  const out=[];
+  for(const m of String(html||'').matchAll(/href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/ig)){
+    try{
+      const u=new URL(m[1],base),label=(stripHtml(m[2])+' '+u.pathname).toLowerCase();
+      if(/affiliate|referral program|partner program|partners\/affiliates/.test(label))out.push(u.href);
+    }catch{}
+  }
+  return [...new Set(out)].slice(0,4);
+}
 const SOCIAL_ALLOW=/(social media|social channels|social networks|social posts?|instagram|linkedin|twitter|\bx\b|facebook|tiktok|youtube).{0,160}(affiliate link|referral link|tracking link|unique link|promotion|promote|share)|(?:affiliate link|referral link|tracking link|unique link).{0,160}(social media|social channels|social networks|instagram|linkedin|twitter|facebook|tiktok|youtube)/i;
 const SOCIAL_GENERAL=/(social media|social channels|social networks|influencer|creator|content creator)/i;
 const SOCIAL_ALL_BAN=/(may not|must not|prohibited|not permitted|do not).{0,120}(post|promote|share|advertise).{0,80}(social media|social networks|social channels)|(?:social media|social networks|social channels).{0,100}(prohibited|not permitted|forbidden)/i;
@@ -95,39 +105,60 @@ async function refreshProfiles(env){
   return {scanned,verified};
 }
 
-async function policySourceMap(env){
-  const pipe=await assetJson(env,'/data/affiliate-pipeline.json',[]);
-  const out=new Map();
-  for(const row of Array.isArray(pipe)?pipe:[]){
-    if(!row?.slug)continue;
-    out.set(row.slug,{source:row.source||row.application_url||row.program_url||null,status:row.status||null});
-  }
-  return out;
-}
 async function refreshPolicies(env){
   await ensureSchema(env);
-  const affiliate=await assetJson(env,'/data/affiliate.json',{}),sources=await policySourceMap(env);
-  const active=Object.entries(affiliate||{}).filter(([,v])=>v?.enabled&&v?.url).map(([slug,v])=>({slug,...v,source:sources.get(slug)?.source||v.publicUrl}));
+  const tools=await assetJson(env,'/data/tools.json',[]);
+  const toolBySlug=new Map((Array.isArray(tools)?tools:[]).map(x=>[x.slug,x]));
+  const activeRows=await env.DB.prepare(`SELECT tool_slug,status,program_url,application_url,evidence_json FROM affiliate_workflow WHERE status IN ('verified','active','earning','link_acquired') ORDER BY tool_slug`).all();
   const rows=await env.DB.prepare(`SELECT tool_slug,last_checked_at FROM affiliate_social_policy`).all(),by=new Map((rows.results||[]).map(x=>[x.tool_slug,x]));
-  const due=active.filter(x=>{const r=by.get(x.slug);if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).slice(0,MAX_POLICY_SCANS);
+  const due=(activeRows.results||[]).filter(x=>{const r=by.get(x.tool_slug);if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).slice(0,MAX_POLICY_SCANS);
   let scanned=0,allowed=0,unknown=0,blocked=0;
   for(const item of due){
     scanned++;
-    const u=publicUrl(item.source)||publicUrl(item.publicUrl);
-    let pages=[];
-    if(u){const p=await fetchText(u.href);if(p){pages.push(p);for(const link of termsLinks(p.html,p.url)){const t=await fetchText(link);if(t)pages.push(t)}}}
+    const tool=toolBySlug.get(item.tool_slug)||{};
+    const home=publicUrl(tool.sourceUrl||tool.website||tool.url);
+    const direct=publicUrl(item.program_url);
+    const candidates=[];
+    if(direct)candidates.push(direct.href);
+    if(home){
+      const homePage=await fetchText(home.href);
+      if(homePage){
+        for(const link of affiliateProgramLinks(homePage.html,homePage.url))candidates.push(link);
+      }
+      for(const path of ['/affiliate','/affiliates','/affiliate-program','/partners/affiliates','/referral-program']){
+        try{candidates.push(new URL(path,home.origin).href)}catch{}
+      }
+    }
+    const pages=[];
+    for(const candidate of [...new Set(candidates)].slice(0,6)){
+      const p=await fetchText(candidate);if(!p)continue;
+      const txt=stripHtml(p.html);
+      if(!/(affiliate|referral|partner program|creator program)/i.test(txt+' '+p.url))continue;
+      pages.push(p);
+      for(const link of termsLinks(p.html,p.url)){
+        const t=await fetchText(link);if(t)pages.push(t);
+      }
+      if(pages.length>=4)break;
+    }
     const text=pages.map(p=>stripHtml(p.html)).join(' ').slice(0,400000);
     const socialBan=SOCIAL_ALL_BAN.test(text),explicit=SOCIAL_ALLOW.test(text),socialGeneral=SOCIAL_GENERAL.test(text),paidBan=PAID_ONLY_BAN.test(text),cloakBan=CLOAK_BAN.test(text),disclosure=DISCLOSURE.test(text);
-    let organic=null,direct=null,redirect=null,status='unknown',detail='No explicit organic-social affiliate permission found in the checked official programme material.';
-    if(socialBan){organic=0;direct=0;redirect=0;status='blocked';detail='Official programme material appears to prohibit social promotion.';blocked++}
-    else if(explicit){
-      organic=1;direct=1;redirect=cloakBan?0:1;status=cloakBan?'social_allowed_direct_only':'verified_social_allowed';
+    let organic=null,directLink=null,redirect=null,status='unknown',detail='No explicit organic-social affiliate permission found in checked official programme material.';
+    if(!pages.length){
+      detail='No official affiliate programme terms page could be verified automatically from the active programme and official vendor site.';
+      unknown++;
+    }else if(socialBan){
+      organic=0;directLink=0;redirect=0;status='blocked';detail='Official programme material appears to prohibit social promotion.';blocked++;
+    }else if(explicit){
+      organic=1;directLink=1;redirect=cloakBan?0:1;status=cloakBan?'social_allowed_direct_only':'verified_social_allowed';
       detail=`Explicit social + affiliate/referral-link language found. Paid-social restriction: ${paidBan?'yes':'no'}. Redirect/cloaking restriction: ${cloakBan?'yes':'no'}.`;allowed++;
-    }else{unknown++;if(socialGeneral)detail='Social/creator language exists, but explicit permission to distribute affiliate/referral links on organic social was not verified.'}
+    }else{
+      unknown++;
+      if(socialGeneral)detail='Social/creator language exists, but explicit permission to distribute affiliate/referral links on organic social was not verified.';
+    }
     await env.DB.prepare(`INSERT INTO affiliate_social_policy(tool_slug,organic_social_allowed,direct_affiliate_link_allowed,redirect_allowed,disclosure_required,policy_status,evidence_url,evidence_detail,last_checked_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET organic_social_allowed=excluded.organic_social_allowed,direct_affiliate_link_allowed=excluded.direct_affiliate_link_allowed,redirect_allowed=excluded.redirect_allowed,disclosure_required=excluded.disclosure_required,policy_status=excluded.policy_status,evidence_url=excluded.evidence_url,evidence_detail=excluded.evidence_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
-      .bind(item.slug,organic,direct,redirect,disclosure?1:1,status,pages[0]?.url||u?.href||null,safe(detail,1200)).run();
+      .bind(item.tool_slug,organic,directLink,redirect,disclosure?1:1,status,pages[0]?.url||direct?.href||home?.href||null,safe(detail,1200)).run();
   }
   return {scanned,allowed,unknown,blocked};
 }
