@@ -39,7 +39,7 @@ async function queueEditorial(env,item){
       const prior=await env.DB.prepare(`SELECT submission_id FROM distribution_submissions WHERE surface_slug=? AND asset_url=? AND submission_type='research_asset' LIMIT 1`).bind(row.surface_slug,item.url).first();
       if(prior){deduped++;continue;}
       const payload={asset_type:item.assetType,title:item.title,url:item.url,data_url:item.dataUrl||null,claims:item.claims||[],policy:item.distributionPolicy||null};
-      await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`sub_${crypto.randomUUID()}`,row.surface_slug,item.url,'research_asset','human_required',JSON.stringify(payload),row.action_url,1).run();
+      await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`sub_${crypto.randomUUID()}`,row.surface_slug,item.url,'research_asset','research_required',JSON.stringify(payload),row.action_url,0).run();
       queued++;
     }catch{}
   }
@@ -56,7 +56,7 @@ export async function syncLinkableAssets(env){
     editorialQueued+=editorial.queued;editorialEligible+=editorial.eligible;deduped+=editorial.deduped;
   }
   if(assets.length){
-    try{await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`research_${crypto.randomUUID()}`,'linkable_research_sync','completed','original_research',assets[0]?.id||null,assets[0]?.url||null,`Synced ${assets.length} verified research asset(s): ${indexNowQueued} new IndexNow queue item(s), ${editorialQueued} editorial/community package(s), ${deduped} duplicate(s) skipped. Editorial outreach remains human-required unless a separately verified safe adapter exists.`).run();}catch{}
+    try{await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`research_${crypto.randomUUID()}`,'linkable_research_sync','completed','original_research',assets[0]?.id||null,assets[0]?.url||null,`Synced ${assets.length} verified research asset(s): ${indexNowQueued} new IndexNow queue item(s), ${editorialQueued} editorial/community package(s), ${deduped} duplicate(s) skipped. Editorial/community opportunities remain inside autonomous research until a safe execution route is found; Chairman escalation is reserved for genuine human-only gates.`).run();}catch{}
   }
   return {ok:true,assets:assets.length,indexNowQueued,editorialEligible,editorialQueued,deduped};
 }
