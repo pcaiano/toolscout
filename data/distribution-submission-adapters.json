@@ -52,7 +52,13 @@
       "credential_prefix": "ls_agent_",
       "credential_ttl_days": 90,
       "required_scope": "startup:submit",
-      "required_fields": ["name","slug","tagline","description","categories"],
+      "required_fields": [
+        "name",
+        "slug",
+        "tagline",
+        "description",
+        "categories"
+      ],
       "note": "Official OpenAPI verified 2026-09-07. POST /api/listings/validate accepted the ToolScout payload with HTTP 200, valid=true, identity_available=true and domain_available=true using category Software. Publishing stays disabled until an explicitly authorized agent identity/token exists.",
       "asset_scope": "product"
     },
@@ -69,7 +75,13 @@
       "setup_state": "policy_blocked",
       "payload_kind": "indietool_app",
       "api_key_prefix": "it_live_",
-      "required_fields": ["appName","appUrl","landingPageHeading","landingPageSubHeading","category"],
+      "required_fields": [
+        "appName",
+        "appUrl",
+        "landingPageHeading",
+        "landingPageSubHeading",
+        "category"
+      ],
       "requires_image_url_or_file": true,
       "free_route_requires_badge": true,
       "note": "Official developer API verified 2026-09-07. API submissions consume credits and JSON mode requires Bearer it_live_* plus a public HTTPS imageUrl. IndieTool advertises a separate free listing route that requires embedding its badge; neither paid API use nor reciprocal-badge installation is automatic under ToolScout policy.",
@@ -150,11 +162,23 @@
   ],
   "policy": {
     "automatic_requires_allowlist": true,
-    "automatic_methods": ["POST"],
-    "automatic_content_types": ["application/json"],
-    "max_automatic_per_run": 3,
+    "automatic_methods": [
+      "POST"
+    ],
+    "automatic_content_types": [
+      "application/json"
+    ],
+    "max_automatic_per_run": 8,
     "max_attempts": 3,
-    "never_automatic": ["captcha","account_creation","payment","community_post","editorial_pitch","terms_acceptance","explicit_third_party_approval"],
+    "never_automatic": [
+      "captcha",
+      "account_creation",
+      "payment",
+      "community_post",
+      "editorial_pitch",
+      "terms_acceptance",
+      "explicit_third_party_approval"
+    ],
     "zero_cost_only": true
   }
 }
