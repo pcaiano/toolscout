@@ -1,13 +1,15 @@
 import base from './distribution-submission-worker.js';
+import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
-const BLOCK_RE=/(captcha|reciprocal|backlink|badge|payment|paid|credit card|terms acceptance|accept terms|automated submissions? (?:are )?(?:not allowed|prohibited|forbidden)|bots? (?:are )?(?:not allowed|prohibited|forbidden))/i;
+const POLICY_BLOCK_RE=/(paid submission|requires? payment|payment required|credit card required|requires? (?:a )?reciprocal (?:link|badge)|must (?:add|place|install) (?:our )?(?:badge|backlink)|automated submissions? (?:are )?(?:not allowed|prohibited|forbidden)|bots? (?:are )?(?:not allowed|prohibited|forbidden))/i;
+const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|accept (?:the )?terms|agree to (?:the )?terms|explicit (?:user|owner) approval|user confirmation required|confirm before submission)/i;
 const AUTH_RE=/(account required|sign in|login required|api key|bearer token|oauth)/i;
 const ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add)/i;
 const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|registry|submit)/i;
-const QUALIFY_LIMIT=12;
-const EXECUTION_LIMIT=4;
+const QUALIFY_LIMIT=20;
+const EXECUTION_LIMIT=8;
 const RESEARCH_COOLDOWN_HOURS=12;
 function safe(v,n=4000){return String(v??'').slice(0,n)}
 function host(v){try{return new URL(v).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
@@ -73,6 +75,58 @@ async function refreshPersistentActionUrls(env){
 }
 function schemaObject(spec,op){const rb=op?.requestBody?.content?.['application/json']?.schema;if(!rb)return null;if(rb.$ref){const path=rb.$ref.replace(/^#\//,'').split('/');let cur=spec;for(const p of path)cur=cur?.[p];return cur||null}return rb}
 function payloadFromSchema(schema){if(!schema||schema.type!=='object')return null;const props=schema.properties||{},required=schema.required||[];for(const key of required){if(!SAFE_FIELDS.has(key)||/(terms|agree|consent|captcha|password|token|key)/i.test(key))return null}const payload={};for(const key of Object.keys(props)){if(!SAFE_FIELDS.has(key))continue;if(key==='name'||key==='title')payload[key]='ToolScout';else if(['url','website','website_url','homepage','product_url','tool_url'].includes(key))payload[key]='https://trytoolscout.org/';else if(key==='description')payload[key]='ToolScout is an independent software discovery and recommendation platform.';else if(key==='tagline')payload[key]='Find the right software for the job without the noise.';else if(key==='category')payload[key]='Software';else if(key==='categories')payload[key]=['Software'];else if(key==='slug')payload[key]='toolscout';else if(key==='domain')payload[key]='trytoolscout.org'}for(const key of required)if(payload[key]===undefined)return null;return payload}
+function tagAttr(tag,name){const m=String(tag||'').match(new RegExp('\\b'+name+'\\s*=\\s*["\\\']([^"\\\']*)["\\\']','i'));return m?m[1]:null}
+function safeFormPayload(html){
+  const payload={};
+  let useful=0;
+  const fields=[...String(html||'').matchAll(/<(input|textarea|select)\b[^>]*>/gi)].map(m=>m[0]);
+  for(const tag of fields){
+    const name=String(tagAttr(tag,'name')||'').trim();
+    if(!name)continue;
+    const type=String(tagAttr(tag,'type')||'text').toLowerCase();
+    const required=/\brequired\b/i.test(tag);
+    if(/password|file|checkbox|radio|submit|button/i.test(type)){
+      if(required)return null;
+      continue;
+    }
+    if(/csrf|token|captcha|terms|agree|consent|password|auth|payment|card/i.test(name))return null;
+    if(type==='hidden'){
+      const value=tagAttr(tag,'value');
+      if(value==null||String(value).length>300)return null;
+      payload[name]=String(value);
+      continue;
+    }
+    if(!SAFE_FIELDS.has(name)){
+      if(required)return null;
+      continue;
+    }
+    if(name==='name'||name==='title')payload[name]='ToolScout';
+    else if(['url','website','website_url','homepage','product_url','tool_url'].includes(name))payload[name]='https://trytoolscout.org/';
+    else if(name==='description')payload[name]='ToolScout is an independent software discovery and recommendation platform.';
+    else if(name==='tagline')payload[name]='Find the right software for the job without the noise.';
+    else if(name==='category')payload[name]='Software';
+    else if(name==='categories')payload[name]='Software';
+    else if(name==='slug')payload[name]='toolscout';
+    else if(name==='domain')payload[name]='trytoolscout.org';
+    useful++;
+  }
+  return useful>=2?payload:null;
+}
+function htmlFormAdapter(homepage,html){
+  if(POLICY_BLOCK_RE.test(html)||HUMAN_BLOCK_RE.test(html)||AUTH_RE.test(html))return null;
+  for(const match of String(html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
+    const open=match[1]||'',body=match[2]||'';
+    const method=String(tagAttr(open,'method')||'GET').toUpperCase();
+    if(method!=='POST'||HUMAN_BLOCK_RE.test(body)||POLICY_BLOCK_RE.test(body)||AUTH_RE.test(body))continue;
+    const action=tagAttr(open,'action')||homepage;
+    let endpoint;try{endpoint=new URL(action,homepage).toString()}catch{continue}
+    if(!sameHostFamily(endpoint,homepage)||!endpoint.startsWith('https://'))continue;
+    const payload=safeFormPayload(body);
+    if(!payload)continue;
+    return {endpoint,payload,method:'POST',content_type:'application/x-www-form-urlencoded',confidence:96,verification_source:homepage,verification_endpoint:null,verification_method:'GET',public_url:null,auth_required:false,auth_detail:null};
+  }
+  return null;
+}
 function serverBase(spec,source){try{const s=spec?.servers?.[0]?.url;if(s)return new URL(s,source).toString()}catch{}return new URL(source).origin+'/'}
 function operationSecurity(spec,op){return op?.security!==undefined?op.security:(Array.isArray(spec?.security)?spec.security:null)}
 function authDetail(spec,security){
@@ -141,11 +195,13 @@ async function findOpenApi(homepage,html){
   }
   return null;
 }
-async function policyBlocked(homepage,html){if(BLOCK_RE.test(html))return true;const terms=links(html,homepage).find(u=>/(terms|terms-of-service|tos|acceptable-use)/i.test(u));if(!terms)return false;const r=await text(terms,6000);return Boolean(r&&BLOCK_RE.test(r.body))}
+async function relatedPolicyText(homepage,html){const terms=links(html,homepage).find(u=>/(terms|terms-of-service|tos|acceptable-use)/i.test(u));if(!terms)return '';const r=await text(terms,6000);return r?.body||''}
+async function policyBlocked(homepage,html){if(POLICY_BLOCK_RE.test(html))return true;const extra=await relatedPolicyText(homepage,html);return Boolean(extra&&POLICY_BLOCK_RE.test(extra))}
+async function humanBlocked(homepage,html){if(HUMAN_BLOCK_RE.test(html))return true;const extra=await relatedPolicyText(homepage,html);return Boolean(extra&&HUMAN_BLOCK_RE.test(extra))}
 async function mark(env,row,result,detail){try{await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,row.surface_slug,row.action_url,result,safe(detail,1200)).run();await env.DB.prepare(`UPDATE distribution_opportunities SET status=CASE WHEN status IN ('discovered','candidate') THEN 'research_required' ELSE status END,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run()}catch{}}
 async function storeAutoAdapter(env,row,h,adapter,policyState){
   await env.DB.prepare(`INSERT INTO distribution_auto_adapters(surface_slug,source_url,endpoint,method,content_type,payload_template_json,confidence,policy_state,verification_source,verification_endpoint,public_url,verification_method,auth_type,auth_detail,last_checked_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET source_url=excluded.source_url,endpoint=excluded.endpoint,method=excluded.method,content_type=excluded.content_type,payload_template_json=excluded.payload_template_json,confidence=excluded.confidence,policy_state=excluded.policy_state,verification_source=excluded.verification_source,verification_endpoint=excluded.verification_endpoint,public_url=excluded.public_url,verification_method=excluded.verification_method,auth_type=excluded.auth_type,auth_detail=excluded.auth_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
-    .bind(row.surface_slug,h.url,adapter.endpoint,'POST','application/json',JSON.stringify(adapter.payload),adapter.confidence,policyState,adapter.verification_source,adapter.verification_endpoint||null,adapter.public_url||null,adapter.verification_method||'GET',adapter.auth_required?'openapi_security':null,adapter.auth_detail?JSON.stringify(adapter.auth_detail):null).run();
+    .bind(row.surface_slug,h.url,adapter.endpoint,adapter.method||'POST',adapter.content_type||'application/json',JSON.stringify(adapter.payload),adapter.confidence,policyState,adapter.verification_source,adapter.verification_endpoint||null,adapter.public_url||null,adapter.verification_method||'GET',adapter.auth_required?'openapi_security':null,adapter.auth_detail?JSON.stringify(adapter.auth_detail):null).run();
 }
 async function qualifyOne(env,row){
   let effectiveRow=row;
@@ -157,9 +213,14 @@ async function qualifyOne(env,row){
   }
   if(!h){await mark(env,effectiveRow,'research_required','homepage_unreachable');return 'research_required'}
   if(await policyBlocked(h.url,h.body)){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='policy_blocked',next_action='Autonomous policy scan found a blocker requiring non-automatic handling.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'policy_blocked','policy_or_terms_blocker');
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='policy_blocked',human_required=0,next_action='Autonomous policy scan found a payment, reciprocal-link or anti-automation blocker. Keep suppressed unless policy changes.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'policy_blocked','policy_blocker');
     return 'policy_blocked';
+  }
+  if(await humanBlocked(h.url,h.body)){
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Autonomous research exhausted safe routes and detected a genuine human-only gate such as CAPTCHA or explicit terms confirmation.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'human_action_required','hard_human_gate');
+    return 'human_action_required';
   }
   const adapter=await findOpenApi(h.url,h.body);
   if(adapter){
@@ -174,13 +235,21 @@ async function qualifyOne(env,row){
     await mark(env,effectiveRow,'ready_to_submit',`verified_auto_adapter:${adapter.endpoint}`);
     return 'ready_to_submit';
   }
-  const pageText=h.body.toLowerCase();
-  if(/<form\b/i.test(h.body)||/(submit your|add your|list your|submit tool|submit startup)/i.test(pageText)||AUTH_RE.test(pageText)){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Submission route detected but no safely verifiable machine-readable no-auth JSON protocol was found.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'human_action_required','form_auth_or_manual_route_only');
-    return 'human_action_required';
+  const formAdapter=htmlFormAdapter(h.url,h.body);
+  if(formAdapter){
+    await storeAutoAdapter(env,effectiveRow,h,formAdapter,'verified');
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=90,acceptance_probability=65,next_action='Verified same-host no-auth form adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'ready_to_submit',`verified_safe_form_adapter:${formAdapter.endpoint}`);
+    return 'ready_to_submit';
   }
-  await mark(env,effectiveRow,'research_required','no_verified_submission_protocol');
+  const pageText=h.body.toLowerCase();
+  if(AUTH_RE.test(pageText)){
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,next_action='Authentication is required. Keep this inside the autonomy research loop until a supported credential or machine identity route is found.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'auth_required','authentication_route_without_safe_adapter');
+    return 'auth_required';
+  }
+  await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action='No safe automatic submission route found yet. Continue autonomous protocol and action-route research; do not escalate to Chairman.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+  await mark(env,effectiveRow,'research_required',/<form\b/i.test(h.body)?'safe_form_adapter_not_yet_resolved':'no_verified_submission_protocol');
   return 'research_required';
 }
 async function qualify(env){
@@ -228,7 +297,7 @@ async function responseEvidence(res,endpoint){
   }catch{return null}
 }
 async function packageAndExecute(env){
-  const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.payload_template_json,a.verification_endpoint,a.public_url FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit' ORDER BY o.distribution_score DESC LIMIT ${EXECUTION_LIMIT}`).all();
+  const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit' ORDER BY o.distribution_score DESC LIMIT ${EXECUTION_LIMIT}`).all();
   let sent=0,failed=0,deduped=0;
   for(const a of q.results||[]){
     const prior=await env.DB.prepare(`SELECT submission_id,status FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
@@ -236,7 +305,10 @@ async function packageAndExecute(env){
     const id=prior?.submission_id||`sub_${crypto.randomUUID()}`;
     if(!prior)await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(id,a.surface_slug,'https://trytoolscout.org/','auto_discovered_json','ready',a.payload_template_json,a.endpoint,0).run();
     try{
-      const r=await fetch(a.endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','User-Agent':'ToolScout Distribution Engine/1.0'},body:a.payload_template_json,redirect:'follow',signal:AbortSignal.timeout(15000)});
+      const payload=JSON.parse(a.payload_template_json||'{}');
+      const contentType=String(a.content_type||'application/json');
+      const body=contentType==='application/x-www-form-urlencoded'?new URLSearchParams(Object.entries(payload).map(([k,v])=>[k,Array.isArray(v)?v.join(','):String(v??'')])).toString():JSON.stringify(payload);
+      const r=await fetch(a.endpoint,{method:String(a.method||'POST').toUpperCase(),headers:{'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout Distribution Engine/1.1'},body,redirect:'follow',signal:AbortSignal.timeout(15000)});
       if(r.ok){
         const evidence=await responseEvidence(r,a.endpoint);
         const responseUrl=evidence||a.verification_endpoint||a.public_url||r.url||a.endpoint;
@@ -284,12 +356,104 @@ async function verifyAutoSubmitted(env){
   }
   return {checked,verified,pending,missingVerification,errors};
 }
+
+let autonomySchemaReady=null;
+async function ensureAutonomySchema(env){
+  if(autonomySchemaReady)return autonomySchemaReady;
+  autonomySchemaReady=env.DB.batch([
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_placements (
+      surface_slug TEXT PRIMARY KEY,
+      public_url TEXT NOT NULL,
+      placement_verified INTEGER NOT NULL DEFAULT 0,
+      backlink_verified INTEGER NOT NULL DEFAULT 0,
+      link_rel TEXT,
+      first_verified_at TEXT,
+      last_checked_at TEXT NOT NULL DEFAULT (datetime('now')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_placements_backlink ON distribution_placements(backlink_verified,updated_at DESC)`)
+  ]).catch(error=>{autonomySchemaReady=null;throw error});
+  return autonomySchemaReady;
+}
+async function normalizeLegacyHumanEscalations(env){
+  let opportunities=0,submissions=0,editorial=0;
+  try{
+    const a=await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action='Autonomous route research resumed. Chairman escalation is reserved for genuine human-only gates.',updated_at=datetime('now') WHERE status='human_action_required' AND next_action LIKE 'Submission route detected but no safely verifiable machine-readable%'`).run();
+    opportunities=Number(a?.meta?.changes||a?.changes||0);
+  }catch{}
+  try{
+    const b=await env.DB.prepare(`UPDATE distribution_submissions SET status='research_required',human_required=0,error=NULL,updated_at=datetime('now') WHERE status='human_required' AND submission_type='research_asset'`).run();
+    submissions=Number(b?.meta?.changes||b?.changes||0);
+  }catch{}
+  try{
+    const d=await env.DB.prepare(`UPDATE distribution_editorial_queue SET status='autonomy_pending',human_required=0,updated_at=datetime('now') WHERE human_required=1 AND status='prepared' AND channel_type IN ('community','community_stack')`).run();
+    editorial=Number(d?.meta?.changes||d?.changes||0);
+  }catch{}
+  return {opportunities,submissions,editorial};
+}
+function backlinkEvidence(html){
+  for(const m of String(html||'').matchAll(/<a\b([^>]*?)href=["']([^"']*trytoolscout\.org[^"']*)["']([^>]*)>/gi)){
+    const attrs=(m[1]||'')+' '+(m[3]||'');
+    const rel=String((attrs.match(/\brel=["']([^"']*)["']/i)||[])[1]||'').toLowerCase();
+    return {found:true,rel:rel||'follow'};
+  }
+  return {found:false,rel:null};
+}
+async function verifyFootprint(env){
+  await ensureAutonomySchema(env);
+  let rows=[];
+  try{
+    const q=await env.DB.prepare(`SELECT o.surface_slug,COALESCE(o.live_url,ds.response_url) public_url,p.last_checked_at
+      FROM distribution_opportunities o
+      LEFT JOIN distribution_submissions ds ON ds.surface_slug=o.surface_slug AND ds.status='submitted'
+      LEFT JOIN distribution_placements p ON p.surface_slug=o.surface_slug
+      WHERE o.status IN ('verified','live') AND COALESCE(o.live_url,ds.response_url) IS NOT NULL
+      GROUP BY o.surface_slug
+      ORDER BY COALESCE(p.last_checked_at,'1970-01-01') ASC
+      LIMIT 12`).all();
+    rows=q.results||[];
+  }catch{return {checked:0,placements:0,backlinks:0,errors:1};}
+  let checked=0,placements=0,backlinks=0,errors=0;
+  for(const row of rows){
+    checked++;
+    try{
+      const r=await fetch(row.public_url,{method:'GET',headers:{Accept:'text/html,application/json;q=0.8,*/*;q=0.5','User-Agent':'ToolScout Footprint Verifier/1.0'},redirect:'follow',signal:AbortSignal.timeout(10000)});
+      const body=r.ok?(await r.text()).slice(0,500000):'';
+      const link=backlinkEvidence(body);
+      const publicUrl=r.url||row.public_url;
+      await env.DB.prepare(`INSERT INTO distribution_placements(surface_slug,public_url,placement_verified,backlink_verified,link_rel,first_verified_at,last_checked_at,created_at,updated_at)
+        VALUES(?,?,?,?,?,CASE WHEN ? THEN datetime('now') ELSE NULL END,datetime('now'),datetime('now'),datetime('now'))
+        ON CONFLICT(surface_slug) DO UPDATE SET public_url=excluded.public_url,placement_verified=excluded.placement_verified,backlink_verified=excluded.backlink_verified,link_rel=excluded.link_rel,first_verified_at=COALESCE(distribution_placements.first_verified_at,excluded.first_verified_at),last_checked_at=datetime('now'),updated_at=datetime('now')`)
+        .bind(row.surface_slug,publicUrl,r.ok?1:0,link.found?1:0,link.rel,r.ok?1:0).run();
+      if(r.ok)placements++;
+      if(link.found)backlinks++;
+    }catch{errors++;}
+  }
+  if(checked)try{await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`footprint_${crypto.randomUUID()}`,'distribution_footprint_verification',errors?'partial':'completed','distribution_engine',`Footprint verification checked ${checked} public placement(s): ${placements} reachable, ${backlinks} backlink(s) confirmed, ${errors} error(s).`).run()}catch{}
+  return {checked,placements,backlinks,errors};
+}
+async function autonomyMetrics(env){
+  await ensureAutonomySchema(env);
+  const [opp,sub,place,editorial]=await Promise.all([
+    env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN status IN ('verified','live') THEN 1 ELSE 0 END) verified,SUM(CASE WHEN human_required=1 AND status='human_action_required' THEN 1 ELSE 0 END) chairman FROM distribution_opportunities`).first(),
+    env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN human_required=0 AND attempts>0 THEN 1 ELSE 0 END) autonomous_attempted,SUM(CASE WHEN status='submitted' THEN 1 ELSE 0 END) submitted FROM distribution_submissions WHERE created_at>=datetime('now','-30 days')`).first(),
+    env.DB.prepare(`SELECT COUNT(*) placements,SUM(backlink_verified) backlinks FROM distribution_placements WHERE placement_verified=1`).first(),
+    env.DB.prepare(`SELECT COUNT(*) chairman_editorial FROM distribution_editorial_queue WHERE human_required=1`).first()
+  ]);
+  let referralSessions=0;
+  try{const metrics=await distributionSurfaceMetrics(env);referralSessions=(metrics||[]).reduce((n,m)=>n+Math.max(0,Number(m?.browser_confirmed_sessions??m?.human_sessions??0)||0),0)}catch{}
+  return {discovered:Number(opp?.total||0),autonomousAttempted:Number(sub?.autonomous_attempted||0),submitted:Number(sub?.submitted||0),verifiedPlacements:Number(place?.placements||opp?.verified||0),verifiedBacklinks:Number(place?.backlinks||0),referralSessions,chairmanActions:Number(opp?.chairman||0)+Number(editorial?.chairman_editorial||0),windowDays:30};
+}
 async function cycle(env){
+  await ensureAutonomySchema(env);
+  const normalized=await normalizeLegacyHumanEscalations(env);
   const routeRefresh=await refreshPersistentActionUrls(env);
   const qualification=await qualify(env);
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
-  return {ok:true,routeRefresh,qualification,execution,verification};
+  const footprint=await verifyFootprint(env);
+  return {ok:true,normalized,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
-export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await cycle(env),{headers:H})}return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);ctx.waitUntil(cycle(env).catch(()=>{}))}};
+export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await cycle(env),{headers:H})}if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await autonomyMetrics(env),{headers:H})}return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);ctx.waitUntil(cycle(env).catch(()=>{}))}};
