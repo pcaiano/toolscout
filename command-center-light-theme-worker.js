@@ -237,6 +237,17 @@ async function applyLightTheme(response) {
   });
 }
 
+async function augmentEntrypointHealth(response) {
+  if (!response.ok) return response;
+  let data;
+  try { data = await response.json(); } catch { return response; }
+  data.entrypoint = 'command-center-light-theme-worker';
+  data.entrypointVersion = 2;
+  data.stats503Fallback = true;
+  data.trafficDetailBackgroundPolling = false;
+  return Response.json(data, {headers:{'Cache-Control':'no-store'}});
+}
+
 async function resilientStatsResponse(request, env, ctx) {
   let primary = null;
   try {
@@ -266,6 +277,9 @@ export default {
     const response = isStats
       ? await resilientStatsResponse(request, env, ctx)
       : await base.fetch(request, env, ctx);
+    if (request.method === 'GET' && url.pathname === '/api/command-center-resilient-health') {
+      return augmentEntrypointHealth(response);
+    }
     if (request.method === 'GET' && ANALYTICS_PATHS.has(url.pathname)) {
       return applyLightTheme(response);
     }
