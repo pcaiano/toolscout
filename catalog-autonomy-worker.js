@@ -77,9 +77,36 @@ async function ensureSchema(env){
       evidence_json TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_events_created ON catalog_runtime_events(created_at DESC)`)
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_events_created ON catalog_runtime_events(created_at DESC)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS software_news_candidates(
+      candidate_id TEXT PRIMARY KEY,
+      tool_slug TEXT NOT NULL,
+      source_url TEXT NOT NULL,
+      title TEXT,
+      summary TEXT,
+      status TEXT NOT NULL DEFAULT 'candidate',
+      materiality_score REAL NOT NULL DEFAULT 0,
+      detected_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_software_news_status ON software_news_candidates(status,materiality_score DESC,updated_at DESC)`)
   ]).catch(error=>{schemaReady=null;throw error});
   return schemaReady;
+}
+function newsMateriality(result,sourceUrl){
+  const text=`${result?.title||''} ${result?.description||''}`.toLowerCase(),path=(()=>{try{return new URL(sourceUrl).pathname.toLowerCase()}catch{return''}})();
+  let score=0;
+  if(/changelog|release|releases|updates|what.?s-new|product-updates/.test(path))score+=35;
+  for(const re of [/\blaunch(?:ed|es)?\b/,/\brelease(?:d|s)?\b/,/\bnew\b/,/\bnow available\b/,/\bgeneral availability\b/,/\bpricing\b/,/\bplan\b/,/\bintegration\b/,/\bsecurity\b/,/\bai\b/,/\bautomation\b/,/\bapi\b/])if(re.test(text))score+=7;
+  return Math.max(0,Math.min(100,score));
+}
+async function upsertNewsCandidate(env,slug,sourceUrl,result){
+  const score=newsMateriality(result,sourceUrl),id=`runtime-${slug}-${result?.fingerprint||Date.now()}`;
+  await env.DB.prepare(`INSERT INTO software_news_candidates(candidate_id,tool_slug,source_url,title,summary,status,materiality_score,detected_at,updated_at)
+    VALUES(?,?,?,?,?,'candidate',?,datetime('now'),datetime('now'))
+    ON CONFLICT(candidate_id) DO UPDATE SET title=excluded.title,summary=excluded.summary,materiality_score=excluded.materiality_score,updated_at=datetime('now')`)
+    .bind(id,slug,sourceUrl,safeText(result?.title,500)||null,safeText(result?.description,1800)||null,score).run();
+  return {candidate_id:id,materiality_score:score};
 }
 async function logEvent(env,slug,type,status,detail,evidence=null){
   await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
@@ -134,7 +161,8 @@ async function verifyBatch(env){
       if(pendingFingerprint&&pendingFingerprint===result.fingerprint)confirmations+=1;else{pendingFingerprint=result.fingerprint;confirmations=1}
       if(confirmations>=2){
         canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='change_detected';contentChanged=1;lastChange=new Date().toISOString().replace('T',' ').slice(0,19);changed++;
-        await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:tool.sourceUrl,http_status:result.httpStatus});
+        const newsCandidate=await upsertNewsCandidate(env,slug,result.finalUrl||tool.sourceUrl,result).catch(()=>null);
+        await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:tool.sourceUrl,http_status:result.httpStatus,news_candidate_id:newsCandidate?.candidate_id||null,news_materiality_score:newsCandidate?.materiality_score??null});
       }
     }else if(result.status==='ok'&&result.fingerprint===prior.fingerprint){
       pendingFingerprint=null;confirmations=0;if(!prior.last_change_at){quality='healthy';contentChanged=0;healthy++}
