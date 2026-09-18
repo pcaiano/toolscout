@@ -1,6 +1,8 @@
 import base from './command-center-final-integrity-worker.js';
 import resilientFallback from './command-center-resilient-worker.js';
 
+const STATS_CACHE_TTL_SECONDS = 30;
+
 const ANALYTICS_PATHS = new Set([
   '/analytics',
   '/analytics/',
@@ -139,7 +141,7 @@ const TRAFFIC_DETAIL_REPAIR = `<style id="toolscout-traffic-detail-repair-style"
 </style><script id="toolscout-traffic-detail-repair">(function(){
 if(window.__toolscoutTrafficDetailRepair)return;
 window.__toolscoutTrafficDetailRepair=true;
-var latest=null,busy=false;
+var latest=null;
 function num(v){var x=Number(v);return Number.isFinite(x)?x:0}
 function fmt(v,d){var x=num(v);return d==null?x.toLocaleString():x.toFixed(d)}
 function escHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})}
@@ -181,10 +183,6 @@ function render(d){
   if(old)old.remove();
   forecast.insertAdjacentHTML('afterend',html);
 }
-async function refresh(){
-  if(busy||document.hidden)return;busy=true;
-  try{var r=await fetch('/analytics/api/stats',{cache:'no-store'});if(r.ok){var d=await r.json();render(d)}}catch(e){}finally{busy=false}
-}
 function ensure(){
   var root=document.getElementById('trafficTruthBody');
   if(!root||!latest)return;
@@ -201,7 +199,6 @@ function installRenderHook(){
 function boot(){
   installRenderHook();
   setTimeout(installRenderHook,150);
-  setTimeout(function(){if(!latest)refresh()},900);
   var root=document.getElementById('trafficTruthBody');
   if(root)new MutationObserver(function(){setTimeout(ensure,0)}).observe(root,{childList:true,subtree:false});
 }
@@ -242,10 +239,43 @@ async function augmentEntrypointHealth(response) {
   let data;
   try { data = await response.json(); } catch { return response; }
   data.entrypoint = 'command-center-light-theme-worker';
-  data.entrypointVersion = 2;
+  data.entrypointVersion = 3;
   data.stats503Fallback = true;
+  data.statsSnapshotCacheSeconds = STATS_CACHE_TTL_SECONDS;
   data.trafficDetailBackgroundPolling = false;
+  data.trafficDetailIndependentFetch = false;
   return Response.json(data, {headers:{'Cache-Control':'no-store'}});
+}
+
+function clientNoStore(response, cacheState) {
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'private, no-store, max-age=0');
+  headers.set('X-ToolScout-Stats-Cache', cacheState);
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  return new Response(response.body, {status:response.status,statusText:response.statusText,headers});
+}
+
+async function cachedStatsResponse(request, env, ctx) {
+  if (typeof caches === 'undefined' || !caches.default) return resilientStatsResponse(request, env, ctx);
+  const url = new URL(request.url);
+  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v3', {method:'GET'});
+  try {
+    const cached = await caches.default.match(cacheKey);
+    if (cached) return clientNoStore(cached, 'hit');
+  } catch {}
+  const fresh = await resilientStatsResponse(request, env, ctx);
+  if (!fresh.ok || !(fresh.headers.get('content-type') || '').toLowerCase().includes('application/json')) {
+    return clientNoStore(fresh, 'bypass');
+  }
+  try {
+    const cacheHeaders = new Headers(fresh.headers);
+    cacheHeaders.set('Cache-Control', 'public, max-age=' + STATS_CACHE_TTL_SECONDS);
+    cacheHeaders.delete('Set-Cookie');
+    const cacheCopy = new Response(fresh.clone().body, {status:fresh.status,statusText:fresh.statusText,headers:cacheHeaders});
+    ctx.waitUntil(caches.default.put(cacheKey, cacheCopy));
+  } catch {}
+  return clientNoStore(fresh, 'miss');
 }
 
 async function resilientStatsResponse(request, env, ctx) {
@@ -275,7 +305,7 @@ export default {
     const url = new URL(request.url);
     const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
-      ? await resilientStatsResponse(request, env, ctx)
+      ? await cachedStatsResponse(request, env, ctx)
       : await base.fetch(request, env, ctx);
     if (request.method === 'GET' && url.pathname === '/api/command-center-resilient-health') {
       return augmentEntrypointHealth(response);
