@@ -1,4 +1,4 @@
-import base from './distribution-embed-worker.js';
+import base from './distribution-network-worker.js';
 
 const PROTOCOL_VERSION='2026-07-28';
 const A2A_VERSION='1.0';
