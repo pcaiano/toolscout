@@ -1,0 +1,39 @@
+name: One off Chairman payload active path v3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/chairman-payload-v3-oneoff.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-worker-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate active path
+        run: |
+          node --check command-center-resilient-worker.js
+          node --check growth-command-center-v2-worker.js
+
+      - name: Deploy Worker and static assets
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
