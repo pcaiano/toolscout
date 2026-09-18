@@ -2,6 +2,8 @@
 
 ## Operational repair, 18 September 2026
 
+Today-window population alignment: `Human Sessions Today` now uses the same Europe/Lisbon confirmed visitor-session linkage rows as `Unique Human Visitors Today`. This preserves all existing session and visitor records, changes no identifiers, performs no reset or backfill, and guarantees the displayed unique visitor count cannot exceed the displayed session-link count for the current day. Historical rolling and month-to-date session series remain intact for continuity.
+
 Authenticated read-only reporting is restored through Make scenario 7424429 (team 2510626, eu1.make.com). The fixed SELECT-only query is versioned in scripts/reporting/weekly-d1-read.sql and tested against production D1 with zero database writes. It uses Make date interpolation for Europe/Lisbon MTD. Detail limits are explicit: use aggregate event totals and retrieve any remaining details before claiming a complete output ledger. Weekly Progress now references this helper and the existing Cloudflare deployment read helpers.
 
 Preserved baseline: reports/measurement-baseline-2026-09-18.json. At 07:48:51 UTC there were 54 allowed sessions since the first retained Browser Guard event on 16 September at 20:52:47 UTC. Verified outbound tracking started 17 September at 17:08:17 UTC, with no events at that reading. Earlier weekly/MTD coverage is incomplete, not zero traffic. Do not splice older likely-human estimates or legacy distribution attribution into this cohort.
