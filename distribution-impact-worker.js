@@ -2,8 +2,16 @@ const WINDOW_DAYS=30;
 
 function hostOf(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
 function variants(slug){const s=String(slug||'').toLowerCase();return [...new Set([s,s.replace(/-/g,'_'),s.replace(/-/g,''),s.replace(/-/g,'.')].filter(Boolean))]}
+function sourceParam(value,name){
+  const raw=String(value||'');if(!raw)return null;
+  try{const u=new URL(raw);const v=u.searchParams.get(name);if(v)return v}catch{}
+  try{const q=raw.includes('?')?raw.slice(raw.indexOf('?')+1):raw;const v=new URLSearchParams(q).get(name);if(v)return v}catch{}
+  const m=raw.match(new RegExp('(?:^|[?&\\s])'+name+'=([^&\\s]+)','i'));if(!m)return null;
+  try{return decodeURIComponent(m[1])}catch{return m[1]}
+}
 function sourceMatchesSurface(source,referrer,row){
   const s=String(source||'').toLowerCase(),r=String(referrer||'').toLowerCase().replace(/^www\./,'');
+  const growth=sourceParam(source,'ts_growth');if(growth===`surface:${row.surface_slug}`)return true;
   for(const v of variants(row.surface_slug))if(s.includes(`utm_source=${v}`)||s.includes(`surface=${v}`)||s.includes(`distribution_surface=${v}`))return true;
   if(s.includes('utm_medium=distribution')||s.includes('distribution_engine')){
     const sourceHost=hostOf(row.action_url)||hostOf(row.live_url);
@@ -41,6 +49,28 @@ export async function distributionSurfaceMetrics(env){
   for(const c of clicks.results||[]){const id=String(c.session_id||''),slug=sessionSurface.get(id);if(slug&&String(c.created_at||'')>=String(first.get(id)||'')&&Number(c.affiliate_active_at_click)===1&&String(c.source||'')!=='internal-test')get(slug).monetized_outbound++;}
   for(const r of revenueRows.results||[]){const id=String(r.session_id||''),slug=sessionSurface.get(id);if(!slug||String(r.created_at||'')<String(first.get(id)||''))continue;const row=get(slug);row.revenue+=Number(r.commission||0);row.currencies.add(String(r.currency||'EUR'));}
   return [...bySurface.values()].map(r=>({...r,currency:r.currencies.size===1?[...r.currencies][0]:(r.currencies.size===0?'EUR':null),revenue:r.currencies.size<=1?r.revenue:null,currencies:undefined}));
+}
+
+export async function growthActionMetrics(env){
+  try{
+    const [actions,entries,outboundEvents,clicks]=await Promise.all([
+      env.DB.prepare(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at FROM growth_action_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+      env.DB.prepare(`SELECT f.session_id,f.source,f.created_at,MIN(pc.created_at) confirmed_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id JOIN funnel_events pc ON pc.session_id=f.session_id AND pc.event_type='page_confirmed' AND pc.created_at>=f.created_at WHERE s.classification='likely-human' AND f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') GROUP BY f.session_id,f.source,f.created_at ORDER BY f.created_at`).all(),
+      env.DB.prepare(`SELECT f.session_id,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='outbound_clicked' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+      env.DB.prepare(`SELECT c.session_id,c.created_at,c.affiliate_active_at_click,c.source FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND c.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
+    ]);
+    const actionMap=new Map((actions.results||[]).map(x=>[x.action_id,x])),sessionAction=new Map(),first=new Map(),byAction=new Map();
+    const get=id=>{if(!byAction.has(id)){const a=actionMap.get(id)||{};byAction.set(id,{action_id:id,opportunity_key:a.opportunity_key||null,engine:a.engine||null,channel:a.channel||null,target_url:a.target_url||null,status:a.status||null,browser_confirmed_sessions:0,outbound_clicks:0,monetized_outbound:0});}return byAction.get(id)};
+    for(const e of entries.results||[]){
+      const id=String(e.session_id||'');if(!id||sessionAction.has(id)||!e.confirmed_at)continue;
+      const actionId=sourceParam(e.source,'ts_action');if(!actionId||!actionMap.has(actionId))continue;
+      sessionAction.set(id,actionId);first.set(id,String(e.created_at||''));get(actionId).browser_confirmed_sessions++;
+    }
+    for(const e of outboundEvents.results||[]){const id=String(e.session_id||''),a=sessionAction.get(id);if(a&&String(e.created_at||'')>=String(first.get(id)||''))get(a).outbound_clicks++}
+    for(const e of clicks.results||[]){const id=String(e.session_id||''),a=sessionAction.get(id);if(a&&String(e.created_at||'')>=String(first.get(id)||'')&&Number(e.affiliate_active_at_click)===1&&String(e.source||'')!=='internal-test')get(a).monetized_outbound++}
+    const rows=[...byAction.values()].sort((a,b)=>b.browser_confirmed_sessions-a.browser_confirmed_sessions||b.outbound_clicks-a.outbound_clicks);
+    return {status:'observed',windowDays:WINDOW_DAYS,preparedActions:(actions.results||[]).length,attributedActions:rows.filter(x=>x.browser_confirmed_sessions>0).length,browserConfirmedSessions:rows.reduce((s,x)=>s+x.browser_confirmed_sessions,0),outboundClicks:rows.reduce((s,x)=>s+x.outbound_clicks,0),monetizedOutbound:rows.reduce((s,x)=>s+x.monetized_outbound,0),topActions:rows.slice(0,10),attribution:'Exact ts_action first-touch marker on a browser-confirmed likely-human session. No traffic is inferred when the marker is absent.'};
+  }catch(error){return {status:'unavailable',windowDays:WINDOW_DAYS,reason:String(error?.message||error)}}
 }
 
 export async function distributionImpactSnapshot(env,totalHumanSessions){
