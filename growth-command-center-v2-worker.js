@@ -155,17 +155,47 @@ async function baseHumanActions(request,env,ctx){
 }
 async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
   const raw=await baseHumanActions(request,env,ctx);
-  const input=[...(raw.affiliate||[]),...(raw.distribution||[])];
+  const editorialRows=await safeAll(env,`SELECT queue_id,asset_url,channel_type,target_name,target_url,angle,suggested_title,suggested_body,status,created_at,updated_at FROM distribution_editorial_queue WHERE human_required=1 AND status='prepared' AND target_url IS NOT NULL ORDER BY CASE WHEN target_name='Stremit' THEN 0 ELSE 1 END,updated_at DESC LIMIT 20`);
+  const editorial=editorialRows.map(row=>{
+    const target=String(row.target_name||'Community');
+    const publicationType=row.channel_type==='community_stack'?'Stack':'Post';
+    const isStremit=target==='Stremit';
+    const instructions=isStremit&&publicationType==='Stack'
+      ?'Open the New stack page. Paste the prepared title. Paste the prepared description. Add ToolScout, ChatGPT, Make and GitHub in that order. Use each Role line in the prepared content as the use case for that tool. Review the stack, then publish it. Do not buy promotion.'
+      :isStremit
+        ?'Open the Stremit composer. Paste the prepared title and content, verify the ToolScout link, then publish if it fits the community context.'
+        :'Open the community destination. Review the prepared title and content against current rules, then publish if appropriate.';
+    return {
+      engine:'distribution',
+      id:`editorial:${row.queue_id}`,
+      editorial_queue_id:row.queue_id,
+      title:`${target}: ${row.suggested_title||'Prepared community contribution'}`,
+      status:'prepared',
+      reason:row.angle||'Prepared community distribution action requiring human review.',
+      action_url:row.target_url,
+      metric:isStremit?72:45,
+      metric_label:'editorial priority',
+      source_of_truth:'distribution_editorial_queue',
+      publication_type:publicationType,
+      prepared_title:row.suggested_title||'',
+      prepared_body:row.suggested_body||'',
+      instructions,
+      source_asset_url:row.asset_url||null
+    };
+  });
+  const input=[...(raw.affiliate||[]),...(raw.distribution||[]),...editorial];
   const rows=await Promise.all(input.map(async action=>{
-    const minutes=estimateMinutes(action);
+    const minutes=action.editorial_queue_id?6:estimateMinutes(action);
     const verification=verifyLinks?await verifyActionUrl(action.action_url):{ok:Boolean(safeUrl(action.action_url)),http_status:null,checked_at:null,reason:null};
     const impactScore=action.engine==='affiliate'?(n(action.metric)*20+40):n(action.metric);
-    return {...action,estimated_minutes:minutes,expected_impact:expectedImpact(action),expected_impact_score:Number(impactScore.toFixed(1)),why_human:action.reason||'This step requires owner authentication, judgement or irreversible third-party action.',after_action:afterAction(action),link_verification:verification};
+    const whyHuman=action.editorial_queue_id?'Publication requires an authenticated community account and a human review of the final public post or stack.':(action.reason||'This step requires owner authentication, judgement or irreversible third-party action.');
+    const after=action.editorial_queue_id?'Mark it published in the Chairman Queue. The Distribution Engine removes the task and continues attribution and performance measurement for the Stremit surface.':afterAction(action);
+    return {...action,estimated_minutes:minutes,expected_impact:expectedImpact(action),expected_impact_score:Number(impactScore.toFixed(1)),why_human:whyHuman,after_action:after,link_verification:verification};
   }));
   const actionable=rows.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,HUMAN_ACTION_LIMIT);
   const brokenLinks=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='internal');
   const externalVerificationIssues=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='external');
-  return {status:'connected',total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Only current engine states with a reachable HTTPS action URL enter the Chairman Queue. External sites that block or fail automated verification are reported separately from internal ToolScout bugs.'};
+  return {status:'connected',total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Only current engine states with a reachable HTTPS action URL enter the Chairman Queue. Prepared community publication tasks include the exact payload needed to complete the human action.'};
 }
 async function growthOpsSnapshot(request,env,ctx,stats){
   const [affiliateLatest,affiliateWeekOld,affiliateStatuses,affiliateDiscovery,distributionStatuses,distribution24,distribution7,deliveryStates,distEvents,affiliateHistory,gsc,sitemap,contentIntel,organicGrowth,aeoGeo,machineReadability,latestAudienceEvent,latestContentPublish]=await Promise.all([
@@ -223,8 +253,18 @@ async function protectedStats(request,env,ctx){
 async function distributionHumanAction(request,env){
   if(!(await validSession(request,env)))return Response.json({ok:false,error:'command_center_session_expired'},{status:401,headers:JSON_H});
   let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_H})}
-  const slug=String(body.surface_slug||'').trim().toLowerCase().slice(0,120),action=String(body.action||'').trim().toLowerCase();
-  if(!slug||!['submitted','skipped'].includes(action))return Response.json({ok:false,error:'invalid_action'},{status:400,headers:JSON_H});
+  const rawId=String(body.surface_slug||'').trim().slice(0,180),action=String(body.action||'').trim().toLowerCase();
+  if(!rawId||!['submitted','skipped'].includes(action))return Response.json({ok:false,error:'invalid_action'},{status:400,headers:JSON_H});
+  if(rawId.startsWith('editorial:')){
+    const queueId=rawId.slice('editorial:'.length);
+    const row=await env.DB.prepare(`SELECT queue_id,target_name,target_url,asset_url,status FROM distribution_editorial_queue WHERE queue_id=?`).bind(queueId).first();
+    if(!row||row.status!=='prepared')return Response.json({ok:false,error:'editorial_action_not_active'},{status:409,headers:JSON_H});
+    const next=action==='submitted'?'published':'skipped';
+    await env.DB.prepare(`UPDATE distribution_editorial_queue SET status=?,updated_at=datetime('now') WHERE queue_id=? AND status='prepared'`).bind(next,queueId).run();
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,asset_id,source_url,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`editorial_${crypto.randomUUID()}`,String(row.target_name||'community').toLowerCase().replace(/[^a-z0-9]+/g,'-'),'editorial_human_resolved',next,'community',queueId,row.asset_url||null,row.target_url||null,`${row.target_name||'Community'} editorial action marked ${next} from Chairman Queue.`).run().catch(()=>{});
+    return Response.json({ok:true,queue_id:queueId,status:next,resume:'distribution_measurement'},{headers:JSON_H});
+  }
+  const slug=rawId.toLowerCase().slice(0,120);
   const row=await env.DB.prepare(`SELECT surface_slug,status,human_required,action_url FROM distribution_opportunities WHERE surface_slug=?`).bind(slug).first();
   if(!row||!n(row.human_required))return Response.json({ok:false,error:'human_gate_not_active'},{status:409,headers:JSON_H});
   const next=action==='submitted'?'submitted':'skipped',nextAction=action==='submitted'?'Human submission confirmed. Engine resumes monitoring and attribution; automatic public verification runs where a machine-verifiable route exists.':'Owner skipped this opportunity. Reconsider only if new evidence materially changes expected value.';
