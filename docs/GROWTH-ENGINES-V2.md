@@ -63,6 +63,53 @@ Lifecycle:
 
 Approval alone is not active coverage. A programme is operationally complete only when its referral route is enabled and verified in production.
 
+## Shared Autonomous Growth Brain - 2026-09-18
+
+ToolScout growth is coordinated through one shared opportunity state rather than independent engine queues.
+
+The shared brain may prioritize:
+
+- distribution surfaces and publisher relationships;
+- vendor amplification and content opportunities;
+- Search / GEO / AEO opportunities;
+- affiliate leakage and programme lifecycle;
+- catalog coverage gaps;
+- catalog factual quality, source changes and freshness debt.
+
+Canonical priority state: `growth_opportunity_state`.
+
+### Affiliate Coverage Engine 2.1
+
+Affiliate growth follows:
+
+`observe human leakage -> discover -> qualify -> prepare -> human gate only if required -> monitor -> capture referral link -> activate -> production verify -> measure yield`
+
+The engine prepares truthful application packs automatically. Human intervention is limited to authentication, CAPTCHA, legal/terms acceptance, identity, tax/payment information, or an irreversible third-party submission that cannot be safely completed by automation.
+
+An approved referral URL stored in canonical D1 state can power `/go/<tool>` directly. Repository editing is not required before monetization can begin. A route is not considered verified until the production redirect is checked.
+
+Affiliate economics may prioritize monetization work. They must never change editorial ranking, recommendation eligibility, or catalog admission.
+
+### Catalog Growth & Quality 1.0
+
+Catalog autonomy follows:
+
+`observe coverage and first-party sources -> prioritize -> verify -> admit / flag / suppress -> measure -> repeat`
+
+Rules:
+
+- official first-party source verification is required for autonomous admission;
+- trusted candidate profiles can be admitted to coverage only after deterministic quality gates;
+- runtime coverage admission has `rankingEligible=false` and `comparisonEligible=false`;
+- ambiguous source changes are flagged for factual re-verification, never silently rewritten;
+- blocked/rate-limited sources are warnings, not deletion evidence;
+- a tool is runtime-suppressed only after two consecutive confirmed 404/410 checks;
+- competitive market signals create research opportunities, not automatic profiles, until first-party evidence exists;
+- the public `/data/tools.json`, sitemap and tool profile routes consume runtime catalog state;
+- catalog growth is affiliate-neutral.
+
+The runtime Catalog Autonomy layer exists so freshness and coverage learning continue even while repository CI is in conservation mode.
+
 ## Growth Command Center 2.0
 
 The Command Center is an operational surface, not an activity dashboard.
