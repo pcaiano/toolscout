@@ -1,0 +1,36 @@
+name: One off outbound integrity audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/outbound-integrity-audit-oneoff.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit outbound tracking
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          echo '=== META ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT key,value FROM outbound_integrity_meta;"
+          echo '=== COUNTS SINCE TRACKING START ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH t AS (SELECT value AS started FROM outbound_integrity_meta WHERE key='tracking_started_at') SELECT (SELECT COUNT(*) FROM click_events,t WHERE click_events.created_at>=t.started) AS raw_clicks_since_tracking, (SELECT COUNT(*) FROM click_events c JOIN sessions s ON s.session_id=c.session_id,t WHERE c.created_at>=t.started AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND s.classification IN ('likely-human','human')) AS classified_human_clicks_since_tracking, (SELECT COUNT(*) FROM click_events c JOIN traffic_guard_events g ON g.session_id=c.session_id AND g.decision='allowed',t WHERE c.created_at>=t.started AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci')) AS guard_linked_clicks_since_tracking, (SELECT COUNT(*) FROM verified_outbound_events,t WHERE verified_outbound_events.created_at>=t.started) AS verified_outbound_since_tracking;"
+          echo '=== LAST 24H COUNTS ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT (SELECT COUNT(*) FROM click_events WHERE created_at>=datetime('now','-24 hours')) raw_clicks_24h, (SELECT COUNT(*) FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-24 hours') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci') AND s.classification IN ('likely-human','human')) classified_human_clicks_24h, (SELECT COUNT(*) FROM click_events c JOIN traffic_guard_events g ON g.session_id=c.session_id AND g.decision='allowed' WHERE c.created_at>=datetime('now','-24 hours') AND COALESCE(c.source,'') NOT IN ('internal-test','synthetic','health-check','ci')) guard_linked_clicks_24h, (SELECT COUNT(*) FROM verified_outbound_events WHERE created_at>=datetime('now','-24 hours')) verified_outbound_24h;"
+          echo '=== BY SOURCE 24H ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT source,COUNT(*) clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM click_events WHERE created_at>=datetime('now','-24 hours') GROUP BY source ORDER BY clicks DESC;"
+          echo '=== RECENT CLICK CLASSIFICATION ==='
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT c.id,c.tool_slug,c.source,c.affiliate_active_at_click,c.created_at,COALESCE(s.classification,'NO_SESSION') classification,CASE WHEN EXISTS(SELECT 1 FROM traffic_guard_events g WHERE g.session_id=c.session_id AND g.decision='allowed') THEN 1 ELSE 0 END guard_allowed,CASE WHEN EXISTS(SELECT 1 FROM verified_outbound_events v WHERE v.click_id=c.id) THEN 1 ELSE 0 END verified FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-24 hours') ORDER BY c.id DESC LIMIT 50;"
