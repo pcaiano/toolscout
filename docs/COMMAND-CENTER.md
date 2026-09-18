@@ -26,7 +26,7 @@ It is not a replacement for technical source-of-truth files such as `AGENTS.md` 
 
 ## Growth Engines 2.0 priority — 2026-09-09
 
-Distribution Engine 2.0, Affiliate Coverage Engine 2.0 and the redesigned Growth Command Center are the highest development priority. The implementation contract is canonical in `docs/GROWTH-ENGINES-V2.md`.
+Distribution Engine 2.1, Affiliate Coverage Engine 2.0 and the redesigned Growth Command Center are the highest development priority. The implementation contract is canonical in `docs/GROWTH-ENGINES-V2.md`.
 
 The immediate operating objective is:
 
