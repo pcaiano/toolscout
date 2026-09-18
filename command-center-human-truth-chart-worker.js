@@ -54,7 +54,7 @@ function renderHealthClarity(d){
   html+=healthRow('SEO / GEO / AIO',seoState+' · '+evidenceName(seo.status),(seo.detail||'No readiness evidence is available.')+(seo.last_event_at?' Last evidence '+tsDt(seo.last_event_at):''));
   var broken=(q.broken_links||[]).length;
   html+=healthRow('Broken Chairman links',String(broken),broken?'Detailed below. These are internal ToolScout action link failures.':'None detected');
-  if(issues.length)html+=issues.map(function(x){return '<div class="bug '+(x.severity==='warning'?'warning':'')+'"><b>'+(x.severity==='warning'?'Warning':'Engine bug')+' · '+String(x.engine||'unknown')+':</b> '+String(x.title||'')+' · '+String(x.detail||'')+'</div>'}).join('');
+  if(issues.length)html+=issues.map(function(x){var name=String(x.engine||x.metric||'unknown'),title=String(x.title||x.reason||'Operational warning'),detail=String(x.detail||'');return '<div class="bug '+(x.severity==='warning'?'warning':'')+'"><b>'+(x.severity==='warning'?'Warning':'Engine bug')+' · '+name+':</b> '+title+(detail&&detail!==title?' · '+detail:'')+'</div>'}).join('');
   root.innerHTML=html;
 }
 var previous=window.render;
@@ -79,7 +79,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-chart-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-chart',version:2,chart:'human-visitors-top',series:3,dualAxis:true,monetizedSeries:'dashed-square-markers',healthSemantics:'engine-state-plus-observability',noAmbiguousNoEvidence:true},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-chart-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-chart',version:3,chart:'human-visitors-top',series:3,dualAxis:true,monetizedSeries:'dashed-square-markers',healthSemantics:'engine-state-plus-observability',noAmbiguousNoEvidence:true},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
