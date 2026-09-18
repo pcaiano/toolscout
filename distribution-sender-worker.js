@@ -12,6 +12,39 @@ function displayToolName(row){
   if(match?.[1])return match[1].trim();
   return String(row?.tool_slug||'Tool').split('-').filter(Boolean).map(part=>part.length<=3?part.toUpperCase():part.charAt(0).toUpperCase()+part.slice(1)).join(' ');
 }
+let networkSchemaReady=null;
+async function ensureNetworkSchema(env){
+  if(networkSchemaReady)return networkSchemaReady;
+  networkSchemaReady=env.DB.batch([
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_network_outreach (
+      surface_slug TEXT PRIMARY KEY,
+      surface_name TEXT NOT NULL,
+      surface_type TEXT,
+      domain TEXT NOT NULL,
+      source_url TEXT NOT NULL,
+      priority_score REAL NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'queued',
+      contact_email TEXT,
+      contact_source_url TEXT,
+      contact_checked_at TEXT,
+      discovery_attempts INTEGER NOT NULL DEFAULT 0,
+      suggested_subject TEXT,
+      suggested_body TEXT,
+      public_dispatch_token TEXT UNIQUE,
+      public_dispatch_leased_at TEXT,
+      outreach_sent_at TEXT,
+      outreach_error TEXT,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      adopted_at TEXT,
+      adoption_kind TEXT,
+      last_observed_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_network_status_priority ON distribution_network_outreach(status,priority_score DESC)`)
+  ]).catch(error=>{networkSchemaReady=null;throw error});
+  return networkSchemaReady;
+}
 function cordialOutreach(row){
   const name=displayToolName(row);
   const subject=`${name} featured on ToolScout`;
@@ -31,14 +64,32 @@ async function leaseQueue(env,limit=3){
 }
 
 async function publicCandidates(env,limit=3){
+  await ensureNetworkSchema(env);
   const n=Math.max(1,Math.min(3,Number(limit)||3));
-  const r=await env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all();
+  const [vendorResult,networkResult]=await Promise.all([
+    env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all(),
+    env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_network_outreach WHERE status='contact_found' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all()
+  ]);
+  const vendorRows=(vendorResult.results||[]).map(row=>({kind:'vendor',row,priority:Number(row.priority_score||0)}));
+  const networkRows=(networkResult.results||[]).map(row=>({kind:'network',row,priority:Number(row.priority_score||0)}));
+  let chosen=[...vendorRows,...networkRows].sort((a,b)=>b.priority-a.priority).slice(0,n);
+  if(networkRows.length&&chosen.every(x=>x.kind!=='network')){
+    chosen=chosen.slice(0,Math.max(0,n-1));
+    chosen.push(networkRows[0]);
+    chosen.sort((a,b)=>b.priority-a.priority);
+  }
   const items=[];
-  for(const row of r.results||[]){
-    const token=row.public_dispatch_token||crypto.randomUUID();
-    if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
-    const copy=cordialOutreach(row);
-    items.push({tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
+  for(const item of chosen){
+    if(item.kind==='vendor'){
+      const row=item.row,token=row.public_dispatch_token||crypto.randomUUID();
+      if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
+      const copy=cordialOutreach(row);
+      items.push({kind:'vendor',tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
+      continue;
+    }
+    const row=item.row,token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
+    if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_network_outreach SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(token,row.surface_slug).run();
+    items.push({kind:'network',tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:row.suggested_body,dispatch_token:token});
   }
   return {status:'connected',limit:n,items};
 }
@@ -46,13 +97,22 @@ async function publicCandidates(env,limit=3){
 async function publicStatus(request,env){
   let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_HEADERS})}
   if(!b.dispatch_token||!['sent','failed'].includes(b.status))return Response.json({error:'dispatch_token_and_status_required'},{status:400,headers:JSON_HEADERS});
-  const row=await env.DB.prepare(`SELECT tool_slug,asset_url,status FROM distribution_vendor_amplification WHERE public_dispatch_token=?`).bind(String(b.dispatch_token)).first();
-  if(!row)return Response.json({error:'unknown_dispatch_token'},{status:404,headers:JSON_HEADERS});
-  if(row.status==='sent')return Response.json({ok:true,idempotent:true},{headers:JSON_HEADERS});
+  const token=String(b.dispatch_token);
+  const row=await env.DB.prepare(`SELECT tool_slug,asset_url,status FROM distribution_vendor_amplification WHERE public_dispatch_token=?`).bind(token).first();
   const ok=b.status==='sent';
-  await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status=?,attempts=attempts+1,last_attempt_at=datetime('now'),outreach_sent_at=CASE WHEN ? THEN datetime('now') ELSE outreach_sent_at END,outreach_error=?,updated_at=datetime('now') WHERE public_dispatch_token=?`).bind(ok?'sent':'send_failed',ok?1:0,ok?null:String(b.error||'make_public_dispatch_failed').slice(0,1000),String(b.dispatch_token)).run();
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vpub_${crypto.randomUUID()}`,ok?'vendor_outreach_sent':'vendor_outreach_failed',ok?'completed':'failed','vendor_amplification',row.tool_slug,row.asset_url,ok?'Vendor amplification outreach sent by Make public handoff.':String(b.error||'Vendor outreach failed in Make public handoff.').slice(0,1000)).run();
-  return Response.json({ok:true},{headers:JSON_HEADERS});
+  if(row){
+    if(row.status==='sent')return Response.json({ok:true,idempotent:true,kind:'vendor'},{headers:JSON_HEADERS});
+    await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status=?,attempts=attempts+1,last_attempt_at=datetime('now'),outreach_sent_at=CASE WHEN ? THEN datetime('now') ELSE outreach_sent_at END,outreach_error=?,updated_at=datetime('now') WHERE public_dispatch_token=?`).bind(ok?'sent':'send_failed',ok?1:0,ok?null:String(b.error||'make_public_dispatch_failed').slice(0,1000),token).run();
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vpub_${crypto.randomUUID()}`,ok?'vendor_outreach_sent':'vendor_outreach_failed',ok?'completed':'failed','vendor_amplification',row.tool_slug,row.asset_url,ok?'Vendor amplification outreach sent by Make public handoff.':String(b.error||'Vendor outreach failed in Make public handoff.').slice(0,1000)).run();
+    return Response.json({ok:true,kind:'vendor'},{headers:JSON_HEADERS});
+  }
+  await ensureNetworkSchema(env);
+  const network=await env.DB.prepare(`SELECT surface_slug,source_url,status FROM distribution_network_outreach WHERE public_dispatch_token=?`).bind(token).first();
+  if(!network)return Response.json({error:'unknown_dispatch_token'},{status:404,headers:JSON_HEADERS});
+  if(network.status==='sent'||network.status==='adopted')return Response.json({ok:true,idempotent:true,kind:'network'},{headers:JSON_HEADERS});
+  await env.DB.prepare(`UPDATE distribution_network_outreach SET status=?,attempts=attempts+1,outreach_sent_at=CASE WHEN ? THEN datetime('now') ELSE outreach_sent_at END,outreach_error=?,updated_at=datetime('now') WHERE public_dispatch_token=?`).bind(ok?'sent':'send_failed',ok?1:0,ok?null:String(b.error||'make_network_dispatch_failed').slice(0,1000),token).run();
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netpub_${crypto.randomUUID()}`,network.surface_slug,ok?'publisher_network_outreach_sent':'publisher_network_outreach_failed',ok?'completed':'failed','distribution_network',network.source_url,ok?'Publisher syndication invitation sent automatically.':String(b.error||'Publisher outreach failed in Make public handoff.').slice(0,1000)).run();
+  return Response.json({ok:true,kind:'network'},{headers:JSON_HEADERS});
 }
 
 export default {
