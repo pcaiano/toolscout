@@ -185,10 +185,15 @@ function editorialTargets(family){
 async function buildBrief(env,family){
   await ensureSchema(env);
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
-  const commercial=await env.DB.prepare(`SELECT p.tool_slug,p.tool_name,p.x_handle,p.bluesky_handle,p.linkedin_url,a.policy_status,a.redirect_allowed
-    FROM content_social_profiles p JOIN affiliate_social_policy a ON a.tool_slug=p.tool_slug
-    WHERE p.status='verified' AND a.organic_social_allowed=1 AND a.direct_affiliate_link_allowed=1 AND a.redirect_allowed=1 AND a.policy_status='verified_social_allowed'
-    ORDER BY p.tool_name`).all();
+  const commercial=await env.DB.prepare(`SELECT a.tool_slug,COALESCE(p.tool_name,a.tool_slug) tool_name,p.x_handle,p.bluesky_handle,p.linkedin_url,a.policy_status,a.redirect_allowed,w.affiliate_url
+    FROM affiliate_social_policy a
+    JOIN affiliate_workflow w ON w.tool_slug=a.tool_slug
+    LEFT JOIN content_social_profiles p ON p.tool_slug=a.tool_slug AND p.status='verified'
+    WHERE a.organic_social_allowed=1 AND a.direct_affiliate_link_allowed=1
+      AND a.policy_status IN ('verified_social_allowed','social_allowed_direct_only')
+      AND (a.redirect_allowed=1 OR w.affiliate_url IS NOT NULL)
+      AND w.status IN ('verified','active','earning','link_acquired')
+    ORDER BY COALESCE(p.tool_name,a.tool_slug)`).all();
   const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=commercial.results||[];
   const profileBySlug=new Map(all.map(x=>[x.tool_slug,x]));
   const comparisonPairs=[
@@ -205,7 +210,8 @@ async function buildBrief(env,family){
   else if(all.length){const start=pickIndex(family+date,all.length);mentionRows=[all[start],all[(start+1)%all.length]].filter((x,i,a)=>x&&a.findIndex(y=>y.tool_slug===x.tool_slug)===i);}
   const mentions=mentionRows.map(x=>({tool_slug:x.tool_slug,name:x.tool_name,x_handle:x.x_handle?('@'+x.x_handle):null,bluesky_handle:x.bluesky_handle?('@'+x.bluesky_handle):null,linkedin_url:x.linkedin_url||null,verified_from_official_site:true}));
   const mode=selected?'affiliate_social_verified':'editorial';
-  let t=selected?targets(selected.tool_slug):editorialTargets(family);
+  const targetMode=selected?(Number(selected.redirect_allowed)===1?'toolscout_redirect':'direct_vendor'):'editorial';
+  let t=selected?(targetMode==='toolscout_redirect'?targets(selected.tool_slug):{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}):editorialTargets(family);
   let comparisonContext=null;
   if(comparison){
     const slug=`${comparison[0]}-vs-${comparison[1]}`;
@@ -218,7 +224,7 @@ async function buildBrief(env,family){
     `CONTENT ENGINE INTELLIGENCE BRIEF (${family})`,
     `Commercial mode: ${mode}.`,
     comparisonContext?`Comparison selected for this run: ${comparisonContext.tool_a} vs ${comparisonContext.tool_b}. Use this exact comparison pair and the exact platform URL supplied below. Present practical tradeoffs, never a universal winner.`:null,
-    selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Its official affiliate programme material explicitly permits organic-social affiliate/referral-link promotion and no redirect/cloaking prohibition was detected in the checked material. Use the exact platform target supplied below and include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
+    selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Official programme material explicitly permits organic-social affiliate/referral-link promotion. Target mode: ${targetMode}. ${targetMode==='direct_vendor'?'The programme restricts redirects/cloaking, so use the exact vendor affiliate URL supplied below without modification.':'The checked material allows the ToolScout redirect route.'} Include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
     mentions.length?`Verified manufacturer/profile candidates discovered from links on their official websites: ${mentions.map(m=>`${m.name} | X ${m.x_handle||'none'} | Bluesky ${m.bluesky_handle||'none'} | LinkedIn company URL ${m.linkedin_url||'none'}`).join(' ; ')}. Mention only when genuinely relevant to the topic. Never invent or guess a handle.`:'No verified social handles are currently available. Do not invent mentions.',
     'Mention guardrail: maximum 2 relevant manufacturers in an editorial post and maximum 1 in a commercial affiliate post. Never tag unrelated people or companies. No engagement bait.',
     selected?'Disclosure required. Use plain, conspicuous wording such as "Affiliate link: ToolScout may earn a commission if you buy through this link. This does not affect our recommendations." For X/Bluesky, "Affiliate link" is the minimum short disclosure when space is constrained.':'No affiliate disclosure is needed unless the post contains an affiliate target.',
@@ -227,7 +233,7 @@ async function buildBrief(env,family){
     `Bluesky target: ${t.bluesky}`
   ].filter(Boolean).join('\n');
   await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||null,JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
-  return {brief_id:briefId,family,commercial_mode:mode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
+  return {brief_id:briefId,family,commercial_mode:mode,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
 async function metrics(env){
