@@ -57,7 +57,7 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
     </section>
 
     <section class="widget" data-widget="distribution" style="--w:6;--h:5">
-      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Distribution Engine 2.0</div></div><div class="widgetMeta" id="distributionMeta">Closed loop</div></div>
+      <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Distribution Engine 2.1</div></div><div class="widgetMeta" id="distributionMeta">Closed loop</div></div>
       <div class="widgetBody" id="distributionBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
@@ -309,7 +309,7 @@ function detailFor(id){
   if(!snapshot)return;
   const g=snapshot.growthOps||{},eng=g.engines||{},f=g.footprint||{};
   if(id==='chairman'){const q=g.chairmanQueue||{};modalRows('Chairman Queue','HUMAN GATES',q.items&&q.items.length?q.items.map(taskHtml).join(''):'<div class="note">No current human gates.</div>');return}
-  if(id==='distribution'){const x=eng.distribution||{};modalRows('Distribution Engine 2.0','ENGINE DETAIL',stateEntries(x.opportunity_status).map(([k,v])=>row(k,num(v),'opportunity state')).join('')+stateEntries(x.delivery_status).map(([k,v])=>row('verification: '+k,num(v),'delivery state')).join(''));return}
+  if(id==='distribution'){const x=eng.distribution||{};modalRows('Distribution Engine 2.1','ENGINE DETAIL',stateEntries(x.opportunity_status).map(([k,v])=>row(k,num(v),'opportunity state')).join('')+stateEntries(x.delivery_status).map(([k,v])=>row('verification: '+k,num(v),'delivery state')).join(''));return}
   if(id==='affiliate'){const x=eng.affiliate||{};modalRows('Affiliate Coverage Engine 2.0','ENGINE DETAIL',stateEntries(x.workflow_status).map(([k,v])=>row(k,num(v),'affiliate state')).join('')+row('Discovery checked',num(x.discovery&&x.discovery.total),dt(x.discovery&&x.discovery.last_checked)));return}
   if(id==='footprint'){const surfaces=f.distribution&&f.distribution.surfaces||[];modalRows('ToolScout Footprint','DISTRIBUTION + SEARCH',row('GSC observed pages',num(f.search&&f.search.observed_pages),f.search&&f.search.note)+row('Sitemap URLs',num(f.search&&f.search.sitemap_urls),'crawlable inventory')+surfaces.map(x=>row(x.name||x.slug,x.status,x.type||'surface')).join(''));return}
   if(id==='ledger'){modalRows('Growth Ledger','EVIDENCE LOG',(g.ledger||[]).map(x=>row((x.engine||'engine')+' · '+(x.subject||''),x.result||'',dt(x.at)+' · '+(x.action||''))).join(''));return}
