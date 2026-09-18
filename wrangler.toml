@@ -52,6 +52,7 @@ run_worker_first = [
   "/a2a*",
   "/embed*",
   "/distribution/feed.xml*",
+  "/distribution/publisher-kit*",
   "/.well-known/toolscout-distribution.json*",
   "/.well-known/api-catalog*",
   "/.well-known/agent-card.json*",
