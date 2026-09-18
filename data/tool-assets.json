@@ -8,6 +8,16 @@
       "httpStatus": 200,
       "checkedAt": "2026-09-16T21:31:49Z",
       "sourcePage": "https://www.pabbly.com/brand-assets/"
+    },
+    "pipedrive": {
+      "url": "https://cdn.was-1.pipedriveassets.com/www-main-renderer/_next/static/media/favicon-196x196.98c71512.png",
+      "provenance": "first-party-high-resolution-icon",
+      "contentType": "image/png",
+      "httpStatus": 200,
+      "checkedAt": "2026-09-18T11:57:14.827Z",
+      "sourcePage": "https://www.pipedrive.com/",
+      "width": 196,
+      "height": 196
     }
   }
 }
