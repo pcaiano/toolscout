@@ -4,6 +4,7 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const FETCH_TIMEOUT=6500;
 const MAX_PROFILE_SCANS=10;
 const MAX_POLICY_SCANS=8;
+const CONTENT_PROOF_SHA256='87c22cb2e3aab0b81431781fb86df292ca8e6a1dfab309ab73413c5c532ba718';
 let schemaReady=null;
 
 const safe=(v,n=2400)=>String(v??'').slice(0,n);
@@ -247,6 +248,7 @@ async function cycle(env){
 }
 
 async function sha256(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'')));return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function proofAuthorized(request){const proof=String(request.headers.get('X-ToolScout-Proof')||'');return Boolean(proof)&&await sha256(proof)===CONTENT_PROOF_SHA256}
 async function recordSocialAffiliateRedirect(request,env,u,response){
   if(request.method!=='GET'||!u.pathname.startsWith('/go/')||u.searchParams.get('ts_affiliate')!=='1'||response.status<300||response.status>=400||!response.headers.get('Location'))return;
   const platform=lower(u.searchParams.get('utm_source')||'unknown').replace(/[^a-z0-9_-]/g,'').slice(0,40),tool=u.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
@@ -259,7 +261,11 @@ async function recordSocialAffiliateRedirect(request,env,u,response){
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(u.pathname==='/api/content-engine/brief'&&request.method==='GET'){
+    if(u.pathname==='/api/content-engine/intelligence/refresh'&&request.method==='POST'){
+      if(!(await proofAuthorized(request)))return Response.json({error:'unauthorized'},{status:401,headers:{...JSON_H,'Cache-Control':'no-store'}});
+      try{return Response.json(await cycle(env),{headers:{...JSON_H,'Cache-Control':'no-store'}})}catch(error){return Response.json({error:'content_intelligence_refresh_failed',message:safe(error?.message||error,500)},{status:500,headers:{...JSON_H,'Cache-Control':'no-store'}})}
+    }
+        if(u.pathname==='/api/content-engine/brief'&&request.method==='GET'){
       const family=['monday_discovery','wednesday_comparison','friday_practical'].includes(u.searchParams.get('family'))?u.searchParams.get('family'):'monday_discovery';
       try{return Response.json(await buildBrief(env,family),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
     }
