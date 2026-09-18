@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "enabled": false,
+  "mode": "hard_interlock",
+  "reason": "GitHub Actions mutation is locked until the post-conservation SEO/catalog generator stack is explicitly reviewed against shared-growth-v3.",
+  "required": {
+    "autonomousGrowthBrain": "shared-growth-v3",
+    "commandCenterComposition": "canonical-growth-v2",
+    "affiliateEngine": "2.1",
+    "catalogGrowth": "1.0",
+    "minimumBuildContract": "2026-09-18.4"
+  },
+  "unlockProcedure": [
+    "Review every mutating generator in seo-engine-v2 against current runtime catalog and growth contracts.",
+    "Run the full workflow on a non-main branch and inspect the generated diff.",
+    "Verify no Worker/runtime source, affiliate state, catalog neutrality rule, or Command Center contract regresses.",
+    "Set enabled=true only in a reviewed pull request."
+  ],
+  "reviewedAt": null,
+  "reviewedBy": null
+}
