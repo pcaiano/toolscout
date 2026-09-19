@@ -454,14 +454,12 @@ async function verifyFootprint(env){
       WHERE o.status IN ('verified','live') AND COALESCE(o.live_url,ds.response_url) IS NOT NULL
       GROUP BY o.surface_slug
       ORDER BY COALESCE(p.last_checked_at,'1970-01-01') ASC
-      LIMIT 12`).all();
+      LIMIT 6`).all();
     rows=q.results||[];
   }catch{return {checked:0,placements:0,backlinks:0,errors:1};}
-  let checked=0,placements=0,backlinks=0,errors=0;
-  for(const row of rows){
-    checked++;
+  const outcomes=await Promise.all(rows.map(async row=>{
     try{
-      const r=await fetch(row.public_url,{method:'GET',headers:{Accept:'text/html,application/json;q=0.8,*/*;q=0.5','User-Agent':'ToolScout Footprint Verifier/1.0'},redirect:'follow',signal:AbortSignal.timeout(10000)});
+      const r=await fetch(row.public_url,{method:'GET',headers:{Accept:'text/html,application/json;q=0.8,*/*;q=0.5','User-Agent':'ToolScout Footprint Verifier/1.0'},redirect:'follow',signal:AbortSignal.timeout(5000)});
       const body=r.ok?(await r.text()).slice(0,500000):'';
       const link=backlinkEvidence(body);
       const publicUrl=r.url||row.public_url;
@@ -469,11 +467,17 @@ async function verifyFootprint(env){
         VALUES(?,?,?,?,?,CASE WHEN ? THEN datetime('now') ELSE NULL END,datetime('now'),datetime('now'),datetime('now'))
         ON CONFLICT(surface_slug) DO UPDATE SET public_url=excluded.public_url,placement_verified=excluded.placement_verified,backlink_verified=excluded.backlink_verified,link_rel=excluded.link_rel,first_verified_at=COALESCE(distribution_placements.first_verified_at,excluded.first_verified_at),last_checked_at=datetime('now'),updated_at=datetime('now')`)
         .bind(row.surface_slug,publicUrl,r.ok?1:0,link.found?1:0,link.rel,r.ok?1:0).run();
-      if(r.ok)placements++;
-      if(link.found)backlinks++;
-    }catch{errors++;}
-  }
-  if(checked)try{await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`footprint_${crypto.randomUUID()}`,'distribution_footprint_verification',errors?'partial':'completed','distribution_engine',`Footprint verification checked ${checked} public placement(s): ${placements} reachable, ${backlinks} backlink(s) confirmed, ${errors} error(s).`).run()}catch{}
+      return {reachable:r.ok?1:0,backlink:link.found?1:0,error:0};
+    }catch{return {reachable:0,backlink:0,error:1}}
+  }));
+  const checked=outcomes.length;
+  const placements=outcomes.reduce((n,x)=>n+x.reachable,0);
+  const backlinks=outcomes.reduce((n,x)=>n+x.backlink,0);
+  const errors=outcomes.reduce((n,x)=>n+x.error,0);
+  if(checked)try{
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`footprint_${crypto.randomUUID()}`,'distribution_footprint_verification',errors?'partial':'completed','distribution_engine',`Footprint verification checked ${checked} public placement(s): ${placements} reachable, ${backlinks} backlink(s) confirmed, ${errors} error(s).`).run()
+  }catch{}
   return {checked,placements,backlinks,errors};
 }
 async function autonomyMetrics(env){
