@@ -77,7 +77,7 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
     </section>
 
     <section class="widget" data-widget="revenue" style="--w:6;--h:4">
-      <div class="widgetHead"><div><div class="widgetKicker">Commercial gaps</div><div class="widgetTitle">Revenue & Coverage</div></div><div class="widgetMeta">Likely-human</div></div>
+      <div class="widgetHead"><div><div class="widgetKicker">Commercial gaps</div><div class="widgetTitle">Revenue & Coverage</div></div><div class="widgetMeta">Strict human truth</div></div>
       <div class="widgetBody" id="revenueBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
@@ -115,14 +115,14 @@ function renderNorthStar(d){
   const out=first(f.outboundClicks,c.totals&&c.totals.outbound)||0;
   const mon=first(c.totals&&c.totals.monetizedOutbound,c.monetizedOutbound,ac.monetizedLikelyHumanClicks);
   document.getElementById('northstarBody').innerHTML='<div class="metricGrid">'+
-    metric('Human sessions · 24h',num(human24h),'Rolling last 24 hours')+
-    metric('Avg human sessions / day · MTD',mtdDailyAverage===null?'—':Number(mtdDailyAverage).toFixed(1),'Month-to-date daily average')+
-    metric('Human sessions · today',num(t.today),'Likely-human sessions since 00:00 Europe/Lisbon')+
+    metric('Strict human sessions · 24h',num(human24h),'Positive-evidence sessions only')+
+    metric('Avg strict sessions / day · MTD',mtdDailyAverage===null?'—':Number(mtdDailyAverage).toFixed(1),'Strict-human month-to-date daily average')+
+    metric('Strict human sessions · today',num(t.today),'Positive human evidence since 00:00 Europe/Lisbon')+
     metric('Human outbound',num(out),pct(f.sessionToOutboundCtr)+' session → outbound')+
     metric('Monetized outbound',mon===null?'—':num(mon),mon===null?'Unavailable, not zero':pct(out?mon/out*100:0)+' of human outbound')+
     metric('Confirmed revenue',r.confirmedRevenue==null?'Unknown':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'No confirmed vendor evidence')+
-    metric('Human sessions · MTD',num(t.monthToDate),'Total month-to-date')+
-    metric('Month projection',num(t.projectedMonth),'Likely-human sessions · current pace')+
+    metric('Strict human sessions · MTD',num(t.monthToDate),'Strict-human total month-to-date')+
+    metric('Month projection',num(t.projectedMonth),'Strict-human sessions · current pace')+
   '</div>';
 }
 function taskHtml(x){
