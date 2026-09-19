@@ -1,6 +1,5 @@
 import { normalizeAffiliateState, MONETIZED_STATES, TERMINAL_UNMONETIZABLE_STATES } from './affiliate-operations.js';
 
-const HUMAN_CLASSIFICATIONS = new Set(['likely-human','human']);
 const EXCLUDED_SOURCES = new Set(['internal-test','synthetic','health-check','ci']);
 
 export function behaviorDemandSignal(record) {
@@ -24,9 +23,8 @@ export function leakageScore(record) {
 export function coverageEngineSnapshot(records, clickRows = []) {
   const valid = clickRows.filter(r => {
     const source = String(r.source || '').toLowerCase();
-    const classification = String(r.classification || '').toLowerCase();
-    const browserConfirmed = Number(r.browser_confirmed || 0) === 1;
-    return browserConfirmed && !EXCLUDED_SOURCES.has(source) && HUMAN_CLASSIFICATIONS.has(classification);
+    const verifiedOutbound = Number(r.verified_outbound || 0) === 1;
+    return verifiedOutbound && !EXCLUDED_SOURCES.has(source);
   });
   const total = valid.reduce((n,r)=>n+Number(r.clicks||0),0);
   const monetized = valid.filter(r=>Number(r.affiliate_active_at_click)===1).reduce((n,r)=>n+Number(r.clicks||0),0);
@@ -46,7 +44,7 @@ export function coverageEngineSnapshot(records, clickRows = []) {
     item.leakage_score=leakageScore(item);
     return item;
   }).filter(r=>!MONETIZED_STATES.has(normalizeAffiliateState(r.status)) && !TERMINAL_UNMONETIZABLE_STATES.has(normalizeAffiliateState(r.status))).sort((a,b)=>b.leakage_score-a.leakage_score||b.unmonetized_clicks_30d-a.unmonetized_clicks_30d);
-  return {window_days:30,human_outbound_clicks:total,monetized_human_outbound_clicks:monetized,unmonetized_human_outbound_clicks:unmonetized,weighted_coverage:total?monetized/total:null,recoverable_queue:queue.slice(0,25),traffic_truth:'browser_confirmed',behavior_model:'canonical_outbound_mirrored_to_posthog',behavior_guardrail:'Affiliate prioritization uses first-party browser-confirmed outbound behavior. PostHog validates the consented subset and does not determine monetization state.'};
+  return {window_days:30,human_outbound_clicks:total,monetized_human_outbound_clicks:monetized,unmonetized_human_outbound_clicks:unmonetized,weighted_coverage:total?monetized/total:null,recoverable_queue:queue.slice(0,25),traffic_truth:'strict_human_verified_outbound',behavior_model:'canonical_outbound_mirrored_to_posthog',behavior_guardrail:'Affiliate prioritization uses first-party verified outbound navigation from the strict-human integrity pipeline. PostHog validates the consented subset and does not determine monetization state.'};
 }
 
 export function automationBoundary(record) {
