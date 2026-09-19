@@ -91,7 +91,7 @@ async function growthRows(env,sql){try{return (await env.DB.prepare(sql).all()).
 async function growthAssetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 async function coordinateGrowthOpportunities(env){
   await ensureGrowthSchema(env);
-  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
+  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
       n.status network_status,n.adoption_kind
@@ -117,6 +117,7 @@ async function coordinateGrowthOpportunities(env){
     growthRows(env,`SELECT tool_slug,signals,sources_json,status,updated_at FROM catalog_market_gaps`),
     growthRows(env,`SELECT candidate_id,tool_slug,source_url,title,summary,status,materiality_score,detected_at,updated_at FROM software_news_candidates WHERE status IN ('verified','published') OR (status='candidate' AND materiality_score>=50)`),
     growthAssetJson(env,'/reports/organic-growth-opportunities.json',{generatedAt:null,opportunities:[],summary:{}}),
+    growthAssetJson(env,'/reports/gsc-signals.json',{generatedAt:null,source:null,startDate:null,endDate:null,siteTotals:{},pages:[],items:[]}),
     growthAssetJson(env,'/reports/aeo-geo-readiness.json',{generatedAt:null,failures:null,warnings:null}),
     growthAssetJson(env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null}),
     growthAssetJson(env,'/reports/catalog-freshness-coverage.json',{generatedAt:null,summary:{},coverage:[],contentChanges:[],quarantined:[]}),
@@ -127,6 +128,20 @@ async function coordinateGrowthOpportunities(env){
     growthAssetJson(env,'/data/software-updates.json',{updatedAt:null,items:[]})
   ]);
   const searchOpportunities=Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
+  const directGscPages=Array.isArray(gscSignals?.pages)?gscSignals.pages:[];
+  const normalizedGscPages=directGscPages
+    .filter(x=>Number(x?.impressions||0)>0)
+    .map(x=>{
+      let pathname='/';try{pathname=new URL(String(x?.page||'https://trytoolscout.org/')).pathname.replace(/\.html$/i,'')||'/'}catch{}
+      const impressions=Math.max(0,Number(x?.impressions||0)),clicks=Math.max(0,Number(x?.clicks||0)),position=Math.max(0,Number(x?.position||0)),ctr=Math.max(0,Number(x?.ctr||0));
+      const rankFactor=position>0?Math.max(0,60-Math.min(60,position)):0;
+      const demandFactor=Math.min(35,Math.log10(impressions+1)*14);
+      const clickFactor=Math.min(20,clicks*10);
+      const priority=Math.max(1,Math.min(100,Math.round(35+demandFactor+rankFactor*0.45+clickFactor)));
+      return{page:String(x?.page||''),pathname,clicks,impressions,ctr,position,topQueries:Array.isArray(x?.topQueries)?x.topQueries.slice(0,5):[],priority};
+    })
+    .sort((a,b)=>b.priority-a.priority||b.impressions-a.impressions)
+    .slice(0,50);
   const searchBoostByTool=new Map();
   for(const op of searchOpportunities){
     const score=Math.max(0,Math.min(100,Number(op?.priorityScore||0)));
@@ -329,6 +344,37 @@ async function coordinateGrowthOpportunities(env){
       .bind(`search:${intent}`,'search',intent,Number(priority.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
     active++;searchCount++;
   }
+  for(const row of normalizedGscPages){
+    const key=row.pathname==='/'?'home':row.pathname;
+    const actions=['search_measurement'];
+    if(row.position>20&&row.impressions>=20)actions.unshift('content_amplification','distribution_amplification','deepen_existing_search_asset');
+    else if(row.position>10&&row.position<=20)actions.unshift('content_amplification','distribution_amplification','strengthen_internal_links');
+    else if(row.position>0&&row.position<=10)actions.unshift('protect_current_ranking','improve_click_capture');
+    const signals={
+      lane:row.position>20?'seo_authority_depth':(row.position>10?'seo_striking_distance':(row.position>0?'seo_first_page':'seo_measure')),
+      action:row.position>20?'deepen_existing':(row.position>10?'strengthen_existing':(row.position>0?'protect_and_improve_ctr':'measure')),
+      evidence_confidence:row.impressions>=20?'meaningful':'low',
+      source:'Google Search Console Search Analytics',
+      gsc_snapshot_generated_at:gscSignals?.generatedAt||null,
+      gsc_start_date:gscSignals?.startDate||null,
+      gsc_end_date:gscSignals?.endDate||null,
+      impressions:row.impressions,
+      clicks:row.clicks,
+      ctr:row.ctr,
+      position:row.position,
+      top_queries:row.topQueries,
+      asset_path:row.pathname,
+      asset_url:row.page,
+      freshness_hours:gscSignals?.generatedAt?Math.max(0,(Date.now()-Date.parse(gscSignals.generatedAt))/3600000):null,
+      north_star:HUMAN_ACQUISITION_SPRINT.northStar
+    };
+    const priority=humanSprintActive()?Math.min(100,row.priority+12):row.priority;
+    await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(`gsc-page:${key}`,'search',row.pathname,Number(priority.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)).run();
+    active++;searchCount++;
+  }
   if(humanSprintActive()){
     for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
       const actions=['content_amplification','distribution_amplification','search_measurement'];
@@ -374,7 +420,7 @@ async function coordinateGrowthOpportunities(env){
   }
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
     .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor, ${affiliateCount} affiliate, ${catalogCount} catalog/quality, ${newsCount} What's New and ${searchCount} Search/GEO/AEO opportunities. ${humanSprintActive()?'Human Acquisition Sprint is active: strict verified human sessions dominate priority; acquisition surfaces, Search, vendor/content amplification and timely news are boosted while affiliate and routine catalog work are subordinated.':'Shared priority state coordinates acquisition, monetization, news, catalog growth and factual quality while keeping affiliate economics separate from editorial ranking.'}`).run().catch(()=>{});
-  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
+  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,gscSnapshot:{generatedAt:gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:directGscPages.length,directOpportunities:normalizedGscPages.length},catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
 async function publicSearchDirectives(env){
