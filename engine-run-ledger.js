@@ -39,7 +39,19 @@ export async function recordEngineRun(env,{runId,engine,mission,triggerName=null
   return id;
 }
 
+export async function reapStaleEngineRuns(env,minutes=120){
+  await ensureEngineRunSchema(env);
+  try{
+    const r=await env.DB.prepare(`UPDATE engine_runs
+      SET status='failed',completed_at=datetime('now'),detail='stale_run_abandoned',evidence_json='{"reason":"stale_run_abandoned"}',updated_at=datetime('now')
+      WHERE status='running' AND started_at<datetime('now', ?)`)
+      .bind(`-${Math.max(30,Number(minutes)||120)} minutes`).run();
+    return Number(r?.meta?.changes||r?.changes||0);
+  }catch{return 0}
+}
+
 export async function runWithLedger(env,{engine,mission,triggerName=null},fn){
+  await reapStaleEngineRuns(env,120);
   const runId=`run_${crypto.randomUUID()}`;
   const startedAt=new Date().toISOString().replace('T',' ').slice(0,19);
   await recordEngineRun(env,{runId,engine,mission,triggerName,status:'running',startedAt,evidence:{phase:'started'}});
