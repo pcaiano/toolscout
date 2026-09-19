@@ -23,16 +23,16 @@ function sourceMatchesSurface(source,referrer,row){
 }
 
 async function browserConfirmedTotal(env){
-  const row=await env.DB.prepare(`SELECT COUNT(DISTINCT pc.session_id) confirmed_sessions FROM funnel_events pc JOIN sessions s ON s.session_id=pc.session_id WHERE s.classification='likely-human' AND pc.event_type='page_confirmed' AND pc.created_at>=datetime('now','-${WINDOW_DAYS} days')`).first();
+  const row=await env.DB.prepare(`SELECT COUNT(DISTINCT session_id) confirmed_sessions FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-${WINDOW_DAYS} days')`).first();
   return Number(row?.confirmed_sessions||0);
 }
 
 export async function distributionSurfaceMetrics(env){
   const [opportunities,entries,outboundEvents,clicks,revenueRows]=await Promise.all([
     env.DB.prepare(`SELECT surface_slug,surface_name,action_url,live_url FROM distribution_opportunities WHERE action_url IS NOT NULL OR live_url IS NOT NULL`).all(),
-    env.DB.prepare(`SELECT f.session_id,f.source,f.referrer_host,f.created_at,MIN(pc.created_at) confirmed_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id JOIN funnel_events pc ON pc.session_id=f.session_id AND pc.event_type='page_confirmed' AND pc.created_at>=f.created_at WHERE s.classification='likely-human' AND f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') GROUP BY f.session_id,f.source,f.referrer_host,f.created_at ORDER BY f.created_at`).all(),
-    env.DB.prepare(`SELECT f.session_id,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='outbound_clicked' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
-    env.DB.prepare(`SELECT c.session_id,c.created_at,c.affiliate_active_at_click,c.source FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND c.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+    env.DB.prepare(`SELECT f.session_id,f.source,f.referrer_host,f.created_at,h.first_evidence_at confirmed_at FROM funnel_events f JOIN traffic_human_evidence h ON h.session_id=f.session_id AND h.first_evidence_at>=f.created_at WHERE f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') ORDER BY f.created_at`).all(),
+    env.DB.prepare(`SELECT session_id,created_at FROM verified_outbound_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+    env.DB.prepare(`SELECT session_id,created_at,affiliate_active_at_click,source FROM verified_outbound_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
     env.DB.prepare(`SELECT session_id,commission,currency,status,created_at FROM revenue_ledger WHERE session_id IS NOT NULL AND status IN ('confirmed','paid') AND created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
   ]);
   const surfaces=opportunities.results||[],sessionSurface=new Map(),first=new Map();
@@ -55,9 +55,9 @@ export async function growthActionMetrics(env){
   try{
     const [actions,entries,outboundEvents,clicks]=await Promise.all([
       env.DB.prepare(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at FROM growth_action_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
-      env.DB.prepare(`SELECT f.session_id,f.source,f.created_at,MIN(pc.created_at) confirmed_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id JOIN funnel_events pc ON pc.session_id=f.session_id AND pc.event_type='page_confirmed' AND pc.created_at>=f.created_at WHERE s.classification='likely-human' AND f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') GROUP BY f.session_id,f.source,f.created_at ORDER BY f.created_at`).all(),
-      env.DB.prepare(`SELECT f.session_id,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE s.classification='likely-human' AND f.event_type='outbound_clicked' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
-      env.DB.prepare(`SELECT c.session_id,c.created_at,c.affiliate_active_at_click,c.source FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE s.classification='likely-human' AND c.created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
+      env.DB.prepare(`SELECT f.session_id,f.source,f.created_at,h.first_evidence_at confirmed_at FROM funnel_events f JOIN traffic_human_evidence h ON h.session_id=f.session_id AND h.first_evidence_at>=f.created_at WHERE f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') ORDER BY f.created_at`).all(),
+      env.DB.prepare(`SELECT session_id,created_at FROM verified_outbound_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+      env.DB.prepare(`SELECT session_id,created_at,affiliate_active_at_click,source FROM verified_outbound_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
     ]);
     const actionMap=new Map((actions.results||[]).map(x=>[x.action_id,x])),sessionAction=new Map(),first=new Map(),byAction=new Map();
     const get=id=>{if(!byAction.has(id)){const a=actionMap.get(id)||{};byAction.set(id,{action_id:id,opportunity_key:a.opportunity_key||null,engine:a.engine||null,channel:a.channel||null,target_url:a.target_url||null,status:a.status||null,browser_confirmed_sessions:0,outbound_clicks:0,monetized_outbound:0});}return byAction.get(id)};
@@ -69,7 +69,7 @@ export async function growthActionMetrics(env){
     for(const e of outboundEvents.results||[]){const id=String(e.session_id||''),a=sessionAction.get(id);if(a&&String(e.created_at||'')>=String(first.get(id)||''))get(a).outbound_clicks++}
     for(const e of clicks.results||[]){const id=String(e.session_id||''),a=sessionAction.get(id);if(a&&String(e.created_at||'')>=String(first.get(id)||'')&&Number(e.affiliate_active_at_click)===1&&String(e.source||'')!=='internal-test')get(a).monetized_outbound++}
     const rows=[...byAction.values()].sort((a,b)=>b.browser_confirmed_sessions-a.browser_confirmed_sessions||b.outbound_clicks-a.outbound_clicks);
-    return {status:'observed',windowDays:WINDOW_DAYS,preparedActions:(actions.results||[]).length,attributedActions:rows.filter(x=>x.browser_confirmed_sessions>0).length,browserConfirmedSessions:rows.reduce((s,x)=>s+x.browser_confirmed_sessions,0),outboundClicks:rows.reduce((s,x)=>s+x.outbound_clicks,0),monetizedOutbound:rows.reduce((s,x)=>s+x.monetized_outbound,0),topActions:rows.slice(0,10),attribution:'Exact ts_action first-touch marker on a browser-confirmed likely-human session. No traffic is inferred when the marker is absent.'};
+    return {status:'observed',windowDays:WINDOW_DAYS,preparedActions:(actions.results||[]).length,attributedActions:rows.filter(x=>x.browser_confirmed_sessions>0).length,browserConfirmedSessions:rows.reduce((s,x)=>s+x.browser_confirmed_sessions,0),outboundClicks:rows.reduce((s,x)=>s+x.outbound_clicks,0),monetizedOutbound:rows.reduce((s,x)=>s+x.monetized_outbound,0),topActions:rows.slice(0,10),attribution:'Exact ts_action first-touch marker on a strict verified human session. Browser validation alone is excluded and no traffic is inferred when the marker is absent.'};
   }catch(error){return {status:'unavailable',windowDays:WINDOW_DAYS,reason:String(error?.message||error)}}
 }
 
@@ -90,7 +90,7 @@ export async function distributionImpactSnapshot(env,totalHumanSessions){
       monetizationCoverage:outbound?Number((monetized/outbound*100).toFixed(1)):0,
       totalBrowserConfirmedSessions:totalConfirmed,
       topSurfaces:rows.slice(0,8),
-      attribution:'First-touch browser-confirmed session within 30 days. A session is eligible only after page_confirmed exists for the same session_id. Attribution then requires a Distribution Engine UTM/source marker or a referrer matching a known distribution surface. Outbound and revenue are counted only after that confirmed attributed entry.',
+      attribution:'First-touch strict verified human session within 30 days. A session is eligible only after positive evidence exists in traffic_human_evidence. Attribution then requires a Distribution Engine UTM/source marker or a referrer matching a known distribution surface. Outbound and revenue are counted only after that confirmed attributed entry.',
       revenueDefinition:'Confirmed/paid ledger evidence only. Revenue remains null when attributed evidence spans multiple currencies; no revenue is inferred from clicks.',
       legacyLikelyHumanTotal:Number(totalHumanSessions||0)
     };
