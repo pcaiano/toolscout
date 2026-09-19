@@ -143,7 +143,7 @@ async function runCycle(env){
   return {...result,reconciliation};
 }
 
-function runAuditedCycle(env,triggerName){
+export function runAuditedAffiliateCoverageCycle(env,triggerName){
   return runWithLedger(env,{engine:'affiliate',mission:'coverage_cycle',triggerName},()=>runCycle(env));
 }
 
@@ -161,12 +161,11 @@ export default {
     if(u.pathname==='/api/affiliate-coverage/run'){
       if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await runAuditedCycle(env,'manual_api'),{headers:JSON_H});
+      return Response.json(await runAuditedAffiliateCoverageCycle(env,'manual_api'),{headers:JSON_H});
     }
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    if(base.scheduled)await base.scheduled(event,env,ctx);
-    ctx.waitUntil(runAuditedCycle(env,event?.cron||'scheduled'));
+    return base.scheduled?base.scheduled(event,env,ctx):undefined;
   }
 };
