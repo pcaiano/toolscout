@@ -104,11 +104,11 @@ async function affiliateCoverageStatusSnapshot(request,env){
       assetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
       assetJson(request,env,'/data/affiliate.json',{}),
       safeAll(env,`SELECT tool_slug,status,updated_at FROM affiliate_workflow`),
-      safeAll(env,`SELECT c.tool_slug,COUNT(*) clicks FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=datetime('now','-30 days') AND s.classification IN ('likely-human','human') AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND EXISTS (SELECT 1 FROM funnel_events f WHERE f.session_id=c.session_id AND f.event_type='page_confirmed') GROUP BY c.tool_slug`)
+      safeAll(env,`SELECT tool_slug,COUNT(*) clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`)
     ]);
     const pipelineMap=new Map((pipeline?.verified_programs||[]).map(x=>[x.slug,x]));
     const workflowMap=new Map(workflowRows.map(x=>[x.tool_slug,x]));
-    const clickMap=new Map(clickRows.map(x=>[x.tool_slug,n(x.clicks)]));
+    const clickMap=new Map(clickRows.map(x=>[x.tool_slug,{clicks:n(x.clicks),monetized:n(x.monetized)}]));
     const groups={active:[],pending:[],rejected:[]};
     for(const tool of tools||[]){
       const route=affiliate?.[tool.slug]||{};
@@ -119,14 +119,14 @@ async function affiliateCoverageStatusSnapshot(request,env){
       else if(PENDING_AFFILIATE_STATES.has(status))group='pending';
       else if(REJECTED_AFFILIATE_STATES.has(status))group='rejected';
       if(!group)continue;
-      groups[group].push({slug:tool.slug,name:tool.name||tool.slug,status,clicks30d:clickMap.get(tool.slug)||0});
+      const ct=clickMap.get(tool.slug)||{clicks:0,monetized:0};groups[group].push({slug:tool.slug,name:tool.name||tool.slug,status,clicks30d:ct.clicks,monetizedClicks30d:ct.monetized});
     }
     for(const items of Object.values(groups))items.sort((a,b)=>b.clicks30d-a.clicks30d||a.name.localeCompare(b.name));
-    const summarize=items=>({count:items.length,clicks30d:items.reduce((s,x)=>s+n(x.clicks30d),0),items});
-    return {status:'observed',windowDays:30,clickDefinition:'Browser-confirmed outbound clicks only; internal and synthetic traffic excluded.',active:summarize(groups.active),pending:summarize(groups.pending),rejected:summarize(groups.rejected)};
+    const summarize=items=>({count:items.length,clicks30d:items.reduce((s,x)=>s+n(x.clicks30d),0),monetizedClicks30d:items.reduce((s,x)=>s+n(x.monetizedClicks30d),0),items});
+    return {status:'observed',windowDays:30,clickDefinition:'First-party verified /go/ outbound navigation only. Pre-integrity browser-confirmed clicks are diagnostic and excluded from canonical coverage.',active:summarize(groups.active),pending:summarize(groups.pending),rejected:summarize(groups.rejected)};
   }catch(e){return {status:'unavailable',reason:String(e?.message||e)}}
 }
-function affiliateCoverageWidget(){return `<section class="widget" data-widget="affiliate-status" style="--w:12;--h:6"><div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Browser-confirmed clicks · 30d</div></div><div class="widgetBody" id="affiliateCoverageStatusBody"><div class="empty">Refresh to load affiliate status.</div></div><div class="resizeHandle"></div></section>`}
+function affiliateCoverageWidget(){return `<section class="widget" data-widget="affiliate-status" style="--w:12;--h:6"><div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Verified outbound · 30d</div></div><div class="widgetBody" id="affiliateCoverageStatusBody"><div class="empty">Refresh to load affiliate status.</div></div><div class="resizeHandle"></div></section>`}
 function autonomousGrowthWidget(){return `<section class="widget" data-widget="autonomous-growth" style="--w:12;--h:6"><div class="widgetHead"><div><div class="widgetKicker">Growth · autonomous loop</div><div class="widgetTitle">Autonomous Growth</div></div><div class="widgetMeta">Discovery → action → verified human impact</div></div><div class="widgetBody" id="autonomousGrowthBody"><div class="empty">Refresh to load autonomous growth.</div></div><div class="resizeHandle"></div></section>`}
 function catalogGrowthWidget(){return `<section class="widget" data-widget="catalog-growth" style="--w:6;--h:5"><div class="widgetHead"><div><div class="widgetKicker">Catalog · factual quality · coverage</div><div class="widgetTitle">Catalog Growth & Quality</div></div><div class="widgetMeta" id="catalogGrowthMeta">Shared growth brain</div></div><div class="widgetBody" id="catalogGrowthBody"><div class="empty">Refresh to load catalog state.</div></div><div class="resizeHandle"></div></section>`}
 function catalogGrowthScript(){return `<script data-catalog-growth-renderer="v1">(function(){const n=v=>Number(v||0).toLocaleString(),esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));function draw(d){const root=document.getElementById('catalogGrowthBody'),meta=document.getElementById('catalogGrowthMeta'),x=d?.growthOps?.engines?.catalog;if(!root)return;if(!x){root.innerHTML='<div class="empty">Catalog growth evidence unavailable.</div>';return}if(meta)meta.textContent=x.report_age_days==null?'Shared growth brain':'Evidence '+n(x.report_age_days)+'d old';root.innerHTML='<div class="metricGrid">'+

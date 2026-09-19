@@ -68,7 +68,7 @@ async function requestWithTrustedSession(request,env){
 }
 
 function affiliateWidget(){return `<section class="widget" data-widget="affiliate-status" style="--w:12;--h:6">
-  <div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Browser-confirmed clicks · 30d</div></div>
+  <div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Verified outbound · 30d</div></div>
   <div class="widgetBody" id="affiliateCoverageStatusBody"><div class="empty">Loading affiliate status…</div></div><div class="resizeHandle"></div>
 </section>`}
 

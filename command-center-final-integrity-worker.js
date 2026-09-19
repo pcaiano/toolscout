@@ -11,6 +11,14 @@ function normalizeStats(data){
   data.tracking={...(data.tracking||{}),status:sessions.status,humanSessionsLast24Hours:sessions.last24,definition};
   data.funnel={...(data.funnel||{}),outboundClicks:out.humanOutbound,sessionToOutboundCtr:null,definition};
   data.commercial={...(data.commercial||{}),monetizedOutbound:out.monetizedOutbound,totals:{...(data.commercial?.totals||{}),outbound:out.humanOutbound,monetizedOutbound:out.monetizedOutbound},trafficDefinition:definition};
+  if(data.affiliateCoverageStatus&&Array.isArray(audit.outboundByTool)){
+    const byTool=new Map(audit.outboundByTool.map(x=>[String(x.tool_slug||''),{outbound:Number(x.humanOutbound||0),monetized:Number(x.monetizedOutbound||0)}]));
+    const syncGroup=group=>{
+      const items=(Array.isArray(group?.items)?group.items:[]).map(item=>{const t=byTool.get(String(item.slug||''))||{outbound:0,monetized:0};return {...item,clicks30d:t.outbound,monetizedClicks30d:t.monetized}});
+      return {...(group||{}),count:items.length,clicks30d:items.reduce((s,x)=>s+Number(x.clicks30d||0),0),monetizedClicks30d:items.reduce((s,x)=>s+Number(x.monetizedClicks30d||0),0),items};
+    };
+    data.affiliateCoverageStatus={...data.affiliateCoverageStatus,trafficTruth:'first_party_verified_navigation',clickDefinition:'First-party verified /go/ outbound navigation only. Pre-integrity clicks are diagnostic only.',humanOutbound30d:out.humanOutbound,monetizedOutbound30d:out.monetizedOutbound,unmonetizedOutbound30d:out.unmonetizedOutbound,weightedCoverage:out.weightedCoverage,active:syncGroup(data.affiliateCoverageStatus.active),pending:syncGroup(data.affiliateCoverageStatus.pending),rejected:syncGroup(data.affiliateCoverageStatus.rejected)};
+  }
 
   const gsc=audit.sources?.gsc||{status:'unknown',generated_at:null},ga4=audit.sources?.ga4||{status:'unknown',generated_at:null};
   data.growthOps=data.growthOps||{};
