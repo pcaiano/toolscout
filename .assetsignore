@@ -11,6 +11,7 @@ scripts/
 .github/
 reports/*
 !reports/gsc-signals.json
+!reports/ga4-health.json
 !reports/organic-growth-opportunities.json
 !reports/aeo-geo-readiness.json
 !reports/machine-readability.json
