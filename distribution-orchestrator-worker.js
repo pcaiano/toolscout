@@ -594,16 +594,14 @@ async function coordinateGrowthOpportunities(env){
     }
   }
   await flushGrowthWrites(env,growthWrites,40);
-  if(activeKeys.length){
-    const placeholders=activeKeys.map(()=>'?').join(',');
-    await env.DB.prepare(`UPDATE growth_opportunity_state
-      SET status='dormant',updated_at=datetime('now')
-      WHERE status='active' AND opportunity_key NOT IN (${placeholders})`).bind(...activeKeys).run().catch(()=>{});
-  }else{
-    await env.DB.prepare(`UPDATE growth_opportunity_state
-      SET status='dormant',updated_at=datetime('now')
-      WHERE status='active'`).run().catch(()=>{});
-  }
+  try{
+    const activeSet=new Set(activeKeys);
+    const currentActive=await env.DB.prepare(`SELECT opportunity_key FROM growth_opportunity_state WHERE status='active'`).all();
+    const stale=(currentActive.results||[]).map(row=>String(row.opportunity_key||'')).filter(key=>key&&!activeSet.has(key));
+    for(let i=0;i<stale.length;i+=40){
+      await env.DB.batch(stale.slice(i,i+40).map(key=>env.DB.prepare(`UPDATE growth_opportunity_state SET status='dormant',updated_at=datetime('now') WHERE opportunity_key=? AND status='active'`).bind(key)));
+    }
+  }catch{}
   const actualTypeRows=await growthRows(env,`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`);
   const actualTypeCounts=Object.fromEntries(actualTypeRows.map(row=>[String(row.subject_type||''),Number(row.n||0)]));
   surfaceCount=actualTypeCounts.surface||0;
