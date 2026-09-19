@@ -35,7 +35,7 @@ if(!content.includes("subject_type IN ('tool','news_update')"))fail("Content Eng
 if(!seoFetch.includes('/api/growth/search-directives')||!seoController.includes('shared_growth_directives_required')||!seoApply.includes('organic_growth_actions_not_authorized_by_shared_brain'))fail('SEO execution is not gated by shared-growth-v3 directives.');
 if(!seoWorkflow.includes('fetch-shared-growth-directives.mjs'))fail('SEO workflow does not fetch runtime growth directives.');
 if(!orchestrator.includes('growth_rnd_experiments')||!orchestrator.includes("mission:'rnd_audit'"))fail('Autonomous Growth R&D audit is missing.');
-if(!orchestrator.includes("id:'borrowed-first-v1'")||!orchestrator.includes("strictVerifiedHumanSessions30d:100")||!orchestrator.includes("returningStrictVisitors30d:20")||!orchestrator.includes("phase:'borrowed_audience_existing_demand_first'"))fail('Borrowed-audience/existing-demand acquisition phase or its mass-critical exit gate is missing.');
+if(!orchestrator.includes("id:'external-demand-first-v2'")||!orchestrator.includes("strictVerifiedHumanSessions30d:100")||!orchestrator.includes("provenExternalSources:2")||!orchestrator.includes("strictHumansPerProvenSource30d:3")||!orchestrator.includes("externalDemandRemainsPrimary:true"))fail('External-demand-first acquisition policy or its repeatability gate is missing.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
 if(!process.exitCode)console.log('PASS: shared autonomous growth brain contract is intact.');
