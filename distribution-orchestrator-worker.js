@@ -499,8 +499,7 @@ async function coordinateGrowthOpportunities(env){
     await env.DB.prepare(`UPDATE growth_opportunity_state
       SET priority_score=CASE
         WHEN subject_type='surface' THEN MIN(100,priority_score+10)
-        WHEN subject_type='search' AND (opportunity_key LIKE 'sprint-search:%' OR COALESCE(json_extract(signal_json,'$.evidence_confidence'),'') IN ('meaningful','gsc_observed')) THEN MIN(100,priority_score+10)
-        WHEN subject_type='search' THEN MIN(100,priority_score+2)
+        WHEN subject_type='search' THEN priority_score
         WHEN subject_type='tool' THEN MIN(100,priority_score+6)
         WHEN subject_type='news_update' THEN MIN(100,priority_score+3)
         WHEN subject_type='affiliate' THEN MIN(priority_score,45)
@@ -514,8 +513,7 @@ async function coordinateGrowthOpportunities(env){
     await env.DB.prepare(`UPDATE growth_opportunity_state
       SET priority_score=CASE
         WHEN subject_type='surface' THEN MIN(100,priority_score+20)
-        WHEN subject_type='search' AND (opportunity_key LIKE 'sprint-search:%' OR COALESCE(json_extract(signal_json,'$.evidence_confidence'),'') IN ('meaningful','gsc_observed')) THEN MIN(100,priority_score+20)
-        WHEN subject_type='search' THEN MIN(100,priority_score+4)
+        WHEN subject_type='search' THEN priority_score
         WHEN subject_type='tool' THEN MIN(100,priority_score+15)
         WHEN subject_type='news_update' THEN MIN(100,priority_score+12)
         WHEN subject_type='affiliate' THEN MIN(priority_score,45)
