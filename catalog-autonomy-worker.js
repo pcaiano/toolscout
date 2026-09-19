@@ -188,7 +188,7 @@ async function mergedTools(env){
   }
   return out;
 }
-async function verifyBatch(env){
+export async function verifyBatch(env){
   await ensureSchema(env);
   const staticTools=await assetJson(env,'/data/tools.json',[]);
   const candidates=await runtimeCandidates(env);
@@ -196,7 +196,11 @@ async function verifyBatch(env){
   const states=await env.DB.prepare(`SELECT tool_slug,source_status,fingerprint,pending_fingerprint,change_confirmations,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at FROM catalog_runtime_state`).all();
   const smap=new Map((states.results||[]).map(x=>[x.tool_slug,x]));
   const chosen=all.filter(x=>x?.slug&&x?.sourceUrl).sort((a,b)=>{
-    const aa=Date.parse(String(smap.get(a.slug)?.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0,bb=Date.parse(String(smap.get(b.slug)?.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0;
+    const as=smap.get(a.slug)||{},bs=smap.get(b.slug)||{};
+    const aw=(as.quality_status==='source_warning'||as.source_status==='network_warning'||as.source_status==='warning'||as.source_status==='blocked_or_limited')?0:1;
+    const bw=(bs.quality_status==='source_warning'||bs.source_status==='network_warning'||bs.source_status==='warning'||bs.source_status==='blocked_or_limited')?0:1;
+    if(aw!==bw)return aw-bw;
+    const aa=Date.parse(String(as.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0,bb=Date.parse(String(bs.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0;
     return aa-bb;
   }).slice(0,MAX_VERIFY_PER_CYCLE);
   let checked=0,healthy=0,changed=0,suppressed=0,warnings=0;
@@ -336,7 +340,7 @@ export default {
   async scheduled(event,env,ctx){
     if(base.scheduled)await base.scheduled(event,env,ctx);
     const trigger=event?.cron||'scheduled';
-    ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyBatch(env)).catch(()=>{}));
+    await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyBatch(env)).catch(()=>{});
     if(event?.cron==='15 3 * * *'){ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env)).catch(()=>{}));}
   }
 };
