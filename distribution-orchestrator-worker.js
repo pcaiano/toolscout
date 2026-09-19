@@ -670,26 +670,77 @@ async function learnEconomics(env){
   try{metrics=await distributionSurfaceMetrics(env)}catch{return{ok:false,observed:0,updated:0,reason:'surface_metrics_unavailable'}}
   const bySlug=new Map(metrics.map(m=>[m.surface_slug,m]));
   const [q,costRows]=await Promise.all([
-    env.DB.prepare(`SELECT surface_slug,distribution_score FROM distribution_opportunities WHERE surface_slug IS NOT NULL`).all(),
+    env.DB.prepare(`SELECT o.surface_slug,o.distribution_score,l.baseline_score
+      FROM distribution_opportunities o
+      LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug
+      WHERE o.surface_slug IS NOT NULL`).all(),
     env.DB.prepare(`SELECT surface_slug,cost_amount,currency,cost_type FROM distribution_surface_costs`).all().catch(()=>({results:[]}))
   ]);
   const costs=new Map((costRows.results||[]).map(c=>[c.surface_slug,{...c,cost_amount:Number(c.cost_amount||0)}]));
-  let updated=0,positive=0,withEvidence=0,paidMeasuring=0;
+  let evaluated=0,updated=0,positive=0,withEvidence=0,paidMeasuring=0;
   for(const row of q.results||[]){
-    const existing=await env.DB.prepare(`SELECT baseline_score FROM distribution_economic_learning WHERE surface_slug=?`).bind(row.surface_slug).first();
-    const baseline=Number(existing?.baseline_score??row.distribution_score??0);
+    evaluated++;
+    const baseline=Number(row.baseline_score??row.distribution_score??0);
     const metric=bySlug.get(row.surface_slug)||null;
     const sessions=confirmedSessions(metric),outbound=Math.max(0,Number(metric?.outbound_clicks)||0),monetized=Math.max(0,Number(metric?.monetized_outbound)||0);
+    const revenue=metric?.revenue==null?null:Number(metric.revenue);
+    const opportunityRevenue=revenue==null?0:revenue;
     const boost=economicBoost(metric),learned=Number(Math.min(100,baseline+boost).toFixed(2)),grade=evidenceGrade(metric),cost=costs.get(row.surface_slug)||null,policy=paidPolicy(metric,cost);
     const sessionToOutbound=sessions?Number((outbound/sessions*100).toFixed(2)):0,monetizationRate=outbound?Number((monetized/outbound*100).toFixed(2)):0;
     if(boost>0)positive++;if(grade!=='none')withEvidence++;if(policy.decision==='experiment_measuring')paidMeasuring++;
-    await env.DB.prepare(`INSERT INTO distribution_economic_learning(surface_slug,baseline_score,learned_score,human_sessions_30d,outbound_clicks_30d,monetized_outbound_30d,confirmed_revenue_30d,currency,economic_boost,last_observed_at,created_at,updated_at,browser_confirmed_sessions_30d,session_to_outbound_rate,monetization_rate,evidence_grade,paid_policy_decision,observed_cost,observed_cost_currency,observed_roi) VALUES(?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'),?,?,?,?,?,?,?,?) ON CONFLICT(surface_slug) DO UPDATE SET learned_score=excluded.learned_score,human_sessions_30d=excluded.human_sessions_30d,outbound_clicks_30d=excluded.outbound_clicks_30d,monetized_outbound_30d=excluded.monetized_outbound_30d,confirmed_revenue_30d=excluded.confirmed_revenue_30d,currency=excluded.currency,economic_boost=excluded.economic_boost,last_observed_at=datetime('now'),updated_at=datetime('now'),browser_confirmed_sessions_30d=excluded.browser_confirmed_sessions_30d,session_to_outbound_rate=excluded.session_to_outbound_rate,monetization_rate=excluded.monetization_rate,evidence_grade=excluded.evidence_grade,paid_policy_decision=excluded.paid_policy_decision,observed_cost=excluded.observed_cost,observed_cost_currency=excluded.observed_cost_currency,observed_roi=excluded.observed_roi`).bind(row.surface_slug,baseline,learned,sessions,outbound,monetized,metric?.revenue==null?null:Number(metric.revenue),metric?.currency||null,boost,sessions,sessionToOutbound,monetizationRate,grade,policy.decision,cost?.cost_amount??null,cost?.currency??null,policy.roi).run();
-    await env.DB.prepare(`UPDATE distribution_opportunities SET distribution_score=?,observed_human_sessions=?,observed_outbound_clicks=?,observed_revenue=?,performance_score=?,learned_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(learned,sessions,outbound,metric?.revenue==null?0:Number(metric.revenue),boost,row.surface_slug).run();
-    updated++;
+    const learningWrite=await env.DB.prepare(`INSERT INTO distribution_economic_learning(surface_slug,baseline_score,learned_score,human_sessions_30d,outbound_clicks_30d,monetized_outbound_30d,confirmed_revenue_30d,currency,economic_boost,last_observed_at,created_at,updated_at,browser_confirmed_sessions_30d,session_to_outbound_rate,monetization_rate,evidence_grade,paid_policy_decision,observed_cost,observed_cost_currency,observed_roi)
+      VALUES(?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'),?,?,?,?,?,?,?,?)
+      ON CONFLICT(surface_slug) DO UPDATE SET
+        learned_score=excluded.learned_score,
+        human_sessions_30d=excluded.human_sessions_30d,
+        outbound_clicks_30d=excluded.outbound_clicks_30d,
+        monetized_outbound_30d=excluded.monetized_outbound_30d,
+        confirmed_revenue_30d=excluded.confirmed_revenue_30d,
+        currency=excluded.currency,
+        economic_boost=excluded.economic_boost,
+        last_observed_at=datetime('now'),
+        updated_at=datetime('now'),
+        browser_confirmed_sessions_30d=excluded.browser_confirmed_sessions_30d,
+        session_to_outbound_rate=excluded.session_to_outbound_rate,
+        monetization_rate=excluded.monetization_rate,
+        evidence_grade=excluded.evidence_grade,
+        paid_policy_decision=excluded.paid_policy_decision,
+        observed_cost=excluded.observed_cost,
+        observed_cost_currency=excluded.observed_cost_currency,
+        observed_roi=excluded.observed_roi
+      WHERE distribution_economic_learning.learned_score IS NOT excluded.learned_score
+         OR distribution_economic_learning.human_sessions_30d IS NOT excluded.human_sessions_30d
+         OR distribution_economic_learning.outbound_clicks_30d IS NOT excluded.outbound_clicks_30d
+         OR distribution_economic_learning.monetized_outbound_30d IS NOT excluded.monetized_outbound_30d
+         OR distribution_economic_learning.confirmed_revenue_30d IS NOT excluded.confirmed_revenue_30d
+         OR distribution_economic_learning.currency IS NOT excluded.currency
+         OR distribution_economic_learning.economic_boost IS NOT excluded.economic_boost
+         OR distribution_economic_learning.browser_confirmed_sessions_30d IS NOT excluded.browser_confirmed_sessions_30d
+         OR distribution_economic_learning.session_to_outbound_rate IS NOT excluded.session_to_outbound_rate
+         OR distribution_economic_learning.monetization_rate IS NOT excluded.monetization_rate
+         OR distribution_economic_learning.evidence_grade IS NOT excluded.evidence_grade
+         OR distribution_economic_learning.paid_policy_decision IS NOT excluded.paid_policy_decision
+         OR distribution_economic_learning.observed_cost IS NOT excluded.observed_cost
+         OR distribution_economic_learning.observed_cost_currency IS NOT excluded.observed_cost_currency
+         OR distribution_economic_learning.observed_roi IS NOT excluded.observed_roi`)
+      .bind(row.surface_slug,baseline,learned,sessions,outbound,monetized,revenue,metric?.currency||null,boost,sessions,sessionToOutbound,monetizationRate,grade,policy.decision,cost?.cost_amount??null,cost?.currency??null,policy.roi).run();
+    const opportunityWrite=await env.DB.prepare(`UPDATE distribution_opportunities
+      SET distribution_score=?,observed_human_sessions=?,observed_outbound_clicks=?,observed_revenue=?,performance_score=?,learned_at=datetime('now'),updated_at=datetime('now')
+      WHERE surface_slug=?
+        AND (distribution_score IS NOT ?
+          OR observed_human_sessions IS NOT ?
+          OR observed_outbound_clicks IS NOT ?
+          OR observed_revenue IS NOT ?
+          OR performance_score IS NOT ?)`)
+      .bind(learned,sessions,outbound,opportunityRevenue,boost,row.surface_slug,learned,sessions,outbound,opportunityRevenue,boost).run();
+    const learningChanges=Number(learningWrite?.meta?.changes||learningWrite?.changes||0);
+    const opportunityChanges=Number(opportunityWrite?.meta?.changes||opportunityWrite?.changes||0);
+    if(learningChanges||opportunityChanges)updated++;
   }
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`econ_${crypto.randomUUID()}`,'distribution_economic_learning','completed','distribution_engine',`Economic learning updated ${updated} surface(s) using strict verified human sessions only; ${withEvidence} surface(s) have evidence, ${positive} received a positive observed-performance boost and ${paidMeasuring} paid experiment(s) remain in measurement. Missing evidence is never treated as traffic.`).run();
-  return{ok:true,observed:metrics.length,updated,positive_boosts:positive,surfaces_with_evidence:withEvidence,paid_experiments_measuring:paidMeasuring,evidence_basis:'strict_verified_human_sessions'};
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`econ_${crypto.randomUUID()}`,'distribution_economic_learning','completed','distribution_engine',`Economic learning evaluated ${evaluated} surface(s) and materially changed ${updated}; ${withEvidence} surface(s) have strict-human evidence, ${positive} have a positive observed-performance boost and ${paidMeasuring} paid experiment(s) remain in measurement. Unchanged state is not rewritten.`).run();
+  return{ok:true,observed:metrics.length,evaluated,updated,positive_boosts:positive,surfaces_with_evidence:withEvidence,paid_experiments_measuring:paidMeasuring,evidence_basis:'strict_verified_human_sessions',write_policy:'material_change_only'};
 }
+
 async function prepareEditorial(env,url,type){
   // Community posting is not treated as autonomous unless a safe authenticated executor exists.
   // Borrowed-audience acquisition continues through publisher outreach, vendor amplification,
