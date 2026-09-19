@@ -467,7 +467,7 @@ async function autonomyMetrics(env){
   try{const metrics=await distributionSurfaceMetrics(env);referralSessions=(metrics||[]).reduce((n,m)=>n+Math.max(0,Number(m?.browser_confirmed_sessions??m?.human_sessions??0)||0),0)}catch{}
   return {discovered:Number(opp?.total||0),autonomousAttempted:Number(sub?.autonomous_attempted||0),submitted:Number(sub?.submitted||0),verifiedPlacements:Number(place?.placements||opp?.verified||0),verifiedBacklinks:Number(place?.backlinks||0),referralSessions,chairmanActions:Number(opp?.chairman||0)+Number(editorial?.chairman_editorial||0),windowDays:30};
 }
-async function cycle(env){
+export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
   const routeRefresh=await refreshPersistentActionUrls(env);
@@ -483,7 +483,7 @@ export default {
     const u=new URL(request.url);
     if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){
       if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api'},()=>cycle(env)),{headers:H});
+      return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api'},()=>runAutonomousDistributionCycle(env)),{headers:H});
     }
     if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){
       if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
@@ -494,6 +494,6 @@ export default {
   async scheduled(event,env,ctx){
     if(base.scheduled)await base.scheduled(event,env,ctx);
     const trigger=event?.cron||'scheduled';
-    await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>cycle(env)).catch(()=>{});
+    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>cycle(env)).catch(()=>{}));
   }
 };
