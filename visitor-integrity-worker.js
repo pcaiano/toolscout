@@ -160,25 +160,28 @@ async function sessionIdentityHealth(env){
 
 async function visitorSnapshot(env){
   await ensureSchema(env);
-  const meta=await env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='visitor_guard_linking_started_at' LIMIT 1`).first();
+  const meta=await env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`).first();
   const trackingSince=parseUtc(meta?.value)||new Date();
   const now=new Date(),todayKey=dayKey(now),monthPrefix=todayKey.slice(0,7),todayStart=sqliteUtc(zonedMidnight(todayKey)),monthStart=sqliteUtc(zonedMidnight(monthPrefix+'-01')),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<monthStart?last24Start:monthStart;
   const trendStart=dayKey(new Date(now.getTime()-29*86400000));
   const [counts,registry,guard,dailyResult]=await Promise.all([
     env.DB.prepare(`SELECT
-      COUNT(DISTINCT CASE WHEN created_at>=? THEN visitor_id END) visitors24,
-      COUNT(DISTINCT CASE WHEN created_at>=? THEN visitor_id END) visitorsToday,
-      COUNT(DISTINCT CASE WHEN created_at>=? THEN visitor_id END) visitorsMonth,
-      COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) linkedSessions24,
-      COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) linkedSessionsToday
-      FROM confirmed_visitor_events
-      WHERE created_at>=?`).bind(last24Start,todayStart,monthStart,last24Start,todayStart,scanStart).first(),
-    env.DB.prepare(`SELECT COUNT(*) count FROM confirmed_visitor_registry`).first(),
+      COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) visitors24,
+      COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) visitorsToday,
+      COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) visitorsMonth,
+      COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN h.session_id END) linkedSessions24,
+      COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN h.session_id END) linkedSessionsToday
+      FROM traffic_human_evidence h
+      LEFT JOIN confirmed_visitor_events v ON v.session_id=h.session_id
+      WHERE h.first_evidence_at>=?`).bind(last24Start,todayStart,monthStart,last24Start,todayStart,scanStart).first(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT v.visitor_id) count FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id`).first(),
     env.DB.prepare(`SELECT
-      COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) guardSessions24,
-      COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) guardSessionsToday
-      FROM traffic_guard_events
-      WHERE decision='allowed' AND created_at>=?`).bind(last24Start,todayStart,last24Start).first(),
+      COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN h.session_id END) strictSessions24,
+      COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN h.session_id END) strictSessionsToday,
+      COUNT(DISTINCT CASE WHEN g.created_at>=? THEN g.session_id END) browserSessions24
+      FROM traffic_human_evidence h
+      LEFT JOIN traffic_guard_events g ON g.session_id=h.session_id AND g.decision='allowed'
+      WHERE h.first_evidence_at>=?`).bind(last24Start,todayStart,last24Start,last24Start).first(),
     env.DB.prepare(`SELECT day,unique_visitors visitors FROM command_center_daily_metrics WHERE day>=? ORDER BY day ASC`).bind(trendStart).all().catch(()=>({results:[]}))
   ]);
   const trackingDay=dayKey(trackingSince),coverage={last24Complete:trackingSince.getTime()<=now.getTime()-86400000,todayComplete:trackingDay<todayKey,monthToDateComplete:trackingDay.slice(0,7)<monthPrefix};
@@ -186,12 +189,12 @@ async function visitorSnapshot(env){
   const daily=[];const p=zonedParts(now),y=Number(p.year),m=Number(p.month),d=Number(p.day);
   for(let offset=-29;offset<=0;offset++){const probe=new Date(Date.UTC(y,m-1,d+offset,12,0,0)),key=dayKey(probe);daily.push({day:key,visitors:key===todayKey?Number(counts?.visitorsToday||0):(dailyMap.has(key)?dailyMap.get(key):null)})}
   return {
-    status:'observed',metric:'Browser Guard linked unique human visitors',
-    definition:'One anonymous first-party browser ID counted once per reporting window only after its ToolScout session is accepted by Browser Guard. Owner, blocked automation, known bots and synthetic traffic are excluded.',
-    canonicalPopulation:'traffic_guard_events decision=allowed linked to first-party visitor ID',timezone:TIME_ZONE,trackingSince:trackingSince.toISOString(),
+    status:'observed',metric:'Strict verified unique human visitors',
+    definition:'One anonymous first-party browser ID counted only after its ToolScout session has positive human evidence: trusted interaction, persistent multi-page navigation, or verified outbound navigation. Browser validation alone is diagnostic and never counts as human.',
+    canonicalPopulation:'traffic_human_evidence joined to first-party visitor ID',timezone:TIME_ZONE,trackingSince:trackingSince.toISOString(),
     last24:Number(counts?.visitors24||0),today:Number(counts?.visitorsToday||0),monthToDate:Number(counts?.visitorsMonth||0),sinceTracking:Number(registry?.count||0),
     coverage,daily,dailyAverageMTD:null,projectedMonth:null,
-    integrity:{guardSessionsLast24:Number(guard?.guardSessions24||0),linkedSessionsLast24:Number(counts?.linkedSessions24||0),guardSessionsToday:Number(guard?.guardSessionsToday||0),linkedSessionsToday:Number(counts?.linkedSessionsToday||0)}
+    integrity:{strictSessionsLast24:Number(guard?.strictSessions24||0),linkedSessionsLast24:Number(counts?.linkedSessions24||0),strictSessionsToday:Number(guard?.strictSessionsToday||0),linkedSessionsToday:Number(counts?.linkedSessionsToday||0),browserValidatedDiagnosticLast24:Number(guard?.browserSessions24||0)}
   };
 }
 function mirrorVisitorCookieScript(){return `<script data-toolscout-visitor-cookie="1">(function(){try{var x=JSON.parse(localStorage.getItem('toolscout_visitor_v1')||'null'),id=x&&String(x.id||'');if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))return;document.cookie='${VISITOR_COOKIE}='+encodeURIComponent(id)+'; Max-Age=${VISITOR_MAX_AGE}; Path=/; SameSite=Lax; Secure'}catch(e){}})();</script>`}
