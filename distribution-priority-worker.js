@@ -133,7 +133,6 @@ export default {
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    await rebalanceDistributionPriorities(env).catch(()=>({ok:false}));
     return base.scheduled?base.scheduled(event,env,ctx):undefined;
   }
 };
