@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-09-19T09:22:53.131Z",
+  "settledThrough": "2026-09-16",
+  "configured": true,
+  "dataSource": "ga4-api",
+  "propertyLinked": true,
+  "dimensionProbe": "channel",
+  "rowCount": 1,
+  "role": "secondary_sanity_check_only",
+  "note": "Health marker only. GA4 metrics are intentionally not published in this asset."
+}
