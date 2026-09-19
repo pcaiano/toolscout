@@ -82,9 +82,10 @@ export async function rebalanceDistributionPriorities(env){
   const explorationCandidates=staged.filter(eligibleForExploration).sort(oldestFirst).slice(0,explorationLimit);
   const explorationSlugs=new Set(explorationCandidates.map(x=>x.surface_slug));
 
-  let updated=0,paidBlocked=0;
+  let evaluated=0,updated=0,paidBlocked=0;
   const counts={scale:0,measure:0,explore:0,suspend:0};
   for(const row of staged){
+    evaluated++;
     const decision=row.decision.s;
     const explorationSlot=explorationSlugs.has(row.surface_slug);
     const priority=priorityWeight(row,decision,{explorationSlot});
@@ -95,21 +96,37 @@ export async function rebalanceDistributionPriorities(env){
     const learned=number(row.learned_score,row.distribution_score);
 
     try{
-      await env.DB.prepare(`INSERT INTO distribution_economic_learning(surface_slug,baseline_score,learned_score,operating_decision,priority_weight,decision_reason,chairman_required,decided_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET operating_decision=excluded.operating_decision,priority_weight=excluded.priority_weight,decision_reason=excluded.decision_reason,chairman_required=excluded.chairman_required,decided_at=datetime('now'),updated_at=datetime('now')`).bind(row.surface_slug,baseline,learned,decision,priority,reason,chairmanRequired?1:0).run();
-      await env.DB.prepare(`UPDATE distribution_opportunities SET distribution_score=?,updated_at=datetime('now') WHERE surface_slug=?`).bind(priority,row.surface_slug).run();
+      const decisionWrite=await env.DB.prepare(`INSERT INTO distribution_economic_learning(surface_slug,baseline_score,learned_score,operating_decision,priority_weight,decision_reason,chairman_required,decided_at,created_at,updated_at)
+        VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
+        ON CONFLICT(surface_slug) DO UPDATE SET
+          operating_decision=excluded.operating_decision,
+          priority_weight=excluded.priority_weight,
+          decision_reason=excluded.decision_reason,
+          chairman_required=excluded.chairman_required,
+          decided_at=datetime('now'),
+          updated_at=datetime('now')
+        WHERE distribution_economic_learning.operating_decision IS NOT excluded.operating_decision
+           OR distribution_economic_learning.priority_weight IS NOT excluded.priority_weight
+           OR distribution_economic_learning.decision_reason IS NOT excluded.decision_reason
+           OR distribution_economic_learning.chairman_required IS NOT excluded.chairman_required`)
+        .bind(row.surface_slug,baseline,learned,decision,priority,reason,chairmanRequired?1:0).run();
+      const priorityWrite=await env.DB.prepare(`UPDATE distribution_opportunities
+        SET distribution_score=?,updated_at=datetime('now')
+        WHERE surface_slug=? AND distribution_score IS NOT ?`).bind(priority,row.surface_slug,priority).run();
+      let paidWrite=null;
       if(isPaid&&row.status===EXECUTABLE_STATUS){
-        await env.DB.prepare(`UPDATE distribution_opportunities SET status='approval_required',human_required=1,next_action='Paid distribution is never executed automatically. Review measured evidence, expected value and cost before authorizing any spend.',updated_at=datetime('now') WHERE surface_slug=? AND status='ready_to_submit'`).bind(row.surface_slug).run();
-        paidBlocked++;
+        paidWrite=await env.DB.prepare(`UPDATE distribution_opportunities SET status='approval_required',human_required=1,next_action='Paid distribution is never executed automatically. Review measured evidence, expected value and cost before authorizing any spend.',updated_at=datetime('now') WHERE surface_slug=? AND status='ready_to_submit'`).bind(row.surface_slug).run();
+        if(Number(paidWrite?.meta?.changes||paidWrite?.changes||0)>0)paidBlocked++;
       }
       counts[decision]++;
-      updated++;
+      if(Number(decisionWrite?.meta?.changes||decisionWrite?.changes||0)>0||Number(priorityWrite?.meta?.changes||priorityWrite?.changes||0)>0||Number(paidWrite?.meta?.changes||paidWrite?.changes||0)>0)updated++;
     }catch{}
   }
 
   try{
-    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`priority_${crypto.randomUUID()}`,'distribution_operating_priorities','completed','distribution_engine',`Operating priorities updated ${updated} surface(s): scale ${counts.scale}, measure ${counts.measure}, explore ${counts.explore}, suspend ${counts.suspend}. ${explorationCandidates.length?`Reserved ${explorationCandidates.map(x=>x.surface_slug).join(', ')} as bounded acquisition exploration slot(s).`:'No eligible free acquisition exploration candidate was available.'} ${paidBlocked} paid ready-to-submit surface(s) were moved behind owner approval.`).run();
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`priority_${crypto.randomUUID()}`,'distribution_operating_priorities','completed','distribution_engine',`Operating priorities evaluated ${evaluated} surface(s) and materially changed ${updated}: scale ${counts.scale}, measure ${counts.measure}, explore ${counts.explore}, suspend ${counts.suspend}. ${explorationCandidates.length?`Reserved ${explorationCandidates.map(x=>x.surface_slug).join(', ')} as bounded acquisition exploration slot(s).`:'No eligible free acquisition exploration candidate was available.'} ${paidBlocked} paid ready-to-submit surface(s) were moved behind owner approval. Unchanged state is not rewritten.`).run();
   }catch{}
-  return{ok:true,updated,decisions:counts,exploration_slot:explorationCandidates[0]?.surface_slug||null,exploration_slots:explorationCandidates.map(x=>x.surface_slug),paid_auto_execution_blocked:paidBlocked,human_acquisition_sprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
+  return{ok:true,evaluated,updated,decisions:counts,exploration_slot:explorationCandidates[0]?.surface_slug||null,exploration_slots:explorationCandidates.map(x=>x.surface_slug),paid_auto_execution_blocked:paidBlocked,write_policy:'material_change_only',human_acquisition_sprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
 async function decisionSnapshot(env){
