@@ -126,15 +126,15 @@ function drawTraffic(d){
     metric('Unique visitors 24h',metricValue(v.last24),'First-party anonymous browser IDs')+
     metric(mtdLabel,metricValue(mtdValue),'Exact visitor tracking')+
     metric('Browser sessions 24h',metricValue(tr.humanSessionsLast24Hours),'Behaviour diagnostic, not visitors')+
-    metric('Human outbound 30d',metricValue(c.humanOutbound),'Browser-confirmed D1')+
-    metric('Monetized outbound 30d',metricValue(c.monetizedOutbound),'Browser-confirmed D1')+
+    metric('Human outbound 30d',metricValue(c.humanOutbound),'Verified D1')+
+    metric('Monetized outbound 30d',metricValue(c.monetizedOutbound),'Verified D1')+
     metric('Affiliate coverage',coverage,'Monetized share of confirmed outbound')+
     metric('Confirmed revenue',r.confirmedRevenue==null?'Unknown':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'No confirmed vendor evidence')+
     metric('Search today',metricValue(search&&search.visitors),'Known referrer or campaign')+
     metric('AI referrals today',metricValue(ai&&ai.visitors),'Known referrer or campaign only')+
     metric('Unattributed deep today',metricValue(deep&&deep.visitors),'Dark direct pattern, source not proven')+
     metric('GSC impressions 28d',metricValue(s.impressions),'Settled search visibility')+
-  '</div><div class="note" style="margin-top:10px"><strong>Canonical commercial truth:</strong> '+esc(c.definition||'Browser-confirmed D1 only.')+(c.legacyDiagnostic&&Number(c.legacyDiagnostic.humanOutbound||0)>0?'<br><br>Legacy diagnostic excluded from headline metrics: '+metricValue(c.legacyDiagnostic.humanOutbound)+' likely-human outbound, '+metricValue(c.legacyDiagnostic.monetizedOutbound)+' monetized, without browser confirmation.':'')+(g.status?'<br><br>GA4 remains a consent-based audit layer. Current status: '+esc(g.status)+'.':'')+'</div>';
+  '</div><div class="note" style="margin-top:10px"><strong>Canonical commercial truth:</strong> '+esc(c.definition||'Verified D1 only.')+(c.legacyDiagnostic&&Number(c.legacyDiagnostic.humanOutbound||0)>0?'<br><br>Legacy diagnostic excluded from headline metrics: '+metricValue(c.legacyDiagnostic.humanOutbound)+' likely-human outbound, '+metricValue(c.legacyDiagnostic.monetizedOutbound)+' monetized, without browser confirmation.':'')+(g.status?'<br><br>GA4 remains a consent-based audit layer. Current status: '+esc(g.status)+'.':'')+'</div>';
 }
 function drawAffiliateStatus(d){
   var root=document.getElementById('affiliateCoverageStatusBody');if(!root)return;
@@ -147,8 +147,8 @@ function drawAffiliateStatus(d){
 }
 function drawAffiliateEngine(d){
   var root=document.getElementById('affiliateBody'),meta=document.getElementById('affiliateMeta');if(!root)return;var x=d&&d.growthOps&&d.growthOps.engines&&d.growthOps.engines.affiliate||{},c=d&&d.canonicalCommercialTruth||{};
-  if(meta)meta.textContent='Browser-confirmed D1';
-  root.innerHTML='<div class="metricGrid">'+metric('Weighted coverage',c.weightedCoverage==null?'No sample':(Number(c.weightedCoverage)*100).toFixed(1)+'%','Canonical browser-confirmed outbound')+metric('Monetized outbound 30d',metricValue(c.monetizedOutbound),metricValue(c.humanOutbound)+' confirmed human outbound')+metric('Revenue leakage 30d',metricValue(c.unmonetizedOutbound),'Confirmed outbound not monetized')+metric('Recoverable queue',metricValue(x.recoverable_queue),'Demand-prioritized candidates')+'</div><div class="note" style="margin-top:10px">Affiliate Coverage and Traffic Truth now use the same D1 browser-confirmed commercial source.</div>';
+  if(meta)meta.textContent='Verified D1';
+  root.innerHTML='<div class="metricGrid">'+metric('Weighted coverage',c.weightedCoverage==null?'No sample':(Number(c.weightedCoverage)*100).toFixed(1)+'%','Canonical verified outbound')+metric('Monetized outbound 30d',metricValue(c.monetizedOutbound),metricValue(c.humanOutbound)+' confirmed human outbound')+metric('Revenue leakage 30d',metricValue(c.unmonetizedOutbound),'Confirmed outbound not monetized')+metric('Recoverable queue',metricValue(x.recoverable_queue),'Demand-prioritized candidates')+'</div><div class="note" style="margin-top:10px">Affiliate Coverage and Traffic Truth now use the same D1 verified commercial source.</div>';
 }
 var previous=window.render;if(typeof previous==='function')window.render=function(d){previous(d);drawTraffic(d);drawAffiliateEngine(d);setTimeout(function(){drawAffiliateStatus(d)},0)};
 try{if(typeof snapshot!=='undefined'&&snapshot){drawTraffic(snapshot);drawAffiliateEngine(snapshot);setTimeout(function(){drawAffiliateStatus(snapshot)},0)}}catch(e){}
