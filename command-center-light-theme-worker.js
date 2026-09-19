@@ -1,7 +1,12 @@
 import base from './command-center-final-integrity-worker.js';
 import resilientFallback from './command-center-resilient-worker.js';
+import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
+import {runDistributionNetworkCycle} from './distribution-network-worker.js';
+import {runWithLedger} from './engine-run-ledger.js';
 
 const STATS_CACHE_TTL_SECONDS = 30;
+const AUDIT_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
+async function auditHandoffOk(request){const token=String(request.headers.get('X-ToolScout-Handoff')||'');if(!token)return false;const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token));const hex=[...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('');return hex===AUDIT_HANDOFF_SHA256;}
 
 const ANALYTICS_PATHS = new Set([
   '/analytics',
@@ -320,6 +325,23 @@ async function resilientStatsResponse(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if(request.method==='GET'&&url.pathname==='/api/audit/runtime-finalize-20260919'){
+      if(!(await auditHandoffOk(request))) return Response.json({error:'unauthorized'},{status:401,headers:{'Cache-Control':'no-store'}});
+      const job=url.searchParams.get('job');
+      if(job==='cleanup'){
+        const r=await env.DB.prepare(`UPDATE distribution_editorial_queue SET status='retired_no_safe_executor',human_required=0,updated_at=datetime('now') WHERE status IN ('autonomy_pending','prepared') AND channel_type IN ('community','community_stack')`).run();
+        return Response.json({ok:true,job,changed:Number(r?.meta?.changes||r?.changes||0)},{headers:{'Cache-Control':'no-store'}});
+      }
+      if(job==='autonomous'){
+        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'deep_audit_finalize'},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
+        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
+      }
+      if(job==='network'){
+        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:'deep_audit_finalize'},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
+        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
+      }
+      return Response.json({error:'invalid_job'},{status:400,headers:{'Cache-Control':'no-store'}});
+    }
     if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health'){
       let assetStatus=null,assetLocation=null;
       try{
