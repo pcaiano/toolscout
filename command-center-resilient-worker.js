@@ -33,6 +33,28 @@ async function safeAll(env,sql,bindings=[]){
 async function assetJson(request,env,path,fallback={}){
   try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback}catch{return fallback}
 }
+async function ensureStrictTruthSchema(env){
+  await env.DB.batch([
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_human_evidence (
+      session_id TEXT PRIMARY KEY,
+      visitor_id TEXT,
+      evidence_type TEXT NOT NULL,
+      evidence_strength INTEGER NOT NULL DEFAULT 1,
+      interaction_count INTEGER NOT NULL DEFAULT 0,
+      first_path TEXT,
+      last_path TEXT,
+      source TEXT,
+      referrer_host TEXT,
+      country TEXT,
+      asn INTEGER,
+      first_evidence_at TEXT NOT NULL DEFAULT (datetime('now')),
+      last_evidence_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_created ON traffic_human_evidence(first_evidence_at)`),
+    env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('strict_human_tracking_started_at',datetime('now'))`)
+  ]);
+}
 async function assetText(request,env,path,fallback=''){
   try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.text():fallback}catch{return fallback}
 }
@@ -138,12 +160,13 @@ async function lightweightQueue(request,env,ctx){
   }catch(error){return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:String(error?.message||error)}}
 }
 async function resilientSnapshot(request,env,ctx){
+  await ensureStrictTruthSchema(env);
   const now=new Date(),todayKey=zonedDayKey(now),monthKey=todayKey.slice(0,7),todayStart=zonedMidnight(todayKey),monthStart=zonedMidnight(monthKey+'-01'),last24Start=new Date(now.getTime()-86400000),window30Start=new Date(now.getTime()-30*86400000);
   const todaySql=sqliteUtc(todayStart),monthSql=sqliteUtc(monthStart),last24Sql=sqliteUtc(last24Start),window30Sql=sqliteUtc(window30Start);
   const [visitors,trackingMeta,sessions,commercial,affiliateByTool,affiliateWorkflowRows,distribution24,distributionStatuses,distributionLive,affiliateStatuses,affiliateRecoverable,trendRows,todayVisitorRows,externalTruth,trafficTruthAsset,sitemap,queue]=await Promise.all([
-    safeFirst(env,`SELECT COUNT(DISTINCT visitor_id) sinceTracking,COUNT(DISTINCT CASE WHEN created_at>=? THEN visitor_id END) last24,COUNT(DISTINCT CASE WHEN created_at>=? THEN visitor_id END) today,COUNT(DISTINCT CASE WHEN created_at>=? THEN visitor_id END) monthToDate FROM visitor_events`,[last24Sql,todaySql,monthSql]),
-    safeFirst(env,`SELECT value FROM visitor_tracking_meta WHERE key='tracking_started_at' LIMIT 1`),
-    safeFirst(env,`SELECT COUNT(DISTINCT CASE WHEN f.created_at>=? THEN f.session_id END) last24,COUNT(DISTINCT CASE WHEN f.created_at>=? THEN f.session_id END) today,COUNT(DISTINCT CASE WHEN f.created_at>=? THEN f.session_id END) monthToDate,COUNT(DISTINCT CASE WHEN f.created_at>=? THEN f.session_id END) window30 FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human')`,[last24Sql,todaySql,monthSql,window30Sql]),
+    safeFirst(env,`SELECT COUNT(DISTINCT v.visitor_id) sinceTracking,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) last24,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) today,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) monthToDate FROM traffic_human_evidence h LEFT JOIN confirmed_visitor_events v ON v.session_id=h.session_id`,[last24Sql,todaySql,monthSql]),
+    safeFirst(env,`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`),
+    safeFirst(env,`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) monthToDate,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) window30 FROM traffic_human_evidence`,[last24Sql,todaySql,monthSql,window30Sql]),
     safeFirst(env,`SELECT COUNT(*) outbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM verified_outbound_events WHERE created_at>=?`,[window30Sql]),
     safeAll(env,`SELECT tool_slug,COUNT(*) clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM verified_outbound_events WHERE created_at>=? GROUP BY tool_slug`,[window30Sql]),
     safeAll(env,`SELECT tool_slug,status,program_name,updated_at FROM affiliate_workflow`),
@@ -152,8 +175,8 @@ async function resilientSnapshot(request,env,ctx){
     safeAll(env,`SELECT surface_slug,surface_name,surface_type,status,COALESCE(live_url,action_url) url,distribution_score,updated_at FROM distribution_opportunities WHERE status IN ('live','verified') ORDER BY updated_at DESC LIMIT 8`),
     safeAll(env,`SELECT status,COUNT(*) count FROM affiliate_workflow GROUP BY status`),
     safeFirst(env,`SELECT COUNT(*) count FROM affiliate_workflow WHERE status IN ('ready_to_apply','human_action_required','approved_needs_link','link_acquired')`),
-    safeAll(env,`SELECT f.session_id,f.created_at FROM funnel_events f JOIN sessions s ON s.session_id=f.session_id WHERE f.event_type='page_confirmed' AND s.classification IN ('likely-human','human') AND f.created_at>=datetime('now','-31 days') ORDER BY f.created_at ASC`),
-    safeAll(env,`SELECT visitor_id,path,source,referrer_host,created_at FROM visitor_events WHERE created_at>=? ORDER BY created_at ASC`,[todaySql]),
+    safeAll(env,`SELECT session_id,first_evidence_at created_at FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-31 days') ORDER BY first_evidence_at ASC`),
+    safeAll(env,`SELECT v.visitor_id,v.path,v.source,v.referrer_host,h.first_evidence_at created_at FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[todaySql]),
     assetJson(request,env,'/data/external-analytics-truth.json',{}),
     assetJson(request,env,'/data/traffic-truth.json',{}),
     assetText(request,env,'/sitemap.xml',''),
@@ -200,7 +223,7 @@ async function resilientSnapshot(request,env,ctx){
   const distLiveCount=n(distributionStatusCounts.live)+n(distributionStatusCounts.verified);
   const distPending=n(distributionStatusCounts.submitted)+n(distributionStatusCounts.pending_review)+n(distributionStatusCounts.scheduled);
   const tracking={status:'observed',humanSessionsLast24Hours:n(sessions?.last24)};
-  const visitorSnapshot={status:'observed',metric:'unique anonymous browser visitors',definition:'One first-party anonymous browser identifier counted once per reporting window. Sessions remain a separate behavior metric.',timezone:TIME_ZONE,trackingSince:trackingSince?.toISOString()||null,last24:n(visitors?.last24),today:n(visitors?.today),monthToDate:n(visitors?.monthToDate),sinceTracking:n(visitors?.sinceTracking),coverage};
+  const visitorSnapshot={status:'observed',metric:'strict verified unique human visitors',definition:'One first-party anonymous browser identifier counted only after positive strict-human evidence. Browser validation alone is diagnostic.',timezone:TIME_ZONE,trackingSince:trackingSince?.toISOString()||null,last24:n(visitors?.last24),today:n(visitors?.today),monthToDate:n(visitors?.monthToDate),sinceTracking:n(visitors?.sinceTracking),coverage};
   const traffic={today:n(sessions?.today),monthToDate:mtdSessions,dailyAverageMTD,projectedMonth};
   const canonicalCommercialTruth={status:'observed',source:'D1 verified_outbound_events',trafficTruth:'first_party_verified_navigation',windowDays:30,definition:'Outbound is counted only after first-party same-origin /go/ navigation proof from an established ToolScout browser session. Pre-integrity browser-confirmed clicks are diagnostic only and excluded.',humanOutbound:outbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,generatedAt:now.toISOString()};
   const distributionEngine={status:'running',last_activity_at:distribution24?.last_activity_at||null,events_24h:n(distribution24?.events),successful_24h:n(distribution24?.successful),failed_24h:n(distribution24?.failed),events_7d:0,successful_7d:0,failed_7d:0,opportunity_status:distributionStatusCounts,delivery_status:{},attributed_human_sessions_30d:0,attributed_outbound_30d:0,attributed_monetized_outbound_30d:0};
@@ -266,8 +289,8 @@ async function resilientSnapshot(request,env,ctx){
     affiliateCoverageStatus,
     canonicalCommercialTruth,
     revenue:{confirmedRevenue:null,currency:'EUR',reportingStatus:'unavailable',ledgerRows:0},
-    trafficTruth:{status:'observed',primaryMetric:'D1 exact visitors plus first-party verified outbound navigation',d1:{status:'observed',metric:'browser-confirmed sessions',last24:n(sessions?.last24),today:n(sessions?.today),monthToDate:mtdSessions,dailyAverageMTD,projectedMonth,humanOutbound:outbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,commercialTruth:'first_party_verified_navigation',commercialDefinition:canonicalCommercialTruth.definition},ga4,googleSearchConsole:{status:gsc.status||'observed',generatedAt:externalTruth?.generatedAt||trafficTruthAsset?.googleSearchConsole?.generatedAt||null,startDate:gsc.startDate||null,endDate:gsc.endDate||null,clicks:n(gsc.clicks),impressions:n(gsc.impressions),pageCount:indexedPages,coverage:'site-wide'}},
-    trafficTrend:{status:'observed',metric:'browser-confirmed sessions',windowDays:30,points,generatedAt:now.toISOString()},
+    trafficTruth:{status:'observed',version:'strict-human-v1',trackingSince:trackingSince?.toISOString()||null,primaryMetric:'D1 strict verified human sessions plus first-party verified outbound navigation',d1:{status:'observed',metric:'strict verified human sessions',last24:n(sessions?.last24),today:n(sessions?.today),monthToDate:mtdSessions,dailyAverageMTD,projectedMonth,humanOutbound:outbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,commercialTruth:'first_party_verified_navigation',commercialDefinition:canonicalCommercialTruth.definition},ga4,googleSearchConsole:{status:gsc.status||'observed',generatedAt:externalTruth?.generatedAt||trafficTruthAsset?.googleSearchConsole?.generatedAt||null,startDate:gsc.startDate||null,endDate:gsc.endDate||null,clicks:n(gsc.clicks),impressions:n(gsc.impressions),pageCount:indexedPages,coverage:'site-wide'}},
+    trafficTrend:{status:'observed',metric:'strict verified human sessions',windowDays:30,points,generatedAt:now.toISOString()},
     discoveryAttribution:{status:'observed',timezone:TIME_ZONE,definition:'Known sources use referrer or campaign evidence. Unattributed deep entry means direct first entry on a non-home page and is not a proven channel.',today:discoveryToday,last24:{total:0,buckets:[]},generatedAt:now.toISOString()},
     growthOps:{chairmanQueue:queue,autonomousGrowth,engines:{affiliate:affiliateEngine,catalog:catalogEngine,distribution:distributionEngine},footprint:{search:{source:'Google Search Console',observed_pages:indexedPages,impressions:n(gsc.impressions),clicks:n(gsc.clicks),generated_at:externalTruth?.generatedAt||null,sitemap_urls:sitemapUrls,note:'Observed pages are URLs with Search Console evidence from the latest imported snapshot; this is not a complete Google index count.'},distribution:{live_verified:distLiveCount,submitted_pending:distPending,human_gates:n(distributionStatusCounts.human_action_required),surfaces:distributionLive.map(x=>({slug:x.surface_slug,name:x.surface_name,type:x.surface_type,status:x.status,url:x.url||null,score:n(x.distribution_score),updated_at:x.updated_at||null}))}},ledger:[],health:{content:{status:'no_evidence',last_event_at:null,detail:'Non-critical content enrichment is excluded from resilient dashboard reads.'},audience:{status:'no_evidence',last_event_at:null,detail:'Non-critical audience enrichment is excluded from resilient dashboard reads.'},seo_geo_aio:{status:gsc.status==='observed'?'partial':'no_evidence',last_event_at:externalTruth?.generatedAt||null,detail:`GSC snapshot: ${n(gsc.impressions)} impressions, ${n(gsc.clicks)} clicks. Heavy readiness enrichment is isolated from the dashboard read path.`},issues:healthIssues},generated_at:now.toISOString()},
     resilientCommandCenter:{active:true,version:2,generatedAt:now.toISOString(),reason:'isolate_dashboard_reads_from_resource_exhaustion',autonomousGrowthIncluded:true,catalogGrowthIncluded:true}
@@ -277,7 +300,7 @@ async function resilientSnapshot(request,env,ctx){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:5,statsMode:'direct-d1-resilient',externalLinkVerificationInStats:false,affiliateCanonicalTruth:'verified-outbound-v1',autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-editorial-v3',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
+    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:6,statsMode:'direct-d1-resilient',trafficTruth:'strict-human-v1',externalLinkVerificationInStats:false,affiliateCanonicalTruth:'verified-outbound-v1',autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-editorial-v3',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
     if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/analytics/api/chairman-queue')){
       if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
       if(url.pathname==='/analytics/api/chairman-queue')return Response.json(await lightweightQueue(request,env,ctx),{headers:JSON_H});
