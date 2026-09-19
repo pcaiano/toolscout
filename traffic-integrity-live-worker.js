@@ -47,15 +47,19 @@ async function pageConfirmationGate(request){
   return null;
 }
 
-async function guardTruth(env){
-  if(!env.DB)return {today:0,last24:0};
+async function strictHumanTruth(env){
+  if(!env.DB)return {today:0,last24:0,browserValidated24:0};
   const now=new Date(),todayKey=dayKey(now),todayStart=sqliteUtc(zonedMidnight(todayKey)),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<todayStart?last24Start:todayStart;
-  const row=await env.DB.prepare(`SELECT
-    COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) last24,
-    COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) today
-    FROM traffic_guard_events
-    WHERE decision='allowed' AND created_at>=?`).bind(last24Start,todayStart,scanStart).first();
-  return {today:Number(row?.today||0),last24:Number(row?.last24||0),generatedAt:new Date().toISOString(),metric:'browser-guard verified sessions'};
+  const [row,diagnostic,meta]=await Promise.all([
+    env.DB.prepare(`SELECT
+      COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,
+      COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today
+      FROM traffic_human_evidence
+      WHERE first_evidence_at>=?`).bind(last24Start,todayStart,scanStart).first(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions FROM traffic_guard_events WHERE decision='allowed' AND created_at>=?`).bind(last24Start).first(),
+    env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`).first()
+  ]);
+  return {today:Number(row?.today||0),last24:Number(row?.last24||0),browserValidated24:Number(diagnostic?.sessions||0),trackingSince:meta?.value||null,generatedAt:new Date().toISOString(),metric:'strict verified human sessions',canonicalPopulation:'traffic_human_evidence'};
 }
 
 async function monetizationProof(env){
@@ -63,8 +67,8 @@ async function monetizationProof(env){
   try{
     const [ledger,clicks,sessions]=await Promise.all([
       env.DB.prepare(`SELECT COUNT(*) AS rows,COUNT(DISTINCT CASE WHEN conversion_id IS NOT NULL THEN affiliate_slug || ':' || conversion_id END) AS conversions,SUM(commission) AS revenue,GROUP_CONCAT(DISTINCT currency) AS currencies FROM revenue_ledger WHERE status IN ('confirmed','paid')`).first(),
-      env.DB.prepare(`SELECT COUNT(*) AS clicks FROM click_events c JOIN sessions s ON s.session_id=c.session_id WHERE c.affiliate_active_at_click=1 AND COALESCE(c.source,'')!='internal-test' AND s.classification='likely-human'`).first(),
-      env.DB.prepare(`SELECT COUNT(*) AS sessions FROM sessions WHERE classification='likely-human'`).first()
+      env.DB.prepare(`SELECT COUNT(*) AS clicks FROM verified_outbound_events WHERE affiliate_active_at_click=1`).first(),
+      env.DB.prepare(`SELECT COUNT(DISTINCT session_id) AS sessions FROM traffic_human_evidence`).first()
     ]);
     const evidenceRows=Number(ledger?.rows||0),monetizedOutboundClicks=Number(clicks?.clicks||0),humanSessions=Number(sessions?.sessions||0),confirmedConversions=Number(ledger?.conversions||0);
     const currencies=String(ledger?.currencies||'').split(',').map(x=>x.trim()).filter(Boolean);
@@ -83,12 +87,12 @@ async function monetizationProof(env){
 async function augmentStats(response,env){
   if(!response.ok)return response;
   let data;try{data=await response.json()}catch{return response}
-  const [guard,proof]=await Promise.all([guardTruth(env),monetizationProof(env)]);
-  if(data.traffic){data.traffic={...data.traffic,today:guard.today,last24:guard.last24,metric:guard.metric,trafficTruth:'browser_guard_verified'}}
-  if(data.tracking)data.tracking={...data.tracking,humanSessionsLast24Hours:guard.last24};
-  if(data.trafficTruth){data.trafficTruth={...data.trafficTruth,primaryMetric:'D1 browser-guard verified sessions'};data.trafficTruth.d1={...(data.trafficTruth.d1||{}),today:guard.today,last24:guard.last24,metric:guard.metric,canonicalPopulation:'traffic_guard_events decision=allowed'}}
-  if(data.trafficTrend&&Array.isArray(data.trafficTrend.points)){const key=dayKey(new Date());data.trafficTrend.points=data.trafficTrend.points.map(p=>p&&p.day===key?{...p,sessions:guard.today}:p)}
-  data.trafficIntegrity={...(data.trafficIntegrity||{}),guardCanonical:{status:'active',today:guard.today,last24:guard.last24,metric:guard.metric,generatedAt:guard.generatedAt}};
+  const [strict,proof]=await Promise.all([strictHumanTruth(env),monetizationProof(env)]);
+  if(data.traffic){data.traffic={...data.traffic,today:strict.today,last24:strict.last24,metric:strict.metric,trafficTruth:'strict-human-v1'}}
+  if(data.tracking)data.tracking={...data.tracking,humanSessionsLast24Hours:strict.last24};
+  if(data.trafficTruth){data.trafficTruth={...data.trafficTruth,primaryMetric:'D1 strict verified human sessions',trackingSince:strict.trackingSince};data.trafficTruth.d1={...(data.trafficTruth.d1||{}),today:strict.today,last24:strict.last24,metric:strict.metric,canonicalPopulation:strict.canonicalPopulation,browserValidatedDiagnosticLast24:strict.browserValidated24}}
+  if(data.trafficTrend&&Array.isArray(data.trafficTrend.points)){const key=dayKey(new Date());data.trafficTrend.points=data.trafficTrend.points.map(p=>p&&p.day===key?{...p,sessions:strict.today}:p)}
+  data.trafficIntegrity={...(data.trafficIntegrity||{}),strictHumanCanonical:{status:'active',version:'strict-human-v1',today:strict.today,last24:strict.last24,trackingSince:strict.trackingSince,metric:strict.metric,canonicalPopulation:strict.canonicalPopulation,generatedAt:strict.generatedAt},browserValidatedDiagnostic:{last24:strict.browserValidated24,canonical:false}};
   data.monetizationProof=proof;
   const headers=new Headers(response.headers);headers.set('Content-Type','application/json; charset=UTF-8');headers.set('Cache-Control','private, no-store');headers.delete('Content-Length');headers.delete('Content-Encoding');
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
