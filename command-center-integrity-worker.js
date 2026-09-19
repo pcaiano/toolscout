@@ -165,7 +165,7 @@ async function canonicalSnapshot(env,upstream){
   const now=new Date(),today=dayKey(now),month=today.slice(0,7),todayStart=sqliteUtc(zonedMidnight(today)),monthStart=sqliteUtc(zonedMidnight(`${month}-01`)),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<monthStart?last24Start:monthStart;
   const trendStart=dayKey(new Date(now.getTime()-29*86400000));
   const strictMeta=await first(env,`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`),strictTrackingSince=parseUtc(strictMeta?.value?.value),strictTrackingDay=strictTrackingSince?dayKey(strictTrackingSince):today;
-  const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,runsResult,unrecoveredFailures,growthLatest,catalogQualityLatest,gscAsset]=await Promise.all([
+  const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,runsResult,unrecoveredFailures,growthLatest,catalogQualityLatest,catalogWarnings,gscAsset]=await Promise.all([
     first(env,`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) monthToDate,MAX(last_evidence_at) lastAllowedAt FROM traffic_human_evidence WHERE first_evidence_at>=?`,[last24Start,todayStart,monthStart,scanStart]),
     all(env,`SELECT day,human_sessions sessions FROM command_center_daily_metrics WHERE day>=? ORDER BY day ASC`,[trendStart]),
     first(env,`SELECT COUNT(*) humanOutbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetizedOutbound,SUM(CASE WHEN affiliate_active_at_click!=1 OR affiliate_active_at_click IS NULL THEN 1 ELSE 0 END) unmonetizedOutbound,MAX(created_at) lastOutboundAt FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days')`),
@@ -191,10 +191,11 @@ async function canonicalSnapshot(env,upstream){
     first(env,`SELECT evidence_json,started_at,completed_at FROM engine_runs
       WHERE engine='catalog' AND mission='runtime_quality' AND status='completed'
       ORDER BY started_at DESC LIMIT 1`),
+    first(env,`SELECT COUNT(*) warnings,MAX(last_checked_at) last_warning_at FROM catalog_runtime_state WHERE quality_status='source_warning' OR source_status IN ('network_warning','warning','blocked_or_limited')`),
     runtimeAssetJson(env,'/reports/gsc-signals.json')
   ]);
 
-  const queryMap={human_sessions:sessions,traffic_trend:trend,verified_outbound:outbound,verified_outbound_by_tool:byTool,attribution_today:todayVisitors,attribution_last24:last24Visitors,visitor_countries:countryRows,audience_evidence:audienceLatest,content_evidence:contentLatest,engine_runs:runsResult,unrecovered_engine_failures:unrecoveredFailures,growth_latest:growthLatest,catalog_quality_latest:catalogQualityLatest};
+  const queryMap={human_sessions:sessions,traffic_trend:trend,verified_outbound:outbound,verified_outbound_by_tool:byTool,attribution_today:todayVisitors,attribution_last24:last24Visitors,visitor_countries:countryRows,audience_evidence:audienceLatest,content_evidence:contentLatest,engine_runs:runsResult,unrecovered_engine_failures:unrecoveredFailures,growth_latest:growthLatest,catalog_quality_latest:catalogQualityLatest,catalog_runtime_warnings:catalogWarnings};
   const issues=Object.entries(queryMap).filter(([,q])=>!q.ok).map(([metric,q])=>({metric,severity:'error',reason:q.error||'query_failed'}));
   const dayNumber=Number(today.slice(8,10))||1,daysInMonth=new Date(Date.UTC(Number(today.slice(0,4)),Number(today.slice(5,7)),0)).getUTCDate();
   const sessionRow=sessions.ok?sessions.value||{}:null,mtd=sessionRow?finiteOrNull(sessionRow.monthToDate):null;
@@ -226,6 +227,8 @@ async function canonicalSnapshot(env,upstream){
   if(!growthEvidence?.gscSnapshot?.generatedAt||Number(growthEvidence?.gscSnapshot?.pages||0)===0)issues.push({metric:'growth:gsc_input',severity:'error',reason:'growth_brain_has_no_runtime_gsc_snapshot'});
   let catalogEvidence={};try{catalogEvidence=JSON.parse(catalogQualityLatest?.value?.evidence_json||'{}')}catch{}
   if(Number(catalogEvidence?.checked||0)>0&&Number(catalogEvidence?.warnings||0)>=Number(catalogEvidence?.checked||0))issues.push({metric:'catalog:runtime_quality',severity:'warning',reason:'latest_catalog_batch_all_warnings'});
+  const unresolvedCatalogWarnings=Number(catalogWarnings?.value?.warnings||0);
+  if(unresolvedCatalogWarnings>0)issues.push({metric:'catalog:unresolved_source_warnings',severity:'warning',reason:`${unresolvedCatalogWarnings}_source_warning_rows_pending_retry`});
   for(const [engine,health] of [['distribution',distributionHealth],['affiliate',affiliateHealth],['audience',audienceHealth],['content',contentHealth]])if(['failed','degraded','stale','unknown'].includes(health.status))issues.push({metric:`engine:${engine}`,severity:health.status==='failed'?'error':'warning',reason:health.status});
 
   return {
