@@ -296,7 +296,7 @@ async function metrics(env){
   return {profiles:Object.fromEntries((profiles.results||[]).map(x=>[x.status,Number(x.n||0)])),affiliateSocialPolicies:Object.fromEntries((policies.results||[]).map(x=>[x.policy_status,Number(x.n||0)])),briefs:Object.fromEntries((briefs.results||[]).map(x=>[x.commercial_mode,{count:Number(x.n||0),lastCreatedAt:x.last_created_at||null}])),socialAffiliateRedirects:Object.fromEntries((socialRedirects.results||[]).map(x=>[x.platform||'unknown',{count:Number(x.n||0),lastCreatedAt:x.last_created_at||null}]))};
 }
 
-async function cycle(env){
+export async function runContentSocialIntelligenceCycle(env){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE growth_action_events SET status='legacy_unverified',updated_at=datetime('now') WHERE status='prepared'`).run().catch(()=>{});
   const profiles=await refreshProfiles(env),policies=await refreshPolicies(env);
@@ -320,7 +320,7 @@ export default {
     const u=new URL(request.url);
     if(u.pathname==='/api/content-engine/intelligence/refresh'&&request.method==='POST'){
       if(!(await proofAuthorized(request)))return Response.json({error:'unauthorized'},{status:401,headers:{...JSON_H,'Cache-Control':'no-store'}});
-      try{return Response.json(await cycle(env),{headers:{...JSON_H,'Cache-Control':'no-store'}})}catch(error){return Response.json({error:'content_intelligence_refresh_failed',message:safe(error?.message||error,500)},{status:500,headers:{...JSON_H,'Cache-Control':'no-store'}})}
+      try{return Response.json(await runContentSocialIntelligenceCycle(env),{headers:{...JSON_H,'Cache-Control':'no-store'}})}catch(error){return Response.json({error:'content_intelligence_refresh_failed',message:safe(error?.message||error,500)},{status:500,headers:{...JSON_H,'Cache-Control':'no-store'}})}
     }
         if(u.pathname==='/api/content-engine/brief'&&request.method==='GET'){
       const family=['monday_discovery','wednesday_comparison','friday_practical'].includes(u.searchParams.get('family'))?u.searchParams.get('family'):'monday_discovery';
@@ -335,10 +335,6 @@ export default {
     return response;
   },
   async scheduled(event,env,ctx){
-    const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
-    ctx.waitUntil(cycle(env).catch(async error=>{
-      await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentintel_fail_${crypto.randomUUID()}`,'content_social_intelligence_refresh','failed','content_engine',safe(error?.message||error,1800)).run().catch(()=>{});
-    }));
-    return result;
+    return base.scheduled?base.scheduled(event,env,ctx):undefined;
   }
 };
