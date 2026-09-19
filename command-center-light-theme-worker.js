@@ -351,6 +351,10 @@ export default {
         ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'deep_audit_finalize'},()=>verifyCatalogBatch(env)).catch(()=>{}));
         return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
       }
+      if(job==='content'){
+        ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:'deep_audit_finalize'},()=>runContentSocialIntelligenceCycle(env)).catch(()=>{}));
+        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
+      }
       return Response.json({error:'invalid_job'},{status:400,headers:{'Cache-Control':'no-store'}});
     }
     if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health'){
