@@ -10,11 +10,12 @@ const HUMAN_ACQUISITION_SPRINT=Object.freeze({
   northStar:'strict_verified_human_sessions'
 });
 const AUDIENCE_ACQUISITION_POLICY=Object.freeze({
-  id:'borrowed-first-v1',
-  objective:'Acquire humans from existing demand and other peoples audiences before relying on ToolScout owned reach.',
+  id:'external-demand-first-v2',
+  objective:'Continuously acquire new humans from existing demand and external audiences. Owned channels may support acquisition but never replace external-demand acquisition as the primary engine.',
   primaryModes:['existing_demand_search','borrowed_audience_distribution','vendor_audience_amplification'],
-  ownedChannelsRole:'measurement_and_support_until_mass_critical',
-  massCritical:{strictVerifiedHumanSessions30d:100,returningStrictVisitors30d:20}
+  ownedChannelsRole:'support_and_optional_expansion_after_repeatable_external_acquisition',
+  externalDemandRemainsPrimary:true,
+  ownedExpansionGate:{strictVerifiedHumanSessions30d:100,provenExternalSources:2,strictHumansPerProvenSource30d:3}
 });
 const HUMAN_ACQUISITION_GSC_TARGETS=Object.freeze([
   {key:'project-management',cluster:'project_management',path:'/best-project-management-tools',title:'Best Project Management Tools',impressions:93,position:38.66,priority:98},
@@ -97,25 +98,50 @@ async function ensureGrowthSchema(env){
 async function growthRows(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
 async function audiencePhaseSnapshot(env){
   try{
-    const row=await env.DB.prepare(`WITH visitor_sessions AS (
-      SELECT v.visitor_id,COUNT(DISTINCT h.session_id) sessions
+    const strictRow=await env.DB.prepare(`SELECT COUNT(DISTINCT session_id) strict_sessions_30d
+      FROM traffic_human_evidence
+      WHERE first_evidence_at>=datetime('now','-30 days')`).first();
+    const sourceRows=await env.DB.prepare(`SELECT
+        LOWER(COALESCE(NULLIF(v.referrer_host,''),NULLIF(v.source,''),'unknown')) acquisition_source,
+        COUNT(DISTINCT h.session_id) strict_sessions
       FROM traffic_human_evidence h
-      JOIN confirmed_visitor_events v ON v.session_id=h.session_id
+      LEFT JOIN confirmed_visitor_events v ON v.session_id=h.session_id
       WHERE h.first_evidence_at>=datetime('now','-30 days')
-      GROUP BY v.visitor_id
-    )
-    SELECT
-      (SELECT COUNT(DISTINCT session_id) FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-30 days')) strict_sessions_30d,
-      COUNT(*) unique_visitors_30d,
-      SUM(CASE WHEN sessions>=2 THEN 1 ELSE 0 END) returning_visitors_30d
-    FROM visitor_sessions`).first();
-    const strict=Math.max(0,Number(row?.strict_sessions_30d||0));
-    const returning=Math.max(0,Number(row?.returning_visitors_30d||0));
-    const unique=Math.max(0,Number(row?.unique_visitors_30d||0));
-    const massCritical=strict>=AUDIENCE_ACQUISITION_POLICY.massCritical.strictVerifiedHumanSessions30d&&returning>=AUDIENCE_ACQUISITION_POLICY.massCritical.returningStrictVisitors30d;
-    return{status:'observed',phase:massCritical?'owned_audience_build':'borrowed_audience_existing_demand_first',borrowedFirst:!massCritical,strictVerifiedHumanSessions30d:strict,uniqueStrictVisitors30d:unique,returningStrictVisitors30d:returning,massCritical,thresholds:AUDIENCE_ACQUISITION_POLICY.massCritical,policy:AUDIENCE_ACQUISITION_POLICY.id};
+      GROUP BY LOWER(COALESCE(NULLIF(v.referrer_host,''),NULLIF(v.source,''),'unknown'))
+      HAVING COUNT(DISTINCT h.session_id)>=?`)
+      .bind(AUDIENCE_ACQUISITION_POLICY.ownedExpansionGate.strictHumansPerProvenSource30d).all();
+    const strict=Math.max(0,Number(strictRow?.strict_sessions_30d||0));
+    const sourceItems=(sourceRows?.results||[]).filter(x=>{
+      const s=String(x?.acquisition_source||'').toLowerCase();
+      return s&&s!=='unknown'&&s!=='direct'&&s!=='internal-test'&&s!=='outbound-proof'&&!s.includes('trytoolscout.org');
+    });
+    const provenExternalSources=sourceItems.length;
+    const ownedExpansionEligible=
+      strict>=AUDIENCE_ACQUISITION_POLICY.ownedExpansionGate.strictVerifiedHumanSessions30d&&
+      provenExternalSources>=AUDIENCE_ACQUISITION_POLICY.ownedExpansionGate.provenExternalSources;
+    return{
+      status:'observed',
+      phase:ownedExpansionEligible?'external_demand_first_with_owned_support':'external_demand_first',
+      borrowedFirst:true,
+      externalDemandPrimary:true,
+      strictVerifiedHumanSessions30d:strict,
+      provenExternalSources30d:provenExternalSources,
+      provenExternalSourceBreakdown:sourceItems.slice(0,12).map(x=>({source:String(x.acquisition_source),strictSessions:Number(x.strict_sessions||0)})),
+      ownedExpansionEligible,
+      thresholds:AUDIENCE_ACQUISITION_POLICY.ownedExpansionGate,
+      policy:AUDIENCE_ACQUISITION_POLICY.id
+    };
   }catch(error){
-    return{status:'unavailable',phase:'borrowed_audience_existing_demand_first',borrowedFirst:true,massCritical:false,thresholds:AUDIENCE_ACQUISITION_POLICY.massCritical,policy:AUDIENCE_ACQUISITION_POLICY.id,reason:String(error?.message||error).slice(0,240)};
+    return{
+      status:'unavailable',
+      phase:'external_demand_first',
+      borrowedFirst:true,
+      externalDemandPrimary:true,
+      ownedExpansionEligible:false,
+      thresholds:AUDIENCE_ACQUISITION_POLICY.ownedExpansionGate,
+      policy:AUDIENCE_ACQUISITION_POLICY.id,
+      reason:String(error?.message||error).slice(0,240)
+    };
   }
 }
 async function growthAssetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
@@ -471,7 +497,7 @@ async function coordinateGrowthOpportunities(env){
       WHERE status='active'`).run().catch(()=>{});
   }
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
-    .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor, ${affiliateCount} affiliate, ${catalogCount} catalog/quality, ${newsCount} What's New and ${searchCount} Search/GEO/AEO opportunities. Audience phase: ${audienceStrategy.phase}. 30d strict sessions: ${audienceStrategy.strictVerifiedHumanSessions30d??'unavailable'}; returning strict visitors: ${audienceStrategy.returningStrictVisitors30d??'unavailable'}. ${audienceStrategy.borrowedFirst?'Existing demand, external distribution and vendor borrowed audiences are explicitly prioritized; owned channels remain support/measurement until the mass-critical gate is reached.': 'Mass-critical gate reached; owned-audience building may now receive normal growth priority.'} ${humanSprintActive()?'Human Acquisition Sprint is active: strict verified human sessions dominate priority; acquisition surfaces, Search, vendor/content amplification and timely news are boosted while affiliate and routine catalog work are subordinated.':'Shared priority state coordinates acquisition, monetization, news, catalog growth and factual quality while keeping affiliate economics separate from editorial ranking.'}`).run().catch(()=>{});
+    .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor, ${affiliateCount} affiliate, ${catalogCount} catalog/quality, ${newsCount} What's New and ${searchCount} Search/GEO/AEO opportunities. Audience phase: ${audienceStrategy.phase}. 30d strict sessions: ${audienceStrategy.strictVerifiedHumanSessions30d??'unavailable'}; proven external acquisition sources: ${audienceStrategy.provenExternalSources30d??'unavailable'}. Existing demand, external distribution and vendor borrowed audiences remain the primary acquisition engine. ${audienceStrategy.ownedExpansionEligible?'Owned channels may now receive additional support because external acquisition has become repeatable, but they do not replace external-demand acquisition.':'Owned channels remain support/measurement until external acquisition reaches the repeatability gate.'} ${humanSprintActive()?'Human Acquisition Sprint is active: strict verified human sessions dominate priority; acquisition surfaces, Search, vendor/content amplification and timely news are boosted while affiliate and routine catalog work are subordinated.':'Shared priority state coordinates acquisition, monetization, news, catalog growth and factual quality while keeping affiliate economics separate from editorial ranking.'}`).run().catch(()=>{});
   return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,gscSnapshot:{generatedAt:gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:directGscPages.length,directOpportunities:normalizedGscPages.length},catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,audienceStrategy,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
