@@ -1,0 +1,42 @@
+name: ToolScout GSC Growth Bridge
+
+on:
+  schedule:
+    - cron: '5 6 * 9 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gsc-growth-bridge
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Refresh GSC snapshot
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+        run: node scripts/sync-gsc-signals.mjs
+      - name: Fail closed on empty or implausible snapshot
+        run: |
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('reports/gsc-signals.json','utf8'));if(!x.generatedAt||!Array.isArray(x.pages)||x.pages.length<20||Number(x.siteTotals?.impressions||0)<100)process.exit(1);console.log(JSON.stringify({generatedAt:x.generatedAt,endDate:x.endDate,pages:x.pages.length,impressions:x.siteTotals.impressions,clicks:x.siteTotals.clicks}))"
+      - name: Commit fresh GSC signal snapshot
+        run: |
+          if git diff --quiet -- reports/gsc-signals.json; then
+            echo "No GSC snapshot change."
+            exit 0
+          fi
+          git config user.name "toolscout-gsc-bridge"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/gsc-signals.json
+          git commit -m "Refresh GSC Growth Brain signals"
+          git pull --rebase origin main
+          git push origin HEAD:main
