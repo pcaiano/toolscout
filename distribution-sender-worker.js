@@ -2,9 +2,11 @@ import base from './distribution-contact-worker.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const MAKE_TOKEN_SHA256='2f9522abe5fb3d87a045b86940f6b5338cc5c9fc3f51ecbc5f5fc31000e3b72c';
+const PUBLIC_HANDOFF_SHA256='a932329e7237021a808ead8d54a2eb4002c827baf275db42ba2f6ce00ced5950';
 
 async function sha256(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function integrationOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!t)return false;if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return (await sha256(t))===MAKE_TOKEN_SHA256}
+async function publicHandoffOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!t)return false;if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return (await sha256(t))===PUBLIC_HANDOFF_SHA256}
 function html(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function displayToolName(row){
   const subject=String(row?.suggested_subject||'').trim();
@@ -160,8 +162,8 @@ export default {
       if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
       return Response.json(await leaseQueue(env,url.searchParams.get('limit')),{headers:JSON_HEADERS});
     }
-    if(url.pathname==='/api/distribution/vendor-amplification/public-candidates'&&request.method==='GET')return Response.json(await publicCandidates(env,url.searchParams.get('limit')),{headers:JSON_HEADERS});
-    if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST')return publicStatus(request,env);
+    if(url.pathname==='/api/distribution/vendor-amplification/public-candidates'&&request.method==='GET'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return Response.json(await publicCandidates(env,url.searchParams.get('limit')),{headers:JSON_HEADERS});}
+    if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined;}
