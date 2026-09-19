@@ -16,6 +16,7 @@ async function suppressTechnicalNoise(env){
     const r=await env.DB.prepare(`UPDATE distribution_opportunities
       SET status='skipped',next_action='Filtered automatically: technical infrastructure host is not an audience-bearing distribution surface.',updated_at=datetime('now')
       WHERE status NOT IN ('live','verified','submitted','pending_review','rejected','policy_blocked','skipped')
+        AND surface_slug NOT IN ('indexnow')
         AND (
           LOWER(action_url) LIKE 'https://api.%'
           OR LOWER(action_url) LIKE 'https://cdn.%'
