@@ -9,6 +9,14 @@ const HUMAN_ACQUISITION_SPRINT=Object.freeze({
   endAt:'2026-09-28T23:00:00.000Z',
   northStar:'strict_verified_human_sessions'
 });
+const HUMAN_ACQUISITION_GSC_TARGETS=Object.freeze([
+  {key:'project-management',cluster:'project_management',path:'/best-project-management-tools',title:'Best Project Management Tools',impressions:93,position:38.66,priority:98},
+  {key:'seo-agencies',cluster:'seo_agencies',path:'/best-seo-tools-for-agencies',title:'Best SEO Tools for Agencies',impressions:727,position:76.02,priority:96},
+  {key:'no-code-automation',cluster:'no_code_automation',path:'/best-no-code-automation-tools',title:'Best No Code Automation Tools',impressions:254,position:74.05,priority:94},
+  {key:'semrush-profile',cluster:'semrush_airtable_profiles',path:'/tools/semrush',title:'Semrush',tool_slug:'semrush',impressions:303,position:55.77,priority:92},
+  {key:'airtable-profile',cluster:'semrush_airtable_profiles',path:'/tools/airtable',title:'Airtable',tool_slug:'airtable',impressions:234,position:73.82,priority:90},
+  {key:'funnel-builders',cluster:'funnel_builders',path:'/best-funnel-builder',title:'Best Funnel Builder',impressions:176,position:76.46,priority:88}
+]);
 function humanSprintActive(now=Date.now()){return now>=Date.parse(HUMAN_ACQUISITION_SPRINT.startAt)&&now<Date.parse(HUMAN_ACQUISITION_SPRINT.endAt);}
 const safe=(v,n=3000)=>String(v??'').slice(0,n);
 async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
@@ -125,6 +133,11 @@ async function coordinateGrowthOpportunities(env){
     for(const tool of Array.isArray(op?.topTools)?op.topTools:[]){
       const slug=String(tool||'').toLowerCase();if(!slug)continue;
       searchBoostByTool.set(slug,Math.max(searchBoostByTool.get(slug)||0,Math.min(15,score*0.2)));
+    }
+  }
+  if(humanSprintActive()){
+    for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
+      if(target.tool_slug)searchBoostByTool.set(target.tool_slug,Math.max(searchBoostByTool.get(target.tool_slug)||0,25));
     }
   }
   const newsByTool=new Map(),nowMs=Date.now();
@@ -317,6 +330,35 @@ async function coordinateGrowthOpportunities(env){
     active++;searchCount++;
   }
   if(humanSprintActive()){
+    for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
+      const actions=['content_amplification','distribution_amplification','search_measurement'];
+      if(target.tool_slug)actions.unshift('vendor_amplification','content_mention');
+      const signals={
+        lane:'human_acquisition_sprint',
+        action:'amplify_gsc_observed_demand',
+        evidence_confidence:'gsc_observed',
+        source:'Google Search Console',
+        evidence_settled_through:'2026-09-16',
+        cluster:target.cluster,
+        asset_path:target.path,
+        asset_url:'https://trytoolscout.org'+target.path,
+        title:target.title,
+        impressions:target.impressions,
+        clicks:0,
+        ctr:0,
+        position:target.position,
+        tool_slug:target.tool_slug||null,
+        north_star:HUMAN_ACQUISITION_SPRINT.northStar,
+        sprint_id:HUMAN_ACQUISITION_SPRINT.id
+      };
+      await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+        VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+        ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+        .bind(`sprint-search:${target.key}`,'search',target.path,target.priority,JSON.stringify(signals),JSON.stringify(actions)).run();
+      active++;searchCount++;
+    }
+  }
+  if(humanSprintActive()){
     await env.DB.prepare(`UPDATE growth_opportunity_state
       SET priority_score=CASE
         WHEN subject_type='surface' THEN MIN(100,priority_score+20)
@@ -353,7 +395,7 @@ async function runGrowthRndAudit(env){
   const counts=Object.fromEntries(types.map(x=>[x.subject_type,{count:Number(x.n||0),max:Number(x.max_score||0)}]));
   const experiments=[];
   const add=(key,type,subject,hypothesis,steps,signal)=>experiments.push({key,type,subject,hypothesis,steps,signal});
-  if((counts.search?.max||0)>=65)add('rnd:search-amplification','search_amplification','search','Observed search demand should compound faster when Content and Distribution reinforce the same intent.',['content_amplification','distribution_amplification','measure_search_lift'],'search_sessions_and_impressions');
+  if((counts.search?.max||0)>=65)add('rnd:search-amplification','search_amplification','search',humanSprintActive()?'Observed GSC demand should compound faster when Content and Distribution reinforce the same intent during the Human Acquisition Sprint.':'Observed search demand should compound faster when Content and Distribution reinforce the same intent.',['content_amplification','distribution_amplification','measure_search_lift'],humanSprintActive()?'strict_verified_human_sessions':'search_sessions_and_impressions');
   if((counts.news_update?.count||0)>0)add('rnd:news-compounding','news_compounding','whats_new','Verified product changes can create timely search, content, catalog and vendor-distribution opportunities.',['catalog_impact_review','content_amplification','search_update_angle','vendor_amplification'],'attributed_sessions_from_news');
   if(!humanSprintActive()&&(counts.affiliate?.max||0)>=70)add('rnd:affiliate-leakage','affiliate_leakage_recovery','affiliate','High-priority affiliate leakage should be closed before lower-value coverage work.',['prepare_application','capture_link','activate_route','verify_route'],'monetized_outbound');
   if(!humanSprintActive()&&((counts.catalog_category?.count||0)>0||(counts.catalog_gap?.count||0)>0))add('rnd:catalog-expansion','catalog_expansion','catalog','Coverage gaps can create new searchable and monetizable decision surfaces when official-source quality gates pass.',['discover_candidates','verify_first_party','admit_coverage_only'],'qualified_catalog_coverage');
