@@ -18,7 +18,7 @@ function label(url){try{const p=new URL(url).pathname.split('/').filter(Boolean)
 async function brainSprintPaths(env){
   try{
     const q=await env.DB.prepare(`SELECT subject_key,opportunity_key,priority_score,signal_json FROM growth_opportunity_state
-      WHERE status='active' AND subject_type='search'
+      WHERE status='active' AND subject_type='search' AND subject_key NOT IN ('/','/tools')
         AND (opportunity_key LIKE 'sprint-search:%' OR COALESCE(json_extract(signal_json,'$.evidence_confidence'),'')='meaningful')
       ORDER BY priority_score DESC,COALESCE(CAST(json_extract(signal_json,'$.impressions') AS INTEGER),0) DESC
       LIMIT 18`).all();
