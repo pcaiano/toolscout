@@ -178,9 +178,8 @@ async function visitorSnapshot(env){
     env.DB.prepare(`SELECT
       COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN h.session_id END) strictSessions24,
       COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN h.session_id END) strictSessionsToday,
-      COUNT(DISTINCT CASE WHEN g.created_at>=? THEN g.session_id END) browserSessions24
+      (SELECT COUNT(DISTINCT session_id) FROM traffic_guard_events WHERE decision='allowed' AND created_at>=?) browserSessions24
       FROM traffic_human_evidence h
-      LEFT JOIN traffic_guard_events g ON g.session_id=h.session_id AND g.decision='allowed'
       WHERE h.first_evidence_at>=?`).bind(last24Start,todayStart,last24Start,last24Start).first(),
     env.DB.prepare(`SELECT day,unique_visitors visitors FROM command_center_daily_metrics WHERE day>=? ORDER BY day ASC`).bind(trendStart).all().catch(()=>({results:[]}))
   ]);
