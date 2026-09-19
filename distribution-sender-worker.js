@@ -2,11 +2,11 @@ import base from './distribution-contact-worker.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const MAKE_TOKEN_SHA256='2f9522abe5fb3d87a045b86940f6b5338cc5c9fc3f51ecbc5f5fc31000e3b72c';
-const PUBLIC_HANDOFF_SHA256='a932329e7237021a808ead8d54a2eb4002c827baf275db42ba2f6ce00ced5950';
+const PUBLIC_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
 
 async function sha256(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function integrationOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!t)return false;if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return (await sha256(t))===MAKE_TOKEN_SHA256}
-async function publicHandoffOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!t)return false;if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return (await sha256(t))===PUBLIC_HANDOFF_SHA256}
+async function publicHandoffOk(request,env){const bearer=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(bearer&&env.ADMIN_TOKEN&&bearer===env.ADMIN_TOKEN)return true;const token=String(request.headers.get('X-ToolScout-Handoff')||'');return Boolean(token)&&(await sha256(token))===PUBLIC_HANDOFF_SHA256}
 function html(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function displayToolName(row){
   const subject=String(row?.suggested_subject||'').trim();
