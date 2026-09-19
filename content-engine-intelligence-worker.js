@@ -300,8 +300,11 @@ export async function runContentSocialIntelligenceCycle(env){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE growth_action_events SET status='legacy_unverified',updated_at=datetime('now') WHERE status='prepared'`).run().catch(()=>{});
   const profiles=await refreshProfiles(env),policies=await refreshPolicies(env);
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentintel_${crypto.randomUUID()}`,'content_social_intelligence_refresh','completed','content_engine',`Content social intelligence: ${profiles.scanned} profile sites scanned, ${profiles.verified} verified social profiles, ${policies.scanned} affiliate policies checked, ${policies.allowed} verified for organic-social affiliate use.`).run().catch(()=>{});
-  return {ok:true,profiles,policies};
+  const workDone=Number(profiles.scanned||0)+Number(policies.scanned||0);
+  if(workDone>0){
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentintel_${crypto.randomUUID()}`,'content_social_intelligence_refresh','completed','content_engine',`Content social intelligence performed ${workDone} due checks: ${profiles.scanned} profile sites and ${policies.scanned} affiliate policies. Empty no-change cycles are not persisted.`).run().catch(()=>{});
+  }
+  return {ok:true,profiles,policies,workDone,write_policy:'due_only'};
 }
 
 async function sha256(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'')));return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
