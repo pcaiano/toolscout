@@ -288,9 +288,6 @@ export default {
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
-    const trigger=event?.cron||'scheduled';
-    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
-    return result;
+    return base.scheduled?base.scheduled(event,env,ctx):undefined;
   }
 };
