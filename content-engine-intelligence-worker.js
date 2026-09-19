@@ -207,6 +207,7 @@ function editorialTargets(family,path='/',campaign='content_engine_v21'){
 }
 async function buildBrief(env,family,{issue=false}={}){
   await ensureSchema(env);
+  await env.DB.prepare(`UPDATE growth_action_events SET status='legacy_unverified',updated_at=datetime('now') WHERE status='prepared'`).run().catch(()=>{});
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
   const growth=await env.DB.prepare(`SELECT subject_type,subject_key,priority_score,opportunity_key FROM growth_opportunity_state WHERE status='active' AND subject_type IN ('tool','news_update') ORDER BY priority_score DESC LIMIT 80`).all().catch(()=>({results:[]}));
   const sprintGrowth=await env.DB.prepare(`SELECT subject_key,priority_score,opportunity_key,signal_json FROM growth_opportunity_state WHERE status='active' AND subject_type='search' AND opportunity_key LIKE 'sprint-search:%' ORDER BY priority_score DESC LIMIT 12`).all().catch(()=>({results:[]}));
