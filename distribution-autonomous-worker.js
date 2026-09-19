@@ -9,13 +9,15 @@ const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|acc
 const AUTH_RE=/(account required|sign in|login required|api key|bearer token|oauth)/i;
 const ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add)/i;
 const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|registry|submit)/i;
-const QUALIFY_LIMIT=20;
-const EXECUTION_LIMIT=8;
+const QUALIFY_LIMIT=4;
+const EXECUTION_LIMIT=3;
 const RESEARCH_COOLDOWN_HOURS=12;
 function safe(v,n=4000){return String(v??'').slice(0,n)}
 function host(v){try{return new URL(v).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
+const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets|asset|img|images|media|js|css|fonts|edge|storage)\./i;
+function isTechnicalSurface(value){const h=host(value);return TECHNICAL_HOST_RE.test(h)||/(?:githubassets\.com|githubusercontent\.com)$/i.test(h)}
 function sameHostFamily(a,b){const x=host(a),y=host(b);return x===y||x.endsWith('.'+y)||y.endsWith('.'+x)}
-async function text(url,timeout=8000){try{const r=await fetch(url,{headers:{'User-Agent':'ToolScout-Distribution-Qualifier/1.0','Accept':'text/html,application/json;q=0.9,*/*;q=0.8'},redirect:'follow',signal:AbortSignal.timeout(timeout)});if(!r.ok)return null;return {url:r.url,contentType:r.headers.get('content-type')||'',body:(await r.text()).slice(0,800000)}}catch{return null}}
+async function text(url,timeout=4000){try{const r=await fetch(url,{headers:{'User-Agent':'ToolScout-Distribution-Qualifier/1.0','Accept':'text/html,application/json;q=0.9,*/*;q=0.8'},redirect:'follow',signal:AbortSignal.timeout(timeout)});if(!r.ok)return null;return {url:r.url,contentType:r.headers.get('content-type')||'',body:(await r.text()).slice(0,800000)}}catch{return null}}
 function links(html,base){const out=new Set();for(const m of String(html||'').matchAll(/href=["']([^"']+)["']/gi)){try{const u=new URL(m[1],base);if(u.protocol==='https:')out.add(u.href)}catch{}}return [...out]}
 const ACTION_ROUTE_RE=/(submit|submission|add(?:-|_|\/)?(?:tool|startup|product)|new(?:-|_|\/)?(?:tool|startup|product)|register|sign(?:-|_|\/)?up|list(?:-|_|\/)?your)/i;
 async function externalRouteFailureCount(env,surfaceSlug){
@@ -44,9 +46,10 @@ async function rediscoverActionUrl(env,row){
       for(const u of links(home.body,home.url))if(sameHostFamily(u,home.url)&&ACTION_ROUTE_RE.test(u))candidates.push(u);
     }
   }catch{}
-  for(const candidate of [...new Set(candidates)].filter(u=>u&&u!==row.action_url).slice(0,16)){
-    const probe=await text(candidate,6000);
-    if(!probe)continue;
+  const probeCandidates=[...new Set(candidates)].filter(u=>u&&u!==row.action_url).slice(0,4);
+  const probed=await Promise.all(probeCandidates.map(async candidate=>({candidate,probe:await text(candidate,3000)})));
+  for(const item of probed){
+    const probe=item.probe;if(!probe)continue;
     try{
       await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,last_checked_at=datetime('now'),next_action=CASE WHEN status='human_action_required' THEN 'Submission route was re-discovered automatically after repeated external verification failures. Use the refreshed action URL for the required human step.' ELSE next_action END,updated_at=datetime('now') WHERE surface_slug=?`).bind(probe.url,row.surface_slug).run();
       await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`route_${crypto.randomUUID()}`,row.surface_slug,'action_url_rediscovered','completed',row.action_url,probe.url,'Persistent external verification failures triggered autonomous action-URL re-discovery.').run();
@@ -58,19 +61,24 @@ async function rediscoverActionUrl(env,row){
 async function refreshPersistentActionUrls(env){
   let checked=0,recovered=0,externalFailures=0;
   try{
-    const q=await env.DB.prepare(`SELECT surface_slug,action_url,status,last_checked_at FROM distribution_opportunities WHERE action_url IS NOT NULL AND status IN ('human_action_required','auth_required','research_required') AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-6 hours')) ORDER BY last_checked_at ASC LIMIT 8`).all();
-    for(const row of q.results||[]){
-      checked++;
-      const probe=await text(row.action_url,5000);
+    const q=await env.DB.prepare(`SELECT surface_slug,action_url,status,last_checked_at FROM distribution_opportunities WHERE action_url IS NOT NULL AND status IN ('human_action_required','auth_required','research_required') AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-6 hours')) ORDER BY last_checked_at ASC LIMIT 3`).all();
+    const results=await Promise.all((q.results||[]).map(async row=>{
+      if(isTechnicalSurface(row.action_url)){
+        await env.DB.prepare(`UPDATE distribution_opportunities SET status='skipped',human_required=0,next_action='Technical infrastructure host excluded from distribution discovery.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run().catch(()=>{});
+        return {checked:1,recovered:0,externalFailure:0};
+      }
+      const probe=await text(row.action_url,3000);
       if(probe){
         await env.DB.prepare(`UPDATE distribution_opportunities SET last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run();
-        continue;
+        return {checked:1,recovered:0,externalFailure:0};
       }
-      externalFailures++;
       await recordExternalRouteFailure(env,row,'action_url_verification_failed');
       const found=await rediscoverActionUrl(env,row);
-      if(found)recovered++;
-    }
+      return {checked:1,recovered:found?1:0,externalFailure:1};
+    }));
+    checked=results.reduce((n,x)=>n+x.checked,0);
+    recovered=results.reduce((n,x)=>n+x.recovered,0);
+    externalFailures=results.reduce((n,x)=>n+x.externalFailure,0);
   }catch{}
   return {checked,recovered,externalFailures};
 }
@@ -165,7 +173,7 @@ function openApiAdapter(spec,source,homepage){
     const endpoint=new URL(path,serverBase(spec,source)).toString();
     if(!sameHostFamily(endpoint,homepage))continue;
     const blob=JSON.stringify({summary:op.summary,description:op.description,schema}).slice(0,12000);
-    if(BLOCK_RE.test(blob))continue;
+    if(POLICY_BLOCK_RE.test(blob)||HUMAN_BLOCK_RE.test(blob))continue;
     const security=operationSecurity(spec,op),authRequired=Array.isArray(security)&&security.length>0;
     const verification=verificationFromSpec(spec,source,homepage)||{};
     return {
@@ -179,12 +187,10 @@ function openApiAdapter(spec,source,homepage){
   return null;
 }
 async function findOpenApi(homepage,html){
-  const guesses=[...links(html,homepage).filter(u=>DOC_RE.test(u)).slice(0,10),new URL('/openapi.json',homepage).toString(),new URL('/api/openapi.json',homepage).toString(),new URL('/swagger.json',homepage).toString(),new URL('/.well-known/openapi.json',homepage).toString()];
-  const seen=new Set();
-  for(const u of guesses){
-    if(seen.has(u)||!sameHostFamily(u,homepage))continue;
-    seen.add(u);
-    const r=await text(u);
+  const guesses=[...links(html,homepage).filter(u=>DOC_RE.test(u)).slice(0,2),new URL('/openapi.json',homepage).toString(),new URL('/swagger.json',homepage).toString()];
+  const unique=[...new Set(guesses)].filter(u=>sameHostFamily(u,homepage)).slice(0,4);
+  const probes=await Promise.all(unique.map(u=>text(u,2500)));
+  for(const r of probes){
     if(!r)continue;
     try{
       const j=JSON.parse(r.body);
@@ -196,9 +202,7 @@ async function findOpenApi(homepage,html){
   }
   return null;
 }
-async function relatedPolicyText(homepage,html){const terms=links(html,homepage).find(u=>/(terms|terms-of-service|tos|acceptable-use)/i.test(u));if(!terms)return '';const r=await text(terms,6000);return r?.body||''}
-async function policyBlocked(homepage,html){if(POLICY_BLOCK_RE.test(html))return true;const extra=await relatedPolicyText(homepage,html);return Boolean(extra&&POLICY_BLOCK_RE.test(extra))}
-async function humanBlocked(homepage,html){if(HUMAN_BLOCK_RE.test(html))return true;const extra=await relatedPolicyText(homepage,html);return Boolean(extra&&HUMAN_BLOCK_RE.test(extra))}
+async function relatedPolicyText(homepage,html){const terms=links(html,homepage).find(u=>/(terms|terms-of-service|tos|acceptable-use)/i.test(u));if(!terms)return '';const r=await text(terms,2500);return r?.body||''}
 async function mark(env,row,result,detail){try{await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,row.surface_slug,row.action_url,result,safe(detail,1200)).run();await env.DB.prepare(`UPDATE distribution_opportunities SET status=CASE WHEN status IN ('discovered','candidate') THEN 'research_required' ELSE status END,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run()}catch{}}
 async function storeAutoAdapter(env,row,h,adapter,policyState){
   await env.DB.prepare(`INSERT INTO distribution_auto_adapters(surface_slug,source_url,endpoint,method,content_type,payload_template_json,confidence,policy_state,verification_source,verification_endpoint,public_url,verification_method,auth_type,auth_detail,last_checked_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET source_url=excluded.source_url,endpoint=excluded.endpoint,method=excluded.method,content_type=excluded.content_type,payload_template_json=excluded.payload_template_json,confidence=excluded.confidence,policy_state=excluded.policy_state,verification_source=excluded.verification_source,verification_endpoint=excluded.verification_endpoint,public_url=excluded.public_url,verification_method=excluded.verification_method,auth_type=excluded.auth_type,auth_detail=excluded.auth_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
@@ -206,6 +210,11 @@ async function storeAutoAdapter(env,row,h,adapter,policyState){
 }
 async function qualifyOne(env,row){
   let effectiveRow=row;
+  if(isTechnicalSurface(row.action_url)){
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='skipped',human_required=0,next_action='Technical infrastructure host excluded from distribution discovery.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run().catch(()=>{});
+    await mark(env,row,'skipped','technical_infrastructure_host');
+    return 'skipped';
+  }
   let h=await text(row.action_url);
   if(!h){
     await recordExternalRouteFailure(env,row,'homepage_unreachable');
@@ -213,12 +222,13 @@ async function qualifyOne(env,row){
     if(recovered){effectiveRow={...row,action_url:recovered.url};h=recovered.page}
   }
   if(!h){await mark(env,effectiveRow,'research_required','homepage_unreachable');return 'research_required'}
-  if(await policyBlocked(h.url,h.body)){
+  const relatedPolicy=await relatedPolicyText(h.url,h.body);
+  if(POLICY_BLOCK_RE.test(h.body)||(relatedPolicy&&POLICY_BLOCK_RE.test(relatedPolicy))){
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='policy_blocked',human_required=0,next_action='Autonomous policy scan found a payment, reciprocal-link or anti-automation blocker. Keep suppressed unless policy changes.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
     await mark(env,effectiveRow,'policy_blocked','policy_blocker');
     return 'policy_blocked';
   }
-  if(await humanBlocked(h.url,h.body)){
+  if(HUMAN_BLOCK_RE.test(h.body)||(relatedPolicy&&HUMAN_BLOCK_RE.test(relatedPolicy))){
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Autonomous research exhausted safe routes and detected a genuine human-only gate such as CAPTCHA or explicit terms confirmation.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
     await mark(env,effectiveRow,'human_action_required','hard_human_gate');
     return 'human_action_required';
@@ -267,18 +277,18 @@ async function qualify(env){
       )
     ORDER BY CASE WHEN o.status='ready_to_submit' THEN 0 WHEN o.status IN ('discovered','candidate') THEN 1 ELSE 2 END,o.distribution_score DESC,o.last_checked_at ASC
     LIMIT ${QUALIFY_LIMIT}`).all();
-  let checked=0,ready=0,auth=0,blocked=0,human=0,research=0;
-  for(const row of q.results||[]){
-    checked++;
-    const r=await qualifyOne(env,row);
+  const outcomes=await Promise.all((q.results||[]).map(row=>qualifyOne(env,row)));
+  let checked=outcomes.length,ready=0,auth=0,blocked=0,human=0,research=0,skipped=0;
+  for(const r of outcomes){
     if(r==='ready_to_submit')ready++;
     else if(r==='auth_required')auth++;
     else if(r==='policy_blocked')blocked++;
     else if(r==='human_action_required')human++;
+    else if(r==='skipped')skipped++;
     else research++;
   }
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,'autonomous_distribution_qualification','completed','distribution_engine',`Autonomous qualification checked ${checked} surface(s): ${ready} verified no-auth adapter(s), ${auth} authenticated adapter(s) awaiting one-time credentials, ${blocked} policy blocked, ${human} human-only, ${research} still research-required. Research cooldown ${RESEARCH_COOLDOWN_HOURS}h; per-cycle limit ${QUALIFY_LIMIT}.`).run();
-  return {ok:true,checked,ready,authRequired:auth,blocked,human,research,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT};
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,'autonomous_distribution_qualification','completed','distribution_engine',`Autonomous qualification checked ${checked} surface(s): ${ready} verified no-auth adapter(s), ${auth} authenticated adapter(s) awaiting one-time credentials, ${blocked} policy blocked, ${human} human-only, ${research} still research-required, ${skipped} technical hosts skipped. Research cooldown ${RESEARCH_COOLDOWN_HOURS}h; per-cycle limit ${QUALIFY_LIMIT}.`).run();
+  return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT};
 }
 function externalEvidenceUrl(value,endpoint){
   try{
@@ -494,6 +504,6 @@ export default {
   async scheduled(event,env,ctx){
     if(base.scheduled)await base.scheduled(event,env,ctx);
     const trigger=event?.cron||'scheduled';
-    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>cycle(env)).catch(()=>{}));
+    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
   }
 };
