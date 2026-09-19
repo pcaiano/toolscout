@@ -9,8 +9,6 @@ import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-w
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 
 const STATS_CACHE_TTL_SECONDS = 30;
-const AUDIT_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
-async function auditHandoffOk(request){const token=String(request.headers.get('X-ToolScout-Handoff')||'');if(!token)return false;const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token));const hex=[...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('');return hex===AUDIT_HANDOFF_SHA256;}
 
 const ANALYTICS_PATHS = new Set([
   '/analytics',
@@ -329,46 +327,13 @@ async function resilientStatsResponse(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/audit/runtime-finalize-20260919'){
-      if(!(await auditHandoffOk(request))) return Response.json({error:'unauthorized'},{status:401,headers:{'Cache-Control':'no-store'}});
-      const job=url.searchParams.get('job');
-      if(job==='cleanup'){
-        const r=await env.DB.prepare(`UPDATE distribution_editorial_queue SET status='retired_no_safe_executor',human_required=0,updated_at=datetime('now') WHERE status IN ('autonomy_pending','prepared') AND channel_type IN ('community','community_stack')`).run();
-        return Response.json({ok:true,job,changed:Number(r?.meta?.changes||r?.changes||0)},{headers:{'Cache-Control':'no-store'}});
-      }
-      if(job==='autonomous'){
-        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'deep_audit_finalize'},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
-        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
-      }
-      if(job==='network'){
-        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:'deep_audit_finalize'},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
-        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
-      }
-      if(job==='affiliate'){
-        ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,'deep_audit_finalize').catch(()=>{}));
-        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
-      }
-      if(job==='catalog'){
-        ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'deep_audit_finalize'},()=>verifyCatalogBatch(env)).catch(()=>{}));
-        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
-      }
-      if(job==='content'){
-        ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:'deep_audit_finalize'},()=>runContentSocialIntelligenceCycle(env)).catch(()=>{}));
-        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
-      }
-      if(job==='operating'){
-        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:'deep_audit_finalize'},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
-        return Response.json({ok:true,started:job},{status:202,headers:{'Cache-Control':'no-store'}});
-      }
-      return Response.json({error:'invalid_job'},{status:400,headers:{'Cache-Control':'no-store'}});
-    }
     if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health'){
       let assetStatus=null,assetLocation=null;
       try{
         const probe=await env.ASSETS.fetch(new Request(new URL('/analytics-v2',request.url).toString(),{method:'GET'}));
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
-      return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},buildContract:'2026-09-19.4'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},buildContract:'2026-09-19.5'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
