@@ -1,41 +1,14 @@
-name: D1 Quota Safe Worker Deploy
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/d1-quota-safe-worker-deploy.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-worker-production
-  cancel-in-progress: false
-
 jobs:
-  deploy-write-fix:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Validate D1 write controls
-        run: |
-          node --check distribution-network-worker.js
-          node --check affiliate-coverage-cycle-worker.js
-          node --check catalog-autonomy-worker.js
-          node --check distribution-autonomous-worker.js
-          node --check distribution-submission-worker.js
-          node --check content-engine-intelligence-worker.js
-          node --check command-center-light-theme-worker.js
-
-      - name: Deploy Worker without D1 migrations
-        run: npx wrangler deploy --config wrangler.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
