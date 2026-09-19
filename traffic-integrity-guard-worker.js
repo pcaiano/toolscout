@@ -46,7 +46,29 @@ async function ensureGuardSchema(env){
       original_classification TEXT,
       first_confirmed_at TEXT,
       quarantined_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`)
+    )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_human_evidence (
+      session_id TEXT PRIMARY KEY,
+      visitor_id TEXT,
+      evidence_type TEXT NOT NULL,
+      evidence_strength INTEGER NOT NULL DEFAULT 1,
+      interaction_count INTEGER NOT NULL DEFAULT 0,
+      first_path TEXT,
+      last_path TEXT,
+      source TEXT,
+      referrer_host TEXT,
+      country TEXT,
+      asn INTEGER,
+      first_evidence_at TEXT NOT NULL DEFAULT (datetime('now')),
+      last_evidence_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_created ON traffic_human_evidence(first_evidence_at)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_visitor ON traffic_human_evidence(visitor_id,first_evidence_at)`),
+    env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('strict_human_tracking_started_at',datetime('now'))`)
   ]);
   })().catch(error=>{guardSchemaReady=null;throw error});
   return guardSchemaReady;
@@ -75,6 +97,41 @@ async function markSynthetic(env,sessionId,source='traffic-guard'){
   if(!UUID.test(String(sessionId||'')))return;
   await env.DB.prepare(SESSION_UPSERT_SQL).bind(sessionId,source,0,SESSION_CLASSIFICATIONS.SYNTHETIC).run();
 }
+async function markStrictHuman(env,request,body,evidenceType,strength=1){
+  const sessionId=String(body?.session_id||''),visitorId=UUID.test(String(body?.visitor_id||''))?String(body.visitor_id):null;
+  if(!UUID.test(sessionId))return false;
+  await ensureGuardSchema(env);
+  const path=safePath(body?.path),source=String(body?.source||'direct').slice(0,100),referrer=body?.referrer_host==null?null:String(body.referrer_host).slice(0,120);
+  const country=String(request.cf?.country||'').slice(0,8)||null,asn=Number.isFinite(Number(request.cf?.asn))?Number(request.cf.asn):null;
+  const interactions=Math.max(0,Number(body?.browser_proof?.trusted_interaction_count??body?.browser_proof?.interaction_count??0)||0);
+  await env.DB.prepare(`INSERT INTO traffic_human_evidence(
+      session_id,visitor_id,evidence_type,evidence_strength,interaction_count,first_path,last_path,source,referrer_host,country,asn,first_evidence_at,last_evidence_at
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))
+    ON CONFLICT(session_id) DO UPDATE SET
+      visitor_id=COALESCE(traffic_human_evidence.visitor_id,excluded.visitor_id),
+      evidence_type=CASE WHEN excluded.evidence_strength>=traffic_human_evidence.evidence_strength THEN excluded.evidence_type ELSE traffic_human_evidence.evidence_type END,
+      evidence_strength=MAX(traffic_human_evidence.evidence_strength,excluded.evidence_strength),
+      interaction_count=MAX(traffic_human_evidence.interaction_count,excluded.interaction_count),
+      last_path=excluded.last_path,
+      source=COALESCE(traffic_human_evidence.source,excluded.source),
+      referrer_host=COALESCE(traffic_human_evidence.referrer_host,excluded.referrer_host),
+      country=COALESCE(traffic_human_evidence.country,excluded.country),
+      asn=COALESCE(traffic_human_evidence.asn,excluded.asn),
+      last_evidence_at=datetime('now')`)
+    .bind(sessionId,visitorId,evidenceType,Math.max(1,Number(strength)||1),interactions,path,path,source,referrer,country,asn).run();
+  return true;
+}
+async function handleHumanEvidence(request,env,ctx,body){
+  const headers=jsonHeaders(),classification=classifySessionRequest(request),sessionId=String(body?.session_id||'');
+  if(classification!==SESSION_CLASSIFICATIONS.LIKELY_HUMAN||!UUID.test(sessionId))return Response.json({ok:false,recorded:false,reason:'not_eligible'},{status:202,headers});
+  const proof=body?.browser_proof||{},interactions=Math.max(0,Number(proof.trusted_interaction_count??proof.interaction_count??0)||0);
+  if(proof.webdriver===true||interactions<1)return Response.json({ok:false,recorded:false,reason:'trusted_interaction_required'},{status:409,headers});
+  await ensureGuardSchema(env);
+  const allowed=await env.DB.prepare(`SELECT 1 ok FROM traffic_guard_events WHERE session_id=? AND decision='allowed' LIMIT 1`).bind(sessionId).first().catch(()=>null);
+  if(!allowed?.ok)return Response.json({ok:false,recorded:false,reason:'browser_validation_required'},{status:409,headers});
+  await markStrictHuman(env,request,body,'trusted_interaction',3);
+  return Response.json({ok:true,recorded:true,strict_human:true,evidence:'trusted_interaction'},{headers});
+}
 async function handlePageConfirmation(request,env,ctx,body){
   const headers=jsonHeaders();
   const classification=classifySessionRequest(request);
@@ -89,6 +146,7 @@ async function handlePageConfirmation(request,env,ctx,body){
   const path=safePath(body?.path);
   const source=String(body?.source||'direct').toLowerCase();
   const referrer=String(body?.referrer_host||'').trim();
+  if(source==='internal-test'||source==='health-check'||source==='synthetic')return Response.json({ok:true,recorded:false,reason:'internal_or_synthetic_source'},{status:202,headers});
   const suspiciousDirect=(!referrer&&(source==='direct'||source==='browser-confirm'||!source))?1:0;
   const insert=await env.DB.prepare(`INSERT INTO traffic_guard_events
     (fingerprint,ua_hash,session_id,path,country,asn,suspicious_direct,decision,created_at)
@@ -117,6 +175,10 @@ async function handlePageConfirmation(request,env,ctx,body){
     return Response.json({ok:true,recorded:false,classification:SESSION_CLASSIFICATIONS.SYNTHETIC,guard:{decision:'blocked',reason}},{status:202,headers});
   }
   if(guardId)await env.DB.prepare(`UPDATE traffic_guard_events SET decision='allowed',reason='browser_proof_and_rate_ok' WHERE id=?`).bind(guardId).run();
+  const pathState=await env.DB.prepare(`SELECT COUNT(DISTINCT path) paths FROM traffic_guard_events WHERE session_id=? AND decision='allowed'`).bind(sessionId).first().catch(()=>null);
+  const trustedInteractions=Math.max(0,Number(body?.browser_proof?.trusted_interaction_count??body?.browser_proof?.interaction_count??0)||0);
+  if(trustedInteractions>0)await markStrictHuman(env,request,body,'trusted_interaction',3);
+  else if(Number(pathState?.paths||0)>=2)await markStrictHuman(env,request,body,'multi_page_navigation',2);
   return base.fetch(request,env,ctx);
 }
 async function handleEvents(request,env,ctx){
@@ -125,16 +187,34 @@ async function handleEvents(request,env,ctx){
   if(!type.startsWith('application/json'))return base.fetch(request,env,ctx);
   let body;
   try{body=JSON.parse(await request.clone().text())}catch{return base.fetch(request,env,ctx)}
+  if(body?.event_type==='human_evidence')return handleHumanEvidence(request,env,ctx,body);
   if(body?.event_type!=='page_confirmed')return base.fetch(request,env,ctx);
   return handlePageConfirmation(request,env,ctx,body);
 }
 function guardClientScript(){
-  return `<script data-toolscout-browser-guard="1">(function(){try{if(window.__toolscoutBrowserGuard)return;window.__toolscoutBrowserGuard=true;var uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,visibleStart=document.visibilityState==='visible'?performance.now():null,interaction=0;['pointerdown','touchstart','keydown','wheel'].forEach(function(k){addEventListener(k,function(){interaction++},{passive:true,once:true})});document.addEventListener('visibilitychange',function(){visibleStart=document.visibilityState==='visible'?performance.now():null});function clean(v,n){return String(v||'').replace(/[^A-Za-z0-9._:&=/-]/g,'').slice(0,n||100)}function sourceInfo(){var source='direct',refHost=null;try{var q=new URLSearchParams(location.search),utm=['utm_source','utm_medium','utm_campaign'].map(function(k){var x=clean(q.get(k));return x?k+'='+x:''}).filter(Boolean).join('&');if(utm)source=clean(utm);else if(q.get('source'))source=clean(q.get('source'));else if(document.referrer){var u=new URL(document.referrer),h=u.hostname.replace(/^www\\./,'');if(h&&h!==location.hostname){refHost=h.slice(0,120);source=clean('ref:'+h)}}}catch(e){}return {source:source,referrer_host:refHost}}function session(){try{var s=JSON.parse(localStorage.getItem('toolscout_session_v2')||'null');return s&&uuid.test(String(s.id||''))?s.id:null}catch(e){return null}}function send(){if(document.visibilityState!=='visible'||visibleStart==null){setTimeout(send,350);return}var ms=Math.round(performance.now()-visibleStart);if(ms<2100){setTimeout(send,Math.max(150,2100-ms));return}var sid=session();if(!sid){setTimeout(send,180);return}try{if(localStorage.getItem('toolscout_page_confirmed_v1')===sid)return}catch(e){}var info=sourceInfo(),eid='evt_'+crypto.randomUUID(),payload={event_id:eid,session_id:sid,event_type:'page_confirmed',path:location.pathname.slice(0,200)||'/',source:info.source,referrer_host:info.referrer_host,browser_proof:{version:1,visible_ms:ms,webdriver:navigator.webdriver===true,interaction_count:interaction,screen_w:Number(screen&&screen.width||0),screen_h:Number(screen&&screen.height||0)}};fetch('/api/events',{method:'POST',credentials:'same-origin',keepalive:true,headers:{'content-type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json().catch(function(){return {}}).then(function(d){if(r.ok&&d&&d.ok&&d.recorded!==false){try{localStorage.setItem('toolscout_page_confirmed_v1',sid)}catch(e){}}})}).catch(function(){})}setTimeout(send,2200)}catch(e){}})();</script>`;
+  return `<script data-toolscout-browser-guard="2">(function(){try{
+    if(window.__toolscoutBrowserGuard)return;window.__toolscoutBrowserGuard=true;
+    var q0=new URLSearchParams(location.search);if(q0.get('ts_internal_check')==='1'||q0.get('source')==='internal-test')return;
+    var uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,visibleStart=document.visibilityState==='visible'?performance.now():null,interaction=0,evidenceSent=false;
+    document.addEventListener('visibilitychange',function(){visibleStart=document.visibilityState==='visible'?performance.now():null});
+    function clean(v,n){return String(v||'').replace(/[^A-Za-z0-9._:&=/-]/g,'').slice(0,n||100)}
+    function sourceInfo(){var source='direct',refHost=null;try{var q=new URLSearchParams(location.search),utm=['utm_source','utm_medium','utm_campaign'].map(function(k){var x=clean(q.get(k));return x?k+'='+x:''}).filter(Boolean).join('&');if(utm)source=clean(utm);else if(q.get('source'))source=clean(q.get('source'));else if(document.referrer){var u=new URL(document.referrer),h=u.hostname.replace(/^www\\./,'');if(h&&h!==location.hostname){refHost=h.slice(0,120);source=clean('ref:'+h)}}}catch(e){}return {source:source,referrer_host:refHost}}
+    function localId(key){try{var x=JSON.parse(localStorage.getItem(key)||'null'),id=x&&String(x.id||'');return uuid.test(id)?id:null}catch(e){return null}}
+    function session(){return localId('toolscout_session_v2')}
+    function visitor(){return localId('toolscout_visitor_v1')}
+    function proof(){return {version:1,visible_ms:visibleStart==null?0:Math.max(0,Math.round(performance.now()-visibleStart)),webdriver:navigator.webdriver===true,interaction_count:interaction,trusted_interaction_count:interaction,screen_w:Number(screen&&screen.width||0),screen_h:Number(screen&&screen.height||0)}}
+    function post(payload){return fetch('/api/events',{method:'POST',credentials:'same-origin',keepalive:true,headers:{'content-type':'application/json'},body:JSON.stringify(payload)})}
+    function sendEvidence(tries){if(evidenceSent||interaction<1)return;var sid=session();if(!sid){if((tries||0)<8)setTimeout(function(){sendEvidence((tries||0)+1)},350);return}var info=sourceInfo(),payload={event_id:'evt_'+crypto.randomUUID(),session_id:sid,visitor_id:visitor(),event_type:'human_evidence',path:location.pathname.slice(0,200)||'/',source:info.source,referrer_host:info.referrer_host,browser_proof:proof()};post(payload).then(function(r){if(r.ok){evidenceSent=true;try{localStorage.setItem('toolscout_human_evidence_v1:'+sid,'1')}catch(e){}}else if((tries||0)<8)setTimeout(function(){sendEvidence((tries||0)+1)},500)}).catch(function(){if((tries||0)<8)setTimeout(function(){sendEvidence((tries||0)+1)},500)})}
+    ['pointerdown','touchstart','keydown','wheel'].forEach(function(k){addEventListener(k,function(e){if(e&&e.isTrusted){interaction++;sendEvidence(0)}},{passive:true,once:true})});
+    function sendPage(){if(document.visibilityState!=='visible'||visibleStart==null){setTimeout(sendPage,350);return}var ms=Math.round(performance.now()-visibleStart);if(ms<2100){setTimeout(sendPage,Math.max(150,2100-ms));return}var sid=session();if(!sid){setTimeout(sendPage,180);return}var key='toolscout_page_confirmed_v2:'+sid+':'+location.pathname;try{if(localStorage.getItem(key)==='1')return}catch(e){}var info=sourceInfo(),payload={event_id:'evt_'+crypto.randomUUID(),session_id:sid,visitor_id:visitor(),event_type:'page_confirmed',path:location.pathname.slice(0,200)||'/',source:info.source,referrer_host:info.referrer_host,browser_proof:proof()};post(payload).then(function(r){return r.json().catch(function(){return {}}).then(function(d){if(r.ok&&d&&d.ok&&d.recorded!==false){try{localStorage.setItem(key,'1')}catch(e){}if(interaction>0)sendEvidence(0)}})}).catch(function(){})}
+    setTimeout(sendPage,2200)
+  }catch(e){}})();</script>`;
 }
+
 async function decorate(response){
   if(!response.ok||!isHtml(response))return response;
   let html=await response.text();
-  if(!html.includes('data-toolscout-browser-guard="1"'))html=html.replace(/<\/body>/i,guardClientScript()+'</body>');
+  if(!html.includes('data-toolscout-browser-guard="2"'))html=html.replace(/<\/body>/i,guardClientScript()+'</body>');
   const headers=new Headers(response.headers);
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
@@ -269,11 +349,15 @@ async function augmentHealth(response,env){
   if(!response.ok)return response;
   let data;try{data=await response.json()}catch{return response}
   await ensureGuardSchema(env);
-  const [blocked,quarantined]=await Promise.all([
+  const [blocked,quarantined,strict,meta,browserValidated]=await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) count,MAX(created_at) last_blocked_at FROM traffic_guard_events WHERE decision='blocked' AND created_at>=datetime('now','-24 hours')`).first(),
-    env.DB.prepare(`SELECT COUNT(*) count FROM traffic_quarantine_sessions`).first()
+    env.DB.prepare(`SELECT COUNT(*) count FROM traffic_quarantine_sessions`).first(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions,COUNT(DISTINCT visitor_id) visitors,MAX(last_evidence_at) last_evidence_at FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-24 hours')`).first(),
+    env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`).first(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions FROM traffic_guard_events WHERE decision='allowed' AND created_at>=datetime('now','-24 hours')`).first()
   ]);
-  data.browserGuard={status:'active',minimumVisibleMs:MIN_VISIBLE_MS,blockedAutomation24h:Number(blocked?.count||0),lastBlockedAt:blocked?.last_blocked_at||null,historicalQuarantinedSessions:Number(quarantined?.count||0),rawIpStored:false,rawUserAgentStored:false};
+  data.browserGuard={status:'diagnostic_only',minimumVisibleMs:MIN_VISIBLE_MS,browserValidatedSessions24h:Number(browserValidated?.sessions||0),blockedAutomation24h:Number(blocked?.count||0),lastBlockedAt:blocked?.last_blocked_at||null,historicalQuarantinedSessions:Number(quarantined?.count||0),rawIpStored:false,rawUserAgentStored:false};
+  data.strictHumanTruth={status:'active',version:'strict-human-v1',trackingSince:meta?.value||null,sessions24h:Number(strict?.sessions||0),visitors24h:Number(strict?.visitors||0),lastEvidenceAt:strict?.last_evidence_at||null,evidenceRequired:true,acceptedEvidence:['trusted_interaction','multi_page_navigation','verified_outbound_navigation']};
   const headers=new Headers(response.headers);headers.set('Content-Type','application/json; charset=UTF-8');headers.set('Cache-Control','no-store');headers.delete('Content-Length');
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }

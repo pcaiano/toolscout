@@ -110,6 +110,22 @@ Rules:
 
 The runtime Catalog Autonomy layer exists so freshness and coverage learning continue even while repository CI is in conservation mode.
 
+## Traffic Truth strict-human-v1
+
+ToolScout business traffic no longer treats a browser that merely executes JavaScript and remains visible as a human.
+
+Canonical human sessions require positive evidence in `traffic_human_evidence`:
+
+- a trusted browser interaction observed with `event.isTrusted`;
+- persistent navigation across at least two ToolScout paths within the same first-party session;
+- a first-party verified `/go/` outbound navigation.
+
+Browser Guard remains a diagnostic pre-filter. Its accepted sessions are not business traffic and do not feed the North Star metric, visitor countries, growth attribution or growth learning.
+
+The strict-human baseline begins when `strict_human_tracking_started_at` is created. Earlier Browser Guard history remains available for diagnostics but is excluded from canonical trends.
+
+The system intentionally prefers false negatives to false positives: an engaged reader who never interacts may be missed, but an automated browser that merely renders a page must not be reported as a human business session.
+
 ## Search / GEO / AEO execution under the shared brain
 
 Search intelligence and Search execution no longer operate as independent strategy layers.

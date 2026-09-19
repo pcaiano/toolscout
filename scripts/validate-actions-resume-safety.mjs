@@ -14,7 +14,10 @@ const files={
   funnel:fs.readFileSync('funnel-worker.js','utf8'),
   seoController:fs.readFileSync('scripts/run-organic-growth-controller-v4.mjs','utf8'),
   seoApply:fs.readFileSync('scripts/apply-organic-growth-actions.mjs','utf8'),
-  seoWorkflow:fs.readFileSync('.github/workflows/seo-engine-v2.yml','utf8')
+  seoWorkflow:fs.readFileSync('.github/workflows/seo-engine-v2.yml','utf8'),
+  trafficGuard:fs.readFileSync('traffic-integrity-guard-worker.js','utf8'),
+  trafficLive:fs.readFileSync('traffic-integrity-live-worker.js','utf8'),
+  commandCenter:fs.readFileSync('command-center-integrity-worker.js','utf8')
 };
 const required=policy.required||{};
 if(required.autonomousGrowthBrain&&!files.light.includes(`autonomousGrowthBrain = '${required.autonomousGrowthBrain}'`)&&!files.light.includes(`brain:'${required.autonomousGrowthBrain}'`))fail('shared growth brain contract mismatch');
@@ -29,5 +32,6 @@ if(!files.catalog.includes('rankingEligible:false')||!files.catalog.includes('co
 if(!files.growth.includes('/api/growth/search-directives'))fail('Shared Search directive endpoint is missing');
 if(!files.seoController.includes('shared_growth_directives_required')||!files.seoApply.includes('organic_growth_actions_not_authorized_by_shared_brain'))fail('SEO execution is not gated by the shared growth brain');
 if(!files.seoWorkflow.includes('fetch-shared-growth-directives.mjs'))fail('SEO workflow does not fetch runtime shared-brain directives');
+if(!files.trafficGuard.includes('traffic_human_evidence')||!files.trafficGuard.includes("'trusted_interaction'")||!files.trafficLive.includes("canonicalPopulation:'traffic_human_evidence'")||!files.commandCenter.includes("version:'strict-human-v1'"))fail('strict-human-v1 Traffic Truth contract is missing');
 
 console.log('PASS: mutating GitHub Actions may run against the reviewed shared-growth-v3 contract.');

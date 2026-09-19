@@ -47,7 +47,25 @@ async function ensureOptimizationSchema(env){
         unmonetized_outbound INTEGER NOT NULL DEFAULT 0,
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_command_center_daily_updated ON command_center_daily_metrics(updated_at)`)
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_command_center_daily_updated ON command_center_daily_metrics(updated_at)`),
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_human_evidence (
+        session_id TEXT PRIMARY KEY,
+        visitor_id TEXT,
+        evidence_type TEXT NOT NULL,
+        evidence_strength INTEGER NOT NULL DEFAULT 1,
+        interaction_count INTEGER NOT NULL DEFAULT 0,
+        first_path TEXT,
+        last_path TEXT,
+        source TEXT,
+        referrer_host TEXT,
+        country TEXT,
+        asn INTEGER,
+        first_evidence_at TEXT NOT NULL DEFAULT (datetime('now')),
+        last_evidence_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_created ON traffic_human_evidence(first_evidence_at)`),
+      env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('strict_human_tracking_started_at',datetime('now'))`)
     ]);
   })().catch(error=>{optimizationReady=null;throw error});
   return optimizationReady;
@@ -70,8 +88,8 @@ async function refreshDailyMetrics(env,daysBack=2){
         day,human_sessions,unique_visitors,outbound_clicks,monetized_outbound,unmonetized_outbound,updated_at
       ) VALUES(
         ?,
-        (SELECT COUNT(DISTINCT session_id) FROM traffic_guard_events WHERE decision='allowed' AND created_at>=? AND created_at<?),
-        (SELECT COUNT(DISTINCT visitor_id) FROM confirmed_visitor_events WHERE created_at>=? AND created_at<?),
+        (SELECT COUNT(DISTINCT session_id) FROM traffic_human_evidence WHERE first_evidence_at>=? AND first_evidence_at<?),
+        (SELECT COUNT(DISTINCT v.visitor_id) FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id WHERE h.first_evidence_at>=? AND h.first_evidence_at<?),
         (SELECT COUNT(*) FROM verified_outbound_events WHERE created_at>=? AND created_at<?),
         (SELECT COUNT(*) FROM verified_outbound_events WHERE affiliate_active_at_click=1 AND created_at>=? AND created_at<?),
         (SELECT COUNT(*) FROM verified_outbound_events WHERE (affiliate_active_at_click!=1 OR affiliate_active_at_click IS NULL) AND created_at>=? AND created_at<?),
@@ -139,14 +157,15 @@ async function canonicalSnapshot(env,upstream){
   await ensureOptimizationSchema(env);
   const now=new Date(),today=dayKey(now),month=today.slice(0,7),todayStart=sqliteUtc(zonedMidnight(today)),monthStart=sqliteUtc(zonedMidnight(`${month}-01`)),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<monthStart?last24Start:monthStart;
   const trendStart=dayKey(new Date(now.getTime()-29*86400000));
+  const strictMeta=await first(env,`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`),strictTrackingSince=parseUtc(strictMeta?.value?.value),strictTrackingDay=strictTrackingSince?dayKey(strictTrackingSince):today;
   const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,runsResult]=await Promise.all([
-    first(env,`SELECT COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) monthToDate,MAX(created_at) lastAllowedAt FROM traffic_guard_events WHERE decision='allowed' AND created_at>=?`,[last24Start,todayStart,monthStart,scanStart]),
+    first(env,`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) monthToDate,MAX(last_evidence_at) lastAllowedAt FROM traffic_human_evidence WHERE first_evidence_at>=?`,[last24Start,todayStart,monthStart,scanStart]),
     all(env,`SELECT day,human_sessions sessions FROM command_center_daily_metrics WHERE day>=? ORDER BY day ASC`,[trendStart]),
     first(env,`SELECT COUNT(*) humanOutbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetizedOutbound,SUM(CASE WHEN affiliate_active_at_click!=1 OR affiliate_active_at_click IS NULL THEN 1 ELSE 0 END) unmonetizedOutbound,MAX(created_at) lastOutboundAt FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days')`),
     all(env,`SELECT tool_slug,COUNT(*) humanOutbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetizedOutbound,MAX(created_at) lastOutboundAt FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug ORDER BY humanOutbound DESC,tool_slug ASC`),
-    all(env,`SELECT visitor_id,session_id,path,source,referrer_host,created_at FROM confirmed_visitor_events WHERE created_at>=? ORDER BY created_at ASC`,[todayStart]),
-    all(env,`SELECT visitor_id,session_id,path,source,referrer_host,created_at FROM confirmed_visitor_events WHERE created_at>=? ORDER BY created_at ASC`,[last24Start]),
-    all(env,`SELECT v.visitor_id,v.session_id,v.created_at,COALESCE(vc.country,(SELECT UPPER(g.country) FROM traffic_guard_events g WHERE g.session_id=v.session_id AND g.decision='allowed' AND g.country IS NOT NULL AND g.country!='' ORDER BY g.created_at ASC LIMIT 1)) country FROM confirmed_visitor_events v LEFT JOIN confirmed_visitor_countries vc ON vc.visitor_id=v.visitor_id AND vc.session_id=v.session_id WHERE v.created_at>=? ORDER BY v.created_at ASC`,[monthStart]),
+    all(env,`SELECT v.visitor_id,v.session_id,v.path,v.source,v.referrer_host,h.first_evidence_at created_at FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[todayStart]),
+    all(env,`SELECT v.visitor_id,v.session_id,v.path,v.source,v.referrer_host,h.first_evidence_at created_at FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[last24Start]),
+    all(env,`SELECT v.visitor_id,v.session_id,h.first_evidence_at created_at,COALESCE(vc.country,UPPER(h.country)) country FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id LEFT JOIN confirmed_visitor_countries vc ON vc.visitor_id=v.visitor_id AND vc.session_id=v.session_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[monthStart]),
     first(env,`SELECT event_type,observed_at,created_at FROM audience_events WHERE source='make-audience-engine' AND status='published' ORDER BY created_at DESC LIMIT 1`),
     first(env,`SELECT event_type,content_id,observed_at,created_at FROM audience_events WHERE source='make_content_engine' AND event_type='content_published' AND status='published' ORDER BY created_at DESC LIMIT 1`),
     latestEngineRuns(env).then(value=>({ok:true,value})).catch(error=>({ok:false,error:String(error?.message||error),value:[]}))
@@ -159,14 +178,14 @@ async function canonicalSnapshot(env,upstream){
   const linkedTodaySessions=todayVisitors.ok?(todayVisitors.value||[]).length:null;
   const distinctTodaySessionIds=todayVisitors.ok?new Set((todayVisitors.value||[]).map(row=>String(row.session_id||'')).filter(Boolean)).size:null;
   const uniqueTodayVisitors=todayVisitors.ok?new Set((todayVisitors.value||[]).map(row=>String(row.visitor_id||'')).filter(Boolean)).size:null;
-  const canonicalToday=distinctTodaySessionIds==null?(sessionRow?finiteOrNull(sessionRow.today):null):distinctTodaySessionIds;
+  const canonicalToday=sessionRow?finiteOrNull(sessionRow.today):null;
   if(linkedTodaySessions!=null&&distinctTodaySessionIds!=null&&distinctTodaySessionIds<linkedTodaySessions)issues.push({metric:'today_session_identity',severity:'warning',reason:'multiple_visitor_session_links_share_a_session_id'});
   if(distinctTodaySessionIds!=null&&uniqueTodayVisitors!=null&&uniqueTodayVisitors>distinctTodaySessionIds)issues.push({metric:'today_population_alignment',severity:'error',reason:'unique_visitors_exceed_distinct_sessions'});
   const dailyAverage=mtd==null?null:mtd/dayNumber,projectedMonth=dailyAverage==null?null:Math.round(dailyAverage*daysInMonth);
 
   const trendMap=new Map();
   if(trend.ok)for(const row of trend.value||[]){const key=String(row.day||'');if(key)trendMap.set(key,finiteOrNull(row.sessions)||0)}
-  const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),key=dayKey(d);const historical=trend.ok?(trendMap.has(key)?trendMap.get(key):null):null;points.push({day:key,sessions:key===today&&canonicalToday!=null?canonicalToday:historical})}
+  const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),key=dayKey(d);const historical=key<strictTrackingDay?null:(trend.ok?(trendMap.has(key)?trendMap.get(key):null):null);points.push({day:key,sessions:key===today&&canonicalToday!=null?canonicalToday:historical})}
 
   const countryMonth=countryRows.ok?countryBuckets(countryRows.value):null;
   const countryLast24=countryRows.ok?countryBuckets((countryRows.value||[]).filter(row=>String(row.created_at||'')>=last24Start)):null;
@@ -183,14 +202,14 @@ async function canonicalSnapshot(env,upstream){
 
   return {
     status:issues.some(x=>x.severity==='error')?'degraded':issues.length?'warning':'healthy',
-    generatedAt:now.toISOString(),timezone:TIME_ZONE,issues,
-    sources:{d1_guard:sessions.ok?'available':'unavailable',daily_metrics:trend.ok?'available':'unavailable',verified_outbound:outbound.ok?'available':'unavailable',confirmed_visitors:todayVisitors.ok&&last24Visitors.ok?'available':'unavailable',visitor_countries:countryRows.ok?'available':'unavailable',engine_runs:runsResult.ok?'available':'unavailable',gsc:gscFreshness,ga4:ga4Freshness},
-    sessions:sessions.ok?{status:'observed',last24:finiteOrNull(sessionRow.last24),today:canonicalToday,monthToDate:mtd,dailyAverageMTD:dailyAverage,projectedMonth,lastAllowedAt:sessionRow.lastAllowedAt||null,todayPopulation:'distinct confirmed visitor-linked session IDs in the Europe/Lisbon today window',todayLinkRows:linkedTodaySessions,todayDistinctSessionIds:distinctTodaySessionIds,todayUniqueVisitors:uniqueTodayVisitors,todayPopulationAligned:linkedTodaySessions===distinctTodaySessionIds&&uniqueTodayVisitors<=distinctTodaySessionIds}: {status:'unavailable',last24:null,today:null,monthToDate:null,dailyAverageMTD:null,projectedMonth:null,reason:sessions.error,todayPopulationAligned:false},
-    trafficTrend:{status:trend.ok?'observed':'unavailable',metric:'Persisted daily Browser Guard session aggregates; current Lisbon day aligned to live confirmed visitor-linked sessions',windowDays:30,points,generatedAt:now.toISOString(),storage:'command_center_daily_metrics',reason:trend.ok?null:trend.error},
+    generatedAt:now.toISOString(),timezone:TIME_ZONE,strictTrackingSince:strictTrackingSince?.toISOString()||null,issues,
+    sources:{strict_human_evidence:sessions.ok?'available':'unavailable',daily_metrics:trend.ok?'available':'unavailable',verified_outbound:outbound.ok?'available':'unavailable',confirmed_visitors:todayVisitors.ok&&last24Visitors.ok?'available':'unavailable',visitor_countries:countryRows.ok?'available':'unavailable',engine_runs:runsResult.ok?'available':'unavailable',gsc:gscFreshness,ga4:ga4Freshness},
+    sessions:sessions.ok?{status:'observed',last24:finiteOrNull(sessionRow.last24),today:canonicalToday,monthToDate:mtd,dailyAverageMTD:dailyAverage,projectedMonth,lastAllowedAt:sessionRow.lastAllowedAt||null,todayPopulation:'strict verified human sessions with positive evidence in the Europe/Lisbon today window',todayLinkRows:linkedTodaySessions,todayDistinctSessionIds:distinctTodaySessionIds,todayUniqueVisitors:uniqueTodayVisitors,todayPopulationAligned:linkedTodaySessions===distinctTodaySessionIds&&uniqueTodayVisitors<=distinctTodaySessionIds}: {status:'unavailable',last24:null,today:null,monthToDate:null,dailyAverageMTD:null,projectedMonth:null,reason:sessions.error,todayPopulationAligned:false},
+    trafficTrend:{status:trend.ok?'observed':'unavailable',metric:'Persisted daily strict verified human session aggregates',windowDays:30,points,generatedAt:now.toISOString(),storage:'command_center_daily_metrics',reason:trend.ok?null:trend.error},
     outbound:outbound.ok?{status:'observed',windowDays:30,humanOutbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,lastOutboundAt:outRow.lastOutboundAt||null}: {status:'unavailable',windowDays:30,humanOutbound:null,monetizedOutbound:null,unmonetizedOutbound:null,weightedCoverage:null,reason:outbound.error},
     outboundByTool:byTool.ok?byTool.value.map(row=>({tool_slug:row.tool_slug,humanOutbound:finiteOrNull(row.humanOutbound),monetizedOutbound:finiteOrNull(row.monetizedOutbound),lastOutboundAt:row.lastOutboundAt||null})):null,
-    attribution:{status:todayVisitors.ok&&last24Visitors.ok?'observed':'unavailable',definition:'First-touch buckets are calculated only from visitor IDs whose sessions were accepted by Browser Guard.',today:todayVisitors.ok?firstTouchBuckets(todayVisitors.value):null,last24:last24Visitors.ok?firstTouchBuckets(last24Visitors.value):null,generatedAt:now.toISOString()},
-    countries:countryRows.ok?{status:'observed',source:'Cloudflare request country on Browser Guard allowed sessions',definition:'Country is the Cloudflare network-location country code associated with each browser-confirmed visitor session. Raw IP addresses are not stored. VPNs or proxies can affect the reported country.',today:countryToday,last24:countryLast24,monthToDate:countryMonth,generatedAt:now.toISOString()}:{status:'unavailable',source:'Cloudflare request country',definition:'Country data is unavailable for this snapshot.',today:null,last24:null,monthToDate:null,reason:countryRows.error,generatedAt:now.toISOString()},
+    attribution:{status:todayVisitors.ok&&last24Visitors.ok?'observed':'unavailable',definition:'First-touch buckets are calculated only from visitor IDs whose sessions have positive strict-human evidence.',today:todayVisitors.ok?firstTouchBuckets(todayVisitors.value):null,last24:last24Visitors.ok?firstTouchBuckets(last24Visitors.value):null,generatedAt:now.toISOString()},
+    countries:countryRows.ok?{status:'observed',source:'Cloudflare request country on strict-human evidence',definition:'Country is the Cloudflare network-location country code associated only with strict verified human sessions. Raw IP addresses are not stored. VPNs or proxies can affect the reported country.',today:countryToday,last24:countryLast24,monthToDate:countryMonth,generatedAt:now.toISOString()}:{status:'unavailable',source:'Cloudflare request country',definition:'Country data is unavailable for this snapshot.',today:null,last24:null,monthToDate:null,reason:countryRows.error,generatedAt:now.toISOString()},
     engines:{distribution:distributionHealth,affiliate:affiliateHealth,audience:audienceHealth,content:contentHealth}
   };
 }
@@ -204,9 +223,9 @@ function mergeAudit(data,audit){
   d.verifiedOutboundByTool=audit.outboundByTool;
   d.canonicalCommercialTruth={...(d.canonicalCommercialTruth||{}),...audit.outbound,source:'D1 verified_outbound_events',trafficTruth:'first_party_verified_navigation'};
   d.affiliateCoverage={...(d.affiliateCoverage||{}),humanOutboundClicks:audit.outbound.humanOutbound,monetizedLikelyHumanClicks:audit.outbound.monetizedOutbound,unmonetizedLikelyHumanClicks:audit.outbound.unmonetizedOutbound,weightedCoverage:audit.outbound.weightedCoverage,trafficTruth:'first_party_verified_navigation'};
-  d.trafficTruth={...(d.trafficTruth||{}),status:audit.sessions.status==='observed'?'observed':'degraded',primaryMetric:'Browser Guard sessions plus first-party verified outbound navigation; today uses the same confirmed visitor-linked session population as Unique Human Visitors',d1:{...(d.trafficTruth?.d1||{}),status:audit.sessions.status,metric:'Browser Guard sessions; today aligned to confirmed visitor linkage',last24:audit.sessions.last24,today:audit.sessions.today,monthToDate:audit.sessions.monthToDate,dailyAverageMTD:audit.sessions.dailyAverageMTD,projectedMonth:audit.sessions.projectedMonth,humanOutbound:audit.outbound.humanOutbound,monetizedOutbound:audit.outbound.monetizedOutbound,unmonetizedOutbound:audit.outbound.unmonetizedOutbound,weightedCoverage:audit.outbound.weightedCoverage,commercialTruth:'first_party_verified_navigation',countries:audit.countries}};
+  d.trafficTruth={...(d.trafficTruth||{}),status:audit.sessions.status==='observed'?'observed':'degraded',version:'strict-human-v1',trackingSince:audit.strictTrackingSince,primaryMetric:'Strict verified human sessions plus first-party verified outbound navigation',d1:{...(d.trafficTruth?.d1||{}),status:audit.sessions.status,metric:'strict verified human sessions',last24:audit.sessions.last24,today:audit.sessions.today,monthToDate:audit.sessions.monthToDate,dailyAverageMTD:audit.sessions.dailyAverageMTD,projectedMonth:audit.sessions.projectedMonth,humanOutbound:audit.outbound.humanOutbound,monetizedOutbound:audit.outbound.monetizedOutbound,unmonetizedOutbound:audit.outbound.unmonetizedOutbound,weightedCoverage:audit.outbound.weightedCoverage,commercialTruth:'first_party_verified_navigation',countries:audit.countries}};
   d.growthOps={...(d.growthOps||{}),engines:{...(d.growthOps?.engines||{}),distribution:{...(d.growthOps?.engines?.distribution||{}),...audit.engines.distribution},affiliate:{...(d.growthOps?.engines?.affiliate||{}),...audit.engines.affiliate}},health:{...(d.growthOps?.health||{}),content:audit.engines.content,audience:audit.engines.audience,issues:[...((d.growthOps?.health?.issues)||[]),...audit.issues]}};
-  d.resilientCommandCenter={...(d.resilientCommandCenter||{}),integrityLayer:'fail_closed_v2',integrityStatus:audit.status,generatedAt:audit.generatedAt};
+  d.resilientCommandCenter={...(d.resilientCommandCenter||{}),integrityLayer:'strict-human-v1',integrityStatus:audit.status,generatedAt:audit.generatedAt};
   return d;
 }
 

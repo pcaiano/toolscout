@@ -78,20 +78,12 @@ async function coordinateGrowthOpportunities(env){
       LEFT JOIN content_social_profiles p ON p.tool_slug=v.tool_slug
       LEFT JOIN affiliate_social_policy a ON a.tool_slug=v.tool_slug
       WHERE v.tool_slug IS NOT NULL`),
-    growthRows(env,`WITH confirmed_sessions AS (
-      SELECT DISTINCT session_id FROM funnel_events WHERE event_type='page_confirmed'
-    )
-    SELECT w.tool_slug,w.status,w.network,w.blocker,w.application_url,w.program_url,w.affiliate_url,w.updated_at,
-      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human')
-        AND c.source NOT IN ('internal-test','synthetic','health-check','ci') THEN 1 ELSE 0 END) outbound_30d,
-      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human')
-        AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND COALESCE(c.affiliate_active_at_click,0)=0 THEN 1 ELSE 0 END) unmonetized_30d,
-      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human')
-        AND c.source NOT IN ('internal-test','synthetic','health-check','ci') AND COALESCE(c.affiliate_active_at_click,0)=1 THEN 1 ELSE 0 END) monetized_30d
+    growthRows(env,`SELECT w.tool_slug,w.status,w.network,w.blocker,w.application_url,w.program_url,w.affiliate_url,w.updated_at,
+      SUM(CASE WHEN c.session_id IS NOT NULL THEN 1 ELSE 0 END) outbound_30d,
+      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(c.affiliate_active_at_click,0)=0 THEN 1 ELSE 0 END) unmonetized_30d,
+      SUM(CASE WHEN c.session_id IS NOT NULL AND COALESCE(c.affiliate_active_at_click,0)=1 THEN 1 ELSE 0 END) monetized_30d
     FROM affiliate_workflow w
-    LEFT JOIN click_events c ON c.tool_slug=w.tool_slug AND c.created_at>=datetime('now','-30 days')
-      AND c.session_id IN (SELECT session_id FROM confirmed_sessions)
-    LEFT JOIN sessions s ON s.session_id=c.session_id
+    LEFT JOIN verified_outbound_events c ON c.tool_slug=w.tool_slug AND c.created_at>=datetime('now','-30 days')
     GROUP BY w.tool_slug,w.status,w.network,w.blocker,w.application_url,w.program_url,w.affiliate_url,w.updated_at`),
     growthRows(env,`SELECT tool_slug,source_status,http_status,content_changed,broken_consecutive,quality_status,last_checked_at,last_change_at FROM catalog_runtime_state`),
     growthRows(env,`SELECT tool_slug,status,source_status,verified_at FROM catalog_runtime_candidates`),
