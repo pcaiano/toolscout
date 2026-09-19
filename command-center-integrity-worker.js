@@ -165,7 +165,7 @@ async function canonicalSnapshot(env,upstream){
   const now=new Date(),today=dayKey(now),month=today.slice(0,7),todayStart=sqliteUtc(zonedMidnight(today)),monthStart=sqliteUtc(zonedMidnight(`${month}-01`)),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<monthStart?last24Start:monthStart;
   const trendStart=dayKey(new Date(now.getTime()-29*86400000));
   const strictMeta=await first(env,`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`),strictTrackingSince=parseUtc(strictMeta?.value?.value),strictTrackingDay=strictTrackingSince?dayKey(strictTrackingSince):today;
-  const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,runsResult,unrecoveredFailures,growthLatest,catalogQualityLatest,catalogWarnings,gscAsset]=await Promise.all([
+  const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,runsResult,unrecoveredFailures,growthLatest,catalogQualityLatest,catalogWarnings,autonomousLatest,networkLatest,falseReady,editorialPending,gscAsset]=await Promise.all([
     first(env,`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) monthToDate,MAX(last_evidence_at) lastAllowedAt FROM traffic_human_evidence WHERE first_evidence_at>=?`,[last24Start,todayStart,monthStart,scanStart]),
     all(env,`SELECT day,human_sessions sessions FROM command_center_daily_metrics WHERE day>=? ORDER BY day ASC`,[trendStart]),
     first(env,`SELECT COUNT(*) humanOutbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetizedOutbound,SUM(CASE WHEN affiliate_active_at_click!=1 OR affiliate_active_at_click IS NULL THEN 1 ELSE 0 END) unmonetizedOutbound,MAX(created_at) lastOutboundAt FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days')`),
@@ -192,10 +192,14 @@ async function canonicalSnapshot(env,upstream){
       WHERE engine='catalog' AND mission='runtime_quality' AND status='completed'
       ORDER BY started_at DESC LIMIT 1`),
     first(env,`SELECT COUNT(*) warnings,MAX(last_checked_at) last_warning_at FROM catalog_runtime_state WHERE quality_status='source_warning' OR source_status IN ('network_warning','warning','blocked_or_limited')`),
+    first(env,`SELECT * FROM engine_runs WHERE engine='distribution' AND mission='autonomous_cycle' ORDER BY started_at DESC LIMIT 1`),
+    first(env,`SELECT * FROM engine_runs WHERE engine='distribution' AND mission='network_cycle' ORDER BY started_at DESC LIMIT 1`),
+    first(env,`SELECT COUNT(*) n FROM distribution_opportunities o WHERE o.status='ready_to_submit' AND o.surface_slug<>'indexnow' AND COALESCE(o.human_required,0)=0 AND NOT EXISTS (SELECT 1 FROM distribution_auto_adapters a WHERE a.surface_slug=o.surface_slug AND a.policy_state='verified' AND a.confidence>=95)`),
+    first(env,`SELECT COUNT(*) n FROM distribution_editorial_queue WHERE status='autonomy_pending'`),
     runtimeAssetJson(env,'/reports/gsc-signals.json')
   ]);
 
-  const queryMap={human_sessions:sessions,traffic_trend:trend,verified_outbound:outbound,verified_outbound_by_tool:byTool,attribution_today:todayVisitors,attribution_last24:last24Visitors,visitor_countries:countryRows,audience_evidence:audienceLatest,content_evidence:contentLatest,engine_runs:runsResult,unrecovered_engine_failures:unrecoveredFailures,growth_latest:growthLatest,catalog_quality_latest:catalogQualityLatest,catalog_runtime_warnings:catalogWarnings};
+  const queryMap={human_sessions:sessions,traffic_trend:trend,verified_outbound:outbound,verified_outbound_by_tool:byTool,attribution_today:todayVisitors,attribution_last24:last24Visitors,visitor_countries:countryRows,audience_evidence:audienceLatest,content_evidence:contentLatest,engine_runs:runsResult,unrecovered_engine_failures:unrecoveredFailures,growth_latest:growthLatest,catalog_quality_latest:catalogQualityLatest,catalog_runtime_warnings:catalogWarnings,distribution_autonomous_latest:autonomousLatest,distribution_network_latest:networkLatest,distribution_false_ready:falseReady,distribution_editorial_pending:editorialPending};
   const issues=Object.entries(queryMap).filter(([,q])=>!q.ok).map(([metric,q])=>({metric,severity:'error',reason:q.error||'query_failed'}));
   const dayNumber=Number(today.slice(8,10))||1,daysInMonth=new Date(Date.UTC(Number(today.slice(0,4)),Number(today.slice(5,7)),0)).getUTCDate();
   const sessionRow=sessions.ok?sessions.value||{}:null,mtd=sessionRow?finiteOrNull(sessionRow.monthToDate):null;
@@ -218,7 +222,13 @@ async function canonicalSnapshot(env,upstream){
   const weightedCoverage=humanOutbound==null||monetized==null?null:(humanOutbound?monetized/humanOutbound:null);
   const runMap=new Map();
   if(runsResult.ok)for(const row of runsResult.value||[]){const existing=runMap.get(row.engine),a=parseUtc(row.started_at)?.getTime()||0,b=parseUtc(existing?.started_at)?.getTime()||0;if(!existing||a>b)runMap.set(row.engine,row)}
-  const distributionHealth=runHealth(runMap.get('distribution'),90),affiliateHealth=runHealth(runMap.get('affiliate'),90),audienceHealth=eventHealth(audienceLatest.ok?audienceLatest.value:null,36*60,'verified audience_events'),contentHealth=eventHealth(contentLatest.ok?contentLatest.value:null,80*60,'verified Bluesky content publication');
+  const distributionControlHealth=runHealth(runMap.get('distribution'),90);
+  const distributionAutonomousHealth=runHealth(autonomousLatest.ok?autonomousLatest.value:null,90);
+  const distributionNetworkHealth=runHealth(networkLatest.ok?networkLatest.value:null,90);
+  const distributionStatuses=[distributionControlHealth.status,distributionAutonomousHealth.status,distributionNetworkHealth.status];
+  const distributionStatus=distributionStatuses.includes('failed')?'failed':(distributionStatuses.some(x=>['degraded','stale','unknown'].includes(x))?'stale':(distributionStatuses.includes('running')?'running':'healthy'));
+  const distributionHealth={...distributionControlHealth,status:distributionStatus,components:{control:distributionControlHealth,autonomous:distributionAutonomousHealth,network:distributionNetworkHealth}};
+  const affiliateHealth=runHealth(runMap.get('affiliate'),90),audienceHealth=eventHealth(audienceLatest.ok?audienceLatest.value:null,36*60,'verified audience_events'),contentHealth=eventHealth(contentLatest.ok?contentLatest.value:null,80*60,'verified Bluesky content publication');
   const gscFreshness=sourceFreshness(gscAsset?.ok?gscAsset.value:{status:'unavailable'},72*60),ga4Freshness=sourceFreshness(upstream?.trafficTruth?.ga4||{},72*60);
   if(['stale','unavailable','unknown'].includes(gscFreshness.status))issues.push({metric:'gsc',severity:gscFreshness.status==='unavailable'?'error':'warning',reason:gscFreshness.status});
   if(['stale','unavailable'].includes(ga4Freshness.status))issues.push({metric:'ga4',severity:'warning',reason:ga4Freshness.status});
@@ -229,6 +239,11 @@ async function canonicalSnapshot(env,upstream){
   if(Number(catalogEvidence?.checked||0)>0&&Number(catalogEvidence?.warnings||0)>=Number(catalogEvidence?.checked||0))issues.push({metric:'catalog:runtime_quality',severity:'warning',reason:'latest_catalog_batch_all_warnings'});
   const unresolvedCatalogWarnings=Number(catalogWarnings?.value?.warnings||0);
   if(unresolvedCatalogWarnings>0)issues.push({metric:'catalog:unresolved_source_warnings',severity:'warning',reason:`${unresolvedCatalogWarnings}_source_warning_rows_pending_retry`});
+  const falseReadyCount=Number(falseReady?.value?.n||0);
+  if(falseReadyCount>0)issues.push({metric:'distribution:false_ready_to_submit',severity:'error',reason:`${falseReadyCount}_ready_surface_without_verified_adapter`});
+  const editorialPendingCount=Number(editorialPending?.value?.n||0);
+  if(editorialPendingCount>0)issues.push({metric:'distribution:community_autonomy_backlog',severity:'error',reason:`${editorialPendingCount}_community_items_without_safe_executor`});
+  for(const [mission,health] of [['autonomous_cycle',distributionAutonomousHealth],['network_cycle',distributionNetworkHealth]])if(['failed','degraded','stale','unknown'].includes(health.status))issues.push({metric:`engine:distribution:${mission}`,severity:health.status==='failed'?'error':'warning',reason:health.status});
   for(const [engine,health] of [['distribution',distributionHealth],['affiliate',affiliateHealth],['audience',audienceHealth],['content',contentHealth]])if(['failed','degraded','stale','unknown'].includes(health.status))issues.push({metric:`engine:${engine}`,severity:health.status==='failed'?'error':'warning',reason:health.status});
 
   return {
