@@ -525,8 +525,6 @@ export default {
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    if(base.scheduled)await base.scheduled(event,env,ctx);
-    const trigger=event?.cron||'scheduled';
-    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
+    if(base.scheduled)return base.scheduled(event,env,ctx);
   }
 };
