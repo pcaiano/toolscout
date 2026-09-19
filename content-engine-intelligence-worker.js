@@ -8,6 +8,14 @@ const CONTENT_PROOF_SHA256='87c22cb2e3aab0b81431781fb86df292ca8e6a1dfab309ab7341
 const HUMAN_ACQUISITION_SPRINT_START=Date.parse('2026-09-18T23:00:00.000Z');
 const HUMAN_ACQUISITION_SPRINT_END=Date.parse('2026-09-28T23:00:00.000Z');
 function humanAcquisitionSprintActive(now=Date.now()){return now>=HUMAN_ACQUISITION_SPRINT_START&&now<HUMAN_ACQUISITION_SPRINT_END;}
+const HUMAN_ACQUISITION_FALLBACK_TARGETS=Object.freeze([
+  {subject_key:'/best-project-management-tools',priority_score:98,opportunity_key:'sprint-search:project-management',signals:{title:'Best Project Management Tools',impressions:93,position:38.66,cluster:'project_management'}},
+  {subject_key:'/best-seo-tools-for-agencies',priority_score:96,opportunity_key:'sprint-search:seo-agencies',signals:{title:'Best SEO Tools for Agencies',impressions:727,position:76.02,cluster:'seo_agencies'}},
+  {subject_key:'/best-no-code-automation-tools',priority_score:94,opportunity_key:'sprint-search:no-code-automation',signals:{title:'Best No Code Automation Tools',impressions:254,position:74.05,cluster:'no_code_automation'}},
+  {subject_key:'/tools/semrush',priority_score:92,opportunity_key:'sprint-search:semrush-profile',signals:{title:'Semrush',impressions:303,position:55.77,cluster:'semrush_airtable_profiles',tool_slug:'semrush'}},
+  {subject_key:'/tools/airtable',priority_score:90,opportunity_key:'sprint-search:airtable-profile',signals:{title:'Airtable',impressions:234,position:73.82,cluster:'semrush_airtable_profiles',tool_slug:'airtable'}},
+  {subject_key:'/best-funnel-builder',priority_score:88,opportunity_key:'sprint-search:funnel-builders',signals:{title:'Best Funnel Builder',impressions:176,position:76.46,cluster:'funnel_builders'}}
+]);
 let schemaReady=null;
 
 const safe=(v,n=2400)=>String(v??'').slice(0,n);
@@ -214,7 +222,8 @@ async function buildBrief(env,family){
   const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=commercial.results||[],briefId=`brief_${crypto.randomUUID()}`;
   const profileBySlug=new Map(all.map(x=>[x.tool_slug,x]));
   const growthTools=[],growthRank=new Map();for(const x of growth.results||[]){if(!x.subject_key||growthRank.has(x.subject_key))continue;const row={...x,rank:growthTools.length};growthTools.push(row);growthRank.set(x.subject_key,{rank:row.rank,score:Number(x.priority_score||0),key:x.opportunity_key,type:x.subject_type});}
-  const sprintRows=(sprintGrowth.results||[]).map(x=>{let signals={};try{signals=JSON.parse(x.signal_json||'{}')}catch{}return{...x,signals};});
+  const observedSprintRows=(sprintGrowth.results||[]).map(x=>{let signals={};try{signals=JSON.parse(x.signal_json||'{}')}catch{}return{...x,signals};});
+  const sprintRows=observedSprintRows.length?observedSprintRows:HUMAN_ACQUISITION_FALLBACK_TARGETS;
   const sprintTarget=humanAcquisitionSprintActive()&&sprintRows.length?sprintRows[pickIndex(family+date,sprintRows.length)]:null;
   const topGrowthProfile=growthTools.map(x=>profileBySlug.get(x.subject_key)).find(Boolean)||null;
   const comparisonPairs=[
