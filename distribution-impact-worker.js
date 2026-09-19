@@ -54,7 +54,7 @@ export async function distributionSurfaceMetrics(env){
 export async function growthActionMetrics(env){
   try{
     const [actions,entries,outboundEvents,clicks]=await Promise.all([
-      env.DB.prepare(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at FROM growth_action_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
+      env.DB.prepare(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at FROM growth_action_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days') AND status IN ('issued','sent','verified','completed')`).all(),
       env.DB.prepare(`SELECT f.session_id,f.source,f.created_at,h.first_evidence_at confirmed_at FROM funnel_events f JOIN traffic_human_evidence h ON h.session_id=f.session_id AND h.first_evidence_at>=f.created_at WHERE f.event_type='session_started' AND f.created_at>=datetime('now','-${WINDOW_DAYS} days') ORDER BY f.created_at`).all(),
       env.DB.prepare(`SELECT session_id,created_at FROM verified_outbound_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all(),
       env.DB.prepare(`SELECT session_id,created_at,affiliate_active_at_click,source FROM verified_outbound_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
