@@ -157,6 +157,18 @@ async function resilientSnapshot(request,env,ctx){
     assetText(request,env,'/sitemap.xml',''),
     lightweightQueue(request,env,ctx)
   ]);
+  const [growthState,growthRnd,contactRoutes,autonomyEvents,humanEvents,placements,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates]=await Promise.all([
+    safeFirst(env,`SELECT COUNT(*) active,SUM(CASE WHEN subject_type='tool' THEN 1 ELSE 0 END) tools,SUM(CASE WHEN subject_type='surface' THEN 1 ELSE 0 END) surfaces,SUM(CASE WHEN subject_type='search' THEN 1 ELSE 0 END) search,SUM(CASE WHEN subject_type='affiliate' THEN 1 ELSE 0 END) affiliate,SUM(CASE WHEN subject_type LIKE 'catalog_%' THEN 1 ELSE 0 END) catalog,SUM(CASE WHEN subject_type='news_update' THEN 1 ELSE 0 END) news,MAX(last_evaluated_at) last_evaluated_at FROM growth_opportunity_state WHERE status='active'`),
+    safeFirst(env,`SELECT COUNT(*) active,MAX(updated_at) last_evaluated_at FROM growth_rnd_experiments WHERE status='active'`),
+    safeFirst(env,`SELECT COUNT(*) routes,COUNT(DISTINCT surface_slug) surfaces FROM distribution_contact_routes WHERE status='discovered'`),
+    safeFirst(env,`SELECT COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND status IN ('completed','verified','live','submitted') AND event_type NOT IN ('human_gate_resolved','editorial_human_resolved')`),
+    safeFirst(env,`SELECT COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved')`),
+    safeFirst(env,`SELECT COUNT(*) placements,COALESCE(SUM(backlink_verified),0) backlinks FROM distribution_placements WHERE placement_verified=1`),
+    safeFirst(env,`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`),
+    safeFirst(env,`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status='admitted_coverage'`),
+    safeFirst(env,`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`),
+    safeFirst(env,`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`)
+  ]);
   const trackingSince=parseSqliteUtc(trackingMeta?.value),trackingDay=trackingSince?zonedDayKey(trackingSince):todayKey;
   const coverage={last24Complete:Boolean(trackingSince&&trackingSince.getTime()<=now.getTime()-86400000),todayComplete:Boolean(trackingSince&&trackingDay<todayKey),monthToDateComplete:Boolean(trackingSince&&trackingDay.slice(0,7)<monthKey)};
   const dayOfMonth=Number(todayKey.slice(8,10))||1,daysInMonth=daysInMonthForKey(todayKey),mtdSessions=n(sessions?.monthToDate),dailyAverageMTD=mtdSessions/dayOfMonth,projectedMonth=Math.round(dailyAverageMTD*daysInMonth);
@@ -178,6 +190,55 @@ async function resilientSnapshot(request,env,ctx){
   const canonicalCommercialTruth={status:'observed',source:'D1',trafficTruth:'browser_confirmed',windowDays:30,definition:'Outbound is counted only when the session has a first-party browser page confirmation. Internal, synthetic, health-check and CI sources are excluded.',humanOutbound:outbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,generatedAt:now.toISOString()};
   const distributionEngine={status:'running',last_activity_at:distribution24?.last_activity_at||null,events_24h:n(distribution24?.events),successful_24h:n(distribution24?.successful),failed_24h:n(distribution24?.failed),events_7d:0,successful_7d:0,failed_7d:0,opportunity_status:distributionStatusCounts,delivery_status:{},attributed_human_sessions_30d:0,attributed_outbound_30d:0,attributed_monetized_outbound_30d:0};
   const affiliateEngine={status:'running',last_run_at:null,traffic_truth:'browser_confirmed',human_outbound_30d:outbound,monetized_outbound_30d:monetized,unmonetized_outbound_30d:unmonetized,weighted_coverage_pct:weightedCoverage==null?null:weightedCoverage*100,coverage_change_7d_pp:null,recoverable_queue:n(affiliateRecoverable?.count),workflow_status:affiliateStatusCounts,discovery:{total:0,qualified:0,human:0,last_checked:null}};
+  const autonomousActions=n(autonomyEvents?.n),humanInterventions=n(humanEvents?.n),autonomyDenominator=autonomousActions+humanInterventions;
+  const autonomousGrowth={
+    status:'observed',
+    window_days:30,
+    active_opportunities:n(growthState?.active),
+    tool_opportunities:n(growthState?.tools),
+    surface_opportunities:n(growthState?.surfaces),
+    affiliate_opportunities:n(growthState?.affiliate),
+    catalog_opportunities:n(growthState?.catalog),
+    news_opportunities:n(growthState?.news),
+    search_opportunities:n(growthState?.search),
+    rnd_experiments:n(growthRnd?.active),
+    rnd_last_evaluated_at:growthRnd?.last_evaluated_at||null,
+    last_evaluated_at:growthState?.last_evaluated_at||null,
+    autonomous_actions_7d:autonomousActions,
+    human_interventions_7d:humanInterventions,
+    autonomy_rate_pct:autonomyDenominator?Number((autonomousActions/autonomyDenominator*100).toFixed(1)):0,
+    chairman_queue:n(queue?.total),
+    contact_routes:n(contactRoutes?.routes),
+    contact_route_surfaces:n(contactRoutes?.surfaces),
+    verified_placements:n(placements?.placements),
+    verified_backlinks:n(placements?.backlinks),
+    prepared_growth_actions_30d:0,
+    attributed_growth_actions_30d:0,
+    attributed_human_sessions_30d:0,
+    attributed_outbound_30d:0,
+    attributed_monetized_outbound_30d:0,
+    attribution_rule:'Resilient mode reports only directly available D1 evidence. Missing action-attribution enrichment is shown as zero, never inferred.'
+  };
+  const catalogEngine={
+    version:'1.1',
+    status:catalogRuntime?.last_checked_at?'running':'awaiting_runtime_evidence',
+    tools:n(catalogRuntime?.total)+n(catalogCandidates?.total),
+    source_healthy:n(catalogRuntime?.healthy),
+    source_warnings:n(catalogRuntime?.warnings),
+    coverage_gaps:n(catalogGaps?.total),
+    content_changes:n(catalogRuntime?.changed),
+    quarantined:n(catalogRuntime?.suppressed),
+    profile_holds:0,
+    runtime_candidates:n(catalogCandidates?.total),
+    active_opportunities:n(growthState?.catalog),
+    report_age_days:catalogRuntime?.last_checked_at?Math.max(0,Math.floor((Date.now()-parseSqliteUtc(catalogRuntime.last_checked_at).getTime())/86400000)):null,
+    freshness_target_days:7,
+    freshness_status:catalogRuntime?.last_checked_at?'runtime observed':'awaiting runtime evidence',
+    last_runtime_check:catalogRuntime?.last_checked_at||null,
+    last_runtime_admission:catalogCandidates?.last_admitted_at||null,
+    whats_new_candidates:n(newsCandidates?.total),
+    rule:'Resilient mode reads Catalog Runtime directly from D1. Official-source quality gates remain authoritative and affiliate economics never affect editorial ranking.'
+  };
   const healthIssues=[{engine:'command-center',severity:'warning',title:'Resilient snapshot active',detail:'Dashboard reads are isolated from external link verification and non-critical enrichment. This prevents a third-party or enrichment failure from returning HTTP 503.'}];
   if(queue.status!=='connected')healthIssues.push({engine:'chairman-queue',severity:'warning',title:'Human-action queue partially unavailable',detail:queue.reason||'Queue source did not return a complete snapshot.'});
   return {
@@ -192,15 +253,15 @@ async function resilientSnapshot(request,env,ctx){
     trafficTruth:{status:'observed',primaryMetric:'D1 exact visitors plus browser-confirmed commercial actions',d1:{status:'observed',metric:'browser-confirmed sessions',last24:n(sessions?.last24),today:n(sessions?.today),monthToDate:mtdSessions,dailyAverageMTD,projectedMonth,humanOutbound:outbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,commercialTruth:'browser_confirmed',commercialDefinition:canonicalCommercialTruth.definition},ga4,googleSearchConsole:{status:gsc.status||'observed',generatedAt:externalTruth?.generatedAt||trafficTruthAsset?.googleSearchConsole?.generatedAt||null,startDate:gsc.startDate||null,endDate:gsc.endDate||null,clicks:n(gsc.clicks),impressions:n(gsc.impressions),pageCount:indexedPages,coverage:'site-wide'}},
     trafficTrend:{status:'observed',metric:'browser-confirmed sessions',windowDays:30,points,generatedAt:now.toISOString()},
     discoveryAttribution:{status:'observed',timezone:TIME_ZONE,definition:'Known sources use referrer or campaign evidence. Unattributed deep entry means direct first entry on a non-home page and is not a proven channel.',today:discoveryToday,last24:{total:0,buckets:[]},generatedAt:now.toISOString()},
-    growthOps:{chairmanQueue:queue,engines:{affiliate:affiliateEngine,distribution:distributionEngine},footprint:{search:{source:'Google Search Console',observed_pages:indexedPages,impressions:n(gsc.impressions),clicks:n(gsc.clicks),generated_at:externalTruth?.generatedAt||null,sitemap_urls:sitemapUrls,note:'Observed pages are URLs with Search Console evidence from the latest imported snapshot; this is not a complete Google index count.'},distribution:{live_verified:distLiveCount,submitted_pending:distPending,human_gates:n(distributionStatusCounts.human_action_required),surfaces:distributionLive.map(x=>({slug:x.surface_slug,name:x.surface_name,type:x.surface_type,status:x.status,url:x.url||null,score:n(x.distribution_score),updated_at:x.updated_at||null}))}},ledger:[],health:{content:{status:'no_evidence',last_event_at:null,detail:'Non-critical content enrichment is excluded from resilient dashboard reads.'},audience:{status:'no_evidence',last_event_at:null,detail:'Non-critical audience enrichment is excluded from resilient dashboard reads.'},seo_geo_aio:{status:gsc.status==='observed'?'partial':'no_evidence',last_event_at:externalTruth?.generatedAt||null,detail:`GSC snapshot: ${n(gsc.impressions)} impressions, ${n(gsc.clicks)} clicks. Heavy readiness enrichment is isolated from the dashboard read path.`},issues:healthIssues},generated_at:now.toISOString()},
-    resilientCommandCenter:{active:true,version:1,generatedAt:now.toISOString(),reason:'isolate_dashboard_reads_from_resource_exhaustion'}
+    growthOps:{chairmanQueue:queue,autonomousGrowth,engines:{affiliate:affiliateEngine,catalog:catalogEngine,distribution:distributionEngine},footprint:{search:{source:'Google Search Console',observed_pages:indexedPages,impressions:n(gsc.impressions),clicks:n(gsc.clicks),generated_at:externalTruth?.generatedAt||null,sitemap_urls:sitemapUrls,note:'Observed pages are URLs with Search Console evidence from the latest imported snapshot; this is not a complete Google index count.'},distribution:{live_verified:distLiveCount,submitted_pending:distPending,human_gates:n(distributionStatusCounts.human_action_required),surfaces:distributionLive.map(x=>({slug:x.surface_slug,name:x.surface_name,type:x.surface_type,status:x.status,url:x.url||null,score:n(x.distribution_score),updated_at:x.updated_at||null}))}},ledger:[],health:{content:{status:'no_evidence',last_event_at:null,detail:'Non-critical content enrichment is excluded from resilient dashboard reads.'},audience:{status:'no_evidence',last_event_at:null,detail:'Non-critical audience enrichment is excluded from resilient dashboard reads.'},seo_geo_aio:{status:gsc.status==='observed'?'partial':'no_evidence',last_event_at:externalTruth?.generatedAt||null,detail:`GSC snapshot: ${n(gsc.impressions)} impressions, ${n(gsc.clicks)} clicks. Heavy readiness enrichment is isolated from the dashboard read path.`},issues:healthIssues},generated_at:now.toISOString()},
+    resilientCommandCenter:{active:true,version:2,generatedAt:now.toISOString(),reason:'isolate_dashboard_reads_from_resource_exhaustion',autonomousGrowthIncluded:true,catalogGrowthIncluded:true}
   };
 }
 
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:3,statsMode:'direct-d1-resilient',externalLinkVerificationInStats:false,chairmanPayloadVersion:'chairman-editorial-v3',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
+    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:4,statsMode:'direct-d1-resilient',externalLinkVerificationInStats:false,autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-editorial-v3',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
     if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/analytics/api/chairman-queue')){
       if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
       if(url.pathname==='/analytics/api/chairman-queue')return Response.json(await lightweightQueue(request,env,ctx),{headers:JSON_H});
