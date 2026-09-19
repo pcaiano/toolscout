@@ -15,9 +15,21 @@ const esc=s=>String(s??'').replace(/[<>&"']/g,m=>({'<':'&lt;','>':'&gt;','&':'&a
 async function assetJson(request,env,path,fallback){try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback;}catch{return fallback;}}
 function cleanUrl(value){try{const u=new URL(String(value));u.protocol='https:';u.hostname='trytoolscout.org';u.search='';u.hash='';u.pathname=u.pathname.replace(/\.html$/i,'');if(u.pathname.length>1)u.pathname=u.pathname.replace(/\/+$/,'');return u.toString();}catch{return null;}}
 function label(url){try{const p=new URL(url).pathname.split('/').filter(Boolean).pop()||'toolscout';return p.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}catch{return 'ToolScout';}}
+async function brainSprintPaths(env){
+  try{
+    const q=await env.DB.prepare(`SELECT subject_key,opportunity_key,priority_score,signal_json FROM growth_opportunity_state
+      WHERE status='active' AND subject_type='search'
+        AND (opportunity_key LIKE 'sprint-search:%' OR COALESCE(json_extract(signal_json,'$.evidence_confidence'),'')='meaningful')
+      ORDER BY priority_score DESC,COALESCE(CAST(json_extract(signal_json,'$.impressions') AS INTEGER),0) DESC
+      LIMIT 18`).all();
+    const out=[],seen=new Set();
+    for(const row of q.results||[]){const path=String(row.subject_key||'');if(!path.startsWith('/')||seen.has(path))continue;seen.add(path);out.push(path);if(out.length>=6)break;}
+    return out.length?out:SPRINT_PATHS;
+  }catch{return SPRINT_PATHS}
+}
 export async function prioritizedDistributionFeed(request,env,format='json'){
-  const [routing,sitemap]=await Promise.all([assetJson(request,env,'/data/search-commercial-routing.json',{priorities:[]}),env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url)))]);
-  const sprint=sprintActive()?SPRINT_PATHS.map(x=>cleanUrl('https://trytoolscout.org'+x)).filter(Boolean):[];
+  const [routing,sitemap,dynamicSprint]=await Promise.all([assetJson(request,env,'/data/search-commercial-routing.json',{priorities:[]}),env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url))),sprintActive()?brainSprintPaths(env):Promise.resolve([])]);
+  const sprint=sprintActive()?dynamicSprint.map(x=>cleanUrl('https://trytoolscout.org'+x)).filter(Boolean):[];
   const priority=(routing.priorities||[]).filter(x=>x?.page&&['guide','comparison','tool-profile'].includes(x.type)).sort((a,b)=>Number(b.priorityScore||0)-Number(a.priorityScore||0)).map(x=>cleanUrl(x.page)).filter(Boolean);
   let rest=[];
   if(sitemap.ok){const xml=await sitemap.text();rest=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>cleanUrl(m[1])).filter(Boolean).filter(u=>/(best-|\-vs-|alternatives|\/tools\/|compare)/i.test(u));}
