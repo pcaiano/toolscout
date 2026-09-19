@@ -1,4 +1,5 @@
 import base from './distribution-command-worker.js';
+import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'};
 const JS_H={'Content-Type':'application/javascript; charset=UTF-8','Cache-Control':'public, max-age=3600'};
@@ -67,8 +68,8 @@ export default {
     if(u.pathname==='/api/recommend'&&request.method==='GET')return recommend(request,env);
     if(u.pathname==='/embed/toolscout.js'&&request.method==='GET')return new Response(widgetScript(),{headers:JS_H});
     if(u.pathname==='/embed/badge.svg'&&request.method==='GET')return new Response(badgeSvg(),{headers:SVG_H});
-    if(u.pathname==='/api/distribution/feed.json'&&request.method==='GET')return feedJson(env);
-    if(u.pathname==='/distribution/feed.xml'&&request.method==='GET')return feedRss(env);
+    if(u.pathname==='/api/distribution/feed.json'&&request.method==='GET')return prioritizedDistributionFeed(request,env,'json');
+    if(u.pathname==='/distribution/feed.xml'&&request.method==='GET')return prioritizedDistributionFeed(request,env,'xml');
     if(u.pathname==='/.well-known/toolscout-distribution.json'&&request.method==='GET')return manifest(env);
     if(u.pathname==='/.well-known/api-catalog'&&(request.method==='GET'||request.method==='HEAD')){const r=apiCatalog();return request.method==='HEAD'?new Response(null,{headers:r.headers}):r;}
     if(u.pathname==='/go/embed'&&request.method==='GET')return logEmbedClick(request,env);
