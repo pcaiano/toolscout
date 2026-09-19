@@ -145,6 +145,9 @@ async function audiencePhaseSnapshot(env){
   }
 }
 async function growthAssetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
+function assetAgeHours(value){
+  const t=Date.parse(String(value||''));return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):Infinity;
+}
 async function coordinateGrowthOpportunities(env){
   await ensureGrowthSchema(env);
   const audienceStrategy=await audiencePhaseSnapshot(env);
@@ -184,18 +187,39 @@ async function coordinateGrowthOpportunities(env){
     growthAssetJson(env,'/data/tools.json',[]),
     growthAssetJson(env,'/data/software-updates.json',{updatedAt:null,items:[]})
   ]);
-  const searchOpportunities=Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
-  const directGscPages=Array.isArray(gscSignals?.pages)?gscSignals.pages:[];
+  const inputFreshness={
+    organicGrowth:{ageHours:assetAgeHours(organicGrowth?.generatedAt),fresh:false},
+    gsc:{ageHours:assetAgeHours(gscSignals?.generatedAt),fresh:false},
+    aeoGeo:{ageHours:assetAgeHours(aeoGeo?.generatedAt),fresh:false},
+    machineReadability:{ageHours:assetAgeHours(machineReadability?.generatedAt),fresh:false},
+    catalogFreshness:{ageHours:assetAgeHours(catalogFreshness?.generatedAt),fresh:false},
+    catalogHealth:{ageHours:assetAgeHours(catalogHealth?.summary?.generatedAt||catalogHealth?.generatedAt),fresh:false},
+    toolProfileHolds:{ageHours:assetAgeHours(toolProfileHolds?.generatedAt),fresh:false}
+  };
+  inputFreshness.organicGrowth.fresh=inputFreshness.organicGrowth.ageHours<=72;
+  inputFreshness.gsc.fresh=inputFreshness.gsc.ageHours<=36;
+  inputFreshness.aeoGeo.fresh=inputFreshness.aeoGeo.ageHours<=72;
+  inputFreshness.machineReadability.fresh=inputFreshness.machineReadability.ageHours<=72;
+  inputFreshness.catalogFreshness.fresh=inputFreshness.catalogFreshness.ageHours<=36;
+  inputFreshness.catalogHealth.fresh=inputFreshness.catalogHealth.ageHours<=36;
+  inputFreshness.toolProfileHolds.fresh=inputFreshness.toolProfileHolds.ageHours<=72;
+  const searchOpportunities=inputFreshness.organicGrowth.fresh&&Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
+  const directGscPages=inputFreshness.gsc.fresh&&Array.isArray(gscSignals?.pages)?gscSignals.pages:[];
   const normalizedGscPages=directGscPages
     .filter(x=>Number(x?.impressions||0)>0)
     .map(x=>{
       let pathname='/';try{pathname=new URL(String(x?.page||'https://trytoolscout.org/')).pathname.replace(/\.html$/i,'')||'/'}catch{}
       const impressions=Math.max(0,Number(x?.impressions||0)),clicks=Math.max(0,Number(x?.clicks||0)),position=Math.max(0,Number(x?.position||0)),ctr=Math.max(0,Number(x?.ctr||0));
-      const rankFactor=position>0?Math.max(0,60-Math.min(60,position)):0;
-      const demandFactor=Math.min(35,Math.log10(impressions+1)*14);
-      const clickFactor=Math.min(20,clicks*10);
-      const priority=Math.max(1,Math.min(100,Math.round(35+demandFactor+rankFactor*0.45+clickFactor)));
-      return{page:String(x?.page||''),pathname,clicks,impressions,ctr,position,topQueries:Array.isArray(x?.topQueries)?x.topQueries.slice(0,5):[],priority};
+      const rankFactor=position>0&&position<=10?15:(position<=20?12:(position<=40?8:4));
+      const demandFactor=Math.min(55,Math.log10(impressions+1)*25);
+      const clickFactor=Math.min(15,clicks*8);
+      let priority=Math.max(1,Math.min(100,Math.round(12+demandFactor+rankFactor+clickFactor)));
+      if(impressions<3)priority=Math.min(priority,35);
+      else if(impressions<5)priority=Math.min(priority,40);
+      else if(impressions<10)priority=Math.min(priority,50);
+      else if(impressions<20)priority=Math.min(priority,60);
+      const evidenceConfidence=impressions>=20?'meaningful':(impressions>=10?'emerging':(impressions>=5?'directional':'low'));
+      return{page:String(x?.page||''),pathname,clicks,impressions,ctr,position,topQueries:Array.isArray(x?.topQueries)?x.topQueries.slice(0,5):[],priority,evidenceConfidence};
     })
     .sort((a,b)=>b.priority-a.priority||b.impressions-a.impressions)
     .slice(0,50);
@@ -289,10 +313,10 @@ async function coordinateGrowthOpportunities(env){
   const runtimeCandidateSet=new Set((catalogCandidates||[]).filter(x=>x.status==='admitted_coverage').map(x=>String(x.tool_slug||'').toLowerCase()));
   const runtimeGapMap=new Map((catalogGaps||[]).map(x=>[String(x.tool_slug||'').toLowerCase(),x]));
   const catalogBySlug=new Map((Array.isArray(catalogTools)?catalogTools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
-  const changed=new Map((Array.isArray(catalogFreshness?.contentChanges)?catalogFreshness.contentChanges:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
-  const quarantined=new Map((Array.isArray(catalogFreshness?.quarantined)?catalogFreshness.quarantined:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
-  const healthBySlug=new Map((Array.isArray(catalogHealth?.tools)?catalogHealth.tools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
-  const heldBySlug=new Map((Array.isArray(toolProfileHolds?.items)?toolProfileHolds.items:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const changed=new Map((inputFreshness.catalogFreshness.fresh&&Array.isArray(catalogFreshness?.contentChanges)?catalogFreshness.contentChanges:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const quarantined=new Map((inputFreshness.catalogFreshness.fresh&&Array.isArray(catalogFreshness?.quarantined)?catalogFreshness.quarantined:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const healthBySlug=new Map((inputFreshness.catalogHealth.fresh&&Array.isArray(catalogHealth?.tools)?catalogHealth.tools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
+  const heldBySlug=new Map((inputFreshness.toolProfileHolds.fresh&&Array.isArray(toolProfileHolds?.items)?toolProfileHolds.items:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
   const catalogSlugs=new Set([...changed.keys(),...quarantined.keys(),...heldBySlug.keys(),...runtimeStateBySlug.keys(),...runtimeCandidateSet]);
   for(const [slug,h] of healthBySlug){
     if(h?.needsWeeklyReview||h?.overdue||Array.isArray(h?.missingCritical)&&h.missingCritical.length)catalogSlugs.add(slug);
@@ -317,7 +341,7 @@ async function coordinateGrowthOpportunities(env){
       .bind(`catalog-tool:${slug}`,'catalog_tool',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify([...new Set(actions)])).run();
     active++;catalogCount++;
   }
-  for(const gap of Array.isArray(catalogFreshness?.coverage)?catalogFreshness.coverage:[]){
+  for(const gap of inputFreshness.catalogFreshness.fresh&&Array.isArray(catalogFreshness?.coverage)?catalogFreshness.coverage:[]){
     const category=String(gap?.category||'').trim();const missing=Math.max(0,Number(gap?.gap||0));if(!category||missing<=0)continue;
     const score=Math.min(100,35+missing*9+Math.min(15,Number(gap?.intentSurfaces||0)*1.5));
     const signals={category,current_tools:Number(gap?.tools||0),target:Number(gap?.target||0),gap:missing,intent_surfaces:Number(gap?.intentSurfaces||0),catalog_entry_does_not_imply_ranking:true,affiliate_neutral:true,freshness_report_generated_at:catalogFreshness?.generatedAt||null};
@@ -390,10 +414,10 @@ async function coordinateGrowthOpportunities(env){
       ctr:Number(op?.searchSignal?.ctr||0),
       position:Number(op?.searchSignal?.position||0),
       top_tools:Array.isArray(op?.topTools)?op.topTools.slice(0,5):[],
-      aeo_geo_failures:Number(aeoGeo?.failures||0),
-      aeo_geo_warnings:Number(aeoGeo?.warnings||0),
-      machine_readability_failures:Number(machineReadability?.failures||0),
-      machine_readability_warnings:Number(machineReadability?.warnings||0),
+      aeo_geo_failures:inputFreshness.aeoGeo.fresh?Number(aeoGeo?.failures||0):null,
+      aeo_geo_warnings:inputFreshness.aeoGeo.fresh?Number(aeoGeo?.warnings||0):null,
+      machine_readability_failures:inputFreshness.machineReadability.fresh?Number(machineReadability?.failures||0):null,
+      machine_readability_warnings:inputFreshness.machineReadability.fresh?Number(machineReadability?.warnings||0):null,
       organic_report_generated_at:organicGrowth?.generatedAt||null,
       audience_strategy:audienceStrategy.phase,
       acquisition_mode:'existing_demand_search',
@@ -409,12 +433,13 @@ async function coordinateGrowthOpportunities(env){
     const key=row.pathname==='/'?'home':row.pathname;
     const actions=['search_measurement'];
     if(row.position>20&&row.impressions>=20)actions.unshift('content_amplification','distribution_amplification','deepen_existing_search_asset');
-    else if(row.position>10&&row.position<=20)actions.unshift('content_amplification','distribution_amplification','strengthen_internal_links');
-    else if(row.position>0&&row.position<=10)actions.unshift('protect_current_ranking','improve_click_capture');
+    else if(row.position>10&&row.position<=20&&row.impressions>=10)actions.unshift('content_amplification','distribution_amplification','strengthen_internal_links');
+    else if(row.position>0&&row.position<=10&&row.impressions>=10)actions.unshift('protect_current_ranking','improve_click_capture');
+    else if(row.position>0&&row.position<=20)actions.unshift('observe_low_sample_ranking');
     const signals={
-      lane:row.position>20?'seo_authority_depth':(row.position>10?'seo_striking_distance':(row.position>0?'seo_first_page':'seo_measure')),
-      action:row.position>20?'deepen_existing':(row.position>10?'strengthen_existing':(row.position>0?'protect_and_improve_ctr':'measure')),
-      evidence_confidence:row.impressions>=20?'meaningful':'low',
+      lane:row.impressions<10&&row.position>0&&row.position<=20?'seo_low_sample_observation':(row.position>20?'seo_authority_depth':(row.position>10?'seo_striking_distance':(row.position>0?'seo_first_page':'seo_measure'))),
+      action:row.impressions<10&&row.position>0&&row.position<=20?'measure_low_sample':(row.position>20?'deepen_existing':(row.position>10?'strengthen_existing':(row.position>0?'protect_and_improve_ctr':'measure'))),
+      evidence_confidence:row.evidenceConfidence,
       source:'Google Search Console Search Analytics',
       gsc_snapshot_generated_at:gscSignals?.generatedAt||null,
       gsc_start_date:gscSignals?.startDate||null,
@@ -431,8 +456,9 @@ async function coordinateGrowthOpportunities(env){
       audience_strategy:audienceStrategy.phase,
       acquisition_mode:'existing_demand_search'
     };
-    const basePriority=audienceStrategy.borrowedFirst?Math.min(100,row.priority+15):row.priority;
-    const priority=humanSprintActive()?Math.min(100,basePriority+12):basePriority;
+    const meaningful=row.impressions>=20||row.clicks>0;
+    const basePriority=audienceStrategy.borrowedFirst?Math.min(100,row.priority+(meaningful?10:2)):row.priority;
+    const priority=humanSprintActive()?Math.min(100,basePriority+(meaningful?10:2)):basePriority;
     await env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
@@ -472,7 +498,8 @@ async function coordinateGrowthOpportunities(env){
     await env.DB.prepare(`UPDATE growth_opportunity_state
       SET priority_score=CASE
         WHEN subject_type='surface' THEN MIN(100,priority_score+10)
-        WHEN subject_type='search' THEN MIN(100,priority_score+10)
+        WHEN subject_type='search' AND (opportunity_key LIKE 'sprint-search:%' OR COALESCE(json_extract(signal_json,'$.evidence_confidence'),'') IN ('meaningful','gsc_observed')) THEN MIN(100,priority_score+10)
+        WHEN subject_type='search' THEN MIN(100,priority_score+2)
         WHEN subject_type='tool' THEN MIN(100,priority_score+6)
         WHEN subject_type='news_update' THEN MIN(100,priority_score+3)
         WHEN subject_type='affiliate' THEN MIN(priority_score,45)
@@ -486,7 +513,8 @@ async function coordinateGrowthOpportunities(env){
     await env.DB.prepare(`UPDATE growth_opportunity_state
       SET priority_score=CASE
         WHEN subject_type='surface' THEN MIN(100,priority_score+20)
-        WHEN subject_type='search' THEN MIN(100,priority_score+20)
+        WHEN subject_type='search' AND (opportunity_key LIKE 'sprint-search:%' OR COALESCE(json_extract(signal_json,'$.evidence_confidence'),'') IN ('meaningful','gsc_observed')) THEN MIN(100,priority_score+20)
+        WHEN subject_type='search' THEN MIN(100,priority_score+4)
         WHEN subject_type='tool' THEN MIN(100,priority_score+15)
         WHEN subject_type='news_update' THEN MIN(100,priority_score+12)
         WHEN subject_type='affiliate' THEN MIN(priority_score,45)
@@ -498,7 +526,7 @@ async function coordinateGrowthOpportunities(env){
   }
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
     .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor, ${affiliateCount} affiliate, ${catalogCount} catalog/quality, ${newsCount} What's New and ${searchCount} Search/GEO/AEO opportunities. Audience phase: ${audienceStrategy.phase}. 30d strict sessions: ${audienceStrategy.strictVerifiedHumanSessions30d??'unavailable'}; proven external acquisition sources: ${audienceStrategy.provenExternalSources30d??'unavailable'}. Existing demand, external distribution and vendor borrowed audiences remain the primary acquisition engine. ${audienceStrategy.ownedExpansionEligible?'Owned channels may now receive additional support because external acquisition has become repeatable, but they do not replace external-demand acquisition.':'Owned channels remain support/measurement until external acquisition reaches the repeatability gate.'} ${humanSprintActive()?'Human Acquisition Sprint is active: strict verified human sessions dominate priority; acquisition surfaces, Search, vendor/content amplification and timely news are boosted while affiliate and routine catalog work are subordinated.':'Shared priority state coordinates acquisition, monetization, news, catalog growth and factual quality while keeping affiliate economics separate from editorial ranking.'}`).run().catch(()=>{});
-  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,gscSnapshot:{generatedAt:gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:directGscPages.length,directOpportunities:normalizedGscPages.length},catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,audienceStrategy,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
+  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,gscSnapshot:{generatedAt:gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:directGscPages.length,directOpportunities:normalizedGscPages.length},catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,inputFreshness,audienceStrategy,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
 async function publicSearchDirectives(env){
