@@ -363,6 +363,9 @@ export default {
     return response;
   },
   async scheduled(event, env, ctx) {
+    const trigger=event?.cron||'scheduled';
+    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
+    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
     if (typeof base.scheduled === 'function') return base.scheduled(event, env, ctx);
   }
 };
