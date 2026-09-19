@@ -91,12 +91,17 @@ async function ensureAffiliateAutonomySchema(env){
 async function prepareApplicationPack(env,row){
   const slug=String(row?.tool_slug||row?.slug||'').trim().toLowerCase();if(!slug)return false;
   const applicationUrl=publicHttpUrl(row?.application_url||row?.program_url)?.href||null;if(!applicationUrl)return false;
-  const pack={...APPLICATION_PACK,tool_slug:slug,tool_name:row?.name||slug,network:row?.network||'Direct',program_url:row?.program_url||null,application_url:applicationUrl,blocker:row?.blocker||null,prepared_at:new Date().toISOString()};
-  await env.DB.prepare(`INSERT INTO affiliate_application_packs(tool_slug,status,network,application_url,pack_json,blocker,prepared_at,updated_at)
+  const pack={...APPLICATION_PACK,tool_slug:slug,tool_name:row?.name||slug,network:row?.network||'Direct',program_url:row?.program_url||null,application_url:applicationUrl,blocker:row?.blocker||null};
+  const write=await env.DB.prepare(`INSERT INTO affiliate_application_packs(tool_slug,status,network,application_url,pack_json,blocker,prepared_at,updated_at)
     VALUES(?,'prepared',?,?,?,?,datetime('now'),datetime('now'))
-    ON CONFLICT(tool_slug) DO UPDATE SET status='prepared',network=excluded.network,application_url=excluded.application_url,pack_json=excluded.pack_json,blocker=excluded.blocker,prepared_at=datetime('now'),updated_at=datetime('now')`)
+    ON CONFLICT(tool_slug) DO UPDATE SET status='prepared',network=excluded.network,application_url=excluded.application_url,pack_json=excluded.pack_json,blocker=excluded.blocker,prepared_at=datetime('now'),updated_at=datetime('now')
+    WHERE affiliate_application_packs.status IS NOT 'prepared'
+       OR affiliate_application_packs.network IS NOT excluded.network
+       OR affiliate_application_packs.application_url IS NOT excluded.application_url
+       OR affiliate_application_packs.pack_json IS NOT excluded.pack_json
+       OR affiliate_application_packs.blocker IS NOT excluded.blocker`)
     .bind(slug,row?.network||null,applicationUrl,JSON.stringify(pack),row?.blocker||null).run();
-  return true;
+  return Number(write?.meta?.changes||write?.changes||0)>0;
 }
 async function verifyAffiliateDestination(url){
   const parsed=publicHttpUrl(url);if(!parsed)return{ok:false,status:null,finalUrl:null,reason:'invalid_public_url'};
@@ -109,14 +114,24 @@ async function verifyAffiliateDestination(url){
 }
 async function activateAcquiredLinks(env){
   await ensureAffiliateAutonomySchema(env);
-  const q=await env.DB.prepare(`SELECT tool_slug,status,affiliate_url FROM affiliate_workflow WHERE status IN ('link_acquired','active') AND affiliate_url IS NOT NULL AND affiliate_url!='' ORDER BY updated_at ASC LIMIT 8`).all();
+  const q=await env.DB.prepare(`SELECT w.tool_slug,w.status,w.affiliate_url
+    FROM affiliate_workflow w
+    LEFT JOIN affiliate_route_verification v ON v.tool_slug=w.tool_slug
+    WHERE w.status IN ('link_acquired','active')
+      AND w.affiliate_url IS NOT NULL AND w.affiliate_url!=''
+      AND (v.tool_slug IS NULL OR v.affiliate_url IS NOT w.affiliate_url OR v.updated_at<=datetime('now','-6 hours'))
+    ORDER BY COALESCE(v.updated_at,'1970-01-01') ASC,w.updated_at ASC
+    LIMIT 8`).all();
   let checked=0,activated=0,verified=0,failed=0;
   for(const row of q.results||[]){
     checked++;
     const external=await verifyAffiliateDestination(row.affiliate_url);
     await env.DB.prepare(`INSERT INTO affiliate_route_verification(tool_slug,affiliate_url,external_status,external_http_status,production_status,production_http_status,production_location,verified_at,updated_at)
       VALUES(?,?,?,?,'pending',NULL,NULL,NULL,datetime('now'))
-      ON CONFLICT(tool_slug) DO UPDATE SET affiliate_url=excluded.affiliate_url,external_status=excluded.external_status,external_http_status=excluded.external_http_status,updated_at=datetime('now')`)
+      ON CONFLICT(tool_slug) DO UPDATE SET affiliate_url=excluded.affiliate_url,external_status=excluded.external_status,external_http_status=excluded.external_http_status,updated_at=datetime('now')
+      WHERE affiliate_route_verification.affiliate_url IS NOT excluded.affiliate_url
+         OR affiliate_route_verification.external_status IS NOT excluded.external_status
+         OR affiliate_route_verification.external_http_status IS NOT excluded.external_http_status`)
       .bind(row.tool_slug,row.affiliate_url,external.ok?'reachable':'failed',external.status).run();
     if(!external.ok){failed++;continue}
     if(row.status==='link_acquired'){
@@ -129,8 +144,11 @@ async function activateAcquiredLinks(env){
       const r=await fetch(`https://trytoolscout.org/go/${encodeURIComponent(row.tool_slug)}`,{method:'GET',redirect:'manual',headers:{'User-Agent':'ToolScout-Affiliate-Route-Health/1.0','X-ToolScout-Health-Check':'affiliate-route'},signal:ctl.signal});
       const location=r.headers.get('Location')||'',targetHost=publicHttpUrl(row.affiliate_url)?.hostname||'',locationHost=publicHttpUrl(location)?.hostname||'';
       const ok=r.status>=300&&r.status<400&&Boolean(location)&&Boolean(targetHost)&&locationHost===targetHost;
-      await env.DB.prepare(`UPDATE affiliate_route_verification SET production_status=?,production_http_status=?,production_location=?,verified_at=?,updated_at=datetime('now') WHERE tool_slug=?`)
-        .bind(ok?'verified':'failed',r.status,location,ok?new Date().toISOString():null,row.tool_slug).run();
+      await env.DB.prepare(`UPDATE affiliate_route_verification
+        SET production_status=?,production_http_status=?,production_location=?,verified_at=CASE WHEN ?='verified' THEN COALESCE(verified_at,datetime('now')) ELSE verified_at END,updated_at=datetime('now')
+        WHERE tool_slug=?
+          AND (production_status IS NOT ? OR production_http_status IS NOT ? OR production_location IS NOT ?)`)
+        .bind(ok?'verified':'failed',r.status,location,ok?'verified':'failed',row.tool_slug,ok?'verified':'failed',r.status,location).run();
       if(ok){
         await env.DB.prepare(`UPDATE affiliate_workflow SET status='verified',source_actor='affiliate_autonomy',last_verified=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND status IN ('active','link_acquired')`).bind(row.tool_slug).run();
         await env.DB.prepare(`INSERT INTO affiliate_workflow_history(tool_slug,previous_state,new_state,evidence_source,actor_source,notes,created_at) VALUES(?,'active','verified','production_go_redirect','affiliate_autonomy','Production /go route verified against the approved affiliate destination.',datetime('now'))`).bind(row.tool_slug).run().catch(()=>{});
@@ -138,7 +156,7 @@ async function activateAcquiredLinks(env){
       }else failed++;
     }catch{failed++}finally{clearTimeout(timer)}
   }
-  return{checked,activated,verified,failed};
+  return{checked,activated,verified,failed,write_policy:'material_change_only',recheck_hours:6};
 }
 
 async function discoverOfficialProgram(tool){
