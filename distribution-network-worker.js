@@ -161,7 +161,19 @@ async function refreshCandidates(env){
             AND distribution_network_outreach.updated_at>datetime('now','-30 days')
             THEN distribution_network_outreach.updated_at
           ELSE datetime('now')
-        END`)
+        END
+      WHERE distribution_network_outreach.surface_name IS NOT excluded.surface_name
+         OR distribution_network_outreach.surface_type IS NOT excluded.surface_type
+         OR distribution_network_outreach.domain IS NOT excluded.domain
+         OR distribution_network_outreach.source_url IS NOT excluded.source_url
+         OR distribution_network_outreach.priority_score IS NOT excluded.priority_score
+         OR distribution_network_outreach.suggested_subject IS NOT excluded.suggested_subject
+         OR distribution_network_outreach.suggested_body IS NOT excluded.suggested_body
+         OR distribution_network_outreach.status='send_failed'
+         OR (
+           distribution_network_outreach.status='suppressed_no_contact'
+           AND (distribution_network_outreach.source_url IS NOT excluded.source_url OR distribution_network_outreach.updated_at<=datetime('now','-30 days'))
+         )`)
       .bind(row.surface_slug,safe(row.surface_name||domain,200),safe(row.surface_type,80),domain,String(row.action_url),Number(row.distribution_score||0),copy.subject,copy.body).run();
     if(Number(r?.meta?.changes||r?.changes||0)>0)queued++;
     if(!row.network_existing)newQueued++;
@@ -176,7 +188,8 @@ async function persistRoutes(row,routes,env){
     const routeId=`${row.surface_slug}|${route.type}|${route.url}`;
     const r=await env.DB.prepare(`INSERT INTO distribution_contact_routes(route_id,surface_slug,domain,route_type,route_url,source_url,status,first_seen_at,last_seen_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,'discovered',datetime('now'),datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(route_id) DO UPDATE SET source_url=excluded.source_url,last_seen_at=datetime('now'),updated_at=datetime('now')`)
+      ON CONFLICT(route_id) DO UPDATE SET source_url=excluded.source_url,last_seen_at=datetime('now'),updated_at=datetime('now')
+      WHERE distribution_contact_routes.source_url IS NOT excluded.source_url`)
       .bind(routeId,row.surface_slug,row.domain,route.type,route.url,route.source_url||row.source_url||null).run();
     if(Number(r?.meta?.changes||r?.changes||0)>0)inserted++;
   }
@@ -248,8 +261,8 @@ async function verifyAdoption(env){
   for(const row of r.results||[]){
     const kind=Number(row.embed_live)?'embed':Number(row.embed_click)?'embed_click':Number(row.backlink_live)?'backlink':null;
     if(!kind)continue;
-    await env.DB.prepare(`UPDATE distribution_network_outreach SET status='adopted',adoption_kind=?,adopted_at=COALESCE(adopted_at,datetime('now')),last_observed_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(kind,row.surface_slug).run();
     if(row.status!=='adopted'){
+      await env.DB.prepare(`UPDATE distribution_network_outreach SET status='adopted',adoption_kind=?,adopted_at=COALESCE(adopted_at,datetime('now')),last_observed_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=? AND (status IS NOT 'adopted' OR adoption_kind IS NOT ?)`).bind(kind,row.surface_slug,kind).run();
       adopted++;
       await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netadopt_${crypto.randomUUID()}`,row.surface_slug,'publisher_network_adopted','completed','distribution_network',`Publisher adoption verified via ${kind}.`).run().catch(()=>{});
     }
@@ -270,8 +283,11 @@ export async function runDistributionNetworkCycle(env){
   const candidates=await refreshCandidates(env);
   const contacts=await discoverContacts(env);
   const adoption=await verifyAdoption(env);
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1: ${candidates.considered} publisher candidates considered, ${candidates.newQueued} newly queued, ${candidates.reopened} reopened after route/cool-off change, ${contacts.found} role emails found, ${contacts.routed} alternate public contact routes found, ${contacts.suppressed} suppressed after repeated misses, ${adoption.adopted} new adoptions verified.`).run().catch(()=>{});
-  return {ok:true,candidates,contacts,adoption};
+  const materialChanges=Number(candidates.newQueued||0)+Number(candidates.reopened||0)+Number(contacts.found||0)+Number(contacts.routed||0)+Number(contacts.suppressed||0)+Number(adoption.adopted||0);
+  if(materialChanges>0){
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1 materially changed ${materialChanges} item(s): ${candidates.newQueued} newly queued, ${candidates.reopened} reopened, ${contacts.found} role emails found, ${contacts.routed} alternate routes found, ${contacts.suppressed} suppressed and ${adoption.adopted} new adoptions verified. No-change cycles are not persisted.`).run().catch(()=>{});
+  }
+  return {ok:true,candidates,contacts,adoption,materialChanges,write_policy:'material_change_only'};
 }
 
 export default {
