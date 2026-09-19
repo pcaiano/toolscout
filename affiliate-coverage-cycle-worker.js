@@ -205,17 +205,11 @@ export async function runAffiliateCoverageCycle(env){
   const [tools,workflow,clicks,discoveries]=await Promise.all([
     loadTools(env),
     safeAll(env,'SELECT * FROM affiliate_workflow'),
-    safeAll(env,`WITH confirmed_sessions AS (
-      SELECT DISTINCT session_id
-      FROM funnel_events
-      WHERE event_type='page_confirmed'
-    )
-    SELECT c.tool_slug,c.affiliate_active_at_click,c.source,COALESCE(s.classification,'unknown/legacy') classification,1 browser_confirmed,COUNT(*) clicks
-    FROM click_events c
-    JOIN confirmed_sessions confirmed ON confirmed.session_id=c.session_id
-    LEFT JOIN sessions s ON s.session_id=c.session_id
-    WHERE c.created_at>=datetime('now','-30 days')
-    GROUP BY c.tool_slug,c.affiliate_active_at_click,c.source,classification`),
+    safeAll(env,`SELECT tool_slug,affiliate_active_at_click,source,1 verified_outbound,COUNT(*) clicks
+    FROM verified_outbound_events
+    WHERE created_at>=datetime('now','-30 days')
+      AND source NOT IN ('internal-test','synthetic','health-check','ci')
+    GROUP BY tool_slug,affiliate_active_at_click,source`),
     safeAll(env,'SELECT tool_slug,last_checked,status FROM affiliate_program_discovery')
   ]);
   const states=new Map((workflow.results||[]).map(r=>[r.tool_slug,r])),checked=new Map((discoveries.results||[]).map(r=>[r.tool_slug,r]));
