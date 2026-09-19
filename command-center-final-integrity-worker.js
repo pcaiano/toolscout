@@ -7,7 +7,7 @@ function statusFromSource(source){const s=String(source?.status||'unknown');retu
 function normalizeStats(data){
   const audit=data?.measurementAudit;
   if(!audit)return data;
-  const sessions=audit.sessions||{},out=audit.outbound||{},definition='Browser Guard allowed sessions plus first-party verified outbound navigation. Unavailable means unavailable, never zero.';
+  const sessions=audit.sessions||{},out=audit.outbound||{},definition='Strict verified human sessions plus first-party verified outbound navigation. Browser validation alone is diagnostic and excluded. Unavailable means unavailable, never zero.';
   data.tracking={...(data.tracking||{}),status:sessions.status,humanSessionsLast24Hours:sessions.last24,definition};
   data.funnel={...(data.funnel||{}),outboundClicks:out.humanOutbound,sessionToOutboundCtr:null,definition};
   data.commercial={...(data.commercial||{}),monetizedOutbound:out.monetizedOutbound,totals:{...(data.commercial?.totals||{}),outbound:out.humanOutbound,monetizedOutbound:out.monetizedOutbound},trafficDefinition:definition};
