@@ -141,6 +141,130 @@ async function decorate(response){
   headers.set('Cache-Control','private, no-store, max-age=0');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
+async function trafficForensics48h(env){
+  await ensureGuardSchema(env);
+  const [overview,countryAsn,fingerprintClusters,uaClusters,hourly,paths,sources,visitorClusters,outbound]=await Promise.all([
+    env.DB.prepare(`WITH allowed AS (
+      SELECT * FROM traffic_guard_events WHERE decision='allowed' AND created_at>=datetime('now','-48 hours')
+    )
+    SELECT COUNT(DISTINCT session_id) allowed_sessions,
+      COUNT(DISTINCT country) countries,
+      COUNT(DISTINCT asn) asns,
+      COUNT(DISTINCT fingerprint) fingerprints,
+      COUNT(DISTINCT ua_hash) ua_hashes,
+      SUM(CASE WHEN suspicious_direct=1 THEN 1 ELSE 0 END) suspicious_direct_events,
+      COUNT(DISTINCT path) paths,
+      MIN(created_at) first_at,
+      MAX(created_at) last_at
+    FROM allowed`).first(),
+    env.DB.prepare(`SELECT COALESCE(country,'??') country,COALESCE(asn,0) asn,
+      COUNT(DISTINCT session_id) sessions,
+      COUNT(DISTINCT fingerprint) fingerprints,
+      COUNT(DISTINCT ua_hash) ua_hashes,
+      COUNT(DISTINCT path) paths,
+      SUM(CASE WHEN suspicious_direct=1 THEN 1 ELSE 0 END) suspicious_direct_events
+    FROM traffic_guard_events
+    WHERE decision='allowed' AND created_at>=datetime('now','-48 hours')
+    GROUP BY country,asn
+    ORDER BY sessions DESC
+    LIMIT 25`).all(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions,
+      COUNT(DISTINCT path) paths,
+      COUNT(DISTINCT country) countries,
+      COUNT(DISTINCT asn) asns,
+      SUM(CASE WHEN suspicious_direct=1 THEN 1 ELSE 0 END) suspicious_direct_events,
+      MIN(created_at) first_at,
+      MAX(created_at) last_at
+    FROM traffic_guard_events
+    WHERE decision='allowed' AND created_at>=datetime('now','-48 hours')
+    GROUP BY fingerprint
+    ORDER BY sessions DESC
+    LIMIT 25`).all(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions,
+      COUNT(DISTINCT fingerprint) fingerprints,
+      COUNT(DISTINCT path) paths,
+      COUNT(DISTINCT country) countries,
+      COUNT(DISTINCT asn) asns
+    FROM traffic_guard_events
+    WHERE decision='allowed' AND created_at>=datetime('now','-48 hours')
+    GROUP BY ua_hash
+    ORDER BY sessions DESC
+    LIMIT 25`).all(),
+    env.DB.prepare(`SELECT strftime('%Y-%m-%d %H:00:00',created_at) hour_utc,
+      COUNT(DISTINCT session_id) sessions,
+      COUNT(DISTINCT fingerprint) fingerprints,
+      COUNT(DISTINCT asn) asns
+    FROM traffic_guard_events
+    WHERE decision='allowed' AND created_at>=datetime('now','-48 hours')
+    GROUP BY hour_utc
+    ORDER BY hour_utc ASC`).all(),
+    env.DB.prepare(`SELECT COALESCE(path,'/') path,COUNT(DISTINCT session_id) sessions,
+      COUNT(DISTINCT fingerprint) fingerprints,
+      COUNT(DISTINCT asn) asns
+    FROM traffic_guard_events
+    WHERE decision='allowed' AND created_at>=datetime('now','-48 hours')
+    GROUP BY path
+    ORDER BY sessions DESC
+    LIMIT 30`).all(),
+    env.DB.prepare(`SELECT COALESCE(v.source,'direct') source,COALESCE(v.referrer_host,'') referrer_host,
+      COUNT(DISTINCT v.session_id) sessions,
+      COUNT(DISTINCT v.visitor_id) visitors
+    FROM confirmed_visitor_events v
+    WHERE v.created_at>=datetime('now','-48 hours')
+    GROUP BY source,referrer_host
+    ORDER BY sessions DESC
+    LIMIT 30`).all().catch(()=>({results:[]})),
+    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions
+    FROM confirmed_visitor_events
+    WHERE created_at>=datetime('now','-48 hours')
+    GROUP BY visitor_id
+    ORDER BY sessions DESC
+    LIMIT 25`).all().catch(()=>({results:[]})),
+    env.DB.prepare(`SELECT COUNT(*) events,COUNT(DISTINCT session_id) sessions,
+      SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized
+    FROM verified_outbound_events
+    WHERE created_at>=datetime('now','-48 hours')`).first().catch(()=>null)
+  ]);
+  const blocked=await env.DB.prepare(`SELECT reason,COUNT(DISTINCT session_id) sessions
+    FROM traffic_guard_events
+    WHERE decision='blocked' AND created_at>=datetime('now','-48 hours')
+    GROUP BY reason ORDER BY sessions DESC`).all();
+  const topCluster=(fingerprintClusters.results||[])[0]||null;
+  const allowed=Number(overview?.allowed_sessions||0),topFp=Number(topCluster?.sessions||0);
+  return {
+    ok:true,
+    window_hours:48,
+    generated_at:new Date().toISOString(),
+    privacy:'Aggregate diagnostics only. No raw IPs, User-Agents, fingerprints, visitor IDs or session IDs are returned.',
+    overview:{
+      allowed_sessions:allowed,
+      countries:Number(overview?.countries||0),
+      asns:Number(overview?.asns||0),
+      fingerprints:Number(overview?.fingerprints||0),
+      ua_hashes:Number(overview?.ua_hashes||0),
+      paths:Number(overview?.paths||0),
+      suspicious_direct_events:Number(overview?.suspicious_direct_events||0),
+      first_at:overview?.first_at||null,
+      last_at:overview?.last_at||null,
+      top_fingerprint_share_pct:allowed?Number((topFp/allowed*100).toFixed(1)):0
+    },
+    country_asn:countryAsn.results||[],
+    fingerprint_cluster_sizes:fingerprintClusters.results||[],
+    ua_cluster_sizes:uaClusters.results||[],
+    hourly:hourly.results||[],
+    paths:paths.results||[],
+    sources:sources.results||[],
+    visitor_session_cluster_sizes:visitorClusters.results||[],
+    blocked:blocked.results||[],
+    verified_outbound_48h:outbound?{events:Number(outbound.events||0),sessions:Number(outbound.sessions||0),monetized:Number(outbound.monetized||0)}:{events:0,sessions:0,monetized:0},
+    interpretation_hints:{
+      high_risk_cluster:'A small number of ASNs/fingerprints dominating many sessions is consistent with automation or proxy concentration.',
+      distributed_human_pattern:'Many ASNs and fingerprints, varied pages and referrers, and low per-fingerprint session counts are more consistent with human traffic.',
+      outbound_note:'Zero verified outbound with many accepted sessions does not prove automation, but it materially weakens the traction signal.'
+    }
+  };
+}
+
 async function augmentHealth(response,env){
   if(!response.ok)return response;
   let data;try{data=await response.json()}catch{return response}
@@ -157,6 +281,7 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/api/events')return handleEvents(request,env,ctx);
+    if(request.method==='GET'&&url.pathname==='/api/traffic-forensics-48h')return Response.json(await trafficForensics48h(env),{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/api/traffic-integrity-health')response=await augmentHealth(response,env);
     if(request.method==='GET'&&isHtml(response)&&!ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
