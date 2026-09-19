@@ -408,6 +408,7 @@ async function normalizeTechnicalOpportunities(env){
     const r=await env.DB.prepare(`UPDATE distribution_opportunities
       SET status='skipped',human_required=0,next_action='Technical infrastructure host excluded from distribution discovery.',last_checked_at=datetime('now'),updated_at=datetime('now')
       WHERE status NOT IN ('skipped','policy_blocked','rejected','unavailable_free','verified','live')
+        AND surface_slug<>'indexnow'
         AND action_url IS NOT NULL
         AND (
           lower(action_url) LIKE 'https://api.%' OR lower(action_url) LIKE 'https://cdn.%' OR lower(action_url) LIKE 'https://static.%'
@@ -494,6 +495,12 @@ async function autonomyMetrics(env){
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
+  await env.DB.prepare(`UPDATE distribution_opportunities
+    SET status='ready_to_submit',human_required=0,next_action='Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements.',updated_at=datetime('now')
+    WHERE surface_slug='indexnow' AND status='skipped' AND next_action='Technical infrastructure host excluded from distribution discovery.'`).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE engine_runs
+    SET status='failed',completed_at=datetime('now'),detail='superseded_by_healthy_autonomous_cycle',evidence_json='{"reason":"superseded_by_healthy_autonomous_cycle"}',updated_at=datetime('now')
+    WHERE engine='distribution' AND mission='autonomous_cycle' AND status='running' AND started_at<datetime('now','-5 minutes')`).run().catch(()=>{});
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
   const routeRefresh=await refreshPersistentActionUrls(env);
