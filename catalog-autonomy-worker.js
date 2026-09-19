@@ -133,8 +133,10 @@ function newsMateriality(result,sourceUrl){
 }
 async function rememberReleaseSources(env,slug,links){
   let n=0;for(const url of Array.isArray(links)?links:[]){
-    await env.DB.prepare(`INSERT INTO software_news_sources(source_url,tool_slug,status,updated_at) VALUES(?,?,'active',datetime('now'))
-      ON CONFLICT(source_url) DO UPDATE SET tool_slug=excluded.tool_slug,status='active',updated_at=datetime('now')`).bind(url,slug).run().catch(()=>{});n++;
+    const write=await env.DB.prepare(`INSERT INTO software_news_sources(source_url,tool_slug,status,updated_at) VALUES(?,?,'active',datetime('now'))
+      ON CONFLICT(source_url) DO UPDATE SET tool_slug=excluded.tool_slug,status='active',updated_at=datetime('now')
+      WHERE software_news_sources.tool_slug IS NOT excluded.tool_slug OR software_news_sources.status IS NOT 'active'`).bind(url,slug).run().catch(()=>null);
+    if(Number(write?.meta?.changes||write?.changes||0)>0)n++;
   }return n;
 }
 export async function verifyNewsSources(env){
@@ -233,7 +235,7 @@ export async function verifyBatch(env){
       .bind(slug,tool.sourceUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   }
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,evidence:'official_source_runtime'};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,evidence:'official_source_runtime',write_policy:'due_check_only'};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
