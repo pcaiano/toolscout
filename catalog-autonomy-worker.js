@@ -188,7 +188,7 @@ async function mergedTools(env){
   }
   return out;
 }
-async function verifyBatch(env){
+export async function verifyBatch(env){
   await ensureSchema(env);
   const staticTools=await assetJson(env,'/data/tools.json',[]);
   const candidates=await runtimeCandidates(env);
