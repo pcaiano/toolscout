@@ -34,16 +34,21 @@ function releaseLinks(html,base){
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
 async function fetchOfficial(url){
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
+  let lastError=null;
+  for(let attempt=1;attempt<=2;attempt++){
   const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);
   try{
-    const r=await fetch(u.href,{method:'GET',redirect:'follow',headers:{'User-Agent':'ToolScout-Catalog-Autonomy/1.0 (+https://trytoolscout.org/)'},signal:ctl.signal});
+    const r=await fetch(u.href,{method:'GET',redirect:'follow',headers:{'User-Agent':attempt===1?'ToolScout-Catalog-Autonomy/1.1 (+https://trytoolscout.org/)':'Mozilla/5.0 (compatible; ToolScoutCatalogVerifier/1.1; +https://trytoolscout.org/)','Accept':'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.5'},signal:ctl.signal});
     if(r.status===404||r.status===410)return{status:'broken',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
     return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,releaseLinks:releaseLinks(html,r.url||u.href)};
-  }catch(e){return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:e?.name==='AbortError'?'timeout':'network_error'}}
+  }catch(e){lastError=e?.name==='AbortError'?'timeout':'network_error'}
   finally{clearTimeout(timer)}
+  if(attempt<2)await new Promise(resolve=>setTimeout(resolve,150));
+  }
+  return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:lastError||'network_error'};
 }
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
