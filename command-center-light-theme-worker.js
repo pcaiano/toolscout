@@ -5,6 +5,7 @@ import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
 import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources} from './catalog-autonomy-worker.js';
+import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 
 const STATS_CACHE_TTL_SECONDS = 30;
 const AUDIT_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
@@ -378,6 +379,7 @@ export default {
     ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
     ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,trigger).catch(()=>{}));
     ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyCatalogBatch(env)).catch(()=>{}));
+    ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:trigger},()=>runContentSocialIntelligenceCycle(env)).catch(()=>{}));
     if(event?.cron==='15 3 * * *'){
       ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));
       ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env)).catch(()=>{}));
