@@ -211,7 +211,7 @@ async function buildBrief(env,family,{issue=false}={}){
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
   const growth=await env.DB.prepare(`SELECT subject_type,subject_key,priority_score,opportunity_key FROM growth_opportunity_state WHERE status='active' AND subject_type IN ('tool','news_update') ORDER BY priority_score DESC LIMIT 80`).all().catch(()=>({results:[]}));
   const sprintGrowth=await env.DB.prepare(`SELECT subject_key,priority_score,opportunity_key,signal_json FROM growth_opportunity_state
-    WHERE status='active' AND subject_type='search'
+    WHERE status='active' AND subject_type='search' AND subject_key NOT IN ('/','/tools')
       AND (opportunity_key LIKE 'sprint-search:%' OR (opportunity_key LIKE 'gsc-page:%' AND COALESCE(json_extract(signal_json,'$.evidence_confidence'),'')='meaningful'))
     ORDER BY priority_score DESC,COALESCE(CAST(json_extract(signal_json,'$.impressions') AS INTEGER),0) DESC
     LIMIT 18`).all().catch(()=>({results:[]}));
