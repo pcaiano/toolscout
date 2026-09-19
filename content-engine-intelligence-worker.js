@@ -205,7 +205,7 @@ function editorialTargets(family,path='/',campaign='content_engine_v21'){
     bluesky:`${base}?utm_source=bluesky&utm_medium=organic_social&utm_campaign=${campaign}&utm_content=${content}`
   };
 }
-async function buildBrief(env,family){
+async function buildBrief(env,family,{issue=false}={}){
   await ensureSchema(env);
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
   const growth=await env.DB.prepare(`SELECT subject_type,subject_key,priority_score,opportunity_key FROM growth_opportunity_state WHERE status='active' AND subject_type IN ('tool','news_update') ORDER BY priority_score DESC LIMIT 80`).all().catch(()=>({results:[]}));
@@ -269,10 +269,12 @@ async function buildBrief(env,family){
     `X target: ${t.x}`,
     `Bluesky target: ${t.bluesky}`
   ].filter(Boolean).join('\n');
-  await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||null,JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
-  await env.DB.batch(Object.entries(t).map(([channel,target])=>env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'prepared',datetime('now'),datetime('now'))`).bind(`${briefId}:${channel}`,growthKey,'content',channel,target))).catch(()=>{});
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentbrief_${crypto.randomUUID()}`,'growth_content_brief_prepared','completed','content_engine',briefId,`Content brief prepared with autonomous growth priority ${growthKey||'none'} and verified mentions only.`).run().catch(()=>{});
-  return {brief_id:briefId,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
+  if(issue){
+    await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||null,JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
+    await env.DB.batch(Object.entries(t).map(([channel,target])=>env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'issued',datetime('now'),datetime('now'))`).bind(`${briefId}:${channel}`,growthKey,'content',channel,target))).catch(()=>{});
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentbrief_${crypto.randomUUID()}`,'growth_content_brief_issued','completed','content_engine',briefId,`Content brief issued to the publishing pipeline with autonomous growth priority ${growthKey||'none'} and verified mentions only.`).run().catch(()=>{});
+  }
+  return {issued:Boolean(issue),brief_id:briefId,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
 async function metrics(env){
@@ -287,6 +289,8 @@ async function metrics(env){
 }
 
 async function cycle(env){
+  await ensureSchema(env);
+  await env.DB.prepare(`UPDATE growth_action_events SET status='legacy_unverified',updated_at=datetime('now') WHERE status='prepared'`).run().catch(()=>{});
   const profiles=await refreshProfiles(env),policies=await refreshPolicies(env);
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentintel_${crypto.randomUUID()}`,'content_social_intelligence_refresh','completed','content_engine',`Content social intelligence: ${profiles.scanned} profile sites scanned, ${profiles.verified} verified social profiles, ${policies.scanned} affiliate policies checked, ${policies.allowed} verified for organic-social affiliate use.`).run().catch(()=>{});
   return {ok:true,profiles,policies};
@@ -312,7 +316,8 @@ export default {
     }
         if(u.pathname==='/api/content-engine/brief'&&request.method==='GET'){
       const family=['monday_discovery','wednesday_comparison','friday_practical'].includes(u.searchParams.get('family'))?u.searchParams.get('family'):'monday_discovery';
-      try{return Response.json(await buildBrief(env,family),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
+      const issue=u.searchParams.get('issue')==='1';
+      try{return Response.json(await buildBrief(env,family,{issue}),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
     }
     if(u.pathname==='/api/content-engine/intelligence/metrics'&&request.method==='GET'){
       try{return Response.json(await metrics(env),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_metrics_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
