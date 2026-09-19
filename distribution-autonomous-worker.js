@@ -1,5 +1,6 @@
 import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
+import {runWithLedger} from './engine-run-ledger.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
@@ -253,7 +254,19 @@ async function qualifyOne(env,row){
   return 'research_required';
 }
 async function qualify(env){
-  const q=await env.DB.prepare(`SELECT surface_slug,action_url,distribution_score,status,last_checked_at FROM distribution_opportunities WHERE human_required=0 AND action_url IS NOT NULL AND (status IN ('discovered','candidate') OR (status='research_required' AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-${RESEARCH_COOLDOWN_HOURS} hours')))) ORDER BY CASE WHEN status IN ('discovered','candidate') THEN 0 ELSE 1 END,distribution_score DESC,last_checked_at ASC LIMIT ${QUALIFY_LIMIT}`).all();
+  const q=await env.DB.prepare(`SELECT o.surface_slug,o.action_url,o.distribution_score,o.status,o.last_checked_at
+    FROM distribution_opportunities o
+    WHERE o.human_required=0 AND o.action_url IS NOT NULL AND o.surface_slug<>'indexnow'
+      AND (
+        o.status IN ('discovered','candidate')
+        OR (o.status='research_required' AND (o.last_checked_at IS NULL OR o.last_checked_at<=datetime('now','-${RESEARCH_COOLDOWN_HOURS} hours')))
+        OR (o.status='ready_to_submit' AND NOT EXISTS (
+          SELECT 1 FROM distribution_auto_adapters a
+          WHERE a.surface_slug=o.surface_slug AND a.policy_state='verified' AND a.confidence>=95
+        ))
+      )
+    ORDER BY CASE WHEN o.status='ready_to_submit' THEN 0 WHEN o.status IN ('discovered','candidate') THEN 1 ELSE 2 END,o.distribution_score DESC,o.last_checked_at ASC
+    LIMIT ${QUALIFY_LIMIT}`).all();
   let checked=0,ready=0,auth=0,blocked=0,human=0,research=0;
   for(const row of q.results||[]){
     checked++;
@@ -297,7 +310,16 @@ async function responseEvidence(res,endpoint){
   }catch{return null}
 }
 async function packageAndExecute(env){
-  const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit' ORDER BY o.distribution_score DESC LIMIT ${EXECUTION_LIMIT}`).all();
+  const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url
+    FROM distribution_auto_adapters a
+    JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
+    LEFT JOIN distribution_economic_learning l ON l.surface_slug=a.surface_slug
+    LEFT JOIN distribution_surface_costs c ON c.surface_slug=a.surface_slug
+    WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
+      AND COALESCE(c.cost_amount,0)=0
+      AND COALESCE(l.operating_decision,'explore') IN ('explore','measure','scale')
+    ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
+    LIMIT ${EXECUTION_LIMIT}`).all();
   let sent=0,failed=0,deduped=0;
   for(const a of q.results||[]){
     const prior=await env.DB.prepare(`SELECT submission_id,status FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
@@ -456,4 +478,22 @@ async function cycle(env){
   return {ok:true,normalized,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
-export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await cycle(env),{headers:H})}if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await autonomyMetrics(env),{headers:H})}return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);ctx.waitUntil(cycle(env).catch(()=>{}))}};
+export default {
+  async fetch(request,env,ctx){
+    const u=new URL(request.url);
+    if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){
+      if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+      return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api'},()=>cycle(env)),{headers:H});
+    }
+    if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){
+      if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+      return Response.json(await autonomyMetrics(env),{headers:H});
+    }
+    return base.fetch(request,env,ctx);
+  },
+  async scheduled(event,env,ctx){
+    if(base.scheduled)await base.scheduled(event,env,ctx);
+    const trigger=event?.cron||'scheduled';
+    await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>cycle(env)).catch(()=>{});
+  }
+};
