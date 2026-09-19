@@ -143,8 +143,11 @@ async function packageQueue(request,env){
     if(status==='auth_required')authRequired++;
     if(status==='policy_blocked')policyBlockedCount++;
   }
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`pack_${crypto.randomUUID()}`,'submission_packaging_refresh','completed','distribution_engine',`Submission Engine prepared ${prepared} item(s), including ${protocol.prepared} IndexNow candidate URL(s) from ${a.length} known asset(s); existing submission state was loaded once (${existingState.rows} active rows) instead of queried once per asset; ${protocol.cooldownSurfaces} automatic protocol surface(s) deferred by rate-limit cooldown; reclassified ${reclassified} stale item(s); ${adapterMissing} await verified adapters; ${authRequired} await authentication; ${policyBlockedCount} blocked by policy; ${human} truly require human action; ${deduped} duplicate(s) skipped.`).run();
-  return {ok:true,assets:a.length,prepared,directProtocol:protocol.prepared,protocolCooldown:protocol.cooldownSurfaces,reclassified,adapterMissing,authRequired,policyBlocked:policyBlockedCount,humanRequired:human,deduped,existingStateRows:existingState.rows,d1Mode:'bulk_existing_submission_state'};
+  const materialChanges=Number(prepared||0)+Number(reclassified||0);
+  if(materialChanges>0){
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`pack_${crypto.randomUUID()}`,'submission_packaging_refresh','completed','distribution_engine',`Submission Engine materially changed ${materialChanges} item(s): prepared ${prepared}, reclassified ${reclassified}. No-change packaging cycles are not persisted.`).run();
+  }
+  return {ok:true,assets:a.length,prepared,directProtocol:protocol.prepared,protocolCooldown:protocol.cooldownSurfaces,reclassified,adapterMissing,authRequired,policyBlocked:policyBlockedCount,humanRequired:human,deduped,existingStateRows:existingState.rows,d1Mode:'bulk_existing_submission_state',materialChanges,write_policy:'material_change_only'};
 }
 
 async function execute(request,env){
@@ -164,8 +167,11 @@ async function execute(request,env){
       else{const isRetryable=retryableHttp(res.status);const err=`${isRetryable?'retryable':'terminal'}:HTTP ${res.status}`;await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(err,row.submission_id).run();failed++;if(!isRetryable)terminal++;}
     }catch(e){const msg=safe(e?.message||e,900);await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(`retryable:${msg}`,row.submission_id).run();failed++;}
   }
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`submit_${crypto.randomUUID()}`,'submission_execution_refresh',failed?'partial':'completed','distribution_engine',`Submission Engine executed ${sent} verified automatic submission(s); IndexNow delivery is owned by the adaptive throughput worker; retried ${retried}; ${blocked} blocked or awaiting setup; ${failed} failed (${terminal} terminal).`).run();
-  return {ok:true,sent,batched,cooldown,retried,blocked,failed,terminal,indexNowOwner:'adaptive_throughput'};
+  const materialChanges=Number(sent||0)+Number(retried||0)+Number(blocked||0)+Number(failed||0);
+  if(materialChanges>0){
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`submit_${crypto.randomUUID()}`,'submission_execution_refresh',failed?'partial':'completed','distribution_engine',`Submission Engine executed material work: ${sent} submitted, ${retried} retried, ${blocked} blocked/setup and ${failed} failed (${terminal} terminal). Empty execution cycles are not persisted.`).run();
+  }
+  return {ok:true,sent,batched,cooldown,retried,blocked,failed,terminal,indexNowOwner:'adaptive_throughput',materialChanges,write_policy:'material_change_only'};
 }
 
 async function verifySubmitted(request,env){
