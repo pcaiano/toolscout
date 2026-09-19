@@ -330,59 +330,54 @@ async function packageAndExecute(env){
       AND COALESCE(l.operating_decision,'explore') IN ('explore','measure','scale')
     ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
     LIMIT ${EXECUTION_LIMIT}`).all();
-  let sent=0,failed=0,deduped=0;
-  for(const a of q.results||[]){
+  const outcomes=await Promise.all((q.results||[]).map(async a=>{
     const prior=await env.DB.prepare(`SELECT submission_id,status FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
-    if(prior&&['submitted','ready'].includes(prior.status)){deduped++;continue}
+    if(prior&&['submitted','ready'].includes(prior.status))return 'deduped';
     const id=prior?.submission_id||`sub_${crypto.randomUUID()}`;
     if(!prior)await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(id,a.surface_slug,'https://trytoolscout.org/','auto_discovered_json','ready',a.payload_template_json,a.endpoint,0).run();
     try{
       const payload=JSON.parse(a.payload_template_json||'{}');
       const contentType=String(a.content_type||'application/json');
       const body=contentType==='application/x-www-form-urlencoded'?new URLSearchParams(Object.entries(payload).map(([k,v])=>[k,Array.isArray(v)?v.join(','):String(v??'')])).toString():JSON.stringify(payload);
-      const r=await fetch(a.endpoint,{method:String(a.method||'POST').toUpperCase(),headers:{'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout Distribution Engine/1.1'},body,redirect:'follow',signal:AbortSignal.timeout(15000)});
+      const r=await fetch(a.endpoint,{method:String(a.method||'POST').toUpperCase(),headers:{'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout Distribution Engine/1.1'},body,redirect:'follow',signal:AbortSignal.timeout(7000)});
       if(r.ok){
         const evidence=await responseEvidence(r,a.endpoint);
         const responseUrl=evidence||a.verification_endpoint||a.public_url||r.url||a.endpoint;
         await env.DB.prepare(`UPDATE distribution_submissions SET status='submitted',attempts=attempts+1,last_attempt_at=datetime('now'),submitted_at=datetime('now'),response_url=?,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(responseUrl,id).run();
         await env.DB.prepare(`UPDATE distribution_opportunities SET status='submitted',next_action='Automatic submission accepted; verification loop will confirm publication when a public resource becomes available.',updated_at=datetime('now') WHERE surface_slug=?`).bind(a.surface_slug).run();
-        sent++;
-      }else{
-        await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(`HTTP ${r.status}`,id).run();
-        failed++;
+        return 'sent';
       }
+      await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(`HTTP ${r.status}`,id).run();
+      return 'failed';
     }catch(e){
       await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(safe(e?.message||e,500),id).run();
-      failed++;
+      return 'failed';
     }
-  }
-  return {sent,failed,deduped,per_cycle_limit:EXECUTION_LIMIT};
+  }));
+  return {sent:outcomes.filter(x=>x==='sent').length,failed:outcomes.filter(x=>x==='failed').length,deduped:outcomes.filter(x=>x==='deduped').length,per_cycle_limit:EXECUTION_LIMIT};
 }
 async function verifyAutoSubmitted(env){
-  const q=await env.DB.prepare(`SELECT ds.submission_id,ds.surface_slug,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url FROM distribution_submissions ds JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug WHERE ds.submission_type='auto_discovered_json' AND ds.status='submitted' AND COALESCE(o.status,'') NOT IN ('verified','live') ORDER BY ds.submitted_at DESC LIMIT 30`).all();
-  let checked=0,verified=0,pending=0,missingVerification=0,errors=0;
-  for(const row of q.results||[]){
+  const q=await env.DB.prepare(`SELECT ds.submission_id,ds.surface_slug,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url FROM distribution_submissions ds JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug WHERE ds.submission_type='auto_discovered_json' AND ds.status='submitted' AND COALESCE(o.status,'') NOT IN ('verified','live') ORDER BY ds.submitted_at DESC LIMIT 6`).all();
+  const outcomes=await Promise.all((q.results||[]).map(async row=>{
     const candidates=[row.response_url,row.verification_endpoint,row.public_url]
       .map(v=>externalEvidenceUrl(v,row.action_url||row.verification_endpoint||row.public_url||'https://example.com/'))
       .filter(Boolean);
     const target=candidates.find(v=>v!==row.action_url)||null;
-    if(!target){missingVerification++;continue}
-    checked++;
+    if(!target)return 'missing';
     try{
-      const r=await fetch(target,{method:'GET',headers:{'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout Distribution Verifier/1.0'},redirect:'follow',signal:AbortSignal.timeout(12000)});
+      const r=await fetch(target,{method:'GET',headers:{'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout Distribution Verifier/1.0'},redirect:'follow',signal:AbortSignal.timeout(5000)});
       if(r.ok){
         const publicUrl=externalEvidenceUrl(r.url,target)||target;
         await env.DB.prepare(`UPDATE distribution_submissions SET response_url=?,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(publicUrl,row.submission_id).run();
         await env.DB.prepare(`UPDATE distribution_auto_adapters SET public_url=COALESCE(public_url,?),verification_endpoint=COALESCE(verification_endpoint,?),updated_at=datetime('now') WHERE surface_slug=?`).bind(publicUrl,target,row.surface_slug).run();
         await env.DB.prepare(`UPDATE distribution_opportunities SET status='verified',live_url=COALESCE(live_url,?),last_checked_at=datetime('now'),next_action='Automatic publication verification confirmed. Monitor referral traffic, ranking and downstream monetization.',updated_at=datetime('now') WHERE surface_slug=?`).bind(publicUrl,row.surface_slug).run();
-        verified++;
-      }else if(r.status===404||r.status===202){
-        pending++;
-      }else{
-        errors++;
+        return 'verified';
       }
-    }catch{errors++}
-  }
+      if(r.status===404||r.status===202)return 'pending';
+      return 'error';
+    }catch{return 'error'}
+  }));
+  const checked=outcomes.filter(x=>x!=='missing').length,verified=outcomes.filter(x=>x==='verified').length,pending=outcomes.filter(x=>x==='pending').length,missingVerification=outcomes.filter(x=>x==='missing').length,errors=outcomes.filter(x=>x==='error').length;
   if(checked||missingVerification){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`autoverify_${crypto.randomUUID()}`,'autonomous_submission_verification',errors?'partial':'completed','distribution_engine',`Autonomous verification checked ${checked} submitted surface(s): ${verified} verified, ${pending} still pending, ${missingVerification} still lack a safe verification URL, ${errors} verification error(s).`).run();
   }
