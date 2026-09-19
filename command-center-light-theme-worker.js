@@ -162,22 +162,22 @@ function countryColumn(label,data){
 }
 function countriesBlock(c){
   if(!c||c.status!=='observed')return '<div class="tsCountryBlock" data-ts-country-bars="1"><div class="tsCountryHead"><strong>Visitor countries</strong><span>Country data is currently unavailable.</span></div></div>';
-  return '<div class="tsCountryBlock" data-ts-country-bars="1"><div class="tsCountryHead"><strong>Visitor countries</strong><span>Country share among browser-confirmed human visitors. Cloudflare network location is used. Raw IP is not stored. VPNs or proxies can affect the reported country.</span></div><div class="tsCountryGridRepair">'+countryColumn('Today',c.today)+countryColumn('Last 24h',c.last24)+countryColumn('MTD',c.monthToDate)+'</div></div>';
+  return '<div class="tsCountryBlock" data-ts-country-bars="1"><div class="tsCountryHead"><strong>Visitor countries</strong><span>Country share among strict verified human visitors only. Cloudflare network location is used. Raw IP is not stored. VPNs or proxies can affect the reported country.</span></div><div class="tsCountryGridRepair">'+countryColumn('Today',c.today)+countryColumn('Last 24h',c.last24)+countryColumn('MTD',c.monthToDate)+'</div></div>';
 }
 function render(d){
   latest=d||latest;if(!latest)return;
   var root=document.getElementById('trafficTruthBody');if(!root)return;
   var forecast=root.querySelector('.tsTruthForecast');if(!forecast)return;
   var v=latest.visitors||{},t=latest.traffic||{},commercial=latest.canonicalCommercialTruth||{},countries=latest.trafficCountries||{};
-  var html='<div class="tsTrafficDetail" data-repair="1"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Human Sessions is the canonical headline metric. Unique Human Visitors remains a supporting exact first-party metric.</span></div><div class="tsDetailGrid">'+
-    card('Unique human visitors, last 24h',fmt(v.last24),windowMeta(v,'last24'))+
-    card('Unique human visitors today',fmt(v.today),windowMeta(v,'today'))+
-    card('Unique human visitors this month',fmt(v.monthToDate),windowMeta(v,'month'))+
-    card('Unique visitors since exact tracking',fmt(v.sinceTracking),'First-party human browser IDs observed since exact visitor tracking began')+
+  var html='<div class="tsTrafficDetail" data-repair="1"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Strict Verified Human Sessions is the canonical business traffic metric. Browser-validated sessions are diagnostic only and never enter this KPI.</span></div><div class="tsDetailGrid">'+
+    card('Strict human visitors, last 24h',fmt(v.last24),windowMeta(v,'last24'))+
+    card('Strict human visitors today',fmt(v.today),windowMeta(v,'today'))+
+    card('Strict human visitors this month',fmt(v.monthToDate),windowMeta(v,'month'))+
+    card('Strict human visitors since baseline',fmt(v.sinceTracking),'First-party visitor IDs attached to positive human evidence since strict-human-v1 began')+
     card('Verified outbound clicks',fmt(commercial.humanOutbound),'First-party verified outbound clicks')+
     card('Monetized outbound clicks, 30d',fmt(commercial.monetizedOutbound),'Human outbound clicks routed through active monetized affiliate paths')+
-    card('Browser sessions this month',fmt(t.monthToDate),'Canonical browser-confirmed month-to-date sessions')+
-    card('Average sessions per day MTD',fmt(t.dailyAverageMTD,1),'Browser-confirmed sessions per calendar day')+
+    card('Strict human sessions this month',fmt(t.monthToDate),'Positive-evidence human sessions only')+
+    card('Average strict sessions / day MTD',fmt(t.dailyAverageMTD,1),'Strict verified human sessions per calendar day')+
     '</div>'+countriesBlock(countries)+'</div>';
   var old=root.querySelector('.tsTrafficDetail');
   if(old)old.remove();
@@ -239,7 +239,7 @@ async function augmentEntrypointHealth(response) {
   let data;
   try { data = await response.json(); } catch { return response; }
   data.entrypoint = 'command-center-light-theme-worker';
-  data.entrypointVersion = 9;
+  data.entrypointVersion = 10;
   data.commandCenterComposition = 'canonical-growth-v2';
   data.autonomousGrowthBrain = 'shared-growth-v3';
   data.affiliateEngineVersion = '2.1';
@@ -254,6 +254,8 @@ async function augmentEntrypointHealth(response) {
   data.whatsNewBrainIntegrated = true;
   data.growthRndAutonomy = 'bounded-v1';
   data.affiliateCanonicalTruth = 'verified-outbound-v1';
+  data.trafficTruthVersion = 'strict-human-v1';
+  data.browserValidatedIsDiagnosticOnly = true;
   data.stats503Fallback = true;
   data.statsSnapshotCacheSeconds = STATS_CACHE_TTL_SECONDS;
   data.trafficDetailBackgroundPolling = false;
@@ -273,7 +275,7 @@ function clientNoStore(response, cacheState) {
 async function cachedStatsResponse(request, env, ctx) {
   if (typeof caches === 'undefined' || !caches.default) return resilientStatsResponse(request, env, ctx);
   const url = new URL(request.url);
-  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v3', {method:'GET'});
+  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v4', {method:'GET'});
   try {
     const cached = await caches.default.match(cacheKey);
     if (cached) return clientNoStore(cached, 'hit');
@@ -323,7 +325,7 @@ export default {
         const probe=await env.ASSETS.fetch(new Request(new URL('/analytics-v2',request.url).toString(),{method:'GET'}));
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
-      return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',buildContract:'2026-09-19.1'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,buildContract:'2026-09-19.2'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
