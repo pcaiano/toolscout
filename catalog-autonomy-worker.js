@@ -137,7 +137,7 @@ async function rememberReleaseSources(env,slug,links){
       ON CONFLICT(source_url) DO UPDATE SET tool_slug=excluded.tool_slug,status='active',updated_at=datetime('now')`).bind(url,slug).run().catch(()=>{});n++;
   }return n;
 }
-async function verifyNewsSources(env){
+export async function verifyNewsSources(env){
   await ensureSchema(env);
   const q=await env.DB.prepare(`SELECT source_url,tool_slug,fingerprint,last_checked_at FROM software_news_sources WHERE status='active' ORDER BY COALESCE(last_checked_at,'1970-01-01') ASC LIMIT 6`).all();
   let checked=0,changed=0,baselined=0,warnings=0;
@@ -259,7 +259,7 @@ async function syncMarketGaps(env){
   }
   return synced;
 }
-async function admitTrustedCandidates(env){
+export async function admitTrustedCandidates(env){
   await ensureSchema(env);
   const config=await assetJson(env,'/data/catalog-engine.json',{});
   const staticTools=await assetJson(env,'/data/tools.json',[]);
@@ -338,9 +338,6 @@ export default {
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    if(base.scheduled)await base.scheduled(event,env,ctx);
-    const trigger=event?.cron||'scheduled';
-    await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyBatch(env)).catch(()=>{});
-    if(event?.cron==='15 3 * * *'){ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env)).catch(()=>{}));}
+    return base.scheduled?base.scheduled(event,env,ctx):undefined;
   }
 };
