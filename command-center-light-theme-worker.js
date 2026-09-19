@@ -3,6 +3,7 @@ import resilientFallback from './command-center-resilient-worker.js';
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
+import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
 
 const STATS_CACHE_TTL_SECONDS = 30;
 const AUDIT_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
@@ -366,6 +367,7 @@ export default {
     const trigger=event?.cron||'scheduled';
     ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
     ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
+    ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,trigger).catch(()=>{}));
     if (typeof base.scheduled === 'function') return base.scheduled(event, env, ctx);
   }
 };
