@@ -27,6 +27,19 @@ const HUMAN_ACQUISITION_GSC_TARGETS=Object.freeze([
   {key:'funnel-builders',cluster:'funnel_builders',path:'/best-funnel-builder',title:'Best Funnel Builder',impressions:176,position:76.46,priority:88}
 ]);
 function humanSprintActive(now=Date.now()){return now>=Date.parse(HUMAN_ACQUISITION_SPRINT.startAt)&&now<Date.parse(HUMAN_ACQUISITION_SPRINT.endAt);}
+function coordinatedGrowthPriority(subjectType,score,audienceStrategy){
+  let priority=Math.max(0,Math.min(100,Number(score)||0));
+  const apply=(mode)=>{
+    if(subjectType==='surface')priority=Math.min(100,priority+(mode==='borrowed'?10:20));
+    else if(subjectType==='tool')priority=Math.min(100,priority+(mode==='borrowed'?6:15));
+    else if(subjectType==='news_update')priority=Math.min(100,priority+(mode==='borrowed'?3:12));
+    else if(subjectType==='affiliate')priority=Math.min(priority,45);
+    else if(['catalog_tool','catalog_category','catalog_gap','catalog_system'].includes(subjectType)&&priority<90)priority=Math.min(priority,55);
+  };
+  if(audienceStrategy?.borrowedFirst)apply('borrowed');
+  if(humanSprintActive())apply('sprint');
+  return Number(priority.toFixed(2));
+}
 const safe=(v,n=3000)=>String(v??'').slice(0,n);
 async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 function classify(url){const p=new URL(url).pathname.toLowerCase();if(p.includes('-vs-'))return'comparison';if(p.includes('best-'))return'best_of';if(p.includes('alternatives'))return'alternatives';return'decision_asset';}
@@ -167,7 +180,9 @@ async function growthAssetJson(env,path,fallback){
           const generatedAt=value?.generatedAt||value?.generated_at||value?.updatedAt||value?.updated_at||value?.summary?.generatedAt||null;
           await env.DB.prepare(`INSERT INTO growth_asset_cache(path,payload_json,source_generated_at,cached_at,updated_at)
             VALUES(?,?,?,datetime('now'),datetime('now'))
-            ON CONFLICT(path) DO UPDATE SET payload_json=excluded.payload_json,source_generated_at=excluded.source_generated_at,cached_at=datetime('now'),updated_at=datetime('now')`)
+            ON CONFLICT(path) DO UPDATE SET payload_json=excluded.payload_json,source_generated_at=excluded.source_generated_at,cached_at=datetime('now'),updated_at=datetime('now')
+            WHERE growth_asset_cache.payload_json IS NOT excluded.payload_json
+               OR growth_asset_cache.source_generated_at IS NOT excluded.source_generated_at`)
             .bind(path,payload,generatedAt==null?null:String(generatedAt)).run();
         }
       }catch{}
@@ -188,9 +203,7 @@ async function coordinateGrowthOpportunities(env){
   await env.DB.prepare(`UPDATE engine_runs
     SET status='failed',completed_at=datetime('now'),detail='superseded_stale_growth_run',evidence_json='{"reason":"superseded_stale_growth_run"}',updated_at=datetime('now')
     WHERE engine='growth' AND mission='opportunity_coordination' AND status='running' AND started_at<datetime('now','-10 minutes')`).run().catch(()=>{});
-  const stamp=await env.DB.prepare(`SELECT datetime('now') ts`).first().catch(()=>({ts:null}));
-  const coordinationStartedAt=String(stamp?.ts||new Date().toISOString().slice(0,19).replace('T',' '));
-  const growthWrites=[];
+  const growthWrites=[],activeKeys=[];
   const audienceStrategy=await audiencePhaseSnapshot(env);
   const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,
@@ -315,7 +328,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={surface_status:row.status,network_status:network||null,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`surface:${row.surface_slug}`,'surface',row.surface_slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`surface:${row.surface_slug}`,'surface',row.surface_slug,coordinatedGrowthPriority('surface',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`surface:${row.surface_slug}`);
     active++;surfaceCount++;
   }
   for(const row of tools){
@@ -330,7 +347,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={vendor_status:vendor,verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),news_priority_boost:Number(newsBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'vendor_borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?10:0};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`tool:${row.tool_slug}`,'tool',row.tool_slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`tool:${row.tool_slug}`,'tool',row.tool_slug,coordinatedGrowthPriority('tool',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`tool:${row.tool_slug}`);
     active++;toolCount++;
   }
   const affiliateStateWeight={research_required:18,program_exists:28,ready_to_apply:42,human_action_required:46,submitted:24,pending_review:24,approved_needs_link:72,link_acquired:88,active:52,verified:8,earning:4,rejected:2,watchlist:3,paused:2,blocked:18,no_program_found:1};
@@ -352,7 +373,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={affiliate_status:state,network:row.network||null,blocker:row.blocker||null,outbound_30d:outbound,unmonetized_outbound_30d:unmonetized,monetized_outbound_30d:monetized,search_priority_boost:Number(searchBoost.toFixed(2)),application_url:row.application_url||null,affiliate_url_present:Boolean(row.affiliate_url),updated_at:row.updated_at||null};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`affiliate:${slug}`,'affiliate',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`affiliate:${slug}`,'affiliate',slug,coordinatedGrowthPriority('affiliate',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`affiliate:${slug}`);
     active++;affiliateCount++;
   }
 
@@ -384,7 +409,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={tool_name:tool?.name||h?.name||slug,category:tool?.category||null,content_changed:Boolean(change)||runtime?.quality_status==='change_detected',quarantined:Boolean(quarantine)||runtime?.quality_status==='confirmed_broken',needs_weekly_review:Boolean(h?.needsWeeklyReview),overdue:Boolean(h?.overdue),missing_critical:Array.isArray(h?.missingCritical)?h.missingCritical:[],profile_hold:hold?.reason||null,source_status:runtime?.source_status||h?.source?.status||change?.sourceStatus||null,source_http_status:runtime?.http_status||h?.source?.httpStatus||change?.httpStatus||null,runtime_quality_status:runtime?.quality_status||null,runtime_last_checked_at:runtime?.last_checked_at||null,runtime_candidate:runtimeCandidateSet.has(slug),search_priority_boost:Number(searchBoost.toFixed(2)),freshness_report_generated_at:catalogFreshness?.generatedAt||null,catalog_health_generated_at:catalogHealth?.summary?.generatedAt||null};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`catalog-tool:${slug}`,'catalog_tool',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify([...new Set(actions)])));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`catalog-tool:${slug}`,'catalog_tool',slug,coordinatedGrowthPriority('catalog_tool',score,audienceStrategy),JSON.stringify(signals),JSON.stringify([...new Set(actions)])));activeKeys.push(`catalog-tool:${slug}`);
     active++;catalogCount++;
   }
   for(const gap of inputFreshness.catalogFreshness.fresh&&Array.isArray(catalogFreshness?.coverage)?catalogFreshness.coverage:[]){
@@ -394,7 +423,11 @@ async function coordinateGrowthOpportunities(env){
     const actions=['discover_catalog_candidates','verify_first_party_sources','admit_only_after_quality_gates'];
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`catalog-category:${category}`,'catalog_category',category,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`catalog-category:${category}`,'catalog_category',category,coordinatedGrowthPriority('catalog_category',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`catalog-category:${category}`);
     active++;catalogCount++;
   }
   for(const [slug,gap] of runtimeGapMap){
@@ -404,7 +437,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={market_signals:signalsCount,market_sources:sources,first_party_profile_required:true,affiliate_neutral:true,updated_at:gap?.updated_at||null};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`catalog-gap:${slug}`,'catalog_gap',slug,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(['research_first_party_candidate_profile','verify_official_source','admit_only_after_quality_gates'])));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`catalog-gap:${slug}`,'catalog_gap',slug,coordinatedGrowthPriority('catalog_gap',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(['research_first_party_candidate_profile','verify_official_source','admit_only_after_quality_gates'])));activeKeys.push(`catalog-gap:${slug}`);
     active++;catalogCount++;
   }
 
@@ -414,7 +451,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={report_age_days:reportAgeDays,target_days:freshnessDays,catalog_tools:Number(catalogFreshness?.summary?.tools||catalogTools?.length||0),reason:'Catalog verification evidence is older than the configured freshness target.'};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES('catalog:quality-refresh','catalog_system','quality-refresh',?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(Math.min(100,60+(reportAgeDays-freshnessDays)*4),JSON.stringify(signals),JSON.stringify(['run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles'])));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(coordinatedGrowthPriority('catalog_system',Math.min(100,60+(reportAgeDays-freshnessDays)*4),audienceStrategy),JSON.stringify(signals),JSON.stringify(['run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles'])));activeKeys.push('catalog:quality-refresh');
     active++;catalogCount++;
   }
 
@@ -426,7 +467,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={tool_slug:slug||null,title:item?.title||null,source_url:item?.sourceUrl||null,article_url:item?.articleUrl||null,published_at:item?.publishedAt||null,partner_update:Boolean(item?.partnerUpdate),search_priority_boost:Number(searchBoost.toFixed(2)),verified_source:true};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`news:${id}`,'news_update',slug||id,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`news:${id}`,'news_update',slug||id,coordinatedGrowthPriority('news_update',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`news:${id}`);
     active++;newsCount++;
   }
   for(const item of newsCandidates||[]){
@@ -436,7 +481,11 @@ async function coordinateGrowthOpportunities(env){
     const signals={tool_slug:slug||null,title:item?.title||null,summary:item?.summary||null,source_url:item?.source_url||null,status:item?.status||null,detected_at:item?.detected_at||null};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`news-candidate:${id}`,'news_update',slug||id,Number(score.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`news-candidate:${id}`,'news_update',slug||id,coordinatedGrowthPriority('news_update',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`news-candidate:${id}`);
     active++;newsCount++;
   }
 
@@ -466,7 +515,11 @@ async function coordinateGrowthOpportunities(env){
     };
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`search:${intent}`,'search',intent,Number(priority.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`search:${intent}`,'search',intent,coordinatedGrowthPriority('search',priority,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`search:${intent}`);
     active++;searchCount++;
   }
   for(const row of normalizedGscPages){
@@ -501,7 +554,11 @@ async function coordinateGrowthOpportunities(env){
     const priority=humanSprintActive()?Math.min(100,basePriority+(meaningful?10:2)):basePriority;
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`gsc-page:${key}`,'search',row.pathname,Number(priority.toFixed(2)),JSON.stringify(signals),JSON.stringify(actions)));
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`gsc-page:${key}`,'search',row.pathname,coordinatedGrowthPriority('search',priority,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`gsc-page:${key}`);
     active++;searchCount++;
   }
   if(humanSprintActive()){
@@ -528,40 +585,23 @@ async function coordinateGrowthOpportunities(env){
       };
       growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
         VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
-        ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(`sprint-search:${target.key}`,'search',target.path,target.priority,JSON.stringify(signals),JSON.stringify(actions)));
+        ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`sprint-search:${target.key}`,'search',target.path,coordinatedGrowthPriority('search',target.priority,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`sprint-search:${target.key}`);
       active++;searchCount++;
     }
   }
   await flushGrowthWrites(env,growthWrites,40);
-  await env.DB.prepare(`UPDATE growth_opportunity_state
-    SET status='dormant',updated_at=datetime('now')
-    WHERE status='active' AND last_evaluated_at<?`).bind(coordinationStartedAt).run().catch(()=>{});
-  if(audienceStrategy.borrowedFirst){
+  if(activeKeys.length){
+    const placeholders=activeKeys.map(()=>'?').join(',');
     await env.DB.prepare(`UPDATE growth_opportunity_state
-      SET priority_score=CASE
-        WHEN subject_type='surface' THEN MIN(100,priority_score+10)
-        WHEN subject_type='search' THEN priority_score
-        WHEN subject_type='tool' THEN MIN(100,priority_score+6)
-        WHEN subject_type='news_update' THEN MIN(100,priority_score+3)
-        WHEN subject_type='affiliate' THEN MIN(priority_score,45)
-        WHEN subject_type IN ('catalog_tool','catalog_category','catalog_gap','catalog_system') AND priority_score<90 THEN MIN(priority_score,55)
-        ELSE priority_score
-      END,
-      updated_at=datetime('now')
-      WHERE status='active'`).run().catch(()=>{});
-  }
-  if(humanSprintActive()){
+      SET status='dormant',updated_at=datetime('now')
+      WHERE status='active' AND opportunity_key NOT IN (${placeholders})`).bind(...activeKeys).run().catch(()=>{});
+  }else{
     await env.DB.prepare(`UPDATE growth_opportunity_state
-      SET priority_score=CASE
-        WHEN subject_type='surface' THEN MIN(100,priority_score+20)
-        WHEN subject_type='search' THEN priority_score
-        WHEN subject_type='tool' THEN MIN(100,priority_score+15)
-        WHEN subject_type='news_update' THEN MIN(100,priority_score+12)
-        WHEN subject_type='affiliate' THEN MIN(priority_score,45)
-        WHEN subject_type IN ('catalog_tool','catalog_category','catalog_gap','catalog_system') AND priority_score<90 THEN MIN(priority_score,55)
-        ELSE priority_score
-      END,
-      updated_at=datetime('now')
+      SET status='dormant',updated_at=datetime('now')
       WHERE status='active'`).run().catch(()=>{});
   }
   const actualTypeRows=await growthRows(env,`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`);
