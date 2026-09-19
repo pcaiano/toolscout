@@ -9,7 +9,15 @@ workers/
 docs/
 scripts/
 .github/
-reports/
+reports/*
+!reports/gsc-signals.json
+!reports/organic-growth-opportunities.json
+!reports/aeo-geo-readiness.json
+!reports/machine-readability.json
+!reports/catalog-freshness-coverage.json
+!reports/catalog-health.json
+!reports/tool-profile-holds.json
+!reports/competitive-gap-signals.json
 
 # Server source and operational files are never public static assets.
 migrations/
