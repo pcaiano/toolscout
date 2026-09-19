@@ -255,6 +255,7 @@ async function augmentEntrypointHealth(response) {
   data.growthRndAutonomy = 'bounded-v1';
   data.affiliateCanonicalTruth = 'verified-outbound-v1';
   data.trafficTruthVersion = 'strict-human-v1';
+  data.humanAcquisitionSprint = {id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z'};
   data.browserValidatedIsDiagnosticOnly = true;
   data.stats503Fallback = true;
   data.statsSnapshotCacheSeconds = STATS_CACHE_TTL_SECONDS;
@@ -325,7 +326,7 @@ export default {
         const probe=await env.ASSETS.fetch(new Request(new URL('/analytics-v2',request.url).toString(),{method:'GET'}));
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
-      return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,buildContract:'2026-09-19.2'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z'},buildContract:'2026-09-19.3'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
