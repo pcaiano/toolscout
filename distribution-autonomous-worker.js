@@ -41,7 +41,7 @@ async function rediscoverActionUrl(env,row){
   }catch{}
   try{
     const current=new URL(row.action_url);
-    const home=await text(current.origin+'/',6000);
+    const home=await text(current.origin+'/',3000);
     if(home){
       for(const u of links(home.body,home.url))if(sameHostFamily(u,home.url)&&ACTION_ROUTE_RE.test(u))candidates.push(u);
     }
@@ -408,6 +408,22 @@ async function ensureAutonomySchema(env){
   ]).catch(error=>{autonomySchemaReady=null;throw error});
   return autonomySchemaReady;
 }
+async function normalizeTechnicalOpportunities(env){
+  try{
+    const r=await env.DB.prepare(`UPDATE distribution_opportunities
+      SET status='skipped',human_required=0,next_action='Technical infrastructure host excluded from distribution discovery.',last_checked_at=datetime('now'),updated_at=datetime('now')
+      WHERE status NOT IN ('skipped','policy_blocked','rejected','unavailable_free','verified','live')
+        AND action_url IS NOT NULL
+        AND (
+          lower(action_url) LIKE 'https://api.%' OR lower(action_url) LIKE 'https://cdn.%' OR lower(action_url) LIKE 'https://static.%'
+          OR lower(action_url) LIKE 'https://assets.%' OR lower(action_url) LIKE 'https://asset.%' OR lower(action_url) LIKE 'https://img.%'
+          OR lower(action_url) LIKE 'https://images.%' OR lower(action_url) LIKE 'https://media.%' OR lower(action_url) LIKE 'https://js.%'
+          OR lower(action_url) LIKE 'https://css.%' OR lower(action_url) LIKE 'https://fonts.%' OR lower(action_url) LIKE 'https://edge.%'
+          OR lower(action_url) LIKE 'https://storage.%' OR lower(action_url) LIKE '%githubassets.com/%' OR lower(action_url) LIKE '%githubusercontent.com/%'
+        )`).run();
+    return Number(r?.meta?.changes||r?.changes||0);
+  }catch{return 0}
+}
 async function normalizeLegacyHumanEscalations(env){
   let opportunities=0,submissions=0,editorial=0;
   try{
@@ -419,7 +435,7 @@ async function normalizeLegacyHumanEscalations(env){
     submissions=Number(b?.meta?.changes||b?.changes||0);
   }catch{}
   try{
-    const d=await env.DB.prepare(`UPDATE distribution_editorial_queue SET status='autonomy_pending',human_required=0,updated_at=datetime('now') WHERE human_required=1 AND status='prepared' AND channel_type IN ('community','community_stack')`).run();
+    const d=await env.DB.prepare(`UPDATE distribution_editorial_queue SET status='retired_no_safe_executor',human_required=0,updated_at=datetime('now') WHERE status IN ('prepared','autonomy_pending') AND channel_type IN ('community','community_stack')`).run();
     editorial=Number(d?.meta?.changes||d?.changes||0);
   }catch{}
   return {opportunities,submissions,editorial};
@@ -479,13 +495,14 @@ async function autonomyMetrics(env){
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
+  const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
   const routeRefresh=await refreshPersistentActionUrls(env);
   const qualification=await qualify(env);
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
-  return {ok:true,normalized,routeRefresh,qualification,execution,verification,footprint};
+  return {ok:true,technicalSuppressed,normalized,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
