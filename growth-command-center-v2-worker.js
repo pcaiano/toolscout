@@ -246,7 +246,7 @@ async function growthOpsSnapshot(request,env,ctx,stats){
     safeAll(env,`SELECT status,COUNT(*) count FROM distribution_network_outreach GROUP BY status ORDER BY count DESC`),
     safeFirst(env,`SELECT COUNT(*) placements,COALESCE(SUM(backlink_verified),0) backlinks FROM distribution_placements WHERE placement_verified=1`)
   ]);
-  const queue=await chairmanQueue(request,env,ctx,{verifyLinks:true});
+  const queue=await chairmanQueue(request,env,ctx,{verifyLinks:false});
   const [growthState,growthRnd,contactRouteState,autonomyEvents,humanEvents,actionImpact]=await Promise.all([
     safeFirst(env,`SELECT COUNT(*) active,SUM(CASE WHEN subject_type='tool' THEN 1 ELSE 0 END) tools,SUM(CASE WHEN subject_type='surface' THEN 1 ELSE 0 END) surfaces,SUM(CASE WHEN subject_type='search' THEN 1 ELSE 0 END) search,SUM(CASE WHEN subject_type='affiliate' THEN 1 ELSE 0 END) affiliate,SUM(CASE WHEN subject_type LIKE 'catalog_%' THEN 1 ELSE 0 END) catalog,SUM(CASE WHEN subject_type='news_update' THEN 1 ELSE 0 END) news,MAX(last_evaluated_at) last_evaluated_at FROM growth_opportunity_state WHERE status='active'`),
     safeFirst(env,`SELECT COUNT(*) active,MAX(updated_at) last_evaluated_at FROM growth_rnd_experiments WHERE status='active'`),
