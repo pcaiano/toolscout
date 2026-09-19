@@ -84,6 +84,19 @@ function zonedMidnight(dayKey,timeZone=TIME_ZONE){
 }
 function stateCounts(rows){const out={};for(const row of rows){const k=String(row.status||'unknown');out[k]=(out[k]||0)+n(row.count)}return out}
 function daysInMonthForKey(key){const [y,m]=key.split('-').map(Number);return new Date(Date.UTC(y,m,0)).getUTCDate()}
+function countryBuckets(rows){
+  const byVisitor=new Map();
+  for(const row of rows||[]){
+    const id=String(row.visitor_id||'');if(!id)continue;
+    const code=/^[A-Z]{2}$/.test(String(row.country||'').toUpperCase())?String(row.country).toUpperCase():null;
+    if(!byVisitor.has(id))byVisitor.set(id,code);
+    else if(!byVisitor.get(id)&&code)byVisitor.set(id,code);
+  }
+  const counts=new Map();let unknown=0;
+  for(const code of byVisitor.values()){if(!code){unknown++;continue}counts.set(code,(counts.get(code)||0)+1)}
+  const countries=[...counts.entries()].map(([country,visitors])=>({country,visitors})).sort((a,b)=>b.visitors-a.visitors||a.country.localeCompare(b.country));
+  const total=byVisitor.size,known=total-unknown;return{total,known,unknown,coverage:total?known/total:null,countries};
+}
 function firstTouchBuckets(rows){
   const first=new Map();
   for(const row of rows){const id=String(row.visitor_id||'');if(id&&!first.has(id))first.set(id,row)}
@@ -163,7 +176,7 @@ async function resilientSnapshot(request,env,ctx){
   await ensureStrictTruthSchema(env);
   const now=new Date(),todayKey=zonedDayKey(now),monthKey=todayKey.slice(0,7),todayStart=zonedMidnight(todayKey),monthStart=zonedMidnight(monthKey+'-01'),last24Start=new Date(now.getTime()-86400000),window30Start=new Date(now.getTime()-30*86400000);
   const todaySql=sqliteUtc(todayStart),monthSql=sqliteUtc(monthStart),last24Sql=sqliteUtc(last24Start),window30Sql=sqliteUtc(window30Start);
-  const [visitors,trackingMeta,sessions,commercial,affiliateByTool,affiliateWorkflowRows,distribution24,distributionStatuses,distributionLive,affiliateStatuses,affiliateRecoverable,trendRows,todayVisitorRows,externalTruth,trafficTruthAsset,sitemap,queue]=await Promise.all([
+  const [visitors,trackingMeta,sessions,commercial,affiliateByTool,affiliateWorkflowRows,distribution24,distributionStatuses,distributionLive,affiliateStatuses,affiliateRecoverable,trendRows,todayVisitorRows,countryRows,externalTruth,trafficTruthAsset,sitemap,queue]=await Promise.all([
     safeFirst(env,`SELECT COUNT(DISTINCT v.visitor_id) sinceTracking,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) last24,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) today,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) monthToDate FROM traffic_human_evidence h LEFT JOIN confirmed_visitor_events v ON v.session_id=h.session_id`,[last24Sql,todaySql,monthSql]),
     safeFirst(env,`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`),
     safeFirst(env,`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) monthToDate,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) window30 FROM traffic_human_evidence`,[last24Sql,todaySql,monthSql,window30Sql]),
@@ -177,6 +190,7 @@ async function resilientSnapshot(request,env,ctx){
     safeFirst(env,`SELECT COUNT(*) count FROM affiliate_workflow WHERE status IN ('ready_to_apply','human_action_required','approved_needs_link','link_acquired')`),
     safeAll(env,`SELECT session_id,first_evidence_at created_at FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-31 days') ORDER BY first_evidence_at ASC`),
     safeAll(env,`SELECT v.visitor_id,v.path,v.source,v.referrer_host,h.first_evidence_at created_at FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[todaySql]),
+    safeAll(env,`SELECT v.visitor_id,h.first_evidence_at created_at,COALESCE(vc.country,UPPER(h.country)) country FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id LEFT JOIN confirmed_visitor_countries vc ON vc.session_id=h.session_id AND vc.visitor_id=v.visitor_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[monthSql]),
     assetJson(request,env,'/data/external-analytics-truth.json',{}),
     assetJson(request,env,'/data/traffic-truth.json',{}),
     assetText(request,env,'/sitemap.xml',''),
@@ -216,6 +230,7 @@ async function resilientSnapshot(request,env,ctx){
   for(const row of trendRows){const at=parseSqliteUtc(row.created_at),id=String(row.session_id||'');if(!at||!id)continue;const day=zonedDayKey(at);if(!trendMap.has(day))trendMap.set(day,new Set());trendMap.get(day).add(id)}
   const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),day=zonedDayKey(d);points.push({day,sessions:trendMap.get(day)?.size||0})}
   const discoveryToday=firstTouchBuckets(todayVisitorRows);
+  const countryMonth=countryBuckets(countryRows),countryLast24=countryBuckets(countryRows.filter(x=>String(x.created_at||'')>=last24Sql)),countryToday=countryBuckets(countryRows.filter(x=>String(x.created_at||'')>=todaySql));
   const gsc=externalTruth?.gsc||trafficTruthAsset?.googleSearchConsole||{};
   const ga4=externalTruth?.ga4||{};
   const sitemapUrls=(sitemap.match(/<loc>/g)||[]).length;
@@ -291,6 +306,7 @@ async function resilientSnapshot(request,env,ctx){
     revenue:{confirmedRevenue:null,currency:'EUR',reportingStatus:'unavailable',ledgerRows:0},
     trafficTruth:{status:'observed',version:'strict-human-v1',trackingSince:trackingSince?.toISOString()||null,primaryMetric:'D1 strict verified human sessions plus first-party verified outbound navigation',d1:{status:'observed',metric:'strict verified human sessions',last24:n(sessions?.last24),today:n(sessions?.today),monthToDate:mtdSessions,dailyAverageMTD,projectedMonth,humanOutbound:outbound,monetizedOutbound:monetized,unmonetizedOutbound:unmonetized,weightedCoverage,commercialTruth:'first_party_verified_navigation',commercialDefinition:canonicalCommercialTruth.definition},ga4,googleSearchConsole:{status:gsc.status||'observed',generatedAt:externalTruth?.generatedAt||trafficTruthAsset?.googleSearchConsole?.generatedAt||null,startDate:gsc.startDate||null,endDate:gsc.endDate||null,clicks:n(gsc.clicks),impressions:n(gsc.impressions),pageCount:indexedPages,coverage:'site-wide'}},
     trafficTrend:{status:'observed',metric:'strict verified human sessions',windowDays:30,points,generatedAt:now.toISOString()},
+    trafficCountries:{status:'observed',source:'Cloudflare country on strict-human evidence',definition:'Country distribution includes only sessions with positive strict-human evidence. Browser-validated diagnostics are excluded.',today:countryToday,last24:countryLast24,monthToDate:countryMonth,generatedAt:now.toISOString()},
     discoveryAttribution:{status:'observed',timezone:TIME_ZONE,definition:'Known sources use referrer or campaign evidence. Unattributed deep entry means direct first entry on a non-home page and is not a proven channel.',today:discoveryToday,last24:{total:0,buckets:[]},generatedAt:now.toISOString()},
     growthOps:{chairmanQueue:queue,autonomousGrowth,engines:{affiliate:affiliateEngine,catalog:catalogEngine,distribution:distributionEngine},footprint:{search:{source:'Google Search Console',observed_pages:indexedPages,impressions:n(gsc.impressions),clicks:n(gsc.clicks),generated_at:externalTruth?.generatedAt||null,sitemap_urls:sitemapUrls,note:'Observed pages are URLs with Search Console evidence from the latest imported snapshot; this is not a complete Google index count.'},distribution:{live_verified:distLiveCount,submitted_pending:distPending,human_gates:n(distributionStatusCounts.human_action_required),surfaces:distributionLive.map(x=>({slug:x.surface_slug,name:x.surface_name,type:x.surface_type,status:x.status,url:x.url||null,score:n(x.distribution_score),updated_at:x.updated_at||null}))}},ledger:[],health:{content:{status:'no_evidence',last_event_at:null,detail:'Non-critical content enrichment is excluded from resilient dashboard reads.'},audience:{status:'no_evidence',last_event_at:null,detail:'Non-critical audience enrichment is excluded from resilient dashboard reads.'},seo_geo_aio:{status:gsc.status==='observed'?'partial':'no_evidence',last_event_at:externalTruth?.generatedAt||null,detail:`GSC snapshot: ${n(gsc.impressions)} impressions, ${n(gsc.clicks)} clicks. Heavy readiness enrichment is isolated from the dashboard read path.`},issues:healthIssues},generated_at:now.toISOString()},
     resilientCommandCenter:{active:true,version:2,generatedAt:now.toISOString(),reason:'isolate_dashboard_reads_from_resource_exhaustion',autonomousGrowthIncluded:true,catalogGrowthIncluded:true}
