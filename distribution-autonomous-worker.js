@@ -287,8 +287,10 @@ async function qualify(env){
     else if(r==='skipped')skipped++;
     else research++;
   }
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,'autonomous_distribution_qualification','completed','distribution_engine',`Autonomous qualification checked ${checked} surface(s): ${ready} verified no-auth adapter(s), ${auth} authenticated adapter(s) awaiting one-time credentials, ${blocked} policy blocked, ${human} human-only, ${research} still research-required, ${skipped} technical hosts skipped. Research cooldown ${RESEARCH_COOLDOWN_HOURS}h; per-cycle limit ${QUALIFY_LIMIT}.`).run();
-  return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT};
+  if(checked>0){
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,'autonomous_distribution_qualification','completed','distribution_engine',`Autonomous qualification checked ${checked} due surface(s): ${ready} verified no-auth adapter(s), ${auth} authenticated adapter(s) awaiting one-time credentials, ${blocked} policy blocked, ${human} human-only, ${research} still research-required, ${skipped} technical hosts skipped. Empty no-change cycles are not persisted.`).run();
+  }
+  return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT,write_policy:'material_or_due_only'};
 }
 function externalEvidenceUrl(value,endpoint){
   try{
@@ -453,6 +455,7 @@ async function verifyFootprint(env){
       LEFT JOIN distribution_submissions ds ON ds.surface_slug=o.surface_slug AND ds.status='submitted'
       LEFT JOIN distribution_placements p ON p.surface_slug=o.surface_slug
       WHERE o.status IN ('verified','live') AND COALESCE(o.live_url,ds.response_url) IS NOT NULL
+        AND (p.last_checked_at IS NULL OR p.last_checked_at<=datetime('now','-24 hours'))
       GROUP BY o.surface_slug
       ORDER BY COALESCE(p.last_checked_at,'1970-01-01') ASC
       LIMIT 6`).all();
@@ -479,7 +482,7 @@ async function verifyFootprint(env){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`footprint_${crypto.randomUUID()}`,'distribution_footprint_verification',errors?'partial':'completed','distribution_engine',`Footprint verification checked ${checked} public placement(s): ${placements} reachable, ${backlinks} backlink(s) confirmed, ${errors} error(s).`).run()
   }catch{}
-  return {checked,placements,backlinks,errors};
+  return {checked,placements,backlinks,errors,recheck_hours:24,write_policy:'due_only'};
 }
 async function autonomyMetrics(env){
   await ensureAutonomySchema(env);
