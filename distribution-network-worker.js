@@ -1,4 +1,5 @@
 import base from './distribution-embed-worker.js';
+import {runWithLedger} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const NETWORK_TYPES=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface)/i;
@@ -265,7 +266,7 @@ async function metrics(env){
   return {status:'connected',states:Object.fromEntries((status.results||[]).map(x=>[x.status,Number(x.n||0)])),adoption:Object.fromEntries((adoption.results||[]).map(x=>[x.adoption_kind,Number(x.n||0)]))};
 }
 
-async function cycle(env){
+export async function runDistributionNetworkCycle(env){
   const candidates=await refreshCandidates(env);
   const contacts=await discoverContacts(env);
   const adoption=await verifyAdoption(env);
@@ -278,7 +279,7 @@ export default {
     const u=new URL(request.url);
     if(u.pathname==='/api/distribution/network/refresh'&&request.method==='POST'){
       if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await cycle(env),{headers:JSON_H});
+      return Response.json(await runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:'manual_api'},()=>runDistributionNetworkCycle(env)),{headers:JSON_H});
     }
     if(u.pathname==='/api/distribution/network/metrics'&&request.method==='GET'){
       if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
@@ -288,7 +289,8 @@ export default {
   },
   async scheduled(event,env,ctx){
     const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
-    ctx.waitUntil(cycle(env).catch(()=>{}));
+    const trigger=event?.cron||'scheduled';
+    ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
     return result;
   }
 };
