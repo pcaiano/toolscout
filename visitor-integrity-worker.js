@@ -186,7 +186,7 @@ async function visitorSnapshot(env){
   const trackingDay=dayKey(trackingSince),coverage={last24Complete:trackingSince.getTime()<=now.getTime()-86400000,todayComplete:trackingDay<todayKey,monthToDateComplete:trackingDay.slice(0,7)<monthPrefix};
   const dailyMap=new Map((dailyResult?.results||[]).map(row=>[String(row.day||''),Number(row.visitors||0)]));
   const daily=[];const p=zonedParts(now),y=Number(p.year),m=Number(p.month),d=Number(p.day);
-  for(let offset=-29;offset<=0;offset++){const probe=new Date(Date.UTC(y,m-1,d+offset,12,0,0)),key=dayKey(probe);daily.push({day:key,visitors:key===todayKey?Number(counts?.visitorsToday||0):(dailyMap.has(key)?dailyMap.get(key):null)})}
+  for(let offset=-29;offset<=0;offset++){const probe=new Date(Date.UTC(y,m-1,d+offset,12,0,0)),key=dayKey(probe);daily.push({day:key,visitors:key<trackingDay?null:(key===todayKey?Number(counts?.visitorsToday||0):(dailyMap.has(key)?dailyMap.get(key):null))})}
   return {
     status:'observed',metric:'Strict verified unique human visitors',
     definition:'One anonymous first-party browser ID counted only after its ToolScout session has positive human evidence: trusted interaction, persistent multi-page navigation, or verified outbound navigation. Browser validation alone is diagnostic and never counts as human.',
