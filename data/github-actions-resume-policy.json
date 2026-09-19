@@ -8,13 +8,13 @@
     "commandCenterComposition": "canonical-growth-v2",
     "affiliateEngine": "2.1",
     "catalogGrowth": "1.0",
-    "minimumBuildContract": "2026-09-18.5"
+    "minimumBuildContract": "2026-09-19.2"
   },
   "unlockProcedure": [
-    "Keep enabled=false until the shared brain search-directive endpoint is live and validated.",
+    "Keep enabled=false until strict-human-v1 Traffic Truth is live and validated in production.",
     "Run the full workflow on a non-main branch and inspect the generated diff.",
     "Verify SEO execution consumes runtime-growth-directives and cannot initiate interventions outside shared-growth-v3 authorization.",
-    "Verify no Worker/runtime source, affiliate state, catalog neutrality rule, What's New policy, or Command Center contract regresses.",
+    "Verify no Worker/runtime source, affiliate state, strict-human Traffic Truth contract, catalog neutrality rule, What's New policy, or Command Center contract regresses.",
     "Set enabled=true only in a reviewed pull request."
   ],
   "reviewedAt": null,
