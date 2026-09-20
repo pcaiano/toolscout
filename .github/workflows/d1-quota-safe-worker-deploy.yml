@@ -1,4 +1,4 @@
-name: One Shot Growth Performance Forensics
+name: One Shot Failed Distribution Deep Dive
 
 on:
   push:
@@ -17,32 +17,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: Growth performance forensic audit
+      - name: Deep dive failed external execution
         run: |
-          echo "=== STRICT HUMANS 25H ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(DISTINCT session_id) strict_humans_25h FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-25 hours');"
-          echo "=== FUNNEL SOURCES WITH GROWTH MARKERS 25H ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(DISTINCT session_id) sessions,COUNT(*) events FROM funnel_events WHERE created_at>=datetime('now','-25 hours') AND source LIKE '%ts_action=%';"
-          echo "=== DISTRIBUTION EVENTS 25H BY TYPE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,COUNT(*) n,MAX(created_at) last_at FROM distribution_events WHERE created_at>=datetime('now','-25 hours') GROUP BY event_type,status ORDER BY n DESC LIMIT 80;"
-          echo "=== GROWTH ACTION EVENTS 25H ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,channel,status,COUNT(*) n,MIN(created_at) first_at,MAX(created_at) last_at FROM growth_action_events WHERE created_at>=datetime('now','-25 hours') GROUP BY engine,channel,status ORDER BY n DESC;"
-          echo "=== ENGINE RUNS 25H ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,mission,status,COUNT(*) n,MAX(completed_at) last_completed FROM engine_runs WHERE started_at>=datetime('now','-25 hours') GROUP BY engine,mission,status ORDER BY engine,mission,status;"
-          echo "=== DISTRIBUTION SUBMISSIONS 25H ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,submission_type,COUNT(*) n,SUM(attempts) attempts,MAX(last_attempt_at) last_attempt FROM distribution_submissions WHERE created_at>=datetime('now','-25 hours') OR last_attempt_at>=datetime('now','-25 hours') GROUP BY status,submission_type ORDER BY n DESC;"
-          echo "=== OPPORTUNITY STATUS MIX ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_type,status,COUNT(*) n FROM distribution_opportunities GROUP BY surface_type,status ORDER BY surface_type,n DESC;"
-          echo "=== ROUTES SOURCE TABLE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,route_type,COUNT(*) n,MAX(updated_at) last_at FROM distribution_contact_routes GROUP BY status,route_type ORDER BY status,route_type;"
-          echo "=== ROUTE ACTION TABLE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,execution_mode,COUNT(*) n,SUM(attempts) attempts,MAX(updated_at) last_at FROM distribution_contact_route_actions GROUP BY status,execution_mode ORDER BY status,execution_mode;"
-          echo "=== VERIFIED PLACEMENTS ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,public_url,placement_verified,backlink_verified,first_verified_at,last_checked_at FROM distribution_placements ORDER BY COALESCE(first_verified_at,last_checked_at) DESC LIMIT 30;"
-          echo "=== EDITORIAL/HUMAN QUEUE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT editorial_id,channel_type,status,human_required,action_url,prepared_title,updated_at FROM distribution_editorial_queue WHERE human_required=1 OR status IN ('prepared','autonomy_pending','human_action_required') ORDER BY updated_at DESC LIMIT 30;" || true
-          echo "=== STREMIT SEARCH ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT editorial_id,channel_type,status,human_required,action_url,prepared_title,prepared_body,updated_at FROM distribution_editorial_queue WHERE lower(COALESCE(action_url,'')) LIKE '%stremit%' OR lower(COALESCE(prepared_title,'')) LIKE '%stremit%' OR lower(COALESCE(prepared_body,'')) LIKE '%stremit%' ORDER BY updated_at DESC LIMIT 20;" || true
+          echo "=== FAILED HTTP JSON BY SURFACE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,error,COUNT(*) n,SUM(attempts) attempts,MIN(created_at) first_created,MAX(last_attempt_at) last_attempt,MIN(action_url) action_url FROM distribution_submissions WHERE submission_type='http_json' AND (created_at>=datetime('now','-25 hours') OR last_attempt_at>=datetime('now','-25 hours')) GROUP BY surface_slug,status,error ORDER BY n DESC;"
+          echo "=== ALL SUBMISSION COUNTS BY SURFACE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,submission_type,status,COUNT(*) n,SUM(attempts) attempts FROM distribution_submissions GROUP BY surface_slug,submission_type,status ORDER BY n DESC;"
+          echo "=== ROUTE ACTION DETAIL ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT a.route_id,a.surface_slug,a.route_type,a.execution_mode,a.status,a.attempts,a.last_result,a.next_action,a.updated_at,r.route_url FROM distribution_contact_route_actions a JOIN distribution_contact_routes r ON r.route_id=a.route_id ORDER BY a.status,a.surface_slug;"
+          echo "=== TABLE INFO EDITORIAL QUEUE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "PRAGMA table_info(distribution_editorial_queue);"
+          echo "=== TABLE INFO GROWTH ACTIONS ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "PRAGMA table_info(growth_action_events);"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
