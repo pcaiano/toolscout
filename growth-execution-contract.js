@@ -3,10 +3,10 @@ const TERMINAL=new Set(['verified','human_required','blocked','cancelled']);
 const EXECUTORS=Object.freeze({
   distribution_network:{engine:'distribution',mode:'internal',claim:90,attempt:180,verify:1440},
   distribution_autonomous:{engine:'distribution',mode:'internal',claim:90,attempt:180,verify:1440},
-  make_sender:{engine:'distribution',mode:'external',claim:360,attempt:720,verify:2880},
+  make_sender:{engine:'distribution',mode:'external',claim:360,attempt:300,verify:720},
   content_issue:{engine:'content',mode:'internal',claim:90,attempt:240,verify:1440},
-  audience_make:{engine:'audience',mode:'external',claim:90,attempt:240,verify:1440},
-  seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:720,verify:2880},
+  audience_make:{engine:'audience',mode:'external',claim:90,attempt:300,verify:720},
+  seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:420,verify:720},
   affiliate_cycle:{engine:'affiliate',mode:'internal',claim:180,attempt:720,verify:2880},
   catalog_cycle:{engine:'catalog',mode:'internal',claim:360,attempt:720,verify:2880},
   growth_supervisor:{engine:'growth',mode:'internal',claim:90,attempt:180,verify:360},
