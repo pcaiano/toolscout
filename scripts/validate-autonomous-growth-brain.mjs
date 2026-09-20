@@ -46,6 +46,10 @@ if(!catalog.includes('rankingEligible:false')||!catalog.includes('comparisonElig
 if(!command.includes('data-widget="catalog-growth"')||!command.includes("version:'2.1'"))fail('Command Center does not expose Catalog Growth and Affiliate 2.1.');
 if(!analytics.includes('Application packs')||!analytics.includes('Production verified routes'))fail('Affiliate autonomy metrics are not rendered in the Command Center.');
 for(const route of ['/api/growth/*','/api/affiliate-coverage*','/api/affiliate-replies*','/api/catalog-autonomy*'])if(!wrangler.includes(route))fail('Worker routing missing '+route);
+if(!supervisor.includes('BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR')||!supervisor.includes('backlink_acquisition')||!supervisor.includes('verified_referring_domains'))fail('Growth Brain is not supervising backlink acquisition as a primary SEO authority objective.');
+if(!orchestrator.includes("'backlink_reference_outreach'")||!orchestrator.includes('backlink_quality_only')||!orchestrator.includes('paid_links_allowed:false'))fail('Growth opportunities do not generate quality backlink outreach actions.');
+if(!executionContract.includes("backlink_reference_outreach:'make_sender'")||!executionContract.includes("verify_backlink_acquisition:'distribution_network'"))fail('Backlink acquisition actions are not bound to real executors.');
+if(!sender.includes('vendor_reference_v22')||!sender.includes('do not request reciprocal links')||!sender.includes('do not pay for ranking links'))fail('Vendor outreach does not enforce legitimate backlink acquisition policy.');
 if(!orchestrator.includes("'news_update'")||!orchestrator.includes('/api/growth/search-directives'))fail("What's New or shared SEO directives are missing from the growth brain.");
 if(!catalog.includes('software_news_candidates')||!catalog.includes('software_news_sources'))fail("What's New official-source watcher is missing.");
 if(!content.includes("subject_type IN ('tool','news_update')"))fail("Content Engine is not consuming What's New growth opportunities.");
