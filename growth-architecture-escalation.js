@@ -193,7 +193,7 @@ export async function markEscalationEmailStatus(env,dispatchToken,status){
   if(!row)return{ok:false,error:'unknown_dispatch_token'};
   if(state==='sent'){
     const final=row.email_status==='pending_resolved'?'resolved_sent':'sent';
-    await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=?,email_sent_at=COALESCE(email_sent_at,datetime('now')),updated_at=datetime('now') WHERE incident_id=?`).bind(final<row.incident_id).run();
+    await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=?,email_sent_at=COALESCE(email_sent_at,datetime('now')),updated_at=datetime('now') WHERE incident_id=?`).bind(final,row.incident_id).run();
   }else{
     await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status='pending',updated_at=datetime('now') WHERE incident_id=?`).bind(row.incident_id).run();
   }
