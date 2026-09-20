@@ -229,6 +229,10 @@ async function resolveHumanActionUrl(value){
   let parsed;try{parsed=new URL(candidate)}catch{return candidate}
   if(parsed.protocol!=='https:')return candidate;
   if(!isMachineOnlyActionUrl(candidate))return candidate;
+  for(const path of ['/submit','/add','/register','/signup','/sign-up']){
+    const direct=await text(parsed.origin+path,3500);
+    if(direct)return direct.url;
+  }
   const home=await text(parsed.origin+'/',3500);
   if(!home)return parsed.origin+'/';
   const candidates=[...new Set(links(home.body,home.url)
