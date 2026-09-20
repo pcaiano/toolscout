@@ -55,7 +55,17 @@ const ACTION_EXECUTOR=Object.freeze({
   resolve_missing_critical_catalog_fields:'catalog_cycle',
   resolve_profile_evidence_hold:'catalog_cycle',
   suppress_unverifiable_profile:'catalog_cycle',
-  verify_changed_catalog_facts:'catalog_cycle'
+  verify_changed_catalog_facts:'catalog_cycle',
+
+  distribution_measurement:'growth_supervisor',
+  search_measurement:'seo_github',
+  catalog_impact_review:'catalog_cycle',
+  discover_catalog_candidates:'catalog_cycle',
+  admit_only_after_quality_gates:'catalog_cycle',
+  prepare_whats_new_candidate:'catalog_cycle',
+  verify_first_party_sources:'catalog_cycle',
+  verify_news_materiality:'catalog_cycle',
+  search_update_angle:'content_issue'
 });
 const SUPERVISOR_EXECUTOR=Object.freeze({
   distribution:'distribution_network',
