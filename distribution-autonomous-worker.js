@@ -661,11 +661,13 @@ async function verifyFootprint(env){
   await ensureAutonomySchema(env);
   let rows=[];
   try{
-    const q=await env.DB.prepare(`SELECT o.surface_slug,COALESCE(o.live_url,ds.response_url) public_url,p.last_checked_at
+    const q=await env.DB.prepare(`SELECT o.surface_slug,COALESCE(p.public_url,o.live_url,ds.response_url,o.action_url) public_url,p.last_checked_at
       FROM distribution_opportunities o
       LEFT JOIN distribution_submissions ds ON ds.surface_slug=o.surface_slug AND ds.status='submitted'
       LEFT JOIN distribution_placements p ON p.surface_slug=o.surface_slug
-      WHERE o.status IN ('verified','live') AND COALESCE(o.live_url,ds.response_url) IS NOT NULL
+      WHERE o.status IN ('verified','live')
+        AND o.surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery','indexnow')
+        AND COALESCE(p.public_url,o.live_url,ds.response_url,o.action_url) IS NOT NULL
         AND (p.last_checked_at IS NULL OR p.last_checked_at<=datetime('now','-24 hours'))
       GROUP BY o.surface_slug
       ORDER BY COALESCE(p.last_checked_at,'1970-01-01') ASC
