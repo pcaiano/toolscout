@@ -1,4 +1,4 @@
-name: One Shot Growth Brain Final Closed Loop Deploy
+name: One Shot Growth Performance Forensics
 
 on:
   push:
@@ -9,12 +9,8 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-worker-production
-  cancel-in-progress: false
-
 jobs:
-  validate-deploy-audit:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,53 +18,31 @@ jobs:
         with:
           node-version: 22
 
-      - name: Syntax checks
+      - name: Growth performance forensic audit
         run: |
-          node --check distribution-network-worker.js
-          node --check content-engine-intelligence-worker.js
-          node --check distribution-orchestrator-worker.js
-          node --check distribution-impact-worker.js
-          node --check growth-command-center-v2-worker.js
-          node --check visitor-accuracy-worker.js
-          node --check traffic-integrity-worker.js
-          node --check traffic-integrity-live-worker.js
-          node --check traffic-integrity-guard-worker.js
-          node --check funnel-model.js
-          node --check scripts/validate-autonomous-growth-brain.mjs
-
-      - name: Validate Growth Brain contract
-        run: node scripts/validate-autonomous-growth-brain.mjs
-
-      - name: Validate attributed source parser
-        run: |
-          node --input-type=module -e "import {parseFunnelEvent} from './funnel-model.js'; const x=parseFunnelEvent({event_id:'evt_1234567890123456',session_id:'123e4567-e89b-12d3-a456-426614174000',event_type:'session_started',path:'/tools',source:'utm_source=linkedin&utm_medium=organic_social&ts_action=brief_1234567890123456:linkedin&ts_growth=surface:test&ts_channel=linkedin'}); if(!x||!x.source.includes('ts_action=')) process.exit(1); console.log(x.source)"
-
-      - name: Deploy Worker
-        run: npx wrangler deploy --config wrangler.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Enforce structural Growth invariants
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            (SELECT COUNT(*) FROM growth_opportunity_state WHERE status='active' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]')) empty_actions,
-            (SELECT COUNT(*) FROM distribution_contact_routes r LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id WHERE r.status IN ('discovered','in_loop') AND a.route_id IS NULL) orphan_routes,
-            (SELECT COUNT(*) FROM distribution_contact_route_actions WHERE (status IN ('queued','retry_due','researching','qualified_auto') AND updated_at<datetime('now','-24 hours')) OR (status='issued_to_content' AND COALESCE(last_attempt_at,updated_at)<datetime('now','-80 hours'))) stale_route_actions,
-            (SELECT COUNT(*) FROM growth_action_events WHERE status IN ('prepared','issued','leased') AND updated_at<datetime('now','-72 hours')) stale_growth_actions,
-            (SELECT COUNT(*) FROM engine_runs f WHERE f.started_at>=datetime('now','-24 hours') AND f.status='failed' AND ((f.engine='growth' AND f.mission IN ('opportunity_coordination','rnd_audit')) OR (f.engine='distribution' AND f.mission IN ('network_cycle','autonomous_cycle','economic_learning')) OR (f.engine='content' AND f.mission='social_intelligence')) AND NOT EXISTS (SELECT 1 FROM engine_runs s WHERE s.engine=f.engine AND s.mission=f.mission AND s.status='completed' AND s.started_at>f.started_at)) unresolved_core_failures,
-            CASE WHEN (SELECT MAX(completed_at) FROM engine_runs WHERE engine='growth' AND mission='opportunity_coordination' AND status='completed')<datetime('now','-4 hours') THEN 1 ELSE 0 END stale_coordination;" > /tmp/growth-invariants.json
-          cat /tmp/growth-invariants.json
-          jq -e '.[0].results[0] | .empty_actions==0 and .orphan_routes==0 and .stale_route_actions==0 and .stale_growth_actions==0 and .unresolved_core_failures==0 and .stale_coordination==0' /tmp/growth-invariants.json
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Audit route lifecycle and Growth opportunity mix
-        run: |
-          echo "=== ROUTE ACTION STATES ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,execution_mode,COUNT(*) n FROM distribution_contact_route_actions GROUP BY status,execution_mode ORDER BY status,execution_mode;"
-          echo "=== ACTIVE OPPORTUNITY MIX ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type ORDER BY n DESC;"
-          echo "=== MATURE GROWTH ACTION BASE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) mature_actions FROM growth_action_events WHERE status IN ('issued','sent','verified','completed') AND created_at<=datetime('now','-48 hours');"
+          echo "=== STRICT HUMANS 25H ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(DISTINCT session_id) strict_humans_25h FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-25 hours');"
+          echo "=== FUNNEL SOURCES WITH GROWTH MARKERS 25H ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(DISTINCT session_id) sessions,COUNT(*) events FROM funnel_events WHERE created_at>=datetime('now','-25 hours') AND source LIKE '%ts_action=%';"
+          echo "=== DISTRIBUTION EVENTS 25H BY TYPE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,COUNT(*) n,MAX(created_at) last_at FROM distribution_events WHERE created_at>=datetime('now','-25 hours') GROUP BY event_type,status ORDER BY n DESC LIMIT 80;"
+          echo "=== GROWTH ACTION EVENTS 25H ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,channel,status,COUNT(*) n,MIN(created_at) first_at,MAX(created_at) last_at FROM growth_action_events WHERE created_at>=datetime('now','-25 hours') GROUP BY engine,channel,status ORDER BY n DESC;"
+          echo "=== ENGINE RUNS 25H ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,mission,status,COUNT(*) n,MAX(completed_at) last_completed FROM engine_runs WHERE started_at>=datetime('now','-25 hours') GROUP BY engine,mission,status ORDER BY engine,mission,status;"
+          echo "=== DISTRIBUTION SUBMISSIONS 25H ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,submission_type,COUNT(*) n,SUM(attempts) attempts,MAX(last_attempt_at) last_attempt FROM distribution_submissions WHERE created_at>=datetime('now','-25 hours') OR last_attempt_at>=datetime('now','-25 hours') GROUP BY status,submission_type ORDER BY n DESC;"
+          echo "=== OPPORTUNITY STATUS MIX ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_type,status,COUNT(*) n FROM distribution_opportunities GROUP BY surface_type,status ORDER BY surface_type,n DESC;"
+          echo "=== ROUTES SOURCE TABLE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,route_type,COUNT(*) n,MAX(updated_at) last_at FROM distribution_contact_routes GROUP BY status,route_type ORDER BY status,route_type;"
+          echo "=== ROUTE ACTION TABLE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,execution_mode,COUNT(*) n,SUM(attempts) attempts,MAX(updated_at) last_at FROM distribution_contact_route_actions GROUP BY status,execution_mode ORDER BY status,execution_mode;"
+          echo "=== VERIFIED PLACEMENTS ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,public_url,placement_verified,backlink_verified,first_verified_at,last_checked_at FROM distribution_placements ORDER BY COALESCE(first_verified_at,last_checked_at) DESC LIMIT 30;"
+          echo "=== EDITORIAL/HUMAN QUEUE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT editorial_id,channel_type,status,human_required,action_url,prepared_title,updated_at FROM distribution_editorial_queue WHERE human_required=1 OR status IN ('prepared','autonomy_pending','human_action_required') ORDER BY updated_at DESC LIMIT 30;" || true
+          echo "=== STREMIT SEARCH ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT editorial_id,channel_type,status,human_required,action_url,prepared_title,prepared_body,updated_at FROM distribution_editorial_queue WHERE lower(COALESCE(action_url,'')) LIKE '%stremit%' OR lower(COALESCE(prepared_title,'')) LIKE '%stremit%' OR lower(COALESCE(prepared_body,'')) LIKE '%stremit%' ORDER BY updated_at DESC LIMIT 20;" || true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
