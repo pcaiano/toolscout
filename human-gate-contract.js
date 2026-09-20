@@ -82,7 +82,16 @@ export async function upsertHumanGate(env,{
       resolution_mode=excluded.resolution_mode,
       payload_json=COALESCE(excluded.payload_json,human_gate_contract.payload_json),
       verification_url=COALESCE(excluded.verification_url,human_gate_contract.verification_url),
-      updated_at=datetime('now')`)
+      updated_at=datetime('now')
+    WHERE human_gate_contract.status IN ('resolved','cancelled')
+       OR human_gate_contract.gate_type IS NOT excluded.gate_type
+       OR (excluded.title IS NOT NULL AND human_gate_contract.title IS NOT excluded.title)
+       OR (excluded.reason IS NOT NULL AND human_gate_contract.reason IS NOT excluded.reason)
+       OR (excluded.instructions IS NOT NULL AND human_gate_contract.instructions IS NOT excluded.instructions)
+       OR (excluded.action_url IS NOT NULL AND human_gate_contract.action_url IS NOT excluded.action_url)
+       OR human_gate_contract.resolution_mode IS NOT excluded.resolution_mode
+       OR (excluded.payload_json IS NOT NULL AND human_gate_contract.payload_json IS NOT excluded.payload_json)
+       OR (excluded.verification_url IS NOT NULL AND human_gate_contract.verification_url IS NOT excluded.verification_url)`)
     .bind(
       gateKey,safe(engine,40),safe(subjectType,80),safe(subjectKey,180),safe(gateType,80),
       title?safe(title,500):null,reason?safe(reason,1600):null,instructions?safe(instructions,3000):null,
