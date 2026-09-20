@@ -10,6 +10,7 @@ import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
 import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
+import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
@@ -50,6 +51,9 @@ function coordinatedGrowthPriority(subjectType,score,audienceStrategy){
 }
 const safe=(v,n=3000)=>String(v??'').slice(0,n);
 async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
+const GROWTH_ESCALATION_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
+async function sha256Hex(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+async function growthEscalationHandoffOk(request){const h=String(request.headers.get('X-ToolScout-Handoff')||'');return Boolean(h)&&(await sha256Hex(h))===GROWTH_ESCALATION_HANDOFF_SHA256}
 function classify(url){const p=new URL(url).pathname.toLowerCase();if(p.includes('-vs-'))return'comparison';if(p.includes('best-'))return'best_of';if(p.includes('alternatives'))return'alternatives';return'decision_asset';}
 function angle(url,type){const slug=new URL(url).pathname.split('/').filter(Boolean).pop()?.replace(/\.html$/,'').replace(/-/g,' ')||'software decision';if(type==='comparison')return`Independent comparison data and decision framing for ${slug}.`;if(type==='best_of')return`Evidence-led shortlist for ${slug}, with a buyer-intent angle rather than a generic tool dump.`;return`Independent ToolScout decision resource about ${slug}.`;}
 function confirmedSessions(metric){return Math.max(0,Number(metric?.browser_confirmed_sessions??metric?.human_sessions??0)||0)}
@@ -712,8 +716,9 @@ async function runGrowthExecutionContractCycle(env){
   results.seo_github={claimed:seoClaim.claimed,external:true};
 
   const after=await reconcileExecutionContracts(env);
+  const architectureEscalation=await auditArchitectureEscalations(env).catch(error=>({ok:false,error:String(error?.message||error).slice(0,500)}));
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,synced,before,results,after,snapshot};
+  return{ok:true,synced,before,results,after,architectureEscalation,snapshot};
 }
 
 async function publicSearchDirectives(env){
@@ -863,4 +868,18 @@ export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.p
 if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'manual_api'},()=>runGrowthSupervisorAudit(env)),{headers:H});}
 if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'manual_api'},()=>runGrowthExecutionContractCycle(env)),{headers:H});}
 if(u.pathname==='/api/growth/execution'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await executionContractSnapshot(env),{headers:H});}
+if(u.pathname==='/api/growth/architecture-escalations/public-candidates'&&request.method==='GET'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  await auditArchitectureEscalations(env).catch(()=>null);
+  return Response.json(await publicEscalationCandidates(env,u.searchParams.get('limit')),{headers:H});
+}
+if(u.pathname==='/api/growth/architecture-escalations/public-status'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  let body={};try{body=await request.json()}catch{}
+  return Response.json(await markEscalationEmailStatus(env,body.dispatch_token,body.status),{headers:H});
+}
+if(u.pathname==='/api/growth/architecture-escalations'&&request.method==='GET'){
+  if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  return Response.json(await architectureEscalationSnapshot(env),{headers:H});
+}
 if(u.pathname==='/api/growth/supervisor'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await growthSupervisorSnapshot(env),{headers:H});}if(u.pathname==='/api/growth/supervisor/public'&&request.method==='GET'){await syncExecutionContracts(env).catch(()=>null);await reconcileExecutionDeadlines(env).catch(()=>null);let s=await growthSupervisorSnapshot(env);const brainState=(s.items||[]).find(x=>x.engine==='growth_brain');const inconsistentUnattributed=brainState?.status==='working_unattributed'&&Number(brainState?.attributed_humans_7d||0)>0;if(!brainState||inconsistentUnattributed){await runGrowthSupervisorAudit(env);s=await growthSupervisorSnapshot(env)}const targets=await growthRows(env,`SELECT opportunity_key,subject_key,priority_score,signal_json FROM growth_opportunity_state WHERE status='active' AND subject_type='search' AND subject_key NOT IN ('/','/tools') ORDER BY priority_score DESC LIMIT 5`);const executionContract=await executionContractSnapshot(env).catch(()=>({states:{},missingExecutors:0,stalled:0}));return Response.json({brain:'shared-growth-v3',northStar:s.northStar,generatedAt:s.generatedAt,executionContract,directives:(s.items||[]).map(x=>({engine:x.engine,role:x.role,status:x.status,directive:x.directive,directiveConfig:x.directiveConfig,lastEvaluatedAt:x.last_evaluated_at})),topSearchTargets:targets.map(x=>{let signals={};try{signals=JSON.parse(x.signal_json||'{}')}catch{}const url=signals.asset_url||('https://trytoolscout.org'+x.subject_key);let audienceUrl=url;try{const a=new URL(url);a.searchParams.set('utm_source','bluesky');a.searchParams.set('utm_medium','audience_engagement');a.searchParams.set('utm_campaign','growth_supervisor');a.searchParams.set('ts_action',`audience:${x.opportunity_key}`);a.searchParams.set('ts_growth',x.opportunity_key);a.searchParams.set('ts_channel','bluesky');audienceUrl=a.toString()}catch{}return{opportunityKey:x.opportunity_key,path:x.subject_key,url,audienceUrl,title:signals.title||x.subject_key,priority:Number(x.priority_score||0),impressions:Number(signals.impressions||0),position:Number(signals.position||0)}})},{headers:{...H,'Cache-Control':'public, max-age=120','Access-Control-Allow-Origin':'*'}});}if(u.pathname==='/api/growth/opportunities'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,last_evaluated_at FROM growth_opportunity_state WHERE status='active' ORDER BY priority_score DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/distribution/editorial-queue'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await normalizeEditorialQueue(env);const q=await env.DB.prepare(`SELECT queue_id,asset_url,channel_type,target_name,target_url,angle,suggested_title,suggested_body,status,human_required,updated_at FROM distribution_editorial_queue ORDER BY created_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}return base.fetch(request,env,ctx);},async scheduled(event,env,ctx){await normalizeEditorialQueue(env);await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:event?.cron||'scheduled'},()=>learnEconomics(env));if(event?.cron==='15 3 * * *'||humanSprintActive()){await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:event?.cron||'scheduled'},()=>coordinateGrowthOpportunities(env)).catch(()=>null);await syncExecutionContracts(env).catch(()=>null);}if(event?.cron==='15 3 * * *'){await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:event.cron},()=>runGrowthRndAudit(env));}if(base.scheduled)await base.scheduled(event,env,ctx);if(event?.cron==='15 3 * * *')await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:event.cron},()=>scanNew(new Request('https://trytoolscout.org/'),env));if(event?.cron==='15 * * * *'||event?.cron==='15 3 * * *'){await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:event?.cron||'scheduled'},()=>runGrowthExecutionContractCycle(env)).catch(()=>null);await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:event?.cron||'scheduled'},()=>runGrowthSupervisorAudit(env)).catch(()=>null);}}};
