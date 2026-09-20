@@ -265,16 +265,20 @@ async function qualifyOne(env,row){
     return 'policy_blocked';
   }
   if(HUMAN_BLOCK_RE.test(h.body)||(relatedPolicy&&HUMAN_BLOCK_RE.test(relatedPolicy))){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Autonomous research exhausted safe routes and detected a genuine human-only gate such as CAPTCHA or explicit terms confirmation.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'human_action_required','hard_human_gate');
+    const reason='Autonomous research exhausted safe routes and detected a genuine human-only gate such as CAPTCHA, explicit confirmation or material terms acceptance.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'human_confirmation',actionUrl:h.url,reason});
+    await mark(env,{...effectiveRow,action_url:h.url},'human_action_required','hard_human_gate');
     return 'human_action_required';
   }
   const adapter=await findOpenApi(h.url,h.body);
   if(adapter){
     if(adapter.auth_required){
       await storeAutoAdapter(env,effectiveRow,h,adapter,'auth_required');
-      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,automation_potential=85,acceptance_probability=70,next_action='Verified JSON submission API discovered automatically, but it requires one-time authentication. Configure an authorized credential before execution.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-      await mark(env,effectiveRow,'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
+      const reason='Verified submission API discovered automatically, but the external service requires owner authentication before ToolScout can be submitted.';
+      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,automation_potential=85,acceptance_probability=70,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+      await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason,verificationUrl:adapter.verification_endpoint||adapter.public_url||null});
+      await mark(env,{...effectiveRow,action_url:h.url},'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
       return 'auth_required';
     }
     await storeAutoAdapter(env,effectiveRow,h,adapter,'verified');
@@ -293,17 +297,17 @@ async function qualifyOne(env,row){
     .filter(u=>u!==h.url&&sameHostFamily(u,h.url)&&ACTION_ROUTE_RE.test(u))
     .filter(u=>!/(privacy|terms|legal|blog|docs|help|support|pricing)(?:[\\/?#]|$)/i.test(new URL(u).pathname))
   )].slice(0,5);
-  let linkedAuth=false,linkedHuman=false,linkedPolicy=false;
+  let linkedAuth=false,linkedHuman=false,linkedPolicy=false,linkedAuthUrl=null,linkedHumanUrl=null;
   if(linkedActionUrls.length){
     const linkedPages=await Promise.all(linkedActionUrls.map(async u=>({u,page:await text(u,3500)})));
     for(const item of linkedPages){
       const page=item.page;if(!page)continue;
       const policy=await relatedPolicyText(page.url,page.body);
       if(POLICY_BLOCK_RE.test(page.body)||(policy&&POLICY_BLOCK_RE.test(policy))){linkedPolicy=true;continue}
-      if(HUMAN_BLOCK_RE.test(page.body)||(policy&&HUMAN_BLOCK_RE.test(policy))){linkedHuman=true;continue}
+      if(HUMAN_BLOCK_RE.test(page.body)||(policy&&HUMAN_BLOCK_RE.test(policy))){linkedHuman=true;linkedHumanUrl=page.url;continue}
       const linkedApi=await findOpenApi(page.url,page.body);
       if(linkedApi){
-        if(linkedApi.auth_required){linkedAuth=true;continue}
+        if(linkedApi.auth_required){linkedAuth=true;linkedAuthUrl=page.url;continue}
         await storeAutoAdapter(env,effectiveRow,page,linkedApi,'verified');
         await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth submission API discovered by following a same-host action route automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(page.url,effectiveRow.surface_slug).run();
         await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_auto_adapter:${linkedApi.endpoint}`);
@@ -316,17 +320,23 @@ async function qualifyOne(env,row){
         await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_safe_form_adapter:${linkedForm.endpoint}`);
         return 'ready_to_submit';
       }
-      if(AUTH_RE.test(page.body))linkedAuth=true;
+      if(AUTH_RE.test(page.body)){linkedAuth=true;linkedAuthUrl=page.url;}
     }
   }
   if(linkedHuman){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Autonomous same-host route discovery found the submission path, but it contains a genuine human-only gate such as CAPTCHA or explicit confirmation.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'human_action_required','linked_submission_route_human_gate');
+    const actionUrl=linkedHumanUrl||effectiveRow.action_url;
+    const reason='Autonomous route discovery found the exact submission path, but it contains a genuine human-only gate such as CAPTCHA or explicit confirmation.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(actionUrl,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:actionUrl},{gateType:'human_confirmation',actionUrl,reason});
+    await mark(env,{...effectiveRow,action_url:actionUrl},'human_action_required','linked_submission_route_human_gate');
     return 'human_action_required';
   }
   if(linkedAuth){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,next_action='Autonomous same-host route discovery found the submission path, but authentication is required. Keep researching machine identity or surface exact one-time setup.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'auth_required','linked_submission_route_auth_required');
+    const actionUrl=linkedAuthUrl||effectiveRow.action_url;
+    const reason='Autonomous route discovery found the exact submission path, but owner authentication is required before ToolScout can be submitted.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(actionUrl,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:actionUrl},{gateType:'authentication',actionUrl,reason});
+    await mark(env,{...effectiveRow,action_url:actionUrl},'auth_required','linked_submission_route_auth_required');
     return 'auth_required';
   }
   if(linkedPolicy){
@@ -336,8 +346,10 @@ async function qualifyOne(env,row){
   }
   const pageText=h.body.toLowerCase();
   if(AUTH_RE.test(pageText)){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,next_action='Authentication is required. Keep this inside the autonomy research loop until a supported credential or machine identity route is found.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'auth_required','authentication_route_without_safe_adapter');
+    const reason='The exact submission route requires owner authentication and no safe machine identity route was found.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason});
+    await mark(env,{...effectiveRow,action_url:h.url},'auth_required','authentication_route_without_safe_adapter');
     return 'auth_required';
   }
   await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action='No safe automatic submission route found yet. Continue autonomous protocol and action-route research; do not escalate to Chairman.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
