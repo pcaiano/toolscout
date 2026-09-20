@@ -199,10 +199,12 @@ export async function syncExecutionContracts(env){
 
 export async function claimExecutorTasks(env,executor,{limit=50,result='executor_claimed'}={}){
   await ensureExecutionContractSchema(env);
-  const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,Math.max(1,Math.min(100,limit))).all();
+  const spec=EXECUTORS[executor]||null;
+  const rows=await env.DB.prepare(`SELECT task_id,status FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,Math.max(1,Math.min(100,limit))).all();
   const ids=(rows.results||[]).map(x=>x.task_id);if(!ids.length)return{claimed:0,taskIds:[]};
   const qs=ids.map(()=>'?').join(',');
-  await env.DB.prepare(`UPDATE growth_execution_contract SET status='claimed',claimed_at=COALESCE(claimed_at,datetime('now')),last_result=?,updated_at=datetime('now') WHERE task_id IN (${qs})`).bind(result,...ids).run();
+  const claim=spec?.claim!=null?dt(spec.claim):null,attempt=spec?.attempt!=null?dt(spec.attempt):null,verify=spec?.verify!=null?dt(spec.verify):null;
+  await env.DB.prepare(`UPDATE growth_execution_contract SET status='claimed',claimed_at=datetime('now'),claim_deadline=?,attempt_deadline=?,verify_deadline=?,last_result=?,updated_at=datetime('now') WHERE task_id IN (${qs})`).bind(claim,attempt,verify,result,...ids).run();
   return{claimed:ids.length,taskIds:ids};
 }
 
