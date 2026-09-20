@@ -229,7 +229,7 @@ export async function syncExecutionContracts(env){
        OR growth_execution_contract.execution_mode IS NOT excluded.execution_mode
        OR growth_execution_contract.priority_score IS NOT excluded.priority_score
        OR growth_execution_contract.status='cancelled'
-       OR excluded.status='executor_missing'`).run();
+       OR (excluded.status='executor_missing' AND growth_execution_contract.status<>'executor_missing')`).run();
 
   await env.DB.prepare(`UPDATE growth_execution_contract
     SET status='cancelled',last_result='source_no_longer_active',completed_at=datetime('now'),updated_at=datetime('now')
