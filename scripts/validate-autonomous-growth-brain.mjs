@@ -17,6 +17,7 @@ const seoApply=read('scripts/apply-organic-growth-actions.mjs');
 const seoWorkflow=read('.github/workflows/seo-engine-v2.yml');
 const seoFetch=read('scripts/fetch-shared-growth-directives.mjs');
 const content=read('content-engine-intelligence-worker.js');
+const network=read('distribution-network-worker.js');
 const rndPolicy=read('data/growth-rnd-policy.json');
 
 if(!funnel.includes("import base from './catalog-autonomy-worker.js'"))fail('Catalog Autonomy is not in the live Worker chain.');
@@ -36,6 +37,11 @@ if(!seoFetch.includes('/api/growth/search-directives')||!seoController.includes(
 if(!seoWorkflow.includes('fetch-shared-growth-directives.mjs'))fail('SEO workflow does not fetch runtime growth directives.');
 if(!orchestrator.includes('growth_rnd_experiments')||!orchestrator.includes("mission:'rnd_audit'"))fail('Autonomous Growth R&D audit is missing.');
 if(!orchestrator.includes("id:'external-demand-first-v2'")||!orchestrator.includes("strictVerifiedHumanSessions30d:100")||!orchestrator.includes("provenExternalSources:2")||!orchestrator.includes("strictHumansPerProvenSource30d:3")||!orchestrator.includes("externalDemandRemainsPrimary:true"))fail('External-demand-first acquisition policy or its repeatability gate is missing.');
+
+if(!network.includes('distribution_contact_route_actions')||!network.includes('materializeRouteActions')||!network.includes('reconcileRouteActions')||!network.includes('closed_loop_routes:true'))fail('Alternate distribution routes are not closed-loop.');
+if(!content.includes('Borrowed-audience amplification candidate')||!content.includes('issued_to_content'))fail('Content Engine is not consuming alternate social distribution routes.');
+if(!orchestrator.includes('execute_alternate_routes')||!orchestrator.includes('alternate_routes_stalled'))fail('Growth Brain does not consume alternate-route lifecycle state.');
+if(!command.includes('Growth loop health')||!command.includes('orphan_alternate_routes')||!command.includes('stale_growth_actions'))fail('Command Center closed-loop watchdog is missing.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
 if(!process.exitCode)console.log('PASS: shared autonomous growth brain contract is intact.');
