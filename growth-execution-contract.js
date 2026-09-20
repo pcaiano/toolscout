@@ -298,7 +298,15 @@ export async function syncExecutionContracts(env){
 
 export async function rebalanceExecutionAdmission(env){
   await ensureExecutionContractSchema(env);
-  const result={promoted:0,deferred:0,executors:{}};
+  const legacy=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+        claimed_at=NULL,attempted_at=NULL,last_result='legacy_generic_execution_requeued_v2',updated_at=datetime('now')
+    WHERE status IN ('claimed','attempted')
+      AND NOT EXISTS (
+        SELECT 1 FROM growth_execution_events e
+        WHERE e.task_id=growth_execution_contract.task_id AND e.event_type='claimed'
+      )`).run();
+  const result={promoted:0,deferred:Number(legacy?.meta?.changes||legacy?.changes||0),legacyRequeued:Number(legacy?.meta?.changes||legacy?.changes||0),executors:{}};
   for(const [executor,spec] of Object.entries(EXECUTORS)){
     if(spec.mode==='human')continue;
     const cap=Math.max(1,Number(READY_CAPS[executor]||2));
