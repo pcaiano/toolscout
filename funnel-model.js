@@ -13,7 +13,7 @@ export const FUNNEL_EVENT_TYPES = new Set([
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EVENT_ID = /^[A-Za-z0-9_-]{16,80}$/;
 const SLUG = /^[a-z0-9][a-z0-9-]{0,99}$/;
-const SOURCE = /^[A-Za-z0-9][A-Za-z0-9._:&=/-]{0,99}$/;
+const SOURCE = /^[A-Za-z0-9][A-Za-z0-9._:&=/-]{0,299}$/;
 const PATH = /^\/[A-Za-z0-9._~!$&'()*+,;=:@%/?-]{0,199}$/;
 const HOST = /^(?=.{1,120}$)[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$/;
 
