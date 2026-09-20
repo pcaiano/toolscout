@@ -71,6 +71,7 @@ const dt=minutes=>new Date(Date.now()+minutes*60000).toISOString().replace('T','
 const sqlTime=v=>String(v||'').replace('T',' ').replace('Z','').slice(0,19);
 async function all(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
 async function first(env,sql,bindings=[]){try{let q=env.DB.prepare(sql);if(bindings.length)q=q.bind(...bindings);return await q.first()}catch{return null}}
+async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 async function hash(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32)}
 
 export function executionRegistry(){return{actions:ACTION_EXECUTOR,executors:EXECUTORS,supervisor:SUPERVISOR_EXECUTOR}}
@@ -229,11 +230,19 @@ export async function reconcileExecutionContracts(env){
       evidence=await first(env,`SELECT result,created_at FROM distribution_qualification_events WHERE surface_slug=? AND created_at>=? ORDER BY created_at DESC LIMIT 1`,[subject,created]);
       if(evidence)evidence={...evidence,verified:true};
     }else if(t.executor==='content_issue'){
-      evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? ORDER BY created_at DESC LIMIT 1`,[created]);
+      if(t.subject_type==='tool')evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? AND selected_tool_slug=? ORDER BY created_at DESC LIMIT 1`,[created,subject]);
+      else if(t.subject_type==='search')evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? AND target_json LIKE ? ORDER BY created_at DESC LIMIT 1`,[created,`%${subject.replaceAll('%','')}%`]);
+      else evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? ORDER BY created_at DESC LIMIT 1`,[created]);
       if(evidence)evidence={...evidence,verified:true};
     }else if(t.executor==='audience_make'){
       evidence=await first(env,`SELECT event_id,event_type,created_at FROM audience_events WHERE status='published' AND created_at>=? ORDER BY created_at DESC LIMIT 1`,[created]);
       if(evidence)evidence={...evidence,verified:true};
+    }else if(t.executor==='seo_github'){
+      const report=await assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]});
+      const generated=Date.parse(String(report.generatedAt||'')),createdAt=Date.parse(String(t.created_at||'').replace(' ','T')+'Z');
+      const intent=subject.replace(/^\//,'').replace(/\.html$/,'');
+      const matched=[...(report.newInterventions||[]),...(report.activeOptimizations||[])].some(x=>String(x?.intent||x?.path||'').replace(/^\//,'').replace(/\.html$/,'')===intent);
+      if(Number.isFinite(generated)&&Number.isFinite(createdAt)&&generated>=createdAt&&matched)evidence={generatedAt:report.generatedAt,intent,verified:true};
     }else if(t.executor==='affiliate_cycle'){
       evidence=await first(env,`SELECT status,updated_at FROM affiliate_workflow WHERE tool_slug=? AND updated_at>=? ORDER BY updated_at DESC LIMIT 1`,[subject,created]);
       if(evidence)evidence={...evidence,verified:true};
