@@ -1,93 +1,14 @@
-name: One Shot Growth Architecture Escalation v12
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/d1-quota-safe-worker-deploy.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-worker-production-execution-contract-v4
-  cancel-in-progress: false
-
 jobs:
-  validate-deploy-audit:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Validate Growth execution contract
-        run: |
-          node --check growth-execution-contract.js
-          node --check growth-architecture-escalation.js
-          node --check growth-supervisor.js
-          node --check distribution-orchestrator-worker.js
-          node --check distribution-contact-worker.js
-          node --check distribution-autonomous-worker.js
-          node --check distribution-network-worker.js
-          node --check content-engine-intelligence-worker.js
-          node --check affiliate-coverage-cycle-worker.js
-          node --check catalog-autonomy-worker.js
-          node --check scripts/validate-autonomous-growth-brain.mjs
-          node scripts/validate-autonomous-growth-brain.mjs
-
-      - name: Deploy Growth execution contract
-        run: npx wrangler deploy --config wrangler.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Bootstrap contract state through live supervisor
-        run: |
-          curl -fsS --max-time 30 --retry 3 --retry-delay 2 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth.json
-          node - <<'NODE'
-          const fs=require('fs');
-          const x=JSON.parse(fs.readFileSync('/tmp/growth.json','utf8'));
-          if(x?.brain!=='shared-growth-v3') throw new Error('growth_brain_unavailable');
-          if(!x.executionContract) throw new Error('execution_contract_not_exposed');
-          console.log(JSON.stringify({northStar:x.northStar,executionContract:x.executionContract},null,2));
-          NODE
-
-      - name: Enforce end to end execution invariants
-        run: |
-          curl -fsS --max-time 30 --retry 3 --retry-delay 2 https://trytoolscout.org/api/growth/supervisor/public >/tmp/growth-resync.json
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            (SELECT COUNT(*) FROM growth_opportunity_state g, json_each(g.action_json) j WHERE g.status='active') active_actions,
-            (SELECT COUNT(*) FROM growth_execution_contract WHERE source_kind='opportunity' AND status<>'cancelled') contracted_actions,
-            (SELECT COUNT(*) FROM growth_opportunity_state g, json_each(g.action_json) j LEFT JOIN growth_execution_contract c ON c.source_kind='opportunity' AND c.source_id=g.opportunity_key AND c.action=j.value AND c.status<>'cancelled' WHERE g.status='active' AND c.task_id IS NULL) uncontracted_actions,
-            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing') missing_executors,
-            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled') stalled,
-            (SELECT COUNT(*) FROM growth_execution_contract WHERE source_kind='supervisor' AND status<>'cancelled') supervisor_contracts;" > /tmp/execution-invariants.json
-          cat /tmp/execution-invariants.json
-          jq -e '.[0].results[0] | .uncontracted_actions==0 and .missing_executors==0 and .stalled==0 and .active_actions==.contracted_actions' /tmp/execution-invariants.json
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Show execution contract by executor
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT executor,execution_mode,status,COUNT(*) n FROM growth_execution_contract WHERE status<>'cancelled' GROUP BY executor,execution_mode,status ORDER BY executor,status;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT source_kind,subject_type,action,executor,status,priority_score,claim_deadline,attempt_deadline,verify_deadline FROM growth_execution_contract WHERE status NOT IN ('cancelled','verified') ORDER BY priority_score DESC LIMIT 40;"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Audit code architecture escalation state
-        run: |
-          curl -fsS --max-time 30 --retry 3 --retry-delay 2 https://trytoolscout.org/api/growth/supervisor/public >/tmp/growth-escalation-bootstrap.json
-          echo "=== ARCHITECTURE INCIDENTS ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT severity,status,engine,executor,action,title,approval_required,email_status,first_detected_at,last_detected_at FROM growth_architecture_incidents ORDER BY last_detected_at DESC LIMIT 30;"
-          echo "=== ARCHITECTURE ESCALATION INVARIANTS ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required<>1) open_without_approval,
-            (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND email_status NOT IN ('pending','sent')) invalid_open_email_state,
-            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing') missing_executors,
-            (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND incident_key LIKE 'executor_missing:%') missing_executor_incidents;" >/tmp/architecture-invariants.json
-          cat /tmp/architecture-invariants.json
-          jq -e '.[0].results[0] | .open_without_approval==0 and .invalid_open_email_state==0 and (.missing_executors==0 or .missing_executor_incidents>0)' /tmp/architecture-invariants.json
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
