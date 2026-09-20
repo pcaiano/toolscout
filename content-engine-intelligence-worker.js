@@ -215,6 +215,8 @@ async function buildBrief(env,family,{issue=false}={}){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE growth_action_events SET status='legacy_unverified',updated_at=datetime('now') WHERE status='prepared'`).run().catch(()=>{});
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
+  let supervisor={status:null,directive:null,config:{}};
+  try{const row=await env.DB.prepare(`SELECT status,directive,directive_json FROM growth_supervisor_state WHERE engine='content'`).first();if(row){let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}supervisor={status:row.status,directive:row.directive,config}}}catch{}
   const growth=await env.DB.prepare(`SELECT subject_type,subject_key,priority_score,opportunity_key FROM growth_opportunity_state WHERE status='active' AND subject_type IN ('tool','news_update') ORDER BY priority_score DESC LIMIT 80`).all().catch(()=>({results:[]}));
   const sprintGrowth=await env.DB.prepare(`SELECT subject_key,priority_score,opportunity_key,signal_json FROM growth_opportunity_state
     WHERE status='active' AND subject_type='search' AND subject_key NOT IN ('/','/tools')
@@ -244,7 +246,9 @@ async function buildBrief(env,family,{issue=false}={}){
   for(const row of observedSprintRows){const key=String(row.subject_key||'');if(!key||seenSprintPaths.has(key))continue;seenSprintPaths.add(key);dedupedSprintRows.push(row);}
   const sprintRows=dedupedSprintRows.length?dedupedSprintRows:HUMAN_ACQUISITION_FALLBACK_TARGETS;
   const sprintPool=sprintRows.slice(0,Math.min(3,sprintRows.length));
-  const sprintTarget=humanAcquisitionSprintActive()&&sprintPool.length?sprintPool[pickIndex(family+date,sprintPool.length)]:null;
+  const supervisorSearchFirst=Boolean(supervisor?.config?.search_demand_first);
+  const acquisitionMode=humanAcquisitionSprintActive()||supervisorSearchFirst;
+  const sprintTarget=acquisitionMode&&sprintPool.length?sprintPool[pickIndex(family+date,sprintPool.length)]:null;
   const topGrowthProfile=growthTools.map(x=>profileBySlug.get(x.subject_key)).find(Boolean)||null;
   const comparisonPairs=[
     ['make','zapier'],['hubspot','pipedrive'],['beehiiv','kit'],['jotform','typeform'],['semrush','ahrefs'],
@@ -266,7 +270,7 @@ async function buildBrief(env,family,{issue=false}={}){
   const routeCandidate=(routeCandidates.results||[])[0]||null;
   const mode=selected?'affiliate_social_verified':'editorial';
   const targetMode=selected?(Number(selected.redirect_allowed)===1?'toolscout_redirect':'direct_vendor'):'editorial';
-  let t=selected?(targetMode==='toolscout_redirect'?targets(selected.tool_slug):{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}):(sprintTarget?editorialTargets(family,sprintTarget.subject_key,'human_acquisition_sprint'):editorialTargets(family));
+  let t=selected?(targetMode==='toolscout_redirect'?targets(selected.tool_slug):{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}):(sprintTarget?editorialTargets(family,sprintTarget.subject_key,humanAcquisitionSprintActive()?'human_acquisition_sprint':'growth_supervisor_search_demand'):editorialTargets(family));
   const growthKey=sprintTarget?sprintTarget.opportunity_key:(selected?(growthRank.get(selected.tool_slug)?.key||`tool:${selected.tool_slug}`):(comparison?(growthRank.get(comparison[0])?.key||growthRank.get(comparison[1])?.key||null):(topGrowthProfile?(growthRank.get(topGrowthProfile.tool_slug)?.key||`tool:${topGrowthProfile.tool_slug}`):null)));
   let comparisonContext=null;
   if(comparison){
@@ -280,7 +284,7 @@ async function buildBrief(env,family,{issue=false}={}){
   const prompt=[
     `CONTENT ENGINE INTELLIGENCE BRIEF (${family})`,
     `Commercial mode: ${mode}.`,
-    sprintTarget?`Human Acquisition Sprint focus: ${sprintTarget.signals?.title||sprintTarget.subject_key}. GSC observed ${Number(sprintTarget.signals?.impressions||0)} impressions at average position ${Number(sprintTarget.signals?.position||0).toFixed(1)} through 2026-09-16. Build the post around the practical user problem behind this page and send readers to the exact ToolScout target below. Optimize for a qualified human visit, not vanity reach.`:null,
+    sprintTarget?`${humanAcquisitionSprintActive()?'Human Acquisition Sprint':'Growth Supervisor'} focus: ${sprintTarget.signals?.title||sprintTarget.subject_key}. GSC observed ${Number(sprintTarget.signals?.impressions||0)} impressions at average position ${Number(sprintTarget.signals?.position||0).toFixed(1)}. Build the post around the practical user problem behind this page and send readers to the exact ToolScout target below. Optimize for a qualified human visit, not vanity reach. Supervisor directive: ${supervisor.directive||'observed demand first'}.`:null,
     comparisonContext?`Comparison selected for this run: ${comparisonContext.tool_a} vs ${comparisonContext.tool_b}. Use this exact comparison pair and the exact platform URL supplied below. Present practical tradeoffs, never a universal winner.`:null,
     selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Official programme material explicitly permits organic-social affiliate/referral-link promotion. Target mode: ${targetMode}. ${targetMode==='direct_vendor'?'The programme restricts redirects/cloaking, so use the exact vendor affiliate URL supplied below without modification.':'The checked material allows the ToolScout redirect route.'} Include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
     mentions.length?`Verified manufacturer/profile candidates discovered from links on their official websites: ${mentions.map(m=>`${m.name} | X ${m.x_handle||'none'} | Bluesky ${m.bluesky_handle||'none'} | LinkedIn company URL ${m.linkedin_url||'none'}`).join(' ; ')}. Mention only when genuinely relevant to the topic. Never invent or guess a handle.`:'No verified manufacturer social handles are currently available. Do not invent mentions.',
