@@ -253,6 +253,51 @@ async function qualifyOne(env,row){
     await mark(env,effectiveRow,'ready_to_submit',`verified_safe_form_adapter:${formAdapter.endpoint}`);
     return 'ready_to_submit';
   }
+  const linkedActionUrls=[...new Set(links(h.body,h.url)
+    .filter(u=>u!==h.url&&sameHostFamily(u,h.url)&&ACTION_ROUTE_RE.test(u))
+    .filter(u=>!/(privacy|terms|legal|blog|docs|help|support|pricing)(?:[\\/?#]|$)/i.test(new URL(u).pathname))
+  )].slice(0,5);
+  let linkedAuth=false,linkedHuman=false,linkedPolicy=false;
+  if(linkedActionUrls.length){
+    const linkedPages=await Promise.all(linkedActionUrls.map(async u=>({u,page:await text(u,3500)})));
+    for(const item of linkedPages){
+      const page=item.page;if(!page)continue;
+      const policy=await relatedPolicyText(page.url,page.body);
+      if(POLICY_BLOCK_RE.test(page.body)||(policy&&POLICY_BLOCK_RE.test(policy))){linkedPolicy=true;continue}
+      if(HUMAN_BLOCK_RE.test(page.body)||(policy&&HUMAN_BLOCK_RE.test(policy))){linkedHuman=true;continue}
+      const linkedApi=await findOpenApi(page.url,page.body);
+      if(linkedApi){
+        if(linkedApi.auth_required){linkedAuth=true;continue}
+        await storeAutoAdapter(env,effectiveRow,page,linkedApi,'verified');
+        await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth submission API discovered by following a same-host action route automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(page.url,effectiveRow.surface_slug).run();
+        await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_auto_adapter:${linkedApi.endpoint}`);
+        return 'ready_to_submit';
+      }
+      const linkedForm=htmlFormAdapter(page.url,page.body);
+      if(linkedForm){
+        await storeAutoAdapter(env,effectiveRow,page,linkedForm,'verified');
+        await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,status='ready_to_submit',human_required=0,automation_potential=90,acceptance_probability=65,next_action='Verified no-auth same-host submission form discovered by following a Submit/Add/List route automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(page.url,effectiveRow.surface_slug).run();
+        await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_safe_form_adapter:${linkedForm.endpoint}`);
+        return 'ready_to_submit';
+      }
+      if(AUTH_RE.test(page.body))linkedAuth=true;
+    }
+  }
+  if(linkedHuman){
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Autonomous same-host route discovery found the submission path, but it contains a genuine human-only gate such as CAPTCHA or explicit confirmation.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'human_action_required','linked_submission_route_human_gate');
+    return 'human_action_required';
+  }
+  if(linkedAuth){
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,next_action='Autonomous same-host route discovery found the submission path, but authentication is required. Keep researching machine identity or surface exact one-time setup.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'auth_required','linked_submission_route_auth_required');
+    return 'auth_required';
+  }
+  if(linkedPolicy){
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='policy_blocked',human_required=0,next_action='Autonomous same-host route discovery found only submission paths blocked by payment, reciprocal-link requirements or anti-automation policy.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
+    await mark(env,effectiveRow,'policy_blocked','linked_submission_route_policy_blocked');
+    return 'policy_blocked';
+  }
   const pageText=h.body.toLowerCase();
   if(AUTH_RE.test(pageText)){
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,next_action='Authentication is required. Keep this inside the autonomy research loop until a supported credential or machine identity route is found.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
