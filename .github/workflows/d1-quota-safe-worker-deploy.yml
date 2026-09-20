@@ -1,73 +1,14 @@
-name: One Shot Human Gate Action Links
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches:
-      - main
-      - fix/human-gate-action-links
-    paths:
-      - 'distribution-autonomous-worker.js'
-      - 'scripts/validate-autonomous-growth-brain.mjs'
-      - '.github/workflows/d1-quota-safe-worker-deploy.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-human-gate-action-links
-  cancel-in-progress: false
-
 jobs:
-  validate-deploy-prove:
+  conservation-notice:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Validate human-usable gate links
-        run: |
-          node --check distribution-autonomous-worker.js
-          node scripts/validate-autonomous-growth-brain.mjs
-
-      - name: Deploy corrected Worker
-        if: github.ref == 'refs/heads/main'
-        run: npx wrangler deploy --config wrangler.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Repair current machine-only gate links
-        if: github.ref == 'refs/heads/main'
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE human_gate_contract
-            SET action_url='https://listedstartups.com/submit',updated_at=datetime('now')
-            WHERE gate_key='distribution:surface:listed-startups'
-              AND action_url LIKE '%/api/%';
-            UPDATE distribution_opportunities
-            SET action_url='https://listedstartups.com/submit',updated_at=datetime('now')
-            WHERE surface_slug='listed-startups'
-              AND action_url LIKE '%/api/%';"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Prove no open gate exposes a machine-only endpoint
-        if: github.ref == 'refs/heads/main'
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) machine_only
-          FROM human_gate_contract
-          WHERE status='open'
-            AND (
-              lower(action_url) LIKE '%/api/%'
-              OR lower(action_url) LIKE '%/openapi%'
-              OR lower(action_url) LIKE '%/swagger%'
-              OR lower(action_url) LIKE '%.json'
-            );" > /tmp/gates.json
-          cat /tmp/gates.json
-          jq -e '.[0].results[0].machine_only==0' /tmp/gates.json
-
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT gate_key,gate_type,status,title,action_url FROM human_gate_contract WHERE status='open' ORDER BY updated_at DESC;"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
