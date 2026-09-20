@@ -1,4 +1,4 @@
-name: One Shot Growth Sender Closed Loop Deploy
+name: One Shot Growth Sender Dedupe Deploy
 
 on:
   push:
