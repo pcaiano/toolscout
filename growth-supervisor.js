@@ -137,7 +137,7 @@ async function saveEngine(env,engine,role,global,ctx,p){
 
 export async function runGrowthSupervisorAudit(env){
   await ensureSchema(env);
-  const [humansRows,exec,gsc,organic,active,executionContract]=await Promise.all([
+  const [humansRows,exec,gsc,organic,active,executionContract,architectureIncidents]=await Promise.all([
     strictRows(env),executionRows(env),
     assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
     assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
@@ -149,7 +149,8 @@ export async function runGrowthSupervisorAudit(env){
       SUM(CASE WHEN status='claimed' THEN 1 ELSE 0 END) claimed,
       SUM(CASE WHEN status='attempted' THEN 1 ELSE 0 END) attempted,
       SUM(CASE WHEN status='verified' THEN 1 ELSE 0 END) verified
-      FROM growth_execution_contract`)
+      FROM growth_execution_contract`),
+    first(env,`SELECT COUNT(*) n FROM growth_architecture_incidents WHERE status='open' AND approval_required=1`)
   ]);
   const byType=Object.fromEntries(active.map(x=>[String(x.subject_type),n(x.n)]));
   const humans={distribution:{h24:0,h7:0},content:{h24:0,h7:0},audience:{h24:0,h7:0},seo_geo_aio:{h24:0,h7:0},unattributed:{h24:0,h7:0}};
@@ -186,9 +187,10 @@ export async function runGrowthSupervisorAudit(env){
   const exec24=engines.filter(x=>PRIMARY.has(x.engine)).reduce((s,x)=>s+x.externalExecutions24h,0);
   const exec7=engines.filter(x=>PRIMARY.has(x.engine)).reduce((s,x)=>s+x.externalExecutions7d,0);
   const attributed7=n(humans.distribution.h7)+n(humans.content.h7)+n(humans.audience.h7)+n(humans.seo_geo_aio.h7);
-  const missingExecutors=n(executionContract?.missing_executors),stalledContracts=n(executionContract?.stalled);
+  const missingExecutors=n(executionContract?.missing_executors),stalledContracts=n(executionContract?.stalled),openArchitectureIncidents=n(architectureIncidents?.n);
   let status='working',directive='keep_learning_from_verified_humans';
-  if(missingExecutors>0||stalledContracts>0){status='failing';directive='repair_execution_contract'}
+  if(openArchitectureIncidents>0){status='failing';directive='await_code_approval'}
+  else if(missingExecutors>0||stalledContracts>0){status='failing';directive='repair_execution_contract'}
   else if(strict7===0&&exec7>0){status='failing';directive='correct_all_acquisition_engines'}
   else if(strict24===0&&exec24===0){status='execution_gap';directive='force_primary_engine_execution'}
   else if(strict24===0){status='underperforming';directive='rotate_after_maturity_and_expand_existing_demand'}
@@ -196,9 +198,9 @@ export async function runGrowthSupervisorAudit(env){
 
   const attributed24=n(humans.distribution.h24)+n(humans.content.h24)+n(humans.audience.h24)+n(humans.seo_geo_aio.h24);
   const gctx={h24:attributed24,h7:attributed7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
-  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)}}};
+  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architecture_escalation:{open_incidents:openArchitectureIncidents,approval_required:openArchitectureIncidents>0}}};
   const growth=await saveEngine(env,'growth_brain','supervisor',global,gctx,gp);
-  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
+  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
 }
 
 export async function growthSupervisorSnapshot(env){
