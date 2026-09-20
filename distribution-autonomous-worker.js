@@ -218,9 +218,36 @@ function humanGatePayload(){
     tagline:'Find the right software for the job without the noise.'
   };
 }
+function isMachineOnlyActionUrl(value){
+  try{
+    const u=new URL(String(value||''));
+    return /(?:^|\\/)(?:api|openapi|swagger|mcp)(?:\\/|$)|\\.(?:json|yaml|yml)$/i.test(u.pathname);
+  }catch{return false}
+}
+async function resolveHumanActionUrl(value){
+  let candidate=String(value||'');
+  let parsed;try{parsed=new URL(candidate)}catch{return candidate}
+  if(parsed.protocol!=='https:')return candidate;
+  if(!isMachineOnlyActionUrl(candidate))return candidate;
+  const home=await text(parsed.origin+'/',3500);
+  if(!home)return parsed.origin+'/';
+  const candidates=[...new Set(links(home.body,home.url)
+    .filter(u=>sameHostFamily(u,home.url)&&ACTION_ROUTE_RE.test(u)&&!isMachineOnlyActionUrl(u))
+    .filter(u=>!/(privacy|terms|legal|blog|docs|help|support|pricing)(?:[\\/?#]|$)/i.test(new URL(u).pathname))
+  )].sort((a,b)=>{
+    const score=u=>/\\/submit(?:[\\/?#]|$)/i.test(u)?0:/add|list-your|new-tool|new-product/i.test(u)?1:/register|sign-up|signup/i.test(u)?2:3;
+    return score(a)-score(b);
+  }).slice(0,6);
+  for(const u of candidates){
+    const page=await text(u,3500);
+    if(page)return page.url;
+  }
+  return parsed.origin+'/';
+}
 async function openDistributionHumanGate(env,row,{gateType='human_confirmation',actionUrl=null,reason=null,verificationUrl=null}={}){
   const target=row.surface_name||row.surface_slug;
   const isAuth=gateType==='authentication';
+  const humanActionUrl=await resolveHumanActionUrl(actionUrl||row.action_url);
   const instructions=isAuth
     ?'Open the exact action page. Sign in, create the required account, complete email/OTP verification, or authorize access as required. Then complete the ToolScout listing/submission using the prepared truthful ToolScout details. Do not buy promotion, add a reciprocal badge, accept optional paid upgrades, or invent claims. When the external step is complete, return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it so autonomous verification can close the gate immediately.'
     :'Open the exact action page and complete only the human-only step shown there, such as CAPTCHA, explicit confirmation, material terms acceptance, or the final irreversible submit. Use the prepared truthful ToolScout details. Do not buy promotion, add reciprocal badges, or invent claims. Then return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it for autonomous verification.';
@@ -232,16 +259,17 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
     title:`${target}: human step required`,
     reason:reason||row.next_action||'Autonomous execution reached a genuine human-only gate.',
     instructions,
-    actionUrl:actionUrl||row.action_url,
+    actionUrl:humanActionUrl,
     resolutionMode:'verify_publication',
     payload:humanGatePayload(),
     verificationUrl
   });
   await env.DB.prepare(`UPDATE distribution_opportunities
     SET human_required=1,
+        action_url=?,
         next_action=?,
         updated_at=datetime('now')
-    WHERE surface_slug=?`).bind(`Human Gate Contract ${gateKey} opened. Complete the exact external step from Chairman Queue, then mark it done for autonomous verification.`,row.surface_slug).run().catch(()=>{});
+    WHERE surface_slug=?`).bind(humanActionUrl,`Human Gate Contract ${gateKey} opened. Complete the exact external step from Chairman Queue, then mark it done for autonomous verification.`,row.surface_slug).run().catch(()=>{});
   return gateKey;
 }
 async function qualifyOne(env,row){
