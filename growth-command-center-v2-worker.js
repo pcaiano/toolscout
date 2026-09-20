@@ -250,51 +250,144 @@ async function growthOpsSnapshot(request,env,ctx,stats){
     safeFirst(env,`SELECT COUNT(*) placements,COALESCE(SUM(backlink_verified),0) backlinks FROM distribution_placements WHERE placement_verified=1`)
   ]);
   const queue=await chairmanQueue(request,env,ctx,{verifyLinks:false});
-  const [growthState,growthRnd,contactRouteState,routeActionState,externalExecutions,internalCycles,humanEvents,actionImpact]=await Promise.all([
-    safeFirst(env,`SELECT COUNT(*) active,SUM(CASE WHEN subject_type='tool' THEN 1 ELSE 0 END) tools,SUM(CASE WHEN subject_type='surface' THEN 1 ELSE 0 END) surfaces,SUM(CASE WHEN subject_type='search' THEN 1 ELSE 0 END) search,SUM(CASE WHEN subject_type='affiliate' THEN 1 ELSE 0 END) affiliate,SUM(CASE WHEN subject_type LIKE 'catalog_%' THEN 1 ELSE 0 END) catalog,SUM(CASE WHEN subject_type='news_update' THEN 1 ELSE 0 END) news,MAX(last_evaluated_at) last_evaluated_at FROM growth_opportunity_state WHERE status='active'`),
-    safeFirst(env,`SELECT COUNT(*) active,MAX(updated_at) last_evaluated_at FROM growth_rnd_experiments WHERE status='active'`),
-    safeFirst(env,`SELECT COUNT(*) routes,COUNT(DISTINCT surface_slug) surfaces FROM distribution_contact_routes`),
-    safeFirst(env,`SELECT COUNT(*) total,
-      SUM(CASE WHEN status IN ('queued','retry_due') THEN 1 ELSE 0 END) queued,
-      SUM(CASE WHEN status IN ('researching','qualified_auto','executed_waiting_verification','issued_to_content') THEN 1 ELSE 0 END) in_progress,
-      SUM(CASE WHEN status='verified_human_impact' THEN 1 ELSE 0 END) verified_human,
-      SUM(CASE WHEN status='verified_placement' THEN 1 ELSE 0 END) verified_placement,
-      SUM(CASE WHEN status='human_action_required' THEN 1 ELSE 0 END) human,
-      SUM(CASE WHEN status='auth_required' THEN 1 ELSE 0 END) auth,
-      SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled,
-      SUM(CASE WHEN status IN ('policy_blocked','exhausted') THEN 1 ELSE 0 END) exhausted
-      FROM distribution_contact_route_actions`),
-    safeFirst(env,`SELECT
-      (SELECT COUNT(*) FROM growth_action_events WHERE created_at>=datetime('now','-7 days') AND status IN ('sent','verified','completed','attributed'))
-      + (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days'))
-      AS n`),
-    safeFirst(env,`SELECT COUNT(*) n FROM engine_runs WHERE started_at>=datetime('now','-7 days') AND status='completed'`),
-    safeFirst(env,`SELECT COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved')`),
+  const [growthCardCore,actionImpact]=await Promise.all([
+    safeFirst(env,`WITH
+      growth AS (
+        SELECT COUNT(*) active,
+          SUM(CASE WHEN subject_type='tool' THEN 1 ELSE 0 END) tools,
+          SUM(CASE WHEN subject_type='surface' THEN 1 ELSE 0 END) surfaces,
+          SUM(CASE WHEN subject_type='search' THEN 1 ELSE 0 END) search,
+          SUM(CASE WHEN subject_type='affiliate' THEN 1 ELSE 0 END) affiliate,
+          SUM(CASE WHEN subject_type LIKE 'catalog_%' THEN 1 ELSE 0 END) catalog,
+          SUM(CASE WHEN subject_type='news_update' THEN 1 ELSE 0 END) news,
+          SUM(CASE WHEN action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]' THEN 1 ELSE 0 END) empty_actions,
+          MAX(last_evaluated_at) last_evaluated_at
+        FROM growth_opportunity_state WHERE status='active'
+      ),
+      rnd AS (
+        SELECT COUNT(*) active,MAX(updated_at) last_evaluated_at FROM growth_rnd_experiments WHERE status='active'
+      ),
+      routes AS (
+        SELECT COUNT(*) routes,COUNT(DISTINCT surface_slug) surfaces FROM distribution_contact_routes
+      ),
+      route_actions AS (
+        SELECT COUNT(*) total,
+          SUM(CASE WHEN status IN ('queued','retry_due') THEN 1 ELSE 0 END) queued,
+          SUM(CASE WHEN status IN ('researching','qualified_auto','executed_waiting_verification','issued_to_content') THEN 1 ELSE 0 END) in_progress,
+          SUM(CASE WHEN status='verified_human_impact' THEN 1 ELSE 0 END) verified_human,
+          SUM(CASE WHEN status='verified_placement' THEN 1 ELSE 0 END) verified_placement,
+          SUM(CASE WHEN status='human_action_required' THEN 1 ELSE 0 END) human,
+          SUM(CASE WHEN status='auth_required' THEN 1 ELSE 0 END) auth,
+          SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled,
+          SUM(CASE WHEN status IN ('policy_blocked','exhausted') THEN 1 ELSE 0 END) exhausted,
+          SUM(CASE WHEN
+            (status IN ('queued','retry_due','researching','qualified_auto') AND updated_at<datetime('now','-24 hours'))
+            OR (status='issued_to_content' AND COALESCE(last_attempt_at,updated_at)<datetime('now','-80 hours'))
+          THEN 1 ELSE 0 END) stale
+        FROM distribution_contact_route_actions
+      ),
+      orphan_routes AS (
+        SELECT COUNT(*) n FROM distribution_contact_routes r
+        LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id
+        WHERE r.status IN ('discovered','in_loop') AND a.route_id IS NULL
+      ),
+      actions AS (
+        SELECT
+          SUM(CASE WHEN created_at>=datetime('now','-7 days') AND status IN ('sent','verified','completed','attributed') THEN 1 ELSE 0 END) external_7d,
+          SUM(CASE WHEN status IN ('prepared','issued','leased') AND updated_at<datetime('now','-72 hours') THEN 1 ELSE 0 END) stale
+        FROM growth_action_events
+      ),
+      submissions AS (
+        SELECT SUM(CASE WHEN surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days') THEN 1 ELSE 0 END) external_7d
+        FROM distribution_submissions
+      ),
+      engine_summary AS (
+        SELECT
+          SUM(CASE WHEN started_at>=datetime('now','-7 days') AND status='completed' THEN 1 ELSE 0 END) internal_cycles_7d,
+          MAX(CASE WHEN engine='growth' AND mission='opportunity_coordination' AND status='completed' THEN completed_at END) loop_last_completed_at,
+          MAX(CASE WHEN engine='growth' AND mission='opportunity_coordination' AND status='completed' THEN started_at END) loop_last_started_at
+        FROM engine_runs
+      ),
+      failed_core AS (
+        SELECT COUNT(*) n
+        FROM engine_runs f
+        WHERE f.started_at>=datetime('now','-24 hours')
+          AND f.status='failed'
+          AND ((f.engine='growth' AND f.mission IN ('opportunity_coordination','rnd_audit'))
+            OR (f.engine='distribution' AND f.mission IN ('network_cycle','autonomous_cycle','economic_learning'))
+            OR (f.engine='content' AND f.mission='social_intelligence'))
+          AND NOT EXISTS (
+            SELECT 1 FROM engine_runs c
+            WHERE c.engine=f.engine AND c.mission=f.mission
+              AND c.status='completed' AND c.started_at>f.started_at
+          )
+      ),
+      human_events AS (
+        SELECT COUNT(*) n FROM distribution_events
+        WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved')
+      ),
+      supervisor AS (
+        SELECT
+          MAX(CASE WHEN engine='growth_brain' THEN status END) status,
+          MAX(CASE WHEN engine='growth_brain' THEN directive END) directive,
+          MAX(CASE WHEN engine='growth_brain' THEN strict_humans_24h END) strict_humans_24h,
+          MAX(CASE WHEN engine='growth_brain' THEN strict_humans_7d END) strict_humans_7d,
+          MAX(CASE WHEN engine='growth_brain' THEN attributed_humans_7d END) attributed_humans_7d,
+          MAX(CASE WHEN engine='growth_brain' THEN external_executions_24h END) external_executions_24h,
+          MAX(CASE WHEN engine='growth_brain' THEN external_executions_7d END) external_executions_7d,
+          MAX(CASE WHEN engine='growth_brain' THEN correction_count END) correction_count,
+          MAX(CASE WHEN engine='growth_brain' THEN last_correction_at END) last_correction_at,
+          MAX(CASE WHEN engine='growth_brain' THEN last_evaluated_at END) last_evaluated_at
+        FROM growth_supervisor_state
+      ),
+      execution_contract AS (
+        SELECT
+          SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
+          SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled
+        FROM growth_execution_contract
+      )
+      SELECT
+        growth.active growth_active,growth.tools growth_tools,growth.surfaces growth_surfaces,growth.search growth_search,
+        growth.affiliate growth_affiliate,growth.catalog growth_catalog,growth.news growth_news,growth.empty_actions growth_empty_actions,
+        growth.last_evaluated_at growth_last_evaluated_at,
+        rnd.active rnd_active,rnd.last_evaluated_at rnd_last_evaluated_at,
+        routes.routes contact_routes,routes.surfaces contact_route_surfaces,
+        route_actions.total route_actions_total,route_actions.queued route_actions_queued,route_actions.in_progress route_actions_in_progress,
+        route_actions.verified_human route_actions_verified_human,route_actions.verified_placement route_actions_verified_placement,
+        route_actions.human route_actions_human,route_actions.auth route_actions_auth,route_actions.stalled route_actions_stalled,
+        route_actions.exhausted route_actions_exhausted,route_actions.stale route_actions_stale,
+        orphan_routes.n orphan_routes,
+        COALESCE(actions.external_7d,0)+COALESCE(submissions.external_7d,0) raw_external_executions_7d,
+        actions.stale stale_growth_actions,
+        engine_summary.internal_cycles_7d internal_cycles_7d,
+        engine_summary.loop_last_completed_at loop_last_completed_at,engine_summary.loop_last_started_at loop_last_started_at,
+        failed_core.n failed_core_runs_24h,human_events.n human_events_7d,
+        supervisor.status supervisor_status,supervisor.directive supervisor_directive,
+        supervisor.strict_humans_24h supervisor_strict_humans_24h,supervisor.strict_humans_7d supervisor_strict_humans_7d,
+        supervisor.attributed_humans_7d supervisor_attributed_humans_7d,
+        supervisor.external_executions_24h supervisor_external_executions_24h,
+        supervisor.external_executions_7d supervisor_external_executions_7d,
+        supervisor.correction_count supervisor_correction_count,
+        supervisor.last_correction_at supervisor_last_correction_at,supervisor.last_evaluated_at supervisor_last_evaluated_at,
+        execution_contract.missing execution_contract_missing,execution_contract.stalled execution_contract_stalled
+      FROM growth,rnd,routes,route_actions,orphan_routes,actions,submissions,engine_summary,failed_core,human_events,supervisor,execution_contract`),
     growthActionMetrics(env)
   ]);
-  const [growthLoopRun,orphanRoutes,staleRouteActions,staleGrowthActions,emptyOpportunityActions,failedCoreRuns]=await Promise.all([
-    safeFirst(env,`SELECT MAX(completed_at) last_completed_at,MAX(started_at) last_started_at FROM engine_runs WHERE engine='growth' AND mission='opportunity_coordination' AND status='completed'`),
-    safeFirst(env,`SELECT COUNT(*) n FROM distribution_contact_routes r LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id WHERE r.status IN ('discovered','in_loop') AND a.route_id IS NULL`),
-    safeFirst(env,`SELECT COUNT(*) n FROM distribution_contact_route_actions WHERE
-      (status IN ('queued','retry_due','researching','qualified_auto') AND updated_at<datetime('now','-24 hours'))
-      OR (status='issued_to_content' AND COALESCE(last_attempt_at,updated_at)<datetime('now','-80 hours'))`),
-    safeFirst(env,`SELECT COUNT(*) n FROM growth_action_events WHERE status IN ('prepared','issued','leased') AND updated_at<datetime('now','-72 hours')`),
-    safeFirst(env,`SELECT COUNT(*) n FROM growth_opportunity_state WHERE status='active' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]')`),
-    safeFirst(env,`SELECT COUNT(*) n
-      FROM engine_runs f
-      WHERE f.started_at>=datetime('now','-24 hours')
-        AND f.status='failed'
-        AND ((f.engine='growth' AND f.mission IN ('opportunity_coordination','rnd_audit'))
-          OR (f.engine='distribution' AND f.mission IN ('network_cycle','autonomous_cycle','economic_learning'))
-          OR (f.engine='content' AND f.mission='social_intelligence'))
-        AND NOT EXISTS (
-          SELECT 1 FROM engine_runs c
-          WHERE c.engine=f.engine
-            AND c.mission=f.mission
-            AND c.status='completed'
-            AND c.started_at>f.started_at
-        )`)
-  ]);
+  const growthState={active:n(growthCardCore?.growth_active),tools:n(growthCardCore?.growth_tools),surfaces:n(growthCardCore?.growth_surfaces),search:n(growthCardCore?.growth_search),affiliate:n(growthCardCore?.growth_affiliate),catalog:n(growthCardCore?.growth_catalog),news:n(growthCardCore?.growth_news),last_evaluated_at:growthCardCore?.growth_last_evaluated_at||null};
+  const growthRnd={active:n(growthCardCore?.rnd_active),last_evaluated_at:growthCardCore?.rnd_last_evaluated_at||null};
+  const contactRouteState={routes:n(growthCardCore?.contact_routes),surfaces:n(growthCardCore?.contact_route_surfaces)};
+  const routeActionState={total:n(growthCardCore?.route_actions_total),queued:n(growthCardCore?.route_actions_queued),in_progress:n(growthCardCore?.route_actions_in_progress),verified_human:n(growthCardCore?.route_actions_verified_human),verified_placement:n(growthCardCore?.route_actions_verified_placement),human:n(growthCardCore?.route_actions_human),auth:n(growthCardCore?.route_actions_auth),stalled:n(growthCardCore?.route_actions_stalled),exhausted:n(growthCardCore?.route_actions_exhausted)};
+  const externalExecutions={n:growthCardCore?.supervisor_external_executions_7d==null?n(growthCardCore?.raw_external_executions_7d):n(growthCardCore?.supervisor_external_executions_7d)};
+  const internalCycles={n:n(growthCardCore?.internal_cycles_7d)};
+  const humanEvents={n:n(growthCardCore?.human_events_7d)};
+  const growthLoopRun={last_completed_at:growthCardCore?.loop_last_completed_at||null,last_started_at:growthCardCore?.loop_last_started_at||null};
+  const orphanRoutes={n:n(growthCardCore?.orphan_routes)};
+  const staleRouteActions={n:n(growthCardCore?.route_actions_stale)};
+  const staleGrowthActions={n:n(growthCardCore?.stale_growth_actions)};
+  const emptyOpportunityActions={n:n(growthCardCore?.growth_empty_actions)};
+  const failedCoreRuns={n:n(growthCardCore?.failed_core_runs_24h)};
+  const growthSupervisor={status:growthCardCore?.supervisor_status||null,directive:growthCardCore?.supervisor_directive||null,strict_humans_24h:n(growthCardCore?.supervisor_strict_humans_24h),strict_humans_7d:n(growthCardCore?.supervisor_strict_humans_7d),attributed_humans_7d:n(growthCardCore?.supervisor_attributed_humans_7d),external_executions_24h:n(growthCardCore?.supervisor_external_executions_24h),external_executions_7d:n(growthCardCore?.supervisor_external_executions_7d),correction_count:n(growthCardCore?.supervisor_correction_count),last_correction_at:growthCardCore?.supervisor_last_correction_at||null,last_evaluated_at:growthCardCore?.supervisor_last_evaluated_at||null};
+  const executionContractState={missing:n(growthCardCore?.execution_contract_missing),stalled:n(growthCardCore?.execution_contract_stalled)};
   const distCounts=workflowCounts(distributionStatuses),affCounts=workflowCounts(affiliateStatuses),deliveryCounts=workflowCounts(deliveryStates),networkCounts=workflowCounts(distributionNetworkStates);
   const indexedItems=(gsc.items||[]).filter(x=>n(x.impressions)>0),gscImpressions=indexedItems.reduce((sum,x)=>sum+n(x.impressions),0),gscClicks=indexedItems.reduce((sum,x)=>sum+n(x.clicks),0),sitemapUrls=[...String(sitemap).matchAll(/<loc>/g)].length;
   const liveSurfaces=await safeAll(env,`SELECT surface_slug,surface_name,surface_type,status,live_url,action_url,distribution_score,updated_at FROM distribution_opportunities WHERE status IN ('verified','live','submitted','pending_review','scheduled','human_action_required') ORDER BY CASE WHEN status IN ('verified','live') THEN 0 WHEN status IN ('submitted','pending_review','scheduled') THEN 1 ELSE 2 END,distribution_score DESC LIMIT 60`);
@@ -304,12 +397,11 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   const seoEvidence=[gsc?.generatedAt,organicGrowth?.generatedAt,aeoGeo?.generatedAt,machineReadability?.generatedAt],seoFresh=seoEvidence.every(x=>freshWithin(x,36)),seoFailures=n(aeoGeo?.failures)+n(machineReadability?.failures),seoWarnings=n(aeoGeo?.warnings)+n(machineReadability?.warnings);
   const catalogGenerated=catalogRuntimeState?.last_checked_at||catalogFreshness?.generatedAt||catalogHealth?.summary?.generatedAt||null,catalogAgeMs=catalogGenerated?Date.now()-timeMs(catalogGenerated):null,catalogAgeDays=catalogAgeMs==null?null:Math.max(0,Math.floor(catalogAgeMs/86400000)),catalogFresh=catalogGenerated?catalogAgeMs<=7*86400000:false;
   const catalogSummary=catalogFreshness?.summary||{},catalogCoverage=Array.isArray(catalogFreshness?.coverage)?catalogFreshness.coverage:[],catalogChanges=Array.isArray(catalogFreshness?.contentChanges)?catalogFreshness.contentChanges:[],catalogQuarantined=Array.isArray(catalogFreshness?.quarantined)?catalogFreshness.quarantined:[];
-  const growthSupervisor=await safeFirst(env,`SELECT status,directive,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at FROM growth_supervisor_state WHERE engine='growth_brain'`);
   const growthLoopAgeHours=hoursSince(growthLoopRun?.last_completed_at);
   const growthEffectivenessUnavailable=actionImpact?.status!=='observed';
   const growthEffectivenessWarning=!growthEffectivenessUnavailable&&n(actionImpact?.maturedActions)>=8&&n(actionImpact?.maturedBrowserConfirmedSessions)===0;
-  const growthLoopFailed=n(orphanRoutes?.n)>0||n(emptyOpportunityActions?.n)>0||n(failedCoreRuns?.n)>0||(growthLoopAgeHours!==null&&growthLoopAgeHours>4);
-  const growthLoopWarning=n(staleRouteActions?.n)>0||n(staleGrowthActions?.n)>0||n(routeActionState?.stalled)>0||growthEffectivenessUnavailable||growthEffectivenessWarning;
+  const growthLoopFailed=executionContractState.missing>0||n(orphanRoutes?.n)>0||n(emptyOpportunityActions?.n)>0||n(failedCoreRuns?.n)>0||(growthLoopAgeHours!==null&&growthLoopAgeHours>4);
+  const growthLoopWarning=executionContractState.stalled>0||n(staleRouteActions?.n)>0||n(staleGrowthActions?.n)>0||n(routeActionState?.stalled)>0||growthEffectivenessUnavailable||growthEffectivenessWarning;
   const growthLoopStatus=growthLoopFailed?'failed':(growthLoopWarning?'warning':'healthy');
   const healthIssues=[
     ...(n(orphanRoutes?.n)>0?[{severity:'bug',engine:'growth',code:'orphan_alternate_routes',title:'Growth loop orphan routes',detail:`${n(orphanRoutes?.n)} alternate distribution route(s) have no execution-state row. This is a closed-loop failure.`,url:null}]:[]),
@@ -325,7 +417,7 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   const autonomousActions=n(externalExecutions?.n),humanInterventions=n(humanEvents?.n),autonomyDenominator=autonomousActions+humanInterventions;
   const observedRouteCount=Math.max(n(contactRouteState?.routes),n(routeActionState?.total));
   const observedRouteSurfaces=Math.max(n(contactRouteState?.surfaces),0);
-  const autonomousGrowth={status:'observed',window_days:30,active_opportunities:n(growthState?.active),tool_opportunities:n(growthState?.tools),surface_opportunities:n(growthState?.surfaces),affiliate_opportunities:n(growthState?.affiliate),catalog_opportunities:n(growthState?.catalog),news_opportunities:n(growthState?.news),search_opportunities:n(growthState?.search),rnd_experiments:n(growthRnd?.active),rnd_last_evaluated_at:growthRnd?.last_evaluated_at||null,last_evaluated_at:growthState?.last_evaluated_at||null,autonomous_actions_7d:autonomousActions,external_executions_7d:autonomousActions,internal_cycles_7d:n(internalCycles?.n),human_interventions_7d:humanInterventions,autonomy_rate_pct:autonomyDenominator?Number((autonomousActions/autonomyDenominator*100).toFixed(1)):0,chairman_queue:n(queue.total),contact_routes:observedRouteCount,contact_route_surfaces:observedRouteSurfaces,route_actions_total:n(routeActionState?.total),route_actions_queued:n(routeActionState?.queued),route_actions_in_progress:n(routeActionState?.in_progress),route_actions_verified_human:n(routeActionState?.verified_human),route_actions_verified_placement:n(routeActionState?.verified_placement),route_actions_human:n(routeActionState?.human),route_actions_auth:n(routeActionState?.auth),route_actions_stalled:n(routeActionState?.stalled),route_actions_exhausted:n(routeActionState?.exhausted),supervisor_status:growthSupervisor?.status||'unavailable',supervisor_directive:growthSupervisor?.directive||null,supervisor_strict_humans_24h:n(growthSupervisor?.strict_humans_24h),supervisor_strict_humans_7d:n(growthSupervisor?.strict_humans_7d),supervisor_attributed_humans_7d:n(growthSupervisor?.attributed_humans_7d),supervisor_external_executions_24h:n(growthSupervisor?.external_executions_24h),supervisor_external_executions_7d:n(growthSupervisor?.external_executions_7d),supervisor_corrections:n(growthSupervisor?.correction_count),supervisor_last_correction_at:growthSupervisor?.last_correction_at||null,supervisor_last_evaluated_at:growthSupervisor?.last_evaluated_at||null,loop_status:growthLoopStatus,loop_last_completed_at:growthLoopRun?.last_completed_at||null,loop_age_hours:growthLoopAgeHours,loop_orphan_routes:n(orphanRoutes?.n),loop_stale_route_actions:n(staleRouteActions?.n),loop_stale_growth_actions:n(staleGrowthActions?.n),loop_empty_opportunity_actions:n(emptyOpportunityActions?.n),loop_failed_core_runs_24h:n(failedCoreRuns?.n),verified_placements:n(distributionPlacements?.placements),verified_backlinks:n(distributionPlacements?.backlinks),prepared_growth_actions_30d:n(actionImpact?.preparedActions),attributed_growth_actions_30d:n(actionImpact?.attributedActions),attributed_human_sessions_30d:n(actionImpact?.browserConfirmedSessions),attributed_outbound_30d:n(actionImpact?.outboundClicks),attributed_monetized_outbound_30d:n(actionImpact?.monetizedOutbound),action_maturity_hours:n(actionImpact?.actionMaturityHours),matured_growth_actions:n(actionImpact?.maturedActions),matured_attributed_actions:n(actionImpact?.maturedAttributedActions),matured_attributed_human_sessions:n(actionImpact?.maturedBrowserConfirmedSessions),matured_outbound_clicks:n(actionImpact?.maturedOutboundClicks),effectiveness_status:growthEffectivenessUnavailable?'unavailable':(growthEffectivenessWarning?'warning':'observed'),attribution_rule:actionImpact?.attribution||'Exact growth action marker plus browser-confirmed likely-human session. Missing evidence is never counted as impact.'};
+  const autonomousGrowth={status:'observed',source:'d1_consolidated_growth_truth_v2',window_days:30,active_opportunities:n(growthState?.active),tool_opportunities:n(growthState?.tools),surface_opportunities:n(growthState?.surfaces),affiliate_opportunities:n(growthState?.affiliate),catalog_opportunities:n(growthState?.catalog),news_opportunities:n(growthState?.news),search_opportunities:n(growthState?.search),rnd_experiments:n(growthRnd?.active),rnd_last_evaluated_at:growthRnd?.last_evaluated_at||null,last_evaluated_at:growthState?.last_evaluated_at||null,autonomous_actions_7d:autonomousActions,external_executions_7d:autonomousActions,internal_cycles_7d:n(internalCycles?.n),human_interventions_7d:humanInterventions,autonomy_rate_pct:autonomyDenominator?Number((autonomousActions/autonomyDenominator*100).toFixed(1)):0,chairman_queue:n(queue.total),contact_routes:observedRouteCount,contact_route_surfaces:observedRouteSurfaces,route_actions_total:n(routeActionState?.total),route_actions_queued:n(routeActionState?.queued),route_actions_in_progress:n(routeActionState?.in_progress),route_actions_verified_human:n(routeActionState?.verified_human),route_actions_verified_placement:n(routeActionState?.verified_placement),route_actions_human:n(routeActionState?.human),route_actions_auth:n(routeActionState?.auth),route_actions_stalled:n(routeActionState?.stalled),route_actions_exhausted:n(routeActionState?.exhausted),supervisor_status:growthSupervisor?.status||'unavailable',supervisor_directive:growthSupervisor?.directive||null,supervisor_strict_humans_24h:n(growthSupervisor?.strict_humans_24h),supervisor_strict_humans_7d:n(growthSupervisor?.strict_humans_7d),supervisor_attributed_humans_7d:n(growthSupervisor?.attributed_humans_7d),supervisor_external_executions_24h:n(growthSupervisor?.external_executions_24h),supervisor_external_executions_7d:n(growthSupervisor?.external_executions_7d),supervisor_corrections:n(growthSupervisor?.correction_count),supervisor_last_correction_at:growthSupervisor?.last_correction_at||null,supervisor_last_evaluated_at:growthSupervisor?.last_evaluated_at||null,loop_status:growthLoopStatus,loop_last_completed_at:growthLoopRun?.last_completed_at||null,loop_age_hours:growthLoopAgeHours,loop_orphan_routes:n(orphanRoutes?.n),loop_stale_route_actions:n(staleRouteActions?.n),loop_stale_growth_actions:n(staleGrowthActions?.n),loop_empty_opportunity_actions:n(emptyOpportunityActions?.n),loop_failed_core_runs_24h:n(failedCoreRuns?.n),verified_placements:n(distributionPlacements?.placements),verified_backlinks:n(distributionPlacements?.backlinks),prepared_growth_actions_30d:n(actionImpact?.preparedActions),attributed_growth_actions_30d:n(actionImpact?.attributedActions),attributed_human_sessions_30d:n(actionImpact?.browserConfirmedSessions),attributed_outbound_30d:n(actionImpact?.outboundClicks),attributed_monetized_outbound_30d:n(actionImpact?.monetizedOutbound),action_maturity_hours:n(actionImpact?.actionMaturityHours),matured_growth_actions:n(actionImpact?.maturedActions),matured_attributed_actions:n(actionImpact?.maturedAttributedActions),matured_attributed_human_sessions:n(actionImpact?.maturedBrowserConfirmedSessions),matured_outbound_clicks:n(actionImpact?.maturedOutboundClicks),effectiveness_status:growthEffectivenessUnavailable?'unavailable':(growthEffectivenessWarning?'warning':'observed'),attribution_rule:actionImpact?.attribution||'Exact growth action marker plus browser-confirmed likely-human session. Missing evidence is never counted as impact.'};
   return {chairmanQueue:queue,autonomousGrowth,engines:{affiliate:{version:'2.1',status:affiliateLatest?'running':'awaiting_strict_evidence',last_run_at:affiliateLatest?.created_at||null,traffic_truth:'browser_confirmed',human_outbound_30d:n(affiliateLatest?.human_outbound_clicks),monetized_outbound_30d:n(affiliateLatest?.monetized_human_outbound_clicks),unmonetized_outbound_30d:n(affiliateLatest?.unmonetized_human_outbound_clicks),weighted_coverage_pct:latestCoverage,coverage_change_7d_pp:latestCoverage!=null&&weekCoverage!=null?Number((latestCoverage-weekCoverage).toFixed(1)):null,recoverable_queue:n(affiliateLatest?.queue_size),workflow_status:affCounts,discovery:{total:n(affiliateDiscovery?.total),qualified:n(affiliateDiscovery?.qualified),human:n(affiliateDiscovery?.human),last_checked:affiliateDiscovery?.last_checked||null},application_packs:{total:n(affiliatePacks?.total),prepared:n(affiliatePacks?.prepared),last_prepared_at:affiliatePacks?.last_prepared_at||null},routes:{total:n(affiliateRoutes?.total),verified:n(affiliateRoutes?.verified),failed:n(affiliateRoutes?.failed),last_verified_at:affiliateRoutes?.last_verified_at||null}},catalog:{version:'1.0',status:catalogFresh?'running':'stale_evidence',tools:n(catalogSummary.tools||catalogHealth?.summary?.tools)+n(catalogRuntimeCandidates?.total),source_healthy:n(catalogRuntimeState?.healthy||catalogSummary.sourceHealthy||catalogHealth?.summary?.sourceLinks?.healthy),source_warnings:n(catalogRuntimeState?.warnings||catalogSummary.sourceWarnings||catalogHealth?.summary?.sourceLinks?.warnings),coverage_gaps:Math.max(n(catalogSummary.coverageGaps||catalogCoverage.filter(x=>n(x.gap)>0).length),n(catalogRuntimeGaps?.total)),content_changes:Math.max(n(catalogChanges.length),n(catalogRuntimeState?.changed)),quarantined:Math.max(n(catalogQuarantined.length),n(catalogRuntimeState?.suppressed)),profile_holds:n(toolProfileHolds?.count),runtime_candidates:n(catalogRuntimeCandidates?.total),active_opportunities:n(growthState?.catalog),report_age_days:catalogAgeDays,freshness_target_days:7,freshness_status:catalogFresh?'within target':'refresh required',last_runtime_check:catalogRuntimeState?.last_checked_at||null,last_runtime_admission:catalogRuntimeCandidates?.last_admitted_at||null,rule:'Catalog growth is affiliate-neutral. Official-source verification and factual quality gates control admission, suppression and profile refresh; ambiguous changes are flagged rather than silently rewritten; catalog inclusion never implies ranking eligibility.'},distribution:{status:'running',version:'2.1',last_activity_at:distribution24?.last_event_at||distribution7?.last_event_at||null,events_24h:n(distribution24?.events),successful_24h:n(distribution24?.successful),failed_24h:n(distribution24?.failed),events_7d:n(distribution7?.events),successful_7d:n(distribution7?.successful),failed_7d:n(distribution7?.failed),opportunity_status:distCounts,delivery_status:deliveryCounts,network_status:networkCounts,network_candidates:Object.values(networkCounts).reduce((a,b)=>a+n(b),0),network_queued:n(networkCounts.queued),network_contact_found:n(networkCounts.contact_found),network_sent:n(networkCounts.sent),network_adopted:n(networkCounts.adopted),verified_placements:n(distributionPlacements?.placements),verified_backlinks:n(distributionPlacements?.backlinks),attributed_human_sessions_30d:n(stats?.distributionImpact?.humanSessions),attributed_outbound_30d:n(stats?.distributionImpact?.outboundClicks),attributed_monetized_outbound_30d:n(stats?.distributionImpact?.monetizedOutbound)}},footprint:{search:{source:'Google Search Console Search Analytics API',observed_pages:indexedItems.length,impressions:gscImpressions,clicks:gscClicks,generated_at:gsc.generatedAt||null,sitemap_urls:sitemapUrls,note:'Observed pages are URLs with Search Console impressions in the imported window; this is evidence of search visibility, not a complete Google index count.'},distribution:{live_verified:n(distCounts.live)+n(distCounts.verified),submitted_pending:n(distCounts.submitted)+n(distCounts.pending_review)+n(distCounts.scheduled),human_gates:n(distCounts.human_action_required),surfaces:liveSurfaces.map(x=>({slug:x.surface_slug,name:x.surface_name,type:x.surface_type,status:x.status,url:x.live_url||x.action_url||null,score:n(x.distribution_score),updated_at:x.updated_at||null}))}},ledger,health,generated_at:new Date().toISOString()};
 }
 function chairmanPayloadEnhancer(){
