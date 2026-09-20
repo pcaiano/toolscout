@@ -682,7 +682,7 @@ async function runGrowthExecutionContractCycle(env){
   await runInternal('distribution_network',24,()=>runDistributionNetworkCycle(env));
   await runInternal('distribution_autonomous',4,()=>runAutonomousDistributionCycle(env));
 
-  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:3,result:'make_sender_scheduled'});
+  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:3,maxInFlight:3,result:'make_sender_scheduled'});
   if(senderClaim.claimed){
     try{
       const [contacts,network]=await Promise.all([
@@ -706,8 +706,8 @@ async function runGrowthExecutionContractCycle(env){
   });
   await runInternal('growth_supervisor',60,()=>runGrowthSupervisorAudit(env));
 
-  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,result:'audience_make_scheduled'});
-  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:12,result:'seo_github_scheduled'});
+  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_scheduled'});
+  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:12,maxInFlight:12,result:'seo_github_scheduled'});
   results.audience_make={claimed:audienceClaim.claimed,external:true};
   results.seo_github={claimed:seoClaim.claimed,external:true};
 
