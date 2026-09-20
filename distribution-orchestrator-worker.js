@@ -664,8 +664,8 @@ async function runGrowthExecutionContractCycle(env){
   const before=await reconcileExecutionContracts(env);
   const results={};
 
-  const runInternal=async(executor,fn)=>{
-    const claim=await claimExecutorTasks(env,executor,{limit:60,result:'growth_brain_dispatched'});
+  const runInternal=async(executor,limit,fn)=>{
+    const claim=await claimExecutorTasks(env,executor,{limit,result:'growth_brain_dispatched'});
     if(!claim.claimed){results[executor]={claimed:0};return}
     try{
       const out=await fn();
@@ -679,10 +679,10 @@ async function runGrowthExecutionContractCycle(env){
     }
   };
 
-  await runInternal('distribution_network',()=>runDistributionNetworkCycle(env));
-  await runInternal('distribution_autonomous',()=>runAutonomousDistributionCycle(env));
+  await runInternal('distribution_network',24,()=>runDistributionNetworkCycle(env));
+  await runInternal('distribution_autonomous',4,()=>runAutonomousDistributionCycle(env));
 
-  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:60,result:'make_sender_scheduled'});
+  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:3,result:'make_sender_scheduled'});
   if(senderClaim.claimed){
     try{
       const [contacts,network]=await Promise.all([
@@ -693,21 +693,21 @@ async function runGrowthExecutionContractCycle(env){
     }catch(error){results.make_sender={claimed:senderClaim.claimed,prepared:false,error:String(error?.message||error).slice(0,800)}}
   }else results.make_sender={claimed:0};
 
-  await runInternal('content_issue',async()=>{
+  await runInternal('content_issue',1,async()=>{
     const intelligence=await runContentSocialIntelligenceCycle(env);
     const brief=await issueGrowthContentBrief(env);
     return{intelligence,brief};
   });
-  await runInternal('affiliate_cycle',()=>runAffiliateCoverageCycle(env));
-  await runInternal('catalog_cycle',async()=>{
+  await runInternal('affiliate_cycle',8,()=>runAffiliateCoverageCycle(env));
+  await runInternal('catalog_cycle',7,async()=>{
     const verify=await contractVerifyCatalogBatch(env);
     const admit=await contractAdmitCatalogCandidates(env);
     return{verify,admit};
   });
-  await runInternal('growth_supervisor',()=>runGrowthSupervisorAudit(env));
+  await runInternal('growth_supervisor',60,()=>runGrowthSupervisorAudit(env));
 
-  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:60,result:'audience_make_scheduled'});
-  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:60,result:'seo_github_scheduled'});
+  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,result:'audience_make_scheduled'});
+  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:12,result:'seo_github_scheduled'});
   results.audience_make={claimed:audienceClaim.claimed,external:true};
   results.seo_github={claimed:seoClaim.claimed,external:true};
 
