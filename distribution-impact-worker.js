@@ -66,7 +66,13 @@ export async function growthActionMetrics(env){
     const get=id=>{if(!byAction.has(id)){const a=actionMap.get(id)||{};byAction.set(id,{action_id:id,opportunity_key:a.opportunity_key||null,engine:a.engine||null,channel:a.channel||null,target_url:a.target_url||null,status:a.status||null,created_at:a.created_at||null,browser_confirmed_sessions:0,outbound_clicks:0,monetized_outbound:0});}return byAction.get(id)};
     for(const e of entries.results||[]){
       const id=String(e.session_id||'');if(!id||sessionAction.has(id)||!e.confirmed_at)continue;
-      const actionId=sourceParam(e.source,'ts_action');if(!actionId||!actionMap.has(actionId))continue;
+      let actionId=sourceParam(e.source,'ts_action');if(!actionId)continue;
+      if(!actionMap.has(actionId)){
+        const channel=sourceParam(e.source,'ts_channel');
+        const legacyChannelId=channel?`${actionId}:${channel}`:null;
+        if(legacyChannelId&&actionMap.has(legacyChannelId))actionId=legacyChannelId;
+      }
+      if(!actionMap.has(actionId))continue;
       sessionAction.set(id,actionId);first.set(id,String(e.created_at||''));get(actionId).browser_confirmed_sessions++;
     }
     for(const e of outboundEvents.results||[]){const id=String(e.session_id||''),a=sessionAction.get(id);if(a&&String(e.created_at||'')>=String(first.get(id)||''))get(a).outbound_clicks++}
