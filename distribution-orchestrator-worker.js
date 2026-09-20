@@ -787,7 +787,7 @@ async function recordExternalExecutorStatus(env,body={}){
   if(!['audience_make','make_sender','seo_github'].includes(executor))return{ok:false,error:'unsupported_executor'};
   let taskId=String(body.task_id||'').trim();
   if(!taskId){
-    const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted','stalled') ORDER BY claimed_at DESC,priority_score DESC LIMIT 2`).bind(executor).all();
+    const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted') ORDER BY claimed_at DESC,priority_score DESC LIMIT 2`).bind(executor).all();
     const rows=q.results||[];
     if(rows.length!==1)return{ok:false,error:rows.length?'ambiguous_active_task':'no_active_task',active:rows.length};
     taskId=rows[0].task_id;
