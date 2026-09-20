@@ -1,6 +1,7 @@
 import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
+import {ensureHumanGateSchema,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,reopenHumanGate,humanGateSnapshot} from './human-gate-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
