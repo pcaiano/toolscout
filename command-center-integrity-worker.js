@@ -102,6 +102,11 @@ async function refreshDailyMetrics(env,daysBack=2){
         monetized_outbound=excluded.monetized_outbound,
         unmonetized_outbound=excluded.unmonetized_outbound,
         updated_at=excluded.updated_at
+      WHERE command_center_daily_metrics.human_sessions IS NOT excluded.human_sessions
+         OR command_center_daily_metrics.unique_visitors IS NOT excluded.unique_visitors
+         OR command_center_daily_metrics.outbound_clicks IS NOT excluded.outbound_clicks
+         OR command_center_daily_metrics.monetized_outbound IS NOT excluded.monetized_outbound
+         OR command_center_daily_metrics.unmonetized_outbound IS NOT excluded.unmonetized_outbound
     `).bind(key,b.start,b.end,b.start,b.end,b.start,b.end,b.start,b.end,b.start,b.end));
   }
   if(statements.length)await env.DB.batch(statements);
@@ -296,9 +301,6 @@ async function augmentHealth(response,env){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/api/stats'||url.pathname==='/api/traffic-integrity-health')){
-      try{await ensureOptimizationSchema(env);ctx.waitUntil(refreshDailyMetrics(env,2))}catch{}
-    }
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/api/stats'))return augmentStats(response,env);
     if(request.method==='GET'&&url.pathname==='/api/traffic-integrity-health')return augmentHealth(response,env);
