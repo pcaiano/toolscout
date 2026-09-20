@@ -65,6 +65,10 @@ jobs:
           node scripts/enforce-seo-hygiene.mjs --fix
           node scripts/generate-sitemap.mjs
 
+      - name: Refresh dependent SEO evidence after correction
+        if: steps.supervisor.outputs.run == 'true'
+        run: node scripts/generate-software-trends-index.mjs
+
       - name: Validate corrected surface
         if: steps.supervisor.outputs.run == 'true'
         run: |
@@ -75,13 +79,13 @@ jobs:
       - name: Commit only material SEO corrections
         if: steps.supervisor.outputs.run == 'true'
         run: |
-          if [ -z "$(git status --porcelain -- reports/gsc-signals.json reports/organic-growth-opportunities.json reports/organic-growth-state.json reports/organic-growth-actions.json reports/runtime-growth-directives.json '*.html' sitemap.xml)" ]; then
+          if [ -z "$(git status --porcelain -- reports/gsc-signals.json reports/organic-growth-opportunities.json reports/organic-growth-state.json reports/organic-growth-actions.json reports/runtime-growth-directives.json software-trends-index.json '*.html' sitemap.xml)" ]; then
             echo "No material Growth Brain SEO correction."
             exit 0
           fi
           git config user.name "toolscout-growth-brain"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- reports/gsc-signals.json reports/organic-growth-opportunities.json reports/organic-growth-state.json reports/organic-growth-actions.json reports/runtime-growth-directives.json '*.html' sitemap.xml
+          git add -- reports/gsc-signals.json reports/organic-growth-opportunities.json reports/organic-growth-state.json reports/organic-growth-actions.json reports/runtime-growth-directives.json software-trends-index.json '*.html' sitemap.xml
           git commit -m "Apply Growth Brain SEO correction"
           git pull --rebase origin main
           git push origin HEAD:main
