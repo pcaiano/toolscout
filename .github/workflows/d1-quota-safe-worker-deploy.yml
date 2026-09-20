@@ -1,4 +1,4 @@
-name: One Shot Failed Distribution Deep Dive
+name: One Shot Growth Execution Repair
 
 on:
   push:
@@ -9,25 +9,57 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: toolscout-worker-production
+  cancel-in-progress: false
+
 jobs:
-  audit:
+  repair-deploy-audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Deep dive failed external execution
+
+      - name: Validate syntax and Growth contract
         run: |
-          echo "=== FAILED HTTP JSON BY SURFACE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,error,COUNT(*) n,SUM(attempts) attempts,MIN(created_at) first_created,MAX(last_attempt_at) last_attempt,MIN(action_url) action_url FROM distribution_submissions WHERE submission_type='http_json' AND (created_at>=datetime('now','-25 hours') OR last_attempt_at>=datetime('now','-25 hours')) GROUP BY surface_slug,status,error ORDER BY n DESC;"
-          echo "=== ALL SUBMISSION COUNTS BY SURFACE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,submission_type,status,COUNT(*) n,SUM(attempts) attempts FROM distribution_submissions GROUP BY surface_slug,submission_type,status ORDER BY n DESC;"
-          echo "=== ROUTE ACTION DETAIL ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT a.route_id,a.surface_slug,a.route_type,a.execution_mode,a.status,a.attempts,a.last_result,a.next_action,a.updated_at,r.route_url FROM distribution_contact_route_actions a JOIN distribution_contact_routes r ON r.route_id=a.route_id ORDER BY a.status,a.surface_slug;"
-          echo "=== TABLE INFO EDITORIAL QUEUE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "PRAGMA table_info(distribution_editorial_queue);"
-          echo "=== TABLE INFO GROWTH ACTIONS ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "PRAGMA table_info(growth_action_events);"
+          node --check distribution-contact-worker.js
+          node --check distribution-network-worker.js
+          node --check distribution-orchestrator-worker.js
+          node --check growth-command-center-v2-worker.js
+          node --check scripts/validate-autonomous-growth-brain.mjs
+          node scripts/validate-autonomous-growth-brain.mjs
+
+      - name: Correct legacy Growth state semantics
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_contact_route_actions SET status=CASE WHEN last_result='strict_human_referral_verified' THEN 'verified_human_impact' ELSE 'verified_placement' END,updated_at=datetime('now') WHERE status='verified_impact';"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities SET status='skipped',human_required=0,next_action='Parent publisher surface is already adopted and externally verified. Secondary contact/submission routes are redundant and must not enter the Chairman Queue.',updated_at=datetime('now') WHERE surface_type='publisher_contact_route' AND surface_slug IN (SELECT a.opportunity_slug FROM distribution_contact_route_actions a JOIN distribution_network_outreach n ON n.surface_slug=a.surface_slug WHERE n.status='adopted');"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_contact_route_actions SET status=CASE WHEN status='verified_human_impact' THEN status ELSE 'verified_placement' END,last_result=CASE WHEN status='verified_human_impact' THEN last_result ELSE 'publisher_adoption_verified' END,updated_at=datetime('now') WHERE surface_slug IN (SELECT surface_slug FROM distribution_network_outreach WHERE status='adopted');"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_editorial_queue SET human_required=0,updated_at=datetime('now') WHERE status IN ('published','retired_no_safe_executor','skipped');"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_network_outreach SET status='suppressed_technical',updated_at=datetime('now') WHERE status='queued' AND (lower(domain) LIKE 'api.%' OR lower(domain) LIKE 'cdn.%' OR lower(domain) LIKE 'static.%' OR lower(domain) LIKE 'assets.%' OR lower(domain) LIKE 'fonts.%' OR lower(domain)='fonts.googleapis.com' OR lower(domain)='cdn.tailwindcss.com');"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE growth_opportunity_state SET status='dormant',updated_at=datetime('now') WHERE subject_type='tool' AND status='active' AND COALESCE(json_extract(signal_json,'$.vendor_status'),'') IN ('needs_contact_fallback','fallback_exhausted') AND COALESCE(json_extract(signal_json,'$.verified_social_profile'),0)=0 AND COALESCE(json_extract(signal_json,'$.affiliate_social_allowed'),0)=0;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy repaired Worker
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Audit truthful Growth state
+        run: |
+          echo "=== ROUTE STATES ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,execution_mode,COUNT(*) n FROM distribution_contact_route_actions GROUP BY status,execution_mode ORDER BY status,execution_mode;"
+          echo "=== STREMIT HUMAN GATES ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,human_required,action_url FROM distribution_opportunities WHERE human_required=1 AND (lower(COALESCE(surface_slug,'')) LIKE '%stremit%' OR lower(COALESCE(action_url,'')) LIKE '%stremit%');"
+          echo "=== NETWORK STATES ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) n FROM distribution_network_outreach GROUP BY status ORDER BY n DESC;"
+          echo "=== VENDOR STATES ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) n FROM distribution_vendor_amplification GROUP BY status ORDER BY n DESC;"
+          echo "=== ACTIVE GROWTH MIX ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type ORDER BY n DESC;"
+          echo "=== REAL EXTERNAL EXECUTIONS 7D ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT (SELECT COUNT(*) FROM growth_action_events WHERE created_at>=datetime('now','-7 days') AND status IN ('sent','verified','completed','attributed')) + (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')) external_executions;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
