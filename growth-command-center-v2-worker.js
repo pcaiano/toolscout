@@ -274,7 +274,20 @@ async function growthOpsSnapshot(request,env,ctx,stats){
       OR (status='issued_to_content' AND COALESCE(last_attempt_at,updated_at)<datetime('now','-80 hours'))`),
     safeFirst(env,`SELECT COUNT(*) n FROM growth_action_events WHERE status IN ('prepared','issued','leased') AND updated_at<datetime('now','-72 hours')`),
     safeFirst(env,`SELECT COUNT(*) n FROM growth_opportunity_state WHERE status='active' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]')`),
-    safeFirst(env,`SELECT COUNT(*) n FROM engine_runs WHERE started_at>=datetime('now','-24 hours') AND status='failed' AND ((engine='growth' AND mission IN ('opportunity_coordination','rnd_audit')) OR (engine='distribution' AND mission IN ('network_cycle','autonomous_cycle','economic_learning')) OR (engine='content' AND mission='social_intelligence'))`)
+    safeFirst(env,`SELECT COUNT(*) n
+      FROM engine_runs f
+      WHERE f.started_at>=datetime('now','-24 hours')
+        AND f.status='failed'
+        AND ((f.engine='growth' AND f.mission IN ('opportunity_coordination','rnd_audit'))
+          OR (f.engine='distribution' AND f.mission IN ('network_cycle','autonomous_cycle','economic_learning'))
+          OR (f.engine='content' AND f.mission='social_intelligence'))
+        AND NOT EXISTS (
+          SELECT 1 FROM engine_runs c
+          WHERE c.engine=f.engine
+            AND c.mission=f.mission
+            AND c.status='completed'
+            AND c.started_at>f.started_at
+        )`)
   ]);
   const distCounts=workflowCounts(distributionStatuses),affCounts=workflowCounts(affiliateStatuses),deliveryCounts=workflowCounts(deliveryStates),networkCounts=workflowCounts(distributionNetworkStates);
   const indexedItems=(gsc.items||[]).filter(x=>n(x.impressions)>0),gscImpressions=indexedItems.reduce((sum,x)=>sum+n(x.impressions),0),gscClicks=indexedItems.reduce((sum,x)=>sum+n(x.clicks),0),sitemapUrls=[...String(sitemap).matchAll(/<loc>/g)].length;
