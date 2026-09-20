@@ -148,33 +148,38 @@ async function handlePageConfirmation(request,env,ctx,body){
   const referrer=String(body?.referrer_host||'').trim();
   if(source==='internal-test'||source==='health-check'||source==='synthetic')return Response.json({ok:true,recorded:false,reason:'internal_or_synthetic_source'},{status:202,headers});
   const suspiciousDirect=(!referrer&&(source==='direct'||source==='browser-confirm'||!source))?1:0;
-  const insert=await env.DB.prepare(`INSERT INTO traffic_guard_events
-    (fingerprint,ua_hash,session_id,path,country,asn,suspicious_direct,decision,created_at)
-    VALUES (?,?,?,?,?,?,?,'pending',datetime('now'))`).bind(fp.fingerprint,fp.uaHash,sessionId,path,fp.country,fp.asn,suspiciousDirect).run();
-  const guardId=Number(insert?.meta?.last_row_id||0);
   const [sameFp,globalBurst]=await Promise.all([
-    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions,COUNT(DISTINCT path) paths
+    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions,COUNT(DISTINCT path) paths,
+        MAX(CASE WHEN session_id=? THEN 1 ELSE 0 END) has_session,
+        MAX(CASE WHEN path=? THEN 1 ELSE 0 END) has_path
       FROM traffic_guard_events
-      WHERE fingerprint=? AND created_at>=datetime('now','-10 minutes')`).bind(fp.fingerprint).first(),
-    env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions,COUNT(DISTINCT path) paths,COUNT(DISTINCT fingerprint) fingerprints
-      FROM traffic_guard_events
-      WHERE suspicious_direct=1 AND created_at>=datetime('now','-60 seconds')`).first()
+      WHERE fingerprint=? AND created_at>=datetime('now','-10 minutes')`).bind(sessionId,path,fp.fingerprint).first(),
+    suspiciousDirect
+      ? env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions,COUNT(DISTINCT path) paths,
+          MAX(CASE WHEN session_id=? THEN 1 ELSE 0 END) has_session,
+          MAX(CASE WHEN path=? THEN 1 ELSE 0 END) has_path
+        FROM traffic_guard_events
+        WHERE suspicious_direct=1 AND created_at>=datetime('now','-60 seconds')`).bind(sessionId,path).first()
+      : Promise.resolve({sessions:0,paths:0,has_session:0,has_path:0})
   ]);
-  const fpSessions=Number(sameFp?.sessions||0),fpPaths=Number(sameFp?.paths||0);
-  const globalSessions=Number(globalBurst?.sessions||0),globalPaths=Number(globalBurst?.paths||0);
+  const fpSessions=Number(sameFp?.sessions||0)+(Number(sameFp?.has_session||0)?0:1);
+  const fpPaths=Number(sameFp?.paths||0)+(Number(sameFp?.has_path||0)?0:1);
+  const globalSessions=Number(globalBurst?.sessions||0)+(suspiciousDirect&&!Number(globalBurst?.has_session||0)?1:0);
+  const globalPaths=Number(globalBurst?.paths||0)+(suspiciousDirect&&!Number(globalBurst?.has_path||0)?1:0);
   let reason=null;
   if(body?.browser_proof?.webdriver===true)reason='webdriver';
   else if(fpSessions>=FP_SESSION_LIMIT_10M)reason='fingerprint_session_rate';
   else if(fpPaths>=FP_PATH_LIMIT_10M)reason='fingerprint_path_scan';
   else if(suspiciousDirect&&globalSessions>=GLOBAL_SESSION_LIMIT_1M&&globalPaths>=GLOBAL_PATH_LIMIT_1M)reason='global_direct_multi_page_burst';
+  const decision=reason?'blocked':'allowed';
+  await env.DB.prepare(`INSERT INTO traffic_guard_events
+    (fingerprint,ua_hash,session_id,path,country,asn,suspicious_direct,decision,reason,created_at)
+    VALUES (?,?,?,?,?,?,?,?,?,datetime('now'))`)
+    .bind(fp.fingerprint,fp.uaHash,sessionId,path,fp.country,fp.asn,suspiciousDirect,decision,reason||'browser_proof_and_rate_ok').run();
   if(reason){
-    await Promise.all([
-      markSynthetic(env,sessionId),
-      guardId?env.DB.prepare(`UPDATE traffic_guard_events SET decision='blocked',reason=? WHERE id=?`).bind(reason,guardId).run():Promise.resolve()
-    ]);
+    await markSynthetic(env,sessionId);
     return Response.json({ok:true,recorded:false,classification:SESSION_CLASSIFICATIONS.SYNTHETIC,guard:{decision:'blocked',reason}},{status:202,headers});
   }
-  if(guardId)await env.DB.prepare(`UPDATE traffic_guard_events SET decision='allowed',reason='browser_proof_and_rate_ok' WHERE id=?`).bind(guardId).run();
   const pathState=await env.DB.prepare(`SELECT COUNT(DISTINCT path) paths,MIN(created_at) first_at,MAX(created_at) last_at FROM traffic_guard_events WHERE session_id=? AND decision='allowed'`).bind(sessionId).first().catch(()=>null);
   const trustedInteractions=Math.max(0,Number(body?.browser_proof?.trusted_interaction_count??body?.browser_proof?.interaction_count??0)||0);
   const pathCount=Number(pathState?.paths||0);
