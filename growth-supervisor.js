@@ -137,11 +137,19 @@ async function saveEngine(env,engine,role,global,ctx,p){
 
 export async function runGrowthSupervisorAudit(env){
   await ensureSchema(env);
-  const [humansRows,exec,gsc,organic,active]=await Promise.all([
+  const [humansRows,exec,gsc,organic,active,executionContract]=await Promise.all([
     strictRows(env),executionRows(env),
     assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
     assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
-    all(env,`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`)
+    all(env,`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`),
+    first(env,`SELECT
+      SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing_executors,
+      SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled,
+      SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending,
+      SUM(CASE WHEN status='claimed' THEN 1 ELSE 0 END) claimed,
+      SUM(CASE WHEN status='attempted' THEN 1 ELSE 0 END) attempted,
+      SUM(CASE WHEN status='verified' THEN 1 ELSE 0 END) verified
+      FROM growth_execution_contract`)
   ]);
   const byType=Object.fromEntries(active.map(x=>[String(x.subject_type),n(x.n)]));
   const humans={distribution:{h24:0,h7:0},content:{h24:0,h7:0},audience:{h24:0,h7:0},seo_geo_aio:{h24:0,h7:0},unattributed:{h24:0,h7:0}};
@@ -178,17 +186,19 @@ export async function runGrowthSupervisorAudit(env){
   const exec24=engines.filter(x=>PRIMARY.has(x.engine)).reduce((s,x)=>s+x.externalExecutions24h,0);
   const exec7=engines.filter(x=>PRIMARY.has(x.engine)).reduce((s,x)=>s+x.externalExecutions7d,0);
   const attributed7=n(humans.distribution.h7)+n(humans.content.h7)+n(humans.audience.h7)+n(humans.seo_geo_aio.h7);
+  const missingExecutors=n(executionContract?.missing_executors),stalledContracts=n(executionContract?.stalled);
   let status='working',directive='keep_learning_from_verified_humans';
-  if(strict7===0&&exec7>0){status='failing';directive='correct_all_acquisition_engines'}
+  if(missingExecutors>0||stalledContracts>0){status='failing';directive='repair_execution_contract'}
+  else if(strict7===0&&exec7>0){status='failing';directive='correct_all_acquisition_engines'}
   else if(strict24===0&&exec24===0){status='execution_gap';directive='force_primary_engine_execution'}
   else if(strict24===0){status='underperforming';directive='rotate_after_maturity_and_expand_existing_demand'}
   else if(strict7>0&&attributed7===0){status='working_unattributed';directive='improve_acquisition_attribution_while_continuing_growth'}
 
   const attributed24=n(humans.distribution.h24)+n(humans.content.h24)+n(humans.audience.h24)+n(humans.seo_geo_aio.h24);
   const gctx={h24:attributed24,h7:attributed7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
-  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7}};
+  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)}}};
   const growth=await saveEngine(env,'growth_brain','supervisor',global,gctx,gp);
-  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
+  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
 }
 
 export async function growthSupervisorSnapshot(env){
