@@ -171,34 +171,91 @@ async function upsertTask(env,{sourceKind,sourceId,opportunityKey=null,subjectTy
 
 export async function syncExecutionContracts(env){
   await ensureExecutionContractSchema(env);
-  const activeIds=new Set(),opps=await all(env,`SELECT opportunity_key,subject_type,subject_key,priority_score,action_json FROM growth_opportunity_state WHERE status='active'`);
-  let opportunityTasks=0,missing=0,human=0;
-  for(const row of opps){
-    let actions=[];try{actions=JSON.parse(row.action_json||'[]')}catch{}
-    if(!Array.isArray(actions))actions=[];
-    for(const action of [...new Set(actions.map(String).filter(Boolean))]){
-      const executor=ACTION_EXECUTOR[action]||null;
-      const id=await upsertTask(env,{sourceKind:'opportunity',sourceId:row.opportunity_key,opportunityKey:row.opportunity_key,subjectType:row.subject_type,subjectKey:row.subject_key,action,executor,priority:row.priority_score});
-      activeIds.add(id);opportunityTasks++;if(!executor)missing++;if(executor==='human_gate')human++;
-    }
-  }
-  const supervisors=await all(env,`SELECT engine,status,directive,directive_json FROM growth_supervisor_state WHERE engine IN ('distribution','content','audience','seo_geo_aio','affiliate','catalog')`);
-  let supervisorTasks=0;
+  const q=v=>"'"+String(v).replaceAll("'","''")+"'";
+  const executorCase=Object.entries(ACTION_EXECUTOR).map(([action,executor])=>`WHEN ${q(action)} THEN ${q(executor)}`).join(' ');
+  const engineCase=Object.entries(EXECUTORS).map(([executor,spec])=>`WHEN ${q(executor)} THEN ${q(spec.engine)}`).join(' ');
+  const modeCase=Object.entries(EXECUTORS).map(([executor,spec])=>`WHEN ${q(executor)} THEN ${q(spec.mode)}`).join(' ');
+  const claimCase=Object.entries(EXECUTORS).filter(([,s])=>s.claim!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.claim)} minutes')`).join(' ');
+  const attemptCase=Object.entries(EXECUTORS).filter(([,s])=>s.attempt!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.attempt)} minutes')`).join(' ');
+  const verifyCase=Object.entries(EXECUTORS).filter(([,s])=>s.verify!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.verify)} minutes')`).join(' ');
+  const mapped=`CASE j.value ${executorCase} ELSE NULL END`;
+
+  await env.DB.prepare(`INSERT INTO growth_execution_contract(
+      task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,execution_mode,priority_score,status,
+      claim_deadline,attempt_deadline,verify_deadline,created_at,updated_at)
+    SELECT
+      substr('opportunity|'||g.opportunity_key||'|'||j.value,1,500),
+      'opportunity',g.opportunity_key,g.opportunity_key,g.subject_type,g.subject_key,j.value,
+      ${mapped} executor,
+      CASE ${mapped} ${engineCase} ELSE 'unmapped' END engine,
+      CASE ${mapped} ${modeCase} ELSE 'unmapped' END execution_mode,
+      g.priority_score,
+      CASE WHEN ${mapped} IS NULL THEN 'executor_missing'
+           WHEN ${mapped}='human_gate' THEN 'human_required'
+           ELSE 'pending' END status,
+      CASE ${mapped} ${claimCase} ELSE NULL END claim_deadline,
+      CASE ${mapped} ${attemptCase} ELSE NULL END attempt_deadline,
+      CASE ${mapped} ${verifyCase} ELSE NULL END verify_deadline,
+      datetime('now'),datetime('now')
+    FROM growth_opportunity_state g, json_each(g.action_json) j
+    WHERE g.status='active'
+    ON CONFLICT(task_id) DO UPDATE SET
+      opportunity_key=excluded.opportunity_key,subject_type=excluded.subject_type,subject_key=excluded.subject_key,
+      executor=excluded.executor,engine=excluded.engine,execution_mode=excluded.execution_mode,priority_score=excluded.priority_score,
+      status=CASE
+        WHEN growth_execution_contract.status IN ('verified','human_required','blocked') THEN growth_execution_contract.status
+        WHEN excluded.status='executor_missing' THEN 'executor_missing'
+        WHEN growth_execution_contract.status='cancelled' THEN 'pending'
+        ELSE growth_execution_contract.status END,
+      claim_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.claim_deadline ELSE growth_execution_contract.claim_deadline END,
+      attempt_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.attempt_deadline ELSE growth_execution_contract.attempt_deadline END,
+      verify_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.verify_deadline ELSE growth_execution_contract.verify_deadline END,
+      updated_at=datetime('now')
+    WHERE growth_execution_contract.opportunity_key IS NOT excluded.opportunity_key
+       OR growth_execution_contract.subject_type IS NOT excluded.subject_type
+       OR growth_execution_contract.subject_key IS NOT excluded.subject_key
+       OR growth_execution_contract.executor IS NOT excluded.executor
+       OR growth_execution_contract.engine IS NOT excluded.engine
+       OR growth_execution_contract.execution_mode IS NOT excluded.execution_mode
+       OR growth_execution_contract.priority_score IS NOT excluded.priority_score
+       OR growth_execution_contract.status='cancelled'
+       OR excluded.status='executor_missing'`).run();
+
+  await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='cancelled',last_result='source_no_longer_active',completed_at=datetime('now'),updated_at=datetime('now')
+    WHERE source_kind='opportunity'
+      AND status NOT IN ('verified','human_required','blocked','cancelled')
+      AND NOT EXISTS(
+        SELECT 1 FROM growth_opportunity_state g,json_each(g.action_json) j
+        WHERE g.status='active'
+          AND g.opportunity_key=growth_execution_contract.source_id
+          AND j.value=growth_execution_contract.action
+      )`).run();
+
+  const supervisors=await all(env,`SELECT engine,status,directive FROM growth_supervisor_state WHERE engine IN ('distribution','content','audience','seo_geo_aio','affiliate','catalog')`);
+  let supervisorTasks=0,missing=0;
+  const activeSupervisorIds=new Set();
   for(const row of supervisors){
     if(!row.directive||row.status==='working')continue;
     const executor=SUPERVISOR_EXECUTOR[row.engine]||null,sourceId=`${row.engine}:${row.directive}`;
     const id=await upsertTask(env,{sourceKind:'supervisor',sourceId,subjectType:'engine',subjectKey:row.engine,action:`directive:${row.directive}`,executor,priority:95});
-    activeIds.add(id);supervisorTasks++;if(!executor)missing++;
+    activeSupervisorIds.add(id);supervisorTasks++;if(!executor)missing++;
+  }
+  const existingSupervisor=await all(env,`SELECT task_id FROM growth_execution_contract WHERE source_kind='supervisor' AND status NOT IN ('verified','human_required','blocked','cancelled')`);
+  const staleSupervisor=existingSupervisor.map(x=>x.task_id).filter(id=>!activeSupervisorIds.has(id));
+  if(staleSupervisor.length){
+    for(let i=0;i<staleSupervisor.length;i+=20){
+      const batch=staleSupervisor.slice(i,i+20),marks=batch.map(()=>'?').join(',');
+      await env.DB.prepare(`UPDATE growth_execution_contract SET status='cancelled',last_result='supervisor_directive_changed',completed_at=datetime('now'),updated_at=datetime('now') WHERE task_id IN (${marks})`).bind(...batch).run();
+    }
   }
 
-  const existing=await all(env,`SELECT task_id FROM growth_execution_contract WHERE status NOT IN ('verified','human_required','blocked','cancelled')`);
-  const stale=existing.map(x=>x.task_id).filter(id=>!activeIds.has(id));
-  for(const batchStart of Array.from({length:Math.ceil(stale.length/40)},(_,i)=>i*40)){
-    const batch=stale.slice(batchStart,batchStart+40);if(!batch.length)continue;
-    const qs=batch.map(()=>'?').join(',');
-    await env.DB.prepare(`UPDATE growth_execution_contract SET status='cancelled',last_result='source_no_longer_active',completed_at=datetime('now'),updated_at=datetime('now') WHERE task_id IN (${qs})`).bind(...batch).run();
-  }
-  return{ok:true,opportunityTasks,supervisorTasks,missingExecutors:missing,humanRequired:human,cancelled:stale.length};
+  const counts=await first(env,`SELECT
+    SUM(CASE WHEN source_kind='opportunity' AND status<>'cancelled' THEN 1 ELSE 0 END) opportunity_tasks,
+    SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
+    SUM(CASE WHEN status='human_required' THEN 1 ELSE 0 END) human_required
+    FROM growth_execution_contract`);
+  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),cancelledSupervisor:staleSupervisor.length,write_policy:'set_based_material_change_only'};
 }
 
 export async function claimExecutorTasks(env,executor,{limit=50,result='executor_claimed'}={}){
