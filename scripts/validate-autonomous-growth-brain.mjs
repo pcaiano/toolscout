@@ -24,6 +24,7 @@ const supervisor=read('growth-supervisor.js');
 const distPriority=read('distribution-priority-worker.js');
 const seoSupervisorExecutor=read('.github/workflows/growth-brain-seo-executor.yml');
 const executionContract=read('growth-execution-contract.js');
+const architectureEscalation=read('growth-architecture-escalation.js');
 const impact=read('distribution-impact-worker.js');
 const visitorAccuracy=read('visitor-accuracy-worker.js');
 const trafficIntegrity=read('traffic-integrity-worker.js');
@@ -78,6 +79,9 @@ if(!executionContract.includes('growth_execution_contract')||!executionContract.
 if(!executionContract.includes("g.subject_type='search'")||!executionContract.includes("THEN 'seo_github'"))fail('Unmapped search actions are not automatically routed to the SEO executor.');
 if(!orchestrator.includes('runGrowthExecutionContractCycle')||!orchestrator.includes("mission:'execution_contract'")||!orchestrator.includes('/api/growth/execution'))fail('Growth execution contracts are not enforced by the runtime loop.');
 if(!supervisor.includes('repair_execution_contract')||!supervisor.includes('missing_executors')||!supervisor.includes("status='stalled'"))fail('Growth Supervisor does not fail on lost or stalled execution contracts.');
+if(!architectureEscalation.includes('growth_architecture_incidents')||!architectureEscalation.includes('CODE APPROVAL REQUIRED')||!architectureEscalation.includes('approval_required')||!architectureEscalation.includes('publicEscalationCandidates'))fail('Growth Brain architecture escalation layer is missing.');
+if(!orchestrator.includes('/api/growth/architecture-escalations/public-candidates')||!orchestrator.includes('growthEscalationHandoffOk')||!orchestrator.includes('auditArchitectureEscalations'))fail('Growth architecture escalation is not wired into the runtime.');
+if(!supervisor.includes('await_code_approval')||!supervisor.includes('growth_architecture_incidents'))fail('Growth Supervisor does not stop and request approval when code or architecture intervention is required.');
 {
   const actions=new Set();
   for(const re of [/actions\.push\(([^)]*)\)/g,/actions\.unshift\(([^)]*)\)/g,/const actions=\[([^\]]*)\]/g,/let actions=\[([^\]]*)\]/g]){
