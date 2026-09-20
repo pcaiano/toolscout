@@ -1,14 +1,104 @@
-name: ToolScout GitHub Actions Conservation Mode
+name: One Shot Human Gate Contract
 
 on:
+  push:
+    branches:
+      - main
+      - feat/human-gate-contract
+    paths:
+      - 'human-gate-contract.js'
+      - 'distribution-autonomous-worker.js'
+      - 'human-action-entry-worker.js'
+      - 'scripts/validate-autonomous-growth-brain.mjs'
+      - '.github/workflows/d1-quota-safe-worker-deploy.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: toolscout-human-gate-contract
+  cancel-in-progress: false
+
 jobs:
-  conservation-notice:
+  validate-deploy-prove:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
-      - name: Conservation mode notice
-        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate Human Gate Contract
+        run: |
+          node --check human-gate-contract.js
+          node --check distribution-autonomous-worker.js
+          node --check human-action-entry-worker.js
+          node scripts/validate-autonomous-growth-brain.mjs
+
+      - name: Deploy corrected Worker
+        if: github.ref == 'refs/heads/main'
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Create contract schema and sync current gates
+        if: github.ref == 'refs/heads/main'
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "CREATE TABLE IF NOT EXISTS human_gate_contract(
+            gate_key TEXT PRIMARY KEY,
+            engine TEXT NOT NULL,
+            subject_type TEXT NOT NULL,
+            subject_key TEXT NOT NULL,
+            gate_type TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'open',
+            title TEXT,
+            reason TEXT,
+            instructions TEXT,
+            action_url TEXT,
+            resolution_mode TEXT NOT NULL DEFAULT 'verify_publication',
+            payload_json TEXT,
+            result_url TEXT,
+            verification_url TEXT,
+            verification_attempts INTEGER NOT NULL DEFAULT 0,
+            next_verification_at TEXT,
+            owner_completed_at TEXT,
+            resolved_at TEXT,
+            last_verification_at TEXT,
+            verification_detail TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+          ); CREATE INDEX IF NOT EXISTS idx_human_gate_status ON human_gate_contract(status,next_verification_at,updated_at); CREATE INDEX IF NOT EXISTS idx_human_gate_subject ON human_gate_contract(engine,subject_type,subject_key);"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Exercise autonomous cycle once
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -fsS --retry 5 --retry-delay 3 -X POST             -H "Authorization: Bearer ${ADMIN_TOKEN}"             https://trytoolscout.org/api/distribution/autonomous/refresh > /tmp/autonomy.json
+          cat /tmp/autonomy.json
+          jq -e '.ok==true' /tmp/autonomy.json
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+
+      - name: Prove Human Gate Contract state
+        if: github.ref == 'refs/heads/main'
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
+            SUM(CASE WHEN status='open' THEN 1 ELSE 0 END) open,
+            SUM(CASE WHEN status='verification_pending' THEN 1 ELSE 0 END) verification_pending,
+            SUM(CASE WHEN status='resolved' THEN 1 ELSE 0 END) resolved,
+            SUM(CASE WHEN engine='distribution' AND status='open' AND action_url IS NULL THEN 1 ELSE 0 END) open_missing_url
+          FROM human_gate_contract;" > /tmp/gates.json
+          cat /tmp/gates.json
+          jq -e '.[0].results[0] | .open_missing_url==0' /tmp/gates.json
+
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) hidden_auth
+          FROM distribution_opportunities o
+          LEFT JOIN human_gate_contract g ON g.engine='distribution' AND g.subject_key=o.surface_slug AND g.status='open'
+          WHERE o.status='auth_required' AND o.action_url IS NOT NULL AND g.gate_key IS NULL;" > /tmp/auth.json
+          cat /tmp/auth.json
+          jq -e '.[0].results[0].hidden_auth==0' /tmp/auth.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
