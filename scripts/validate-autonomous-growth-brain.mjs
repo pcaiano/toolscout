@@ -23,6 +23,7 @@ const sender=read('distribution-sender-worker.js');
 const supervisor=read('growth-supervisor.js');
 const distPriority=read('distribution-priority-worker.js');
 const seoSupervisorExecutor=read('.github/workflows/growth-brain-seo-executor.yml');
+const executionContract=read('growth-execution-contract.js');
 const impact=read('distribution-impact-worker.js');
 const visitorAccuracy=read('visitor-accuracy-worker.js');
 const trafficIntegrity=read('traffic-integrity-worker.js');
@@ -73,6 +74,18 @@ if(!orchestrator.includes("mission:'self_audit'")||!orchestrator.includes("/api/
 if(!distPriority.includes("growth_supervisor_state")||!distPriority.includes("exploration_slots")||!distPriority.includes("priority_boost"))fail('Distribution priorities do not obey Growth Supervisor corrections.');
 if(!content.includes("growth_supervisor_state")||!content.includes("supervisorSearchFirst")||!content.includes("Growth Supervisor"))fail('Content Engine does not obey Growth Supervisor acquisition corrections.');
 if(!seoSupervisorExecutor.includes("/api/growth/supervisor/public")||!seoSupervisorExecutor.includes("run_executor")||!seoSupervisorExecutor.includes("run-organic-growth-controller-v4.mjs"))fail('SEO does not have a supervisor-controlled autonomous correction executor.');
+if(!executionContract.includes('growth_execution_contract')||!executionContract.includes('claimExecutorTasks')||!executionContract.includes('reconcileExecutionContracts')||!executionContract.includes('executor_missing'))fail('Central Growth execution contract is missing.');
+if(!orchestrator.includes('runGrowthExecutionContractCycle')||!orchestrator.includes("mission:'execution_contract'")||!orchestrator.includes('/api/growth/execution'))fail('Growth execution contracts are not enforced by the runtime loop.');
+if(!supervisor.includes('repair_execution_contract')||!supervisor.includes('missing_executors')||!supervisor.includes("status='stalled'"))fail('Growth Supervisor does not fail on lost or stalled execution contracts.');
+{
+  const actions=new Set();
+  for(const re of [/actions\.push\(([^)]*)\)/g,/actions\.unshift\(([^)]*)\)/g,/const actions=\[([^\]]*)\]/g,/let actions=\[([^\]]*)\]/g]){
+    let m;while((m=re.exec(orchestrator)))for(const q of m[1].matchAll(/['"]([^'"]+)['"]/g))actions.add(q[1]);
+  }
+  const missing=[...actions].filter(action=>!executionContract.includes(action+':'));
+  if(missing.length)fail('Growth actions without registered executors: '+missing.join(', '));
+}
+
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
 if(!process.exitCode)console.log('PASS: shared autonomous growth brain contract is intact.');
