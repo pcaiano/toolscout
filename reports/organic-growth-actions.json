@@ -1,32 +1,9 @@
 {
-  "generatedAt": "2026-09-13T12:15:28.070Z",
-  "engine": "ToolScout Organic Growth Engine v3",
-  "newInterventions": [
-    {
-      "intent": "best-crm-for-sales-teams",
-      "variant": "decision-depth-v1",
-      "lane": "seo-authority-depth",
-      "priorityScore": 45,
-      "impressions": 50,
-      "position": 75.52
-    },
-    {
-      "intent": "best-funnel-builder",
-      "variant": "decision-depth-v1",
-      "lane": "seo-authority-depth",
-      "priorityScore": 43,
-      "impressions": 127,
-      "position": 77.1024
-    },
-    {
-      "intent": "best-free-project-management-tools",
-      "variant": "decision-depth-v1",
-      "lane": "seo-authority-depth",
-      "priorityScore": 43,
-      "impressions": 47,
-      "position": 55.383
-    }
-  ],
+  "generatedAt": "2026-09-20T08:32:40.251Z",
+  "engine": "ToolScout Organic Growth Engine v4",
+  "brain": "shared-growth-v3",
+  "brainDirectivesGeneratedAt": "2026-09-20T08:32:40.174Z",
+  "newInterventions": [],
   "activeOptimizations": [
     {
       "intent": "best-seo-tools-for-agencies",
@@ -137,6 +114,7 @@
       }
     }
   ],
+  "indexingRecovery": [],
   "evaluations": [],
   "rollbacks": [],
   "ownerActionRequired": false

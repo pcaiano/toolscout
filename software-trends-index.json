@@ -1,49 +1,80 @@
 {
-  "version": 2,
+  "version": 3,
   "edition": "2026-09",
   "editionLabel": "September 2026",
-  "publishedAt": "2026-09-16T08:52:00.000Z",
-  "scope": "Buyer focused summary of public software product changes and recurring themes from vendor announcements.",
-  "editorialPolicy": "Updates are selected for product relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
+  "publishedAt": "2026-09-18T09:43:00.000Z",
+  "scope": "ToolScout first-party observations of public software product changes and ToolScout search visibility. This is not a measure of global market share.",
+  "searchVisibility": {
+    "source": "Google Search Console",
+    "impressions": 2215,
+    "clicks": 1,
+    "ctr": 0.0451,
+    "position": 0
+  },
+  "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "themes": [
     {
       "id": "agent-workflows",
       "title": "AI agents are becoming reusable team workflows",
-      "summary": "Recent releases point toward reusable skills, shared AI behaviour and workflows that teams can invoke repeatedly instead of starting from a blank chat.",
+      "summary": "Recent product releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
       "evidence": [
-        "notion-3-7-agent-skills",
-        "hubspot-mcp-server-update"
+        "notion-3-7-agent-skills"
       ]
     },
     {
       "id": "connected-software",
       "title": "Business software is opening up to agent connections",
-      "summary": "MCP, integrations and related connection layers are making software easier for AI tools and external systems to work with directly.",
+      "summary": "MCP and related integration layers are making software easier for AI tools to read from and act on with explicit permissions.",
       "evidence": [
         "hubspot-mcp-server-update"
       ]
     },
     {
       "id": "workflow-convergence",
-      "title": "Work apps are absorbing more automation",
-      "summary": "Product updates increasingly combine core work, automation and AI in the same product experience, reducing the distance between planning and execution.",
+      "title": "Analysis and execution are moving closer together",
+      "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
-        "notion-3-7-agent-skills"
+        "github-actions-workflow-execution-protections-ga",
+        "hubspot-mcp-server-update"
       ]
     }
   ],
   "updates": [
+    {
+      "id": "github-actions-workflow-execution-protections-ga",
+      "publishedAt": "2026-09-17",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub Actions adds stronger controls over who can run workflows",
+      "summary": "GitHub Actions workflow execution protections are now generally available, adding workflow-specific targeting, policy insights, REST APIs and safer defaults for public repositories.",
+      "articleUrl": "/news/github-actions-workflow-execution-protections-ga.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-17-workflow-execution-protections-in-github-actions-generally-available/"
+    },
+    {
+      "id": "github-ai-scan-codeql-setup",
+      "publishedAt": "2026-09-16",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub removes a setup barrier for AI Scan in pull requests",
+      "summary": "GitHub AI Scan can now check pull requests without requiring CodeQL default setup first, reducing configuration friction for eligible GitHub Advanced Security customers.",
+      "articleUrl": "/news/github-ai-scan-codeql-setup.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-16-code-scanning-ai-scan-no-longer-requires-codeql-default-setup/"
+    },
     {
       "id": "notion-3-7-agent-skills",
       "publishedAt": "2026-09-15",
       "toolSlug": "notion",
       "toolName": "Notion",
       "label": "Official release",
-      "title": "Notion 3.7 adds shared Agent skills",
-      "summary": "Notion now lets teams create reusable AI skills, keep them in a shared library and run them from Agent conversations.",
+      "title": "Notion 3.7 turns team prompts into reusable Agent skills",
+      "summary": "Notion 3.7 adds reusable team skills, a shared skills library and portability to external AI coding agents.",
+      "articleUrl": "/news/notion-3-7-agent-skills.html",
       "sourceName": "Notion release notes",
-      "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15",
-      "profileUrl": "/tools/notion.html"
+      "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15"
     },
     {
       "id": "hubspot-mcp-server-update",
@@ -51,11 +82,11 @@
       "toolSlug": "hubspot",
       "toolName": "HubSpot",
       "label": "Official product update",
-      "title": "HubSpot publishes new MCP server updates",
-      "summary": "HubSpot has published an update covering its MCP server and related AI integration tooling.",
+      "title": "HubSpot expands its MCP server from insight to action",
+      "summary": "HubSpot is broadening what teams can do with CRM data and actions from AI conversations through its MCP server and Claude connector.",
+      "articleUrl": "/news/hubspot-mcp-server-updates.html",
       "sourceName": "HubSpot Releases and Updates",
-      "sourceUrl": "https://community.hubspot.com/c/resources/releases-and-updates/134",
-      "profileUrl": "/tools/hubspot.html"
+      "sourceUrl": "https://community.hubspot.com/t/spotlight-feature-hubspot-mcp-server-updates/156456"
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",

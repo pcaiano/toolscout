@@ -1,33 +1,42 @@
 {
-  "generatedAt": "2026-09-13T12:15:28.003Z",
-  "engine": "ToolScout Search and Answer Opportunity Engine v5",
-  "objective": "Autonomously pursue the highest sustainable search rankings and qualified clicks using observed data while failing closed on weak editorial evidence.",
+  "generatedAt": "2026-09-20T08:32:39.438Z",
+  "engine": "ToolScout Search and Answer Opportunity Engine v6",
+  "objective": "Autonomously pursue sustainable search rankings and qualified clicks while separating indexing failures from content-performance failures.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 2215,
-    "ctr": 0.0451,
-    "gscStartDate": "2026-08-17",
-    "gscEndDate": "2026-09-13",
+    "searchImpressions": 3436,
+    "ctr": 0.0291,
+    "gscStartDate": "2026-08-24",
+    "gscEndDate": "2026-09-20",
     "gscDataState": "all",
     "trafficTruthStatus": "observed",
-    "rule": "Impressions are visibility, not traffic. Every first-page signal is a strategic opportunity. Confidence controls intervention intensity, not whether the opportunity exists."
+    "rule": "Impressions are visibility, not traffic. A known indexing barrier blocks editorial intervention until technical recovery is confirmed."
   },
-  "autonomyDirective": "The engine owns observation, prioritization, optimization, validation, publication, measurement and rechecking. The owner is not required to edit content.",
+  "indexingTruth": {
+    "available": true,
+    "generatedAt": "2026-09-14T14:01:51.032Z",
+    "total": 162,
+    "indexed": 1,
+    "barriers": 5
+  },
+  "autonomyDirective": "The engine owns observation, indexing triage, prioritization, optimization, validation, publication, measurement and rechecking. The owner is not required to edit content.",
   "dailyDecisionRules": [
+    "Check indexing state before interpreting weak search performance as a content problem.",
+    "Do not rewrite a page while Google reports a canonical or indexation barrier.",
     "Treat every first-page result as a strategic opportunity.",
-    "Protect low-sample first-page rankings and gather evidence instead of ignoring them or rewriting them aggressively.",
-    "Use meaningful Search Console samples for aggressive CTR and ranking interventions.",
+    "Protect low-sample first-page rankings and gather evidence instead of rewriting aggressively.",
+    "Use meaningful Search Console samples for CTR and ranking interventions.",
     "Never fill a ranking with a wrong-category, capability-mismatched or semantically weak tool.",
-    "Prefer withholding one page to weakening ToolScout editorial credibility.",
-    "Measure every intervention and re-evaluate from fresh Search Console and browser-confirmed traffic data."
+    "Measure every intervention and re-evaluate from fresh Search Console and indexing data."
   ],
   "summary": {
-    "observedGscIntents": 31,
-    "observedGscPages": 79,
+    "observedGscIntents": 36,
+    "observedGscPages": 99,
     "searchClicks": 1,
-    "searchImpressions": 2215,
+    "searchImpressions": 3436,
     "organicAcquisitionStatus": "early-search-acquisition",
+    "indexingRecovery": 1,
     "actionableOpportunities": 21,
     "firstPageOpportunities": 10,
     "firstPageMeaningful": 0,
@@ -35,10 +44,69 @@
     "strikingDistanceOpportunities": 0,
     "strikingMeaningful": 0,
     "strikingLowSample": 0,
-    "authorityDepthOpportunities": 7,
+    "authorityDepthOpportunities": 6,
     "competitorResearchCandidates": 5
   },
   "opportunities": [
+    {
+      "intent": "best-free-project-management-tools",
+      "priorityScore": 43,
+      "lane": "seo-indexing-recovery",
+      "action": "repair-indexing",
+      "reason": "Google indexing state is canonical-alternate. Fix technical discovery and canonical signals before changing editorial content.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/best-free-project-management-tools",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-02T00:42:53+00:00"
+      },
+      "indexingBarrier": true,
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "preserve-current-url",
+        "verify-self-canonical",
+        "verify-sitemap-entry",
+        "verify-indexability",
+        "strengthen-internal-discovery",
+        "validate-public-surface",
+        "recheck-google-indexing"
+      ],
+      "qualityGates": [
+        "indexing-safety",
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 47,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 55.383,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 21,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "topTools": [
+        "trello",
+        "clickup",
+        "asana"
+      ]
+    },
     {
       "intent": "best-seo-tools-for-agencies",
       "priorityScore": 53,
@@ -47,6 +115,8 @@
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -59,6 +129,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -96,6 +167,8 @@
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -108,6 +181,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -145,6 +219,8 @@
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -157,6 +233,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -194,6 +271,8 @@
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -206,6 +285,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -235,55 +315,6 @@
       ]
     },
     {
-      "intent": "best-free-project-management-tools",
-      "priorityScore": 43,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 47,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 55.383,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 21,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "topTools": [
-        "trello",
-        "clickup",
-        "asana"
-      ]
-    },
-    {
       "intent": "best-free-crm",
       "priorityScore": 41,
       "lane": "seo-authority-depth",
@@ -291,6 +322,8 @@
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -303,6 +336,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -340,6 +374,8 @@
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -352,6 +388,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -389,6 +426,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -399,6 +438,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -436,6 +476,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -446,6 +488,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -483,6 +526,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -493,6 +538,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -530,6 +576,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -540,6 +588,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -577,6 +626,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -587,6 +638,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -624,6 +676,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -634,6 +688,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -670,6 +725,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -680,6 +737,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -717,6 +775,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -727,6 +787,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -764,6 +825,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -774,6 +837,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -811,6 +875,8 @@
       "reason": "First-page visibility is strategically valuable even with a small sample. Preserve the URL and ranking, validate quality, and gather more evidence before aggressive rewriting.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -821,6 +887,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -857,6 +924,8 @@
       "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -866,6 +935,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -901,6 +971,8 @@
       "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -910,6 +982,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -945,6 +1018,8 @@
       "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -954,6 +1029,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -989,6 +1065,8 @@
       "reason": "Catalog evidence is insufficient for a credible ranking. Hold publication and improve catalog coverage automatically.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -998,6 +1076,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1031,6 +1110,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1038,6 +1119,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1064,6 +1146,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1071,6 +1155,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1097,6 +1182,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1104,6 +1191,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1130,6 +1218,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1137,6 +1227,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1163,6 +1254,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1170,6 +1263,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1196,6 +1290,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1203,6 +1299,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1229,6 +1326,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1236,6 +1335,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1261,6 +1361,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1268,6 +1370,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1294,6 +1397,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1301,6 +1406,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1327,6 +1433,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1334,6 +1442,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1360,6 +1469,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1367,6 +1478,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1404,6 +1516,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1411,6 +1525,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1437,6 +1552,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "none",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1444,6 +1561,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1470,6 +1588,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1477,6 +1597,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1514,6 +1635,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1521,6 +1644,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1558,6 +1682,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1565,6 +1691,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1602,6 +1729,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1609,6 +1738,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1646,6 +1776,8 @@
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "autonomy": "fully-autonomous",
       "ownerActionRequired": false,
       "executionPlan": [
@@ -1653,6 +1785,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -1685,41 +1818,13 @@
   ],
   "pageOpportunities": [
     {
-      "page": "https://trytoolscout.org/",
-      "pathname": "/",
-      "type": "home",
-      "clicks": 1,
-      "impressions": 69,
-      "ctr": 1.4493,
-      "position": 6.942,
-      "topQueries": [
-        {
-          "query": "toolscout",
-          "clicks": 1,
-          "impressions": 33,
-          "position": 9.0909
-        },
-        {
-          "query": "trucscout",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 7
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 11.927,
-      "outcome": "traffic-observed"
-    },
-    {
       "page": "https://trytoolscout.org/tools.html",
       "pathname": "/tools.html",
       "type": "directory",
       "clicks": 0,
-      "impressions": 24,
+      "impressions": 29,
       "ctr": 0,
-      "position": 13.8333,
+      "position": 12.7586,
       "topQueries": [
         {
           "query": "\"moz\" \"keyword research\" -site:reddit.com -site:twitter.com -site:x.com -site:wykop.pl -site:tripadvisor.com -site:youtube.com -site:yelp.com -site:booking.com -site:facebook.com -site:instagram.com -site:tiktok.com",
@@ -1752,25 +1857,19 @@
           "position": 8
         }
       ],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/tools",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-07T14:50:16+00:00"
+      },
+      "indexingBarrier": true,
       "meaningfulSample": true,
       "strategicOpportunity": true,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.735,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/make.html",
-      "pathname": "/tools/make.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 7,
-      "ctr": 0,
-      "position": 5.7143,
-      "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 1.225,
+      "opportunityScore": 2.273,
       "outcome": "visibility-only"
     },
     {
@@ -1782,10 +1881,206 @@
       "ctr": 0,
       "position": 4.2,
       "topQueries": [],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/activecampaign-vs-mailchimp",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-01T14:31:41+00:00"
+      },
+      "indexingBarrier": true,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
       "opportunityScore": 1.19,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "http://trytoolscout.org/tools/shopify",
+      "pathname": "/tools/shopify",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3,
+      "topQueries": [],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/tools/shopify",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-11T15:59:27+00:00"
+      },
+      "indexingBarrier": true,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.333,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/guides.html",
+      "pathname": "/guides.html",
+      "type": "directory",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 6.5,
+      "topQueries": [],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/guides",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-07T20:11:35+00:00"
+      },
+      "indexingBarrier": true,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.308,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/best-free-project-management-tools.html",
+      "pathname": "/best-free-project-management-tools.html",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 77,
+      "ctr": 0,
+      "position": 58.1169,
+      "topQueries": [
+        {
+          "query": "free online project manager tools",
+          "clicks": 0,
+          "impressions": 31,
+          "position": 67.1935
+        },
+        {
+          "query": "best free tools for project management",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 37
+        },
+        {
+          "query": "best free project management tools",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 41
+        },
+        {
+          "query": "free online tools for project management",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 62.6
+        },
+        {
+          "query": "free project management tools",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 65.8
+        }
+      ],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/best-free-project-management-tools",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-02T00:42:53+00:00"
+      },
+      "indexingBarrier": true,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 1.325,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/shopify.html",
+      "pathname": "/tools/shopify.html",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 46,
+      "topQueries": [],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/tools/shopify",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-11T15:59:27+00:00"
+      },
+      "indexingBarrier": true,
+      "meaningfulSample": false,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.043,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/",
+      "pathname": "/",
+      "type": "home",
+      "clicks": 1,
+      "impressions": 119,
+      "ctr": 0.8403,
+      "position": 7.5294,
+      "topQueries": [
+        {
+          "query": "toolscout",
+          "clicks": 1,
+          "impressions": 67,
+          "position": 8.8657
+        },
+        {
+          "query": "tool scout",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 7.8
+        },
+        {
+          "query": "trucscout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 7
+        }
+      ],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/",
+        "status": "indexed",
+        "verdict": "PASS",
+        "coverageState": "Submitted and indexed",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-11T02:44:30+00:00"
+      },
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 18.966,
+      "outcome": "traffic-observed"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/make.html",
+      "pathname": "/tools/make.html",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 7,
+      "ctr": 0,
+      "position": 5.7143,
+      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 1.225,
       "outcome": "visibility-only"
     },
     {
@@ -1797,36 +2092,8 @@
       "ctr": 0,
       "position": 2,
       "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 1,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/hubspot.html",
-      "pathname": "/tools/hubspot.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 2,
-      "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 1,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-ai-research-tools.html",
-      "pathname": "/best-ai-research-tools.html",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 1,
-      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -1842,6 +2109,8 @@
       "ctr": 0,
       "position": 4.5,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -1864,6 +2133,15 @@
           "position": 10
         }
       ],
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/",
+        "status": "indexed",
+        "verdict": "PASS",
+        "coverageState": "Submitted and indexed",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-11T02:44:30+00:00"
+      },
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -1879,10 +2157,29 @@
       "ctr": 0,
       "position": 4.3333,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
       "opportunityScore": 0.692,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/privacy.html",
+      "pathname": "/privacy.html",
+      "type": "other",
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 7.4,
+      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.676,
       "outcome": "visibility-only"
     },
     {
@@ -1894,55 +2191,12 @@
       "ctr": 0,
       "position": 6,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
       "opportunityScore": 0.667,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/amplitude.html",
-      "pathname": "/tools/amplitude.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 3,
-      "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.667,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/privacy.html",
-      "pathname": "/privacy.html",
-      "type": "other",
-      "clicks": 0,
-      "impressions": 4,
-      "ctr": 0,
-      "position": 7,
-      "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.571,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/buffer.html",
-      "pathname": "/tools/buffer.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 4,
-      "ctr": 0,
-      "position": 7.5,
-      "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.533,
       "outcome": "visibility-only"
     },
     {
@@ -1954,10 +2208,29 @@
       "ctr": 0,
       "position": 6,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
       "opportunityScore": 0.5,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/news/notion-3-7-agent-skills",
+      "pathname": "/news/notion-3-7-agent-skills",
+      "type": "other",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0,
+      "position": 6.6667,
+      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.45,
       "outcome": "visibility-only"
     },
     {
@@ -1969,6 +2242,8 @@
       "ctr": 0,
       "position": 7.3333,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -1984,6 +2259,8 @@
       "ctr": 0,
       "position": 7.6667,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -1999,21 +2276,8 @@
       "ctr": 0,
       "position": 3,
       "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.333,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "http://trytoolscout.org/tools/shopify",
-      "pathname": "/tools/shopify",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 3,
-      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2029,6 +2293,8 @@
       "ctr": 0,
       "position": 3,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2044,21 +2310,8 @@
       "ctr": 0,
       "position": 6.5,
       "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.308,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/guides.html",
-      "pathname": "/guides.html",
-      "type": "directory",
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 6.5,
-      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2074,6 +2327,8 @@
       "ctr": 0,
       "position": 6.5,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2089,10 +2344,29 @@
       "ctr": 0,
       "position": 10,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
       "opportunityScore": 0.3,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/claude",
+      "pathname": "/tools/claude",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 7,
+      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.286,
       "outcome": "visibility-only"
     },
     {
@@ -2104,6 +2378,8 @@
       "ctr": 0,
       "position": 8,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2119,6 +2395,8 @@
       "ctr": 0,
       "position": 8.5,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2126,14 +2404,16 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-crm-for-solopreneurs",
-      "pathname": "/best-crm-for-solopreneurs",
+      "page": "https://trytoolscout.org/best-marketing-automation-tools.html",
+      "pathname": "/best-marketing-automation-tools.html",
       "type": "guide",
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 6,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2149,6 +2429,8 @@
       "ctr": 0,
       "position": 6,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2164,6 +2446,25 @@
       "ctr": 0,
       "position": 7,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.143,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/zendesk",
+      "pathname": "/tools/zendesk",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 7,
+      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2179,6 +2480,8 @@
       "ctr": 0,
       "position": 8,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2194,6 +2497,32 @@
       "ctr": 0,
       "position": 8,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.125,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
+      "pathname": "/news/github-actions-workflow-execution-protections-ga",
+      "type": "other",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 8,
+      "topQueries": [
+        {
+          "query": "github actions execution protections ga",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 8
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2209,6 +2538,8 @@
       "ctr": 0,
       "position": 8,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2224,6 +2555,8 @@
       "ctr": 0,
       "position": 9,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2239,6 +2572,8 @@
       "ctr": 0,
       "position": 9,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2254,6 +2589,8 @@
       "ctr": 0,
       "position": 10,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2269,6 +2606,25 @@
       "ctr": 0,
       "position": 10,
       "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.1,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/compare",
+      "pathname": "/compare",
+      "type": "directory",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 10,
+      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2284,21 +2640,8 @@
       "ctr": 0,
       "position": 10,
       "topQueries": [],
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.1,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/shopify.html",
-      "pathname": "/tools/shopify.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 10,
-      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
@@ -2310,45 +2653,47 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 535,
+      "impressions": 789,
       "ctr": 0,
-      "position": 77.0355,
+      "position": 75.9341,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 162,
-          "position": 73.9506
+          "impressions": 235,
+          "position": 72.4936
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 102,
-          "position": 81.0588
+          "impressions": 162,
+          "position": 80.1235
         },
         {
           "query": "what is the best tool for seo agency",
           "clicks": 0,
-          "impressions": 99,
-          "position": 77.5152
+          "impressions": 139,
+          "position": 77.2518
         },
         {
           "query": "best seo tool for agencies",
           "clicks": 0,
-          "impressions": 51,
-          "position": 72.098
+          "impressions": 82,
+          "position": 70.6098
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 20,
-          "position": 73.45
+          "impressions": 29,
+          "position": 71.7586
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 6.945,
+      "opportunityScore": 10.391,
       "outcome": "visibility-only"
     },
     {
@@ -2356,33 +2701,33 @@
       "pathname": "/tools/semrush.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 215,
+      "impressions": 315,
       "ctr": 0,
-      "position": 55.4558,
+      "position": 55.5841,
       "topQueries": [
         {
           "query": "semrush tool",
+          "clicks": 0,
+          "impressions": 138,
+          "position": 56.8261
+        },
+        {
+          "query": "semrush software",
           "clicks": 0,
           "impressions": 102,
           "position": 56.7941
         },
         {
-          "query": "semrush software",
-          "clicks": 0,
-          "impressions": 67,
-          "position": 56.5821
-        },
-        {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 28,
-          "position": 51.3214
+          "impressions": 42,
+          "position": 51.619
         },
         {
           "query": "semrush tools",
           "clicks": 0,
-          "impressions": 11,
-          "position": 52.3636
+          "impressions": 25,
+          "position": 52.08
         },
         {
           "query": "semrush seo software",
@@ -2391,10 +2736,108 @@
           "position": 72
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.877,
+      "opportunityScore": 5.667,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
+      "pathname": "/best-seo-keyword-research-tools.html",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 317,
+      "ctr": 0,
+      "position": 75.7823,
+      "topQueries": [
+        {
+          "query": "website research tool",
+          "clicks": 0,
+          "impressions": 122,
+          "position": 66.082
+        },
+        {
+          "query": "competitor keyword research tools for seo",
+          "clicks": 0,
+          "impressions": 26,
+          "position": 84.7692
+        },
+        {
+          "query": "seo search tools",
+          "clicks": 0,
+          "impressions": 24,
+          "position": 78.5417
+        },
+        {
+          "query": "seo search tool",
+          "clicks": 0,
+          "impressions": 21,
+          "position": 68.9524
+        },
+        {
+          "query": "keyword analysis seo tool",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 82.3846
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 4.183,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/airtable.html",
+      "pathname": "/tools/airtable.html",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 276,
+      "ctr": 0,
+      "position": 73.8514,
+      "topQueries": [
+        {
+          "query": "airtable",
+          "clicks": 0,
+          "impressions": 58,
+          "position": 62.7931
+        },
+        {
+          "query": "what is airtable",
+          "clicks": 0,
+          "impressions": 38,
+          "position": 86.5526
+        },
+        {
+          "query": "what is airtable used for",
+          "clicks": 0,
+          "impressions": 34,
+          "position": 90.4118
+        },
+        {
+          "query": "airtable software",
+          "clicks": 0,
+          "impressions": 29,
+          "position": 66.5172
+        },
+        {
+          "query": "airtabel",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 66.2353
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 3.737,
       "outcome": "visibility-only"
     },
     {
@@ -2402,21 +2845,21 @@
       "pathname": "/best-no-code-automation-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 228,
+      "impressions": 260,
       "ctr": 0,
-      "position": 73.7018,
+      "position": 74.1038,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 41,
-          "position": 71.4878
+          "impressions": 49,
+          "position": 72.3878
         },
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 30,
-          "position": 71.6
+          "impressions": 41,
+          "position": 73.1951
         },
         {
           "query": "no code automation",
@@ -2433,106 +2876,16 @@
         {
           "query": "no code automation tool",
           "clicks": 0,
-          "impressions": 15,
-          "position": 70.6
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.094,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
-      "pathname": "/best-seo-keyword-research-tools.html",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 199,
-      "ctr": 0,
-      "position": 74.7889,
-      "topQueries": [
-        {
-          "query": "website research tool",
-          "clicks": 0,
-          "impressions": 75,
-          "position": 64
-        },
-        {
-          "query": "seo search tools",
-          "clicks": 0,
-          "impressions": 18,
-          "position": 78.1667
-        },
-        {
-          "query": "competitor keyword research tools for seo",
-          "clicks": 0,
           "impressions": 17,
-          "position": 84.5294
-        },
-        {
-          "query": "seo search tool",
-          "clicks": 0,
-          "impressions": 15,
-          "position": 70.8
-        },
-        {
-          "query": "best seo keyword research tool",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 97.7
+          "position": 71
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.661,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/airtable.html",
-      "pathname": "/tools/airtable.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 164,
-      "ctr": 0,
-      "position": 73.0671,
-      "topQueries": [
-        {
-          "query": "airtable",
-          "clicks": 0,
-          "impressions": 34,
-          "position": 62.1471
-        },
-        {
-          "query": "what is airtable",
-          "clicks": 0,
-          "impressions": 26,
-          "position": 85.5
-        },
-        {
-          "query": "what is airtable used for",
-          "clicks": 0,
-          "impressions": 20,
-          "position": 89
-        },
-        {
-          "query": "airtable software",
-          "clicks": 0,
-          "impressions": 16,
-          "position": 66
-        },
-        {
-          "query": "airtable ticketing system",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 61.8182
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.245,
+      "opportunityScore": 3.509,
       "outcome": "visibility-only"
     },
     {
@@ -2540,45 +2893,47 @@
       "pathname": "/tools/klaviyo.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 127,
+      "impressions": 188,
       "ctr": 0,
-      "position": 60.2205,
+      "position": 61.4309,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 63,
-          "position": 59.5079
+          "impressions": 94,
+          "position": 60.0532
         },
         {
           "query": "klayvio",
           "clicks": 0,
-          "impressions": 13,
-          "position": 62.2308
+          "impressions": 20,
+          "position": 63.1
         },
         {
           "query": "what is klaviyo",
           "clicks": 0,
-          "impressions": 6,
-          "position": 77.1667
-        },
-        {
-          "query": "kalviyo",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 60.6667
+          "impressions": 11,
+          "position": 78.0909
         },
         {
           "query": "klavyio",
           "clicks": 0,
-          "impressions": 3,
-          "position": 61.3333
+          "impressions": 4,
+          "position": 60.5
+        },
+        {
+          "query": "kalviyo",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 61.75
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.109,
+      "opportunityScore": 3.06,
       "outcome": "visibility-only"
     },
     {
@@ -2586,45 +2941,47 @@
       "pathname": "/best-project-management-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 67,
+      "impressions": 105,
       "ctr": 0,
-      "position": 40.0448,
+      "position": 38.7524,
       "topQueries": [
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 17,
-          "position": 44.5294
-        },
-        {
-          "query": "project workflow tools",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 41.8182
+          "impressions": 26,
+          "position": 41.6923
         },
         {
           "query": "project management workflow tools",
           "clicks": 0,
-          "impressions": 10,
-          "position": 32.7
+          "impressions": 17,
+          "position": 31.7059
         },
         {
           "query": "automated project management tools",
           "clicks": 0,
-          "impressions": 10,
-          "position": 35.7
+          "impressions": 16,
+          "position": 35
         },
         {
-          "query": "best project management tool to manage workflow",
+          "query": "project workflow tools",
           "clicks": 0,
-          "impressions": 5,
-          "position": 48
+          "impressions": 13,
+          "position": 41.6154
+        },
+        {
+          "query": "project management workflow tool",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 29.7273
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.673,
+      "opportunityScore": 2.71,
       "outcome": "visibility-only"
     },
     {
@@ -2632,91 +2989,47 @@
       "pathname": "/best-funnel-builder.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 127,
+      "impressions": 188,
       "ctr": 0,
-      "position": 77.1024,
+      "position": 76.0106,
       "topQueries": [
         {
           "query": "best funnel builder",
           "clicks": 0,
-          "impressions": 31,
-          "position": 65.5484
+          "impressions": 48,
+          "position": 66.9167
         },
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 31,
-          "position": 89.3226
+          "impressions": 44,
+          "position": 86.5682
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 29,
-          "position": 85.6552
+          "impressions": 38,
+          "position": 84.9211
         },
         {
           "query": "best sales funnel builder",
           "clicks": 0,
-          "impressions": 6,
-          "position": 69.3333
+          "impressions": 8,
+          "position": 70.125
         },
         {
           "query": "funnelbuilder",
           "clicks": 0,
-          "impressions": 6,
-          "position": 84.1667
+          "impressions": 7,
+          "position": 83.2857
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.647,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-free-project-management-tools.html",
-      "pathname": "/best-free-project-management-tools.html",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 47,
-      "ctr": 0,
-      "position": 55.383,
-      "topQueries": [
-        {
-          "query": "free online project manager tools",
-          "clicks": 0,
-          "impressions": 19,
-          "position": 66.8421
-        },
-        {
-          "query": "best free tools for project management",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 29.1818
-        },
-        {
-          "query": "free online project managers",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 66.75
-        },
-        {
-          "query": "free online tools for project management",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 64
-        },
-        {
-          "query": "free online pm tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 67
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.849,
+      "opportunityScore": 2.473,
       "outcome": "visibility-only"
     },
     {
@@ -2724,45 +3037,47 @@
       "pathname": "/tools/moz-pro.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 55,
+      "impressions": 127,
       "ctr": 0,
-      "position": 69.4,
+      "position": 69.8504,
       "topQueries": [
         {
           "query": "moz pro tools",
           "clicks": 0,
-          "impressions": 24,
-          "position": 69.4583
+          "impressions": 57,
+          "position": 70.7544
         },
         {
           "query": "moz free trial",
           "clicks": 0,
-          "impressions": 14,
-          "position": 67.2857
+          "impressions": 33,
+          "position": 67.9091
         },
         {
           "query": "moz pro overview",
           "clicks": 0,
-          "impressions": 10,
-          "position": 72.5
-        },
-        {
-          "query": "what is moz pro",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 66.3333
+          "impressions": 13,
+          "position": 72.7692
         },
         {
           "query": "moz pro free trial",
           "clicks": 0,
-          "impressions": 1,
-          "position": 61
+          "impressions": 5,
+          "position": 65
+        },
+        {
+          "query": "moz trial",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 66.5
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.793,
+      "opportunityScore": 1.818,
       "outcome": "visibility-only"
     },
     {
@@ -2770,33 +3085,33 @@
       "pathname": "/tools/tally.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 27,
+      "impressions": 59,
       "ctr": 0,
-      "position": 40.1481,
+      "position": 40.322,
       "topQueries": [
         {
           "query": "tally software",
           "clicks": 0,
-          "impressions": 10,
-          "position": 39.8
-        },
-        {
-          "query": "tally",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 44.5
+          "impressions": 29,
+          "position": 42.1034
         },
         {
           "query": "tallykey",
           "clicks": 0,
-          "impressions": 4,
-          "position": 15.5
+          "impressions": 11,
+          "position": 14.9091
+        },
+        {
+          "query": "tally",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 49.4444
         },
         {
           "query": "what is tally",
           "clicks": 0,
-          "impressions": 3,
-          "position": 38.3333
+          "impressions": 4,
+          "position": 45.25
         },
         {
           "query": "tally program",
@@ -2805,65 +3120,58 @@
           "position": 31
         }
       ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.673,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-crm-for-sales-teams.html",
-      "pathname": "/best-crm-for-sales-teams.html",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 50,
-      "ctr": 0,
-      "position": 75.52,
-      "topQueries": [
-        {
-          "query": "crm for sales teams",
-          "clicks": 0,
-          "impressions": 15,
-          "position": 74.6667
-        },
-        {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 12,
-          "position": 79.9167
-        },
-        {
-          "query": "best crm for sales teams",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 75.2222
-        },
-        {
-          "query": "best crm for sales team",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 65.4286
-        },
-        {
-          "query": "top crm platforms for sales teams",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 76.5
-        }
-      ],
-      "meaningfulSample": true,
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "opportunityScore": 0.662,
+      "opportunityScore": 1.463,
       "outcome": "visibility-only"
     }
   ],
   "autonomousActionQueue": [
     {
+      "intent": "best-free-project-management-tools",
+      "priorityScore": 43,
+      "lane": "seo-indexing-recovery",
+      "action": "repair-indexing",
+      "indexingSignal": {
+        "url": "https://trytoolscout.org/best-free-project-management-tools",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-02T00:42:53+00:00"
+      },
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "preserve-current-url",
+        "verify-self-canonical",
+        "verify-sitemap-entry",
+        "verify-indexability",
+        "strengthen-internal-discovery",
+        "validate-public-surface",
+        "recheck-google-indexing"
+      ],
+      "qualityGates": [
+        "indexing-safety",
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
       "intent": "best-seo-tools-for-agencies",
       "priorityScore": 53,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -2875,6 +3183,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -2891,6 +3200,7 @@
       "priorityScore": 46,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -2902,6 +3212,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -2918,6 +3229,7 @@
       "priorityScore": 45,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -2929,6 +3241,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -2945,6 +3258,7 @@
       "priorityScore": 43,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -2956,33 +3270,7 @@
         "measure"
       ],
       "qualityGates": [
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-free-project-management-tools",
-      "priorityScore": 43,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -2999,6 +3287,7 @@
       "priorityScore": 41,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -3010,6 +3299,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3026,6 +3316,7 @@
       "priorityScore": 37,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "deepen-evidence-and-relevance",
@@ -3037,6 +3328,7 @@
         "measure"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3053,6 +3345,7 @@
       "priorityScore": 41,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3062,6 +3355,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3078,6 +3372,7 @@
       "priorityScore": 41,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3087,6 +3382,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3103,6 +3399,7 @@
       "priorityScore": 40,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3112,6 +3409,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3128,6 +3426,7 @@
       "priorityScore": 40,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3137,6 +3436,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3153,6 +3453,7 @@
       "priorityScore": 37,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3162,6 +3463,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3178,6 +3480,7 @@
       "priorityScore": 35,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3187,6 +3490,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3203,6 +3507,7 @@
       "priorityScore": 34,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3212,6 +3517,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3228,6 +3534,7 @@
       "priorityScore": 34,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3237,6 +3544,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3253,6 +3561,7 @@
       "priorityScore": 31,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3262,6 +3571,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3278,6 +3588,7 @@
       "priorityScore": 20,
       "lane": "seo-first-page-observation",
       "action": "protect-and-measure",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "preserve-current-url",
@@ -3287,6 +3598,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3303,6 +3615,7 @@
       "priorityScore": 43,
       "lane": "editorial-safety",
       "action": "hold-publication-and-research-catalog",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "hold-publication",
@@ -3311,6 +3624,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3327,6 +3641,7 @@
       "priorityScore": 25,
       "lane": "editorial-safety",
       "action": "hold-publication-and-research-catalog",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "hold-publication",
@@ -3335,6 +3650,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3351,6 +3667,7 @@
       "priorityScore": 24,
       "lane": "editorial-safety",
       "action": "hold-publication-and-research-catalog",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "hold-publication",
@@ -3359,6 +3676,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3375,6 +3693,7 @@
       "priorityScore": 13,
       "lane": "editorial-safety",
       "action": "hold-publication-and-research-catalog",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "hold-publication",
@@ -3383,6 +3702,7 @@
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3399,12 +3719,14 @@
       "priorityScore": 72,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3421,12 +3743,14 @@
       "priorityScore": 71,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3443,12 +3767,14 @@
       "priorityScore": 66,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3465,12 +3791,14 @@
       "priorityScore": 62,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3487,12 +3815,14 @@
       "priorityScore": 60,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3509,12 +3839,14 @@
       "priorityScore": 59,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3531,12 +3863,14 @@
       "priorityScore": 53,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3553,12 +3887,14 @@
       "priorityScore": 53,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3575,12 +3911,14 @@
       "priorityScore": 49,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3597,12 +3935,14 @@
       "priorityScore": 44,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3619,12 +3959,14 @@
       "priorityScore": 38,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3641,12 +3983,14 @@
       "priorityScore": 37,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3663,12 +4007,14 @@
       "priorityScore": 36,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3685,12 +4031,14 @@
       "priorityScore": 35,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3707,12 +4055,14 @@
       "priorityScore": 35,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3729,12 +4079,14 @@
       "priorityScore": 28,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3751,12 +4103,14 @@
       "priorityScore": 20,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
@@ -3773,12 +4127,14 @@
       "priorityScore": 18,
       "lane": "measure",
       "action": "measure-and-recheck",
+      "indexingSignal": null,
       "ownerActionRequired": false,
       "executionPlan": [
         "measure",
         "recheck-automatically"
       ],
       "qualityGates": [
+        "indexing-safety",
         "canonical-safety",
         "non-duplication",
         "strict-category-fit",
