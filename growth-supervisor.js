@@ -34,7 +34,7 @@ async function ensureSchema(env){
 function classifyAcquisition(source,referrer){
   const s=String(source||'').toLowerCase(),r=String(referrer||'').toLowerCase().replace(/^www\./,'');
   if(/(^|\.)google\.|(^|\.)bing\.|duckduckgo|search\.brave|ecosia|yahoo\./.test(r)||/ref:(google|bing|duckduckgo|search\.brave|ecosia|yahoo)/.test(s))return'seo_geo_aio';
-  if(/audience[_-]?engine|audience[_-]?growth|bluesky[_-]?engagement/.test(s))return'audience';
+  if(/audience[_-]?engine|audience[_-]?growth|audience_engagement|bluesky[_-]?engagement/.test(s))return'audience';
   if(/utm_source=(linkedin|x|twitter|bluesky)|organic_social|content_engine/.test(s)||/(^|\.)(linkedin\.com|x\.com|twitter\.com|bsky\.app)$/.test(r))return'content';
   if(/vendor_outreach|distribution|publisher|directory|launch|community|stremit|uneed|producthunt|product_hunt|saashub|startupfame|startup_fame|peerlist|reddit|hackernews|hacker-news|indiehackers/.test(s))return'distribution';
   if(r&&r!=='trytoolscout.org'&&!r.endsWith('.trytoolscout.org'))return'distribution';
