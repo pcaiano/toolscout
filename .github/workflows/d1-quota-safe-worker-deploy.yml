@@ -1,4 +1,4 @@
-name: One Shot Growth Brain Self Supervisor Deploy v2
+name: One Shot Growth Brain Self Supervisor Deploy v3
 
 on:
   push:
@@ -62,6 +62,6 @@ jobs:
           echo "=== SUPERVISOR EVENTS ==="
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,previous_status,new_status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,created_at FROM growth_supervisor_events ORDER BY created_at DESC LIMIT 20;"
           echo "=== STRICT HUMAN SOURCE TRUTH 7D ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH fv AS (SELECT session_id,source,referrer_host,created_at,ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC,id ASC) rn FROM confirmed_visitor_events WHERE created_at>=datetime('now','-7 days')) SELECT COALESCE(v.source,'unattributed') source,COALESCE(v.referrer_host,'') referrer_host,COUNT(DISTINCT h.session_id) strict_humans FROM traffic_human_evidence h LEFT JOIN fv v ON v.session_id=h.session_id AND v.rn=1 WHERE h.first_evidence_at>=datetime('now','-7 days') GROUP BY source,referrer_host ORDER BY strict_humans DESC;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH fv AS (SELECT session_id,source,referrer_host,created_at,ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC,id ASC) rn FROM confirmed_visitor_events WHERE created_at>=datetime('now','-7 days')) SELECT COALESCE(v.source,'unattributed') acquisition_source,COALESCE(v.referrer_host,'') referrer_host,COUNT(DISTINCT h.session_id) strict_humans FROM traffic_human_evidence h LEFT JOIN fv v ON v.session_id=h.session_id AND v.rn=1 WHERE h.first_evidence_at>=datetime('now','-7 days') GROUP BY COALESCE(v.source,'unattributed'),COALESCE(v.referrer_host,'') ORDER BY strict_humans DESC;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
