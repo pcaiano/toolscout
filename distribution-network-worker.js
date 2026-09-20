@@ -8,6 +8,9 @@ const MAX_CANDIDATES_PER_CYCLE=24;
 const MAX_CONTACT_SCANS=6;
 const MAX_PAGES_PER_SITE=3;
 const ROUTE_PRIORITY={form:0,linkedin:1,x:2,bluesky:3,github:4};
+const MAX_ROUTE_ACTIONS_PER_CYCLE=16;
+const ROUTE_CONTENT_RETRY_HOURS=72;
+const MAX_ROUTE_CONTENT_ATTEMPTS=2;
 let schemaReady=null;
 
 const safe=(v,n=2000)=>String(v??'').slice(0,n);
@@ -38,6 +41,13 @@ function discoverRoutes(html,baseUrl,domain){
 }
 async function fetchHtml(url){try{const r=await fetch(url,{headers:{'User-Agent':'ToolScout Distribution Network/2.1 (+https://trytoolscout.org)','Accept':'text/html'},redirect:'follow',signal:AbortSignal.timeout(7000)});if(!r.ok||!(r.headers.get('content-type')||'').includes('text/html'))return null;return {url:r.url,html:(await r.text()).slice(0,400000)}}catch{return null}}
 async function authorized(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
+async function routeHash(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16)}
+function routeMode(type){return ['x','bluesky','linkedin'].includes(String(type||''))?'content_amplification':'autonomous_qualification'}
+function routeNextAction(type){
+  if(type==='form')return 'Autonomously qualify this public contact/submission route. Execute only through a verified no-auth safe adapter; otherwise expose the exact human gate.';
+  if(type==='github')return 'Autonomously inspect the public GitHub organisation route for a safe machine-resolvable contact or contribution path; do not create unsolicited issues.';
+  return 'Feed this verified public social route into the Content Engine as a borrowed-audience amplification candidate. Mention or engage only when directly relevant and non-spammy.';
+}
 
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
@@ -82,6 +92,23 @@ async function ensureSchema(env){
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_routes_surface ON distribution_contact_routes(surface_slug,status)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_routes_domain ON distribution_contact_routes(domain,route_type)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_contact_route_actions (
+      route_id TEXT PRIMARY KEY,
+      surface_slug TEXT NOT NULL,
+      route_type TEXT NOT NULL,
+      route_url TEXT NOT NULL,
+      execution_mode TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'queued',
+      opportunity_slug TEXT,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      last_attempt_at TEXT,
+      last_result TEXT,
+      next_action TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_route_actions_status ON distribution_contact_route_actions(status,updated_at)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_route_actions_surface ON distribution_contact_route_actions(surface_slug,status)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_network_status_priority ON distribution_network_outreach(status,priority_score DESC)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_network_domain ON distribution_network_outreach(domain)`)
   ]).catch(error=>{schemaReady=null;throw error});
@@ -103,6 +130,7 @@ async function refreshCandidates(env){
       FROM distribution_opportunities o
       LEFT JOIN distribution_network_outreach n ON n.surface_slug=o.surface_slug
       WHERE o.action_url IS NOT NULL
+        AND o.surface_type!='publisher_contact_route'
         AND o.status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')
         AND (
           n.surface_slug IS NULL
@@ -249,6 +277,114 @@ async function discoverContacts(env){
   return {scanned,found,routed,suppressed};
 }
 
+
+async function materializeRouteActions(env){
+  await ensureSchema(env);
+  const q=await env.DB.prepare(`SELECT r.route_id,r.surface_slug,r.domain,r.route_type,r.route_url,r.source_url,r.status route_status,
+      n.surface_name,n.priority_score,n.suggested_subject,n.suggested_body,
+      a.execution_mode,a.status action_status,a.opportunity_slug,a.attempts,a.last_attempt_at
+    FROM distribution_contact_routes r
+    JOIN distribution_network_outreach n ON n.surface_slug=r.surface_slug
+    LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id
+    WHERE r.status IN ('discovered','in_loop')
+      AND (
+        a.route_id IS NULL
+        OR a.status IN ('queued','retry_due')
+        OR (a.status='issued_to_content' AND a.last_attempt_at<=datetime('now','-${ROUTE_CONTENT_RETRY_HOURS} hours') AND a.attempts<?)
+      )
+    ORDER BY n.priority_score DESC,r.first_seen_at ASC
+    LIMIT ?`).bind(MAX_ROUTE_CONTENT_ATTEMPTS,MAX_ROUTE_ACTIONS_PER_CYCLE).all();
+  let queued=0,synthetic=0,content=0,retried=0;
+  for(const row of q.results||[]){
+    const mode=routeMode(row.route_type),hash=await routeHash(row.route_id),oppSlug=`route-${hash}`,next=routeNextAction(row.route_type);
+    const previous=String(row.action_status||'');
+    const write=await env.DB.prepare(`INSERT INTO distribution_contact_route_actions(route_id,surface_slug,route_type,route_url,execution_mode,status,opportunity_slug,attempts,last_result,next_action,created_at,updated_at)
+      VALUES(?,?,?,?,?,'queued',?,0,NULL,?,datetime('now'),datetime('now'))
+      ON CONFLICT(route_id) DO UPDATE SET
+        surface_slug=excluded.surface_slug,
+        route_type=excluded.route_type,
+        route_url=excluded.route_url,
+        execution_mode=excluded.execution_mode,
+        status=CASE WHEN distribution_contact_route_actions.status IN ('verified_impact','executed_waiting_verification','human_action_required','auth_required','policy_blocked','exhausted') THEN distribution_contact_route_actions.status ELSE 'queued' END,
+        opportunity_slug=excluded.opportunity_slug,
+        next_action=excluded.next_action,
+        updated_at=datetime('now')
+      WHERE distribution_contact_route_actions.route_url IS NOT excluded.route_url
+         OR distribution_contact_route_actions.execution_mode IS NOT excluded.execution_mode
+         OR distribution_contact_route_actions.opportunity_slug IS NOT excluded.opportunity_slug
+         OR distribution_contact_route_actions.next_action IS NOT excluded.next_action
+         OR distribution_contact_route_actions.status='retry_due'`)
+      .bind(row.route_id,row.surface_slug,row.route_type,row.route_url,mode,oppSlug,next).run();
+    if(Number(write?.meta?.changes||write?.changes||0)>0)queued++;
+    if(previous==='retry_due')retried++;
+    await env.DB.prepare(`UPDATE distribution_contact_routes SET status='in_loop',updated_at=datetime('now') WHERE route_id=? AND status='discovered'`).bind(row.route_id).run().catch(()=>{});
+    if(mode==='autonomous_qualification'){
+      const score=Math.max(35,Math.min(95,Number(row.priority_score||0)));
+      const r=await env.DB.prepare(`INSERT INTO distribution_opportunities(surface_slug,surface_name,surface_type,audience_fit,authority,traffic_potential,backlink_value,acceptance_probability,automation_potential,effort_cost,distribution_score,status,action_url,human_required,next_action,created_at,updated_at)
+        VALUES(?,?, 'publisher_contact_route',0,0,0,0,45,80,15,?,'research_required',?,0,?,datetime('now'),datetime('now'))
+        ON CONFLICT(surface_slug) DO UPDATE SET surface_name=excluded.surface_name,action_url=excluded.action_url,distribution_score=excluded.distribution_score,next_action=excluded.next_action,updated_at=datetime('now')
+        WHERE distribution_opportunities.action_url IS NOT excluded.action_url
+           OR distribution_opportunities.distribution_score IS NOT excluded.distribution_score
+           OR distribution_opportunities.next_action IS NOT excluded.next_action`)
+        .bind(oppSlug,`${safe(row.surface_name||row.domain,150)} via ${row.route_type}`,score,row.route_url,next).run();
+      if(Number(r?.meta?.changes||r?.changes||0)>0)synthetic++;
+    }else{
+      await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at)
+        VALUES(?,?,?,?,?,'prepared',datetime('now'),datetime('now'))
+        ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status=CASE WHEN growth_action_events.status IN ('sent','completed','verified','attributed') THEN growth_action_events.status ELSE 'prepared' END,updated_at=datetime('now')
+        WHERE growth_action_events.target_url IS NOT excluded.target_url OR growth_action_events.status='legacy_unverified'`)
+        .bind(`route:${hash}`,`surface:${row.surface_slug}`,'distribution_route',row.route_type,row.route_url).run().catch(()=>{});
+      content++;
+    }
+  }
+  return {considered:(q.results||[]).length,queued,synthetic,content,retried};
+}
+
+async function reconcileRouteActions(env){
+  await ensureSchema(env);
+  const q=await env.DB.prepare(`SELECT a.route_id,a.surface_slug,a.route_type,a.execution_mode,a.status,a.opportunity_slug,a.attempts,a.last_attempt_at,
+      r.domain,r.route_url,n.status network_status,
+      o.status opportunity_status,o.last_checked_at,
+      EXISTS(
+        SELECT 1 FROM confirmed_visitor_events v
+        JOIN traffic_human_evidence h ON h.session_id=v.session_id
+        WHERE lower(replace(COALESCE(v.referrer_host,''),'www.',''))=lower(replace(r.domain,'www.',''))
+          AND (a.last_attempt_at IS NULL OR h.first_evidence_at>=a.last_attempt_at)
+      ) referral_human
+    FROM distribution_contact_route_actions a
+    JOIN distribution_contact_routes r ON r.route_id=a.route_id
+    LEFT JOIN distribution_network_outreach n ON n.surface_slug=a.surface_slug
+    LEFT JOIN distribution_opportunities o ON o.surface_slug=a.opportunity_slug
+    WHERE a.status NOT IN ('verified_impact','policy_blocked','exhausted')
+    ORDER BY a.updated_at ASC LIMIT 80`).all().catch(()=>({results:[]}));
+  let changed=0,verified=0,stalled=0,retryDue=0;
+  for(const row of q.results||[]){
+    let next=String(row.status||'queued'),result=null;
+    if(row.network_status==='adopted'||Number(row.referral_human||0)>0){next='verified_impact';result=row.network_status==='adopted'?'publisher_adoption_verified':'strict_human_referral_verified';verified++;}
+    else if(row.execution_mode==='autonomous_qualification'){
+      const s=String(row.opportunity_status||'');
+      if(['live','verified'].includes(s)){next='verified_impact';result=`route_opportunity_${s}`;verified++;}
+      else if(['submitted','pending_review'].includes(s)){next='executed_waiting_verification';result=`route_opportunity_${s}`;}
+      else if(s==='ready_to_submit'){next='qualified_auto';result='safe_adapter_ready';}
+      else if(s==='human_action_required'){next='human_action_required';result='hard_human_gate';}
+      else if(s==='auth_required'){next='auth_required';result='authentication_required';}
+      else if(['policy_blocked','rejected','skipped','unavailable_free'].includes(s)){next='policy_blocked';result=`route_opportunity_${s}`;}
+      else if(s==='research_required'){next='researching';result='autonomous_qualification_in_progress';}
+      else if(!s){next='stalled';result='missing_synthetic_opportunity';stalled++;}
+    }else if(row.execution_mode==='content_amplification'){
+      if(row.status==='issued_to_content'&&row.last_attempt_at&&String(row.last_attempt_at)<=new Date(Date.now()-ROUTE_CONTENT_RETRY_HOURS*3600000).toISOString().replace('T',' ').slice(0,19)){
+        if(Number(row.attempts||0)>=MAX_ROUTE_CONTENT_ATTEMPTS){next='exhausted';result='content_amplification_attempts_exhausted';}
+        else{next='retry_due';result='content_amplification_retry_due';retryDue++;}
+      }
+    }
+    if(next!==row.status||result){
+      const w=await env.DB.prepare(`UPDATE distribution_contact_route_actions SET status=?,last_result=COALESCE(?,last_result),updated_at=datetime('now') WHERE route_id=? AND (status IS NOT ? OR COALESCE(last_result,'') IS NOT COALESCE(?,''))`).bind(next,result,row.route_id,next,result).run();
+      if(Number(w?.meta?.changes||w?.changes||0)>0)changed++;
+    }
+  }
+  return {checked:(q.results||[]).length,changed,verified,stalled,retryDue};
+}
+
 async function verifyAdoption(env){
   await ensureSchema(env);
   const r=await env.DB.prepare(`SELECT n.surface_slug,n.domain,n.status,
@@ -272,22 +408,25 @@ async function verifyAdoption(env){
 
 async function metrics(env){
   await ensureSchema(env);
-  const [status,adoption]=await Promise.all([
+  const [status,adoption,routeActions]=await Promise.all([
     env.DB.prepare(`SELECT status,COUNT(*) n FROM distribution_network_outreach GROUP BY status`).all(),
-    env.DB.prepare(`SELECT adoption_kind,COUNT(*) n FROM distribution_network_outreach WHERE status='adopted' GROUP BY adoption_kind`).all()
+    env.DB.prepare(`SELECT adoption_kind,COUNT(*) n FROM distribution_network_outreach WHERE status='adopted' GROUP BY adoption_kind`).all(),
+    env.DB.prepare(`SELECT status,COUNT(*) n FROM distribution_contact_route_actions GROUP BY status`).all().catch(()=>({results:[]}))
   ]);
-  return {status:'connected',states:Object.fromEntries((status.results||[]).map(x=>[x.status,Number(x.n||0)])),adoption:Object.fromEntries((adoption.results||[]).map(x=>[x.adoption_kind,Number(x.n||0)]))};
+  return {status:'connected',states:Object.fromEntries((status.results||[]).map(x=>[x.status,Number(x.n||0)])),adoption:Object.fromEntries((adoption.results||[]).map(x=>[x.adoption_kind,Number(x.n||0)])),routeActions:Object.fromEntries((routeActions.results||[]).map(x=>[x.status,Number(x.n||0)]))};
 }
 
 export async function runDistributionNetworkCycle(env){
   const candidates=await refreshCandidates(env);
   const contacts=await discoverContacts(env);
+  const routeActions=await materializeRouteActions(env);
+  const routeReconciliation=await reconcileRouteActions(env);
   const adoption=await verifyAdoption(env);
-  const materialChanges=Number(candidates.newQueued||0)+Number(candidates.reopened||0)+Number(contacts.found||0)+Number(contacts.routed||0)+Number(contacts.suppressed||0)+Number(adoption.adopted||0);
+  const materialChanges=Number(candidates.newQueued||0)+Number(candidates.reopened||0)+Number(contacts.found||0)+Number(contacts.routed||0)+Number(contacts.suppressed||0)+Number(routeActions.queued||0)+Number(routeActions.synthetic||0)+Number(routeActions.content||0)+Number(routeReconciliation.changed||0)+Number(adoption.adopted||0);
   if(materialChanges>0){
-    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1 materially changed ${materialChanges} item(s): ${candidates.newQueued} newly queued, ${candidates.reopened} reopened, ${contacts.found} role emails found, ${contacts.routed} alternate routes found, ${contacts.suppressed} suppressed and ${adoption.adopted} new adoptions verified. No-change cycles are not persisted.`).run().catch(()=>{});
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1 materially changed ${materialChanges} item(s): ${candidates.newQueued} newly queued, ${candidates.reopened} reopened, ${contacts.found} role emails found, ${contacts.routed} alternate routes found, ${routeActions.queued} route actions queued, ${routeActions.synthetic} autonomous route opportunities materialized, ${routeActions.content} content-amplification routes prepared, ${routeReconciliation.verified} route impacts verified, ${routeReconciliation.retryDue} retries due, ${contacts.suppressed} suppressed and ${adoption.adopted} new adoptions verified. No-change cycles are not persisted.`).run().catch(()=>{});
   }
-  return {ok:true,candidates,contacts,adoption,materialChanges,write_policy:'material_change_only'};
+  return {ok:true,candidates,contacts,routeActions,routeReconciliation,adoption,materialChanges,write_policy:'material_change_only',closed_loop_routes:true};
 }
 
 export default {
