@@ -90,7 +90,7 @@ function policy(engine,c){
     if(c.gscImpressions>0)return{status:'active',directive:'execute_observed_search_demand',config:withBacklinks({mode:'execute_observed_search_demand',run_executor:true,priority_boost:25,observed_demand_only:true},c)};
     return{status:'active',directive:'build_search_visibility_and_execute',config:withBacklinks({mode:'build_search_visibility_and_execute',run_executor:true,priority_boost:20},c)};
   }
-  if(engine==='affiliate')return{status:'supporting',directive:'maintain_monetization_readiness',config:{mode:'maintain_monetization_readiness',priority_cap:35,north_star_secondary:true,business_funnel:BUSINESS_FUNNEL}};
+  if(engine==='affiliate')return{status:'supporting',directive:'maintain_monetization_readiness',config:{mode:'maintenance_only',priority_cap:35,north_star_secondary:true,business_funnel:BUSINESS_FUNNEL}};
   if(engine==='catalog')return{status:'supporting',directive:'demand_led_quality_only',config:{mode:'demand_led_quality',priority_cap:50,admit_when_search_or_quality_evidence:true,north_star_secondary:true,business_funnel:BUSINESS_FUNNEL}};
   return{status:'observed',directive:'observe',config:{mode:'observe'}};
 }
