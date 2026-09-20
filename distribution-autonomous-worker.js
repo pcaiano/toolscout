@@ -385,6 +385,92 @@ async function qualify(env){
   }
   return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT,write_policy:'material_or_due_only'};
 }
+async function syncExistingHumanGates(env){
+  await ensureHumanGateSchema(env);
+  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,status,action_url,next_action,live_url
+    FROM distribution_opportunities
+    WHERE action_url IS NOT NULL
+      AND status IN ('human_action_required','auth_required','approval_required')
+    ORDER BY updated_at DESC
+    LIMIT 40`).all();
+  let synced=0;
+  for(const row of q.results||[]){
+    const gateType=row.status==='auth_required'?'authentication':(row.status==='approval_required'?'owner_approval':'human_confirmation');
+    const reason=row.next_action||(
+      gateType==='authentication'
+        ?'Owner authentication is required before ToolScout can be submitted.'
+        :'A genuine human-only step is required before autonomous execution can continue.'
+    );
+    await openDistributionHumanGate(env,row,{gateType,actionUrl:row.action_url,reason,verificationUrl:row.live_url||null});
+    synced++;
+  }
+  return synced;
+}
+
+function gateEvidence(page,url){
+  const body=String(page?.body||'');
+  const finalUrl=String(page?.url||url||'');
+  const urlEvidence=/toolscout/i.test(finalUrl);
+  const bodyEvidence=/trytoolscout\.org|\bToolScout\b/i.test(body);
+  return {ok:Boolean(page&&bodyEvidence||page&&urlEvidence),bodyEvidence,urlEvidence,finalUrl};
+}
+
+async function verifyHumanGateResolutions(env){
+  await ensureHumanGateSchema(env);
+  const gates=await dueHumanGateVerifications(env,{engine:'distribution',limit:10});
+  let checked=0,resolved=0,deferred=0,reopened=0;
+  for(const gate of gates){
+    checked++;
+    const [opp,adapter,placement]=await Promise.all([
+      env.DB.prepare(`SELECT surface_slug,surface_name,status,action_url,live_url,next_action FROM distribution_opportunities WHERE surface_slug=? LIMIT 1`).bind(gate.subject_key).first().catch(()=>null),
+      env.DB.prepare(`SELECT verification_endpoint,public_url FROM distribution_auto_adapters WHERE surface_slug=? LIMIT 1`).bind(gate.subject_key).first().catch(()=>null),
+      env.DB.prepare(`SELECT public_url FROM distribution_placements WHERE surface_slug=? LIMIT 1`).bind(gate.subject_key).first().catch(()=>null)
+    ]);
+    const candidates=[gate.result_url,gate.verification_url,opp?.live_url,adapter?.verification_endpoint,adapter?.public_url,placement?.public_url]
+      .filter(Boolean)
+      .map(String)
+      .filter((v,i,a)=>a.indexOf(v)===i)
+      .slice(0,5);
+    let proof=null;
+    for(const candidate of candidates){
+      const page=await text(candidate,6000);
+      const evidence=gateEvidence(page,candidate);
+      if(evidence.ok){proof={candidate,page,evidence};break}
+    }
+    if(proof){
+      const publicUrl=proof.evidence.finalUrl||proof.candidate;
+      const link=backlinkEvidence(proof.page?.body||'');
+      await resolveHumanGate(env,gate.gate_key,{resultUrl:publicUrl,detail:`verified_public_evidence:${publicUrl}`});
+      await env.DB.prepare(`UPDATE distribution_opportunities
+        SET status='verified',human_required=0,live_url=?,next_action='Human gate completed and public ToolScout evidence verified autonomously. Continue attribution and performance measurement.',last_checked_at=datetime('now'),updated_at=datetime('now')
+        WHERE surface_slug=?`).bind(publicUrl,gate.subject_key).run().catch(()=>{});
+      await env.DB.prepare(`INSERT INTO distribution_placements(surface_slug,public_url,placement_verified,backlink_verified,link_rel,first_verified_at,last_checked_at,created_at,updated_at)
+        VALUES(?,?,1,?,?,datetime('now'),datetime('now'),datetime('now'),datetime('now'))
+        ON CONFLICT(surface_slug) DO UPDATE SET public_url=excluded.public_url,placement_verified=1,backlink_verified=MAX(distribution_placements.backlink_verified,excluded.backlink_verified),link_rel=COALESCE(excluded.link_rel,distribution_placements.link_rel),first_verified_at=COALESCE(distribution_placements.first_verified_at,datetime('now')),last_checked_at=datetime('now'),updated_at=datetime('now')`)
+        .bind(gate.subject_key,publicUrl,link.found?1:0,link.rel).run().catch(()=>{});
+      await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at)
+        VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+        .bind(`human_gate_${crypto.randomUUID()}`,gate.subject_key,'human_gate_resolved','verified',gate.action_url||null,publicUrl,'Owner completed the human-only step; autonomous verification confirmed public ToolScout evidence and resumed the distribution loop.').run().catch(()=>{});
+      resolved++;
+      continue;
+    }
+    const attempts=Number(gate.verification_attempts||0)+1;
+    if(attempts>=4){
+      const reason='You marked this human step complete, but ToolScout still cannot verify a public result automatically.';
+      const instructions='Open the external service and confirm the ToolScout listing/submission is actually live. If it is live, copy the exact public ToolScout/profile URL. Return to the Chairman Queue, open this task and mark it done again, pasting that public URL. If the listing is still pending review, leave it until the service publishes it.';
+      await reopenHumanGate(env,gate.gate_key,{reason,instructions});
+      await env.DB.prepare(`UPDATE distribution_opportunities
+        SET status='human_action_required',human_required=1,next_action=?,updated_at=datetime('now')
+        WHERE surface_slug=?`).bind(reason,gate.subject_key).run().catch(()=>{});
+      reopened++;
+    }else{
+      await deferHumanGateVerification(env,gate.gate_key,{detail:candidates.length?'public_evidence_not_yet_confirmed':'no_public_verification_url_yet',hours:attempts===1?2:6});
+      deferred++;
+    }
+  }
+  return {ok:true,checked,resolved,deferred,reopened};
+}
+
 function externalEvidenceUrl(value,endpoint){
   try{
     const u=new URL(String(value||''),endpoint);
@@ -587,7 +673,9 @@ async function autonomyMetrics(env){
   ]);
   let referralSessions=0;
   try{const metrics=await distributionSurfaceMetrics(env);referralSessions=(metrics||[]).reduce((n,m)=>n+Math.max(0,Number(m?.browser_confirmed_sessions??m?.human_sessions??0)||0),0)}catch{}
-  return {discovered:Number(opp?.total||0),autonomousAttempted:Number(sub?.autonomous_attempted||0),submitted:Number(sub?.submitted||0),verifiedPlacements:Number(place?.placements||opp?.verified||0),verifiedBacklinks:Number(place?.backlinks||0),referralSessions,chairmanActions:Number(opp?.chairman||0)+Number(editorial?.chairman_editorial||0),windowDays:30};
+  const gates=await humanGateSnapshot(env).catch(()=>({byEngine:{}}));
+  const distributionGates=gates?.byEngine?.distribution||{};
+  return {discovered:Number(opp?.total||0),autonomousAttempted:Number(sub?.autonomous_attempted||0),submitted:Number(sub?.submitted||0),verifiedPlacements:Number(place?.placements||opp?.verified||0),verifiedBacklinks:Number(place?.backlinks||0),referralSessions,chairmanActions:Number(distributionGates.open||0)+Number(editorial?.chairman_editorial||0),humanGateContract:distributionGates,windowDays:30};
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
@@ -597,14 +685,17 @@ export async function runAutonomousDistributionCycle(env){
   await env.DB.prepare(`UPDATE engine_runs
     SET status='failed',completed_at=datetime('now'),detail='superseded_by_healthy_autonomous_cycle',evidence_json='{"reason":"superseded_by_healthy_autonomous_cycle"}',updated_at=datetime('now')
     WHERE engine='distribution' AND mission='autonomous_cycle' AND status='running' AND started_at<datetime('now','-5 minutes')`).run().catch(()=>{});
+  await ensureHumanGateSchema(env);
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
+  const humanGateSync=await syncExistingHumanGates(env);
+  const humanGateVerification=await verifyHumanGateResolutions(env);
   const routeRefresh=await refreshPersistentActionUrls(env);
   const qualification=await qualify(env);
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
-  return {ok:true,technicalSuppressed,normalized,routeRefresh,qualification,execution,verification,footprint};
+  return {ok:true,technicalSuppressed,normalized,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
