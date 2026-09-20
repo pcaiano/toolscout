@@ -1,41 +1,61 @@
-name: One Shot External Proof Union Audit
+name: One Shot External Proof Consolidation
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - fix/external-proof-consolidation
     paths:
+      - 'growth-command-center-v2-worker.js'
       - '.github/workflows/d1-quota-safe-worker-deploy.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: toolscout-external-proof-consolidation
+  cancel-in-progress: false
+
 jobs:
-  audit:
+  validate-deploy-prove:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Cross-check verified external proof
+
+      - name: Validate external proof consolidation
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT r.surface_slug,a.status,a.route_id,a.updated_at FROM distribution_contact_route_actions a JOIN distribution_contact_routes r ON r.route_id=a.route_id WHERE a.status IN ('verified_placement','verified_human_impact') ORDER BY a.updated_at DESC;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,status,live_url,action_url,updated_at FROM distribution_opportunities WHERE status IN ('verified','live') ORDER BY updated_at DESC;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH proof AS (
-            SELECT surface_slug,'placement_ledger' source FROM distribution_placements WHERE placement_verified=1
-            UNION
-            SELECT r.surface_slug,'route_action' source FROM distribution_contact_route_actions a JOIN distribution_contact_routes r ON r.route_id=a.route_id WHERE a.status IN ('verified_placement','verified_human_impact')
-            UNION
-            SELECT surface_slug,'opportunity' source FROM distribution_opportunities WHERE status IN ('verified','live')
-          )
-          SELECT surface_slug,GROUP_CONCAT(source) sources FROM proof GROUP BY surface_slug ORDER BY surface_slug;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH proof AS (
+          node --check growth-command-center-v2-worker.js
+          grep -q "external_proof AS" growth-command-center-v2-worker.js
+          grep -q "toolscout-machine-discovery" growth-command-center-v2-worker.js
+
+      - name: Deploy corrected Worker
+        if: github.ref == 'refs/heads/main'
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Prove consolidated external proof
+        if: github.ref == 'refs/heads/main'
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "WITH proof AS (
             SELECT surface_slug FROM distribution_placements WHERE placement_verified=1
             UNION
             SELECT r.surface_slug FROM distribution_contact_route_actions a JOIN distribution_contact_routes r ON r.route_id=a.route_id WHERE a.status IN ('verified_placement','verified_human_impact')
             UNION
             SELECT surface_slug FROM distribution_opportunities WHERE status IN ('verified','live')
-          ) SELECT COUNT(*) distinct_verified_surfaces FROM proof;"
+          ),
+          external_proof AS (
+            SELECT surface_slug FROM proof WHERE surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')
+          )
+          SELECT
+            (SELECT COUNT(*) FROM external_proof) placements,
+            (SELECT COUNT(DISTINCT surface_slug) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1 AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')) backlinks;" > /tmp/proof.json
+          cat /tmp/proof.json
+          jq -e '.[0].results[0] | .placements==6 and .backlinks==3' /tmp/proof.json
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

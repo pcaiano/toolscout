@@ -247,7 +247,24 @@ async function growthOpsSnapshot(request,env,ctx,stats){
     safeFirst(env,`SELECT MAX(created_at) AS last_event_at FROM audience_events`),
     safeFirst(env,`SELECT MAX(created_at) AS last_publish_at,COUNT(*) AS published_30d FROM audience_events WHERE event_type='content_published' AND status='published' AND created_at>=datetime('now','-30 days')`),
     safeAll(env,`SELECT status,COUNT(*) count FROM distribution_network_outreach GROUP BY status ORDER BY count DESC`),
-    safeFirst(env,`SELECT COUNT(*) placements,COALESCE(SUM(backlink_verified),0) backlinks FROM distribution_placements WHERE placement_verified=1`)
+    safeFirst(env,`WITH proof AS (
+      SELECT surface_slug FROM distribution_placements WHERE placement_verified=1
+      UNION
+      SELECT r.surface_slug FROM distribution_contact_route_actions a
+      JOIN distribution_contact_routes r ON r.route_id=a.route_id
+      WHERE a.status IN ('verified_placement','verified_human_impact')
+      UNION
+      SELECT surface_slug FROM distribution_opportunities WHERE status IN ('verified','live')
+    ),
+    external_proof AS (
+      SELECT surface_slug FROM proof
+      WHERE surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')
+    )
+    SELECT
+      (SELECT COUNT(*) FROM external_proof) placements,
+      (SELECT COUNT(DISTINCT surface_slug) FROM distribution_placements
+        WHERE placement_verified=1 AND backlink_verified=1
+          AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')) backlinks`)
   ]);
   const queue=await chairmanQueue(request,env,ctx,{verifyLinks:false});
   const [growthCardCore,actionImpact]=await Promise.all([
