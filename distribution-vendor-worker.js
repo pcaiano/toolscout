@@ -48,14 +48,15 @@ async function refreshVendorAmplification(request,env){
       const aff=affiliate?.[slug];
       const route=routeByPath.get(cleanPath(assetUrl))||null;
       const searchBoost=route?Math.min(25,Math.round(Number(route.priorityScore||0)/6)):0;
-      const priority=Math.min(100,50+(aff?.enabled&&aff?.url?12:0)+(assetUrl.includes('-vs-')?12:assetUrl.includes('/tools/')?8:6)+searchBoost);
+      const backlinkBoost=route?15:8;
+      const priority=Math.min(100,50+(aff?.enabled&&aff?.url?12:0)+(assetUrl.includes('-vs-')?12:assetUrl.includes('/tools/')?8:6)+searchBoost+backlinkBoost);
       if(route)searchPrioritized++;
       let domain=null;try{domain=new URL(tool.sourceUrl||'').hostname.replace(/^www\./,'');}catch{}
       const title=assetUrl.split('/').filter(Boolean).pop()?.replace(/\.html$/i,'').replace(/-/g,' ')||'ToolScout feature';
       const subject=`${tool.name} featured on ToolScout`;
-      const body=`ToolScout recently featured ${tool.name} in ${title}. The page is designed for software buyers comparing options for a specific job to be done. If it is useful for your audience, feel free to share or reference the analysis. ToolScout rankings are based on fit and are not sold. ${assetUrl}`;
-      await env.DB.prepare(`INSERT INTO distribution_vendor_amplification(tool_slug,asset_url,trigger_type,priority_score,status,vendor_domain,suggested_subject,suggested_body,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(tool_slug,asset_url) DO UPDATE SET priority_score=excluded.priority_score,vendor_domain=excluded.vendor_domain,suggested_subject=excluded.suggested_subject,suggested_body=excluded.suggested_body,updated_at=datetime('now')`)
-        .bind(slug,assetUrl,route?'gsc_priority_feature':assetUrl.includes('-vs-')?'comparison':'editorial_feature',priority,'queued',domain,subject,body).run();
+      const body=`ToolScout recently featured ${tool.name} in ${title}. The page is designed for software buyers comparing options for a specific job to be done. If the analysis is genuinely useful to your audience, you are welcome to share it or cite the relevant ToolScout page from an appropriate resources, press, community or partner page. We do not request reciprocal links and do not pay for ranking links. ToolScout rankings are based on fit and are not sold. ${assetUrl}`;
+      await env.DB.prepare(`INSERT INTO distribution_vendor_amplification(tool_slug,asset_url,trigger_type,priority_score,status,vendor_domain,suggested_subject,suggested_body,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now')) ON CONFLICT(tool_slug,asset_url) DO UPDATE SET trigger_type=excluded.trigger_type,priority_score=excluded.priority_score,vendor_domain=excluded.vendor_domain,suggested_subject=excluded.suggested_subject,suggested_body=excluded.suggested_body,updated_at=datetime('now')`)
+        .bind(slug,assetUrl,route?'gsc_backlink_reference':assetUrl.includes('-vs-')?'comparison_reference':'editorial_reference',priority,'queued',domain,subject,body).run();
       queued++;
     }
   }
