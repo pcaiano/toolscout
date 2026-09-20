@@ -1,6 +1,7 @@
 import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
+import {ensureHumanGateSchema,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,reopenHumanGate,humanGateSnapshot} from './human-gate-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
@@ -208,6 +209,41 @@ async function storeAutoAdapter(env,row,h,adapter,policyState){
   await env.DB.prepare(`INSERT INTO distribution_auto_adapters(surface_slug,source_url,endpoint,method,content_type,payload_template_json,confidence,policy_state,verification_source,verification_endpoint,public_url,verification_method,auth_type,auth_detail,last_checked_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET source_url=excluded.source_url,endpoint=excluded.endpoint,method=excluded.method,content_type=excluded.content_type,payload_template_json=excluded.payload_template_json,confidence=excluded.confidence,policy_state=excluded.policy_state,verification_source=excluded.verification_source,verification_endpoint=excluded.verification_endpoint,public_url=excluded.public_url,verification_method=excluded.verification_method,auth_type=excluded.auth_type,auth_detail=excluded.auth_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
     .bind(row.surface_slug,h.url,adapter.endpoint,adapter.method||'POST',adapter.content_type||'application/json',JSON.stringify(adapter.payload),adapter.confidence,policyState,adapter.verification_source,adapter.verification_endpoint||null,adapter.public_url||null,adapter.verification_method||'GET',adapter.auth_required?'openapi_security':null,adapter.auth_detail?JSON.stringify(adapter.auth_detail):null).run();
 }
+function humanGatePayload(){
+  return {
+    name:'ToolScout',
+    website:'https://trytoolscout.org/',
+    domain:'trytoolscout.org',
+    description:'ToolScout is an independent software discovery and recommendation platform.',
+    tagline:'Find the right software for the job without the noise.'
+  };
+}
+async function openDistributionHumanGate(env,row,{gateType='human_confirmation',actionUrl=null,reason=null,verificationUrl=null}={}){
+  const target=row.surface_name||row.surface_slug;
+  const isAuth=gateType==='authentication';
+  const instructions=isAuth
+    ?'Open the exact action page. Sign in, create the required account, complete email/OTP verification, or authorize access as required. Then complete the ToolScout listing/submission using the prepared truthful ToolScout details. Do not buy promotion, add a reciprocal badge, accept optional paid upgrades, or invent claims. When the external step is complete, return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it so autonomous verification can close the gate immediately.'
+    :'Open the exact action page and complete only the human-only step shown there, such as CAPTCHA, explicit confirmation, material terms acceptance, or the final irreversible submit. Use the prepared truthful ToolScout details. Do not buy promotion, add reciprocal badges, or invent claims. Then return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it for autonomous verification.';
+  const gateKey=await upsertHumanGate(env,{
+    engine:'distribution',
+    subjectType:'surface',
+    subjectKey:row.surface_slug,
+    gateType,
+    title:`${target}: human step required`,
+    reason:reason||row.next_action||'Autonomous execution reached a genuine human-only gate.',
+    instructions,
+    actionUrl:actionUrl||row.action_url,
+    resolutionMode:'verify_publication',
+    payload:humanGatePayload(),
+    verificationUrl
+  });
+  await env.DB.prepare(`UPDATE distribution_opportunities
+    SET human_required=1,
+        next_action=?,
+        updated_at=datetime('now')
+    WHERE surface_slug=?`).bind(`Human Gate Contract ${gateKey} opened. Complete the exact external step from Chairman Queue, then mark it done for autonomous verification.`,row.surface_slug).run().catch(()=>{});
+  return gateKey;
+}
 async function qualifyOne(env,row){
   let effectiveRow=row;
   if(isTechnicalSurface(row.action_url)){
@@ -229,16 +265,20 @@ async function qualifyOne(env,row){
     return 'policy_blocked';
   }
   if(HUMAN_BLOCK_RE.test(h.body)||(relatedPolicy&&HUMAN_BLOCK_RE.test(relatedPolicy))){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Autonomous research exhausted safe routes and detected a genuine human-only gate such as CAPTCHA or explicit terms confirmation.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'human_action_required','hard_human_gate');
+    const reason='Autonomous research exhausted safe routes and detected a genuine human-only gate such as CAPTCHA, explicit confirmation or material terms acceptance.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'human_confirmation',actionUrl:h.url,reason});
+    await mark(env,{...effectiveRow,action_url:h.url},'human_action_required','hard_human_gate');
     return 'human_action_required';
   }
   const adapter=await findOpenApi(h.url,h.body);
   if(adapter){
     if(adapter.auth_required){
       await storeAutoAdapter(env,effectiveRow,h,adapter,'auth_required');
-      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,automation_potential=85,acceptance_probability=70,next_action='Verified JSON submission API discovered automatically, but it requires one-time authentication. Configure an authorized credential before execution.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-      await mark(env,effectiveRow,'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
+      const reason='Verified submission API discovered automatically, but the external service requires owner authentication before ToolScout can be submitted.';
+      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,automation_potential=85,acceptance_probability=70,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+      await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason,verificationUrl:adapter.verification_endpoint||adapter.public_url||null});
+      await mark(env,{...effectiveRow,action_url:h.url},'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
       return 'auth_required';
     }
     await storeAutoAdapter(env,effectiveRow,h,adapter,'verified');
@@ -257,17 +297,17 @@ async function qualifyOne(env,row){
     .filter(u=>u!==h.url&&sameHostFamily(u,h.url)&&ACTION_ROUTE_RE.test(u))
     .filter(u=>!/(privacy|terms|legal|blog|docs|help|support|pricing)(?:[\\/?#]|$)/i.test(new URL(u).pathname))
   )].slice(0,5);
-  let linkedAuth=false,linkedHuman=false,linkedPolicy=false;
+  let linkedAuth=false,linkedHuman=false,linkedPolicy=false,linkedAuthUrl=null,linkedHumanUrl=null;
   if(linkedActionUrls.length){
     const linkedPages=await Promise.all(linkedActionUrls.map(async u=>({u,page:await text(u,3500)})));
     for(const item of linkedPages){
       const page=item.page;if(!page)continue;
       const policy=await relatedPolicyText(page.url,page.body);
       if(POLICY_BLOCK_RE.test(page.body)||(policy&&POLICY_BLOCK_RE.test(policy))){linkedPolicy=true;continue}
-      if(HUMAN_BLOCK_RE.test(page.body)||(policy&&HUMAN_BLOCK_RE.test(policy))){linkedHuman=true;continue}
+      if(HUMAN_BLOCK_RE.test(page.body)||(policy&&HUMAN_BLOCK_RE.test(policy))){linkedHuman=true;linkedHumanUrl=page.url;continue}
       const linkedApi=await findOpenApi(page.url,page.body);
       if(linkedApi){
-        if(linkedApi.auth_required){linkedAuth=true;continue}
+        if(linkedApi.auth_required){linkedAuth=true;linkedAuthUrl=page.url;continue}
         await storeAutoAdapter(env,effectiveRow,page,linkedApi,'verified');
         await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth submission API discovered by following a same-host action route automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(page.url,effectiveRow.surface_slug).run();
         await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_auto_adapter:${linkedApi.endpoint}`);
@@ -280,17 +320,23 @@ async function qualifyOne(env,row){
         await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_safe_form_adapter:${linkedForm.endpoint}`);
         return 'ready_to_submit';
       }
-      if(AUTH_RE.test(page.body))linkedAuth=true;
+      if(AUTH_RE.test(page.body)){linkedAuth=true;linkedAuthUrl=page.url;}
     }
   }
   if(linkedHuman){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,next_action='Autonomous same-host route discovery found the submission path, but it contains a genuine human-only gate such as CAPTCHA or explicit confirmation.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'human_action_required','linked_submission_route_human_gate');
+    const actionUrl=linkedHumanUrl||effectiveRow.action_url;
+    const reason='Autonomous route discovery found the exact submission path, but it contains a genuine human-only gate such as CAPTCHA or explicit confirmation.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(actionUrl,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:actionUrl},{gateType:'human_confirmation',actionUrl,reason});
+    await mark(env,{...effectiveRow,action_url:actionUrl},'human_action_required','linked_submission_route_human_gate');
     return 'human_action_required';
   }
   if(linkedAuth){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,next_action='Autonomous same-host route discovery found the submission path, but authentication is required. Keep researching machine identity or surface exact one-time setup.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'auth_required','linked_submission_route_auth_required');
+    const actionUrl=linkedAuthUrl||effectiveRow.action_url;
+    const reason='Autonomous route discovery found the exact submission path, but owner authentication is required before ToolScout can be submitted.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(actionUrl,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:actionUrl},{gateType:'authentication',actionUrl,reason});
+    await mark(env,{...effectiveRow,action_url:actionUrl},'auth_required','linked_submission_route_auth_required');
     return 'auth_required';
   }
   if(linkedPolicy){
@@ -300,8 +346,10 @@ async function qualifyOne(env,row){
   }
   const pageText=h.body.toLowerCase();
   if(AUTH_RE.test(pageText)){
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=0,next_action='Authentication is required. Keep this inside the autonomy research loop until a supported credential or machine identity route is found.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
-    await mark(env,effectiveRow,'auth_required','authentication_route_without_safe_adapter');
+    const reason='The exact submission route requires owner authentication and no safe machine identity route was found.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason});
+    await mark(env,{...effectiveRow,action_url:h.url},'auth_required','authentication_route_without_safe_adapter');
     return 'auth_required';
   }
   await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action='No safe automatic submission route found yet. Continue autonomous protocol and action-route research; do not escalate to Chairman.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
@@ -309,7 +357,7 @@ async function qualifyOne(env,row){
   return 'research_required';
 }
 async function qualify(env){
-  const q=await env.DB.prepare(`SELECT o.surface_slug,o.action_url,o.distribution_score,o.status,o.last_checked_at
+  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,o.status,o.last_checked_at
     FROM distribution_opportunities o
     WHERE o.human_required=0 AND o.action_url IS NOT NULL AND o.surface_slug<>'indexnow'
       AND (
@@ -337,6 +385,92 @@ async function qualify(env){
   }
   return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT,write_policy:'material_or_due_only'};
 }
+async function syncExistingHumanGates(env){
+  await ensureHumanGateSchema(env);
+  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,status,action_url,next_action,live_url
+    FROM distribution_opportunities
+    WHERE action_url IS NOT NULL
+      AND status IN ('human_action_required','auth_required','approval_required')
+    ORDER BY updated_at DESC
+    LIMIT 40`).all();
+  let synced=0;
+  for(const row of q.results||[]){
+    const gateType=row.status==='auth_required'?'authentication':(row.status==='approval_required'?'owner_approval':'human_confirmation');
+    const reason=row.next_action||(
+      gateType==='authentication'
+        ?'Owner authentication is required before ToolScout can be submitted.'
+        :'A genuine human-only step is required before autonomous execution can continue.'
+    );
+    await openDistributionHumanGate(env,row,{gateType,actionUrl:row.action_url,reason,verificationUrl:row.live_url||null});
+    synced++;
+  }
+  return synced;
+}
+
+function gateEvidence(page,url){
+  const body=String(page?.body||'');
+  const finalUrl=String(page?.url||url||'');
+  const urlEvidence=/toolscout/i.test(finalUrl);
+  const bodyEvidence=/trytoolscout\.org|\bToolScout\b/i.test(body);
+  return {ok:Boolean(page&&bodyEvidence||page&&urlEvidence),bodyEvidence,urlEvidence,finalUrl};
+}
+
+async function verifyHumanGateResolutions(env){
+  await ensureHumanGateSchema(env);
+  const gates=await dueHumanGateVerifications(env,{engine:'distribution',limit:10});
+  let checked=0,resolved=0,deferred=0,reopened=0;
+  for(const gate of gates){
+    checked++;
+    const [opp,adapter,placement]=await Promise.all([
+      env.DB.prepare(`SELECT surface_slug,surface_name,status,action_url,live_url,next_action FROM distribution_opportunities WHERE surface_slug=? LIMIT 1`).bind(gate.subject_key).first().catch(()=>null),
+      env.DB.prepare(`SELECT verification_endpoint,public_url FROM distribution_auto_adapters WHERE surface_slug=? LIMIT 1`).bind(gate.subject_key).first().catch(()=>null),
+      env.DB.prepare(`SELECT public_url FROM distribution_placements WHERE surface_slug=? LIMIT 1`).bind(gate.subject_key).first().catch(()=>null)
+    ]);
+    const candidates=[gate.result_url,gate.verification_url,opp?.live_url,adapter?.verification_endpoint,adapter?.public_url,placement?.public_url]
+      .filter(Boolean)
+      .map(String)
+      .filter((v,i,a)=>a.indexOf(v)===i)
+      .slice(0,5);
+    let proof=null;
+    for(const candidate of candidates){
+      const page=await text(candidate,6000);
+      const evidence=gateEvidence(page,candidate);
+      if(evidence.ok){proof={candidate,page,evidence};break}
+    }
+    if(proof){
+      const publicUrl=proof.evidence.finalUrl||proof.candidate;
+      const link=backlinkEvidence(proof.page?.body||'');
+      await resolveHumanGate(env,gate.gate_key,{resultUrl:publicUrl,detail:`verified_public_evidence:${publicUrl}`});
+      await env.DB.prepare(`UPDATE distribution_opportunities
+        SET status='verified',human_required=0,live_url=?,next_action='Human gate completed and public ToolScout evidence verified autonomously. Continue attribution and performance measurement.',last_checked_at=datetime('now'),updated_at=datetime('now')
+        WHERE surface_slug=?`).bind(publicUrl,gate.subject_key).run().catch(()=>{});
+      await env.DB.prepare(`INSERT INTO distribution_placements(surface_slug,public_url,placement_verified,backlink_verified,link_rel,first_verified_at,last_checked_at,created_at,updated_at)
+        VALUES(?,?,1,?,?,datetime('now'),datetime('now'),datetime('now'),datetime('now'))
+        ON CONFLICT(surface_slug) DO UPDATE SET public_url=excluded.public_url,placement_verified=1,backlink_verified=MAX(distribution_placements.backlink_verified,excluded.backlink_verified),link_rel=COALESCE(excluded.link_rel,distribution_placements.link_rel),first_verified_at=COALESCE(distribution_placements.first_verified_at,datetime('now')),last_checked_at=datetime('now'),updated_at=datetime('now')`)
+        .bind(gate.subject_key,publicUrl,link.found?1:0,link.rel).run().catch(()=>{});
+      await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at)
+        VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+        .bind(`human_gate_${crypto.randomUUID()}`,gate.subject_key,'human_gate_resolved','verified',gate.action_url||null,publicUrl,'Owner completed the human-only step; autonomous verification confirmed public ToolScout evidence and resumed the distribution loop.').run().catch(()=>{});
+      resolved++;
+      continue;
+    }
+    const attempts=Number(gate.verification_attempts||0)+1;
+    if(attempts>=4){
+      const reason='You marked this human step complete, but ToolScout still cannot verify a public result automatically.';
+      const instructions='Open the external service and confirm the ToolScout listing/submission is actually live. If it is live, copy the exact public ToolScout/profile URL. Return to the Chairman Queue, open this task and mark it done again, pasting that public URL. If the listing is still pending review, leave it until the service publishes it.';
+      await reopenHumanGate(env,gate.gate_key,{reason,instructions});
+      await env.DB.prepare(`UPDATE distribution_opportunities
+        SET status='human_action_required',human_required=1,next_action=?,updated_at=datetime('now')
+        WHERE surface_slug=?`).bind(reason,gate.subject_key).run().catch(()=>{});
+      reopened++;
+    }else{
+      await deferHumanGateVerification(env,gate.gate_key,{detail:candidates.length?'public_evidence_not_yet_confirmed':'no_public_verification_url_yet',hours:attempts===1?2:6});
+      deferred++;
+    }
+  }
+  return {ok:true,checked,resolved,deferred,reopened};
+}
+
 function externalEvidenceUrl(value,endpoint){
   try{
     const u=new URL(String(value||''),endpoint);
@@ -539,7 +673,9 @@ async function autonomyMetrics(env){
   ]);
   let referralSessions=0;
   try{const metrics=await distributionSurfaceMetrics(env);referralSessions=(metrics||[]).reduce((n,m)=>n+Math.max(0,Number(m?.browser_confirmed_sessions??m?.human_sessions??0)||0),0)}catch{}
-  return {discovered:Number(opp?.total||0),autonomousAttempted:Number(sub?.autonomous_attempted||0),submitted:Number(sub?.submitted||0),verifiedPlacements:Number(place?.placements||opp?.verified||0),verifiedBacklinks:Number(place?.backlinks||0),referralSessions,chairmanActions:Number(opp?.chairman||0)+Number(editorial?.chairman_editorial||0),windowDays:30};
+  const gates=await humanGateSnapshot(env).catch(()=>({byEngine:{}}));
+  const distributionGates=gates?.byEngine?.distribution||{};
+  return {discovered:Number(opp?.total||0),autonomousAttempted:Number(sub?.autonomous_attempted||0),submitted:Number(sub?.submitted||0),verifiedPlacements:Number(place?.placements||opp?.verified||0),verifiedBacklinks:Number(place?.backlinks||0),referralSessions,chairmanActions:Number(distributionGates.open||0)+Number(editorial?.chairman_editorial||0),humanGateContract:distributionGates,windowDays:30};
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
@@ -549,14 +685,17 @@ export async function runAutonomousDistributionCycle(env){
   await env.DB.prepare(`UPDATE engine_runs
     SET status='failed',completed_at=datetime('now'),detail='superseded_by_healthy_autonomous_cycle',evidence_json='{"reason":"superseded_by_healthy_autonomous_cycle"}',updated_at=datetime('now')
     WHERE engine='distribution' AND mission='autonomous_cycle' AND status='running' AND started_at<datetime('now','-5 minutes')`).run().catch(()=>{});
+  await ensureHumanGateSchema(env);
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
+  const humanGateSync=await syncExistingHumanGates(env);
+  const humanGateVerification=await verifyHumanGateResolutions(env);
   const routeRefresh=await refreshPersistentActionUrls(env);
   const qualification=await qualify(env);
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
-  return {ok:true,technicalSuppressed,normalized,routeRefresh,qualification,execution,verification,footprint};
+  return {ok:true,technicalSuppressed,normalized,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
