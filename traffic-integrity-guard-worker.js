@@ -183,7 +183,14 @@ async function handlePageConfirmation(request,env,ctx,body){
   const spanMs=Number.isFinite(firstMs)&&Number.isFinite(lastMs)?Math.max(0,lastMs-firstMs):null;
   if(trustedInteractions===0&&pathCount>=2&&spanMs!=null&&spanMs<5000){
     await markSynthetic(env,sessionId);
-    await env.DB.prepare(`UPDATE traffic_guard_events SET decision='blocked',reason='parallel_multi_page_zero_interaction' WHERE session_id=?`).bind(sessionId).run();
+    await env.DB.batch([
+      env.DB.prepare(`DELETE FROM traffic_human_evidence WHERE session_id=?`).bind(sessionId),
+      env.DB.prepare(`INSERT INTO traffic_quarantine_sessions(session_id,reason,original_classification,first_confirmed_at,quarantined_at)
+        VALUES(?,'parallel_multi_page_zero_interaction',?,NULL,datetime('now'))
+        ON CONFLICT(session_id) DO UPDATE SET reason=excluded.reason,quarantined_at=datetime('now')`)
+        .bind(sessionId,SESSION_CLASSIFICATIONS.LIKELY_HUMAN),
+      env.DB.prepare(`UPDATE traffic_guard_events SET decision='blocked',reason='parallel_multi_page_zero_interaction' WHERE session_id=?`).bind(sessionId)
+    ]);
     return Response.json({ok:true,recorded:false,classification:SESSION_CLASSIFICATIONS.SYNTHETIC,guard:{decision:'blocked',reason:'parallel_multi_page_zero_interaction'}},{status:202,headers});
   }
   if(trustedInteractions>0)await markStrictHuman(env,request,body,'trusted_interaction',3);
