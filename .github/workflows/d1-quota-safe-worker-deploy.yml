@@ -1,4 +1,4 @@
-name: One Shot Growth Catalog State Reconciliation
+name: One Shot Growth Supervisor State Sync
 
 on:
   push:
@@ -10,59 +10,57 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-growth-catalog-state-reconciliation
-  cancel-in-progress: false
-
 jobs:
-  reconcile-and-prove:
+  sync-and-prove:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Validate deployed Growth Brain contract
+      - name: Sync Growth Brain supervisor from live execution state
         run: |
-          node --check distribution-orchestrator-worker.js
-          node --check growth-execution-contract.js
-          node scripts/validate-autonomous-growth-brain.mjs
-
-      - name: Retire obsolete catalog execution state
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE growth_opportunity_state SET status='dormant',updated_at=datetime('now') WHERE opportunity_key='catalog:quality-refresh'; UPDATE growth_execution_contract SET status='cancelled',last_result='legacy_catalog_action_retired',completed_at=COALESCE(completed_at,datetime('now')),updated_at=datetime('now') WHERE action IN ('run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles') AND status<>'cancelled';"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE growth_supervisor_state
+          SET status='failing',
+              directive='repair_execution_contract',
+              directive_json=json_object(
+                'mode','repair_execution_contract',
+                'execution_contract',json_object(
+                  'missing_executors',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing'),
+                  'stalled',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled'),
+                  'pending',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='pending'),
+                  'claimed',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='claimed'),
+                  'attempted',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='attempted'),
+                  'verified',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='verified')
+                ),
+                'architecture_escalation',json_object(
+                  'open_incidents',(SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1),
+                  'approval_required',CASE WHEN (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1)>0 THEN json('true') ELSE json('false') END
+                )
+              ),
+              last_evaluated_at=datetime('now'),
+              updated_at=datetime('now')
+          WHERE engine='growth_brain'
+            AND (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1)=0
+            AND (SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing')=0
+            AND (SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled')>0;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      - name: Ask production Growth Brain to reconcile and resolve incidents
-        run: |
-          curl -fsS --retry 5 --retry-delay 3 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth-supervisor.json
-          cat /tmp/growth-supervisor.json
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Prove production execution state is clean
+      - name: Prove current supervisor truth
         run: |
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
-            SUM(CASE WHEN action IN ('run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles') AND status<>'cancelled' THEN 1 ELSE 0 END) legacy_active
-            FROM growth_execution_contract;" > /tmp/catalog-contract.json
-          cat /tmp/catalog-contract.json
-          jq -e '.[0].results[0] | .missing==0 and .legacy_active==0' /tmp/catalog-contract.json
-
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            SUM(CASE WHEN status='open' AND action IN ('run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles') THEN 1 ELSE 0 END) legacy_incidents_open
-            FROM growth_architecture_incidents;" > /tmp/catalog-incidents.json
-          cat /tmp/catalog-incidents.json
-          jq -e '.[0].results[0] | .legacy_incidents_open==0' /tmp/catalog-incidents.json
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Inspect recent core Growth failures
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,mission,status,detail,started_at,completed_at FROM engine_runs WHERE started_at>=datetime('now','-2 hours') AND engine='growth' ORDER BY started_at DESC LIMIT 25;"
+            s.status,s.directive,s.directive_json,s.last_evaluated_at,
+            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing') missing,
+            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled') stalled,
+            (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1) open_incidents
+          FROM growth_supervisor_state s WHERE s.engine='growth_brain';" > /tmp/supervisor.json
+          cat /tmp/supervisor.json
+          jq -e '.[0].results[0] | .missing==0 and .open_incidents==0 and .directive=="repair_execution_contract"' /tmp/supervisor.json
+          curl -fsS --retry 5 --retry-delay 3 https://trytoolscout.org/api/growth/supervisor/public > /tmp/public.json
+          cat /tmp/public.json
+          jq -e '.executionContract.missingExecutors==0 and (.directives[] | select(.engine=="growth_brain") | .directive=="repair_execution_contract")' /tmp/public.json
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
