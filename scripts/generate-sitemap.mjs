@@ -28,7 +28,7 @@ const newsFiles=fs.existsSync(newsDir)?fs.readdirSync(newsDir).filter(name=>name
 for(const file of newsFiles)urls.push(`${BASE}/news/${cleanFile(file)}`);
 const unique=[...new Set(urls)];
 const toolDir=path.join(ROOT,'tools');
-if(fs.existsSync(toolDir))for(const file of fs.readdirSync(toolDir).filter(name=>name.endsWith('.html')).filter(name=>isIndexable(path.join(toolDir,name))).sort())unique.push(`${BASE}/tools/${cleanFile(file)}`);
+if(fs.existsSync(toolDir))for(const file of fs.readdirSync(toolDir).filter(name=>name.endsWith('.html')).filter(name=>isIndexable(path.join(toolDir,name))).sort())unique.push(`${BASE}/tools/${file}`);
 const finalUrls=[...new Set(unique)];
 const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${finalUrls.map(u=>`  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`;
 fs.writeFileSync(path.join(ROOT,'sitemap.xml'),xml,'utf8');
