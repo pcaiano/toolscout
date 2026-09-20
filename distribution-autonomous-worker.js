@@ -221,7 +221,7 @@ function humanGatePayload(){
 function isMachineOnlyActionUrl(value){
   try{
     const u=new URL(String(value||''));
-    return /(?:^|\\/)(?:api|openapi|swagger|mcp)(?:\\/|$)|\\.(?:json|yaml|yml)$/i.test(u.pathname);
+    return /(?:^|\/)(?:api|openapi|swagger|mcp)(?:\/|$)|\.(?:json|yaml|yml)$/i.test(u.pathname);
   }catch{return false}
 }
 async function resolveHumanActionUrl(value){
@@ -233,9 +233,9 @@ async function resolveHumanActionUrl(value){
   if(!home)return parsed.origin+'/';
   const candidates=[...new Set(links(home.body,home.url)
     .filter(u=>sameHostFamily(u,home.url)&&ACTION_ROUTE_RE.test(u)&&!isMachineOnlyActionUrl(u))
-    .filter(u=>!/(privacy|terms|legal|blog|docs|help|support|pricing)(?:[\\/?#]|$)/i.test(new URL(u).pathname))
+    .filter(u=>!/(privacy|terms|legal|blog|docs|help|support|pricing)(?:[\/?#]|$)/i.test(new URL(u).pathname))
   )].sort((a,b)=>{
-    const score=u=>/\\/submit(?:[\\/?#]|$)/i.test(u)?0:/add|list-your|new-tool|new-product/i.test(u)?1:/register|sign-up|signup/i.test(u)?2:3;
+    const score=u=>/\/submit(?:[\/?#]|$)/i.test(u)?0:/add|list-your|new-tool|new-product/i.test(u)?1:/register|sign-up|signup/i.test(u)?2:3;
     return score(a)-score(b);
   }).slice(0,6);
   for(const u of candidates){
