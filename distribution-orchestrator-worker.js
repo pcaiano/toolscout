@@ -692,9 +692,13 @@ async function runGrowthExecutionContractCycle(env){
     const task=claim.tasks?.[0]||null;
     try{
       const out=await fn(task);
-      await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
-      const supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v2',claim.taskIds);
-      results[executor]={claimed:claim.claimed,ok:true,task:{task_id:task?.task_id||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},supervisorVerified:supervisorProof.verified,result:out||null};
+      let supervisorProof={verified:0},attemptRecorded=false;
+      if(task?.source_kind==='supervisor'){
+        await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
+        attemptRecorded=true;
+        supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v2',claim.taskIds);
+      }
+      results[executor]={claimed:claim.claimed,ok:true,task:{task_id:task?.task_id||null,source_kind:task?.source_kind||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},attemptRecorded,supervisorVerified:supervisorProof.verified,result:out||null};
     }catch(error){
       const message=String(error?.message||error).slice(0,800);
       await markExecutorAttempt(env,executor,`executor_error:${message}`,{failed:true,taskIds:claim.taskIds});
@@ -722,7 +726,7 @@ async function runGrowthExecutionContractCycle(env){
 
   await runInternal('content_issue',async()=>{
     const intelligence=await runContentSocialIntelligenceCycle(env);
-    const brief=await issueGrowthContentBrief(env);
+    const brief=await issueGrowthContentBrief(env,task);
     return{intelligence,brief};
   });
   await runInternal('affiliate_cycle',()=>runAffiliateCoverageCycle(env));
