@@ -1,83 +1,14 @@
-name: One Shot Autonomous Index Everywhere Fix
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches:
-      - main
-      - fix/autonomous-index-everywhere
-    paths:
-      - 'distribution-autonomous-worker.js'
-      - 'distribution-throughput-worker.js'
-      - '.github/workflows/d1-quota-safe-worker-deploy.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-autonomous-index-everywhere
-  cancel-in-progress: false
-
 jobs:
-  validate-deploy-prove:
+  conservation-notice:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Validate autonomous distribution changes
-        run: |
-          node --check distribution-autonomous-worker.js
-          node --check distribution-throughput-worker.js
-          grep -q "verified_linked_safe_form_adapter" distribution-autonomous-worker.js
-          grep -q "INDEXNOW_BATCH_LIMIT=10" distribution-throughput-worker.js
-          grep -q "retryable:indexnow_recovery" distribution-throughput-worker.js
-
-      - name: Deploy corrected Worker
-        if: github.ref == 'refs/heads/main'
-        run: npx wrangler deploy --config wrangler.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Recover exhausted IndexNow rows
-        if: github.ref == 'refs/heads/main'
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_submissions
-            SET status='ready',attempts=0,error='retryable:indexnow_recovery',updated_at=datetime('now')
-            WHERE surface_slug='indexnow'
-              AND human_required=0
-              AND status='failed'
-              AND error='terminal:indexnow_retry_limit'
-              AND COALESCE(last_attempt_at,created_at)<=datetime('now','-6 hours')
-              AND NOT EXISTS (
-                SELECT 1 FROM distribution_delivery_state st
-                WHERE st.submission_id=distribution_submissions.submission_id
-                  AND st.retry_after_at>datetime('now')
-              );"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Prove recovery state
-        if: github.ref == 'refs/heads/main'
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            SUM(CASE WHEN status='ready' THEN 1 ELSE 0 END) ready,
-            SUM(CASE WHEN status='submitted' THEN 1 ELSE 0 END) submitted,
-            SUM(CASE WHEN status='failed' AND error='terminal:indexnow_retry_limit' THEN 1 ELSE 0 END) terminal
-          FROM distribution_submissions WHERE surface_slug='indexnow';" > /tmp/indexnow.json
-          cat /tmp/indexnow.json
-          jq -e '.[0].results[0] | .ready>0 and .terminal==0' /tmp/indexnow.json
-
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            COUNT(*) candidates
-          FROM distribution_opportunities
-          WHERE human_required=0
-            AND status IN ('candidate','research_required')
-            AND action_url IS NOT NULL;" > /tmp/surfaces.json
-          cat /tmp/surfaces.json
-          jq -e '.[0].results[0].candidates>0' /tmp/surfaces.json
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
