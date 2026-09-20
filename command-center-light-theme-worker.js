@@ -247,7 +247,7 @@ async function augmentEntrypointHealth(response) {
   let data;
   try { data = await response.json(); } catch { return response; }
   data.entrypoint = 'command-center-light-theme-worker';
-  data.entrypointVersion = 11;
+  data.entrypointVersion = 12;
   data.commandCenterComposition = 'canonical-growth-v2';
   data.autonomousGrowthBrain = 'shared-growth-v3';
   data.affiliateEngineVersion = '2.1';
@@ -281,10 +281,139 @@ function clientNoStore(response, cacheState) {
   return new Response(response.body, {status:response.status,statusText:response.statusText,headers});
 }
 
+const truthNum=v=>Number.isFinite(Number(v))?Number(v):0;
+
+async function canonicalAutonomousGrowthTruth(env) {
+  const first=async(sql)=>{
+    try{return await env.DB.prepare(sql).first()}catch{return null}
+  };
+  const [supervisor,growth,routes,routeActions,contract,loop,cycles,humanEvents,proof,backlinks]=await Promise.all([
+    first(`SELECT status,directive,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
+      FROM growth_supervisor_state WHERE engine='growth_brain' LIMIT 1`),
+    first(`SELECT COUNT(*) active,
+      SUM(CASE WHEN subject_type='tool' THEN 1 ELSE 0 END) tools,
+      SUM(CASE WHEN subject_type='surface' THEN 1 ELSE 0 END) surfaces,
+      SUM(CASE WHEN subject_type='search' THEN 1 ELSE 0 END) search,
+      SUM(CASE WHEN subject_type='affiliate' THEN 1 ELSE 0 END) affiliate,
+      SUM(CASE WHEN subject_type LIKE 'catalog_%' THEN 1 ELSE 0 END) catalog,
+      SUM(CASE WHEN subject_type='news_update' THEN 1 ELSE 0 END) news,
+      MAX(last_evaluated_at) last_evaluated_at
+      FROM growth_opportunity_state WHERE status='active'`),
+    first(`SELECT COUNT(*) routes,COUNT(DISTINCT surface_slug) surfaces FROM distribution_contact_routes`),
+    first(`SELECT COUNT(*) total,
+      SUM(CASE WHEN status IN ('queued','retry_due') THEN 1 ELSE 0 END) queued,
+      SUM(CASE WHEN status IN ('researching','qualified_auto','executed_waiting_verification','issued_to_content') THEN 1 ELSE 0 END) in_progress,
+      SUM(CASE WHEN status='verified_human_impact' THEN 1 ELSE 0 END) verified_human,
+      SUM(CASE WHEN status='verified_placement' THEN 1 ELSE 0 END) verified_placement,
+      SUM(CASE WHEN status='human_action_required' THEN 1 ELSE 0 END) human,
+      SUM(CASE WHEN status='auth_required' THEN 1 ELSE 0 END) auth,
+      SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled,
+      SUM(CASE WHEN status IN ('policy_blocked','exhausted') THEN 1 ELSE 0 END) exhausted
+      FROM distribution_contact_route_actions`),
+    first(`SELECT
+      SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
+      SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled
+      FROM growth_execution_contract`),
+    first(`SELECT
+      MAX(CASE WHEN engine='growth' AND mission='opportunity_coordination' AND status='completed' THEN completed_at END) last_completed_at,
+      SUM(CASE WHEN started_at>=datetime('now','-24 hours') AND status='failed'
+        AND ((engine='growth' AND mission IN ('opportunity_coordination','rnd_audit'))
+          OR (engine='distribution' AND mission IN ('network_cycle','autonomous_cycle','economic_learning'))
+          OR (engine='content' AND mission='social_intelligence'))
+        THEN 1 ELSE 0 END) failed_core
+      FROM engine_runs`),
+    first(`SELECT COUNT(*) n FROM engine_runs WHERE started_at>=datetime('now','-7 days') AND status='completed'`),
+    first(`SELECT COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved')`),
+    first(`SELECT COUNT(*) placements FROM (
+      SELECT surface_slug FROM distribution_placements WHERE placement_verified=1
+      UNION
+      SELECT r.surface_slug FROM distribution_contact_route_actions a
+        JOIN distribution_contact_routes r ON r.route_id=a.route_id
+        WHERE a.status IN ('verified_placement','verified_human_impact')
+      UNION
+      SELECT surface_slug FROM distribution_opportunities WHERE status IN ('verified','live')
+    ) p WHERE surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`),
+    first(`SELECT COUNT(DISTINCT surface_slug) backlinks FROM distribution_placements
+      WHERE placement_verified=1 AND backlink_verified=1
+        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`)
+  ]);
+  const ageHours=loop?.last_completed_at?Math.max(0,(Date.now()-Date.parse(String(loop.last_completed_at).replace(' ','T')+'Z'))/36e5):null;
+  const missing=truthNum(contract?.missing),stalled=truthNum(contract?.stalled),failed=truthNum(loop?.failed_core);
+  const loopStatus=missing>0||failed>0||(ageHours!=null&&ageHours>4)?'failed':(stalled>0?'warning':'healthy');
+  return {
+    source:'entrypoint_canonical_growth_truth_v3',
+    active_opportunities:truthNum(growth?.active),
+    tool_opportunities:truthNum(growth?.tools),
+    surface_opportunities:truthNum(growth?.surfaces),
+    affiliate_opportunities:truthNum(growth?.affiliate),
+    catalog_opportunities:truthNum(growth?.catalog),
+    news_opportunities:truthNum(growth?.news),
+    search_opportunities:truthNum(growth?.search),
+    last_evaluated_at:growth?.last_evaluated_at||supervisor?.last_evaluated_at||null,
+    external_executions_7d:truthNum(supervisor?.external_executions_7d),
+    autonomous_actions_7d:truthNum(supervisor?.external_executions_7d),
+    internal_cycles_7d:truthNum(cycles?.n),
+    human_interventions_7d:truthNum(humanEvents?.n),
+    contact_routes:truthNum(routes?.routes),
+    contact_route_surfaces:truthNum(routes?.surfaces),
+    route_actions_total:truthNum(routeActions?.total),
+    route_actions_queued:truthNum(routeActions?.queued),
+    route_actions_in_progress:truthNum(routeActions?.in_progress),
+    route_actions_verified_human:truthNum(routeActions?.verified_human),
+    route_actions_verified_placement:truthNum(routeActions?.verified_placement),
+    route_actions_human:truthNum(routeActions?.human),
+    route_actions_auth:truthNum(routeActions?.auth),
+    route_actions_stalled:truthNum(routeActions?.stalled),
+    route_actions_exhausted:truthNum(routeActions?.exhausted),
+    supervisor_status:supervisor?.status||'unavailable',
+    supervisor_directive:supervisor?.directive||null,
+    supervisor_strict_humans_24h:truthNum(supervisor?.strict_humans_24h),
+    supervisor_strict_humans_7d:truthNum(supervisor?.strict_humans_7d),
+    supervisor_attributed_humans_7d:truthNum(supervisor?.attributed_humans_7d),
+    supervisor_external_executions_24h:truthNum(supervisor?.external_executions_24h),
+    supervisor_external_executions_7d:truthNum(supervisor?.external_executions_7d),
+    supervisor_corrections:truthNum(supervisor?.correction_count),
+    supervisor_last_correction_at:supervisor?.last_correction_at||null,
+    supervisor_last_evaluated_at:supervisor?.last_evaluated_at||null,
+    loop_status:loopStatus,
+    loop_last_completed_at:loop?.last_completed_at||null,
+    loop_age_hours:ageHours,
+    loop_failed_core_runs_24h:failed,
+    verified_placements:proof?.placements==null?null:truthNum(proof.placements),
+    verified_backlinks:backlinks?.backlinks==null?null:truthNum(backlinks.backlinks),
+    execution_contract_missing:missing,
+    execution_contract_stalled:stalled
+  };
+}
+
+async function enforceCanonicalAutonomousGrowth(response,env,mode='primary') {
+  if(!response?.ok||!(response.headers.get('content-type')||'').toLowerCase().includes('application/json'))return response;
+  let data;
+  try{data=await response.json()}catch{return response}
+  const truth=await canonicalAutonomousGrowthTruth(env);
+  const prior=data?.growthOps?.autonomousGrowth||{};
+  const external7=truth.external_executions_7d;
+  const human7=truth.human_interventions_7d;
+  data.growthOps={...(data.growthOps||{}),autonomousGrowth:{
+    ...prior,
+    ...truth,
+    status:'observed',
+    autonomy_rate_pct:(external7+human7)>0?Number((external7/(external7+human7)*100).toFixed(1)):0
+  }};
+  const headers=new Headers(response.headers);
+  headers.set('Content-Type','application/json; charset=UTF-8');
+  headers.set('Cache-Control','private, no-store, max-age=0');
+  headers.set('X-ToolScout-Growth-Truth','entrypoint-canonical-v3');
+  headers.set('X-ToolScout-Stats-Origin',mode);
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  return Response.json(data,{status:response.status,headers});
+}
+
 async function cachedStatsResponse(request, env, ctx) {
   if (typeof caches === 'undefined' || !caches.default) return resilientStatsResponse(request, env, ctx);
   const url = new URL(request.url);
-  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v5', {method:'GET'});
+  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v6', {method:'GET'});
   try {
     const cached = await caches.default.match(cacheKey);
     if (cached) return clientNoStore(cached, 'hit');
@@ -307,7 +436,7 @@ async function resilientStatsResponse(request, env, ctx) {
   let primary = null;
   try {
     primary = await base.fetch(request, env, ctx);
-    if (primary.status < 500) return primary;
+    if (primary.status < 500) return enforceCanonicalAutonomousGrowth(primary,env,'primary');
   } catch {}
   try {
     const fallback = await resilientFallback.fetch(request, env, ctx);
@@ -315,9 +444,10 @@ async function resilientStatsResponse(request, env, ctx) {
     const headers = new Headers(fallback.headers);
     headers.set('X-ToolScout-Stats-Mode', 'resilient-fallback');
     headers.set('Cache-Control', 'private, no-store');
-    return new Response(fallback.body, {status:fallback.status,statusText:fallback.statusText,headers});
+    const wrapped=new Response(fallback.body, {status:fallback.status,statusText:fallback.statusText,headers});
+    return enforceCanonicalAutonomousGrowth(wrapped,env,'resilient-fallback');
   } catch (error) {
-    if (primary) return primary;
+    if (primary) return enforceCanonicalAutonomousGrowth(primary,env,'primary-error');
     return Response.json(
       {error:'command_center_stats_unavailable',message:String(error&&error.message||error)},
       {status:503,headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'}}
@@ -334,7 +464,7 @@ export default {
         const probe=await env.ASSETS.fetch(new Request(new URL('/analytics-v2',request.url).toString(),{method:'GET'}));
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
-      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},buildContract:'2026-09-20.1'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},buildContract:'2026-09-20.2'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
