@@ -3,6 +3,13 @@ import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
 import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
+import {syncExecutionContracts,reconcileExecutionContracts,claimExecutorTasks,markExecutorAttempt,executionContractSnapshot} from './growth-execution-contract.js';
+import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
+import {runDistributionNetworkCycle} from './distribution-network-worker.js';
+import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
+import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates} from './catalog-autonomy-worker.js';
+import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
+import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
