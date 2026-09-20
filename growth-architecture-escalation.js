@@ -110,14 +110,14 @@ export async function auditArchitectureEscalations(env){
 
   let core={results:[]};
   try{
-    core=await env.DB.prepare(`SELECT f.engine,f.mission,f.error,COUNT(*) n,MAX(f.started_at) last_failed
+    core=await env.DB.prepare(`SELECT f.engine,f.mission,f.detail,f.evidence_json,COUNT(*) n,MAX(f.started_at) last_failed
       FROM engine_runs f
       WHERE f.started_at>=datetime('now','-24 hours') AND f.status='failed'
         AND NOT EXISTS(
           SELECT 1 FROM engine_runs s
           WHERE s.engine=f.engine AND s.mission=f.mission AND s.status='completed' AND s.started_at>f.started_at
         )
-      GROUP BY f.engine,f.mission,f.error
+      GROUP BY f.engine,f.mission,f.detail,f.evidence_json
       ORDER BY last_failed DESC LIMIT 50`).all();
   }catch{}
   for(const row of core.results||[]){
@@ -127,7 +127,7 @@ export async function auditArchitectureEscalations(env){
       key,severity:n(row.n)>=2?'P1':'P2',engine:row.engine,executor:null,action:row.mission,
       title:`Unresolved core Growth run failure: ${row.engine}/${row.mission}`,
       summary:`Core mission "${row.mission}" has an unresolved failed run and no later successful recovery run.`,
-      evidence:{engine:row.engine,mission:row.mission,error:row.error,count:n(row.n),last_failed:row.last_failed},
+      evidence:{engine:row.engine,mission:row.mission,detail:row.detail,evidence_json:row.evidence_json,count:n(row.n),last_failed:row.last_failed},
       selfCorrections:['The runtime waited for a later successful run to close the failure automatically.','The failure remained unresolved, so it is being escalated instead of treated as healthy.'],
       whyCodeRequired:'A core mission that cannot recover on a subsequent run may require changes to worker code, workflow configuration, schema, or engine integration.',
       recommendedIntervention:'Read the latest failed run and repository code for this mission, identify the root cause, prepare a bounded code or architecture correction, and require Pedro approval before deployment.'
