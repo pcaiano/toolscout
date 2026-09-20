@@ -20,6 +20,9 @@ const content=read('content-engine-intelligence-worker.js');
 const network=read('distribution-network-worker.js');
 const contact=read('distribution-contact-worker.js');
 const sender=read('distribution-sender-worker.js');
+const supervisor=read('growth-supervisor.js');
+const distPriority=read('distribution-priority-worker.js');
+const seoSupervisorExecutor=read('.github/workflows/growth-brain-seo-executor.yml');
 const impact=read('distribution-impact-worker.js');
 const visitorAccuracy=read('visitor-accuracy-worker.js');
 const trafficIntegrity=read('traffic-integrity-worker.js');
@@ -49,7 +52,7 @@ if(!orchestrator.includes("id:'external-demand-first-v2'")||!orchestrator.includ
 if(!network.includes('distribution_contact_route_actions')||!network.includes('materializeRouteActions')||!network.includes('reconcileRouteActions')||!network.includes('closed_loop_routes:true'))fail('Alternate distribution routes are not closed-loop.');
 if(!content.includes('Borrowed-audience amplification candidate')||!content.includes('issued_to_content'))fail('Content Engine is not consuming alternate social distribution routes.');
 if(!orchestrator.includes('execute_alternate_routes')||!orchestrator.includes('alternate_routes_stalled'))fail('Growth Brain does not consume alternate-route lifecycle state.');
-if(!command.includes('Growth loop health')||!command.includes('orphan_alternate_routes')||!command.includes('stale_growth_actions'))fail('Command Center closed-loop watchdog is missing.');
+if(!command.includes('Growth Brain verdict')||!command.includes('Growth loop integrity')||!command.includes('orphan_alternate_routes')||!command.includes('stale_growth_actions'))fail('Command Center Growth Brain verdict or closed-loop watchdog is missing.');
 if(!orchestrator.includes('recheck_affiliate_program_on_evidence_or_cadence')||!orchestrator.includes("if(!actions.length)actions.push('reconcile_affiliate_state')"))fail('Affiliate opportunities can still become active without a next action.');
 if(!orchestrator.includes('refresh_catalog_profile_for_observed_search_demand')||!orchestrator.includes("if(!actions.length)continue;"))fail('Non-actionable catalog rows can still be promoted to active Growth opportunities.');
 if(!command.includes('NOT EXISTS (')||!command.includes("c.started_at>f.started_at"))fail('Growth watchdog does not distinguish recovered failures from unresolved failures.');
@@ -65,6 +68,11 @@ if(!contact.includes('fallback_exhausted')||!contact.includes('COMMON_CONTACT_PA
 if(!contact.includes('PUBLIC_HANDOFF_SHA256')||!sender.includes('contact_refresh')||!sender.includes('/api/distribution/vendor-amplification/contact-scan'))fail('External sender does not refresh executable contacts before leasing candidates.');
 if(!sender.includes("outreach_sent_at>=datetime('now','-30 days')")||!sender.includes("prior.tool_slug=v.tool_slug")||!sender.includes("prior.contact_email"))fail('Vendor outreach dedupe window is missing.');
 if(!orchestrator.includes('vendor_execution_available')||!orchestrator.includes("if(!actions.length)continue;"))fail('Non-executable vendor dead ends can still become active Growth opportunities.');
+if(!supervisor.includes("const NORTH_STAR='strict_verified_human_sessions'")||!supervisor.includes("runGrowthSupervisorAudit")||!supervisor.includes("growth_supervisor_state")||!supervisor.includes("correct_all_acquisition_engines"))fail('Growth Brain self-audit supervisor is missing or not human-traffic driven.');
+if(!orchestrator.includes("mission:'self_audit'")||!orchestrator.includes("/api/growth/supervisor/public")||!orchestrator.includes("growthSupervisorDirective"))fail('Growth Supervisor is not wired into the runtime Growth Brain.');
+if(!distPriority.includes("growth_supervisor_state")||!distPriority.includes("exploration_slots")||!distPriority.includes("priority_boost"))fail('Distribution priorities do not obey Growth Supervisor corrections.');
+if(!content.includes("growth_supervisor_state")||!content.includes("supervisorSearchFirst")||!content.includes("Growth Supervisor"))fail('Content Engine does not obey Growth Supervisor acquisition corrections.');
+if(!seoSupervisorExecutor.includes("/api/growth/supervisor/public")||!seoSupervisorExecutor.includes("run_executor")||!seoSupervisorExecutor.includes("run-organic-growth-controller-v4.mjs"))fail('SEO does not have a supervisor-controlled autonomous correction executor.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
 if(!process.exitCode)console.log('PASS: shared autonomous growth brain contract is intact.');
