@@ -294,7 +294,7 @@ async function canonicalAutonomousGrowthTruth(env) {
     const m=String(uri||'').match(/^at:\/\/([^/]+)\/app\.bsky\.feed\.post\/([^/]+)$/);
     return m?`https://bsky.app/profile/${m[1]}/post/${m[2]}`:null;
   };
-  const [supervisor,growth,routes,routeActions,contract,loop,cycles,humanEvents,proof,backlinks,distributionActions,distributionSubmissions,contentPublishes,contentActions,audienceReplies]=await Promise.all([
+  const [supervisor,growth,routes,routeActions,contract,loop,cycles,humanEvents,proof,backlinks,backlinkRows,distributionActions,distributionSubmissions,contentPublishes,contentActions,audienceReplies]=await Promise.all([
     first(`SELECT status,directive,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state WHERE engine='growth_brain' LIMIT 1`),
     first(`SELECT COUNT(*) active,
@@ -343,6 +343,9 @@ async function canonicalAutonomousGrowthTruth(env) {
     first(`SELECT COUNT(DISTINCT surface_slug) backlinks FROM distribution_placements
       WHERE placement_verified=1 AND backlink_verified=1
         AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`),
+    all(`SELECT surface_slug,public_url,link_rel,first_verified_at FROM distribution_placements
+      WHERE placement_verified=1 AND backlink_verified=1
+        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`),
     all(`SELECT g.action_id,g.opportunity_key,g.engine,g.channel,g.target_url,g.status,g.created_at,
         CASE WHEN g.action_id LIKE 'vendor:%' THEN substr(g.action_id,8) ELSE NULL END tool_slug,
         (SELECT v.contact_email FROM distribution_vendor_amplification v WHERE v.tool_slug=substr(g.action_id,8) ORDER BY v.outreach_sent_at DESC LIMIT 1) contact_email,
@@ -371,6 +374,13 @@ async function canonicalAutonomousGrowthTruth(env) {
       WHERE created_at>=datetime('now','-7 days') AND status='published' AND event_type='outbound_reply'
       ORDER BY created_at DESC`)
   ]);
+  const backlinkDomains=new Set();
+  for(const row of backlinkRows||[]){
+    try{const host=new URL(String(row.public_url||'')).hostname.replace(/^www\./,'').toLowerCase();if(host&&host!=='trytoolscout.org'&&!host.endsWith('.trytoolscout.org'))backlinkDomains.add(host)}catch{}
+  }
+  const verifiedReferringDomains=backlinkDomains.size;
+  const backlinkBootstrapFloor=10;
+  const backlinkAcquisitionRequired=verifiedReferringDomains<backlinkBootstrapFloor;
   const executionItems=[
     ...distributionActions.map(x=>({
       id:x.action_id,engine:'distribution',type:x.engine==='vendor_amplification'?'vendor_email':x.engine,
@@ -443,6 +453,10 @@ async function canonicalAutonomousGrowthTruth(env) {
     loop_failed_core_runs_24h:failed,
     verified_placements:proof?.placements==null?null:truthNum(proof.placements),
     verified_backlinks:backlinks?.backlinks==null?null:truthNum(backlinks.backlinks),
+    verified_referring_domains:verifiedReferringDomains,
+    backlink_bootstrap_floor:backlinkBootstrapFloor,
+    backlink_acquisition_required:backlinkAcquisitionRequired,
+    backlink_quality_only:true,
     execution_contract_missing:missing,
     execution_contract_stalled:stalled,
     external_execution_items:executionItems,
@@ -477,7 +491,7 @@ async function enforceCanonicalAutonomousGrowth(response,env,mode='primary') {
 async function cachedStatsResponse(request, env, ctx) {
   if (typeof caches === 'undefined' || !caches.default) return resilientStatsResponse(request, env, ctx);
   const url = new URL(request.url);
-  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v7', {method:'GET'});
+  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v8', {method:'GET'});
   try {
     const cached = await caches.default.match(cacheKey);
     if (cached) return clientNoStore(cached, 'hit');
@@ -529,7 +543,7 @@ export default {
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
       const autonomousGrowthTruth=await canonicalAutonomousGrowthTruth(env).catch(()=>null);
-      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.6'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.7'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
