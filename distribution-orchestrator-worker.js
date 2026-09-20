@@ -3,7 +3,7 @@ import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
 import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
-import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,executionContractSnapshot} from './growth-execution-contract.js';
+import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,recordExecutionProof,executionContractSnapshot} from './growth-execution-contract.js';
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
@@ -782,6 +782,20 @@ async function publicAudienceBrief(env){
   };
 }
 
+async function recordExternalExecutorStatus(env,body={}){
+  const executor=String(body.executor||'');
+  if(!['audience_make','make_sender','seo_github'].includes(executor))return{ok:false,error:'unsupported_executor'};
+  let taskId=String(body.task_id||'').trim();
+  if(!taskId){
+    const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted','stalled') ORDER BY claimed_at DESC,priority_score DESC LIMIT 2`).bind(executor).all();
+    const rows=q.results||[];
+    if(rows.length!==1)return{ok:false,error:rows.length?'ambiguous_active_task':'no_active_task',active:rows.length};
+    taskId=rows[0].task_id;
+  }
+  const status=body.status==='verified'?'verified':body.status==='blocked'?'blocked':'failed';
+  return recordExecutionProof(env,{taskId,executor,status,detail:safe(body.detail||body.error||`external_${status}`,900),externalId:safe(body.external_id||'',300)||null,evidence:{source:'external_executor_callback',reported_status:status}});
+}
+
 async function publicSearchDirectives(env){
   await ensureGrowthSchema(env);
   const [q,seoSupervisor,growthSupervisor]=await Promise.all([
@@ -928,6 +942,12 @@ async function scanNew(request,env){let r=null;const sitemapRequest=new Request(
 export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/orchestrate'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}if(!b.asset_url||!/^https:\/\/trytoolscout\.org\//.test(String(b.asset_url)))return Response.json({error:'valid_toolscout_asset_url_required'},{status:400,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_fanout',triggerName:'manual_api'},()=>fanout(env,String(b.asset_url))),{headers:H});}if(u.pathname==='/api/distribution/orchestrate/scan'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:'manual_api'},()=>scanNew(request,env)),{headers:H});}if(u.pathname==='/api/distribution/economic-learning'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:'manual_api'},()=>learnEconomics(env)),{headers:H});}if(u.pathname==='/api/growth/search-directives'&&request.method==='GET'){return Response.json(await publicSearchDirectives(env),{headers:{...H,'Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'}});}if(u.pathname==='/api/growth/rnd/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:'manual_api'},()=>runGrowthRndAudit(env)),{headers:H});}if(u.pathname==='/api/growth/rnd'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT * FROM growth_rnd_experiments ORDER BY updated_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/growth/opportunities/refresh'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'manual_api'},()=>coordinateGrowthOpportunities(env)),{headers:H});}
 if(u.pathname==='/api/growth/audience-brief/public'&&request.method==='GET'){return Response.json(await publicAudienceBrief(env),{headers:{...H,'Cache-Control':'public, max-age=120','Access-Control-Allow-Origin':'*'}});}
 if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'manual_api'},()=>runGrowthSupervisorAudit(env)),{headers:H});}
+if(u.pathname==='/api/growth/execution/external-status'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  let body={};try{body=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}
+  const out=await recordExternalExecutorStatus(env,body);
+  return Response.json(out,{status:out?.ok?200:409,headers:H});
+}
 if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'manual_api'},()=>runGrowthExecutionContractCycle(env)),{headers:H});}
 if(u.pathname==='/api/growth/execution'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await executionContractSnapshot(env),{headers:H});}
 if(u.pathname==='/api/growth/architecture-escalations/public-candidates'&&request.method==='GET'){
