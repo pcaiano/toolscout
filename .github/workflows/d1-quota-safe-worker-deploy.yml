@@ -1,14 +1,84 @@
-name: ToolScout GitHub Actions Conservation Mode
+name: One Shot Growth Catalog Freshness Contract Fix
 
 on:
+  push:
+    branches:
+      - main
+      - fix/growth-catalog-freshness-contract
+    paths:
+      - 'distribution-orchestrator-worker.js'
+      - 'scripts/validate-autonomous-growth-brain.mjs'
+      - '.github/workflows/d1-quota-safe-worker-deploy.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: toolscout-growth-catalog-freshness-fix
+  cancel-in-progress: false
+
 jobs:
-  conservation-notice:
+  validate-deploy-audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
-      - name: Conservation mode notice
-        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate Growth Brain contract
+        run: |
+          node --check distribution-orchestrator-worker.js
+          node --check growth-execution-contract.js
+          node --check catalog-autonomy-worker.js
+          node scripts/validate-autonomous-growth-brain.mjs
+
+      - name: Deploy corrected Worker
+        if: github.ref == 'refs/heads/main'
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Exercise one remote Growth cycle
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-dev.log 2>&1 &
+          DEV_PID=$!
+          cleanup(){ kill $DEV_PID >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          READY=0
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 2 http://127.0.0.1:8787/api/autonomous-growth-health >/dev/null 2>&1; then READY=1; break; fi
+            sleep 2
+          done
+          if [ "$READY" != "1" ]; then cat /tmp/wrangler-dev.log; exit 1; fi
+          if curl -fsS --max-time 120 "http://127.0.0.1:8787/__scheduled?cron=15+*+*+*+*" > /tmp/scheduled.txt; then
+            :
+          elif curl -fsS --max-time 120 "http://127.0.0.1:8787/cdn-cgi/handler/scheduled?cron=15+*+*+*+*" > /tmp/scheduled.txt; then
+            :
+          else
+            curl -fsS --max-time 120 "http://127.0.0.1:8787/cdn-cgi/local/scheduled?cron=15+*+*+*+*" > /tmp/scheduled.txt
+          fi
+          cat /tmp/scheduled.txt
+          sleep 3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Prove no legacy or missing catalog executors remain
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -fsS --retry 5 --retry-delay 3 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth-supervisor.json
+          cat /tmp/growth-supervisor.json
+          jq -e '.executionContract.missingExecutors == 0' /tmp/growth-supervisor.json
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
+            SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
+            SUM(CASE WHEN action IN ('run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles') AND status<>'cancelled' THEN 1 ELSE 0 END) legacy_active
+            FROM growth_execution_contract;" > /tmp/catalog-contract.json
+          cat /tmp/catalog-contract.json
+          jq -e '.[0].results[0] | .missing==0 and .legacy_active==0' /tmp/catalog-contract.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
