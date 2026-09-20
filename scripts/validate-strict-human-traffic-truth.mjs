@@ -15,7 +15,8 @@ const light=read('command-center-light-theme-worker.js');
 const ui=read('analytics-v2.html');
 
 if(!guard.includes('traffic_human_evidence'))fail('strict human evidence table missing at collection layer');
-if(!guard.includes("'trusted_interaction'")||!guard.includes("'multi_page_navigation'"))fail('positive human evidence gates missing');
+if(!guard.includes("'trusted_interaction'"))fail('trusted interaction human evidence gate missing');
+if(guard.includes("markStrictHuman(env,request,body,'multi_page_navigation'"))fail('multi page navigation can still promote a session to strict human');
 if(!guard.includes("ts_internal_check")||!guard.includes("e.isTrusted"))fail('internal-check exclusion or trusted interaction guard missing');
 if(!outbound.includes("'verified_outbound_navigation'"))fail('verified outbound does not promote strict human evidence');
 if(!live.includes("canonicalPopulation:'traffic_human_evidence'"))fail('live Traffic Truth is not strict-human canonical');
