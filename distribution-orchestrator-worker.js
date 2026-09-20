@@ -659,6 +659,62 @@ async function coordinateGrowthOpportunities(env){
   return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,gscSnapshot:{generatedAt:gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:directGscPages.length,directOpportunities:normalizedGscPages.length},catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,inputFreshness,audienceStrategy,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
+async function runGrowthExecutionContractCycle(env){
+  const synced=await syncExecutionContracts(env);
+  const before=await reconcileExecutionContracts(env);
+  const results={};
+
+  const runInternal=async(executor,fn)=>{
+    const claim=await claimExecutorTasks(env,executor,{limit:60,result:'growth_brain_dispatched'});
+    if(!claim.claimed){results[executor]={claimed:0};return}
+    try{
+      const out=await fn();
+      await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900));
+      results[executor]={claimed:claim.claimed,ok:true,result:out||null};
+    }catch(error){
+      const message=String(error?.message||error).slice(0,800);
+      await markExecutorAttempt(env,executor,`executor_error:${message}`);
+      results[executor]={claimed:claim.claimed,ok:false,error:message};
+    }
+  };
+
+  await runInternal('distribution_network',()=>runDistributionNetworkCycle(env));
+  await runInternal('distribution_autonomous',()=>runAutonomousDistributionCycle(env));
+
+  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:60,result:'make_sender_scheduled'});
+  if(senderClaim.claimed){
+    try{
+      const [contacts,network]=await Promise.all([
+        runVendorContactDiscovery(env),
+        runDistributionNetworkCycle(env)
+      ]);
+      results.make_sender={claimed:senderClaim.claimed,prepared:true,contacts,network};
+    }catch(error){results.make_sender={claimed:senderClaim.claimed,prepared:false,error:String(error?.message||error).slice(0,800)}}
+  }else results.make_sender={claimed:0};
+
+  await runInternal('content_issue',async()=>{
+    const intelligence=await runContentSocialIntelligenceCycle(env);
+    const brief=await issueGrowthContentBrief(env);
+    return{intelligence,brief};
+  });
+  await runInternal('affiliate_cycle',()=>runAffiliateCoverageCycle(env));
+  await runInternal('catalog_cycle',async()=>{
+    const verify=await contractVerifyCatalogBatch(env);
+    const admit=await contractAdmitCatalogCandidates(env);
+    return{verify,admit};
+  });
+  await runInternal('growth_supervisor',()=>runGrowthSupervisorAudit(env));
+
+  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:60,result:'audience_make_scheduled'});
+  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:60,result:'seo_github_scheduled'});
+  results.audience_make={claimed:audienceClaim.claimed,external:true};
+  results.seo_github={claimed:seoClaim.claimed,external:true};
+
+  const after=await reconcileExecutionContracts(env);
+  const snapshot=await executionContractSnapshot(env);
+  return{ok:true,synced,before,results,after,snapshot};
+}
+
 async function publicSearchDirectives(env){
   await ensureGrowthSchema(env);
   const [q,seoSupervisor,growthSupervisor]=await Promise.all([
