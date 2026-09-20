@@ -287,7 +287,14 @@ async function canonicalAutonomousGrowthTruth(env) {
   const first=async(sql)=>{
     try{return await env.DB.prepare(sql).first()}catch{return null}
   };
-  const [supervisor,growth,routes,routeActions,contract,loop,cycles,humanEvents,proof,backlinks]=await Promise.all([
+  const all=async(sql)=>{
+    try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}
+  };
+  const blueskyUrl=uri=>{
+    const m=String(uri||'').match(/^at:\/\/([^/]+)\/app\.bsky\.feed\.post\/([^/]+)$/);
+    return m?`https://bsky.app/profile/${m[1]}/post/${m[2]}`:null;
+  };
+  const [supervisor,growth,routes,routeActions,contract,loop,cycles,humanEvents,proof,backlinks,distributionActions,distributionSubmissions,contentPublishes,contentActions,audienceReplies]=await Promise.all([
     first(`SELECT status,directive,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state WHERE engine='growth_brain' LIMIT 1`),
     first(`SELECT COUNT(*) active,
@@ -335,8 +342,61 @@ async function canonicalAutonomousGrowthTruth(env) {
     ) p WHERE surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`),
     first(`SELECT COUNT(DISTINCT surface_slug) backlinks FROM distribution_placements
       WHERE placement_verified=1 AND backlink_verified=1
-        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`)
+        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`),
+    all(`SELECT g.action_id,g.opportunity_key,g.engine,g.channel,g.target_url,g.status,g.created_at,
+        v.tool_slug,v.contact_email,v.suggested_subject,v.asset_url
+      FROM growth_action_events g
+      LEFT JOIN distribution_vendor_amplification v ON g.action_id='vendor:'||v.tool_slug
+      WHERE g.created_at>=datetime('now','-7 days')
+        AND g.status IN ('sent','verified','completed','attributed')
+        AND (g.engine='vendor_amplification' OR g.engine LIKE 'distribution%')
+      ORDER BY g.created_at DESC`),
+    all(`SELECT submission_id,surface_slug,submission_type,status,attempts,COALESCE(last_attempt_at,created_at) created_at,response_url,error
+      FROM distribution_submissions
+      WHERE surface_slug<>'indexnow' AND attempts>0
+        AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')
+      ORDER BY COALESCE(last_attempt_at,created_at) DESC`),
+    all(`SELECT event_id,platform,event_type,status,post_uri,parent_uri,content_id,source,created_at
+      FROM audience_events
+      WHERE created_at>=datetime('now','-7 days') AND status='published' AND event_type='content_published'
+      ORDER BY created_at DESC`),
+    all(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at
+      FROM growth_action_events
+      WHERE created_at>=datetime('now','-7 days') AND status IN ('sent','verified','completed','attributed') AND engine='content'
+      ORDER BY created_at DESC`),
+    all(`SELECT event_id,platform,event_type,status,post_uri,parent_uri,source,created_at
+      FROM audience_events
+      WHERE created_at>=datetime('now','-7 days') AND status='published' AND event_type='outbound_reply'
+      ORDER BY created_at DESC`)
   ]);
+  const executionItems=[
+    ...distributionActions.map(x=>({
+      id:x.action_id,engine:'distribution',type:x.engine==='vendor_amplification'?'vendor_email':x.engine,
+      channel:x.channel||null,status:x.status,at:x.created_at,
+      label:x.tool_slug?`Vendor outreach: ${x.tool_slug}`:(x.opportunity_key||x.action_id),
+      detail:x.contact_email?`${x.suggested_subject||'Vendor outreach'} → ${x.contact_email}`:null,
+      target_url:x.target_url||x.asset_url||null,external_url:null
+    })),
+    ...distributionSubmissions.map(x=>({
+      id:x.submission_id,engine:'distribution',type:'external_submission',channel:x.submission_type||null,status:x.status,at:x.created_at,
+      label:`External submission: ${x.surface_slug}`,
+      detail:x.error||(`Attempt ${truthNum(x.attempts)}`),target_url:x.response_url||null,external_url:x.response_url||null
+    })),
+    ...contentPublishes.map(x=>({
+      id:x.event_id,engine:'content',type:'content_published',channel:x.platform||null,status:x.status,at:x.created_at,
+      label:x.content_id?`Published content: ${x.content_id}`:'Published content',
+      detail:x.source||null,target_url:blueskyUrl(x.post_uri),external_url:blueskyUrl(x.post_uri)
+    })),
+    ...contentActions.map(x=>({
+      id:x.action_id,engine:'content',type:'content_action',channel:x.channel||null,status:x.status,at:x.created_at,
+      label:x.opportunity_key||x.action_id,detail:null,target_url:x.target_url||null,external_url:null
+    })),
+    ...audienceReplies.map(x=>({
+      id:x.event_id,engine:'audience',type:'outbound_reply',channel:x.platform||null,status:x.status,at:x.created_at,
+      label:'Outbound audience reply',detail:x.source||null,
+      target_url:blueskyUrl(x.parent_uri),external_url:blueskyUrl(x.post_uri)
+    }))
+  ].sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
   const ageHours=loop?.last_completed_at?Math.max(0,(Date.now()-Date.parse(String(loop.last_completed_at).replace(' ','T')+'Z'))/36e5):null;
   const missing=truthNum(contract?.missing),stalled=truthNum(contract?.stalled),failed=truthNum(loop?.failed_core);
   const loopStatus=missing>0||failed>0||(ageHours!=null&&ageHours>4)?'failed':(stalled>0?'warning':'healthy');
@@ -382,7 +442,9 @@ async function canonicalAutonomousGrowthTruth(env) {
     verified_placements:proof?.placements==null?null:truthNum(proof.placements),
     verified_backlinks:backlinks?.backlinks==null?null:truthNum(backlinks.backlinks),
     execution_contract_missing:missing,
-    execution_contract_stalled:stalled
+    execution_contract_stalled:stalled,
+    external_execution_items:executionItems,
+    external_execution_items_count:executionItems.length
   };
 }
 
@@ -413,7 +475,7 @@ async function enforceCanonicalAutonomousGrowth(response,env,mode='primary') {
 async function cachedStatsResponse(request, env, ctx) {
   if (typeof caches === 'undefined' || !caches.default) return resilientStatsResponse(request, env, ctx);
   const url = new URL(request.url);
-  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v6', {method:'GET'});
+  const cacheKey = new Request(url.origin + '/__toolscout_internal/command-center-stats-v7', {method:'GET'});
   try {
     const cached = await caches.default.match(cacheKey);
     if (cached) return clientNoStore(cached, 'hit');
@@ -465,7 +527,7 @@ export default {
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
       const autonomousGrowthTruth=await canonicalAutonomousGrowthTruth(env).catch(()=>null);
-      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.3'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.4'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
