@@ -686,57 +686,62 @@ async function runGrowthExecutionContractCycle(env){
   const before=await reconcileExecutionContracts(env);
   const results={};
 
-  const runInternal=async(executor,limit,fn)=>{
-    const claim=await claimExecutorTasks(env,executor,{limit,result:'growth_brain_dispatched'});
+  const runInternal=async(executor,fn)=>{
+    const claim=await claimExecutorTasks(env,executor,{limit:1,maxInFlight:1,result:'growth_brain_dispatched_task_v2'});
     if(!claim.claimed){results[executor]={claimed:0};return}
+    const task=claim.tasks?.[0]||null;
     try{
-      const out=await fn();
-      await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900));
-      await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed');
-      results[executor]={claimed:claim.claimed,ok:true,result:out||null};
+      const out=await fn(task);
+      await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
+      const supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v2',claim.taskIds);
+      results[executor]={claimed:claim.claimed,ok:true,task:{task_id:task?.task_id||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},supervisorVerified:supervisorProof.verified,result:out||null};
     }catch(error){
       const message=String(error?.message||error).slice(0,800);
-      await markExecutorAttempt(env,executor,`executor_error:${message}`);
-      results[executor]={claimed:claim.claimed,ok:false,error:message};
+      await markExecutorAttempt(env,executor,`executor_error:${message}`,{failed:true,taskIds:claim.taskIds});
+      results[executor]={claimed:claim.claimed,ok:false,task:{task_id:task?.task_id||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},error:message};
     }
   };
 
-  await runInternal('distribution_network',24,()=>runDistributionNetworkCycle(env));
-  await runInternal('distribution_autonomous',4,()=>runAutonomousDistributionCycle(env));
+  await runInternal('distribution_network',()=>runDistributionNetworkCycle(env));
+  await runInternal('distribution_autonomous',()=>runAutonomousDistributionCycle(env));
 
-  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:3,maxInFlight:3,result:'make_sender_scheduled'});
+  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:1,maxInFlight:1,result:'make_sender_waiting_for_exact_external_send'});
   if(senderClaim.claimed){
     try{
       const [contacts,network]=await Promise.all([
         runVendorContactDiscovery(env),
         runDistributionNetworkCycle(env)
       ]);
-      results.make_sender={claimed:senderClaim.claimed,prepared:true,contacts,network};
-    }catch(error){results.make_sender={claimed:senderClaim.claimed,prepared:false,error:String(error?.message||error).slice(0,800)}}
+      results.make_sender={claimed:senderClaim.claimed,prepared:true,task:senderClaim.tasks?.[0]||null,contacts,network};
+    }catch(error){
+      const message=String(error?.message||error).slice(0,800);
+      await markExecutorAttempt(env,'make_sender',`executor_prepare_error:${message}`,{failed:true,taskIds:senderClaim.taskIds});
+      results.make_sender={claimed:senderClaim.claimed,prepared:false,error:message};
+    }
   }else results.make_sender={claimed:0};
 
-  await runInternal('content_issue',1,async()=>{
+  await runInternal('content_issue',async()=>{
     const intelligence=await runContentSocialIntelligenceCycle(env);
     const brief=await issueGrowthContentBrief(env);
     return{intelligence,brief};
   });
-  await runInternal('affiliate_cycle',8,()=>runAffiliateCoverageCycle(env));
-  await runInternal('catalog_cycle',7,async()=>{
+  await runInternal('affiliate_cycle',()=>runAffiliateCoverageCycle(env));
+  await runInternal('catalog_cycle',async()=>{
     const verify=await contractVerifyCatalogBatch(env);
     const admit=await contractAdmitCatalogCandidates(env);
     return{verify,admit};
   });
-  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_scheduled'});
-  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:12,maxInFlight:12,result:'seo_github_scheduled'});
-  results.audience_make={claimed:audienceClaim.claimed,external:true};
-  results.seo_github={claimed:seoClaim.claimed,external:true};
+
+  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_waiting_for_exact_published_reply'});
+  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:1,maxInFlight:1,result:'seo_github_waiting_for_exact_evidence'});
+  results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
+  results.seo_github={claimed:seoClaim.claimed,external:true,task:seoClaim.tasks?.[0]||null};
 
   const after=await reconcileExecutionContracts(env);
   const architectureEscalation=await auditArchitectureEscalations(env).catch(error=>({ok:false,error:String(error?.message||error).slice(0,500)}));
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,synced,before,results,after,architectureEscalation,snapshot};
+  return{ok:true,integrityVersion:'task-specific-v2',synced,before,results,after,architectureEscalation,snapshot};
 }
-
 async function publicSearchDirectives(env){
   await ensureGrowthSchema(env);
   const [q,seoSupervisor,growthSupervisor]=await Promise.all([
