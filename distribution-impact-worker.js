@@ -1,4 +1,5 @@
 const WINDOW_DAYS=30;
+const ACTION_MATURITY_HOURS=48;
 
 function hostOf(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
 function variants(slug){const s=String(slug||'').toLowerCase();return [...new Set([s,s.replace(/-/g,'_'),s.replace(/-/g,''),s.replace(/-/g,'.')].filter(Boolean))]}
@@ -60,7 +61,9 @@ export async function growthActionMetrics(env){
       env.DB.prepare(`SELECT session_id,created_at,affiliate_active_at_click,source FROM verified_outbound_events WHERE created_at>=datetime('now','-${WINDOW_DAYS} days')`).all()
     ]);
     const actionMap=new Map((actions.results||[]).map(x=>[x.action_id,x])),sessionAction=new Map(),first=new Map(),byAction=new Map();
-    const get=id=>{if(!byAction.has(id)){const a=actionMap.get(id)||{};byAction.set(id,{action_id:id,opportunity_key:a.opportunity_key||null,engine:a.engine||null,channel:a.channel||null,target_url:a.target_url||null,status:a.status||null,browser_confirmed_sessions:0,outbound_clicks:0,monetized_outbound:0});}return byAction.get(id)};
+    const maturityCutoff=Date.now()-ACTION_MATURITY_HOURS*3600000;
+    const actionTime=value=>{const raw=String(value||'');const t=Date.parse(raw.includes('T')?raw:raw.replace(' ','T')+'Z');return Number.isFinite(t)?t:Infinity};
+    const get=id=>{if(!byAction.has(id)){const a=actionMap.get(id)||{};byAction.set(id,{action_id:id,opportunity_key:a.opportunity_key||null,engine:a.engine||null,channel:a.channel||null,target_url:a.target_url||null,status:a.status||null,created_at:a.created_at||null,browser_confirmed_sessions:0,outbound_clicks:0,monetized_outbound:0});}return byAction.get(id)};
     for(const e of entries.results||[]){
       const id=String(e.session_id||'');if(!id||sessionAction.has(id)||!e.confirmed_at)continue;
       const actionId=sourceParam(e.source,'ts_action');if(!actionId||!actionMap.has(actionId))continue;
@@ -69,7 +72,10 @@ export async function growthActionMetrics(env){
     for(const e of outboundEvents.results||[]){const id=String(e.session_id||''),a=sessionAction.get(id);if(a&&String(e.created_at||'')>=String(first.get(id)||''))get(a).outbound_clicks++}
     for(const e of clicks.results||[]){const id=String(e.session_id||''),a=sessionAction.get(id);if(a&&String(e.created_at||'')>=String(first.get(id)||'')&&Number(e.affiliate_active_at_click)===1&&String(e.source||'')!=='internal-test')get(a).monetized_outbound++}
     const rows=[...byAction.values()].sort((a,b)=>b.browser_confirmed_sessions-a.browser_confirmed_sessions||b.outbound_clicks-a.outbound_clicks);
-    return {status:'observed',windowDays:WINDOW_DAYS,preparedActions:(actions.results||[]).length,attributedActions:rows.filter(x=>x.browser_confirmed_sessions>0).length,browserConfirmedSessions:rows.reduce((s,x)=>s+x.browser_confirmed_sessions,0),outboundClicks:rows.reduce((s,x)=>s+x.outbound_clicks,0),monetizedOutbound:rows.reduce((s,x)=>s+x.monetized_outbound,0),topActions:rows.slice(0,10),attribution:'Exact ts_action first-touch marker on a strict verified human session. Browser validation alone is excluded and no traffic is inferred when the marker is absent.'};
+    const matured=(actions.results||[]).filter(a=>actionTime(a.created_at)<=maturityCutoff);
+    const maturedIds=new Set(matured.map(a=>a.action_id));
+    const maturedRows=rows.filter(x=>maturedIds.has(x.action_id));
+    return {status:'observed',windowDays:WINDOW_DAYS,actionMaturityHours:ACTION_MATURITY_HOURS,preparedActions:(actions.results||[]).length,attributedActions:rows.filter(x=>x.browser_confirmed_sessions>0).length,browserConfirmedSessions:rows.reduce((s,x)=>s+x.browser_confirmed_sessions,0),outboundClicks:rows.reduce((s,x)=>s+x.outbound_clicks,0),monetizedOutbound:rows.reduce((s,x)=>s+x.monetized_outbound,0),maturedActions:matured.length,maturedAttributedActions:maturedRows.filter(x=>x.browser_confirmed_sessions>0).length,maturedBrowserConfirmedSessions:maturedRows.reduce((s,x)=>s+x.browser_confirmed_sessions,0),maturedOutboundClicks:maturedRows.reduce((s,x)=>s+x.outbound_clicks,0),topActions:rows.slice(0,10),attribution:'Exact ts_action first-touch marker on a strict verified human session. Browser validation alone is excluded and no traffic is inferred when the marker is absent.'};
   }catch(error){return {status:'unavailable',windowDays:WINDOW_DAYS,reason:String(error?.message||error)}}
 }
 
