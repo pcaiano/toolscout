@@ -90,8 +90,10 @@ async function hash(value){const d=await crypto.subtle.digest('SHA-256',new Text
 
 export function executionRegistry(){return{actions:ACTION_EXECUTOR,executors:EXECUTORS,supervisor:SUPERVISOR_EXECUTOR}}
 
+let executionSchemaReady=null;
 export async function ensureExecutionContractSchema(env){
-  await env.DB.batch([
+  if(executionSchemaReady)return executionSchemaReady;
+  executionSchemaReady=env.DB.batch([
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_execution_contract(
       task_id TEXT PRIMARY KEY,
       source_kind TEXT NOT NULL,
@@ -131,7 +133,8 @@ export async function ensureExecutionContractSchema(env){
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_execution_events_task ON growth_execution_events(task_id,created_at DESC)`)
-  ]);
+  ]).catch(error=>{executionSchemaReady=null;throw error});
+  return executionSchemaReady;
 }
 
 async function upsertTask(env,{sourceKind,sourceId,opportunityKey=null,subjectType=null,subjectKey=null,action,executor,priority=0}){
@@ -165,7 +168,7 @@ async function upsertTask(env,{sourceKind,sourceId,opportunityKey=null,subjectTy
        OR growth_execution_contract.execution_mode IS NOT excluded.execution_mode
        OR growth_execution_contract.priority_score IS NOT excluded.priority_score
        OR growth_execution_contract.status='cancelled'
-       OR excluded.status='executor_missing'`)
+       OR (excluded.status='executor_missing' AND growth_execution_contract.status<>'executor_missing')`)
     .bind(taskId,sourceKind,sourceId,opportunityKey,subjectType,subjectKey,action,executor||null,engine,mode,Number(priority||0),status,claim,attempt,verify).run();
   if(Number(write?.meta?.changes||write?.changes||0)>0&&status==='executor_missing'){
     await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
@@ -204,6 +207,7 @@ export async function syncExecutionContracts(env){
       datetime('now'),datetime('now')
     FROM growth_opportunity_state g, json_each(g.action_json) j
     WHERE g.status='active'
+      AND j.value NOT IN ('distribution_measurement','search_measurement')
     ON CONFLICT(task_id) DO UPDATE SET
       opportunity_key=excluded.opportunity_key,subject_type=excluded.subject_type,subject_key=excluded.subject_key,
       executor=excluded.executor,engine=excluded.engine,execution_mode=excluded.execution_mode,priority_score=excluded.priority_score,
@@ -236,6 +240,7 @@ export async function syncExecutionContracts(env){
         WHERE g.status='active'
           AND g.opportunity_key=growth_execution_contract.source_id
           AND j.value=growth_execution_contract.action
+          AND j.value NOT IN ('distribution_measurement','search_measurement')
       )`).run();
 
   await env.DB.prepare(`UPDATE growth_execution_contract
