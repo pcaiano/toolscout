@@ -209,6 +209,41 @@ async function storeAutoAdapter(env,row,h,adapter,policyState){
   await env.DB.prepare(`INSERT INTO distribution_auto_adapters(surface_slug,source_url,endpoint,method,content_type,payload_template_json,confidence,policy_state,verification_source,verification_endpoint,public_url,verification_method,auth_type,auth_detail,last_checked_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET source_url=excluded.source_url,endpoint=excluded.endpoint,method=excluded.method,content_type=excluded.content_type,payload_template_json=excluded.payload_template_json,confidence=excluded.confidence,policy_state=excluded.policy_state,verification_source=excluded.verification_source,verification_endpoint=excluded.verification_endpoint,public_url=excluded.public_url,verification_method=excluded.verification_method,auth_type=excluded.auth_type,auth_detail=excluded.auth_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
     .bind(row.surface_slug,h.url,adapter.endpoint,adapter.method||'POST',adapter.content_type||'application/json',JSON.stringify(adapter.payload),adapter.confidence,policyState,adapter.verification_source,adapter.verification_endpoint||null,adapter.public_url||null,adapter.verification_method||'GET',adapter.auth_required?'openapi_security':null,adapter.auth_detail?JSON.stringify(adapter.auth_detail):null).run();
 }
+function humanGatePayload(){
+  return {
+    name:'ToolScout',
+    website:'https://trytoolscout.org/',
+    domain:'trytoolscout.org',
+    description:'ToolScout is an independent software discovery and recommendation platform.',
+    tagline:'Find the right software for the job without the noise.'
+  };
+}
+async function openDistributionHumanGate(env,row,{gateType='human_confirmation',actionUrl=null,reason=null,verificationUrl=null}={}){
+  const target=row.surface_name||row.surface_slug;
+  const isAuth=gateType==='authentication';
+  const instructions=isAuth
+    ?'Open the exact action page. Sign in, create the required account, complete email/OTP verification, or authorize access as required. Then complete the ToolScout listing/submission using the prepared truthful ToolScout details. Do not buy promotion, add a reciprocal badge, accept optional paid upgrades, or invent claims. When the external step is complete, return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it so autonomous verification can close the gate immediately.'
+    :'Open the exact action page and complete only the human-only step shown there, such as CAPTCHA, explicit confirmation, material terms acceptance, or the final irreversible submit. Use the prepared truthful ToolScout details. Do not buy promotion, add reciprocal badges, or invent claims. Then return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it for autonomous verification.';
+  const gateKey=await upsertHumanGate(env,{
+    engine:'distribution',
+    subjectType:'surface',
+    subjectKey:row.surface_slug,
+    gateType,
+    title:`${target}: human step required`,
+    reason:reason||row.next_action||'Autonomous execution reached a genuine human-only gate.',
+    instructions,
+    actionUrl:actionUrl||row.action_url,
+    resolutionMode:'verify_publication',
+    payload:humanGatePayload(),
+    verificationUrl
+  });
+  await env.DB.prepare(`UPDATE distribution_opportunities
+    SET human_required=1,
+        next_action=?,
+        updated_at=datetime('now')
+    WHERE surface_slug=?`).bind(`Human Gate Contract ${gateKey} opened. Complete the exact external step from Chairman Queue, then mark it done for autonomous verification.`,row.surface_slug).run().catch(()=>{});
+  return gateKey;
+}
 async function qualifyOne(env,row){
   let effectiveRow=row;
   if(isTechnicalSurface(row.action_url)){
@@ -310,7 +345,7 @@ async function qualifyOne(env,row){
   return 'research_required';
 }
 async function qualify(env){
-  const q=await env.DB.prepare(`SELECT o.surface_slug,o.action_url,o.distribution_score,o.status,o.last_checked_at
+  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,o.status,o.last_checked_at
     FROM distribution_opportunities o
     WHERE o.human_required=0 AND o.action_url IS NOT NULL AND o.surface_slug<>'indexnow'
       AND (
