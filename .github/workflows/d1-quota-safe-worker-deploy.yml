@@ -1,4 +1,4 @@
-name: One Shot Growth Brain Self Supervisor Deploy v4
+name: One Shot Growth Execution Contract Deploy
 
 on:
   push:
@@ -22,46 +22,53 @@ jobs:
         with:
           node-version: 22
 
-      - name: Validate Growth Brain supervisor contract
+      - name: Validate Growth execution contract
         run: |
+          node --check growth-execution-contract.js
           node --check growth-supervisor.js
           node --check distribution-orchestrator-worker.js
-          node --check distribution-priority-worker.js
+          node --check distribution-contact-worker.js
+          node --check distribution-autonomous-worker.js
+          node --check distribution-network-worker.js
           node --check content-engine-intelligence-worker.js
-          node --check growth-command-center-v2-worker.js
-          node --check command-center-light-theme-worker.js
+          node --check affiliate-coverage-cycle-worker.js
+          node --check catalog-autonomy-worker.js
           node --check scripts/validate-autonomous-growth-brain.mjs
           node scripts/validate-autonomous-growth-brain.mjs
 
-      - name: Deploy self supervising Worker
+      - name: Deploy Growth execution contract
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      - name: Bootstrap and inspect Growth Supervisor
+      - name: Bootstrap contract state through live supervisor
         run: |
-          curl -fsS --retry 5 --retry-delay 3 https://trytoolscout.org/api/growth/supervisor/public > /tmp/supervisor.json
+          curl -fsS --retry 6 --retry-delay 3 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth.json
           node - <<'NODE'
           const fs=require('fs');
-          const x=JSON.parse(fs.readFileSync('/tmp/supervisor.json','utf8'));
-          if(x.brain!=='shared-growth-v3') throw new Error('wrong_growth_brain');
-          const growth=(x.directives||[]).find(d=>d.engine==='growth_brain');
-          if(!growth) throw new Error('growth_supervisor_not_bootstrapped');
-          console.log(JSON.stringify({
-            northStar:x.northStar,
-            growth,
-            engines:(x.directives||[]).map(d=>({engine:d.engine,status:d.status,directive:d.directive})),
-            topSearchTargets:(x.topSearchTargets||[]).map(t=>({path:t.path,priority:t.priority,audienceUrl:Boolean(t.audienceUrl)}))
-          },null,2));
+          const x=JSON.parse(fs.readFileSync('/tmp/growth.json','utf8'));
+          if(x?.brain!=='shared-growth-v3') throw new Error('growth_brain_unavailable');
+          if(!x.executionContract) throw new Error('execution_contract_not_exposed');
+          console.log(JSON.stringify({northStar:x.northStar,executionContract:x.executionContract},null,2));
           NODE
 
-      - name: Audit D1 supervisor truth
+      - name: Enforce end to end execution invariants
         run: |
-          echo "=== GROWTH SUPERVISOR STATE ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,role,status,north_star,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,directive,correction_count,last_correction_at,last_evaluated_at FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine;"
-          echo "=== SUPERVISOR EVENTS ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,previous_status,new_status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,created_at FROM growth_supervisor_events ORDER BY created_at DESC LIMIT 20;"
-          echo "=== STRICT HUMAN SOURCE TRUTH 7D ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "WITH fv AS (SELECT session_id,source,referrer_host,created_at,ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC,id ASC) rn FROM confirmed_visitor_events WHERE created_at>=datetime('now','-7 days')) SELECT COALESCE(v.source,'unattributed') acquisition_source,COALESCE(v.referrer_host,'') referrer_host,COUNT(DISTINCT h.session_id) strict_humans FROM traffic_human_evidence h LEFT JOIN fv v ON v.session_id=h.session_id AND v.rn=1 WHERE h.first_evidence_at>=datetime('now','-7 days') GROUP BY COALESCE(v.source,'unattributed'),COALESCE(v.referrer_host,'') ORDER BY strict_humans DESC;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM growth_opportunity_state g, json_each(g.action_json) j WHERE g.status='active') active_actions,
+            (SELECT COUNT(*) FROM growth_execution_contract WHERE source_kind='opportunity' AND status<>'cancelled') contracted_actions,
+            (SELECT COUNT(*) FROM growth_opportunity_state g, json_each(g.action_json) j LEFT JOIN growth_execution_contract c ON c.source_kind='opportunity' AND c.source_id=g.opportunity_key AND c.action=j.value AND c.status<>'cancelled' WHERE g.status='active' AND c.task_id IS NULL) uncontracted_actions,
+            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing') missing_executors,
+            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled') stalled,
+            (SELECT COUNT(*) FROM growth_execution_contract WHERE source_kind='supervisor' AND status<>'cancelled') supervisor_contracts;" > /tmp/execution-invariants.json
+          cat /tmp/execution-invariants.json
+          jq -e '.[0].results[0] | .uncontracted_actions==0 and .missing_executors==0 and .stalled==0 and .active_actions==.contracted_actions' /tmp/execution-invariants.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Show execution contract by executor
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT executor,execution_mode,status,COUNT(*) n FROM growth_execution_contract WHERE status<>'cancelled' GROUP BY executor,execution_mode,status ORDER BY executor,status;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT source_kind,subject_type,action,executor,status,priority_score,claim_deadline,attempt_deadline,verify_deadline FROM growth_execution_contract WHERE status NOT IN ('cancelled','verified') ORDER BY priority_score DESC LIMIT 40;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
