@@ -23,7 +23,7 @@ const ACTION_EXECUTOR=Object.freeze({
   distribution_amplification:'make_sender',
   vendor_amplification:'make_sender',
   backlink_reference_outreach:'make_sender',
-  verify_backlink_acquisition:'distribution_network',
+  verify_backlink_acquisition:'distribution_autonomous',
   content_relevance_amplification:'content_issue',
   content_amplification:'content_issue',
   content_mention:'content_issue',
