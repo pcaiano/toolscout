@@ -1,6 +1,10 @@
 name: ToolScout Growth Brain SEO Executor
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/growth-brain-seo-executor.yml'
   schedule:
     - cron: '43 6 * * *'
   workflow_dispatch:
