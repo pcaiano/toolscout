@@ -11,7 +11,7 @@ async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(n
 
 async function ensureSchema(env){
   await env.DB.batch([
-    env.DB.prepare(\`CREATE TABLE IF NOT EXISTS growth_supervisor_state(
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_supervisor_state(
       engine TEXT PRIMARY KEY,role TEXT NOT NULL,status TEXT NOT NULL,north_star TEXT NOT NULL,
       strict_humans_24h INTEGER NOT NULL DEFAULT 0,strict_humans_7d INTEGER NOT NULL DEFAULT 0,
       attributed_humans_24h INTEGER NOT NULL DEFAULT 0,attributed_humans_7d INTEGER NOT NULL DEFAULT 0,
@@ -19,15 +19,15 @@ async function ensureSchema(env){
       evidence_age_hours REAL,directive TEXT NOT NULL,directive_json TEXT NOT NULL,
       correction_count INTEGER NOT NULL DEFAULT 0,last_correction_at TEXT,last_execution_at TEXT,
       last_evaluated_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )\`),
-    env.DB.prepare(\`CREATE INDEX IF NOT EXISTS idx_growth_supervisor_status ON growth_supervisor_state(status,updated_at)\`),
-    env.DB.prepare(\`CREATE TABLE IF NOT EXISTS growth_supervisor_events(
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_supervisor_status ON growth_supervisor_state(status,updated_at)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_supervisor_events(
       event_id TEXT PRIMARY KEY,engine TEXT NOT NULL,previous_status TEXT,new_status TEXT NOT NULL,
       directive TEXT NOT NULL,strict_humans_24h INTEGER NOT NULL DEFAULT 0,strict_humans_7d INTEGER NOT NULL DEFAULT 0,
       external_executions_24h INTEGER NOT NULL DEFAULT 0,external_executions_7d INTEGER NOT NULL DEFAULT 0,
       detail TEXT,created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )\`),
-    env.DB.prepare(\`CREATE INDEX IF NOT EXISTS idx_growth_supervisor_events_engine ON growth_supervisor_events(engine,created_at DESC)\`)
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_supervisor_events_engine ON growth_supervisor_events(engine,created_at DESC)`)
   ]);
 }
 
@@ -86,7 +86,7 @@ function countSince(rows,field,hours,pred=()=>true){
 }
 
 async function strictRows(env){
-  return all(env,\`WITH fv AS (
+  return all(env,`WITH fv AS (
     SELECT session_id,source,referrer_host,created_at,
       ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC,id ASC) rn
     FROM confirmed_visitor_events WHERE created_at>=datetime('now','-7 days')
@@ -94,25 +94,25 @@ async function strictRows(env){
   SELECT h.session_id,h.first_evidence_at,v.source,v.referrer_host
   FROM traffic_human_evidence h
   LEFT JOIN fv v ON v.session_id=h.session_id AND v.rn=1
-  WHERE h.first_evidence_at>=datetime('now','-7 days')\`);
+  WHERE h.first_evidence_at>=datetime('now','-7 days')`);
 }
 
 async function executionRows(env){
   const [actions,submissions,audience]=await Promise.all([
-    all(env,\`SELECT engine,status,created_at,updated_at FROM growth_action_events WHERE created_at>=datetime('now','-7 days')\`),
-    all(env,\`SELECT surface_slug,status,attempts,COALESCE(last_attempt_at,created_at) at FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')\`),
-    all(env,\`SELECT event_type,status,platform,created_at FROM audience_events WHERE created_at>=datetime('now','-7 days') AND status='published'\`)
+    all(env,`SELECT engine,status,created_at,updated_at FROM growth_action_events WHERE created_at>=datetime('now','-7 days')`),
+    all(env,`SELECT surface_slug,status,attempts,COALESCE(last_attempt_at,created_at) at FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')`),
+    all(env,`SELECT event_type,status,platform,created_at FROM audience_events WHERE created_at>=datetime('now','-7 days') AND status='published'`)
   ]);
   return{actions,submissions,audience};
 }
 
 async function saveEngine(env,engine,role,global,ctx,p){
-  const prev=await env.DB.prepare(\`SELECT status,directive,directive_json,correction_count FROM growth_supervisor_state WHERE engine=?\`).bind(engine).first();
+  const prev=await env.DB.prepare(`SELECT status,directive,directive_json,correction_count FROM growth_supervisor_state WHERE engine=?`).bind(engine).first();
   const json=JSON.stringify(p.config),changed=!prev||prev.status!==p.status||prev.directive!==p.directive||String(prev.directive_json||'')!==json;
   const lastExecution=Number.isFinite(ctx.lastExecutionAgeHours)&&ctx.lastExecutionAgeHours<1e6?new Date(Date.now()-ctx.lastExecutionAgeHours*HOUR).toISOString().replace('T',' ').slice(0,19):null;
   const evidenceAge=engine==='seo_geo_aio'?Math.min(ctx.gscAgeHours,ctx.organicActionsAgeHours):(Number.isFinite(ctx.lastExecutionAgeHours)?ctx.lastExecutionAgeHours:null);
   const corrections=n(prev?.correction_count)+(changed?1:0);
-  await env.DB.prepare(\`INSERT INTO growth_supervisor_state(
+  await env.DB.prepare(`INSERT INTO growth_supervisor_state(
       engine,role,status,north_star,strict_humans_24h,strict_humans_7d,attributed_humans_24h,attributed_humans_7d,
       external_executions_24h,external_executions_7d,evidence_age_hours,directive,directive_json,correction_count,last_correction_at,last_execution_at,last_evaluated_at,updated_at)
     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,CASE WHEN ?=1 THEN datetime('now') ELSE NULL END,?,datetime('now'),datetime('now'))
@@ -124,13 +124,13 @@ async function saveEngine(env,engine,role,global,ctx,p){
       evidence_age_hours=excluded.evidence_age_hours,directive=excluded.directive,directive_json=excluded.directive_json,
       correction_count=excluded.correction_count,
       last_correction_at=CASE WHEN ?=1 THEN datetime('now') ELSE growth_supervisor_state.last_correction_at END,
-      last_execution_at=excluded.last_execution_at,last_evaluated_at=datetime('now'),updated_at=datetime('now')\`)
+      last_execution_at=excluded.last_execution_at,last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
     .bind(engine,role,p.status,NORTH_STAR,global.strict24,global.strict7,n(ctx.h24),n(ctx.h7),n(ctx.e24),n(ctx.e7),evidenceAge,p.directive,json,corrections,changed?1:0,lastExecution,changed?1:0).run();
   if(changed){
-    await env.DB.prepare(\`INSERT INTO growth_supervisor_events(event_id,engine,previous_status,new_status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,detail,created_at)
-      VALUES(?,?,?,?,?,?,?,?,?,?,datetime('now'))\`)
-      .bind(\`gs_\${crypto.randomUUID()}\`,engine,prev?.status||null,p.status,p.directive,global.strict24,global.strict7,n(ctx.e24),n(ctx.e7),
-        safe(\`North star \${NORTH_STAR}. Attributed humans 24h/7d \${n(ctx.h24)}/\${n(ctx.h7)}. External executions 24h/7d \${n(ctx.e24)}/\${n(ctx.e7)}.\`)).run();
+    await env.DB.prepare(`INSERT INTO growth_supervisor_events(event_id,engine,previous_status,new_status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,detail,created_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,datetime('now'))`)
+      .bind(`gs_${crypto.randomUUID()}`,engine,prev?.status||null,p.status,p.directive,global.strict24,global.strict7,n(ctx.e24),n(ctx.e7),
+        safe(`North star ${NORTH_STAR}. Attributed humans 24h/7d ${n(ctx.h24)}/${n(ctx.h7)}. External executions 24h/7d ${n(ctx.e24)}/${n(ctx.e7)}.`)).run();
   }
   return{engine,role,status:p.status,directive:p.directive,directiveConfig:p.config,attributedHumans24h:n(ctx.h24),attributedHumans7d:n(ctx.h7),externalExecutions24h:n(ctx.e24),externalExecutions7d:n(ctx.e7)};
 }
@@ -141,7 +141,7 @@ export async function runGrowthSupervisorAudit(env){
     strictRows(env),executionRows(env),
     assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
     assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
-    all(env,\`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type\`)
+    all(env,`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`)
   ]);
   const byType=Object.fromEntries(active.map(x=>[String(x.subject_type),n(x.n)]));
   const humans={distribution:{h24:0,h7:0},content:{h24:0,h7:0},audience:{h24:0,h7:0},seo_geo_aio:{h24:0,h7:0},unattributed:{h24:0,h7:0}};
@@ -192,13 +192,13 @@ export async function runGrowthSupervisorAudit(env){
 
 export async function growthSupervisorSnapshot(env){
   await ensureSchema(env);
-  const rows=await all(env,\`SELECT engine,role,status,north_star,strict_humans_24h,strict_humans_7d,attributed_humans_24h,attributed_humans_7d,external_executions_24h,external_executions_7d,evidence_age_hours,directive,directive_json,correction_count,last_correction_at,last_execution_at,last_evaluated_at FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 WHEN 'distribution' THEN 1 WHEN 'content' THEN 2 WHEN 'audience' THEN 3 WHEN 'seo_geo_aio' THEN 4 WHEN 'affiliate' THEN 5 ELSE 6 END\`);
+  const rows=await all(env,`SELECT engine,role,status,north_star,strict_humans_24h,strict_humans_7d,attributed_humans_24h,attributed_humans_7d,external_executions_24h,external_executions_7d,evidence_age_hours,directive,directive_json,correction_count,last_correction_at,last_execution_at,last_evaluated_at FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 WHEN 'distribution' THEN 1 WHEN 'content' THEN 2 WHEN 'audience' THEN 3 WHEN 'seo_geo_aio' THEN 4 WHEN 'affiliate' THEN 5 ELSE 6 END`);
   return{northStar:NORTH_STAR,generatedAt:new Date().toISOString(),items:rows.map(x=>{let cfg={};try{cfg=JSON.parse(x.directive_json||'{}')}catch{}const y={...x,directiveConfig:cfg};delete y.directive_json;return y})};
 }
 
 export async function growthSupervisorDirective(env,engine){
   await ensureSchema(env);
-  const row=await env.DB.prepare(\`SELECT status,directive,directive_json,last_evaluated_at FROM growth_supervisor_state WHERE engine=?\`).bind(engine).first();
+  const row=await env.DB.prepare(`SELECT status,directive,directive_json,last_evaluated_at FROM growth_supervisor_state WHERE engine=?`).bind(engine).first();
   if(!row)return null;let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}
   return{status:row.status,directive:row.directive,config,lastEvaluatedAt:row.last_evaluated_at};
 }
