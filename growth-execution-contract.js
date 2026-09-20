@@ -218,6 +218,16 @@ export async function markExecutorAttempt(env,executor,result,{verified=false,bl
   return{changed:Number(w?.meta?.changes||w?.changes||0),status};
 }
 
+export async function verifySupervisorExecutorTasks(env,executor,result='supervisor_executor_completed'){
+  await ensureExecutionContractSchema(env);
+  const w=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='verified',attempts=attempts+1,attempted_at=COALESCE(attempted_at,datetime('now')),
+        completed_at=datetime('now'),verified_at=datetime('now'),last_result=?,updated_at=datetime('now')
+    WHERE executor=? AND source_kind='supervisor' AND status IN ('claimed','attempted')`)
+    .bind(String(result||'supervisor_executor_completed').slice(0,1000),executor).run();
+  return{verified:Number(w?.meta?.changes||w?.changes||0)};
+}
+
 export async function reconcileExecutionContracts(env){
   await ensureExecutionContractSchema(env);
   const tasks=await all(env,`SELECT * FROM growth_execution_contract WHERE status IN ('pending','claimed','attempted','stalled','executor_missing') ORDER BY priority_score DESC,created_at ASC LIMIT 500`);
