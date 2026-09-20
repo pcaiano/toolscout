@@ -151,12 +151,16 @@ async function upsertTask(env,{sourceKind,sourceId,opportunityKey=null,subjectTy
       claim_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.claim_deadline ELSE growth_execution_contract.claim_deadline END,
       attempt_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.attempt_deadline ELSE growth_execution_contract.attempt_deadline END,
       verify_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.verify_deadline ELSE growth_execution_contract.verify_deadline END,
-      updated_at=CASE
-        WHEN growth_execution_contract.executor IS NOT excluded.executor
-          OR growth_execution_contract.priority_score IS NOT excluded.priority_score
-          OR growth_execution_contract.status='cancelled'
-          OR excluded.status='executor_missing'
-        THEN datetime('now') ELSE growth_execution_contract.updated_at END`)
+      updated_at=datetime('now')
+    WHERE growth_execution_contract.opportunity_key IS NOT excluded.opportunity_key
+       OR growth_execution_contract.subject_type IS NOT excluded.subject_type
+       OR growth_execution_contract.subject_key IS NOT excluded.subject_key
+       OR growth_execution_contract.executor IS NOT excluded.executor
+       OR growth_execution_contract.engine IS NOT excluded.engine
+       OR growth_execution_contract.execution_mode IS NOT excluded.execution_mode
+       OR growth_execution_contract.priority_score IS NOT excluded.priority_score
+       OR growth_execution_contract.status='cancelled'
+       OR excluded.status='executor_missing'`)
     .bind(taskId,sourceKind,sourceId,opportunityKey,subjectType,subjectKey,action,executor||null,engine,mode,Number(priority||0),status,claim,attempt,verify).run();
   if(Number(write?.meta?.changes||write?.changes||0)>0&&status==='executor_missing'){
     await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
