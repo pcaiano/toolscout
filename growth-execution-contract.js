@@ -289,9 +289,28 @@ export async function verifySupervisorExecutorTasks(env,executor,result='supervi
   return{verified:Number(w?.meta?.changes||w?.changes||0)};
 }
 
+export async function reconcileExecutionDeadlines(env){
+  await ensureExecutionContractSchema(env);
+  const w=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='stalled',
+        last_result=CASE
+          WHEN status='pending' THEN 'claim_sla_missed'
+          WHEN status='claimed' THEN 'attempt_sla_missed'
+          ELSE 'verification_sla_missed' END,
+        updated_at=datetime('now')
+    WHERE status IN ('pending','claimed','attempted')
+      AND (
+        (status='pending' AND claim_deadline IS NOT NULL AND claim_deadline<datetime('now'))
+        OR (status='claimed' AND attempt_deadline IS NOT NULL AND attempt_deadline<datetime('now'))
+        OR (status='attempted' AND verify_deadline IS NOT NULL AND verify_deadline<datetime('now'))
+      )`).run();
+  return{stalled:Number(w?.meta?.changes||w?.changes||0)};
+}
+
 export async function reconcileExecutionContracts(env){
   await ensureExecutionContractSchema(env);
-  const tasks=await all(env,`SELECT * FROM growth_execution_contract WHERE status IN ('pending','claimed','attempted','stalled','executor_missing') ORDER BY priority_score DESC,created_at ASC LIMIT 500`);
+  await reconcileExecutionDeadlines(env);
+  const tasks=await all(env,`SELECT * FROM growth_execution_contract WHERE status IN ('pending','claimed','attempted','stalled','executor_missing') ORDER BY priority_score DESC,created_at ASC LIMIT 60`);
   let verified=0,stalled=0,missing=0;
   const now=Date.now();
   for(const t of tasks){
