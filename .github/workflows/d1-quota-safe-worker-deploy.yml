@@ -1,39 +1,14 @@
-name: One Shot Traffic Truth Scanner Fix
+name: ToolScout GitHub Actions Conservation Mode
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/d1-quota-safe-worker-deploy.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-worker-production-traffic-truth-fix
-  cancel-in-progress: false
-
 jobs:
-  validate-deploy:
+  conservation-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Validate strict human traffic truth
-        run: |
-          node --check traffic-integrity-guard-worker.js
-          node --check scripts/validate-strict-human-traffic-truth.mjs
-          node scripts/validate-strict-human-traffic-truth.mjs
-
-      - name: Deploy traffic truth fix
-        run: npx wrangler deploy --config wrangler.toml --latest
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Verify production health contract
-        run: |
-          curl -fsS --retry 5 --retry-delay 3 https://trytoolscout.org/api/traffic-truth/health > /tmp/traffic-health.json || true
-          cat /tmp/traffic-health.json
+      - name: Conservation mode notice
+        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
