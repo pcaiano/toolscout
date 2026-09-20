@@ -273,15 +273,22 @@ export async function syncExecutionContracts(env){
   return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),cancelledSupervisor:staleSupervisor.length,write_policy:'set_based_material_change_only'};
 }
 
-export async function claimExecutorTasks(env,executor,{limit=50,result='executor_claimed'}={}){
+export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null,result='executor_claimed'}={}){
   await ensureExecutionContractSchema(env);
   const spec=EXECUTORS[executor]||null;
-  const rows=await env.DB.prepare(`SELECT task_id,status FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,Math.max(1,Math.min(100,limit))).all();
-  const ids=(rows.results||[]).map(x=>x.task_id);if(!ids.length)return{claimed:0,taskIds:[]};
+  let effective=Math.max(0,Math.min(100,Number(limit)||0)),inFlight=0;
+  if(maxInFlight!=null){
+    const row=await first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted')`,[executor]);
+    inFlight=n(row?.n);
+    effective=Math.max(0,Math.min(effective,Math.max(0,Number(maxInFlight)-inFlight)));
+  }
+  if(effective<=0)return{claimed:0,taskIds:[],inFlight,capacity:Number(maxInFlight||limit||0)};
+  const rows=await env.DB.prepare(`SELECT task_id,status FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
+  const ids=(rows.results||[]).map(x=>x.task_id);if(!ids.length)return{claimed:0,taskIds:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   const qs=ids.map(()=>'?').join(',');
   const claim=spec?.claim!=null?dt(spec.claim):null,attempt=spec?.attempt!=null?dt(spec.attempt):null,verify=spec?.verify!=null?dt(spec.verify):null;
   await env.DB.prepare(`UPDATE growth_execution_contract SET status='claimed',claimed_at=datetime('now'),claim_deadline=?,attempt_deadline=?,verify_deadline=?,last_result=?,updated_at=datetime('now') WHERE task_id IN (${qs})`).bind(claim,attempt,verify,result,...ids).run();
-  return{claimed:ids.length,taskIds:ids};
+  return{claimed:ids.length,taskIds:ids,inFlightBefore:inFlight,capacity:Number(maxInFlight||limit||0)};
 }
 
 export async function markExecutorAttempt(env,executor,result,{verified=false,blocked=false}={}){
