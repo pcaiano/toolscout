@@ -1,15 +1,15 @@
 const HOUR=3600000;
 const TERMINAL=new Set(['verified','human_required','blocked','cancelled']);
 const EXECUTORS=Object.freeze({
-  distribution_network:{engine:'distribution',mode:'internal',claim:30,attempt:120,verify:1440},
-  distribution_autonomous:{engine:'distribution',mode:'internal',claim:30,attempt:120,verify:1440},
+  distribution_network:{engine:'distribution',mode:'internal',claim:90,attempt:180,verify:1440},
+  distribution_autonomous:{engine:'distribution',mode:'internal',claim:90,attempt:180,verify:1440},
   make_sender:{engine:'distribution',mode:'external',claim:360,attempt:720,verify:2880},
-  content_issue:{engine:'content',mode:'internal',claim:60,attempt:180,verify:1440},
-  audience_make:{engine:'audience',mode:'external',claim:30,attempt:180,verify:1440},
+  content_issue:{engine:'content',mode:'internal',claim:90,attempt:240,verify:1440},
+  audience_make:{engine:'audience',mode:'external',claim:90,attempt:240,verify:1440},
   seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:720,verify:2880},
   affiliate_cycle:{engine:'affiliate',mode:'internal',claim:180,attempt:720,verify:2880},
   catalog_cycle:{engine:'catalog',mode:'internal',claim:360,attempt:720,verify:2880},
-  growth_supervisor:{engine:'growth',mode:'internal',claim:30,attempt:60,verify:180},
+  growth_supervisor:{engine:'growth',mode:'internal',claim:90,attempt:180,verify:360},
   human_gate:{engine:'human',mode:'human',claim:null,attempt:null,verify:null}
 });
 const ACTION_EXECUTOR=Object.freeze({
