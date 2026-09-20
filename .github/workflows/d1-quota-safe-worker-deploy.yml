@@ -1,4 +1,4 @@
-name: One Shot Growth Closed Loop Deploy
+name: One Shot Growth Loop Final Audit
 
 on:
   push:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  validate-migrate-deploy-audit:
+  validate-deploy-audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,11 +30,12 @@ jobs:
           node --check growth-command-center-v2-worker.js
           node --check scripts/validate-autonomous-growth-brain.mjs
 
-      - name: Validate autonomous Growth Brain contract
+      - name: Validate Growth Brain contract
         run: node scripts/validate-autonomous-growth-brain.mjs
 
-      - name: Apply D1 closed-loop schema and backfill
-        run: npx wrangler d1 execute toolscout --remote --config wrangler.toml --file=migrations/0080_distribution_route_closed_loop.sql
+      - name: Repair legacy active affiliate opportunities without actions
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE growth_opportunity_state SET action_json=CASE WHEN COALESCE(json_extract(signal_json,'$.affiliate_status'),'') IN ('no_program_found','watchlist') THEN '[\"recheck_affiliate_program_on_evidence_or_cadence\"]' ELSE '[\"reconcile_affiliate_state\"]' END,updated_at=datetime('now') WHERE status='active' AND subject_type='affiliate' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]');"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
@@ -43,17 +44,23 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      - name: Audit alternate-route lifecycle
+      - name: Audit Growth Brain loop
         run: |
-          echo "=== ROUTE ACTION STATES ==="
+          echo "=== ACTIVE OPPORTUNITIES WITHOUT ACTION BY TYPE ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]') GROUP BY subject_type ORDER BY n DESC;"
+          echo "=== ALTERNATE ROUTE ACTION STATES ==="
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,execution_mode,COUNT(*) n FROM distribution_contact_route_actions GROUP BY status,execution_mode ORDER BY status,execution_mode;"
-          echo "=== ORPHAN ROUTES ==="
+          echo "=== ORPHAN ALTERNATE ROUTES ==="
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) orphan_routes FROM distribution_contact_routes r LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id WHERE r.status IN ('discovered','in_loop') AND a.route_id IS NULL;"
-          echo "=== ROUTE OPPORTUNITIES ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) n FROM distribution_opportunities WHERE surface_type='publisher_contact_route' GROUP BY status ORDER BY status;"
-          echo "=== GROWTH LOOP CORE RUNS 24H ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,mission,status,COUNT(*) n,MAX(completed_at) last_completed FROM engine_runs WHERE started_at>=datetime('now','-24 hours') AND ((engine='growth' AND mission IN ('opportunity_coordination','rnd_audit')) OR (engine='distribution' AND mission IN ('network_cycle','autonomous_cycle','economic_learning')) OR (engine='content' AND mission='social_intelligence')) GROUP BY engine,mission,status ORDER BY engine,mission,status;"
-          echo "=== ACTIVE OPPORTUNITIES WITHOUT ACTION ==="
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) n FROM growth_opportunity_state WHERE status='active' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]');"
+          echo "=== STALE ROUTE ACTIONS ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) stale_route_actions FROM distribution_contact_route_actions WHERE (status IN ('queued','retry_due','researching','qualified_auto') AND updated_at<datetime('now','-24 hours')) OR (status='issued_to_content' AND COALESCE(last_attempt_at,updated_at)<datetime('now','-80 hours'));"
+          echo "=== STALE GROWTH ACTIONS ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) stale_growth_actions FROM growth_action_events WHERE status IN ('prepared','issued','leased') AND updated_at<datetime('now','-72 hours');"
+          echo "=== UNRESOLVED CORE FAILURES 24H ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT f.engine,f.mission,COUNT(*) n FROM engine_runs f WHERE f.started_at>=datetime('now','-24 hours') AND f.status='failed' AND ((f.engine='growth' AND f.mission IN ('opportunity_coordination','rnd_audit')) OR (f.engine='distribution' AND f.mission IN ('network_cycle','autonomous_cycle','economic_learning')) OR (f.engine='content' AND f.mission='social_intelligence')) AND NOT EXISTS (SELECT 1 FROM engine_runs c WHERE c.engine=f.engine AND c.mission=f.mission AND c.status='completed' AND c.started_at>f.started_at) GROUP BY f.engine,f.mission;"
+          echo "=== LAST SUCCESSFUL CORE RUNS ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,mission,MAX(completed_at) last_completed FROM engine_runs WHERE status='completed' AND ((engine='growth' AND mission IN ('opportunity_coordination','rnd_audit')) OR (engine='distribution' AND mission IN ('network_cycle','autonomous_cycle','economic_learning')) OR (engine='content' AND mission='social_intelligence')) GROUP BY engine,mission ORDER BY engine,mission;"
+          echo "=== ACTIVE OPPORTUNITY COUNTS ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type ORDER BY n DESC;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
