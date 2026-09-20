@@ -1,4 +1,5 @@
 import base from './affiliate-workflow-worker.js';
+import {recordExecutionProof} from './growth-execution-contract.js';
 
 const TOOLSCOUT_BLUESKY_DID='did:plc:hjawfnxtifnuqcgidlvmas76';
 const jsonHeaders={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
@@ -36,7 +37,15 @@ async function ingestAudienceEvent(request,env){
   try{
     await env.DB.prepare(`INSERT INTO audience_events(event_id,platform,event_type,direction,status,actor_handle,post_uri,parent_uri,content_id,context_text,suggestion_text,risk,followers,impressions,reactions,replies,reposts,source,observed_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(event_id) DO NOTHING`)
       .bind(eventId,platform,eventType,safeText(body.direction,20)||null,status,safeText(body.actor_handle,120)||null,postUri||null,safeText(body.parent_uri,500)||null,safeText(body.content_id,120)||null,safeText(body.context_text,2000)||null,safeText(body.suggestion_text,2000)||null,risk,null,null,null,null,null,safeText(body.source,80)||'make',safeText(body.observed_at,80)||new Date().toISOString()).run();
-    return Response.json({ok:true,event_id:eventId,verified:true},{headers:jsonHeaders});
+    let executionProof=null;
+    if(eventType==='outbound_reply'&&status==='published'){
+      const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='audience_make' AND source_kind='supervisor' AND status IN ('claimed','attempted','stalled') ORDER BY claimed_at DESC,priority_score DESC LIMIT 2`).all().catch(()=>({results:[]}));
+      const tasks=q.results||[];
+      if(tasks.length===1){
+        executionProof=await recordExecutionProof(env,{taskId:tasks[0].task_id,executor:'audience_make',status:'verified',detail:'exact_published_reply_verified',externalId:eventId,evidence:{platform,event_type:eventType,post_uri:postUri,parent_uri:safeText(body.parent_uri,500)||null}});
+      }
+    }
+    return Response.json({ok:true,event_id:eventId,verified:true,execution_proof:executionProof},{headers:jsonHeaders});
   }catch(e){return Response.json({error:'audience_event_store_failed',message:String(e?.message||e)},{status:500,headers:jsonHeaders});}
 }
 
