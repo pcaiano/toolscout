@@ -492,18 +492,26 @@ async function coordinateGrowthOpportunities(env){
     active++;catalogCount++;
   }
 
-  const freshnessDays=Number(catalogEngine?.cadence?.freshnessTargetDays||7),reportMs=Date.parse(catalogFreshness?.generatedAt||'');
-  const reportAgeDays=Number.isFinite(reportMs)?Math.floor((Date.now()-reportMs)/86400000):999;
-  if(reportAgeDays>=freshnessDays){
-    const signals={report_age_days:reportAgeDays,target_days:freshnessDays,catalog_tools:Number(catalogFreshness?.summary?.tools||catalogTools?.length||0),reason:'Catalog verification evidence is older than the configured freshness target.'};
+  const freshnessDays=Math.max(1,Number(catalogEngine?.cadence?.freshnessTargetDays||7));
+  const freshnessMs=freshnessDays*86400000;
+  const freshnessEpoch=Math.floor(nowMs/freshnessMs);
+  for(const tool of Array.isArray(catalogTools)?catalogTools:[]){
+    const slug=String(tool?.slug||'').toLowerCase();if(!slug)continue;
+    const runtime=runtimeStateBySlug.get(slug)||null;
+    const checkedAt=Date.parse(String(runtime?.last_checked_at||'').replace(' ','T')+'Z');
+    const ageDays=Number.isFinite(checkedAt)?Math.max(0,(nowMs-checkedAt)/86400000):999;
+    if(Number.isFinite(checkedAt)&&nowMs-checkedAt<freshnessMs)continue;
+    const score=Math.min(catalogCap,Math.max(25,38+Math.min(17,Math.floor(Math.max(0,ageDays-freshnessDays)))));
+    const opportunityKey=`catalog-freshness:${slug}:${freshnessEpoch}`;
+    const signals={tool_name:tool?.name||slug,category:tool?.category||null,last_checked_at:runtime?.last_checked_at||null,age_days:Number.isFinite(ageDays)?Number(ageDays.toFixed(1)):null,target_days:freshnessDays,reason:'Runtime first-party verification is due or missing.',runtime_freshness_contract:true};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
-      VALUES('catalog:quality-refresh','catalog_system','quality-refresh',?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
       WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
          OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
          OR growth_opportunity_state.action_json IS NOT excluded.action_json
-         OR growth_opportunity_state.status IS NOT 'active'`).bind(coordinatedGrowthPriority('catalog_system',Math.min(100,60+(reportAgeDays-freshnessDays)*4),audienceStrategy),JSON.stringify(signals),JSON.stringify(['run_catalog_freshness_verification','run_catalog_quality_control','regenerate_verified_profiles'])));activeKeys.push('catalog:quality-refresh');
-    active++;catalogCount++;
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(opportunityKey,'catalog_tool',slug,coordinatedGrowthPriority('catalog_tool',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(['verify_first_party_sources'])));
+    activeKeys.push(opportunityKey);active++;catalogCount++;
   }
 
   for(const item of Array.isArray(softwareUpdates?.items)?softwareUpdates.items:[]){
