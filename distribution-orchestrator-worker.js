@@ -2,6 +2,7 @@ import base,{rebalanceDistributionPriorities} from './distribution-priority-work
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
+import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
@@ -205,6 +206,12 @@ async function coordinateGrowthOpportunities(env){
     WHERE engine='growth' AND mission='opportunity_coordination' AND status='running' AND started_at<datetime('now','-10 minutes')`).run().catch(()=>{});
   const growthWrites=[],activeKeys=[];
   const audienceStrategy=await audiencePhaseSnapshot(env);
+  const supervisorRows=await growthRows(env,`SELECT engine,status,directive,directive_json FROM growth_supervisor_state`);
+  const supervisor=new Map(supervisorRows.map(row=>{let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}return[String(row.engine),{status:row.status,directive:row.directive,config}]}));
+  const distBoost=Math.max(0,Math.min(30,Number(supervisor.get('distribution')?.config?.priority_boost||0)));
+  const seoBoost=Math.max(0,Math.min(30,Number(supervisor.get('seo_geo_aio')?.config?.priority_boost||0)));
+  const affiliateCap=Math.max(5,Math.min(45,Number(supervisor.get('affiliate')?.config?.priority_cap||45)));
+  const catalogCap=Math.max(15,Math.min(55,Number(supervisor.get('catalog')?.config?.priority_cap||55)));
   const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
@@ -222,10 +229,10 @@ async function coordinateGrowthOpportunities(env){
       LEFT JOIN (
         SELECT surface_slug,COUNT(*) route_actions,
           SUM(CASE WHEN execution_mode='autonomous_qualification' AND status NOT IN ('policy_blocked','exhausted') THEN 1 ELSE 0 END) route_auto,
-          SUM(CASE WHEN execution_mode='content_amplification' AND status NOT IN ('verified_impact','exhausted') THEN 1 ELSE 0 END) route_content,
+          SUM(CASE WHEN execution_mode='content_amplification' AND status NOT IN ('verified_human_impact','verified_placement','exhausted') THEN 1 ELSE 0 END) route_content,
           SUM(CASE WHEN status='human_action_required' THEN 1 ELSE 0 END) route_human,
           SUM(CASE WHEN status='auth_required' THEN 1 ELSE 0 END) route_auth,
-          SUM(CASE WHEN status='verified_impact' THEN 1 ELSE 0 END) route_verified,
+          SUM(CASE WHEN status IN ('verified_human_impact','verified_placement') THEN 1 ELSE 0 END) route_verified,
           SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) route_stalled
         FROM distribution_contact_route_actions GROUP BY surface_slug
       ) ra ON ra.surface_slug=o.surface_slug
@@ -336,7 +343,7 @@ async function coordinateGrowthOpportunities(env){
     const score=Math.min(100,Math.max(0,Number(row.distribution_score||0)
       +(GROWTH_EVIDENCE_RANK[evidence]||0)*4
       +(network==='contact_route_found'?4:0)+(network==='contact_found'?7:0)+(network==='sent'?10:0)+(network==='adopted'?18:0)
-      +(audienceStrategy.borrowedFirst?15:0)));
+      +(audienceStrategy.borrowedFirst?15:0)+distBoost));
     const actions=['distribution_measurement'];
     if(!network||network==='queued'||network==='send_failed')actions.unshift('publisher_contact_discovery');
     if(network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
@@ -362,7 +369,7 @@ async function coordinateGrowthOpportunities(env){
     const affiliate=Number(row.organic_social_allowed)===1&&Number(row.direct_affiliate_link_allowed)===1;
     const vendor=String(row.vendor_status||'');
     const toolSlug=String(row.tool_slug||'').toLowerCase(),searchBoost=Number(searchBoostByTool.get(toolSlug)||0),newsBoost=Number(newsByTool.get(toolSlug)||0);
-    const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)+searchBoost+newsBoost+(audienceStrategy.borrowedFirst?10:0)));
+    const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)+searchBoost+newsBoost+(audienceStrategy.borrowedFirst?10:0)+distBoost));
     const actions=[];
     const vendorExecutable=!['needs_contact_fallback','fallback_exhausted'].includes(vendor);
     if(vendorExecutable)actions.push('vendor_amplification');
@@ -385,7 +392,7 @@ async function coordinateGrowthOpportunities(env){
     const state=String(row.status||'research_required'),unmonetized=Math.max(0,Number(row.unmonetized_30d||0)),outbound=Math.max(0,Number(row.outbound_30d||0)),monetized=Math.max(0,Number(row.monetized_30d||0));
     const searchBoost=Number(searchBoostByTool.get(slug)||0);
     const leakageBoost=Math.min(40,unmonetized*8+Math.max(0,outbound-monetized)*2);
-    const score=Math.min(100,Math.max(0,Number(affiliateStateWeight[state]||10)+leakageBoost+searchBoost));
+    const score=Math.min(affiliateCap,Math.max(0,Number(affiliateStateWeight[state]||10)+leakageBoost+searchBoost));
     const actions=[];
     if(state==='research_required'||state==='program_exists')actions.push('discover_and_qualify_affiliate_program');
     if(state==='ready_to_apply'||state==='human_action_required')actions.push('prepare_affiliate_application_pack','surface_only_true_human_gate');
@@ -431,7 +438,7 @@ async function coordinateGrowthOpportunities(env){
     if(Array.isArray(h?.missingCritical)&&h.missingCritical.length){score+=28;actions.push('resolve_missing_critical_catalog_fields');}
     if(hold){score+=18;actions.push('resolve_profile_evidence_hold');}
     if(quarantine){score+=55;actions.push('confirm_source_breakage','suppress_unverifiable_profile');}
-    score=Math.min(100,score+searchBoost);
+    score=Math.min(catalogCap,score+searchBoost);
     const runtime=runtimeStateBySlug.get(slug)||null;if(runtime?.quality_status==='change_detected'){score+=34;actions.push('verify_changed_catalog_facts','refresh_profile_if_confirmed')}if(runtime?.quality_status==='confirmed_broken'){score+=45;actions.push('suppress_unverifiable_profile')}if(runtimeCandidateSet.has(slug)){score+=8;actions.push('monitor_runtime_coverage_profile')}
     if(searchBoost>0)actions.push('refresh_catalog_profile_for_observed_search_demand');
     if(!actions.length)continue;
@@ -520,7 +527,7 @@ async function coordinateGrowthOpportunities(env){
 
   for(const op of searchOpportunities.slice(0,40)){
     const intent=String(op?.intent||'').trim();if(!intent)continue;
-    const priority=Math.max(0,Math.min(100,Number(op?.priorityScore||0)+(audienceStrategy.borrowedFirst?15:0)));
+    const priority=Math.max(0,Math.min(100,Number(op?.priorityScore||0)+(audienceStrategy.borrowedFirst?15:0)+seoBoost));
     const execution=Array.isArray(op?.executionPlan)?op.executionPlan:[];
     const actions=[...new Set([...execution,'content_amplification','distribution_amplification','search_measurement'])];
     const signals={
@@ -579,7 +586,7 @@ async function coordinateGrowthOpportunities(env){
       acquisition_mode:'existing_demand_search'
     };
     const meaningful=row.impressions>=20||row.clicks>0;
-    const basePriority=audienceStrategy.borrowedFirst?Math.min(100,row.priority+(meaningful?10:2)):row.priority;
+    const basePriority=Math.min(100,(audienceStrategy.borrowedFirst?row.priority+(meaningful?10:2):row.priority)+seoBoost);
     const priority=humanSprintActive()?Math.min(100,basePriority+(meaningful?10:2)):basePriority;
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
@@ -618,7 +625,7 @@ async function coordinateGrowthOpportunities(env){
       WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
          OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
          OR growth_opportunity_state.action_json IS NOT excluded.action_json
-         OR growth_opportunity_state.status IS NOT 'active'`).bind(`sprint-search:${target.key}`,'search',target.path,coordinatedGrowthPriority('search',target.priority,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`sprint-search:${target.key}`);
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(`sprint-search:${target.key}`,'search',target.path,coordinatedGrowthPriority('search',Math.min(100,target.priority+seoBoost),audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`sprint-search:${target.key}`);
       active++;searchCount++;
     }
   }
@@ -647,8 +654,12 @@ async function coordinateGrowthOpportunities(env){
 
 async function publicSearchDirectives(env){
   await ensureGrowthSchema(env);
-  const q=await env.DB.prepare(`SELECT opportunity_key,subject_key,priority_score,signal_json,action_json,last_evaluated_at FROM growth_opportunity_state WHERE status='active' AND subject_type='search' ORDER BY priority_score DESC LIMIT 100`).all();
-  return {brain:'shared-growth-v3',generatedAt:new Date().toISOString(),directives:(q.results||[]).map(row=>{let signals={},actions=[];try{signals=JSON.parse(row.signal_json||'{}')}catch{}try{actions=JSON.parse(row.action_json||'[]')}catch{}return{opportunity_key:row.opportunity_key,intent:row.subject_key,priority_score:Number(row.priority_score||0),lane:signals.lane||null,action:signals.action||null,evidence_confidence:signals.evidence_confidence||null,impressions:Number(signals.impressions||0),clicks:Number(signals.clicks||0),ctr:Number(signals.ctr||0),position:Number(signals.position||0),actions:Array.isArray(actions)?actions:[],last_evaluated_at:row.last_evaluated_at||null}})};
+  const [q,seoSupervisor,growthSupervisor]=await Promise.all([
+    env.DB.prepare(`SELECT opportunity_key,subject_key,priority_score,signal_json,action_json,last_evaluated_at FROM growth_opportunity_state WHERE status='active' AND subject_type='search' ORDER BY priority_score DESC LIMIT 100`).all(),
+    growthSupervisorDirective(env,'seo_geo_aio'),
+    growthSupervisorDirective(env,'growth_brain')
+  ]);
+  return {brain:'shared-growth-v3',generatedAt:new Date().toISOString(),northStar:HUMAN_ACQUISITION_SPRINT.northStar,supervisor:{seo:seoSupervisor,growth:growthSupervisor},directives:(q.results||[]).map(row=>{let signals={},actions=[];try{signals=JSON.parse(row.signal_json||'{}')}catch{}try{actions=JSON.parse(row.action_json||'[]')}catch{}return{opportunity_key:row.opportunity_key,intent:row.subject_key,priority_score:Number(row.priority_score||0),lane:signals.lane||null,action:signals.action||null,evidence_confidence:signals.evidence_confidence||null,impressions:Number(signals.impressions||0),clicks:Number(signals.clicks||0),ctr:Number(signals.ctr||0),position:Number(signals.position||0),actions:Array.isArray(actions)?actions:[],last_evaluated_at:row.last_evaluated_at||null}})};
 }
 async function runGrowthRndAudit(env){
   await ensureGrowthSchema(env);
@@ -784,4 +795,6 @@ async function normalizeEditorialQueue(env){
 }
 async function fanout(env,url){await normalizeEditorialQueue(env);const type=classify(url);await env.DB.prepare(`INSERT INTO distribution_asset_state(asset_url,asset_type,first_seen_at,last_seen_at,distributed_at) VALUES(?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(asset_url) DO UPDATE SET asset_type=excluded.asset_type,last_seen_at=datetime('now'),distributed_at=COALESCE(distribution_asset_state.distributed_at,datetime('now'))`).bind(url,type).run();const editorial=await prepareEditorial(env,url,type);await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`asset_${crypto.randomUUID()}`,'asset_distribution_triggered','completed',type,url,url,`Event-driven fanout prepared: syndication feed exposure, Submission Engine eligibility and Vendor Amplification eligibility. Community posting is intentionally not queued as autonomous without a safe authenticated executor.`).run();return {ok:true,asset_url:url,asset_type:type,editorialPrepared:editorial};}
 async function scanNew(request,env){let r=null;const sitemapRequest=new Request(new URL('/sitemap.xml',request.url));try{r=await env.ASSETS.fetch(sitemapRequest.clone());}catch{}if(!r||!r.ok){try{r=await base.fetch(sitemapRequest.clone(),env,{waitUntil(){}});}catch{}}if(!r)return{ok:false,scanned:0,newAssets:0,reason:'sitemap_fetch_failed'};if(!r.ok)return{ok:false,scanned:0,newAssets:0,reason:`sitemap_http_${r.status}`};const xml=await r.text();const urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]).filter(u=>/^https:\/\/trytoolscout\.org\//.test(u)&&/(best-|\-vs-|alternatives|compare)/i.test(u));let added=0;for(const url of urls.slice(0,150)){const row=await env.DB.prepare('SELECT asset_url FROM distribution_asset_state WHERE asset_url=?').bind(url).first();if(row)continue;await fanout(env,url);added++;}return{ok:true,scanned:urls.length,newAssets:added};}
-export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/orchestrate'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}if(!b.asset_url||!/^https:\/\/trytoolscout\.org\//.test(String(b.asset_url)))return Response.json({error:'valid_toolscout_asset_url_required'},{status:400,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_fanout',triggerName:'manual_api'},()=>fanout(env,String(b.asset_url))),{headers:H});}if(u.pathname==='/api/distribution/orchestrate/scan'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:'manual_api'},()=>scanNew(request,env)),{headers:H});}if(u.pathname==='/api/distribution/economic-learning'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:'manual_api'},()=>learnEconomics(env)),{headers:H});}if(u.pathname==='/api/growth/search-directives'&&request.method==='GET'){return Response.json(await publicSearchDirectives(env),{headers:{...H,'Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'}});}if(u.pathname==='/api/growth/rnd/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:'manual_api'},()=>runGrowthRndAudit(env)),{headers:H});}if(u.pathname==='/api/growth/rnd'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT * FROM growth_rnd_experiments ORDER BY updated_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/growth/opportunities/refresh'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'manual_api'},()=>coordinateGrowthOpportunities(env)),{headers:H});}if(u.pathname==='/api/growth/opportunities'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,last_evaluated_at FROM growth_opportunity_state WHERE status='active' ORDER BY priority_score DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/distribution/editorial-queue'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await normalizeEditorialQueue(env);const q=await env.DB.prepare(`SELECT queue_id,asset_url,channel_type,target_name,target_url,angle,suggested_title,suggested_body,status,human_required,updated_at FROM distribution_editorial_queue ORDER BY created_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}return base.fetch(request,env,ctx);},async scheduled(event,env,ctx){await normalizeEditorialQueue(env);await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:event?.cron||'scheduled'},()=>learnEconomics(env));if(event?.cron==='15 3 * * *'||humanSprintActive()){await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:event?.cron||'scheduled'},()=>coordinateGrowthOpportunities(env)).catch(()=>null);}if(event?.cron==='15 3 * * *'){await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:event.cron},()=>runGrowthRndAudit(env));}if(base.scheduled)await base.scheduled(event,env,ctx);if(event?.cron==='15 3 * * *')await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:event.cron},()=>scanNew(new Request('https://trytoolscout.org/'),env));}};
+export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/orchestrate'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}if(!b.asset_url||!/^https:\/\/trytoolscout\.org\//.test(String(b.asset_url)))return Response.json({error:'valid_toolscout_asset_url_required'},{status:400,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_fanout',triggerName:'manual_api'},()=>fanout(env,String(b.asset_url))),{headers:H});}if(u.pathname==='/api/distribution/orchestrate/scan'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:'manual_api'},()=>scanNew(request,env)),{headers:H});}if(u.pathname==='/api/distribution/economic-learning'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:'manual_api'},()=>learnEconomics(env)),{headers:H});}if(u.pathname==='/api/growth/search-directives'&&request.method==='GET'){return Response.json(await publicSearchDirectives(env),{headers:{...H,'Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'}});}if(u.pathname==='/api/growth/rnd/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:'manual_api'},()=>runGrowthRndAudit(env)),{headers:H});}if(u.pathname==='/api/growth/rnd'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT * FROM growth_rnd_experiments ORDER BY updated_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/growth/opportunities/refresh'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'manual_api'},()=>coordinateGrowthOpportunities(env)),{headers:H});}
+if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'manual_api'},()=>runGrowthSupervisorAudit(env)),{headers:H});}
+if(u.pathname==='/api/growth/supervisor'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await growthSupervisorSnapshot(env),{headers:H});}if(u.pathname==='/api/growth/opportunities'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,last_evaluated_at FROM growth_opportunity_state WHERE status='active' ORDER BY priority_score DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/distribution/editorial-queue'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await normalizeEditorialQueue(env);const q=await env.DB.prepare(`SELECT queue_id,asset_url,channel_type,target_name,target_url,angle,suggested_title,suggested_body,status,human_required,updated_at FROM distribution_editorial_queue ORDER BY created_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}return base.fetch(request,env,ctx);},async scheduled(event,env,ctx){await normalizeEditorialQueue(env);await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:event?.cron||'scheduled'},()=>learnEconomics(env));if(event?.cron==='15 3 * * *'||humanSprintActive()){await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:event?.cron||'scheduled'},()=>coordinateGrowthOpportunities(env)).catch(()=>null);}if(event?.cron==='15 3 * * *'){await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:event.cron},()=>runGrowthRndAudit(env));}if(base.scheduled)await base.scheduled(event,env,ctx);if(event?.cron==='15 3 * * *')await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:event.cron},()=>scanNew(new Request('https://trytoolscout.org/'),env));if(event?.cron==='15 * * * *'||event?.cron==='15 3 * * *')await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:event?.cron||'scheduled'},()=>runGrowthSupervisorAudit(env)).catch(()=>null);}};
