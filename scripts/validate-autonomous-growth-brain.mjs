@@ -56,6 +56,7 @@ if(!orchestrator.includes("id:'external-demand-first-v2'")||!orchestrator.includ
 
 if(!humanGate.includes('human_gate_contract')||!humanGate.includes("status='verification_pending'")||!humanGate.includes("status='resolved'"))fail('Unified Human Gate Contract lifecycle is missing.');
 if(!distributionAuto.includes("from './human-gate-contract.js'")||!distributionAuto.includes('openDistributionHumanGate')||!distributionAuto.includes('verifyHumanGateResolutions')||!distributionAuto.includes("status='auth_required',human_required=1"))fail('Distribution Engine is not routing proven human gates through the contract.');
+if(!distributionAuto.includes('isMachineOnlyActionUrl')||!distributionAuto.includes('resolveHumanActionUrl')||!distributionAuto.includes("/submit"))fail('Human Gate Contract can still surface machine-only API URLs to the Chairman.');
 if(!humanAction.includes('/analytics/api/human-actions/gate')||!humanAction.includes('data-human-gate-done')||!humanAction.includes('auto_resume_queued:true'))fail('Chairman Queue cannot complete a Human Gate Contract and resume autonomous execution.');
 if(!network.includes('distribution_contact_route_actions')||!network.includes('materializeRouteActions')||!network.includes('reconcileRouteActions')||!network.includes('closed_loop_routes:true'))fail('Alternate distribution routes are not closed-loop.');
 if(!content.includes('Borrowed-audience amplification candidate')||!content.includes('issued_to_content'))fail('Content Engine is not consuming alternate social distribution routes.');
