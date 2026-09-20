@@ -1,4 +1,4 @@
-name: One Shot Growth Execution Contract Runtime Proof v7
+name: One Shot Growth Execution Contract Runtime Proof v8
 
 on:
   push:
@@ -86,7 +86,14 @@ jobs:
             sleep 2
           done
           if [ "$READY" != "1" ]; then cat /tmp/wrangler-dev.log; exit 1; fi
-          curl -fsS --max-time 90 "http://127.0.0.1:8787/cdn-cgi/local/scheduled?cron=15+*+*+*+*" > /tmp/scheduled.txt
+          if curl -fsS --max-time 90 "http://127.0.0.1:8787/__scheduled?cron=15+*+*+*+*" > /tmp/scheduled.txt; then
+            :
+          elif curl -fsS --max-time 90 "http://127.0.0.1:8787/cdn-cgi/handler/scheduled?cron=15+*+*+*+*" > /tmp/scheduled.txt; then
+            :
+          else
+            cat /tmp/wrangler-dev.log
+            exit 1
+          fi
           cat /tmp/scheduled.txt
           sleep 3
         env:
