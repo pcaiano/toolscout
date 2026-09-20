@@ -1,9 +1,13 @@
-name: One Shot Human Gate Contract Reconciliation
+name: One Shot Human Gate Action Links
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - fix/human-gate-action-links
     paths:
+      - 'distribution-autonomous-worker.js'
+      - 'scripts/validate-autonomous-growth-brain.mjs'
       - '.github/workflows/d1-quota-safe-worker-deploy.yml'
   workflow_dispatch:
 
@@ -11,97 +15,59 @@ permissions:
   contents: read
 
 concurrency:
-  group: toolscout-human-gate-reconciliation
+  group: toolscout-human-gate-action-links
   cancel-in-progress: false
 
 jobs:
-  reconcile-prove:
+  validate-deploy-prove:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Validate deployed Human Gate Contract
+      - name: Validate human-usable gate links
         run: |
-          node --check human-gate-contract.js
           node --check distribution-autonomous-worker.js
-          node --check human-action-entry-worker.js
           node scripts/validate-autonomous-growth-brain.mjs
 
-      - name: Reconcile current owner-only gates into the contract
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE distribution_opportunities
-            SET human_required=1,updated_at=datetime('now')
-            WHERE action_url IS NOT NULL
-              AND status IN ('auth_required','human_action_required','approval_required');
-
-            INSERT OR IGNORE INTO human_gate_contract(
-              gate_key,engine,subject_type,subject_key,gate_type,status,title,reason,instructions,action_url,
-              resolution_mode,payload_json,verification_url,verification_attempts,created_at,updated_at
-            )
-            SELECT
-              'distribution:surface:'||surface_slug,
-              'distribution',
-              'surface',
-              surface_slug,
-              CASE
-                WHEN status='auth_required' THEN 'authentication'
-                WHEN status='approval_required' THEN 'owner_approval'
-                ELSE 'human_confirmation'
-              END,
-              'open',
-              COALESCE(surface_name,surface_slug)||': human step required',
-              COALESCE(next_action,'Autonomous execution reached a genuine owner-only gate.'),
-              CASE
-                WHEN status='auth_required' THEN 'Open the exact action page. Sign in, create the required account, complete email or OTP verification, or authorize access as required. Then complete the ToolScout listing or submission using truthful ToolScout details. Do not buy promotion, add a reciprocal badge, accept optional paid upgrades, or invent claims. Return to the Chairman Queue and click Mark done. Paste the public ToolScout or profile URL if the service provides one.'
-                ELSE 'Open the exact action page and complete only the human-only step, such as CAPTCHA, explicit confirmation, material terms acceptance, owner approval, or final irreversible submit. Use truthful ToolScout details. Do not buy promotion, add reciprocal badges, or invent claims. Return to the Chairman Queue and click Mark done. Paste the public ToolScout or profile URL if available.'
-              END,
-              action_url,
-              'verify_publication',
-              json_object(
-                'name','ToolScout',
-                'website','https://trytoolscout.org/',
-                'domain','trytoolscout.org',
-                'description','ToolScout is an independent software discovery and recommendation platform.',
-                'tagline','Find the right software for the job without the noise.'
-              ),
-              live_url,
-              0,
-              datetime('now'),
-              datetime('now')
-            FROM distribution_opportunities
-            WHERE action_url IS NOT NULL
-              AND status IN ('auth_required','human_action_required','approval_required');"
+      - name: Deploy corrected Worker
+        if: github.ref == 'refs/heads/main'
+        run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      - name: Prove no owner-only distribution gate is hidden
+      - name: Repair current machine-only gate links
+        if: github.ref == 'refs/heads/main'
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            SUM(CASE WHEN status='open' THEN 1 ELSE 0 END) open,
-            SUM(CASE WHEN status='verification_pending' THEN 1 ELSE 0 END) verification_pending,
-            SUM(CASE WHEN status='resolved' THEN 1 ELSE 0 END) resolved,
-            SUM(CASE WHEN engine='distribution' AND status='open' AND action_url IS NULL THEN 1 ELSE 0 END) open_missing_url
-          FROM human_gate_contract;" > /tmp/gates.json
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE human_gate_contract
+            SET action_url='https://listedstartups.com/submit',updated_at=datetime('now')
+            WHERE gate_key='distribution:surface:listed-startups'
+              AND action_url LIKE '%/api/%';
+            UPDATE distribution_opportunities
+            SET action_url='https://listedstartups.com/submit',updated_at=datetime('now')
+            WHERE surface_slug='listed-startups'
+              AND action_url LIKE '%/api/%';"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Prove no open gate exposes a machine-only endpoint
+        if: github.ref == 'refs/heads/main'
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) machine_only
+          FROM human_gate_contract
+          WHERE status='open'
+            AND (
+              lower(action_url) LIKE '%/api/%'
+              OR lower(action_url) LIKE '%/openapi%'
+              OR lower(action_url) LIKE '%/swagger%'
+              OR lower(action_url) LIKE '%.json'
+            );" > /tmp/gates.json
           cat /tmp/gates.json
-          jq -e '.[0].results[0] | .open_missing_url==0' /tmp/gates.json
+          jq -e '.[0].results[0].machine_only==0' /tmp/gates.json
 
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) hidden
-          FROM distribution_opportunities o
-          LEFT JOIN human_gate_contract g
-            ON g.engine='distribution'
-           AND g.subject_type='surface'
-           AND g.subject_key=o.surface_slug
-           AND g.status='open'
-          WHERE o.action_url IS NOT NULL
-            AND o.status IN ('auth_required','human_action_required','approval_required')
-            AND g.gate_key IS NULL;" > /tmp/hidden.json
-          cat /tmp/hidden.json
-          jq -e '.[0].results[0].hidden==0' /tmp/hidden.json
-
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT gate_key,gate_type,status,title,action_url,verification_attempts FROM human_gate_contract WHERE engine='distribution' ORDER BY updated_at DESC LIMIT 30;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT gate_key,gate_type,status,title,action_url FROM human_gate_contract WHERE status='open' ORDER BY updated_at DESC;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
