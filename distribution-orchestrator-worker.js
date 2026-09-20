@@ -208,11 +208,28 @@ async function coordinateGrowthOpportunities(env){
   const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
-      n.status network_status,n.adoption_kind
+      n.status network_status,n.adoption_kind,
+      COALESCE(ra.route_actions,0) route_actions,
+      COALESCE(ra.route_auto,0) route_auto,
+      COALESCE(ra.route_content,0) route_content,
+      COALESCE(ra.route_human,0) route_human,
+      COALESCE(ra.route_auth,0) route_auth,
+      COALESCE(ra.route_verified,0) route_verified,
+      COALESCE(ra.route_stalled,0) route_stalled
       FROM distribution_opportunities o
       LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug
       LEFT JOIN distribution_network_outreach n ON n.surface_slug=o.surface_slug
-      WHERE o.surface_slug IS NOT NULL AND o.status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')`),
+      LEFT JOIN (
+        SELECT surface_slug,COUNT(*) route_actions,
+          SUM(CASE WHEN execution_mode='autonomous_qualification' AND status NOT IN ('policy_blocked','exhausted') THEN 1 ELSE 0 END) route_auto,
+          SUM(CASE WHEN execution_mode='content_amplification' AND status NOT IN ('verified_impact','exhausted') THEN 1 ELSE 0 END) route_content,
+          SUM(CASE WHEN status='human_action_required' THEN 1 ELSE 0 END) route_human,
+          SUM(CASE WHEN status='auth_required' THEN 1 ELSE 0 END) route_auth,
+          SUM(CASE WHEN status='verified_impact' THEN 1 ELSE 0 END) route_verified,
+          SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) route_stalled
+        FROM distribution_contact_route_actions GROUP BY surface_slug
+      ) ra ON ra.surface_slug=o.surface_slug
+      WHERE o.surface_slug IS NOT NULL AND o.surface_type!='publisher_contact_route' AND o.status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')`),
     growthRows(env,`SELECT v.tool_slug,v.priority_score,v.status vendor_status,v.asset_url,
       p.status profile_status,a.policy_status,a.organic_social_allowed,a.direct_affiliate_link_allowed
       FROM distribution_vendor_amplification v
@@ -322,10 +339,15 @@ async function coordinateGrowthOpportunities(env){
       +(audienceStrategy.borrowedFirst?15:0)));
     const actions=['distribution_measurement'];
     if(!network||network==='queued'||network==='send_failed')actions.unshift('publisher_contact_discovery');
-    if(network==='contact_route_found')actions.unshift('content_relevance_amplification');
+    if(network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
+    if(Number(row.route_content||0)>0)actions.unshift('content_relevance_amplification');
+    if(Number(row.route_auto||0)>0)actions.unshift('autonomous_route_qualification');
+    if(Number(row.route_auth||0)>0)actions.unshift('resolve_supported_route_auth');
+    if(Number(row.route_human||0)>0)actions.unshift('surface_only_true_human_route_gate');
+    if(Number(row.route_stalled||0)>0)actions.unshift('repair_stalled_route_execution');
     if(network==='contact_found')actions.unshift('publisher_outreach');
-    if(network==='adopted')actions.unshift('scale_proven_surface');
-    const signals={surface_status:row.status,network_status:network||null,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0};
+    if(network==='adopted'||Number(row.route_verified||0)>0)actions.unshift('scale_proven_surface');
+    const signals={surface_status:row.status,network_status:network||null,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,alternate_routes:Number(row.route_actions||0),alternate_routes_autonomous:Number(row.route_auto||0),alternate_routes_content:Number(row.route_content||0),alternate_routes_human:Number(row.route_human||0),alternate_routes_auth:Number(row.route_auth||0),alternate_routes_verified:Number(row.route_verified||0),alternate_routes_stalled:Number(row.route_stalled||0),audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
