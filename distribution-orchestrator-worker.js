@@ -392,6 +392,8 @@ async function coordinateGrowthOpportunities(env){
     if(state==='active')actions.push('production_verify_affiliate_route');
     if(state==='verified'||state==='earning')actions.push('measure_affiliate_yield');
     if(state==='blocked'||state==='rejected'||state==='paused')actions.push('monitor_retry_evidence');
+    if(state==='no_program_found'||state==='watchlist')actions.push('recheck_affiliate_program_on_evidence_or_cadence');
+    if(!actions.length)actions.push('reconcile_affiliate_state');
     const signals={affiliate_status:state,network:row.network||null,blocker:row.blocker||null,outbound_30d:outbound,unmonetized_outbound_30d:unmonetized,monetized_outbound_30d:monetized,search_priority_boost:Number(searchBoost.toFixed(2)),application_url:row.application_url||null,affiliate_url_present:Boolean(row.affiliate_url),updated_at:row.updated_at||null};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
