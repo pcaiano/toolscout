@@ -19,6 +19,11 @@ const seoFetch=read('scripts/fetch-shared-growth-directives.mjs');
 const content=read('content-engine-intelligence-worker.js');
 const network=read('distribution-network-worker.js');
 const impact=read('distribution-impact-worker.js');
+const visitorAccuracy=read('visitor-accuracy-worker.js');
+const trafficIntegrity=read('traffic-integrity-worker.js');
+const trafficLive=read('traffic-integrity-live-worker.js');
+const trafficGuard=read('traffic-integrity-guard-worker.js');
+const funnelModel=read('funnel-model.js');
 const rndPolicy=read('data/growth-rnd-policy.json');
 
 if(!funnel.includes("import base from './catalog-autonomy-worker.js'"))fail('Catalog Autonomy is not in the live Worker chain.');
@@ -49,6 +54,9 @@ if(!command.includes('NOT EXISTS (')||!command.includes("c.started_at>f.started_
 if(!content.includes("u.searchParams.set('ts_action',\`\${briefId}:\${channel}\`)"))fail('Content Engine action IDs do not match channel-specific growth_action_events.');
 if(!impact.includes('maturedBrowserConfirmedSessions')||!impact.includes('legacyChannelId'))fail('Growth effectiveness attribution watchdog or legacy attribution recovery is missing.');
 if(!command.includes('growth_actions_no_human_impact')||!command.includes('effectiveness_status'))fail('Growth effectiveness cannot surface silent underperformance.');
+for(const [name,source] of [['visitor accuracy',visitorAccuracy],['confirmed visitor',trafficIntegrity],['late visitor retry',trafficLive],['browser guard',trafficGuard]])if(!source.includes("'ts_action','ts_growth','ts_channel'")||!source.includes("join('&'),300"))fail(name+' tracker drops Growth attribution markers.');
+if(!funnelModel.includes("{0,299}"))fail('Funnel source validator is too short for Growth attribution markers.');
+if(!network.includes("row.opportunity_slug||"))fail('Alternate route backfill can diverge from runtime opportunity IDs.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
 if(!process.exitCode)console.log('PASS: shared autonomous growth brain contract is intact.');
