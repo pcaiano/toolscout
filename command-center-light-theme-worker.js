@@ -7,6 +7,7 @@ import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worke
 import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
+import {growthSupervisorDirective} from './growth-supervisor.js';
 
 const STATS_CACHE_TTL_SECONDS = 30;
 
@@ -354,16 +355,23 @@ export default {
     const scheduledHour=new Date(Number(event?.scheduledTime)||Date.now()).getUTCHours();
     const threeHourly=hourly&&scheduledHour%3===0;
     const sixHourly=hourly&&scheduledHour%6===0;
+    const twelveHourly=hourly&&scheduledHour%12===0;
+    const [affiliateSupervisor,catalogSupervisor]=await Promise.all([
+      growthSupervisorDirective(env,'affiliate').catch(()=>null),
+      growthSupervisorDirective(env,'catalog').catch(()=>null)
+    ]);
+    const affiliateMaintenance=affiliateSupervisor?.config?.mode==='maintenance_only';
+    const catalogDemandLed=catalogSupervisor?.config?.mode==='demand_led_quality';
 
     if(hourly){
       ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
       if(threeHourly){
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:trigger},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
-        ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,trigger).catch(()=>{}));
+        if(!affiliateMaintenance||twelveHourly)ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,trigger).catch(()=>{}));
       }
       if(sixHourly){
-        ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyCatalogBatch(env)).catch(()=>{}));
+        if(!catalogDemandLed||twelveHourly)ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyCatalogBatch(env)).catch(()=>{}));
         ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:trigger},()=>runContentSocialIntelligenceCycle(env)).catch(()=>{}));
       }
     }
