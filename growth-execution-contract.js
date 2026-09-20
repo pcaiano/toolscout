@@ -22,6 +22,8 @@ const ACTION_EXECUTOR=Object.freeze({
   publisher_outreach:'make_sender',
   distribution_amplification:'make_sender',
   vendor_amplification:'make_sender',
+  backlink_reference_outreach:'make_sender',
+  verify_backlink_acquisition:'distribution_network',
   content_relevance_amplification:'content_issue',
   content_amplification:'content_issue',
   content_mention:'content_issue',
