@@ -1,4 +1,4 @@
-name: One Shot Growth Execution Contract Deploy v6
+name: One Shot Growth Execution Contract Runtime Proof v7
 
 on:
   push:
@@ -70,5 +70,42 @@ jobs:
         run: |
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT executor,execution_mode,status,COUNT(*) n FROM growth_execution_contract WHERE status<>'cancelled' GROUP BY executor,execution_mode,status ORDER BY executor,status;"
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT source_kind,subject_type,action,executor,status,priority_score,claim_deadline,attempt_deadline,verify_deadline FROM growth_execution_contract WHERE status NOT IN ('cancelled','verified') ORDER BY priority_score DESC LIMIT 40;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Exercise one remote scheduled execution cycle
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-dev.log 2>&1 &
+          DEV_PID=$!
+          cleanup(){ kill $DEV_PID >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          READY=0
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 2 http://127.0.0.1:8787/api/autonomous-growth-health >/dev/null 2>&1; then READY=1; break; fi
+            sleep 2
+          done
+          if [ "$READY" != "1" ]; then cat /tmp/wrangler-dev.log; exit 1; fi
+          curl -fsS --max-time 90 "http://127.0.0.1:8787/cdn-cgi/local/scheduled?cron=15+*+*+*+*" > /tmp/scheduled.txt
+          cat /tmp/scheduled.txt
+          sleep 3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Prove execution state advanced
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
+            SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending,
+            SUM(CASE WHEN status='claimed' THEN 1 ELSE 0 END) claimed,
+            SUM(CASE WHEN status='attempted' THEN 1 ELSE 0 END) attempted,
+            SUM(CASE WHEN status='verified' THEN 1 ELSE 0 END) verified,
+            SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
+            SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled,
+            SUM(CASE WHEN executor='make_sender' AND status IN ('claimed','attempted') THEN 1 ELSE 0 END) sender_inflight,
+            SUM(CASE WHEN executor='seo_github' AND status IN ('claimed','attempted') THEN 1 ELSE 0 END) seo_inflight,
+            SUM(CASE WHEN executor='audience_make' AND status IN ('claimed','attempted') THEN 1 ELSE 0 END) audience_inflight
+            FROM growth_execution_contract WHERE status<>'cancelled';" > /tmp/execution-progress.json
+          cat /tmp/execution-progress.json
+          jq -e '.[0].results[0] | ((.claimed + .attempted + .verified) > 0) and .missing==0 and .stalled==0 and .sender_inflight<=3 and .seo_inflight<=12 and .audience_inflight<=1' /tmp/execution-progress.json
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
