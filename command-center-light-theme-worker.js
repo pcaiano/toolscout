@@ -295,7 +295,7 @@ async function canonicalAutonomousGrowthTruth(env) {
     return m?`https://bsky.app/profile/${m[1]}/post/${m[2]}`:null;
   };
   const [supervisor,growth,routes,routeActions,contract,loop,cycles,humanEvents,proof,backlinks,backlinkRows,distributionActions,distributionSubmissions,contentPublishes,contentActions,audienceReplies]=await Promise.all([
-    first(`SELECT status,directive,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
+    first(`SELECT status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state WHERE engine='growth_brain' LIMIT 1`),
     first(`SELECT COUNT(*) active,
       SUM(CASE WHEN subject_type='tool' THEN 1 ELSE 0 END) tools,
@@ -374,6 +374,8 @@ async function canonicalAutonomousGrowthTruth(env) {
       WHERE created_at>=datetime('now','-7 days') AND status='published' AND event_type='outbound_reply'
       ORDER BY created_at DESC`)
   ]);
+  let supervisorConfig={};
+  try{supervisorConfig=JSON.parse(supervisor?.directive_json||'{}')}catch{}
   const backlinkDomains=new Set();
   for(const row of backlinkRows||[]){
     try{const host=new URL(String(row.public_url||'')).hostname.replace(/^www\./,'').toLowerCase();if(host&&host!=='trytoolscout.org'&&!host.endsWith('.trytoolscout.org'))backlinkDomains.add(host)}catch{}
@@ -439,6 +441,15 @@ async function canonicalAutonomousGrowthTruth(env) {
     route_actions_exhausted:truthNum(routeActions?.exhausted),
     supervisor_status:supervisor?.status||'unavailable',
     supervisor_directive:supervisor?.directive||null,
+    operating_mode:supervisorConfig?.operating_mode||null,
+    critical_strict_humans_24h_max:truthNum(supervisorConfig?.critical_strict_humans_24h_max),
+    external_execution_min_24h:truthNum(supervisorConfig?.external_execution_min_24h),
+    external_execution_target_24h:truthNum(supervisorConfig?.external_execution_target_24h),
+    external_execution_max_24h:truthNum(supervisorConfig?.external_execution_max_24h),
+    verified_outbound_24h:truthNum(supervisorConfig?.verified_outbound_24h),
+    verified_outbound_7d:truthNum(supervisorConfig?.verified_outbound_7d),
+    monetized_outbound_24h:truthNum(supervisorConfig?.monetized_outbound_24h),
+    monetized_outbound_7d:truthNum(supervisorConfig?.monetized_outbound_7d),
     supervisor_strict_humans_24h:truthNum(supervisor?.strict_humans_24h),
     supervisor_strict_humans_7d:truthNum(supervisor?.strict_humans_7d),
     supervisor_attributed_humans_7d:truthNum(supervisor?.attributed_humans_7d),
@@ -543,7 +554,7 @@ export default {
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
       const autonomousGrowthTruth=await canonicalAutonomousGrowthTruth(env).catch(()=>null);
-      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.7'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v2',operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:2,businessFunnel:['strict_verified_human_sessions','verified_outbound_clicks','monetized_verified_outbound_clicks'],selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.8'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
@@ -562,7 +573,7 @@ export default {
     const hourly=trigger==='15 * * * *';
     const daily=trigger==='15 3 * * *';
     const scheduledHour=new Date(Number(event?.scheduledTime)||Date.now()).getUTCHours();
-    const threeHourly=hourly&&scheduledHour%3===0;
+    const twoHourly=hourly&&scheduledHour%2===0;
     const sixHourly=hourly&&scheduledHour%6===0;
     const twelveHourly=hourly&&scheduledHour%12===0;
     const [affiliateSupervisor,catalogSupervisor]=await Promise.all([
@@ -574,7 +585,7 @@ export default {
 
     if(hourly){
       ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
-      if(threeHourly){
+      if(twoHourly){
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:trigger},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
         if(!affiliateMaintenance||twelveHourly)ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,trigger).catch(()=>{}));
