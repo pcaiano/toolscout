@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-20T08:59:53.713Z",
+  "generatedAt": "2026-09-20T11:09:58.618Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,7 +8,7 @@
   "endDate": "2026-09-20",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 3436,
+    "impressions": 3438,
     "ctr": 0.0291
   },
   "pageTypeSummary": {
@@ -35,12 +35,12 @@
     "other": {
       "pages": 10,
       "clicks": 0,
-      "impressions": 22
+      "impressions": 23
     },
     "tool-profile": {
       "pages": 41,
       "clicks": 0,
-      "impressions": 1179
+      "impressions": 1180
     }
   },
   "pageCount": 99,
@@ -545,9 +545,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 127,
+      "impressions": 128,
       "ctr": 0,
-      "position": 69.8504,
+      "position": 69.8047,
       "topQueries": [
         {
           "query": "moz pro tools",
@@ -570,8 +570,8 @@
         {
           "query": "moz pro free trial",
           "clicks": 0,
-          "impressions": 5,
-          "position": 65
+          "impressions": 6,
+          "position": 64.8333
         },
         {
           "query": "moz trial",
@@ -2176,6 +2176,25 @@
       "topQueries": []
     },
     {
+      "page": "https://trytoolscout.org/news/hubspot-mcp-server-updates",
+      "pathname": "/news/hubspot-mcp-server-updates",
+      "key": "hubspot-mcp-server-updates",
+      "type": "other",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 81,
+      "topQueries": [
+        {
+          "query": "hubspot mcp",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 81
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/claude",
       "pathname": "/tools/claude",
       "key": "claude",
@@ -2492,25 +2511,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 8
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/news/hubspot-mcp-server-updates",
-      "pathname": "/news/hubspot-mcp-server-updates",
-      "key": "hubspot-mcp-server-updates",
-      "type": "other",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 82,
-      "topQueries": [
-        {
-          "query": "hubspot mcp",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 82
         }
       ]
     },
