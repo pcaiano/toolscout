@@ -75,6 +75,7 @@ if(!distPriority.includes("growth_supervisor_state")||!distPriority.includes("ex
 if(!content.includes("growth_supervisor_state")||!content.includes("supervisorSearchFirst")||!content.includes("Growth Supervisor"))fail('Content Engine does not obey Growth Supervisor acquisition corrections.');
 if(!seoSupervisorExecutor.includes("/api/growth/supervisor/public")||!seoSupervisorExecutor.includes("run_executor")||!seoSupervisorExecutor.includes("run-organic-growth-controller-v4.mjs"))fail('SEO does not have a supervisor-controlled autonomous correction executor.');
 if(!executionContract.includes('growth_execution_contract')||!executionContract.includes('claimExecutorTasks')||!executionContract.includes('reconcileExecutionContracts')||!executionContract.includes('executor_missing'))fail('Central Growth execution contract is missing.');
+if(!executionContract.includes("g.subject_type='search'")||!executionContract.includes("THEN 'seo_github'"))fail('Unmapped search actions are not automatically routed to the SEO executor.');
 if(!orchestrator.includes('runGrowthExecutionContractCycle')||!orchestrator.includes("mission:'execution_contract'")||!orchestrator.includes('/api/growth/execution'))fail('Growth execution contracts are not enforced by the runtime loop.');
 if(!supervisor.includes('repair_execution_contract')||!supervisor.includes('missing_executors')||!supervisor.includes("status='stalled'"))fail('Growth Supervisor does not fail on lost or stalled execution contracts.');
 {
