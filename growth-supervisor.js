@@ -184,8 +184,9 @@ export async function runGrowthSupervisorAudit(env){
   else if(strict24===0){status='underperforming';directive='rotate_after_maturity_and_expand_existing_demand'}
   else if(strict7>0&&attributed7===0){status='working_unattributed';directive='improve_acquisition_attribution_while_continuing_growth'}
 
-  const gctx={h24:strict24,h7:strict7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
-  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7}};
+  const attributed24=n(humans.distribution.h24)+n(humans.content.h24)+n(humans.audience.h24)+n(humans.seo_geo_aio.h24);
+  const gctx={h24:attributed24,h7:attributed7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
+  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7}};
   const growth=await saveEngine(env,'growth_brain','supervisor',global,gctx,gp);
   return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
 }
