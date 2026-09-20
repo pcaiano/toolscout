@@ -5,8 +5,10 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const NETWORK_TYPES=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface)/i;
 const ROLE_PRIORITY=['editorial','editor','partnerships','partners','partner','submissions','submit','newsletter','press','media','growth','marketing','hello','contact'];
 const MAX_CANDIDATES_PER_CYCLE=24;
-const MAX_CONTACT_SCANS=6;
-const MAX_PAGES_PER_SITE=3;
+const MAX_CONTACT_SCANS=10;
+const MAX_PAGES_PER_SITE=6;
+const COMMON_CONTACT_PATHS=['/contact','/contact-us','/submit','/submit-tool','/partners','/partnerships','/press','/media','/about'];
+const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets?|img|images|media|js|css|fonts|edge|storage)\.|(?:^|\.)(?:googleapis\.com|githubassets\.com|githubusercontent\.com|tailwindcss\.com)$/i;
 const ROUTE_PRIORITY={form:0,linkedin:1,x:2,bluesky:3,github:4};
 const MAX_ROUTE_ACTIONS_PER_CYCLE=16;
 const ROUTE_CONTENT_RETRY_HOURS=72;
@@ -15,6 +17,7 @@ let schemaReady=null;
 
 const safe=(v,n=2000)=>String(v??'').slice(0,n);
 function hostOf(v){try{return new URL(String(v||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
+function isTechnicalHost(host){const h=String(host||'').toLowerCase().replace(/^www\./,'');return !h||TECHNICAL_HOST_RE.test(h)||h==='fonts.googleapis.com'||h==='cdn.tailwindcss.com'||h.startsWith('static.')||h.startsWith('cdn.')||h.startsWith('api.');}
 function roleScore(email){const local=String(email||'').split('@')[0].toLowerCase();const i=ROLE_PRIORITY.findIndex(x=>local===x||local.includes(x));return i<0?999:i}
 function cleanEmail(v){return String(v||'').trim().replace(/^mailto:/i,'').split('?')[0].toLowerCase()}
 function isRoleEmail(email,domain){const p=String(email||'').split('@');return p.length===2&&p[1].replace(/^www\./,'')===domain&&roleScore(email)<999}
@@ -150,7 +153,7 @@ async function refreshCandidates(env){
     if(considered>=MAX_CANDIDATES_PER_CYCLE)break;
     if(!NETWORK_TYPES.test(String(row.surface_type||'')))continue;
     const domain=hostOf(row.action_url);
-    if(!domain||domain==='trytoolscout.org'||vendorDomains.has(domain))continue;
+    if(!domain||domain==='trytoolscout.org'||vendorDomains.has(domain)||isTechnicalHost(domain))continue;
     considered++;
     const copy=outreachCopy({...row,domain});
     const r=await env.DB.prepare(`INSERT INTO distribution_network_outreach(surface_slug,surface_name,surface_type,domain,source_url,priority_score,status,suggested_subject,suggested_body,created_at,updated_at)
@@ -227,16 +230,19 @@ async function persistRoutes(row,routes,env){
 async function scanContact(row,env){
   const domain=String(row.domain||'').replace(/^www\./,'').toLowerCase();
   if(!domain)return {found:false,routed:false};
+  if(isTechnicalHost(domain)){
+    await env.DB.prepare(`UPDATE distribution_network_outreach SET status='suppressed_technical',contact_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run().catch(()=>{});
+    return {found:false,routed:false,status:'suppressed_technical'};
+  }
   const home='https://'+domain+'/';
-  const pages=[];
+  const pages=[],seen=new Set();
+  const add=async url=>{if(pages.length>=MAX_PAGES_PER_SITE||seen.has(url))return;seen.add(url);const p=await fetchHtml(url);if(p)pages.push(p)};
   const first=await fetchHtml(home);
   if(first){
-    pages.push(first);
-    for(const u of contactLinks(first.html,first.url)){
-      const p=await fetchHtml(u);if(p)pages.push(p);
-      if(pages.length>=MAX_PAGES_PER_SITE)break;
-    }
+    pages.push(first);seen.add(first.url);
+    for(const u of contactLinks(first.html,first.url)){await add(u);if(pages.length>=MAX_PAGES_PER_SITE)break}
   }
+  for(const p of COMMON_CONTACT_PATHS){if(pages.length>=MAX_PAGES_PER_SITE)break;await add(new URL(p,home).toString())}
   const routes=[];
   for(const p of pages){
     const emails=extractEmails(p.html,domain);
@@ -305,7 +311,7 @@ async function materializeRouteActions(env){
         route_type=excluded.route_type,
         route_url=excluded.route_url,
         execution_mode=excluded.execution_mode,
-        status=CASE WHEN distribution_contact_route_actions.status IN ('verified_impact','executed_waiting_verification','human_action_required','auth_required','policy_blocked','exhausted') THEN distribution_contact_route_actions.status ELSE 'queued' END,
+        status=CASE WHEN distribution_contact_route_actions.status IN ('verified_human_impact','verified_placement','executed_waiting_verification','human_action_required','auth_required','policy_blocked','exhausted') THEN distribution_contact_route_actions.status ELSE 'queued' END,
         opportunity_slug=excluded.opportunity_slug,
         next_action=excluded.next_action,
         updated_at=datetime('now')
@@ -355,15 +361,16 @@ async function reconcileRouteActions(env){
     JOIN distribution_contact_routes r ON r.route_id=a.route_id
     LEFT JOIN distribution_network_outreach n ON n.surface_slug=a.surface_slug
     LEFT JOIN distribution_opportunities o ON o.surface_slug=a.opportunity_slug
-    WHERE a.status NOT IN ('verified_impact','policy_blocked','exhausted')
+    WHERE a.status NOT IN ('verified_human_impact','verified_placement','policy_blocked','exhausted')
     ORDER BY a.updated_at ASC LIMIT 80`).all().catch(()=>({results:[]}));
-  let changed=0,verified=0,stalled=0,retryDue=0;
+  let changed=0,verifiedHuman=0,verifiedPlacement=0,stalled=0,retryDue=0;
   for(const row of q.results||[]){
     let next=String(row.status||'queued'),result=null;
-    if(row.network_status==='adopted'||Number(row.referral_human||0)>0){next='verified_impact';result=row.network_status==='adopted'?'publisher_adoption_verified':'strict_human_referral_verified';verified++;}
+    if(Number(row.referral_human||0)>0){next='verified_human_impact';result='strict_human_referral_verified';verifiedHuman++;}
+    else if(row.network_status==='adopted'){next='verified_placement';result='publisher_adoption_verified';verifiedPlacement++;}
     else if(row.execution_mode==='autonomous_qualification'){
       const s=String(row.opportunity_status||'');
-      if(['live','verified'].includes(s)){next='verified_impact';result=`route_opportunity_${s}`;verified++;}
+      if(['live','verified'].includes(s)){next='verified_placement';result=`route_opportunity_${s}`;verifiedPlacement++;}
       else if(['submitted','pending_review'].includes(s)){next='executed_waiting_verification';result=`route_opportunity_${s}`;}
       else if(s==='ready_to_submit'){next='qualified_auto';result='safe_adapter_ready';}
       else if(s==='human_action_required'){next='human_action_required';result='hard_human_gate';}
@@ -382,7 +389,7 @@ async function reconcileRouteActions(env){
       if(Number(w?.meta?.changes||w?.changes||0)>0)changed++;
     }
   }
-  return {checked:(q.results||[]).length,changed,verified,stalled,retryDue};
+  return {checked:(q.results||[]).length,changed,verifiedHuman,verifiedPlacement,stalled,retryDue};
 }
 
 async function verifyAdoption(env){
@@ -424,7 +431,7 @@ export async function runDistributionNetworkCycle(env){
   const adoption=await verifyAdoption(env);
   const materialChanges=Number(candidates.newQueued||0)+Number(candidates.reopened||0)+Number(contacts.found||0)+Number(contacts.routed||0)+Number(contacts.suppressed||0)+Number(routeActions.queued||0)+Number(routeActions.synthetic||0)+Number(routeActions.content||0)+Number(routeReconciliation.changed||0)+Number(adoption.adopted||0);
   if(materialChanges>0){
-    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1 materially changed ${materialChanges} item(s): ${candidates.newQueued} newly queued, ${candidates.reopened} reopened, ${contacts.found} role emails found, ${contacts.routed} alternate routes found, ${routeActions.queued} route actions queued, ${routeActions.synthetic} autonomous route opportunities materialized, ${routeActions.content} content-amplification routes prepared, ${routeReconciliation.verified} route impacts verified, ${routeReconciliation.retryDue} retries due, ${contacts.suppressed} suppressed and ${adoption.adopted} new adoptions verified. No-change cycles are not persisted.`).run().catch(()=>{});
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1 materially changed ${materialChanges} item(s): ${candidates.newQueued} newly queued, ${candidates.reopened} reopened, ${contacts.found} role emails found, ${contacts.routed} alternate routes found, ${routeActions.queued} route actions queued, ${routeActions.synthetic} autonomous route opportunities materialized, ${routeActions.content} content-amplification routes prepared, ${routeReconciliation.verifiedHuman} strict-human route impacts verified, ${routeReconciliation.verifiedPlacement} route placements verified, ${routeReconciliation.retryDue} retries due, ${contacts.suppressed} suppressed and ${adoption.adopted} new adoptions verified. No-change cycles are not persisted.`).run().catch(()=>{});
   }
   return {ok:true,candidates,contacts,routeActions,routeReconciliation,adoption,materialChanges,write_policy:'material_change_only',closed_loop_routes:true};
 }
