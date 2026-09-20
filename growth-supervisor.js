@@ -1,0 +1,204 @@
+const NORTH_STAR='strict_verified_human_sessions';
+const PRIMARY=new Set(['distribution','content','audience','seo_geo_aio']);
+const HOUR=3600000;
+const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
+const safe=(v,m=2000)=>String(v??'').slice(0,m);
+const ageHours=v=>{const t=Date.parse(String(v||''));return Number.isFinite(t)?Math.max(0,(Date.now()-t)/HOUR):Infinity};
+
+async function first(env,sql){try{return await env.DB.prepare(sql).first()}catch{return null}}
+async function all(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
+async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
+
+async function ensureSchema(env){
+  await env.DB.batch([
+    env.DB.prepare(\`CREATE TABLE IF NOT EXISTS growth_supervisor_state(
+      engine TEXT PRIMARY KEY,role TEXT NOT NULL,status TEXT NOT NULL,north_star TEXT NOT NULL,
+      strict_humans_24h INTEGER NOT NULL DEFAULT 0,strict_humans_7d INTEGER NOT NULL DEFAULT 0,
+      attributed_humans_24h INTEGER NOT NULL DEFAULT 0,attributed_humans_7d INTEGER NOT NULL DEFAULT 0,
+      external_executions_24h INTEGER NOT NULL DEFAULT 0,external_executions_7d INTEGER NOT NULL DEFAULT 0,
+      evidence_age_hours REAL,directive TEXT NOT NULL,directive_json TEXT NOT NULL,
+      correction_count INTEGER NOT NULL DEFAULT 0,last_correction_at TEXT,last_execution_at TEXT,
+      last_evaluated_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )\`),
+    env.DB.prepare(\`CREATE INDEX IF NOT EXISTS idx_growth_supervisor_status ON growth_supervisor_state(status,updated_at)\`),
+    env.DB.prepare(\`CREATE TABLE IF NOT EXISTS growth_supervisor_events(
+      event_id TEXT PRIMARY KEY,engine TEXT NOT NULL,previous_status TEXT,new_status TEXT NOT NULL,
+      directive TEXT NOT NULL,strict_humans_24h INTEGER NOT NULL DEFAULT 0,strict_humans_7d INTEGER NOT NULL DEFAULT 0,
+      external_executions_24h INTEGER NOT NULL DEFAULT 0,external_executions_7d INTEGER NOT NULL DEFAULT 0,
+      detail TEXT,created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )\`),
+    env.DB.prepare(\`CREATE INDEX IF NOT EXISTS idx_growth_supervisor_events_engine ON growth_supervisor_events(engine,created_at DESC)\`)
+  ]);
+}
+
+function classifyAcquisition(source,referrer){
+  const s=String(source||'').toLowerCase(),r=String(referrer||'').toLowerCase().replace(/^www\./,'');
+  if(/(^|\.)google\.|(^|\.)bing\.|duckduckgo|search\.brave|ecosia|yahoo\./.test(r)||/ref:(google|bing|duckduckgo|search\.brave|ecosia|yahoo)/.test(s))return'seo_geo_aio';
+  if(/audience[_-]?engine|audience[_-]?growth|bluesky[_-]?engagement/.test(s))return'audience';
+  if(/utm_source=(linkedin|x|twitter|bluesky)|organic_social|content_engine/.test(s)||/(^|\.)(linkedin\.com|x\.com|twitter\.com|bsky\.app)$/.test(r))return'content';
+  if(/vendor_outreach|distribution|publisher|directory|launch|community|stremit|uneed|producthunt|product_hunt|saashub|startupfame|startup_fame|peerlist|reddit|hackernews|hacker-news|indiehackers/.test(s))return'distribution';
+  if(r&&r!=='trytoolscout.org'&&!r.endsWith('.trytoolscout.org'))return'distribution';
+  return'unattributed';
+}
+
+function policy(engine,c){
+  const h24=n(c.h24),h7=n(c.h7),e24=n(c.e24),e7=n(c.e7),age=c.lastExecutionAgeHours;
+  if(engine==='distribution'){
+    if(h24>0)return{status:'working',directive:'scale_proven_human_sources',config:{mode:'scale_proven_human_sources',priority_boost:10,exploration_slots:3}};
+    if(e24>0&&age<24)return{status:'measuring',directive:'measure_current_external_actions',config:{mode:'measure_current_external_actions',priority_boost:8,exploration_slots:3,maturity_hours:24}};
+    if(e7>=3&&h7===0)return{status:'underperforming',directive:'rotate_and_expand_borrowed_audiences',config:{mode:'rotate_and_expand_borrowed_audiences',priority_boost:20,exploration_slots:5,no_impact_maturity_hours:48}};
+    if(e24===0&&c.activeOpportunities>0)return{status:'execution_gap',directive:'force_external_execution',config:{mode:'force_external_execution',priority_boost:25,exploration_slots:5}};
+    return{status:'waiting_for_executable_opportunities',directive:'discover_executable_routes',config:{mode:'discover_executable_routes',priority_boost:15,exploration_slots:4}};
+  }
+  if(engine==='content'){
+    if(h7>0)return{status:'working',directive:'scale_human_generating_topics',config:{mode:'scale_human_generating_topics',search_demand_first:true}};
+    if(age>96)return{status:'execution_gap',directive:'restore_content_execution',config:{mode:'restore_content_execution',search_demand_first:true,require_tracked_target:true}};
+    if(e7>0)return{status:'underperforming',directive:'search_demand_first',config:{mode:'search_demand_first',search_demand_first:true,generic_content:false,require_tracked_target:true}};
+    return{status:'execution_gap',directive:'publish_from_observed_demand',config:{mode:'publish_from_observed_demand',search_demand_first:true,require_tracked_target:true}};
+  }
+  if(engine==='audience'){
+    if(h7>0)return{status:'working',directive:'scale_relevant_conversations',config:{mode:'scale_relevant_conversations',relevance_only:true}};
+    if(e7>=10)return{status:'underperforming',directive:'qualified_conversations_only',config:{mode:'qualified_conversations_only',relevance_only:true,link_only_when_directly_helpful:true,avoid_activity_for_activity_sake:true}};
+    if(age>72)return{status:'execution_gap',directive:'restore_audience_execution',config:{mode:'restore_audience_execution',relevance_only:true}};
+    return{status:'measuring',directive:'measure_audience_quality',config:{mode:'measure_audience_quality',relevance_only:true}};
+  }
+  if(engine==='seo_geo_aio'){
+    if(c.gscAgeHours>36)return{status:'evidence_stale',directive:'refresh_search_evidence',config:{mode:'refresh_search_evidence',run_executor:true,priority_boost:25}};
+    if(c.organicActionsAgeHours>72)return{status:'executor_stale',directive:'run_targeted_seo_executor',config:{mode:'run_targeted_seo_executor',run_executor:true,priority_boost:25,observed_demand_only:true}};
+    if(h7>0)return{status:'working',directive:'scale_queries_generating_humans',config:{mode:'scale_queries_generating_humans',priority_boost:10,observed_demand_only:true}};
+    if(c.gscImpressions>0)return{status:'underperforming',directive:'deepen_observed_search_demand',config:{mode:'deepen_observed_search_demand',run_executor:true,priority_boost:20,observed_demand_only:true}};
+    return{status:'insufficient_search_evidence',directive:'measure_search_visibility',config:{mode:'measure_search_visibility',run_executor:true}};
+  }
+  if(engine==='affiliate')return{status:'supporting',directive:'maintenance_only_while_human_acquisition_is_primary',config:{mode:'maintenance_only',priority_cap:35,north_star_secondary:true}};
+  if(engine==='catalog')return{status:'supporting',directive:'demand_led_quality_only',config:{mode:'demand_led_quality',priority_cap:50,admit_when_search_or_quality_evidence:true,north_star_secondary:true}};
+  return{status:'observed',directive:'observe',config:{mode:'observe'}};
+}
+
+function countSince(rows,field,hours,pred=()=>true){
+  const cutoff=Date.now()-hours*HOUR;let count=0,last=0;
+  for(const row of rows){
+    if(!pred(row))continue;
+    const raw=String(row?.[field]||'');const t=Date.parse(raw.includes('T')?raw:raw.replace(' ','T')+'Z');
+    if(!Number.isFinite(t)||t<cutoff)continue;
+    count++;if(t>last)last=t;
+  }
+  return{count,last};
+}
+
+async function strictRows(env){
+  return all(env,\`WITH fv AS (
+    SELECT session_id,source,referrer_host,created_at,
+      ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC,id ASC) rn
+    FROM confirmed_visitor_events WHERE created_at>=datetime('now','-7 days')
+  )
+  SELECT h.session_id,h.first_evidence_at,v.source,v.referrer_host
+  FROM traffic_human_evidence h
+  LEFT JOIN fv v ON v.session_id=h.session_id AND v.rn=1
+  WHERE h.first_evidence_at>=datetime('now','-7 days')\`);
+}
+
+async function executionRows(env){
+  const [actions,submissions,audience]=await Promise.all([
+    all(env,\`SELECT engine,status,created_at,updated_at FROM growth_action_events WHERE created_at>=datetime('now','-7 days')\`),
+    all(env,\`SELECT surface_slug,status,attempts,COALESCE(last_attempt_at,created_at) at FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')\`),
+    all(env,\`SELECT event_type,status,platform,created_at FROM audience_events WHERE created_at>=datetime('now','-7 days') AND status='published'\`)
+  ]);
+  return{actions,submissions,audience};
+}
+
+async function saveEngine(env,engine,role,global,ctx,p){
+  const prev=await env.DB.prepare(\`SELECT status,directive,directive_json,correction_count FROM growth_supervisor_state WHERE engine=?\`).bind(engine).first();
+  const json=JSON.stringify(p.config),changed=!prev||prev.status!==p.status||prev.directive!==p.directive||String(prev.directive_json||'')!==json;
+  const lastExecution=Number.isFinite(ctx.lastExecutionAgeHours)&&ctx.lastExecutionAgeHours<1e6?new Date(Date.now()-ctx.lastExecutionAgeHours*HOUR).toISOString().replace('T',' ').slice(0,19):null;
+  const evidenceAge=engine==='seo_geo_aio'?Math.min(ctx.gscAgeHours,ctx.organicActionsAgeHours):(Number.isFinite(ctx.lastExecutionAgeHours)?ctx.lastExecutionAgeHours:null);
+  const corrections=n(prev?.correction_count)+(changed?1:0);
+  await env.DB.prepare(\`INSERT INTO growth_supervisor_state(
+      engine,role,status,north_star,strict_humans_24h,strict_humans_7d,attributed_humans_24h,attributed_humans_7d,
+      external_executions_24h,external_executions_7d,evidence_age_hours,directive,directive_json,correction_count,last_correction_at,last_execution_at,last_evaluated_at,updated_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,CASE WHEN ?=1 THEN datetime('now') ELSE NULL END,?,datetime('now'),datetime('now'))
+    ON CONFLICT(engine) DO UPDATE SET
+      role=excluded.role,status=excluded.status,north_star=excluded.north_star,
+      strict_humans_24h=excluded.strict_humans_24h,strict_humans_7d=excluded.strict_humans_7d,
+      attributed_humans_24h=excluded.attributed_humans_24h,attributed_humans_7d=excluded.attributed_humans_7d,
+      external_executions_24h=excluded.external_executions_24h,external_executions_7d=excluded.external_executions_7d,
+      evidence_age_hours=excluded.evidence_age_hours,directive=excluded.directive,directive_json=excluded.directive_json,
+      correction_count=excluded.correction_count,
+      last_correction_at=CASE WHEN ?=1 THEN datetime('now') ELSE growth_supervisor_state.last_correction_at END,
+      last_execution_at=excluded.last_execution_at,last_evaluated_at=datetime('now'),updated_at=datetime('now')\`)
+    .bind(engine,role,p.status,NORTH_STAR,global.strict24,global.strict7,n(ctx.h24),n(ctx.h7),n(ctx.e24),n(ctx.e7),evidenceAge,p.directive,json,corrections,changed?1:0,lastExecution,changed?1:0).run();
+  if(changed){
+    await env.DB.prepare(\`INSERT INTO growth_supervisor_events(event_id,engine,previous_status,new_status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,detail,created_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,datetime('now'))\`)
+      .bind(\`gs_\${crypto.randomUUID()}\`,engine,prev?.status||null,p.status,p.directive,global.strict24,global.strict7,n(ctx.e24),n(ctx.e7),
+        safe(\`North star \${NORTH_STAR}. Attributed humans 24h/7d \${n(ctx.h24)}/\${n(ctx.h7)}. External executions 24h/7d \${n(ctx.e24)}/\${n(ctx.e7)}.\`)).run();
+  }
+  return{engine,role,status:p.status,directive:p.directive,directiveConfig:p.config,attributedHumans24h:n(ctx.h24),attributedHumans7d:n(ctx.h7),externalExecutions24h:n(ctx.e24),externalExecutions7d:n(ctx.e7)};
+}
+
+export async function runGrowthSupervisorAudit(env){
+  await ensureSchema(env);
+  const [humansRows,exec,gsc,organic,active]=await Promise.all([
+    strictRows(env),executionRows(env),
+    assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
+    assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
+    all(env,\`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type\`)
+  ]);
+  const byType=Object.fromEntries(active.map(x=>[String(x.subject_type),n(x.n)]));
+  const humans={distribution:{h24:0,h7:0},content:{h24:0,h7:0},audience:{h24:0,h7:0},seo_geo_aio:{h24:0,h7:0},unattributed:{h24:0,h7:0}};
+  const now=Date.now();let strict24=0,strict7=0;
+  for(const row of humansRows){
+    const raw=String(row.first_evidence_at||'');const t=Date.parse(raw.includes('T')?raw:raw.replace(' ','T')+'Z');if(!Number.isFinite(t))continue;
+    strict7++;if(now-t<=24*HOUR)strict24++;
+    const k=classifyAcquisition(row.source,row.referrer_host);humans[k]??={h24:0,h7:0};humans[k].h7++;if(now-t<=24*HOUR)humans[k].h24++;
+  }
+
+  const valid=r=>['sent','verified','completed','attributed'].includes(String(r.status||''));
+  const distAction=r=>/vendor_amplification|distribution_network|distribution_route|distribution/i.test(String(r.engine||''))&&valid(r);
+  const contentAction=r=>String(r.engine||'')==='content'&&valid(r);
+  const d24=countSince(exec.actions,'created_at',24,distAction),d7=countSince(exec.actions,'created_at',168,distAction);
+  const s24=countSince(exec.submissions,'at',24),s7=countSince(exec.submissions,'at',168);
+  const cp24=countSince(exec.audience,'created_at',24,r=>r.event_type==='content_published'),cp7=countSince(exec.audience,'created_at',168,r=>r.event_type==='content_published');
+  const ca24=countSince(exec.actions,'created_at',24,contentAction),ca7=countSince(exec.actions,'created_at',168,contentAction);
+  const au24=countSince(exec.audience,'created_at',24,r=>r.event_type==='outbound_reply'),au7=countSince(exec.audience,'created_at',168,r=>r.event_type==='outbound_reply');
+  const gscAge=ageHours(gsc?.generatedAt),organicAge=ageHours(organic?.generatedAt);
+  const seoInterventions=Array.isArray(organic?.newInterventions)?organic.newInterventions.length:0;
+
+  const ctx={
+    distribution:{...humans.distribution,e24:d24.count+s24.count,e7:d7.count+s7.count,lastExecutionAgeHours:(Math.max(d7.last,s7.last)?(now-Math.max(d7.last,s7.last))/HOUR:Infinity),activeOpportunities:n(byType.surface)+n(byType.tool)},
+    content:{...humans.content,e24:cp24.count+ca24.count,e7:cp7.count+ca7.count,lastExecutionAgeHours:(Math.max(cp7.last,ca7.last)?(now-Math.max(cp7.last,ca7.last))/HOUR:Infinity),activeOpportunities:n(byType.search)+n(byType.tool)+n(byType.news_update)},
+    audience:{...humans.audience,e24:au24.count,e7:au7.count,lastExecutionAgeHours:au7.last?(now-au7.last)/HOUR:Infinity,activeOpportunities:n(byType.surface)+n(byType.tool)},
+    seo_geo_aio:{...humans.seo_geo_aio,e24:0,e7:seoInterventions,lastExecutionAgeHours:organicAge,activeOpportunities:n(byType.search),gscAgeHours:gscAge,organicActionsAgeHours:organicAge,gscImpressions:n(gsc?.siteTotals?.impressions),gscClicks:n(gsc?.siteTotals?.clicks)},
+    affiliate:{h24:0,h7:0,e24:0,e7:0,lastExecutionAgeHours:Infinity,activeOpportunities:n(byType.affiliate)},
+    catalog:{h24:0,h7:0,e24:0,e7:0,lastExecutionAgeHours:Infinity,activeOpportunities:Object.entries(byType).filter(([k])=>k.startsWith('catalog')).reduce((s,[,v])=>s+n(v),0)}
+  };
+  const global={strict24,strict7};
+  const engines=[];
+  for(const engine of ['distribution','content','audience','seo_geo_aio','affiliate','catalog'])engines.push(await saveEngine(env,engine,PRIMARY.has(engine)?'primary_human_acquisition':'supporting',global,ctx[engine],policy(engine,ctx[engine])));
+
+  const exec24=engines.filter(x=>PRIMARY.has(x.engine)).reduce((s,x)=>s+x.externalExecutions24h,0);
+  const exec7=engines.filter(x=>PRIMARY.has(x.engine)).reduce((s,x)=>s+x.externalExecutions7d,0);
+  const attributed7=n(humans.distribution.h7)+n(humans.content.h7)+n(humans.audience.h7)+n(humans.seo_geo_aio.h7);
+  let status='working',directive='keep_learning_from_verified_humans';
+  if(strict7===0&&exec7>0){status='failing';directive='correct_all_acquisition_engines'}
+  else if(strict24===0&&exec24===0){status='execution_gap';directive='force_primary_engine_execution'}
+  else if(strict24===0){status='underperforming';directive='rotate_after_maturity_and_expand_existing_demand'}
+  else if(strict7>0&&attributed7===0){status='working_unattributed';directive='improve_acquisition_attribution_while_continuing_growth'}
+
+  const gctx={h24:strict24,h7:strict7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
+  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7}};
+  const growth=await saveEngine(env,'growth_brain','supervisor',global,gctx,gp);
+  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
+}
+
+export async function growthSupervisorSnapshot(env){
+  await ensureSchema(env);
+  const rows=await all(env,\`SELECT engine,role,status,north_star,strict_humans_24h,strict_humans_7d,attributed_humans_24h,attributed_humans_7d,external_executions_24h,external_executions_7d,evidence_age_hours,directive,directive_json,correction_count,last_correction_at,last_execution_at,last_evaluated_at FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 WHEN 'distribution' THEN 1 WHEN 'content' THEN 2 WHEN 'audience' THEN 3 WHEN 'seo_geo_aio' THEN 4 WHEN 'affiliate' THEN 5 ELSE 6 END\`);
+  return{northStar:NORTH_STAR,generatedAt:new Date().toISOString(),items:rows.map(x=>{let cfg={};try{cfg=JSON.parse(x.directive_json||'{}')}catch{}const y={...x,directiveConfig:cfg};delete y.directive_json;return y})};
+}
+
+export async function growthSupervisorDirective(env,engine){
+  await ensureSchema(env);
+  const row=await env.DB.prepare(\`SELECT status,directive,directive_json,last_evaluated_at FROM growth_supervisor_state WHERE engine=?\`).bind(engine).first();
+  if(!row)return null;let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}
+  return{status:row.status,directive:row.directive,config,lastEvaluatedAt:row.last_evaluated_at};
+}
