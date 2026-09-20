@@ -296,7 +296,7 @@ async function materializeRouteActions(env){
     LIMIT ?`).bind(MAX_ROUTE_CONTENT_ATTEMPTS,MAX_ROUTE_ACTIONS_PER_CYCLE).all();
   let queued=0,synthetic=0,content=0,retried=0;
   for(const row of q.results||[]){
-    const mode=routeMode(row.route_type),hash=await routeHash(row.route_id),oppSlug=`route-${hash}`,next=routeNextAction(row.route_type);
+    const mode=routeMode(row.route_type),hash=await routeHash(row.route_id),oppSlug=safe(row.opportunity_slug||`route-${hash}`,100),next=routeNextAction(row.route_type);
     const previous=String(row.action_status||'');
     const write=await env.DB.prepare(`INSERT INTO distribution_contact_route_actions(route_id,surface_slug,route_type,route_url,execution_mode,status,opportunity_slug,attempts,last_result,next_action,created_at,updated_at)
       VALUES(?,?,?,?,?,'queued',?,0,NULL,?,datetime('now'),datetime('now'))
