@@ -1,0 +1,83 @@
+name: ToolScout Growth Brain SEO Executor
+
+on:
+  schedule:
+    - cron: '43 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: growth-brain-seo-executor
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read Growth Brain supervisor
+        id: supervisor
+        run: |
+          curl -fsS --retry 3 --retry-delay 2 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth-supervisor.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/growth-supervisor.json','utf8'));
+          if(x?.brain!=='shared-growth-v3') throw new Error('growth_supervisor_unavailable');
+          const seo=(x.directives||[]).find(d=>d.engine==='seo_geo_aio');
+          const growth=(x.directives||[]).find(d=>d.engine==='growth_brain');
+          const run=Boolean(seo?.directiveConfig?.run_executor);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`run=${run?'true':'false'}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`seo_status=${seo?.status||'unknown'}\n`);
+          console.log(JSON.stringify({northStar:x.northStar,growth:growth?.status,seo:seo?.status,directive:seo?.directive,run}));
+          NODE
+
+      - name: Refresh GSC evidence
+        if: steps.supervisor.outputs.run == 'true'
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+        run: node scripts/sync-gsc-signals.mjs
+
+      - name: Refresh indexing and organic opportunities
+        if: steps.supervisor.outputs.run == 'true'
+        run: |
+          node scripts/seo-indexing-gate.mjs
+          node scripts/build-organic-growth-opportunities-v6.mjs
+          node scripts/fetch-shared-growth-directives.mjs
+          node scripts/run-organic-growth-controller-v4.mjs
+
+      - name: Apply targeted SEO corrections
+        if: steps.supervisor.outputs.run == 'true'
+        run: |
+          node scripts/apply-organic-growth-actions.mjs
+          node scripts/enforce-seo-hygiene.mjs --fix
+          node scripts/generate-sitemap.mjs
+
+      - name: Validate corrected surface
+        if: steps.supervisor.outputs.run == 'true'
+        run: |
+          node scripts/validate-seo-pages.mjs
+          node scripts/validate-editorial-trust.mjs
+          node scripts/validate-public-surface.mjs
+
+      - name: Commit only material SEO corrections
+        if: steps.supervisor.outputs.run == 'true'
+        run: |
+          if [ -z "$(git status --porcelain -- reports/gsc-signals.json reports/organic-growth-opportunities.json reports/organic-growth-state.json reports/organic-growth-actions.json reports/runtime-growth-directives.json '*.html' sitemap.xml)" ]; then
+            echo "No material Growth Brain SEO correction."
+            exit 0
+          fi
+          git config user.name "toolscout-growth-brain"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- reports/gsc-signals.json reports/organic-growth-opportunities.json reports/organic-growth-state.json reports/organic-growth-actions.json reports/runtime-growth-directives.json '*.html' sitemap.xml
+          git commit -m "Apply Growth Brain SEO correction"
+          git pull --rebase origin main
+          git push origin HEAD:main
