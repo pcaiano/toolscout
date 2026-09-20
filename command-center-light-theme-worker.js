@@ -346,7 +346,9 @@ async function canonicalAutonomousGrowthTruth(env) {
     all(`SELECT g.action_id,g.opportunity_key,g.engine,g.channel,g.target_url,g.status,g.created_at,
         v.tool_slug,v.contact_email,v.suggested_subject,v.asset_url
       FROM growth_action_events g
-      LEFT JOIN distribution_vendor_amplification v ON g.action_id='vendor:'||v.tool_slug
+      LEFT JOIN distribution_vendor_amplification v
+        ON g.action_id='vendor:'||v.tool_slug
+       AND (g.target_url=v.asset_url OR g.target_url LIKE v.asset_url||'?%')
       WHERE g.created_at>=datetime('now','-7 days')
         AND g.status IN ('sent','verified','completed','attributed')
         AND (g.engine='vendor_amplification' OR g.engine LIKE 'distribution%')
@@ -527,7 +529,7 @@ export default {
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
       const autonomousGrowthTruth=await canonicalAutonomousGrowthTruth(env).catch(()=>null);
-      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.4'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v1',selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.5'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
