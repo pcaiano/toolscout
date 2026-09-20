@@ -6,9 +6,10 @@ const MAX_VENDOR_SCANS=12;
 const MAX_PAGES_PER_VENDOR=6;
 const COMMON_CONTACT_PATHS=['/contact','/contact-us','/company/contact','/partners','/partnerships','/affiliate','/affiliates','/press','/media','/about'];
 const MAKE_TOKEN_SHA256='2f9522abe5fb3d87a045b86940f6b5338cc5c9fc3f51ecbc5f5fc31000e3b72c';
+const PUBLIC_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
 
 async function sha256(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-async function integrationOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!t)return false;if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return (await sha256(t))===MAKE_TOKEN_SHA256}
+async function integrationOk(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(t&&env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;if(t&&(await sha256(t))===MAKE_TOKEN_SHA256)return true;const h=String(request.headers.get('X-ToolScout-Handoff')||'');return Boolean(h)&&(await sha256(h))===PUBLIC_HANDOFF_SHA256}
 function roleScore(email){const local=String(email).split('@')[0].toLowerCase();const i=ROLE_PRIORITY.findIndex(x=>local===x||local.includes(x));return i<0?999:i}
 function cleanEmail(v){return String(v||'').trim().replace(/^mailto:/i,'').split('?')[0].toLowerCase()}
 function isRoleEmail(email,domain){if(!email||!domain)return false;const parts=email.split('@');if(parts.length!==2||parts[1].replace(/^www\./,'')!==domain)return false;return roleScore(email)<999}
