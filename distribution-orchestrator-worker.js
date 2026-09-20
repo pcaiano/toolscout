@@ -3,7 +3,7 @@ import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
 import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
-import {syncExecutionContracts,reconcileExecutionContracts,claimExecutorTasks,markExecutorAttempt,executionContractSnapshot} from './growth-execution-contract.js';
+import {syncExecutionContracts,reconcileExecutionContracts,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,executionContractSnapshot} from './growth-execution-contract.js';
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
@@ -670,6 +670,7 @@ async function runGrowthExecutionContractCycle(env){
     try{
       const out=await fn();
       await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900));
+      await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed');
       results[executor]={claimed:claim.claimed,ok:true,result:out||null};
     }catch(error){
       const message=String(error?.message||error).slice(0,800);
