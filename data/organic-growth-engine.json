@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "principles": {
     "fullyAutonomous": true,
     "ownerContentInterventionRequired": false,
@@ -17,12 +17,24 @@
     "fewerCorrectRecommendationsBeatMoreIncorrectRecommendations": true,
     "boundedInterventions": true,
     "reversibleExperiments": true,
-    "demandLedOptimization": true
+    "demandLedOptimization": true,
+    "legitimateBacklinkAcquisitionPrimarySeoObjective": true,
+    "neverBuyRankingLinks": true,
+    "neverRequireReciprocalLinks": true
   },
   "autonomy": {
     "mode": "closed-loop",
     "ownerRole": "observability-only",
-    "cycle": ["observe","prioritize","optimize","validate","publish","distribute","measure","learn"],
+    "cycle": [
+      "observe",
+      "prioritize",
+      "optimize",
+      "validate",
+      "publish",
+      "distribute",
+      "measure",
+      "learn"
+    ],
     "publishOnlyAfterQualityGates": true,
     "insufficientEvidenceAction": "measure-and-recheck-automatically",
     "target": "continuously improve qualified rankings and search clicks without claiming control over Google positions"
@@ -55,19 +67,89 @@
     "blockPublicationOnEligibilityFailure": true
   },
   "competitors": [
-    {"name":"AlternativeTo","baseUrl":"https://alternativeto.net","sitemapCandidates":["https://alternativeto.net/sitemap.xml","https://alternativeto.net/sitemap_index.xml"]},
-    {"name":"SaaSHub","baseUrl":"https://www.saashub.com","sitemapCandidates":["https://www.saashub.com/sitemap.xml"]},
-    {"name":"G2","baseUrl":"https://www.g2.com","sitemapCandidates":["https://www.g2.com/sitemap.xml"]},
-    {"name":"Capterra","baseUrl":"https://www.capterra.com","sitemapCandidates":["https://www.capterra.com/sitemap.xml"]},
-    {"name":"Futurepedia","baseUrl":"https://www.futurepedia.io","sitemapCandidates":["https://www.futurepedia.io/sitemap.xml"]},
-    {"name":"There's An AI For That","baseUrl":"https://theresanaiforthat.com","sitemapCandidates":["https://theresanaiforthat.com/sitemap.xml"]}
+    {
+      "name": "AlternativeTo",
+      "baseUrl": "https://alternativeto.net",
+      "sitemapCandidates": [
+        "https://alternativeto.net/sitemap.xml",
+        "https://alternativeto.net/sitemap_index.xml"
+      ]
+    },
+    {
+      "name": "SaaSHub",
+      "baseUrl": "https://www.saashub.com",
+      "sitemapCandidates": [
+        "https://www.saashub.com/sitemap.xml"
+      ]
+    },
+    {
+      "name": "G2",
+      "baseUrl": "https://www.g2.com",
+      "sitemapCandidates": [
+        "https://www.g2.com/sitemap.xml"
+      ]
+    },
+    {
+      "name": "Capterra",
+      "baseUrl": "https://www.capterra.com",
+      "sitemapCandidates": [
+        "https://www.capterra.com/sitemap.xml"
+      ]
+    },
+    {
+      "name": "Futurepedia",
+      "baseUrl": "https://www.futurepedia.io",
+      "sitemapCandidates": [
+        "https://www.futurepedia.io/sitemap.xml"
+      ]
+    },
+    {
+      "name": "There's An AI For That",
+      "baseUrl": "https://theresanaiforthat.com",
+      "sitemapCandidates": [
+        "https://theresanaiforthat.com/sitemap.xml"
+      ]
+    }
   ],
-  "opportunityTerms": ["alternative","alternatives","vs","compare","comparison","best","tools","software","crm","seo","automation","marketing","email","sales","forms","project-management","ai","research","coding","analytics"],
+  "opportunityTerms": [
+    "alternative",
+    "alternatives",
+    "vs",
+    "compare",
+    "comparison",
+    "best",
+    "tools",
+    "software",
+    "crm",
+    "seo",
+    "automation",
+    "marketing",
+    "email",
+    "sales",
+    "forms",
+    "project-management",
+    "ai",
+    "research",
+    "coding",
+    "analytics"
+  ],
   "thresholds": {
     "minimumCompetitorMentionsForGap": 2,
     "maximumCompetitorUrlsPerSource": 1500,
     "minimumGscImpressionsForCtrAction": 20,
     "strikingDistanceMaxPosition": 20,
     "firstPageMaxPosition": 10
+  },
+  "backlinkAuthority": {
+    "mode": "quality-first",
+    "bootstrapReferringDomainFloor": 10,
+    "prioritizeObservedDemandAssets": true,
+    "vendorReferenceOutreach": true,
+    "publisherAndDirectoryPlacements": true,
+    "verifyPublicBacklinkEvidence": true,
+    "countDistinctReferringDomains": true,
+    "allowPaidRankingLinks": false,
+    "requireReciprocalLinks": false,
+    "target": "grow relevant verified referring domains and human referral potential without link schemes"
   }
 }
