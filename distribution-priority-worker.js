@@ -71,6 +71,8 @@ function eligibleForExploration(row){
 }
 
 export async function rebalanceDistributionPriorities(env){
+  let supervisor={status:null,directive:null,config:{}};
+  try{const row=await env.DB.prepare(`SELECT status,directive,directive_json FROM growth_supervisor_state WHERE engine='distribution'`).first();if(row){let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}supervisor={status:row.status,directive:row.directive,config}}}catch{}
   let rows=[];
   try{
     const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.human_required,o.distribution_score,o.last_checked_at,o.updated_at,l.baseline_score,l.learned_score,l.economic_boost,l.evidence_grade,l.paid_policy_decision,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,l.confirmed_revenue_30d,c.cost_amount,c.currency AS cost_currency,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status='submitted') AS already_submitted,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status IN ('auth_required','adapter_missing','policy_blocked','setup_required','human_required')) AS submission_blocked FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug LEFT JOIN distribution_surface_costs c ON c.surface_slug=o.surface_slug WHERE o.surface_slug IS NOT NULL`).all();
@@ -78,7 +80,8 @@ export async function rebalanceDistributionPriorities(env){
   }catch(error){return{ok:false,updated:0,reason:'operating_decision_schema_unavailable',detail:String(error?.message||error).slice(0,500)};}
 
   const staged=rows.map(row=>({...row,decision:operatingDecision(row)}));
-  const explorationLimit=humanSprintActive()?HUMAN_ACQUISITION_SPRINT.explorationSlots:1;
+  const supervisorSlots=Math.max(0,Math.min(8,number(supervisor?.config?.exploration_slots,0)));
+  const explorationLimit=Math.max(humanSprintActive()?HUMAN_ACQUISITION_SPRINT.explorationSlots:1,supervisorSlots);
   const explorationCandidates=staged.filter(eligibleForExploration).sort(oldestFirst).slice(0,explorationLimit);
   const explorationSlugs=new Set(explorationCandidates.map(x=>x.surface_slug));
 
@@ -88,10 +91,13 @@ export async function rebalanceDistributionPriorities(env){
     evaluated++;
     const decision=row.decision.s;
     const explorationSlot=explorationSlugs.has(row.surface_slug);
-    const priority=priorityWeight(row,decision,{explorationSlot});
+    const basePriority=priorityWeight(row,decision,{explorationSlot});
+    const supervisorBoost=Math.max(0,Math.min(25,number(supervisor?.config?.priority_boost,0)));
+    const priority=Number(Math.min(100,basePriority+(decision==='scale'?Math.min(10,supervisorBoost):supervisorBoost)).toFixed(2));
     const isPaid=number(row.cost_amount)>0;
     const chairmanRequired=number(row.human_required)>0||row.status==='approval_required'||isPaid;
-    const reason=explorationSlot?`${row.decision.reason} Reserved as this cycle's bounded acquisition exploration slot.`:row.decision.reason;
+    const supervisorReason=supervisor?.directive?` Growth Supervisor: ${supervisor.directive}.`:'';
+    const reason=(explorationSlot?`${row.decision.reason} Reserved as this cycle's bounded acquisition exploration slot.`:row.decision.reason)+supervisorReason;
     const baseline=number(row.baseline_score,row.distribution_score);
     const learned=number(row.learned_score,row.distribution_score);
 
@@ -126,7 +132,7 @@ export async function rebalanceDistributionPriorities(env){
   try{
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`priority_${crypto.randomUUID()}`,'distribution_operating_priorities','completed','distribution_engine',`Operating priorities evaluated ${evaluated} surface(s) and materially changed ${updated}: scale ${counts.scale}, measure ${counts.measure}, explore ${counts.explore}, suspend ${counts.suspend}. ${explorationCandidates.length?`Reserved ${explorationCandidates.map(x=>x.surface_slug).join(', ')} as bounded acquisition exploration slot(s).`:'No eligible free acquisition exploration candidate was available.'} ${paidBlocked} paid ready-to-submit surface(s) were moved behind owner approval. Unchanged state is not rewritten.`).run();
   }catch{}
-  return{ok:true,evaluated,updated,decisions:counts,exploration_slot:explorationCandidates[0]?.surface_slug||null,exploration_slots:explorationCandidates.map(x=>x.surface_slug),paid_auto_execution_blocked:paidBlocked,write_policy:'material_change_only',human_acquisition_sprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
+  return{ok:true,evaluated,updated,decisions:counts,exploration_slot:explorationCandidates[0]?.surface_slug||null,exploration_slots:explorationCandidates.map(x=>x.surface_slug),paid_auto_execution_blocked:paidBlocked,write_policy:'material_change_only',growth_supervisor:supervisor,human_acquisition_sprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
 async function decisionSnapshot(env){
