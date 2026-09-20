@@ -1,4 +1,4 @@
-name: One Shot Autonomous Distribution Funnel Audit
+name: One Shot Autonomous Surface Audit
 
 on:
   push:
@@ -18,13 +18,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Audit autonomous distribution funnel
+      - name: Inspect due autonomous surfaces
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT policy_state,COUNT(*) n,MIN(confidence) min_conf,MAX(confidence) max_conf FROM distribution_auto_adapters GROUP BY policy_state ORDER BY n DESC;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT a.surface_slug,a.policy_state,a.confidence,a.endpoint,a.method,a.auth_type,o.status opportunity_status,o.human_required,o.next_action FROM distribution_auto_adapters a LEFT JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug ORDER BY a.updated_at DESC LIMIT 40;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT submission_type,status,COUNT(*) n,SUM(attempts) attempts FROM distribution_submissions GROUP BY submission_type,status ORDER BY n DESC;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,submission_type,status,attempts,last_attempt_at,response_url,error,human_required FROM distribution_submissions WHERE submission_type='auto_discovered_json' ORDER BY updated_at DESC LIMIT 40;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) n FROM distribution_opportunities GROUP BY status ORDER BY n DESC;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT result,COUNT(*) n FROM distribution_qualification_events WHERE created_at>=datetime('now','-7 days') GROUP BY result ORDER BY n DESC;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,surface_type,status,action_url,live_url,distribution_score,automation_potential,acceptance_probability,human_required,next_action,last_checked_at FROM distribution_opportunities WHERE status IN ('ready_to_submit','candidate','research_required','auth_required') ORDER BY CASE status WHEN 'ready_to_submit' THEN 0 WHEN 'candidate' THEN 1 WHEN 'research_required' THEN 2 ELSE 3 END,distribution_score DESC LIMIT 80;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,error,COUNT(*) failures,MAX(last_attempt_at) last_attempt,SUM(attempts) attempts FROM distribution_submissions WHERE status='failed' GROUP BY surface_slug,error ORDER BY failures DESC,attempts DESC LIMIT 80;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,result,detail,source_url,created_at FROM distribution_qualification_events WHERE result IN ('research_required','external_verification_failed','auth_required') ORDER BY created_at DESC LIMIT 80;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
