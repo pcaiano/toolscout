@@ -66,6 +66,7 @@ async function upsertIncident(env,x){
 
 export async function auditArchitectureEscalations(env){
   await ensureSchema(env);
+  await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=CASE WHEN email_status='sending_resolved' THEN 'pending_resolved' ELSE 'pending' END,updated_at=datetime('now') WHERE email_status IN ('sending','sending_resolved') AND updated_at<datetime('now','-30 minutes')`).run().catch(()=>{});
   const activeKeys=new Set();
   let opened=0;
 
@@ -179,10 +180,13 @@ export async function publicEscalationCandidates(env,limit=3){
   const q=await env.DB.prepare(`SELECT * FROM growth_architecture_incidents
     WHERE email_status IN ('pending','pending_resolved')
     ORDER BY CASE severity WHEN 'P1' THEN 0 ELSE 1 END, first_detected_at ASC LIMIT ?`).bind(nLimit).all();
-  return{ok:true,items:(q.results||[]).map(row=>{
-    const mail=row.email_status==='pending_resolved'?buildResolvedEmail(row):buildOpenEmail(row);
-    return{incident_id:row.incident_id,dispatch_token:row.dispatch_token,email_kind:row.email_status==='pending_resolved'?'resolved':'code_approval_required',subject:mail.subject,body:mail.body};
-  })};
+  const items=[];
+  for(const row of q.results||[]){
+    const resolved=row.email_status==='pending_resolved',mail=resolved?buildResolvedEmail(row):buildOpenEmail(row);
+    await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=?,updated_at=datetime('now') WHERE incident_id=? AND email_status=?`).bind(resolved?'sending_resolved':'sending',row.incident_id,row.email_status).run();
+    items.push({incident_id:row.incident_id,dispatch_token:row.dispatch_token,email_kind:resolved?'resolved':'code_approval_required',subject:mail.subject,body:mail.body});
+  }
+  return{ok:true,items};
 }
 
 export async function markEscalationEmailStatus(env,dispatchToken,status){
@@ -192,10 +196,11 @@ export async function markEscalationEmailStatus(env,dispatchToken,status){
   const row=await env.DB.prepare(`SELECT incident_id,email_status FROM growth_architecture_incidents WHERE dispatch_token=?`).bind(String(dispatchToken||'')).first();
   if(!row)return{ok:false,error:'unknown_dispatch_token'};
   if(state==='sent'){
-    const final=row.email_status==='pending_resolved'?'resolved_sent':'sent';
+    const final=row.email_status==='sending_resolved'?'resolved_sent':'sent';
     await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=?,email_sent_at=COALESCE(email_sent_at,datetime('now')),updated_at=datetime('now') WHERE incident_id=?`).bind(final,row.incident_id).run();
   }else{
-    await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status='pending',updated_at=datetime('now') WHERE incident_id=?`).bind(row.incident_id).run();
+    const retry=row.email_status==='sending_resolved'?'pending_resolved':'pending';
+    await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=?,updated_at=datetime('now') WHERE incident_id=?`).bind(retry,row.incident_id).run();
   }
   return{ok:true,incident_id:row.incident_id,status:state};
 }
