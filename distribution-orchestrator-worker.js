@@ -363,10 +363,13 @@ async function coordinateGrowthOpportunities(env){
     const vendor=String(row.vendor_status||'');
     const toolSlug=String(row.tool_slug||'').toLowerCase(),searchBoost=Number(searchBoostByTool.get(toolSlug)||0),newsBoost=Number(newsByTool.get(toolSlug)||0);
     const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)+searchBoost+newsBoost+(audienceStrategy.borrowedFirst?10:0)));
-    const actions=['vendor_amplification'];
+    const actions=[];
+    const vendorExecutable=!['needs_contact_fallback','fallback_exhausted'].includes(vendor);
+    if(vendorExecutable)actions.push('vendor_amplification');
     if(profile)actions.push('content_mention');
     if(affiliate)actions.push('affiliate_social');
-    const signals={vendor_status:vendor,verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),news_priority_boost:Number(newsBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'vendor_borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?10:0};
+    if(!actions.length)continue;
+    const signals={vendor_status:vendor,vendor_execution_available:vendorExecutable,verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),news_priority_boost:Number(newsBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'vendor_borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?10:0};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
