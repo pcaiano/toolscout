@@ -1,66 +1,26 @@
-name: One Shot Growth Supervisor State Sync
+name: One Shot Growth Stall Diagnosis
 
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/d1-quota-safe-worker-deploy.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  sync-and-prove:
+  diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
-      - name: Sync Growth Brain supervisor from live execution state
+      - name: Group stalled contracts by executor and reason
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE growth_supervisor_state
-          SET status='failing',
-              directive='repair_execution_contract',
-              directive_json=json_object(
-                'mode','repair_execution_contract',
-                'execution_contract',json_object(
-                  'missing_executors',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing'),
-                  'stalled',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled'),
-                  'pending',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='pending'),
-                  'claimed',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='claimed'),
-                  'attempted',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='attempted'),
-                  'verified',(SELECT COUNT(*) FROM growth_execution_contract WHERE status='verified')
-                ),
-                'architecture_escalation',json_object(
-                  'open_incidents',(SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1),
-                  'approval_required',CASE WHEN (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1)>0 THEN json('true') ELSE json('false') END
-                )
-              ),
-              last_evaluated_at=datetime('now'),
-              updated_at=datetime('now')
-          WHERE engine='growth_brain'
-            AND (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1)=0
-            AND (SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing')=0
-            AND (SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled')>0;"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Prove current supervisor truth
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
-            s.status,s.directive,s.directive_json,s.last_evaluated_at,
-            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='executor_missing') missing,
-            (SELECT COUNT(*) FROM growth_execution_contract WHERE status='stalled') stalled,
-            (SELECT COUNT(*) FROM growth_architecture_incidents WHERE status='open' AND approval_required=1) open_incidents
-          FROM growth_supervisor_state s WHERE s.engine='growth_brain';" > /tmp/supervisor.json
-          cat /tmp/supervisor.json
-          jq -e '.[0].results[0] | .missing==0 and .open_incidents==0 and .directive=="repair_execution_contract"' /tmp/supervisor.json
-          curl -fsS --retry 5 --retry-delay 3 https://trytoolscout.org/api/growth/supervisor/public > /tmp/public.json
-          cat /tmp/public.json
-          jq -e '.executionContract.missingExecutors==0 and (.directives[] | select(.engine=="growth_brain") | .directive=="repair_execution_contract")' /tmp/public.json
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT executor,last_result,COUNT(*) n,MIN(created_at) oldest,MAX(created_at) newest,MIN(attempts) min_attempts,MAX(attempts) max_attempts FROM growth_execution_contract WHERE status='stalled' GROUP BY executor,last_result ORDER BY n DESC;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT executor,action,subject_type,COUNT(*) n FROM growth_execution_contract WHERE status='stalled' GROUP BY executor,action,subject_type ORDER BY n DESC LIMIT 40;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
