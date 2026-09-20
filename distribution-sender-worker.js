@@ -99,7 +99,23 @@ async function publicCandidates(env,limit=3){
   await ensureNetworkSchema(env);
   const n=Math.max(1,Math.min(3,Number(limit)||3));
   const [vendorResult,networkResult]=await Promise.all([
-    env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all(),
+    env.DB.prepare(`SELECT v.tool_slug,v.asset_url,v.priority_score,v.vendor_domain,v.contact_email,v.contact_source_url,v.suggested_subject,v.suggested_body,v.public_dispatch_token
+      FROM distribution_vendor_amplification v
+      WHERE v.status='contact_found'
+        AND v.contact_method='public_role_email'
+        AND v.contact_email IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1
+          FROM distribution_vendor_amplification prior
+          WHERE prior.status='sent'
+            AND prior.outreach_sent_at>=datetime('now','-30 days')
+            AND (
+              prior.tool_slug=v.tool_slug
+              OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,''))
+            )
+        )
+      ORDER BY v.priority_score DESC
+      LIMIT ?`).bind(n).all(),
     env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_network_outreach WHERE status='contact_found' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(n).all()
   ]);
   const vendorRows=(vendorResult.results||[]).map(row=>({kind:'vendor',row,priority:Number(row.priority_score||0)}));
