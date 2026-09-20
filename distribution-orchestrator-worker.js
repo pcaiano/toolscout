@@ -742,6 +742,42 @@ async function runGrowthExecutionContractCycle(env){
   const snapshot=await executionContractSnapshot(env);
   return{ok:true,integrityVersion:'task-specific-v2',synced,before,results,after,architectureEscalation,snapshot};
 }
+async function publicAudienceBrief(env){
+  const [audience,growth,targets]=await Promise.all([
+    growthSupervisorDirective(env,'audience'),
+    growthSupervisorDirective(env,'growth_brain'),
+    growthRows(env,`SELECT opportunity_key,subject_key,priority_score,signal_json FROM growth_opportunity_state WHERE status='active' AND subject_type='search' AND subject_key NOT IN ('/','/tools') ORDER BY priority_score DESC LIMIT 3`)
+  ]);
+  return{
+    brain:'shared-growth-v3',
+    northStar:HUMAN_ACQUISITION_SPRINT.northStar,
+    generatedAt:new Date().toISOString(),
+    growth:{status:growth?.status||null,directive:growth?.directive||null},
+    audience:{
+      status:audience?.status||null,
+      directive:audience?.directive||null,
+      relevance_only:audience?.config?.relevance_only!==false,
+      link_only_when_directly_helpful:audience?.config?.link_only_when_directly_helpful!==false
+    },
+    topSearchTargets:targets.map(row=>{
+      let signals={};try{signals=JSON.parse(row.signal_json||'{}')}catch{}
+      const base=signals.asset_url||('https://trytoolscout.org'+row.subject_key);
+      let audienceUrl=base;
+      try{
+        const u=new URL(base);
+        u.searchParams.set('utm_source','bluesky');
+        u.searchParams.set('utm_medium','audience_engagement');
+        u.searchParams.set('utm_campaign','growth_supervisor');
+        u.searchParams.set('ts_action',`audience:${row.opportunity_key}`);
+        u.searchParams.set('ts_growth',row.opportunity_key);
+        u.searchParams.set('ts_channel','bluesky');
+        audienceUrl=u.toString();
+      }catch{}
+      return{title:signals.title||row.subject_key,path:row.subject_key,audienceUrl,priority:Number(row.priority_score||0),impressions:Number(signals.impressions||0),position:Number(signals.position||0)};
+    })
+  };
+}
+
 async function publicSearchDirectives(env){
   await ensureGrowthSchema(env);
   const [q,seoSupervisor,growthSupervisor]=await Promise.all([
@@ -886,6 +922,7 @@ async function normalizeEditorialQueue(env){
 async function fanout(env,url){await normalizeEditorialQueue(env);const type=classify(url);await env.DB.prepare(`INSERT INTO distribution_asset_state(asset_url,asset_type,first_seen_at,last_seen_at,distributed_at) VALUES(?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(asset_url) DO UPDATE SET asset_type=excluded.asset_type,last_seen_at=datetime('now'),distributed_at=COALESCE(distribution_asset_state.distributed_at,datetime('now'))`).bind(url,type).run();const editorial=await prepareEditorial(env,url,type);await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`asset_${crypto.randomUUID()}`,'asset_distribution_triggered','completed',type,url,url,`Event-driven fanout prepared: syndication feed exposure, Submission Engine eligibility and Vendor Amplification eligibility. Community posting is intentionally not queued as autonomous without a safe authenticated executor.`).run();return {ok:true,asset_url:url,asset_type:type,editorialPrepared:editorial};}
 async function scanNew(request,env){let r=null;const sitemapRequest=new Request(new URL('/sitemap.xml',request.url));try{r=await env.ASSETS.fetch(sitemapRequest.clone());}catch{}if(!r||!r.ok){try{r=await base.fetch(sitemapRequest.clone(),env,{waitUntil(){}});}catch{}}if(!r)return{ok:false,scanned:0,newAssets:0,reason:'sitemap_fetch_failed'};if(!r.ok)return{ok:false,scanned:0,newAssets:0,reason:`sitemap_http_${r.status}`};const xml=await r.text();const urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]).filter(u=>/^https:\/\/trytoolscout\.org\//.test(u)&&/(best-|\-vs-|alternatives|compare)/i.test(u));let added=0;for(const url of urls.slice(0,150)){const row=await env.DB.prepare('SELECT asset_url FROM distribution_asset_state WHERE asset_url=?').bind(url).first();if(row)continue;await fanout(env,url);added++;}return{ok:true,scanned:urls.length,newAssets:added};}
 export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/orchestrate'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}if(!b.asset_url||!/^https:\/\/trytoolscout\.org\//.test(String(b.asset_url)))return Response.json({error:'valid_toolscout_asset_url_required'},{status:400,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_fanout',triggerName:'manual_api'},()=>fanout(env,String(b.asset_url))),{headers:H});}if(u.pathname==='/api/distribution/orchestrate/scan'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:'manual_api'},()=>scanNew(request,env)),{headers:H});}if(u.pathname==='/api/distribution/economic-learning'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:'manual_api'},()=>learnEconomics(env)),{headers:H});}if(u.pathname==='/api/growth/search-directives'&&request.method==='GET'){return Response.json(await publicSearchDirectives(env),{headers:{...H,'Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'}});}if(u.pathname==='/api/growth/rnd/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:'manual_api'},()=>runGrowthRndAudit(env)),{headers:H});}if(u.pathname==='/api/growth/rnd'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT * FROM growth_rnd_experiments ORDER BY updated_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/growth/opportunities/refresh'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'manual_api'},()=>coordinateGrowthOpportunities(env)),{headers:H});}
+if(u.pathname==='/api/growth/audience-brief/public'&&request.method==='GET'){return Response.json(await publicAudienceBrief(env),{headers:{...H,'Cache-Control':'public, max-age=120','Access-Control-Allow-Origin':'*'}});}
 if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'manual_api'},()=>runGrowthSupervisorAudit(env)),{headers:H});}
 if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'manual_api'},()=>runGrowthExecutionContractCycle(env)),{headers:H});}
 if(u.pathname==='/api/growth/execution'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await executionContractSnapshot(env),{headers:H});}
