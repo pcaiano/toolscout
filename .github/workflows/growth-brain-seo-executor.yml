@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/growth-brain-seo-executor.yml'
   schedule:
-    - cron: '43 6 * * *'
+    - cron: '43 */6 * * *'
   workflow_dispatch:
 
 permissions:
