@@ -1,4 +1,4 @@
-name: One Shot Growth Execution Contract Deploy v4
+name: One Shot Growth Execution Contract Deploy v5
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Bootstrap contract state through live supervisor
         run: |
-          curl -fsS --retry 6 --retry-delay 3 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth.json
+          curl -fsS --max-time 30 --retry 3 --retry-delay 2 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth.json
           node - <<'NODE'
           const fs=require('fs');
           const x=JSON.parse(fs.readFileSync('/tmp/growth.json','utf8'));
