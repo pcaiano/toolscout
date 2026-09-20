@@ -18,6 +18,7 @@ const seoWorkflow=read('.github/workflows/seo-engine-v2.yml');
 const seoFetch=read('scripts/fetch-shared-growth-directives.mjs');
 const content=read('content-engine-intelligence-worker.js');
 const network=read('distribution-network-worker.js');
+const contact=read('distribution-contact-worker.js');
 const impact=read('distribution-impact-worker.js');
 const visitorAccuracy=read('visitor-accuracy-worker.js');
 const trafficIntegrity=read('traffic-integrity-worker.js');
@@ -57,6 +58,10 @@ if(!command.includes('growth_actions_no_human_impact')||!command.includes('effec
 for(const [name,source] of [['visitor accuracy',visitorAccuracy],['confirmed visitor',trafficIntegrity],['late visitor retry',trafficLive],['browser guard',trafficGuard]])if(!source.includes("'ts_action','ts_growth','ts_channel'")||!source.includes("join('&'),300"))fail(name+' tracker drops Growth attribution markers.');
 if(!funnelModel.includes("{0,299}"))fail('Funnel source validator is too short for Growth attribution markers.');
 if(!network.includes("row.opportunity_slug||"))fail('Alternate route backfill can diverge from runtime opportunity IDs.');
+if(!network.includes('verified_human_impact')||!network.includes('verified_placement')||network.includes("next='verified_impact'"))fail('Route placement and strict-human impact are not separated.');
+if(!command.includes('External executions · 7d')||!command.includes('internal_cycles_7d')||!command.includes("surface_slug<>'indexnow'"))fail('Command Center still counts internal Growth activity as autonomous execution.');
+if(!contact.includes('fallback_exhausted')||!contact.includes('COMMON_CONTACT_PATHS'))fail('Vendor contact dead ends are not bounded and closed.');
+if(!orchestrator.includes('vendor_execution_available')||!orchestrator.includes("if(!actions.length)continue;"))fail('Non-executable vendor dead ends can still become active Growth opportunities.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
 if(!process.exitCode)console.log('PASS: shared autonomous growth brain contract is intact.');
