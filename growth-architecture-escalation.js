@@ -131,7 +131,7 @@ export async function auditArchitectureEscalations(env){
       evidence:{engine:row.engine,mission:row.mission,detail:row.detail,evidence_json:row.evidence_json,count:n(row.n),last_failed:row.last_failed},
       selfCorrections:['The runtime waited for a later successful run to close the failure automatically.','The failure remained unresolved, so it is being escalated instead of treated as healthy.'],
       whyCodeRequired:'A core mission that cannot recover on a subsequent run may require changes to worker code, workflow configuration, schema, or engine integration.',
-      recommendedIntervention:'Read the latest failed run and repository code for this mission, identify the root cause, prepare a bounded code or architecture correction, and require Pedro approval before deployment.'
+      recommendedIntervention:'Read the latest failed run and repository code for this mission, identify the root cause and propose a bounded code or architecture correction. Do not modify code, workflow, schema or architecture until Pedro explicitly approves the correction.'
     });opened++;
   }
 
@@ -164,7 +164,7 @@ function buildOpenEmail(row){
   <h3>Why code or architecture is required</h3><p>${html(row.why_code_required)}</p>
   <h3>Recommended intervention</h3><p>${html(row.recommended_intervention)}</p>
   <hr>
-  <p><strong>Next step for Pedro:</strong> open ChatGPT and say: <em>“Lê o último alerta de arquitetura do Growth Brain, investiga o incidente ${html(row.incident_id)} e prepara a correção. Não faças deploy de alterações de código ou arquitetura sem a minha aprovação.”</em></p>`;
+  <p><strong>Next step for Pedro:</strong> open ChatGPT and say: <em>“Lê o último alerta de arquitetura do Growth Brain e investiga o incidente ${html(row.incident_id)}. Propõe a correção e espera pela minha aprovação antes de alterar código, workflows, schema ou arquitetura.”</em></p>`;
   return{subject,body};
 }
 function buildResolvedEmail(row){
