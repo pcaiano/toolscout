@@ -313,20 +313,21 @@ export async function verifySupervisorExecutorTasks(env,executor,result='supervi
 
 export async function reconcileExecutionDeadlines(env){
   await ensureExecutionContractSchema(env);
+  const recovered=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='pending',last_result='queued_awaiting_executor_capacity',updated_at=datetime('now')
+    WHERE status='stalled' AND last_result='claim_sla_missed' AND attempts=0`).run();
   const w=await env.DB.prepare(`UPDATE growth_execution_contract
     SET status='stalled',
         last_result=CASE
-          WHEN status='pending' THEN 'claim_sla_missed'
           WHEN status='claimed' THEN 'attempt_sla_missed'
           ELSE 'verification_sla_missed' END,
         updated_at=datetime('now')
-    WHERE status IN ('pending','claimed','attempted')
+    WHERE status IN ('claimed','attempted')
       AND (
-        (status='pending' AND claim_deadline IS NOT NULL AND claim_deadline<datetime('now'))
-        OR (status='claimed' AND attempt_deadline IS NOT NULL AND attempt_deadline<datetime('now'))
+        (status='claimed' AND attempt_deadline IS NOT NULL AND attempt_deadline<datetime('now'))
         OR (status='attempted' AND verify_deadline IS NOT NULL AND verify_deadline<datetime('now'))
       )`).run();
-  return{stalled:Number(w?.meta?.changes||w?.changes||0)};
+  return{stalled:Number(w?.meta?.changes||w?.changes||0),recoveredQueueBacklog:Number(recovered?.meta?.changes||recovered?.changes||0)};
 }
 
 export async function reconcileExecutionContracts(env){
