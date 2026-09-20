@@ -307,6 +307,12 @@ async function buildBrief(env,family,{issue=false}={}){
   return {issued:Boolean(issue),brief_id:briefId,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
+export async function issueGrowthContentBrief(env){
+  const day=new Date().getUTCDay();
+  const family=day===1?'monday_discovery':day===3?'wednesday_comparison':'friday_practical';
+  return buildBrief(env,family,{issue:true});
+}
+
 async function metrics(env){
   await ensureSchema(env);
   const [profiles,policies,briefs,socialRedirects]=await Promise.all([
