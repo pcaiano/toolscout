@@ -18,6 +18,7 @@ const seoWorkflow=read('.github/workflows/seo-engine-v2.yml');
 const seoFetch=read('scripts/fetch-shared-growth-directives.mjs');
 const content=read('content-engine-intelligence-worker.js');
 const network=read('distribution-network-worker.js');
+const impact=read('distribution-impact-worker.js');
 const rndPolicy=read('data/growth-rnd-policy.json');
 
 if(!funnel.includes("import base from './catalog-autonomy-worker.js'"))fail('Catalog Autonomy is not in the live Worker chain.');
