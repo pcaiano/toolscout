@@ -181,7 +181,7 @@ export async function syncExecutionContracts(env){
   const claimCase=Object.entries(EXECUTORS).filter(([,s])=>s.claim!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.claim)} minutes')`).join(' ');
   const attemptCase=Object.entries(EXECUTORS).filter(([,s])=>s.attempt!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.attempt)} minutes')`).join(' ');
   const verifyCase=Object.entries(EXECUTORS).filter(([,s])=>s.verify!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.verify)} minutes')`).join(' ');
-  const mapped=`CASE j.value ${executorCase} ELSE NULL END`;
+  const mapped=`CASE j.value ${executorCase} ELSE CASE WHEN g.subject_type='search' THEN 'seo_github' ELSE NULL END END`;
 
   await env.DB.prepare(`INSERT INTO growth_execution_contract(
       task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,execution_mode,priority_score,status,
