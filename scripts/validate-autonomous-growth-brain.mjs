@@ -45,6 +45,9 @@ if(!command.includes('Growth loop health')||!command.includes('orphan_alternate_
 if(!orchestrator.includes('recheck_affiliate_program_on_evidence_or_cadence')||!orchestrator.includes("if(!actions.length)actions.push('reconcile_affiliate_state')"))fail('Affiliate opportunities can still become active without a next action.');
 if(!orchestrator.includes('refresh_catalog_profile_for_observed_search_demand')||!orchestrator.includes("if(!actions.length)continue;"))fail('Non-actionable catalog rows can still be promoted to active Growth opportunities.');
 if(!command.includes('NOT EXISTS (')||!command.includes("c.started_at>f.started_at"))fail('Growth watchdog does not distinguish recovered failures from unresolved failures.');
+if(!content.includes("u.searchParams.set('ts_action',\`\${briefId}:\${channel}\`)"))fail('Content Engine action IDs do not match channel-specific growth_action_events.');
+if(!impact.includes('maturedBrowserConfirmedSessions')||!impact.includes('legacyChannelId'))fail('Growth effectiveness attribution watchdog or legacy attribution recovery is missing.');
+if(!command.includes('growth_actions_no_human_impact')||!command.includes('effectiveness_status'))fail('Growth effectiveness cannot surface silent underperformance.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
 if(!process.exitCode)console.log('PASS: shared autonomous growth brain contract is intact.');
