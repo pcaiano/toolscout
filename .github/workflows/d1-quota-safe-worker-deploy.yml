@@ -1,4 +1,4 @@
-name: One Shot External Proof Audit
+name: One Shot External Proof Audit v2
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,7 +20,7 @@ jobs:
           node-version: '22'
       - name: Audit external proof pipeline
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT placement_id,surface_slug,source_url,destination_url,placement_verified,backlink_verified,created_at,updated_at FROM distribution_placements WHERE placement_verified=1 ORDER BY updated_at DESC;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "PRAGMA table_info(distribution_placements); SELECT * FROM distribution_placements WHERE placement_verified=1 ORDER BY created_at DESC LIMIT 20;"
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) n FROM distribution_opportunities GROUP BY status ORDER BY n DESC;"
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT verification_state,COUNT(*) n FROM distribution_delivery_state GROUP BY verification_state ORDER BY n DESC;"
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT status,COUNT(*) n FROM distribution_network_outreach GROUP BY status ORDER BY n DESC;"
