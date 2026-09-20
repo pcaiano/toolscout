@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-18T09:43:00Z",
+  "updatedAt": "2026-09-20T09:13:06Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "zapier-next-gen-zaps-mcp",
+      "publishedAt": "2026-09-20",
+      "toolSlug": "zapier",
+      "toolName": "Zapier",
+      "label": "Official product update",
+      "title": "Zapier lets AI agents build and deploy Zaps through MCP",
+      "summary": "Next Gen Zaps lets supported MCP clients build and deploy Zapier automations from plain-language instructions, currently in early access.",
+      "sourceName": "Zapier Help Center",
+      "sourceUrl": "https://help.zapier.com/hc/en-us/articles/48391476448141-Get-started-with-Next-Gen-Zaps",
+      "articleUrl": "/news/zapier-next-gen-zaps-mcp.html",
+      "profileUrl": "/news/zapier-next-gen-zaps-mcp.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "github-actions-workflow-execution-protections-ga",
       "publishedAt": "2026-09-17",
