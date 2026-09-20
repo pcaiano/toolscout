@@ -65,7 +65,9 @@ const ACTION_EXECUTOR=Object.freeze({
   prepare_whats_new_candidate:'catalog_cycle',
   verify_first_party_sources:'catalog_cycle',
   verify_news_materiality:'catalog_cycle',
-  search_update_angle:'content_issue'
+  search_update_angle:'content_issue',
+  verify_official_source:'catalog_cycle',
+  research_first_party_candidate_profile:'catalog_cycle'
 });
 const SUPERVISOR_EXECUTOR=Object.freeze({
   distribution:'distribution_network',
@@ -146,6 +148,7 @@ async function upsertTask(env,{sourceKind,sourceId,opportunityKey=null,subjectTy
       status=CASE
         WHEN growth_execution_contract.status IN ('verified','human_required','blocked') THEN growth_execution_contract.status
         WHEN excluded.status='executor_missing' THEN 'executor_missing'
+        WHEN growth_execution_contract.status='executor_missing' AND excluded.status<>'executor_missing' THEN excluded.status
         WHEN growth_execution_contract.status='cancelled' THEN 'pending'
         ELSE growth_execution_contract.status END,
       claim_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.claim_deadline ELSE growth_execution_contract.claim_deadline END,
@@ -205,6 +208,7 @@ export async function syncExecutionContracts(env){
       status=CASE
         WHEN growth_execution_contract.status IN ('verified','human_required','blocked') THEN growth_execution_contract.status
         WHEN excluded.status='executor_missing' THEN 'executor_missing'
+        WHEN growth_execution_contract.status='executor_missing' AND excluded.status<>'executor_missing' THEN excluded.status
         WHEN growth_execution_contract.status='cancelled' THEN 'pending'
         ELSE growth_execution_contract.status END,
       claim_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.claim_deadline ELSE growth_execution_contract.claim_deadline END,
@@ -230,6 +234,17 @@ export async function syncExecutionContracts(env){
         WHERE g.status='active'
           AND g.opportunity_key=growth_execution_contract.source_id
           AND j.value=growth_execution_contract.action
+      )`).run();
+
+  await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='cancelled',last_result='superseded_by_set_based_contract',completed_at=datetime('now'),updated_at=datetime('now')
+    WHERE source_kind='opportunity'
+      AND status<>'cancelled'
+      AND task_id NOT LIKE 'opportunity|%'
+      AND EXISTS(
+        SELECT 1 FROM growth_execution_contract current
+        WHERE current.task_id=substr('opportunity|'||growth_execution_contract.source_id||'|'||growth_execution_contract.action,1,500)
+          AND current.status<>'cancelled'
       )`).run();
 
   const supervisors=await all(env,`SELECT engine,status,directive FROM growth_supervisor_state WHERE engine IN ('distribution','content','audience','seo_geo_aio','affiliate','catalog')`);
