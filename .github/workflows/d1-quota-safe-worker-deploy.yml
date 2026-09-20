@@ -1,4 +1,4 @@
-name: One Shot Growth Execution Contract Deploy
+name: One Shot Growth Execution Contract Deploy v2
 
 on:
   push:
