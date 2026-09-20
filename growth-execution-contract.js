@@ -229,7 +229,7 @@ export async function syncExecutionContracts(env){
         WHEN growth_execution_contract.status IN ('verified','human_required','blocked') THEN growth_execution_contract.status
         WHEN excluded.status='executor_missing' THEN 'executor_missing'
         WHEN growth_execution_contract.status='executor_missing' AND excluded.status<>'executor_missing' THEN excluded.status
-        WHEN growth_execution_contract.status='cancelled' THEN 'pending'
+        WHEN growth_execution_contract.status='cancelled' THEN excluded.status
         ELSE growth_execution_contract.status END,
       claim_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.claim_deadline ELSE growth_execution_contract.claim_deadline END,
       attempt_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.attempt_deadline ELSE growth_execution_contract.attempt_deadline END,
