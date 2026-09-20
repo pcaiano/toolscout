@@ -2,6 +2,11 @@ const NORTH_STAR='strict_verified_human_sessions';
 const PRIMARY=new Set(['distribution','content','audience','seo_geo_aio']);
 const HOUR=3600000;
 const BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR=10;
+const CRITICAL_STRICT_HUMANS_24H_MAX=2;
+const BASELINE_EXTERNAL_EXECUTIONS_MIN_24H=10;
+const BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H=15;
+const BASELINE_EXTERNAL_EXECUTIONS_MAX_24H=20;
+const BUSINESS_FUNNEL=['strict_verified_human_sessions','verified_outbound_clicks','monetized_verified_outbound_clicks'];
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const safe=(v,m=2000)=>String(v??'').slice(0,m);
 const ageHours=v=>{const t=Date.parse(String(v||''));return Number.isFinite(t)?Math.max(0,(Date.now()-t)/HOUR):Infinity};
@@ -56,38 +61,37 @@ function backlinkPolicy(c){
     backlink_priority_basis:'relevance + editorial legitimacy + observed search demand + potential human referrals'
   };
 }
-function withBacklinks(config,c){return{...config,...backlinkPolicy(c)}}
+function acquisitionBaseline(config={}){return{operating_mode:'always_on_acquisition',always_on_acquisition:true,strict_human_truth_only:true,probable_human_metric:false,critical_strict_humans_24h_max:CRITICAL_STRICT_HUMANS_24H_MAX,external_execution_min_24h:BASELINE_EXTERNAL_EXECUTIONS_MIN_24H,external_execution_target_24h:BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H,external_execution_max_24h:BASELINE_EXTERNAL_EXECUTIONS_MAX_24H,optimize_funnel:BUSINESS_FUNNEL,...config}}
+function withBacklinks(config,c){return{...acquisitionBaseline(config),...backlinkPolicy(c)}}
 function policy(engine,c){
   const h24=n(c.h24),h7=n(c.h7),e24=n(c.e24),e7=n(c.e7),age=c.lastExecutionAgeHours;
   if(engine==='distribution'){
-    if(h24>0)return{status:'working',directive:'scale_proven_human_sources',config:withBacklinks({mode:'scale_proven_human_sources',priority_boost:10,exploration_slots:3},c)};
-    if(e24>0&&age<24)return{status:'measuring',directive:'measure_current_external_actions',config:withBacklinks({mode:'measure_current_external_actions',priority_boost:8,exploration_slots:3,maturity_hours:24},c)};
-    if(e7>=3&&h7===0)return{status:'underperforming',directive:'rotate_and_expand_borrowed_audiences',config:withBacklinks({mode:'rotate_and_expand_borrowed_audiences',priority_boost:20,exploration_slots:5,no_impact_maturity_hours:48},c)};
-    if(e24===0&&c.activeOpportunities>0)return{status:'execution_gap',directive:'force_external_execution',config:withBacklinks({mode:'force_external_execution',priority_boost:25,exploration_slots:5},c)};
-    return{status:'waiting_for_executable_opportunities',directive:'discover_executable_routes',config:withBacklinks({mode:'discover_executable_routes',priority_boost:15,exploration_slots:4},c)};
+    if(h24>0)return{status:'working',directive:'scale_proven_sources_and_keep_exploring',config:withBacklinks({mode:'scale_proven_sources_and_keep_exploring',execute_now:true,priority_boost:30,exploration_slots:6,reallocate_by_verified_humans:true,reallocate_by_outbounds:true},c)};
+    if(e24>=BASELINE_EXTERNAL_EXECUTIONS_MIN_24H)return{status:'underperforming',directive:'rotate_expand_and_execute_now',config:withBacklinks({mode:'rotate_expand_and_execute_now',execute_now:true,priority_boost:40,exploration_slots:10,no_wait_for_maturity:true,reallocate_by_verified_humans:true,reallocate_by_outbounds:true},c)};
+    if(c.activeOpportunities>0)return{status:'active',directive:'execute_highest_probability_external_actions',config:withBacklinks({mode:'execute_highest_probability_external_actions',execute_now:true,priority_boost:35,exploration_slots:8,no_wait_for_maturity:true},c)};
+    return{status:'discovery_required',directive:'discover_and_execute_new_routes',config:withBacklinks({mode:'discover_and_execute_new_routes',execute_now:true,priority_boost:25,exploration_slots:8},c)};
   }
   if(engine==='content'){
-    if(h7>0)return{status:'working',directive:'scale_human_generating_topics',config:{mode:'scale_human_generating_topics',search_demand_first:true}};
-    if(age>96)return{status:'execution_gap',directive:'restore_content_execution',config:{mode:'restore_content_execution',search_demand_first:true,require_tracked_target:true}};
-    if(e7>0)return{status:'underperforming',directive:'search_demand_first',config:{mode:'search_demand_first',search_demand_first:true,generic_content:false,require_tracked_target:true}};
-    return{status:'execution_gap',directive:'publish_from_observed_demand',config:{mode:'publish_from_observed_demand',search_demand_first:true,require_tracked_target:true}};
+    if(h7>0)return{status:'working',directive:'scale_human_generating_topics_and_distribute',config:acquisitionBaseline({mode:'scale_human_generating_topics_and_distribute',search_demand_first:true,require_tracked_target:true,quality_floor:true})};
+    if(age>48)return{status:'execution_gap',directive:'restore_and_publish_from_observed_demand',config:acquisitionBaseline({mode:'restore_and_publish_from_observed_demand',search_demand_first:true,require_tracked_target:true,generic_content:false,quality_floor:true})};
+    return{status:'active',directive:'publish_from_observed_demand_and_distribute',config:acquisitionBaseline({mode:'publish_from_observed_demand_and_distribute',search_demand_first:true,generic_content:false,require_tracked_target:true,quality_floor:true})};
   }
   if(engine==='audience'){
-    if(h7>0)return{status:'working',directive:'scale_relevant_conversations',config:{mode:'scale_relevant_conversations',relevance_only:true}};
-    if(e7>=10)return{status:'underperforming',directive:'qualified_conversations_only',config:{mode:'qualified_conversations_only',relevance_only:true,link_only_when_directly_helpful:true,avoid_activity_for_activity_sake:true}};
-    if(age>72)return{status:'execution_gap',directive:'restore_audience_execution',config:{mode:'restore_audience_execution',relevance_only:true}};
-    return{status:'measuring',directive:'measure_audience_quality',config:{mode:'measure_audience_quality',relevance_only:true}};
+    if(h7>0)return{status:'working',directive:'scale_relevant_conversations_and_keep_exploring',config:acquisitionBaseline({mode:'scale_relevant_conversations_and_keep_exploring',relevance_only:true,link_only_when_directly_helpful:true})};
+    if(e7>=10)return{status:'underperforming',directive:'rotate_conversation_targets_and_execute',config:acquisitionBaseline({mode:'rotate_conversation_targets_and_execute',relevance_only:true,link_only_when_directly_helpful:true,avoid_activity_for_activity_sake:true,no_wait_for_maturity:true})};
+    if(age>24)return{status:'execution_gap',directive:'restore_audience_execution_now',config:acquisitionBaseline({mode:'restore_audience_execution_now',relevance_only:true,link_only_when_directly_helpful:true})};
+    return{status:'active',directive:'execute_qualified_conversations',config:acquisitionBaseline({mode:'execute_qualified_conversations',relevance_only:true,link_only_when_directly_helpful:true,avoid_activity_for_activity_sake:true})};
   }
   if(engine==='seo_geo_aio'){
-    if(c.gscAgeHours>36)return{status:'evidence_stale',directive:'refresh_search_evidence',config:withBacklinks({mode:'refresh_search_evidence',run_executor:true,priority_boost:25},c)};
-    if(c.organicActionsAgeHours>72)return{status:'executor_stale',directive:'run_targeted_seo_executor',config:withBacklinks({mode:'run_targeted_seo_executor',run_executor:true,priority_boost:25,observed_demand_only:true},c)};
-    if(h7>0)return{status:'working',directive:'scale_queries_generating_humans',config:withBacklinks({mode:'scale_queries_generating_humans',priority_boost:10,observed_demand_only:true},c)};
-    if(c.gscImpressions>0&&n(c.verifiedReferringDomains)<BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR)return{status:'underperforming',directive:'deepen_search_demand_and_build_relevant_authority',config:withBacklinks({mode:'deepen_search_demand_and_build_relevant_authority',run_executor:true,priority_boost:25,observed_demand_only:true},c)};
-    if(c.gscImpressions>0)return{status:'underperforming',directive:'deepen_observed_search_demand',config:withBacklinks({mode:'deepen_observed_search_demand',run_executor:true,priority_boost:20,observed_demand_only:true},c)};
-    return{status:'insufficient_search_evidence',directive:'measure_search_visibility',config:withBacklinks({mode:'measure_search_visibility',run_executor:true},c)};
+    if(c.gscAgeHours>36)return{status:'evidence_stale',directive:'refresh_search_evidence_and_execute',config:withBacklinks({mode:'refresh_search_evidence_and_execute',run_executor:true,priority_boost:30,no_wait_for_maturity:true},c)};
+    if(c.organicActionsAgeHours>48)return{status:'executor_stale',directive:'run_targeted_seo_executor_now',config:withBacklinks({mode:'run_targeted_seo_executor_now',run_executor:true,priority_boost:30,observed_demand_only:true},c)};
+    if(h7>0)return{status:'working',directive:'scale_queries_generating_humans_and_authority',config:withBacklinks({mode:'scale_queries_generating_humans_and_authority',run_executor:true,priority_boost:20,observed_demand_only:true},c)};
+    if(c.gscImpressions>0&&n(c.verifiedReferringDomains)<BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR)return{status:'underperforming',directive:'execute_search_demand_and_authority_growth',config:withBacklinks({mode:'execute_search_demand_and_authority_growth',run_executor:true,priority_boost:30,observed_demand_only:true,no_wait_for_maturity:true},c)};
+    if(c.gscImpressions>0)return{status:'active',directive:'execute_observed_search_demand',config:withBacklinks({mode:'execute_observed_search_demand',run_executor:true,priority_boost:25,observed_demand_only:true},c)};
+    return{status:'active',directive:'build_search_visibility_and_execute',config:withBacklinks({mode:'build_search_visibility_and_execute',run_executor:true,priority_boost:20},c)};
   }
-  if(engine==='affiliate')return{status:'supporting',directive:'maintenance_only_while_human_acquisition_is_primary',config:{mode:'maintenance_only',priority_cap:35,north_star_secondary:true}};
-  if(engine==='catalog')return{status:'supporting',directive:'demand_led_quality_only',config:{mode:'demand_led_quality',priority_cap:50,admit_when_search_or_quality_evidence:true,north_star_secondary:true}};
+  if(engine==='affiliate')return{status:'supporting',directive:'maintain_monetization_readiness',config:{mode:'maintain_monetization_readiness',priority_cap:35,north_star_secondary:true,business_funnel:BUSINESS_FUNNEL}};
+  if(engine==='catalog')return{status:'supporting',directive:'demand_led_quality_only',config:{mode:'demand_led_quality',priority_cap:50,admit_when_search_or_quality_evidence:true,north_star_secondary:true,business_funnel:BUSINESS_FUNNEL}};
   return{status:'observed',directive:'observe',config:{mode:'observe'}};
 }
 
@@ -154,7 +158,7 @@ async function saveEngine(env,engine,role,global,ctx,p){
 
 export async function runGrowthSupervisorAudit(env){
   await ensureSchema(env);
-  const [humansRows,exec,gsc,organic,active,executionContract,architectureIncidents,backlinkPlacements]=await Promise.all([
+  const [humansRows,exec,gsc,organic,active,executionContract,architectureIncidents,backlinkPlacements,outboundMetrics]=await Promise.all([
     strictRows(env),executionRows(env),
     assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
     assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
@@ -171,7 +175,13 @@ export async function runGrowthSupervisorAudit(env){
     all(env,`SELECT surface_slug,public_url,link_rel,first_verified_at
       FROM distribution_placements
       WHERE placement_verified=1 AND backlink_verified=1
-        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`)
+        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`),
+    first(env,`SELECT
+      SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) verified_outbound_24h,
+      SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) verified_outbound_7d,
+      SUM(CASE WHEN created_at>=datetime('now','-24 hours') AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized_outbound_24h,
+      SUM(CASE WHEN created_at>=datetime('now','-7 days') AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized_outbound_7d
+      FROM verified_outbound_events`)
   ]);
   const referringDomains=new Set();
   for(const row of backlinkPlacements||[]){
@@ -216,19 +226,18 @@ export async function runGrowthSupervisorAudit(env){
   const exec7=engines.filter(x=>PRIMARY.has(x.engine)).reduce((s,x)=>s+x.externalExecutions7d,0);
   const attributed7=n(humans.distribution.h7)+n(humans.content.h7)+n(humans.audience.h7)+n(humans.seo_geo_aio.h7);
   const missingExecutors=n(executionContract?.missing_executors),stalledContracts=n(executionContract?.stalled),openArchitectureIncidents=n(architectureIncidents?.n);
-  let status='working',directive='keep_learning_from_verified_humans';
-  if(openArchitectureIncidents>0){status='failing';directive='await_code_approval'}
-  else if(missingExecutors>0||stalledContracts>0){status='failing';directive='repair_execution_contract'}
-  else if(strict7===0&&exec7>0){status='failing';directive='correct_all_acquisition_engines'}
-  else if(strict24===0&&exec24===0){status='execution_gap';directive='force_primary_engine_execution'}
-  else if(strict24===0){status='underperforming';directive='rotate_after_maturity_and_expand_existing_demand'}
-  else if(strict7>0&&attributed7===0){status='working_unattributed';directive='improve_acquisition_attribution_while_continuing_growth'}
+  let status='working',directive='accelerate_and_scale_verified_human_acquisition';
+  if(openArchitectureIncidents>0){status='critical';directive='repair_architecture_and_continue_acquisition'}
+  else if(missingExecutors>0||stalledContracts>0){status='critical';directive='repair_execution_contract_and_continue_acquisition'}
+  else if(strict24<=CRITICAL_STRICT_HUMANS_24H_MAX){status='critical';directive='critical_acquisition_incident_execute_measure_reallocate'}
+  else if(exec24<BASELINE_EXTERNAL_EXECUTIONS_MIN_24H){status='underpowered';directive='increase_external_execution_to_baseline'}
+  else if(strict7>0&&attributed7===0){status='working_unattributed';directive='improve_attribution_while_accelerating_acquisition'}
 
   const attributed24=n(humans.distribution.h24)+n(humans.content.h24)+n(humans.audience.h24)+n(humans.seo_geo_aio.h24);
   const gctx={h24:attributed24,h7:attributed7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
-  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,backlink_acquisition:{required:backlinkAcquisitionRequired,quality_only:true,verified_backlinks:verifiedBacklinks,verified_referring_domains:verifiedReferringDomains,bootstrap_referring_domain_floor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,paid_links_allowed:false,reciprocal_links_required:false},execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architecture_escalation:{open_incidents:openArchitectureIncidents,approval_required:openArchitectureIncidents>0}}};
+  const gp={status,directive,config:{...acquisitionBaseline({mode:directive}),strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),verified_outbound_24h:n(outboundMetrics?.verified_outbound_24h),verified_outbound_7d:n(outboundMetrics?.verified_outbound_7d),monetized_outbound_24h:n(outboundMetrics?.monetized_outbound_24h),monetized_outbound_7d:n(outboundMetrics?.monetized_outbound_7d),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,backlink_acquisition:{required:backlinkAcquisitionRequired,quality_only:true,verified_backlinks:verifiedBacklinks,verified_referring_domains:verifiedReferringDomains,bootstrap_referring_domain_floor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,paid_links_allowed:false,reciprocal_links_required:false},execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architecture_escalation:{open_incidents:openArchitectureIncidents,approval_required:openArchitectureIncidents>0}}};
   const growth=await saveEngine(env,'growth_brain','supervisor',global,gctx,gp);
-  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,backlinkAcquisition:{required:backlinkAcquisitionRequired,verifiedBacklinks,verifiedReferringDomains,bootstrapReferringDomainFloor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,qualityOnly:true},executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
+  return{ok:true,northStar:NORTH_STAR,businessFunnel:BUSINESS_FUNNEL,operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:CRITICAL_STRICT_HUMANS_24H_MAX,externalExecutionBaseline24h:{min:BASELINE_EXTERNAL_EXECUTIONS_MIN_24H,target:BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H,max:BASELINE_EXTERNAL_EXECUTIONS_MAX_24H},status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),verifiedOutbound24h:n(outboundMetrics?.verified_outbound_24h),verifiedOutbound7d:n(outboundMetrics?.verified_outbound_7d),monetizedOutbound24h:n(outboundMetrics?.monetized_outbound_24h),monetizedOutbound7d:n(outboundMetrics?.monetized_outbound_7d),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,backlinkAcquisition:{required:backlinkAcquisitionRequired,verifiedBacklinks,verifiedReferringDomains,bootstrapReferringDomainFloor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,qualityOnly:true},executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
 }
 
 export async function growthSupervisorSnapshot(env){
