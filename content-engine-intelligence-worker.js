@@ -100,6 +100,12 @@ async function ensureSchema(env){
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_action_events_created ON growth_action_events(created_at DESC)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_action_events_opportunity ON growth_action_events(opportunity_key,status)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_contact_route_actions(
+      route_id TEXT PRIMARY KEY,surface_slug TEXT NOT NULL,route_type TEXT NOT NULL,route_url TEXT NOT NULL,execution_mode TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'queued',opportunity_slug TEXT,attempts INTEGER NOT NULL DEFAULT 0,last_attempt_at TEXT,last_result TEXT,next_action TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_route_actions_content ON distribution_contact_route_actions(execution_mode,status,updated_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_content_briefs_created ON content_engine_briefs(created_at DESC)`)
   ]).catch(error=>{schemaReady=null;throw error});
   return schemaReady;
@@ -224,6 +230,12 @@ async function buildBrief(env,family,{issue=false}={}){
       AND (a.redirect_allowed=1 OR w.affiliate_url IS NOT NULL)
       AND w.status IN ('verified','active','earning','link_acquired')
     ORDER BY COALESCE(p.tool_name,a.tool_slug)`).all();
+  const routeCandidates=await env.DB.prepare(`SELECT a.route_id,a.surface_slug,a.route_type,a.route_url,a.attempts,n.surface_name,n.priority_score
+    FROM distribution_contact_route_actions a
+    JOIN distribution_network_outreach n ON n.surface_slug=a.surface_slug
+    WHERE a.execution_mode='content_amplification' AND a.status IN ('queued','retry_due')
+      AND a.attempts<2
+    ORDER BY n.priority_score DESC,a.updated_at ASC LIMIT 12`).all().catch(()=>({results:[]}));
   const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=commercial.results||[],briefId=`brief_${crypto.randomUUID()}`;
   const profileBySlug=new Map(all.map(x=>[x.tool_slug,x]));
   const growthTools=[],growthRank=new Map();for(const x of growth.results||[]){if(!x.subject_key||growthRank.has(x.subject_key))continue;const row={...x,rank:growthTools.length};growthTools.push(row);growthRank.set(x.subject_key,{rank:row.rank,score:Number(x.priority_score||0),key:x.opportunity_key,type:x.subject_type});}
@@ -251,6 +263,7 @@ async function buildBrief(env,family,{issue=false}={}){
   else if(comparison)mentionRows=comparison.map(slug=>profileBySlug.get(slug)).filter(Boolean);
   else if(all.length){const start=pickIndex(family+date,all.length);mentionRows=[topGrowthProfile,all[start],all[(start+1)%all.length]].filter((x,i,a)=>x&&a.findIndex(y=>y.tool_slug===x.tool_slug)===i).slice(0,2);}
   const mentions=mentionRows.map(x=>({tool_slug:x.tool_slug,name:x.tool_name,x_handle:x.x_handle?('@'+x.x_handle):null,bluesky_handle:x.bluesky_handle?('@'+x.bluesky_handle):null,linkedin_url:x.linkedin_url||null,verified_from_official_site:true}));
+  const routeCandidate=(routeCandidates.results||[])[0]||null;
   const mode=selected?'affiliate_social_verified':'editorial';
   const targetMode=selected?(Number(selected.redirect_allowed)===1?'toolscout_redirect':'direct_vendor'):'editorial';
   let t=selected?(targetMode==='toolscout_redirect'?targets(selected.tool_slug):{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}):(sprintTarget?editorialTargets(family,sprintTarget.subject_key,'human_acquisition_sprint'):editorialTargets(family));
@@ -270,8 +283,9 @@ async function buildBrief(env,family,{issue=false}={}){
     sprintTarget?`Human Acquisition Sprint focus: ${sprintTarget.signals?.title||sprintTarget.subject_key}. GSC observed ${Number(sprintTarget.signals?.impressions||0)} impressions at average position ${Number(sprintTarget.signals?.position||0).toFixed(1)} through 2026-09-16. Build the post around the practical user problem behind this page and send readers to the exact ToolScout target below. Optimize for a qualified human visit, not vanity reach.`:null,
     comparisonContext?`Comparison selected for this run: ${comparisonContext.tool_a} vs ${comparisonContext.tool_b}. Use this exact comparison pair and the exact platform URL supplied below. Present practical tradeoffs, never a universal winner.`:null,
     selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Official programme material explicitly permits organic-social affiliate/referral-link promotion. Target mode: ${targetMode}. ${targetMode==='direct_vendor'?'The programme restricts redirects/cloaking, so use the exact vendor affiliate URL supplied below without modification.':'The checked material allows the ToolScout redirect route.'} Include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
-    mentions.length?`Verified manufacturer/profile candidates discovered from links on their official websites: ${mentions.map(m=>`${m.name} | X ${m.x_handle||'none'} | Bluesky ${m.bluesky_handle||'none'} | LinkedIn company URL ${m.linkedin_url||'none'}`).join(' ; ')}. Mention only when genuinely relevant to the topic. Never invent or guess a handle.`:'No verified social handles are currently available. Do not invent mentions.',
-    'Mention guardrail: maximum 2 relevant manufacturers in an editorial post and maximum 1 in a commercial affiliate post. Never tag unrelated people or companies. No engagement bait.',
+    mentions.length?`Verified manufacturer/profile candidates discovered from links on their official websites: ${mentions.map(m=>`${m.name} | X ${m.x_handle||'none'} | Bluesky ${m.bluesky_handle||'none'} | LinkedIn company URL ${m.linkedin_url||'none'}`).join(' ; ')}. Mention only when genuinely relevant to the topic. Never invent or guess a handle.`:'No verified manufacturer social handles are currently available. Do not invent mentions.',
+    routeCandidate?`Borrowed-audience amplification candidate from the Distribution Network: ${routeCandidate.surface_name||routeCandidate.surface_slug} via ${routeCandidate.route_type} at ${routeCandidate.route_url}. This is an alternate route, not proof of placement. Use or mention this external profile only if it is directly relevant to the post topic and the interaction is useful rather than promotional noise. Do not invent a handle, do not send a direct message, and do not force a tag when relevance is weak.`:'No alternate social distribution route is queued for this brief.',
+    'Mention guardrail: maximum 2 relevant manufacturers plus at most 1 directly relevant borrowed-audience route in an editorial post. Never tag unrelated people or companies. No engagement bait.',
     selected?'Disclosure required. Use plain, conspicuous wording such as "Affiliate link: ToolScout may earn a commission if you buy through this link. This does not affect our recommendations." For X/Bluesky, "Affiliate link" is the minimum short disclosure when space is constrained.':'No affiliate disclosure is needed unless the post contains an affiliate target.',
     `LinkedIn target: ${t.linkedin}`,
     `X target: ${t.x}`,
@@ -280,9 +294,13 @@ async function buildBrief(env,family,{issue=false}={}){
   if(issue){
     await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||null,JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
     await env.DB.batch(Object.entries(t).map(([channel,target])=>env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'issued',datetime('now'),datetime('now'))`).bind(`${briefId}:${channel}`,growthKey,'content',channel,target))).catch(()=>{});
-    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentbrief_${crypto.randomUUID()}`,'growth_content_brief_issued','completed','content_engine',briefId,`Content brief issued to the publishing pipeline with autonomous growth priority ${growthKey||'none'} and verified mentions only.`).run().catch(()=>{});
+    if(routeCandidate){
+      await env.DB.prepare(`UPDATE distribution_contact_route_actions SET status='issued_to_content',attempts=attempts+1,last_attempt_at=datetime('now'),last_result='issued_to_content_engine',updated_at=datetime('now') WHERE route_id=? AND status IN ('queued','retry_due')`).bind(routeCandidate.route_id).run().catch(()=>{});
+      await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'issued',datetime('now'),datetime('now')) ON CONFLICT(action_id) DO UPDATE SET status='issued',target_url=excluded.target_url,updated_at=datetime('now')`).bind(`route-content:${routeCandidate.route_id}`,`surface:${routeCandidate.surface_slug}`,'content_route',routeCandidate.route_type,routeCandidate.route_url).run().catch(()=>{});
+    }
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentbrief_${crypto.randomUUID()}`,'growth_content_brief_issued','completed','content_engine',briefId,`Content brief issued to the publishing pipeline with autonomous growth priority ${growthKey||'none'}, verified manufacturer mentions only, and ${routeCandidate?'one borrowed-audience route candidate':'no borrowed-audience route candidate'}.`).run().catch(()=>{});
   }
-  return {issued:Boolean(issue),brief_id:briefId,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
+  return {issued:Boolean(issue),brief_id:briefId,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
 async function metrics(env){
