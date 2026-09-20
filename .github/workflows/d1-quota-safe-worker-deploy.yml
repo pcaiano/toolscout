@@ -33,9 +33,10 @@ jobs:
       - name: Validate Growth Brain contract
         run: node scripts/validate-autonomous-growth-brain.mjs
 
-      - name: Repair legacy active affiliate opportunities without actions
+      - name: Repair legacy active opportunities without actions
         run: |
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE growth_opportunity_state SET action_json=CASE WHEN COALESCE(json_extract(signal_json,'$.affiliate_status'),'') IN ('no_program_found','watchlist') THEN '[\"recheck_affiliate_program_on_evidence_or_cadence\"]' ELSE '[\"reconcile_affiliate_state\"]' END,updated_at=datetime('now') WHERE status='active' AND subject_type='affiliate' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]');"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "UPDATE growth_opportunity_state SET status='dormant',updated_at=datetime('now') WHERE status='active' AND subject_type='catalog_tool' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]');"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
@@ -62,5 +63,19 @@ jobs:
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT engine,mission,MAX(completed_at) last_completed FROM engine_runs WHERE status='completed' AND ((engine='growth' AND mission IN ('opportunity_coordination','rnd_audit')) OR (engine='distribution' AND mission IN ('network_cycle','autonomous_cycle','economic_learning')) OR (engine='content' AND mission='social_intelligence')) GROUP BY engine,mission ORDER BY engine,mission;"
           echo "=== ACTIVE OPPORTUNITY COUNTS ==="
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type ORDER BY n DESC;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Enforce no-silent-failure invariants
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM growth_opportunity_state WHERE status='active' AND (action_json IS NULL OR trim(action_json)='' OR trim(action_json)='[]')) empty_actions,
+            (SELECT COUNT(*) FROM distribution_contact_routes r LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id WHERE r.status IN ('discovered','in_loop') AND a.route_id IS NULL) orphan_routes,
+            (SELECT COUNT(*) FROM distribution_contact_route_actions WHERE (status IN ('queued','retry_due','researching','qualified_auto') AND updated_at<datetime('now','-24 hours')) OR (status='issued_to_content' AND COALESCE(last_attempt_at,updated_at)<datetime('now','-80 hours'))) stale_route_actions,
+            (SELECT COUNT(*) FROM growth_action_events WHERE status IN ('prepared','issued','leased') AND updated_at<datetime('now','-72 hours')) stale_growth_actions,
+            (SELECT COUNT(*) FROM engine_runs f WHERE f.started_at>=datetime('now','-24 hours') AND f.status='failed' AND ((f.engine='growth' AND f.mission IN ('opportunity_coordination','rnd_audit')) OR (f.engine='distribution' AND f.mission IN ('network_cycle','autonomous_cycle','economic_learning')) OR (f.engine='content' AND f.mission='social_intelligence')) AND NOT EXISTS (SELECT 1 FROM engine_runs s WHERE s.engine=f.engine AND s.mission=f.mission AND s.status='completed' AND s.started_at>f.started_at)) unresolved_core_failures,
+            CASE WHEN (SELECT MAX(completed_at) FROM engine_runs WHERE engine='growth' AND mission='opportunity_coordination' AND status='completed')<datetime('now','-4 hours') THEN 1 ELSE 0 END stale_coordination;" > /tmp/growth-invariants.json
+          cat /tmp/growth-invariants.json
+          jq -e '.[0].results[0] | .empty_actions==0 and .orphan_routes==0 and .stale_route_actions==0 and .stale_growth_actions==0 and .unresolved_core_failures==0 and .stale_coordination==0' /tmp/growth-invariants.json
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
