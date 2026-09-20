@@ -1,4 +1,4 @@
-name: One Shot Autonomous Surface Audit
+name: One Shot IndexNow Live Audit
 
 on:
   push:
@@ -12,16 +12,16 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Inspect due autonomous surfaces
+      - name: Inspect IndexNow live state
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,surface_name,surface_type,status,action_url,live_url,distribution_score,automation_potential,acceptance_probability,human_required,next_action,last_checked_at FROM distribution_opportunities WHERE status IN ('ready_to_submit','candidate','research_required','auth_required') ORDER BY CASE status WHEN 'ready_to_submit' THEN 0 WHEN 'candidate' THEN 1 WHEN 'research_required' THEN 2 ELSE 3 END,distribution_score DESC LIMIT 80;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,error,COUNT(*) failures,MAX(last_attempt_at) last_attempt,SUM(attempts) attempts FROM distribution_submissions WHERE status='failed' GROUP BY surface_slug,error ORDER BY failures DESC,attempts DESC LIMIT 80;"
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT surface_slug,result,detail,source_url,created_at FROM distribution_qualification_events WHERE result IN ('research_required','external_verification_failed','auth_required') ORDER BY created_at DESC LIMIT 80;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT verification_state,last_http_status,last_error,retry_after_at,last_network_attempt_at,updated_at,COUNT(*) n FROM distribution_delivery_state WHERE surface_slug='indexnow' GROUP BY verification_state,last_http_status,last_error,retry_after_at,last_network_attempt_at,updated_at ORDER BY updated_at DESC LIMIT 20;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT event_type,status,detail,created_at FROM distribution_events WHERE event_type='indexnow_adaptive_delivery' ORDER BY created_at DESC LIMIT 10;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT COUNT(*) backlog,MIN(created_at) oldest,SUM(CASE WHEN status='submitted' THEN 1 ELSE 0 END) submitted,SUM(CASE WHEN status='failed' AND error LIKE 'retryable:%' THEN 1 ELSE 0 END) retryable,SUM(CASE WHEN status='failed' AND error LIKE 'terminal:%' THEN 1 ELSE 0 END) terminal FROM distribution_submissions WHERE surface_slug='indexnow';"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
