@@ -1,6 +1,7 @@
 const NORTH_STAR='strict_verified_human_sessions';
 const PRIMARY=new Set(['distribution','content','audience','seo_geo_aio']);
 const HOUR=3600000;
+const BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR=10;
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const safe=(v,m=2000)=>String(v??'').slice(0,m);
 const ageHours=v=>{const t=Date.parse(String(v||''));return Number.isFinite(t)?Math.max(0,(Date.now()-t)/HOUR):Infinity};
@@ -41,14 +42,29 @@ function classifyAcquisition(source,referrer){
   return'unattributed';
 }
 
+function backlinkPolicy(c){
+  const verifiedBacklinks=n(c.verifiedBacklinks),verifiedReferringDomains=n(c.verifiedReferringDomains);
+  const gap=verifiedReferringDomains<BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR;
+  return{
+    backlink_acquisition:gap,
+    backlink_quality_only:true,
+    backlink_paid_links_allowed:false,
+    backlink_reciprocal_links_required:false,
+    backlink_verified:verifiedBacklinks,
+    verified_referring_domains:verifiedReferringDomains,
+    referring_domain_bootstrap_floor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,
+    backlink_priority_basis:'relevance + editorial legitimacy + observed search demand + potential human referrals'
+  };
+}
+function withBacklinks(config,c){return{...config,...backlinkPolicy(c)}}
 function policy(engine,c){
   const h24=n(c.h24),h7=n(c.h7),e24=n(c.e24),e7=n(c.e7),age=c.lastExecutionAgeHours;
   if(engine==='distribution'){
-    if(h24>0)return{status:'working',directive:'scale_proven_human_sources',config:{mode:'scale_proven_human_sources',priority_boost:10,exploration_slots:3}};
-    if(e24>0&&age<24)return{status:'measuring',directive:'measure_current_external_actions',config:{mode:'measure_current_external_actions',priority_boost:8,exploration_slots:3,maturity_hours:24}};
-    if(e7>=3&&h7===0)return{status:'underperforming',directive:'rotate_and_expand_borrowed_audiences',config:{mode:'rotate_and_expand_borrowed_audiences',priority_boost:20,exploration_slots:5,no_impact_maturity_hours:48}};
-    if(e24===0&&c.activeOpportunities>0)return{status:'execution_gap',directive:'force_external_execution',config:{mode:'force_external_execution',priority_boost:25,exploration_slots:5}};
-    return{status:'waiting_for_executable_opportunities',directive:'discover_executable_routes',config:{mode:'discover_executable_routes',priority_boost:15,exploration_slots:4}};
+    if(h24>0)return{status:'working',directive:'scale_proven_human_sources',config:withBacklinks({mode:'scale_proven_human_sources',priority_boost:10,exploration_slots:3},c)};
+    if(e24>0&&age<24)return{status:'measuring',directive:'measure_current_external_actions',config:withBacklinks({mode:'measure_current_external_actions',priority_boost:8,exploration_slots:3,maturity_hours:24},c)};
+    if(e7>=3&&h7===0)return{status:'underperforming',directive:'rotate_and_expand_borrowed_audiences',config:withBacklinks({mode:'rotate_and_expand_borrowed_audiences',priority_boost:20,exploration_slots:5,no_impact_maturity_hours:48},c)};
+    if(e24===0&&c.activeOpportunities>0)return{status:'execution_gap',directive:'force_external_execution',config:withBacklinks({mode:'force_external_execution',priority_boost:25,exploration_slots:5},c)};
+    return{status:'waiting_for_executable_opportunities',directive:'discover_executable_routes',config:withBacklinks({mode:'discover_executable_routes',priority_boost:15,exploration_slots:4},c)};
   }
   if(engine==='content'){
     if(h7>0)return{status:'working',directive:'scale_human_generating_topics',config:{mode:'scale_human_generating_topics',search_demand_first:true}};
@@ -63,11 +79,12 @@ function policy(engine,c){
     return{status:'measuring',directive:'measure_audience_quality',config:{mode:'measure_audience_quality',relevance_only:true}};
   }
   if(engine==='seo_geo_aio'){
-    if(c.gscAgeHours>36)return{status:'evidence_stale',directive:'refresh_search_evidence',config:{mode:'refresh_search_evidence',run_executor:true,priority_boost:25}};
-    if(c.organicActionsAgeHours>72)return{status:'executor_stale',directive:'run_targeted_seo_executor',config:{mode:'run_targeted_seo_executor',run_executor:true,priority_boost:25,observed_demand_only:true}};
-    if(h7>0)return{status:'working',directive:'scale_queries_generating_humans',config:{mode:'scale_queries_generating_humans',priority_boost:10,observed_demand_only:true}};
-    if(c.gscImpressions>0)return{status:'underperforming',directive:'deepen_observed_search_demand',config:{mode:'deepen_observed_search_demand',run_executor:true,priority_boost:20,observed_demand_only:true}};
-    return{status:'insufficient_search_evidence',directive:'measure_search_visibility',config:{mode:'measure_search_visibility',run_executor:true}};
+    if(c.gscAgeHours>36)return{status:'evidence_stale',directive:'refresh_search_evidence',config:withBacklinks({mode:'refresh_search_evidence',run_executor:true,priority_boost:25},c)};
+    if(c.organicActionsAgeHours>72)return{status:'executor_stale',directive:'run_targeted_seo_executor',config:withBacklinks({mode:'run_targeted_seo_executor',run_executor:true,priority_boost:25,observed_demand_only:true},c)};
+    if(h7>0)return{status:'working',directive:'scale_queries_generating_humans',config:withBacklinks({mode:'scale_queries_generating_humans',priority_boost:10,observed_demand_only:true},c)};
+    if(c.gscImpressions>0&&n(c.verifiedReferringDomains)<BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR)return{status:'underperforming',directive:'deepen_search_demand_and_build_relevant_authority',config:withBacklinks({mode:'deepen_search_demand_and_build_relevant_authority',run_executor:true,priority_boost:25,observed_demand_only:true},c)};
+    if(c.gscImpressions>0)return{status:'underperforming',directive:'deepen_observed_search_demand',config:withBacklinks({mode:'deepen_observed_search_demand',run_executor:true,priority_boost:20,observed_demand_only:true},c)};
+    return{status:'insufficient_search_evidence',directive:'measure_search_visibility',config:withBacklinks({mode:'measure_search_visibility',run_executor:true},c)};
   }
   if(engine==='affiliate')return{status:'supporting',directive:'maintenance_only_while_human_acquisition_is_primary',config:{mode:'maintenance_only',priority_cap:35,north_star_secondary:true}};
   if(engine==='catalog')return{status:'supporting',directive:'demand_led_quality_only',config:{mode:'demand_led_quality',priority_cap:50,admit_when_search_or_quality_evidence:true,north_star_secondary:true}};
@@ -137,7 +154,7 @@ async function saveEngine(env,engine,role,global,ctx,p){
 
 export async function runGrowthSupervisorAudit(env){
   await ensureSchema(env);
-  const [humansRows,exec,gsc,organic,active,executionContract,architectureIncidents]=await Promise.all([
+  const [humansRows,exec,gsc,organic,active,executionContract,architectureIncidents,backlinkPlacements]=await Promise.all([
     strictRows(env),executionRows(env),
     assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
     assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
@@ -150,8 +167,19 @@ export async function runGrowthSupervisorAudit(env){
       SUM(CASE WHEN status='attempted' THEN 1 ELSE 0 END) attempted,
       SUM(CASE WHEN status='verified' THEN 1 ELSE 0 END) verified
       FROM growth_execution_contract`),
-    first(env,`SELECT COUNT(*) n FROM growth_architecture_incidents WHERE status='open' AND approval_required=1`)
+    first(env,`SELECT COUNT(*) n FROM growth_architecture_incidents WHERE status='open' AND approval_required=1`),
+    all(env,`SELECT surface_slug,public_url,link_rel,first_verified_at
+      FROM distribution_placements
+      WHERE placement_verified=1 AND backlink_verified=1
+        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`)
   ]);
+  const referringDomains=new Set();
+  for(const row of backlinkPlacements||[]){
+    try{const host=new URL(String(row.public_url||'')).hostname.replace(/^www\./,'').toLowerCase();if(host&&host!=='trytoolscout.org'&&!host.endsWith('.trytoolscout.org'))referringDomains.add(host)}catch{}
+  }
+  const verifiedBacklinks=(backlinkPlacements||[]).length;
+  const verifiedReferringDomains=referringDomains.size;
+  const backlinkAcquisitionRequired=verifiedReferringDomains<BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR;
   const byType=Object.fromEntries(active.map(x=>[String(x.subject_type),n(x.n)]));
   const humans={distribution:{h24:0,h7:0},content:{h24:0,h7:0},audience:{h24:0,h7:0},seo_geo_aio:{h24:0,h7:0},unattributed:{h24:0,h7:0}};
   const now=Date.now();let strict24=0,strict7=0;
@@ -173,10 +201,10 @@ export async function runGrowthSupervisorAudit(env){
   const seoInterventions=Array.isArray(organic?.newInterventions)?organic.newInterventions.length:0;
 
   const ctx={
-    distribution:{...humans.distribution,e24:d24.count+s24.count,e7:d7.count+s7.count,lastExecutionAgeHours:(Math.max(d7.last,s7.last)?(now-Math.max(d7.last,s7.last))/HOUR:Infinity),activeOpportunities:n(byType.surface)+n(byType.tool)},
+    distribution:{...humans.distribution,e24:d24.count+s24.count,e7:d7.count+s7.count,lastExecutionAgeHours:(Math.max(d7.last,s7.last)?(now-Math.max(d7.last,s7.last))/HOUR:Infinity),activeOpportunities:n(byType.surface)+n(byType.tool),verifiedBacklinks,verifiedReferringDomains,backlinkAcquisitionRequired},
     content:{...humans.content,e24:cp24.count+ca24.count,e7:cp7.count+ca7.count,lastExecutionAgeHours:(Math.max(cp7.last,ca7.last)?(now-Math.max(cp7.last,ca7.last))/HOUR:Infinity),activeOpportunities:n(byType.search)+n(byType.tool)+n(byType.news_update)},
     audience:{...humans.audience,e24:au24.count,e7:au7.count,lastExecutionAgeHours:au7.last?(now-au7.last)/HOUR:Infinity,activeOpportunities:n(byType.surface)+n(byType.tool)},
-    seo_geo_aio:{...humans.seo_geo_aio,e24:0,e7:seoInterventions,lastExecutionAgeHours:organicAge,activeOpportunities:n(byType.search),gscAgeHours:gscAge,organicActionsAgeHours:organicAge,gscImpressions:n(gsc?.siteTotals?.impressions),gscClicks:n(gsc?.siteTotals?.clicks)},
+    seo_geo_aio:{...humans.seo_geo_aio,e24:0,e7:seoInterventions,lastExecutionAgeHours:organicAge,activeOpportunities:n(byType.search),gscAgeHours:gscAge,organicActionsAgeHours:organicAge,gscImpressions:n(gsc?.siteTotals?.impressions),gscClicks:n(gsc?.siteTotals?.clicks),verifiedBacklinks,verifiedReferringDomains,backlinkAcquisitionRequired},
     affiliate:{h24:0,h7:0,e24:0,e7:0,lastExecutionAgeHours:Infinity,activeOpportunities:n(byType.affiliate)},
     catalog:{h24:0,h7:0,e24:0,e7:0,lastExecutionAgeHours:Infinity,activeOpportunities:Object.entries(byType).filter(([k])=>k.startsWith('catalog')).reduce((s,[,v])=>s+n(v),0)}
   };
@@ -198,9 +226,9 @@ export async function runGrowthSupervisorAudit(env){
 
   const attributed24=n(humans.distribution.h24)+n(humans.content.h24)+n(humans.audience.h24)+n(humans.seo_geo_aio.h24);
   const gctx={h24:attributed24,h7:attributed7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
-  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architecture_escalation:{open_incidents:openArchitectureIncidents,approval_required:openArchitectureIncidents>0}}};
+  const gp={status,directive,config:{mode:directive,strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,backlink_acquisition:{required:backlinkAcquisitionRequired,quality_only:true,verified_backlinks:verifiedBacklinks,verified_referring_domains:verifiedReferringDomains,bootstrap_referring_domain_floor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,paid_links_allowed:false,reciprocal_links_required:false},execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architecture_escalation:{open_incidents:openArchitectureIncidents,approval_required:openArchitectureIncidents>0}}};
   const growth=await saveEngine(env,'growth_brain','supervisor',global,gctx,gp);
-  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
+  return{ok:true,northStar:NORTH_STAR,status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,backlinkAcquisition:{required:backlinkAcquisitionRequired,verifiedBacklinks,verifiedReferringDomains,bootstrapReferringDomainFloor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,qualityOnly:true},executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
 }
 
 export async function growthSupervisorSnapshot(env){
