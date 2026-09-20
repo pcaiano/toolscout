@@ -63,6 +63,7 @@ if(!network.includes('verified_human_impact')||!network.includes('verified_place
 if(!command.includes('External executions · 7d')||!command.includes('internal_cycles_7d')||!command.includes("surface_slug<>'indexnow'"))fail('Command Center still counts internal Growth activity as autonomous execution.');
 if(!contact.includes('fallback_exhausted')||!contact.includes('COMMON_CONTACT_PATHS'))fail('Vendor contact dead ends are not bounded and closed.');
 if(!contact.includes('PUBLIC_HANDOFF_SHA256')||!sender.includes('contact_refresh')||!sender.includes('/api/distribution/vendor-amplification/contact-scan'))fail('External sender does not refresh executable contacts before leasing candidates.');
+if(!sender.includes("outreach_sent_at>=datetime('now','-30 days')")||!sender.includes("prior.tool_slug=v.tool_slug")||!sender.includes("prior.contact_email"))fail('Vendor outreach dedupe window is missing.');
 if(!orchestrator.includes('vendor_execution_available')||!orchestrator.includes("if(!actions.length)continue;"))fail('Non-executable vendor dead ends can still become active Growth opportunities.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
