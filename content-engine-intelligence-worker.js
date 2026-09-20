@@ -275,7 +275,7 @@ async function buildBrief(env,family,{issue=false}={}){
     const base=`https://trytoolscout.org/${slug}.html`,common='utm_medium=organic_social&utm_campaign=content_engine_v21&utm_content=wednesday_comparison';
     t={linkedin:`${base}?utm_source=linkedin&${common}`,x:`${base}?utm_source=x&${common}`,bluesky:`${base}?utm_source=bluesky&${common}`};
   }
-  const tagOwned=(value,channel)=>{try{const u=new URL(String(value||''));if(u.hostname!=='trytoolscout.org')return value;u.searchParams.set('ts_action',briefId);if(growthKey)u.searchParams.set('ts_growth',growthKey);u.searchParams.set('ts_channel',channel);return u.toString()}catch{return value}};
+  const tagOwned=(value,channel)=>{try{const u=new URL(String(value||''));if(u.hostname!=='trytoolscout.org')return value;u.searchParams.set('ts_action',`${briefId}:${channel}`);if(growthKey)u.searchParams.set('ts_growth',growthKey);u.searchParams.set('ts_channel',channel);return u.toString()}catch{return value}};
   t={linkedin:tagOwned(t.linkedin,'linkedin'),x:tagOwned(t.x,'x'),bluesky:tagOwned(t.bluesky,'bluesky')};
   const prompt=[
     `CONTENT ENGINE INTELLIGENCE BRIEF (${family})`,
