@@ -1,5 +1,6 @@
 import base from './affiliate-coverage-entry-worker.js';
 import { normalizeAffiliateState } from './affiliate-operations.js';
+import {ensureHumanGateSchema,listOpenHumanGates,markHumanGateOwnerComplete} from './human-gate-contract.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const SESSION_COOKIE='toolscout_cc';
