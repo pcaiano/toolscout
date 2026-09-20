@@ -43,6 +43,7 @@ if(!content.includes('Borrowed-audience amplification candidate')||!content.incl
 if(!orchestrator.includes('execute_alternate_routes')||!orchestrator.includes('alternate_routes_stalled'))fail('Growth Brain does not consume alternate-route lifecycle state.');
 if(!command.includes('Growth loop health')||!command.includes('orphan_alternate_routes')||!command.includes('stale_growth_actions'))fail('Command Center closed-loop watchdog is missing.');
 if(!orchestrator.includes('recheck_affiliate_program_on_evidence_or_cadence')||!orchestrator.includes("if(!actions.length)actions.push('reconcile_affiliate_state')"))fail('Affiliate opportunities can still become active without a next action.');
+if(!orchestrator.includes('refresh_catalog_profile_for_observed_search_demand')||!orchestrator.includes("if(!actions.length)continue;"))fail('Non-actionable catalog rows can still be promoted to active Growth opportunities.');
 if(!command.includes('NOT EXISTS (')||!command.includes("c.started_at>f.started_at"))fail('Growth watchdog does not distinguish recovered failures from unresolved failures.');
 const rnd=JSON.parse(rndPolicy);if(rnd.mode!=='bounded_autonomy'||!Array.isArray(rnd.hardGates)||!rnd.hardGates.includes('new_paid_spend'))fail('Growth R&D bounded-autonomy guardrails are missing.');
 
