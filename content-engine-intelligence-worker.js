@@ -211,7 +211,7 @@ function editorialTargets(family,path='/',campaign='content_engine_v21'){
     bluesky:`${base}?utm_source=bluesky&utm_medium=organic_social&utm_campaign=${campaign}&utm_content=${content}`
   };
 }
-async function buildBrief(env,family,{issue=false}={}){
+async function buildBrief(env,family,{issue=false,task=null}={}){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE growth_action_events SET status='legacy_unverified',updated_at=datetime('now') WHERE status='prepared'`).run().catch(()=>{});
   const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
@@ -248,7 +248,25 @@ async function buildBrief(env,family,{issue=false}={}){
   const sprintPool=sprintRows.slice(0,Math.min(3,sprintRows.length));
   const supervisorSearchFirst=Boolean(supervisor?.config?.search_demand_first);
   const acquisitionMode=humanAcquisitionSprintActive()||supervisorSearchFirst;
-  const sprintTarget=acquisitionMode&&sprintPool.length?sprintPool[pickIndex(family+date,sprintPool.length)]:null;
+  let forcedTarget=null;
+  if(task?.subject_type==='search'&&task?.subject_key){
+    const existing=sprintRows.find(x=>String(x.subject_key||'')===String(task.subject_key));
+    if(existing)forcedTarget=existing;
+    else{
+      const row=await env.DB.prepare(`SELECT opportunity_key,subject_key,priority_score,signal_json FROM growth_opportunity_state WHERE opportunity_key=? LIMIT 1`).bind(task.opportunity_key||task.source_id||'').first().catch(()=>null);
+      let signals={};try{signals=JSON.parse(row?.signal_json||'{}')}catch{}
+      forcedTarget={opportunity_key:task.opportunity_key||row?.opportunity_key||null,subject_key:task.subject_key,priority_score:Number(task.priority_score||row?.priority_score||0),signals};
+    }
+  }else if(task?.subject_type==='tool'&&task?.subject_key){
+    const profile=profileBySlug.get(String(task.subject_key));
+    forcedTarget={
+      opportunity_key:task.opportunity_key||null,
+      subject_key:`/tools/${String(task.subject_key)}`,
+      priority_score:Number(task.priority_score||0),
+      signals:{title:profile?.tool_name||String(task.subject_key),tool_slug:String(task.subject_key),impressions:0,position:0}
+    };
+  }
+  const sprintTarget=forcedTarget||(acquisitionMode&&sprintPool.length?sprintPool[pickIndex(family+date,sprintPool.length)]:null);
   const topGrowthProfile=growthTools.map(x=>profileBySlug.get(x.subject_key)).find(Boolean)||null;
   const comparisonPairs=[
     ['make','zapier'],['hubspot','pipedrive'],['beehiiv','kit'],['jotform','typeform'],['semrush','ahrefs'],
@@ -296,7 +314,7 @@ async function buildBrief(env,family,{issue=false}={}){
     `Bluesky target: ${t.bluesky}`
   ].filter(Boolean).join('\n');
   if(issue){
-    await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||null,JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
+    await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||(task?.subject_type==='tool'?String(task.subject_key||''):null),JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
     await env.DB.batch(Object.entries(t).map(([channel,target])=>env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'issued',datetime('now'),datetime('now'))`).bind(`${briefId}:${channel}`,growthKey,'content',channel,target))).catch(()=>{});
     if(routeCandidate){
       await env.DB.prepare(`UPDATE distribution_contact_route_actions SET status='issued_to_content',attempts=attempts+1,last_attempt_at=datetime('now'),last_result='issued_to_content_engine',updated_at=datetime('now') WHERE route_id=? AND status IN ('queued','retry_due')`).bind(routeCandidate.route_id).run().catch(()=>{});
@@ -304,13 +322,13 @@ async function buildBrief(env,family,{issue=false}={}){
     }
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentbrief_${crypto.randomUUID()}`,'growth_content_brief_issued','completed','content_engine',briefId,`Content brief issued to the publishing pipeline with autonomous growth priority ${growthKey||'none'}, verified manufacturer mentions only, and ${routeCandidate?'one borrowed-audience route candidate':'no borrowed-audience route candidate'}.`).run().catch(()=>{});
   }
-  return {issued:Boolean(issue),brief_id:briefId,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
+  return {issued:Boolean(issue),brief_id:briefId,execution_task_id:task?.task_id||null,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
-export async function issueGrowthContentBrief(env){
+export async function issueGrowthContentBrief(env,task=null){
   const day=new Date().getUTCDay();
   const family=day===1?'monday_discovery':day===3?'wednesday_comparison':'friday_practical';
-  return buildBrief(env,family,{issue:true});
+  return buildBrief(env,family,{issue:true,task});
 }
 
 async function metrics(env){

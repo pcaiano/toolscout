@@ -3,10 +3,10 @@ const TERMINAL=new Set(['verified','human_required','blocked','cancelled']);
 const EXECUTORS=Object.freeze({
   distribution_network:{engine:'distribution',mode:'internal',claim:90,attempt:180,verify:1440},
   distribution_autonomous:{engine:'distribution',mode:'internal',claim:90,attempt:180,verify:1440},
-  make_sender:{engine:'distribution',mode:'external',claim:360,attempt:720,verify:2880},
+  make_sender:{engine:'distribution',mode:'external',claim:360,attempt:300,verify:720},
   content_issue:{engine:'content',mode:'internal',claim:90,attempt:240,verify:1440},
-  audience_make:{engine:'audience',mode:'external',claim:90,attempt:240,verify:1440},
-  seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:720,verify:2880},
+  audience_make:{engine:'audience',mode:'external',claim:90,attempt:300,verify:720},
+  seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:420,verify:720},
   affiliate_cycle:{engine:'affiliate',mode:'internal',claim:180,attempt:720,verify:2880},
   catalog_cycle:{engine:'catalog',mode:'internal',claim:360,attempt:720,verify:2880},
   growth_supervisor:{engine:'growth',mode:'internal',claim:90,attempt:180,verify:360},
@@ -78,6 +78,17 @@ const SUPERVISOR_EXECUTOR=Object.freeze({
   seo_geo_aio:'seo_github',
   affiliate:'affiliate_cycle',
   catalog:'catalog_cycle'
+});
+const READY_CAPS=Object.freeze({
+  distribution_network:4,
+  distribution_autonomous:2,
+  make_sender:3,
+  content_issue:2,
+  audience_make:1,
+  seo_github:4,
+  affiliate_cycle:3,
+  catalog_cycle:3,
+  growth_supervisor:1
 });
 
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
@@ -154,7 +165,7 @@ async function upsertTask(env,{sourceKind,sourceId,opportunityKey=null,subjectTy
         WHEN growth_execution_contract.status IN ('verified','human_required','blocked') THEN growth_execution_contract.status
         WHEN excluded.status='executor_missing' THEN 'executor_missing'
         WHEN growth_execution_contract.status='executor_missing' AND excluded.status<>'executor_missing' THEN excluded.status
-        WHEN growth_execution_contract.status='cancelled' THEN 'pending'
+        WHEN growth_execution_contract.status='cancelled' THEN excluded.status
         ELSE growth_execution_contract.status END,
       claim_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.claim_deadline ELSE growth_execution_contract.claim_deadline END,
       attempt_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.attempt_deadline ELSE growth_execution_contract.attempt_deadline END,
@@ -186,7 +197,10 @@ export async function syncExecutionContracts(env){
   const claimCase=Object.entries(EXECUTORS).filter(([,s])=>s.claim!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.claim)} minutes')`).join(' ');
   const attemptCase=Object.entries(EXECUTORS).filter(([,s])=>s.attempt!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.attempt)} minutes')`).join(' ');
   const verifyCase=Object.entries(EXECUTORS).filter(([,s])=>s.verify!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.verify)} minutes')`).join(' ');
-  const mapped=`CASE j.value ${executorCase} ELSE CASE WHEN g.subject_type='search' THEN 'seo_github' ELSE NULL END END`;
+  const mapped=`CASE
+    WHEN g.subject_type='search' AND j.value IN ('distribution_amplification','backlink_reference_outreach') THEN 'distribution_network'
+    ELSE CASE j.value ${executorCase} ELSE CASE WHEN g.subject_type='search' THEN 'seo_github' ELSE NULL END END
+  END`;
 
   await env.DB.prepare(`INSERT INTO growth_execution_contract(
       task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,execution_mode,priority_score,status,
@@ -200,10 +214,10 @@ export async function syncExecutionContracts(env){
       g.priority_score,
       CASE WHEN ${mapped} IS NULL THEN 'executor_missing'
            WHEN ${mapped}='human_gate' THEN 'human_required'
-           ELSE 'pending' END status,
-      CASE ${mapped} ${claimCase} ELSE NULL END claim_deadline,
-      CASE ${mapped} ${attemptCase} ELSE NULL END attempt_deadline,
-      CASE ${mapped} ${verifyCase} ELSE NULL END verify_deadline,
+           ELSE 'deferred' END status,
+      NULL claim_deadline,
+      NULL attempt_deadline,
+      NULL verify_deadline,
       datetime('now'),datetime('now')
     FROM growth_opportunity_state g, json_each(g.action_json) j
     WHERE g.status='active'
@@ -215,7 +229,7 @@ export async function syncExecutionContracts(env){
         WHEN growth_execution_contract.status IN ('verified','human_required','blocked') THEN growth_execution_contract.status
         WHEN excluded.status='executor_missing' THEN 'executor_missing'
         WHEN growth_execution_contract.status='executor_missing' AND excluded.status<>'executor_missing' THEN excluded.status
-        WHEN growth_execution_contract.status='cancelled' THEN 'pending'
+        WHEN growth_execution_contract.status='cancelled' THEN excluded.status
         ELSE growth_execution_contract.status END,
       claim_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.claim_deadline ELSE growth_execution_contract.claim_deadline END,
       attempt_deadline=CASE WHEN growth_execution_contract.status='cancelled' THEN excluded.attempt_deadline ELSE growth_execution_contract.attempt_deadline END,
@@ -272,16 +286,54 @@ export async function syncExecutionContracts(env){
     }
   }
 
+  const admission=await rebalanceExecutionAdmission(env);
   const counts=await first(env,`SELECT
     SUM(CASE WHEN source_kind='opportunity' AND status<>'cancelled' THEN 1 ELSE 0 END) opportunity_tasks,
     SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
-    SUM(CASE WHEN status='human_required' THEN 1 ELSE 0 END) human_required
+    SUM(CASE WHEN status='human_required' THEN 1 ELSE 0 END) human_required,
+    SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred
     FROM growth_execution_contract`);
-  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),cancelledSupervisor:staleSupervisor.length,write_policy:'set_based_material_change_only'};
+  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v2'};
+}
+
+export async function rebalanceExecutionAdmission(env){
+  await ensureExecutionContractSchema(env);
+  const result={promoted:0,deferred:0,executors:{}};
+  for(const [executor,spec] of Object.entries(EXECUTORS)){
+    if(spec.mode==='human')continue;
+    const cap=Math.max(1,Number(READY_CAPS[executor]||2));
+    const inFlightRow=await first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted')`,[executor]);
+    const inFlight=n(inFlightRow?.n),readySlots=Math.max(0,cap-inFlight);
+    const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending' ORDER BY priority_score DESC,created_at ASC`).bind(executor).all();
+    const pendingIds=(pending.results||[]).map(x=>x.task_id);
+    const keep=pendingIds.slice(0,readySlots),demote=pendingIds.slice(readySlots);
+    if(demote.length){
+      for(let i=0;i<demote.length;i+=40){
+        const ids=demote.slice(i,i+40),marks=ids.map(()=>'?').join(',');
+        const w=await env.DB.prepare(`UPDATE growth_execution_contract SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,last_result='deferred_by_capacity',updated_at=datetime('now') WHERE task_id IN (${marks}) AND status='pending'`).bind(...ids).run();
+        result.deferred+=Number(w?.meta?.changes||w?.changes||0);
+      }
+    }
+    let promoted=0;
+    const remaining=Math.max(0,readySlots-keep.length);
+    if(remaining>0){
+      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred' ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
+      const ids=(rows.results||[]).map(x=>x.task_id);
+      if(ids.length){
+        const marks=ids.map(()=>'?').join(',');
+        const claimDeadline=spec.claim!=null?dt(spec.claim):null;
+        const w=await env.DB.prepare(`UPDATE growth_execution_contract SET status='pending',claim_deadline=?,attempt_deadline=NULL,verify_deadline=NULL,last_result='admitted_to_ready_queue',updated_at=datetime('now') WHERE task_id IN (${marks}) AND status='deferred'`).bind(claimDeadline,...ids).run();
+        promoted=Number(w?.meta?.changes||w?.changes||0);result.promoted+=promoted;
+      }
+    }
+    result.executors[executor]={cap,inFlight,pendingKept:keep.length,promoted};
+  }
+  return result;
 }
 
 export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null,result='executor_claimed'}={}){
   await ensureExecutionContractSchema(env);
+  await rebalanceExecutionAdmission(env);
   const spec=EXECUTORS[executor]||null;
   let effective=Math.max(0,Math.min(100,Number(limit)||0)),inFlight=0;
   if(maxInFlight!=null){
@@ -289,52 +341,87 @@ export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null
     inFlight=n(row?.n);
     effective=Math.max(0,Math.min(effective,Math.max(0,Number(maxInFlight)-inFlight)));
   }
-  if(effective<=0)return{claimed:0,taskIds:[],inFlight,capacity:Number(maxInFlight||limit||0)};
-  const rows=await env.DB.prepare(`SELECT task_id,status FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
-  const ids=(rows.results||[]).map(x=>x.task_id);if(!ids.length)return{claimed:0,taskIds:[],inFlight,capacity:Number(maxInFlight||limit||0)};
+  if(effective<=0)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
+  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
+  const tasks=rows.results||[],ids=tasks.map(x=>x.task_id);
+  if(!ids.length)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   const qs=ids.map(()=>'?').join(',');
   const claim=spec?.claim!=null?dt(spec.claim):null,attempt=spec?.attempt!=null?dt(spec.attempt):null,verify=spec?.verify!=null?dt(spec.verify):null;
   await env.DB.prepare(`UPDATE growth_execution_contract SET status='claimed',claimed_at=datetime('now'),claim_deadline=?,attempt_deadline=?,verify_deadline=?,last_result=?,updated_at=datetime('now') WHERE task_id IN (${qs})`).bind(claim,attempt,verify,result,...ids).run();
-  return{claimed:ids.length,taskIds:ids,inFlightBefore:inFlight,capacity:Number(maxInFlight||limit||0)};
+  for(const task of tasks){
+    await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+      .bind(`ge_${crypto.randomUUID()}`,task.task_id,'claimed',executor,'claimed',String(result||'executor_claimed').slice(0,1000)).run().catch(()=>{});
+  }
+  return{claimed:ids.length,taskIds:ids,tasks,inFlightBefore:inFlight,capacity:Number(maxInFlight||limit||0)};
 }
 
-export async function markExecutorAttempt(env,executor,result,{verified=false,blocked=false}={}){
+export async function markExecutorAttempt(env,executor,result,{verified=false,blocked=false,failed=false,taskIds=null}={}){
   await ensureExecutionContractSchema(env);
-  const status=blocked?'blocked':verified?'verified':'attempted';
-  const completion=verified||blocked?',completed_at=datetime(\'now\')':'';
-  const verification=verified?',verified_at=datetime(\'now\')':'';
-  const sql=`UPDATE growth_execution_contract SET status=?,attempts=attempts+1,attempted_at=datetime('now'),last_result=?,updated_at=datetime('now')${completion}${verification} WHERE executor=? AND status='claimed'`;
-  const w=await env.DB.prepare(sql).bind(status,String(result||'executor_attempted').slice(0,1000),executor).run();
-  return{changed:Number(w?.meta?.changes||w?.changes||0),status};
+  const ids=Array.isArray(taskIds)?taskIds.filter(Boolean).slice(0,100):[];
+  const status=failed?'stalled':blocked?'blocked':verified?'verified':'attempted';
+  const completion=verified||blocked?",completed_at=datetime('now')":"";
+  const verification=verified?",verified_at=datetime('now')":"";
+  const failureDetail=String(result||'executor_attempted').slice(0,1000);
+  let sql=`UPDATE growth_execution_contract SET status=?,attempts=attempts+1,attempted_at=datetime('now'),last_result=?,updated_at=datetime('now')${completion}${verification} WHERE executor=? AND status='claimed'`;
+  const bindings=[status,failureDetail,executor];
+  if(ids.length){sql+=` AND task_id IN (${ids.map(()=>'?').join(',')})`;bindings.push(...ids)}
+  const w=await env.DB.prepare(sql).bind(...bindings).run();
+  const changed=Number(w?.meta?.changes||w?.changes||0);
+  const eventType=failed?'executor_failed':verified?'verified':blocked?'blocked':'attempted';
+  if(ids.length){
+    for(const taskId of ids)await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+      .bind(`ge_${crypto.randomUUID()}`,taskId,eventType,executor,status,failureDetail).run().catch(()=>{});
+  }
+  return{changed,status};
 }
 
-export async function verifySupervisorExecutorTasks(env,executor,result='supervisor_executor_completed'){
+export async function recordExecutionProof(env,{taskId,executor=null,status='verified',detail='execution_verified',evidence=null,externalId=null}={}){
   await ensureExecutionContractSchema(env);
-  const w=await env.DB.prepare(`UPDATE growth_execution_contract
-    SET status='verified',attempts=attempts+1,attempted_at=COALESCE(attempted_at,datetime('now')),
-        completed_at=datetime('now'),verified_at=datetime('now'),last_result=?,updated_at=datetime('now')
-    WHERE executor=? AND source_kind='supervisor' AND status IN ('claimed','attempted')`)
-    .bind(String(result||'supervisor_executor_completed').slice(0,1000),executor).run();
-  return{verified:Number(w?.meta?.changes||w?.changes||0)};
+  if(!taskId)return{ok:false,error:'task_id_required'};
+  const task=await first(env,`SELECT task_id,executor,status,source_kind,subject_type,subject_key,action FROM growth_execution_contract WHERE task_id=?`,[taskId]);
+  if(!task)return{ok:false,error:'unknown_task'};
+  if(executor&&task.executor!==executor)return{ok:false,error:'executor_mismatch',expected:task.executor};
+  if(task.status==='verified'&&status==='verified')return{ok:true,idempotent:true,taskId};
+  const normalized=status==='failed'?'stalled':status==='blocked'?'blocked':'verified';
+  const payload={...(evidence&&typeof evidence==='object'?evidence:{}),external_id:externalId||undefined,proof_task_id:taskId,proof_executor:task.executor};
+  const verified=normalized==='verified';
+  const sql=`UPDATE growth_execution_contract SET status=?,attempts=CASE WHEN attempted_at IS NULL THEN attempts+1 ELSE attempts END,attempted_at=COALESCE(attempted_at,datetime('now')),completed_at=${verified?"datetime('now')":"completed_at"},verified_at=${verified?"datetime('now')":"verified_at"},last_result=?,evidence_json=?,updated_at=datetime('now') WHERE task_id=?`;
+  await env.DB.prepare(sql).bind(normalized,String(detail||normalized).slice(0,1000),JSON.stringify(payload).slice(0,4000),taskId).run();
+  await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+    .bind(`ge_${crypto.randomUUID()}`,taskId,verified?'verified':normalized==='stalled'?'executor_failed':'blocked',task.executor,normalized,String(detail||normalized).slice(0,1000)).run().catch(()=>{});
+  return{ok:true,taskId,status:normalized};
+}
+
+export async function verifySupervisorExecutorTasks(env,executor,result='supervisor_executor_completed',taskIds=null){
+  await ensureExecutionContractSchema(env);
+  const ids=Array.isArray(taskIds)?taskIds.filter(Boolean).slice(0,100):[];
+  if(!ids.length)return{verified:0};
+  let verified=0;
+  for(const taskId of ids){
+    const row=await first(env,`SELECT source_kind,status FROM growth_execution_contract WHERE task_id=? AND executor=?`,[taskId,executor]);
+    if(row?.source_kind!=='supervisor'||!['claimed','attempted','stalled'].includes(String(row?.status||'')))continue;
+    const out=await recordExecutionProof(env,{taskId,executor,status:'verified',detail:result,evidence:{proof_kind:'supervisor_executor_cycle'}});
+    if(out?.ok)verified++;
+  }
+  return{verified};
 }
 
 export async function reconcileExecutionDeadlines(env){
   await ensureExecutionContractSchema(env);
-  const recovered=await env.DB.prepare(`UPDATE growth_execution_contract
-    SET status='pending',last_result='queued_awaiting_executor_capacity',updated_at=datetime('now')
-    WHERE status='stalled' AND last_result='claim_sla_missed' AND attempts=0`).run();
   const w=await env.DB.prepare(`UPDATE growth_execution_contract
     SET status='stalled',
         last_result=CASE
+          WHEN status='pending' THEN 'claim_sla_missed'
           WHEN status='claimed' THEN 'attempt_sla_missed'
           ELSE 'verification_sla_missed' END,
         updated_at=datetime('now')
-    WHERE status IN ('claimed','attempted')
+    WHERE status IN ('pending','claimed','attempted')
       AND (
-        (status='claimed' AND attempt_deadline IS NOT NULL AND attempt_deadline<datetime('now'))
+        (status='pending' AND claim_deadline IS NOT NULL AND claim_deadline<datetime('now'))
+        OR (status='claimed' AND attempt_deadline IS NOT NULL AND attempt_deadline<datetime('now'))
         OR (status='attempted' AND verify_deadline IS NOT NULL AND verify_deadline<datetime('now'))
       )`).run();
-  return{stalled:Number(w?.meta?.changes||w?.changes||0),recoveredQueueBacklog:Number(recovered?.meta?.changes||recovered?.changes||0)};
+  return{stalled:Number(w?.meta?.changes||w?.changes||0),recoveredQueueBacklog:0,policy:'missed_sla_stays_visible_until_reclaimed_or_proved'};
 }
 
 export async function reconcileExecutionContracts(env){
@@ -356,8 +443,13 @@ export async function reconcileExecutionContracts(env){
         if(['sent','adopted'].includes(String(evidence?.status||'')))evidence={...evidence,verified:true};
       }
     }else if(t.executor==='distribution_network'){
-      evidence=await first(env,`SELECT event_type,status,created_at FROM distribution_events WHERE created_at>=? AND (surface_slug=? OR asset_id=? OR detail LIKE ?) ORDER BY created_at DESC LIMIT 1`,[created,subject,subject,`%${subject.replaceAll('%','')}%`]);
-      if(evidence&&['completed','verified','live','submitted'].includes(String(evidence.status||'')))evidence={...evidence,verified:true};
+      if(t.subject_type==='search'&&opportunity){
+        evidence=await first(env,`SELECT action_id,status,created_at,target_url FROM growth_action_events WHERE opportunity_key=? AND created_at>=? AND engine LIKE 'distribution%' AND status IN ('sent','verified','completed','attributed') ORDER BY created_at DESC LIMIT 1`,[opportunity,created]);
+        if(evidence)evidence={...evidence,verified:true,proof_scope:'opportunity'};
+      }else{
+        evidence=await first(env,`SELECT event_type,status,created_at,surface_slug,asset_id FROM distribution_events WHERE created_at>=? AND (surface_slug=? OR asset_id=?) ORDER BY created_at DESC LIMIT 1`,[created,subject,subject]);
+        if(evidence&&['completed','verified','live'].includes(String(evidence.status||'')))evidence={...evidence,verified:true,proof_scope:'subject'};
+      }
     }else if(t.executor==='distribution_autonomous'){
       evidence=await first(env,`SELECT result,created_at FROM distribution_qualification_events WHERE surface_slug=? AND created_at>=? ORDER BY created_at DESC LIMIT 1`,[subject,created]);
       if(evidence)evidence={...evidence,verified:true};
@@ -366,9 +458,9 @@ export async function reconcileExecutionContracts(env){
       else if(t.subject_type==='search')evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? AND target_json LIKE ? ORDER BY created_at DESC LIMIT 1`,[created,`%${subject.replaceAll('%','')}%`]);
       else evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? ORDER BY created_at DESC LIMIT 1`,[created]);
       if(evidence)evidence={...evidence,verified:true};
-    }else if(t.executor==='audience_make'){
-      evidence=await first(env,`SELECT event_id,event_type,created_at FROM audience_events WHERE status='published' AND created_at>=? ORDER BY created_at DESC LIMIT 1`,[created]);
-      if(evidence)evidence={...evidence,verified:true};
+    }else if(t.executor==='audience_make'&&t.source_kind==='supervisor'){
+      evidence=await first(env,`SELECT event_id,event_type,created_at,post_uri FROM audience_events WHERE status='published' AND event_type='outbound_reply' AND created_at>=COALESCE(?,?) ORDER BY created_at ASC LIMIT 1`,[sqlTime(t.claimed_at),created]);
+      if(evidence)evidence={...evidence,verified:true,proof_scope:'single_inflight_supervisor_task'};
     }else if(t.executor==='seo_github'){
       const report=await assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]});
       const generated=Date.parse(String(report.generatedAt||'')),createdAt=Date.parse(String(t.created_at||'').replace(' ','T')+'Z');
@@ -387,8 +479,9 @@ export async function reconcileExecutionContracts(env){
     }
 
     if(evidence?.verified){
-      await env.DB.prepare(`UPDATE growth_execution_contract SET status='verified',verified_at=datetime('now'),completed_at=COALESCE(completed_at,datetime('now')),last_result='execution_verified',evidence_json=?,updated_at=datetime('now') WHERE task_id=? AND status<>'verified'`).bind(JSON.stringify(evidence).slice(0,4000),t.task_id).run();
-      verified++;continue;
+      const proof=await recordExecutionProof(env,{taskId:t.task_id,executor:t.executor,status:'verified',detail:'execution_verified',evidence});
+      if(proof?.ok)verified++;
+      continue;
     }
 
     const claimDeadline=Date.parse(String(t.claim_deadline||'').replace(' ','T')+'Z');
@@ -409,11 +502,30 @@ export async function reconcileExecutionContracts(env){
 
 export async function executionContractSnapshot(env){
   await ensureExecutionContractSchema(env);
-  const [states,executors,missing,stalled]=await Promise.all([
+  const [states,executors,missing,stalled,ages]=await Promise.all([
     all(env,`SELECT status,COUNT(*) n FROM growth_execution_contract GROUP BY status`),
     all(env,`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status ORDER BY executor,status`),
     first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE status='executor_missing'`),
-    first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE status='stalled'`)
+    first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE status='stalled'`),
+    first(env,`SELECT
+      MIN(CASE WHEN status='pending' THEN created_at END) oldest_pending,
+      MIN(CASE WHEN status='claimed' THEN claimed_at END) oldest_claimed,
+      MIN(CASE WHEN status='attempted' THEN attempted_at END) oldest_attempted
+      FROM growth_execution_contract`)
   ]);
-  return{states:Object.fromEntries(states.map(x=>[x.status,n(x.n)])),executors,missingExecutors:n(missing?.n),stalled:n(stalled?.n)};
+  const ageHours=value=>{if(!value)return null;const t=Date.parse(String(value).replace(' ','T')+'Z');return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):null};
+  const stateMap=Object.fromEntries(states.map(x=>[x.status,n(x.n)]));
+  return{
+    integrityVersion:'task-specific-v2',
+    states:stateMap,
+    executors,
+    missingExecutors:n(missing?.n),
+    stalled:n(stalled?.n),
+    ready:n(stateMap.pending),
+    inFlight:n(stateMap.claimed)+n(stateMap.attempted),
+    deferred:n(stateMap.deferred),
+    oldestPendingAgeHours:ageHours(ages?.oldest_pending),
+    oldestClaimedAgeHours:ageHours(ages?.oldest_claimed),
+    oldestAttemptedAgeHours:ageHours(ages?.oldest_attempted)
+  };
 }

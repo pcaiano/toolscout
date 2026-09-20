@@ -3,7 +3,7 @@ import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
 import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
-import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,executionContractSnapshot} from './growth-execution-contract.js';
+import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,recordExecutionProof,executionContractSnapshot} from './growth-execution-contract.js';
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
@@ -686,55 +686,114 @@ async function runGrowthExecutionContractCycle(env){
   const before=await reconcileExecutionContracts(env);
   const results={};
 
-  const runInternal=async(executor,limit,fn)=>{
-    const claim=await claimExecutorTasks(env,executor,{limit,result:'growth_brain_dispatched'});
+  const runInternal=async(executor,fn)=>{
+    const claim=await claimExecutorTasks(env,executor,{limit:1,maxInFlight:1,result:'growth_brain_dispatched_task_v2'});
     if(!claim.claimed){results[executor]={claimed:0};return}
+    const task=claim.tasks?.[0]||null;
     try{
-      const out=await fn();
-      await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900));
-      await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed');
-      results[executor]={claimed:claim.claimed,ok:true,result:out||null};
+      const out=await fn(task);
+      let supervisorProof={verified:0},attemptRecorded=false;
+      if(task?.source_kind==='supervisor'){
+        await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
+        attemptRecorded=true;
+        supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v2',claim.taskIds);
+      }
+      results[executor]={claimed:claim.claimed,ok:true,task:{task_id:task?.task_id||null,source_kind:task?.source_kind||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},attemptRecorded,supervisorVerified:supervisorProof.verified,result:out||null};
     }catch(error){
       const message=String(error?.message||error).slice(0,800);
-      await markExecutorAttempt(env,executor,`executor_error:${message}`);
-      results[executor]={claimed:claim.claimed,ok:false,error:message};
+      await markExecutorAttempt(env,executor,`executor_error:${message}`,{failed:true,taskIds:claim.taskIds});
+      results[executor]={claimed:claim.claimed,ok:false,task:{task_id:task?.task_id||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},error:message};
     }
   };
 
-  await runInternal('distribution_network',24,()=>runDistributionNetworkCycle(env));
-  await runInternal('distribution_autonomous',4,()=>runAutonomousDistributionCycle(env));
+  await runInternal('distribution_network',()=>runDistributionNetworkCycle(env));
+  await runInternal('distribution_autonomous',()=>runAutonomousDistributionCycle(env));
 
-  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:3,maxInFlight:3,result:'make_sender_scheduled'});
+  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:1,maxInFlight:1,result:'make_sender_waiting_for_exact_external_send'});
   if(senderClaim.claimed){
     try{
       const [contacts,network]=await Promise.all([
         runVendorContactDiscovery(env),
         runDistributionNetworkCycle(env)
       ]);
-      results.make_sender={claimed:senderClaim.claimed,prepared:true,contacts,network};
-    }catch(error){results.make_sender={claimed:senderClaim.claimed,prepared:false,error:String(error?.message||error).slice(0,800)}}
+      results.make_sender={claimed:senderClaim.claimed,prepared:true,task:senderClaim.tasks?.[0]||null,contacts,network};
+    }catch(error){
+      const message=String(error?.message||error).slice(0,800);
+      await markExecutorAttempt(env,'make_sender',`executor_prepare_error:${message}`,{failed:true,taskIds:senderClaim.taskIds});
+      results.make_sender={claimed:senderClaim.claimed,prepared:false,error:message};
+    }
   }else results.make_sender={claimed:0};
 
-  await runInternal('content_issue',1,async()=>{
+  await runInternal('content_issue',async()=>{
     const intelligence=await runContentSocialIntelligenceCycle(env);
-    const brief=await issueGrowthContentBrief(env);
+    const brief=await issueGrowthContentBrief(env,task);
     return{intelligence,brief};
   });
-  await runInternal('affiliate_cycle',8,()=>runAffiliateCoverageCycle(env));
-  await runInternal('catalog_cycle',7,async()=>{
+  await runInternal('affiliate_cycle',()=>runAffiliateCoverageCycle(env));
+  await runInternal('catalog_cycle',async()=>{
     const verify=await contractVerifyCatalogBatch(env);
     const admit=await contractAdmitCatalogCandidates(env);
     return{verify,admit};
   });
-  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_scheduled'});
-  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:12,maxInFlight:12,result:'seo_github_scheduled'});
-  results.audience_make={claimed:audienceClaim.claimed,external:true};
-  results.seo_github={claimed:seoClaim.claimed,external:true};
+
+  const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_waiting_for_exact_published_reply'});
+  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:1,maxInFlight:1,result:'seo_github_waiting_for_exact_evidence'});
+  results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
+  results.seo_github={claimed:seoClaim.claimed,external:true,task:seoClaim.tasks?.[0]||null};
 
   const after=await reconcileExecutionContracts(env);
   const architectureEscalation=await auditArchitectureEscalations(env).catch(error=>({ok:false,error:String(error?.message||error).slice(0,500)}));
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,synced,before,results,after,architectureEscalation,snapshot};
+  return{ok:true,integrityVersion:'task-specific-v2',synced,before,results,after,architectureEscalation,snapshot};
+}
+async function publicAudienceBrief(env){
+  const [audience,growth,targets]=await Promise.all([
+    growthSupervisorDirective(env,'audience'),
+    growthSupervisorDirective(env,'growth_brain'),
+    growthRows(env,`SELECT opportunity_key,subject_key,priority_score,signal_json FROM growth_opportunity_state WHERE status='active' AND subject_type='search' AND subject_key NOT IN ('/','/tools') ORDER BY priority_score DESC LIMIT 3`)
+  ]);
+  return{
+    brain:'shared-growth-v3',
+    northStar:HUMAN_ACQUISITION_SPRINT.northStar,
+    generatedAt:new Date().toISOString(),
+    growth:{status:growth?.status||null,directive:growth?.directive||null},
+    audience:{
+      status:audience?.status||null,
+      directive:audience?.directive||null,
+      relevance_only:audience?.config?.relevance_only!==false,
+      link_only_when_directly_helpful:audience?.config?.link_only_when_directly_helpful!==false
+    },
+    topSearchTargets:targets.map(row=>{
+      let signals={};try{signals=JSON.parse(row.signal_json||'{}')}catch{}
+      const base=signals.asset_url||('https://trytoolscout.org'+row.subject_key);
+      let audienceUrl=base;
+      try{
+        const u=new URL(base);
+        u.searchParams.set('utm_source','bluesky');
+        u.searchParams.set('utm_medium','audience_engagement');
+        u.searchParams.set('utm_campaign','growth_supervisor');
+        u.searchParams.set('ts_action',`audience:${row.opportunity_key}`);
+        u.searchParams.set('ts_growth',row.opportunity_key);
+        u.searchParams.set('ts_channel','bluesky');
+        audienceUrl=u.toString();
+      }catch{}
+      return{title:signals.title||row.subject_key,path:row.subject_key,audienceUrl,priority:Number(row.priority_score||0),impressions:Number(signals.impressions||0),position:Number(signals.position||0)};
+    })
+  };
+}
+
+async function recordExternalExecutorStatus(env,body={}){
+  const executor=String(body.executor||'');
+  if(!['audience_make','make_sender','seo_github'].includes(executor))return{ok:false,error:'unsupported_executor'};
+  let taskId=String(body.task_id||'').trim();
+  if(!taskId){
+    const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted') ORDER BY claimed_at DESC,priority_score DESC LIMIT 2`).bind(executor).all();
+    const rows=q.results||[];
+    if(rows.length!==1)return{ok:false,error:rows.length?'ambiguous_active_task':'no_active_task',active:rows.length};
+    taskId=rows[0].task_id;
+  }
+  const status=body.status==='verified'?'verified':body.status==='blocked'?'blocked':'failed';
+  return recordExecutionProof(env,{taskId,executor,status,detail:safe(body.detail||body.error||`external_${status}`,900),externalId:safe(body.external_id||'',300)||null,evidence:{source:'external_executor_callback',reported_status:status}});
 }
 
 async function publicSearchDirectives(env){
@@ -881,7 +940,14 @@ async function normalizeEditorialQueue(env){
 async function fanout(env,url){await normalizeEditorialQueue(env);const type=classify(url);await env.DB.prepare(`INSERT INTO distribution_asset_state(asset_url,asset_type,first_seen_at,last_seen_at,distributed_at) VALUES(?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(asset_url) DO UPDATE SET asset_type=excluded.asset_type,last_seen_at=datetime('now'),distributed_at=COALESCE(distribution_asset_state.distributed_at,datetime('now'))`).bind(url,type).run();const editorial=await prepareEditorial(env,url,type);await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`asset_${crypto.randomUUID()}`,'asset_distribution_triggered','completed',type,url,url,`Event-driven fanout prepared: syndication feed exposure, Submission Engine eligibility and Vendor Amplification eligibility. Community posting is intentionally not queued as autonomous without a safe authenticated executor.`).run();return {ok:true,asset_url:url,asset_type:type,editorialPrepared:editorial};}
 async function scanNew(request,env){let r=null;const sitemapRequest=new Request(new URL('/sitemap.xml',request.url));try{r=await env.ASSETS.fetch(sitemapRequest.clone());}catch{}if(!r||!r.ok){try{r=await base.fetch(sitemapRequest.clone(),env,{waitUntil(){}});}catch{}}if(!r)return{ok:false,scanned:0,newAssets:0,reason:'sitemap_fetch_failed'};if(!r.ok)return{ok:false,scanned:0,newAssets:0,reason:`sitemap_http_${r.status}`};const xml=await r.text();const urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]).filter(u=>/^https:\/\/trytoolscout\.org\//.test(u)&&/(best-|\-vs-|alternatives|compare)/i.test(u));let added=0;for(const url of urls.slice(0,150)){const row=await env.DB.prepare('SELECT asset_url FROM distribution_asset_state WHERE asset_url=?').bind(url).first();if(row)continue;await fanout(env,url);added++;}return{ok:true,scanned:urls.length,newAssets:added};}
 export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/orchestrate'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}if(!b.asset_url||!/^https:\/\/trytoolscout\.org\//.test(String(b.asset_url)))return Response.json({error:'valid_toolscout_asset_url_required'},{status:400,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_fanout',triggerName:'manual_api'},()=>fanout(env,String(b.asset_url))),{headers:H});}if(u.pathname==='/api/distribution/orchestrate/scan'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:'manual_api'},()=>scanNew(request,env)),{headers:H});}if(u.pathname==='/api/distribution/economic-learning'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:'manual_api'},()=>learnEconomics(env)),{headers:H});}if(u.pathname==='/api/growth/search-directives'&&request.method==='GET'){return Response.json(await publicSearchDirectives(env),{headers:{...H,'Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'}});}if(u.pathname==='/api/growth/rnd/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:'manual_api'},()=>runGrowthRndAudit(env)),{headers:H});}if(u.pathname==='/api/growth/rnd'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT * FROM growth_rnd_experiments ORDER BY updated_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/growth/opportunities/refresh'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'manual_api'},()=>coordinateGrowthOpportunities(env)),{headers:H});}
+if(u.pathname==='/api/growth/audience-brief/public'&&request.method==='GET'){return Response.json(await publicAudienceBrief(env),{headers:{...H,'Cache-Control':'public, max-age=120','Access-Control-Allow-Origin':'*'}});}
 if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'manual_api'},()=>runGrowthSupervisorAudit(env)),{headers:H});}
+if(u.pathname==='/api/growth/execution/external-status'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  let body={};try{body=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}
+  const out=await recordExternalExecutorStatus(env,body);
+  return Response.json(out,{status:out?.ok?200:409,headers:H});
+}
 if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'manual_api'},()=>runGrowthExecutionContractCycle(env)),{headers:H});}
 if(u.pathname==='/api/growth/execution'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await executionContractSnapshot(env),{headers:H});}
 if(u.pathname==='/api/growth/architecture-escalations/public-candidates'&&request.method==='GET'){

@@ -319,7 +319,14 @@ async function canonicalAutonomousGrowthTruth(env) {
       FROM distribution_contact_route_actions`),
     first(`SELECT
       SUM(CASE WHEN status='executor_missing' THEN 1 ELSE 0 END) missing,
-      SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled
+      SUM(CASE WHEN status='stalled' THEN 1 ELSE 0 END) stalled,
+      SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending,
+      SUM(CASE WHEN status='claimed' THEN 1 ELSE 0 END) claimed,
+      SUM(CASE WHEN status='attempted' THEN 1 ELSE 0 END) attempted,
+      SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred,
+      MIN(CASE WHEN status='pending' THEN created_at END) oldest_pending,
+      MIN(CASE WHEN status='claimed' THEN claimed_at END) oldest_claimed,
+      MIN(CASE WHEN status='attempted' THEN attempted_at END) oldest_attempted
       FROM growth_execution_contract`),
     first(`SELECT
       MAX(CASE WHEN engine='growth' AND mission='opportunity_coordination' AND status='completed' THEN completed_at END) last_completed_at,
@@ -412,8 +419,12 @@ async function canonicalAutonomousGrowthTruth(env) {
     }))
   ].sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
   const ageHours=loop?.last_completed_at?Math.max(0,(Date.now()-Date.parse(String(loop.last_completed_at).replace(' ','T')+'Z'))/36e5):null;
+  const contractAgeHours=value=>{if(!value)return null;const t=Date.parse(String(value).replace(' ','T')+'Z');return Number.isFinite(t)?Math.max(0,(Date.now()-t)/36e5):null};
   const missing=truthNum(contract?.missing),stalled=truthNum(contract?.stalled),failed=truthNum(loop?.failed_core);
-  const loopStatus=missing>0||failed>0||(ageHours!=null&&ageHours>4)?'failed':(stalled>0?'warning':'healthy');
+  const ready=truthNum(contract?.pending),claimed=truthNum(contract?.claimed),attempted=truthNum(contract?.attempted),deferred=truthNum(contract?.deferred);
+  const oldestPendingAgeHours=contractAgeHours(contract?.oldest_pending),oldestClaimedAgeHours=contractAgeHours(contract?.oldest_claimed),oldestAttemptedAgeHours=contractAgeHours(contract?.oldest_attempted);
+  const activeBacklog=ready+claimed+attempted;
+  const loopStatus=missing>0||failed>0||(ageHours!=null&&ageHours>4)?'failed':(stalled>0||(oldestClaimedAgeHours!=null&&oldestClaimedAgeHours>6)||(oldestAttemptedAgeHours!=null&&oldestAttemptedAgeHours>24)?'warning':'healthy');
   return {
     source:'entrypoint_canonical_growth_truth_v3',
     active_opportunities:truthNum(growth?.active),
@@ -468,8 +479,18 @@ async function canonicalAutonomousGrowthTruth(env) {
     backlink_bootstrap_floor:backlinkBootstrapFloor,
     backlink_acquisition_required:backlinkAcquisitionRequired,
     backlink_quality_only:true,
+    execution_contract_integrity:'task-specific-v2',
     execution_contract_missing:missing,
     execution_contract_stalled:stalled,
+    execution_contract_ready:ready,
+    execution_contract_claimed:claimed,
+    execution_contract_attempted:attempted,
+    execution_contract_in_flight:claimed+attempted,
+    execution_contract_deferred:deferred,
+    execution_contract_active_backlog:activeBacklog,
+    execution_contract_oldest_pending_age_hours:oldestPendingAgeHours,
+    execution_contract_oldest_claimed_age_hours:oldestClaimedAgeHours,
+    execution_contract_oldest_attempted_age_hours:oldestAttemptedAgeHours,
     external_execution_items:executionItems,
     external_execution_items_count:executionItems.length
   };
@@ -554,7 +575,7 @@ export default {
         assetStatus=probe.status;assetLocation=probe.headers.get('Location')||null;
       }catch{}
       const autonomousGrowthTruth=await canonicalAutonomousGrowthTruth(env).catch(()=>null);
-      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v2',operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:2,businessFunnel:['strict_verified_human_sessions','verified_outbound_clicks','monetized_verified_outbound_clicks'],selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v2',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.8'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v2',operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:2,businessFunnel:['strict_verified_human_sessions','verified_outbound_clicks','monetized_verified_outbound_clicks'],selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v3',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.8'},{headers:{'Cache-Control':'no-store'}});
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
