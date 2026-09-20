@@ -162,7 +162,17 @@ export default {
       if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
       return Response.json(await leaseQueue(env,url.searchParams.get('limit')),{headers:JSON_HEADERS});
     }
-    if(url.pathname==='/api/distribution/vendor-amplification/public-candidates'&&request.method==='GET'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return Response.json(await publicCandidates(env,url.searchParams.get('limit')),{headers:JSON_HEADERS});}
+    if(url.pathname==='/api/distribution/vendor-amplification/public-candidates'&&request.method==='GET'){
+      if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+      const handoff=request.headers.get('X-ToolScout-Handoff')||'';
+      let contactRefresh=null;
+      try{
+        const refreshRequest=new Request('https://trytoolscout.org/api/distribution/vendor-amplification/contact-scan',{method:'POST',headers:{'X-ToolScout-Handoff':handoff}});
+        const refreshed=await base.fetch(refreshRequest,env,ctx);
+        contactRefresh=refreshed.ok?await refreshed.json():{ok:false,http_status:refreshed.status};
+      }catch(e){contactRefresh={ok:false,error:String(e?.message||e).slice(0,300)}}
+      return Response.json({...await publicCandidates(env,url.searchParams.get('limit')),contact_refresh:contactRefresh},{headers:JSON_HEADERS});
+    }
     if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
     return base.fetch(request,env,ctx);
   },
