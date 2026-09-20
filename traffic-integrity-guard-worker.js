@@ -175,10 +175,18 @@ async function handlePageConfirmation(request,env,ctx,body){
     return Response.json({ok:true,recorded:false,classification:SESSION_CLASSIFICATIONS.SYNTHETIC,guard:{decision:'blocked',reason}},{status:202,headers});
   }
   if(guardId)await env.DB.prepare(`UPDATE traffic_guard_events SET decision='allowed',reason='browser_proof_and_rate_ok' WHERE id=?`).bind(guardId).run();
-  const pathState=await env.DB.prepare(`SELECT COUNT(DISTINCT path) paths FROM traffic_guard_events WHERE session_id=? AND decision='allowed'`).bind(sessionId).first().catch(()=>null);
+  const pathState=await env.DB.prepare(`SELECT COUNT(DISTINCT path) paths,MIN(created_at) first_at,MAX(created_at) last_at FROM traffic_guard_events WHERE session_id=? AND decision='allowed'`).bind(sessionId).first().catch(()=>null);
   const trustedInteractions=Math.max(0,Number(body?.browser_proof?.trusted_interaction_count??body?.browser_proof?.interaction_count??0)||0);
+  const pathCount=Number(pathState?.paths||0);
+  const firstMs=Date.parse(String(pathState?.first_at||'').replace(' ','T')+'Z');
+  const lastMs=Date.parse(String(pathState?.last_at||'').replace(' ','T')+'Z');
+  const spanMs=Number.isFinite(firstMs)&&Number.isFinite(lastMs)?Math.max(0,lastMs-firstMs):null;
+  if(trustedInteractions===0&&pathCount>=2&&spanMs!=null&&spanMs<5000){
+    await markSynthetic(env,sessionId);
+    await env.DB.prepare(`UPDATE traffic_guard_events SET decision='blocked',reason='parallel_multi_page_zero_interaction' WHERE session_id=?`).bind(sessionId).run();
+    return Response.json({ok:true,recorded:false,classification:SESSION_CLASSIFICATIONS.SYNTHETIC,guard:{decision:'blocked',reason:'parallel_multi_page_zero_interaction'}},{status:202,headers});
+  }
   if(trustedInteractions>0)await markStrictHuman(env,request,body,'trusted_interaction',3);
-  else if(Number(pathState?.paths||0)>=2)await markStrictHuman(env,request,body,'multi_page_navigation',2);
   return base.fetch(request,env,ctx);
 }
 async function handleEvents(request,env,ctx){
@@ -357,7 +365,7 @@ async function augmentHealth(response,env){
     env.DB.prepare(`SELECT COUNT(DISTINCT session_id) sessions FROM traffic_guard_events WHERE decision='allowed' AND created_at>=datetime('now','-24 hours')`).first()
   ]);
   data.browserGuard={status:'diagnostic_only',minimumVisibleMs:MIN_VISIBLE_MS,browserValidatedSessions24h:Number(browserValidated?.sessions||0),blockedAutomation24h:Number(blocked?.count||0),lastBlockedAt:blocked?.last_blocked_at||null,historicalQuarantinedSessions:Number(quarantined?.count||0),rawIpStored:false,rawUserAgentStored:false};
-  data.strictHumanTruth={status:'active',version:'strict-human-v1',trackingSince:meta?.value||null,sessions24h:Number(strict?.sessions||0),visitors24h:Number(strict?.visitors||0),lastEvidenceAt:strict?.last_evidence_at||null,evidenceRequired:true,acceptedEvidence:['trusted_interaction','multi_page_navigation','verified_outbound_navigation']};
+  data.strictHumanTruth={status:'active',version:'strict-human-v1',trackingSince:meta?.value||null,sessions24h:Number(strict?.sessions||0),visitors24h:Number(strict?.visitors||0),lastEvidenceAt:strict?.last_evidence_at||null,evidenceRequired:true,acceptedEvidence:['trusted_interaction','verified_outbound_navigation'],multiPageNavigationDiagnosticOnly:true};
   const headers=new Headers(response.headers);headers.set('Content-Type','application/json; charset=UTF-8');headers.set('Cache-Control','no-store');headers.delete('Content-Length');
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }
