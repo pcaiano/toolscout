@@ -1,0 +1,75 @@
+name: ToolScout Google Search Reality
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sync-gsc-signals.mjs'
+      - '.github/workflows/gsc-search-reality.yml'
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gsc-search-reality
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect first-party Search Console reality
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+          GSC_INSPECTION_LIMIT: '250'
+        run: node scripts/sync-gsc-signals.mjs
+
+      - name: Validate Search Console reality
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='reports/gsc-search-reality.json';
+          if(!fs.existsSync(p)) throw new Error('gsc_search_reality_missing');
+          const x=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(x?.source!=='Google Search Console first-party APIs') throw new Error('unexpected_gsc_source');
+          if(x?.authorizationScope!=='https://www.googleapis.com/auth/webmasters.readonly') throw new Error('gsc_not_read_only');
+          if(!x?.searchPerformance?.window28d) throw new Error('search_performance_missing');
+          if(!x?.indexHealth) throw new Error('index_health_missing');
+          if(!x?.sitemaps) throw new Error('sitemap_health_missing');
+          const age=Date.now()-Date.parse(x.generatedAt||'');
+          if(!Number.isFinite(age)||age>30*60*1000) throw new Error('gsc_reality_stale');
+          console.log(JSON.stringify({
+            generatedAt:x.generatedAt,
+            impressions:x.searchPerformance.window28d.impressions,
+            clicks:x.searchPerformance.window28d.clicks,
+            inspected:x.indexHealth.inspected,
+            indexed:x.indexHealth.indexed,
+            indexIssues:x.indexHealth.notIndexed,
+            canonicalMismatches:x.indexHealth.canonicalMismatches,
+            sitemapApiOk:x.sitemaps.apiOk
+          }));
+          NODE
+
+      - name: Commit telemetry only
+        run: |
+          if [ -z "$(git status --porcelain -- reports/gsc-signals.json reports/gsc-search-reality.json)" ]; then
+            echo "No Search Console telemetry changes."
+            exit 0
+          fi
+          git config user.name "toolscout-gsc-reality"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- reports/gsc-signals.json reports/gsc-search-reality.json
+          git commit -m "Refresh first-party Google Search reality"
+          git pull --rebase origin main
+          git push origin HEAD:main
