@@ -218,11 +218,11 @@ export async function executeCatalogGrowthTask(env,task={}){
     await event(env,slug,(hint?.name||humanName(slug))+' resolved to existing catalog tool '+alias.name+'. No duplicate profile was created.',{slug,existing_slug:alias.slug,toolscout_url:BASE+'/tools/'+alias.slug});
     return{ok:true,verified:true,admitted:false,already_present:true,slug:alias.slug,profile:alias,toolscoutUrl:BASE+'/tools/'+alias.slug};
   }
-  const existing=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status='admitted_coverage'").bind(slug).first();
+  const existing=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status IN ('published','admitted_coverage')").bind(slug).first();
   if(existing){
     let profile=null;try{profile=JSON.parse(existing.profile_json)}catch{}
     if(isFullParityProfile(profile)){
-      await env.DB.prepare("UPDATE catalog_market_gaps SET status='admitted_coverage',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
+      await env.DB.prepare("UPDATE catalog_market_gaps SET status='published',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
       return{ok:true,verified:true,admitted:false,already_admitted:true,slug,profile,toolscoutUrl:BASE+'/tools/'+slug};
     }
   }
@@ -251,9 +251,9 @@ export async function executeCatalogGrowthTask(env,task={}){
     provenance:{mode:'verified_catalog_runtime',admittedAt:new Date().toISOString(),marketSignals:{count:Number(gap.signals||0),sources},affiliateNeutral:true,competitorContentUsedForEditorialFacts:false,reviewMethod:'first_party_verified_structured_profile_v2'}
   };
   profile.editorialReview=editorialReview(profile);
-  await env.DB.prepare("INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'admitted_coverage','ok',datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='admitted_coverage',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')").bind(slug,JSON.stringify(profile)).run();
+  await env.DB.prepare("INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')").bind(slug,JSON.stringify(profile)).run();
   await env.DB.prepare("INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,quality_status,static_last_verified,last_checked_at,updated_at) VALUES(?,?,'ok',200,?,'healthy',date('now'),datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status='ok',http_status=200,final_url=excluded.final_url,quality_status='healthy',static_last_verified=date('now'),last_checked_at=datetime('now'),updated_at=datetime('now')").bind(slug,official.url,official.url).run().catch(()=>{});
-  await env.DB.prepare("UPDATE catalog_market_gaps SET status='admitted_coverage',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
+  await env.DB.prepare("UPDATE catalog_market_gaps SET status='published',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
   const toolscoutUrl=BASE+'/tools/'+slug;
   await event(env,slug,name+' added automatically as a full ToolScout catalog profile after first-party verification and scoring.',{slug,name,source_url:official.url,toolscout_url:toolscoutUrl,category:cat,market_signals:Number(gap.signals||0),verified_capabilities:features});
   return{ok:true,verified:true,admitted:true,slug,profile,toolscoutUrl};

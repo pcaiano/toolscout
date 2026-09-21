@@ -204,7 +204,7 @@ async function resilientSnapshot(request,env,ctx){
     safeFirst(env,`SELECT COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved')`),
     safeFirst(env,`SELECT COUNT(*) placements,COALESCE(SUM(backlink_verified),0) backlinks FROM distribution_placements WHERE placement_verified=1`),
     safeFirst(env,`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`),
-    safeFirst(env,`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status='admitted_coverage'`),
+    safeFirst(env,`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage')`),
     safeFirst(env,`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`),
     safeAll(env,`SELECT tool_slug,detail,evidence_json,created_at FROM catalog_runtime_events WHERE event_type='catalog_growth_admitted' AND status='completed' ORDER BY created_at DESC LIMIT 8`),
     safeFirst(env,`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`)

@@ -80,7 +80,7 @@ async function ensureSchema(env){
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS catalog_runtime_candidates(
       tool_slug TEXT PRIMARY KEY,
       profile_json TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'admitted_coverage',
+      status TEXT NOT NULL DEFAULT 'published',
       source_status TEXT,
       verified_at TEXT,
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -178,7 +178,7 @@ async function runtimeSnapshot(env,{force=false}={}){
   await ensureSchema(env);
   const [states,candidates]=await Promise.all([
     env.DB.prepare(`SELECT * FROM catalog_runtime_state`).all(),
-    env.DB.prepare(`SELECT tool_slug,profile_json,status,source_status,verified_at FROM catalog_runtime_candidates WHERE status='admitted_coverage' ORDER BY verified_at DESC`).all()
+    env.DB.prepare(`SELECT tool_slug,profile_json,status,source_status,verified_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage') ORDER BY verified_at DESC`).all()
   ]);
   const stateMap=new Map((states.results||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
   for(const row of candidates.results||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
@@ -275,7 +275,7 @@ async function syncMarketGaps(env){
   for(const gap of Array.isArray(report?.gaps)?report.gaps:[]){
     const slug=String(gap?.slug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');if(!slug)continue;
     await env.DB.prepare(`INSERT INTO catalog_market_gaps(tool_slug,signals,sources_json,examples_json,status,updated_at) VALUES(?,?,?,?,'research_required',datetime('now'))
-      ON CONFLICT(tool_slug) DO UPDATE SET signals=excluded.signals,sources_json=excluded.sources_json,examples_json=excluded.examples_json,status=CASE WHEN catalog_market_gaps.status IN ('admitted_coverage','covered','covered_existing') THEN catalog_market_gaps.status ELSE 'research_required' END,updated_at=datetime('now')`)
+      ON CONFLICT(tool_slug) DO UPDATE SET signals=excluded.signals,sources_json=excluded.sources_json,examples_json=excluded.examples_json,status=CASE WHEN catalog_market_gaps.status IN ('published','admitted_coverage','covered','covered_existing') THEN catalog_market_gaps.status ELSE 'research_required' END,updated_at=datetime('now')`)
       .bind(slug,Number(gap?.mentions||gap?.sources?.length||0),JSON.stringify(gap?.sources||[]),JSON.stringify(gap?.exampleUrls||[])).run();
     synced++;
   }
@@ -298,8 +298,8 @@ export async function admitTrustedCandidates(env){
       const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
       const profile={...raw,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2'}};
       profile.editorialReview=profile.editorialReview||runtimeEditorialView(profile);
-      await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'admitted_coverage','ok',datetime('now'),datetime('now'))
-        ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='admitted_coverage',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
+      await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
+        ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
         .bind(slug,JSON.stringify(profile)).run();
       await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted as a full ToolScout catalog peer after official-source and deterministic quality gates.',{source_url:profile.sourceUrl,category:profile.category});
       existing.add(slug);admitted++;
@@ -365,7 +365,7 @@ async function status(env){
   await ensureSchema(env);
   const [states,candidates,gaps,events,newsSources,newsCandidates]=await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`).first(),
-    env.DB.prepare(`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status='admitted_coverage'`).first(),
+    env.DB.prepare(`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`).first(),
     env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_events WHERE created_at>=datetime('now','-7 days')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(last_checked_at) last_checked_at FROM software_news_sources WHERE status='active'`).first(),

@@ -438,7 +438,7 @@ async function coordinateGrowthOpportunities(env){
   }
 
   const runtimeStateBySlug=new Map((catalogRuntime||[]).map(x=>[String(x.tool_slug||'').toLowerCase(),x]));
-  const runtimeCandidateSet=new Set((catalogCandidates||[]).filter(x=>x.status==='admitted_coverage').map(x=>String(x.tool_slug||'').toLowerCase()));
+  const runtimeCandidateSet=new Set((catalogCandidates||[]).filter(x=>['published','admitted_coverage'].includes(x.status)).map(x=>String(x.tool_slug||'').toLowerCase()));
   const runtimeGapMap=new Map((catalogGaps||[]).map(x=>[String(x.tool_slug||'').toLowerCase(),x]));
   const catalogBySlug=new Map((Array.isArray(catalogTools)?catalogTools:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
   const changed=new Map((inputFreshness.catalogFreshness.fresh&&Array.isArray(catalogFreshness?.contentChanges)?catalogFreshness.contentChanges:[]).map(x=>[String(x?.slug||'').toLowerCase(),x]));
