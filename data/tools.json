@@ -788,6 +788,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://claude.ai/",
+    "verificationUrl": "https://docs.anthropic.com/en/docs/intro-to-claude",
     "lastVerified": "2026-09-01",
     "scores": {
       "price": 8,
@@ -2510,6 +2511,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://replit.com/",
+    "verificationUrl": "https://docs.replit.com/welcome",
     "lastVerified": "2026-09-01",
     "scores": {
       "price": 8,
@@ -2672,6 +2674,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://chatgpt.com/",
+    "verificationUrl": "https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
     "lastVerified": "2026-09-01",
     "scores": {
       "price": 9,
@@ -2712,6 +2715,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://gemini.google.com/",
+    "verificationUrl": "https://gemini.google/overview/",
     "lastVerified": "2026-09-01",
     "scores": {
       "price": 9,
