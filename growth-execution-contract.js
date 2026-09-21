@@ -91,6 +91,8 @@ const READY_CAPS=Object.freeze({
   growth_supervisor:1
 });
 const GENERIC_BATCH_EXECUTORS=new Set(['distribution_network','distribution_autonomous','affiliate_cycle']);
+const RECONCILE_ACTIVE_LIMIT=16;
+const RECONCILE_DEFERRED_PROOF_LIMIT=4;
 
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const dt=minutes=>new Date(Date.now()+minutes*60000).toISOString().replace('T',' ').slice(0,19);
@@ -562,13 +564,23 @@ export async function reconcileExecutionDeadlines(env){
 export async function reconcileExecutionContracts(env){
   await ensureExecutionContractSchema(env);
   await reconcileExecutionDeadlines(env);
-  const tasks=await all(env,`SELECT * FROM growth_execution_contract
+  const activeTasks=await all(env,`SELECT * FROM growth_execution_contract
     WHERE status IN ('pending','claimed','attempted','stalled','executor_missing')
-       OR (status='deferred' AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle'))
-    ORDER BY CASE status WHEN 'claimed' THEN 0 WHEN 'attempted' THEN 1 WHEN 'stalled' THEN 2 WHEN 'pending' THEN 3 WHEN 'executor_missing' THEN 4 ELSE 5 END,
+    ORDER BY CASE status WHEN 'claimed' THEN 0 WHEN 'attempted' THEN 1 WHEN 'stalled' THEN 2 WHEN 'pending' THEN 3 ELSE 4 END,
              priority_score DESC,created_at ASC
-    LIMIT 160`);
-  let verified=0,stalled=0,missing=0;
+    LIMIT ${RECONCILE_ACTIVE_LIMIT}`);
+  const deferredCountRow=await first(env,`SELECT COUNT(*) n FROM growth_execution_contract
+    WHERE status='deferred' AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle')`);
+  const deferredTotal=n(deferredCountRow?.n);
+  const deferredOffset=deferredTotal>RECONCILE_DEFERRED_PROOF_LIMIT
+    ? (Math.floor(Date.now()/HOUR)*RECONCILE_DEFERRED_PROOF_LIMIT)%deferredTotal
+    : 0;
+  const deferredTasks=deferredTotal>0?await all(env,`SELECT * FROM growth_execution_contract
+    WHERE status='deferred' AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle')
+    ORDER BY priority_score DESC,created_at ASC
+    LIMIT ${RECONCILE_DEFERRED_PROOF_LIMIT} OFFSET ${deferredOffset}`):[];
+  const tasks=[...activeTasks,...deferredTasks];
+  let verified=0,stalled=0,missing=0,seoReport=null;
   const now=Date.now();
   for(const t of tasks){
     if(t.status==='executor_missing'){missing++;continue}
@@ -602,7 +614,8 @@ export async function reconcileExecutionContracts(env){
       evidence=await first(env,`SELECT event_id,event_type,created_at,post_uri FROM audience_events WHERE status='published' AND event_type='outbound_reply' AND created_at>=COALESCE(?,?) ORDER BY created_at ASC LIMIT 1`,[sqlTime(t.claimed_at),created]);
       if(evidence)evidence={...evidence,verified:true,proof_scope:'single_inflight_supervisor_task'};
     }else if(t.executor==='seo_github'){
-      const report=await assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]});
+      if(!seoReport)seoReport=await assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]});
+      const report=seoReport;
       const generated=Date.parse(String(report.generatedAt||'')),createdAt=Date.parse(String(t.created_at||'').replace(' ','T')+'Z');
       const intent=subject.replace(/^\//,'').replace(/\.html$/,'');
       const matched=[...(report.newInterventions||[]),...(report.activeOptimizations||[])].some(x=>String(x?.intent||x?.path||'').replace(/^\//,'').replace(/\.html$/,'')===intent);
@@ -637,7 +650,7 @@ export async function reconcileExecutionContracts(env){
       stalled++;
     }
   }
-  return{ok:true,checked:tasks.length,verified,stalled,missingExecutors:missing};
+  return{ok:true,checked:tasks.length,verified,stalled,missingExecutors:missing,reconcileBudget:{activeLimit:RECONCILE_ACTIVE_LIMIT,deferredProofLimit:RECONCILE_DEFERRED_PROOF_LIMIT,activeChecked:activeTasks.length,deferredProofChecked:deferredTasks.length,deferredTotal,deferredOffset}};
 }
 
 export async function executionContractSnapshot(env){

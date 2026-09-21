@@ -752,6 +752,12 @@ async function runBoundedPublicExecutionReconcile(env){
   const snapshot=await executionContractSnapshot(env);
   return{ok:true,mode:'bounded_handoff_v1',synced,deadlines,integrity,snapshot};
 }
+async function runProtectedGrowthCoreRecovery(env){
+  const execution=await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'architecture_recovery',singleFlightMinutes:20},()=>runGrowthExecutionContractCycle(env));
+  const selfAudit=await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'architecture_recovery',singleFlightMinutes:20},()=>runGrowthSupervisorAudit(env));
+  const architecture=await auditArchitectureEscalations(env).catch(error=>({ok:false,error:String(error?.message||error).slice(0,500)}));
+  return{ok:execution?.status!=='failed'&&selfAudit?.status!=='failed',mode:'protected_core_recovery_v1',execution,selfAudit,architecture};
+}
 async function runCatalogGapReconcile(env){
   const synced=await syncExecutionContracts(env);
   const before=await reconcileExecutionContracts(env);
@@ -992,6 +998,10 @@ if(u.pathname==='/api/growth/execution/catalog-quality-status'&&request.method==
 if(u.pathname==='/api/growth/execution/public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   return Response.json(await runBoundedPublicExecutionReconcile(env),{headers:H});
+}
+if(u.pathname==='/api/growth/execution/core-recover'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  return Response.json(await runProtectedGrowthCoreRecovery(env),{headers:H});
 }
 if(u.pathname==='/api/growth/execution/integrity-self-test'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
