@@ -13,7 +13,7 @@ test('dynamic comparator always renders a ToolScout editorial analysis',()=>{
   assert.match(html,/function editorialConclusion\(a,b\)/);
   assert.match(html,/comparisonDimensions=/);
   assert.match(html,/editorialConclusion\(x,y\)/);
-  assert.doesNotMatch(html,/[–—]/);
+  assert.doesNotMatch(html,/[\u2013\u2014]/);
 });
 
 test('registered static comparisons preserve the ToolScout conclusion',()=>{
