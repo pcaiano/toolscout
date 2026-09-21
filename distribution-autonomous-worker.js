@@ -11,9 +11,17 @@ const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|acc
 const AUTH_RE=/(account required|sign in|login required|api key|bearer token|oauth)/i;
 const ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add)/i;
 const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|registry|submit)/i;
-const QUALIFY_LIMIT=4;
-const EXECUTION_LIMIT=3;
-const RESEARCH_COOLDOWN_HOURS=12;
+const QUALIFY_LIMIT=24;
+const EXECUTION_LIMIT=12;
+const RESEARCH_COOLDOWN_HOURS=6;
+async function runDiscoveryRefresh(env){
+  if(!env.ADMIN_TOKEN)return {ok:false,reason:'admin_token_unavailable'};
+  try{
+    const response=await base.fetch(new Request('https://trytoolscout.org/api/distribution/discovery/refresh',{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`}}),env);
+    if(!response?.ok)return {ok:false,status:Number(response?.status||0),reason:'discovery_refresh_failed'};
+    return await response.json();
+  }catch(e){return {ok:false,reason:String(e?.message||e).slice(0,300)}}
+}
 function safe(v,n=4000){return String(v??'').slice(0,n)}
 function host(v){try{return new URL(v).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
 const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets|asset|img|images|media|js|css|fonts|edge|storage)\./i;
@@ -705,6 +713,7 @@ function backlinkEvidence(html){
 }
 async function verifyFootprint(env){
   await ensureAutonomySchema(env);
+  const discovery=await runDiscoveryRefresh(env);
   let rows=[];
   try{
     const q=await env.DB.prepare(`SELECT o.surface_slug,COALESCE(p.public_url,o.live_url,ds.response_url,o.action_url) public_url,p.last_checked_at
@@ -777,7 +786,7 @@ export async function runAutonomousDistributionCycle(env){
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
-  return {ok:true,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
+  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
