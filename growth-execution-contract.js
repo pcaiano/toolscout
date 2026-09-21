@@ -260,7 +260,7 @@ export async function syncExecutionContracts(env){
   await env.DB.prepare(`UPDATE growth_execution_contract
     SET status='cancelled',last_result='source_no_longer_active',completed_at=datetime('now'),updated_at=datetime('now')
     WHERE source_kind='opportunity'
-      AND status NOT IN ('verified','human_required','blocked','cancelled')
+      AND status NOT IN ('verified','blocked','cancelled')
       AND NOT EXISTS(
         SELECT 1 FROM growth_opportunity_state g,json_each(g.action_json) j
         WHERE g.status='active'
@@ -428,6 +428,18 @@ export async function rebalanceExecutionAdmission(env){
 
 export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null,result='executor_claimed'}={}){
   await ensureExecutionContractSchema(env);
+  if(executor==='seo_github'){
+    const github=await assetJson(env,'/data/github-actions-resume-policy.json',{enabled:true,reason:null});
+    if(github?.enabled===false){
+      const reason=String(github?.reason||'github_actions_disabled').slice(0,600);
+      await env.DB.prepare(`UPDATE growth_execution_contract
+        SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+            claimed_at=NULL,attempted_at=NULL,last_result=?,updated_at=datetime('now')
+        WHERE executor='seo_github' AND status IN ('pending','claimed','attempted','stalled')`)
+        .bind(`executor_unavailable:seo_github:${reason}`).run();
+      return{claimed:0,taskIds:[],tasks:[],inFlight:0,capacity:Number(maxInFlight||limit||0),available:false,reason};
+    }
+  }
   await rebalanceExecutionAdmission(env);
   const spec=EXECUTORS[executor]||null;
   let effective=Math.max(0,Math.min(100,Number(limit)||0)),inFlight=0;
