@@ -83,8 +83,10 @@ async function refreshPersistentActionUrls(env){
   }catch{}
   return {checked,recovered,externalFailures};
 }
-function schemaObject(spec,op){const rb=op?.requestBody?.content?.['application/json']?.schema;if(!rb)return null;if(rb.$ref){const path=rb.$ref.replace(/^#\//,'').split('/');let cur=spec;for(const p of path)cur=cur?.[p];return cur||null}return rb}
-function payloadFromSchema(schema){if(!schema||schema.type!=='object')return null;const props=schema.properties||{},required=schema.required||[];for(const key of required){if(!SAFE_FIELDS.has(key)||/(terms|agree|consent|captcha|password|token|key)/i.test(key))return null}const payload={};for(const key of Object.keys(props)){if(!SAFE_FIELDS.has(key))continue;if(key==='name'||key==='title')payload[key]='ToolScout';else if(['url','website','website_url','homepage','product_url','tool_url'].includes(key))payload[key]='https://trytoolscout.org/';else if(key==='description')payload[key]='ToolScout is an independent software discovery and recommendation platform.';else if(key==='tagline')payload[key]='Find the right software for the job without the noise.';else if(key==='category')payload[key]='Software';else if(key==='categories')payload[key]=['Software'];else if(key==='slug')payload[key]='toolscout';else if(key==='domain')payload[key]='trytoolscout.org'}for(const key of required)if(payload[key]===undefined)return null;return payload}
+function resolveSchemaRef(spec,schema){if(!schema)return null;if(!schema.$ref)return schema;const path=String(schema.$ref).replace(/^#\//,'').split('/');let cur=spec;for(const p of path)cur=cur?.[p];return cur||null}
+function schemaObject(spec,op){const rb=op?.requestBody?.content?.['application/json']?.schema;return resolveSchemaRef(spec,rb)}
+function listingPayloadFromSchema(spec,schema){const resolved=resolveSchemaRef(spec,schema);if(!resolved||resolved.type!=='object')return null;const props=resolved.properties||{},required=resolved.required||[],payload={};for(const key of Object.keys(props)){if(key==='listing_type')payload[key]='company';else if(key==='name'||key==='title')payload[key]='ToolScout';else if(key==='slug')payload[key]='toolscout';else if(key==='tagline')payload[key]='Find the right software for the job without the noise.';else if(key==='description')payload[key]='ToolScout is an independent software discovery and recommendation platform.';else if(['url','website_url','homepage','product_url','tool_url'].includes(key))payload[key]='https://trytoolscout.org/';else if(key==='domain')payload[key]='trytoolscout.org';else if(key==='categories')payload[key]=['Software'];else if(key==='category')payload[key]='Software';else if(key==='is_stealth')payload[key]=false;else if(key==='type_data')payload[key]={}}for(const key of required)if(payload[key]===undefined)return null;return payload}
+function payloadFromSchema(spec,schema){const resolved=resolveSchemaRef(spec,schema);if(!resolved||resolved.type!=='object')return null;const props=resolved.properties||{},required=resolved.required||[];if(props.listing){const listing=listingPayloadFromSchema(spec,props.listing);if(!listing)return null;const payload={listing};if(props.attribution)payload.attribution={agent_name:'ToolScout Distribution Engine',represented_organization:'ToolScout'};if(required.includes('website'))payload.website='';for(const key of required)if(payload[key]===undefined)return null;return payload}for(const key of required){if(!SAFE_FIELDS.has(key)||/(terms|agree|consent|captcha|password|token|key)/i.test(key))return null}const payload={};for(const key of Object.keys(props)){if(!SAFE_FIELDS.has(key))continue;if(key==='name'||key==='title')payload[key]='ToolScout';else if(['url','website','website_url','homepage','product_url','tool_url'].includes(key))payload[key]='https://trytoolscout.org/';else if(key==='description')payload[key]='ToolScout is an independent software discovery and recommendation platform.';else if(key==='tagline')payload[key]='Find the right software for the job without the noise.';else if(key==='category')payload[key]='Software';else if(key==='categories')payload[key]=['Software'];else if(key==='slug')payload[key]='toolscout';else if(key==='domain')payload[key]='trytoolscout.org'}for(const key of required)if(payload[key]===undefined)return null;return payload}
 function tagAttr(tag,name){const m=String(tag||'').match(new RegExp('\\b'+name+'\\s*=\\s*["\\\']([^"\\\']*)["\\\']','i'));return m?m[1]:null}
 function safeFormPayload(html){
   const payload={};
@@ -139,6 +141,7 @@ function htmlFormAdapter(homepage,html){
 }
 function serverBase(spec,source){try{const s=spec?.servers?.[0]?.url;if(s)return new URL(s,source).toString()}catch{}return new URL(source).origin+'/'}
 function operationSecurity(spec,op){return op?.security!==undefined?op.security:(Array.isArray(spec?.security)?spec.security:null)}
+function securityRequiresAuth(security){if(!Array.isArray(security)||security.length===0)return false;return !security.some(req=>req&&typeof req==='object'&&Object.keys(req).length===0)}
 function authDetail(spec,security){
   if(!Array.isArray(security)||security.length===0)return null;
   const schemes=spec?.components?.securitySchemes||{};
@@ -152,7 +155,7 @@ function verificationFromSpec(spec,source,homepage){
     const op=methods?.get;
     if(!op||!ROUTE_RE.test(path+' '+safe(op.summary,300)+' '+safe(op.operationId,200)))continue;
     const sec=operationSecurity(spec,op);
-    if(Array.isArray(sec)&&sec.length>0)continue;
+    if(securityRequiresAuth(sec))continue;
     const params=[...String(path).matchAll(/\{([^}]+)\}/g)].map(m=>m[1]);
     if(!params.length&&!/toolscout/i.test(path))continue;
     if(params.some(p=>replacements[String(p).toLowerCase()]===undefined))continue;
@@ -169,13 +172,13 @@ function openApiAdapter(spec,source,homepage){
   for(const [path,methods] of Object.entries(spec.paths)){
     const op=methods?.post;
     if(!op||!ROUTE_RE.test(path+' '+safe(op.summary,300)+' '+safe(op.operationId,200)))continue;
-    const schema=schemaObject(spec,op),payload=payloadFromSchema(schema);
+    const schema=schemaObject(spec,op),payload=payloadFromSchema(spec,schema);
     if(!payload)continue;
     const endpoint=new URL(path,serverBase(spec,source)).toString();
     if(!sameHostFamily(endpoint,homepage))continue;
     const blob=JSON.stringify({summary:op.summary,description:op.description,schema}).slice(0,12000);
     if(POLICY_BLOCK_RE.test(blob)||HUMAN_BLOCK_RE.test(blob))continue;
-    const security=operationSecurity(spec,op),authRequired=Array.isArray(security)&&security.length>0;
+    const security=operationSecurity(spec,op),authRequired=securityRequiresAuth(security);
     const verification=verificationFromSpec(spec,source,homepage)||{};
     return {
       endpoint,payload,confidence:98,verification_source:source,
