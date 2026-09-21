@@ -131,7 +131,11 @@ async function eventContext(request){
 async function linkAfterRequest(request,env,url,response,event){
   const visitor=visitorId(request);
   if(!visitor)return;
-  if(event){await linkVisitor(env,{visitor,...event});return}
+  if(event){
+    const persisted=await env.DB.prepare(`SELECT 1 ok FROM funnel_events WHERE session_id=? AND event_type='page_confirmed' LIMIT 1`).bind(event.session).first().catch(()=>null);
+    if(persisted?.ok)await linkVisitor(env,{visitor,...event});
+    return;
+  }
   if(request.method==='GET'&&url.pathname.startsWith('/go/')&&response.status>=300&&response.status<400){
     const session=sessionId(request);if(!session)return;
     let path='/',referrerHost=null;
