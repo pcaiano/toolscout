@@ -118,6 +118,11 @@ export async function auditArchitectureEscalations(env){
           SELECT 1 FROM engine_runs s
           WHERE s.engine=f.engine AND s.mission=f.mission AND s.status='completed' AND s.started_at>f.started_at
         )
+        AND NOT EXISTS(
+          SELECT 1 FROM engine_runs r
+          WHERE r.engine=f.engine AND r.mission=f.mission AND r.status='running'
+            AND r.started_at>f.started_at AND r.started_at>=datetime('now','-20 minutes')
+        )
       GROUP BY f.engine,f.mission,f.detail,f.evidence_json
       ORDER BY last_failed DESC LIMIT 50`).all();
   }catch{}
