@@ -155,15 +155,32 @@ const UI_INTEGRITY=`<script>
     modalRows('Engine & Data Health','NO SILENT FAILURES',html);
   };
 
+  function renderCatalogAdmissions(d){
+    const x=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.catalog||{},items=Array.isArray(x.recent_admissions)?x.recent_admissions:[];
+    const card=[...document.querySelectorAll('.widget')].find(w=>/catalog(?:ue)? growth/i.test(w.textContent||''));
+    if(!card)return;
+    let box=card.querySelector('[data-catalog-recent]');if(!box){box=document.createElement('div');box.setAttribute('data-catalog-recent','1');box.style.marginTop='10px';card.appendChild(box)}
+    box.innerHTML='<div class="note"><b>Catalog additions | 7d:</b> '+fmtCount(x.admissions_7d)+'</div>'+
+      (items.length?'<div style="margin-top:7px">'+items.slice(0,5).map(v=>row(v.evidence&&v.evidence.name||v.tool_slug,'Added',((v.evidence&&v.evidence.category)||'coverage')+(v.created_at?' | '+dt(v.created_at):''))).join('')+'</div>':'<div class="note" style="margin-top:7px">No recent catalog admissions.</div>');
+  }
   const priorRender=render;
-  render=function(d){priorRender(d);renderHealth(d);const a=d.measurementAudit||{},state=statusLabel(a.status||'unknown');statusEl.innerHTML='<strong>Updated '+esc(new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'}))+'.</strong> Integrity: '+esc(state)+'. Values marked Unavailable are not zero.';};
+  render=function(d){priorRender(d);renderHealth(d);renderCatalogAdmissions(d);const a=d.measurementAudit||{},state=statusLabel(a.status||'unknown');statusEl.innerHTML='<strong>Updated '+esc(new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'}))+'.</strong> Integrity: '+esc(state)+'. Values marked Unavailable are not zero.';};
 })();
 </script>`;
 
-async function normalizeJsonResponse(response){
+async function normalizeJsonResponse(response,env){
   if(!response.ok)return response;
   let data;try{data=await response.json()}catch{return response}
   data=normalizeStats(data);
+  try{
+    const [recent,count]=await Promise.all([
+      env.DB.prepare("SELECT tool_slug,detail,evidence_json,created_at FROM catalog_runtime_events WHERE event_type='catalog_candidate_admitted' AND status='completed' ORDER BY created_at DESC LIMIT 8").all(),
+      env.DB.prepare("SELECT COUNT(*) n FROM catalog_runtime_events WHERE event_type='catalog_candidate_admitted' AND status='completed' AND created_at>=datetime('now','-7 days')").first()
+    ]);
+    data.growthOps=data.growthOps||{};data.growthOps.engines=data.growthOps.engines||{};data.growthOps.engines.catalog=data.growthOps.engines.catalog||{};
+    data.growthOps.engines.catalog.admissions_7d=Number(count?.n||0);
+    data.growthOps.engines.catalog.recent_admissions=(recent?.results||[]).map(x=>{let evidence=null;try{evidence=JSON.parse(x.evidence_json||'null')}catch{}return{tool_slug:x.tool_slug,detail:x.detail,created_at:x.created_at,evidence}});
+  }catch{}
   const headers=new Headers(response.headers);headers.set('Content-Type','application/json; charset=UTF-8');headers.set('Cache-Control','private, no-store');headers.delete('Content-Length');headers.delete('Content-Encoding');
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }
@@ -176,6 +193,6 @@ async function injectUi(response){
 }
 
 export default {
-  async fetch(request,env,ctx){const url=new URL(request.url);const response=await base.fetch(request,env,ctx);if(request.method==='GET'&&statsPath(url.pathname))return normalizeJsonResponse(response);if(request.method==='GET'&&analyticsPath(url.pathname))return injectUi(response);return response},
+  async fetch(request,env,ctx){const url=new URL(request.url);const response=await base.fetch(request,env,ctx);if(request.method==='GET'&&statsPath(url.pathname))return normalizeJsonResponse(response,env);if(request.method==='GET'&&analyticsPath(url.pathname))return injectUi(response);return response},
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
