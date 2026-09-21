@@ -231,9 +231,9 @@ async function canonicalSnapshot(env,upstream){
   const weightedCoverage=humanOutbound==null||monetized==null?null:(humanOutbound?monetized/humanOutbound:null);
   const runMap=new Map();
   if(runsResult.ok)for(const row of runsResult.value||[]){const existing=runMap.get(row.engine),a=parseUtc(row.started_at)?.getTime()||0,b=parseUtc(existing?.started_at)?.getTime()||0;if(!existing||a>b)runMap.set(row.engine,row)}
-  const distributionControlHealth=runHealth(operatingLatest.ok?operatingLatest.value:null,90);
+  const distributionControlHealth=runHealth(operatingLatest.ok?operatingLatest.value:null,150);
   const distributionAutonomousHealth=runHealth(autonomousLatest.ok?autonomousLatest.value:null,90);
-  const distributionNetworkHealth=runHealth(networkLatest.ok?networkLatest.value:null,90);
+  const distributionNetworkHealth=runHealth(networkLatest.ok?networkLatest.value:null,150);
   const distributionStatuses=[distributionControlHealth.status,distributionAutonomousHealth.status,distributionNetworkHealth.status];
   const distributionStatus=distributionStatuses.includes('failed')?'failed':(distributionStatuses.some(x=>['degraded','stale','unknown'].includes(x))?'stale':(distributionStatuses.includes('running')?'running':'healthy'));
   const distributionHealth={...distributionControlHealth,status:distributionStatus,components:{control:distributionControlHealth,autonomous:distributionAutonomousHealth,network:distributionNetworkHealth}};
