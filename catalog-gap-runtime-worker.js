@@ -211,11 +211,20 @@ async function event(env,slug,detail,evidence){
 export async function executeCatalogGrowthTask(env,task={}){
   const slug=String(task.subject_key||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
   if(task.subject_type!=='catalog_gap'||!slug)return{ok:false,verified:false,reason:'unsupported_catalog_task'};
+  const hint=PROFILE_HINTS[slug]||null;
+  const alias=await existingCatalogAlias(env,slug,hint);
+  if(alias){
+    await env.DB.prepare("UPDATE catalog_market_gaps SET status='covered_existing',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
+    await event(env,slug,(hint?.name||humanName(slug))+' resolved to existing catalog tool '+alias.name+'. No duplicate profile was created.',{slug,existing_slug:alias.slug,toolscout_url:BASE+'/tools/'+alias.slug});
+    return{ok:true,verified:true,admitted:false,already_present:true,slug:alias.slug,profile:alias,toolscoutUrl:BASE+'/tools/'+alias.slug};
+  }
   const existing=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status='admitted_coverage'").bind(slug).first();
   if(existing){
-    await env.DB.prepare("UPDATE catalog_market_gaps SET status='admitted_coverage',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
     let profile=null;try{profile=JSON.parse(existing.profile_json)}catch{}
-    return{ok:true,verified:true,admitted:false,already_admitted:true,slug,profile,toolscoutUrl:BASE+'/tools/'+slug};
+    if(isFullParityProfile(profile)){
+      await env.DB.prepare("UPDATE catalog_market_gaps SET status='admitted_coverage',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
+      return{ok:true,verified:true,admitted:false,already_admitted:true,slug,profile,toolscoutUrl:BASE+'/tools/'+slug};
+    }
   }
   const gap=await env.DB.prepare("SELECT signals,sources_json,examples_json FROM catalog_market_gaps WHERE tool_slug=?").bind(slug).first();
   if(!gap)return{ok:false,verified:false,reason:'catalog_gap_not_found',slug};
