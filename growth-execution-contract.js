@@ -6,9 +6,9 @@ const EXECUTORS=Object.freeze({
   make_sender:{engine:'distribution',mode:'external',claim:360,attempt:300,verify:720},
   content_issue:{engine:'content',mode:'internal',claim:90,attempt:240,verify:1440},
   audience_make:{engine:'audience',mode:'external',claim:90,attempt:300,verify:720},
-  seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:420,verify:720},
-  affiliate_cycle:{engine:'affiliate',mode:'internal',claim:180,attempt:720,verify:2880},
-  catalog_cycle:{engine:'catalog',mode:'internal',claim:360,attempt:720,verify:2880},
+  seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:300,verify:720},
+  affiliate_cycle:{engine:'affiliate',mode:'internal',claim:180,attempt:360,verify:2880},
+  catalog_cycle:{engine:'catalog',mode:'internal',claim:360,attempt:360,verify:2880},
   growth_supervisor:{engine:'growth',mode:'internal',claim:90,attempt:180,verify:360},
   human_gate:{engine:'human',mode:'human',claim:null,attempt:null,verify:null}
 });
@@ -80,16 +80,17 @@ const SUPERVISOR_EXECUTOR=Object.freeze({
   catalog:'catalog_cycle'
 });
 const READY_CAPS=Object.freeze({
-  distribution_network:4,
-  distribution_autonomous:2,
-  make_sender:3,
-  content_issue:2,
+  distribution_network:1,
+  distribution_autonomous:1,
+  make_sender:1,
+  content_issue:1,
   audience_make:1,
-  seo_github:4,
-  affiliate_cycle:3,
-  catalog_cycle:3,
+  seo_github:1,
+  affiliate_cycle:1,
+  catalog_cycle:1,
   growth_supervisor:1
 });
+const GENERIC_BATCH_EXECUTORS=new Set(['distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle']);
 
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const dt=minutes=>new Date(Date.now()+minutes*60000).toISOString().replace('T',' ').slice(0,19);
@@ -97,6 +98,15 @@ const sqlTime=v=>String(v||'').replace('T',' ').replace('Z','').slice(0,19);
 async function all(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
 async function first(env,sql,bindings=[]){try{let q=env.DB.prepare(sql);if(bindings.length)q=q.bind(...bindings);return await q.first()}catch{return null}}
 async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
+let availabilityCache={at:0,value:null};
+async function executionAvailability(env){
+  if(availabilityCache.value&&Date.now()-availabilityCache.at<60000)return availabilityCache.value;
+  const github=await assetJson(env,'/data/github-actions-resume-policy.json',{enabled:true,reason:null});
+  const value={
+    seo_github:{available:github?.enabled!==false,reason:github?.enabled===false?String(github?.reason||'github_actions_disabled'):null}
+  };
+  availabilityCache={at:Date.now(),value};return value;
+}
 async function hash(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32)}
 
 export function executionRegistry(){return{actions:ACTION_EXECUTOR,executors:EXECUTORS,supervisor:SUPERVISOR_EXECUTOR}}
@@ -291,17 +301,33 @@ export async function syncExecutionContracts(env){
         claim_deadline=NULL,
         attempt_deadline=NULL,
         verify_deadline=NULL,
-        last_result='legacy_capacity_backlog_normalized_v2',
+        claimed_at=NULL,
+        attempted_at=NULL,
+        last_result='legacy_sla_backlog_requeued_v3',
         updated_at=datetime('now')
-    WHERE source_kind='opportunity'
+    WHERE created_at<'2026-09-21 09:05:00'
       AND status='stalled'
-      AND attempts=0
-      AND last_result IN ('claim_sla_missed','queued_awaiting_executor_capacity','executor_capacity_backlog')`).run();
+      AND last_result IN ('claim_sla_missed','attempt_sla_missed','verification_sla_missed','queued_awaiting_executor_capacity','executor_capacity_backlog')`).run();
+  const staleLegacyClaims=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='deferred',
+        claim_deadline=NULL,
+        attempt_deadline=NULL,
+        verify_deadline=NULL,
+        claimed_at=NULL,
+        attempted_at=NULL,
+        last_result='legacy_stale_claim_released_v3',
+        updated_at=datetime('now')
+    WHERE created_at<'2026-09-21 09:05:00'
+      AND status IN ('claimed','attempted')
+      AND claimed_at IS NOT NULL
+      AND claimed_at<datetime('now','-6 hours')`).run();
   const contentTaskBindingRecovery=await env.DB.prepare(`UPDATE growth_execution_contract
     SET status='deferred',
         claim_deadline=NULL,
         attempt_deadline=NULL,
         verify_deadline=NULL,
+        claimed_at=NULL,
+        attempted_at=NULL,
         last_result='requeued_after_content_task_binding_fix',
         updated_at=datetime('now')
     WHERE executor='content_issue'
@@ -314,11 +340,13 @@ export async function syncExecutionContracts(env){
     SUM(CASE WHEN status='human_required' THEN 1 ELSE 0 END) human_required,
     SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred
     FROM growth_execution_contract`);
-  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v2'};
+  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),staleLegacyClaimsReleased:Number(staleLegacyClaims?.meta?.changes||staleLegacyClaims?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v3'};
 }
 
 export async function rebalanceExecutionAdmission(env){
   await ensureExecutionContractSchema(env);
+  const availability=await executionAvailability(env);
+
   const legacy=await env.DB.prepare(`UPDATE growth_execution_contract
     SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
         claimed_at=NULL,attempted_at=NULL,last_result='legacy_generic_execution_requeued_v2',updated_at=datetime('now')
@@ -327,13 +355,48 @@ export async function rebalanceExecutionAdmission(env){
         SELECT 1 FROM growth_execution_events e
         WHERE e.task_id=growth_execution_contract.task_id AND e.event_type='claimed'
       )`).run();
-  const result={promoted:0,deferred:Number(legacy?.meta?.changes||legacy?.changes||0),legacyRequeued:Number(legacy?.meta?.changes||legacy?.changes||0),executors:{}};
+
+  const batchRelease=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+        claimed_at=NULL,attempted_at=NULL,last_result='batch_executor_waiting_for_subject_evidence_v3',updated_at=datetime('now')
+    WHERE source_kind='opportunity'
+      AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle')
+      AND status IN ('pending','claimed','attempted','stalled')
+      AND COALESCE(last_result,'') NOT LIKE 'executor_error:%'`).run();
+
+  let unavailableReleased=0;
+  if(availability?.seo_github?.available===false){
+    const reason=String(availability.seo_github.reason||'github_actions_disabled').slice(0,600);
+    const w=await env.DB.prepare(`UPDATE growth_execution_contract
+      SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+          claimed_at=NULL,attempted_at=NULL,last_result=?,updated_at=datetime('now')
+      WHERE executor='seo_github'
+        AND status IN ('pending','claimed','attempted','stalled')`).bind(`executor_unavailable:seo_github:${reason}`).run();
+    unavailableReleased=Number(w?.meta?.changes||w?.changes||0);
+  }
+
+  const result={
+    promoted:0,
+    deferred:Number(legacy?.meta?.changes||legacy?.changes||0)+Number(batchRelease?.meta?.changes||batchRelease?.changes||0)+unavailableReleased,
+    legacyRequeued:Number(legacy?.meta?.changes||legacy?.changes||0),
+    batchOpportunityReleased:Number(batchRelease?.meta?.changes||batchRelease?.changes||0),
+    unavailableReleased,
+    availability,
+    executors:{}
+  };
+
   for(const [executor,spec] of Object.entries(EXECUTORS)){
     if(spec.mode==='human')continue;
-    const cap=Math.max(1,Number(READY_CAPS[executor]||2));
+    const cap=Math.max(1,Number(READY_CAPS[executor]||1));
+    if(executor==='seo_github'&&availability?.seo_github?.available===false){
+      result.executors[executor]={cap,available:false,reason:availability.seo_github.reason||'github_actions_disabled',inFlight:0,pendingKept:0,promoted:0};
+      continue;
+    }
     const inFlightRow=await first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted')`,[executor]);
     const inFlight=n(inFlightRow?.n),readySlots=Math.max(0,cap-inFlight);
-    const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending' ORDER BY priority_score DESC,created_at ASC`).bind(executor).all();
+
+    const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
+    const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY priority_score DESC,created_at ASC`).bind(executor).all();
     const pendingIds=(pending.results||[]).map(x=>x.task_id);
     const keep=pendingIds.slice(0,readySlots),demote=pendingIds.slice(readySlots);
     if(demote.length){
@@ -346,7 +409,8 @@ export async function rebalanceExecutionAdmission(env){
     let promoted=0;
     const remaining=Math.max(0,readySlots-keep.length);
     if(remaining>0){
-      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred' ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
+      const deferredWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
+      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
         const marks=ids.map(()=>'?').join(',');
@@ -355,7 +419,7 @@ export async function rebalanceExecutionAdmission(env){
         promoted=Number(w?.meta?.changes||w?.changes||0);result.promoted+=promoted;
       }
     }
-    result.executors[executor]={cap,inFlight,pendingKept:keep.length,promoted};
+    result.executors[executor]={cap,available:true,inFlight,pendingKept:keep.length,promoted};
   }
   return result;
 }
@@ -421,6 +485,48 @@ export async function recordExecutionProof(env,{taskId,executor=null,status='ver
   return{ok:true,taskId,status:normalized};
 }
 
+export async function deferExecutionTask(env,taskId,result='deferred_without_task_specific_proof'){
+  await ensureExecutionContractSchema(env);
+  const row=await first(env,`SELECT task_id,executor,status FROM growth_execution_contract WHERE task_id=?`,[taskId]);
+  if(!row)return{ok:false,error:'unknown_task'};
+  if(TERMINAL.has(String(row.status||'')))return{ok:true,idempotent:true,status:row.status};
+  const w=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+        claimed_at=NULL,attempted_at=NULL,last_result=?,updated_at=datetime('now')
+    WHERE task_id=? AND status NOT IN ('verified','human_required','blocked','cancelled')`).bind(String(result||'deferred_without_task_specific_proof').slice(0,1000),taskId).run();
+  await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+    .bind(`ge_${crypto.randomUUID()}`,taskId,'deferred',row.executor,'deferred',String(result||'deferred_without_task_specific_proof').slice(0,1000)).run().catch(()=>{});
+  return{ok:true,changed:Number(w?.meta?.changes||w?.changes||0),status:'deferred'};
+}
+
+export async function runExecutionIntegritySelfTest(env){
+  await ensureExecutionContractSchema(env);
+  const taskId=`selftest|${crypto.randomUUID()}`;
+  const executor='growth_supervisor';
+  try{
+    await env.DB.prepare(`INSERT INTO growth_execution_contract(
+      task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,execution_mode,priority_score,status,
+      claim_deadline,attempt_deadline,verify_deadline,claimed_at,created_at,updated_at)
+      VALUES(?, 'self_test', ?, NULL, 'self_test', 'closed_loop_integrity', 'integrity_self_test', ?, 'growth', 'internal', 0, 'claimed',
+        datetime('now','+5 minutes'),datetime('now','+5 minutes'),datetime('now','+5 minutes'),datetime('now'),datetime('now'),datetime('now'))`)
+      .bind(taskId,taskId,executor).run();
+    await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+      .bind(`ge_${crypto.randomUUID()}`,taskId,'claimed',executor,'claimed','integrity_self_test_claimed').run();
+
+    await markExecutorAttempt(env,executor,'integrity_self_test_injected_failure',{failed:true,taskIds:[taskId]});
+    const failedRow=await first(env,`SELECT status,last_result FROM growth_execution_contract WHERE task_id=?`,[taskId]);
+    const failedEvent=await first(env,`SELECT event_type,status FROM growth_execution_events WHERE task_id=? AND event_type='executor_failed' ORDER BY created_at DESC LIMIT 1`,[taskId]);
+
+    const recovery=await recordExecutionProof(env,{taskId,executor,status:'verified',detail:'integrity_self_test_recovered',evidence:{self_test:true,phase:'recovery'}});
+    const verifiedRow=await first(env,`SELECT status,verified_at FROM growth_execution_contract WHERE task_id=?`,[taskId]);
+    const ok=failedRow?.status==='stalled'&&failedEvent?.event_type==='executor_failed'&&recovery?.ok===true&&verifiedRow?.status==='verified';
+    return{ok,failureVisible:failedRow?.status==='stalled',failureEventRecorded:failedEvent?.event_type==='executor_failed',recoveryVerified:verifiedRow?.status==='verified'};
+  }finally{
+    await env.DB.prepare(`DELETE FROM growth_execution_events WHERE task_id=?`).bind(taskId).run().catch(()=>{});
+    await env.DB.prepare(`DELETE FROM growth_execution_contract WHERE task_id=?`).bind(taskId).run().catch(()=>{});
+  }
+}
+
 export async function verifySupervisorExecutorTasks(env,executor,result='supervisor_executor_completed',taskIds=null){
   await ensureExecutionContractSchema(env);
   const ids=Array.isArray(taskIds)?taskIds.filter(Boolean).slice(0,100):[];
@@ -456,7 +562,12 @@ export async function reconcileExecutionDeadlines(env){
 export async function reconcileExecutionContracts(env){
   await ensureExecutionContractSchema(env);
   await reconcileExecutionDeadlines(env);
-  const tasks=await all(env,`SELECT * FROM growth_execution_contract WHERE status IN ('pending','claimed','attempted','stalled','executor_missing') ORDER BY priority_score DESC,created_at ASC LIMIT 60`);
+  const tasks=await all(env,`SELECT * FROM growth_execution_contract
+    WHERE status IN ('pending','claimed','attempted','stalled','executor_missing')
+       OR (status='deferred' AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle'))
+    ORDER BY CASE status WHEN 'claimed' THEN 0 WHEN 'attempted' THEN 1 WHEN 'stalled' THEN 2 WHEN 'pending' THEN 3 WHEN 'executor_missing' THEN 4 ELSE 5 END,
+             priority_score DESC,created_at ASC
+    LIMIT 160`);
   let verified=0,stalled=0,missing=0;
   const now=Date.now();
   for(const t of tasks){
@@ -537,7 +648,7 @@ export async function executionContractSnapshot(env){
     first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE status='executor_missing'`),
     first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE status='stalled'`),
     first(env,`SELECT
-      MIN(CASE WHEN status='pending' THEN created_at END) oldest_pending,
+      MIN(CASE WHEN status='pending' THEN updated_at END) oldest_pending,
       MIN(CASE WHEN status='claimed' THEN claimed_at END) oldest_claimed,
       MIN(CASE WHEN status='attempted' THEN attempted_at END) oldest_attempted
       FROM growth_execution_contract`),
