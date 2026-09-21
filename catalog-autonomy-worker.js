@@ -4,6 +4,7 @@ import { runWithLedger } from './engine-run-ledger.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=3;
+const MAX_CANDIDATE_CHECKS_PER_CYCLE=4;
 const FETCH_TIMEOUT_MS=6000;
 let schemaReady=null;
 let runtimeCache={at:0,candidates:[],candidateMap:new Map(),stateMap:new Map(),suppressed:new Set()};
@@ -271,7 +272,7 @@ export async function admitTrustedCandidates(env){
   for(const file of config?.trustedCandidateFiles||[]){
     const candidates=await assetJson(env,'/'+String(file).replace(/^\//,''),[]);
     for(const raw of Array.isArray(candidates)?candidates:[]){
-      if(admitted>=MAX_ADMIT_PER_DAY)break;
+      if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
       const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug))continue;
       considered++;
       const errors=validCandidate(raw,config);if(errors.length){held++;continue}
@@ -283,11 +284,11 @@ export async function admitTrustedCandidates(env){
       await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted to the runtime coverage catalog after official-source and deterministic quality gates. Ranking remains disabled.',{source_url:profile.sourceUrl,category:profile.category});
       existing.add(slug);admitted++;
     }
-    if(admitted>=MAX_ADMIT_PER_DAY)break;
+    if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
   }
   const market_gaps=await syncMarketGaps(env);
   runtimeCache.at=0;
-  return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,rule:'Affiliate economics cannot increase catalog admission or ranking eligibility.'};
+  return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,rule:'Affiliate economics cannot increase catalog admission or ranking eligibility.'};
 }
 function candidatePage(tool){
   const url=`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,features=(tool.features||[]).map(x=>`<li>${esc(x)}</li>`).join(''),best=(tool.bestFor||[]).map(x=>`<li>${esc(x)}</li>`).join('');
