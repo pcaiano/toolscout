@@ -107,11 +107,27 @@ async function validateMakeSenderTask(env,taskId,subjectType,subjectKey){
     return task;
   }catch{return null}
 }
+async function recordAuthorityNoOutput(env,reason,taskId=null){
+  const detail=`Authority handoff produced no external action: ${String(reason||'unknown').slice(0,180)}${taskId?` · task ${String(taskId).slice(0,180)}`:''}. This is a no-output acquisition cycle, not a growth success. Discovery/network replenishment is requested automatically.`;
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authnoop_${crypto.randomUUID()}`,'authority_handoff_no_output','no_output','backlink_acquisition',detail).run().catch(()=>{});
+}
+async function replenishAuthorityPipeline(env){
+  if(!env.ADMIN_TOKEN)return {scheduled:false,reason:'admin_token_unavailable'};
+  const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`};
+  const results=[];
+  for(const target of ['/api/distribution/discovery/refresh','/api/distribution/network/refresh']){
+    try{
+      const r=await fetch('https://trytoolscout.org'+target,{method:'POST',headers,signal:AbortSignal.timeout(15000)});
+      results.push({target,status:r.status,ok:r.ok});
+    }catch(e){results.push({target,status:0,ok:false,error:String(e?.message||e).slice(0,200)})}
+  }
+  return {scheduled:true,results};
+}
 async function publicCandidates(env,limit=3){
   await ensureNetworkSchema(env);
   const n=Math.max(1,Math.min(3,Number(limit)||3));
   const task=await currentMakeSenderTask(env);
-  if(!task)return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-v2'};
+  if(!task){await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-v2'};}
   const items=[];
   if(task.subject_type==='tool'){
     const row=await env.DB.prepare(`SELECT v.tool_slug,v.asset_url,v.priority_score,v.vendor_domain,v.contact_email,v.contact_source_url,v.suggested_subject,v.suggested_body,v.public_dispatch_token
@@ -129,6 +145,7 @@ async function publicCandidates(env,limit=3){
       ORDER BY v.priority_score DESC LIMIT 1`).bind(task.subject_key).first();
     if(!row){
       const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_vendor_candidate');
+      await recordAuthorityNoOutput(env,'claimed_task_has_no_ready_vendor_candidate',task.task_id);
       return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_vendor_candidate',task_id:task.task_id,integrity:'task-specific-v2',release};
     }
     const token=row.public_dispatch_token||crypto.randomUUID();
@@ -140,6 +157,7 @@ async function publicCandidates(env,limit=3){
     const row=await env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_network_outreach WHERE surface_slug=? AND status='contact_found' AND contact_email IS NOT NULL LIMIT 1`).bind(task.subject_key).first();
     if(!row){
       const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_surface_candidate');
+      await recordAuthorityNoOutput(env,'claimed_task_has_no_ready_surface_candidate',task.task_id);
       return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_surface_candidate',task_id:task.task_id,integrity:'task-specific-v2',release};
     }
     const token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
@@ -198,7 +216,10 @@ export default {
         const refreshed=await base.fetch(refreshRequest,env,ctx);
         contactRefresh=refreshed.ok?await refreshed.json():{ok:false,http_status:refreshed.status};
       }catch(e){contactRefresh={ok:false,error:String(e?.message||e).slice(0,300)}}
-      return Response.json({...await publicCandidates(env,url.searchParams.get('limit')),contact_refresh:contactRefresh},{headers:JSON_HEADERS});
+      const result=await publicCandidates(env,url.searchParams.get('limit'));
+      const replenish=!(result.items||[]).length&&Boolean(env.ADMIN_TOKEN);
+      if(replenish&&ctx?.waitUntil)ctx.waitUntil(replenishAuthorityPipeline(env).catch(()=>null));
+      return Response.json({...result,contact_refresh:contactRefresh,authority_replenishment_scheduled:replenish},{headers:JSON_HEADERS});
     }
     if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
     return base.fetch(request,env,ctx);
