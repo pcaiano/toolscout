@@ -179,7 +179,7 @@ export async function runGrowthSupervisorAudit(env){
   const [humansRows,exec,gsc,gscReality,organic,active,executionContract,architectureIncidents,backlinkPlacements,outboundMetrics,authorityMetrics]=await Promise.all([
     strictRows(env),executionRows(env),
     assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
-    assetJson(env,'/reports/gsc-search-reality.json',{generatedAt:null,searchPerformance:{},indexHealth:{},sitemaps:{}}),
+    assetJson(env,'/data/gsc-search-reality.json',{generatedAt:null,searchPerformance:{},indexHealth:{},sitemaps:{}}),
     assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
     all(env,`SELECT subject_type,COUNT(*) n FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`),
     first(env,`SELECT
