@@ -183,7 +183,9 @@ export async function publicEscalationCandidates(env,limit=3){
   const items=[];
   for(const row of q.results||[]){
     const resolved=row.email_status==='pending_resolved',mail=resolved?buildResolvedEmail(row):buildOpenEmail(row);
-    await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=?,updated_at=datetime('now') WHERE incident_id=? AND email_status=?`).bind(resolved?'sending_resolved':'sending',row.incident_id,row.email_status).run();
+    const lease=await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=?,updated_at=datetime('now') WHERE incident_id=? AND email_status=?`).bind(resolved?'sending_resolved':'sending',row.incident_id,row.email_status).run();
+    const leased=Number(lease?.meta?.changes||lease?.changes||0)>0;
+    if(!leased)continue;
     items.push({incident_id:row.incident_id,dispatch_token:row.dispatch_token,email_kind:resolved?'resolved':'code_approval_required',subject:mail.subject,body:mail.body});
   }
   return{ok:true,items};

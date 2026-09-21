@@ -724,7 +724,7 @@ async function runGrowthExecutionContractCycle(env){
     }
   }else results.make_sender={claimed:0};
 
-  await runInternal('content_issue',async()=>{
+  await runInternal('content_issue',async(task)=>{
     const intelligence=await runContentSocialIntelligenceCycle(env);
     const brief=await issueGrowthContentBrief(env,task);
     return{intelligence,brief};
