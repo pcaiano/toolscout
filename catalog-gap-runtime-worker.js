@@ -7,7 +7,7 @@ const PROFILE_HINTS=Object.freeze({
     sourceUrl:'https://character.ai/',
     category:'ai-assistant',
     description:'AI character platform for interactive conversations, character creation, storytelling and personalized entertainment.',
-    features:['AI character conversations','character creation','interactive storytelling','personas','memory','creative conversation'],
+    features:['AI assistant','AI character conversations','character creation','interactive storytelling','personas','memory','creative conversation'],
     bestFor:['interactive storytelling','character creators','roleplay and creative conversation','casual AI users','entertainment'],
     pricing:'Free plan available; paid plans are available. See vendor for current regional pricing.',
     freePlan:true,
@@ -235,7 +235,7 @@ export async function executeCatalogGrowthTask(env,task={}){
   const corpus=official.title+' '+official.description+' '+official.text,features=capabilities(corpus);
   if(features.length<2)return{ok:true,verified:false,reason:'first_party_capabilities_too_thin',slug,sourceUrl:official.url,capabilities:features.length};
   const name=hint?.name||humanName(slug),cat=category(corpus,hint?.category);
-  const verifiedFeatures=[...new Set([...(hint?.features||[]),...features])].filter(Boolean).slice(0,10);
+  const verifiedFeatures=[...new Set(Array.isArray(hint?.features)&&hint.features.length?hint.features:features)].filter(Boolean).slice(0,10);
   const description=clean(hint?.description||(official.description.length>=60?official.description:(name+' provides '+verifiedFeatures.slice(0,4).join(', ')+'.')));
   const free=detectFreePlan(corpus,hint);
   const profile={
