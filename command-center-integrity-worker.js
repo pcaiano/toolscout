@@ -170,7 +170,7 @@ async function canonicalSnapshot(env,upstream){
   const now=new Date(),today=dayKey(now),month=today.slice(0,7),todayStart=sqliteUtc(zonedMidnight(today)),monthStart=sqliteUtc(zonedMidnight(`${month}-01`)),last24Start=sqliteUtc(new Date(now.getTime()-86400000)),scanStart=last24Start<monthStart?last24Start:monthStart;
   const trendStart=dayKey(new Date(now.getTime()-29*86400000));
   const strictMeta=await first(env,`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`),strictTrackingSince=parseUtc(strictMeta?.value?.value),strictTrackingDay=strictTrackingSince?dayKey(strictTrackingSince):today;
-  const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,runsResult,unrecoveredFailures,growthLatest,catalogQualityLatest,catalogWarnings,operatingLatest,autonomousLatest,networkLatest,falseReady,editorialPending,gscAsset,ga4Asset]=await Promise.all([
+  const [sessions,trend,outbound,byTool,todayVisitors,last24Visitors,countryRows,audienceLatest,contentLatest,contentExecutionLatest,affiliateSupervisor,runsResult,unrecoveredFailures,growthLatest,catalogQualityLatest,catalogWarnings,operatingLatest,autonomousLatest,networkLatest,falseReady,editorialPending,gscAsset,ga4Asset]=await Promise.all([
     first(env,`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) monthToDate,MAX(last_evidence_at) lastAllowedAt FROM traffic_human_evidence WHERE first_evidence_at>=?`,[last24Start,todayStart,monthStart,scanStart]),
     all(env,`SELECT day,human_sessions sessions FROM command_center_daily_metrics WHERE day>=? ORDER BY day ASC`,[trendStart]),
     first(env,`SELECT COUNT(*) humanOutbound,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetizedOutbound,SUM(CASE WHEN affiliate_active_at_click!=1 OR affiliate_active_at_click IS NULL THEN 1 ELSE 0 END) unmonetizedOutbound,MAX(created_at) lastOutboundAt FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days')`),
@@ -180,6 +180,8 @@ async function canonicalSnapshot(env,upstream){
     all(env,`SELECT v.visitor_id,v.session_id,h.first_evidence_at created_at,COALESCE(vc.country,UPPER(h.country)) country FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id LEFT JOIN confirmed_visitor_countries vc ON vc.visitor_id=v.visitor_id AND vc.session_id=v.session_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[monthStart]),
     first(env,`SELECT event_type,observed_at,created_at FROM audience_events WHERE source='make-audience-engine' AND status='published' ORDER BY created_at DESC LIMIT 1`),
     first(env,`SELECT event_type,content_id,observed_at,created_at FROM audience_events WHERE source='make_content_engine' AND event_type='content_published' AND status='published' ORDER BY created_at DESC LIMIT 1`),
+    first(env,`SELECT * FROM engine_runs WHERE engine='content' AND mission='social_intelligence' ORDER BY started_at DESC LIMIT 1`),
+    first(env,`SELECT directive_json FROM growth_supervisor_state WHERE engine='affiliate' LIMIT 1`),
     latestEngineRuns(env).then(value=>({ok:true,value})).catch(error=>({ok:false,error:String(error?.message||error),value:[]})),
     all(env,`SELECT f.engine,f.mission,f.started_at,f.detail
       FROM engine_runs f
@@ -206,7 +208,7 @@ async function canonicalSnapshot(env,upstream){
     runtimeAssetJson(env,'/reports/ga4-health.json')
   ]);
 
-  const queryMap={human_sessions:sessions,traffic_trend:trend,verified_outbound:outbound,verified_outbound_by_tool:byTool,attribution_today:todayVisitors,attribution_last24:last24Visitors,visitor_countries:countryRows,audience_evidence:audienceLatest,content_evidence:contentLatest,engine_runs:runsResult,unrecovered_engine_failures:unrecoveredFailures,growth_latest:growthLatest,catalog_quality_latest:catalogQualityLatest,catalog_runtime_warnings:catalogWarnings,distribution_operating_latest:operatingLatest,distribution_autonomous_latest:autonomousLatest,distribution_network_latest:networkLatest,distribution_false_ready:falseReady,distribution_editorial_pending:editorialPending};
+  const queryMap={human_sessions:sessions,traffic_trend:trend,verified_outbound:outbound,verified_outbound_by_tool:byTool,attribution_today:todayVisitors,attribution_last24:last24Visitors,visitor_countries:countryRows,audience_evidence:audienceLatest,content_evidence:contentLatest,content_execution:contentExecutionLatest,affiliate_supervisor:affiliateSupervisor,engine_runs:runsResult,unrecovered_engine_failures:unrecoveredFailures,growth_latest:growthLatest,catalog_quality_latest:catalogQualityLatest,catalog_runtime_warnings:catalogWarnings,distribution_operating_latest:operatingLatest,distribution_autonomous_latest:autonomousLatest,distribution_network_latest:networkLatest,distribution_false_ready:falseReady,distribution_editorial_pending:editorialPending};
   const issues=Object.entries(queryMap).filter(([,q])=>!q.ok).map(([metric,q])=>({metric,severity:'error',reason:q.error||'query_failed'}));
   const dayNumber=Number(today.slice(8,10))||1,daysInMonth=new Date(Date.UTC(Number(today.slice(0,4)),Number(today.slice(5,7)),0)).getUTCDate();
   const sessionRow=sessions.ok?sessions.value||{}:null,mtd=sessionRow?finiteOrNull(sessionRow.monthToDate):null;
@@ -235,7 +237,14 @@ async function canonicalSnapshot(env,upstream){
   const distributionStatuses=[distributionControlHealth.status,distributionAutonomousHealth.status,distributionNetworkHealth.status];
   const distributionStatus=distributionStatuses.includes('failed')?'failed':(distributionStatuses.some(x=>['degraded','stale','unknown'].includes(x))?'stale':(distributionStatuses.includes('running')?'running':'healthy'));
   const distributionHealth={...distributionControlHealth,status:distributionStatus,components:{control:distributionControlHealth,autonomous:distributionAutonomousHealth,network:distributionNetworkHealth}};
-  const affiliateHealth=runHealth(runMap.get('affiliate'),90),audienceHealth=eventHealth(audienceLatest.ok?audienceLatest.value:null,36*60,'verified audience_events'),contentHealth=eventHealth(contentLatest.ok?contentLatest.value:null,80*60,'verified Bluesky content publication');
+  let affiliateSupervisorConfig={};try{affiliateSupervisorConfig=JSON.parse(affiliateSupervisor?.value?.directive_json||'{}')}catch{}
+  const affiliateMaintenance=affiliateSupervisorConfig?.mode==='maintenance_only';
+  const affiliateExpectedCadenceMinutes=affiliateMaintenance?12*60:2*60;
+  const affiliateHealth={...runHealth(runMap.get('affiliate'),affiliateMaintenance?13*60:150),expected_cadence_minutes:affiliateExpectedCadenceMinutes,mode:affiliateMaintenance?'maintenance_only':'active'};
+  const audienceHealth=eventHealth(audienceLatest.ok?audienceLatest.value:null,36*60,'verified audience_events');
+  const contentPublicationHealth=eventHealth(contentLatest.ok?contentLatest.value:null,80*60,'verified Bluesky content publication');
+  const contentExecutionHealth=runHealth(contentExecutionLatest.ok?contentExecutionLatest.value:null,7*60);
+  const contentHealth={...contentExecutionHealth,publication:contentPublicationHealth,detail:contentExecutionHealth.detail||`Execution heartbeat from engine_runs; publication evidence is ${contentPublicationHealth.status}.`};
   const gscFreshness=sourceFreshness(gscAsset?.ok?gscAsset.value:{status:'unavailable'},72*60),ga4Freshness=sourceFreshness(ga4Asset?.ok?ga4Asset.value:{status:'unavailable'},36*60);
   if(['stale','unavailable','unknown'].includes(gscFreshness.status))issues.push({metric:'gsc',severity:gscFreshness.status==='unavailable'?'error':'warning',reason:gscFreshness.status});
   if(['stale','unavailable','unknown'].includes(ga4Freshness.status))issues.push({metric:'ga4',severity:'warning',reason:ga4Freshness.status});
