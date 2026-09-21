@@ -23,6 +23,10 @@ start.setUTCDate(start.getUTCDate() - lookbackDays + 1);
 const isoDate = d => d.toISOString().slice(0, 10);
 const startDate = isoDate(start);
 const endDate = isoDate(end);
+let previousSearchReality=null;
+try{
+  if(fs.existsSync('data/gsc-search-reality.json'))previousSearchReality=JSON.parse(fs.readFileSync('data/gsc-search-reality.json','utf8'));
+}catch{}
 
 function base64url(value) {
   return Buffer.from(value).toString('base64url');
@@ -342,11 +346,14 @@ for(const item of canonicalMismatches){
   opportunityRows.push({kind:'canonical_mismatch',queue:'fix_now',url:canonicalUrl||item.url,page:new URL(item.url).pathname,score:page?.impressions?98:82,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',googleCanonical:item.googleCanonical,userCanonical:item.userCanonical});
 }
 opportunityRows.sort((a,b)=>b.score-a.score||b.impressions-a.impressions);
-const queueSummary=['fix_now','index_recovery','ranking_opportunities','protect'].reduce((acc,key)=>{
-  const rows=opportunityRows.filter(x=>x.queue===key);
-  acc[key]={count:rows.length,top:rows.slice(0,10).map(x=>({page:x.page,url:x.url,kind:x.kind,score:x.score,impressions:x.impressions,position:x.position,action:x.action}))};
-  return acc;
-},{});
+function buildQueueSummary(rows){
+  return ['fix_now','index_recovery','ranking_opportunities','protect'].reduce((acc,key)=>{
+    const list=rows.filter(x=>x.queue===key);
+    acc[key]={count:list.length,top:list.slice(0,10).map(x=>({page:x.page,url:x.url,kind:x.kind,score:x.score,impressions:x.impressions,position:x.position,action:x.action,coverageState:x.coverageState||undefined}))};
+    return acc;
+  },{});
+}
+const queueSummary=buildQueueSummary(opportunityRows);
 
 const searchReality = {
   generatedAt:new Date().toISOString(),
@@ -404,6 +411,30 @@ const searchReality = {
     canonicalInspections.length<canonicalUniverse.size?'Canonical index health is based on the inspected sitemap sample shown in this report.':'The current inspection run covered the full canonical sitemap universe.'
   ]
 };
+const inspectionAttemptCoveragePct=canonicalUniverse.size?Number((canonicalInspections.length/canonicalUniverse.size*100).toFixed(1)):0;
+const inspectionQuotaLimited=inspectionErrors.some(x=>Number(x.httpStatus||0)===429||/RESOURCE_EXHAUSTED|Quota exceeded/i.test(String(x.error||'')));
+const previousHealthyCoverage=Number(previousSearchReality?.indexHealth?.inspectionCoveragePct||0);
+if(inspectionAttemptCoveragePct<80&&previousHealthyCoverage>=80&&previousSearchReality?.indexHealth){
+  const currentPerformance=(searchReality.opportunities||[]).filter(x=>['ranking_opportunities','protect'].includes(String(x?.queue||'')));
+  const priorTechnical=(previousSearchReality.opportunities||[]).filter(x=>['fix_now','index_recovery'].includes(String(x?.queue||'')));
+  const merged=[...currentPerformance,...priorTechnical].sort((a,b)=>Number(b?.score||0)-Number(a?.score||0)||Number(b?.impressions||0)-Number(a?.impressions||0)).slice(0,50);
+  searchReality.indexHealth={
+    ...previousSearchReality.indexHealth,
+    preservedFromPrevious:true,
+    preservedFromGeneratedAt:previousSearchReality?.indexHealth?.preservedFromGeneratedAt||previousSearchReality?.generatedAt||null,
+    lastInspectionAttemptAt:searchReality.generatedAt,
+    lastInspectionAttemptCoveragePct:inspectionAttemptCoveragePct,
+    lastInspectionAttemptErrors:inspectionErrors.length,
+    quotaLimited:inspectionQuotaLimited
+  };
+  searchReality.inspections=Array.isArray(previousSearchReality?.inspections)?previousSearchReality.inspections:[];
+  searchReality.opportunities=merged;
+  searchReality.queues=buildQueueSummary(merged);
+  searchReality.inspectionRun={attempted:canonicalInspections.length+inspectionErrors.length,succeeded:canonicalInspections.length,errors:inspectionErrors.length,coveragePct:inspectionAttemptCoveragePct,quotaLimited:inspectionQuotaLimited,preservedPriorHealthySnapshot:true};
+  searchReality.limitations.push('This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed.');
+}else{
+  searchReality.inspectionRun={attempted:canonicalInspections.length+inspectionErrors.length,succeeded:canonicalInspections.length,errors:inspectionErrors.length,coveragePct:inspectionAttemptCoveragePct,quotaLimited:inspectionQuotaLimited,preservedPriorHealthySnapshot:false};
+}
 searchReality.searchPerformance.window28d.ctr = searchReality.searchPerformance.window28d.impressions ? Number((searchReality.searchPerformance.window28d.clicks/searchReality.searchPerformance.window28d.impressions*100).toFixed(4)) : 0;
 searchReality.searchPerformance.window28d.position = pages.reduce((s,x)=>s+Number(x.position||0)*Number(x.impressions||0),0) / Math.max(1,searchReality.searchPerformance.window28d.impressions);
 searchReality.searchPerformance.window28d.position = Number(searchReality.searchPerformance.window28d.position.toFixed(4));
