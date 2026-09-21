@@ -16,7 +16,9 @@ test('dynamic comparator always renders a ToolScout editorial analysis',()=>{
   assert.match(html,/data-default-a="" data-default-b=""/);
   assert.match(html,/id="suggestions"/);
   assert.match(html,/function comparableTools\(a,b,tools\)/);
-  assert.match(html,/function suggestionsHtml\(a,b,tools\)/);
+  assert.match(html,/function suggestionLogoHtml\(tool,assets\)/);
+  assert.match(html,/function suggestionsHtml\(a,b,tools,assets\)/);
+  assert.match(html,/suggestionLogoHtml\(item\.tool,assets\)/);
   assert.match(html,/source=comparison-suggestions/);
   assert.doesNotMatch(html,/affiliateUrl|commission/);
   assert.doesNotMatch(html,/[\u2013\u2014]/);
@@ -39,6 +41,8 @@ test('registered static comparisons use the dynamic comparator surface',()=>{
     assert.match(html,/id="suggestions"/);
     assert.match(html,/Also worth comparing/);
     assert.match(html,/source=comparison-suggestions/);
+    assert.match(html,/class=['"]suggestion-top['"]/);
+    assert.match(html,/alt=['"][^'"]+ logo['"]/);
     assert.doesNotMatch(html,/Frequently asked questions|Related buying guides|How this comparison works|class="decision"/);
     assert.doesNotMatch(html,/[\u2013\u2014]/);
   }
@@ -51,7 +55,9 @@ test('comparison generator derives static pages from compare.html',()=>{
   assert.match(generator,/data-default-a=/);
   assert.match(generator,/initialTable\(a,b\)/);
   assert.match(generator,/function comparableTools\(a,b\)/);
+  assert.match(generator,/function suggestionLogoHtml\(tool\)/);
   assert.match(generator,/function suggestionsHtml\(a,b\)/);
+  assert.match(generator,/suggestionLogoHtml\(item\.tool\)/);
   assert.match(generator,/suggestionsHtml\(a,b\)/);
   assert.doesNotMatch(generator,/affiliateUrl|commission/);
   assert.doesNotMatch(generator,/Related buying guides|Frequently asked questions|How this comparison works/);
@@ -73,5 +79,7 @@ test('comparison suggestions stay compact and category grounded',()=>{
   assert.match(dynamic,/candidate\.category!==anchor\.category/);
   assert.match(dynamic,/Same '\+anchor\.category\+' category as/);
   assert.match(dynamic,/\.suggestion-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(dynamic,/\.suggestion-top\{display:flex;align-items:center;gap:10px/);
+  assert.match(dynamic,/onerror="nextIcon\(this\)"/);
   assert.match(dynamic,/@media\(max-width:650px\)[\s\S]*\.suggestion-grid\{grid-template-columns:1fr\}/);
 });
