@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T21:03:37.444Z",
+  "generatedAt": "2026-09-21T21:05:48.134Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -191,9 +191,9 @@
     "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
     "preservedFromPrevious": true,
     "preservedFromGeneratedAt": "2026-09-21T21:02:54.858Z",
-    "lastInspectionAttemptAt": "2026-09-21T21:03:37.444Z",
-    "lastInspectionAttemptCoveragePct": 7.7,
-    "lastInspectionAttemptErrors": 163,
+    "lastInspectionAttemptAt": "2026-09-21T21:05:48.134Z",
+    "lastInspectionAttemptCoveragePct": 8.9,
+    "lastInspectionAttemptErrors": 160,
     "quotaLimited": true
   },
   "sitemaps": {
@@ -6289,12 +6289,13 @@
     "Search Analytics returns top rows and is not guaranteed to include every row available in Search Console.",
     "URL Inspection describes the version in the Google index and does not perform a live indexability test.",
     "Canonical index health is based on the inspected sitemap sample shown in this report.",
-    "URL Inspection quota was exhausted during this collection. Index health is preserved from the last full healthy inspection while Search Analytics remains current."
+    "This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed."
   ],
   "inspectionRun": {
-    "attempted": 176,
-    "succeeded": 13,
-    "errors": 163,
+    "attempted": 175,
+    "succeeded": 15,
+    "errors": 160,
+    "coveragePct": 8.9,
     "quotaLimited": true,
     "preservedPriorHealthySnapshot": true
   }
