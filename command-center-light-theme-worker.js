@@ -247,7 +247,7 @@ async function augmentEntrypointHealth(response) {
   let data;
   try { data = await response.json(); } catch { return response; }
   data.entrypoint = 'command-center-light-theme-worker';
-  data.entrypointVersion = 13;
+  data.entrypointVersion = 14;
   data.commandCenterComposition = 'canonical-growth-v2';
   data.autonomousGrowthBrain = 'shared-growth-v3';
   data.affiliateEngineVersion = '2.1';
@@ -582,6 +582,14 @@ async function missionNeedsRecovery(env,engine,mission){
     return row.status==='failed'||row.status==='degraded';
   }catch{return false}
 }
+async function catalogQualityNeedsRecovery(env){
+  try{
+    const row=await env.DB.prepare(`SELECT evidence_json FROM engine_runs WHERE engine='catalog' AND mission='runtime_quality' AND status='completed' ORDER BY started_at DESC LIMIT 1`).first();
+    const evidence=JSON.parse(row?.evidence_json||'{}');
+    const checked=Number(evidence?.checked||0),warnings=Number(evidence?.warnings||0);
+    return checked>0&&warnings>=checked;
+  }catch{return false}
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -637,14 +645,18 @@ export default {
     }
 
     if(daily){
-      ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));
-      ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env)).catch(()=>{}));
+      ctx.waitUntil((async()=>{
+        try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env))}catch{}
+        try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env))}catch{}
+      })());
     }else if(hourly){
-      const [recoverCoverage,recoverNews]=await Promise.all([
+      const [recoverCoverage,recoverNews,recoverQuality]=await Promise.all([
         missionNeedsRecovery(env,'catalog','runtime_coverage'),
-        missionNeedsRecovery(env,'content','software_news_source_watch')
+        missionNeedsRecovery(env,'content','software_news_source_watch'),
+        catalogQualityNeedsRecovery(env)
       ]);
-      if(recoverCoverage||recoverNews)ctx.waitUntil((async()=>{
+      if(recoverCoverage||recoverNews||recoverQuality)ctx.waitUntil((async()=>{
+        if(recoverQuality){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery'},()=>verifyCatalogBatch(env))}catch{}}
         if(recoverCoverage){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+':recovery'},()=>admitTrustedCandidates(env))}catch{}}
         if(recoverNews){try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger+':recovery'},()=>verifyNewsSources(env))}catch{}}
       })());
