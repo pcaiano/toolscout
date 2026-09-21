@@ -324,7 +324,7 @@ async function canonicalAutonomousGrowthTruth(env) {
       SUM(CASE WHEN status='claimed' THEN 1 ELSE 0 END) claimed,
       SUM(CASE WHEN status='attempted' THEN 1 ELSE 0 END) attempted,
       SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred,
-      MIN(CASE WHEN status='pending' THEN created_at END) oldest_pending,
+      MIN(CASE WHEN status='pending' THEN updated_at END) oldest_pending,
       MIN(CASE WHEN status='claimed' THEN claimed_at END) oldest_claimed,
       MIN(CASE WHEN status='attempted' THEN attempted_at END) oldest_attempted
       FROM growth_execution_contract`),
