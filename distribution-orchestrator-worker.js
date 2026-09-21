@@ -757,6 +757,33 @@ async function runGrowthExecutionContractCycle(env){
   const snapshot=await executionContractSnapshot(env);
   return{ok:true,integrityVersion:'task-specific-v2',synced,before,results,after,architectureEscalation,snapshot};
 }
+async function runCatalogGapReconcile(env){
+  const synced=await syncExecutionContracts(env);
+  const before=await reconcileExecutionContracts(env);
+  const claim=await claimExecutorTasks(env,'catalog_cycle',{limit:1,maxInFlight:1,result:'catalog_gap_public_reconcile_v1'});
+  if(!claim.claimed)return{ok:true,synced,before,claimed:0,after:await reconcileExecutionContracts(env)};
+  const task=claim.tasks?.[0]||null;
+  if(task?.subject_type!=='catalog_gap'){
+    await deferExecutionTask(env,task?.task_id,'catalog_gap_reconcile_skipped_non_gap');
+    return{ok:true,synced,before,claimed:1,skipped:true,task,after:await reconcileExecutionContracts(env)};
+  }
+  try{
+    const out=await executeCatalogGrowthTask(env,task);
+    if(!out?.verified){
+      await deferExecutionTask(env,task.task_id,String(out?.reason||'catalog_gap_not_verified'));
+      return{ok:true,synced,before,claimed:1,task:out,deferred:true,after:await reconcileExecutionContracts(env)};
+    }
+    const related=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='catalog_cycle' AND subject_type='catalog_gap' AND subject_key=? AND status NOT IN ('verified','blocked','cancelled','human_required')`).bind(task.subject_key).all();
+    const ids=(related.results||[]).map(x=>x.task_id);
+    for(const taskId of ids)await recordExecutionProof(env,{taskId,executor:'catalog_cycle',status:'verified',detail:out.admitted?'catalog_gap_admitted_from_first_party_evidence':'catalog_gap_already_admitted',externalId:out.toolscoutUrl||null,evidence:{slug:out.slug||task.subject_key,toolscout_url:out.toolscoutUrl||null,source_url:out.profile?.sourceUrl||null,category:out.profile?.category||null,admitted:Boolean(out.admitted)}});
+    await env.DB.prepare(`UPDATE growth_opportunity_state SET status='resolved',last_evaluated_at=datetime('now'),updated_at=datetime('now') WHERE status='active' AND subject_type='catalog_gap' AND subject_key=?`).bind(task.subject_key).run().catch(()=>{});
+    return{ok:true,synced,before,claimed:1,verified:ids.length,task:out,after:await reconcileExecutionContracts(env)};
+  }catch(error){
+    await deferExecutionTask(env,task.task_id,'catalog_gap_reconcile_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
+    return{ok:false,synced,before,claimed:1,error:String(error?.message||error).slice(0,500),after:await reconcileExecutionContracts(env)};
+  }
+}
+
 async function publicAudienceBrief(env){
   const [audience,growth,targets]=await Promise.all([
     growthSupervisorDirective(env,'audience'),
@@ -953,6 +980,10 @@ async function scanNew(request,env){let r=null;const sitemapRequest=new Request(
 export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/orchestrate'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}if(!b.asset_url||!/^https:\/\/trytoolscout\.org\//.test(String(b.asset_url)))return Response.json({error:'valid_toolscout_asset_url_required'},{status:400,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_fanout',triggerName:'manual_api'},()=>fanout(env,String(b.asset_url))),{headers:H});}if(u.pathname==='/api/distribution/orchestrate/scan'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:'manual_api'},()=>scanNew(request,env)),{headers:H});}if(u.pathname==='/api/distribution/economic-learning'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:'manual_api'},()=>learnEconomics(env)),{headers:H});}if(u.pathname==='/api/growth/search-directives'&&request.method==='GET'){return Response.json(await publicSearchDirectives(env),{headers:{...H,'Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'}});}if(u.pathname==='/api/growth/rnd/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:'manual_api'},()=>runGrowthRndAudit(env)),{headers:H});}if(u.pathname==='/api/growth/rnd'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});await ensureGrowthSchema(env);const q=await env.DB.prepare(`SELECT * FROM growth_rnd_experiments ORDER BY updated_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:q.results||[]},{headers:H});}if(u.pathname==='/api/growth/opportunities/refresh'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'manual_api'},()=>coordinateGrowthOpportunities(env)),{headers:H});}
 if(u.pathname==='/api/growth/audience-brief/public'&&request.method==='GET'){return Response.json(await publicAudienceBrief(env),{headers:{...H,'Cache-Control':'public, max-age=120','Access-Control-Allow-Origin':'*'}});}
 if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'manual_api'},()=>runGrowthSupervisorAudit(env)),{headers:H});}
+if(u.pathname==='/api/growth/execution/catalog-public-reconcile'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  return Response.json(await runWithLedger(env,{engine:'catalog',mission:'gap_growth',triggerName:'make_handoff'},()=>runCatalogGapReconcile(env)),{headers:H});
+}
 if(u.pathname==='/api/growth/execution/public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   const execution=await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'make_handoff'},()=>runGrowthExecutionContractCycle(env));
