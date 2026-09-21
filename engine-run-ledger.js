@@ -18,7 +18,15 @@ export async function ensureEngineRunSchema(env){
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       )`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_engine_started ON engine_runs(engine,started_at DESC)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_status_started ON engine_runs(status,started_at DESC)`)
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_status_started ON engine_runs(status,started_at DESC)`),
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS engine_run_leases (
+        engine TEXT NOT NULL,
+        mission TEXT NOT NULL,
+        run_id TEXT NOT NULL,
+        acquired_at TEXT NOT NULL DEFAULT (datetime('now')),
+        expires_at TEXT NOT NULL,
+        PRIMARY KEY(engine,mission)
+      )`)
     ]);
   })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
@@ -50,11 +58,25 @@ export async function reapStaleEngineRuns(env,minutes=120){
   }catch{return 0}
 }
 
-export async function runWithLedger(env,{engine,mission,triggerName=null},fn){
+export async function runWithLedger(env,{engine,mission,triggerName=null,singleFlightMinutes=0},fn){
   await reapStaleEngineRuns(env,120);
+  await ensureEngineRunSchema(env);
   const runId=`run_${crypto.randomUUID()}`;
+  const singleFlight=Math.max(0,Number(singleFlightMinutes)||0);
+  let leased=false;
+  if(singleFlight>0){
+    await env.DB.prepare(`DELETE FROM engine_run_leases WHERE engine=? AND mission=? AND expires_at<=datetime('now')`).bind(String(engine||'unknown'),String(mission||'unknown')).run().catch(()=>{});
+    const expiresAt=new Date(Date.now()+singleFlight*60000).toISOString().replace('T',' ').slice(0,19);
+    const lease=await env.DB.prepare(`INSERT OR IGNORE INTO engine_run_leases(engine,mission,run_id,acquired_at,expires_at) VALUES(?,?,?,datetime('now'),?)`)
+      .bind(String(engine||'unknown'),String(mission||'unknown'),runId,expiresAt).run();
+    leased=Number(lease?.meta?.changes||lease?.changes||0)>0;
+    if(!leased){
+      const active=await env.DB.prepare(`SELECT run_id,acquired_at,expires_at FROM engine_run_leases WHERE engine=? AND mission=?`).bind(String(engine||'unknown'),String(mission||'unknown')).first();
+      return{ok:true,skipped:true,reason:'mission_already_running',activeRunId:active?.run_id||null,activeAcquiredAt:active?.acquired_at||null,activeExpiresAt:active?.expires_at||null};
+    }
+  }
   const startedAt=new Date().toISOString().replace('T',' ').slice(0,19);
-  await recordEngineRun(env,{runId,engine,mission,triggerName,status:'running',startedAt,evidence:{phase:'started'}});
+  await recordEngineRun(env,{runId,engine,mission,triggerName,status:'running',startedAt,evidence:{phase:'started',single_flight:singleFlight>0}});
   try{
     const result=await fn();
     const explicitFailure=result&&result.ok===false;
@@ -65,6 +87,8 @@ export async function runWithLedger(env,{engine,mission,triggerName=null},fn){
   }catch(error){
     await recordEngineRun(env,{runId,engine,mission,triggerName,status:'failed',startedAt,completedAt:new Date().toISOString().replace('T',' ').slice(0,19),detail:String(error?.message||error),evidence:{name:error?.name||'Error',message:String(error?.message||error)}}).catch(()=>{});
     throw error;
+  }finally{
+    if(leased)await env.DB.prepare(`DELETE FROM engine_run_leases WHERE engine=? AND mission=? AND run_id=?`).bind(String(engine||'unknown'),String(mission||'unknown'),runId).run().catch(()=>{});
   }
 }
 
