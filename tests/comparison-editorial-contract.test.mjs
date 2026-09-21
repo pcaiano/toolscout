@@ -14,6 +14,11 @@ test('dynamic comparator always renders a ToolScout editorial analysis',()=>{
   assert.match(html,/comparisonDimensions=/);
   assert.match(html,/editorialConclusion\(x,y\)/);
   assert.match(html,/data-default-a="" data-default-b=""/);
+  assert.match(html,/id="suggestions"/);
+  assert.match(html,/function comparableTools\(a,b,tools\)/);
+  assert.match(html,/function suggestionsHtml\(a,b,tools\)/);
+  assert.match(html,/source=comparison-suggestions/);
+  assert.doesNotMatch(html,/affiliateUrl|commission/);
   assert.doesNotMatch(html,/[\u2013\u2014]/);
 });
 
@@ -31,6 +36,9 @@ test('registered static comparisons use the dynamic comparator surface',()=>{
     assert.match(html,/class="table"/);
     assert.match(html,/ToolScout analysis/);
     assert.match(html,/What this comparison means in practice/);
+    assert.match(html,/id="suggestions"/);
+    assert.match(html,/Also worth comparing/);
+    assert.match(html,/source=comparison-suggestions/);
     assert.doesNotMatch(html,/Frequently asked questions|Related buying guides|How this comparison works|class="decision"/);
     assert.doesNotMatch(html,/[\u2013\u2014]/);
   }
@@ -42,6 +50,10 @@ test('comparison generator derives static pages from compare.html',()=>{
   assert.match(generator,/function editorialConclusion\(a,b\)/);
   assert.match(generator,/data-default-a=/);
   assert.match(generator,/initialTable\(a,b\)/);
+  assert.match(generator,/function comparableTools\(a,b\)/);
+  assert.match(generator,/function suggestionsHtml\(a,b\)/);
+  assert.match(generator,/suggestionsHtml\(a,b\)/);
+  assert.doesNotMatch(generator,/affiliateUrl|commission/);
   assert.doesNotMatch(generator,/Related buying guides|Frequently asked questions|How this comparison works/);
 });
 
@@ -52,4 +64,14 @@ test('dynamic comparator stays within a mobile viewport',()=>{
   assert.match(html,/\.table\{overflow:hidden\}/);
   assert.match(html,/overflow-wrap:anywhere/);
   assert.match(html,/\.actions\{display:grid;grid-template-columns:1fr/);
+});
+
+
+test('comparison suggestions stay compact and category grounded',()=>{
+  const dynamic=read('compare.html');
+  assert.match(dynamic,/return out\.slice\(0,4\)/);
+  assert.match(dynamic,/candidate\.category!==anchor\.category/);
+  assert.match(dynamic,/Same '\+anchor\.category\+' category as/);
+  assert.match(dynamic,/\.suggestion-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(dynamic,/@media\(max-width:650px\)[\s\S]*\.suggestion-grid\{grid-template-columns:1fr\}/);
 });
