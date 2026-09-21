@@ -2,7 +2,7 @@ import base from './command-center-final-integrity-worker.js';
 import resilientFallback from './command-center-resilient-worker.js';
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
-import {runWithLedger} from './engine-run-ledger.js';
+import {runWithLedger,reapStaleEngineRuns} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
 import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
@@ -576,8 +576,10 @@ async function resilientStatsResponse(request, env, ctx) {
 
 async function missionNeedsRecovery(env,engine,mission){
   try{
-    const row=await env.DB.prepare(`SELECT status FROM engine_runs WHERE engine=? AND mission=? ORDER BY started_at DESC LIMIT 1`).bind(engine,mission).first();
-    return row?.status==='failed';
+    await reapStaleEngineRuns(env,45);
+    const row=await env.DB.prepare(`SELECT status,started_at FROM engine_runs WHERE engine=? AND mission=? ORDER BY started_at DESC LIMIT 1`).bind(engine,mission).first();
+    if(!row)return true;
+    return row.status==='failed'||row.status==='degraded';
   }catch{return false}
 }
 
@@ -625,7 +627,8 @@ export default {
       if(twoHourly){
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:trigger},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
-        if(!affiliateMaintenance||twelveHourly)ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,trigger).catch(()=>{}));
+        const affiliateRecovery=await missionNeedsRecovery(env,'affiliate','coverage_cycle');
+        if(!affiliateMaintenance||twelveHourly||affiliateRecovery)ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,affiliateRecovery?trigger+':recovery':trigger).catch(()=>{}));
       }
       if(sixHourly){
         if(!catalogDemandLed||twelveHourly)ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyCatalogBatch(env)).catch(()=>{}));
@@ -634,10 +637,8 @@ export default {
     }
 
     if(daily){
-      ctx.waitUntil((async()=>{
-        try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env))}catch{}
-        try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env))}catch{}
-      })());
+      ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));
+      ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env)).catch(()=>{}));
     }else if(hourly){
       const [recoverCoverage,recoverNews]=await Promise.all([
         missionNeedsRecovery(env,'catalog','runtime_coverage'),
