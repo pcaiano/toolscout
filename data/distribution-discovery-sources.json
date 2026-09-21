@@ -37,8 +37,8 @@
     }
   ],
   "guardrails": {
-    "max_fetches_per_run": 6,
-    "max_candidates_per_source": 50,
+    "max_fetches_per_run": 16,
+    "max_candidates_per_source": 80,
     "allowed_protocols": [
       "https:"
     ],
