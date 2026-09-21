@@ -221,10 +221,11 @@ async function coordinateGrowthOpportunities(env){
   const supervisor=new Map(supervisorRows.map(row=>{let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}return[String(row.engine),{status:row.status,directive:row.directive,config}]}));
   const distBoost=Math.max(0,Math.min(30,Number(supervisor.get('distribution')?.config?.priority_boost||0)));
   const seoBoost=Math.max(0,Math.min(30,Number(supervisor.get('seo_geo_aio')?.config?.priority_boost||0)));
-  const backlinkConfig=supervisor.get('seo_geo_aio')?.config||supervisor.get('distribution')?.config||{};
+  const backlinkConfig={...(supervisor.get('seo_geo_aio')?.config||{}),...(supervisor.get('distribution')?.config||{})};
   const backlinkAcquisition=Boolean(backlinkConfig.backlink_acquisition);
   const verifiedReferringDomains=Math.max(0,Number(backlinkConfig.verified_referring_domains||0));
   const backlinkBootstrapFloor=Math.max(0,Number(backlinkConfig.referring_domain_bootstrap_floor||0));
+  const authorityUrgencyBoost=backlinkAcquisition?Math.min(22,(backlinkConfig.backlink_stagnating?14:0)+(backlinkConfig.backlink_throughput_gap?8:0)):0;
   const affiliateCap=Math.max(5,Math.min(45,Number(supervisor.get('affiliate')?.config?.priority_cap||45)));
   const catalogCap=Math.max(15,Math.min(55,Number(supervisor.get('catalog')?.config?.priority_cap||55)));
   const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
@@ -362,7 +363,7 @@ async function coordinateGrowthOpportunities(env){
     const score=Math.min(100,Math.max(0,Number(row.distribution_score||0)
       +(GROWTH_EVIDENCE_RANK[evidence]||0)*4
       +(network==='contact_route_found'?4:0)+(network==='contact_found'?7:0)+(network==='sent'?10:0)+(network==='adopted'?18:0)
-      +(audienceStrategy.borrowedFirst?15:0)+distBoost+backlinkSurfaceBoost));
+      +(audienceStrategy.borrowedFirst?15:0)+distBoost+backlinkSurfaceBoost+authorityUrgencyBoost));
     const actions=['distribution_measurement'];
     if(backlinkAcquisition&&externalSurface&&['live','verified'].includes(String(row.status||''))&&!backlinkVerified)actions.unshift('verify_backlink_acquisition');
     if(!network||network==='queued'||network==='send_failed')actions.unshift('publisher_contact_discovery');
@@ -374,7 +375,7 @@ async function coordinateGrowthOpportunities(env){
     if(Number(row.route_stalled||0)>0)actions.unshift('repair_stalled_route_execution');
     if(network==='contact_found')actions.unshift('publisher_outreach');
     if(network==='adopted'||Number(row.route_verified||0)>0)actions.unshift('scale_proven_surface');
-    const signals={surface_status:row.status,network_status:network||null,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,alternate_routes:Number(row.route_actions||0),alternate_routes_autonomous:Number(row.route_auto||0),alternate_routes_content:Number(row.route_content||0),alternate_routes_human:Number(row.route_human||0),alternate_routes_auth:Number(row.route_auth||0),alternate_routes_verified:Number(row.route_verified||0),alternate_routes_stalled:Number(row.route_stalled||0),audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0,backlink_acquisition:backlinkAcquisition,backlink_value:Number(row.backlink_value||0),backlink_verified:backlinkVerified,backlink_priority_boost:Number(backlinkSurfaceBoost.toFixed(2)),backlink_quality_only:true};
+    const signals={surface_status:row.status,network_status:network||null,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,alternate_routes:Number(row.route_actions||0),alternate_routes_autonomous:Number(row.route_auto||0),alternate_routes_content:Number(row.route_content||0),alternate_routes_human:Number(row.route_human||0),alternate_routes_auth:Number(row.route_auth||0),alternate_routes_verified:Number(row.route_verified||0),alternate_routes_stalled:Number(row.route_stalled||0),audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0,backlink_acquisition:backlinkAcquisition,backlink_value:Number(row.backlink_value||0),backlink_verified:backlinkVerified,backlink_priority_boost:Number((backlinkSurfaceBoost+authorityUrgencyBoost).toFixed(2)),backlink_quality_only:true,backlink_throughput_gap:Boolean(backlinkConfig.backlink_throughput_gap),backlink_stagnating:Boolean(backlinkConfig.backlink_stagnating),authority_urgency_boost:authorityUrgencyBoost};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
@@ -390,7 +391,7 @@ async function coordinateGrowthOpportunities(env){
     const vendor=String(row.vendor_status||'');
     const toolSlug=String(row.tool_slug||'').toLowerCase(),searchBoost=Number(searchBoostByTool.get(toolSlug)||0),newsBoost=Number(newsByTool.get(toolSlug)||0);
     const backlinkBoost=backlinkAcquisition?Math.min(18,8+Math.max(0,searchBoost)*0.35):0;
-    const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)+searchBoost+newsBoost+(audienceStrategy.borrowedFirst?10:0)+distBoost+backlinkBoost));
+    const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)+searchBoost+newsBoost+(audienceStrategy.borrowedFirst?10:0)+distBoost+backlinkBoost+authorityUrgencyBoost));
     const actions=[];
     const vendorExecutable=!['needs_contact_fallback','fallback_exhausted'].includes(vendor);
     if(vendorExecutable&&backlinkAcquisition)actions.push('backlink_reference_outreach');
@@ -398,7 +399,7 @@ async function coordinateGrowthOpportunities(env){
     if(profile)actions.push('content_mention');
     if(affiliate)actions.push('affiliate_social');
     if(!actions.length)continue;
-    const signals={vendor_status:vendor,vendor_execution_available:vendorExecutable,verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),news_priority_boost:Number(newsBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'vendor_borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?10:0,backlink_acquisition:backlinkAcquisition,backlink_quality_only:true,verified_referring_domains:verifiedReferringDomains,referring_domain_bootstrap_floor:backlinkBootstrapFloor,backlink_priority_boost:Number(backlinkBoost.toFixed(2)),paid_links_allowed:false,reciprocal_links_required:false};
+    const signals={vendor_status:vendor,vendor_execution_available:vendorExecutable,verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),news_priority_boost:Number(newsBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'vendor_borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?10:0,backlink_acquisition:backlinkAcquisition,backlink_quality_only:true,verified_referring_domains:verifiedReferringDomains,referring_domain_bootstrap_floor:backlinkBootstrapFloor,backlink_priority_boost:Number((backlinkBoost+authorityUrgencyBoost).toFixed(2)),backlink_throughput_gap:Boolean(backlinkConfig.backlink_throughput_gap),backlink_stagnating:Boolean(backlinkConfig.backlink_stagnating),authority_urgency_boost:authorityUrgencyBoost,paid_links_allowed:false,reciprocal_links_required:false};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
