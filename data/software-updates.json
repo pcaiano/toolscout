@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-20T09:13:06Z",
+  "updatedAt": "2026-09-21T09:50:34Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "chatgpt-word-microsoft-office",
+      "publishedAt": "2026-09-21",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Official product update",
+      "title": "ChatGPT arrives in Microsoft Word across all plans",
+      "summary": "OpenAI has added ChatGPT to Microsoft Word, bringing drafting, summarization, revision and document formatting into the Word sidebar across all ChatGPT plans.",
+      "sourceName": "OpenAI ChatGPT release notes",
+      "sourceUrl": "https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+      "articleUrl": "/news/chatgpt-word-microsoft-office.html",
+      "profileUrl": "/news/chatgpt-word-microsoft-office.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "zapier-next-gen-zaps-mcp",
       "publishedAt": "2026-09-20",
