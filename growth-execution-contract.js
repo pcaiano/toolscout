@@ -396,7 +396,7 @@ export async function rebalanceExecutionAdmission(env){
     const inFlight=n(inFlightRow?.n),readySlots=Math.max(0,cap-inFlight);
 
     const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
-    const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY priority_score DESC,created_at ASC`).bind(executor).all();
+    const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC`).bind(executor).all();
     const pendingIds=(pending.results||[]).map(x=>x.task_id);
     const keep=pendingIds.slice(0,readySlots),demote=pendingIds.slice(readySlots);
     if(demote.length){
@@ -410,7 +410,7 @@ export async function rebalanceExecutionAdmission(env){
     const remaining=Math.max(0,readySlots-keep.length);
     if(remaining>0){
       const deferredWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
-      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
+      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
         const marks=ids.map(()=>'?').join(',');
@@ -435,7 +435,7 @@ export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null
     effective=Math.max(0,Math.min(effective,Math.max(0,Number(maxInFlight)-inFlight)));
   }
   if(effective<=0)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
-  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
+  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
   const tasks=rows.results||[],ids=tasks.map(x=>x.task_id);
   if(!ids.length)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   const qs=ids.map(()=>'?').join(',');
