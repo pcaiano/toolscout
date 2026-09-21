@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/sync-gsc-signals.mjs'
+      - 'sitemap.xml'
       - '.github/workflows/gsc-search-reality.yml'
   schedule:
     - cron: '23 6 * * *'
