@@ -64,6 +64,15 @@ async function upsertIncident(env,x){
   return incidentId;
 }
 
+async function resolvedIncidentCoversEvidence(env,key,evidenceAt){
+  if(!key||!evidenceAt)return false;
+  const row=await env.DB.prepare(`SELECT status,resolved_at FROM growth_architecture_incidents WHERE incident_key=?`).bind(key).first();
+  if(row?.status!=='resolved'||!row?.resolved_at)return false;
+  const resolved=Date.parse(String(row.resolved_at).replace(' ','T')+'Z');
+  const evidence=Date.parse(String(evidenceAt).replace(' ','T')+'Z');
+  return Number.isFinite(resolved)&&Number.isFinite(evidence)&&resolved>=evidence;
+}
+
 export async function auditArchitectureEscalations(env){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=CASE WHEN email_status='sending_resolved' THEN 'pending_resolved' ELSE 'pending' END,updated_at=datetime('now') WHERE email_status IN ('sending','sending_resolved') AND updated_at<datetime('now','-30 minutes')`).run().catch(()=>{});
@@ -128,7 +137,9 @@ export async function auditArchitectureEscalations(env){
   }catch{}
   for(const row of core.results||[]){
     if(!CORE_MISSIONS.has(String(row.mission||'')))continue;
-    const key=`unresolved_core_run:${row.engine||'unknown'}:${row.mission||'unknown'}`;activeKeys.add(key);
+    const key=`unresolved_core_run:${row.engine||'unknown'}:${row.mission||'unknown'}`;
+    if(await resolvedIncidentCoversEvidence(env,key,row.last_failed))continue;
+    activeKeys.add(key);
     await upsertIncident(env,{
       key,severity:n(row.n)>=2?'P1':'P2',engine:row.engine,executor:null,action:row.mission,
       title:`Unresolved core Growth run failure: ${row.engine}/${row.mission}`,
