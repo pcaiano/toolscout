@@ -4,7 +4,7 @@ import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.j
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger,reapStaleEngineRuns} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
-import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources} from './catalog-autonomy-worker.js';
+import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources,publicMergedTools,publicRuntimeToolResponse,publicMergedSitemap} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 import {growthSupervisorDirective} from './growth-supervisor.js';
@@ -602,6 +602,17 @@ export default {
       }catch{}
       const autonomousGrowthTruth=await canonicalAutonomousGrowthTruth(env).catch(()=>null);
       return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v2',operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:2,businessFunnel:['strict_verified_human_sessions','verified_outbound_clicks','monetized_verified_outbound_clicks'],selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v3',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.8'},{headers:{'Cache-Control':'no-store'}});
+    }
+    if(request.method==='GET'&&url.pathname==='/data/tools.json'){
+      return Response.json(await publicMergedTools(env),{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+    }
+    if(request.method==='GET'&&/^\/tools\/[a-z0-9][a-z0-9-]*(?:\.html)?\/?$/i.test(url.pathname)){
+      const slug=(url.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)/i)||[])[1]?.toLowerCase()||'';
+      const runtimeResponse=await publicRuntimeToolResponse(env,slug);
+      if(runtimeResponse)return runtimeResponse;
+    }
+    if(request.method==='GET'&&url.pathname==='/sitemap.xml'){
+      return publicMergedSitemap(await base.fetch(request,env,ctx),env);
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
