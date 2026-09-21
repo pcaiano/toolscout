@@ -168,7 +168,7 @@
     "automatic_content_types": [
       "application/json"
     ],
-    "max_automatic_per_run": 8,
+    "max_automatic_per_run": 16,
     "max_attempts": 3,
     "never_automatic": [
       "captcha",
