@@ -273,7 +273,7 @@ async function coordinateGrowthOpportunities(env){
     growthRows(env,`SELECT candidate_id,tool_slug,source_url,title,summary,status,materiality_score,detected_at,updated_at FROM software_news_candidates WHERE status IN ('verified','published') OR (status='candidate' AND materiality_score>=50)`),
     growthAssetJson(env,'/reports/organic-growth-opportunities.json',{generatedAt:null,opportunities:[],summary:{}}),
     growthAssetJson(env,'/reports/gsc-signals.json',{generatedAt:null,source:null,startDate:null,endDate:null,siteTotals:{},pages:[],items:[]}),
-    growthAssetJson(env,'/reports/gsc-search-reality.json',{generatedAt:null,searchPerformance:{},indexHealth:{},sitemaps:{},opportunities:[]}),
+    growthAssetJson(env,'/data/gsc-search-reality.json',{generatedAt:null,searchPerformance:{},indexHealth:{},sitemaps:{},opportunities:[]}),
     growthAssetJson(env,'/reports/aeo-geo-readiness.json',{generatedAt:null,failures:null,warnings:null}),
     growthAssetJson(env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null}),
     growthAssetJson(env,'/reports/catalog-freshness-coverage.json',{generatedAt:null,summary:{},coverage:[],contentChanges:[],quarantined:[]}),
