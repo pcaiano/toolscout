@@ -3,7 +3,7 @@ import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
 import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
-import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,recordExecutionProof,executionContractSnapshot} from './growth-execution-contract.js';
+import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,recordExecutionProof,deferExecutionTask,runExecutionIntegritySelfTest,executionContractSnapshot} from './growth-execution-contract.js';
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
@@ -692,13 +692,17 @@ async function runGrowthExecutionContractCycle(env){
     const task=claim.tasks?.[0]||null;
     try{
       const out=await fn(task);
-      let supervisorProof={verified:0},attemptRecorded=false;
+      let supervisorProof={verified:0},attemptRecorded=false,directProof=null,deferred=null;
       if(task?.source_kind==='supervisor'){
         await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
         attemptRecorded=true;
-        supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v2',claim.taskIds);
+        supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v3',claim.taskIds);
+      }else if(executor==='content_issue'&&out?.brief?.issued===true&&out?.brief?.execution_task_id===task?.task_id){
+        directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'content_brief_task_specific_v3',externalId:out.brief.brief_id||null,evidence:{brief_id:out.brief.brief_id||null,growth_opportunity_key:out.brief.growth_opportunity_key||null}});
+      }else{
+        deferred=await deferExecutionTask(env,task.task_id,'cycle_completed_without_task_specific_proof_v3');
       }
-      results[executor]={claimed:claim.claimed,ok:true,task:{task_id:task?.task_id||null,source_kind:task?.source_kind||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},attemptRecorded,supervisorVerified:supervisorProof.verified,result:out||null};
+      results[executor]={claimed:claim.claimed,ok:true,task:{task_id:task?.task_id||null,source_kind:task?.source_kind||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},attemptRecorded,supervisorVerified:supervisorProof.verified,directProof,deferred,result:out||null};
     }catch(error){
       const message=String(error?.message||error).slice(0,800);
       await markExecutorAttempt(env,executor,`executor_error:${message}`,{failed:true,taskIds:claim.taskIds});
@@ -706,8 +710,8 @@ async function runGrowthExecutionContractCycle(env){
     }
   };
 
-  await runInternal('distribution_network',()=>runDistributionNetworkCycle(env));
-  await runInternal('distribution_autonomous',()=>runAutonomousDistributionCycle(env));
+  await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
+  await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
 
   const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:1,maxInFlight:1,result:'make_sender_waiting_for_exact_external_send'});
   if(senderClaim.claimed){
@@ -729,8 +733,8 @@ async function runGrowthExecutionContractCycle(env){
     const brief=await issueGrowthContentBrief(env,task);
     return{intelligence,brief};
   });
-  await runInternal('affiliate_cycle',()=>runAffiliateCoverageCycle(env));
-  await runInternal('catalog_cycle',async()=>{
+  await runInternal('affiliate_cycle',(task)=>runAffiliateCoverageCycle(env,task));
+  await runInternal('catalog_cycle',async(task)=>{
     const verify=await contractVerifyCatalogBatch(env);
     const admit=await contractAdmitCatalogCandidates(env);
     return{verify,admit};
@@ -944,7 +948,13 @@ if(u.pathname==='/api/growth/audience-brief/public'&&request.method==='GET'){ret
 if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'manual_api'},()=>runGrowthSupervisorAudit(env)),{headers:H});}
 if(u.pathname==='/api/growth/execution/public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
-  return Response.json(await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'make_handoff'},()=>runGrowthExecutionContractCycle(env)),{headers:H});
+  const execution=await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'make_handoff'},()=>runGrowthExecutionContractCycle(env));
+  const supervisor=await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:'make_handoff'},()=>runGrowthSupervisorAudit(env));
+  return Response.json({ok:true,execution,supervisor},{headers:H});
+}
+if(u.pathname==='/api/growth/execution/integrity-self-test'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  return Response.json(await runExecutionIntegritySelfTest(env),{headers:H});
 }
 if(u.pathname==='/api/growth/execution/external-status'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
