@@ -89,10 +89,13 @@ function pageInfo(page) {
   let url;
   try { url = new URL(page); } catch { return null; }
   if (url.hostname !== 'trytoolscout.org' && url.hostname !== 'www.trytoolscout.org') return null;
-  const pathname = url.pathname || '/';
+  let pathname = url.pathname || '/';
+  if(pathname==='/index.html')pathname='/';
+  else if(/\.html$/i.test(pathname))pathname=pathname.replace(/\.html$/i,'');
+  url.protocol='https:';url.hostname='trytoolscout.org';url.pathname=pathname;url.search='';url.hash='';
   const base = path.basename(pathname).replace(/\.html$/i, '');
   let type = 'other';
-  if (pathname === '/' || pathname === '/index.html') type = 'home';
+  if (pathname === '/') type = 'home';
   else if (pathname.startsWith('/blog/')) type = 'blog';
   else if (pathname.startsWith('/tools/')) type = 'tool-profile';
   else if (/^best-[a-z0-9-]+$/.test(base)) type = 'guide';
@@ -103,7 +106,7 @@ function pageInfo(page) {
 }
 
 const pageJson = await querySearchConsole(['page']);
-const pages = [];
+const pagesByCanonical = new Map();
 const byIntent = new Map();
 for (const row of pageJson.rows || []) {
   const page = String(row.keys?.[0] || '');
@@ -113,7 +116,9 @@ for (const row of pageJson.rows || []) {
   const clicks = Number(row.clicks || 0);
   const ctr = Number(row.ctr || 0) * 100;
   const position = Number(row.position || 0);
-  pages.push({ ...info, clicks, impressions, ctr: Number(ctr.toFixed(4)), position: Number(position.toFixed(4)) });
+  const pageCurrent=pagesByCanonical.get(info.page)||{...info,clicks:0,impressions:0,positionNumerator:0};
+  pageCurrent.clicks+=clicks;pageCurrent.impressions+=impressions;pageCurrent.positionNumerator+=position*impressions;
+  pagesByCanonical.set(info.page,pageCurrent);
   if (!info.intent) continue;
   const current = byIntent.get(info.intent) || { intent: info.intent, page: info.page, clicks: 0, impressions: 0, ctrNumerator: 0, positionNumerator: 0 };
   current.clicks += clicks;
@@ -122,6 +127,12 @@ for (const row of pageJson.rows || []) {
   current.positionNumerator += position * impressions;
   byIntent.set(info.intent, current);
 }
+const pages=[...pagesByCanonical.values()].map(x=>({
+  page:x.page,pathname:x.pathname,key:x.key,type:x.type,intent:x.intent,
+  clicks:x.clicks,impressions:x.impressions,
+  ctr:x.impressions?Number((x.clicks/x.impressions*100).toFixed(4)):0,
+  position:x.impressions?Number((x.positionNumerator/x.impressions).toFixed(4)):0
+}));
 
 const queryJson = await querySearchConsole(['page', 'query']);
 const queriesByIntent = new Map();
