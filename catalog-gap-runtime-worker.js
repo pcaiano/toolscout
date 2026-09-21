@@ -1,3 +1,4 @@
+import {auditCatalogTool} from './catalog-quality-runtime.js';
 const BASE='https://trytoolscout.org';
 const TIMEOUT=12000;
 const PROFILE_HINTS=Object.freeze({
@@ -251,10 +252,16 @@ export async function executeCatalogGrowthTask(env,task={}){
     provenance:{mode:'verified_catalog_runtime',admittedAt:new Date().toISOString(),marketSignals:{count:Number(gap.signals||0),sources},affiliateNeutral:true,competitorContentUsedForEditorialFacts:false,reviewMethod:'first_party_verified_structured_profile_v2'}
   };
   profile.editorialReview=editorialReview(profile);
+  const quality=await auditCatalogTool(env,profile,{officialPage:official});
+  if(!quality.publishable){
+    await env.DB.prepare("UPDATE catalog_market_gaps SET status='research_required',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run().catch(()=>{});
+    return{ok:true,verified:false,reason:quality.issues.includes('visual_asset_unresolved')?'visual_asset_unresolved':'catalog_quality_gate_failed',slug,issues:quality.issues,warnings:quality.warnings,sourceUrl:official.url};
+  }
+  Object.assign(profile,quality.repairedTool);
   await env.DB.prepare("INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')").bind(slug,JSON.stringify(profile)).run();
   await env.DB.prepare("INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,quality_status,static_last_verified,last_checked_at,updated_at) VALUES(?,?,'ok',200,?,'healthy',date('now'),datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status='ok',http_status=200,final_url=excluded.final_url,quality_status='healthy',static_last_verified=date('now'),last_checked_at=datetime('now'),updated_at=datetime('now')").bind(slug,official.url,official.url).run().catch(()=>{});
   await env.DB.prepare("UPDATE catalog_market_gaps SET status='published',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
   const toolscoutUrl=BASE+'/tools/'+slug;
-  await event(env,slug,name+' added automatically as a full ToolScout catalog profile after first-party verification and scoring.',{slug,name,source_url:official.url,toolscout_url:toolscoutUrl,category:cat,market_signals:Number(gap.signals||0),verified_capabilities:features});
+  await event(env,slug,name+' added automatically as a full ToolScout catalog profile after first-party verification and scoring.',{slug,name,source_url:official.url,toolscout_url:toolscoutUrl,category:cat,market_signals:Number(gap.signals||0),verified_capabilities:verifiedFeatures,logo_url:profile.logoUrl,logo_provenance:profile.logoProvenance});
   return{ok:true,verified:true,admitted:true,slug,profile,toolscoutUrl};
 }

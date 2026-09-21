@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "principles": {
     "catalogMustStayMarketRelevant": true,
     "officialSourcesRequired": true,
@@ -9,10 +9,10 @@
     "commercialRelationshipsAreStoredSeparatelyFromEditorialFit": true,
     "unsupportedClaimsMustNeverEnterEditorialRanking": true,
     "genericCategoryProfilesCannotCreateEditorialFacts": true,
-    "catalogBreadthIsSeparateFromRankingEligibility": true,
     "catalogEntryDoesNotImplyRecommendation": true,
     "volatileFactsRequireFieldLevelFreshness": true,
-    "visualAssetsArePartOfCatalogQuality": true
+    "visualAssetsArePartOfCatalogQuality": true,
+    "catalogToolsUseSameRankingEligibilityRules": true
   },
   "cadence": {
     "run": "daily",
@@ -23,19 +23,76 @@
   "coverage": {
     "minimumToolsPerIntentCategory": 5,
     "priorityCategories": [
-      "crm", "marketing", "seo", "automation", "forms", "sales", "support", "social", "website", "analytics", "ai-research", "ai-assistant", "ai-writing", "developer", "ecommerce", "design", "content", "business"
+      "crm",
+      "marketing",
+      "seo",
+      "automation",
+      "forms",
+      "sales",
+      "support",
+      "social",
+      "website",
+      "analytics",
+      "ai-research",
+      "ai-assistant",
+      "ai-writing",
+      "developer",
+      "ecommerce",
+      "design",
+      "content",
+      "business"
     ]
   },
   "admission": {
-    "requiredFields": ["slug","name","category","description","pricing","freePlan","features","bestFor","sourceUrl","scores"],
-    "scoreKeys": ["price","ease","automation","integrations","sales","ai","marketing","seo","research","content","agency"],
+    "requiredFields": [
+      "slug",
+      "name",
+      "category",
+      "description",
+      "pricing",
+      "freePlan",
+      "features",
+      "bestFor",
+      "sourceUrl",
+      "scores"
+    ],
+    "scoreKeys": [
+      "price",
+      "ease",
+      "automation",
+      "integrations",
+      "sales",
+      "ai",
+      "marketing",
+      "seo",
+      "research",
+      "content",
+      "agency"
+    ],
     "minimumFeatures": 3,
     "minimumBestFor": 2,
     "minimumDescriptionLength": 60,
     "requireReachableOfficialSource": true,
     "requireKnownIntentCategory": true,
     "allowedCatalogCategories": [
-      "crm", "marketing", "seo", "automation", "forms", "sales", "support", "social", "website", "analytics", "ai-research", "ai-assistant", "ai-writing", "developer", "ecommerce", "design", "content", "business"
+      "crm",
+      "marketing",
+      "seo",
+      "automation",
+      "forms",
+      "sales",
+      "support",
+      "social",
+      "website",
+      "analytics",
+      "ai-research",
+      "ai-assistant",
+      "ai-writing",
+      "developer",
+      "ecommerce",
+      "design",
+      "content",
+      "business"
     ],
     "allowTrustedEnrichmentFiles": true,
     "autoAdmitTrustedCandidates": true,
@@ -51,26 +108,40 @@
     "minimumDescriptionLength": 60,
     "requireReachableOfficialSource": true,
     "requireKnownCategory": true,
-    "rankingEligibleOnAdmission": false,
-    "comparisonEligibleOnAdmission": false,
+    "rankingEligibleOnAdmission": true,
+    "comparisonEligibleOnAdmission": true,
     "requirePricingForCatalogEntry": false,
     "requireToolSpecificScoresForCatalogEntry": false,
-    "upgradeToEditorialRequiresSeparateEvidence": true
+    "upgradeToEditorialRequiresSeparateEvidence": false,
+    "requireVisualAssetForCatalogEntry": true
   },
   "qualityControl": {
     "enabled": true,
     "volatileFieldReviewDays": 7,
     "stableFieldReviewDays": 30,
     "maxSameOriginEvidencePages": 2,
-    "trackFields": ["pricing", "freePlan", "trial", "features"],
+    "trackFields": [
+      "pricing",
+      "freePlan",
+      "trial",
+      "features"
+    ],
     "preferFirstPartyVisualAssets": true,
     "validateVisualAssets": true,
     "autoCorrectExplicitFreePlanContradictions": true,
     "autoCorrectInferredFreePlanContradictions": false,
     "pricingChangesRequireEvidenceReview": true,
     "featureChangesRequireEvidenceReview": true,
-    "highSeverityFacts": ["freePlan", "trial", "pricing"],
-    "reportUnresolvedVisualAssetFailures": true
+    "highSeverityFacts": [
+      "freePlan",
+      "trial",
+      "pricing"
+    ],
+    "reportUnresolvedVisualAssetFailures": true,
+    "requireResolvedVisualAssetBeforePublication": true,
+    "auditAllPublishedTools": true,
+    "runtimeQualityBatchSize": 12,
+    "automaticQualityHoldForRuntimeFailures": true
   },
   "trustedCandidateFiles": [
     "data/catalog-wave1-enrichment.json",
@@ -85,7 +156,7 @@
     "minimumIndependentMarketSignals": 2,
     "maxCompetitiveGapProfilesPerCycle": 3,
     "minimumVerifiedCapabilitiesForGapProfile": 2,
-    "competitiveGapProfilesAreNonRanking": true,
+    "competitiveGapProfilesAreNonRanking": false,
     "competitiveGapEditorialFactsRequireFirstPartySource": true
   }
 }

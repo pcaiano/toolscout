@@ -2,6 +2,7 @@ export {executeCatalogGrowthTask} from './catalog-gap-runtime-worker.js';
 import base from './dynamic-worker.js';
 import { runWithLedger } from './engine-run-ledger.js';
 import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
+import {auditCatalogTool,mapLimit} from './catalog-quality-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
@@ -86,6 +87,19 @@ async function ensureSchema(env){
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_runtime_candidates_status ON catalog_runtime_candidates(status,updated_at)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS catalog_quality_audit(
+      tool_slug TEXT PRIMARY KEY,
+      quality_status TEXT NOT NULL,
+      issues_json TEXT NOT NULL DEFAULT '[]',
+      warnings_json TEXT NOT NULL DEFAULT '[]',
+      source_status TEXT,
+      source_url TEXT,
+      logo_url TEXT,
+      logo_provenance TEXT,
+      last_checked_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_quality_status ON catalog_quality_audit(quality_status,last_checked_at)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS catalog_market_gaps(
       tool_slug TEXT PRIMARY KEY,
       signals INTEGER NOT NULL DEFAULT 0,
@@ -296,8 +310,11 @@ export async function admitTrustedCandidates(env){
       considered++;
       const errors=validCandidate(raw,config);if(errors.length){held++;continue}
       const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
-      const profile={...raw,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2'}};
+      let profile={...raw,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2'}};
       profile.editorialReview=profile.editorialReview||runtimeEditorialView(profile);
+      const quality=await auditCatalogTool(env,profile);
+      if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings});continue}
+      profile=quality.repairedTool;
       await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
         ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
         .bind(slug,JSON.stringify(profile)).run();
@@ -310,6 +327,47 @@ export async function admitTrustedCandidates(env){
   runtimeCache.at=0;
   return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,rule:'Affiliate economics cannot increase catalog admission or ranking eligibility.'};
 }
+export async function auditCatalogQualityBatch(env,{limit=12}={}){
+  await ensureSchema(env);
+  const tools=await mergedTools(env);
+  const prior=await env.DB.prepare(`SELECT tool_slug,last_checked_at FROM catalog_quality_audit`).all();
+  const checked=new Map((prior.results||[]).map(x=>[String(x.tool_slug),Date.parse(String(x.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0]));
+  const selected=[...tools].sort((a,b)=>(checked.get(a.slug)||0)-(checked.get(b.slug)||0)||String(a.slug).localeCompare(String(b.slug))).slice(0,Math.max(1,Math.min(25,Number(limit)||12)));
+  const results=await mapLimit(selected,4,tool=>auditCatalogTool(env,tool));
+  let passed=0,warnings=0,held=0,repaired=0;
+  for(const result of results){
+    if(!result)continue;
+    if(result.status==='pass')passed++;else if(result.status==='warning')warnings++;else held++;
+    await env.DB.prepare(`INSERT INTO catalog_quality_audit(tool_slug,quality_status,issues_json,warnings_json,source_status,source_url,logo_url,logo_provenance,last_checked_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))
+      ON CONFLICT(tool_slug) DO UPDATE SET quality_status=excluded.quality_status,issues_json=excluded.issues_json,warnings_json=excluded.warnings_json,source_status=excluded.source_status,source_url=excluded.source_url,logo_url=excluded.logo_url,logo_provenance=excluded.logo_provenance,last_checked_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(result.slug,result.status,JSON.stringify(result.issues||[]),JSON.stringify(result.warnings||[]),result.source?.status||null,result.source?.url||null,result.logo?.url||null,result.logo?.provenance||null).run();
+    const row=await env.DB.prepare(`SELECT profile_json,status FROM catalog_runtime_candidates WHERE tool_slug=? LIMIT 1`).bind(result.slug).first();
+    if(row){
+      let profile=null;try{profile=JSON.parse(row.profile_json||'{}')}catch{}
+      if(result.publishable&&profile&&result.logo?.url&&(profile.logoUrl!==result.logo.url||!profile.logoVerifiedAt)){
+        const next={...profile,logoUrl:result.logo.url,logoProvenance:result.logo.provenance,logoVerifiedAt:new Date().toISOString()};
+        await env.DB.prepare(`UPDATE catalog_runtime_candidates SET profile_json=?,status='published',updated_at=datetime('now') WHERE tool_slug=?`).bind(JSON.stringify(next),result.slug).run();
+        repaired++;
+      }else if(!result.publishable&&row.status==='published'){
+        await env.DB.prepare(`UPDATE catalog_runtime_candidates SET status='quality_hold',updated_at=datetime('now') WHERE tool_slug=?`).bind(result.slug).run();
+        await logEvent(env,result.slug,'catalog_quality_hold','completed','Runtime catalog profile moved to quality hold after catalog QC failed.',{issues:result.issues,warnings:result.warnings});
+      }
+    }
+  }
+  runtimeCache.at=0;
+  const summary=await env.DB.prepare(`SELECT quality_status,COUNT(*) n FROM catalog_quality_audit GROUP BY quality_status ORDER BY quality_status`).all();
+  return{ok:true,checked:results.length,passed,warnings,held,repaired,total_catalog:tools.length,summary:summary.results||[],remaining_unchecked:Math.max(0,tools.length-new Set([...(prior.results||[]).map(x=>String(x.tool_slug)),...results.map(x=>String(x?.slug||''))]).size)};
+}
+export async function catalogQualitySnapshot(env){
+  await ensureSchema(env);
+  const [counts,issues]=await Promise.all([
+    env.DB.prepare(`SELECT quality_status,COUNT(*) n FROM catalog_quality_audit GROUP BY quality_status ORDER BY quality_status`).all(),
+    env.DB.prepare(`SELECT tool_slug,quality_status,issues_json,warnings_json,source_status,source_url,logo_url,logo_provenance,last_checked_at FROM catalog_quality_audit WHERE quality_status!='pass' ORDER BY CASE quality_status WHEN 'hold' THEN 0 ELSE 1 END,last_checked_at DESC LIMIT 100`).all()
+  ]);
+  return{counts:counts.results||[],items:(issues.results||[]).map(x=>({...x,issues:(()=>{try{return JSON.parse(x.issues_json||'[]')}catch{return[]}})(),warnings:(()=>{try{return JSON.parse(x.warnings_json||'[]')}catch{return[]}})()}))};
+}
+
 const RUNTIME_SCORE_LABELS={price:'value for money',ease:'ease of use',automation:'automation',integrations:'integrations',sales:'sales capability',ai:'AI capability',marketing:'marketing capability',seo:'SEO capability',research:'research capability',content:'content capability',agency:'agency fit'};
 function runtimeListPhrase(items){
   const xs=(items||[]).filter(Boolean);
@@ -327,14 +385,20 @@ function runtimeEditorialView(tool){
   const commercial=tool?.freePlanKnown===false?' The current free-plan position is not verified.':tool?.freePlan?' A recorded free plan makes it easier to test before committing.':' Validate the use case and current pricing before committing.';
   return safeText((fit+strengths+trade+commercial+' Check current vendor limits, integrations and pricing before purchase.').replace(/[\u2013\u2014]/g,'-'),1800);
 }
+function runtimeLogo(tool){
+  if(tool?.logoUrl)return tool.logoUrl;
+  try{return 'https://www.google.com/s2/favicons?domain='+encodeURIComponent(new URL(tool.sourceUrl).hostname)+'&sz=128'}catch{return''}
+}
+function runtimeInitials(name){return String(name||'T').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
 function candidatePage(tool){
   const url=`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`;
+  const logo=runtimeLogo(tool),initials=runtimeInitials(tool.name);
   const features=(tool.features||[]).map(x=>`<span style="font-size:12px;background:#f2f4f7;border-radius:999px;padding:7px 9px">${esc(x)}</span>`).join('');
   const best=(tool.bestFor||[]).map(x=>`<li>${esc(x)}</li>`).join('');
   const free=tool.freePlanKnown===false?'Unknown':tool.freePlan?'Yes':'No';
   const review=runtimeEditorialView(tool);
   const faqBest=(tool.bestFor||[]).join(', ')||'the use cases shown on this page';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="canonical" href="${url}"><title>${esc(tool.name)} Tool Profile: Features, Pricing and Best For | ToolScout</title><meta name="description" content="${esc(tool.description)}"><style>body{font-family:Inter,system-ui,sans-serif;margin:0;background:#f6f7f9;color:#101828}.wrap{max-width:940px;margin:auto;padding:24px 22px 80px}a{color:#344054}.brand{font-size:22px;font-weight:850;text-decoration:none;color:#101828}.crumbs{margin-top:30px;font-size:13px;color:#667085}.hero{padding:46px 0 26px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#667085}h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:12px 0 18px}.lead{font-size:19px;line-height:1.65;color:#667085}.editorial{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px;margin-bottom:14px}.editorial p,.panel p,.panel li,details p{color:#667085;line-height:1.65}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel,details{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px}.chips{display:flex;flex-wrap:wrap;gap:7px}.cta{display:inline-block;background:#101828;color:#fff;padding:12px 17px;border-radius:11px;text-decoration:none;font-weight:750;margin-top:18px}.secondary{background:#eef2f6;color:#101828;margin-left:8px}.section{margin-top:42px;padding-top:28px;border-top:1px solid #e4e7ec}.small{font-size:12px;color:#667085;line-height:1.55}summary{font-weight:750;cursor:pointer}@media(max-width:700px){.grid{grid-template-columns:1fr}.secondary{margin-left:0}}</style></head><body><div class="wrap"><a class="brand" href="/">ToolScout</a><nav class="crumbs"><a href="/">Home</a> / <a href="/tools">Tools</a> / ${esc(tool.name)}</nav><main class="hero"><div class="eyebrow">Independent ${esc(tool.category)} software profile</div><h1>${esc(tool.name)} profile</h1><p class="lead">${esc(tool.description)}</p></main><section class="editorial"><div class="eyebrow">ToolScout view</div><p>${esc(review)}</p></section><section class="grid"><div class="panel"><h2>Best for</h2><ul>${best}</ul><h2>Key capabilities</h2><div class="chips">${features}</div></div><div class="panel"><h2>Pricing at a glance</h2><p>${esc(tool.pricing||'See vendor for current pricing.')}</p><p><strong>Free plan recorded:</strong> ${free}</p><p><strong>Category:</strong> ${esc(tool.category)}</p><a class="cta" href="/go/${encodeURIComponent(tool.slug)}" rel="nofollow sponsored">Explore ${esc(tool.name)}</a><a class="cta secondary" href="/compare.html?a=${encodeURIComponent(tool.slug)}&source=tool-profile">Add to comparator</a></div></section><section class="section"><h2>Frequently asked questions</h2><details><summary>What is ${esc(tool.name)} best for?</summary><p>${esc(tool.name)} is recorded in the ToolScout catalog for ${esc(faqBest)}.</p></details><details><summary>Does ${esc(tool.name)} have a free plan?</summary><p>${tool.freePlanKnown===false?'ToolScout has not yet verified the current free-plan position.':tool.freePlan?'The current ToolScout catalog records a free plan. Check the vendor for current limits and eligibility.':'The current ToolScout catalog does not record a free plan. Check the vendor for current offers.'}</p></details><details><summary>How current is this ${esc(tool.name)} profile?</summary><p>Source data last checked ${esc(tool.lastVerified||'recently')}. Vendor pricing and capabilities can change.</p></details></section><p class="small">Source data last checked ${esc(tool.lastVerified||'recently')}. Vendor pricing and capabilities can change. ToolScout may earn affiliate compensation, but affiliate relationships do not influence ranking or fit.</p></div></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="canonical" href="${url}"><title>${esc(tool.name)} Tool Profile: Features, Pricing and Best For | ToolScout</title><meta name="description" content="${esc(tool.description)}">${logo?`<meta property="og:image" content="${esc(logo)}">`:''}<style>body{font-family:Inter,system-ui,sans-serif;margin:0;background:#f6f7f9;color:#101828}.wrap{max-width:940px;margin:auto;padding:24px 22px 80px}a{color:#344054}.brand{font-size:22px;font-weight:850;text-decoration:none;color:#101828}.crumbs{margin-top:30px;font-size:13px;color:#667085}.hero{padding:46px 0 26px}.heroHead{display:grid;grid-template-columns:92px 1fr;gap:22px;align-items:center}.toolLogo,.logoFallback{width:88px;height:88px;border-radius:20px;background:#fff;border:1px solid #e4e7ec;box-shadow:0 8px 24px rgba(16,24,40,.08);box-sizing:border-box}.toolLogo{object-fit:contain;padding:14px}.logoFallback{display:grid;place-items:center;font-size:26px;font-weight:850}.logoFallback[hidden]{display:none!important}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#667085}h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:12px 0 18px}.lead{font-size:19px;line-height:1.65;color:#667085}.editorial{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px;margin-bottom:14px}.editorial p,.panel p,.panel li,details p{color:#667085;line-height:1.65}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel,details{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px}.chips{display:flex;flex-wrap:wrap;gap:7px}.cta{display:inline-block;background:#101828;color:#fff;padding:12px 17px;border-radius:11px;text-decoration:none;font-weight:750;margin-top:18px}.secondary{background:#eef2f6;color:#101828;margin-left:8px}.section{margin-top:42px;padding-top:28px;border-top:1px solid #e4e7ec}.small{font-size:12px;color:#667085;line-height:1.55}summary{font-weight:750;cursor:pointer}@media(max-width:700px){.grid{grid-template-columns:1fr}.heroHead{grid-template-columns:72px 1fr;gap:16px}.toolLogo,.logoFallback{width:68px;height:68px}.secondary{margin-left:0}}</style></head><body><div class="wrap"><a class="brand" href="/">ToolScout</a><nav class="crumbs"><a href="/">Home</a> / <a href="/tools">Tools</a> / ${esc(tool.name)}</nav><main class="hero"><div class="heroHead">${logo?`<img class="toolLogo" src="${esc(logo)}" alt="${esc(tool.name)} logo" width="88" height="88" loading="eager" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="logoFallback" hidden aria-hidden="true">${esc(initials)}</span>`:`<span class="logoFallback" aria-hidden="true">${esc(initials)}</span>`}<div><div class="eyebrow">Independent ${esc(tool.category)} software profile</div><h1>${esc(tool.name)} profile</h1></div></div><p class="lead">${esc(tool.description)}</p></main><section class="editorial"><div class="eyebrow">ToolScout view</div><p>${esc(review)}</p></section><section class="grid"><div class="panel"><h2>Best for</h2><ul>${best}</ul><h2>Key capabilities</h2><div class="chips">${features}</div></div><div class="panel"><h2>Pricing at a glance</h2><p>${esc(tool.pricing||'See vendor for current pricing.')}</p><p><strong>Free plan recorded:</strong> ${free}</p><p><strong>Category:</strong> ${esc(tool.category)}</p><a class="cta" href="/go/${encodeURIComponent(tool.slug)}" rel="nofollow sponsored">Explore ${esc(tool.name)}</a><a class="cta secondary" href="/compare.html?a=${encodeURIComponent(tool.slug)}&source=tool-profile">Add to comparator</a></div></section><section class="section"><h2>Frequently asked questions</h2><details><summary>What is ${esc(tool.name)} best for?</summary><p>${esc(tool.name)} is recorded in the ToolScout catalog for ${esc(faqBest)}.</p></details><details><summary>Does ${esc(tool.name)} have a free plan?</summary><p>${tool.freePlanKnown===false?'ToolScout has not yet verified the current free-plan position.':tool.freePlan?'The current ToolScout catalog records a free plan. Check the vendor for current limits and eligibility.':'The current ToolScout catalog does not record a free plan. Check the vendor for current offers.'}</p></details><details><summary>How current is this ${esc(tool.name)} profile?</summary><p>Source data last checked ${esc(tool.lastVerified||'recently')}. Vendor pricing and capabilities can change.</p></details></section><p class="small">Source data last checked ${esc(tool.lastVerified||'recently')}. Vendor pricing and capabilities can change. ToolScout may earn affiliate compensation, but affiliate relationships do not influence ranking or fit.</p></div></body></html>`;
 }
 function injectPendingReview(html,state){
   if(!state||state.quality_status!=='change_detected'||String(html).includes('data-catalog-runtime-warning'))return html;
