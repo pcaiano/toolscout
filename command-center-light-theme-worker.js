@@ -574,12 +574,19 @@ async function resilientStatsResponse(request, env, ctx) {
   }
 }
 
-async function missionNeedsRecovery(env,engine,mission){
+async function missionNeedsRecovery(env,engine,mission,maxAgeMinutes=0){
   try{
-    await reapStaleEngineRuns(env,45);
-    const row=await env.DB.prepare(`SELECT status,started_at FROM engine_runs WHERE engine=? AND mission=? ORDER BY started_at DESC LIMIT 1`).bind(engine,mission).first();
+    await reapStaleEngineRuns(env,120);
+    const row=await env.DB.prepare(`SELECT status,started_at,completed_at FROM engine_runs WHERE engine=? AND mission=? ORDER BY started_at DESC LIMIT 1`).bind(engine,mission).first();
     if(!row)return true;
-    return row.status==='failed'||row.status==='degraded';
+    if(row.status==='failed'||row.status==='degraded')return true;
+    if(row.status==='running')return false;
+    if(maxAgeMinutes>0&&row.status==='completed'){
+      const stamp=row.completed_at||row.started_at;
+      const t=Date.parse(String(stamp||'').replace(' ','T')+'Z');
+      if(Number.isFinite(t)&&Date.now()-t>maxAgeMinutes*60000)return true;
+    }
+    return false;
   }catch{return false}
 }
 async function catalogQualityNeedsRecovery(env){
@@ -588,6 +595,15 @@ async function catalogQualityNeedsRecovery(env){
     const evidence=JSON.parse(row?.evidence_json||'{}');
     const checked=Number(evidence?.checked||0),warnings=Number(evidence?.warnings||0);
     return checked>0&&warnings>=checked;
+  }catch{return false}
+}
+async function catalogWarningsNeedRecovery(env,hours=6){
+  try{
+    const cutoff=`-${Math.max(1,Number(hours)||6)} hours`;
+    const row=await env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_state
+      WHERE (quality_status='source_warning' OR source_status IN ('network_warning','warning','blocked_or_limited'))
+        AND (last_checked_at IS NULL OR last_checked_at<=datetime('now', ?))`).bind(cutoff).first();
+    return Number(row?.n||0)>0;
   }catch{return false}
 }
 
@@ -705,18 +721,21 @@ export default {
 
     if(hourly){
       ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
-      const prioritiesRecovery=await missionNeedsRecovery(env,'distribution','operating_priorities');
+      const prioritiesRecovery=await missionNeedsRecovery(env,'distribution','operating_priorities',150);
+      const contentRecovery=await missionNeedsRecovery(env,'content','social_intelligence',7*60);
       if(twoHourly){
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
         const affiliateRecovery=await missionNeedsRecovery(env,'affiliate','coverage_cycle');
         if(!affiliateMaintenance||twelveHourly||affiliateRecovery)ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,affiliateRecovery?trigger+':recovery':trigger).catch(()=>{}));
       }
       if(twoHourly||prioritiesRecovery){
-        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:prioritiesRecovery?trigger+':recovery':trigger},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
+        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:prioritiesRecovery?trigger+':recovery':trigger,singleFlightMinutes:20},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
       }
       if(sixHourly){
-        if(!catalogDemandLed||twelveHourly)ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyCatalogBatch(env)).catch(()=>{}));
-        ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:trigger},()=>runContentSocialIntelligenceCycle(env)).catch(()=>{}));
+        if(!catalogDemandLed||twelveHourly)ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger,singleFlightMinutes:20},()=>verifyCatalogBatch(env)).catch(()=>{}));
+      }
+      if(sixHourly||contentRecovery){
+        ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:contentRecovery?trigger+':recovery':trigger,singleFlightMinutes:15},()=>runContentSocialIntelligenceCycle(env)).catch(()=>{}));
       }
     }
 
@@ -726,13 +745,14 @@ export default {
         try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env))}catch{}
       })());
     }else if(hourly){
-      const [recoverCoverage,recoverNews,recoverQuality]=await Promise.all([
+      const [recoverCoverage,recoverNews,recoverQuality,recoverWarnings]=await Promise.all([
         missionNeedsRecovery(env,'catalog','runtime_coverage'),
         missionNeedsRecovery(env,'content','software_news_source_watch'),
-        catalogQualityNeedsRecovery(env)
+        catalogQualityNeedsRecovery(env),
+        catalogWarningsNeedRecovery(env,6)
       ]);
-      if(recoverCoverage||recoverNews||recoverQuality)ctx.waitUntil((async()=>{
-        if(recoverQuality){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery'},()=>verifyCatalogBatch(env))}catch{}}
+      if(recoverCoverage||recoverNews||recoverQuality||recoverWarnings)ctx.waitUntil((async()=>{
+        if(recoverQuality||recoverWarnings){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery',singleFlightMinutes:20},()=>verifyCatalogBatch(env))}catch{}}
         if(recoverCoverage){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+':recovery'},()=>admitTrustedCandidates(env))}catch{}}
         if(recoverNews){try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger+':recovery'},()=>verifyNewsSources(env))}catch{}}
       })());
