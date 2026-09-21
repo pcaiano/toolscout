@@ -194,6 +194,10 @@ async function ensureSchema(env){
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_catalog_events_created ON catalog_runtime_events(created_at DESC)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS catalog_admission_notifications(
+      event_id TEXT PRIMARY KEY,
+      notified_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS software_news_candidates(
       candidate_id TEXT PRIMARY KEY,
       tool_slug TEXT NOT NULL,
