@@ -1,7 +1,7 @@
 import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
-import {ensureHumanGateSchema,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,reopenHumanGate,humanGateSnapshot} from './human-gate-contract.js';
+import {ensureHumanGateSchema,humanGateKey,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,reopenHumanGate,humanGateSnapshot} from './human-gate-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
@@ -420,6 +420,38 @@ async function qualify(env){
   }
   return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT,write_policy:'material_or_due_only'};
 }
+async function recoverMachineResolvableAuthGates(env){
+  await ensureHumanGateSchema(env);
+  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,action_url,status,last_checked_at
+    FROM distribution_opportunities
+    WHERE status='auth_required' AND human_required=1 AND action_url IS NOT NULL
+    ORDER BY updated_at ASC
+    LIMIT 4`).all();
+  let checked=0,recovered=0;
+  for(const row of q.results||[]){
+    checked++;
+    const page=await text(row.action_url,4500);
+    if(!page)continue;
+    const adapter=await findOpenApi(page.url,page.body);
+    if(!adapter||adapter.auth_required)continue;
+    await storeAutoAdapter(env,row,page,adapter,'verified');
+    await env.DB.prepare(`UPDATE distribution_opportunities
+      SET status='ready_to_submit',
+          human_required=0,
+          automation_potential=95,
+          acceptance_probability=70,
+          next_action='Previously escalated authentication gate was reclassified as an open machine submission API. Autonomous execution resumed.',
+          last_checked_at=datetime('now'),
+          updated_at=datetime('now')
+      WHERE surface_slug=?`).bind(row.surface_slug).run();
+    await resolveHumanGate(env,humanGateKey('distribution','surface',row.surface_slug),{
+      detail:`machine_resolvable_auth_gate_recovered:${adapter.endpoint}`
+    });
+    await mark(env,row,'ready_to_submit',`recovered_open_machine_adapter:${adapter.endpoint}`);
+    recovered++;
+  }
+  return {checked,recovered};
+}
 async function syncExistingHumanGates(env){
   await ensureHumanGateSchema(env);
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,status,action_url,next_action,live_url
@@ -725,6 +757,7 @@ export async function runAutonomousDistributionCycle(env){
   await ensureHumanGateSchema(env);
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
+  const machineGateRecovery=await recoverMachineResolvableAuthGates(env);
   const humanGateSync=await syncExistingHumanGates(env);
   const humanGateVerification=await verifyHumanGateResolutions(env);
   const routeRefresh=await refreshPersistentActionUrls(env);
@@ -732,7 +765,7 @@ export async function runAutonomousDistributionCycle(env){
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
-  return {ok:true,technicalSuppressed,normalized,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
+  return {ok:true,technicalSuppressed,normalized,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
