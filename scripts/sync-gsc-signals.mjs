@@ -402,7 +402,9 @@ const pageTypeSummary = Object.fromEntries([...new Set(pages.map(x => x.type))].
 }));
 
 fs.mkdirSync('reports', { recursive: true });
+fs.mkdirSync('data', { recursive: true });
 fs.writeFileSync('reports/gsc-search-reality.json', JSON.stringify(searchReality, null, 2) + '\n');
+fs.writeFileSync('data/gsc-search-reality.json', JSON.stringify(searchReality, null, 2) + '\n');
 fs.writeFileSync('reports/gsc-signals.json', JSON.stringify({
   generatedAt: new Date().toISOString(),
   source: 'Google Search Console Search Analytics API',
