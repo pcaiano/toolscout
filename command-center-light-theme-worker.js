@@ -4,7 +4,7 @@ import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.j
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger,reapStaleEngineRuns} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
-import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources,publicMergedTools,publicRuntimeToolResponse,publicMergedSitemap,publicRuntimeRankingResponse} from './catalog-autonomy-worker.js';
+import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources,publicMergedTools,publicRuntimeToolResponse,publicQualityEnhancedToolResponse,publicMergedSitemap,publicRuntimeRankingResponse} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 import {growthSupervisorDirective} from './growth-supervisor.js';
@@ -610,6 +610,7 @@ export default {
       const slug=(url.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)/i)||[])[1]?.toLowerCase()||'';
       const runtimeResponse=await publicRuntimeToolResponse(env,slug);
       if(runtimeResponse)return runtimeResponse;
+      return publicQualityEnhancedToolResponse(await base.fetch(request,env,ctx),env,slug);
     }
     if(request.method==='GET'&&url.pathname==='/sitemap.xml'){
       return publicMergedSitemap(await base.fetch(request,env,ctx),env);

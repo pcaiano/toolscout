@@ -414,6 +414,19 @@ async function mergedSitemap(response,env){
   const h=new Headers(response.headers);h.delete('Content-Length');h.set('Content-Type','application/xml; charset=UTF-8');return new Response(xml,{status:response.status,headers:h});
 }
 export async function publicMergedTools(env){return mergedTools(env)}
+export async function publicQualityEnhancedToolResponse(response,env,slug){
+  if(!response?.ok||!(response.headers.get('Content-Type')||'').includes('text/html'))return response;
+  await ensureSchema(env);
+  const row=await env.DB.prepare(`SELECT logo_url FROM catalog_quality_audit WHERE tool_slug=? AND logo_url IS NOT NULL LIMIT 1`).bind(String(slug||'').toLowerCase()).first().catch(()=>null);
+  if(!row?.logo_url)return response;
+  let html=await response.text();
+  const logo=esc(row.logo_url);
+  html=html.replace(/(<img class="toolLogo" src=")[^"]*(")/i,`$1${logo}$2`);
+  if(/<meta property="og:image"/i.test(html))html=html.replace(/(<meta property="og:image" content=")[^"]*(")/i,`$1${logo}$2`);
+  else html=html.replace('</head>',`<meta property="og:image" content="${logo}"></head>`);
+  const h=new Headers(response.headers);h.delete('Content-Length');h.set('Cache-Control','public, max-age=60');
+  return new Response(html,{status:response.status,headers:h});
+}
 export async function publicRuntimeToolResponse(env,slug){
   const key=String(slug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
   if(!key)return null;

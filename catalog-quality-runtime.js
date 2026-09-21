@@ -75,12 +75,13 @@ export async function resolveCatalogLogo(env,tool,{officialPage=null}={}){
   const explicit=tool?.logoUrl?{url:tool.logoUrl,provenance:tool.logoProvenance||'profile-logo'}:null;
   const page=officialPage?.html!==undefined?officialPage:await fetchPage(tool?.verificationUrl||tool?.sourceUrl);
   const firstParty=page?.url?iconCandidates(page.html,page.url):[];
-  let google=null;
+  let duck=null,google=null;
   try{
     const host=new URL(tool?.sourceUrl||page?.url).hostname;
+    duck={url:`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,provenance:'duckduckgo-favicon-fallback'};
     google={url:`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`,provenance:'google-favicon-fallback'};
   }catch{}
-  const resolved=await firstValid([[explicit,curated],firstParty.slice(0,4),google]);
+  const resolved=await firstValid([[explicit,curated],firstParty.slice(0,4),[duck,google]]);
   return{
     ok:Boolean(resolved),
     logo:resolved,
