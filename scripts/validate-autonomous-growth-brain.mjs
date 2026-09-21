@@ -35,6 +35,7 @@ const rndPolicy=read('data/growth-rnd-policy.json');
 const humanGate=read('human-gate-contract.js');
 const humanAction=read('human-action-entry-worker.js');
 const distributionAuto=read('distribution-autonomous-worker.js');
+const discovery=read('distribution-discovery-worker.js');
 
 if(!funnel.includes("import base from './catalog-autonomy-worker.js'"))fail('Catalog Autonomy is not in the live Worker chain.');
 if(!orchestrator.includes("'affiliate'")||!orchestrator.includes("'catalog_tool'")||!orchestrator.includes("'catalog_category'"))fail('Shared growth brain is missing Affiliate or Catalog opportunity types.');
@@ -47,6 +48,11 @@ if(!command.includes('data-widget="catalog-growth"')||!command.includes("version
 if(!analytics.includes('Application packs')||!analytics.includes('Production verified routes'))fail('Affiliate autonomy metrics are not rendered in the Command Center.');
 for(const route of ['/api/growth/*','/api/affiliate-coverage*','/api/affiliate-replies*','/api/catalog-autonomy*'])if(!wrangler.includes(route))fail('Worker routing missing '+route);
 if(!supervisor.includes('BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR')||!supervisor.includes('backlink_acquisition')||!supervisor.includes('verified_referring_domains'))fail('Growth Brain is not supervising backlink acquisition as a primary SEO authority objective.');
+if(!supervisor.includes('BACKLINK_ATTEMPT_MIN_24H=6')||!supervisor.includes('BACKLINK_STAGNATION_HOURS=72')||!supervisor.includes('expand_authority_routes_and_execute')||!supervisor.includes('rotate_authority_channel_mix_and_execute'))fail('Backlink acquisition lacks throughput and stagnation supervision.');
+if(!orchestrator.includes('authorityUrgencyBoost')||!orchestrator.includes('backlink_throughput_gap')||!orchestrator.includes('backlink_stagnating'))fail('Growth opportunity priority does not react to authority-loop underperformance.');
+if(!distributionAuto.includes('authority_pipeline_replenishment')||!distributionAuto.includes('authorityLoopState')||!distributionAuto.includes('AUTHORITY_RECOVERY_COOLDOWN_HOURS'))fail('Authority acquisition cannot autonomously replenish discovery after throughput gaps.');
+if(!sender.includes('authority_handoff_no_output')||!sender.includes('authority_replenishment_scheduled')||!sender.includes('replenishAuthorityPipeline'))fail('No-output sender runs are still silent or do not replenish authority discovery.');
+if(!discovery.includes('editorial_resource')||!discovery.includes('partner_resource')||!discovery.includes('community_resource')||!discovery.includes('backlink:94'))fail('Authority discovery is not diversified beyond generic directories.');
 if(!orchestrator.includes("'backlink_reference_outreach'")||!orchestrator.includes('backlink_quality_only')||!orchestrator.includes('paid_links_allowed:false'))fail('Growth opportunities do not generate quality backlink outreach actions.');
 if(!executionContract.includes("backlink_reference_outreach:'make_sender'")||!executionContract.includes("verify_backlink_acquisition:'distribution_autonomous'"))fail('Backlink acquisition actions are not bound to real executors.');
 if(!sender.includes('vendor_reference_v22')||!sender.includes('do not request reciprocal links')||!sender.includes('do not pay for ranking links'))fail('Vendor outreach does not enforce legitimate backlink acquisition policy.');
@@ -73,6 +79,8 @@ if(!network.includes('distribution_contact_route_actions')||!network.includes('m
 if(!content.includes('Borrowed-audience amplification candidate')||!content.includes('issued_to_content'))fail('Content Engine is not consuming alternate social distribution routes.');
 if(!orchestrator.includes('execute_alternate_routes')||!orchestrator.includes('alternate_routes_stalled'))fail('Growth Brain does not consume alternate-route lifecycle state.');
 if(!command.includes('Growth Brain verdict')||!command.includes('Growth loop integrity')||!command.includes('orphan_alternate_routes')||!command.includes('stale_growth_actions'))fail('Command Center Growth Brain verdict or closed-loop watchdog is missing.');
+if(!command.includes('data-widget="business-pulse"')||!command.includes('Business trajectory')||!command.includes('verified_referring_domains')||!command.includes('authority_throughput_gap')||!command.includes('sender_no_output_24h'))fail('Command Center is not business-first or does not expose authority-loop truth.');
+if(!analytics.includes('Show operational detail')||!analytics.includes('data-detail="1"')||!analytics.includes('Business truth first'))fail('Command Center operational detail is not subordinated to the business view.');
 if(!orchestrator.includes('recheck_affiliate_program_on_evidence_or_cadence')||!orchestrator.includes("if(!actions.length)actions.push('reconcile_affiliate_state')"))fail('Affiliate opportunities can still become active without a next action.');
 if(!orchestrator.includes('refresh_catalog_profile_for_observed_search_demand')||!orchestrator.includes("if(!actions.length)continue;"))fail('Non-actionable catalog rows can still be promoted to active Growth opportunities.');
 if(!command.includes('NOT EXISTS (')||!command.includes("c.started_at>f.started_at"))fail('Growth watchdog does not distinguish recovered failures from unresolved failures.');
@@ -104,6 +112,7 @@ if(!orchestrator.includes('catalog-freshness:${slug}:${freshnessEpoch}')||!orche
 if(!executionContract.includes("g.subject_type='search'")||!executionContract.includes("THEN 'seo_github'"))fail('Unmapped search actions are not automatically routed to the SEO executor.');
 if(!orchestrator.includes('runGrowthExecutionContractCycle')||!orchestrator.includes("mission:'execution_contract'")||!orchestrator.includes('/api/growth/execution'))fail('Growth execution contracts are not enforced by the runtime loop.');
 if(!orchestrator.includes("integrityVersion:'task-specific-bounded-v3'")||!orchestrator.includes('maxInternalLanesPerRun:1')||!orchestrator.includes('externalExecutorsClaimOnly:true'))fail('Growth execution contract is not bounded to one internal lane with external claim-only handoff.');
+if(!executionContract.includes("integrityVersion:'task-specific-bounded-v3'")||sender.includes('task-specific-v2')||command.includes("integrity:'task-specific-v2'"))fail('Execution integrity version is inconsistent across runtime surfaces.');
 if(orchestrator.includes('const [contacts,network]=await Promise.all'))fail('Growth execution contract still duplicates heavy distribution work inside make_sender preparation.');
 {const scheduledCore=orchestrator.lastIndexOf("mission:'execution_contract'");const scheduledBase=orchestrator.lastIndexOf('if(base.scheduled)await base.scheduled(event,env,ctx);');if(scheduledCore<0||scheduledBase<0||scheduledCore>scheduledBase)fail('Growth execution contract still runs after the downstream scheduled chain and can be starved into stale_run_abandoned.');}
 if(!supervisor.includes('repair_execution_contract')||!supervisor.includes('missing_executors')||!supervisor.includes("status='stalled'"))fail('Growth Supervisor does not fail on lost or stalled execution contracts.');
