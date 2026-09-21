@@ -563,7 +563,8 @@ export async function reconcileExecutionContracts(env){
   await ensureExecutionContractSchema(env);
   await reconcileExecutionDeadlines(env);
   const tasks=await all(env,`SELECT * FROM growth_execution_contract
-    WHERE status IN ('pending','claimed','attempted','stalled','executor_missing','deferred')
+    WHERE status IN ('pending','claimed','attempted','stalled','executor_missing')
+       OR (status='deferred' AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle'))
     ORDER BY CASE status WHEN 'claimed' THEN 0 WHEN 'attempted' THEN 1 WHEN 'stalled' THEN 2 WHEN 'pending' THEN 3 WHEN 'executor_missing' THEN 4 ELSE 5 END,
              priority_score DESC,created_at ASC
     LIMIT 160`);
