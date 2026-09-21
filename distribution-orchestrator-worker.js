@@ -302,7 +302,17 @@ async function coordinateGrowthOpportunities(env){
   inputFreshness.catalogHealth.fresh=inputFreshness.catalogHealth.ageHours<=36;
   inputFreshness.toolProfileHolds.fresh=inputFreshness.toolProfileHolds.ageHours<=72;
   const searchOpportunities=inputFreshness.organicGrowth.fresh&&Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
-  const searchRealityTechnical=inputFreshness.gscReality.fresh&&Array.isArray(gscReality?.opportunities)?gscReality.opportunities.filter(x=>['index_issue','canonical_mismatch','sitemap_redirect'].includes(String(x?.kind||''))).slice(0,50):[];
+  const searchRealityTechnical=(()=>{
+    if(!inputFreshness.gscReality.fresh||!Array.isArray(gscReality?.opportunities))return[];
+    const precedence={sitemap_redirect:3,canonical_mismatch:2,index_issue:1},byPage=new Map();
+    for(const row of gscReality.opportunities){
+      const kind=String(row?.kind||'');if(!precedence[kind])continue;
+      const page=String(row?.page||row?.url||'');if(!page)continue;
+      const prior=byPage.get(page);
+      if(!prior||precedence[kind]>precedence[String(prior?.kind||'')]||(precedence[kind]===precedence[String(prior?.kind||'')]&&Number(row?.score||0)>Number(prior?.score||0)))byPage.set(page,row);
+    }
+    return[...byPage.values()].sort((a,b)=>Number(b?.score||0)-Number(a?.score||0)).slice(0,50);
+  })();
   const directGscPages=inputFreshness.gsc.fresh&&Array.isArray(gscSignals?.pages)?gscSignals.pages:[];
   const normalizedGscPages=directGscPages
     .filter(x=>Number(x?.impressions||0)>0)
