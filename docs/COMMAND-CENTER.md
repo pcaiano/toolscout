@@ -261,6 +261,8 @@ Editorial authority update (2026-09-17): the software catalog now uses a hybrid 
 
 Dynamic comparison parity (2026-09-21): `/compare.html` now renders a ToolScout analysis for every valid tool pair using the same evidence boundaries as generated A-vs-B pages: scored criteria, catalog audiences and shared capabilities. The analysis is deterministic and always has a grounded fallback when scores do not separate the tools. `tests/comparison-editorial-contract.test.mjs` guards both dynamic and registered static comparisons, and the SEO engine runs that contract after comparison generation.
 
+- Static comparison parity (2026-09-21): all registered A-vs-B pages are now generated from `compare.html` itself, with pair-specific metadata and pre-rendered comparison content. Static pages therefore share the same compact table, ToolScout analysis, selectors, CTAs and mobile responsive styling as the dynamic comparator. The former card, decision, related-guide, methodology and FAQ sections were removed from the static generator. `tests/comparison-editorial-contract.test.mjs` enforces shared styling and rejects the retired long-form sections.
+
 
 The 2026-09-01 commercial SEO sprint added crawlable, catalog-backed static profiles for all 100 tools, linked the 38 intent guides and 15 comparison pages bidirectionally through those profiles, centralized the comparison registry, and expanded the static sitemap from 107 to 207 URLs. No editorial ranking, affiliate configuration, distribution state, or speculative intent inventory changed. Full scope and acceptance evidence are recorded in `docs/SEO-COMMERCIAL-SPRINT-2026-09-01.md`.
 
