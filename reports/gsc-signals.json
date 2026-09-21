@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T13:18:32.345Z",
+  "generatedAt": "2026-09-21T20:25:54.715Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,24 +8,24 @@
   "endDate": "2026-09-21",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 3557,
-    "ctr": 0.0281
+    "impressions": 3643,
+    "ctr": 0.0274
   },
   "pageTypeSummary": {
     "comparison": {
       "pages": 4,
       "clicks": 0,
-      "impressions": 34
+      "impressions": 38
     },
     "directory": {
       "pages": 4,
       "clicks": 0,
-      "impressions": 35
+      "impressions": 37
     },
     "guide": {
-      "pages": 42,
+      "pages": 43,
       "clicks": 0,
-      "impressions": 2109
+      "impressions": 2130
     },
     "home": {
       "pages": 2,
@@ -35,15 +35,15 @@
     "other": {
       "pages": 11,
       "clicks": 0,
-      "impressions": 32
+      "impressions": 40
     },
     "tool-profile": {
-      "pages": 46,
+      "pages": 51,
       "clicks": 0,
-      "impressions": 1222
+      "impressions": 1273
     }
   },
-  "pageCount": 109,
+  "pageCount": 115,
   "pages": [
     {
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
@@ -52,21 +52,21 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 804,
+      "impressions": 810,
       "ctr": 0,
-      "position": 75.8595,
+      "position": 75.8444,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 239,
-          "position": 72.5481
+          "impressions": 242,
+          "position": 72.6405
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 165,
-          "position": 80.0545
+          "impressions": 166,
+          "position": 80.012
         },
         {
           "query": "what is the best tool for seo agency",
@@ -125,9 +125,9 @@
       "type": "guide",
       "intent": "best-seo-keyword-research-tools",
       "clicks": 0,
-      "impressions": 322,
+      "impressions": 325,
       "ctr": 0,
-      "position": 75.7733,
+      "position": 75.56,
       "topQueries": [
         {
           "query": "website research tool",
@@ -198,15 +198,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 317,
+      "impressions": 321,
       "ctr": 0,
-      "position": 55.5615,
+      "position": 55.514,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 138,
-          "position": 56.8261
+          "impressions": 139,
+          "position": 56.7986
         },
         {
           "query": "semrush software",
@@ -217,13 +217,13 @@
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 43,
-          "position": 51.6744
+          "impressions": 44,
+          "position": 51.5682
         },
         {
           "query": "semrush tools",
           "clicks": 0,
-          "impressions": 26,
+          "impressions": 27,
           "position": 52
         },
         {
@@ -237,6 +237,12 @@
           "clicks": 0,
           "impressions": 2,
           "position": 78
+        },
+        {
+          "query": "samras tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 55
         },
         {
           "query": "what is semrush tool",
@@ -253,9 +259,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 291,
+      "impressions": 294,
       "ctr": 0,
-      "position": 73.9622,
+      "position": 74.1871,
       "topQueries": [
         {
           "query": "airtable",
@@ -284,8 +290,8 @@
         {
           "query": "what is airtable and how it works",
           "clicks": 0,
-          "impressions": 19,
-          "position": 92.1579
+          "impressions": 22,
+          "position": 92.6818
         },
         {
           "query": "airtabel",
@@ -399,9 +405,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 190,
+      "impressions": 192,
       "ctr": 0,
-      "position": 61.4632,
+      "position": 61.5885,
       "topQueries": [
         {
           "query": "klaviyo",
@@ -424,8 +430,8 @@
         {
           "query": "clavio",
           "clicks": 0,
-          "impressions": 5,
-          "position": 62.4
+          "impressions": 6,
+          "position": 68.1667
         },
         {
           "query": "klavyio",
@@ -545,9 +551,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 131,
+      "impressions": 132,
       "ctr": 0,
-      "position": 69.7328,
+      "position": 69.2424,
       "topQueries": [
         {
           "query": "moz pro tools",
@@ -862,15 +868,15 @@
       "type": "guide",
       "intent": "best-keyword-research-tools",
       "clicks": 0,
-      "impressions": 75,
+      "impressions": 76,
       "ctr": 0,
-      "position": 73.3733,
+      "position": 73.3553,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 64,
-          "position": 74.3281
+          "impressions": 65,
+          "position": 74.2923
         },
         {
           "query": "keyword discovery tools",
@@ -1082,9 +1088,9 @@
       "type": "directory",
       "intent": null,
       "clicks": 0,
-      "impressions": 29,
+      "impressions": 30,
       "ctr": 0,
-      "position": 12.7586,
+      "position": 12.5333,
       "topQueries": [
         {
           "query": "\"moz\" \"keyword research\" -site:reddit.com -site:twitter.com -site:x.com -site:wykop.pl -site:tripadvisor.com -site:youtube.com -site:yelp.com -site:booking.com -site:facebook.com -site:instagram.com -site:tiktok.com",
@@ -1174,6 +1180,43 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/screaming-frog",
+      "pathname": "/tools/screaming-frog",
+      "key": "screaming-frog",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 24,
+      "ctr": 0,
+      "position": 74.2917,
+      "topQueries": [
+        {
+          "query": "screaming frog",
+          "clicks": 0,
+          "impressions": 20,
+          "position": 74.4
+        },
+        {
+          "query": "screaming frog seo tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 74
+        },
+        {
+          "query": "screaming frog software",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 67
+        },
+        {
+          "query": "screamingfrog",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 80
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/asana-vs-clickup.html",
       "pathname": "/asana-vs-clickup.html",
       "key": "asana-vs-clickup",
@@ -1201,6 +1244,43 @@
           "clicks": 0,
           "impressions": 1,
           "position": 71
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/mixpanel.html",
+      "pathname": "/tools/mixpanel.html",
+      "key": "mixpanel",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 22,
+      "ctr": 0,
+      "position": 86.2273,
+      "topQueries": [
+        {
+          "query": "mixpanel",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 87.2857
+        },
+        {
+          "query": "mixpannel",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 87.3333
+        },
+        {
+          "query": "mix panel",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 87.5
+        },
+        {
+          "query": "mixpnel",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 87.5
         }
       ]
     },
@@ -1266,43 +1346,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tools/mixpanel.html",
-      "pathname": "/tools/mixpanel.html",
-      "key": "mixpanel",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 21,
-      "ctr": 0,
-      "position": 86.0952,
-      "topQueries": [
-        {
-          "query": "mixpanel",
-          "clicks": 0,
-          "impressions": 13,
-          "position": 87.1538
-        },
-        {
-          "query": "mixpannel",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 87.3333
-        },
-        {
-          "query": "mix panel",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 87.5
-        },
-        {
-          "query": "mixpnel",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 87.5
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/tools/miro",
       "pathname": "/tools/miro",
       "key": "miro",
@@ -1324,6 +1367,61 @@
           "clicks": 0,
           "impressions": 3,
           "position": 85
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/best-social-media-management-tools",
+      "pathname": "/best-social-media-management-tools",
+      "key": "best-social-media-management-tools",
+      "type": "guide",
+      "intent": "best-social-media-management-tools",
+      "clicks": 0,
+      "impressions": 17,
+      "ctr": 0,
+      "position": 58.2353,
+      "topQueries": [
+        {
+          "query": "social media management tool",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 69
+        },
+        {
+          "query": "social media management tools",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 64.25
+        },
+        {
+          "query": "best social media management tool",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 25.6667
+        },
+        {
+          "query": "social media tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 65
+        },
+        {
+          "query": "best tools for social media managers",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 23
+        },
+        {
+          "query": "social media marketing management tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 77
+        },
+        {
+          "query": "tools for social media managers",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 81
         }
       ]
     },
@@ -1402,76 +1500,21 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-social-media-management-tools",
-      "pathname": "/best-social-media-management-tools",
-      "key": "best-social-media-management-tools",
-      "type": "guide",
-      "intent": "best-social-media-management-tools",
-      "clicks": 0,
-      "impressions": 13,
-      "ctr": 0,
-      "position": 56.3077,
-      "topQueries": [
-        {
-          "query": "social media management tool",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 70
-        },
-        {
-          "query": "best social media management tool",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 25.6667
-        },
-        {
-          "query": "social media management tools",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 65.5
-        },
-        {
-          "query": "best tools for social media managers",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 23
-        },
-        {
-          "query": "social media tool",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 63
-        },
-        {
-          "query": "social media marketing management tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 77
-        },
-        {
-          "query": "tools for social media managers",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 81
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/tools/matomo.html",
       "pathname": "/tools/matomo.html",
       "key": "matomo",
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 12,
+      "impressions": 13,
       "ctr": 0,
-      "position": 58.25,
+      "position": 57.3846,
       "topQueries": [
         {
           "query": "matomo analytics",
           "clicks": 0,
-          "impressions": 3,
-          "position": 39
+          "impressions": 4,
+          "position": 41
         },
         {
           "query": "matomo",
@@ -1537,27 +1580,21 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tools/screaming-frog",
-      "pathname": "/tools/screaming-frog",
-      "key": "screaming-frog",
-      "type": "tool-profile",
+      "page": "https://trytoolscout.org/news/hubspot-mcp-server-updates",
+      "pathname": "/news/hubspot-mcp-server-updates",
+      "key": "hubspot-mcp-server-updates",
+      "type": "other",
       "intent": null,
       "clicks": 0,
       "impressions": 10,
       "ctr": 0,
-      "position": 73.7,
+      "position": 85.1,
       "topQueries": [
         {
-          "query": "screaming frog",
+          "query": "hubspot mcp",
           "clicks": 0,
-          "impressions": 9,
-          "position": 74.4444
-        },
-        {
-          "query": "screaming frog software",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 67
+          "impressions": 10,
+          "position": 85.1
         }
       ]
     },
@@ -1692,6 +1729,37 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/airtable-vs-notion",
+      "pathname": "/airtable-vs-notion",
+      "key": "airtable-vs-notion",
+      "type": "comparison",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 6,
+      "ctr": 0,
+      "position": 62.1667,
+      "topQueries": [
+        {
+          "query": "airtable notion",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 71.5
+        },
+        {
+          "query": "notion airtable",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 67
+        },
+        {
+          "query": "notion and airtable",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 69
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-ai-coding-tools.html",
       "pathname": "/best-ai-coding-tools.html",
       "key": "best-ai-coding-tools",
@@ -1754,23 +1822,35 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/news/hubspot-mcp-server-updates",
-      "pathname": "/news/hubspot-mcp-server-updates",
-      "key": "hubspot-mcp-server-updates",
-      "type": "other",
+      "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
+      "pathname": "/best-funnel-builder-for-beginners",
+      "key": "best-funnel-builder-for-beginners",
+      "type": "guide",
+      "intent": "best-funnel-builder-for-beginners",
+      "clicks": 0,
+      "impressions": 6,
+      "ctr": 0,
+      "position": 55.6667,
+      "topQueries": [
+        {
+          "query": "best free funnel builder",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 69
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/descript",
+      "pathname": "/tools/descript",
+      "key": "descript",
+      "type": "tool-profile",
       "intent": null,
       "clicks": 0,
       "impressions": 6,
       "ctr": 0,
-      "position": 83.8333,
-      "topQueries": [
-        {
-          "query": "hubspot mcp",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 83.8333
-        }
-      ]
+      "position": 64,
+      "topQueries": []
     },
     {
       "page": "https://trytoolscout.org/activecampaign-vs-mailchimp.html",
@@ -1785,54 +1865,35 @@
       "topQueries": []
     },
     {
-      "page": "https://trytoolscout.org/airtable-vs-notion",
-      "pathname": "/airtable-vs-notion",
-      "key": "airtable-vs-notion",
-      "type": "comparison",
-      "intent": null,
+      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
+      "pathname": "/best-competitor-seo-tools.html",
+      "key": "best-competitor-seo-tools",
+      "type": "guide",
+      "intent": "best-competitor-seo-tools",
       "clicks": 0,
       "impressions": 5,
       "ctr": 0,
-      "position": 68,
+      "position": 41,
       "topQueries": [
         {
-          "query": "airtable notion",
+          "query": "seo competitor research tool",
           "clicks": 0,
           "impressions": 2,
-          "position": 71.5
-        },
-        {
-          "query": "notion airtable",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 67
-        },
-        {
-          "query": "notion and airtable",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 69
+          "position": 98
         }
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
-      "pathname": "/best-funnel-builder-for-beginners",
-      "key": "best-funnel-builder-for-beginners",
+      "page": "https://trytoolscout.org/best-funnel-builder",
+      "pathname": "/best-funnel-builder",
+      "key": "best-funnel-builder",
       "type": "guide",
-      "intent": "best-funnel-builder-for-beginners",
+      "intent": "best-funnel-builder",
       "clicks": 0,
       "impressions": 5,
       "ctr": 0,
-      "position": 48.2,
-      "topQueries": [
-        {
-          "query": "best free funnel builder",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 69
-        }
-      ]
+      "position": 73,
+      "topQueries": []
     },
     {
       "page": "https://trytoolscout.org/best-productivity-tools-for-teams.html",
@@ -1929,23 +1990,40 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
-      "pathname": "/best-competitor-seo-tools.html",
-      "key": "best-competitor-seo-tools",
-      "type": "guide",
-      "intent": "best-competitor-seo-tools",
+      "page": "https://trytoolscout.org/tools/jasper",
+      "pathname": "/tools/jasper",
+      "key": "jasper",
+      "type": "tool-profile",
+      "intent": null,
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 5,
       "ctr": 0,
-      "position": 51,
-      "topQueries": [
-        {
-          "query": "seo competitor research tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 98
-        }
-      ]
+      "position": 56.6,
+      "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/tools/mangools",
+      "pathname": "/tools/mangools",
+      "key": "mangools",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 41.2,
+      "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/tools/workato",
+      "pathname": "/tools/workato",
+      "key": "workato",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 57.6,
+      "topQueries": []
     },
     {
       "page": "https://trytoolscout.org/best-developer-tools.html",
@@ -2017,6 +2095,37 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/make-vs-zapier",
+      "pathname": "/make-vs-zapier",
+      "key": "make-vs-zapier",
+      "type": "comparison",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 80.5,
+      "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
+      "pathname": "/news/github-actions-workflow-execution-protections-ga",
+      "key": "github-actions-workflow-execution-protections-ga",
+      "type": "other",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 6,
+      "topQueries": [
+        {
+          "query": "github actions execution protections ga",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 7.3333
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/hubspot.html",
       "pathname": "/tools/hubspot.html",
       "key": "hubspot",
@@ -2070,6 +2179,18 @@
       "impressions": 4,
       "ctr": 0,
       "position": 6,
+      "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/whats-new",
+      "pathname": "/whats-new",
+      "key": "whats-new",
+      "type": "other",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 62.75,
       "topQueries": []
     },
     {
@@ -2135,21 +2256,21 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
-      "pathname": "/news/github-actions-workflow-execution-protections-ga",
-      "key": "github-actions-workflow-execution-protections-ga",
-      "type": "other",
+      "page": "https://trytoolscout.org/compare",
+      "pathname": "/compare",
+      "key": "compare",
+      "type": "directory",
       "intent": null,
       "clicks": 0,
       "impressions": 3,
       "ctr": 0,
-      "position": 7.3333,
+      "position": 37.3333,
       "topQueries": [
         {
-          "query": "github actions execution protections ga",
+          "query": "comparison of tools",
           "clicks": 0,
-          "impressions": 3,
-          "position": 7.3333
+          "impressions": 1,
+          "position": 80
         }
       ]
     },
@@ -2408,25 +2529,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/compare",
-      "pathname": "/compare",
-      "key": "compare",
-      "type": "directory",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 45,
-      "topQueries": [
-        {
-          "query": "comparison of tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 80
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/guides.html",
       "pathname": "/guides.html",
       "key": "guides",
@@ -2436,6 +2538,30 @@
       "impressions": 2,
       "ctr": 0,
       "position": 6.5,
+      "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/tools/activecampaign",
+      "pathname": "/tools/activecampaign",
+      "key": "activecampaign",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 28,
+      "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/tools/ahrefs.html",
+      "pathname": "/tools/ahrefs.html",
+      "key": "ahrefs",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 6,
       "topQueries": []
     },
     {
@@ -2498,6 +2624,18 @@
       "impressions": 2,
       "ctr": 0,
       "position": 6.5,
+      "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/tools/posthog",
+      "pathname": "/tools/posthog",
+      "key": "posthog",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 29,
       "topQueries": []
     },
     {
@@ -2580,6 +2718,18 @@
       "topQueries": []
     },
     {
+      "page": "https://trytoolscout.org/best-crm-for-real-estate.html",
+      "pathname": "/best-crm-for-real-estate.html",
+      "key": "best-crm-for-real-estate",
+      "type": "guide",
+      "intent": "best-crm-for-real-estate",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 92,
+      "topQueries": []
+    },
+    {
       "page": "https://trytoolscout.org/best-crm-for-small-business.html",
       "pathname": "/best-crm-for-small-business.html",
       "key": "best-crm-for-small-business",
@@ -2609,18 +2759,6 @@
           "position": 71
         }
       ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-funnel-builder",
-      "pathname": "/best-funnel-builder",
-      "key": "best-funnel-builder",
-      "type": "guide",
-      "intent": "best-funnel-builder",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 68,
-      "topQueries": []
     },
     {
       "page": "https://trytoolscout.org/best-marketing-automation-tools.html",
@@ -2690,18 +2828,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/make-vs-zapier",
-      "pathname": "/make-vs-zapier",
-      "key": "make-vs-zapier",
-      "type": "comparison",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 67,
-      "topQueries": []
-    },
-    {
       "page": "https://trytoolscout.org/privacy",
       "pathname": "/privacy",
       "key": "privacy",
@@ -2745,27 +2871,27 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tools/ahrefs.html",
-      "pathname": "/tools/ahrefs.html",
-      "key": "ahrefs",
+      "page": "https://trytoolscout.org/tools/asana",
+      "pathname": "/tools/asana",
+      "key": "asana",
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 9,
+      "position": 24,
       "topQueries": []
     },
     {
-      "page": "https://trytoolscout.org/tools/descript",
-      "pathname": "/tools/descript",
-      "key": "descript",
+      "page": "https://trytoolscout.org/tools/clickup",
+      "pathname": "/tools/clickup",
+      "key": "clickup",
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 66,
+      "position": 23,
       "topQueries": []
     },
     {
@@ -2786,6 +2912,18 @@
           "position": 71
         }
       ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/freshdesk",
+      "pathname": "/tools/freshdesk",
+      "key": "freshdesk",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 21,
+      "topQueries": []
     },
     {
       "page": "https://trytoolscout.org/tools/gemini.html",
@@ -2821,30 +2959,6 @@
       "impressions": 1,
       "ctr": 0,
       "position": 6,
-      "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/tools/jasper",
-      "pathname": "/tools/jasper",
-      "key": "jasper",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 64,
-      "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/tools/mangools",
-      "pathname": "/tools/mangools",
-      "key": "mangools",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 62,
       "topQueries": []
     },
     {
@@ -2891,18 +3005,6 @@
       "topQueries": []
     },
     {
-      "page": "https://trytoolscout.org/tools/workato",
-      "pathname": "/tools/workato",
-      "key": "workato",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 65,
-      "topQueries": []
-    },
-    {
       "page": "https://trytoolscout.org/tools/zendesk",
       "pathname": "/tools/zendesk",
       "key": "zendesk",
@@ -2932,41 +3034,29 @@
           "position": 70
         }
       ]
-    },
-    {
-      "page": "https://trytoolscout.org/whats-new",
-      "pathname": "/whats-new",
-      "key": "whats-new",
-      "type": "other",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 63,
-      "topQueries": []
     }
   ],
-  "count": 37,
+  "count": 38,
   "items": [
     {
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
       "clicks": 0,
-      "impressions": 804,
+      "impressions": 810,
       "ctr": 0,
-      "position": 75.8595,
+      "position": 75.8444,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 239,
-          "position": 72.5481
+          "impressions": 242,
+          "position": 72.6405
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 165,
-          "position": 80.0545
+          "impressions": 166,
+          "position": 80.012
         },
         {
           "query": "what is the best tool for seo agency",
@@ -3022,9 +3112,9 @@
       "intent": "best-seo-keyword-research-tools",
       "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 322,
+      "impressions": 325,
       "ctr": 0,
-      "position": 75.7733,
+      "position": 75.56,
       "topQueries": [
         {
           "query": "website research tool",
@@ -3162,9 +3252,9 @@
       "intent": "best-funnel-builder",
       "page": "https://trytoolscout.org/best-funnel-builder",
       "clicks": 0,
-      "impressions": 190,
+      "impressions": 194,
       "ctr": 0,
-      "position": 75.9579,
+      "position": 75.9227,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -3442,15 +3532,15 @@
       "intent": "best-keyword-research-tools",
       "page": "https://trytoolscout.org/best-keyword-research-tools.html",
       "clicks": 0,
-      "impressions": 75,
+      "impressions": 76,
       "ctr": 0,
-      "position": 73.3733,
+      "position": 73.3553,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 64,
-          "position": 74.3281
+          "impressions": 65,
+          "position": 74.2923
         },
         {
           "query": "keyword discovery tools",
@@ -3574,15 +3664,21 @@
       "intent": "best-social-media-management-tools",
       "page": "https://trytoolscout.org/best-social-media-management-tools",
       "clicks": 0,
-      "impressions": 14,
+      "impressions": 18,
       "ctr": 0,
-      "position": 56.3571,
+      "position": 58.1667,
       "topQueries": [
         {
           "query": "social media management tool",
           "clicks": 0,
+          "impressions": 5,
+          "position": 69
+        },
+        {
+          "query": "social media management tools",
+          "clicks": 0,
           "impressions": 4,
-          "position": 70
+          "position": 64.25
         },
         {
           "query": "best social media management tool",
@@ -3591,22 +3687,16 @@
           "position": 25.6667
         },
         {
-          "query": "social media management tools",
+          "query": "social media tool",
           "clicks": 0,
           "impressions": 2,
-          "position": 65.5
+          "position": 65
         },
         {
           "query": "best tools for social media managers",
           "clicks": 0,
           "impressions": 1,
           "position": 23
-        },
-        {
-          "query": "social media tool",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 63
         },
         {
           "query": "social media marketing management tools",
@@ -3710,15 +3800,31 @@
       "intent": "best-funnel-builder-for-beginners",
       "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 6,
       "ctr": 0,
-      "position": 48.2,
+      "position": 55.6667,
       "topQueries": [
         {
           "query": "best free funnel builder",
           "clicks": 0,
           "impressions": 1,
           "position": 69
+        }
+      ]
+    },
+    {
+      "intent": "best-competitor-seo-tools",
+      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 41,
+      "topQueries": [
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 98
         }
       ]
     },
@@ -3735,22 +3841,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 68
-        }
-      ]
-    },
-    {
-      "intent": "best-competitor-seo-tools",
-      "page": "https://trytoolscout.org/best-competitor-seo-tools.html",
-      "clicks": 0,
-      "impressions": 4,
-      "ctr": 0,
-      "position": 51,
-      "topQueries": [
-        {
-          "query": "seo competitor research tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 98
         }
       ]
     },
@@ -3974,6 +4064,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 8,
+      "topQueries": []
+    },
+    {
+      "intent": "best-crm-for-real-estate",
+      "page": "https://trytoolscout.org/best-crm-for-real-estate.html",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 92,
       "topQueries": []
     },
     {
