@@ -34,17 +34,17 @@ function renderChart(d){
 }
 function tsDt(v){return v?new Date(String(v).replace(' ','T')+(String(v).includes('T')?'':'Z')).toLocaleString(undefined,{timeZone:'Europe/Lisbon'}):'Not available'}
 function healthRow(name,value,meta){return '<div class="row"><div><div class="rowName">'+name+'</div><div class="rowMeta">'+meta+'</div></div><div class="rowValue">'+value+'</div></div>'}
-function stateName(v){var s=String(v||'').toLowerCase();if(s==='running')return 'Running';if(s==='awaiting_strict_evidence')return 'Waiting';if(s==='failed')return 'Failed';if(s==='warning')return 'Warning';if(s==='observed')return 'Observed';return s?'Unknown':'Unknown'}
-function evidenceName(v){var s=String(v||'').toLowerCase();if(s==='observed')return 'Verified';if(s==='partial')return 'Partial';if(s==='warning')return 'Partial';if(s==='failed')return 'Verified failure';if(s==='no_evidence')return 'Limited';return 'Limited'}
+function stateName(v){var s=String(v||'').toLowerCase();if(s==='healthy')return 'Healthy';if(s==='running')return 'Running';if(s==='completed')return 'Completed';if(s==='awaiting_strict_evidence')return 'Waiting';if(s==='failed')return 'Failed';if(s==='degraded')return 'Degraded';if(s==='stale')return 'Stale';if(s==='warning')return 'Warning';if(s==='partial')return 'Partial';if(s==='observed')return 'Observed';if(s==='no_evidence')return 'Unknown';return s?'Unknown':'Unknown'}
+function evidenceName(v){var s=String(v||'').toLowerCase();if(s==='healthy'||s==='running'||s==='completed'||s==='observed')return 'Verified';if(s==='partial'||s==='warning'||s==='degraded'||s==='stale')return 'Partial';if(s==='failed')return 'Verified failure';if(s==='no_evidence'||s==='unknown'||s==='unavailable')return 'Limited';return 'Limited'}
 function renderHealthClarity(d){
   latest=d||latest;if(!latest)return;
   var root=document.getElementById('healthBody');if(!root)return;
   var widget=root.closest('.widget[data-widget="health"]'),tr=latest.tracking||{},g=latest.growthOps||{},q=g.chairmanQueue||{},eng=g.engines||{},aff=eng.affiliate||{},dist=eng.distribution||{},h=g.health||{},content=h.content||{},audience=h.audience||{},seo=h.seo_geo_aio||{},issues=Array.isArray(h.issues)?h.issues:[],res=latest.resilientCommandCenter||{};
   if(widget){var kicker=widget.querySelector('.widgetKicker'),meta=widget.querySelector('.widgetMeta');if(kicker)kicker.textContent='ENGINE STATE + OBSERVABILITY';if(meta)meta.textContent='Execution + evidence'}
   var affEvidence=aff.last_run_at?'Verified':'Partial',distEvidence=dist.last_activity_at?'Verified':'Partial';
-  var contentState=content.status==='failed'?'Failed':content.status==='observed'?'Observed':'Unknown';
-  var audienceState=audience.status==='failed'?'Failed':audience.status==='observed'?'Observed':'Unknown';
-  var seoState=seo.status==='failed'?'Failed':'Unknown';
+  var contentState=stateName(content.status);
+  var audienceState=stateName(audience.status);
+  var seoState=stateName(seo.status);
   var html='';
   html+=healthRow('Tracking','Observed · Verified',n(tr.humanSessionsLast24Hours)+' human sessions · 24h');
   html+=healthRow('Affiliate Coverage Engine',stateName(aff.status)+' · '+affEvidence,aff.last_run_at?'Last verified '+tsDt(aff.last_run_at):'Engine state reports running. Execution heartbeat is not exposed by the resilient read.');
