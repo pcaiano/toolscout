@@ -297,6 +297,16 @@ export async function syncExecutionContracts(env){
       AND status='stalled'
       AND attempts=0
       AND last_result IN ('claim_sla_missed','queued_awaiting_executor_capacity','executor_capacity_backlog')`).run();
+  const contentTaskBindingRecovery=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='deferred',
+        claim_deadline=NULL,
+        attempt_deadline=NULL,
+        verify_deadline=NULL,
+        last_result='requeued_after_content_task_binding_fix',
+        updated_at=datetime('now')
+    WHERE executor='content_issue'
+      AND status='stalled'
+      AND last_result='executor_error:task is not defined'`).run();
   const admission=await rebalanceExecutionAdmission(env);
   const counts=await first(env,`SELECT
     SUM(CASE WHEN source_kind='opportunity' AND status<>'cancelled' THEN 1 ELSE 0 END) opportunity_tasks,
@@ -304,7 +314,7 @@ export async function syncExecutionContracts(env){
     SUM(CASE WHEN status='human_required' THEN 1 ELSE 0 END) human_required,
     SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred
     FROM growth_execution_contract`);
-  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v2'};
+  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v2'};
 }
 
 export async function rebalanceExecutionAdmission(env){
