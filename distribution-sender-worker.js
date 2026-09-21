@@ -127,7 +127,7 @@ async function publicCandidates(env,limit=3){
   await ensureNetworkSchema(env);
   const n=Math.max(1,Math.min(3,Number(limit)||3));
   const task=await currentMakeSenderTask(env);
-  if(!task){await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-v2'};}
+  if(!task){await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-bounded-v3'};}
   const items=[];
   if(task.subject_type==='tool'){
     const row=await env.DB.prepare(`SELECT v.tool_slug,v.asset_url,v.priority_score,v.vendor_domain,v.contact_email,v.contact_source_url,v.suggested_subject,v.suggested_body,v.public_dispatch_token
@@ -146,7 +146,7 @@ async function publicCandidates(env,limit=3){
     if(!row){
       const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_vendor_candidate');
       await recordAuthorityNoOutput(env,'claimed_task_has_no_ready_vendor_candidate',task.task_id);
-      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_vendor_candidate',task_id:task.task_id,integrity:'task-specific-v2',release};
+      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_vendor_candidate',task_id:task.task_id,integrity:'task-specific-bounded-v3',release};
     }
     const token=row.public_dispatch_token||crypto.randomUUID();
     if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
@@ -158,7 +158,7 @@ async function publicCandidates(env,limit=3){
     if(!row){
       const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_surface_candidate');
       await recordAuthorityNoOutput(env,'claimed_task_has_no_ready_surface_candidate',task.task_id);
-      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_surface_candidate',task_id:task.task_id,integrity:'task-specific-v2',release};
+      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_surface_candidate',task_id:task.task_id,integrity:'task-specific-bounded-v3',release};
     }
     const token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
     if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_network_outreach SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(token,row.surface_slug).run();
@@ -169,7 +169,7 @@ async function publicCandidates(env,limit=3){
     await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now')) ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`).bind(action,growth,'distribution_network','email',kit).run().catch(()=>{});
     items.push({kind:'network',task_id:task.task_id,task_action:task.action,tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:body,dispatch_token:token});
   }
-  return {status:'connected',limit:n,items,task_id:task.task_id,integrity:'task-specific-v2'};
+  return {status:'connected',limit:n,items,task_id:task.task_id,integrity:'task-specific-bounded-v3'};
 }
 async function publicStatus(request,env){
   let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_HEADERS})}
