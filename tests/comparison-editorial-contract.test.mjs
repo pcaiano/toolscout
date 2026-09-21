@@ -33,3 +33,13 @@ test('comparison generator preserves editorial conclusions on regeneration',()=>
   assert.match(generator,/class="section editorial-conclusion"/);
   assert.match(generator,/ToolScout conclusion/);
 });
+
+
+test('dynamic comparator stays within a mobile viewport',()=>{
+  const html=read('compare.html');
+  assert.match(html,/@media\(max-width:650px\)/);
+  assert.match(html,/\.row\{grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\);min-width:0\}/);
+  assert.match(html,/\.table\{overflow:hidden\}/);
+  assert.match(html,/overflow-wrap:anywhere/);
+  assert.match(html,/\.actions\{display:grid;grid-template-columns:1fr/);
+});
