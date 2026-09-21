@@ -591,9 +591,45 @@ async function catalogQualityNeedsRecovery(env){
   }catch{return false}
 }
 
+
+function canonicalSeoPath(pathname){
+  const p=String(pathname||'/');
+  if(p==='/index.html')return'/';
+  return p.replace(/\.html$/i,'')||'/';
+}
+function canonicalizeOwnedMarkup(value){
+  return String(value||'')
+    .replace(/https:\/\/www\.trytoolscout\.org/gi,'https://trytoolscout.org')
+    .replace(/https:\/\/trytoolscout\.org(\/[^"'<>\\\s?#]*?)\.html(?=([?#"'<>\\\s]|$))/gi,'https://trytoolscout.org$1')
+    .replace(/(["'=])((?:\.\/|\/)[^"'<>\\\s?#]*?)\.html(?=([?#"'<>\\\s]|$))/gi,'$1$2');
+}
+async function canonicalizeHtmlResponse(response){
+  if(!response||!response.ok)return response;
+  const type=String(response.headers.get('content-type')||'').toLowerCase();
+  if(!type.includes('text/html'))return response;
+  const body=canonicalizeOwnedMarkup(await response.text());
+  const headers=new Headers(response.headers);headers.delete('content-length');headers.set('X-ToolScout-SEO-Canonical','extensionless-v1');
+  return new Response(body,{status:response.status,statusText:response.statusText,headers});
+}
+async function canonicalizeSitemapResponse(response){
+  if(!response||!response.ok)return response;
+  let xml=canonicalizeOwnedMarkup(await response.text());
+  const seen=new Set();
+  xml=xml.replace(/<url>([\s\S]*?)<\/url>/gi,(block,inner)=>{
+    const m=String(inner).match(/<loc>([^<]+)<\/loc>/i);if(!m)return block;
+    const loc=String(m[1]||'').trim();if(seen.has(loc))return'';seen.add(loc);return block;
+  });
+  const headers=new Headers(response.headers);headers.delete('content-length');headers.set('Content-Type','application/xml; charset=UTF-8');headers.set('X-ToolScout-SEO-Sitemap','canonical-extensionless-v1');
+  return new Response(xml,{status:response.status,statusText:response.statusText,headers});
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if((request.method==='GET'||request.method==='HEAD')&&/\.html$/i.test(url.pathname)){
+      const target=new URL(url.toString());target.pathname=canonicalSeoPath(url.pathname);
+      return Response.redirect(target.toString(),308);
+    }
     if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health'){
       let assetStatus=null,assetLocation=null;
       try{
@@ -609,15 +645,15 @@ export default {
     if(request.method==='GET'&&/^\/tools\/[a-z0-9][a-z0-9-]*(?:\.html)?\/?$/i.test(url.pathname)){
       const slug=(url.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)/i)||[])[1]?.toLowerCase()||'';
       const runtimeResponse=await publicRuntimeToolResponse(env,slug);
-      if(runtimeResponse)return runtimeResponse;
-      return publicQualityEnhancedToolResponse(await base.fetch(request,env,ctx),env,slug);
+      if(runtimeResponse)return canonicalizeHtmlResponse(runtimeResponse);
+      return canonicalizeHtmlResponse(await publicQualityEnhancedToolResponse(await base.fetch(request,env,ctx),env,slug));
     }
     if(request.method==='GET'&&url.pathname==='/sitemap.xml'){
-      return publicMergedSitemap(await base.fetch(request,env,ctx),env);
+      return canonicalizeSitemapResponse(await publicMergedSitemap(await base.fetch(request,env,ctx),env));
     }
     if(request.method==='GET'&&/^\/best-[a-z0-9-]+(?:\.html)?\/?$/i.test(url.pathname)){
       const rankingResponse=await publicRuntimeRankingResponse(env,url.pathname);
-      if(rankingResponse)return rankingResponse;
+      if(rankingResponse)return canonicalizeHtmlResponse(rankingResponse);
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
@@ -626,10 +662,12 @@ export default {
     if (request.method === 'GET' && url.pathname === '/api/command-center-resilient-health') {
       return augmentEntrypointHealth(response);
     }
+    let finalResponse=response;
+    if(request.method==='GET')finalResponse=await canonicalizeHtmlResponse(finalResponse);
     if (request.method === 'GET' && ANALYTICS_PATHS.has(url.pathname)) {
-      return applyLightTheme(response);
+      return applyLightTheme(finalResponse);
     }
-    return response;
+    return finalResponse;
   },
   async scheduled(event, env, ctx) {
     const trigger=event?.cron||'scheduled';
