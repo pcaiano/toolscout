@@ -3,6 +3,7 @@ import { runWithLedger } from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
+const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=3;
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=4;
 const FETCH_TIMEOUT_MS=6000;
@@ -142,7 +143,7 @@ async function rememberReleaseSources(env,slug,links){
 }
 export async function verifyNewsSources(env){
   await ensureSchema(env);
-  const q=await env.DB.prepare(`SELECT source_url,tool_slug,fingerprint,last_checked_at FROM software_news_sources WHERE status='active' ORDER BY COALESCE(last_checked_at,'1970-01-01') ASC LIMIT 6`).all();
+  const q=await env.DB.prepare(`SELECT source_url,tool_slug,fingerprint,last_checked_at FROM software_news_sources WHERE status='active' ORDER BY COALESCE(last_checked_at,'1970-01-01') ASC LIMIT ?`).bind(MAX_NEWS_SOURCE_CHECKS_PER_CYCLE).all();
   let checked=0,changed=0,baselined=0,warnings=0;
   for(const row of q.results||[]){
     const result=await fetchOfficial(row.source_url);checked++;
@@ -154,7 +155,7 @@ export async function verifyNewsSources(env){
     }
     await env.DB.prepare(`UPDATE software_news_sources SET fingerprint=?,title=?,summary=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE source_url=?`).bind(result.fingerprint,safeText(result.title,500),safeText(result.description,1800),row.source_url).run();
   }
-  return{ok:true,checked,changed,baselined,warnings,limit:6};
+  return{ok:true,checked,changed,baselined,warnings,limit:MAX_NEWS_SOURCE_CHECKS_PER_CYCLE};
 }
 async function upsertNewsCandidate(env,slug,sourceUrl,result){
   const score=newsMateriality(result,sourceUrl),id=`runtime-${slug}-${result?.fingerprint||Date.now()}`;
