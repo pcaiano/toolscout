@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-21T05:25:29.650Z",
+  "generatedAt": "2026-09-21T13:18:32.423Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v6",
   "objective": "Autonomously pursue sustainable search rankings and qualified clicks while separating indexing failures from content-performance failures.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 3527,
-    "ctr": 0.0284,
+    "searchImpressions": 3557,
+    "ctr": 0.0281,
     "gscStartDate": "2026-08-25",
     "gscEndDate": "2026-09-21",
     "gscDataState": "all",
@@ -32,9 +32,9 @@
   ],
   "summary": {
     "observedGscIntents": 37,
-    "observedGscPages": 101,
+    "observedGscPages": 109,
     "searchClicks": 1,
-    "searchImpressions": 3527,
+    "searchImpressions": 3557,
     "organicAcquisitionStatus": "early-search-acquisition",
     "indexingRecovery": 1,
     "actionableOpportunities": 21,
@@ -1949,9 +1949,9 @@
       "pathname": "/best-free-project-management-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 78,
+      "impressions": 80,
       "ctr": 0,
-      "position": 58.4231,
+      "position": 58,
       "topQueries": [
         {
           "query": "free online project manager tools",
@@ -1968,14 +1968,14 @@
         {
           "query": "free project management tools",
           "clicks": 0,
-          "impressions": 6,
-          "position": 68.5
+          "impressions": 7,
+          "position": 67.5714
         },
         {
           "query": "best free project management tools",
           "clicks": 0,
-          "impressions": 5,
-          "position": 41
+          "impressions": 6,
+          "position": 37.6667
         },
         {
           "query": "free online tools for project management",
@@ -1996,7 +1996,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.335,
+      "opportunityScore": 1.379,
       "outcome": "visibility-only"
     },
     {
@@ -2204,9 +2204,9 @@
       "pathname": "/news/notion-3-7-agent-skills",
       "type": "other",
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 5,
       "ctr": 0,
-      "position": 7.5,
+      "position": 8,
       "topQueries": [
         {
           "query": "notion 3.7",
@@ -2220,7 +2220,7 @@
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
-      "opportunityScore": 0.533,
+      "opportunityScore": 0.625,
       "outcome": "visibility-only"
     },
     {
@@ -2657,9 +2657,9 @@
       "pathname": "/best-seo-tools-for-agencies.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 799,
+      "impressions": 804,
       "ctr": 0,
-      "position": 75.8773,
+      "position": 75.8595,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -2697,7 +2697,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 10.53,
+      "opportunityScore": 10.599,
       "outcome": "visibility-only"
     },
     {
@@ -2753,9 +2753,9 @@
       "pathname": "/best-seo-keyword-research-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 321,
+      "impressions": 322,
       "ctr": 0,
-      "position": 75.7819,
+      "position": 75.7733,
       "topQueries": [
         {
           "query": "website research tool",
@@ -2793,7 +2793,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 4.236,
+      "opportunityScore": 4.25,
       "outcome": "visibility-only"
     },
     {
@@ -2849,15 +2849,15 @@
       "pathname": "/best-no-code-automation-tools.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 261,
+      "impressions": 264,
       "ctr": 0,
-      "position": 74.1111,
+      "position": 74.0833,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 50,
-          "position": 72.46
+          "impressions": 52,
+          "position": 72.5962
         },
         {
           "query": "no-code automation tools",
@@ -2889,7 +2889,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.522,
+      "opportunityScore": 3.564,
       "outcome": "visibility-only"
     },
     {
@@ -3041,9 +3041,9 @@
       "pathname": "/tools/moz-pro.html",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 130,
+      "impressions": 131,
       "ctr": 0,
-      "position": 69.7692,
+      "position": 69.7328,
       "topQueries": [
         {
           "query": "moz pro tools",
@@ -3081,7 +3081,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.863,
+      "opportunityScore": 1.879,
       "outcome": "visibility-only"
     },
     {
@@ -3137,15 +3137,15 @@
       "pathname": "/best-free-crm.html",
       "type": "guide",
       "clicks": 0,
-      "impressions": 77,
+      "impressions": 78,
       "ctr": 0,
-      "position": 74.1688,
+      "position": 74.1026,
       "topQueries": [
         {
           "query": "best free crm tools",
           "clicks": 0,
-          "impressions": 24,
-          "position": 67.4583
+          "impressions": 25,
+          "position": 67.52
         },
         {
           "query": "crm free tools",
@@ -3177,7 +3177,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.038,
+      "opportunityScore": 1.053,
       "outcome": "visibility-only"
     }
   ],

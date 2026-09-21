@@ -1,62 +1,19 @@
 {
-  "generatedAt": "2026-09-21T05:25:30.284Z",
+  "generatedAt": "2026-09-21T13:18:33.133Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-09-21T05:25:30.197Z",
-  "newInterventions": [
-    {
-      "intent": "best-free-crm",
-      "variant": "decision-depth-v1",
-      "lane": "seo-authority-depth",
-      "priorityScore": 86,
-      "impressions": 79,
-      "position": 74.1266,
-      "brainOpportunity": "search:best-free-crm",
-      "brainActions": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure",
-        "content_amplification",
-        "distribution_amplification",
-        "search_measurement"
-      ]
-    },
-    {
-      "intent": "best-keyword-research-tools",
-      "variant": "decision-depth-v1",
-      "lane": "seo-authority-depth",
-      "priorityScore": 82,
-      "impressions": 75,
-      "position": 73.3733,
-      "brainOpportunity": "search:best-keyword-research-tools",
-      "brainActions": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure",
-        "content_amplification",
-        "distribution_amplification",
-        "search_measurement"
-      ]
-    }
-  ],
+  "brainDirectivesGeneratedAt": "2026-09-21T13:18:33.058Z",
+  "newInterventions": [],
   "activeOptimizations": [
     {
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 799,
+        "impressions": 804,
         "ctr": 0,
-        "position": 75.8773
+        "position": 75.8595
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -72,11 +29,11 @@
       "intent": "best-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 119,
+        "impressions": 120,
         "ctr": 0,
-        "position": 39.4286
+        "position": 39.4083
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -92,11 +49,11 @@
       "intent": "best-no-code-automation-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 261,
+        "impressions": 264,
         "ctr": 0,
-        "position": 74.1111
+        "position": 74.0833
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -116,7 +73,7 @@
         "ctr": 0,
         "position": 74.8364
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -132,11 +89,11 @@
       "intent": "best-funnel-builder",
       "latest": {
         "clicks": 0,
-        "impressions": 189,
+        "impressions": 190,
         "ctr": 0,
-        "position": 76
+        "position": 75.9579
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -152,11 +109,11 @@
       "intent": "best-free-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 78,
+        "impressions": 80,
         "ctr": 0,
-        "position": 58.4231
+        "position": 58
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -179,11 +136,11 @@
       "intent": "best-free-crm",
       "latest": {
         "clicks": 0,
-        "impressions": 79,
+        "impressions": 80,
         "ctr": 0,
-        "position": 74.1266
+        "position": 74.0625
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -203,7 +160,7 @@
         "ctr": 0,
         "position": 73.3733
       },
-      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "lastSeenAt": "2026-09-21T13:18:33.133Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
