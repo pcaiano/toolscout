@@ -257,6 +257,16 @@ function normalizeUrl(value) {
     return u.toString();
   } catch { return null; }
 }
+function canonicalPublicUrl(value) {
+  try {
+    const u = new URL(String(value));
+    if (!['trytoolscout.org','www.trytoolscout.org'].includes(u.hostname)) return null;
+    u.protocol='https:';u.hostname='trytoolscout.org';u.hash='';u.search='';
+    if(u.pathname==='/index.html')u.pathname='/';
+    else if(/\.html$/i.test(u.pathname))u.pathname=u.pathname.replace(/\.html$/i,'');
+    return u.toString();
+  } catch { return null; }
+}
 const sitemapXml = fs.existsSync('sitemap.xml') ? fs.readFileSync('sitemap.xml','utf8') : '';
 const sitemapUrls = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>normalizeUrl(String(m[1]).replaceAll('&amp;','&'))).filter(Boolean);
 const inspectionLimit = Math.max(20, Math.min(500, Number(process.env.GSC_INSPECTION_LIMIT || 250)));
@@ -295,28 +305,30 @@ const noindexBlocked = canonicalInspections.filter(x=>['BLOCKED_BY_META_TAG','BL
 const fetchIssues = canonicalInspections.filter(x=>x.pageFetchState&&!['SUCCESSFUL','PAGE_FETCH_STATE_UNSPECIFIED'].includes(x.pageFetchState));
 const sitemapState = await listSitemaps();
 
-const pageByUrl = new Map(pages.map(x=>[normalizeUrl(x.page),x]));
+const pageByUrl = new Map(pages.map(x=>[canonicalPublicUrl(x.page),x]));
 const opportunityRows = [];
 for (const page of pages) {
-  const url=normalizeUrl(page.page), impressions=Number(page.impressions||0), clicks=Number(page.clicks||0), position=Number(page.position||0), ctr=Number(page.ctr||0);
+  const url=canonicalPublicUrl(page.page), impressions=Number(page.impressions||0), clicks=Number(page.clicks||0), position=Number(page.position||0), ctr=Number(page.ctr||0);
   let kind=null, queue=null, score=0, action=null;
   if(impressions>=20&&position>10&&position<=50){kind='striking_distance';queue='ranking_opportunities';score=Math.min(100,55+Math.log10(impressions+1)*12+(50-position)*0.5);action='authority_and_content_amplification'}
   else if(impressions>=50&&position>50){kind='high_impression_low_rank';queue='ranking_opportunities';score=Math.min(100,48+Math.log10(impressions+1)*14);action='authority_depth_and_query_alignment'}
   else if(impressions>=20&&position>0&&position<=20&&ctr<1){kind='ctr_opportunity';queue='ranking_opportunities';score=Math.min(100,60+Math.log10(impressions+1)*10);action='improve_search_snippet_and_click_capture'}
   else if(impressions>=10&&position>0&&position<=10){kind='protect';queue='protect';score=Math.min(100,58+Math.log10(impressions+1)*10+(10-position));action='protect_current_ranking'}
-  if(kind)opportunityRows.push({kind,queue,url,page:page.pathname,score:Number(score.toFixed(1)),impressions,clicks,ctr,position,action});
+  if(kind)opportunityRows.push({kind,queue,url,page:url?new URL(url).pathname:page.pathname.replace(/\.html$/i,''),score:Number(score.toFixed(1)),impressions,clicks,ctr,position,action});
 }
 for(const item of indexRecoveryCandidates){
-  const page=pageByUrl.get(normalizeUrl(item.url));
-  opportunityRows.push({kind:'index_issue',queue:'index_recovery',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?96:78,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_indexing',coverageState:item.coverageState,verdict:item.verdict});
+  const canonicalUrl=canonicalPublicUrl(item.url),page=pageByUrl.get(canonicalUrl);
+  const coverage=String(item.coverageState||'');
+  const action=coverage==='URL is unknown to Google'?'improve_discovery_and_internal_links':coverage==='Discovered - currently not indexed'?'strengthen_internal_links_and_index_worthiness':coverage==='Crawled - currently not indexed'?'review_quality_and_duplication':'repair_indexing';
+  opportunityRows.push({kind:'index_issue',queue:'index_recovery',url:canonicalUrl||item.url,page:new URL(canonicalUrl||item.url).pathname,score:page?.impressions?96:78,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action,coverageState:item.coverageState,verdict:item.verdict});
 }
 for(const item of redirectedInspections){
-  const page=pageByUrl.get(normalizeUrl(item.url));
-  opportunityRows.push({kind:'sitemap_redirect',queue:'fix_now',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?99:88,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',coverageState:item.coverageState,googleCanonical:item.googleCanonical||null,userCanonical:item.userCanonical||null});
+  const canonicalUrl=canonicalPublicUrl(item.url),page=pageByUrl.get(canonicalUrl);
+  opportunityRows.push({kind:'sitemap_redirect',queue:'fix_now',url:canonicalUrl||item.url,page:new URL(item.url).pathname,score:page?.impressions?99:88,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',coverageState:item.coverageState,googleCanonical:item.googleCanonical||null,userCanonical:item.userCanonical||null});
 }
 for(const item of canonicalMismatches){
-  const page=pageByUrl.get(normalizeUrl(item.url));
-  opportunityRows.push({kind:'canonical_mismatch',queue:'fix_now',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?98:82,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',googleCanonical:item.googleCanonical,userCanonical:item.userCanonical});
+  const canonicalUrl=canonicalPublicUrl(item.url),page=pageByUrl.get(canonicalUrl);
+  opportunityRows.push({kind:'canonical_mismatch',queue:'fix_now',url:canonicalUrl||item.url,page:new URL(item.url).pathname,score:page?.impressions?98:82,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',googleCanonical:item.googleCanonical,userCanonical:item.userCanonical});
 }
 opportunityRows.sort((a,b)=>b.score-a.score||b.impressions-a.impressions);
 const queueSummary=['fix_now','index_recovery','ranking_opportunities','protect'].reduce((acc,key)=>{
