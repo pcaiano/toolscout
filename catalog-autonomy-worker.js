@@ -1,6 +1,7 @@
 export {executeCatalogGrowthTask} from './catalog-gap-runtime-worker.js';
 import base from './dynamic-worker.js';
 import { runWithLedger } from './engine-run-ledger.js';
+import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
@@ -358,6 +359,7 @@ export async function publicRuntimeToolResponse(env,slug){
   return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
+export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}
 
 async function status(env){
   await ensureSchema(env);
