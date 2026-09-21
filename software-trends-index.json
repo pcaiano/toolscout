@@ -2,7 +2,7 @@
   "version": 3,
   "edition": "2026-09",
   "editionLabel": "September 2026",
-  "publishedAt": "2026-09-18T09:43:00.000Z",
+  "publishedAt": "2026-09-20T09:13:06.000Z",
   "scope": "ToolScout first-party observations of public software product changes and ToolScout search visibility. This is not a measure of global market share.",
   "searchVisibility": {
     "source": "Google Search Console",
@@ -18,6 +18,7 @@
       "title": "AI agents are becoming reusable team workflows",
       "summary": "Recent product releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
       "evidence": [
+        "zapier-next-gen-zaps-mcp",
         "notion-3-7-agent-skills"
       ]
     },
@@ -26,6 +27,7 @@
       "title": "Business software is opening up to agent connections",
       "summary": "MCP and related integration layers are making software easier for AI tools to read from and act on with explicit permissions.",
       "evidence": [
+        "zapier-next-gen-zaps-mcp",
         "hubspot-mcp-server-update"
       ]
     },
@@ -34,12 +36,25 @@
       "title": "Analysis and execution are moving closer together",
       "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
+        "zapier-next-gen-zaps-mcp",
         "github-actions-workflow-execution-protections-ga",
         "hubspot-mcp-server-update"
       ]
     }
   ],
   "updates": [
+    {
+      "id": "zapier-next-gen-zaps-mcp",
+      "publishedAt": "2026-09-20",
+      "toolSlug": "zapier",
+      "toolName": "Zapier",
+      "label": "Official product update",
+      "title": "Zapier lets AI agents build and deploy Zaps through MCP",
+      "summary": "Next Gen Zaps lets supported MCP clients build and deploy Zapier automations from plain-language instructions, currently in early access.",
+      "articleUrl": "/news/zapier-next-gen-zaps-mcp.html",
+      "sourceName": "Zapier Help Center",
+      "sourceUrl": "https://help.zapier.com/hc/en-us/articles/48391476448141-Get-started-with-Next-Gen-Zaps"
+    },
     {
       "id": "github-actions-workflow-execution-protections-ga",
       "publishedAt": "2026-09-17",

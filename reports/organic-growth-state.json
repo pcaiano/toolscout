@@ -1,16 +1,16 @@
 {
   "version": 4,
-  "updatedAt": "2026-09-20T08:59:54.361Z",
+  "updatedAt": "2026-09-21T05:25:30.284Z",
   "pages": {
     "best-seo-tools-for-agencies": {
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 535,
+        "impressions": 799,
         "ctr": 0,
-        "position": 77.0355
+        "position": 75.8773
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -18,17 +18,19 @@
         "impressions": 533,
         "ctr": 0,
         "position": 77.0694
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-project-management-tools": {
       "intent": "best-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 67,
+        "impressions": 119,
         "ctr": 0,
-        "position": 40.0448
+        "position": 39.4286
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -36,17 +38,19 @@
         "impressions": 65,
         "ctr": 0,
         "position": 39.9231
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-no-code-automation-tools": {
       "intent": "best-no-code-automation-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 228,
+        "impressions": 261,
         "ctr": 0,
-        "position": 73.7018
+        "position": 74.1111
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -54,17 +58,19 @@
         "impressions": 228,
         "ctr": 0,
         "position": 73.7018
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-crm-for-sales-teams": {
       "intent": "best-crm-for-sales-teams",
       "latest": {
         "clicks": 0,
-        "impressions": 50,
+        "impressions": 55,
         "ctr": 0,
-        "position": 75.52
+        "position": 74.8364
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -72,17 +78,19 @@
         "impressions": 50,
         "ctr": 0,
         "position": 75.52
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-funnel-builder": {
       "intent": "best-funnel-builder",
       "latest": {
         "clicks": 0,
-        "impressions": 127,
+        "impressions": 189,
         "ctr": 0,
-        "position": 77.1024
+        "position": 76
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -90,17 +98,19 @@
         "impressions": 127,
         "ctr": 0,
         "position": 77.1024
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-free-project-management-tools": {
       "intent": "best-free-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 47,
+        "impressions": 78,
         "ctr": 0,
-        "position": 55.383
+        "position": 58.4231
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -108,27 +118,56 @@
         "impressions": 47,
         "ctr": 0,
         "position": 55.383
-      }
+      },
+      "indexing": {
+        "url": "https://trytoolscout.org/best-free-project-management-tools",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-02T00:42:53+00:00"
+      },
+      "contentOptimizationSuspended": true
     },
     "best-free-crm": {
       "intent": "best-free-crm",
       "latest": {
         "clicks": 0,
-        "impressions": 42,
+        "impressions": 79,
         "ctr": 0,
-        "position": 73.0952
+        "position": 74.1266
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-09-21T05:25:30.284Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 79,
+        "ctr": 0,
+        "position": 74.1266
+      }
     },
     "best-keyword-research-tools": {
       "intent": "best-keyword-research-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 42,
+        "impressions": 75,
         "ctr": 0,
-        "position": 74.3095
+        "position": 73.3733
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-09-21T05:25:30.284Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 75,
+        "ctr": 0,
+        "position": 73.3733
+      }
     },
     "best-forms-for-small-business": {
       "intent": "best-forms-for-small-business",
@@ -138,7 +177,9 @@
         "ctr": 0,
         "position": 4.5
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-email-marketing-tools": {
       "intent": "best-email-marketing-tools",
@@ -148,7 +189,9 @@
         "ctr": 0,
         "position": 8.5
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-crm-for-consultants": {
       "intent": "best-crm-for-consultants",
@@ -158,7 +201,9 @@
         "ctr": 0,
         "position": 8
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-crm-for-small-business": {
       "intent": "best-crm-for-small-business",
@@ -168,7 +213,9 @@
         "ctr": 0,
         "position": 8
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-sales-prospecting-tools": {
       "intent": "best-sales-prospecting-tools",
@@ -178,7 +225,9 @@
         "ctr": 0,
         "position": 7.6667
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-cold-email-tools": {
       "intent": "best-cold-email-tools",
@@ -188,7 +237,9 @@
         "ctr": 0,
         "position": 6.5
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-team-collaboration-tools": {
       "intent": "best-team-collaboration-tools",
@@ -198,7 +249,9 @@
         "ctr": 0,
         "position": 8
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-tools-for-agencies": {
       "intent": "best-tools-for-agencies",
@@ -208,27 +261,33 @@
         "ctr": 0,
         "position": 10
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-developer-tools": {
       "intent": "best-developer-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 3,
+        "impressions": 4,
         "ctr": 0,
-        "position": 10
+        "position": 19.25
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-ai-research-tools": {
       "intent": "best-ai-research-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 1,
+        "impressions": 2,
         "ctr": 0,
-        "position": 1
+        "position": 40.5
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-video-content-tools": {
       "intent": "best-video-content-tools",
@@ -238,37 +297,45 @@
         "ctr": 0,
         "position": 10
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-ai-ad-creative-tools": {
       "intent": "best-ai-ad-creative-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 4,
+        "impressions": 9,
         "ctr": 0,
-        "position": 84.25
+        "position": 81.8889
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-all-in-one-business-tools": {
       "intent": "best-all-in-one-business-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 4,
+        "impressions": 6,
         "ctr": 0,
-        "position": 90.75
+        "position": 88.1667
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-productivity-tools-for-teams": {
       "intent": "best-productivity-tools-for-teams",
       "latest": {
         "clicks": 0,
-        "impressions": 4,
+        "impressions": 5,
         "ctr": 0,
-        "position": 38
+        "position": 35.2
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-competitor-seo-tools": {
       "intent": "best-competitor-seo-tools",
@@ -278,7 +345,9 @@
         "ctr": 0,
         "position": 51
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-lead-capture-forms": {
       "intent": "best-lead-capture-forms",
@@ -288,7 +357,9 @@
         "ctr": 0,
         "position": 47.5
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-product-analytics-tools": {
       "intent": "best-product-analytics-tools",
@@ -298,27 +369,81 @@
         "ctr": 0,
         "position": 20.25
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-social-media-management-tools": {
       "intent": "best-social-media-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 1,
+        "impressions": 10,
         "ctr": 0,
-        "position": 57
+        "position": 51.8
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     "best-ai-coding-tools": {
       "intent": "best-ai-coding-tools",
       "latest": {
         "clicks": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 77.5
+      },
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null
+    },
+    "best-crm-with-automation": {
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "intent": "best-crm-with-automation",
+      "latest": {
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 90.5
+      },
+      "lastSeenAt": "2026-09-21T05:25:30.284Z"
+    },
+    "best-marketing-automation-tools": {
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "intent": "best-marketing-automation-tools",
+      "latest": {
+        "clicks": 0,
         "impressions": 1,
         "ctr": 0,
-        "position": 78
+        "position": 6
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z"
+      "lastSeenAt": "2026-09-21T05:25:30.284Z"
+    },
+    "best-customer-support-tools": {
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "intent": "best-customer-support-tools",
+      "latest": {
+        "clicks": 0,
+        "impressions": 25,
+        "ctr": 0,
+        "position": 74.84
+      },
+      "lastSeenAt": "2026-09-21T05:25:30.284Z"
+    },
+    "best-website-builders": {
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "intent": "best-website-builders",
+      "latest": {
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 70.6667
+      },
+      "lastSeenAt": "2026-09-21T05:25:30.284Z"
     }
   }
 }

@@ -1,40 +1,99 @@
 {
   "brain": "shared-growth-v3",
-  "generatedAt": "2026-09-20T08:59:54.267Z",
+  "generatedAt": "2026-09-21T05:25:30.197Z",
   "northStar": "strict_verified_human_sessions",
   "supervisor": {
     "seo": {
-      "status": "executor_stale",
-      "directive": "run_targeted_seo_executor",
+      "status": "evidence_stale",
+      "directive": "refresh_search_evidence_and_execute",
       "config": {
-        "mode": "run_targeted_seo_executor",
+        "operating_mode": "always_on_acquisition",
+        "always_on_acquisition": true,
+        "strict_human_truth_only": true,
+        "probable_human_metric": false,
+        "critical_strict_humans_24h_max": 2,
+        "external_execution_min_24h": 10,
+        "external_execution_target_24h": 15,
+        "external_execution_max_24h": 20,
+        "optimize_funnel": [
+          "strict_verified_human_sessions",
+          "verified_outbound_clicks",
+          "monetized_verified_outbound_clicks"
+        ],
+        "mode": "refresh_search_evidence_and_execute",
         "run_executor": true,
-        "priority_boost": 25,
-        "observed_demand_only": true
+        "priority_boost": 30,
+        "no_wait_for_maturity": true,
+        "backlink_acquisition": true,
+        "backlink_quality_only": true,
+        "backlink_paid_links_allowed": false,
+        "backlink_reciprocal_links_required": false,
+        "backlink_verified": 4,
+        "verified_referring_domains": 4,
+        "referring_domain_bootstrap_floor": 10,
+        "backlink_priority_basis": "relevance + editorial legitimacy + observed search demand + potential human referrals"
       },
-      "lastEvaluatedAt": "2026-09-20 08:30:07"
+      "lastEvaluatedAt": "2026-09-21 05:16:10"
     },
     "growth": {
-      "status": "working_unattributed",
-      "directive": "improve_acquisition_attribution_while_continuing_growth",
+      "status": "critical",
+      "directive": "repair_architecture_and_continue_acquisition",
       "config": {
-        "mode": "improve_acquisition_attribution_while_continuing_growth",
-        "strict_humans_24h": 3,
-        "strict_humans_7d": 3,
+        "operating_mode": "always_on_acquisition",
+        "always_on_acquisition": true,
+        "strict_human_truth_only": true,
+        "probable_human_metric": false,
+        "critical_strict_humans_24h_max": 2,
+        "external_execution_min_24h": 10,
+        "external_execution_target_24h": 15,
+        "external_execution_max_24h": 20,
+        "optimize_funnel": [
+          "strict_verified_human_sessions",
+          "verified_outbound_clicks",
+          "monetized_verified_outbound_clicks"
+        ],
+        "mode": "repair_architecture_and_continue_acquisition",
+        "strict_humans_24h": 0,
+        "strict_humans_7d": 0,
         "attributed_humans_24h": 0,
         "attributed_humans_7d": 0,
-        "unattributed_humans_7d": 3,
-        "acquisition_executions_24h": 3,
-        "acquisition_executions_7d": 16
+        "unattributed_humans_7d": 0,
+        "verified_outbound_24h": 0,
+        "verified_outbound_7d": 0,
+        "monetized_outbound_24h": 0,
+        "monetized_outbound_7d": 0,
+        "acquisition_executions_24h": 9,
+        "acquisition_executions_7d": 20,
+        "backlink_acquisition": {
+          "required": true,
+          "quality_only": true,
+          "verified_backlinks": 4,
+          "verified_referring_domains": 4,
+          "bootstrap_referring_domain_floor": 10,
+          "paid_links_allowed": false,
+          "reciprocal_links_required": false
+        },
+        "execution_contract": {
+          "missing_executors": 0,
+          "stalled": 41,
+          "pending": 15,
+          "claimed": 6,
+          "attempted": 0,
+          "verified": 56
+        },
+        "architecture_escalation": {
+          "open_incidents": 2,
+          "approval_required": true
+        }
       },
-      "lastEvaluatedAt": "2026-09-20 08:30:08"
+      "lastEvaluatedAt": "2026-09-21 05:16:10"
     }
   },
   "directives": [
     {
       "opportunity_key": "sprint-search:project-management",
       "intent": "/best-project-management-tools",
-      "priority_score": 98,
+      "priority_score": 100,
       "lane": "human_acquisition_sprint",
       "action": "amplify_gsc_observed_demand",
       "evidence_confidence": "gsc_observed",
@@ -47,12 +106,12 @@
         "distribution_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-19 14:16:56"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
       "opportunity_key": "sprint-search:seo-agencies",
       "intent": "/best-seo-tools-for-agencies",
-      "priority_score": 96,
+      "priority_score": 100,
       "lane": "human_acquisition_sprint",
       "action": "amplify_gsc_observed_demand",
       "evidence_confidence": "gsc_observed",
@@ -65,12 +124,12 @@
         "distribution_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-19 14:16:56"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
       "opportunity_key": "sprint-search:no-code-automation",
       "intent": "/best-no-code-automation-tools",
-      "priority_score": 94,
+      "priority_score": 100,
       "lane": "human_acquisition_sprint",
       "action": "amplify_gsc_observed_demand",
       "evidence_confidence": "gsc_observed",
@@ -83,12 +142,12 @@
         "distribution_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-19 14:16:56"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
       "opportunity_key": "sprint-search:semrush-profile",
       "intent": "/tools/semrush",
-      "priority_score": 92,
+      "priority_score": 100,
       "lane": "human_acquisition_sprint",
       "action": "amplify_gsc_observed_demand",
       "evidence_confidence": "gsc_observed",
@@ -103,145 +162,12 @@
         "distribution_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-19 14:16:56"
-    },
-    {
-      "opportunity_key": "gsc-page:/tools/semrush",
-      "intent": "/tools/semrush",
-      "priority_score": 91,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 312,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 55.6314,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-seo-tools-for-agencies",
-      "intent": "/best-seo-tools-for-agencies",
-      "priority_score": 91,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 765,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 75.9111,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-seo-keyword-research-tools",
-      "intent": "/best-seo-keyword-research-tools",
-      "priority_score": 91,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 309,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 75.6019,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-no-code-automation-tools",
-      "intent": "/best-no-code-automation-tools",
-      "priority_score": 91,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 259,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 74.0888,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/tools/airtable",
-      "intent": "/tools/airtable",
-      "priority_score": 91,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 269,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 73.9777,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-funnel-builder",
-      "intent": "/best-funnel-builder",
-      "priority_score": 91,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 188,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 76.0106,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/tools/klaviyo",
-      "intent": "/tools/klaviyo",
-      "priority_score": 91,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 185,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 61.4757,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
       "opportunity_key": "sprint-search:airtable-profile",
       "intent": "/tools/airtable",
-      "priority_score": 90,
+      "priority_score": 100,
       "lane": "human_acquisition_sprint",
       "action": "amplify_gsc_observed_demand",
       "evidence_confidence": "gsc_observed",
@@ -256,12 +182,12 @@
         "distribution_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-19 14:16:56"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
       "opportunity_key": "sprint-search:funnel-builders",
       "intent": "/best-funnel-builder",
-      "priority_score": 88,
+      "priority_score": 100,
       "lane": "human_acquisition_sprint",
       "action": "amplify_gsc_observed_demand",
       "evidence_confidence": "gsc_observed",
@@ -274,88 +200,132 @@
         "distribution_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-19 14:16:56"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
-      "opportunity_key": "gsc-page:/tools/moz-pro",
-      "intent": "/tools/moz-pro",
-      "priority_score": 88,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 123,
+      "opportunity_key": "search:best-crm-for-real-estate",
+      "intent": "best-crm-for-real-estate",
+      "priority_score": 100,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
       "clicks": 0,
       "ctr": 0,
-      "position": 69.813,
+      "position": 0,
       "actions": [
+        "measure",
+        "recheck-automatically",
         "content_amplification",
         "distribution_amplification",
-        "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
-      "opportunity_key": "gsc-page:/best-free-crm",
-      "intent": "/best-free-crm",
-      "priority_score": 83,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 72,
+      "opportunity_key": "search:best-affordable-crm",
+      "intent": "best-affordable-crm",
+      "priority_score": 100,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
       "clicks": 0,
       "ctr": 0,
-      "position": 75.2222,
+      "position": 0,
       "actions": [
+        "measure",
+        "recheck-automatically",
         "content_amplification",
         "distribution_amplification",
-        "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
-      "opportunity_key": "gsc-page:/best-free-project-management-tools",
-      "intent": "/best-free-project-management-tools",
-      "priority_score": 83,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 72,
+      "opportunity_key": "search:best-crm-with-automation",
+      "intent": "best-crm-with-automation",
+      "priority_score": 100,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
       "clicks": 0,
       "ctr": 0,
-      "position": 59.3889,
+      "position": 0,
       "actions": [
+        "measure",
+        "recheck-automatically",
         "content_amplification",
         "distribution_amplification",
-        "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 09:16:41"
     },
     {
-      "opportunity_key": "gsc-page:/best-keyword-research-tools",
-      "intent": "/best-keyword-research-tools",
-      "priority_score": 82,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 69,
+      "opportunity_key": "search:best-marketing-automation-tools",
+      "intent": "best-marketing-automation-tools",
+      "priority_score": 100,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
       "clicks": 0,
       "ctr": 0,
-      "position": 73.7681,
+      "position": 0,
       "actions": [
+        "measure",
+        "recheck-automatically",
         "content_amplification",
         "distribution_amplification",
-        "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 09:16:41"
+    },
+    {
+      "opportunity_key": "search:best-workflow-automation-tools",
+      "intent": "best-workflow-automation-tools",
+      "priority_score": 100,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 09:16:41"
+    },
+    {
+      "opportunity_key": "search:best-seo-tools",
+      "intent": "best-seo-tools",
+      "priority_score": 100,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
     },
     {
       "opportunity_key": "gsc-page:/tools",
       "intent": "/tools",
-      "priority_score": 81,
+      "priority_score": 100,
       "lane": "seo_striking_distance",
       "action": "strengthen_existing",
       "evidence_confidence": "meaningful",
@@ -369,69 +339,278 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/tools/semrush",
+      "intent": "/tools/semrush",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 315,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 55.5841,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-seo-tools-for-agencies",
+      "intent": "/best-seo-tools-for-agencies",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 789,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 75.9341,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-seo-keyword-research-tools",
+      "intent": "/best-seo-keyword-research-tools",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 317,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 75.7823,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-no-code-automation-tools",
+      "intent": "/best-no-code-automation-tools",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 260,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 74.1038,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/tools/airtable",
+      "intent": "/tools/airtable",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 276,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 73.8514,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/tally",
       "intent": "/tools/tally",
-      "priority_score": 80,
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 59,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 40.322,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-funnel-builder",
+      "intent": "/best-funnel-builder",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 188,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 76.0106,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/tools/klaviyo",
+      "intent": "/tools/klaviyo",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 188,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 61.4309,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/tools/moz-pro",
+      "intent": "/tools/moz-pro",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 128,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 69.8047,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-free-crm",
+      "intent": "/best-free-crm",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 73,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 74.726,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-keyword-research-tools",
+      "intent": "/best-keyword-research-tools",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 72,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 73.8472,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-free-project-management-tools",
+      "intent": "/best-free-project-management-tools",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 77,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 58.1169,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-crm-for-sales-teams",
+      "intent": "/best-crm-for-sales-teams",
+      "priority_score": 100,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "meaningful",
       "impressions": 54,
       "clicks": 0,
       "ctr": 0,
-      "position": 40.037,
+      "position": 74.9444,
       "actions": [
         "content_amplification",
         "distribution_amplification",
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-crm-for-sales-teams",
-      "intent": "/best-crm-for-sales-teams",
-      "priority_score": 79,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "meaningful",
-      "impressions": 53,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 75.1509,
-      "actions": [
-        "content_amplification",
-        "distribution_amplification",
-        "deepen_existing_search_asset",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/netlify",
       "intent": "/tools/netlify",
-      "priority_score": 76,
+      "priority_score": 100,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "meaningful",
-      "impressions": 40,
+      "impressions": 44,
       "clicks": 0,
       "ctr": 0,
-      "position": 61.975,
+      "position": 62.4773,
       "actions": [
         "content_amplification",
         "distribution_amplification",
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/asana-vs-clickup",
       "intent": "/asana-vs-clickup",
-      "priority_score": 71,
+      "priority_score": 100,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "meaningful",
@@ -445,50 +624,413 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/gorgias",
       "intent": "/tools/gorgias",
-      "priority_score": 69,
+      "priority_score": 100,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "meaningful",
-      "impressions": 20,
+      "impressions": 21,
       "clicks": 0,
       "ctr": 0,
-      "position": 64.3,
+      "position": 64.381,
       "actions": [
         "content_amplification",
         "distribution_amplification",
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/tools/mixpanel",
+      "intent": "/tools/mixpanel",
+      "priority_score": 100,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 21,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 86.0952,
+      "actions": [
+        "content_amplification",
+        "distribution_amplification",
+        "deepen_existing_search_asset",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-customer-support-tools",
       "intent": "/best-customer-support-tools",
-      "priority_score": 69,
+      "priority_score": 100,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "meaningful",
-      "impressions": 20,
+      "impressions": 23,
       "clicks": 0,
       "ctr": 0,
-      "position": 69.6,
+      "position": 73.2174,
       "actions": [
         "content_amplification",
         "distribution_amplification",
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-seo-tools-for-agencies",
+      "intent": "best-seo-tools-for-agencies",
+      "priority_score": 98,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 535,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 77.0355,
+      "actions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-ai-marketing-tools",
+      "intent": "best-ai-marketing-tools",
+      "priority_score": 98,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-ecommerce-platforms",
+      "intent": "best-ecommerce-platforms",
+      "priority_score": 98,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-customer-support-tools",
+      "intent": "best-customer-support-tools",
+      "priority_score": 94,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-project-management-tools",
+      "intent": "best-project-management-tools",
+      "priority_score": 91,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 67,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 40.0448,
+      "actions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-crm-for-sales-teams",
+      "intent": "best-crm-for-sales-teams",
+      "priority_score": 90,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 50,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 75.52,
+      "actions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-website-builders",
+      "intent": "best-website-builders",
+      "priority_score": 89,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
+    },
+    {
+      "opportunity_key": "search:best-funnel-builder",
+      "intent": "best-funnel-builder",
+      "priority_score": 88,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 127,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 77.1024,
+      "actions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-free-project-management-tools",
+      "intent": "best-free-project-management-tools",
+      "priority_score": 88,
+      "lane": "seo-indexing-recovery",
+      "action": "repair-indexing",
+      "evidence_confidence": "meaningful",
+      "impressions": 47,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 55.383,
+      "actions": [
+        "preserve-current-url",
+        "verify-self-canonical",
+        "verify-sitemap-entry",
+        "verify-indexability",
+        "strengthen-internal-discovery",
+        "validate-public-surface",
+        "recheck-google-indexing",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-no-code-automation-tools",
+      "intent": "best-no-code-automation-tools",
+      "priority_score": 88,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "evidence_confidence": "meaningful",
+      "impressions": 228,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 73.7018,
+      "actions": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-free-crm",
+      "intent": "best-free-crm",
+      "priority_score": 86,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 42,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 73.0952,
+      "actions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-forms-for-small-business",
+      "intent": "best-forms-for-small-business",
+      "priority_score": 86,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 4,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 4.5,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-email-marketing-tools",
+      "intent": "best-email-marketing-tools",
+      "priority_score": 86,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 2,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 8.5,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-crm-for-consultants",
+      "intent": "best-crm-for-consultants",
+      "priority_score": 85,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 1,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 8,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-crm-for-small-business",
+      "intent": "best-crm-for-small-business",
+      "priority_score": 85,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 1,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 8,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
     },
     {
       "opportunity_key": "gsc-page:/tools/make",
       "intent": "/tools/make",
-      "priority_score": 54,
+      "priority_score": 84,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "directional",
@@ -500,12 +1042,100 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-productivity-tools-for-teams",
+      "intent": "best-productivity-tools-for-teams",
+      "priority_score": 83,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "low",
+      "impressions": 4,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 38,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
+    },
+    {
+      "opportunity_key": "search:best-keyword-research-tools",
+      "intent": "best-keyword-research-tools",
+      "priority_score": 82,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "evidence_confidence": "meaningful",
+      "impressions": 42,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 74.3095,
+      "actions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-sales-prospecting-tools",
+      "intent": "best-sales-prospecting-tools",
+      "priority_score": 82,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 3,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 7.6667,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-ai-assistants",
+      "intent": "best-ai-assistants",
+      "priority_score": 82,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
     },
     {
       "opportunity_key": "gsc-page:home",
       "intent": "/",
-      "priority_score": 52,
+      "priority_score": 82,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "directional",
@@ -517,28 +1147,111 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-21 05:15:45"
     },
     {
-      "opportunity_key": "gsc-page:/tools/mixpanel",
-      "intent": "/tools/mixpanel",
-      "priority_score": 52,
+      "opportunity_key": "search:best-design-tools",
+      "intent": "best-design-tools",
+      "priority_score": 81,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "none",
+      "impressions": 0,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 0,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
+    },
+    {
+      "opportunity_key": "gsc-page:/tools/miro",
+      "intent": "/tools/miro",
+      "priority_score": 81,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "emerging",
-      "impressions": 18,
+      "impressions": 16,
       "clicks": 0,
       "ctr": 0,
-      "position": 85.6667,
+      "position": 50.3125,
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-cold-email-tools",
+      "intent": "best-cold-email-tools",
+      "priority_score": 80,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 2,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 6.5,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-competitor-seo-tools",
+      "intent": "best-competitor-seo-tools",
+      "priority_score": 80,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "low",
+      "impressions": 4,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 51,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
+    },
+    {
+      "opportunity_key": "search:best-lead-capture-forms",
+      "intent": "best-lead-capture-forms",
+      "priority_score": 80,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "low",
+      "impressions": 4,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 47.5,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
     },
     {
       "opportunity_key": "gsc-page:/activecampaign-vs-mailchimp",
       "intent": "/activecampaign-vs-mailchimp",
-      "priority_score": 50,
+      "priority_score": 80,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "directional",
@@ -550,12 +1263,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/privacy",
       "intent": "/privacy",
-      "priority_score": 50,
+      "priority_score": 80,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "directional",
@@ -567,12 +1280,74 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-team-collaboration-tools",
+      "intent": "best-team-collaboration-tools",
+      "priority_score": 79,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 2,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 8,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-tools-for-agencies",
+      "intent": "best-tools-for-agencies",
+      "priority_score": 79,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 1,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 10,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-project-management-tools",
+      "intent": "/best-project-management-tools",
+      "priority_score": 79,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "emerging",
+      "impressions": 13,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 45.3077,
+      "actions": [
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-21 05:15:45"
     },
     {
       "opportunity_key": "gsc-page:/tools/monday-crm",
       "intent": "/tools/monday-crm",
-      "priority_score": 49,
+      "priority_score": 79,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "emerging",
@@ -583,28 +1358,12 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-project-management-tools",
-      "intent": "/best-project-management-tools",
-      "priority_score": 48,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "emerging",
-      "impressions": 12,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 45.9167,
-      "actions": [
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/matomo",
       "intent": "/tools/matomo",
-      "priority_score": 48,
+      "priority_score": 78,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "emerging",
@@ -615,28 +1374,12 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/tools/miro",
-      "intent": "/tools/miro",
-      "priority_score": 48,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "directional",
-      "impressions": 8,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 39,
-      "actions": [
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/surfer",
       "intent": "/tools/surfer",
-      "priority_score": 47,
+      "priority_score": 77,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "emerging",
@@ -647,12 +1390,51 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-developer-tools",
+      "intent": "best-developer-tools",
+      "priority_score": 76,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 3,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 10,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-ai-ad-creative-tools",
+      "intent": "/best-ai-ad-creative-tools",
+      "priority_score": 75,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "directional",
+      "impressions": 9,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 81.8889,
+      "actions": [
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-forms-for-small-business",
       "intent": "/best-forms-for-small-business",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -664,12 +1446,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/perplexity",
       "intent": "/tools/perplexity",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -681,12 +1463,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/beehiiv",
       "intent": "/tools/beehiiv",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -698,12 +1480,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/chatgpt",
       "intent": "/tools/chatgpt",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -715,12 +1497,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-sales-prospecting-tools",
       "intent": "/best-sales-prospecting-tools",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -732,12 +1514,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/canva",
       "intent": "/tools/canva",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -749,12 +1531,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-developer-tools",
       "intent": "/best-developer-tools",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -766,12 +1548,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/sprout-social",
       "intent": "/tools/sprout-social",
-      "priority_score": 44,
+      "priority_score": 74,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "directional",
@@ -782,28 +1564,49 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
-      "opportunity_key": "gsc-page:/best-ai-ad-creative-tools",
-      "intent": "/best-ai-ad-creative-tools",
-      "priority_score": 44,
-      "lane": "seo_authority_depth",
-      "action": "deepen_existing",
-      "evidence_confidence": "directional",
-      "impressions": 8,
+      "opportunity_key": "gsc-page:/news/notion-3-7-agent-skills",
+      "intent": "/news/notion-3-7-agent-skills",
+      "priority_score": 74,
+      "lane": "seo_low_sample_observation",
+      "action": "measure_low_sample",
+      "evidence_confidence": "low",
+      "impressions": 3,
       "clicks": 0,
       "ctr": 0,
-      "position": 81.125,
+      "position": 6.6667,
       "actions": [
+        "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-product-analytics-tools",
+      "intent": "best-product-analytics-tools",
+      "priority_score": 73,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "low",
+      "impressions": 4,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 20.25,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
     },
     {
       "opportunity_key": "gsc-page:/tools/buffer",
       "intent": "/tools/buffer",
-      "priority_score": 43,
+      "priority_score": 73,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "directional",
@@ -814,12 +1617,12 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tool",
       "intent": "/tool",
-      "priority_score": 43,
+      "priority_score": 73,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "directional",
@@ -830,12 +1633,12 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-productivity-tools-for-teams",
       "intent": "/best-productivity-tools-for-teams",
-      "priority_score": 43,
+      "priority_score": 73,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "directional",
@@ -846,12 +1649,12 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-product-analytics-tools",
       "intent": "/best-product-analytics-tools",
-      "priority_score": 41,
+      "priority_score": 71,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "low",
@@ -862,12 +1665,56 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-video-content-tools",
+      "intent": "best-video-content-tools",
+      "priority_score": 70,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "evidence_confidence": "low",
+      "impressions": 1,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 10,
+      "actions": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-ai-ad-creative-tools",
+      "intent": "best-ai-ad-creative-tools",
+      "priority_score": 69,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "evidence_confidence": "low",
+      "impressions": 4,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 84.25,
+      "actions": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
     },
     {
       "opportunity_key": "gsc-page:/compare",
       "intent": "/compare",
-      "priority_score": 39,
+      "priority_score": 69,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -879,12 +1726,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-cold-email-tools",
       "intent": "/best-cold-email-tools",
-      "priority_score": 39,
+      "priority_score": 69,
       "lane": "seo_low_sample_observation",
       "action": "measure_low_sample",
       "evidence_confidence": "low",
@@ -896,46 +1743,12 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-email-marketing-tools",
-      "intent": "/best-email-marketing-tools",
-      "priority_score": 39,
-      "lane": "seo_low_sample_observation",
-      "action": "measure_low_sample",
-      "evidence_confidence": "low",
-      "impressions": 2,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 8.5,
-      "actions": [
-        "observe_low_sample_ranking",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
-    },
-    {
-      "opportunity_key": "gsc-page:/best-team-collaboration-tools",
-      "intent": "/best-team-collaboration-tools",
-      "priority_score": 39,
-      "lane": "seo_low_sample_observation",
-      "action": "measure_low_sample",
-      "evidence_confidence": "low",
-      "impressions": 2,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 8,
-      "actions": [
-        "observe_low_sample_ranking",
-        "search_measurement"
-      ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/tools/amplitude",
       "intent": "/tools/amplitude",
-      "priority_score": 39,
+      "priority_score": 69,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "low",
@@ -946,12 +1759,12 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-all-in-one-business-tools",
       "intent": "/best-all-in-one-business-tools",
-      "priority_score": 39,
+      "priority_score": 69,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "directional",
@@ -962,12 +1775,12 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
     },
     {
       "opportunity_key": "gsc-page:/best-ai-coding-tools",
       "intent": "/best-ai-coding-tools",
-      "priority_score": 39,
+      "priority_score": 69,
       "lane": "seo_authority_depth",
       "action": "deepen_existing",
       "evidence_confidence": "directional",
@@ -978,7 +1791,108 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-09-20 08:16:40"
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "gsc-page:/best-funnel-builder-for-beginners",
+      "intent": "/best-funnel-builder-for-beginners",
+      "priority_score": 69,
+      "lane": "seo_authority_depth",
+      "action": "deepen_existing",
+      "evidence_confidence": "directional",
+      "impressions": 5,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 48.2,
+      "actions": [
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 22:15:52"
+    },
+    {
+      "opportunity_key": "search:best-ai-research-tools",
+      "intent": "best-ai-research-tools",
+      "priority_score": 65,
+      "lane": "seo-first-page-observation",
+      "action": "protect-and-measure",
+      "evidence_confidence": "low",
+      "impressions": 1,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 1,
+      "actions": [
+        "preserve-current-url",
+        "validate-editorial-quality",
+        "verify-query-title-alignment",
+        "monitor-ranking-and-impressions",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
+    },
+    {
+      "opportunity_key": "search:best-social-media-management-tools",
+      "intent": "best-social-media-management-tools",
+      "priority_score": 65,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "low",
+      "impressions": 1,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 57,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
+    },
+    {
+      "opportunity_key": "search:best-ai-coding-tools",
+      "intent": "best-ai-coding-tools",
+      "priority_score": 63,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "evidence_confidence": "low",
+      "impressions": 1,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 78,
+      "actions": [
+        "measure",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:10"
+    },
+    {
+      "opportunity_key": "search:best-all-in-one-business-tools",
+      "intent": "best-all-in-one-business-tools",
+      "priority_score": 58,
+      "lane": "editorial-safety",
+      "action": "hold-publication-and-research-catalog",
+      "evidence_confidence": "low",
+      "impressions": 4,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 90.75,
+      "actions": [
+        "hold-publication",
+        "research-catalog-coverage",
+        "revalidate-eligibility",
+        "recheck-automatically",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "last_evaluated_at": "2026-09-20 18:16:09"
     }
   ]
 }

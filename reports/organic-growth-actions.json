@@ -1,19 +1,62 @@
 {
-  "generatedAt": "2026-09-20T08:59:54.361Z",
+  "generatedAt": "2026-09-21T05:25:30.284Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-09-20T08:59:54.267Z",
-  "newInterventions": [],
+  "brainDirectivesGeneratedAt": "2026-09-21T05:25:30.197Z",
+  "newInterventions": [
+    {
+      "intent": "best-free-crm",
+      "variant": "decision-depth-v1",
+      "lane": "seo-authority-depth",
+      "priorityScore": 86,
+      "impressions": 79,
+      "position": 74.1266,
+      "brainOpportunity": "search:best-free-crm",
+      "brainActions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ]
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "variant": "decision-depth-v1",
+      "lane": "seo-authority-depth",
+      "priorityScore": 82,
+      "impressions": 75,
+      "position": 73.3733,
+      "brainOpportunity": "search:best-keyword-research-tools",
+      "brainActions": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure",
+        "content_amplification",
+        "distribution_amplification",
+        "search_measurement"
+      ]
+    }
+  ],
   "activeOptimizations": [
     {
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 535,
+        "impressions": 799,
         "ctr": 0,
-        "position": 77.0355
+        "position": 75.8773
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -21,17 +64,19 @@
         "impressions": 533,
         "ctr": 0,
         "position": 77.0694
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     {
       "intent": "best-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 67,
+        "impressions": 119,
         "ctr": 0,
-        "position": 40.0448
+        "position": 39.4286
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -39,17 +84,19 @@
         "impressions": 65,
         "ctr": 0,
         "position": 39.9231
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     {
       "intent": "best-no-code-automation-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 228,
+        "impressions": 261,
         "ctr": 0,
-        "position": 73.7018
+        "position": 74.1111
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -57,17 +104,19 @@
         "impressions": 228,
         "ctr": 0,
         "position": 73.7018
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     {
       "intent": "best-crm-for-sales-teams",
       "latest": {
         "clicks": 0,
-        "impressions": 50,
+        "impressions": 55,
         "ctr": 0,
-        "position": 75.52
+        "position": 74.8364
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -75,17 +124,19 @@
         "impressions": 50,
         "ctr": 0,
         "position": 75.52
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     {
       "intent": "best-funnel-builder",
       "latest": {
         "clicks": 0,
-        "impressions": 127,
+        "impressions": 189,
         "ctr": 0,
-        "position": 77.1024
+        "position": 76
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -93,17 +144,19 @@
         "impressions": 127,
         "ctr": 0,
         "position": 77.1024
-      }
+      },
+      "contentOptimizationSuspended": false,
+      "indexing": null
     },
     {
       "intent": "best-free-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 47,
+        "impressions": 78,
         "ctr": 0,
-        "position": 55.383
+        "position": 58.4231
       },
-      "lastSeenAt": "2026-09-13T12:15:28.070Z",
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -111,10 +164,76 @@
         "impressions": 47,
         "ctr": 0,
         "position": 55.383
+      },
+      "indexing": {
+        "url": "https://trytoolscout.org/best-free-project-management-tools",
+        "status": "canonical-alternate",
+        "verdict": "NEUTRAL",
+        "coverageState": "Alternate page with proper canonical tag",
+        "indexingState": "INDEXING_ALLOWED",
+        "lastCrawlTime": "2026-09-02T00:42:53+00:00"
+      },
+      "contentOptimizationSuspended": true
+    },
+    {
+      "intent": "best-free-crm",
+      "latest": {
+        "clicks": 0,
+        "impressions": 79,
+        "ctr": 0,
+        "position": 74.1266
+      },
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-09-21T05:25:30.284Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 79,
+        "ctr": 0,
+        "position": 74.1266
+      }
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "latest": {
+        "clicks": 0,
+        "impressions": 75,
+        "ctr": 0,
+        "position": 73.3733
+      },
+      "lastSeenAt": "2026-09-21T05:25:30.284Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-09-21T05:25:30.284Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 75,
+        "ctr": 0,
+        "position": 73.3733
       }
     }
   ],
-  "indexingRecovery": [],
+  "indexingRecovery": [
+    {
+      "intent": "best-free-project-management-tools",
+      "status": "canonical-alternate",
+      "coverageState": "Alternate page with proper canonical tag",
+      "lastCrawlTime": "2026-09-02T00:42:53+00:00",
+      "action": "repair-indexing",
+      "executionPlan": [
+        "preserve-current-url",
+        "verify-self-canonical",
+        "verify-sitemap-entry",
+        "verify-indexability",
+        "strengthen-internal-discovery",
+        "validate-public-surface",
+        "recheck-google-indexing"
+      ]
+    }
+  ],
   "evaluations": [],
   "rollbacks": [],
   "ownerActionRequired": false
