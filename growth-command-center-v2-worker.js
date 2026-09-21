@@ -230,7 +230,10 @@ const n=v=>Number(v||0).toLocaleString(),num=v=>Number(v||0),esc=v=>String(v??''
 function metric(label,value,sub){return '<div class="metric"><small>'+esc(label)+'</small><b>'+esc(value)+'</b><span>'+esc(sub||'')+'</span></div>'}
 function draw(d){const root=document.getElementById('googleSearchRealityBody'),meta=document.getElementById('googleSearchRealityMeta');if(!root)return;const x=d?.growthOps?.googleSearchReality;if(!x||!x.generatedAt){root.innerHTML='<div class="empty">First-party Search Console telemetry has not completed yet.</div>';return}
 const p=x.searchPerformance||{},w=p.window28d||{},r=p.recent7||{},prev=p.previous7||{},chg=p.change7d||{},idx=x.indexHealth||{},sm=x.sitemaps||{},ops=Array.isArray(x.opportunities)?x.opportunities:[];
-if(meta)meta.textContent='Updated '+dt(x.generatedAt);
+const queueOf=o=>o?.queue||(o?.kind==='sitemap_redirect'||o?.kind==='canonical_mismatch'?'fix_now':o?.kind==='index_issue'?'index_recovery':o?.kind==='protect'?'protect':['striking_distance','high_impression_low_rank','ctr_opportunity'].includes(o?.kind)?'ranking_opportunities':'other');
+const queues={fix_now:ops.filter(o=>queueOf(o)==='fix_now'),index_recovery:ops.filter(o=>queueOf(o)==='index_recovery'),ranking_opportunities:ops.filter(o=>queueOf(o)==='ranking_opportunities'),protect:ops.filter(o=>queueOf(o)==='protect')};
+const hygieneBaseline='2026-09-21T20:47:35.000Z',postHygiene=Date.parse(x.generatedAt)>=Date.parse(hygieneBaseline);
+if(meta)meta.textContent='Updated '+dt(x.generatedAt)+(postHygiene?'':' · pre-hygiene baseline');
 root.innerHTML='<div class="metricGrid">'+
 metric('Impressions · 28d',n(w.impressions),n(w.clicks)+' clicks · CTR '+Number(w.ctr||0).toFixed(2)+'%')+
 metric('Average position · 28d',Number(w.position||0).toFixed(1),n(p.observedPages)+' Google-visible pages')+
@@ -240,10 +243,14 @@ metric('URL Inspection',n(idx.indexed)+' / '+n(idx.inspected)+' indexed',n(idx.d
 metric('Inspection coverage',Number(idx.inspectionCoveragePct||0).toFixed(1)+'%',n(idx.inspectionUniverseUrls)+' canonical sitemap URLs · '+n(idx.redirected)+' redirects')+
 metric('Canonical mismatches',n(idx.canonicalMismatches),n(idx.failed)+' FAIL · '+n(idx.robotsBlocked)+' robots · '+n(idx.noindexBlocked)+' noindex')+
 metric('Sitemaps',n(sm.submittedCount),sm.apiOk?'Search Console API healthy':'API problem')+
+metric('Fix now',postHygiene?n(queues.fix_now.length):'Recheck','Redirects and canonical conflicts')+
+metric('Index recovery',postHygiene?n(queues.index_recovery.length):'Recheck','Unknown or discovered but not indexed')+
+metric('Ranking opportunities',n(queues.ranking_opportunities.length),'Authority concentrated on top 20 demand pages')+
+metric('Protect',n(queues.protect.length),'First-page assets to defend')+
 '</div>'+
 '<div class="businessPanel"><div><div class="row"><div><div class="rowName">Google index view</div><div class="rowMeta">'+esc(idx.note||'')+'</div></div><div class="rowValue">'+(idx.inspected?Number(idx.indexedPct||0).toFixed(1)+'% pass':'—')+'</div></div>'+
 '<div class="row"><div><div class="rowName">Device mix</div><div class="rowMeta">'+(Array.isArray(p.devices)&&p.devices.length?p.devices.slice(0,4).map(z=>esc(z.device)+': '+n(z.impressions)).join(' · '):'No device data')+'</div></div><div class="rowValue">'+n(r.impressions)+' 7d imp.</div></div></div>'+
-'<div><div class="row"><div><div class="rowName">Top Search opportunities</div><div class="rowMeta">Growth Brain should use these as evidence, not as a ranking verdict.</div></div><div class="rowValue">'+n(ops.length)+'</div></div>'+
+'<div><div class="row"><div><div class="rowName">Growth Brain Search queues</div><div class="rowMeta">'+(postHygiene?'Technical queues use post-hygiene Google evidence.':'Technical Fix now and Index recovery are paused until Google is reinspected after the hygiene deployment.')+'</div></div><div class="rowValue">'+n(queues.ranking_opportunities.length)+' ranking</div></div>'+
 (ops.length?ops.slice(0,6).map(o=>'<div class="task" style="margin-top:7px"><div class="rowName">'+esc(o.page||o.url||o.kind)+'</div><div class="rowMeta">'+esc(String(o.kind||'opportunity').replaceAll('_',' '))+' · score '+Number(o.score||0).toFixed(0)+' · '+n(o.impressions)+' imp. · pos '+Number(o.position||0).toFixed(1)+'</div><div class="taskReason">'+esc(String(o.action||'measure').replaceAll('_',' '))+'</div></div>').join(''):'<div class="empty">No priority Search opportunity in the current evidence.</div>')+'</div></div>'+
 '<div class="note" style="margin-top:10px">Read-only source: '+esc(x.source||'Google Search Console')+'. Search Analytics does not guarantee every row; URL Inspection describes the version in Google\'s index, not a live test.</div>';
 }
