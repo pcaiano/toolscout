@@ -136,6 +136,74 @@ function category(text,fallback){
   return best.name;
 }
 function humanName(slug){return String(slug).split('-').map(x=>x==='ai'?'AI':x.charAt(0).toUpperCase()+x.slice(1)).join(' ')}
+const SCORE_KEYS=['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency'];
+const CATEGORY_SCORES={
+  'ai-assistant':{price:7,ease:8,automation:6,integrations:6,sales:3,ai:9,marketing:6,seo:3,research:7,content:8,agency:6},
+  'ai-research':{price:7,ease:8,automation:6,integrations:6,sales:3,ai:9,marketing:6,seo:6,research:10,content:8,agency:6},
+  developer:{price:7,ease:7,automation:9,integrations:8,sales:2,ai:8,marketing:2,seo:2,research:7,content:4,agency:6},
+  content:{price:7,ease:8,automation:7,integrations:6,sales:3,ai:8,marketing:8,seo:3,research:3,content:10,agency:7},
+  design:{price:7,ease:8,automation:6,integrations:6,sales:3,ai:7,marketing:7,seo:2,research:2,content:10,agency:8},
+  business:{price:7,ease:8,automation:7,integrations:7,sales:5,ai:5,marketing:5,seo:2,research:4,content:4,agency:7}
+};
+const CATEGORY_AUDIENCES={
+  'ai-assistant':['knowledge workers','creators','students','teams'],
+  'ai-research':['researchers','knowledge workers','analysts','students','content teams'],
+  developer:['software developers','engineering teams','technical founders','product teams'],
+  content:['content creators','marketing teams','creative teams','agencies'],
+  design:['designers','creative teams','marketers','agencies'],
+  business:['small businesses','operations teams','growing teams','consultants']
+};
+function clampScore(v){return Math.max(1,Math.min(10,Math.round(Number(v)||0)))}
+function fullScores(cat,features,hintScores){
+  const base={price:6,ease:7,automation:5,integrations:5,sales:4,ai:4,marketing:4,seo:3,research:4,content:5,agency:5,...(CATEGORY_SCORES[cat]||{}),...(hintScores||{})};
+  const text=(features||[]).join(' ').toLowerCase();
+  const boost=(key,value)=>{base[key]=Math.max(Number(base[key]||0),value)};
+  if(/automation|workflow|agent/.test(text))boost('automation',8);
+  if(/integration|api|sdk/.test(text))boost('integrations',8);
+  if(/research|search|citation|source synthesis/.test(text))boost('research',9);
+  if(/video|image|writing|content|storytelling|transcription|summar/.test(text))boost('content',8);
+  if(/marketing|campaign|social|creative/.test(text))boost('marketing',7);
+  if(/sales|crm|prospect|lead/.test(text))boost('sales',7);
+  if(/ai |gemini|model|generation|assistant|character/.test(' '+text))boost('ai',9);
+  return Object.fromEntries(SCORE_KEYS.map(k=>[k,clampScore(base[k])]));
+}
+function deriveBestFor(cat,features,hintBestFor){
+  if(Array.isArray(hintBestFor)&&hintBestFor.length)return [...new Set(hintBestFor)].slice(0,6);
+  const out=[...(CATEGORY_AUDIENCES[cat]||['small businesses','teams','professionals'])],text=(features||[]).join(' ').toLowerCase();
+  if(/video/.test(text))out.unshift('video creators');
+  if(/meeting|transcription/.test(text))out.unshift('meeting-heavy teams');
+  if(/developer|api|sdk|coding/.test(text))out.unshift('software developers');
+  if(/research|citation|web search/.test(text))out.unshift('researchers');
+  if(/character|storytelling/.test(text))out.unshift('interactive storytelling');
+  return [...new Set(out)].slice(0,6);
+}
+function detectFreePlan(text,hint){
+  if(typeof hint?.freePlan==='boolean')return{freePlan:hint.freePlan,freePlanKnown:true};
+  const t=String(text||'').toLowerCase();
+  if(/\bfree plan\b|\bfree tier\b|\bfree version\b/.test(t))return{freePlan:true,freePlanKnown:true};
+  return{freePlan:false,freePlanKnown:false};
+}
+function editorialReview(profile){
+  const entries=Object.entries(profile.scores||{}).filter(([,v])=>Number.isFinite(Number(v))).sort((a,b)=>Number(b[1])-Number(a[1]));
+  const label={price:'value for money',ease:'ease of use',automation:'automation',integrations:'integrations',sales:'sales capability',ai:'AI capability',marketing:'marketing capability',seo:'SEO capability',research:'research capability',content:'content capability',agency:'agency fit'};
+  const strengths=entries.slice(0,2).map(([k])=>label[k]||k),weak=entries.at(-1),aud=(profile.bestFor||[]).slice(0,3),caps=(profile.features||[]).slice(0,3);
+  const fit=profile.name+' is a practical fit for '+(aud.length?aud.join(', '):'buyers whose workflow matches its core capabilities')+', especially when '+(caps.length?caps.join(', '):'its core workflow')+' matter most.';
+  const strong=strengths.length?' In ToolScout scoring, '+strengths.join(' and ')+' are its strongest recorded dimensions.':'';
+  const trade=weak&&Number(entries[0]?.[1]||0)-Number(weak[1])>=3?' '+(label[weak[0]]||weak[0])+' is the clearest recorded trade-off, so compare alternatives if that requirement is central.':'';
+  const commercial=profile.freePlanKnown===false?' The current free-plan position is not verified.':profile.freePlan?' A recorded free plan makes it easier to test before committing.':' Validate the use case and current pricing before committing.';
+  return clean(fit+strong+trade+commercial+' Check current vendor limits, integrations and pricing before purchase.');
+}
+function isFullParityProfile(p){
+  return Boolean(p&&p.rankingEligible!==false&&p.comparisonEligible!==false&&Array.isArray(p.bestFor)&&p.bestFor.length&&p.scores&&SCORE_KEYS.every(k=>Number.isFinite(Number(p.scores[k])))&&p.editorialReview);
+}
+async function staticTools(env){try{const r=await env.ASSETS.fetch(new Request(BASE+'/data/tools.json'));return r.ok?await r.json():[]}catch{return[]}}
+function normalizedName(v){return String(v||'').toLowerCase().replace(/\b(ai|app|software|platform)\b/g,'').replace(/[^a-z0-9]/g,'')}
+async function existingCatalogAlias(env,slug,hint){
+  const tools=await staticTools(env),alias=STATIC_ALIASES[slug];
+  if(alias&&tools.some(t=>t.slug===alias))return tools.find(t=>t.slug===alias);
+  const target=normalizedName(hint?.name||humanName(slug));
+  return tools.find(t=>normalizedName(t.name)===target)||null;
+}
 async function event(env,slug,detail,evidence){
   await env.DB.prepare("INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))")
     .bind('cat_'+crypto.randomUUID(),slug,'catalog_growth_admitted','completed',detail,JSON.stringify(evidence).slice(0,8000)).run();
