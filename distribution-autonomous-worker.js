@@ -14,6 +14,10 @@ const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|r
 const QUALIFY_LIMIT=24;
 const EXECUTION_LIMIT=12;
 const RESEARCH_COOLDOWN_HOURS=6;
+const AUTHORITY_ATTEMPT_MIN_24H=6;
+const AUTHORITY_STAGNATION_HOURS=72;
+const AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D=12;
+const AUTHORITY_RECOVERY_COOLDOWN_HOURS=6;
 async function runDiscoveryRefresh(env){
   if(!env.ADMIN_TOKEN)return {ok:false,reason:'admin_token_unavailable'};
   try{
@@ -765,6 +769,30 @@ async function autonomyMetrics(env){
   const distributionGates=gates?.byEngine?.distribution||{};
   return {discovered:Number(opp?.total||0),autonomousAttempted:Number(sub?.autonomous_attempted||0),submitted:Number(sub?.submitted||0),verifiedPlacements:Number(place?.placements||opp?.verified||0),verifiedBacklinks:Number(place?.backlinks||0),referralSessions,chairmanActions:Number(distributionGates.open||0)+Number(editorial?.chairman_editorial||0),humanGateContract:distributionGates,windowDays:30};
 }
+async function authorityLoopState(env){
+  let attempts24=0,attempts7=0,lastVerifiedAt=null,lastRecoveryAt=null,authorityQueue=0;
+  let placements=[];
+  try{
+    const row=await env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
+      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24,
+      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days'))+
+      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-7 days')) attempts7,
+      (SELECT MAX(first_verified_at) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1 AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')) last_verified_at,
+      (SELECT MAX(created_at) FROM distribution_events WHERE event_type='authority_pipeline_replenishment') last_recovery_at,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes') AND status IN ('pending','claimed','attempted','deferred','stalled')) authority_queue`).first();
+    attempts24=Number(row?.attempts24||0);attempts7=Number(row?.attempts7||0);lastVerifiedAt=row?.last_verified_at||null;lastRecoveryAt=row?.last_recovery_at||null;authorityQueue=Number(row?.authority_queue||0);
+    const q=await env.DB.prepare(`SELECT public_url FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1 AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`).all();placements=q.results||[];
+  }catch{}
+  const domains=new Set();for(const row of placements){try{const h=new URL(String(row.public_url||'')).hostname.toLowerCase().replace(/^www\./,'');if(h&&h!=='trytoolscout.org'&&!h.endsWith('.trytoolscout.org'))domains.add(h)}catch{}}
+  const verifiedReferringDomains=domains.size,required=verifiedReferringDomains<10;
+  const now=Date.now(),lastVerifiedMs=lastVerifiedAt?Date.parse(String(lastVerifiedAt).replace(' ','T')+'Z'):NaN,lastRecoveryMs=lastRecoveryAt?Date.parse(String(lastRecoveryAt).replace(' ','T')+'Z'):NaN;
+  const lastVerifiedAgeHours=Number.isFinite(lastVerifiedMs)?Math.max(0,(now-lastVerifiedMs)/3600000):null;
+  const throughputGap=required&&attempts24<AUTHORITY_ATTEMPT_MIN_24H;
+  const stagnating=required&&attempts7>=AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D&&(lastVerifiedAgeHours==null||lastVerifiedAgeHours>=AUTHORITY_STAGNATION_HOURS);
+  const recoveryDue=required&&(throughputGap||stagnating)&&(!Number.isFinite(lastRecoveryMs)||(now-lastRecoveryMs)>=AUTHORITY_RECOVERY_COOLDOWN_HOURS*3600000);
+  return {required,verifiedReferringDomains,bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
+}
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
   const discovery=await runDiscoveryRefresh(env);
@@ -786,7 +814,14 @@ export async function runAutonomousDistributionCycle(env){
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
-  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
+  const authority=await authorityLoopState(env);
+  let authorityRecovery=null;
+  if(authority.recoveryDue){
+    authorityRecovery=await runDiscoveryRefresh(env);
+    const status=authorityRecovery?.ok===false?'partial':'completed';
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authority_${crypto.randomUUID()}`,'authority_pipeline_replenishment',status,'backlink_acquisition',`Authority loop replenishment triggered automatically. Referring domains ${authority.verifiedReferringDomains}/${authority.bootstrapFloor}; qualified attempts ${authority.attempts24}/${authority.attemptMin24h} in 24h; queue ${authority.authorityQueue}; throughput gap ${authority.throughputGap}; stagnating ${authority.stagnating}. Discovery result: ${JSON.stringify(authorityRecovery).slice(0,900)}`).run().catch(()=>{});
+  }
+  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint,authority,authorityRecovery};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
