@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T21:05:48.134Z",
+  "generatedAt": "2026-09-21T22:47:35.043Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -8,17 +8,17 @@
       "startDate": "2026-08-25",
       "endDate": "2026-09-21",
       "clicks": 1,
-      "impressions": 3643,
-      "ctr": 0.0274,
-      "position": 64.6555
+      "impressions": 3834,
+      "ctr": 0.0261,
+      "position": 63.8185
     },
     "recent7": {
       "startDate": "2026-09-15",
       "endDate": "2026-09-21",
       "clicks": 0,
-      "impressions": 897,
+      "impressions": 936,
       "ctr": 0,
-      "position": 64.67
+      "position": 64.235
     },
     "previous7": {
       "startDate": "2026-09-08",
@@ -30,23 +30,23 @@
     },
     "change7d": {
       "clicksPct": 0,
-      "impressionsPct": -40.44,
-      "positionDelta": -2.2291
+      "impressionsPct": -37.85,
+      "positionDelta": -2.6641
     },
     "countries": [
       {
         "country": "usa",
         "clicks": 0,
-        "impressions": 2163,
+        "impressions": 2184,
         "ctr": 0,
-        "position": 67.841
+        "position": 67.7212
       },
       {
         "country": "gbr",
         "clicks": 0,
-        "impressions": 350,
+        "impressions": 353,
         "ctr": 0,
-        "position": 71.5829
+        "position": 71.4363
       },
       {
         "country": "aus",
@@ -65,16 +65,16 @@
       {
         "country": "nld",
         "clicks": 0,
-        "impressions": 98,
+        "impressions": 99,
         "ctr": 0,
-        "position": 67.3061
+        "position": 67.3535
       },
       {
         "country": "ind",
         "clicks": 0,
-        "impressions": 61,
+        "impressions": 62,
         "ctr": 0,
-        "position": 52.5082
+        "position": 52.8548
       },
       {
         "country": "can",
@@ -91,6 +91,13 @@
         "position": 57.6111
       },
       {
+        "country": "bra",
+        "clicks": 0,
+        "impressions": 35,
+        "ctr": 0,
+        "position": 58.7429
+      },
+      {
         "country": "deu",
         "clicks": 0,
         "impressions": 28,
@@ -103,13 +110,6 @@
         "impressions": 27,
         "ctr": 0,
         "position": 67.9259
-      },
-      {
-        "country": "bra",
-        "clicks": 0,
-        "impressions": 26,
-        "ctr": 0,
-        "position": 58.3462
       },
       {
         "country": "ukr",
@@ -144,16 +144,16 @@
       {
         "device": "DESKTOP",
         "clicks": 0,
-        "impressions": 2817,
+        "impressions": 2855,
         "ctr": 0,
-        "position": 65.8701
+        "position": 65.7037
       },
       {
         "device": "MOBILE",
         "clicks": 1,
-        "impressions": 640,
-        "ctr": 0.1563,
-        "position": 70.0109
+        "impressions": 641,
+        "ctr": 0.156,
+        "position": 70.0374
       },
       {
         "device": "TABLET",
@@ -163,7 +163,7 @@
         "position": 75.5385
       }
     ],
-    "observedPages": 102
+    "observedPages": 122
   },
   "indexHealth": {
     "inspectionUniverseUrls": 169,
@@ -191,16 +191,16 @@
     "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
     "preservedFromPrevious": true,
     "preservedFromGeneratedAt": "2026-09-21T21:02:54.858Z",
-    "lastInspectionAttemptAt": "2026-09-21T21:05:48.134Z",
-    "lastInspectionAttemptCoveragePct": 8.9,
-    "lastInspectionAttemptErrors": 160,
+    "lastInspectionAttemptAt": "2026-09-21T22:47:35.043Z",
+    "lastInspectionAttemptCoveragePct": 0,
+    "lastInspectionAttemptErrors": 250,
     "quotaLimited": true
   },
   "sitemaps": {
     "apiOk": true,
     "apiStatus": 200,
     "apiError": null,
-    "localSitemapUrls": 169,
+    "localSitemapUrls": 171,
     "submittedCount": 1,
     "items": [
       {
@@ -338,9 +338,9 @@
           "page": "/tools",
           "url": "https://trytoolscout.org/tools",
           "kind": "striking_distance",
-          "score": 91.6,
-          "impressions": 30,
-          "position": 12.5333,
+          "score": 92.7,
+          "impressions": 34,
+          "position": 11.6176,
           "action": "authority_and_content_amplification"
         },
         {
@@ -375,26 +375,26 @@
           "url": "https://trytoolscout.org/tools/semrush",
           "kind": "high_impression_low_rank",
           "score": 83.1,
-          "impressions": 321,
-          "position": 55.514,
+          "impressions": 322,
+          "position": 55.5248,
           "action": "authority_depth_and_query_alignment"
         },
         {
           "page": "/tools/airtable",
           "url": "https://trytoolscout.org/tools/airtable",
           "kind": "high_impression_low_rank",
-          "score": 82.6,
-          "impressions": 294,
-          "position": 74.1871,
+          "score": 82.7,
+          "impressions": 298,
+          "position": 74.1275,
           "action": "authority_depth_and_query_alignment"
         },
         {
           "page": "/best-no-code-automation-tools",
           "url": "https://trytoolscout.org/best-no-code-automation-tools",
           "kind": "high_impression_low_rank",
-          "score": 81.9,
-          "impressions": 264,
-          "position": 74.0833,
+          "score": 82,
+          "impressions": 266,
+          "position": 74.1053,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -411,17 +411,17 @@
           "url": "https://trytoolscout.org/",
           "kind": "ctr_opportunity",
           "score": 81,
-          "impressions": 125,
-          "position": 7.536,
+          "impressions": 126,
+          "position": 7.5476,
           "action": "improve_search_snippet_and_click_capture"
         },
         {
           "page": "/best-funnel-builder",
           "url": "https://trytoolscout.org/best-funnel-builder",
           "kind": "high_impression_low_rank",
-          "score": 80.1,
-          "impressions": 194,
-          "position": 75.9227,
+          "score": 80.4,
+          "impressions": 204,
+          "position": 76.0392,
           "action": "authority_depth_and_query_alignment"
         }
       ]
@@ -437,11 +437,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/tools",
       "page": "/tools",
-      "score": 91.6,
-      "impressions": 30,
+      "score": 92.7,
+      "impressions": 34,
       "clicks": 0,
       "ctr": 0,
-      "position": 12.5333,
+      "position": 11.6176,
       "action": "authority_and_content_amplification"
     },
     {
@@ -486,10 +486,10 @@
       "url": "https://trytoolscout.org/tools/semrush",
       "page": "/tools/semrush",
       "score": 83.1,
-      "impressions": 321,
+      "impressions": 322,
       "clicks": 0,
       "ctr": 0,
-      "position": 55.514,
+      "position": 55.5248,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -497,11 +497,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/tools/airtable",
       "page": "/tools/airtable",
-      "score": 82.6,
-      "impressions": 294,
+      "score": 82.7,
+      "impressions": 298,
       "clicks": 0,
       "ctr": 0,
-      "position": 74.1871,
+      "position": 74.1275,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -509,11 +509,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-no-code-automation-tools",
       "page": "/best-no-code-automation-tools",
-      "score": 81.9,
-      "impressions": 264,
+      "score": 82,
+      "impressions": 266,
       "clicks": 0,
       "ctr": 0,
-      "position": 74.0833,
+      "position": 74.1053,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -534,10 +534,10 @@
       "url": "https://trytoolscout.org/",
       "page": "/",
       "score": 81,
-      "impressions": 125,
+      "impressions": 126,
       "clicks": 1,
-      "ctr": 0.8,
-      "position": 7.536,
+      "ctr": 0.7937,
+      "position": 7.5476,
       "action": "improve_search_snippet_and_click_capture"
     },
     {
@@ -545,11 +545,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-funnel-builder",
       "page": "/best-funnel-builder",
-      "score": 80.1,
-      "impressions": 194,
+      "score": 80.4,
+      "impressions": 204,
       "clicks": 0,
       "ctr": 0,
-      "position": 75.9227,
+      "position": 76.0392,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -557,11 +557,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/tools/klaviyo",
       "page": "/tools/klaviyo",
-      "score": 80,
-      "impressions": 192,
+      "score": 80.1,
+      "impressions": 196,
       "clicks": 0,
       "ctr": 0,
-      "position": 61.5885,
+      "position": 61.1582,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -959,11 +959,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-free-crm",
       "page": "/best-free-crm",
-      "score": 74.7,
-      "impressions": 80,
+      "score": 74.9,
+      "impressions": 82,
       "clicks": 0,
       "ctr": 0,
-      "position": 74.0625,
+      "position": 73.8415,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -983,11 +983,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-keyword-research-tools",
       "page": "/best-keyword-research-tools",
-      "score": 74.4,
-      "impressions": 76,
+      "score": 74.6,
+      "impressions": 78,
       "clicks": 0,
       "ctr": 0,
-      "position": 73.3553,
+      "position": 71.5128,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -6292,10 +6292,10 @@
     "This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed."
   ],
   "inspectionRun": {
-    "attempted": 175,
-    "succeeded": 15,
-    "errors": 160,
-    "coveragePct": 8.9,
+    "attempted": 250,
+    "succeeded": 0,
+    "errors": 250,
+    "coveragePct": 0,
     "quotaLimited": true,
     "preservedPriorHealthySnapshot": true
   }
