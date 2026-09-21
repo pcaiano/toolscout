@@ -351,9 +351,14 @@ async function coordinateGrowthOpportunities(env){
   }
   for(const row of searchRealityTechnical){
     const kind=String(row.kind||'index_issue');
-    const page=String(row.page||'/');
+    const page=String(row.page||'/').replace(/\.html$/i,'')||'/';
     const key=`gsc-reality:${kind}:${page}`.slice(0,480);
-    const actions=['canonical_mismatch','sitemap_redirect'].includes(kind)?['repair_canonical_alignment','search_measurement']:['repair_indexing','search_measurement'];
+    let actions;
+    if(['canonical_mismatch','sitemap_redirect'].includes(kind))actions=['repair_canonical_alignment','search_measurement'];
+    else if(String(row.coverageState||'')==='URL is unknown to Google')actions=['strengthen_internal_links','search_measurement'];
+    else if(String(row.coverageState||'')==='Discovered - currently not indexed')actions=['strengthen_internal_links','deepen_existing_search_asset','search_measurement'];
+    else if(String(row.coverageState||'')==='Crawled - currently not indexed')actions=['deepen_existing_search_asset','search_measurement'];
+    else actions=['repair_indexing','search_measurement'];
     const signals={
       lane:'seo_index_reality',
       action:kind,
