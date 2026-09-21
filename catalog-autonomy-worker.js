@@ -329,7 +329,21 @@ export async function admitTrustedCandidates(env){
 }
 export async function auditCatalogQualityBatch(env,{limit=12}={}){
   await ensureSchema(env);
-  const tools=await mergedTools(env);
+  const [staticTools,runtimeRows,suppressed]=await Promise.all([
+    assetJson(env,'/data/tools.json',[]),
+    env.DB.prepare(`SELECT tool_slug,profile_json,status FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold') ORDER BY updated_at DESC`).all(),
+    suppressedSlugs(env)
+  ]);
+  const tools=[],seen=new Set();
+  for(const tool of Array.isArray(staticTools)?staticTools:[]){
+    const slug=String(tool?.slug||'').toLowerCase();if(!slug||seen.has(slug)||suppressed.has(slug))continue;
+    seen.add(slug);tools.push(tool);
+  }
+  for(const row of runtimeRows.results||[]){
+    let tool=null;try{tool=JSON.parse(row.profile_json||'{}')}catch{}
+    const slug=String(tool?.slug||row.tool_slug||'').toLowerCase();if(!slug||seen.has(slug)||suppressed.has(slug)||!tool)continue;
+    seen.add(slug);tools.push(tool);
+  }
   const prior=await env.DB.prepare(`SELECT tool_slug,quality_status,last_checked_at FROM catalog_quality_audit`).all();
   const auditState=new Map((prior.results||[]).map(x=>[String(x.tool_slug),{status:String(x.quality_status||''),checkedAt:Date.parse(String(x.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0}]));
   const priority=slug=>{const s=auditState.get(slug);if(!s)return 0;if(s.status==='hold')return 1;if(s.status==='warning')return 2;return 3};
