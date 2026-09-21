@@ -19,7 +19,7 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
 .statusbar strong{color:var(--ink)}.layoutHint{font-size:11px;white-space:nowrap}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:76px;gap:12px;align-items:stretch}
 .widget{grid-column:span var(--w,6);grid-row:span var(--h,4);position:relative;min-height:0;background:linear-gradient(180deg,var(--card),#101419);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.18)}
-.widget[data-dragging="1"]{opacity:.55;outline:1px solid var(--accent)}.widgetHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 17px 10px;cursor:grab;user-select:none}.widgetHead:active{cursor:grabbing}
+.widget[data-dragging="1"]{opacity:.55;outline:1px solid var(--accent)}body:not(.show-detail) .widget[data-detail="1"]{display:none}.widgetHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 17px 10px;cursor:grab;user-select:none}.widgetHead:active{cursor:grabbing}
 .widgetTitle{font-size:16px;font-weight:850;letter-spacing:-.02em}.widgetKicker{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:850;margin-bottom:3px}.widgetMeta{font-size:11px;color:var(--muted);text-align:right}
 .widgetBody{height:calc(100% - 58px);overflow:auto;padding:0 17px 17px;scrollbar-width:thin}.resizeHandle{position:absolute;right:3px;bottom:3px;width:20px;height:20px;cursor:nwse-resize;opacity:.6}
 .resizeHandle:after{content:"";position:absolute;right:4px;bottom:4px;width:9px;height:9px;border-right:2px solid #596474;border-bottom:2px solid #596474}
@@ -40,10 +40,10 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
 <body>
 <div class="wrap">
   <header class="top">
-    <div><div class="eyebrow">TOOLSCOUT · GROWTH OPERATIONS</div><h1>Command Center</h1><p class="sub">One operational surface for traffic, distribution and affiliate monetization. Human intervention is treated as an exception; the engines keep the state.</p></div>
-    <div class="controls"><button class="btn" id="resetLayout">Reset layout</button><button class="btn primary" id="refresh">Refresh data</button></div>
+    <div><div class="eyebrow">TOOLSCOUT · BUSINESS CONTROL</div><h1>Command Center</h1><p class="sub">A human-readable view of whether ToolScout is acquiring real people, building authority, creating outbound intent and turning that activity into sustainable revenue. Internal engine activity is detail, not success.</p></div>
+    <div class="controls"><button class="btn" id="toggleDetail">Show operational detail</button><button class="btn" id="resetLayout">Reset layout</button><button class="btn primary" id="refresh">Refresh data</button></div>
   </header>
-  <div class="statusbar"><div id="status"><strong>Not loaded.</strong> Press Refresh data for a current operational snapshot.</div><div class="layoutHint">Drag · resize · click for detail</div></div>
+  <div class="statusbar"><div id="status"><strong>Not loaded.</strong> Press Refresh data for a current operational snapshot.</div><div class="layoutHint">Business truth first · operational detail optional</div></div>
 
   <main class="grid" id="grid">
     <section class="widget" data-widget="chairman" style="--w:8;--h:5">
@@ -51,32 +51,32 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
       <div class="widgetBody" id="chairmanBody"><div class="empty">Refresh to load current human gates.</div></div><div class="resizeHandle"></div>
     </section>
 
-    <section class="widget" data-widget="northstar" style="--w:4;--h:5">
+    <section class="widget" data-widget="northstar" data-detail="1" style="--w:4;--h:5">
       <div class="widgetHead"><div><div class="widgetKicker">Economic funnel</div><div class="widgetTitle">North Star</div></div><div class="widgetMeta">Human only</div></div>
       <div class="widgetBody" id="northstarBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
-    <section class="widget" data-widget="distribution" style="--w:6;--h:5">
+    <section class="widget" data-widget="distribution" data-detail="1" style="--w:6;--h:5">
       <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Distribution Engine</div></div><div class="widgetMeta" id="distributionMeta">Runtime state</div></div>
       <div class="widgetBody" id="distributionBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
-    <section class="widget" data-widget="affiliate" style="--w:6;--h:5">
+    <section class="widget" data-widget="affiliate" data-detail="1" style="--w:6;--h:5">
       <div class="widgetHead"><div><div class="widgetKicker">Engine scorecard</div><div class="widgetTitle">Affiliate Coverage Engine</div></div><div class="widgetMeta" id="affiliateMeta">Runtime state</div></div>
       <div class="widgetBody" id="affiliateBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
-    <section class="widget" data-widget="footprint" style="--w:5;--h:5">
+    <section class="widget" data-widget="footprint" data-detail="1" style="--w:5;--h:5">
       <div class="widgetHead"><div><div class="widgetKicker">Where ToolScout exists</div><div class="widgetTitle">ToolScout Footprint</div></div><div class="widgetMeta">Verified evidence</div></div>
       <div class="widgetBody" id="footprintBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
-    <section class="widget" data-widget="ledger" style="--w:7;--h:5">
+    <section class="widget" data-widget="ledger" data-detail="1" style="--w:7;--h:5">
       <div class="widgetHead"><div><div class="widgetKicker">Actions → outcomes</div><div class="widgetTitle">Growth Ledger</div></div><div class="widgetMeta">Latest evidence</div></div>
       <div class="widgetBody" id="ledgerBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
 
-    <section class="widget" data-widget="revenue" style="--w:6;--h:4">
+    <section class="widget" data-widget="revenue" data-detail="1" style="--w:6;--h:4">
       <div class="widgetHead"><div><div class="widgetKicker">Commercial gaps</div><div class="widgetTitle">Revenue & Coverage</div></div><div class="widgetMeta">Strict human truth</div></div>
       <div class="widgetBody" id="revenueBody"><div class="empty">Refresh to load.</div></div><div class="resizeHandle"></div>
     </section>
@@ -96,8 +96,12 @@ button,a{font:inherit}.wrap{max-width:1500px;margin:auto;padding:30px 22px 80px}
 const API='/analytics/api/stats';
 const QUEUE_API='/analytics/api/chairman-queue';
 const LAYOUT_KEY='toolscout_command_center_v2_layout';
-const grid=document.getElementById('grid'),refreshBtn=document.getElementById('refresh'),statusEl=document.getElementById('status');
-let snapshot=null,loading=false,resizing=false;
+const DETAIL_KEY='toolscout_command_center_detail_v1';
+const grid=document.getElementById('grid'),refreshBtn=document.getElementById('refresh'),statusEl=document.getElementById('status'),toggleDetailBtn=document.getElementById('toggleDetail');
+let snapshot=null,loading=false,resizing=false,detailVisible=localStorage.getItem(DETAIL_KEY)==='1';
+function applyDetailVisibility(){document.body.classList.toggle('show-detail',detailVisible);if(toggleDetailBtn)toggleDetailBtn.textContent=detailVisible?'Hide operational detail':'Show operational detail'}
+if(toggleDetailBtn)toggleDetailBtn.addEventListener('click',()=>{detailVisible=!detailVisible;localStorage.setItem(DETAIL_KEY,detailVisible?'1':'0');applyDetailVisibility()});
+applyDetailVisibility();
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const num=v=>Number(v||0).toLocaleString();
 const pct=v=>v===null||v===undefined?'—':Number(v).toFixed(1)+'%';
