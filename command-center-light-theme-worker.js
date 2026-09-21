@@ -488,7 +488,7 @@ async function canonicalAutonomousGrowthTruth(env) {
     backlink_bootstrap_floor:backlinkBootstrapFloor,
     backlink_acquisition_required:backlinkAcquisitionRequired,
     backlink_quality_only:true,
-    execution_contract_integrity:'task-specific-v2',
+    execution_contract_integrity:'task-specific-bounded-v3',
     execution_contract_missing:missing,
     execution_contract_stalled:stalled,
     execution_contract_ready:ready,
@@ -648,11 +648,14 @@ export default {
 
     if(hourly){
       ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
+      const prioritiesRecovery=await missionNeedsRecovery(env,'distribution','operating_priorities');
       if(twoHourly){
         ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger},()=>runDistributionNetworkCycle(env)).catch(()=>{}));
-        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:trigger},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
         const affiliateRecovery=await missionNeedsRecovery(env,'affiliate','coverage_cycle');
         if(!affiliateMaintenance||twelveHourly||affiliateRecovery)ctx.waitUntil(runAuditedAffiliateCoverageCycle(env,affiliateRecovery?trigger+':recovery':trigger).catch(()=>{}));
+      }
+      if(twoHourly||prioritiesRecovery){
+        ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:prioritiesRecovery?trigger+':recovery':trigger},()=>rebalanceDistributionPriorities(env)).catch(()=>{}));
       }
       if(sixHourly){
         if(!catalogDemandLed||twelveHourly)ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger},()=>verifyCatalogBatch(env)).catch(()=>{}));
