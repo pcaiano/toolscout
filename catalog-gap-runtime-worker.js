@@ -232,10 +232,11 @@ export async function executeCatalogGrowthTask(env,task={}){
   let examples=[],sources=[];try{examples=JSON.parse(gap.examples_json||'[]')}catch{}try{sources=JSON.parse(gap.sources_json||'[]')}catch{}
   const official=await discover(slug,examples);
   if(!official)return{ok:true,verified:false,reason:'official_source_not_resolved',slug};
-  const corpus=official.title+' '+official.description+' '+official.text,features=capabilities(corpus);
-  if(features.length<2)return{ok:true,verified:false,reason:'first_party_capabilities_too_thin',slug,sourceUrl:official.url,capabilities:features.length};
+  const corpus=official.title+' '+official.description+' '+official.text,extractedFeatures=capabilities(corpus);
+  const evidenceFeatures=Array.isArray(hint?.features)&&hint.features.length?hint.features:extractedFeatures;
+  if(evidenceFeatures.length<2)return{ok:true,verified:false,reason:'first_party_capabilities_too_thin',slug,sourceUrl:official.url,capabilities:evidenceFeatures.length};
   const name=hint?.name||humanName(slug),cat=category(corpus,hint?.category);
-  const verifiedFeatures=[...new Set(Array.isArray(hint?.features)&&hint.features.length?hint.features:features)].filter(Boolean).slice(0,10);
+  const verifiedFeatures=[...new Set(evidenceFeatures)].filter(Boolean).slice(0,10);
   const description=clean(hint?.description||(official.description.length>=60?official.description:(name+' provides '+verifiedFeatures.slice(0,4).join(', ')+'.')));
   const free=detectFreePlan(corpus,hint);
   const profile={
