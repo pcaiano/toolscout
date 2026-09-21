@@ -405,3 +405,9 @@ The owner changed the repository to private on 2026-09-08. GitHub connector meta
 - Comparison follow-on discovery (2026-09-21): every dynamic and registered static comparison now shows up to four comparable tools immediately after the ToolScout analysis. Suggestions are restricted to the same software categories as the compared tools and ranked only by catalog feature overlap, documented audience overlap and proximity across ToolScout score dimensions. Affiliate status and commission are excluded. Each suggestion opens a new comparator pair with `source=comparison-suggestions`, and the static generator pre-renders the same links for crawlability and immediate rendering.
 
 - Comparison suggestion logos (2026-09-21): follow-on comparison cards now render each suggested tool's logo using the same curated asset, vendor favicon and Google favicon fallback chain as the main comparator. The static generator pre-renders the same logo markup, so dynamic and static comparison surfaces stay visually aligned.
+
+## Affiliate activation update - 2026-09-21
+
+- Unbounce approved ToolScout for its PartnerStack partner program. The verified referral URL `https://unbounce.partnerlinks.io/o7sb3nmtp431` is enabled in `data/affiliate.json` and is the production destination for `/go/unbounce`.
+- Approval evidence confirms a 90-day cookie, a minimum 25% commission for the first customer year, and customer discounts of 20% for the first three months or 35% for the first annual subscription.
+- Affiliate status does not affect editorial ranking. Unbounce is not currently part of the canonical `data/tools.json` catalog, so this activation does not change catalog membership or recommendation eligibility.
