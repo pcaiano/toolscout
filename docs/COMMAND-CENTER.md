@@ -227,7 +227,7 @@ The shared `chairman-task-quality.js` contract rejects internal boilerplate, mac
 
 Route materialization excludes form routes for already-submitted canonical products; cycle reconciliation cancels existing duplicates. Canonical opportunity state must still require human action before an open gate is displayed. Resolved, cancelled and verification-pending contracts cannot be reopened by routine upserts.
 
-Regression check: `node tests/chairman-quality.test.mjs` (uses built-in Node SQLite). Production deployment verification is required after this source change.
+Regression check: `node tests/chairman-quality.test.mjs` (uses built-in Node SQLite). Production verified after explicit owner authorization: PR #131 merged as `5360db4f8540870a46b31bfaa9162012ead33fa0`; Cloudflare build `f2e9769f-a599-45e7-a97d-19be93d25708` succeeded. Worker `toolscout` deployment `7c5212cf-f125-4ca8-ab40-5c476984648e` serves version `492fb790-a0b9-4961-8bc5-7598a4de031b` at 100%. The live `/api/command-center-resilient-health` response confirms `chairmanPayloadVersion=chairman-quality-v1`. D1 readback confirms both Launch Llama derived routes remain skipped, the duplicate contract is cancelled, and the canonical listing remains pending_review with no human action. The protected queue was not directly read because the existing stats probe returned HTTP 401; live verification covers deployment, runtime version and canonical D1 state.
 
 ## Distribution status
 
