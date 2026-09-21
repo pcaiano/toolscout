@@ -61,7 +61,7 @@ async function rememberSource(env,s,parent){try{await env.DB.prepare(`INSERT INT
 async function markScanned(env,slug,total,relevant){try{await env.DB.prepare(`UPDATE distribution_discovery_sources SET last_scanned_at=datetime('now'),links_seen=?,relevant_links_seen=?,confidence=MIN(95,confidence+CASE WHEN ?>=5 THEN 5 WHEN ?=0 THEN -10 ELSE 0 END),status=CASE WHEN confidence<=20 THEN 'deprioritized' ELSE status END,updated_at=datetime('now') WHERE source_slug=?`).bind(total,relevant,relevant,relevant,slug).run();}catch{}}
 async function discover(request,env){
   const technicalSuppressed=await suppressTechnicalNoise(env);
-  const [c,families]=await Promise.all([config(request,env),familySignals(env)]),maxFetch=Math.max(1,Math.min(12,Number(c.guardrails?.max_fetches_per_run||6))),staticSources=(c.sources||[]).filter(x=>x.enabled),dynamic=await dynamicSources(env,Math.max(0,maxFetch-staticSources.length)),sources=[...staticSources,...dynamic].slice(0,maxFetch);
+  const [c,families]=await Promise.all([config(request,env),familySignals(env)]),maxFetch=Math.max(1,Math.min(24,Number(c.guardrails?.max_fetches_per_run||16))),staticSources=(c.sources||[]).filter(x=>x.enabled),dynamic=await dynamicSources(env,Math.max(0,maxFetch-staticSources.length)),sources=[...staticSources,...dynamic].slice(0,maxFetch);
   const existing=await env.DB.prepare('SELECT surface_slug FROM distribution_opportunities').all(),known=new Set((existing.results||[]).map(x=>String(x.surface_slug)));
   let scanned=0,found=0,inserted=0,recursiveAdded=0,familyBoosted=0;
   for(const s of sources){
