@@ -603,11 +603,30 @@ function canonicalizeOwnedMarkup(value){
     .replace(/https:\/\/trytoolscout\.org(\/[^"'<>\\\s?#]*?)\.html(?=([?#"'<>\\\s]|$))/gi,'https://trytoolscout.org$1')
     .replace(/(["'=])((?:\.\/|\/)[^"'<>\\\s?#]*?)\.html(?=([?#"'<>\\\s]|$))/gi,'$1$2');
 }
-async function canonicalizeHtmlResponse(response){
+const SEO_DISCOVERY_LINKS={
+  '/guides':[
+    ['/methodology','Methodology'],['/categories','Software categories'],['/crm-tools','CRM tools'],['/seo-tools','SEO tools'],['/software-trends-index','Software trends index'],['/best-affordable-crm','Best affordable CRM'],['/best-workflow-automation-tools','Best workflow automation tools']
+  ],
+  '/compare':[
+    ['/apollo-vs-lemlist','Apollo vs Lemlist'],['/brevo-vs-mailchimp','Brevo vs Mailchimp'],['/hubspot-vs-pipedrive','HubSpot vs Pipedrive'],['/n8n-vs-make','n8n vs Make'],['/semrush-vs-ahrefs','Semrush vs Ahrefs'],['/tally-vs-typeform','Tally vs Typeform'],['/webflow-vs-framer','Webflow vs Framer']
+  ],
+  '/tools':[
+    ['/tools/adobe-express','Adobe Express'],['/tools/attio','Attio'],['/tools/basecamp','Basecamp'],['/tools/brevo','Brevo'],['/tools/constant-contact','Constant Contact'],['/tools/fillout','Fillout'],['/tools/github','GitHub'],['/tools/jira','Jira'],['/tools/mailchimp','Mailchimp'],['/tools/notebooklm','NotebookLM'],['/tools/replit','Replit'],['/tools/typeform','Typeform'],['/tools/webflow','Webflow']
+  ]
+};
+function injectSeoDiscoveryLinks(body,pathname){
+  const path=canonicalSeoPath(pathname),items=SEO_DISCOVERY_LINKS[path];
+  if(!items?.length||String(body).includes('data-ts-search-discovery="1"'))return body;
+  const links=items.map(([href,label])=>`<a href="${href}">${label}</a>`).join('');
+  const section=`<section data-ts-search-discovery="1" aria-label="Explore more ToolScout resources" style="max-width:1100px;margin:44px auto 24px;padding:20px 22px;border-top:1px solid #e4e7ec"><h2 style="font-size:16px;margin:0 0 12px">Explore more ToolScout resources</h2><div style="display:flex;flex-wrap:wrap;gap:9px 14px">${links}</div></section>`;
+  return String(body).replace(/<\/body>/i,section+'</body>');
+}
+async function canonicalizeHtmlResponse(response,pathname=''){
   if(!response||!response.ok)return response;
   const type=String(response.headers.get('content-type')||'').toLowerCase();
   if(!type.includes('text/html'))return response;
-  const body=canonicalizeOwnedMarkup(await response.text());
+  let body=canonicalizeOwnedMarkup(await response.text());
+  body=injectSeoDiscoveryLinks(body,pathname);
   const headers=new Headers(response.headers);headers.delete('content-length');headers.set('X-ToolScout-SEO-Canonical','extensionless-v1');
   return new Response(body,{status:response.status,statusText:response.statusText,headers});
 }
@@ -645,15 +664,15 @@ export default {
     if(request.method==='GET'&&/^\/tools\/[a-z0-9][a-z0-9-]*(?:\.html)?\/?$/i.test(url.pathname)){
       const slug=(url.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)/i)||[])[1]?.toLowerCase()||'';
       const runtimeResponse=await publicRuntimeToolResponse(env,slug);
-      if(runtimeResponse)return canonicalizeHtmlResponse(runtimeResponse);
-      return canonicalizeHtmlResponse(await publicQualityEnhancedToolResponse(await base.fetch(request,env,ctx),env,slug));
+      if(runtimeResponse)return canonicalizeHtmlResponse(runtimeResponse,url.pathname);
+      return canonicalizeHtmlResponse(await publicQualityEnhancedToolResponse(await base.fetch(request,env,ctx),env,slug),url.pathname);
     }
     if(request.method==='GET'&&url.pathname==='/sitemap.xml'){
       return canonicalizeSitemapResponse(await publicMergedSitemap(await base.fetch(request,env,ctx),env));
     }
     if(request.method==='GET'&&/^\/best-[a-z0-9-]+(?:\.html)?\/?$/i.test(url.pathname)){
       const rankingResponse=await publicRuntimeRankingResponse(env,url.pathname);
-      if(rankingResponse)return canonicalizeHtmlResponse(rankingResponse);
+      if(rankingResponse)return canonicalizeHtmlResponse(rankingResponse,url.pathname);
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
@@ -663,7 +682,7 @@ export default {
       return augmentEntrypointHealth(response);
     }
     let finalResponse=response;
-    if(request.method==='GET')finalResponse=await canonicalizeHtmlResponse(finalResponse);
+    if(request.method==='GET')finalResponse=await canonicalizeHtmlResponse(finalResponse,url.pathname);
     if (request.method === 'GET' && ANALYTICS_PATHS.has(url.pathname)) {
       return applyLightTheme(finalResponse);
     }
