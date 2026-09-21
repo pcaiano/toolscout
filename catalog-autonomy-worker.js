@@ -4,7 +4,7 @@ import { runWithLedger } from './engine-run-ledger.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
-const MAX_ADMIT_PER_DAY=3;
+const MAX_ADMIT_PER_DAY=5;
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=4;
 const WARNING_RETRY_HOURS=24;
 const MAX_WARNING_RETRIES_PER_CYCLE=1;
@@ -47,13 +47,105 @@ async function fetchOfficial(url){
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
-    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,releaseLinks:releaseLinks(html,r.url||u.href)};
+    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,text,releaseLinks:releaseLinks(html,r.url||u.href)};
   }catch(e){lastError=e?.name==='AbortError'?'timeout':'network_error'}
   finally{clearTimeout(timer)}
   if(attempt<2)await new Promise(resolve=>setTimeout(resolve,150));
   }
   return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:lastError||'network_error'};
 }
+
+const GAP_DENY_HOSTS=['alternativeto.net','futurepedia.io','capterra.com','g2.com','saashub.com','facebook.com','instagram.com','linkedin.com','youtube.com','x.com','twitter.com','tiktok.com','discord.com','github.com','apps.apple.com','play.google.com'];
+function gapHost(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
+function gapDenied(host){return GAP_DENY_HOSTS.some(x=>host===x||host.endsWith('.'+x))}
+function gapTokens(slug){return String(slug||'').toLowerCase().split(/[^a-z0-9]+/).filter(x=>x.length>=4&&!['software','tools','tool','studio'].includes(x))}
+async function gapPage(url){
+  const u=publicHttps(url);if(!u)return null;
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);
+  try{
+    const r=await fetch(u.href,{redirect:'follow',headers:{'User-Agent':'ToolScout-Catalog-Discovery/1.2 (+https://trytoolscout.org/)','Accept':'text/html,*/*;q=0.5'},signal:ctl.signal});
+    if(!r.ok||!(r.headers.get('content-type')||'').toLowerCase().includes('text/html'))return null;
+    return{url:r.url||u.href,html:(await r.text()).slice(0,650000)};
+  }catch{return null}finally{clearTimeout(timer)}
+}
+function gapLinks(html,pageUrl,slug){
+  const pageHost=gapHost(pageUrl),tokens=gapTokens(slug),out=[],seen=new Set(),re=/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;let m;
+  while((m=re.exec(String(html||'')))){
+    let raw=String(m[1]||'').replace(/&amp;/g,'&'),u;try{u=new URL(raw,pageUrl)}catch{continue}
+    for(const key of ['url','target','dest','destination','redirect']){const v=u.searchParams.get(key);if(v){try{const t=new URL(decodeURIComponent(v));if(t.protocol==='https:')u=t}catch{}}}
+    if(u.protocol!=='https:')continue;
+    const host=gapHost(u.href);if(!host||host===pageHost||host.endsWith('.'+pageHost)||gapDenied(host)||seen.has(u.origin))continue;
+    seen.add(u.origin);
+    const label=stripHtml(m[2]).toLowerCase(),hay=(host+' '+u.pathname+' '+label).toLowerCase();
+    let score=/visit site|website|official|get started|open app/.test(label)?5:0;
+    for(const t of tokens)if(hay.includes(t))score+=4;
+    out.push({url:u.origin+'/',score});
+  }
+  return out.sort((a,b)=>b.score-a.score);
+}
+function gapGuesses(slug){
+  const s=String(slug||'').toLowerCase(),compact=s.replace(/-/g,''),base=s.replace(/-ai$/,'');
+  return [...new Set(['https://'+s+'.com/','https://'+compact+'.com/','https://'+base+'.ai/','https://'+compact+'.ai/'])].map(url=>({url,score:0}));
+}
+function gapIdentity(slug,url,result){
+  const tokens=gapTokens(slug),hay=(gapHost(url)+' '+String(result?.title||'')+' '+String(result?.description||'')).toLowerCase();
+  if(!tokens.length)return 1;let hit=0;for(const t of tokens)if(hay.includes(t))hit++;return hit/tokens.length;
+}
+async function discoverGapOfficial(gap){
+  let examples=[];try{examples=JSON.parse(gap.examples_json||'[]')}catch{}
+  let links=[];for(const x of examples.slice(0,3)){const p=await gapPage(x);if(p)links.push(...gapLinks(p.html,p.url,gap.tool_slug))}
+  links.push(...gapGuesses(gap.tool_slug));
+  const seen=new Set(),ordered=links.filter(x=>{const k=String(x.url||'');if(!k||seen.has(k))return false;seen.add(k);return true}).sort((a,b)=>b.score-a.score).slice(0,10);
+  let best=null;for(const x of ordered){const result=await fetchOfficial(x.url);if(result.status!=='ok')continue;const identity=gapIdentity(gap.tool_slug,result.finalUrl||x.url,result),row={url:result.finalUrl||x.url,result,identity};if(identity>=0.5)return row;if(!best||identity>best.identity)best=row}
+  return best&&best.identity>=0.34?best:null;
+}
+function gapCategory(text){
+  const t=String(text||'').toLowerCase();
+  if(/transcrib|meeting|notetaker|speaker identification/.test(t))return'ai-assistant';
+  if(/research|citation|answer engine|web search|search the web|source-backed/.test(t))return'ai-research';
+  if(/video generation|image generation|generate video|generate image|visual creation/.test(t))return'design';
+  if(/\bapi\b|\bsdk\b|developer|function calling|build with|prototype/.test(t))return'developer';
+  if(/character|chatbot|conversational|ai assistant|voice chat/.test(t))return'ai-assistant';
+  if(/writing|copywriting|rewrite/.test(t))return'ai-writing';
+  if(/seo|keyword/.test(t))return'seo';
+  if(/automation|workflow/.test(t))return'automation';
+  if(/analytics|dashboard/.test(t))return'analytics';
+  return null;
+}
+function gapFeatures(text){
+  const t=String(text||'').toLowerCase(),rules=[
+    [/web search|search the web/,'Web search'],[/citation|source-backed/,'Source citations'],[/deep research|research report/,'Deep research'],
+    [/transcrib/,'Transcription'],[/speaker identification|speaker name/,'Speaker identification'],[/meeting summar|meeting summary/,'Meeting summaries'],
+    [/ai chat/,'AI chat'],[/zoom|microsoft teams|google meet/,'Meeting integrations'],
+    [/image generation|generate images?/,'Image generation'],[/video generation|generate videos?/,'Video generation'],[/text-to-speech|\btts\b/,'Text to speech'],
+    [/\bapi\b/,'API access'],[/\bsdk\b/,'SDKs'],[/function calling|tool calling/,'Tool calling'],
+    [/create.*characters?|character creation/,'Character creation'],[/discover.*characters?|character discovery/,'Character discovery'],[/\bchat\b|conversation/,'Conversational chat'],
+    [/summari[sz]/,'Summaries'],[/calendar/,'Calendar integration'],[/automation|workflow/,'Workflow automation']
+  ],out=[];for(const [re,label] of rules)if(re.test(t)&&!out.includes(label))out.push(label);return out.slice(0,7);
+}
+function gapName(slug,result){const raw=stripHtml(String(result?.title||'')).replace(/\s+/g,' ').trim(),first=raw.split(/\s+[|:]\s+|\s+-\s+/)[0]?.trim();return first&&first.length<=70?first:String(slug||'').split('-').map(x=>x==='ai'?'AI':x.charAt(0).toUpperCase()+x.slice(1)).join(' ')}
+async function resolveMarketGaps(env,config,existing,limit){
+  const cap=Math.max(0,Math.min(Number(limit||0),Number(config?.coverageAdmission?.maxPromotionsPerCycle||5)));if(!cap)return{considered:0,admitted:0,held:0,admitted_slugs:[]};
+  const q=await env.DB.prepare("SELECT tool_slug,signals,sources_json,examples_json FROM catalog_market_gaps WHERE status='research_required' ORDER BY signals DESC,updated_at ASC LIMIT ?").bind(Math.max(cap,5)).all();
+  let considered=0,admitted=0,held=0;const admittedSlugs=[];
+  for(const gap of q.results||[]){if(admitted>=cap)break;const slug=String(gap.tool_slug||'').toLowerCase();if(!slug)continue;
+    if(existing.has(slug)){await env.DB.prepare("UPDATE catalog_market_gaps SET status='covered',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();continue}
+    considered++;const official=await discoverGapOfficial(gap);if(!official){held++;continue}
+    const evidence=[official.result.title,official.result.description,official.result.text].filter(Boolean).join(' '),features=gapFeatures(evidence),category=gapCategory(evidence),name=gapName(slug,official.result);
+    let description=stripHtml(String(official.result.description||'')).replace(/\s+/g,' ').trim();if(description.length<60&&features.length>=3)description=name+' is a software product whose official site currently documents capabilities including '+features.slice(0,4).join(', ')+'.';
+    const allowed=new Set(config?.admission?.allowedCatalogCategories||[]),minSignals=Number(config?.coverageAdmission?.minimumIndependentMarketSignals||2),minFeatures=Number(config?.coverageAdmission?.minimumVerifiedCapabilities||3),errors=[];
+    if(Number(gap.signals||0)<minSignals)errors.push('insufficient_market_signals');if(!category||(allowed.size&&!allowed.has(category)))errors.push('unknown_category');if(features.length<minFeatures)errors.push('insufficient_verified_capabilities');if(description.length<Number(config?.coverageAdmission?.minimumDescriptionLength||60))errors.push('description_too_short');
+    if(errors.length){held++;await logEvent(env,slug,'catalog_gap_quality_hold','held','Competitive catalog gap found an official source but did not yet satisfy deterministic coverage gates.',{errors,official_source:official.url});continue}
+    let marketSources=[];try{marketSources=JSON.parse(gap.sources_json||'[]')}catch{}
+    const profile={slug,name,category,description:safeText(description,420),pricing:null,freePlan:null,features,bestFor:[],sourceUrl:official.url,lastVerified:new Date().toISOString().slice(0,10),catalogTier:'coverage',rankingEligible:false,comparisonEligible:false,provenance:{mode:'runtime_competitive_gap_verified',admittedAt:new Date().toISOString(),affiliateNeutral:true,rankingNote:'Catalog coverage only. Ranking and comparison eligibility require separate editorial evidence.',marketSignals:Number(gap.signals||0),marketSources}};
+    await env.DB.prepare("INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'admitted_coverage','ok',datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='admitted_coverage',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')").bind(slug,JSON.stringify(profile)).run();
+    await env.DB.prepare("UPDATE catalog_market_gaps SET status='admitted',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
+    await logEvent(env,slug,'catalog_candidate_admitted','completed','Demand-led catalog gap admitted automatically after independent market signals, official-source discovery and deterministic quality gates.',{source_url:profile.sourceUrl,category:profile.category,features:profile.features,market_signals:Number(gap.signals||0),mode:'runtime_competitive_gap_verified'});
+    existing.add(slug);admitted++;admittedSlugs.push(slug);
+  }
+  return{considered,admitted,held,admitted_slugs:admittedSlugs};
+}
+
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
   schemaReady=env.DB.batch([
@@ -285,27 +377,25 @@ export async function admitTrustedCandidates(env){
   const staticTools=await assetJson(env,'/data/tools.json',[]);
   const existing=new Set((Array.isArray(staticTools)?staticTools:[]).map(x=>String(x?.slug||'').toLowerCase()));
   for(const x of await runtimeCandidates(env))existing.add(String(x?.slug||'').toLowerCase());
-  let admitted=0,held=0,considered=0;
+  const market_gaps=await syncMarketGaps(env);
+  const gapRun=await resolveMarketGaps(env,config,existing,MAX_ADMIT_PER_DAY);
+  let admitted=gapRun.admitted,held=gapRun.held,considered=gapRun.considered;const admittedSlugs=[...gapRun.admitted_slugs];
   for(const file of config?.trustedCandidateFiles||[]){
     const candidates=await assetJson(env,'/'+String(file).replace(/^\//,''),[]);
     for(const raw of Array.isArray(candidates)?candidates:[]){
-      if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
-      const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug))continue;
-      considered++;
+      if(admitted>=MAX_ADMIT_PER_DAY)break;
+      const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug))continue;considered++;
       const errors=validCandidate(raw,config);if(errors.length){held++;continue}
       const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
       const profile={...raw,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),catalogTier:'coverage',rankingEligible:false,comparisonEligible:false,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_coverage',admittedAt:new Date().toISOString(),affiliateNeutral:true,rankingNote:'Catalog inclusion does not imply recommendation. Ranking and comparison eligibility require separate editorial evidence.'}};
-      await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'admitted_coverage','ok',datetime('now'),datetime('now'))
-        ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='admitted_coverage',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
-        .bind(slug,JSON.stringify(profile)).run();
-      await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted to the runtime coverage catalog after official-source and deterministic quality gates. Ranking remains disabled.',{source_url:profile.sourceUrl,category:profile.category});
-      existing.add(slug);admitted++;
+      await env.DB.prepare("INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'admitted_coverage','ok',datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='admitted_coverage',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')").bind(slug,JSON.stringify(profile)).run();
+      await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted to the runtime coverage catalog after official-source and deterministic quality gates. Ranking remains disabled.',{source_url:profile.sourceUrl,category:profile.category,mode:'runtime_trusted_coverage'});
+      existing.add(slug);admitted++;admittedSlugs.push(slug);
     }
-    if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
+    if(admitted>=MAX_ADMIT_PER_DAY)break;
   }
-  const market_gaps=await syncMarketGaps(env);
   runtimeCache.at=0;
-  return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,rule:'Affiliate economics cannot increase catalog admission or ranking eligibility.'};
+  return{ok:true,considered,admitted,held,admitted_slugs:admittedSlugs,market_gaps_synced:market_gaps,gap_resolution:gapRun,max_admissions:MAX_ADMIT_PER_DAY,rule:'Demand-led catalog gaps are resolved first. Affiliate economics cannot increase catalog admission or ranking eligibility.'};
 }
 function candidatePage(tool){
   const url=`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,features=(tool.features||[]).map(x=>`<li>${esc(x)}</li>`).join(''),best=(tool.bestFor||[]).map(x=>`<li>${esc(x)}</li>`).join('');
