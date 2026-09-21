@@ -267,13 +267,152 @@ function validCandidate(candidate,config){
   if(!publicHttps(candidate?.sourceUrl))errors.push('invalid_official_source');
   return errors;
 }
+
+const GAP_OFFICIAL_HINTS=Object.freeze({
+  'character-ai':'https://character.ai/about',
+  'google-ai-studio':'https://aistudio.google.com/',
+  'kling-ai':'https://kling.ai/',
+  'otter-ai':'https://otter.ai/transcription',
+  'perplexity-ai':'https://www.perplexity.ai/'
+});
+const GAP_NAMES=Object.freeze({'character-ai':'Character.AI','google-ai-studio':'Google AI Studio','kling-ai':'Kling AI','otter-ai':'Otter.ai','perplexity-ai':'Perplexity'});
+const GAP_BLOCKED_HOSTS=['alternativeto.net','futurepedia.io','g2.com','capterra.com','saashub.com','facebook.com','instagram.com','linkedin.com','x.com','twitter.com','youtube.com','reddit.com'];
+const GAP_CAPABILITIES=[
+  ['AI assistant',['ai assistant','assistant']],
+  ['interactive characters',['characters','character ai']],
+  ['conversations',['conversation','conversations','chat']],
+  ['storytelling',['storytelling','stories']],
+  ['creative expression',['creative expression','create']],
+  ['research',['research']],
+  ['citations',['citations','sources']],
+  ['web search',['web search','open web','answer engine']],
+  ['analysis',['analysis','analyze']],
+  ['API',[' api ','api platform','gemini api','sdk']],
+  ['image generation',['image generation','generate images','image generator']],
+  ['video generation',['video generation','generate videos','video generator']],
+  ['video editing',['video editing','video editor']],
+  ['sound generation',['sound generation','audio generation']],
+  ['text to speech',['text-to-speech','text to speech','tts']],
+  ['transcription',['transcription','transcribe']],
+  ['meeting notes',['meeting notes','notetaker','meeting notetaker']],
+  ['summaries',['summaries','summary']],
+  ['action items',['action items']],
+  ['integrations',['integrations','zOom','google meet','microsoft teams']]
+];
+const GAP_CATEGORY_RULES={
+  'ai-research':['citations','research','web search','answer engine','open web'],
+  'ai-assistant':['ai assistant','characters','conversation','chat'],
+  developer:['api platform','gemini api','sdk','developer'],
+  content:['video generation','video editor','image generation','transcription','meeting notes','notetaker'],
+  design:['image generation','visual design']
+};
+function gapHumanName(slug){return String(slug||'').split('-').filter(Boolean).map(x=>x==='ai'?'AI':x.charAt(0).toUpperCase()+x.slice(1)).join(' ')}
+function gapHostBlocked(host){host=String(host||'').toLowerCase().replace(/^www\./,'');return GAP_BLOCKED_HOSTS.come(x=>host===x||host.endsWith('.'+x))}
+function gapStrip(html){return stripHtml(String(html||'')).slice(0,50000)}
+async function fetchGapPage(url){
+  let u;try{u=new URL(url)}catch{return null}
+  if(u.protocol!=='https:')return null;
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);
+  try{
+    const r=await fetch(u.href,{redirect:'follow',headers:{'User-Agent':'ToolScout-Catalog-Gap/1.0 +https://trytoolscout.org/)','Accept':'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.5'},signal:ctl.signal});
+    if(!r.ok)return null;
+    const html=(await r.text()).slice(0,600000);
+    const title=(html.match(/<title[^>]*>([\\S\S]
+ÊOÝ]OÚJOËÌW_	ÉÊK\XÙJ×ÊËÙË	È	ÊK[J
+NÂÛÛÝ\ØÜ\[Û[Y]J[	Ù\ØÜ\[ÛÊ_Y]J[	ÛÙÎ\ØÜ\[ÛÊNÂ]\Ý\\KY[]K\ØÜ\[Û^Ø\Ý\
+[
+_NÂXØ]ÚÜ]\[Y[[^ØÛX\[Y[Ý]
+[Y\_BB[Ý[ÛØ\[ÔØÛÜJ\X[ÛYÊ^Â]NÝ^ÝO[]ÈT
+\
+_XØ]ÚÜ]\LLBYØ\ÜÝØÚÙY
+KÜÝ[YJJ\]\LLÂÛÛÝÚÙ[ÏTÝ[ÊÛYß	ÉÊKÜ]
+	ËIÊK[\O[ÝLÉOOIØ\	ÉOOIÝÛÛ	ÊNÂÛÛÝÜÝ]KÜÝ[YKÓÝÙ\Ø\ÙJ
+K\XÙJ×ÝÝ×Ë	ÉÊK\XÙJÖ×K^NWKÙË	ÉÊNÂÛÛÝ]]K][YKÓÝÙ\Ø\ÙJ
+K\XÙJÖ×K^NWKÙË	ÉÊNÂ]ØÛÜOLÂÜÛÛÝÚÙ[ÙÚÙ[Ê^ÚYÜÝ[ÛY\ÊÚÙ[J\ØÛÜJÏMNÙ[ÙHY][ÛY\ÊÚÙ[J\ØÛÜJÏL_BYÛÙXÚX[ÙXÚ]_\Ú]Ü[ÚK\Ý
+Ý[ÊX[	ÉÊJJ\ØÛÜJÏLÎÂ]\ØÛÜNÂB\Þ[È[Ý[Û\ØÛÝ\Ø\ÙXÚX[ÛÝ\ÙJÛYË^[\\Ê^ÂYÐTÓÑPÒPSÒSÖÜÛY×J^ÂÛÛÝYÙOX]ØZ]]ÚØ\YÙJÐTÓÑPÒPSÒSÖÜÛY×JNÂYYÙIYØ\ÜÝØÚÙY
+]ÈT
+YÙK\
+KÜÝ[YJJ\]\YÙNÂBÛÛÝØ[Y]\Ï[]ÈX\
+
+NÂÜÛÛÝ^[\HÙ
+\^K\Ð\^J^[\\ÊOÙ^[\\Î×JKÛXÙJÊJ^ÂÛÛÝYÙOX]ØZ]]ÚØ\YÙJ^[\JNÚY\YÙJXÛÛ[YNÂÛÛÝOKÏW×JYVÈ×J×È×JÊVÈV×J×××JÊOØOÙÚNÛ]NÂÚ[J
+O\K^XÊYÙK[
+JJ^Â]NÝ^ÝO[]ÈT
+Ý[ÊVÌW_	ÉÊKYÙK\
+_XØ]ÚØÛÛ[Y_BYKÝØÛÛOOIÚÎßØ\ÜÝØÚÙY
+KÜÝ[YJJXÛÛ[YNÂÛÛÝX[YØ\Ý\
+VÌJKÛXÙJL
+KØÛÜOYØ\[ÔØÛÜJKÔÝ[Ê
+KX[ÛYÊNÂYØÛÜO
+XÛÛ[YNÂÛÛÝÙ^O]KÜYÚ[ÝÏXØ[Y]\ËÙ]
+Ù^J_Ý\KÔÝ[Ê
+KØÛÜNNÜÝËØÛÜOSX]X^
+ÝËØÛÜKØÛÜJNØØ[Y]\ËÙ]
+Ù^KÝÊNÂBBÜÛÛÝÝÈÙËØ[Y]\Ë[Y\Ê
+WKÛÜ
+
+KOOØÛÜKXKØÛÜJKÛXÙJJJ^ÂÛÛÝYÙOX]ØZ]]ÚØ\YÙJÝË\
+NÚYYÙJ\]\YÙNÂB]\[ÂB[Ý[ÛØ\Ø\X[]Y\Ê^
+^ÂÛÛÝÛÜ\ÏIÈ	ÊÔÝ[Ê^	ÉÊKÓÝÙ\Ø\ÙJ
+K\XÙJ×ÊËÙË	È	ÊJÉÈ	ÎÂ]\ÐTÐÐTPSUQTË[\
+Ë\\×JOO\\ËÛÛYJ\OOÛÜ\Ë[ÛY\Ê\JJJKX\
+
+ÛX[JOOX[
+KÛXÙJL
+NÂB[Ý[ÛØ\Ø]YÛÜJ^
+^ÂÛÛÝÛÜ\ÏTÝ[Ê^	ÉÊKÓÝÙ\Ø\ÙJ
+NÂ]\Ý^ØØ]YÛÜNØ\Ú[\ÜÉËØÛÜNNÂÜÛÛÝØØ]YÛÜK\\×HÙØXÝ[Y\ÊÐTÐÐUQÓÔWÔSTÊJ^ØÛÛÝØÛÜO]\\Ë[\OÛÜ\Ë[ÛY\Ê
+JK[ÝÚYØÛÜO\ÝØÛÜJX\Ý^ØØ]YÛÜKØÛÜ__B]\\ÝÂB^Ü\Þ[È[Ý[Û^XÝ]PØ][ÙÑÜÝÝ\ÚÊ[\ÚÏ^ßJ^Â]ØZ][Ý\TØÚ[XJ[NÂÛÛÝÛYÏTÝ[Ê\ÚÏËÝXXÝÚÙ^_	ÉÊKÓÝÙ\Ø\ÙJ
+K\XÙJÖ×K^NKWKÙË	ÉÊNÂY\ÚÏËÝXXÝÝ\HOOIØØ][Ù×ÙØ\	ß\ÛYÊ\]\ÛÚÎ[ÙK\YYY[ÙKX\ÛÛÝ[Ý\ÜYØØ][Ù×Ý\ÚÉßNÂÛÛÝ^\Ý[ÏX]ØZ][\\JÑSPÕÙ[WÚÛÛ\YYYØ]ÓHØ][Ù×Ü[[YWØØ[Y]\ÈÒTHÛÛÜÛYÏOÈSÝ]\ÏIØYZ]YØÛÝ\YÙIØ
+K[
+ÛYÊK\Ý
+
+NÂY^\Ý[Ê^Â]ØZ][\\JTUHØ][Ù×ÛX\Ù]ÙØ\ÈÑUÝ]\ÏIØYZ]YØÛÝ\YÙIË\]YØ]Y]][YJ	ÛÝÉÊHÒTHÛÛÜÛYÏOØ
+K[
+ÛYÊK[
+NÂ]Ù[O[[Ý^ÜÙ[ORÓÓ\ÙJ^\Ý[ËÙ[WÚÛÛ_XØ]ÚßB]\ÛÚÎYK\YYYYKYZ]Y[ÙK[XYWØYZ]YYKÛYËÙ[_NÂBÛÛÝØ\X]ØZ][\\JÑSPÕÛÛÜÛYËÚYÛ[ËÛÝ\Ù\×ÚÛÛ^[\\×ÚÛÛÝ]\ÈÓHØ][Ù×ÛX\Ù]ÙØ\ÈÒTHÛÛÜÛYÏOØ
+K[
+ÛYÊK\Ý
+
+NÂYYØ\
+\]\ÛÚÎ[ÙK\YYY[ÙKX\ÛÛØØ][Ù×ÙØ\ÛÝÙÝ[	ËÛYßNÂY[X\Ø\ÚYÛ[ß
+O\]\ÛÚÎYK\YYY[ÙKX\ÛÛÚ[ÝYXÚY[Ú[\[[ÛX\Ù]ÜÚYÛ[ÉËÛYßNÂ]^[\\ÏV×NÝ^Ù^[\\ÏRÓÓ\ÙJØ\^[\\×ÚÛÛ	Ö×IÊ_XØ]ÚßBÛÛÝÙXÚX[X]ØZ]\ØÛÝ\Ø\ÙXÚX[ÛÝ\ÙJÛYË^[\\ÊNÂY[ÙXÚX[
+\]\ÛÚÎYK\YYY[ÙKX\ÛÛÛÙXÚX[ÜÛÝ\ÙWÛÝÜ\ÛÛY	ËÛYßNÂÛÛÝÛÜ\ÏZÛÙXÚX[]_	ÉßH	ÛÙXÚX[\ØÜ\[Û	ÉßH	ÛÙXÚX[^	ÉßXÂÛÛÝX]\\ÏYØ\Ø\X[]Y\ÊÛÜ\ÊKØ]YØ\Ø]YÛÜJÛÜ\ÊNÂYX]\\Ë[Ý\]\ÛÚÎYK\YYY[ÙKX\ÛÛÙ\ÝÜ\WØØ\X[]Y\×ÝÛ×Ý[ËÛYËÛÝ\ÙU\ÙXÚX[\Ø\X[]Y\ÎX]\\Ë[ÝNÂÛÛÝ[YOQÐTÓSQTÖÜÛY×_Ø\[X[[YJÛYÊNÂÛÛÝ\ØÜ\[ÛTÝ[ÊÙXÚX[\ØÜ\[Û	ÉÊK[J
+K[ÝMÔÝ[ÊÙXÚX[\ØÜ\[ÛK[J
+N	Û[Y_HÝY\È	ÙX]\\ËÛXÙJ
+KÚ[	Ë	Ê_KÛÛØÛÝ]\YYY\ÙHØ\X[]Y\È\XÝHÛHHÙXÝ	ÜÈÙXÚX[\Ý\\HÙXÚ]HYÜHY[È\ÈÛÝ\YÙHÙ[KÂ]ÛÝ\Ù\ÏV×NÝ^ÜÛÝ\Ù\ÏRÓÓ\ÙJØ\ÛÝ\Ù\×ÚÛÛ	Ö×IÊ_XØ]ÚßBÛÛÝÙ[O^ÜÛYË[YKØ]YÛÜNØ]Ø]YÛÜK\ØÜ\[ÛXÚ[ÎÔÙYHHÙXÚX[[ÜÚ]HÜÝ\[XÚ[ËËYT[[X]\\Ë\ÝÜ×KÛÝ\ÙU\ÙXÚX[\\Ý\YYY]È]J
+KÒTÓÔÝ[Ê
+KÛXÙJL
+KØÛÜ\ÎßKØ][ÙÕY\ØÛÝ\YÙIË[Ú[Ñ[YÚXN[ÙKÛÛ\\\ÛÛ[YÚXN[ÙK\XÝÙXÚX[ÝNYKÝ[[ÙNÛ[ÙNÝ\YYYØÛÛ\]]]WÙØ\Ü[[YIËYZ]Y]]È]J
+KÒTÓÔÝ[Ê
+KX\Ù]ÚYÛ[ÎØÛÝ[[X\Ø\ÚYÛ[ß
+KÛÝ\Ù\ßKY[X]S]][YKÛÛ\]]ÜÛÛ[\ÙYÜY]ÜX[XÝÎ[ÙK[Ú[ÓÝNÐØ][ÙÈ[Û\Ú[ÛÙ\ÈÝ[\HXÛÛ[Y[][Û[Ú[È[ÛÛ\\\ÛÛ[YÚX[]H\]Z\HÙ\\]HY]ÜX[]Y[ÙKß_NÂ]ØZ][\\JSÑTSÈØ][Ù×Ü[[YWØØ[Y]\ÊÛÛÜÛYËÙ[WÚÛÛÝ]\ËÛÝ\ÙWÜÝ]\Ë\YYYØ]\]YØ]
+HSQTÊËË	ØYZ]YØÛÝ\YÙIË	ÛÚÉË]][YJ	ÛÝÉÊK]][YJ	ÛÝÉÊJHÓÓÓPÕ
+ÛÛÜÛYÊHÈTUHÑUÙ[WÚÛÛY^ÛYYÙ[WÚÛÛÝ]\ÏIØYZ]YØÛÝ\YÙIËÛÝ\ÙWÜÝ]\ÏIÛÚÉË\YYYØ]Y]][YJ	ÛÝÉÊK\]YØ]Y]][YJ	ÛÝÉÊX
+K[
+ÛYËÓÓÝ[ÚYJÙ[JJK[
+NÂ]ØZ][\\JSÑTSÈØ][Ù×Ü[[YWÜÝ]JÛÛÜÛYËÛÝ\ÙWÝ\ÛÝ\ÙWÜÝ]\ËÜÝ]\Ë[[Ý\]X[]WÜÝ]\ËÝ]X×Û\ÝÝ\YYY\ÝØÚXÚÙYØ]\]YØ]
+HSQTÊËË	ÛÚÉËË	ÚX[IË]J	ÛÝÉÊK]][YJ	ÛÝÉÊK]][YJ	ÛÝÉÊJHÓÓÓPÕ
+ÛÛÜÛYÊHÈTUHÑUÛÝ\ÙWÝ\Y^ÛYYÛÝ\ÙWÝ\ÛÝ\ÙWÜÝ]\ÏIÛÚÉËÜÝ]\ÏL[[Ý\Y^ÛYY[[Ý\]X[]WÜÝ]\ÏIÚX[IËÝ]X×Û\ÝÝ\YYYY]J	ÛÝÉÊK\ÝØÚXÚÙYØ]Y]][YJ	ÛÝÉÊK\]YØ]Y]][YJ	ÛÝÉÊX
+K[
+ÛYËÙXÚX[\ÙXÚX[\
+K[
+KØ]Ú
+
+
+OOßJNÂ]ØZ][\\JTUHØ][Ù×ÛX\Ù]ÙØ\ÈÑUÝ]\ÏIØYZ]YØÛÝ\YÙIË\]YØ]Y]][YJ	ÛÝÉÊHÒTHÛÛÜÛYÏOØ
+K[
+ÛYÊK[
+NÂ]ØZ]ÙÑ][
+[ÛYË	ØØ][Ù×ÙÜÝÝØYZ]Y	Ë	ØÛÛ\]Y	Ë	Û[Y_HYY]]ÛX]XØ[HÛHH\YYYX\Ù]Y[X[ÛÝ\YÙHØ\Y\\Ý\\HÛÝ\ÙH[Y][ÛÜÛYË[YKÛÝ\ÙWÝ\ÙXÚX[\ÛÛØÛÝ]Ý\ÎËÝ]ÛÛØÛÝ]ÜËÝÛÛËÉÜÛYßXØ]YÛÜNØ]Ø]YÛÜKX\Ù]ÜÚYÛ[Î[X\Ø\ÚYÛ[ß
+K\YYYØØ\X[]Y\ÎX]\\ßJNÂ[[YPØXÚK]LÂ]\ÛÚÎYK\YYYYKYZ]YYKÛYËÙ[KÛÛØÛÝ]\ÎËÝ]ÛÛØÛÝ]ÜËÝÛÛËÉÜÛYßXNÂB
 async function syncMarketGaps(env){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
   let synced=0;
   for(const gap of Array.isArray(report?.gaps)?report.gaps:[]){
     const slug=String(gap?.slug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');if(!slug)continue;
     await env.DB.prepare(`INSERT INTO catalog_market_gaps(tool_slug,signals,sources_json,examples_json,status,updated_at) VALUES(?,?,?,?,'research_required',datetime('now'))
-      ON CONFLICT(tool_slug) DO UPDATE SET signals=excluded.signals,sources_json=excluded.sources_json,examples_json=excluded.examples_json,updated_at=datetime('now')`)
+      ON CONFLICT(tool_slug) DO UPDATE SET signals=excluded.signals,sources_json=excluded.sources_json,examples_json=excluded.examples_json,status=CASE WHEN catalog_market_gaps.status IN ('admitted_coverage','covered') THEN catalog_market_gaps.status ELSE 'research_required' END,updated_at=datetime('now')`)
       .bind(slug,Number(gap?.mentions||gap?.sources?.length||0),JSON.stringify(gap?.sources||[]),JSON.stringify(gap?.exampleUrls||[])).run();
     synced++;
   }
@@ -309,7 +448,7 @@ export async function admitTrustedCandidates(env){
 }
 function candidatePage(tool){
   const url=`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,features=(tool.features||[]).map(x=>`<li>${esc(x)}</li>`).join(''),best=(tool.bestFor||[]).map(x=>`<li>${esc(x)}</li>`).join('');
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="canonical" href="${url}"><title>${esc(tool.name)} Tool Profile | ToolScout</title><meta name="description" content="${esc(tool.description)}"></head><body style="margin:0;background:#f6f7f9;color:#101828;font-family:Inter,system-ui,sans-serif"><main style="max-width:900px;margin:auto;padding:36px 22px 80px"><a href="/" style="color:#101828;font-weight:850;text-decoration:none;font-size:22px">ToolScout</a><p style="margin-top:42px;color:#667085;font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:800">Verified coverage profile</p><h1 style="font-size:52px;letter-spacing:-.05em;margin:10px 0 18px">${esc(tool.name)}</h1><p style="font-size:18px;line-height:1.65;color:#475467">${esc(tool.description)}</p><section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px"><div style="background:white;border:1px solid #e4e7ec;border-radius:18px;padding:22px"><h2>Key capabilities</h2><ul style="line-height:1.7;color:#475467">${features}</ul><h2>Best for</h2><ul style="line-height:1.7;color:#475467">${best}</ul></div><div style="background:white;border:1px solid #e4e7ec;border-radius:18px;padding:22px"><h2>Pricing at a glance</h2><p style="line-height:1.65;color:#475467">${esc(tool.pricing||'Check the vendor for current pricing.')}</p><p><strong>Category:</strong> ${esc(tool.category)}</p><a href="/go/${encodeURIComponent(tool.slug)}" rel="nofollow sponsored" style="display:inline-block;background:#101828;color:white;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:750">Explore ${esc(tool.name)}</a></div></section><section style="margin-top:30px;background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px"><h2>Verification status</h2><p style="line-height:1.6;color:#475467">ToolScout admitted this product to catalog coverage after validating a trusted product profile against an official first-party source. Catalog inclusion does not imply ranking, endorsement or comparison eligibility.</p><p style="font-size:13px;color:#667085">Official source: <a href="${esc(tool.sourceUrl)}" rel="nofollow">${esc(tool.sourceUrl)}</a> · Last verified ${esc(tool.lastVerified||'recently')}.</p></section></main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="canonical" href="${url}"><title>${esc(tool.name)} Tool Profile | ToolScout</title><meta name="description" content="${esc(tool.description)}"></head><body style="margin:0;background:#f6f7f9;color:#101828;font-family:Inter,system-ui,sans-serif"><main style="max-width:900px;margin:auto;padding:36px 22px 80px"><a href="/" style="color:#101828;font-weight:850;text-decoration:none;font-size:22px">ToolScout</a><p style="margin-top:42px;color:#667085;font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:800">Verified coverage profile</p><h1 style="font-size:52px;letter-spacing:-.05em;margin:10px 0 18px">${esc(tool.name)}</h1><p style="font-size:18px;line-height:1.65;color:#475467">${esc(tool.description)}</p><section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px"><div style="background:white;border:1px solid #e4e7ec;border-radius:18px;padding:22px"><h2>Key capabilities</h2><ul style="line-height:1.7;color:#475467">${features}</ul><h2>Best for</h2><ul style="line-height:1.7;color:#475467">${best}</ul></div><div style="background:white;border:1px solid #e4e7ec;border-radius:18px;padding:22px"><h2>Pricing at a glance</h2><p style="line-height:1.65;color:#475467">${esc(tool.pricing||'Check the vendor for current pricing.')}</p><p><strong>Category:</strong> ${esc(tool.category)}</p><a href="${esc(tool.directOfficialCta?tool.sourceUrl:'/go/'+encodeURIComponent(tool.slug))}" rel="${tool.directOfficialCta?'noopener nofollow':'nofollow sponsored'}" style="display:inline-block;background:#101828;color:white;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:750">Explore ${esc(tool.name)}</a></div></section><section style="margin-top:30px;background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px"><h2>Verification status</h2><p style="line-height:1.6;color:#475467">ToolScout admitted this product to catalog coverage after validating a trusted product profile against an official first-party source. Catalog inclusion does not imply ranking, endorsement or comparison eligibility.</p><p style="font-size:13px;color:#667085">Official source: <a href="${esc(tool.sourceUrl)}" rel="nofollow">${esc(tool.sourceUrl)}</a> · Last verified ${esc(tool.lastVerified||'recently')}.</p></section></main></body></html>`;
 }
 function injectPendingReview(html,state){
   if(!state||state.quality_status!=='change_detected'||String(html).includes('data-catalog-runtime-warning'))return html;
