@@ -244,7 +244,7 @@ async function growthOpsSnapshot(request,env,ctx,stats){
     assetJson(request,env,'/reports/catalog-health.json',{summary:{},tools:[]}),
     assetJson(request,env,'/reports/tool-profile-holds.json',{generatedAt:null,count:0,items:[]}),
     safeFirst(env,`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`),
-    safeFirst(env,`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status='admitted_coverage'`),
+    safeFirst(env,`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage')`),
     safeFirst(env,`SELECT COUNT(*) total,MAX(updated_at) last_gap_at FROM catalog_market_gaps WHERE status='research_required'`),
     safeAll(env,`SELECT tool_slug,detail,evidence_json,created_at FROM catalog_runtime_events WHERE event_type='catalog_growth_admitted' AND status='completed' ORDER BY created_at DESC LIMIT 8`),
     safeFirst(env,`SELECT MAX(created_at) AS last_event_at FROM audience_events`),
