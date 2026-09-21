@@ -530,7 +530,7 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   const failedCoreRuns={n:n(growthCardCore?.failed_core_runs_24h)};
   const growthSupervisor={status:growthCardCore?.supervisor_status||null,directive:growthCardCore?.supervisor_directive||null,strict_humans_24h:n(growthCardCore?.supervisor_strict_humans_24h),strict_humans_7d:n(growthCardCore?.supervisor_strict_humans_7d),attributed_humans_7d:n(growthCardCore?.supervisor_attributed_humans_7d),external_executions_24h:n(growthCardCore?.supervisor_external_executions_24h),external_executions_7d:n(growthCardCore?.supervisor_external_executions_7d),correction_count:n(growthCardCore?.supervisor_correction_count),last_correction_at:growthCardCore?.supervisor_last_correction_at||null,last_evaluated_at:growthCardCore?.supervisor_last_evaluated_at||null};
   const executionContractState={
-    integrity:'task-specific-v2',
+    integrity:'task-specific-bounded-v3',
     missing:n(growthCardCore?.execution_contract_missing),
     stalled:n(growthCardCore?.execution_contract_stalled),
     ready:n(growthCardCore?.execution_contract_pending),
