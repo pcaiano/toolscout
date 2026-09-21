@@ -299,25 +299,31 @@ const pageByUrl = new Map(pages.map(x=>[normalizeUrl(x.page),x]));
 const opportunityRows = [];
 for (const page of pages) {
   const url=normalizeUrl(page.page), impressions=Number(page.impressions||0), clicks=Number(page.clicks||0), position=Number(page.position||0), ctr=Number(page.ctr||0);
-  let kind=null, score=0, action=null;
-  if(impressions>=20&&position>10&&position<=50){kind='striking_distance';score=Math.min(100,55+Math.log10(impressions+1)*12+(50-position)*0.5);action='authority_and_content_amplification'}
-  else if(impressions>=50&&position>50){kind='high_impression_low_rank';score=Math.min(100,48+Math.log10(impressions+1)*14);action='authority_depth_and_query_alignment'}
-  else if(impressions>=20&&position>0&&position<=20&&ctr<1){kind='ctr_opportunity';score=Math.min(100,60+Math.log10(impressions+1)*10);action='improve_search_snippet_and_click_capture'}
-  if(kind)opportunityRows.push({kind,url,page:page.pathname,score:Number(score.toFixed(1)),impressions,clicks,ctr,position,action});
+  let kind=null, queue=null, score=0, action=null;
+  if(impressions>=20&&position>10&&position<=50){kind='striking_distance';queue='ranking_opportunities';score=Math.min(100,55+Math.log10(impressions+1)*12+(50-position)*0.5);action='authority_and_content_amplification'}
+  else if(impressions>=50&&position>50){kind='high_impression_low_rank';queue='ranking_opportunities';score=Math.min(100,48+Math.log10(impressions+1)*14);action='authority_depth_and_query_alignment'}
+  else if(impressions>=20&&position>0&&position<=20&&ctr<1){kind='ctr_opportunity';queue='ranking_opportunities';score=Math.min(100,60+Math.log10(impressions+1)*10);action='improve_search_snippet_and_click_capture'}
+  else if(impressions>=10&&position>0&&position<=10){kind='protect';queue='protect';score=Math.min(100,58+Math.log10(impressions+1)*10+(10-position));action='protect_current_ranking'}
+  if(kind)opportunityRows.push({kind,queue,url,page:page.pathname,score:Number(score.toFixed(1)),impressions,clicks,ctr,position,action});
 }
 for(const item of indexRecoveryCandidates){
   const page=pageByUrl.get(normalizeUrl(item.url));
-  opportunityRows.push({kind:'index_issue',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?96:78,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_indexing',coverageState:item.coverageState,verdict:item.verdict});
+  opportunityRows.push({kind:'index_issue',queue:'index_recovery',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?96:78,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_indexing',coverageState:item.coverageState,verdict:item.verdict});
 }
 for(const item of redirectedInspections){
   const page=pageByUrl.get(normalizeUrl(item.url));
-  opportunityRows.push({kind:'sitemap_redirect',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?99:88,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',coverageState:item.coverageState,googleCanonical:item.googleCanonical||null,userCanonical:item.userCanonical||null});
+  opportunityRows.push({kind:'sitemap_redirect',queue:'fix_now',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?99:88,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',coverageState:item.coverageState,googleCanonical:item.googleCanonical||null,userCanonical:item.userCanonical||null});
 }
 for(const item of canonicalMismatches){
   const page=pageByUrl.get(normalizeUrl(item.url));
-  opportunityRows.push({kind:'canonical_mismatch',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?98:82,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',googleCanonical:item.googleCanonical,userCanonical:item.userCanonical});
+  opportunityRows.push({kind:'canonical_mismatch',queue:'fix_now',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?98:82,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',googleCanonical:item.googleCanonical,userCanonical:item.userCanonical});
 }
 opportunityRows.sort((a,b)=>b.score-a.score||b.impressions-a.impressions);
+const queueSummary=['fix_now','index_recovery','ranking_opportunities','protect'].reduce((acc,key)=>{
+  const rows=opportunityRows.filter(x=>x.queue===key);
+  acc[key]={count:rows.length,top:rows.slice(0,10).map(x=>({page:x.page,url:x.url,kind:x.kind,score:x.score,impressions:x.impressions,position:x.position,action:x.action}))};
+  return acc;
+},{});
 
 const searchReality = {
   generatedAt:new Date().toISOString(),
@@ -366,6 +372,7 @@ const searchReality = {
     submittedCount:sitemapState.items.length,
     items:sitemapState.items
   },
+  queues:queueSummary,
   opportunities:opportunityRows.slice(0,50),
   inspections,
   limitations:[
