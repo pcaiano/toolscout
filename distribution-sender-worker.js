@@ -1,5 +1,5 @@
 import base from './distribution-contact-worker.js';
-import {recordExecutionProof} from './growth-execution-contract.js';
+import {recordExecutionProof,deferExecutionTask} from './growth-execution-contract.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const MAKE_TOKEN_SHA256='2f9522abe5fb3d87a045b86940f6b5338cc5c9fc3f51ecbc5f5fc31000e3b72c';
@@ -127,7 +127,10 @@ async function publicCandidates(env,limit=3){
             AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
         )
       ORDER BY v.priority_score DESC LIMIT 1`).bind(task.subject_key).first();
-    if(!row)return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_vendor_candidate',task_id:task.task_id,integrity:'task-specific-v2'};
+    if(!row){
+      const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_vendor_candidate');
+      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_vendor_candidate',task_id:task.task_id,integrity:'task-specific-v2',release};
+    }
     const token=row.public_dispatch_token||crypto.randomUUID();
     if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
     const copy=cordialOutreach(row);
@@ -135,7 +138,10 @@ async function publicCandidates(env,limit=3){
     items.push({kind:'vendor',task_id:task.task_id,task_action:task.action,tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
   }else if(task.subject_type==='surface'){
     const row=await env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_network_outreach WHERE surface_slug=? AND status='contact_found' AND contact_email IS NOT NULL LIMIT 1`).bind(task.subject_key).first();
-    if(!row)return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_surface_candidate',task_id:task.task_id,integrity:'task-specific-v2'};
+    if(!row){
+      const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_surface_candidate');
+      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_surface_candidate',task_id:task.task_id,integrity:'task-specific-v2',release};
+    }
     const token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
     if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_network_outreach SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(token,row.surface_slug).run();
     const action=`network:${row.surface_slug}`,growth=`surface:${row.surface_slug}`;
