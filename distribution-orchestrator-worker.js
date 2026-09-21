@@ -301,6 +301,7 @@ async function coordinateGrowthOpportunities(env){
   inputFreshness.catalogFreshness.fresh=inputFreshness.catalogFreshness.ageHours<=36;
   inputFreshness.catalogHealth.fresh=inputFreshness.catalogHealth.ageHours<=36;
   inputFreshness.toolProfileHolds.fresh=inputFreshness.toolProfileHolds.ageHours<=72;
+  let active=0,toolCount=0,surfaceCount=0,searchCount=0,affiliateCount=0,catalogCount=0,newsCount=0;
   const searchOpportunities=inputFreshness.organicGrowth.fresh&&Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
   const searchRealityTechnical=(()=>{
     if(!inputFreshness.gscReality.fresh||!Array.isArray(gscReality?.opportunities))return[];
@@ -401,7 +402,6 @@ async function coordinateGrowthOpportunities(env){
       gscSnapshot:{generatedAt:gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:Array.isArray(gscSignals?.pages)?gscSignals.pages.length:0},
       preservedExistingOpportunities:true};
   }
-  let active=0,toolCount=0,surfaceCount=0,searchCount=0,affiliateCount=0,catalogCount=0,newsCount=0;
   for(const row of surfaces){
     const evidence=String(row.evidence_grade||'none');
     const network=String(row.network_status||'');
