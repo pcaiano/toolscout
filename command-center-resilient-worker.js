@@ -1,3 +1,4 @@
+import {partitionChairmanTasks} from './chairman-task-quality.js';
 import base from './command-center-autoload-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
@@ -168,8 +169,9 @@ async function lightweightQueue(request,env,ctx){
     const raw=rawResponse.ok?await rawResponse.json():{affiliate:[],distribution:[]};
     const nonEditorial=[...(raw.affiliate||[]),...(raw.distribution||[])].filter(x=>!x.editorial_queue_id&&!String(x.id||'').startsWith('editorial:'));
     const editorial=editorialRows.map(editorialAction);
-    const items=[...nonEditorial,...editorial].map(queueItem).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,12);
-    return {status:'connected',total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-editorial-v3',rule:'Current canonical engine states plus prepared editorial actions read directly from D1. Editorial tasks include publication type, exact instructions, title and prepared content.'};
+    const quality=partitionChairmanTasks([...nonEditorial,...editorial].map(queueItem));
+    const items=quality.items.sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,12);
+    return {status:rawResponse.ok?'connected':'partial',quality_holds:[...(raw.quality_holds||[]),...quality.quality_holds],quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-editorial-v3',rule:'Current canonical engine states plus prepared editorial actions read directly from D1. Editorial tasks include publication type, exact instructions, title and prepared content.'};
   }catch(error){return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:String(error?.message||error)}}
 }
 async function resilientSnapshot(request,env,ctx){
@@ -295,6 +297,7 @@ async function resilientSnapshot(request,env,ctx){
     rule:'Resilient mode reads Catalog Runtime directly from D1. Official-source quality gates remain authoritative and affiliate economics never affect editorial ranking.'
   };
   const healthIssues=[{engine:'command-center',severity:'warning',title:'Resilient snapshot active',detail:'Dashboard reads are isolated from external link verification and non-critical enrichment. This prevents a third-party or enrichment failure from returning HTTP 503.'}];
+  if(queue.quality_holds?.length)healthIssues.push({engine:'chairman-queue',severity:'warning',title:'Incomplete owner tasks held for engine repair',detail:queue.quality_holds.length+' task(s) require evidence or payload repair before owner action.'});
   if(queue.status!=='connected')healthIssues.push({engine:'chairman-queue',severity:'warning',title:'Human-action queue partially unavailable',detail:queue.reason||'Queue source did not return a complete snapshot.'});
   return {
     visitors:visitorSnapshot,
@@ -318,7 +321,7 @@ async function resilientSnapshot(request,env,ctx){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:6,statsMode:'direct-d1-resilient',trafficTruth:'strict-human-v1',externalLinkVerificationInStats:false,affiliateCanonicalTruth:'verified-outbound-v1',autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-editorial-v3',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
+    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:6,statsMode:'direct-d1-resilient',trafficTruth:'strict-human-v1',externalLinkVerificationInStats:false,affiliateCanonicalTruth:'verified-outbound-v1',autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-quality-v1',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
     if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/analytics/api/chairman-queue')){
       if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
       if(url.pathname==='/analytics/api/chairman-queue')return Response.json(await lightweightQueue(request,env,ctx),{headers:JSON_H});

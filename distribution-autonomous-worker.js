@@ -1,7 +1,8 @@
+import {actionUrl as validHumanActionUrl,existingParentSubmission,reconcileDuplicateSubmissionGates} from './chairman-task-quality.js';
 import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
-import {ensureHumanGateSchema,humanGateKey,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,reopenHumanGate,humanGateSnapshot} from './human-gate-contract.js';
+import {ensureHumanGateSchema,humanGateKey,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,humanGateSnapshot} from './human-gate-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
@@ -255,20 +256,39 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
   const target=row.surface_name||row.surface_slug;
   const isAuth=gateType==='authentication';
   const humanActionUrl=await resolveHumanActionUrl(actionUrl||row.action_url);
+  if(await existingParentSubmission(env,row.surface_slug)){await reconcileDuplicateSubmissionGates(env);return null;}
+  const previous=await env.DB.prepare('SELECT status FROM human_gate_contract WHERE gate_key=?').bind(humanGateKey('distribution','surface',row.surface_slug)).first();
+  if(previous&&previous.status!=='open')return null;
+  const page=validHumanActionUrl(humanActionUrl)?await text(humanActionUrl,4500):null;
+  // A sign-in link in a navigation bar is not proof that submission requires login.
+  const authProof=page&&(/<input[^>]+type=["']password["']/i.test(page.body)||/(?:must|need to|required to) (?:be logged|sign|log) in|login required|account required/i.test(page.body));
+  const captchaProof=page&&/<(?:div|iframe|input)[^>]+(?:g-recaptcha|h-captcha|cf-turnstile|captcha)/i.test(page.body);
+  if(!page||!(isAuth?authProof:captchaProof)){
+    const detail='Chairman quality hold: no verified, actionable owner-only step on the destination. Engine must research the route and prepare exact instructions.';
+    await env.DB.batch([
+      env.DB.prepare("UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,updated_at=datetime('now') WHERE surface_slug=?").bind(detail,row.surface_slug),
+      env.DB.prepare("UPDATE human_gate_contract SET status='cancelled',verification_detail=?,resolved_at=datetime('now'),updated_at=datetime('now') WHERE gate_key=? AND status='open'").bind(detail,humanGateKey('distribution','surface',row.surface_slug)),
+      env.DB.prepare("INSERT INTO distribution_events(event_id,surface_slug,event_type,status,detail,observed_at,created_at) VALUES(?,?,'chairman_quality_hold','research_required',?,datetime('now'),datetime('now'))").bind(`quality_${crypto.randomUUID()}`,row.surface_slug,detail)
+    ]);
+    return null;
+  }
+  const finalActionUrl=page.url;
+  const evidenceDetail=isAuth?'The destination displays a password form or an explicit login requirement.':'The destination displays an interactive CAPTCHA widget.';
+  const humanReason=`${target}: ${evidenceDetail} Only the owner can complete this account or browser challenge.`;
   const instructions=isAuth
-    ?'Open the exact action page. Sign in, create the required account, complete email/OTP verification, or authorize access as required. Then complete the ToolScout listing/submission using the prepared truthful ToolScout details. Do not buy promotion, add a reciprocal badge, accept optional paid upgrades, or invent claims. When the external step is complete, return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it so autonomous verification can close the gate immediately.'
-    :'Open the exact action page and complete only the human-only step shown there, such as CAPTCHA, explicit confirmation, material terms acceptance, or the final irreversible submit. Use the prepared truthful ToolScout details. Do not buy promotion, add reciprocal badges, or invent claims. Then return to the Chairman Queue and click Mark done. If the site gives you a public ToolScout/profile URL, paste it for autonomous verification.';
+    ?`Open ${finalActionUrl}. Sign in to your ${target} account. Complete the ToolScout submission with the prepared name, website, tagline and description below. If a submission already exists, do not submit again; copy its result URL instead. Return here and mark the step done with that URL. Do not buy promotion or add a reciprocal badge.`
+    :`Open ${finalActionUrl}. Complete the CAPTCHA shown on the submission form. Fill the ToolScout fields with the prepared details below and submit once. Return here and mark the step done with the result URL. Do not buy promotion or add a reciprocal badge.`;
   const gateKey=await upsertHumanGate(env,{
     engine:'distribution',
     subjectType:'surface',
     subjectKey:row.surface_slug,
     gateType,
     title:`${target}: human step required`,
-    reason:reason||row.next_action||'Autonomous execution reached a genuine human-only gate.',
+    reason:humanReason,
     instructions,
-    actionUrl:humanActionUrl,
+    actionUrl:finalActionUrl,
     resolutionMode:'verify_publication',
-    payload:humanGatePayload(),
+    payload:{...humanGatePayload(),gate_evidence:{url:finalActionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail}},
     verificationUrl
   });
   await env.DB.prepare(`UPDATE distribution_opportunities
@@ -276,7 +296,7 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
         action_url=?,
         next_action=?,
         updated_at=datetime('now')
-    WHERE surface_slug=?`).bind(humanActionUrl,`Human Gate Contract ${gateKey} opened. Complete the exact external step from Chairman Queue, then mark it done for autonomous verification.`,row.surface_slug).run().catch(()=>{});
+    WHERE surface_slug=?`).bind(finalActionUrl,instructions,row.surface_slug).run().catch(()=>{});
   return gateKey;
 }
 async function qualifyOne(env,row){
@@ -502,7 +522,7 @@ async function verifyHumanGateResolutions(env){
     for(const candidate of candidates){
       const page=await text(candidate,6000);
       const evidence=gateEvidence(page,candidate);
-      if(evidence.ok){proof={candidate,page,evidence};break}
+      if(evidence.ok&&!/under review|pending (?:editorial )?review|awaiting approval/i.test(page?.body||'')){proof={candidate,page,evidence};break}
     }
     if(proof){
       const publicUrl=proof.evidence.finalUrl||proof.candidate;
@@ -522,18 +542,9 @@ async function verifyHumanGateResolutions(env){
       continue;
     }
     const attempts=Number(gate.verification_attempts||0)+1;
-    if(attempts>=4){
-      const reason='You marked this human step complete, but ToolScout still cannot verify a public result automatically.';
-      const instructions='Open the external service and confirm the ToolScout listing/submission is actually live. If it is live, copy the exact public ToolScout/profile URL. Return to the Chairman Queue, open this task and mark it done again, pasting that public URL. If the listing is still pending review, leave it until the service publishes it.';
-      await reopenHumanGate(env,gate.gate_key,{reason,instructions});
-      await env.DB.prepare(`UPDATE distribution_opportunities
-        SET status='human_action_required',human_required=1,next_action=?,updated_at=datetime('now')
-        WHERE surface_slug=?`).bind(reason,gate.subject_key).run().catch(()=>{});
-      reopened++;
-    }else{
-      await deferHumanGateVerification(env,gate.gate_key,{detail:candidates.length?'public_evidence_not_yet_confirmed':'no_public_verification_url_yet',hours:attempts===1?2:6});
-      deferred++;
-    }
+    // Pending publication and unavailable verification are engine work, not a new owner task.
+    await deferHumanGateVerification(env,gate.gate_key,{detail:candidates.length?'public_evidence_not_yet_confirmed':'engine_must_discover_public_verification_url',hours:attempts>=4?24:attempts===1?2:6});
+    deferred++;
   }
   return {ok:true,checked,resolved,deferred,reopened};
 }
@@ -757,6 +768,7 @@ export async function runAutonomousDistributionCycle(env){
   await ensureHumanGateSchema(env);
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
+  const duplicateGates=await reconcileDuplicateSubmissionGates(env);
   const machineGateRecovery=await recoverMachineResolvableAuthGates(env);
   const humanGateSync=await syncExistingHumanGates(env);
   const humanGateVerification=await verifyHumanGateResolutions(env);
@@ -765,7 +777,7 @@ export async function runAutonomousDistributionCycle(env){
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
-  return {ok:true,technicalSuppressed,normalized,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
+  return {ok:true,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {

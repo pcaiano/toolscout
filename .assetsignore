@@ -72,3 +72,5 @@ traffic-truth-extension.js
 behavior-intelligence.js
 distribution-behavior-worker.js
 posthog-behavior-worker.js
+chairman-task-quality.js
+human-gate-contract.js
