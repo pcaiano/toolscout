@@ -61,6 +61,24 @@ async function probeImage(candidate){
     return{url:r.url||candidate.url,provenance:candidate.provenance||'unknown',contentType:type||null,httpStatus:r.status};
   }catch{return null}finally{clearTimeout(timer)}
 }
+const SIMPLE_ICON_ALIASES=Object.freeze({
+  'copy-ai':'copydotai',
+  'gemini':'googlegemini',
+  'google-ai-studio':'google',
+  'otter-ai':'otter',
+  'close':'close',
+  'beehiiv':'beehiiv',
+  'integrately':'integrately',
+  'jasper':'jasper'
+});
+function simpleIconCandidates(tool){
+  const raw=[
+    SIMPLE_ICON_ALIASES[tool?.slug],
+    String(tool?.slug||'').replace(/-/g,''),
+    String(tool?.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'')
+  ].filter(Boolean);
+  return uniq(raw).map(key=>({url:`https://cdn.simpleicons.org/${encodeURIComponent(key)}`,provenance:'simple-icons-brand-logo'}));
+}
 async function firstValid(candidates){
   for(const group of candidates){
     const rows=Array.isArray(group)?group:[group];
@@ -75,13 +93,14 @@ export async function resolveCatalogLogo(env,tool,{officialPage=null}={}){
   const explicit=tool?.logoUrl?{url:tool.logoUrl,provenance:tool.logoProvenance||'profile-logo'}:null;
   const page=officialPage?.html!==undefined?officialPage:await fetchPage(tool?.verificationUrl||tool?.sourceUrl);
   const firstParty=page?.url?iconCandidates(page.html,page.url):[];
+  const brandIcons=simpleIconCandidates(tool);
   let duck=null,google=null;
   try{
     const host=new URL(tool?.sourceUrl||page?.url).hostname;
     duck={url:`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,provenance:'duckduckgo-favicon-fallback'};
     google={url:`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`,provenance:'google-favicon-fallback'};
   }catch{}
-  const resolved=await firstValid([[explicit,curated],firstParty.slice(0,4),[duck,google]]);
+  const resolved=await firstValid([[explicit,curated],firstParty.slice(0,4),brandIcons.slice(0,3),[duck,google]]);
   return{
     ok:Boolean(resolved),
     logo:resolved,

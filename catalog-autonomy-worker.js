@@ -330,9 +330,10 @@ export async function admitTrustedCandidates(env){
 export async function auditCatalogQualityBatch(env,{limit=12}={}){
   await ensureSchema(env);
   const tools=await mergedTools(env);
-  const prior=await env.DB.prepare(`SELECT tool_slug,last_checked_at FROM catalog_quality_audit`).all();
-  const checked=new Map((prior.results||[]).map(x=>[String(x.tool_slug),Date.parse(String(x.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0]));
-  const selected=[...tools].sort((a,b)=>(checked.get(a.slug)||0)-(checked.get(b.slug)||0)||String(a.slug).localeCompare(String(b.slug))).slice(0,Math.max(1,Math.min(25,Number(limit)||12)));
+  const prior=await env.DB.prepare(`SELECT tool_slug,quality_status,last_checked_at FROM catalog_quality_audit`).all();
+  const auditState=new Map((prior.results||[]).map(x=>[String(x.tool_slug),{status:String(x.quality_status||''),checkedAt:Date.parse(String(x.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0}]));
+  const priority=slug=>{const s=auditState.get(slug);if(!s)return 0;if(s.status==='hold')return 1;if(s.status==='warning')return 2;return 3};
+  const selected=[...tools].sort((a,b)=>priority(a.slug)-priority(b.slug)||(auditState.get(a.slug)?.checkedAt||0)-(auditState.get(b.slug)?.checkedAt||0)||String(a.slug).localeCompare(String(b.slug))).slice(0,Math.max(1,Math.min(25,Number(limit)||12)));
   const results=await mapLimit(selected,4,tool=>auditCatalogTool(env,tool));
   let passed=0,warnings=0,held=0,repaired=0;
   for(const result of results){
