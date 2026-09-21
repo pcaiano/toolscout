@@ -713,7 +713,6 @@ function backlinkEvidence(html){
 }
 async function verifyFootprint(env){
   await ensureAutonomySchema(env);
-  const discovery=await runDiscoveryRefresh(env);
   let rows=[];
   try{
     const q=await env.DB.prepare(`SELECT o.surface_slug,COALESCE(p.public_url,o.live_url,ds.response_url,o.action_url) public_url,p.last_checked_at
@@ -768,6 +767,7 @@ async function autonomyMetrics(env){
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
+  const discovery=await runDiscoveryRefresh(env);
   await env.DB.prepare(`UPDATE distribution_opportunities
     SET status='ready_to_submit',human_required=0,next_action='Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements.',updated_at=datetime('now')
     WHERE surface_slug='indexnow' AND status='skipped' AND next_action='Technical infrastructure host excluded from distribution discovery.'`).run().catch(()=>{});
