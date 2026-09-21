@@ -293,6 +293,7 @@ async function materializeRouteActions(env){
     JOIN distribution_network_outreach n ON n.surface_slug=r.surface_slug
     LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id
     WHERE r.status IN ('discovered','in_loop')
+      AND NOT (r.route_type='form' AND EXISTS (SELECT 1 FROM distribution_opportunities canonical WHERE canonical.surface_slug=r.surface_slug AND canonical.status IN ('submitted','pending_review','scheduled','live','verified')))
       AND (
         a.route_id IS NULL
         OR a.status IN ('queued','retry_due')

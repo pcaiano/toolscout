@@ -1,3 +1,4 @@
+import {partitionChairmanTasks} from './chairman-task-quality.js';
 import base from './affiliate-human-action-entry-worker.js';
 import { normalizeAffiliateState } from './affiliate-operations.js';
 import { growthActionMetrics } from './distribution-impact-worker.js';
@@ -215,10 +216,11 @@ async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
     const after=action.editorial_queue_id?'Mark it published in the Chairman Queue. The Distribution Engine removes the task and continues attribution and performance measurement for the Stremit surface.':afterAction(action);
     return {...action,estimated_minutes:minutes,expected_impact:expectedImpact(action),expected_impact_score:Number(impactScore.toFixed(1)),why_human:whyHuman,after_action:after,link_verification:verification};
   }));
-  const actionable=rows.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,HUMAN_ACTION_LIMIT);
+  const quality=partitionChairmanTasks(rows);
+  const actionable=quality.items.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,HUMAN_ACTION_LIMIT);
   const brokenLinks=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='internal');
   const externalVerificationIssues=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='external');
-  return {status:'connected',total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Only current engine states with a reachable HTTPS action URL enter the Chairman Queue. Prepared community publication tasks include the exact payload needed to complete the human action.'};
+  return {status:'connected',quality_holds:[...(raw.quality_holds||[]),...quality.quality_holds],quality_version:quality.quality_version,total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Only current engine states with a reachable HTTPS action URL enter the Chairman Queue. Prepared community publication tasks include the exact payload needed to complete the human action.'};
 }
 async function growthOpsSnapshot(request,env,ctx,stats){
   const [affiliateLatest,affiliateWeekOld,affiliateStatuses,affiliateDiscovery,affiliatePacks,affiliateRoutes,distributionStatuses,distribution24,distribution7,deliveryStates,distEvents,affiliateHistory,gsc,sitemap,contentIntel,organicGrowth,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogRuntimeState,catalogRuntimeCandidates,catalogRuntimeGaps,catalogRecentAdmissions,latestAudienceEvent,latestContentPublish,distributionNetworkStates,distributionPlacements]=await Promise.all([
@@ -542,6 +544,7 @@ async function distributionHumanAction(request,env){
   if(!row||!n(row.human_required))return Response.json({ok:false,error:'human_gate_not_active'},{status:409,headers:JSON_H});
   const next=action==='submitted'?'submitted':'skipped',nextAction=action==='submitted'?'Human submission confirmed. Engine resumes monitoring and attribution; automatic public verification runs where a machine-verifiable route exists.':'Owner skipped this opportunity. Reconsider only if new evidence materially changes expected value.';
   await env.DB.prepare(`UPDATE distribution_opportunities SET status=?,human_required=0,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(next,nextAction,slug).run();
+  await env.DB.prepare(`UPDATE human_gate_contract SET status=?,next_verification_at=CASE WHEN ?='verification_pending' THEN datetime('now') ELSE NULL END,owner_completed_at=CASE WHEN ?='verification_pending' THEN datetime('now') ELSE owner_completed_at END,updated_at=datetime('now') WHERE engine='distribution' AND subject_key=? AND status='open'`).bind(action==='submitted'?'verification_pending':'cancelled',action==='submitted'?'verification_pending':'cancelled',action==='submitted'?'verification_pending':'cancelled',slug).run();
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`human_${crypto.randomUUID()}`,slug,'human_gate_resolved',next,'distribution_engine',nextAction).run();
   return Response.json({ok:true,surface_slug:slug,status:next,resume:'verification_measurement'},{headers:JSON_H});
 }

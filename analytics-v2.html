@@ -127,22 +127,22 @@ function renderNorthStar(d){
 }
 function taskHtml(x){
   const url=safeHttps(x.action_url),canConfirm=x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status));
-  const isEditorial=Boolean(x.editorial_queue_id),publishLabel=isEditorial?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
+  const isEditorial=Boolean(x.editorial_queue_id),publishLabel=x.gate_key?'Mark done':isEditorial?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
   const copyButton=(label,value)=>value?'<button class="btn" data-copy-value="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
-  const payload=isEditorial?'<details open style="margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card2)"><summary style="cursor:pointer;font-weight:800">Publication payload · '+esc(x.publication_type||'Post')+'</summary>'+
+  const payload=(isEditorial||x.prepared_body)?'<details open style="margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card2)"><summary style="cursor:pointer;font-weight:800">Publication payload · '+esc(x.publication_type||'Post')+'</summary>'+
     '<div class="taskReason" style="margin-top:10px"><b>Steps:</b><div style="white-space:pre-wrap;margin-top:5px">'+esc(x.instructions||'')+'</div>'+copyButton('Copy steps',x.instructions)+'</div>'+
     '<div class="taskReason" style="margin-top:10px"><b>Title:</b><div style="white-space:pre-wrap;margin-top:5px">'+esc(x.prepared_title||'')+'</div>'+copyButton('Copy title',x.prepared_title)+'</div>'+
     '<div class="taskReason" style="margin-top:10px"><b>Content:</b><div style="white-space:pre-wrap;margin-top:5px;max-height:340px;overflow:auto;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card)">'+esc(x.prepared_body||'')+'</div>'+copyButton('Copy content',x.prepared_body)+'</div>'+
     '</details>':'';
   return '<div class="task" data-task-engine="'+esc(x.engine)+'" data-task-id="'+esc(x.id)+'">'+
     '<div class="taskTop"><div><div class="taskTitle">'+esc(x.title)+'</div><div class="taskMeta">'+esc(x.engine)+' · '+esc(x.status)+' · ~'+esc(x.estimated_minutes)+' min</div></div>'+pill(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate','warn')+'</div>'+
-    '<div class="taskReason"><b>Do:</b> '+esc(x.reason)+'</div>'+
+    '<div class="taskReason"><b>Do:</b> '+esc(x.instructions||x.reason)+'</div>'+
     '<div class="taskReason"><b>Why you:</b> '+esc(x.why_human)+'</div>'+
     '<div class="taskReason"><b>Expected impact:</b> '+esc(x.expected_impact)+'</div>'+
     '<div class="taskAfter"><b>Then:</b> '+esc(x.after_action)+'</div>'+
     payload+
     '<div class="taskActions">'+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+
-    (canConfirm?'<button class="btn" data-resolve-task="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status)+'">'+publishLabel+'</button>':'')+
+    (canConfirm?'<button class="btn" data-gate-key="'+esc(x.gate_key||'')+'" data-resolve-task="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status)+'">'+publishLabel+'</button>':'')+
     (x.engine==='distribution'?'<button class="btn danger" data-resolve-task="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+
     '</div></div>';
 }
@@ -151,7 +151,8 @@ function renderChairman(d){
   document.getElementById('chairmanMeta').textContent=q.total?q.total+' current gate'+(q.total===1?'':'s'):'Clear';
   document.getElementById('chairmanBody').innerHTML=q.items.length?
     '<div class="queueSummary"><b>'+num(q.total)+'</b><span>actions · ~'+num(q.estimated_minutes)+' min total</span></div>'+q.items.map(taskHtml).join(''):
-    '<div class="empty"><div><b data-state="good">Everything the engines can do is currently unblocked.</b><br><br>No current human action with a verified direct link.</div></div>';
+    '<div class="empty"><div><b>No owner action is ready.</b><br><br>No current human action with complete instructions and evidence.</div></div>';
+  if(q.quality_holds?.length)document.getElementById('chairmanBody').innerHTML+='<div class="empty">'+num(q.quality_holds.length)+' incomplete task(s) held for engine repair. No owner action required.</div>';
 }
 function renderDistribution(d){
   const x=d.growthOps&&d.growthOps.engines&&d.growthOps.engines.distribution||{};
@@ -253,9 +254,12 @@ async function resolveTask(button){
   if(!engine||!id||!action)return;
   const old=button.textContent;button.disabled=true;button.textContent='Saving…';
   try{
-    const endpoint=engine==='distribution'?'/analytics/api/distribution-human-action':'/analytics/api/affiliate-human-action';
+    const gateKey=button.dataset.gateKey||'';
+    const resultUrl=gateKey?window.prompt('Paste the result or listing URL, if available. Leave blank if the service is reviewing the submission.',''):'';
+    if(gateKey&&resultUrl===null){button.disabled=false;button.textContent=old;return;}
+    const endpoint=gateKey?'/analytics/api/human-actions/gate':engine==='distribution'?'/analytics/api/distribution-human-action':'/analytics/api/affiliate-human-action';
     const affiliateEvent=status==='human_action_required'?'completed':'submitted';
-    const body=engine==='distribution'?{surface_slug:id,action}:{tool_slug:id,event:affiliateEvent,evidence:'Confirmed from Command Center V2 Chairman Queue'};
+    const body=gateKey?{gate_key:gateKey,result_url:resultUrl}:engine==='distribution'?{surface_slug:id,action}:{tool_slug:id,event:affiliateEvent,evidence:'Confirmed from Command Center V2 Chairman Queue'};
     const r=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d=await r.json().catch(()=>({}));
     if(!r.ok||d.ok===false)throw new Error(d.error||'action_update_failed');

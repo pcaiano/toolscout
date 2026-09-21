@@ -219,6 +219,16 @@ The operating loop is now:
 
 The next acceptance criterion is not candidate volume. It is repeated evidence of `new opportunity -> autonomous action -> verified external presence or outreach -> browser-confirmed human session`.
 
+## Chairman Queue quality repair - 2026-09-21
+
+Launch Llama has an existing ToolScout product page at https://tools.launchllama.co/products/toolscout displaying "Launching this week. Under review." The canonical `launch-llama` opportunity remains `pending_review`; this is not proof of an approved listing, backlink or human traffic. The duplicate submission/form opportunities `route-c9c494db6c05bc43` and `route-bcfa96d69627bd53` were reconciled to `skipped`, their route actions retired, and the open duplicate gate cancelled. A legacy prepared blog submission was retired with an audit row. No repeat submission or owner completion was recorded.
+
+The shared `chairman-task-quality.js` contract rejects internal boilerplate, machine endpoints, missing prepared content, missing distinct instructions/reason, and missing effort/impact/follow-up. Contract-backed distribution tasks additionally require recent observed human-gate evidence. Both queue readers and the human-actions entrypoint expose rejected tasks as engine-owned quality holds. The UI displays instructions separately from the human reason and includes prepared content for distribution gates. Mark done queues autonomous verification; pending editorial review and verification delays never reopen an owner task on their own.
+
+Route materialization excludes form routes for already-submitted canonical products; cycle reconciliation cancels existing duplicates. Canonical opportunity state must still require human action before an open gate is displayed. Resolved, cancelled and verification-pending contracts cannot be reopened by routine upserts.
+
+Regression check: `node tests/chairman-quality.test.mjs` (uses built-in Node SQLite). Production deployment verification is required after this source change.
+
 ## Distribution status
 
 Current known distribution state:

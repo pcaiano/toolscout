@@ -1,3 +1,4 @@
+import {taskQualityIssues} from './chairman-task-quality.js';
 let schemaReady=null;
 
 function safe(v,n=4000){return String(v??'').slice(0,n)}
@@ -60,6 +61,8 @@ export async function upsertHumanGate(env,{
   payload=null,
   verificationUrl=null
 }){
+  const issues=taskQualityIssues({action_url:actionUrl,instructions,reason,gate_key:'new',gate_evidence:payload?.gate_evidence,prepared_body:payload?.description,estimated_minutes:5,expected_impact:'Unlock distribution',after_action:resolutionMode});
+  if(issues.length)throw new Error('invalid_human_gate:'+issues.join(','));
   await ensureHumanGateSchema(env);
   const gateKey=humanGateKey(engine,subjectType,subjectKey);
   const action=normalizeUrl(actionUrl);
@@ -72,7 +75,7 @@ export async function upsertHumanGate(env,{
     ON CONFLICT(gate_key) DO UPDATE SET
       gate_type=excluded.gate_type,
       status=CASE
-        WHEN human_gate_contract.status IN ('resolved','cancelled') THEN 'open'
+        WHEN human_gate_contract.status IN ('resolved','cancelled') THEN human_gate_contract.status
         ELSE human_gate_contract.status
       END,
       title=COALESCE(excluded.title,human_gate_contract.title),
@@ -83,15 +86,14 @@ export async function upsertHumanGate(env,{
       payload_json=COALESCE(excluded.payload_json,human_gate_contract.payload_json),
       verification_url=COALESCE(excluded.verification_url,human_gate_contract.verification_url),
       updated_at=datetime('now')
-    WHERE human_gate_contract.status IN ('resolved','cancelled')
-       OR human_gate_contract.gate_type IS NOT excluded.gate_type
+    WHERE human_gate_contract.status='open' AND (human_gate_contract.gate_type IS NOT excluded.gate_type
        OR (excluded.title IS NOT NULL AND human_gate_contract.title IS NOT excluded.title)
        OR (excluded.reason IS NOT NULL AND human_gate_contract.reason IS NOT excluded.reason)
        OR (excluded.instructions IS NOT NULL AND human_gate_contract.instructions IS NOT excluded.instructions)
        OR (excluded.action_url IS NOT NULL AND human_gate_contract.action_url IS NOT excluded.action_url)
        OR human_gate_contract.resolution_mode IS NOT excluded.resolution_mode
        OR (excluded.payload_json IS NOT NULL AND human_gate_contract.payload_json IS NOT excluded.payload_json)
-       OR (excluded.verification_url IS NOT NULL AND human_gate_contract.verification_url IS NOT excluded.verification_url)`)
+       OR (excluded.verification_url IS NOT NULL AND human_gate_contract.verification_url IS NOT excluded.verification_url))`)
     .bind(
       gateKey,safe(engine,40),safe(subjectType,80),safe(subjectKey,180),safe(gateType,80),
       title?safe(title,500):null,reason?safe(reason,1600):null,instructions?safe(instructions,3000):null,
@@ -119,7 +121,7 @@ export async function markHumanGateOwnerComplete(env,gateKey,{resultUrl=null}={}
   await ensureHumanGateSchema(env);
   const row=await env.DB.prepare(`SELECT * FROM human_gate_contract WHERE gate_key=? LIMIT 1`).bind(gateKey).first();
   if(!row)return {ok:false,error:'gate_not_found'};
-  if(row.status==='resolved')return {ok:true,unchanged:true,row};
+  if(row.status!=='open')return {ok:false,error:'gate_not_open',row};
   const result=normalizeUrl(resultUrl);
   await env.DB.prepare(`UPDATE human_gate_contract
     SET status='verification_pending',
