@@ -19,7 +19,7 @@ const HOST = /^(?=.{1,120}$)[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$/;
 
 export function parseFunnelEvent(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
-  const allowed = new Set(['event_id','session_id','event_type','intent_slug','tool_slug','path','source','referrer_host','browser_proof']);
+  const allowed = new Set(['event_id','session_id','event_type','intent_slug','tool_slug','path','source','referrer_host','browser_proof','visitor_id']);
   if (Object.keys(value).some(key => !allowed.has(key))) return null;
   const event = {
     event_id: String(value.event_id || ''),
@@ -31,6 +31,7 @@ export function parseFunnelEvent(value) {
     source: String(value.source || 'direct'),
     referrer_host: value.referrer_host == null ? null : String(value.referrer_host).toLowerCase()
   };
+  if (value.visitor_id != null && !UUID.test(String(value.visitor_id))) return null;
   if ('browser_proof' in value && event.event_type !== 'page_confirmed') return null;
   if (!EVENT_ID.test(event.event_id) || !UUID.test(event.session_id) || !FUNNEL_EVENT_TYPES.has(event.event_type)) return null;
   if (event.intent_slug !== null && !SLUG.test(event.intent_slug)) return null;
