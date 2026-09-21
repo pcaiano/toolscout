@@ -274,13 +274,20 @@ for (let i=0;i<inspectionTargets.length;i+=10) {
   inspections.push(...await Promise.all(batch.map(inspectUrl)));
 }
 const successfulInspections = inspections.filter(x=>x.ok);
-const indexedInspections = successfulInspections.filter(x=>x.verdict==='PASS');
-const indexIssues = successfulInspections.filter(x=>x.verdict!=='PASS');
-const canonicalMismatches = successfulInspections.filter(x=>x.googleCanonical&&x.userCanonical&&normalizeUrl(x.googleCanonical)!==normalizeUrl(x.userCanonical));
-const robotsBlocked = successfulInspections.filter(x=>x.robotsTxtState&&x.robotsTxtState!=='ALLOWED');
-const noindexBlocked = successfulInspections.filter(x=>x.indexingState&&x.indexingState!=='INDEXING_ALLOWED');
-const fetchIssues = successfulInspections.filter(x=>x.pageFetchState&&x.pageFetchState!=='SUCCESSFUL');
 const inspectionErrors = inspections.filter(x=>!x.ok);
+const canonicalUniverse = new Set(sitemapUrls.map(normalizeUrl).filter(Boolean));
+const canonicalInspections = successfulInspections.filter(x=>canonicalUniverse.has(normalizeUrl(x.url)));
+const legacyObservedInspections = successfulInspections.filter(x=>!canonicalUniverse.has(normalizeUrl(x.url)));
+const indexedInspections = canonicalInspections.filter(x=>x.verdict==='PASS');
+const excludedInspections = canonicalInspections.filter(x=>x.verdict==='NEUTRAL');
+const failedInspections = canonicalInspections.filter(x=>x.verdict==='FAIL');
+const unknownInspections = canonicalInspections.filter(x=>!x.verdict||x.verdict==='VERDICT_UNSPECIFIED');
+const indexIssues = canonicalInspections.filter(x=>x.verdict==='FAIL'||x.verdict==='NEUTRAL'||!x.verdict||x.verdict==='VERDICT_UNSPECIFIED');
+const canonicalMismatches = canonicalInspections.filter(x=>x.googleCanonical&&x.userCanonical&&normalizeUrl(x.googleCanonical)!==normalizeUrl(x.userCanonical));
+const canonicalDisagreementsAll = successfulInspections.filter(x=>x.googleCanonical&&x.userCanonical&&normalizeUrl(x.googleCanonical)!==normalizeUrl(x.userCanonical));
+const robotsBlocked = canonicalInspections.filter(x=>x.robotsTxtState==='DISALLOWED');
+const noindexBlocked = canonicalInspections.filter(x=>['BLOCKED_BY_META_TAG','BLOCKED_BY_HTTP_HEADER'].includes(String(x.indexingState||'')));
+const fetchIssues = canonicalInspections.filter(x=>x.pageFetchState&&!['SUCCESSFUL','PAGE_FETCH_STATE_UNSPECIFIED'].includes(x.pageFetchState));
 const sitemapState = await listSitemaps();
 
 const pageByUrl = new Map(pages.map(x=>[normalizeUrl(x.page),x]));
@@ -318,19 +325,24 @@ const searchReality = {
     observedPages:pages.length
   },
   indexHealth:{
-    inspectionUniverseUrls:inspectionCandidates.length,
+    inspectionUniverseUrls:canonicalUniverse.size,
     inspectionLimit,
-    inspected:successfulInspections.length,
+    inspected:canonicalInspections.length,
     indexed:indexedInspections.length,
+    excluded:excludedInspections.length,
+    failed:failedInspections.length,
+    unknown:unknownInspections.length,
     notIndexed:indexIssues.length,
     errors:inspectionErrors.length,
-    inspectionCoveragePct:inspectionCandidates.length?Number((successfulInspections.length/inspectionCandidates.length*100).toFixed(1)):0,
-    indexedPct:successfulInspections.length?Number((indexedInspections.length/successfulInspections.length*100).toFixed(1)):0,
+    legacyObservedVariantsInspected:legacyObservedInspections.length,
+    inspectionCoveragePct:canonicalUniverse.size?Number((canonicalInspections.length/canonicalUniverse.size*100).toFixed(1)):0,
+    indexedPct:canonicalInspections.length?Number((indexedInspections.length/canonicalInspections.length*100).toFixed(1)):0,
     canonicalMismatches:canonicalMismatches.length,
+    canonicalDisagreementsAll:canonicalDisagreementsAll.length,
     robotsBlocked:robotsBlocked.length,
     noindexBlocked:noindexBlocked.length,
     fetchIssues:fetchIssues.length,
-    note:'URL Inspection reports the version known to the Google index, not a live URL test.'
+    note:'Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.'
   },
   sitemaps:{
     apiOk:sitemapState.ok,
@@ -345,7 +357,7 @@ const searchReality = {
   limitations:[
     'Search Analytics returns top rows and is not guaranteed to include every row available in Search Console.',
     'URL Inspection describes the version in the Google index and does not perform a live indexability test.',
-    successfulInspections.length<inspectionCandidates.length?'Index health is based on the inspected URL sample shown in this report, not the entire sitemap universe.':'The current inspection run covered the full discovered URL universe.'
+    canonicalInspections.length<canonicalUniverse.size?'Canonical index health is based on the inspected sitemap sample shown in this report.':'The current inspection run covered the full canonical sitemap universe.'
   ]
 };
 searchReality.searchPerformance.window28d.ctr = searchReality.searchPerformance.window28d.impressions ? Number((searchReality.searchPerformance.window28d.clicks/searchReality.searchPerformance.window28d.impressions*100).toFixed(4)) : 0;
