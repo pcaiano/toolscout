@@ -310,8 +310,11 @@ export async function admitTrustedCandidates(env){
       considered++;
       const errors=validCandidate(raw,config);if(errors.length){held++;continue}
       const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
-      const profile={...raw,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2'}};
+      let profile={...raw,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2'}};
       profile.editorialReview=profile.editorialReview||runtimeEditorialView(profile);
+      const quality=await auditCatalogTool(env,profile);
+      if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings});continue}
+      profile=quality.repairedTool;
       await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
         ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
         .bind(slug,JSON.stringify(profile)).run();
@@ -354,7 +357,7 @@ export async function auditCatalogQualityBatch(env,{limit=12}={}){
   }
   runtimeCache.at=0;
   const summary=await env.DB.prepare(`SELECT quality_status,COUNT(*) n FROM catalog_quality_audit GROUP BY quality_status ORDER BY quality_status`).all();
-  return{ok:true,checked:results.length,passed,warnings,held,repaired,total_catalog:tools.length,summary:summary.results||[],remaining_unchecked:Math.max(0,tools.length-(prior.results||[]).length)};
+  return{ok:true,checked:results.length,passed,warnings,held,repaired,total_catalog:tools.length,summary:summary.results||[],remaining_unchecked:Math.max(0,tools.length-new Set([...(prior.results||[]).map(x=>String(x.tool_slug)),...results.map(x=>String(x?.slug||''))]).size)};
 }
 export async function catalogQualitySnapshot(env){
   await ensureSchema(env);
