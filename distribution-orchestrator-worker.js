@@ -1108,6 +1108,20 @@ if(u.pathname==='/api/distribution/priorities/public-reconcile'&&request.method=
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   return Response.json(await runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:'make_handoff_recovery'},()=>rebalanceDistributionPriorities(env)),{headers:H});
 }
+if(u.pathname==='/api/growth/engine-health/public-reconcile'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  const results={};
+  const run=async(key,engine,mission,minutes,fn)=>{
+    try{results[key]=await runWithLedger(env,{engine,mission,triggerName:'make_engine_health_recovery',singleFlightMinutes:minutes},fn)}
+    catch(error){results[key]={ok:false,error:String(error?.message||error).slice(0,500)}}
+  };
+  await run('economicLearning','distribution','economic_learning',20,()=>learnEconomics(env));
+  await run('operatingPriorities','distribution','operating_priorities',20,()=>rebalanceDistributionPriorities(env));
+  await run('catalogRuntimeQuality','catalog','runtime_quality',20,()=>contractVerifyCatalogBatch(env));
+  await run('contentSocialIntelligence','content','social_intelligence',15,()=>runContentSocialIntelligenceCycle(env));
+  const ok=Object.values(results).every(x=>x?.ok!==false);
+  return Response.json({ok,mode:'engine_health_recovery_v1',results},{status:ok?200:207,headers:H});
+}
 if(u.pathname==='/api/growth/execution/core-recover'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   return Response.json(await runProtectedGrowthCoreRecovery(env),{headers:H});
