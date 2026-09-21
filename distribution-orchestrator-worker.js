@@ -302,7 +302,7 @@ async function coordinateGrowthOpportunities(env){
   inputFreshness.catalogHealth.fresh=inputFreshness.catalogHealth.ageHours<=36;
   inputFreshness.toolProfileHolds.fresh=inputFreshness.toolProfileHolds.ageHours<=72;
   const searchOpportunities=inputFreshness.organicGrowth.fresh&&Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
-  const searchRealityTechnical=inputFreshness.gscReality.fresh&&Array.isArray(gscReality?.opportunities)?gscReality.opportunities.filter(x=>['index_issue','canonical_mismatch'].includes(String(x?.kind||''))).slice(0,50):[];
+  const searchRealityTechnical=inputFreshness.gscReality.fresh&&Array.isArray(gscReality?.opportunities)?gscReality.opportunities.filter(x=>['index_issue','canonical_mismatch','sitemap_redirect'].includes(String(x?.kind||''))).slice(0,50):[];
   const directGscPages=inputFreshness.gsc.fresh&&Array.isArray(gscSignals?.pages)?gscSignals.pages:[];
   const normalizedGscPages=directGscPages
     .filter(x=>Number(x?.impressions||0)>0)
@@ -334,7 +334,7 @@ async function coordinateGrowthOpportunities(env){
     const kind=String(row.kind||'index_issue');
     const page=String(row.page||'/');
     const key=`gsc-reality:${kind}:${page}`.slice(0,480);
-    const actions=kind==='canonical_mismatch'?['repair_canonical_alignment','search_measurement']:['repair_indexing','search_measurement'];
+    const actions=['canonical_mismatch','sitemap_redirect'].includes(kind)?['repair_canonical_alignment','search_measurement']:['repair_indexing','search_measurement'];
     const signals={
       lane:'seo_index_reality',
       action:kind,
