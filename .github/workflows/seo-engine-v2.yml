@@ -77,6 +77,8 @@ jobs:
         run: node scripts/sync-comparison-demand.mjs
       - name: Generate commercial comparisons
         run: node scripts/generate-comparisons.mjs
+      - name: Validate comparison editorial contract
+        run: node --test tests/comparison-editorial-contract.test.mjs
       - name: Enrich comparisons with decision context
         run: node scripts/enrich-comparison-context.mjs
       - name: Generate indexable tool profiles
