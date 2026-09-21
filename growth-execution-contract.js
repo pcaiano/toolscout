@@ -361,7 +361,7 @@ export async function rebalanceExecutionAdmission(env){
         claimed_at=NULL,attempted_at=NULL,last_result='batch_executor_waiting_for_subject_evidence_v3',updated_at=datetime('now')
     WHERE source_kind='opportunity'
       AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle')
-      AND status IN ('claimed','attempted','stalled')
+      AND status IN ('pending','claimed','attempted','stalled')
       AND COALESCE(last_result,'') NOT LIKE 'executor_error:%'`).run();
 
   let unavailableReleased=0;
