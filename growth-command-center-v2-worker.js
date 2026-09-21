@@ -358,7 +358,7 @@ async function growthOpsSnapshot(request,env,ctx,stats){
     safeAll(env,`SELECT surface_slug,event_type,status,detail,human_sessions,outbound_clicks,monetized_outbound,revenue,created_at FROM distribution_events ORDER BY created_at DESC LIMIT 30`),
     safeAll(env,`SELECT tool_slug,previous_state,new_state,actor_source,notes,created_at FROM affiliate_workflow_history ORDER BY created_at DESC LIMIT 30`),
     assetJson(request,env,'/reports/gsc-signals.json',{items:[],generatedAt:null}),
-    assetJson(request,env,'/reports/gsc-search-reality.json',{generatedAt:null,source:null,searchPerformance:{},indexHealth:{},sitemaps:{},opportunities:[]}),
+    assetJson(request,env,'/data/gsc-search-reality.json',{generatedAt:null,source:null,searchPerformance:{},indexHealth:{},sitemaps:{},opportunities:[]}),
     assetText(request,env,'/sitemap.xml',''),
     assetJson(request,env,'/reports/content-intelligence.json',{generatedAt:null}),
     assetJson(request,env,'/reports/organic-growth-opportunities.json',{generatedAt:null,summary:{}}),
