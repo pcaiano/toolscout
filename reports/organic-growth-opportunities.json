@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-21T13:18:32.423Z",
+  "generatedAt": "2026-09-21T22:11:00.627Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v6",
   "objective": "Autonomously pursue sustainable search rankings and qualified clicks while separating indexing failures from content-performance failures.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 1,
-    "searchImpressions": 3557,
-    "ctr": 0.0281,
+    "searchImpressions": 3655,
+    "ctr": 0.0274,
     "gscStartDate": "2026-08-25",
     "gscEndDate": "2026-09-21",
     "gscDataState": "all",
@@ -31,10 +31,10 @@
     "Measure every intervention and re-evaluate from fresh Search Console and indexing data."
   ],
   "summary": {
-    "observedGscIntents": 37,
-    "observedGscPages": 109,
+    "observedGscIntents": 38,
+    "observedGscPages": 102,
     "searchClicks": 1,
-    "searchImpressions": 3557,
+    "searchImpressions": 3655,
     "organicAcquisitionStatus": "early-search-acquisition",
     "indexingRecovery": 1,
     "actionableOpportunities": 21,
@@ -1818,13 +1818,13 @@
   ],
   "pageOpportunities": [
     {
-      "page": "https://trytoolscout.org/tools.html",
-      "pathname": "/tools.html",
+      "page": "https://trytoolscout.org/tools",
+      "pathname": "/tools",
       "type": "directory",
       "clicks": 0,
-      "impressions": 29,
+      "impressions": 30,
       "ctr": 0,
-      "position": 12.7586,
+      "position": 12.5333,
       "topQueries": [
         {
           "query": "\"moz\" \"keyword research\" -site:reddit.com -site:twitter.com -site:x.com -site:wykop.pl -site:tripadvisor.com -site:youtube.com -site:yelp.com -site:booking.com -site:facebook.com -site:instagram.com -site:tiktok.com",
@@ -1869,12 +1869,12 @@
       "meaningfulSample": true,
       "strategicOpportunity": true,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.273,
+      "opportunityScore": 2.394,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/activecampaign-vs-mailchimp.html",
-      "pathname": "/activecampaign-vs-mailchimp.html",
+      "page": "https://trytoolscout.org/activecampaign-vs-mailchimp",
+      "pathname": "/activecampaign-vs-mailchimp",
       "type": "comparison",
       "clicks": 0,
       "impressions": 5,
@@ -1897,32 +1897,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "http://trytoolscout.org/tools/shopify",
-      "pathname": "/tools/shopify",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 3,
-      "topQueries": [],
-      "indexingSignal": {
-        "url": "https://trytoolscout.org/tools/shopify",
-        "status": "canonical-alternate",
-        "verdict": "NEUTRAL",
-        "coverageState": "Alternate page with proper canonical tag",
-        "indexingState": "INDEXING_ALLOWED",
-        "lastCrawlTime": "2026-09-11T15:59:27+00:00"
-      },
-      "indexingBarrier": true,
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.333,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/guides.html",
-      "pathname": "/guides.html",
+      "page": "https://trytoolscout.org/guides",
+      "pathname": "/guides",
       "type": "directory",
       "clicks": 0,
       "impressions": 2,
@@ -1945,8 +1921,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-free-project-management-tools.html",
-      "pathname": "/best-free-project-management-tools.html",
+      "page": "https://trytoolscout.org/best-free-project-management-tools",
+      "pathname": "/best-free-project-management-tools",
       "type": "guide",
       "clicks": 0,
       "impressions": 80,
@@ -2000,13 +1976,13 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/shopify.html",
-      "pathname": "/tools/shopify.html",
+      "page": "https://trytoolscout.org/tools/shopify",
+      "pathname": "/tools/shopify",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 3,
       "ctr": 0,
-      "position": 46,
+      "position": 31.6667,
       "topQueries": [],
       "indexingSignal": {
         "url": "https://trytoolscout.org/tools/shopify",
@@ -2020,7 +1996,7 @@
       "meaningfulSample": false,
       "strategicOpportunity": false,
       "evidenceConfidence": "low",
-      "opportunityScore": 0.043,
+      "opportunityScore": 0.095,
       "outcome": "visibility-only"
     },
     {
@@ -2028,9 +2004,9 @@
       "pathname": "/",
       "type": "home",
       "clicks": 1,
-      "impressions": 119,
-      "ctr": 0.8403,
-      "position": 7.5294,
+      "impressions": 125,
+      "ctr": 0.8,
+      "position": 7.536,
       "topQueries": [
         {
           "query": "toolscout",
@@ -2043,6 +2019,12 @@
           "clicks": 0,
           "impressions": 5,
           "position": 7.8
+        },
+        {
+          "query": "toolscout",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 10
         },
         {
           "query": "trucscout",
@@ -2063,12 +2045,12 @@
       "meaningfulSample": true,
       "strategicOpportunity": true,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 18.966,
+      "opportunityScore": 19.904,
       "outcome": "traffic-observed"
     },
     {
-      "page": "https://trytoolscout.org/tools/make.html",
-      "pathname": "/tools/make.html",
+      "page": "https://trytoolscout.org/tools/make",
+      "pathname": "/tools/make",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 7,
@@ -2084,25 +2066,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "http://trytoolscout.org/compare",
-      "pathname": "/compare",
-      "type": "directory",
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 2,
-      "topQueries": [],
-      "indexingSignal": null,
-      "indexingBarrier": false,
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 1,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-forms-for-small-business.html",
-      "pathname": "/best-forms-for-small-business.html",
+      "page": "https://trytoolscout.org/best-forms-for-small-business",
+      "pathname": "/best-forms-for-small-business",
       "type": "guide",
       "clicks": 0,
       "impressions": 4,
@@ -2118,39 +2083,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "http://trytoolscout.org/",
-      "pathname": "/",
-      "type": "home",
-      "clicks": 0,
-      "impressions": 6,
-      "ctr": 0,
-      "position": 7.6667,
-      "topQueries": [
-        {
-          "query": "toolscout",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 10
-        }
-      ],
-      "indexingSignal": {
-        "url": "https://trytoolscout.org/",
-        "status": "indexed",
-        "verdict": "PASS",
-        "coverageState": "Submitted and indexed",
-        "indexingState": "INDEXING_ALLOWED",
-        "lastCrawlTime": "2026-09-11T02:44:30+00:00"
-      },
-      "indexingBarrier": false,
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.783,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/chatgpt.html",
-      "pathname": "/tools/chatgpt.html",
+      "page": "https://trytoolscout.org/tools/chatgpt",
+      "pathname": "/tools/chatgpt",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 3,
@@ -2166,25 +2100,32 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/privacy.html",
-      "pathname": "/privacy.html",
+      "page": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
+      "pathname": "/news/github-actions-workflow-execution-protections-ga",
       "type": "other",
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 4,
       "ctr": 0,
-      "position": 7.4,
-      "topQueries": [],
+      "position": 6,
+      "topQueries": [
+        {
+          "query": "github actions execution protections ga",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 7.3333
+        }
+      ],
       "indexingSignal": null,
       "indexingBarrier": false,
       "meaningfulSample": false,
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
-      "opportunityScore": 0.676,
+      "opportunityScore": 0.667,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/perplexity.html",
-      "pathname": "/tools/perplexity.html",
+      "page": "https://trytoolscout.org/tools/perplexity",
+      "pathname": "/tools/perplexity",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 4,
@@ -2224,8 +2165,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/beehiiv.html",
-      "pathname": "/tools/beehiiv.html",
+      "page": "https://trytoolscout.org/tools/beehiiv",
+      "pathname": "/tools/beehiiv",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 3,
@@ -2241,32 +2182,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
-      "pathname": "/news/github-actions-workflow-execution-protections-ga",
-      "type": "other",
-      "clicks": 0,
-      "impressions": 3,
-      "ctr": 0,
-      "position": 7.3333,
-      "topQueries": [
-        {
-          "query": "github actions execution protections ga",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 7.3333
-        }
-      ],
-      "indexingSignal": null,
-      "indexingBarrier": false,
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.409,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/tools/canva.html",
-      "pathname": "/tools/canva.html",
+      "page": "https://trytoolscout.org/tools/canva",
+      "pathname": "/tools/canva",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 3,
@@ -2306,7 +2223,7 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "http://trytoolscout.org/best-sales-prospecting-tools",
+      "page": "https://trytoolscout.org/best-sales-prospecting-tools",
       "pathname": "/best-sales-prospecting-tools",
       "type": "guide",
       "clicks": 0,
@@ -2323,13 +2240,13 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "http://trytoolscout.org/tool?tool=zoho-crm",
-      "pathname": "/tool",
-      "type": "other",
+      "page": "https://trytoolscout.org/tools/ahrefs",
+      "pathname": "/tools/ahrefs",
+      "type": "tool-profile",
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
-      "position": 3,
+      "position": 6,
       "topQueries": [],
       "indexingSignal": null,
       "indexingBarrier": false,
@@ -2340,8 +2257,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/gemini.html",
-      "pathname": "/tools/gemini.html",
+      "page": "https://trytoolscout.org/tools/gemini",
+      "pathname": "/tools/gemini",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 1,
@@ -2357,8 +2274,25 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-cold-email-tools.html",
-      "pathname": "/best-cold-email-tools.html",
+      "page": "https://trytoolscout.org/privacy",
+      "pathname": "/privacy",
+      "type": "other",
+      "clicks": 0,
+      "impressions": 6,
+      "ctr": 0,
+      "position": 18.6667,
+      "topQueries": [],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": false,
+      "strategicOpportunity": true,
+      "evidenceConfidence": "low",
+      "opportunityScore": 0.321,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/best-cold-email-tools",
+      "pathname": "/best-cold-email-tools",
       "type": "guide",
       "clicks": 0,
       "impressions": 2,
@@ -2374,8 +2308,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/lemlist.html",
-      "pathname": "/tools/lemlist.html",
+      "page": "https://trytoolscout.org/tools/lemlist",
+      "pathname": "/tools/lemlist",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 2,
@@ -2391,8 +2325,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-team-collaboration-tools.html",
-      "pathname": "/best-team-collaboration-tools.html",
+      "page": "https://trytoolscout.org/best-team-collaboration-tools",
+      "pathname": "/best-team-collaboration-tools",
       "type": "guide",
       "clicks": 0,
       "impressions": 2,
@@ -2408,8 +2342,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-email-marketing-tools.html",
-      "pathname": "/best-email-marketing-tools.html",
+      "page": "https://trytoolscout.org/best-email-marketing-tools",
+      "pathname": "/best-email-marketing-tools",
       "type": "guide",
       "clicks": 0,
       "impressions": 2,
@@ -2425,8 +2359,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-developer-tools.html",
-      "pathname": "/best-developer-tools.html",
+      "page": "https://trytoolscout.org/best-developer-tools",
+      "pathname": "/best-developer-tools",
       "type": "guide",
       "clicks": 0,
       "impressions": 4,
@@ -2449,8 +2383,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-marketing-automation-tools.html",
-      "pathname": "/best-marketing-automation-tools.html",
+      "page": "https://trytoolscout.org/best-marketing-automation-tools",
+      "pathname": "/best-marketing-automation-tools",
       "type": "guide",
       "clicks": 0,
       "impressions": 1,
@@ -2466,8 +2400,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/integrately.html",
-      "pathname": "/tools/integrately.html",
+      "page": "https://trytoolscout.org/tools/integrately",
+      "pathname": "/tools/integrately",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 1,
@@ -2480,23 +2414,6 @@
       "strategicOpportunity": true,
       "evidenceConfidence": "low",
       "opportunityScore": 0.167,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "http://trytoolscout.org/tool?tool=monday-crm",
-      "pathname": "/tool",
-      "type": "other",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 7,
-      "topQueries": [],
-      "indexingSignal": null,
-      "indexingBarrier": false,
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.143,
       "outcome": "visibility-only"
     },
     {
@@ -2517,8 +2434,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-crm-for-consultants.html",
-      "pathname": "/best-crm-for-consultants.html",
+      "page": "https://trytoolscout.org/best-crm-for-consultants",
+      "pathname": "/best-crm-for-consultants",
       "type": "guide",
       "clicks": 0,
       "impressions": 1,
@@ -2534,8 +2451,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-crm-for-small-business.html",
-      "pathname": "/best-crm-for-small-business.html",
+      "page": "https://trytoolscout.org/best-crm-for-small-business",
+      "pathname": "/best-crm-for-small-business",
       "type": "guide",
       "clicks": 0,
       "impressions": 1,
@@ -2551,8 +2468,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/ubersuggest.html",
-      "pathname": "/tools/ubersuggest.html",
+      "page": "https://trytoolscout.org/tools/ubersuggest",
+      "pathname": "/tools/ubersuggest",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 1,
@@ -2568,8 +2485,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/ahrefs.html",
-      "pathname": "/tools/ahrefs.html",
+      "page": "https://trytoolscout.org/tools/instantly",
+      "pathname": "/tools/instantly",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 1,
@@ -2585,25 +2502,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/instantly.html",
-      "pathname": "/tools/instantly.html",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 9,
-      "topQueries": [],
-      "indexingSignal": null,
-      "indexingBarrier": false,
-      "meaningfulSample": false,
-      "strategicOpportunity": true,
-      "evidenceConfidence": "low",
-      "opportunityScore": 0.111,
-      "outcome": "visibility-only"
-    },
-    {
-      "page": "https://trytoolscout.org/best-tools-for-agencies.html",
-      "pathname": "/best-tools-for-agencies.html",
+      "page": "https://trytoolscout.org/best-tools-for-agencies",
+      "pathname": "/best-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
       "impressions": 1,
@@ -2619,8 +2519,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-video-content-tools.html",
-      "pathname": "/best-video-content-tools.html",
+      "page": "https://trytoolscout.org/best-video-content-tools",
+      "pathname": "/best-video-content-tools",
       "type": "guide",
       "clicks": 0,
       "impressions": 1,
@@ -2636,8 +2536,8 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/omnisend.html",
-      "pathname": "/tools/omnisend.html",
+      "page": "https://trytoolscout.org/tools/omnisend",
+      "pathname": "/tools/omnisend",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 1,
@@ -2653,25 +2553,25 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-seo-tools-for-agencies.html",
-      "pathname": "/best-seo-tools-for-agencies.html",
+      "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
+      "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 804,
+      "impressions": 810,
       "ctr": 0,
-      "position": 75.8595,
+      "position": 75.8444,
       "topQueries": [
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 239,
-          "position": 72.5481
+          "impressions": 242,
+          "position": 72.6405
         },
         {
           "query": "seo tools for agency",
           "clicks": 0,
-          "impressions": 165,
-          "position": 80.0545
+          "impressions": 166,
+          "position": 80.012
         },
         {
           "query": "what is the best tool for seo agency",
@@ -2697,23 +2597,23 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 10.599,
+      "opportunityScore": 10.68,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/semrush.html",
-      "pathname": "/tools/semrush.html",
+      "page": "https://trytoolscout.org/tools/semrush",
+      "pathname": "/tools/semrush",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 317,
+      "impressions": 321,
       "ctr": 0,
-      "position": 55.5615,
+      "position": 55.514,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 138,
-          "position": 56.8261
+          "impressions": 139,
+          "position": 56.7986
         },
         {
           "query": "semrush software",
@@ -2724,13 +2624,13 @@
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 43,
-          "position": 51.6744
+          "impressions": 44,
+          "position": 51.5682
         },
         {
           "query": "semrush tools",
           "clicks": 0,
-          "impressions": 26,
+          "impressions": 27,
           "position": 52
         },
         {
@@ -2745,17 +2645,17 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 5.705,
+      "opportunityScore": 5.782,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-seo-keyword-research-tools.html",
-      "pathname": "/best-seo-keyword-research-tools.html",
+      "page": "https://trytoolscout.org/best-seo-keyword-research-tools",
+      "pathname": "/best-seo-keyword-research-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 322,
+      "impressions": 325,
       "ctr": 0,
-      "position": 75.7733,
+      "position": 75.56,
       "topQueries": [
         {
           "query": "website research tool",
@@ -2793,17 +2693,17 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 4.25,
+      "opportunityScore": 4.301,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/airtable.html",
-      "pathname": "/tools/airtable.html",
+      "page": "https://trytoolscout.org/tools/airtable",
+      "pathname": "/tools/airtable",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 291,
+      "impressions": 294,
       "ctr": 0,
-      "position": 73.9622,
+      "position": 74.1871,
       "topQueries": [
         {
           "query": "airtable",
@@ -2832,8 +2732,8 @@
         {
           "query": "what is airtable and how it works",
           "clicks": 0,
-          "impressions": 19,
-          "position": 92.1579
+          "impressions": 22,
+          "position": 92.6818
         }
       ],
       "indexingSignal": null,
@@ -2841,17 +2741,17 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.934,
+      "opportunityScore": 3.963,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-no-code-automation-tools.html",
-      "pathname": "/best-no-code-automation-tools.html",
+      "page": "https://trytoolscout.org/best-no-code-automation-tools",
+      "pathname": "/best-no-code-automation-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 264,
+      "impressions": 266,
       "ctr": 0,
-      "position": 74.0833,
+      "position": 74.1053,
       "topQueries": [
         {
           "query": "no code automation tools",
@@ -2878,10 +2778,10 @@
           "position": 75.9474
         },
         {
-          "query": "no code automation tool",
+          "query": "which workflow automation tools are the most popular for no-code platforms?",
           "clicks": 0,
-          "impressions": 17,
-          "position": 71
+          "impressions": 18,
+          "position": 76.8889
         }
       ],
       "indexingSignal": null,
@@ -2889,23 +2789,23 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.564,
+      "opportunityScore": 3.589,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/klaviyo.html",
-      "pathname": "/tools/klaviyo.html",
+      "page": "https://trytoolscout.org/tools/klaviyo",
+      "pathname": "/tools/klaviyo",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 190,
+      "impressions": 195,
       "ctr": 0,
-      "position": 61.4632,
+      "position": 61.4513,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 95,
-          "position": 60.1053
+          "impressions": 98,
+          "position": 59.8776
         },
         {
           "query": "klayvio",
@@ -2922,8 +2822,8 @@
         {
           "query": "clavio",
           "clicks": 0,
-          "impressions": 5,
-          "position": 62.4
+          "impressions": 6,
+          "position": 68.1667
         },
         {
           "query": "klavyio",
@@ -2937,17 +2837,17 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 3.091,
+      "opportunityScore": 3.173,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-project-management-tools.html",
-      "pathname": "/best-project-management-tools.html",
+      "page": "https://trytoolscout.org/best-project-management-tools",
+      "pathname": "/best-project-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 105,
+      "impressions": 120,
       "ctr": 0,
-      "position": 38.7524,
+      "position": 39.4083,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -2985,17 +2885,17 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.71,
+      "opportunityScore": 3.045,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-funnel-builder.html",
-      "pathname": "/best-funnel-builder.html",
+      "page": "https://trytoolscout.org/best-funnel-builder",
+      "pathname": "/best-funnel-builder",
       "type": "guide",
       "clicks": 0,
-      "impressions": 189,
+      "impressions": 194,
       "ctr": 0,
-      "position": 76,
+      "position": 75.9227,
       "topQueries": [
         {
           "query": "best funnel builder",
@@ -3033,17 +2933,17 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.487,
+      "opportunityScore": 2.555,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/moz-pro.html",
-      "pathname": "/tools/moz-pro.html",
+      "page": "https://trytoolscout.org/tools/moz-pro",
+      "pathname": "/tools/moz-pro",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 131,
+      "impressions": 132,
       "ctr": 0,
-      "position": 69.7328,
+      "position": 69.2424,
       "topQueries": [
         {
           "query": "moz pro tools",
@@ -3081,12 +2981,12 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.879,
+      "opportunityScore": 1.906,
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/tools/tally.html",
-      "pathname": "/tools/tally.html",
+      "page": "https://trytoolscout.org/tools/tally",
+      "pathname": "/tools/tally",
       "type": "tool-profile",
       "clicks": 0,
       "impressions": 60,
@@ -3133,13 +3033,13 @@
       "outcome": "visibility-only"
     },
     {
-      "page": "https://trytoolscout.org/best-free-crm.html",
-      "pathname": "/best-free-crm.html",
+      "page": "https://trytoolscout.org/best-free-crm",
+      "pathname": "/best-free-crm",
       "type": "guide",
       "clicks": 0,
-      "impressions": 78,
+      "impressions": 80,
       "ctr": 0,
-      "position": 74.1026,
+      "position": 74.0625,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -3177,7 +3077,217 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 1.053,
+      "opportunityScore": 1.08,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/best-keyword-research-tools",
+      "pathname": "/best-keyword-research-tools",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 76,
+      "ctr": 0,
+      "position": 73.3553,
+      "topQueries": [
+        {
+          "query": "keyword discovery tool",
+          "clicks": 0,
+          "impressions": 65,
+          "position": 74.2923
+        },
+        {
+          "query": "keyword discovery tools",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 74.1
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 1.036,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/best-crm-for-sales-teams",
+      "pathname": "/best-crm-for-sales-teams",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 55,
+      "ctr": 0,
+      "position": 74.8364,
+      "topQueries": [
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 19,
+          "position": 73.1579
+        },
+        {
+          "query": "crm for sales team",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 79.1538
+        },
+        {
+          "query": "best crm for sales teams",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 75.2222
+        },
+        {
+          "query": "best crm for sales team",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 65.4286
+        },
+        {
+          "query": "top crm platforms for sales teams",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 76.5
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 0.735,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/tools/netlify",
+      "pathname": "/tools/netlify",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 44,
+      "ctr": 0,
+      "position": 62.4773,
+      "topQueries": [
+        {
+          "query": "netlify",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 63.5
+        },
+        {
+          "query": "what is netlify",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 70.8
+        },
+        {
+          "query": "netlify plans",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 72.3333
+        },
+        {
+          "query": "netlify cost",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 69.5
+        },
+        {
+          "query": "should you use netlify",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 75.5
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 0.704,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/asana-vs-clickup",
+      "pathname": "/asana-vs-clickup",
+      "type": "comparison",
+      "clicks": 0,
+      "impressions": 23,
+      "ctr": 0,
+      "position": 66.1739,
+      "topQueries": [
+        {
+          "query": "asana clickup integration",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 84.1429
+        },
+        {
+          "query": "asana vs clickup",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 82.6667
+        },
+        {
+          "query": "clickup vs asana",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 71
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 0.348,
+      "outcome": "visibility-only"
+    },
+    {
+      "page": "https://trytoolscout.org/best-customer-support-tools",
+      "pathname": "/best-customer-support-tools",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 26,
+      "ctr": 0,
+      "position": 75.6923,
+      "topQueries": [
+        {
+          "query": "support tools",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 88.7273
+        },
+        {
+          "query": "customer support tool",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 63.4
+        },
+        {
+          "query": "tools for customer support",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 58.3333
+        },
+        {
+          "query": "suport tools",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 100.3333
+        },
+        {
+          "query": "customer support tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 54
+        }
+      ],
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "meaningfulSample": true,
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "opportunityScore": 0.343,
       "outcome": "visibility-only"
     }
   ],

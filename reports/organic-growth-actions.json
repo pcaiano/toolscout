@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-21T13:18:33.133Z",
+  "generatedAt": "2026-09-21T22:11:01.245Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-09-21T13:18:33.058Z",
+  "brainDirectivesGeneratedAt": "2026-09-21T22:11:01.183Z",
   "newInterventions": [],
   "activeOptimizations": [
     {
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 804,
+        "impressions": 810,
         "ctr": 0,
-        "position": 75.8595
+        "position": 75.8444
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -33,7 +33,7 @@
         "ctr": 0,
         "position": 39.4083
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -49,11 +49,11 @@
       "intent": "best-no-code-automation-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 264,
+        "impressions": 266,
         "ctr": 0,
-        "position": 74.0833
+        "position": 74.1053
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -73,7 +73,7 @@
         "ctr": 0,
         "position": 74.8364
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -89,11 +89,11 @@
       "intent": "best-funnel-builder",
       "latest": {
         "clicks": 0,
-        "impressions": 190,
+        "impressions": 194,
         "ctr": 0,
-        "position": 75.9579
+        "position": 75.9227
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -113,7 +113,7 @@
         "ctr": 0,
         "position": 58
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -140,7 +140,7 @@
         "ctr": 0,
         "position": 74.0625
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -156,11 +156,11 @@
       "intent": "best-keyword-research-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 75,
+        "impressions": 76,
         "ctr": 0,
-        "position": 73.3733
+        "position": 73.3553
       },
-      "lastSeenAt": "2026-09-21T13:18:33.133Z",
+      "lastSeenAt": "2026-09-21T22:11:01.245Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
