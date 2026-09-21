@@ -79,7 +79,7 @@ async function decorate(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-chart-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-chart',version:3,chart:'human-visitors-top',series:3,dualAxis:true,monetizedSeries:'dashed-square-markers',healthSemantics:'engine-state-plus-observability',noAmbiguousNoEvidence:true},{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-chart-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-chart',version:4,chart:'human-visitors-top',series:3,dualAxis:true,monetizedSeries:'dashed-square-markers',healthSemantics:'engine-state-plus-observability',noAmbiguousNoEvidence:true},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
