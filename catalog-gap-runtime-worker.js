@@ -109,8 +109,8 @@ function linkScore(url,label,slug){
   return score;
 }
 async function discover(slug,examples){
-  const hint=OFFICIAL[slug];
-  if(hint){const page=await fetchPage(hint.url);if(page&&!blocked(new URL(page.url).hostname))return{...page,hint}}
+  const hint=PROFILE_HINTS[slug];
+  if(hint){const page=await fetchPage(hint.verificationUrl||hint.sourceUrl);if(page&&!blocked(new URL(page.url).hostname))return{...page,hint}}
   const candidates=new Map();
   for(const src of (examples||[]).slice(0,3)){
     const page=await fetchPage(src);if(!page)continue;
