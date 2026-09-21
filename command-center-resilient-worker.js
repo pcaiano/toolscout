@@ -196,7 +196,7 @@ async function resilientSnapshot(request,env,ctx){
     assetText(request,env,'/sitemap.xml',''),
     lightweightQueue(request,env,ctx)
   ]);
-  const [growthState,growthRnd,contactRoutes,autonomyEvents,humanEvents,placements,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates]=await Promise.all([
+  const [growthState,growthRnd,contactRoutes,autonomyEvents,humanEvents,placements,catalogRuntime,catalogCandidates,catalogGaps,catalogRecentAdmissions,newsCandidates]=await Promise.all([
     safeFirst(env,`SELECT COUNT(*) active,SUM(CASE WHEN subject_type='tool' THEN 1 ELSE 0 END) tools,SUM(CASE WHEN subject_type='surface' THEN 1 ELSE 0 END) surfaces,SUM(CASE WHEN subject_type='search' THEN 1 ELSE 0 END) search,SUM(CASE WHEN subject_type='affiliate' THEN 1 ELSE 0 END) affiliate,SUM(CASE WHEN subject_type LIKE 'catalog_%' THEN 1 ELSE 0 END) catalog,SUM(CASE WHEN subject_type='news_update' THEN 1 ELSE 0 END) news,MAX(last_evaluated_at) last_evaluated_at FROM growth_opportunity_state WHERE status='active'`),
     safeFirst(env,`SELECT COUNT(*) active,MAX(updated_at) last_evaluated_at FROM growth_rnd_experiments WHERE status='active'`),
     safeFirst(env,`SELECT COUNT(*) routes,COUNT(DISTINCT surface_slug) surfaces FROM distribution_contact_routes WHERE status='discovered'`),
@@ -206,6 +206,7 @@ async function resilientSnapshot(request,env,ctx){
     safeFirst(env,`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`),
     safeFirst(env,`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status='admitted_coverage'`),
     safeFirst(env,`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`),
+    safeAll(env,`SELECT tool_slug,detail,evidence_json,created_at FROM catalog_runtime_events WHERE event_type='catalog_growth_admitted' AND status='completed' ORDER BY created_at DESC LIMIT 8`),
     safeFirst(env,`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`)
   ]);
   const trackingSince=parseSqliteUtc(trackingMeta?.value),trackingDay=trackingSince?zonedDayKey(trackingSince):todayKey;
@@ -284,6 +285,7 @@ async function resilientSnapshot(request,env,ctx){
     profile_holds:0,
     runtime_candidates:n(catalogCandidates?.total),
     active_opportunities:n(growthState?.catalog),
+    recent_admissions:(catalogRecentAdmissions||[]).map(x=>{let e={};try{e=JSON.parse(x.evidence_json||'{}')}catch{}return{slug:x.tool_slug,name:e.name||x.tool_slug,toolscout_url:e.toolscout_url||('/tools/'+x.tool_slug),source_url:e.source_url||null,category:e.category||null,created_at:x.created_at||null,detail:x.detail||null}}),
     report_age_days:catalogRuntime?.last_checked_at?Math.max(0,Math.floor((Date.now()-parseSqliteUtc(catalogRuntime.last_checked_at).getTime())/86400000)):null,
     freshness_target_days:7,
     freshness_status:catalogRuntime?.last_checked_at?'runtime observed':'awaiting runtime evidence',

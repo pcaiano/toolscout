@@ -90,7 +90,7 @@ const READY_CAPS=Object.freeze({
   catalog_cycle:1,
   growth_supervisor:1
 });
-const GENERIC_BATCH_EXECUTORS=new Set(['distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle']);
+const GENERIC_BATCH_EXECUTORS=new Set(['distribution_network','distribution_autonomous','affiliate_cycle']);
 
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const dt=minutes=>new Date(Date.now()+minutes*60000).toISOString().replace('T',' ').slice(0,19);
@@ -360,7 +360,7 @@ export async function rebalanceExecutionAdmission(env){
     SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
         claimed_at=NULL,attempted_at=NULL,last_result='batch_executor_waiting_for_subject_evidence_v3',updated_at=datetime('now')
     WHERE source_kind='opportunity'
-      AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle')
+      AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle')
       AND status IN ('pending','claimed','attempted','stalled')
       AND COALESCE(last_result,'') NOT LIKE 'executor_error:%'`).run();
 
@@ -564,7 +564,7 @@ export async function reconcileExecutionContracts(env){
   await reconcileExecutionDeadlines(env);
   const tasks=await all(env,`SELECT * FROM growth_execution_contract
     WHERE status IN ('pending','claimed','attempted','stalled','executor_missing')
-       OR (status='deferred' AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle','catalog_cycle'))
+       OR (status='deferred' AND executor IN ('distribution_network','distribution_autonomous','affiliate_cycle'))
     ORDER BY CASE status WHEN 'claimed' THEN 0 WHEN 'attempted' THEN 1 WHEN 'stalled' THEN 2 WHEN 'pending' THEN 3 WHEN 'executor_missing' THEN 4 ELSE 5 END,
              priority_score DESC,created_at ASC
     LIMIT 160`);

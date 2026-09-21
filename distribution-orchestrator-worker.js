@@ -7,7 +7,7 @@ import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDea
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
-import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates} from './catalog-autonomy-worker.js';
+import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates,executeCatalogGrowthTask} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
@@ -699,6 +699,12 @@ async function runGrowthExecutionContractCycle(env){
         supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v3',claim.taskIds);
       }else if(executor==='content_issue'&&out?.brief?.issued===true&&out?.brief?.execution_task_id===task?.task_id){
         directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'content_brief_task_specific_v3',externalId:out.brief.brief_id||null,evidence:{brief_id:out.brief.brief_id||null,growth_opportunity_key:out.brief.growth_opportunity_key||null}});
+      }else if(executor==='catalog_cycle'&&out?.task?.verified===true&&task?.subject_type==='catalog_gap'){
+        const related=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='catalog_cycle' AND subject_type='catalog_gap' AND subject_key=? AND status NOT IN ('verified','blocked','cancelled','human_required')`).bind(task.subject_key).all();
+        const ids=(related.results||[]).map(x=>x.task_id);
+        for(const taskId of ids)await recordExecutionProof(env,{taskId,executor,status:'verified',detail:out.task.admitted?'catalog_gap_admitted_from_first_party_evidence':'catalog_gap_already_admitted',externalId:out.task.toolscoutUrl||null,evidence:{slug:out.task.slug||task.subject_key,toolscout_url:out.task.toolscoutUrl||null,source_url:out.task.profile?.sourceUrl||null,category:out.task.profile?.category||null,admitted:Boolean(out.task.admitted)}});
+        await env.DB.prepare(`UPDATE growth_opportunity_state SET status='resolved',last_evaluated_at=datetime('now'),updated_at=datetime('now') WHERE status='active' AND subject_type='catalog_gap' AND subject_key=?`).bind(task.subject_key).run().catch(()=>{});
+        directProof={verified:ids.length,subject_key:task.subject_key,admitted:Boolean(out.task.admitted),toolscout_url:out.task.toolscoutUrl||null};
       }else{
         deferred=await deferExecutionTask(env,task.task_id,'cycle_completed_without_task_specific_proof_v3');
       }
@@ -735,6 +741,7 @@ async function runGrowthExecutionContractCycle(env){
   });
   await runInternal('affiliate_cycle',(task)=>runAffiliateCoverageCycle(env,task));
   await runInternal('catalog_cycle',async(task)=>{
+    if(task?.source_kind==='opportunity'&&task?.subject_type==='catalog_gap')return{task:await executeCatalogGrowthTask(env,task)};
     const verify=await contractVerifyCatalogBatch(env);
     const admit=await contractAdmitCatalogCandidates(env);
     return{verify,admit};
