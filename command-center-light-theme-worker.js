@@ -247,7 +247,7 @@ async function augmentEntrypointHealth(response) {
   let data;
   try { data = await response.json(); } catch { return response; }
   data.entrypoint = 'command-center-light-theme-worker';
-  data.entrypointVersion = 12;
+  data.entrypointVersion = 13;
   data.commandCenterComposition = 'canonical-growth-v2';
   data.autonomousGrowthBrain = 'shared-growth-v3';
   data.affiliateEngineVersion = '2.1';
