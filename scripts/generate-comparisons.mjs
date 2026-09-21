@@ -41,6 +41,55 @@ function editorialConclusion(a,b){
   const third=overlap.length?`Because both list ${listPhrase(overlap)}, compare the depth of those shared capabilities against your workflow before choosing.`:'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
   return clean([first,second,third].filter(Boolean).join(' '));
 }
+function overlapValues(a,b,key){
+  const bSet=new Set((b[key]||[]).map(v=>String(v).toLowerCase()));
+  return (a[key]||[]).filter(v=>bSet.has(String(v).toLowerCase()));
+}
+function scoreDistance(a,b){
+  const diffs=dimensions.map(key=>Math.abs(Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)));
+  return diffs.reduce((sum,v)=>sum+v,0)/Math.max(1,diffs.length);
+}
+function comparableScore(candidate,anchor){
+  if(candidate.category!==anchor.category)return -1;
+  const featureOverlap=overlapValues(candidate,anchor,'features').length;
+  const audienceOverlap=overlapValues(candidate,anchor,'bestFor').length;
+  return featureOverlap*10+audienceOverlap*5+Math.max(0,30-scoreDistance(candidate,anchor)*6);
+}
+function comparableTools(a,b){
+  const eligible=tools.filter(t=>t.comparisonEligible!==false);
+  const used=new Set([a.slug,b.slug]),out=[];
+  for(const anchor of [a,b]){
+    const ranked=eligible.filter(t=>!used.has(t.slug)&&t.category===anchor.category).map(t=>({tool:t,anchor,score:comparableScore(t,anchor)})).sort((x,y)=>y.score-x.score||String(x.tool.name).localeCompare(String(y.tool.name)));
+    for(const item of ranked){
+      if(out.filter(x=>x.anchor.slug===anchor.slug).length>=2)break;
+      if(used.has(item.tool.slug))continue;
+      out.push(item);used.add(item.tool.slug);
+      if(out.length>=4)break;
+    }
+    if(out.length>=4)break;
+  }
+  if(out.length<4){
+    const anchors=[a,b];
+    const fill=eligible.filter(t=>!used.has(t.slug)&&anchors.some(anchor=>t.category===anchor.category)).map(t=>{
+      const anchor=anchors.filter(x=>x.category===t.category).sort((x,y)=>comparableScore(t,y)-comparableScore(t,x))[0];
+      return{tool:t,anchor,score:comparableScore(t,anchor)};
+    }).sort((x,y)=>y.score-x.score||String(x.tool.name).localeCompare(String(y.tool.name)));
+    for(const item of fill){if(out.length>=4)break;if(!used.has(item.tool.slug)){out.push(item);used.add(item.tool.slug)}}
+  }
+  return out.slice(0,4);
+}
+function suggestionReason(tool,anchor){
+  const sharedFeatures=overlapValues(tool,anchor,'features').slice(0,2);
+  if(sharedFeatures.length)return `Same ${anchor.category} category as ${anchor.name} and shares ${listPhrase(sharedFeatures)}.`;
+  const sharedAudience=overlapValues(tool,anchor,'bestFor').slice(0,2);
+  if(sharedAudience.length)return `Same ${anchor.category} category as ${anchor.name} and targets ${listPhrase(sharedAudience)}.`;
+  return `Same ${anchor.category} category as ${anchor.name} with a nearby ToolScout score profile.`;
+}
+function suggestionsHtml(a,b){
+  const items=comparableTools(a,b);
+  if(!items.length)return '';
+  return `<div class='suggestions-head'><div class='meta'>Explore alternatives</div><h2>Also worth comparing</h2><p>Other tools in the same categories that may help sharpen the decision.</p></div><div class='suggestion-grid'>${items.map(item=>`<a class='suggestion-card' href='/compare.html?a=${encodeURIComponent(item.anchor.slug)}&amp;b=${encodeURIComponent(item.tool.slug)}&amp;source=comparison-suggestions'><strong>${esc(item.tool.name)}</strong><span>${esc(suggestionReason(item.tool,item.anchor))}</span><b>Compare with ${esc(item.anchor.name)}</b></a>`).join('')}</div>`;
+}
 function initials(n){return String(n||'T').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
 function iconSources(t){
   let first='',google='';
@@ -76,6 +125,7 @@ function render(a,b){
   html=html.replace('<div id="pairNote"></div>',`<div id="pairNote"><div class="pairNote">Comparing <strong>${esc(a.name)}</strong> with <strong>${esc(b.name)}</strong>. Change either selector to explore another pair.</div></div>`);
   html=html.replace('<div id="table" class="table"></div>',`<div id="table" class="table">${initialTable(a,b)}</div>`);
   html=html.replace('<section id="analysis" class="analysis" aria-live="polite"></section>',`<section id="analysis" class="analysis" aria-live="polite"><div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>${esc(editorialConclusion(a,b))}</p></section>`);
+  html=html.replace('<section id="suggestions" class="suggestions" aria-live="polite"></section>',`<section id="suggestions" class="suggestions" aria-live="polite">${suggestionsHtml(a,b)}</section>`);
   return html;
 }
 
