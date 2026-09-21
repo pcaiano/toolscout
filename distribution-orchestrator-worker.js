@@ -7,7 +7,7 @@ import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDea
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
-import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates,executeCatalogGrowthTask} from './catalog-autonomy-worker.js';
+import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates,executeCatalogGrowthTask,auditCatalogQualityBatch,catalogQualitySnapshot} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
@@ -989,6 +989,16 @@ if(u.pathname==='/api/growth/supervisor/audit'&&request.method==='POST'){if(!(aw
 if(u.pathname==='/api/growth/execution/catalog-public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   return Response.json(await runWithLedger(env,{engine:'catalog',mission:'gap_growth',triggerName:'make_handoff'},()=>runCatalogGapReconcile(env)),{headers:H});
+}
+if(u.pathname==='/api/growth/execution/catalog-quality-reconcile'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  let body={};try{body=await request.json()}catch{}
+  const limit=Math.max(1,Math.min(25,Number(body?.limit||12)||12));
+  return Response.json(await runWithLedger(env,{engine:'catalog',mission:'quality_control',triggerName:'make_handoff'},()=>auditCatalogQualityBatch(env,{limit})),{headers:H});
+}
+if(u.pathname==='/api/growth/execution/catalog-quality-status'&&request.method==='GET'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  return Response.json(await catalogQualitySnapshot(env),{headers:H});
 }
 if(u.pathname==='/api/growth/execution/public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
