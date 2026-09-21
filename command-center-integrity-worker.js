@@ -198,7 +198,7 @@ async function canonicalSnapshot(env,upstream){
     first(env,`SELECT evidence_json,started_at,completed_at FROM engine_runs
       WHERE engine='catalog' AND mission='runtime_quality' AND status='completed'
       ORDER BY started_at DESC LIMIT 1`),
-    first(env,`SELECT COUNT(*) warnings,MAX(last_checked_at) last_warning_at FROM catalog_runtime_state WHERE quality_status='source_warning' OR source_status IN ('network_warning','warning','blocked_or_limited')`),
+    first(env,`SELECT COUNT(*) warnings,MAX(last_checked_at) last_warning_at FROM catalog_runtime_state WHERE quality_status='source_warning'`),
     first(env,`SELECT * FROM engine_runs WHERE engine='distribution' AND mission='operating_priorities' ORDER BY started_at DESC LIMIT 1`),
     first(env,`SELECT * FROM engine_runs WHERE engine='distribution' AND mission='autonomous_cycle' ORDER BY started_at DESC LIMIT 1`),
     first(env,`SELECT * FROM engine_runs WHERE engine='distribution' AND mission='network_cycle' ORDER BY started_at DESC LIMIT 1`),
