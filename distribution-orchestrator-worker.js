@@ -228,7 +228,7 @@ async function coordinateGrowthOpportunities(env){
   const authorityUrgencyBoost=backlinkAcquisition?Math.min(22,(backlinkConfig.backlink_stagnating?14:0)+(backlinkConfig.backlink_throughput_gap?8:0)):0;
   const affiliateCap=Math.max(5,Math.min(45,Number(supervisor.get('affiliate')?.config?.priority_cap||45)));
   const catalogCap=Math.max(15,Math.min(55,Number(supervisor.get('catalog')?.config?.priority_cap||55)));
-  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
+  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,gscReality,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,o.backlink_value,
       EXISTS(SELECT 1 FROM distribution_placements bp WHERE bp.surface_slug=o.surface_slug AND bp.backlink_verified=1) backlink_verified,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
@@ -273,6 +273,7 @@ async function coordinateGrowthOpportunities(env){
     growthRows(env,`SELECT candidate_id,tool_slug,source_url,title,summary,status,materiality_score,detected_at,updated_at FROM software_news_candidates WHERE status IN ('verified','published') OR (status='candidate' AND materiality_score>=50)`),
     growthAssetJson(env,'/reports/organic-growth-opportunities.json',{generatedAt:null,opportunities:[],summary:{}}),
     growthAssetJson(env,'/reports/gsc-signals.json',{generatedAt:null,source:null,startDate:null,endDate:null,siteTotals:{},pages:[],items:[]}),
+    growthAssetJson(env,'/reports/gsc-search-reality.json',{generatedAt:null,searchPerformance:{},indexHealth:{},sitemaps:{},opportunities:[]}),
     growthAssetJson(env,'/reports/aeo-geo-readiness.json',{generatedAt:null,failures:null,warnings:null}),
     growthAssetJson(env,'/reports/machine-readability.json',{generatedAt:null,failures:null,warnings:null}),
     growthAssetJson(env,'/reports/catalog-freshness-coverage.json',{generatedAt:null,summary:{},coverage:[],contentChanges:[],quarantined:[]}),
@@ -285,6 +286,7 @@ async function coordinateGrowthOpportunities(env){
   const inputFreshness={
     organicGrowth:{ageHours:assetAgeHours(organicGrowth?.generatedAt),fresh:false},
     gsc:{ageHours:assetAgeHours(gscSignals?.generatedAt),fresh:false},
+    gscReality:{ageHours:assetAgeHours(gscReality?.generatedAt),fresh:false},
     aeoGeo:{ageHours:assetAgeHours(aeoGeo?.generatedAt),fresh:false},
     machineReadability:{ageHours:assetAgeHours(machineReadability?.generatedAt),fresh:false},
     catalogFreshness:{ageHours:assetAgeHours(catalogFreshness?.generatedAt),fresh:false},
@@ -293,12 +295,14 @@ async function coordinateGrowthOpportunities(env){
   };
   inputFreshness.organicGrowth.fresh=inputFreshness.organicGrowth.ageHours<=72;
   inputFreshness.gsc.fresh=inputFreshness.gsc.ageHours<=36;
+  inputFreshness.gscReality.fresh=inputFreshness.gscReality.ageHours<=36;
   inputFreshness.aeoGeo.fresh=inputFreshness.aeoGeo.ageHours<=72;
   inputFreshness.machineReadability.fresh=inputFreshness.machineReadability.ageHours<=72;
   inputFreshness.catalogFreshness.fresh=inputFreshness.catalogFreshness.ageHours<=36;
   inputFreshness.catalogHealth.fresh=inputFreshness.catalogHealth.ageHours<=36;
   inputFreshness.toolProfileHolds.fresh=inputFreshness.toolProfileHolds.ageHours<=72;
   const searchOpportunities=inputFreshness.organicGrowth.fresh&&Array.isArray(organicGrowth?.opportunities)?organicGrowth.opportunities:[];
+  const searchRealityTechnical=inputFreshness.gscReality.fresh&&Array.isArray(gscReality?.opportunities)?gscReality.opportunities.filter(x=>['index_issue','canonical_mismatch'].includes(String(x?.kind||''))).slice(0,50):[];
   const directGscPages=inputFreshness.gsc.fresh&&Array.isArray(gscSignals?.pages)?gscSignals.pages:[];
   const normalizedGscPages=directGscPages
     .filter(x=>Number(x?.impressions||0)>0)
@@ -325,6 +329,40 @@ async function coordinateGrowthOpportunities(env){
       const slug=String(tool||'').toLowerCase();if(!slug)continue;
       searchBoostByTool.set(slug,Math.max(searchBoostByTool.get(slug)||0,Math.min(15,score*0.2)));
     }
+  }
+  for(const row of searchRealityTechnical){
+    const kind=String(row.kind||'index_issue');
+    const page=String(row.page||'/');
+    const key=`gsc-reality:${kind}:${page}`.slice(0,480);
+    const actions=kind==='canonical_mismatch'?['repair_canonical_alignment','search_measurement']:['repair_indexing','search_measurement'];
+    const signals={
+      lane:'seo_index_reality',
+      action:kind,
+      evidence_confidence:'google_url_inspection',
+      source:'Google Search Console URL Inspection API',
+      gsc_reality_generated_at:gscReality?.generatedAt||null,
+      asset_path:page,
+      asset_url:String(row.url||('https://trytoolscout.org'+page)),
+      impressions:Number(row.impressions||0),
+      clicks:Number(row.clicks||0),
+      ctr:Number(row.ctr||0),
+      position:Number(row.position||0),
+      coverage_state:row.coverageState||null,
+      verdict:row.verdict||null,
+      google_canonical:row.googleCanonical||null,
+      user_canonical:row.userCanonical||null,
+      north_star:HUMAN_ACQUISITION_SPRINT.northStar,
+      acquisition_mode:'existing_demand_search'
+    };
+    const priority=Math.max(70,Math.min(100,Number(row.score||80)));
+    growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(key,'search',page,coordinatedGrowthPriority('search',priority,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(key);
+    active++;searchCount++;
   }
   if(humanSprintActive()){
     for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
@@ -679,7 +717,7 @@ async function coordinateGrowthOpportunities(env){
   active=Object.values(actualTypeCounts).reduce((sum,n)=>sum+Number(n||0),0);
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
     .bind(`growthcoord_${crypto.randomUUID()}`,'growth_opportunity_coordination','completed','growth_system',`Autonomous growth coordinator refreshed ${active} active opportunities: ${surfaceCount} distribution surfaces, ${toolCount} tool/vendor, ${affiliateCount} affiliate, ${catalogCount} catalog/quality, ${newsCount} What's New and ${searchCount} Search/GEO/AEO opportunities. Audience phase: ${audienceStrategy.phase}. 30d strict sessions: ${audienceStrategy.strictVerifiedHumanSessions30d??'unavailable'}; proven external acquisition sources: ${audienceStrategy.provenExternalSources30d??'unavailable'}. Existing demand, external distribution and vendor borrowed audiences remain the primary acquisition engine. ${audienceStrategy.ownedExpansionEligible?'Owned channels may now receive additional support because external acquisition has become repeatable, but they do not replace external-demand acquisition.':'Owned channels remain support/measurement until external acquisition reaches the repeatability gate.'} ${humanSprintActive()?'Human Acquisition Sprint is active: strict verified human sessions dominate priority; acquisition surfaces, Search, vendor/content amplification and timely news are boosted while affiliate and routine catalog work are subordinated.':'Shared priority state coordinates acquisition, monetization, news, catalog growth and factual quality while keeping affiliate economics separate from editorial ranking.'}`).run().catch(()=>{});
-  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,gscSnapshot:{generatedAt:gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:directGscPages.length,directOpportunities:normalizedGscPages.length},catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,inputFreshness,audienceStrategy,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
+  return {ok:true,active,surfaces:surfaceCount,tools:toolCount,affiliate:affiliateCount,catalog:catalogCount,news:newsCount,search:searchCount,searchEvidenceGeneratedAt:organicGrowth?.generatedAt||null,gscSnapshot:{generatedAt:gscReality?.generatedAt||gscSignals?.generatedAt||null,startDate:gscSignals?.startDate||null,endDate:gscSignals?.endDate||null,pages:directGscPages.length,directOpportunities:normalizedGscPages.length,indexTechnicalOpportunities:searchRealityTechnical.length,indexInspected:Number(gscReality?.indexHealth?.inspected||0),indexPass:Number(gscReality?.indexHealth?.indexed||0)},catalogEvidenceGeneratedAt:catalogFreshness?.generatedAt||null,inputFreshness,audienceStrategy,humanAcquisitionSprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
 async function runGrowthExecutionContractCycle(env){
