@@ -531,7 +531,7 @@ export async function reconcileExecutionContracts(env){
 
 export async function executionContractSnapshot(env){
   await ensureExecutionContractSchema(env);
-  const [states,executors,missing,stalled,ages]=await Promise.all([
+  const [states,executors,missing,stalled,ages,stalledReasons,stalledTasks,activeClaims]=await Promise.all([
     all(env,`SELECT status,COUNT(*) n FROM growth_execution_contract GROUP BY status`),
     all(env,`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status ORDER BY executor,status`),
     first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE status='executor_missing'`),
@@ -540,7 +540,22 @@ export async function executionContractSnapshot(env){
       MIN(CASE WHEN status='pending' THEN created_at END) oldest_pending,
       MIN(CASE WHEN status='claimed' THEN claimed_at END) oldest_claimed,
       MIN(CASE WHEN status='attempted' THEN attempted_at END) oldest_attempted
-      FROM growth_execution_contract`)
+      FROM growth_execution_contract`),
+    all(env,`SELECT executor,last_result,COUNT(*) n,MAX(attempts) max_attempts,MIN(updated_at) oldest_updated_at
+      FROM growth_execution_contract
+      WHERE status='stalled'
+      GROUP BY executor,last_result
+      ORDER BY n DESC,executor,last_result`),
+    all(env,`SELECT task_id,source_kind,opportunity_key,subject_type,subject_key,action,executor,attempts,last_result,created_at,updated_at,claim_deadline,attempt_deadline,verify_deadline
+      FROM growth_execution_contract
+      WHERE status='stalled'
+      ORDER BY priority_score DESC,updated_at ASC
+      LIMIT 60`),
+    all(env,`SELECT task_id,source_kind,opportunity_key,subject_type,subject_key,action,executor,status,attempts,last_result,claimed_at,attempted_at,claim_deadline,attempt_deadline,verify_deadline
+      FROM growth_execution_contract
+      WHERE status IN ('claimed','attempted')
+      ORDER BY claimed_at ASC
+      LIMIT 30`)
   ]);
   const ageHours=value=>{if(!value)return null;const t=Date.parse(String(value).replace(' ','T')+'Z');return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):null};
   const stateMap=Object.fromEntries(states.map(x=>[x.status,n(x.n)]));
@@ -555,6 +570,9 @@ export async function executionContractSnapshot(env){
     deferred:n(stateMap.deferred),
     oldestPendingAgeHours:ageHours(ages?.oldest_pending),
     oldestClaimedAgeHours:ageHours(ages?.oldest_claimed),
-    oldestAttemptedAgeHours:ageHours(ages?.oldest_attempted)
+    oldestAttemptedAgeHours:ageHours(ages?.oldest_attempted),
+    stalledReasons:(stalledReasons||[]).map(x=>({...x,n:n(x.n),max_attempts:n(x.max_attempts),oldest_age_hours:ageHours(x.oldest_updated_at)})),
+    stalledTasks:(stalledTasks||[]).map(x=>({...x,age_hours:ageHours(x.updated_at)})),
+    activeClaims:(activeClaims||[]).map(x=>({...x,claim_age_hours:ageHours(x.claimed_at),attempt_age_hours:ageHours(x.attempted_at)}))
   };
 }
