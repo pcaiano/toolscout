@@ -330,11 +330,20 @@ async function canonicalAutonomousGrowthTruth(env) {
       FROM growth_execution_contract`),
     first(`SELECT
       MAX(CASE WHEN engine='growth' AND mission='opportunity_coordination' AND status='completed' THEN completed_at END) last_completed_at,
-      SUM(CASE WHEN started_at>=datetime('now','-24 hours') AND status='failed'
-        AND ((engine='growth' AND mission IN ('opportunity_coordination','rnd_audit'))
-          OR (engine='distribution' AND mission IN ('network_cycle','autonomous_cycle','economic_learning'))
-          OR (engine='content' AND mission='social_intelligence'))
-        THEN 1 ELSE 0 END) failed_core
+      (
+        SELECT COUNT(*)
+        FROM engine_runs f
+        WHERE f.started_at>=datetime('now','-24 hours')
+          AND f.status='failed'
+          AND ((f.engine='growth' AND f.mission IN ('opportunity_coordination','rnd_audit'))
+            OR (f.engine='distribution' AND f.mission IN ('network_cycle','autonomous_cycle','economic_learning'))
+            OR (f.engine='content' AND f.mission='social_intelligence'))
+          AND NOT EXISTS (
+            SELECT 1 FROM engine_runs c
+            WHERE c.engine=f.engine AND c.mission=f.mission
+              AND c.status='completed' AND c.started_at>f.started_at
+          )
+      ) failed_core
       FROM engine_runs`),
     first(`SELECT COUNT(*) n FROM engine_runs WHERE started_at>=datetime('now','-7 days') AND status='completed'`),
     first(`SELECT COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved')`),
