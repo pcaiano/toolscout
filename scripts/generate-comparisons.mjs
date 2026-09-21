@@ -85,10 +85,15 @@ function suggestionReason(tool,anchor){
   if(sharedAudience.length)return `Same ${anchor.category} category as ${anchor.name} and targets ${listPhrase(sharedAudience)}.`;
   return `Same ${anchor.category} category as ${anchor.name} with a nearby ToolScout score profile.`;
 }
+function suggestionLogoHtml(tool){
+  const icon=iconSources(tool);
+  const img=icon.src?`<img src="${esc(icon.src)}" data-first="${esc(icon.first)}" data-google="${esc(icon.google)}" data-stage="${icon.stage}" alt="${esc(tool.name)} logo" width="25" height="25" loading="lazy" referrerpolicy="no-referrer" onerror="nextIcon(this)">`:'';
+  return `<div class="logo"><span class="logo-fallback">${esc(initials(tool.name))}</span>${img}</div>`;
+}
 function suggestionsHtml(a,b){
   const items=comparableTools(a,b);
   if(!items.length)return '';
-  return `<div class='suggestions-head'><div class='meta'>Explore alternatives</div><h2>Also worth comparing</h2><p>Other tools in the same categories that may help sharpen the decision.</p></div><div class='suggestion-grid'>${items.map(item=>`<a class='suggestion-card' href='/compare.html?a=${encodeURIComponent(item.anchor.slug)}&amp;b=${encodeURIComponent(item.tool.slug)}&amp;source=comparison-suggestions'><strong>${esc(item.tool.name)}</strong><span>${esc(suggestionReason(item.tool,item.anchor))}</span><b>Compare with ${esc(item.anchor.name)}</b></a>`).join('')}</div>`;
+  return `<div class='suggestions-head'><div class='meta'>Explore alternatives</div><h2>Also worth comparing</h2><p>Other tools in the same categories that may help sharpen the decision.</p></div><div class='suggestion-grid'>${items.map(item=>`<a class='suggestion-card' href='/compare.html?a=${encodeURIComponent(item.anchor.slug)}&amp;b=${encodeURIComponent(item.tool.slug)}&amp;source=comparison-suggestions'><div class='suggestion-top'>${suggestionLogoHtml(item.tool)}<strong>${esc(item.tool.name)}</strong></div><span>${esc(suggestionReason(item.tool,item.anchor))}</span><b>Compare with ${esc(item.anchor.name)}</b></a>`).join('')}</div>`;
 }
 function initials(n){return String(n||'T').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
 function iconSources(t){
