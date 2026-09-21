@@ -234,13 +234,26 @@ export async function executeCatalogGrowthTask(env,task={}){
   if(!official)return{ok:true,verified:false,reason:'official_source_not_resolved',slug};
   const corpus=official.title+' '+official.description+' '+official.text,features=capabilities(corpus);
   if(features.length<2)return{ok:true,verified:false,reason:'first_party_capabilities_too_thin',slug,sourceUrl:official.url,capabilities:features.length};
-  const hint=OFFICIAL[slug],name=hint?.name||humanName(slug),cat=category(corpus,hint?.category);
-  const description=official.description.length>=60?official.description:(name+' provides '+features.slice(0,4).join(', ')+'. ToolScout verified these capabilities directly from the product official first-party website before adding this coverage profile.');
-  const profile={slug,name,category:cat,description,pricing:'See the official vendor site for current pricing.',freePlan:null,features,bestFor:[],sourceUrl:official.url,lastVerified:new Date().toISOString().slice(0,10),scores:{},catalogTier:'coverage',rankingEligible:false,comparisonEligible:false,directOfficialCta:true,provenance:{mode:'verified_competitive_gap_runtime',admittedAt:new Date().toISOString(),marketSignals:{count:Number(gap.signals||0),sources},affiliateNeutral:true,competitorContentUsedForEditorialFacts:false,rankingNote:'Catalog inclusion does not imply recommendation. Ranking and comparison eligibility require separate editorial evidence.'}};
+  const name=hint?.name||humanName(slug),cat=category(corpus,hint?.category);
+  const verifiedFeatures=[...new Set([...(hint?.features||[]),...features])].filter(Boolean).slice(0,10);
+  const description=clean(hint?.description||(official.description.length>=60?official.description:(name+' provides '+verifiedFeatures.slice(0,4).join(', ')+'.')));
+  const free=detectFreePlan(corpus,hint);
+  const profile={
+    slug,name,category:cat,description,
+    pricing:hint?.pricing||(free.freePlan?'Free plan available; paid plans may vary. See vendor for current pricing.':'See vendor for current pricing.'),
+    freePlan:free.freePlan,freePlanKnown:free.freePlanKnown,
+    features:verifiedFeatures,bestFor:deriveBestFor(cat,verifiedFeatures,hint?.bestFor),
+    sourceUrl:hint?.sourceUrl||official.url,verificationUrl:official.url,
+    lastVerified:new Date().toISOString().slice(0,10),
+    scores:fullScores(cat,verifiedFeatures,hint?.scores),
+    rankingEligible:true,comparisonEligible:true,directOfficialCta:false,
+    provenance:{mode:'verified_catalog_runtime',admittedAt:new Date().toISOString(),marketSignals:{count:Number(gap.signals||0),sources},affiliateNeutral:true,competitorContentUsedForEditorialFacts:false,reviewMethod:'first_party_verified_structured_profile_v2'}
+  };
+  profile.editorialReview=editorialReview(profile);
   await env.DB.prepare("INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'admitted_coverage','ok',datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='admitted_coverage',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')").bind(slug,JSON.stringify(profile)).run();
   await env.DB.prepare("INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,quality_status,static_last_verified,last_checked_at,updated_at) VALUES(?,?,'ok',200,?,'healthy',date('now'),datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status='ok',http_status=200,final_url=excluded.final_url,quality_status='healthy',static_last_verified=date('now'),last_checked_at=datetime('now'),updated_at=datetime('now')").bind(slug,official.url,official.url).run().catch(()=>{});
   await env.DB.prepare("UPDATE catalog_market_gaps SET status='admitted_coverage',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
   const toolscoutUrl=BASE+'/tools/'+slug;
-  await event(env,slug,name+' added automatically from a verified market-demand coverage gap after first-party source validation.',{slug,name,source_url:official.url,toolscout_url:toolscoutUrl,category:cat,market_signals:Number(gap.signals||0),verified_capabilities:features});
+  await event(env,slug,name+' added automatically as a full ToolScout catalog profile after first-party verification and scoring.',{slug,name,source_url:official.url,toolscout_url:toolscoutUrl,category:cat,market_signals:Number(gap.signals||0),verified_capabilities:features});
   return{ok:true,verified:true,admitted:true,slug,profile,toolscoutUrl};
 }
