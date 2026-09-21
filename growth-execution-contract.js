@@ -36,6 +36,8 @@ const ACTION_EXECUTOR=Object.freeze({
   protect_current_ranking:'seo_github',
   strengthen_internal_links:'seo_github',
   observe_low_sample_ranking:'seo_github',
+  repair_indexing:'seo_github',
+  repair_canonical_alignment:'seo_github',
 
   activate_affiliate_route:'affiliate_cycle',
   capture_approved_referral_link:'affiliate_cycle',
