@@ -2,6 +2,9 @@ const NORTH_STAR='strict_verified_human_sessions';
 const PRIMARY=new Set(['distribution','content','audience','seo_geo_aio']);
 const HOUR=3600000;
 const BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR=10;
+const BACKLINK_ATTEMPT_MIN_24H=6;
+const BACKLINK_STAGNATION_HOURS=72;
+const BACKLINK_STAGNATION_MIN_ATTEMPTS_7D=12;
 const CRITICAL_STRICT_HUMANS_24H_MAX=2;
 const BASELINE_EXTERNAL_EXECUTIONS_MIN_24H=10;
 const BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H=15;
@@ -49,7 +52,11 @@ function classifyAcquisition(source,referrer){
 
 function backlinkPolicy(c){
   const verifiedBacklinks=n(c.verifiedBacklinks),verifiedReferringDomains=n(c.verifiedReferringDomains);
+  const attempts24=n(c.backlinkAttempts24),attempts7=n(c.backlinkAttempts7),authorityQueue=n(c.authorityQueue);
+  const lastVerifiedAge=Number.isFinite(Number(c.backlinkLastVerifiedAgeHours))?Number(c.backlinkLastVerifiedAgeHours):Infinity;
   const gap=verifiedReferringDomains<BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR;
+  const throughputGap=gap&&attempts24<BACKLINK_ATTEMPT_MIN_24H;
+  const stagnating=gap&&attempts7>=BACKLINK_STAGNATION_MIN_ATTEMPTS_7D&&lastVerifiedAge>=BACKLINK_STAGNATION_HOURS;
   return{
     backlink_acquisition:gap,
     backlink_quality_only:true,
@@ -58,6 +65,14 @@ function backlinkPolicy(c){
     backlink_verified:verifiedBacklinks,
     verified_referring_domains:verifiedReferringDomains,
     referring_domain_bootstrap_floor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,
+    backlink_attempt_min_24h:BACKLINK_ATTEMPT_MIN_24H,
+    backlink_attempts_24h:attempts24,
+    backlink_attempts_7d:attempts7,
+    backlink_authority_queue:authorityQueue,
+    backlink_last_verified_age_hours:Number.isFinite(lastVerifiedAge)?Number(lastVerifiedAge.toFixed(1)):null,
+    backlink_throughput_gap:throughputGap,
+    backlink_stagnating:stagnating,
+    backlink_stagnation_hours:BACKLINK_STAGNATION_HOURS,
     backlink_priority_basis:'relevance + editorial legitimacy + observed search demand + potential human referrals'
   };
 }
@@ -66,6 +81,9 @@ function withBacklinks(config,c){return{...acquisitionBaseline(config),...backli
 function policy(engine,c){
   const h24=n(c.h24),h7=n(c.h7),e24=n(c.e24),e7=n(c.e7),age=c.lastExecutionAgeHours;
   if(engine==='distribution'){
+    const bp=backlinkPolicy(c);
+    if(bp.backlink_stagnating)return{status:'underperforming',directive:'rotate_authority_channel_mix_and_execute',config:withBacklinks({mode:'rotate_authority_channel_mix_and_execute',execute_now:true,priority_boost:50,exploration_slots:14,no_wait_for_maturity:true,reallocate_by_verified_humans:true,reallocate_by_outbounds:true,authority_first:true,rotate_surface_families:true},c)};
+    if(bp.backlink_throughput_gap)return{status:'underpowered',directive:'expand_authority_routes_and_execute',config:withBacklinks({mode:'expand_authority_routes_and_execute',execute_now:true,priority_boost:45,exploration_slots:12,no_wait_for_maturity:true,authority_first:true,replenish_empty_sender_queue:true},c)};
     if(h24>0)return{status:'working',directive:'scale_proven_sources_and_keep_exploring',config:withBacklinks({mode:'scale_proven_sources_and_keep_exploring',execute_now:true,priority_boost:30,exploration_slots:6,reallocate_by_verified_humans:true,reallocate_by_outbounds:true},c)};
     if(e24>=BASELINE_EXTERNAL_EXECUTIONS_MIN_24H)return{status:'underperforming',directive:'rotate_expand_and_execute_now',config:withBacklinks({mode:'rotate_expand_and_execute_now',execute_now:true,priority_boost:40,exploration_slots:10,no_wait_for_maturity:true,reallocate_by_verified_humans:true,reallocate_by_outbounds:true},c)};
     if(c.activeOpportunities>0)return{status:'active',directive:'execute_highest_probability_external_actions',config:withBacklinks({mode:'execute_highest_probability_external_actions',execute_now:true,priority_boost:35,exploration_slots:8,no_wait_for_maturity:true},c)};
@@ -158,7 +176,7 @@ async function saveEngine(env,engine,role,global,ctx,p){
 
 export async function runGrowthSupervisorAudit(env){
   await ensureSchema(env);
-  const [humansRows,exec,gsc,organic,active,executionContract,architectureIncidents,backlinkPlacements,outboundMetrics]=await Promise.all([
+  const [humansRows,exec,gsc,organic,active,executionContract,architectureIncidents,backlinkPlacements,outboundMetrics,authorityMetrics]=await Promise.all([
     strictRows(env),executionRows(env),
     assetJson(env,'/reports/gsc-signals.json',{generatedAt:null,siteTotals:{}}),
     assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]}),
@@ -181,7 +199,14 @@ export async function runGrowthSupervisorAudit(env){
       SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) verified_outbound_7d,
       SUM(CASE WHEN created_at>=datetime('now','-24 hours') AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized_outbound_24h,
       SUM(CASE WHEN created_at>=datetime('now','-7 days') AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized_outbound_7d
-      FROM verified_outbound_events`)
+      FROM verified_outbound_events`),
+    first(env,`SELECT
+      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
+      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) backlink_attempts_24h,
+      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days'))+
+      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-7 days')) backlink_attempts_7d,
+      (SELECT MAX(first_verified_at) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1 AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')) last_verified_at,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes') AND status IN ('pending','claimed','attempted','deferred','stalled')) authority_queue`)
   ]);
   const referringDomains=new Set();
   for(const row of backlinkPlacements||[]){
@@ -190,6 +215,10 @@ export async function runGrowthSupervisorAudit(env){
   const verifiedBacklinks=(backlinkPlacements||[]).length;
   const verifiedReferringDomains=referringDomains.size;
   const backlinkAcquisitionRequired=verifiedReferringDomains<BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR;
+  const backlinkAttempts24=n(authorityMetrics?.backlink_attempts_24h),backlinkAttempts7=n(authorityMetrics?.backlink_attempts_7d),authorityQueue=n(authorityMetrics?.authority_queue);
+  const backlinkLastVerifiedAgeHours=authorityMetrics?.last_verified_at?ageHours(String(authorityMetrics.last_verified_at).replace(' ','T')+'Z'):Infinity;
+  const backlinkThroughputGap=backlinkAcquisitionRequired&&backlinkAttempts24<BACKLINK_ATTEMPT_MIN_24H;
+  const backlinkStagnating=backlinkAcquisitionRequired&&backlinkAttempts7>=BACKLINK_STAGNATION_MIN_ATTEMPTS_7D&&backlinkLastVerifiedAgeHours>=BACKLINK_STAGNATION_HOURS;
   const byType=Object.fromEntries(active.map(x=>[String(x.subject_type),n(x.n)]));
   const humans={distribution:{h24:0,h7:0},content:{h24:0,h7:0},audience:{h24:0,h7:0},seo_geo_aio:{h24:0,h7:0},unattributed:{h24:0,h7:0}};
   const now=Date.now();let strict24=0,strict7=0;
@@ -211,10 +240,10 @@ export async function runGrowthSupervisorAudit(env){
   const seoInterventions=Array.isArray(organic?.newInterventions)?organic.newInterventions.length:0;
 
   const ctx={
-    distribution:{...humans.distribution,e24:d24.count+s24.count,e7:d7.count+s7.count,lastExecutionAgeHours:(Math.max(d7.last,s7.last)?(now-Math.max(d7.last,s7.last))/HOUR:Infinity),activeOpportunities:n(byType.surface)+n(byType.tool),verifiedBacklinks,verifiedReferringDomains,backlinkAcquisitionRequired},
+    distribution:{...humans.distribution,e24:d24.count+s24.count,e7:d7.count+s7.count,lastExecutionAgeHours:(Math.max(d7.last,s7.last)?(now-Math.max(d7.last,s7.last))/HOUR:Infinity),activeOpportunities:n(byType.surface)+n(byType.tool),verifiedBacklinks,verifiedReferringDomains,backlinkAcquisitionRequired,backlinkAttempts24,backlinkAttempts7,backlinkLastVerifiedAgeHours,backlinkThroughputGap,backlinkStagnating,authorityQueue},
     content:{...humans.content,e24:cp24.count+ca24.count,e7:cp7.count+ca7.count,lastExecutionAgeHours:(Math.max(cp7.last,ca7.last)?(now-Math.max(cp7.last,ca7.last))/HOUR:Infinity),activeOpportunities:n(byType.search)+n(byType.tool)+n(byType.news_update)},
     audience:{...humans.audience,e24:au24.count,e7:au7.count,lastExecutionAgeHours:au7.last?(now-au7.last)/HOUR:Infinity,activeOpportunities:n(byType.surface)+n(byType.tool)},
-    seo_geo_aio:{...humans.seo_geo_aio,e24:0,e7:seoInterventions,lastExecutionAgeHours:organicAge,activeOpportunities:n(byType.search),gscAgeHours:gscAge,organicActionsAgeHours:organicAge,gscImpressions:n(gsc?.siteTotals?.impressions),gscClicks:n(gsc?.siteTotals?.clicks),verifiedBacklinks,verifiedReferringDomains,backlinkAcquisitionRequired},
+    seo_geo_aio:{...humans.seo_geo_aio,e24:0,e7:seoInterventions,lastExecutionAgeHours:organicAge,activeOpportunities:n(byType.search),gscAgeHours:gscAge,organicActionsAgeHours:organicAge,gscImpressions:n(gsc?.siteTotals?.impressions),gscClicks:n(gsc?.siteTotals?.clicks),verifiedBacklinks,verifiedReferringDomains,backlinkAcquisitionRequired,backlinkAttempts24,backlinkAttempts7,backlinkLastVerifiedAgeHours,backlinkThroughputGap,backlinkStagnating,authorityQueue},
     affiliate:{h24:0,h7:0,e24:0,e7:0,lastExecutionAgeHours:Infinity,activeOpportunities:n(byType.affiliate)},
     catalog:{h24:0,h7:0,e24:0,e7:0,lastExecutionAgeHours:Infinity,activeOpportunities:Object.entries(byType).filter(([k])=>k.startsWith('catalog')).reduce((s,[,v])=>s+n(v),0)}
   };
@@ -235,9 +264,9 @@ export async function runGrowthSupervisorAudit(env){
 
   const attributed24=n(humans.distribution.h24)+n(humans.content.h24)+n(humans.audience.h24)+n(humans.seo_geo_aio.h24);
   const gctx={h24:attributed24,h7:attributed7,e24:exec24,e7:exec7,lastExecutionAgeHours:0};
-  const gp={status,directive,config:{...acquisitionBaseline({mode:directive}),strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),verified_outbound_24h:n(outboundMetrics?.verified_outbound_24h),verified_outbound_7d:n(outboundMetrics?.verified_outbound_7d),monetized_outbound_24h:n(outboundMetrics?.monetized_outbound_24h),monetized_outbound_7d:n(outboundMetrics?.monetized_outbound_7d),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,backlink_acquisition:{required:backlinkAcquisitionRequired,quality_only:true,verified_backlinks:verifiedBacklinks,verified_referring_domains:verifiedReferringDomains,bootstrap_referring_domain_floor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,paid_links_allowed:false,reciprocal_links_required:false},execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architecture_escalation:{open_incidents:openArchitectureIncidents,approval_required:openArchitectureIncidents>0}}};
+  const gp={status,directive,config:{...acquisitionBaseline({mode:directive}),strict_humans_24h:strict24,strict_humans_7d:strict7,attributed_humans_24h:attributed24,attributed_humans_7d:attributed7,unattributed_humans_7d:n(humans.unattributed.h7),verified_outbound_24h:n(outboundMetrics?.verified_outbound_24h),verified_outbound_7d:n(outboundMetrics?.verified_outbound_7d),monetized_outbound_24h:n(outboundMetrics?.monetized_outbound_24h),monetized_outbound_7d:n(outboundMetrics?.monetized_outbound_7d),acquisition_executions_24h:exec24,acquisition_executions_7d:exec7,backlink_acquisition:{required:backlinkAcquisitionRequired,quality_only:true,verified_backlinks:verifiedBacklinks,verified_referring_domains:verifiedReferringDomains,bootstrap_referring_domain_floor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,attempt_min_24h:BACKLINK_ATTEMPT_MIN_24H,attempts_24h:backlinkAttempts24,attempts_7d:backlinkAttempts7,authority_queue:authorityQueue,last_verified_at:authorityMetrics?.last_verified_at||null,last_verified_age_hours:Number.isFinite(backlinkLastVerifiedAgeHours)?Number(backlinkLastVerifiedAgeHours.toFixed(1)):null,throughput_gap:backlinkThroughputGap,stagnating:backlinkStagnating,stagnation_hours:BACKLINK_STAGNATION_HOURS,paid_links_allowed:false,reciprocal_links_required:false},execution_contract:{missing_executors:missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architecture_escalation:{open_incidents:openArchitectureIncidents,approval_required:openArchitectureIncidents>0}}};
   const growth=await saveEngine(env,'growth_brain','supervisor',global,gctx,gp);
-  return{ok:true,northStar:NORTH_STAR,businessFunnel:BUSINESS_FUNNEL,operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:CRITICAL_STRICT_HUMANS_24H_MAX,externalExecutionBaseline24h:{min:BASELINE_EXTERNAL_EXECUTIONS_MIN_24H,target:BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H,max:BASELINE_EXTERNAL_EXECUTIONS_MAX_24H},status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),verifiedOutbound24h:n(outboundMetrics?.verified_outbound_24h),verifiedOutbound7d:n(outboundMetrics?.verified_outbound_7d),monetizedOutbound24h:n(outboundMetrics?.monetized_outbound_24h),monetizedOutbound7d:n(outboundMetrics?.monetized_outbound_7d),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,backlinkAcquisition:{required:backlinkAcquisitionRequired,verifiedBacklinks,verifiedReferringDomains,bootstrapReferringDomainFloor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,qualityOnly:true},executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
+  return{ok:true,northStar:NORTH_STAR,businessFunnel:BUSINESS_FUNNEL,operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:CRITICAL_STRICT_HUMANS_24H_MAX,externalExecutionBaseline24h:{min:BASELINE_EXTERNAL_EXECUTIONS_MIN_24H,target:BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H,max:BASELINE_EXTERNAL_EXECUTIONS_MAX_24H},status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),verifiedOutbound24h:n(outboundMetrics?.verified_outbound_24h),verifiedOutbound7d:n(outboundMetrics?.verified_outbound_7d),monetizedOutbound24h:n(outboundMetrics?.monetized_outbound_24h),monetizedOutbound7d:n(outboundMetrics?.monetized_outbound_7d),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,backlinkAcquisition:{required:backlinkAcquisitionRequired,verifiedBacklinks,verifiedReferringDomains,bootstrapReferringDomainFloor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,qualityOnly:true,attemptMin24h:BACKLINK_ATTEMPT_MIN_24H,attempts24h:backlinkAttempts24,attempts7d:backlinkAttempts7,authorityQueue,lastVerifiedAt:authorityMetrics?.last_verified_at||null,lastVerifiedAgeHours:Number.isFinite(backlinkLastVerifiedAgeHours)?Number(backlinkLastVerifiedAgeHours.toFixed(1)):null,throughputGap:backlinkThroughputGap,stagnating:backlinkStagnating,stagnationHours:BACKLINK_STAGNATION_HOURS},executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAge,impressions:n(gsc?.siteTotals?.impressions),clicks:n(gsc?.siteTotals?.clicks)},organicActions:{generatedAt:organic?.generatedAt||null,ageHours:organicAge,newInterventions:seoInterventions},growth,engines};
 }
 
 export async function growthSupervisorSnapshot(env){
