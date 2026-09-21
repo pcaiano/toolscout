@@ -88,7 +88,7 @@ function growthRndEvidenceItem(row){
 }
 function growthRndState(tasks,sourceBound){
   const counts={pending:0,claimed:0,attempted:0,deferred:0,verified:0,human_required:0,executor_missing:0,stalled:0,blocked:0};
-  for(const task of tasks||[]){const k=String(task.status||'');if(Object.hasOwn(counts,k))counts[k]++}
+  for(const task of tasks||[]){const k=String(task.status||'');if(Object.prototype.hasOwnProperty.call(counts,k))counts[k]++}
   if(!sourceBound)return {status:'unbound',counts};
   if(!tasks?.length)return {status:'awaiting_contract_sync',counts};
   if(counts.executor_missing||counts.blocked)return {status:'blocked',counts};
@@ -481,7 +481,7 @@ async function growthOpsSnapshot(request,env,ctx,stats){
   executionContractState.inFlight=executionContractState.claimed+executionContractState.attempted;
   executionContractState.activeBacklog=executionContractState.ready+executionContractState.inFlight;
   const growthRndItems=(growthRndRows||[]).map(row=>{
-    const steps=Array.isArray(parseJson(row.action_json||'[]',[]))?parseJson(row.action_json||'[]',[]):[];
+    const parsedSteps=parseJson(row.action_json||'[]',[]);const steps=Array.isArray(parsedSteps)?parsedSteps:[];
     const executableActions=GROWTH_RND_EXECUTION_BINDINGS[row.experiment_type]||steps;
     const sourceCandidates=(growthRndSourceRows||[]).filter(op=>growthRndSubjectMatch(row.experiment_type,op.subject_type));
     const actionCandidates=sourceCandidates.filter(op=>{const actions=parseJson(op.action_json||'[]',[]);return Array.isArray(actions)&&actions.some(action=>executableActions.includes(action)||steps.includes(action))});
