@@ -1,12 +1,53 @@
 const BASE='https://trytoolscout.org';
 const TIMEOUT=12000;
-const OFFICIAL=Object.freeze({
-  'character-ai':{name:'Character.AI',url:'https://character.ai/about',category:'ai-assistant'},
-  'google-ai-studio':{name:'Google AI Studio',url:'https://aistudio.google.com/',category:'developer'},
-  'kling-ai':{name:'Kling AI',url:'https://kling.ai/',category:'content'},
-  'otter-ai':{name:'Otter.ai',url:'https://otter.ai/transcription',category:'content'},
-  'perplexity-ai':{name:'Perplexity',url:'https://www.perplexity.ai/',category:'ai-research'}
+const PROFILE_HINTS=Object.freeze({
+  'character-ai':{
+    name:'Character.AI',
+    verificationUrl:'https://character.ai/about',
+    sourceUrl:'https://character.ai/',
+    category:'ai-assistant',
+    description:'AI character platform for interactive conversations, character creation, storytelling and personalized entertainment.',
+    features:['AI character conversations','character creation','interactive storytelling','personas','memory','creative conversation'],
+    bestFor:['interactive storytelling','character creators','roleplay and creative conversation','casual AI users','entertainment'],
+    pricing:'Free plan available; paid plans are available. See vendor for current regional pricing.',
+    freePlan:true,
+    scores:{price:9,ease:9,automation:5,integrations:4,sales:2,ai:9,marketing:5,seo:2,research:4,content:9,agency:4}
+  },
+  'google-ai-studio':{
+    name:'Google AI Studio',
+    verificationUrl:'https://aistudio.google.com/',
+    sourceUrl:'https://aistudio.google.com/',
+    category:'developer',
+    features:['Gemini model prototyping','prompt development','multimodal testing','API development','structured output','developer workflows'],
+    bestFor:['software developers','AI prototyping','technical founders','product teams','Gemini API evaluation'],
+    scores:{price:8,ease:8,automation:8,integrations:8,sales:2,ai:10,marketing:3,seo:2,research:8,content:6,agency:6}
+  },
+  'kling-ai':{
+    name:'Kling AI',
+    verificationUrl:'https://kling.ai/',
+    sourceUrl:'https://kling.ai/',
+    category:'content',
+    features:['AI video generation','image generation','text to video','image to video','creative generation'],
+    bestFor:['video creators','marketing teams','social content teams','creative professionals','agencies'],
+    scores:{price:7,ease:8,automation:7,integrations:5,sales:3,ai:10,marketing:8,seo:2,research:2,content:10,agency:8}
+  },
+  'otter-ai':{
+    name:'Otter.ai',
+    verificationUrl:'https://otter.ai/transcription',
+    sourceUrl:'https://otter.ai/',
+    category:'content',
+    features:['meeting transcription','AI meeting notes','summaries','action items','speaker identification','meeting integrations'],
+    bestFor:['meeting-heavy teams','sales teams','researchers','consultants','remote teams'],
+    scores:{price:8,ease:9,automation:9,integrations:9,sales:7,ai:8,marketing:5,seo:2,research:7,content:7,agency:7}
+  },
+  'perplexity-ai':{
+    name:'Perplexity',
+    verificationUrl:'https://www.perplexity.ai/',
+    sourceUrl:'https://www.perplexity.ai/',
+    category:'ai-research'
+  }
 });
+const STATIC_ALIASES=Object.freeze({'perplexity-ai':'perplexity'});
 const BLOCKED=['alternativeto.net','futurepedia.io','g2.com','capterra.com','saashub.com','facebook.com','instagram.com','linkedin.com','x.com','twitter.com','youtube.com','reddit.com'];
 const CAPABILITIES=[
   ['AI assistant',['ai assistant','assistant']],
