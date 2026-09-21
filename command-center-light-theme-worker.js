@@ -4,7 +4,7 @@ import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.j
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger,reapStaleEngineRuns} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
-import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources,publicMergedTools,publicRuntimeToolResponse,publicMergedSitemap} from './catalog-autonomy-worker.js';
+import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources,publicMergedTools,publicRuntimeToolResponse,publicMergedSitemap,publicRuntimeRankingResponse} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 import {growthSupervisorDirective} from './growth-supervisor.js';
@@ -613,6 +613,10 @@ export default {
     }
     if(request.method==='GET'&&url.pathname==='/sitemap.xml'){
       return publicMergedSitemap(await base.fetch(request,env,ctx),env);
+    }
+    if(request.method==='GET'&&/^\/best-[a-z0-9-]+(?:\.html)?\/?$/i.test(url.pathname)){
+      const rankingResponse=await publicRuntimeRankingResponse(env,url.pathname);
+      if(rankingResponse)return rankingResponse;
     }
         const isStats = request.method === 'GET' && url.pathname === '/analytics/api/stats';
     const response = isStats
