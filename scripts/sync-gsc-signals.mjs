@@ -281,8 +281,13 @@ const legacyObservedInspections = successfulInspections.filter(x=>!canonicalUniv
 const indexedInspections = canonicalInspections.filter(x=>x.verdict==='PASS');
 const excludedInspections = canonicalInspections.filter(x=>x.verdict==='NEUTRAL');
 const failedInspections = canonicalInspections.filter(x=>x.verdict==='FAIL');
-const unknownInspections = canonicalInspections.filter(x=>!x.verdict||x.verdict==='VERDICT_UNSPECIFIED');
-const indexIssues = canonicalInspections.filter(x=>x.verdict==='FAIL'||x.verdict==='NEUTRAL'||!x.verdict||x.verdict==='VERDICT_UNSPECIFIED');
+const unknownVerdictInspections = canonicalInspections.filter(x=>!x.verdict||x.verdict==='VERDICT_UNSPECIFIED');
+const redirectedInspections = canonicalInspections.filter(x=>x.coverageState==='Page with redirect');
+const unknownToGoogleInspections = canonicalInspections.filter(x=>x.coverageState==='URL is unknown to Google');
+const discoveredNotIndexedInspections = canonicalInspections.filter(x=>x.coverageState==='Discovered - currently not indexed');
+const crawledNotIndexedInspections = canonicalInspections.filter(x=>x.coverageState==='Crawled - currently not indexed');
+const indexRecoveryCandidates = canonicalInspections.filter(x=>x.verdict==='FAIL'||['URL is unknown to Google','Discovered - currently not indexed','Crawled - currently not indexed'].includes(String(x.coverageState||'')));
+const otherExcludedInspections = excludedInspections.filter(x=>!['Page with redirect','URL is unknown to Google','Discovered - currently not indexed','Crawled - currently not indexed'].includes(String(x.coverageState||'')));
 const canonicalMismatches = canonicalInspections.filter(x=>x.googleCanonical&&x.userCanonical&&normalizeUrl(x.googleCanonical)!==normalizeUrl(x.userCanonical));
 const canonicalDisagreementsAll = successfulInspections.filter(x=>x.googleCanonical&&x.userCanonical&&normalizeUrl(x.googleCanonical)!==normalizeUrl(x.userCanonical));
 const robotsBlocked = canonicalInspections.filter(x=>x.robotsTxtState==='DISALLOWED');
@@ -300,9 +305,13 @@ for (const page of pages) {
   else if(impressions>=20&&position>0&&position<=20&&ctr<1){kind='ctr_opportunity';score=Math.min(100,60+Math.log10(impressions+1)*10);action='improve_search_snippet_and_click_capture'}
   if(kind)opportunityRows.push({kind,url,page:page.pathname,score:Number(score.toFixed(1)),impressions,clicks,ctr,position,action});
 }
-for(const item of indexIssues){
+for(const item of indexRecoveryCandidates){
   const page=pageByUrl.get(normalizeUrl(item.url));
   opportunityRows.push({kind:'index_issue',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?96:78,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_indexing',coverageState:item.coverageState,verdict:item.verdict});
+}
+for(const item of redirectedInspections){
+  const page=pageByUrl.get(normalizeUrl(item.url));
+  opportunityRows.push({kind:'sitemap_redirect',url:item.url,page:new URL(item.url).pathname,score:page?.impressions?99:88,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action:'repair_canonical_alignment',coverageState:item.coverageState,googleCanonical:item.googleCanonical||null,userCanonical:item.userCanonical||null});
 }
 for(const item of canonicalMismatches){
   const page=pageByUrl.get(normalizeUrl(item.url));
@@ -331,8 +340,13 @@ const searchReality = {
     indexed:indexedInspections.length,
     excluded:excludedInspections.length,
     failed:failedInspections.length,
-    unknown:unknownInspections.length,
-    notIndexed:indexIssues.length,
+    unknownVerdict:unknownVerdictInspections.length,
+    redirected:redirectedInspections.length,
+    unknownToGoogle:unknownToGoogleInspections.length,
+    discoveredNotIndexed:discoveredNotIndexedInspections.length,
+    crawledNotIndexed:crawledNotIndexedInspections.length,
+    otherExcluded:otherExcludedInspections.length,
+    indexRecoveryCandidates:indexRecoveryCandidates.length,
     errors:inspectionErrors.length,
     legacyObservedVariantsInspected:legacyObservedInspections.length,
     inspectionCoveragePct:canonicalUniverse.size?Number((canonicalInspections.length/canonicalUniverse.size*100).toFixed(1)):0,
@@ -417,7 +431,10 @@ console.log(JSON.stringify({
   queryRows: [...queriesByPage.values()].reduce((n, rows) => n + rows.length, 0),
   inspectedUrls: searchReality.indexHealth.inspected,
   indexedUrls: searchReality.indexHealth.indexed,
-  indexIssues: searchReality.indexHealth.notIndexed,
+  indexRecoveryCandidates: searchReality.indexHealth.indexRecoveryCandidates,
+  redirectedInSitemap: searchReality.indexHealth.redirected,
+  discoveredNotIndexed: searchReality.indexHealth.discoveredNotIndexed,
+  unknownToGoogle: searchReality.indexHealth.unknownToGoogle,
   canonicalMismatches: searchReality.indexHealth.canonicalMismatches,
   sitemapApiOk: searchReality.sitemaps.apiOk
 }));
