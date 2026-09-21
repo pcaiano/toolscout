@@ -684,7 +684,7 @@ export async function executionContractSnapshot(env){
   const ageHours=value=>{if(!value)return null;const t=Date.parse(String(value).replace(' ','T')+'Z');return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):null};
   const stateMap=Object.fromEntries(states.map(x=>[x.status,n(x.n)]));
   return{
-    integrityVersion:'task-specific-v2',
+    integrityVersion:'task-specific-bounded-v3',
     states:stateMap,
     executors,
     missingExecutors:n(missing?.n),
