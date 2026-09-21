@@ -6,6 +6,8 @@ const MAX_VERIFY_PER_CYCLE=4;
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=3;
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=4;
+const WARNING_RETRY_HOURS=24;
+const MAX_WARNING_RETRIES_PER_CYCLE=1;
 const FETCH_TIMEOUT_MS=6000;
 let schemaReady=null;
 let runtimeCache={at:0,candidates:[],candidateMap:new Map(),stateMap:new Map(),suppressed:new Set()};
@@ -197,19 +199,32 @@ export async function verifyBatch(env){
   const staticTools=await assetJson(env,'/data/tools.json',[]);
   const candidates=await runtimeCandidates(env);
   const all=[...(Array.isArray(staticTools)?staticTools:[]),...candidates];
-  const states=await env.DB.prepare(`SELECT tool_slug,source_status,fingerprint,pending_fingerprint,change_confirmations,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at FROM catalog_runtime_state`).all();
+  const states=await env.DB.prepare(`SELECT tool_slug,source_url,source_status,fingerprint,pending_fingerprint,change_confirmations,content_changed,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at FROM catalog_runtime_state`).all();
   const smap=new Map((states.results||[]).map(x=>[x.tool_slug,x]));
-  const chosen=all.filter(x=>x?.slug&&x?.sourceUrl).sort((a,b)=>{
-    const as=smap.get(a.slug)||{},bs=smap.get(b.slug)||{};
-    const aw=(as.quality_status==='source_warning'||as.source_status==='network_warning'||as.source_status==='warning'||as.source_status==='blocked_or_limited')?0:1;
-    const bw=(bs.quality_status==='source_warning'||bs.source_status==='network_warning'||bs.source_status==='warning'||bs.source_status==='blocked_or_limited')?0:1;
-    if(aw!==bw)return aw-bw;
-    const aa=Date.parse(String(as.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0,bb=Date.parse(String(bs.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0;
-    return aa-bb;
-  }).slice(0,MAX_VERIFY_PER_CYCLE);
+  const toolsWithSources=all.filter(x=>x?.slug&&x?.sourceUrl);
+  const isWarningState=s=>s?.quality_status==='source_warning'||s?.source_status==='network_warning'||s?.source_status==='warning'||s?.source_status==='blocked_or_limited';
+  const verificationUrl=tool=>String(tool?.verificationUrl||tool?.sourceUrl||'');
+  const retryCutoff=Date.now()-WARNING_RETRY_HOURS*3600000;
+  const changedWarning=[],retryWarning=[],regular=[];
+  for(const tool of toolsWithSources){
+    const prior=smap.get(tool.slug)||{},verifyUrl=verificationUrl(tool);
+    const last=Date.parse(String(prior.last_checked_at||'1970-01-01').replace(' ','T')+'Z')||0;
+    const sourceChanged=Boolean(prior.source_url&&verifyUrl&&prior.source_url!==verifyUrl);
+    if(isWarningState(prior)){
+      if(sourceChanged)changedWarning.push({tool,last});
+      else if(!last||last<=retryCutoff)retryWarning.push({tool,last});
+    }else regular.push({tool,last});
+  }
+  const oldest=(a,b)=>a.last-b.last;
+  changedWarning.sort(oldest);retryWarning.sort(oldest);regular.sort(oldest);
+  const chosen=[
+    ...changedWarning.map(x=>x.tool),
+    ...retryWarning.slice(0,MAX_WARNING_RETRIES_PER_CYCLE).map(x=>x.tool),
+    ...regular.map(x=>x.tool)
+  ].slice(0,MAX_VERIFY_PER_CYCLE);
   let checked=0,healthy=0,changed=0,suppressed=0,warnings=0;
   for(const tool of chosen){
-    const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},result=await fetchOfficial(tool.sourceUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
+    const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     checked++;
     if(result.status==='ok'&&Array.isArray(result.releaseLinks)&&result.releaseLinks.length)await rememberReleaseSources(env,slug,result.releaseLinks);
     const reviewedSinceChange=Boolean(prior.last_change_at&&prior.static_last_verified&&staticVerified&&staticVerified!==prior.static_last_verified);
@@ -218,26 +233,27 @@ export async function verifyBatch(env){
     let quality=String(prior.quality_status||'unverified'),contentChanged=Number(prior.content_changed||0),lastChange=prior.last_change_at||null;
     let canonicalFingerprint=prior.fingerprint||result.fingerprint||null,pendingFingerprint=prior.pending_fingerprint||null,confirmations=Number(prior.change_confirmations||0);
     if(reviewedSinceChange){quality='healthy';contentChanged=0;lastChange=null;canonicalFingerprint=result.fingerprint||canonicalFingerprint;pendingFingerprint=null;confirmations=0}
-    if(result.status==='ok'&&!prior.fingerprint){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;healthy++}
+    if(verificationSourceChanged&&result.status==='ok'){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;lastChange=null;healthy++}
+    else if(result.status==='ok'&&!prior.fingerprint){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;healthy++}
     else if(fingerprintChanged&&!reviewedSinceChange){
       if(pendingFingerprint&&pendingFingerprint===result.fingerprint)confirmations+=1;else{pendingFingerprint=result.fingerprint;confirmations=1}
       if(confirmations>=2){
         canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='change_detected';contentChanged=1;lastChange=new Date().toISOString().replace('T',' ').slice(0,19);changed++;
-        const newsCandidate=await upsertNewsCandidate(env,slug,result.finalUrl||tool.sourceUrl,result).catch(()=>null);
-        await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:tool.sourceUrl,http_status:result.httpStatus,news_candidate_id:newsCandidate?.candidate_id||null,news_materiality_score:newsCandidate?.materiality_score??null});
+        const newsCandidate=await upsertNewsCandidate(env,slug,result.finalUrl||verifyUrl,result).catch(()=>null);
+        await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:verifyUrl,http_status:result.httpStatus,news_candidate_id:newsCandidate?.candidate_id||null,news_materiality_score:newsCandidate?.materiality_score??null});
       }
     }else if(result.status==='ok'&&result.fingerprint===prior.fingerprint){
       pendingFingerprint=null;confirmations=0;if(!prior.last_change_at){quality='healthy';contentChanged=0;healthy++}
     }
-    if(broken>=2){quality='confirmed_broken';contentChanged=0;pendingFingerprint=null;confirmations=0;suppressed++;await logEvent(env,slug,'catalog_tool_suppressed','completed','Official source returned a confirmed 404/410 on two consecutive runtime checks.',{source_url:tool.sourceUrl,http_status:result.httpStatus})}
+    if(broken>=2){quality='confirmed_broken';contentChanged=0;pendingFingerprint=null;confirmations=0;suppressed++;await logEvent(env,slug,'catalog_tool_suppressed','completed','Official source returned a confirmed 404/410 on two consecutive runtime checks.',{source_url:verifyUrl,http_status:result.httpStatus})}
     else if(result.status!=='ok'&&result.status!=='broken'){warnings++;if(quality==='unverified')quality='source_warning'}
     await env.DB.prepare(`INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,fingerprint,pending_fingerprint,change_confirmations,content_changed,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at,updated_at)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status=excluded.source_status,http_status=excluded.http_status,final_url=excluded.final_url,fingerprint=COALESCE(excluded.fingerprint,catalog_runtime_state.fingerprint),pending_fingerprint=excluded.pending_fingerprint,change_confirmations=excluded.change_confirmations,content_changed=excluded.content_changed,broken_consecutive=excluded.broken_consecutive,quality_status=excluded.quality_status,static_last_verified=excluded.static_last_verified,last_checked_at=datetime('now'),last_change_at=excluded.last_change_at,updated_at=datetime('now')`)
-      .bind(slug,tool.sourceUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
+      .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   }
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,evidence:'official_source_runtime',write_policy:'due_check_only'};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_source_runtime',write_policy:'due_check_only'};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
