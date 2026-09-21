@@ -1050,6 +1050,10 @@ if(u.pathname==='/api/growth/rnd/public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   return Response.json(await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:'make_handoff_recovery'},()=>runGrowthRndAudit(env)),{headers:H});
 }
+if(u.pathname==='/api/growth/opportunities/public-reconcile'&&request.method==='POST'){
+  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  return Response.json(await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'make_handoff_search_reality'},()=>coordinateGrowthOpportunities(env)),{headers:H});
+}
 if(u.pathname==='/api/distribution/priorities/public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   return Response.json(await runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:'make_handoff_recovery'},()=>rebalanceDistributionPriorities(env)),{headers:H});
