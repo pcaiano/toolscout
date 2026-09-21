@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T13:10:00.000Z",
+  "generatedAt": "2026-09-21T22:44:38Z",
   "assets": {
     "pabbly-connect": {
       "url": "https://www.pabbly.com/assets/images/brand-assets/Pabbly-connect.png",
@@ -54,6 +54,12 @@
       "provenance": "first-party-favicon",
       "checkedAt": "2026-09-21T13:10:00.000Z",
       "sourcePage": "https://otter.ai/transcription"
+    },
+    "unbounce": {
+      "url": "https://unbounce.com/photos/cropped-unbounce-favicon-2-270x270.png",
+      "provenance": "first-party-favicon",
+      "checkedAt": "2026-09-21T22:44:38Z",
+      "sourcePage": "https://unbounce.com/"
     }
   }
 }

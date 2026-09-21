@@ -4123,5 +4123,51 @@
       "content": 8,
       "agency": 4
     }
+  },
+  {
+    "affiliateUrl": "https://unbounce.partnerlinks.io/o7sb3nmtp431",
+    "slug": "unbounce",
+    "name": "Unbounce",
+    "category": "marketing",
+    "description": "Landing page and conversion optimization platform for building campaign pages, capturing leads, running A/B tests and improving marketing conversion rates.",
+    "pricing": "Paid plans with a 14-day free trial; check Unbounce for current plan pricing and limits",
+    "freePlan": false,
+    "freePlanKnown": true,
+    "features": [
+      "landing pages",
+      "lead generation",
+      "A/B testing",
+      "conversion optimization",
+      "AI copywriting",
+      "popups and sticky bars",
+      "forms",
+      "integrations"
+    ],
+    "bestFor": [
+      "marketing teams",
+      "performance marketers",
+      "agencies",
+      "lead generation teams",
+      "small businesses"
+    ],
+    "affiliateProgram": "Unbounce Partner Program",
+    "commission": "Minimum 25% for the first customer year",
+    "sourceUrl": "https://unbounce.com/",
+    "lastVerified": "2026-09-21",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "scores": {
+      "price": 5,
+      "ease": 9,
+      "automation": 8,
+      "integrations": 9,
+      "sales": 9,
+      "ai": 8,
+      "marketing": 10,
+      "seo": 6,
+      "research": 4,
+      "content": 8,
+      "agency": 10
+    }
   }
 ]

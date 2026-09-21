@@ -66,6 +66,8 @@ async function mapLimit(items, limit, fn) {
 }
 
 const rows = await mapLimit(tools, 8, async tool => {
+  let profileExists = true;
+  try { await fs.access(`tools/${tool.slug}.html`); } catch { profileExists = false; }
   const source = await probe(tool.sourceUrl);
   const affiliateConfig = affiliate[tool.slug] || {};
   const affiliateEnabled = Boolean(affiliateConfig.enabled && affiliateConfig.url);
@@ -83,6 +85,7 @@ const rows = await mapLimit(tools, 8, async tool => {
     needsWeeklyReview,
     overdue,
     missingCritical,
+    profile: { exists: profileExists, path: `tools/${tool.slug}.html` },
     source: { url: tool.sourceUrl || null, ...source },
     affiliate: affiliateEnabled ? { enabled: true, url: affiliateConfig.url, ...affiliateLink } : { enabled: false, url: null, status: 'inactive' }
   };
@@ -112,6 +115,9 @@ const summary = {
     needsConfirmation: affiliateProbeFailures.length,
     warnings: count(r => r.affiliate.enabled && !['ok', 'broken'].includes(r.affiliate.status))
   },
+  profiles: {
+    missing: count(r => !r.profile.exists)
+  },
   metadata: {
     verifiedWithin7Days: count(r => r.verifiedAgeDays !== null && r.verifiedAgeDays <= 7),
     needsWeeklyReview: count(r => r.needsWeeklyReview),
@@ -133,5 +139,5 @@ if (affiliateProbeFailures.length) {
 // probe failure on an affiliate redirect does not, because tracking networks
 // commonly return bot-specific 404/403 responses. Affiliate failures remain
 // visible as needsConfirmation and must be corroborated before disabling links.
-const hardFailures = summary.sourceLinks.confirmedBroken + summary.metadata.missingCriticalFields;
+const hardFailures = summary.sourceLinks.confirmedBroken + summary.metadata.missingCriticalFields + summary.profiles.missing;
 if (hardFailures > 0) process.exitCode = 2;

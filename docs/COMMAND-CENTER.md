@@ -411,3 +411,10 @@ The owner changed the repository to private on 2026-09-08. GitHub connector meta
 - Unbounce approved ToolScout for its PartnerStack partner program. The verified referral URL `https://unbounce.partnerlinks.io/o7sb3nmtp431` is enabled in `data/affiliate.json` and is the production destination for `/go/unbounce`.
 - Approval evidence confirms a 90-day cookie, a minimum 25% commission for the first customer year, and customer discounts of 20% for the first three months or 35% for the first annual subscription.
 - Affiliate status does not affect editorial ranking. Unbounce is not currently part of the canonical `data/tools.json` catalog, so this activation does not change catalog membership or recommendation eligibility.
+
+## Unbounce catalog repair - 2026-09-21
+
+- Unbounce was visible in ToolScout's pending/public inventory but was missing from the canonical `data/tools.json`, causing its profile route to return 404.
+- Unbounce is now a canonical catalog tool with normal ranking and comparison eligibility, a generated public profile at `/tools/unbounce.html`, a verified first-party logo asset, and the active vendor CTA routed through `/go/unbounce` to the approved PartnerStack link.
+- The pending affiliate-only record was removed to avoid split catalog state.
+- Catalog health now treats any canonical tool without a generated profile as a hard failure, preventing future public catalog entries from silently pointing to 404 profiles.
