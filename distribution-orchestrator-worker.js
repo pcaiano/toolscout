@@ -1117,6 +1117,7 @@ if(u.pathname==='/api/growth/engine-health/public-reconcile'&&request.method==='
   };
   await run('economicLearning','distribution','economic_learning',20,()=>learnEconomics(env));
   await run('operatingPriorities','distribution','operating_priorities',20,()=>rebalanceDistributionPriorities(env));
+  await run('networkCycle','distribution','network_cycle',20,()=>runDistributionNetworkCycle(env));
   await run('catalogRuntimeQuality','catalog','runtime_quality',20,()=>contractVerifyCatalogBatch(env));
   await run('contentSocialIntelligence','content','social_intelligence',15,()=>runContentSocialIntelligenceCycle(env));
   const ok=Object.values(results).every(x=>x?.ok!==false);
