@@ -56,6 +56,13 @@ if(!content.includes("subject_type IN ('tool','news_update')"))fail("Content Eng
 if(!seoFetch.includes('/api/growth/search-directives')||!seoController.includes('shared_growth_directives_required')||!seoApply.includes('organic_growth_actions_not_authorized_by_shared_brain'))fail('SEO execution is not gated by shared-growth-v3 directives.');
 if(!seoWorkflow.includes('fetch-shared-growth-directives.mjs'))fail('SEO workflow does not fetch runtime growth directives.');
 if(!orchestrator.includes('growth_rnd_experiments')||!orchestrator.includes("mission:'rnd_audit'"))fail('Autonomous Growth R&D audit is missing.');
+if(!command.includes('rnd_items:growthRndItems')
+  || !command.includes('No action required from you.')
+  || !command.includes('rnd_experiment_unbound')
+  || !command.includes('rnd_execution_binding_pending')
+  || !command.includes('Evidence · hypothesis · action · owner · status · result')
+  || !command.includes('contract_bound')
+  || !command.includes('source_bound'))fail('Growth R&D Command Center is not execution-aware or owner-clear.');
 if(!orchestrator.includes("id:'external-demand-first-v2'")||!orchestrator.includes("strictVerifiedHumanSessions30d:100")||!orchestrator.includes("provenExternalSources:2")||!orchestrator.includes("strictHumansPerProvenSource30d:3")||!orchestrator.includes("externalDemandRemainsPrimary:true"))fail('External-demand-first acquisition policy or its repeatability gate is missing.');
 
 if(!humanGate.includes('human_gate_contract')||!humanGate.includes("status='verification_pending'")||!humanGate.includes("status='resolved'"))fail('Unified Human Gate Contract lifecycle is missing.');
