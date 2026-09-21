@@ -51,19 +51,25 @@ async function ingestEvidence(request,env){
 
 async function contentSocialIntelligenceHealth(env){
   try{
-    const [event,profiles,policies,briefs]=await Promise.all([
+    const [run,event,profiles,policies,briefs]=await Promise.all([
+      env.DB.prepare(`SELECT status,detail,started_at,completed_at,evidence_json FROM engine_runs WHERE engine='content' AND mission='social_intelligence' ORDER BY started_at DESC LIMIT 1`).first(),
       env.DB.prepare(`SELECT status,detail,created_at FROM distribution_events WHERE event_type='content_social_intelligence_refresh' ORDER BY created_at DESC LIMIT 1`).first(),
       env.DB.prepare(`SELECT SUM(CASE WHEN status='verified' THEN 1 ELSE 0 END) verified,COUNT(*) total,MAX(last_checked_at) last_checked FROM content_social_profiles`).first(),
       env.DB.prepare(`SELECT SUM(CASE WHEN policy_status='verified_social_allowed' THEN 1 ELSE 0 END) social_allowed,SUM(CASE WHEN policy_status='blocked' THEN 1 ELSE 0 END) blocked,COUNT(*) total,MAX(last_checked_at) last_checked FROM affiliate_social_policy`).first(),
       env.DB.prepare(`SELECT COUNT(*) briefs,MAX(created_at) last_brief FROM content_engine_briefs WHERE created_at>=datetime('now','-30 days')`).first()
     ]);
-    const age=event?.created_at?ageMinutes(event.created_at):null;
+    const heartbeat=run?.completed_at||run?.started_at||event?.created_at||null;
+    const age=heartbeat?ageMinutes(heartbeat):null;
     let status='healthy';
-    if(!event)status='pending';
-    else if(event.status==='failed')status='failed';
-    else if(age!=null&&age>180)status='stale';
-    return {status,last_refresh_at:event?.created_at||null,age_minutes:age,detail:event?.detail||null,verified_profiles:Number(profiles?.verified||0),profiles_total:Number(profiles?.total||0),verified_social_affiliate_programs:Number(policies?.social_allowed||0),blocked_social_affiliate_programs:Number(policies?.blocked||0),policies_total:Number(policies?.total||0),briefs_30d:Number(briefs?.briefs||0),last_brief_at:briefs?.last_brief||null,proof:'content_social_profiles + affiliate_social_policy + distribution_events'};
-  }catch(error){return {status:'unavailable',reason:String(error?.message||error),proof:'content social intelligence tables'};}
+    if(!run&&!event)status='pending';
+    else if(run?.status==='failed'||event?.status==='failed')status='failed';
+    else if(run?.status==='degraded')status='degraded';
+    else if(run?.status==='running')status=age!=null&&age>30?'stale':'running';
+    else if(age!=null&&age>7*60)status='stale';
+    let evidence={};try{evidence=JSON.parse(run?.evidence_json||'{}')}catch{}
+    const detail=run?.detail||event?.detail||(run?.status==='completed'?`Content social intelligence heartbeat completed; ${Number(evidence?.workDone||0)} due checks executed.`:null);
+    return {status,last_refresh_at:heartbeat,age_minutes:age,detail,verified_profiles:Number(profiles?.verified||0),profiles_total:Number(profiles?.total||0),verified_social_affiliate_programs:Number(policies?.social_allowed||0),blocked_social_affiliate_programs:Number(policies?.blocked||0),policies_total:Number(policies?.total||0),briefs_30d:Number(briefs?.briefs||0),last_brief_at:briefs?.last_brief||null,proof:'engine_runs + content_social_profiles + affiliate_social_policy + distribution_events'};
+  }catch(error){return {status:'unavailable',reason:String(error?.message||error),proof:'content social intelligence tables + engine_runs'};}
 }
 
 export async function contentMissionHealth(env){
