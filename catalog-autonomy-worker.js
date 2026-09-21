@@ -325,6 +325,17 @@ async function mergedSitemap(response,env){
   for(const tool of await runtimeCandidates(env)){const loc=`https://trytoolscout.org/tools/${tool.slug}`;if(!xml.includes(`<loc>${loc}</loc>`))xml=xml.replace('</urlset>',`  <url><loc>${loc}</loc></url>\n</urlset>`)}
   const h=new Headers(response.headers);h.delete('Content-Length');h.set('Content-Type','application/xml; charset=UTF-8');return new Response(xml,{status:response.status,headers:h});
 }
+export async function publicMergedTools(env){return mergedTools(env)}
+export async function publicRuntimeToolResponse(env,slug){
+  const key=String(slug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if(!key)return null;
+  const [state,candidate]=await Promise.all([toolState(env,key),runtimeCandidate(env,key)]);
+  if(state?.quality_status==='confirmed_broken')return new Response('Tool profile temporarily unavailable while the official source is re-verified.',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
+  if(!candidate)return null;
+  return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+}
+export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
+
 async function status(env){
   await ensureSchema(env);
   const [states,candidates,gaps,events,newsSources,newsCandidates]=await Promise.all([
