@@ -574,6 +574,13 @@ async function resilientStatsResponse(request, env, ctx) {
   }
 }
 
+async function missionNeedsRecovery(env,engine,mission){
+  try{
+    const row=await env.DB.prepare(`SELECT status FROM engine_runs WHERE engine=? AND mission=? ORDER BY started_at DESC LIMIT 1`).bind(engine,mission).first();
+    return row?.status==='failed';
+  }catch{return false}
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -601,7 +608,7 @@ export default {
   async scheduled(event, env, ctx) {
     const trigger=event?.cron||'scheduled';
     const hourly=trigger==='15 * * * *';
-    const daily=trigger==='15 3 * * *';
+    const daily=trigger==='35 3 * * *';
     const scheduledHour=new Date(Number(event?.scheduledTime)||Date.now()).getUTCHours();
     const twoHourly=hourly&&scheduledHour%2===0;
     const sixHourly=hourly&&scheduledHour%6===0;
@@ -627,8 +634,19 @@ export default {
     }
 
     if(daily){
-      ctx.waitUntil(runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env)).catch(()=>{}));
-      ctx.waitUntil(runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env)).catch(()=>{}));
+      ctx.waitUntil((async()=>{
+        try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env))}catch{}
+        try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env))}catch{}
+      })());
+    }else if(hourly){
+      const [recoverCoverage,recoverNews]=await Promise.all([
+        missionNeedsRecovery(env,'catalog','runtime_coverage'),
+        missionNeedsRecovery(env,'content','software_news_source_watch')
+      ]);
+      if(recoverCoverage||recoverNews)ctx.waitUntil((async()=>{
+        if(recoverCoverage){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+':recovery'},()=>admitTrustedCandidates(env))}catch{}}
+        if(recoverNews){try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger+':recovery'},()=>verifyNewsSources(env))}catch{}}
+      })());
     }
     if (typeof base.scheduled === 'function') return base.scheduled(event, env, ctx);
   }
