@@ -8,7 +8,9 @@ const GA_ADMIN_ORIGIN='https://analyticsadmin.googleapis.com';
 const DEFAULT_MEASUREMENT_ID='G-9VR80SYYH7';
 const DEFAULT_REDIRECT_URI='https://trytoolscout.org/api/google-analytics/callback';
 const OAUTH_COOKIE='ts_ga4_oauth';
+const CONNECTION_COOKIE='ts_ga4_connection';
 const OAUTH_TTL_SECONDS=600;
+const CONNECTION_TTL_SECONDS=2592000;
 let oauthAccessCache=null;
 let schemaReady=false;
 
@@ -40,9 +42,10 @@ async function decryptText(env,value){
   const parts=String(value||'').split('.');if(parts.length!==3||parts[0]!=='v1')throw new Error('oauth_ciphertext_invalid');
   const key=await cryptoKey(env),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64url(parts[1])},key,fromB64url(parts[2]));return dec.decode(plain);
 }
-function cookieValue(request,name){const raw=String(request.headers.get('Cookie')||'');const match=raw.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));return match?decodeURIComponent(match[1]):''}
+function cookieValue(request,name){const raw=String(request?.headers?.get('Cookie')||'');const match=raw.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));return match?decodeURIComponent(match[1]):''}
 function oauthCookie(value,maxAge=OAUTH_TTL_SECONDS){return `${OAUTH_COOKIE}=${encodeURIComponent(value)}; Path=/api/google-analytics/callback; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`}
-function redirect(location,cookie=null){const headers=new Headers({Location:location,'Cache-Control':'no-store'});if(cookie!==null)headers.append('Set-Cookie',cookie);return new Response(null,{status:303,headers})}
+function connectionCookie(value,maxAge=CONNECTION_TTL_SECONDS){return `${CONNECTION_COOKIE}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`}
+function redirect(location,cookies=null){const headers=new Headers({Location:location,'Cache-Control':'no-store'});for(const cookie of (Array.isArray(cookies)?cookies:cookies?[cookies]:[]))headers.append('Set-Cookie',cookie);return new Response(null,{status:303,headers})}
 async function googleJson(url,token,init={}){const headers=new Headers(init.headers||{});headers.set('Authorization',`Bearer ${token}`);if(init.body)headers.set('Content-Type','application/json');const response=await fetch(url,{...init,headers});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(`google_api_${response.status}:${body?.error?.message||'request_failed'}`);return body}
 async function discoverPropertyId(token,measurementId){
   const summary=await googleJson(`${GA_ADMIN_ORIGIN}/v1beta/accountSummaries?pageSize=200`,token);const properties=[];
@@ -58,7 +61,19 @@ async function ensureOAuthSchema(env){
   ]);
   schemaReady=true;
 }
-async function loadConnection(env){try{return await env.DB.prepare(`SELECT provider,owner_email,property_id,measurement_id,refresh_token_ciphertext,scopes,connected_at,updated_at,last_refresh_at,last_error FROM google_oauth_connections WHERE provider='google_analytics'`).first()}catch{return null}}
+async function cookieConnection(env,request){
+  if(!request)return null;
+  try{
+    const encrypted=cookieValue(request,CONNECTION_COOKIE);if(!encrypted)return null;
+    const data=JSON.parse(await decryptText(env,encrypted));
+    if(!data||data.ownerEmail!==OWNER_EMAIL||!data.refreshTokenCiphertext||n(data.exp)<Date.now())return null;
+    return {provider:'google_analytics',owner_email:data.ownerEmail,property_id:data.propertyId||null,measurement_id:data.measurementId||DEFAULT_MEASUREMENT_ID,refresh_token_ciphertext:data.refreshTokenCiphertext,scopes:data.scopes||GA_SCOPE,connected_at:data.connectedAt||null,updated_at:data.connectedAt||null,last_refresh_at:null,last_error:data.persistenceError||null,storage:'cookie'};
+  }catch{return null}
+}
+async function loadConnection(env,request=null){
+  try{const row=await env.DB.prepare(`SELECT provider,owner_email,property_id,measurement_id,refresh_token_ciphertext,scopes,connected_at,updated_at,last_refresh_at,last_error FROM google_oauth_connections WHERE provider='google_analytics'`).first();if(row)return {...row,storage:'d1'}}catch{}
+  return cookieConnection(env,request);
+}
 async function saveConnection(env,{ownerEmail,propertyId,measurementId,ciphertext,scopes,lastError=null}){
   await ensureOAuthSchema(env);
   await env.DB.prepare(`INSERT INTO google_oauth_connections(provider,owner_email,property_id,measurement_id,refresh_token_ciphertext,scopes,connected_at,updated_at,last_error) VALUES('google_analytics',?,?,?,?,?,datetime('now'),datetime('now'),?) ON CONFLICT(provider) DO UPDATE SET owner_email=excluded.owner_email,property_id=COALESCE(excluded.property_id,google_oauth_connections.property_id),measurement_id=excluded.measurement_id,refresh_token_ciphertext=excluded.refresh_token_ciphertext,scopes=excluded.scopes,updated_at=datetime('now'),last_error=excluded.last_error`).bind(ownerEmail,propertyId||null,measurementId,ciphertext,scopes||GA_SCOPE,lastError).run();
@@ -67,8 +82,8 @@ async function updateConnectionHealth(env,{propertyId=null,error=null,refreshed=
 async function exchangeCode(config,code,verifier){const body=new URLSearchParams({client_id:config.clientId,client_secret:config.clientSecret,code,code_verifier:verifier,grant_type:'authorization_code',redirect_uri:config.redirectUri});const response=await fetch(GOOGLE_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const data=await response.json().catch(()=>({}));if(!response.ok||!data.access_token)throw new Error(`google_oauth_exchange_${response.status}:${data.error_description||data.error||'failed'}`);return data}
 async function refreshToken(config,refresh){const body=new URLSearchParams({client_id:config.clientId,client_secret:config.clientSecret,refresh_token:refresh,grant_type:'refresh_token'});const response=await fetch(GOOGLE_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const data=await response.json().catch(()=>({}));if(!response.ok||!data.access_token)throw new Error(`google_oauth_refresh_${response.status}:${data.error_description||data.error||'failed'}`);return data}
 
-export async function googleAnalyticsOAuthStatus(env){
-  const config=oauthConfig(env),row=await loadConnection(env);return {configured:Boolean(config.clientId&&config.clientSecret),connected:Boolean(row),ownerEmail:row?.owner_email||null,propertyId:row?.property_id||config.propertyId||null,measurementId:row?.measurement_id||config.measurementId,connectedAt:row?.connected_at||null,lastRefreshAt:row?.last_refresh_at||null,lastError:row?.last_error||null,redirectUri:config.redirectUri};
+export async function googleAnalyticsOAuthStatus(env,request=null){
+  const config=oauthConfig(env),row=await loadConnection(env,request);return {configured:Boolean(config.clientId&&config.clientSecret),connected:Boolean(row),ownerEmail:row?.owner_email||null,propertyId:row?.property_id||config.propertyId||null,measurementId:row?.measurement_id||config.measurementId,connectedAt:row?.connected_at||null,lastRefreshAt:row?.last_refresh_at||null,lastError:row?.last_error||null,storage:row?.storage||null,redirectUri:config.redirectUri};
 }
 export async function googleAnalyticsConnectResponse(request,env,ctx){
   if(!(await ownerAuthenticated(request,ctx)))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
@@ -85,22 +100,28 @@ export async function googleAnalyticsCallbackResponse(request,env){
     if(Date.now()>n(stateData.exp)||!stateData.state||stateData.state!==url.searchParams.get('state'))throw new Error('oauth_state_invalid');
     const code=String(url.searchParams.get('code')||'');if(!code)throw new Error('oauth_code_missing');const tokens=await exchangeCode(config,code,stateData.verifier);const user=await googleJson(GOOGLE_USERINFO_URL,tokens.access_token);
     if(String(user.email||'').toLowerCase()!==OWNER_EMAIL||user.email_verified===false)throw new Error('oauth_google_account_not_owner');
-    const existing=await loadConnection(env);let ciphertext=existing?.refresh_token_ciphertext||null;if(tokens.refresh_token)ciphertext=await encryptText(env,tokens.refresh_token);if(!ciphertext)throw new Error('google_refresh_token_missing');
+    const existing=await loadConnection(env,request);let ciphertext=existing?.refresh_token_ciphertext||null;if(tokens.refresh_token)ciphertext=await encryptText(env,tokens.refresh_token);if(!ciphertext)throw new Error('google_refresh_token_missing');
     let propertyId=config.propertyId||existing?.property_id||null,discoveryError=null;if(!propertyId){try{propertyId=await discoverPropertyId(tokens.access_token,config.measurementId)}catch(error){discoveryError=String(error?.message||error)}}
-    await saveConnection(env,{ownerEmail:OWNER_EMAIL,propertyId,measurementId:config.measurementId,ciphertext,scopes:tokens.scope||`${GA_SCOPE} openid email`,lastError:discoveryError});oauthAccessCache=null;
-    return redirect(discoveryError?'/analytics?google=connected&property=unresolved':'/analytics?google=connected',clear);
+    const scopes=tokens.scope||`${GA_SCOPE} openid email`,connectedAt=new Date().toISOString();let persistenceError=null;
+    try{await saveConnection(env,{ownerEmail:OWNER_EMAIL,propertyId,measurementId:config.measurementId,ciphertext,scopes,lastError:discoveryError})}catch(error){persistenceError=String(error?.message||error).slice(0,500)}
+    const fallbackPayload=await encryptText(env,JSON.stringify({ownerEmail:OWNER_EMAIL,propertyId,measurementId:config.measurementId,refreshTokenCiphertext:ciphertext,scopes,connectedAt,persistenceError,exp:Date.now()+CONNECTION_TTL_SECONDS*1000}));
+    oauthAccessCache=null;
+    const target=discoveryError?'/analytics?google=connected&property=unresolved':persistenceError?'/analytics?google=connected&storage=cookie':'/analytics?google=connected';
+    return redirect(target,[clear,connectionCookie(fallbackPayload)]);
   }catch(error){return redirect(`/analytics?google=error&reason=${encodeURIComponent(String(error?.message||error).slice(0,160))}`,clear)}
 }
-export async function googleAnalyticsOAuthAccess(env){
-  const config=oauthConfig(env),row=await loadConnection(env);if(!row)return null;if(!config.clientId||!config.clientSecret)throw new Error('google_oauth_app_not_configured');
+export async function googleAnalyticsOAuthAccess(env,request=null){
+  const config=oauthConfig(env),row=await loadConnection(env,request);if(!row)return null;if(!config.clientId||!config.clientSecret)throw new Error('google_oauth_app_not_configured');
   const now=Date.now();if(oauthAccessCache&&oauthAccessCache.expiresAt>now+60000&&oauthAccessCache.ownerEmail===row.owner_email)return oauthAccessCache;
   try{
     const refresh=await decryptText(env,row.refresh_token_ciphertext),tokens=await refreshToken(config,refresh);let propertyId=row.property_id||config.propertyId||null;if(!propertyId)propertyId=await discoverPropertyId(tokens.access_token,row.measurement_id||config.measurementId);
-    oauthAccessCache={token:tokens.access_token,propertyId,ownerEmail:row.owner_email,measurementId:row.measurement_id||config.measurementId,authMode:'oauth',expiresAt:now+n(tokens.expires_in||3600)*1000};await updateConnectionHealth(env,{propertyId,error:null,refreshed:true});return oauthAccessCache;
+    oauthAccessCache={token:tokens.access_token,propertyId,ownerEmail:row.owner_email,measurementId:row.measurement_id||config.measurementId,authMode:'oauth',storage:row.storage||'d1',expiresAt:now+n(tokens.expires_in||3600)*1000};
+    if(row.storage==='cookie'){try{await saveConnection(env,{ownerEmail:row.owner_email,propertyId,measurementId:row.measurement_id||config.measurementId,ciphertext:row.refresh_token_ciphertext,scopes:row.scopes||GA_SCOPE,lastError:null})}catch{}}
+    await updateConnectionHealth(env,{propertyId,error:null,refreshed:true});return oauthAccessCache;
   }catch(error){await updateConnectionHealth(env,{error:String(error?.message||error).slice(0,500)});throw error}
 }
 export async function googleAnalyticsDisconnectResponse(request,env,ctx){
   if(!(await ownerAuthenticated(request,ctx))||!originOk(request))return Response.json({ok:false,error:'forbidden'},{status:403,headers:{'Cache-Control':'no-store'}});
-  const row=await loadConnection(env);if(row){try{const token=await decryptText(env,row.refresh_token_ciphertext);await fetch(GOOGLE_REVOKE_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({token})})}catch{}try{await env.DB.prepare(`DELETE FROM google_oauth_connections WHERE provider='google_analytics'`).run()}catch{}}
-  oauthAccessCache=null;return Response.json({ok:true,disconnected:true},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}});
+  const row=await loadConnection(env,request);if(row){try{const token=await decryptText(env,row.refresh_token_ciphertext);await fetch(GOOGLE_REVOKE_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({token})})}catch{}try{await env.DB.prepare(`DELETE FROM google_oauth_connections WHERE provider='google_analytics'`).run()}catch{}}
+  oauthAccessCache=null;const headers=new Headers({'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'});headers.append('Set-Cookie',connectionCookie('',0));return new Response(JSON.stringify({ok:true,disconnected:true}),{headers});
 }
