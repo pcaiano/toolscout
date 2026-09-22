@@ -8,6 +8,7 @@ const GA_DATA_ORIGIN='https://analyticsdata.googleapis.com';
 const GA_ADMIN_ORIGIN='https://analyticsadmin.googleapis.com';
 const DEFAULT_MEASUREMENT_ID='G-9VR80SYYH7';
 const BUSINESS_TIME_ZONE='Europe/Lisbon';
+const OWNER_EMAIL='pcaiano@gmail.com';
 let tokenCache=null;
 let propertyCache=null;
 
@@ -31,6 +32,7 @@ function gaConfig(env){
     privateKey:String(env.GA4_PRIVATE_KEY||service.private_key||'')
   };
 }
+function ownerRouteAuthenticated(request){return String(request.headers.get('Cf-Access-Authenticated-User-Email')||request.headers.get('cf-access-authenticated-user-email')||'').toLowerCase()===OWNER_EMAIL}
 async function serviceAccountAccessToken(env){
   const cfg=gaConfig(env),now=Math.floor(Date.now()/1000);
   if(!cfg.clientEmail||!cfg.privateKey)throw new Error('ga4_service_account_not_configured');
@@ -41,7 +43,7 @@ async function serviceAccountAccessToken(env){
   const key=await crypto.subtle.importKey('pkcs8',pemBytes(cfg.privateKey),{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
   const signature=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned));
   const assertion=`${unsigned}.${b64url(new Uint8Array(signature))}`;
-  const response=await fetch(GA_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion})});
+  const response=await fetch(GA_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth-grant-type:jwt-bearer',assertion})});
   const body=await response.json().catch(()=>({}));
   if(!response.ok||!body.access_token)throw new Error(`ga4_oauth_${response.status}:${body.error_description||body.error||'token_failed'}`);
   tokenCache={email:cfg.clientEmail,token:body.access_token,expiresAt:now+n(body.expires_in||3600)};
@@ -90,20 +92,14 @@ function sqlUtc(ms){return new Date(ms).toISOString().replace('T',' ').replace(/
 async function runReport(propertyId,token,body){return googleJson(`${GA_DATA_ORIGIN}/v1beta/properties/${propertyId}:runReport`,token,{method:'POST',body:JSON.stringify(body)})}
 function firstMetric(report,index=0){return n(report?.rows?.[0]?.metricValues?.[index]?.value)}
 function sourceRows(report){
-  return (report?.rows||[]).map(row=>({
-    source:row.dimensionValues?.[0]?.value||'(not set)',
-    medium:row.dimensionValues?.[1]?.value||'(not set)',
-    channel:row.dimensionValues?.[2]?.value||'(not set)',
-    landingPage:row.dimensionValues?.[3]?.value||'(not set)',
-    sessions:n(row.metricValues?.[0]?.value)
-  })).filter(row=>row.sessions>0);
+  return (report?.rows||[]).map(row=>({source:row.dimensionValues?.[0]?.value||'(not set)',medium:row.dimensionValues?.[1]?.value||'(not set)',channel:row.dimensionValues?.[2]?.value||'(not set)',landingPage:row.dimensionValues?.[3]?.value||'(not set)',sessions:n(row.metricValues?.[0]?.value)})).filter(row=>row.sessions>0);
 }
-async function ga4Snapshot(env){
-  const cfg=gaConfig(env),oauthBefore=await googleAnalyticsOAuthStatus(env);
+async function ga4Snapshot(env,request=null){
+  const cfg=gaConfig(env),oauthBefore=await googleAnalyticsOAuthStatus(env,request);
   let token=null,propertyId=null,authMode=null,connectedEmail=null;
   try{
     if(oauthBefore.connected){
-      const oauth=await googleAnalyticsOAuthAccess(env);
+      const oauth=await googleAnalyticsOAuthAccess(env,request);if(!oauth)throw new Error('google_oauth_connection_unavailable');
       token=oauth.token;propertyId=oauth.propertyId;authMode='oauth';connectedEmail=oauth.ownerEmail;
     }else if(cfg.clientEmail&&cfg.privateKey){
       token=await serviceAccountAccessToken(env);propertyId=await resolvePropertyId(env,token);authMode='service_account';connectedEmail=cfg.clientEmail;
@@ -119,11 +115,9 @@ async function ga4Snapshot(env){
       runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'sessionSource'},{name:'sessionMedium'},{name:'sessionDefaultChannelGroup'},{name:'landingPagePlusQueryString'}],metrics:[{name:'sessions'}],limit:'100',orderBys:[{metric:{metricName:'sessions'},desc:true}]})
     ]);
     let last24Hours=0;for(const row of hourReport.rows||[]){const key=String(row.dimensionValues?.[0]?.value||'');if(key>=cutoff&&key<=current)last24Hours+=n(row.metricValues?.[0]?.value)}
-    const sessionsToday=firstMetric(todayReport,0),mtd=firstMetric(mtdReport,0),elapsedDays=Math.max(1,local.day),dailyAverage=mtd/elapsedDays,projection=dailyAverage*daysInMonth(local.year,local.month),timeZone=todayReport?.metadata?.timeZone||mtdReport?.metadata?.timeZone||BUSINESS_TIME_ZONE,oauth=await googleAnalyticsOAuthStatus(env);
+    const sessionsToday=firstMetric(todayReport,0),mtd=firstMetric(mtdReport,0),elapsedDays=Math.max(1,local.day),dailyAverage=mtd/elapsedDays,projection=dailyAverage*daysInMonth(local.year,local.month),timeZone=todayReport?.metadata?.timeZone||mtdReport?.metadata?.timeZone||BUSINESS_TIME_ZONE,oauth=await googleAnalyticsOAuthStatus(env,request);
     return {status:'connected',canonical:true,source:'Google Analytics 4 Data API',propertyId,measurementId:cfg.measurementId,timeZone,authMode,connectedEmail,oauth,sessions:{today:sessionsToday,last24Hours,monthToDate:mtd,dailyAverageMTD:Number(dailyAverage.toFixed(2)),projectedMonth:Math.round(projection)},users:{today:firstMetric(todayReport,1),activeToday:firstMetric(todayReport,2),monthToDate:firstMetric(mtdReport,1)},sources:sourceRows(sourcesReport),fetchedAt:new Date().toISOString(),consentNote:'GA4 acquisition is consent dependent under the current ToolScout consent implementation. These figures reproduce the GA4 reporting population and are not expanded with ToolScout traffic classification estimates.'};
-  }catch(error){
-    return {status:'unavailable',canonical:true,source:'Google Analytics 4 Data API',reason:String(error?.message||error),measurementId:cfg.measurementId,authMode,connectedEmail,oauth:await googleAnalyticsOAuthStatus(env),fetchedAt:new Date().toISOString()};
-  }
+  }catch(error){return {status:'unavailable',canonical:true,source:'Google Analytics 4 Data API',reason:String(error?.message||error),measurementId:cfg.measurementId,authMode,connectedEmail,oauth:await googleAnalyticsOAuthStatus(env,request),fetchedAt:new Date().toISOString()}}
 }
 async function serverCommerceSnapshot(env){
   try{
@@ -139,9 +133,7 @@ async function serverCommerceSnapshot(env){
     return {status:'connected',canonical:true,source:'ToolScout server redirect ledger',definition:'Every non-owner /go/ redirect recorded by the ToolScout Worker. Monetized means affiliate_active_at_click=1 at redirect time.',last24Hours:{outbound:n(row?.outbound_24h),monetized:n(row?.monetized_24h)},today:{outbound:n(row?.outbound_today),monetized:n(row?.monetized_today)},monthToDate:{outbound:n(row?.outbound_mtd),monetized:n(row?.monetized_mtd),unknownMonetization:n(row?.unknown_monetization_mtd)},fetchedAt:new Date().toISOString()};
   }catch(error){return {status:'unavailable',canonical:true,source:'ToolScout server redirect ledger',reason:String(error?.message||error),fetchedAt:new Date().toISOString()}}
 }
-function diagnosticTraffic(data){
-  return {status:data?.tracking?.status||'unavailable',role:'diagnostic_only',source:'ToolScout Traffic Quality',strictHumanSessionsLast24Hours:n(data?.tracking?.humanSessionsLast24Hours),today:n(data?.traffic?.today),monthToDate:n(data?.traffic?.monthToDate),note:'Traffic Quality is diagnostic only. It may flag suspicious or browser-confirmed traffic but it cannot subtract or replace GA4 acquisition sessions.'};
-}
+function diagnosticTraffic(data){return {status:data?.tracking?.status||'unavailable',role:'diagnostic_only',source:'ToolScout Traffic Quality',strictHumanSessionsLast24Hours:n(data?.tracking?.humanSessionsLast24Hours),today:n(data?.traffic?.today),monthToDate:n(data?.traffic?.monthToDate),note:'Traffic Quality is diagnostic only. It may flag suspicious or browser-confirmed traffic but it cannot subtract or replace GA4 acquisition sessions.'}}
 function mergeTruth(data,acquisition,commerce){
   const quality=diagnosticTraffic(data),next={...data,acquisition,commerceTruth:commerce,trafficQuality:quality};
   if(acquisition.status==='connected'){
@@ -157,8 +149,8 @@ function mergeTruth(data,acquisition,commerce){
   return next;
 }
 function acquisitionWidget(){return `<section class="widget" data-widget="acquisition-truth" style="--w:12;--h:5"><div class="widgetHead"><div><div class="widgetKicker">GA4 acquisition + server commerce</div><div class="widgetTitle">Acquisition & Outbound Truth</div></div><div class="widgetMeta" id="acquisitionTruthMeta">Canonical business sources</div></div><div class="widgetBody" id="acquisitionTruthBody"><div class="empty">Refresh to load GA4 acquisition.</div></div><div class="resizeHandle"></div></section>`}
-function acquisitionScript(){return `<script data-ga4-acquisition-renderer="v2">(function(){
-const esc2=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])),num2=v=>Number(v||0).toLocaleString(),pct2=v=>Number.isFinite(Number(v))?Number(v).toFixed(1)+'%':'Unavailable';
+function acquisitionScript(){return `<script data-ga4-acquisition-renderer="v3">(function(){
+const esc2=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])),num2=v=>Number(v||0).toLocaleString(),pct2=v=>Number.isFinite(Number(v))?Number(v).toFixed(1)+'%':'Unavailable';let latestData=null;
 function metric2(label,value,meta){return '<div class="metric"><small>'+esc2(label)+'</small><b>'+esc2(value)+'</b><span>'+esc2(meta||'')+'</span></div>'}
 function row2(name,value,meta){return '<div class="row"><div><div class="rowName">'+esc2(name)+'</div>'+(meta?'<div class="rowMeta">'+esc2(meta)+'</div>':'')+'</div><div class="rowValue">'+esc2(value)+'</div></div>'}
 function draw(d){
@@ -176,13 +168,15 @@ function draw(d){
   const health=document.getElementById('healthBody');if(health&&!health.querySelector('[data-ga4-health-row]')){health.insertAdjacentHTML('afterbegin','<div data-ga4-health-row>'+row2('GA4 acquisition',a.status==='connected'?'Observed':'Unavailable',a.status==='connected'?'Canonical sessions · '+(a.authMode==='oauth'?'OAuth':'service account'):' '+esc2(a.reason||'configuration required'))+row2('Traffic Quality','Diagnostic only',num2(q.strictHumanSessionsLast24Hours)+' strict / browser-confirmed sessions · 24h')+row2('Server commerce',c.status==='connected'?'Observed':'Unavailable',c.status==='connected'?num2(c.last24Hours&&c.last24Hours.outbound)+' outbound · '+num2(c.last24Hours&&c.last24Hours.monetized)+' monetized / 24h':esc2(c.reason||''))+'</div>')}
 }
 document.addEventListener('click',async function(e){const button=e.target.closest('[data-ga4-disconnect]');if(!button)return;e.preventDefault();const old=button.textContent;button.disabled=true;button.textContent='Disconnecting';try{const response=await fetch('/analytics/api/google/disconnect',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'}});if(!response.ok)throw new Error('disconnect_failed');location.reload()}catch{button.disabled=false;button.textContent='Disconnect failed';setTimeout(()=>button.textContent=old,1500)}});
-const original=window.render;if(typeof original==='function')window.render=function(d){original(d);draw(d)};
+const original=window.render;if(typeof original==='function')window.render=function(d){latestData=d;original(d);draw(d)};
+async function refreshGa4Direct(){try{const response=await fetch('/analytics/api/google/acquisition',{credentials:'same-origin',cache:'no-store'});if(!response.ok)return;const acquisition=await response.json();if(!acquisition||acquisition.status!=='connected')return;draw(latestData?{...latestData,acquisition}:{acquisition,commerceTruth:{status:'unavailable',reason:'D1 temporarily unavailable'},trafficQuality:{},revenue:{reportingStatus:'unavailable'}})}catch{}}
+setTimeout(refreshGa4Direct,900);
 })();</script>`}
 async function decoratePage(response){
   const type=String(response.headers.get('content-type')||'').toLowerCase();if(!response.ok||!type.includes('text/html'))return response;
   let html=await response.text();
   if(!html.includes('data-widget="acquisition-truth"'))html=html.replace('<section class="widget" data-widget="chairman"',acquisitionWidget()+'\n    <section class="widget" data-widget="chairman"');
-  if(!html.includes('data-ga4-acquisition-renderer="v2"'))html=html.replace('</body>',acquisitionScript()+'</body>');
+  if(!html.includes('data-ga4-acquisition-renderer="v3"'))html=html.replace('</body>',acquisitionScript()+'</body>');
   html=html.replace('Business truth first · operational detail optional','GA4 acquisition + server commerce first · operational detail optional');
   html=html.replace('<div class="widgetMeta">Human only</div>','<div class="widgetMeta">GA4 + server</div>');
   const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');return new Response(html,{status:response.status,statusText:response.statusText,headers});
@@ -195,14 +189,18 @@ export default {
     if(request.method==='GET'&&url.pathname==='/analytics/api/google/connect')return googleAnalyticsConnectResponse(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/api/google-analytics/callback')return googleAnalyticsCallbackResponse(request,env);
     if(request.method==='POST'&&url.pathname==='/analytics/api/google/disconnect')return googleAnalyticsDisconnectResponse(request,env,ctx);
+    if(request.method==='GET'&&url.pathname==='/analytics/api/google/acquisition'){
+      if(!ownerRouteAuthenticated(request))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+      const acquisition=await ga4Snapshot(env,request);return Response.json(acquisition,{status:acquisition.status==='connected'?200:503,headers:JSON_H});
+    }
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats'){
       const upstream=await base.fetch(request,env,ctx);if(!upstream.ok)return upstream;
       let data;try{data=await upstream.json()}catch{return new Response('Command Center stats unavailable',{status:502,headers:{'Cache-Control':'no-store'}})}
-      const [acquisition,commerce]=await Promise.all([ga4Snapshot(env),serverCommerceSnapshot(env)]);
+      const [acquisition,commerce]=await Promise.all([ga4Snapshot(env,request),serverCommerceSnapshot(env)]);
       return Response.json(mergeTruth(data,acquisition,commerce),{headers:JSON_H});
     }
     if(request.method==='GET'&&url.pathname==='/analytics/api/ga4-health'){
-      const acquisition=await ga4Snapshot(env);return Response.json({ok:acquisition.status==='connected',acquisition},{status:acquisition.status==='connected'?200:503,headers:JSON_H});
+      const acquisition=await ga4Snapshot(env,request);return Response.json({ok:acquisition.status==='connected',acquisition},{status:acquisition.status==='connected'?200:503,headers:JSON_H});
     }
     const response=await base.fetch(request,env,ctx);
     return request.method==='GET'&&analyticsPage(url.pathname)?decoratePage(response):response;
