@@ -44,6 +44,7 @@ run_worker_first = [
   "/api/affiliate-replies*",
   "/api/catalog-autonomy*",
   "/api/recommend*",
+  "/api/google-analytics/*",
   "/api/discovery-attribution-health*",
   "/api/command-center-truth-health*",
   "/api/command-center-autoload-health*",
