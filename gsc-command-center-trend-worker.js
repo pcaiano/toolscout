@@ -45,21 +45,22 @@ async function enrichStats(request, env, response) {
 const GSC_TREND_ENHANCEMENT = `<style id="gsc-trend-chart-style">
 #gscTrendBlock{margin:12px 0 14px;border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:12px 12px 10px}
 .gscTrendHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap}.gscTrendHead b{font-size:13px}.gscTrendHead span{display:block;color:var(--muted);font-size:10px;line-height:1.45;margin-top:3px}.gscTrendBadge{font-size:9px!important;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border:1px solid var(--line);border-radius:999px;padding:5px 8px;margin:0!important;white-space:nowrap}.gscTrendCanvas{position:relative;overflow-x:auto}.gscTrendSvg{display:block;width:100%;min-width:760px;height:auto}.gscTrendTooltip{display:none;position:absolute;z-index:3;pointer-events:none;min-width:180px;max-width:240px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 9px;box-shadow:0 8px 30px rgba(0,0,0,.12);font-size:10px;line-height:1.45}.gscTrendTooltip b{display:block;font-size:11px;margin-bottom:4px}.gscTrendFoot{color:var(--muted);font-size:9px;line-height:1.5;margin-top:7px}@media(max-width:720px){#gscTrendBlock{padding:10px 8px}.gscTrendHead{padding:0 3px}}
-</style><script data-gsc-trend-renderer="v1">(function(){
+</style><script data-gsc-trend-renderer="v2">(function(){
 var esc=function(v){return String(v==null?'':v).replace(/[&<>\"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[m]})};
 var num=function(v){return Number(v||0).toLocaleString()};
 var one=function(v){return Number(v||0).toFixed(1)};
 var pct=function(v){return Number(v||0).toFixed(2)+'%'};
 var shortDate=function(v){try{return new Date(String(v)+'T12:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric'})}catch{return String(v||'')}};
 var longDate=function(v){try{return new Date(String(v)+'T12:00:00Z').toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}catch{return String(v||'')}};
-function latestValue(rows,key){for(var i=rows.length-1;i>=0;i--){var value=Number(rows[i]&&rows[i][key]);if(Number.isFinite(value))return value}return null}
+function numericValue(row,key){if(!row||row[key]==null)return null;var value=Number(row[key]);return Number.isFinite(value)?value:null}
+function latestValue(rows,key){for(var i=rows.length-1;i>=0;i--){var value=numericValue(rows[i],key);if(value!==null)return value}return null}
 function seriesPath(rows,series,left,width,top,height){
-  var values=rows.map(function(r){var v=Number(r&&r[series.key]);return Number.isFinite(v)?v:null}).filter(function(v){return v!==null});
+  var values=rows.map(function(r){return numericValue(r,series.key)}).filter(function(v){return v!==null});
   if(!values.length)return '';
   var min=Math.min.apply(null,values),max=Math.max.apply(null,values);
   if(max===min){min=min===0?0:min-1;max=max+1}
   var points=[];
-  rows.forEach(function(row,index){var value=Number(row&&row[series.key]);if(!Number.isFinite(value))return;var ratio=(value-min)/(max-min);var x=left+(rows.length===1?width/2:index/(rows.length-1)*width);var y=series.invert?top+ratio*height:top+height-ratio*height;points.push((points.length?'L':'M')+x.toFixed(1)+' '+y.toFixed(1))});
+  rows.forEach(function(row,index){var value=numericValue(row,series.key);if(value===null)return;var ratio=(value-min)/(max-min);var x=left+(rows.length===1?width/2:index/(rows.length-1)*width);var y=series.invert?top+ratio*height:top+height-ratio*height;points.push((points.length?'L':'M')+x.toFixed(1)+' '+y.toFixed(1))});
   return points.join(' ');
 }
 function renderTrend(data){
@@ -96,7 +97,7 @@ function renderTrend(data){
   block.innerHTML='<div class="gscTrendHead"><div><b>Search performance trend</b><span>Daily visibility and ranking movement from first-party Google Search Console data.</span></div><span class="gscTrendBadge">'+esc(range.days||rows.length)+' days</span></div><div class="gscTrendCanvas">'+svg+'<div class="gscTrendTooltip"></div></div><div class="gscTrendFoot">Each line uses its own scale so very different metrics remain readable. Average position is inverted so ranking improvement moves upward. Search-visible pages means pages seen in Search Analytics that day, not total indexed URLs.</div>';
   anchor.insertAdjacentElement('afterend',block);
   var canvas=block.querySelector('.gscTrendCanvas'),tip=block.querySelector('.gscTrendTooltip');
-  canvas.addEventListener('mousemove',function(event){var rect=canvas.getBoundingClientRect();var relative=Math.max(0,Math.min(rect.width,event.clientX-rect.left));var index=Math.max(0,Math.min(rows.length-1,Math.round(relative/Math.max(1,rect.width)*(rows.length-1))));var row=rows[index]||{};tip.innerHTML='<b>'+esc(longDate(row.date))+'</b>Impressions: '+num(row.impressions)+'<br>Clicks: '+num(row.clicks)+'<br>CTR: '+pct(row.ctr)+'<br>Average position: '+(row.position==null?'n/a':one(row.position))+'<br>Search-visible pages: '+num(row.searchVisiblePages);tip.style.display='block';var maxLeft=Math.max(6,rect.width-230);tip.style.left=Math.max(6,Math.min(maxLeft,relative+10))+'px';tip.style.top='12px'});
+  canvas.addEventListener('mousemove',function(event){var rect=canvas.getBoundingClientRect();var visibleX=Math.max(0,Math.min(rect.width,event.clientX-rect.left));var dataX=Math.max(0,Math.min(canvas.scrollWidth,visibleX+canvas.scrollLeft));var index=Math.max(0,Math.min(rows.length-1,Math.round(dataX/Math.max(1,canvas.scrollWidth)*(rows.length-1))));var row=rows[index]||{};tip.innerHTML='<b>'+esc(longDate(row.date))+'</b>Impressions: '+num(row.impressions)+'<br>Clicks: '+num(row.clicks)+'<br>CTR: '+pct(row.ctr)+'<br>Average position: '+(row.position==null?'n/a':one(row.position))+'<br>Search-visible pages: '+num(row.searchVisiblePages);tip.style.display='block';var maxLeft=Math.max(6,rect.width-230);tip.style.left=Math.max(6,Math.min(maxLeft,visibleX+10))+'px';tip.style.top='12px'});
   canvas.addEventListener('mouseleave',function(){tip.style.display='none'});
 }
 var original=window.render;if(typeof original==='function')window.render=function(data){original(data);renderTrend(data)};
@@ -106,8 +107,9 @@ async function decorateAnalytics(response) {
   if (!response.ok || !String(response.headers.get('content-type') || '').includes('text/html')) return response;
   try {
     const html = await response.text();
-    if (html.includes('data-gsc-trend-renderer="v1"')) return responseWithBody(response, html, 'text/html; charset=UTF-8');
-    const decorated = html.includes('</body>') ? html.replace('</body>', GSC_TREND_ENHANCEMENT + '</body>') : html + GSC_TREND_ENHANCEMENT;
+    if (html.includes('data-gsc-trend-renderer="v2"')) return responseWithBody(response, html, 'text/html; charset=UTF-8');
+    const withoutV1 = html.replace(/<style id="gsc-trend-chart-style">[\s\S]*?<\/script>/, '');
+    const decorated = withoutV1.includes('</body>') ? withoutV1.replace('</body>', GSC_TREND_ENHANCEMENT + '</body>') : withoutV1 + GSC_TREND_ENHANCEMENT;
     return responseWithBody(response, decorated, 'text/html; charset=UTF-8');
   } catch {
     return response;
