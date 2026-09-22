@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T09:08:41.752Z",
+  "generatedAt": "2026-09-22T11:53:23.074Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -8,17 +8,17 @@
       "startDate": "2026-08-26",
       "endDate": "2026-09-22",
       "clicks": 1,
-      "impressions": 3893,
-      "ctr": 0.0257,
-      "position": 63.8608
+      "impressions": 3914,
+      "ctr": 0.0255,
+      "position": 63.7892
     },
     "recent7": {
       "startDate": "2026-09-16",
       "endDate": "2026-09-22",
       "clicks": 0,
-      "impressions": 823,
+      "impressions": 844,
       "ctr": 0,
-      "position": 64.0814
+      "position": 63.7441
     },
     "previous7": {
       "startDate": "2026-09-09",
@@ -30,16 +30,16 @@
     },
     "change7d": {
       "clicksPct": 0,
-      "impressionsPct": -43.75,
-      "positionDelta": -2.8393
+      "impressionsPct": -42.31,
+      "positionDelta": -3.1766
     },
     "countries": [
       {
         "country": "usa",
         "clicks": 0,
-        "impressions": 2222,
+        "impressions": 2240,
         "ctr": 0,
-        "position": 67.6548
+        "position": 67.5362
       },
       {
         "country": "gbr",
@@ -79,9 +79,9 @@
       {
         "country": "can",
         "clicks": 0,
-        "impressions": 44,
+        "impressions": 45,
         "ctr": 0,
-        "position": 62.1818
+        "position": 61.9778
       },
       {
         "country": "nzl",
@@ -144,16 +144,16 @@
       {
         "device": "DESKTOP",
         "clicks": 0,
-        "impressions": 2899,
+        "impressions": 2918,
         "ctr": 0,
-        "position": 65.7013
+        "position": 65.6014
       },
       {
         "device": "MOBILE",
         "clicks": 1,
-        "impressions": 656,
-        "ctr": 0.1524,
-        "position": 70.0305
+        "impressions": 658,
+        "ctr": 0.152,
+        "position": 69.9757
       },
       {
         "device": "TABLET",
@@ -163,7 +163,7 @@
         "position": 75.5385
       }
     ],
-    "observedPages": 123
+    "observedPages": 124
   },
   "indexHealth": {
     "inspectionUniverseUrls": 169,
@@ -191,7 +191,7 @@
     "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
     "preservedFromPrevious": true,
     "preservedFromGeneratedAt": "2026-09-21T21:02:54.858Z",
-    "lastInspectionAttemptAt": "2026-09-22T09:08:41.752Z",
+    "lastInspectionAttemptAt": "2026-09-22T11:53:23.074Z",
     "lastInspectionAttemptCoveragePct": 0,
     "lastInspectionAttemptErrors": 250,
     "quotaLimited": true
@@ -357,8 +357,8 @@
           "url": "https://trytoolscout.org/best-project-management-tools",
           "kind": "striking_distance",
           "score": 85.3,
-          "impressions": 120,
-          "position": 39.4083,
+          "impressions": 121,
+          "position": 39.3802,
           "action": "authority_and_content_amplification"
         },
         {
@@ -375,8 +375,8 @@
           "url": "https://trytoolscout.org/tools/semrush",
           "kind": "high_impression_low_rank",
           "score": 83.2,
-          "impressions": 325,
-          "position": 55.5231,
+          "impressions": 327,
+          "position": 55.4985,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -389,6 +389,15 @@
           "action": "authority_depth_and_query_alignment"
         },
         {
+          "page": "/tools/tally",
+          "url": "https://trytoolscout.org/tools/tally",
+          "kind": "striking_distance",
+          "score": 82.1,
+          "impressions": 67,
+          "position": 39.7164,
+          "action": "authority_and_content_amplification"
+        },
+        {
           "page": "/best-no-code-automation-tools",
           "url": "https://trytoolscout.org/best-no-code-automation-tools",
           "kind": "high_impression_low_rank",
@@ -396,15 +405,6 @@
           "impressions": 268,
           "position": 74.056,
           "action": "authority_depth_and_query_alignment"
-        },
-        {
-          "page": "/tools/tally",
-          "url": "https://trytoolscout.org/tools/tally",
-          "kind": "striking_distance",
-          "score": 81.9,
-          "impressions": 64,
-          "position": 39.7031,
-          "action": "authority_and_content_amplification"
         },
         {
           "page": "/",
@@ -462,10 +462,10 @@
       "url": "https://trytoolscout.org/best-project-management-tools",
       "page": "/best-project-management-tools",
       "score": 85.3,
-      "impressions": 120,
+      "impressions": 121,
       "clicks": 0,
       "ctr": 0,
-      "position": 39.4083,
+      "position": 39.3802,
       "action": "authority_and_content_amplification"
     },
     {
@@ -486,10 +486,10 @@
       "url": "https://trytoolscout.org/tools/semrush",
       "page": "/tools/semrush",
       "score": 83.2,
-      "impressions": 325,
+      "impressions": 327,
       "clicks": 0,
       "ctr": 0,
-      "position": 55.5231,
+      "position": 55.4985,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -505,6 +505,18 @@
       "action": "authority_depth_and_query_alignment"
     },
     {
+      "kind": "striking_distance",
+      "queue": "ranking_opportunities",
+      "url": "https://trytoolscout.org/tools/tally",
+      "page": "/tools/tally",
+      "score": 82.1,
+      "impressions": 67,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 39.7164,
+      "action": "authority_and_content_amplification"
+    },
+    {
       "kind": "high_impression_low_rank",
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-no-code-automation-tools",
@@ -515,18 +527,6 @@
       "ctr": 0,
       "position": 74.056,
       "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "striking_distance",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/tally",
-      "page": "/tools/tally",
-      "score": 81.9,
-      "impressions": 64,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 39.7031,
-      "action": "authority_and_content_amplification"
     },
     {
       "kind": "ctr_opportunity",
@@ -947,11 +947,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/tools/moz-pro",
       "page": "/tools/moz-pro",
-      "score": 77.8,
-      "impressions": 134,
+      "score": 77.9,
+      "impressions": 136,
       "clicks": 0,
       "ctr": 0,
-      "position": 68.8731,
+      "position": 68.8162,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -991,6 +991,18 @@
       "action": "authority_depth_and_query_alignment"
     },
     {
+      "kind": "striking_distance",
+      "queue": "ranking_opportunities",
+      "url": "https://trytoolscout.org/tools/miro",
+      "page": "/tools/miro",
+      "score": 72.6,
+      "impressions": 21,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 46.9524,
+      "action": "authority_and_content_amplification"
+    },
+    {
       "kind": "high_impression_low_rank",
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-crm-for-sales-teams",
@@ -1001,18 +1013,6 @@
       "ctr": 0,
       "position": 74.8364,
       "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "striking_distance",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/miro",
-      "page": "/tools/miro",
-      "score": 71.4,
-      "impressions": 20,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 49,
-      "action": "authority_and_content_amplification"
     }
   ],
   "inspections": [

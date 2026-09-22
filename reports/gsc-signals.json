@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T09:08:41.755Z",
+  "generatedAt": "2026-09-22T11:53:23.077Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-22",
   "siteTotals": {
     "clicks": 1,
-    "impressions": 3893,
-    "ctr": 0.0257
+    "impressions": 3914,
+    "ctr": 0.0255
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 41,
       "clicks": 0,
-      "impressions": 2193
+      "impressions": 2204
     },
     "home": {
       "pages": 1,
@@ -38,12 +38,12 @@
       "impressions": 51
     },
     "tool-profile": {
-      "pages": 65,
+      "pages": 66,
       "clicks": 0,
-      "impressions": 1418
+      "impressions": 1428
     }
   },
-  "pageCount": 123,
+  "pageCount": 124,
   "pages": [
     {
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
@@ -198,15 +198,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 325,
+      "impressions": 327,
       "ctr": 0,
-      "position": 55.5231,
+      "position": 55.4985,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 140,
-          "position": 56.8143
+          "impressions": 141,
+          "position": 56.7872
         },
         {
           "query": "semrush software",
@@ -223,8 +223,8 @@
         {
           "query": "semrush tools",
           "clicks": 0,
-          "impressions": 29,
-          "position": 51.9655
+          "impressions": 30,
+          "position": 51.9
         },
         {
           "query": "semrush seo software",
@@ -551,9 +551,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 134,
+      "impressions": 136,
       "ctr": 0,
-      "position": 68.8731,
+      "position": 68.8162,
       "topQueries": [
         {
           "query": "moz pro tools",
@@ -580,6 +580,12 @@
           "position": 64.8333
         },
         {
+          "query": "moz pro trial",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 66
+        },
+        {
           "query": "moz trial",
           "clicks": 0,
           "impressions": 4,
@@ -590,12 +596,6 @@
           "clicks": 0,
           "impressions": 3,
           "position": 64
-        },
-        {
-          "query": "moz pro trial",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 65.6667
         },
         {
           "query": "what is moz pro",
@@ -661,9 +661,9 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 120,
+      "impressions": 121,
       "ctr": 0,
-      "position": 39.4083,
+      "position": 39.3802,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -905,15 +905,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 64,
+      "impressions": 67,
       "ctr": 0,
-      "position": 39.7031,
+      "position": 39.7164,
       "topQueries": [
         {
           "query": "tally software",
           "clicks": 0,
-          "impressions": 32,
-          "position": 42.4688
+          "impressions": 35,
+          "position": 42.2571
         },
         {
           "query": "tallykey",
@@ -1094,6 +1094,67 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-social-media-management-tools",
+      "pathname": "/best-social-media-management-tools",
+      "key": "best-social-media-management-tools",
+      "type": "guide",
+      "intent": "best-social-media-management-tools",
+      "clicks": 0,
+      "impressions": 34,
+      "ctr": 0,
+      "position": 58.1471,
+      "topQueries": [
+        {
+          "query": "social media management tools",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 63.7692
+        },
+        {
+          "query": "best social media management tool",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 25.3333
+        },
+        {
+          "query": "social media management tool",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 67.8333
+        },
+        {
+          "query": "social media tool",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 64.3333
+        },
+        {
+          "query": "tools for social media managers",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 80.5
+        },
+        {
+          "query": "best tools for social media managers",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 23
+        },
+        {
+          "query": "social media marketing management tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 77
+        },
+        {
+          "query": "social media manager tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 78
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools",
       "pathname": "/tools",
       "key": "tools",
@@ -1198,9 +1259,9 @@
       "type": "guide",
       "intent": "best-customer-support-tools",
       "clicks": 0,
-      "impressions": 26,
+      "impressions": 27,
       "ctr": 0,
-      "position": 75.6923,
+      "position": 75.1852,
       "topQueries": [
         {
           "query": "support tools",
@@ -1233,6 +1294,12 @@
           "position": 54
         },
         {
+          "query": "help center tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 62
+        },
+        {
           "query": "customer service tools",
           "clicks": 0,
           "impressions": 1,
@@ -1243,61 +1310,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 79
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-social-media-management-tools",
-      "pathname": "/best-social-media-management-tools",
-      "key": "best-social-media-management-tools",
-      "type": "guide",
-      "intent": "best-social-media-management-tools",
-      "clicks": 0,
-      "impressions": 25,
-      "ctr": 0,
-      "position": 59.6,
-      "topQueries": [
-        {
-          "query": "social media management tools",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 63.8
-        },
-        {
-          "query": "social media management tool",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 67.8333
-        },
-        {
-          "query": "best social media management tool",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 25.6667
-        },
-        {
-          "query": "social media tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 65
-        },
-        {
-          "query": "best tools for social media managers",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 23
-        },
-        {
-          "query": "social media marketing management tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 77
-        },
-        {
-          "query": "tools for social media managers",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 81
         }
       ]
     },
@@ -1376,9 +1388,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 21,
+      "impressions": 22,
       "ctr": 0,
-      "position": 64.381,
+      "position": 64.4545,
       "topQueries": [
         {
           "query": "gorgias",
@@ -1387,16 +1399,16 @@
           "position": 63.5455
         },
         {
+          "query": "what is gorgias",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 66
+        },
+        {
           "query": "gorgias software",
           "clicks": 0,
           "impressions": 2,
           "position": 53
-        },
-        {
-          "query": "what is gorgias",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 66
         },
         {
           "query": "giorgias",
@@ -1431,27 +1443,15 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tools/descript",
-      "pathname": "/tools/descript",
-      "key": "descript",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 20,
-      "ctr": 0,
-      "position": 61.95,
-      "topQueries": []
-    },
-    {
       "page": "https://trytoolscout.org/tools/miro",
       "pathname": "/tools/miro",
       "key": "miro",
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 20,
+      "impressions": 21,
       "ctr": 0,
-      "position": 49,
+      "position": 46.9524,
       "topQueries": [
         {
           "query": "miro tool",
@@ -1466,6 +1466,18 @@
           "position": 85
         }
       ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/descript",
+      "pathname": "/tools/descript",
+      "key": "descript",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 20,
+      "ctr": 0,
+      "position": 61.95,
+      "topQueries": []
     },
     {
       "page": "https://trytoolscout.org/tools/workato",
@@ -3086,6 +3098,25 @@
       "topQueries": []
     },
     {
+      "page": "https://trytoolscout.org/tools/sentry",
+      "pathname": "/tools/sentry",
+      "key": "sentry",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 51,
+      "topQueries": [
+        {
+          "query": "sentry tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 51
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/slack",
       "pathname": "/tools/slack",
       "key": "slack",
@@ -3432,9 +3463,9 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools",
       "clicks": 0,
-      "impressions": 120,
+      "impressions": 121,
       "ctr": 0,
-      "position": 39.4083,
+      "position": 39.3802,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -3719,12 +3750,70 @@
       ]
     },
     {
+      "intent": "best-social-media-management-tools",
+      "page": "https://trytoolscout.org/best-social-media-management-tools",
+      "clicks": 0,
+      "impressions": 34,
+      "ctr": 0,
+      "position": 58.1471,
+      "topQueries": [
+        {
+          "query": "social media management tools",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 63.7692
+        },
+        {
+          "query": "best social media management tool",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 25.3333
+        },
+        {
+          "query": "social media management tool",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 67.8333
+        },
+        {
+          "query": "social media tool",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 64.3333
+        },
+        {
+          "query": "tools for social media managers",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 80.5
+        },
+        {
+          "query": "best tools for social media managers",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 23
+        },
+        {
+          "query": "social media marketing management tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 77
+        },
+        {
+          "query": "social media manager tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 78
+        }
+      ]
+    },
+    {
       "intent": "best-customer-support-tools",
       "page": "https://trytoolscout.org/best-customer-support-tools",
       "clicks": 0,
-      "impressions": 26,
+      "impressions": 27,
       "ctr": 0,
-      "position": 75.6923,
+      "position": 75.1852,
       "topQueries": [
         {
           "query": "support tools",
@@ -3757,6 +3846,12 @@
           "position": 54
         },
         {
+          "query": "help center tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 62
+        },
+        {
           "query": "customer service tools",
           "clicks": 0,
           "impressions": 1,
@@ -3767,58 +3862,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 79
-        }
-      ]
-    },
-    {
-      "intent": "best-social-media-management-tools",
-      "page": "https://trytoolscout.org/best-social-media-management-tools",
-      "clicks": 0,
-      "impressions": 25,
-      "ctr": 0,
-      "position": 59.6,
-      "topQueries": [
-        {
-          "query": "social media management tools",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 63.8
-        },
-        {
-          "query": "social media management tool",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 67.8333
-        },
-        {
-          "query": "best social media management tool",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 25.6667
-        },
-        {
-          "query": "social media tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 65
-        },
-        {
-          "query": "best tools for social media managers",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 23
-        },
-        {
-          "query": "social media marketing management tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 77
-        },
-        {
-          "query": "tools for social media managers",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 81
         }
       ]
     },
