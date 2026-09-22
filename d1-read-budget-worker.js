@@ -1,4 +1,4 @@
-import base from './command-center-ga4-worker.js';
+import base from './command-center-make-ga4-worker.js';
 
 const READ_TTLS = new Map([
   ['/analytics/api/stats', 300],
