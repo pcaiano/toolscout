@@ -1,4 +1,4 @@
-import base from './command-center-make-ga4-worker.js';
+import base from './command-center-ga4-worker.js';
 
 const READ_TTLS = new Map([
   ['/analytics/api/stats', 300],
@@ -151,6 +151,9 @@ async function reduceDashboardPolling(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname === '/analytics/api/ga4-health') {
+      return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
+    }
     if (request.method === 'GET' && READ_TTLS.has(url.pathname)) {
       if (PROTECTED_READS.has(url.pathname)) {
         const scope = await credentialScope(request);
