@@ -9,6 +9,7 @@ const OWNER_SOURCE='toolscout_owner';
 const OWNER_MEDIUM='internal';
 const OWNER_COOKIE_TTL_SECONDS=31536000;
 const CLEAN_WINDOW_HOURS=24;
+const GA_MEASUREMENT_ID='G-9VR80SYYH7';
 
 function n(value){const x=Number(value);return Number.isFinite(x)?x:0}
 async function digestHex(value){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('')}
@@ -63,22 +64,34 @@ async function ownerSafeAcquisition24h(request,env,ctx){
 
 function widget(){return `<section class="widget" data-widget="ga4-external-truth" style="--w:12;--h:5"><div class="widgetHead"><div><div class="widgetKicker">GA4 owner exclusion</div><div class="widgetTitle">External Acquisition Truth</div></div><div class="widgetMeta" id="ga4ExternalMeta">Separating owner from external traffic</div></div><div class="widgetBody" id="ga4ExternalBody"><div class="empty">Loading owner-safe GA4 acquisition...</div></div><div class="resizeHandle"></div></section>`}
 function script(){return `<script data-ga4-external-truth="v1">(function(){
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])),num=v=>Number(v||0).toLocaleString(),pc=v=>v==null?'Warming up':Number(v||0).toFixed(1)+'%';
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m])),num=v=>Number(v||0).toLocaleString(),pc=v=>v==null?'Warming up':Number(v||0).toFixed(1)+'%';
 function metric(label,value,meta){return '<div class="metric"><small>'+esc(label)+'</small><b>'+esc(value)+'</b><span>'+esc(meta||'')+'</span></div>'}
 function row(name,value,meta){return '<div class="row"><div><div class="rowName">'+esc(name)+'</div>'+(meta?'<div class="rowMeta">'+esc(meta)+'</div>':'')+'</div><div class="rowValue">'+esc(value)+'</div></div>'}
 function sources(rows,title){if(!rows||!rows.length)return '';return '<div style="margin-top:12px"><div class="widgetKicker" style="margin-bottom:6px">'+esc(title)+'</div>'+rows.slice(0,8).map(x=>row((x.source||'(not set)')+' / '+(x.medium||'(not set)'),num(x.sessions)+' sessions',(x.channel||'')+' · '+num(x.engagedSessions)+' engaged · '+pc(x.engagementRate))).join('')+'</div>'}
 async function load(){const root=document.getElementById('ga4ExternalBody'),meta=document.getElementById('ga4ExternalMeta');if(!root)return;try{const r=await fetch('/analytics/api/google/external-24h',{credentials:'same-origin',cache:'no-store'}),d=await r.json().catch(()=>null);if(!r.ok||!d||d.status!=='connected')throw new Error(d&&d.reason||'External GA4 acquisition unavailable');const ready=d.external&&d.external.status==='ready',marker=d.marker||{},ext=d.external||{},owner=d.owner||{},total=d.total||{};if(meta)meta.textContent=ready?'Clean 24h window · GA4 property '+d.propertyId:'Warm-up · '+Number(marker.warmupRemainingHours||0).toFixed(1)+'h remaining';root.innerHTML='<div class="metricGrid">'+metric('GA4 total · 24h',num(total.sessions),'Raw GA4 acquisition')+metric('Owner-marked · 24h',num(owner.sessions),'toolscout_owner / internal')+metric(ready?'GA4 external · 24h':'Non-owner-marked · 24h',num(ready?ext.sessions:ext.candidateSessions),ready?'Operational acquisition metric':'Candidate only during warm-up')+metric(ready?'External engagement rate':'Owner exclusion status',ready?pc(ext.engagementRate):'Warming up',ready?num(ext.engagedSessions)+' engaged':'Growth learning disabled · '+Number(marker.warmupRemainingHours||0).toFixed(1)+'h remaining')+'</div>'+sources(ext.sources,ready?'External sources':'Non-owner-marked sources · warm-up')+'<div class="note" style="margin-top:10px">'+esc(d.note||'')+'</div>';}catch(e){root.innerHTML='<div class="bug"><b>External GA4 acquisition is unavailable.</b><div style="margin-top:6px">'+esc(e&&e.message||e)+'</div></div>';}}
 setTimeout(load,1700);setInterval(load,300000);
 })();</script>`}
-async function decorate(response){
+function ownerGaConfig(){return `gtag('config','${GA_MEASUREMENT_ID}',{campaign_source:'${OWNER_SOURCE}',campaign_medium:'${OWNER_MEDIUM}',campaign_name:'owner_exclusion_v1'});`}
+function markOwnerAnalyticsHtml(html){
+  let value=String(html||'');
+  const plain=`gtag('config','${GA_MEASUREMENT_ID}');`,owner=ownerGaConfig();
+  if(value.includes(plain))value=value.replace(plain,owner);
+  return value;
+}
+async function decorate(response,forceOwnerAnalytics=false){
   const type=String(response.headers.get('content-type')||'').toLowerCase();if(!response.ok||!type.includes('text/html'))return response;
   let html=await response.text();
+  if(forceOwnerAnalytics)html=markOwnerAnalyticsHtml(html);
   if(!html.includes('data-widget="ga4-external-truth"')){
     if(html.includes('<section class="widget" data-widget="ga4-attribution-24h"'))html=html.replace('<section class="widget" data-widget="ga4-attribution-24h"',widget()+'\n    <section class="widget" data-widget="ga4-attribution-24h"');
     else html=html.replace('<section class="widget" data-widget="chairman"',widget()+'\n    <section class="widget" data-widget="chairman"');
   }
   if(!html.includes('data-ga4-external-truth="v1"'))html=html.replace('</body>',script()+'</body>');
   const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');return new Response(html,{status:response.status,statusText:response.statusText,headers});
+}
+async function markPublicOwnerAnalytics(response){
+  const type=String(response.headers.get('content-type')||'').toLowerCase();if(!response.ok||!type.includes('text/html'))return response;
+  const html=markOwnerAnalyticsHtml(await response.text());const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
 export default {
@@ -89,10 +102,14 @@ export default {
       const data=await ownerSafeAcquisition24h(request,env,ctx);return Response.json(data,{status:data.status==='connected'?200:503,headers:JSON_H});
     }
     const ownerPage=request.method==='GET'&&analyticsPage(url.pathname)&&await validCommandCenterSession(request,env);
+    const markedOwner=request.method==='GET'&&cookieValue(request,OWNER_COOKIE)==='1';
     const response=await base.fetch(request,env,ctx);
-    if(request.method!=='GET'||!analyticsPage(url.pathname))return response;
-    const decorated=await decorate(response);
-    return ownerPage?withOwnerMarker(decorated,request):decorated;
+    if(request.method!=='GET')return response;
+    if(analyticsPage(url.pathname)){
+      const decorated=await decorate(response,ownerPage||markedOwner);
+      return ownerPage?withOwnerMarker(decorated,request):decorated;
+    }
+    return markedOwner?markPublicOwnerAnalytics(response):response;
   },
   async scheduled(event,env,ctx){return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined}
 };
