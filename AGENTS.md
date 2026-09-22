@@ -55,16 +55,19 @@ GitHub Actions conservation mode is not a development or production deployment f
 5. The Make Cloudflare Deploy Version scenario is a fallback for promoting an already-uploaded Cloudflare Worker version. It does not replace the source build/upload step unless a separate Cloudflare build trigger is invoked.
 6. Before assuming deployment is blocked, inspect the current Cloudflare Workers Build/deployment state. Treat Cloudflare as the deployment source of truth during conservation.
 
-## Traffic analysis source-of-truth contract
+## Traffic and commercial measurement source-of-truth contract
 
-When the owner asks to analyse ToolScout traffic, traffic performance, visitors, sessions, sources, outbound activity, or current traffic health, use the D1 Traffic Truth data and the definitions implemented by the Command Center as the primary source of truth.
+When the owner asks to analyse ToolScout traffic, traffic performance, visitors, sessions, sources, referrals, outbound activity, or current traffic health, preserve the split-source contract documented in `docs/GA4-ACQUISITION-SOURCE-OF-TRUTH.md`.
 
-1. D1 and the Command Center definitions are authoritative for likely-human sessions, owner exclusion, bot and synthetic exclusion, outbound clicks, monetized outbound clicks and related traffic KPIs.
-2. Google Analytics and PostHog are consent-dependent and may undercount traffic. Do not use either as the headline source for ToolScout traffic totals or as a substitute for D1 Traffic Truth.
-3. GA4 and PostHog may be used only as secondary diagnostic or corroborating sources, clearly labelled as consent-dependent and non-canonical.
-4. Google Search Console remains authoritative for Google Search visibility metrics such as impressions, clicks, CTR, queries, landing pages and average position. It is complementary to D1 traffic, not a replacement for it.
-5. If D1 Traffic Truth cannot be read or verified, report the traffic KPI as unavailable or stale and state the observability blocker. Do not promote a GA4 or PostHog count to canonical traffic merely because D1 is temporarily inaccessible.
-6. When reporting traffic, preserve the Command Center population definitions and time windows exactly unless the owner explicitly asks for a different cohort or period.
+1. Google Analytics 4 Data API is authoritative for headline acquisition reporting: sessions, users, session source, medium, channel, referral and landing-page reporting in the GA4 reporting population.
+2. ToolScout's first-party Worker redirect ledger is authoritative for outbound clicks and monetized outbound clicks. Monetized status uses the immutable click-time affiliate state recorded for `/go/*` navigation. Owner/internal-test redirects are excluded from business totals.
+3. D1 Traffic Truth, Browser Guard and strict-human classification remain a Traffic Quality diagnostic layer. They may flag suspicious, synthetic, bot, unknown or browser-confirmation states, but they must never subtract from, zero, replace or silently override GA4 acquisition totals.
+4. GA4 is consent dependent under ToolScout's current consent implementation and may undercount physical visitors who decline or block analytics. State that limitation when material. Do not inflate GA4 with estimated sessions and do not describe the GA4 population as a perfect physical-human census.
+5. If GA4 cannot be read or verified, report headline acquisition as unavailable and surface the observability/configuration blocker. Do not promote D1 Traffic Quality or PostHog to canonical acquisition merely because GA4 is temporarily inaccessible.
+6. If the Worker redirect ledger cannot be read or verified, report outbound and monetized outbound as unavailable. Do not substitute GA4 browser outbound events for the server redirect ledger.
+7. Google Search Console remains authoritative for Google Search visibility metrics such as impressions, clicks, CTR, queries, landing pages and average position. It is complementary to GA4 acquisition and server-side commerce measurement.
+8. Exact growth-action attribution may continue to use stricter browser-confirmed D1 evidence when proving that a specific tracked distribution action produced a visit. Those figures must be labelled attributed or browser-confirmed and must not be presented as ToolScout's total acquisition traffic.
+9. Preserve the Command Center time windows and population labels exactly unless the owner explicitly asks for a different cohort or period.
 
 ## What's New software article contract
 
@@ -85,9 +88,9 @@ ToolScout software discovery pages must combine machine-readable structure with 
 2. Tool profile generation must include a distinct ToolScout editorial analysis of roughly 60 to 100 words, separate from the shorter catalog-card summary. It should explain practical fit, supported strengths, the clearest meaningful trade-off where evidence supports one, and commercial testing context using only catalog evidence, while keeping pricing, category, capabilities, best-for fields, schema markup, crawlable links and other machine-readable structure intact.
 3. Every tool profile must show a visible `Add to comparator` CTA beside the primary vendor CTA. It must open `/compare.html` with that tool preselected through the `a` query parameter and `source=tool-profile`. Do not add buying-guide or comparison-list sections inside tool profiles; keep profiles concise and use the comparator CTA for comparison discovery.
 4. Every A-vs-B comparison must retain structured facts and scored criteria, then include a concise ToolScout conclusion in prose that synthesizes the practical trade-offs. Do not declare a universal winner when the evidence only supports criterion-specific differences.
-4. Editorial conclusions must be grounded in catalog evidence, scoring dimensions, documented audiences and verified product facts. Do not invent feature depth, pricing, performance, market position or user sentiment.
-5. Generators and refresh scripts must preserve this contract so regenerated pages do not fall back to thin, badge-heavy or database-like presentation.
-6. ToolScout editorial copy is English only. Do not add translations. Do not use em dashes or en dashes in ToolScout content.
+5. Editorial conclusions must be grounded in catalog evidence, scoring dimensions, documented audiences and verified product facts. Do not invent feature depth, pricing, performance, market position or user sentiment.
+6. Generators and refresh scripts must preserve this contract so regenerated pages do not fall back to thin, badge-heavy or database-like presentation.
+7. ToolScout editorial copy is English only. Do not add translations. Do not use em dashes or en dashes in ToolScout content.
 
 ## Vendor amplification sender contract
 
