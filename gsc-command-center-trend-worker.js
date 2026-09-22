@@ -2,6 +2,7 @@ import base from './growth-runtime-closed-loop-worker.js';
 
 const ANALYTICS_PATHS = new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const STATS_PATHS = new Set(['/api/stats','/analytics/api/stats']);
+const GSC_TREND_COMPONENT_VERSION = 2;
 
 async function readTrend(request, env) {
   try {
@@ -36,6 +37,24 @@ async function enrichStats(request, env, response) {
         reality.searchPerformance.trendGeneratedAt = trend.generatedAt || null;
       }
     }
+    return responseWithBody(response, JSON.stringify(data), 'application/json; charset=UTF-8');
+  } catch {
+    return response;
+  }
+}
+
+async function enrichHealth(request, env, response) {
+  if (!response.ok || !String(response.headers.get('content-type') || '').includes('application/json')) return response;
+  try {
+    const data = await response.json();
+    const trend = await readTrend(request, env);
+    data.gscTrendChart = {
+      version: GSC_TREND_COMPONENT_VERSION,
+      status: trend?.daily?.length ? 'observed' : 'awaiting_data',
+      points: Number(trend?.daily?.length || 0),
+      generatedAt: trend?.generatedAt || null,
+      range: trend?.range || null
+    };
     return responseWithBody(response, JSON.stringify(data), 'application/json; charset=UTF-8');
   } catch {
     return response;
@@ -120,6 +139,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const response = await base.fetch(request, env, ctx);
+    if (url.pathname === '/api/health') return enrichHealth(request, env, response);
     if (STATS_PATHS.has(url.pathname)) return enrichStats(request, env, response);
     if (ANALYTICS_PATHS.has(url.pathname)) return decorateAnalytics(response);
     return response;
