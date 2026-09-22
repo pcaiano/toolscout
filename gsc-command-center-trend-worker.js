@@ -1,4 +1,4 @@
-import base from './growth-runtime-closed-loop-worker.js';
+import base from './growth-runtime-observability-worker.js';
 
 const ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const STATS_PATHS=new Set(['/api/stats','/analytics/api/stats']);
