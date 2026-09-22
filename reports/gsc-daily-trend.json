@@ -1,0 +1,250 @@
+{
+  "generatedAt": "2026-09-22T09:07:26.542Z",
+  "source": "Google Search Console Search Analytics API - daily trend",
+  "property": "sc-domain:trytoolscout.org",
+  "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
+  "dataState": "all",
+  "range": {
+    "startDate": "2026-08-26",
+    "endDate": "2026-09-22",
+    "days": 28
+  },
+  "metrics": [
+    "impressions",
+    "clicks",
+    "position",
+    "ctr",
+    "searchVisiblePages"
+  ],
+  "daily": [
+    {
+      "date": "2026-08-26",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": null,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-08-27",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": null,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-08-28",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": null,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-08-29",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": null,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-08-30",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-08-31",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-09-01",
+      "clicks": 1,
+      "impressions": 5,
+      "ctr": 20,
+      "position": 8.2,
+      "searchVisiblePages": 2
+    },
+    {
+      "date": "2026-09-02",
+      "clicks": 0,
+      "impressions": 53,
+      "ctr": 0,
+      "position": 72.1698,
+      "searchVisiblePages": 10
+    },
+    {
+      "date": "2026-09-03",
+      "clicks": 0,
+      "impressions": 185,
+      "ctr": 0,
+      "position": 69.7243,
+      "searchVisiblePages": 13
+    },
+    {
+      "date": "2026-09-04",
+      "clicks": 0,
+      "impressions": 235,
+      "ctr": 0,
+      "position": 65.5064,
+      "searchVisiblePages": 51
+    },
+    {
+      "date": "2026-09-05",
+      "clicks": 0,
+      "impressions": 188,
+      "ctr": 0,
+      "position": 70.0904,
+      "searchVisiblePages": 14
+    },
+    {
+      "date": "2026-09-06",
+      "clicks": 0,
+      "impressions": 202,
+      "ctr": 0,
+      "position": 68.099,
+      "searchVisiblePages": 17
+    },
+    {
+      "date": "2026-09-07",
+      "clicks": 0,
+      "impressions": 199,
+      "ctr": 0,
+      "position": 67.809,
+      "searchVisiblePages": 25
+    },
+    {
+      "date": "2026-09-08",
+      "clicks": 0,
+      "impressions": 215,
+      "ctr": 0,
+      "position": 65.8605,
+      "searchVisiblePages": 27
+    },
+    {
+      "date": "2026-09-09",
+      "clicks": 0,
+      "impressions": 250,
+      "ctr": 0,
+      "position": 67.796,
+      "searchVisiblePages": 36
+    },
+    {
+      "date": "2026-09-10",
+      "clicks": 0,
+      "impressions": 150,
+      "ctr": 0,
+      "position": 64.4933,
+      "searchVisiblePages": 24
+    },
+    {
+      "date": "2026-09-11",
+      "clicks": 0,
+      "impressions": 195,
+      "ctr": 0,
+      "position": 67.2051,
+      "searchVisiblePages": 21
+    },
+    {
+      "date": "2026-09-12",
+      "clicks": 0,
+      "impressions": 242,
+      "ctr": 0,
+      "position": 67.876,
+      "searchVisiblePages": 25
+    },
+    {
+      "date": "2026-09-13",
+      "clicks": 0,
+      "impressions": 209,
+      "ctr": 0,
+      "position": 66.4402,
+      "searchVisiblePages": 26
+    },
+    {
+      "date": "2026-09-14",
+      "clicks": 0,
+      "impressions": 245,
+      "ctr": 0,
+      "position": 67.551,
+      "searchVisiblePages": 23
+    },
+    {
+      "date": "2026-09-15",
+      "clicks": 0,
+      "impressions": 172,
+      "ctr": 0,
+      "position": 65.7849,
+      "searchVisiblePages": 31
+    },
+    {
+      "date": "2026-09-16",
+      "clicks": 0,
+      "impressions": 223,
+      "ctr": 0,
+      "position": 64,
+      "searchVisiblePages": 30
+    },
+    {
+      "date": "2026-09-17",
+      "clicks": 0,
+      "impressions": 137,
+      "ctr": 0,
+      "position": 62.7518,
+      "searchVisiblePages": 30
+    },
+    {
+      "date": "2026-09-18",
+      "clicks": 0,
+      "impressions": 112,
+      "ctr": 0,
+      "position": 63.3661,
+      "searchVisiblePages": 24
+    },
+    {
+      "date": "2026-09-19",
+      "clicks": 0,
+      "impressions": 103,
+      "ctr": 0,
+      "position": 64.767,
+      "searchVisiblePages": 29
+    },
+    {
+      "date": "2026-09-20",
+      "clicks": 0,
+      "impressions": 107,
+      "ctr": 0,
+      "position": 66.2056,
+      "searchVisiblePages": 31
+    },
+    {
+      "date": "2026-09-21",
+      "clicks": 0,
+      "impressions": 141,
+      "ctr": 0,
+      "position": 63.9574,
+      "searchVisiblePages": 81
+    },
+    {
+      "date": "2026-09-22",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": null,
+      "searchVisiblePages": 0
+    }
+  ],
+  "limitations": [
+    "Search Analytics is the source of truth for Google search visibility, but it does not guarantee every row.",
+    "Search-visible pages are pages returned by Search Analytics for a date, not a count of all URLs in the Google index.",
+    "Average position is a Search Console aggregate. Lower values indicate stronger average ranking."
+  ]
+}
