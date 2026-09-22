@@ -1,3 +1,4 @@
+// deploy-sync: 2026-09-22T13:35Z GA4 auth fix
 import base from './command-center-ga4-worker.js';
 
 const READ_TTLS = new Map([
