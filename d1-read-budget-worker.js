@@ -1,4 +1,4 @@
-// deploy-sync: 2026-09-22T13:35Z GA4 auth fix
+// deploy-sync: 2026-09-22T13:55Z fix analytics redirect loop
 import base from './command-center-ga4-worker.js';
 
 const READ_TTLS = new Map([
@@ -195,11 +195,6 @@ export default {
       const forwarded = await validCommandCenterSession(request, env) ? withOwnerAccessHeader(request) : request;
       return base.fetch(forwarded, env, ctx);
     }
-    if (request.method === 'GET' && (url.pathname === '/analytics' || url.pathname === '/analytics/')) {
-      const target = new URL(request.url);
-      target.pathname = '/analytics.html';
-      return Response.redirect(target.toString(), 302);
-    }
     if (request.method === 'GET' && READ_TTLS.has(url.pathname)) {
       if (PROTECTED_READS.has(url.pathname)) {
         const scope = await credentialScope(request);
@@ -208,7 +203,7 @@ export default {
       }
       return cachedRead(request, env, ctx, READ_TTLS.get(url.pathname), 'public');
     }
-    if (request.method === 'GET' && (url.pathname === '/analytics.html' || url.pathname === '/command-center' || url.pathname === '/command-center/')) {
+    if (request.method === 'GET' && (url.pathname === '/analytics' || url.pathname === '/analytics/' || url.pathname === '/analytics.html' || url.pathname === '/command-center' || url.pathname === '/command-center/')) {
       return reduceDashboardPolling(request, env, ctx);
     }
     return base.fetch(request, env, ctx);
