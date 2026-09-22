@@ -34,37 +34,75 @@ Server-side `/go/*` redirect counts do not depend on the GA4 browser tag. Owner 
 For `/analytics/api/stats` it:
 
 - calls the existing Command Center stats implementation;
-- obtains a Google OAuth access token from a GA4 service account;
-- resolves the Analytics property from `GA4_PROPERTY_ID` or, when possible, discovers it from the ToolScout measurement ID;
+- prefers the owner's stored Google OAuth connection for GA4 access;
+- keeps the service account implementation only as a technical fallback;
+- resolves the Analytics property from a stored property ID, `GA4_PROPERTY_ID`, or the ToolScout measurement ID through the Google Analytics Admin API;
 - queries the GA4 Data API for today, rolling 24-hour, month-to-date and acquisition-source reporting;
 - queries D1 `click_events` for non-owner `/go/*` redirects and click-time affiliate state;
 - returns `acquisition`, `commerceTruth` and `trafficQuality` objects;
 - maps legacy headline traffic fields to GA4 only when GA4 is connected;
 - never promotes Traffic Quality as a fallback if GA4 is unavailable.
 
-The Command Center page is decorated with an `Acquisition & Outbound Truth` card and the North Star card is rewritten to use GA4 sessions plus server-side outbound metrics.
+The Command Center page contains an `Acquisition & Outbound Truth` card and the North Star card uses GA4 sessions plus server-side outbound metrics.
 
-## Worker configuration
+## Owner OAuth connection
 
-Preferred secret:
+The normal owner flow is mobile friendly:
 
-- `GA4_SERVICE_ACCOUNT_JSON`: complete Google service account JSON with Analytics read access.
+1. Open the protected Command Center.
+2. Tap `Connect Google Analytics`.
+3. Sign in to Google and approve read-only Analytics access.
+4. Google returns to `/api/google-analytics/callback`.
+5. ToolScout validates OAuth state, PKCE and the Google account identity.
+6. The refresh token is encrypted before it is stored in D1.
+7. Future Command Center reads refresh the Google access token without another owner interaction.
 
-Alternative split secrets:
+The callback accepts only the owner Google account `pcaiano@gmail.com`. The refresh token is never sent to the browser after the callback and is never stored in repository files.
 
-- `GA4_CLIENT_EMAIL`
-- `GA4_PRIVATE_KEY`
+OAuth connection state is stored in `google_oauth_connections`, created by migration `0081_google_analytics_oauth.sql`.
+
+## One-time Worker configuration
+
+Required secrets for the OAuth app:
+
+- `GOOGLE_OAUTH_CLIENT_ID`
+- `GOOGLE_OAUTH_CLIENT_SECRET`
+
+The OAuth web client must authorize this exact redirect URI:
+
+`https://trytoolscout.org/api/google-analytics/callback`
 
 Optional configuration:
 
-- `GA4_PROPERTY_ID`: numeric GA4 property ID. Recommended because it avoids Admin API discovery.
-- `GA4_MEASUREMENT_ID`: defaults to ToolScout's public measurement ID `G-9VR80SYYH7`.
+- `OAUTH_TOKEN_ENCRYPTION_KEY`: dedicated secret used to encrypt the stored refresh token. When absent, the Worker derives the encryption key from the existing `ADMIN_TOKEN` secret.
+- `GA4_PROPERTY_ID`: numeric GA4 property ID. If absent, ToolScout attempts discovery through the Analytics Admin API.
+- `GA4_MEASUREMENT_ID`: defaults to `G-9VR80SYYH7`.
+- `GOOGLE_OAUTH_REDIRECT_URI`: defaults to the production callback above and should not normally be changed.
 
-The service account must have read access to the ToolScout GA4 property. The Google Analytics Data API must be enabled for its Google Cloud project. If property auto-discovery is used, Analytics Admin API access must also be available.
+The Google Cloud project used by the OAuth client must have the Google Analytics Data API enabled. If property discovery is required, the Google Analytics Admin API must also be enabled. The OAuth app requests only `openid`, `email` and `analytics.readonly`.
+
+## OAuth security contract
+
+The connection flow uses a short-lived encrypted state cookie and PKCE. The callback is routed outside the protected `/analytics` path so Google can return to it, but it cannot establish a connection unless the encrypted state is valid and the Google account is the ToolScout owner.
+
+The refresh token is encrypted with AES-GCM before D1 storage. Disconnect attempts to revoke the Google token and always removes the local OAuth connection. The disconnect endpoint remains owner protected and same-origin checked.
+
+## Service account fallback
+
+The earlier service account path remains supported only as a fallback through:
+
+- `GA4_SERVICE_ACCOUNT_JSON`, or
+- `GA4_CLIENT_EMAIL` plus `GA4_PRIVATE_KEY`.
+
+The normal owner experience should not require a service account JSON file.
 
 ## Failure semantics
 
 If GA4 cannot be queried, acquisition is `unavailable`. The Command Center must not present D1 strict-human sessions as a replacement headline number.
+
+If the OAuth app has not been configured, the Command Center states that one-time setup is required. If the app is configured but the owner has not connected Google Analytics, the card shows `Connect Google Analytics`.
+
+If the stored Google token is revoked or refresh fails, the connection remains visible as needing attention rather than silently falling back to Traffic Quality.
 
 If the D1 redirect ledger cannot be queried, outbound and monetized outbound are `unavailable`. GA4 browser outbound events must not replace the first-party redirect ledger.
 
