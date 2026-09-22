@@ -10,16 +10,16 @@ const DEFAULT_REDIRECT_URI='https://trytoolscout.org/api/google-analytics/callba
 const OAUTH_COOKIE='ts_ga4_oauth';
 const OAUTH_TTL_SECONDS=600;
 let oauthAccessCache=null;
+let schemaReady=false;
 
 const enc=new TextEncoder();
 const dec=new TextDecoder();
 function n(value){const x=Number(value);return Number.isFinite(x)?x:0}
 function b64urlBytes(bytes){let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
-function b64url(value){return b64urlBytes(typeof value==='string'?enc.encode(value):value)}
 function fromB64url(value){const raw=String(value||'').replace(/-/g,'+').replace(/_/g,'/');const padded=raw+'='.repeat((4-raw.length%4)%4);const binary=atob(padded);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes}
 function randomToken(bytes=32){const value=new Uint8Array(bytes);crypto.getRandomValues(value);return b64urlBytes(value)}
 function oauthConfig(env){return {clientId:String(env.GOOGLE_OAUTH_CLIENT_ID||''),clientSecret:String(env.GOOGLE_OAUTH_CLIENT_SECRET||''),redirectUri:String(env.GOOGLE_OAUTH_REDIRECT_URI||DEFAULT_REDIRECT_URI),measurementId:String(env.GA4_MEASUREMENT_ID||DEFAULT_MEASUREMENT_ID),propertyId:String(env.GA4_PROPERTY_ID||'').replace(/^properties\//,'')}}
-function originOk(request){const origin=String(request.headers.get('Origin')||'');return !origin||origin===new URL(request.url).origin}
+function originOk(request){return String(request.headers.get('Origin')||'')===new URL(request.url).origin}
 async function ownerAuthenticated(request,ctx){
   const headerEmail=String(request.headers.get('Cf-Access-Authenticated-User-Email')||request.headers.get('cf-access-authenticated-user-email')||'').toLowerCase();
   if(headerEmail===OWNER_EMAIL)return true;
@@ -50,8 +50,17 @@ async function discoverPropertyId(token,measurementId){
   for(const property of properties){try{const streams=await googleJson(`${GA_ADMIN_ORIGIN}/v1beta/${property}/dataStreams?pageSize=200`,token);const match=(streams.dataStreams||[]).find(stream=>String(stream?.webStreamData?.measurementId||'')===measurementId);if(match)return property.replace(/^properties\//,'')}catch{}}
   throw new Error('ga4_property_id_not_discoverable');
 }
+async function ensureOAuthSchema(env){
+  if(schemaReady)return;
+  await env.DB.batch([
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS google_oauth_connections (provider TEXT PRIMARY KEY CHECK (provider = 'google_analytics'),owner_email TEXT NOT NULL,property_id TEXT,measurement_id TEXT NOT NULL,refresh_token_ciphertext TEXT NOT NULL,scopes TEXT NOT NULL DEFAULT '',connected_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now')),last_refresh_at TEXT,last_error TEXT)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_google_oauth_connections_updated ON google_oauth_connections(updated_at)`)
+  ]);
+  schemaReady=true;
+}
 async function loadConnection(env){try{return await env.DB.prepare(`SELECT provider,owner_email,property_id,measurement_id,refresh_token_ciphertext,scopes,connected_at,updated_at,last_refresh_at,last_error FROM google_oauth_connections WHERE provider='google_analytics'`).first()}catch{return null}}
 async function saveConnection(env,{ownerEmail,propertyId,measurementId,ciphertext,scopes,lastError=null}){
+  await ensureOAuthSchema(env);
   await env.DB.prepare(`INSERT INTO google_oauth_connections(provider,owner_email,property_id,measurement_id,refresh_token_ciphertext,scopes,connected_at,updated_at,last_error) VALUES('google_analytics',?,?,?,?,?,datetime('now'),datetime('now'),?) ON CONFLICT(provider) DO UPDATE SET owner_email=excluded.owner_email,property_id=COALESCE(excluded.property_id,google_oauth_connections.property_id),measurement_id=excluded.measurement_id,refresh_token_ciphertext=excluded.refresh_token_ciphertext,scopes=excluded.scopes,updated_at=datetime('now'),last_error=excluded.last_error`).bind(ownerEmail,propertyId||null,measurementId,ciphertext,scopes||GA_SCOPE,lastError).run();
 }
 async function updateConnectionHealth(env,{propertyId=null,error=null,refreshed=false}={}){try{await env.DB.prepare(`UPDATE google_oauth_connections SET property_id=COALESCE(?,property_id),last_error=?,last_refresh_at=CASE WHEN ?=1 THEN datetime('now') ELSE last_refresh_at END,updated_at=datetime('now') WHERE provider='google_analytics'`).bind(propertyId,error,refreshed?1:0).run()}catch{}}
