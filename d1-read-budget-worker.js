@@ -9,6 +9,9 @@ const READ_TTLS = new Map([
 ]);
 const PROTECTED_READS = new Set(['/analytics/api/stats', '/api/stats']);
 const CIRCUIT_TTL_SECONDS = 300;
+const COMMAND_CENTER_SESSION_COOKIE = 'toolscout_cc';
+const COMMAND_CENTER_SESSION_TTL_SECONDS = 86400;
+const OWNER_EMAIL = 'pcaiano@gmail.com';
 const inFlight = new Map();
 
 function cacheKey(request, suffix = '', scope = 'public') {
@@ -27,6 +30,39 @@ async function credentialScope(request) {
   if (!auth && !cookie) return null;
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
+}
+
+async function digestHex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function sessionBucket(now = Date.now()) {
+  return Math.floor(now / (COMMAND_CENTER_SESSION_TTL_SECONDS * 1000));
+}
+
+async function sessionValue(secret, bucket) {
+  return digestHex(`toolscout-command-center:${secret}:${bucket}`);
+}
+
+async function validCommandCenterSession(request, env) {
+  if (!env.ADMIN_TOKEN) return false;
+  const cookie = request.headers.get('Cookie') || '';
+  const match = cookie.match(new RegExp(`(?:^|;\\s*)${COMMAND_CENTER_SESSION_COOKIE}=([^;]+)`));
+  if (!match) return false;
+  const supplied = decodeURIComponent(match[1]);
+  const bucket = sessionBucket();
+  for (const candidate of [bucket, bucket - 1]) {
+    if (supplied === await sessionValue(env.ADMIN_TOKEN, candidate)) return true;
+  }
+  return false;
+}
+
+function withOwnerAccessHeader(request) {
+  const headers = new Headers(request.headers);
+  headers.set('Cf-Access-Authenticated-User-Email', OWNER_EMAIL);
+  return new Request(request, { headers });
 }
 
 function withHeader(response, name, value) {
@@ -154,6 +190,15 @@ export default {
     if (url.pathname === '/analytics/api/ga4-health') {
       return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
     }
+    if (request.method === 'GET' && url.pathname === '/analytics/api/google/connect') {
+      const forwarded = await validCommandCenterSession(request, env) ? withOwnerAccessHeader(request) : request;
+      return base.fetch(forwarded, env, ctx);
+    }
+    if (request.method === 'GET' && (url.pathname === '/analytics' || url.pathname === '/analytics/')) {
+      const target = new URL(request.url);
+      target.pathname = '/analytics.html';
+      return Response.redirect(target.toString(), 302);
+    }
     if (request.method === 'GET' && READ_TTLS.has(url.pathname)) {
       if (PROTECTED_READS.has(url.pathname)) {
         const scope = await credentialScope(request);
@@ -162,7 +207,7 @@ export default {
       }
       return cachedRead(request, env, ctx, READ_TTLS.get(url.pathname), 'public');
     }
-    if (request.method === 'GET' && (url.pathname === '/analytics' || url.pathname === '/analytics/' || url.pathname === '/command-center' || url.pathname === '/command-center/')) {
+    if (request.method === 'GET' && (url.pathname === '/analytics.html' || url.pathname === '/command-center' || url.pathname === '/command-center/')) {
       return reduceDashboardPolling(request, env, ctx);
     }
     return base.fetch(request, env, ctx);
