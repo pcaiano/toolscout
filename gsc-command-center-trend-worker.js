@@ -2,7 +2,7 @@ import base from './growth-runtime-closed-loop-worker.js';
 
 const ANALYTICS_PATHS = new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const STATS_PATHS = new Set(['/api/stats','/analytics/api/stats']);
-const GSC_TREND_COMPONENT_VERSION = 4;
+const GSC_TREND_COMPONENT_VERSION = 5;
 
 async function readTrend(request, env) {
   try {
@@ -51,7 +51,7 @@ async function enrichHealth(request, env, response) {
     data.gscTrendChart = {
       version: GSC_TREND_COMPONENT_VERSION,
       status: trend?.daily?.length ? 'observed' : 'awaiting_data',
-      renderStrategy: 'server-rendered-svg-inside-canonical-gsc-widget',
+      renderStrategy: 'server-svg-baked-into-canonical-google-search-renderer',
       points: Number(trend?.daily?.length || 0),
       generatedAt: trend?.generatedAt || null,
       range: trend?.range || null
@@ -105,8 +105,7 @@ function dateLabel(value) {
 }
 function buildServerTrend(trend) {
   const rows = Array.isArray(trend?.daily) ? trend.daily : [];
-  if (!rows.length) return '<div id="gscTrendBlock" data-gsc-server-chart="v4" class="empty">Daily GSC trend is temporarily unavailable.</div>';
-
+  if (!rows.length) return '<div id="gscTrendBlock" data-gsc-server-chart="v5" class="empty">Daily GSC trend is temporarily unavailable.</div>';
   const series = [
     {key:'impressions', label:'Impressions', stroke:'#2563eb', invert:false},
     {key:'clicks', label:'Clicks', stroke:'#16a34a', invert:false},
@@ -116,7 +115,7 @@ function buildServerTrend(trend) {
   ];
   const width = 1000, left = 160, right = 970, plotWidth = right - left, laneHeight = 42, laneGap = 12, top = 22;
   const lastIndex = Math.max(0, rows.length - 1);
-  let svg = `<svg width="100%" height="350" viewBox="0 0 1000 350" role="img" aria-label="Google Search Console 28 day trend" preserveAspectRatio="xMinYMin meet">`;
+  let svg = '<svg width="100%" height="350" viewBox="0 0 1000 350" role="img" aria-label="Google Search Console 28 day trend" preserveAspectRatio="xMinYMin meet">';
   series.forEach((s, index) => {
     const laneTop = top + index * (laneHeight + laneGap);
     const latest = latestValue(rows, s.key);
@@ -126,15 +125,17 @@ function buildServerTrend(trend) {
     svg += `<text x="8" y="${laneTop + 32}" fill="currentColor" opacity="0.62" font-size="10">Latest: ${esc(formatValue(s.key, latest))}${s.key === 'position' ? ' | lower is better' : ''}</text>`;
     if (path) svg += `<path d="${path}" fill="none" stroke="${s.stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   });
-  const ticks = [0, Math.round(lastIndex * .25), Math.round(lastIndex * .5), Math.round(lastIndex * .75), lastIndex].filter((v,i,a) => a.indexOf(v) === i);
-  ticks.forEach(index => {
+  [0, Math.round(lastIndex * .25), Math.round(lastIndex * .5), Math.round(lastIndex * .75), lastIndex].filter((v,i,a) => a.indexOf(v) === i).forEach(index => {
     const x = left + (lastIndex ? index / lastIndex * plotWidth : plotWidth / 2);
     svg += `<line x1="${x.toFixed(1)}" y1="${top}" x2="${x.toFixed(1)}" y2="${top + 5 * (laneHeight + laneGap) - laneGap}" stroke="currentColor" opacity="0.12" stroke-width="1" stroke-dasharray="3 5"/>`;
     svg += `<text x="${x.toFixed(1)}" y="328" fill="currentColor" opacity="0.62" font-size="10" text-anchor="middle">${esc(dateLabel(rows[index]?.date))}</text>`;
   });
   svg += '</svg>';
   const days = Number(trend?.range?.days || rows.length);
-  return `<div id="gscTrendBlock" data-gsc-server-chart="v4"><div class="sectionHead"><div><b>Search performance trend</b><span>First-party Google Search Console daily history</span></div><span class="pill">${esc(days)} days</span></div><div style="overflow-x:auto;min-width:0">${svg}</div><div class="empty" style="padding:4px 0 0;text-align:left">Each line uses its own scale. Average position is inverted so ranking improvement moves upward. Search-visible pages are pages seen in Search Analytics that day, not total indexed URLs.</div></div>`;
+  return `<div id="gscTrendBlock" data-gsc-server-chart="v5"><div class="sectionHead"><div><b>Search performance trend</b><span>First-party Google Search Console daily history</span></div><span class="pill">${esc(days)} days</span></div><div>${svg}</div><div class="empty">Each line uses its own scale. Average position is inverted so ranking improvement moves upward. Search-visible pages are pages seen in Search Analytics that day, not total indexed URLs.</div></div>`;
+}
+function jsSingleQuoted(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/[\r\n]+/g, '');
 }
 
 async function decorateAnalytics(request, env, response) {
@@ -144,17 +145,14 @@ async function decorateAnalytics(request, env, response) {
     html = html.replace(/<style id="gsc-trend-chart-style">[\s\S]*?<\/script>/g, '');
     const trend = await readTrend(request, env);
     const chart = buildServerTrend(trend);
-    const marker = `<div class="widgetBody" id="googleSearchRealityBody"><div class="empty">Refresh to load Google's view of ToolScout.</div></div>`;
-    if (html.includes(marker)) {
-      html = html.replace(marker, marker + chart);
-    } else {
-      const fallbackMarker = '<div class="resizeHandle"></div></section>';
-      const widgetStart = html.indexOf('<section class="widget" data-widget="google-search-reality"');
-      if (widgetStart >= 0) {
-        const resizeAt = html.indexOf(fallbackMarker, widgetStart);
-        if (resizeAt >= 0) html = html.slice(0, resizeAt) + chart + html.slice(resizeAt);
-      }
-    }
+
+    const initial = `<div class="widgetBody" id="googleSearchRealityBody"><div class="empty">Refresh to load Google's view of ToolScout.</div></div>`;
+    if (html.includes(initial)) html = html.replace(initial, `<div class="widgetBody" id="googleSearchRealityBody">${chart}</div>`);
+
+    const rendererNeedle = `root.innerHTML='<div class=\\"metricGrid\\">'+`;
+    const rendererReplacement = `root.innerHTML='${jsSingleQuoted(chart)}<div class=\\"metricGrid\\">'+`;
+    if (html.includes(rendererNeedle)) html = html.replace(rendererNeedle, rendererReplacement);
+
     return responseWithBody(response, html, 'text/html; charset=UTF-8');
   } catch {
     return response;
