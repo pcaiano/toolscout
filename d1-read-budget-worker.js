@@ -1,4 +1,4 @@
-// deploy-sync: 2026-09-22T13:55Z fix analytics redirect loop
+// deploy-sync: 2026-09-22T14:05Z D1-independent GA4 acquisition
 import base from './command-center-ga4-worker.js';
 
 const READ_TTLS = new Map([
@@ -191,7 +191,7 @@ export default {
     if (url.pathname === '/analytics/api/ga4-health') {
       return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
     }
-    if (request.method === 'GET' && url.pathname === '/analytics/api/google/connect') {
+    if (request.method === 'GET' && (url.pathname === '/analytics/api/google/connect' || url.pathname === '/analytics/api/google/acquisition')) {
       const forwarded = await validCommandCenterSession(request, env) ? withOwnerAccessHeader(request) : request;
       return base.fetch(forwarded, env, ctx);
     }
