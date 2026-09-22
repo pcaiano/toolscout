@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "gsc-command-center-visible-worker.js"
+main = "command-center-health-language-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
