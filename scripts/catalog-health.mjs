@@ -66,8 +66,11 @@ async function mapLimit(items, limit, fn) {
 }
 
 const rows = await mapLimit(tools, 8, async tool => {
+  const profilePath = `tools/${tool.slug}.html`;
   let profileExists = true;
-  try { await fs.access(`tools/${tool.slug}.html`); } catch { profileExists = false; }
+  let profileHtml = '';
+  try { profileHtml = await fs.readFile(profilePath, 'utf8'); } catch { profileExists = false; }
+  const emptyImageSources = profileExists ? (profileHtml.match(/<img\b[^>]*\bsrc=(?:""|'')/gi) || []).length : 0;
   const source = await probe(tool.sourceUrl);
   const affiliateConfig = affiliate[tool.slug] || {};
   const affiliateEnabled = Boolean(affiliateConfig.enabled && affiliateConfig.url);
@@ -85,7 +88,7 @@ const rows = await mapLimit(tools, 8, async tool => {
     needsWeeklyReview,
     overdue,
     missingCritical,
-    profile: { exists: profileExists, path: `tools/${tool.slug}.html` },
+    profile: { exists: profileExists, path: profilePath, emptyImageSources },
     source: { url: tool.sourceUrl || null, ...source },
     affiliate: affiliateEnabled ? { enabled: true, url: affiliateConfig.url, ...affiliateLink } : { enabled: false, url: null, status: 'inactive' }
   };
@@ -116,7 +119,8 @@ const summary = {
     warnings: count(r => r.affiliate.enabled && !['ok', 'broken'].includes(r.affiliate.status))
   },
   profiles: {
-    missing: count(r => !r.profile.exists)
+    missing: count(r => !r.profile.exists),
+    emptyImageSources: rows.reduce((sum, r) => sum + Number(r.profile.emptyImageSources || 0), 0)
   },
   metadata: {
     verifiedWithin7Days: count(r => r.verifiedAgeDays !== null && r.verifiedAgeDays <= 7),
@@ -135,9 +139,9 @@ if (affiliateProbeFailures.length) {
   console.log(JSON.stringify({ affiliateProbeFailures }, null, 2));
 }
 
-// Product/source integrity failures block catalog automation. A single automated
-// probe failure on an affiliate redirect does not, because tracking networks
-// commonly return bot-specific 404/403 responses. Affiliate failures remain
-// visible as needsConfirmation and must be corroborated before disabling links.
-const hardFailures = summary.sourceLinks.confirmedBroken + summary.metadata.missingCriticalFields + summary.profiles.missing;
+// Product/source and profile integrity failures block catalog automation. A single
+// automated probe failure on an affiliate redirect does not, because tracking
+// networks commonly return bot-specific 404/403 responses. Affiliate failures
+// remain visible as needsConfirmation and must be corroborated before disabling links.
+const hardFailures = summary.sourceLinks.confirmedBroken + summary.metadata.missingCriticalFields + summary.profiles.missing + summary.profiles.emptyImageSources;
 if (hardFailures > 0) process.exitCode = 2;
