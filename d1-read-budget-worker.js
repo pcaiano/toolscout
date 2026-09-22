@@ -7,15 +7,26 @@ const READ_TTLS = new Map([
   ['/api/distribution/discovery-health', 600],
   ['/api/distribution/authority/closed-loop-health', 300]
 ]);
+const PROTECTED_READS = new Set(['/analytics/api/stats', '/api/stats']);
 const CIRCUIT_TTL_SECONDS = 300;
 const inFlight = new Map();
 
-function cacheKey(request, suffix = '') {
+function cacheKey(request, suffix = '', scope = 'public') {
   const u = new URL(request.url);
   u.hostname = 'd1-budget-cache.trytoolscout.org';
   u.protocol = 'https:';
   if (suffix) u.pathname = `/__d1_budget__/${suffix}`;
+  u.searchParams.set('__scope', scope);
   return new Request(u.toString(), { method: 'GET' });
+}
+
+async function credentialScope(request) {
+  const auth = String(request.headers.get('Authorization') || '');
+  const cookie = String(request.headers.get('Cookie') || '');
+  const secret = `${auth}\n${cookie}`;
+  if (!auth && !cookie) return null;
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
 }
 
 function withHeader(response, name, value) {
@@ -30,7 +41,7 @@ function withHeader(response, name, value) {
 }
 
 async function circuitIsOpen(cache, request) {
-  return Boolean(await cache.match(cacheKey(request, 'circuit')));
+  return Boolean(await cache.match(cacheKey(request, 'circuit', 'global')));
 }
 
 async function openCircuit(cache, request, detail = 'D1 read quota unavailable') {
@@ -39,7 +50,7 @@ async function openCircuit(cache, request, detail = 'D1 read quota unavailable')
     'Cache-Control': `public, max-age=${CIRCUIT_TTL_SECONDS}`
   });
   const marker = new Response(JSON.stringify({ openedAt: new Date().toISOString(), detail }), { headers });
-  await cache.put(cacheKey(request, 'circuit'), marker);
+  await cache.put(cacheKey(request, 'circuit', 'global'), marker);
 }
 
 function d1ReadFailure(status, text) {
@@ -65,9 +76,9 @@ function circuitResponse() {
   });
 }
 
-async function cachedRead(request, env, ctx, ttl) {
+async function cachedRead(request, env, ctx, ttl, scope = 'public') {
   const cache = caches.default;
-  const key = cacheKey(request);
+  const key = cacheKey(request, '', scope);
   const hit = await cache.match(key);
   if (hit) return withHeader(hit, 'X-ToolScout-D1-Cache', 'HIT');
 
@@ -140,8 +151,13 @@ async function reduceDashboardPolling(request, env, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (request.method === 'GET' && READ_TTLS.has(url.pathname) && !request.headers.get('Authorization')) {
-      return cachedRead(request, env, ctx, READ_TTLS.get(url.pathname));
+    if (request.method === 'GET' && READ_TTLS.has(url.pathname)) {
+      if (PROTECTED_READS.has(url.pathname)) {
+        const scope = await credentialScope(request);
+        if (!scope) return base.fetch(request, env, ctx);
+        return cachedRead(request, env, ctx, READ_TTLS.get(url.pathname), `session-${scope}`);
+      }
+      return cachedRead(request, env, ctx, READ_TTLS.get(url.pathname), 'public');
     }
     if (request.method === 'GET' && (url.pathname === '/analytics' || url.pathname === '/analytics/' || url.pathname === '/command-center' || url.pathname === '/command-center/')) {
       return reduceDashboardPolling(request, env, ctx);
