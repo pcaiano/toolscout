@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-21T09:50:34Z",
+  "updatedAt": "2026-09-22T09:35:26Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "notion-mail-shuts-down",
+      "publishedAt": "2026-09-22",
+      "toolSlug": "notion",
+      "toolName": "Notion",
+      "label": "Product retirement",
+      "title": "Notion Mail shuts down as Notion shifts email workflows to AI",
+      "summary": "Notion Mail shuts down across all plans on 22 September while Gmail-connected AI features and agent email tools remain available.",
+      "sourceName": "Notion Help Center",
+      "sourceUrl": "https://www.notion.com/help/notion-mail-inbox-is-going-away-what-to-do-next",
+      "articleUrl": "/news/notion-mail-shuts-down.html",
+      "profileUrl": "/news/notion-mail-shuts-down.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "chatgpt-word-microsoft-office",
       "publishedAt": "2026-09-21",
