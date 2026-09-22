@@ -40,7 +40,8 @@ function analyticsPage(path){return path==='/analytics'||path==='/analytics/'||p
 
 async function ownerSafeAcquisition24h(request,env,ctx){
   const target=new URL(request.url);target.pathname='/analytics/api/google/acquisition-24h';target.search='';
-  const upstream=await base.fetch(new Request(target.toString(),request),env,ctx);
+  const upstreamRequest=new Request(target.toString(),{method:'GET',headers:new Headers(request.headers)});
+  const upstream=await base.fetch(upstreamRequest,env,ctx);
   const raw=await upstream.json().catch(()=>null);
   if(!upstream.ok||!raw||raw.status!=='connected')return {status:'unavailable',reason:raw?.reason||'GA4 rolling 24h acquisition is unavailable.',marker:markerState(request),fetchedAt:new Date().toISOString()};
   const sources=Array.isArray(raw.sources)?raw.sources:[];
