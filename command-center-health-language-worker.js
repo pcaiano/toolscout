@@ -1,4 +1,4 @@
-import base from './gsc-command-center-trend-worker.js';
+import base from './gsc-command-center-visible-worker.js';
 
 function headers(response){const h=new Headers(response.headers);h.set('Content-Type','application/json; charset=UTF-8');h.set('Cache-Control','private, no-store, max-age=0');h.delete('Content-Length');h.delete('Content-Encoding');return h}
 function isCatalogBatchWarning(issue){const t=[issue?.engine,issue?.title,issue?.detail,issue?.code].filter(Boolean).join(' ').toLowerCase();return t.includes('catalog')&&t.includes('latest_catalog_batch_all_warnings')}
