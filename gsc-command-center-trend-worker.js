@@ -2,7 +2,7 @@ import base from './growth-runtime-closed-loop-worker.js';
 
 const ANALYTICS_PATHS = new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
 const STATS_PATHS = new Set(['/api/stats','/analytics/api/stats']);
-const GSC_TREND_COMPONENT_VERSION = 3;
+const GSC_TREND_COMPONENT_VERSION = 4;
 
 async function readTrend(request, env) {
   try {
@@ -51,7 +51,7 @@ async function enrichHealth(request, env, response) {
     data.gscTrendChart = {
       version: GSC_TREND_COMPONENT_VERSION,
       status: trend?.daily?.length ? 'observed' : 'awaiting_data',
-      renderStrategy: 'persistent-widget-sibling-with-render-and-fetch-fallback',
+      renderStrategy: 'server-rendered-svg-inside-canonical-gsc-widget',
       points: Number(trend?.daily?.length || 0),
       generatedAt: trend?.generatedAt || null,
       range: trend?.range || null
@@ -62,58 +62,100 @@ async function enrichHealth(request, env, response) {
   }
 }
 
-const GSC_TREND_ENHANCEMENT = `<style id="gsc-trend-chart-style">
-#gscTrendBlock{margin:12px 12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:12px 12px 10px;position:relative;z-index:1}.gscTrendHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap}.gscTrendHead b{font-size:13px}.gscTrendHead span{display:block;color:var(--muted);font-size:10px;line-height:1.45;margin-top:3px}.gscTrendBadge{font-size:9px!important;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border:1px solid var(--line);border-radius:999px;padding:5px 8px;margin:0!important;white-space:nowrap}.gscTrendCanvas{position:relative;overflow-x:auto}.gscTrendSvg{display:block;width:100%;min-width:760px;height:auto}.gscTrendTooltip{display:none;position:absolute;z-index:3;pointer-events:none;min-width:180px;max-width:240px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 9px;box-shadow:0 8px 30px rgba(0,0,0,.12);font-size:10px;line-height:1.45}.gscTrendTooltip b{display:block;font-size:11px;margin-bottom:4px}.gscTrendFoot{color:var(--muted);font-size:9px;line-height:1.5;margin-top:7px}.gscTrendLoading{color:var(--muted);font-size:11px;padding:8px 0}@media(max-width:720px){#gscTrendBlock{padding:10px 8px;margin-left:8px;margin-right:8px}.gscTrendHead{padding:0 3px}}
-</style><script data-gsc-trend-renderer="v3">(function(){
-var renderedFromPage=false,fallbackStarted=false;
-var esc=function(v){return String(v==null?'':v).replace(/[&<>\\\"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','\\\"':'&quot;',"'":'&#039;'}[m]})};
-var num=function(v){return Number(v||0).toLocaleString()};
-var one=function(v){return Number(v||0).toFixed(1)};
-var pct=function(v){return Number(v||0).toFixed(2)+'%'};
-var shortDate=function(v){try{return new Date(String(v)+'T12:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric'})}catch{return String(v||'')}};
-var longDate=function(v){try{return new Date(String(v)+'T12:00:00Z').toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}catch{return String(v||'')}};
-function numericValue(row,key){if(!row||row[key]==null)return null;var value=Number(row[key]);return Number.isFinite(value)?value:null}
-function latestValue(rows,key){for(var i=rows.length-1;i>=0;i--){var value=numericValue(rows[i],key);if(value!==null)return value}return null}
-function findWidget(){return document.querySelector('section[data-widget="google-search-reality"]')}
-function ensureBlock(){
-  var widget=findWidget();if(!widget)return null;
-  var block=document.getElementById('gscTrendBlock');if(block)return block;
-  block=document.createElement('div');block.id='gscTrendBlock';block.innerHTML='<div class="gscTrendHead"><div><b>Search performance trend</b><span>Daily Google Search Console visibility and ranking movement.</span></div><span class="gscTrendBadge">28 days</span></div><div class="gscTrendLoading">Loading daily GSC history...</div>';
-  var resize=widget.querySelector('.resizeHandle');if(resize)widget.insertBefore(block,resize);else widget.appendChild(block);
-  return block;
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
-function seriesPath(rows,series,left,width,top,height){
-  var values=rows.map(function(r){return numericValue(r,series.key)}).filter(function(v){return v!==null});if(!values.length)return '';
-  var min=Math.min.apply(null,values),max=Math.max.apply(null,values);if(max===min){min=min===0?0:min-1;max=max+1}
-  var points=[];rows.forEach(function(row,index){var value=numericValue(row,series.key);if(value===null)return;var ratio=(value-min)/(max-min);var x=left+(rows.length===1?width/2:index/(rows.length-1)*width);var y=series.invert?top+ratio*height:top+height-ratio*height;points.push((points.length?'L':'M')+x.toFixed(1)+' '+y.toFixed(1))});return points.join(' ')
+function valueOf(row, key) {
+  if (!row || row[key] == null) return null;
+  const value = Number(row[key]);
+  return Number.isFinite(value) ? value : null;
 }
-function renderTrend(data){
-  var block=ensureBlock();if(!block)return false;
-  var reality=data&&data.growthOps&&data.growthOps.googleSearchReality,performance=reality&&reality.searchPerformance,fallback=data&&data.gscDailyTrend;
-  var rows=performance&&Array.isArray(performance.daily)?performance.daily:(fallback&&Array.isArray(fallback.daily)?fallback.daily:[]);
-  if(!rows.length){block.innerHTML='<div class="gscTrendHead"><div><b>Search performance trend</b><span>Daily GSC history is temporarily unavailable.</span></div><span class="gscTrendBadge">28 days</span></div>';return true}
-  var series=[{key:'impressions',label:'Impressions',color:'#2563eb',format:num,invert:false},{key:'clicks',label:'Clicks',color:'#16a34a',format:num,invert:false},{key:'ctr',label:'CTR',color:'#7c3aed',format:pct,invert:false},{key:'position',label:'Average position',color:'#d97706',format:one,invert:true},{key:'searchVisiblePages',label:'Search-visible pages',color:'#0891b2',format:num,invert:false}];
-  var width=1000,left=155,right=972,plotWidth=right-left,laneHeight=42,laneGap=12,top=22,lastIndex=Math.max(0,rows.length-1),svg='<svg class="gscTrendSvg" viewBox="0 0 1000 350" role="img" aria-label="Google Search Console daily trend">';
-  series.forEach(function(s,index){var laneTop=top+index*(laneHeight+laneGap),latest=latestValue(rows,s.key),path=seriesPath(rows,s,left,plotWidth,laneTop,laneHeight);svg+='<line x1="'+left+'" y1="'+(laneTop+laneHeight)+'" x2="'+right+'" y2="'+(laneTop+laneHeight)+'" stroke="var(--line)" stroke-width="1"/><text x="8" y="'+(laneTop+16)+'" fill="var(--text)" font-size="12" font-weight="700">'+esc(s.label)+'</text><text x="8" y="'+(laneTop+32)+'" fill="var(--muted)" font-size="10">Latest: '+esc(latest==null?'n/a':s.format(latest))+(s.key==='position'?' | lower is better':'')+'</text>';if(path)svg+='<path d="'+path+'" fill="none" stroke="'+s.color+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'});
-  [0,Math.round(lastIndex*.25),Math.round(lastIndex*.5),Math.round(lastIndex*.75),lastIndex].filter(function(v,i,a){return a.indexOf(v)===i}).forEach(function(index){var x=left+(lastIndex?index/lastIndex*plotWidth:plotWidth/2);svg+='<line x1="'+x.toFixed(1)+'" y1="'+top+'" x2="'+x.toFixed(1)+'" y2="'+(top+5*(laneHeight+laneGap)-laneGap)+'" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 5" opacity=".65"/><text x="'+x.toFixed(1)+'" y="328" fill="var(--muted)" font-size="10" text-anchor="middle">'+esc(shortDate(rows[index]&&rows[index].date))+'</text>'});svg+='</svg>';
-  var range=(performance&&performance.dailyRange)||(fallback&&fallback.range)||{};
-  block.innerHTML='<div class="gscTrendHead"><div><b>Search performance trend</b><span>Daily visibility and ranking movement from first-party Google Search Console data.</span></div><span class="gscTrendBadge">'+esc(range.days||rows.length)+' days</span></div><div class="gscTrendCanvas">'+svg+'<div class="gscTrendTooltip"></div></div><div class="gscTrendFoot">Each line uses its own scale. Average position is inverted so ranking improvement moves upward. Search-visible pages are pages seen in Search Analytics that day, not the total indexed URL count.</div>';
-  var canvas=block.querySelector('.gscTrendCanvas'),tip=block.querySelector('.gscTrendTooltip');canvas.addEventListener('mousemove',function(event){var rect=canvas.getBoundingClientRect(),visibleX=Math.max(0,Math.min(rect.width,event.clientX-rect.left)),dataX=Math.max(0,Math.min(canvas.scrollWidth,visibleX+canvas.scrollLeft)),index=Math.max(0,Math.min(rows.length-1,Math.round(dataX/Math.max(1,canvas.scrollWidth)*(rows.length-1)))),row=rows[index]||{};tip.innerHTML='<b>'+esc(longDate(row.date))+'</b>Impressions: '+num(row.impressions)+'<br>Clicks: '+num(row.clicks)+'<br>CTR: '+pct(row.ctr)+'<br>Average position: '+(row.position==null?'n/a':one(row.position))+'<br>Search-visible pages: '+num(row.searchVisiblePages);tip.style.display='block';tip.style.left=Math.max(6,Math.min(Math.max(6,rect.width-230),visibleX+10))+'px';tip.style.top='12px'});canvas.addEventListener('mouseleave',function(){tip.style.display='none'});return true
+function latestValue(rows, key) {
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const value = valueOf(rows[i], key);
+    if (value !== null) return value;
+  }
+  return null;
 }
-function mountSoon(attempt){if(ensureBlock())return;if((attempt||0)<40)setTimeout(function(){mountSoon((attempt||0)+1)},100)}
-async function fallbackLoad(){if(renderedFromPage||fallbackStarted)return;fallbackStarted=true;try{var response=await fetch('/api/stats',{credentials:'same-origin',cache:'no-store'});if(response.ok){var data=await response.json();renderTrend(data)}}catch(e){var block=ensureBlock();if(block)block.innerHTML='<div class="gscTrendHead"><div><b>Search performance trend</b><span>Trend data could not be loaded on this refresh.</span></div><span class="gscTrendBadge">GSC</span></div>'}}
-mountSoon(0);
-var original=window.render;if(typeof original==='function')window.render=function(data){original(data);renderedFromPage=true;setTimeout(function(){renderTrend(data)},0)};
-setTimeout(fallbackLoad,1200);
-})();</script>`;
+function formatValue(key, value) {
+  if (value == null) return 'n/a';
+  if (key === 'ctr') return `${value.toFixed(2)}%`;
+  if (key === 'position') return value.toFixed(1);
+  return Math.round(value).toLocaleString('en-US');
+}
+function seriesPath(rows, key, invert, left, width, top, height) {
+  const values = rows.map(row => valueOf(row, key)).filter(value => value !== null);
+  if (!values.length) return '';
+  let min = Math.min(...values), max = Math.max(...values);
+  if (max === min) { min = min === 0 ? 0 : min - 1; max += 1; }
+  const points = [];
+  rows.forEach((row, index) => {
+    const value = valueOf(row, key);
+    if (value === null) return;
+    const ratio = (value - min) / (max - min);
+    const x = left + (rows.length === 1 ? width / 2 : index / (rows.length - 1) * width);
+    const y = invert ? top + ratio * height : top + height - ratio * height;
+    points.push(`${points.length ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`);
+  });
+  return points.join(' ');
+}
+function dateLabel(value) {
+  const s = String(value || '');
+  return s.length >= 10 ? `${s.slice(5,7)}/${s.slice(8,10)}` : s;
+}
+function buildServerTrend(trend) {
+  const rows = Array.isArray(trend?.daily) ? trend.daily : [];
+  if (!rows.length) return '<div id="gscTrendBlock" data-gsc-server-chart="v4" class="empty">Daily GSC trend is temporarily unavailable.</div>';
 
-async function decorateAnalytics(response) {
+  const series = [
+    {key:'impressions', label:'Impressions', stroke:'#2563eb', invert:false},
+    {key:'clicks', label:'Clicks', stroke:'#16a34a', invert:false},
+    {key:'ctr', label:'CTR', stroke:'#7c3aed', invert:false},
+    {key:'position', label:'Average position', stroke:'#d97706', invert:true},
+    {key:'searchVisiblePages', label:'Search-visible pages', stroke:'#0891b2', invert:false}
+  ];
+  const width = 1000, left = 160, right = 970, plotWidth = right - left, laneHeight = 42, laneGap = 12, top = 22;
+  const lastIndex = Math.max(0, rows.length - 1);
+  let svg = `<svg width="100%" height="350" viewBox="0 0 1000 350" role="img" aria-label="Google Search Console 28 day trend" preserveAspectRatio="xMinYMin meet">`;
+  series.forEach((s, index) => {
+    const laneTop = top + index * (laneHeight + laneGap);
+    const latest = latestValue(rows, s.key);
+    const path = seriesPath(rows, s.key, s.invert, left, plotWidth, laneTop, laneHeight);
+    svg += `<line x1="${left}" y1="${laneTop + laneHeight}" x2="${right}" y2="${laneTop + laneHeight}" stroke="currentColor" opacity="0.15" stroke-width="1"/>`;
+    svg += `<text x="8" y="${laneTop + 16}" fill="currentColor" font-size="12" font-weight="700">${esc(s.label)}</text>`;
+    svg += `<text x="8" y="${laneTop + 32}" fill="currentColor" opacity="0.62" font-size="10">Latest: ${esc(formatValue(s.key, latest))}${s.key === 'position' ? ' | lower is better' : ''}</text>`;
+    if (path) svg += `<path d="${path}" fill="none" stroke="${s.stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  });
+  const ticks = [0, Math.round(lastIndex * .25), Math.round(lastIndex * .5), Math.round(lastIndex * .75), lastIndex].filter((v,i,a) => a.indexOf(v) === i);
+  ticks.forEach(index => {
+    const x = left + (lastIndex ? index / lastIndex * plotWidth : plotWidth / 2);
+    svg += `<line x1="${x.toFixed(1)}" y1="${top}" x2="${x.toFixed(1)}" y2="${top + 5 * (laneHeight + laneGap) - laneGap}" stroke="currentColor" opacity="0.12" stroke-width="1" stroke-dasharray="3 5"/>`;
+    svg += `<text x="${x.toFixed(1)}" y="328" fill="currentColor" opacity="0.62" font-size="10" text-anchor="middle">${esc(dateLabel(rows[index]?.date))}</text>`;
+  });
+  svg += '</svg>';
+  const days = Number(trend?.range?.days || rows.length);
+  return `<div id="gscTrendBlock" data-gsc-server-chart="v4"><div class="sectionHead"><div><b>Search performance trend</b><span>First-party Google Search Console daily history</span></div><span class="pill">${esc(days)} days</span></div><div style="overflow-x:auto;min-width:0">${svg}</div><div class="empty" style="padding:4px 0 0;text-align:left">Each line uses its own scale. Average position is inverted so ranking improvement moves upward. Search-visible pages are pages seen in Search Analytics that day, not total indexed URLs.</div></div>`;
+}
+
+async function decorateAnalytics(request, env, response) {
   if (!response.ok || !String(response.headers.get('content-type') || '').includes('text/html')) return response;
   try {
-    const html = await response.text();
-    const withoutOld = html.replace(/<style id="gsc-trend-chart-style">[\s\S]*?<\/script>/g, '');
-    const decorated = withoutOld.includes('</body>') ? withoutOld.replace('</body>', GSC_TREND_ENHANCEMENT + '</body>') : withoutOld + GSC_TREND_ENHANCEMENT;
-    return responseWithBody(response, decorated, 'text/html; charset=UTF-8');
+    let html = await response.text();
+    html = html.replace(/<style id="gsc-trend-chart-style">[\s\S]*?<\/script>/g, '');
+    const trend = await readTrend(request, env);
+    const chart = buildServerTrend(trend);
+    const marker = `<div class="widgetBody" id="googleSearchRealityBody"><div class="empty">Refresh to load Google's view of ToolScout.</div></div>`;
+    if (html.includes(marker)) {
+      html = html.replace(marker, marker + chart);
+    } else {
+      const fallbackMarker = '<div class="resizeHandle"></div></section>';
+      const widgetStart = html.indexOf('<section class="widget" data-widget="google-search-reality"');
+      if (widgetStart >= 0) {
+        const resizeAt = html.indexOf(fallbackMarker, widgetStart);
+        if (resizeAt >= 0) html = html.slice(0, resizeAt) + chart + html.slice(resizeAt);
+      }
+    }
+    return responseWithBody(response, html, 'text/html; charset=UTF-8');
   } catch {
     return response;
   }
@@ -125,7 +167,7 @@ export default {
     const response = await base.fetch(request, env, ctx);
     if (url.pathname === '/api/health') return enrichHealth(request, env, response);
     if (STATS_PATHS.has(url.pathname)) return enrichStats(request, env, response);
-    if (ANALYTICS_PATHS.has(url.pathname)) return decorateAnalytics(response);
+    if (ANALYTICS_PATHS.has(url.pathname)) return decorateAnalytics(request, env, response);
     return response;
   },
   async scheduled(event, env, ctx) {
