@@ -124,7 +124,7 @@ for (let index = 0; index < lookbackDays; index += 1) {
     clicks,
     impressions,
     ctr: impressions ? Number((clicks / impressions * 100).toFixed(4)) : 0,
-    position: row && Number.isFinite(Number(row.position)) ? Number(Number(row.position).toFixed(4)) : null,
+    position: impressions > 0 && row && Number.isFinite(Number(row.position)) ? Number(Number(row.position).toFixed(4)) : null,
     searchVisiblePages: visiblePagesByDate.get(date)?.size || 0
   });
 }
