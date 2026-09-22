@@ -1,58 +1,106 @@
 # ToolScout Google Search Console
 
-## What this integration does
+## Current integration
 
-Google Search Console (GSC) and ToolScout's internal growth intelligence are separate systems.
+Google Search Console is the authoritative source for ToolScout Google Search visibility metrics such as impressions, clicks, CTR, landing pages, queries and average position.
 
-- GSC property verification, sitemap submission, crawling and indexing happen in Google.
-- ToolScout does not currently authenticate to the Google Search Console API.
-- ToolScout's `reports/growth-priority.json` can optionally consume page-performance signals imported from a GSC Pages CSV export.
+ToolScout authenticates to the Search Console API with a service account stored outside the repository and uses the read only scope:
 
-Therefore, `gsc.available: false` in a ToolScout report must never be interpreted as "the site is not verified/indexed in Google". It means only that no matching GSC performance dataset has been imported into the repository.
+`https://www.googleapis.com/auth/webmasters.readonly`
 
-## Current ingestion path
+The configured property is:
 
-1. In Google Search Console, open the `trytoolscout.org` property.
-2. Open Performance / Search results.
-3. Use the Pages dimension.
-4. Export the table as CSV with columns for Page, Clicks, Impressions, CTR and Position.
-5. Run:
+`sc-domain:trytoolscout.org`
 
-```bash
-node scripts/import-gsc-signals.mjs <gsc-pages.csv>
-```
+Credentials must never be committed to Git.
 
-6. This creates `reports/gsc-signals.json`.
-7. Run:
+## Automated collection
 
-```bash
-node scripts/build-growth-priority.mjs
-```
+The scheduled workflow `.github/workflows/gsc-search-reality.yml` collects first party Search Console evidence daily and can also be run manually.
 
-8. `reports/growth-priority.json` will then report `gsc.ingestionStatus: "signals-imported"` when matching `best-*` intent pages contain GSC observations.
+The main collector is:
 
-## Status semantics
+`scripts/sync-gsc-signals.mjs`
 
-`gsc.available` means "usable imported GSC intent signals exist".
+It writes:
 
-`gsc.ingestionStatus` can be:
+- `reports/gsc-search-reality.json`
+- `data/gsc-search-reality.json`
+- `reports/gsc-signals.json`
 
-- `signals-imported` — imported GSC data is actively influencing growth prioritization;
-- `imported-no-matching-intents` — a GSC dataset exists but does not contain matching ToolScout `best-*` intent pages;
-- `not-imported` — no `reports/gsc-signals.json` exists yet.
+This dataset supplies the Command Center Google Search Reality card, Search and Growth Brain opportunity evidence, country and device summaries, URL Inspection health and sitemap status.
 
-None of these fields are authoritative for Google's verification/indexing status. Search Console itself is authoritative for that.
+The daily trend collector is:
 
-## Automation decision
+`scripts/sync-gsc-daily-trend.mjs`
 
-Do not spend Work/Codex credits merely to import GSC data. The current CSV ingestion is sufficient for early-stage growth and keeps Google credentials out of the repository.
+It writes:
 
-A future direct Search Console API integration is justified only when repeated manual exports become a material operating burden. That implementation would require a dedicated Google credential path, least-privilege access, secret storage outside Git, scheduled ingestion, and explicit property validation for `trytoolscout.org`.
+- `reports/gsc-daily-trend.json`
+- `data/gsc-daily-trend.json`
 
-## Operational rule
+The default trend window is 28 days. The daily series contains:
 
-Before claiming GSC integration is broken, distinguish these three questions:
+- impressions
+- clicks
+- CTR
+- average position
+- search visible pages
 
-1. Is the Google property verified and is the sitemap accepted? — answer in Search Console.
-2. Is Google generating impressions/clicks? — answer in Search Console Performance.
-3. Has that performance data been imported into ToolScout growth intelligence? — answer from `reports/gsc-signals.json` and `gsc.ingestionStatus`.
+Search visible pages means distinct ToolScout pages returned by Search Analytics for that date. It must not be presented as the total number of URLs indexed by Google.
+
+Average position is nullable on days with no impressions. A missing position must never be converted to zero. Lower average position values indicate stronger average ranking.
+
+## Command Center presentation
+
+The protected Command Center Google Search Reality card includes a daily temporal chart sourced from `data/gsc-daily-trend.json`.
+
+The chart shows five aligned trend lanes over the same date axis:
+
+1. Impressions
+2. Clicks
+3. CTR
+4. Average position
+5. Search visible pages
+
+Each metric uses its own vertical scale because the units and magnitudes are not directly comparable. Average position is visually inverted so an improvement in ranking moves upward while the displayed raw value remains the Search Console value.
+
+The chart is implemented by `gsc-command-center-trend-worker.js`, an outer decorator around the existing closed loop Worker chain. It enriches the protected stats payload and decorates the canonical Command Center response. It does not replace or rebuild the canonical Command Center composition owned by `growth-command-center-v2-worker.js`.
+
+## Search Console reality semantics
+
+Search Analytics and URL Inspection answer different questions.
+
+Search Analytics reports observed Google Search performance. It is authoritative for impressions, clicks, CTR, queries, pages and average position, but Google does not guarantee that every possible row is returned.
+
+URL Inspection reports Google's indexed view of inspected URLs. It is not a live indexability test. ToolScout keeps URL Inspection coverage, indexed status, discovery issues, canonical mismatches and related technical evidence separate from Search Analytics performance.
+
+The sitemap API reports submitted sitemap state. Sitemap counts must not be treated as equivalent to a complete Google index count.
+
+## Quality and freshness rules
+
+- The scheduled GSC workflow validates that both the search reality dataset and daily trend dataset are fresh and use the read only scope.
+- The daily trend must contain at least seven valid observations before the workflow can commit it.
+- The normal Command Center trend window is 28 days.
+- Empty Search Analytics days retain zero impressions, zero clicks and zero CTR, but average position is `null`.
+- Search visible pages are a visibility indicator only, not an index coverage metric.
+- Missing GSC evidence must be shown as unavailable or awaiting refresh, never fabricated from another analytics system.
+
+## Legacy CSV importer
+
+`scripts/import-gsc-signals.mjs` may remain available for historical or diagnostic CSV imports, but it is no longer the primary production ingestion path.
+
+Do not describe ToolScout as dependent on manual Search Console CSV exports while the authenticated read only API workflow is healthy.
+
+## Operational checks
+
+When diagnosing Google Search performance, distinguish these questions:
+
+1. Is the Search Console API collection fresh and healthy?
+2. Are impressions, clicks, CTR and average position changing over time?
+3. How many ToolScout pages are appearing in Search Analytics?
+4. What does URL Inspection say about canonical sitemap URLs?
+5. Are sitemap submission and download states healthy?
+6. Are Search opportunities reaching the Growth Brain execution loop?
+
+The Command Center should make these signals readable without requiring the owner to interpret raw JSON or manually export Search Console data.
