@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T09:07:26.542Z",
+  "generatedAt": "2026-09-22T09:08:42.329Z",
   "source": "Google Search Console Search Analytics API - daily trend",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -54,7 +54,7 @@
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,
-      "position": 0,
+      "position": null,
       "searchVisiblePages": 0
     },
     {
@@ -62,7 +62,7 @@
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,
-      "position": 0,
+      "position": null,
       "searchVisiblePages": 0
     },
     {

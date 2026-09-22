@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T09:07:26.186Z",
+  "generatedAt": "2026-09-22T09:08:41.752Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -191,7 +191,7 @@
     "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
     "preservedFromPrevious": true,
     "preservedFromGeneratedAt": "2026-09-21T21:02:54.858Z",
-    "lastInspectionAttemptAt": "2026-09-22T09:07:26.186Z",
+    "lastInspectionAttemptAt": "2026-09-22T09:08:41.752Z",
     "lastInspectionAttemptCoveragePct": 0,
     "lastInspectionAttemptErrors": 250,
     "quotaLimited": true
