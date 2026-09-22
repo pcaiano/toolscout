@@ -68,6 +68,9 @@ run_worker_first = [
   "/distribution-workflow*"
 ]
 
+[vars]
+GA4_PROPERTY_ID = "554080029"
+
 [triggers]
 crons = ["15 * * * *", "35 3 * * *"]
 
