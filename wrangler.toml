@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "command-center-health-language-worker.js"
+main = "d1-read-budget-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
