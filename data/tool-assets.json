@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T22:44:38Z",
+  "generatedAt": "2026-09-23T21:35:00Z",
   "assets": {
     "pabbly-connect": {
       "url": "https://www.pabbly.com/assets/images/brand-assets/Pabbly-connect.png",
@@ -52,14 +52,32 @@
     "otter-ai": {
       "url": "https://cdn.prod.website-files.com/618e9316785b3582a5178502/618e94bcbca88b51e2ad81f7_favicon.png",
       "provenance": "first-party-favicon",
-      "checkedAt": "2026-09-21T13:10:00.000Z",
-      "sourcePage": "https://otter.ai/transcription"
+      "checkedAt": "2026-09-23T21:35:00Z",
+      "sourcePage": "https://otter.ai/"
     },
     "unbounce": {
       "url": "https://unbounce.com/photos/cropped-unbounce-favicon-2-270x270.png",
       "provenance": "first-party-favicon",
       "checkedAt": "2026-09-21T22:44:38Z",
       "sourcePage": "https://unbounce.com/"
+    },
+    "character-ai": {
+      "url": "https://character.ai/icon.svg",
+      "provenance": "first-party-icon",
+      "checkedAt": "2026-09-23T21:35:00Z",
+      "sourcePage": "https://character.ai/"
+    },
+    "google-ai-studio": {
+      "url": "https://www.gstatic.com/images/branding/productlogos/ai_studio/v1/web-32dp/logo_ai_studio_color_1x_web_32dp.png",
+      "provenance": "first-party-google-product-logo",
+      "checkedAt": "2026-09-23T21:35:00Z",
+      "sourcePage": "https://aistudio.google.com/"
+    },
+    "kling-ai": {
+      "url": "https://s16-kling.klingai.com/kos/s101/nlav112918/kling-homepage-aio/favicon.ico",
+      "provenance": "first-party-favicon",
+      "checkedAt": "2026-09-23T21:35:00Z",
+      "sourcePage": "https://kling.ai/"
     }
   }
 }
