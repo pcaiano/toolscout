@@ -6,13 +6,17 @@ const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'priva
 const HOURLY='15 * * * *';
 const DAILY='35 3 * * *';
 
-async function internalJson(request,env,ctx,path,{method='POST',body=null}={}){
+async function internalJson(request,env,ctx,path,{method='POST',body=null,timeoutMs=45000}={}){
   if(!env.ADMIN_TOKEN)return {ok:false,httpStatus:0,error:'admin_token_unavailable'};
   const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
   const init={method,headers};
   if(body!=null)init.body=JSON.stringify(body);
   try{
-    const response=await base.fetch(new Request(new URL(path,request.url),init),env,ctx);
+    const work=base.fetch(new Request(new URL(path,request.url),init),env,ctx);
+    let timer;
+    const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(`stage_timeout:${path}`)),Math.max(5000,Number(timeoutMs)||45000))});
+    const response=await Promise.race([work,timeout]);
+    clearTimeout(timer);
     let payload=null;try{payload=await response.json()}catch{}
     return {ok:response.ok,httpStatus:response.status,payload};
   }catch(error){return {ok:false,httpStatus:0,error:String(error?.message||error).slice(0,800)}}
