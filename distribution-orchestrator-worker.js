@@ -769,10 +769,32 @@ async function runGrowthExecutionContractCycle(env){
     if(contentState?.status==='execution_gap'&&contentReady?.ok){
       selectedInternalLane='content_issue';
     }else{
-      const next=await env.DB.prepare("SELECT executor FROM growth_execution_contract WHERE executor IN ('distribution_network','distribution_autonomous','content_issue','seo_cloudflare','affiliate_cycle','catalog_cycle') AND status IN ('pending','stalled') ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT 1").first();
+      const next=await env.DB.prepare("SELECT executor FROM growth_execution_contract WHERE executor IN ('distribution_network','distribution_autonomous','content_issue','affiliate_cycle','catalog_cycle') AND status IN ('pending','stalled') ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT 1").first();
       selectedInternalLane=String(next?.executor||'')||null;
     }
   }catch{}
+
+  const runSeoBatch=async(limit=4)=>{
+    const claim=await claimExecutorTasks(env,'seo_cloudflare',{limit,maxInFlight:limit,result:'growth_brain_cloudflare_seo_batch_v1'});
+    if(!claim.claimed){results.seo_cloudflare={claimed:0,internal:true,batch:true};return}
+    const items=[];
+    for(const task of claim.tasks||[]){
+      try{
+        const out=await executeCloudflareSeoTask(env,task);
+        if(out?.verified&&out?.pathname){
+          const proof=await recordExecutionProof(env,{taskId:task.task_id,executor:'seo_cloudflare',status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
+          items.push({task_id:task.task_id,status:'verified',pathname:out.pathname,action:task.action,indexNow:Boolean(out?.indexNow?.queued),proof:proof?.ok===true});
+        }else{
+          await deferExecutionTask(env,task.task_id,'cloudflare_seo_batch_not_verified:'+String(out?.reason||'unknown'));
+          items.push({task_id:task.task_id,status:'deferred',reason:out?.reason||'not_verified'});
+        }
+      }catch(error){
+        await deferExecutionTask(env,task.task_id,'cloudflare_seo_batch_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
+        items.push({task_id:task.task_id,status:'deferred',error:String(error?.message||error).slice(0,500)});
+      }
+    }
+    results.seo_cloudflare={claimed:claim.claimed,internal:true,batch:true,items,verified:items.filter(x=>x.status==='verified').length};
+  };
 
   const runInternal=async(executor,fn)=>{
     const claim=await claimExecutorTasks(env,executor,{limit:1,maxInFlight:1,result:'growth_brain_dispatched_task_v2'});
@@ -815,7 +837,7 @@ async function runGrowthExecutionContractCycle(env){
   results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null};
 
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
-  if(selectedInternalLane==='seo_cloudflare')await runInternal('seo_cloudflare',(task)=>executeCloudflareSeoTask(env,task));
+  await runSeoBatch(4);
   if(selectedInternalLane==='affiliate_cycle')await runInternal('affiliate_cycle',(task)=>runAffiliateCoverageCycle(env,task));
   if(selectedInternalLane==='catalog_cycle')await runInternal('catalog_cycle',async(task)=>{
     if(task?.source_kind==='opportunity'&&task?.subject_type==='catalog_gap')return{task:await executeCatalogGrowthTask(env,task)};
@@ -826,11 +848,9 @@ async function runGrowthExecutionContractCycle(env){
 
   const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_waiting_for_exact_published_reply'});
   results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
-  if(!results.seo_cloudflare)results.seo_cloudflare={claimed:0,internal:true};
-
   const after=await reconcileExecutionContracts(env);
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,boundedExecution:{maxInternalLanesPerRun:1,selectedInternalLane,externalExecutorsClaimOnly:true,seoExecutor:'cloudflare_internal',contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
+  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,boundedExecution:{maxPrimaryInternalLanesPerRun:1,selectedInternalLane,seoBatchMax:4,seoExecutor:'cloudflare_internal',externalExecutorsClaimOnly:true,contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
 }
 async function runBoundedPublicExecutionReconcile(env){
   const synced=await syncExecutionContracts(env);
