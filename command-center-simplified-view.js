@@ -50,7 +50,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&
 const n=v=>Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable';
 const dec=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'Unavailable';
 const money=(v,c)=>{if(v===null||v===undefined||!Number.isFinite(Number(v)))return 'Unknown';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:c||'EUR',maximumFractionDigits:2}).format(Number(v))}catch{return String(v)}};
-const dt=v=>{if(!v)return 'Unavailable';try{let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';return new Date(s).toLocaleString(undefined,{timeZone:'Europe/Lisbon'})}catch{return String(v)}};
+const dt=v=>{if(!v)return 'Unavailable';try{let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';const d=new Date(s);const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d);const m=Object.fromEntries(p.map(x=>[x.type,x.value]));return m.day+' '+m.month+' '+m.year+', '+m.hour+':'+m.minute}catch{return String(v)}};
 const ageHours=v=>{if(!v)return null;let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';const t=Date.parse(s);return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):null};
 const human=v=>String(v||'').replaceAll('_',' ');
 const pill=(v,state)=>'<span class="pill '+(state||'')+'">'+esc(v)+'</span>';
@@ -128,19 +128,20 @@ function trafficProgress(){
 }
 function authorityProgress(){
  const b=data?.truth?.authority||{},rows=Array.isArray(b.history30)?b.history30:[];
- document.getElementById('authorityProgressMeta').textContent=b.lastVerifiedAt?'Last verified '+dt(b.lastVerifiedAt):'Verified authority history';
+ document.getElementById('authorityProgressMeta').textContent=b.latestPlacementVerifiedAt?'Latest authority placement '+dt(b.latestPlacementVerifiedAt):(b.lastVerifiedAt?'Last backlink verified '+dt(b.lastVerifiedAt):'Verified authority history');
  document.getElementById('authorityProgressBody').innerHTML=
   '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Verified backlinks</small><b>'+n(b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(b.authorityQueue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(b.attempts24h)+' / '+n(b.attemptMin24h)+'</b></div></div>'+donut(b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'backlinks',label:'Verified backlinks',cls:'primary'},{key:'referringDomains',label:'Referring domains',cls:'good'}])+'</div>'+
-  '<div class="sourceLine">Cumulative authority is built only from verified public backlink placements. The donut tracks the 10-domain bootstrap floor.</div>';
+  '<div class="section">'+row('Latest authority placement',b.latestPlacementVerifiedAt?dt(b.latestPlacementVerifiedAt):'Unavailable','Any verified public authority placement')+row('Last backlink verified',b.lastVerifiedAt?dt(b.lastVerifiedAt):'Unavailable','Backlink-specific evidence')+'</div>'+
+  '<div class="sourceLine">Cumulative lines count verified backlinks and referring domains only. Authority placement freshness is shown separately so recent directory or registry verification is not confused with backlink acquisition.</div>';
 }
 function gscProgress(){
- const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{},recent=g.recent7||{},prev=g.previous7||{};
- document.getElementById('gscProgressMeta').textContent='GSC refreshed '+dt(g.runtimeGeneratedAt||g.generatedAt);
+ const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{};
+ document.getElementById('gscProgressMeta').textContent=(g.verifiedThroughDate?'Verified through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.runtimeGeneratedAt||g.generatedAt);
  document.getElementById('gscProgressBody').innerHTML=
-  '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Impressions 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>Avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1))+'</b></div></div>'+
+  '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Completed 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>Avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1))+'</b></div></div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
-  '<div class="sourceLine">Search Console trend uses daily first-party API data. Lower average position is better; the comparison is recent 7 days versus the prior 7.</div>';
+  '<div class="sourceLine">The trend stops at the latest completed GSC day. The current partial day is excluded from the chart and from the 7-day comparison so it cannot create an artificial drop to zero.</div>';
 }
 
 function brain(){
@@ -155,6 +156,8 @@ function brain(){
    row('Execution contract',n(ec.verified)+' verified',n(ec.missingExecutors)+' missing executors - '+n(ec.stalled)+' stalled - '+n(ec.inFlight)+' in flight')+
    row('Architecture incidents',n(arch.openIncidents),arch.approvalRequired?'Approval required':'No architecture approval required')+
    '</div>');
+ const activity=Array.isArray(t.growthActivity)?t.growthActivity.slice(0,7):[];
+ if(activity.length)body.push('<div class="section"><div class="sectionTitle">Latest engine activity</div>'+activity.map(x=>row(human((x.engine||'engine')+' - '+(x.mission||'cycle')),human(x.status||'unknown'),dt(x.at)+(x.detail?' - '+human(x.detail):''))).join('')+'</div>');
  document.getElementById('brainMeta').textContent='Evaluated '+dt(growth.lastEvaluatedAt||t.generatedAt);
  document.getElementById('brainBody').innerHTML=body.join('');
 }
@@ -205,7 +208,14 @@ function health(){
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
  if(Number(arch.openIncidents||0)>0)issues.push({level:'bad',title:'Architecture incidents',detail:n(arch.openIncidents)+' open architecture incidents.'});
  if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
- if(a.status&&a.status!=='healthy')issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+a.status+'.'});
+ if(a.status&&a.status!=='healthy'){
+   const floorMet=Number(a.attempts24||0)>=Number(a.attemptMin24h||6);
+   if(a.status==='executing_backlog'&&floorMet)issues.push({level:'warn',title:'Authority backlog is not draining fast enough',detail:n(a.queue)+' opportunities remain. The '+n(a.attempts24)+' / '+n(a.attemptMin24h)+' daily attempt floor is met, but the latest recovery cycle found no new external handoff candidate.'});
+   else issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+a.status+'.'});
+ }
+ const latestExternal=Array.isArray(t.recentResults)&&t.recentResults.length?t.recentResults[0]:null;
+ const externalAge=latestExternal?.at?ageHours(latestExternal.at):null;
+ if(externalAge!=null&&externalAge>2)issues.push({level:'warn',title:'No new verified external result',detail:'Latest verified external outcome was '+dt(latestExternal.at)+' ('+dec(externalAge,1)+'h ago). Engines are still running; this warning is about outcome freshness, not scheduler activity.'});
  if(t.affiliate&&t.affiliate.reconciled===false)issues.push({level:'warn',title:'Affiliate metadata reconciliation',detail:n((t.affiliate.productionWithoutActivePipeline||[]).length)+' live production route(s) are not marked active in pipeline metadata: '+(t.affiliate.productionWithoutActivePipeline||[]).join(', ')+'. Production registry remains canonical.'});
  if(Number(growth.externalExecutions24h||0)<10)issues.push({level:'warn',title:'Acquisition execution below operating floor',detail:n(growth.externalExecutions24h)+' external executions in 24h. Floor is 10; target is 15.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh and authority loop have no current measurable failure.'});
