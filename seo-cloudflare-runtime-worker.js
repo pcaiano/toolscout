@@ -161,7 +161,10 @@ async function health(env){
 export default{
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/seo/runtime-health')return Response.json(await health(env),{headers:H});
+    if(request.method==='GET'&&url.pathname==='/api/seo/runtime-health'){
+      await refreshState(request,env).catch(()=>{});
+      return Response.json(await health(env),{headers:H});
+    }
     const response=await base.fetch(request,env,ctx);
     return transformPage(request,response,env);
   },
