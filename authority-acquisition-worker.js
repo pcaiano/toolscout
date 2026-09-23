@@ -183,6 +183,34 @@ async function health(env){
   }
   return {status:'active',executor:'cloudflare',routeCount:ROUTES.length,reconciliation,items};
 }
+async function authorityInternal(request,env,ctx,path,{method='POST'}={}){
+  if(!env.ADMIN_TOKEN)return {ok:false,status:0,body:null,error:'admin_token_unavailable'};
+  try{
+    const r=await base.fetch(new Request(new URL(path,request.url),{method,headers:{Authorization:'Bearer '+env.ADMIN_TOKEN,'Content-Type':'application/json'}}),env,ctx);
+    let body=null;try{body=await r.json()}catch{}
+    return {ok:r.ok,status:r.status,body};
+  }catch(error){return {ok:false,status:0,body:null,error:String(error?.message||error).slice(0,500)}}
+}
+async function recoverAuthorityPipeline(request,env,ctx){
+  const stages={};
+  stages.dispatchBefore=await authorityInternal(request,env,ctx,'/api/growth/execution/dispatch');
+  stages.candidateBefore=await authorityInternal(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=1',{method:'GET'});
+  if(Array.isArray(stages.candidateBefore?.body?.items)&&stages.candidateBefore.body.items.length){
+    return {ok:true,status:'candidate_ready',replenished:false,stages,candidate:stages.candidateBefore.body.items[0]};
+  }
+  stages.network=await authorityInternal(request,env,ctx,'/api/distribution/network/refresh');
+  stages.discovery=await authorityInternal(request,env,ctx,'/api/distribution/discovery/refresh');
+  stages.dispatchAfter=await authorityInternal(request,env,ctx,'/api/growth/execution/dispatch');
+  stages.candidateAfter=await authorityInternal(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=1',{method:'GET'});
+  const candidate=Array.isArray(stages.candidateAfter?.body?.items)?stages.candidateAfter.body.items[0]||null:null;
+  return {
+    ok:Boolean(candidate),
+    status:candidate?'candidate_ready':'no_executable_candidate_after_replenishment',
+    replenished:true,
+    stages,
+    candidate
+  };
+}
 function authorized(request,env){
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
@@ -193,10 +221,7 @@ export default{
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/authority-sender-recovery-20260923'){
-      if(!env.ADMIN_TOKEN)return Response.json({ok:false,error:'admin_token_unavailable'},{status:503,headers:H});
-      const rr=await base.fetch(new Request(new URL('/api/distribution/vendor-amplification/public-candidates?limit=1',request.url),{method:'GET',headers:{Authorization:'Bearer '+env.ADMIN_TOKEN}}),env,ctx);
-      let body=null;try{body=await rr.json()}catch{}
-      return Response.json({ok:rr.ok,status:rr.status,body},{headers:H});
+      return Response.json(await recoverAuthorityPipeline(request,env,ctx),{headers:H});
     }
     if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
@@ -206,11 +231,14 @@ export default{
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
-    // Authority routes run before the inherited growth cycle so the supervisor
-    // evaluates the post-execution state in the same cron, not one hour later.
     if(trigger==='15 * * * *'){
       await Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
     }
-    if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);
+    const inherited=typeof base.scheduled==='function'?await base.scheduled(event,env,ctx):undefined;
+    if(trigger==='15 * * * *'){
+      const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/'),env,ctx).catch(()=>null);
+      if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
+    }
+    return inherited;
   }
 };
