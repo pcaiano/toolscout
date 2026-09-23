@@ -200,10 +200,11 @@ export default{
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
-    if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
+    // Authority routes run before the inherited growth cycle so the supervisor
+    // evaluates the post-execution state in the same cron, not one hour later.
     if(trigger==='15 * * * *'){
-      const task=Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
-      if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
+      await Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
     }
+    if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);
   }
 };
