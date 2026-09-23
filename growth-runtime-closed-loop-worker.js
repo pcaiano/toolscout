@@ -119,17 +119,8 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   if(before.queue<=0||before.attempts24>=AUTHORITY_ATTEMPT_MIN_24H){
     return {ok:true,skipped:true,reason:before.queue<=0?'no_authority_queue':'throughput_floor_met',status:authorityStatus(before),before,after:before,pipelineClosed:true};
   }
-  if(before.senderFreshClaim){
-    await normalizeFalseAsyncFailure(env,before);
-    await recordEvent(env,'authority_external_handoff_pending','pending',`Authority sender handoff is awaiting external callback. ${before.senderClaimed} claimed task(s); oldest claim age ${before.senderClaimAgeMinutes} min; hard timeout ${SENDER_HANDOFF_TIMEOUT_MINUTES} min. No external attempt is counted before callback evidence.`);
-    return {ok:true,status:'pending_external_confirmation',pendingExternalConfirmation:true,pipelineClosed:true,externalAttemptObserved:false,handoffReady:true,before,after:before};
-  }
-  if(before.senderClaimed>0&&!before.senderFreshClaim){
-    await recordEvent(env,'authority_external_handoff_timeout','failed',`Authority sender handoff exceeded ${SENDER_HANDOFF_TIMEOUT_MINUTES} min without callback. Claimed tasks ${before.senderClaimed}; oldest age ${before.senderClaimAgeMinutes} min.`);
-    return {ok:false,status:'failed',reason:'authority_external_handoff_timeout',pipelineClosed:false,before,after:before};
-  }
-
-  // Authority acquisition is Cloudflare-first. Exhaust verified no-auth machine routes
+  // Authority acquisition is Cloudflare-first. A pending external sender handoff must
+  // never block no-auth/API/MCP submission routes. Machine routes are always attempted first.
   // before falling back to email/outreach handoffs that depend on an external sender.
   const submissionPackage=await internalJson(request,env,ctx,'/api/distribution/submissions/package');
   const submissionExecute=await internalJson(request,env,ctx,'/api/distribution/submissions/execute');
@@ -147,6 +138,31 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
       submissionExecute:submissionExecute.payload||submissionExecute.error||null,
       submissionVerify:submissionVerify.payload||submissionVerify.error||null,
       autonomous:autonomous.payload||autonomous.error||null,
+      executor:'cloudflare'
+    };
+  }
+
+  // Only after exhausting Cloudflare-native machine routes do we respect the
+  // external sender handoff state.
+  if(before.senderFreshClaim){
+    await normalizeFalseAsyncFailure(env,before);
+    await recordEvent(env,'authority_external_handoff_pending','pending',`Authority machine routes were exhausted first. External sender handoff is awaiting callback. ${before.senderClaimed} claimed task(s); oldest claim age ${before.senderClaimAgeMinutes} min; hard timeout ${SENDER_HANDOFF_TIMEOUT_MINUTES} min. No external attempt is counted before callback evidence.`);
+    return {
+      ok:true,status:'pending_external_confirmation',pendingExternalConfirmation:true,pipelineClosed:true,
+      externalAttemptObserved:false,handoffReady:true,before,after:afterMachine,
+      stages:{submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,autonomous:autonomous.ok},
+      submissionPackage:submissionPackage.payload||submissionPackage.error||null,
+      submissionExecute:submissionExecute.payload||submissionExecute.error||null,
+      submissionVerify:submissionVerify.payload||submissionVerify.error||null,
+      autonomous:autonomous.payload||autonomous.error||null,
+      executor:'cloudflare'
+    };
+  }
+  if(before.senderClaimed>0&&!before.senderFreshClaim){
+    await recordEvent(env,'authority_external_handoff_timeout','failed',`Authority machine routes were exhausted first. External sender handoff exceeded ${SENDER_HANDOFF_TIMEOUT_MINUTES} min without callback. Claimed tasks ${before.senderClaimed}; oldest age ${before.senderClaimAgeMinutes} min.`);
+    return {
+      ok:false,status:'failed',reason:'authority_external_handoff_timeout',pipelineClosed:false,before,after:afterMachine,
+      stages:{submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,autonomous:autonomous.ok},
       executor:'cloudflare'
     };
   }
