@@ -95,7 +95,23 @@ async function exchangeCode(config,code,verifier){const body=new URLSearchParams
 async function refreshToken(config,refresh){const body=new URLSearchParams({client_id:config.clientId,client_secret:config.clientSecret,refresh_token:refresh,grant_type:'refresh_token'});const response=await fetch(GOOGLE_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const data=await response.json().catch(()=>({}));if(!response.ok||!data.access_token)throw new Error(`google_oauth_refresh_${response.status}:${data.error_description||data.error||'failed'}`);return data}
 
 export async function googleAnalyticsOAuthStatus(env,request=null){
-  const config=oauthConfig(env),row=await loadConnection(env,request);return {configured:Boolean(config.clientId&&config.clientSecret),connected:Boolean(row),ownerEmail:row?.owner_email||null,propertyId:row?.property_id||config.propertyId||null,measurementId:row?.measurement_id||config.measurementId,connectedAt:row?.connected_at||null,lastRefreshAt:row?.last_refresh_at||null,lastError:row?.last_error||null,storage:row?.storage||null,redirectUri:config.redirectUri};
+  const config=oauthConfig(env),row=await loadConnection(env,request);
+  const scopes=String(row?.scopes||'').split(/\s+/).filter(Boolean);
+  return {
+    configured:Boolean(config.clientId&&config.clientSecret),
+    connected:Boolean(row),
+    ownerEmail:row?.owner_email||null,
+    propertyId:row?.property_id||config.propertyId||null,
+    measurementId:row?.measurement_id||config.measurementId,
+    connectedAt:row?.connected_at||null,
+    lastRefreshAt:row?.last_refresh_at||null,
+    lastError:row?.last_error||null,
+    storage:row?.storage||null,
+    redirectUri:config.redirectUri,
+    scopes,
+    analyticsScopeGranted:scopes.includes(GA_SCOPE),
+    searchConsoleScopeGranted:scopes.includes(GSC_SCOPE)
+  };
 }
 export async function googleAnalyticsConnectResponse(request,env,ctx){
   if(!(await ownerAuthenticated(request,ctx)))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
