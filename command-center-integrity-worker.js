@@ -1,6 +1,5 @@
 import base from './visitor-integrity-worker.js';
 import {latestEngineRuns} from './engine-run-ledger.js';
-import {googleAnalyticsOAuthStatus} from './google-analytics-oauth.js';
 
 const TIME_ZONE='Europe/Lisbon';
 let optimizationReady=null;
@@ -210,7 +209,8 @@ async function canonicalSnapshot(env,upstream){
       (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24`),
     runtimeAssetJson(env,'/reports/gsc-signals.json'),
     runtimeAssetJson(env,'/reports/ga4-health.json'),
-    googleAnalyticsOAuthStatus(env,null).then(value=>({ok:true,value})).catch(error=>({ok:false,value:null,error:String(error?.message||error)}))
+    first(env,`SELECT provider,owner_email,property_id,measurement_id,scopes,updated_at,last_refresh_at,last_error
+      FROM google_oauth_connections WHERE provider='google_analytics' LIMIT 1`)
   ]);
 
   const queryMap={human_sessions:sessions,traffic_trend:trend,verified_outbound:outbound,verified_outbound_by_tool:byTool,attribution_today:todayVisitors,attribution_last24:last24Visitors,visitor_countries:countryRows,audience_evidence:audienceLatest,content_evidence:contentLatest,content_execution:contentExecutionLatest,affiliate_supervisor:affiliateSupervisor,engine_runs:runsResult,unrecovered_engine_failures:unrecoveredFailures,growth_latest:growthLatest,catalog_quality_latest:catalogQualityLatest,catalog_runtime_warnings:catalogWarnings,distribution_operating_latest:operatingLatest,distribution_autonomous_latest:autonomousLatest,distribution_network_latest:networkLatest,distribution_false_ready:falseReady,distribution_editorial_pending:editorialPending};
@@ -252,7 +252,7 @@ async function canonicalSnapshot(env,upstream){
   const contentHealth={...contentExecutionHealth,publication:contentPublicationHealth,detail:contentExecutionHealth.detail||`Execution heartbeat from engine_runs; publication evidence is ${contentPublicationHealth.status}.`};
   const gscFreshness=sourceFreshness(gscAsset?.ok?gscAsset.value:{status:'unavailable'},72*60);
   const legacyGa4Freshness=sourceFreshness(ga4Asset?.ok?ga4Asset.value:{status:'unavailable'},36*60);
-  const oauthConnected=Boolean(ga4OAuth?.ok&&ga4OAuth?.value?.connected);
+  const oauthConnected=Boolean(ga4OAuth?.ok&&ga4OAuth?.value?.provider==='google_analytics');
   const ga4Freshness=oauthConnected
     ? {status:'live_on_demand',generated_at:new Date().toISOString(),age_minutes:0,source:'Google Analytics 4 Data API via OAuth'}
     : legacyGa4Freshness;
