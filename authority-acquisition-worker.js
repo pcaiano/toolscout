@@ -99,7 +99,7 @@ async function attemptRoute(env,route,{force=false}={}){
       method:'POST',
       headers:{'Content-Type':'application/json','Accept':'application/json','User-Agent':'ToolScout Authority Acquisition/1.0'},
       body:JSON.stringify(route.payload),
-      signal:AbortSignal.timeout(30000)
+      signal:AbortSignal.timeout(12000)
     });
     const text=(await res.text()).slice(0,1200);
     const accepted=res.ok||res.status===409;
@@ -123,8 +123,9 @@ async function attemptRoute(env,route,{force=false}={}){
   }
 }
 async function runVetted(env,{force=false}={}){
-  const results=[];
-  for(const route of ROUTES)results.push(await attemptRoute(env,route,{force}));
+  const results=await Promise.all(ROUTES.map(route=>attemptRoute(env,route,{force}).catch(error=>({
+    slug:route.slug,attempted:false,accepted:false,httpStatus:0,status:'internal_error',detail:String(error?.message||error).slice(0,800)
+  }))));
   const attempted=results.filter(x=>x.attempted).length;
   const accepted=results.filter(x=>x.accepted).length;
   return {ok:attempted>0,executor:'cloudflare',attempted,accepted,routes:results,generatedAt:new Date().toISOString()};
