@@ -95,7 +95,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function commandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,engineActivityRows,actionPipelineRows]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -136,7 +136,11 @@ async function commandCenterBusinessTruth(request,env){
     env.DB.prepare(`SELECT engine,mission,status,trigger_name,started_at,completed_at,detail
       FROM engine_runs
       WHERE started_at>=datetime('now','-12 hours')
-      ORDER BY started_at DESC LIMIT 30`).all().then(r=>r.results||[]).catch(()=>[])
+      ORDER BY started_at DESC LIMIT 30`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at
+      FROM growth_action_events
+      WHERE created_at>=datetime('now','-12 hours')
+      ORDER BY updated_at DESC,created_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -215,6 +219,16 @@ async function commandCenterBusinessTruth(request,env){
     trigger:x.trigger_name,
     detail:x.detail||null
   })).filter(x=>x.at).slice(0,14);
+  const growthActions=(actionPipelineRows||[]).map(x=>({
+    id:x.action_id,
+    at:x.updated_at||x.created_at,
+    createdAt:x.created_at,
+    engine:x.engine,
+    channel:x.channel,
+    status:x.status,
+    opportunityKey:x.opportunity_key,
+    targetUrl:x.target_url||null
+  })).filter(x=>x.at).slice(0,12);
   const recentResults=[
     ...audienceRows.map(x=>({id:x.event_id,at:x.created_at,engine:x.event_type==='content_published'?'content':'audience',type:x.event_type,status:'verified',label:x.event_type==='content_published'?'Content published':'Audience reply published',detail:x.platform||'external publication',url:x.post_uri||null})),
     ...submissionRows.map(x=>({id:x.submission_id,at:x.at,engine:'distribution',type:'external_submission',status:x.status||'attempted',label:'External submission: '+String(x.surface_slug||'surface'),detail:x.error||('Attempt '+truthNum(x.attempts)),url:x.response_url||null})),
@@ -294,6 +308,7 @@ async function commandCenterBusinessTruth(request,env){
     },
     recentResults,
     growthActivity,
+    growthActions,
     executionContract:contract,
     architecture:{
       openIncidents:truthNum(architecture.open_incidents),
