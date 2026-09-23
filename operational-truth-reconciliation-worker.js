@@ -95,14 +95,32 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function commandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscHealth,affiliateRegistry,affiliatePipeline]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscHealth,affiliateRegistry,affiliatePipeline,audienceRows,submissionRows,placementRows,actionRows]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/data/affiliate.json',{}),
-    ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]})
+    ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
+    env.DB.prepare(`SELECT event_id,platform,event_type,status,post_uri,content_id,created_at
+      FROM audience_events WHERE status='published' AND created_at>=datetime('now','-7 days')
+        AND event_type IN ('content_published','outbound_reply')
+      ORDER BY created_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT submission_id,surface_slug,submission_type,status,attempts,
+        COALESCE(last_attempt_at,created_at) at,response_url,error
+      FROM distribution_submissions
+      WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')
+      ORDER BY COALESCE(last_attempt_at,created_at) DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT surface_slug,public_url,placement_verified,backlink_verified,first_verified_at,last_checked_at
+      FROM distribution_placements
+      WHERE placement_verified=1 AND COALESCE(first_verified_at,last_checked_at)>=datetime('now','-7 days')
+      ORDER BY COALESCE(first_verified_at,last_checked_at) DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at
+      FROM growth_action_events
+      WHERE created_at>=datetime('now','-7 days') AND status IN ('sent','verified','completed','attributed')
+        AND (engine='vendor_amplification' OR engine LIKE 'distribution%' OR engine='content' OR engine='audience')
+      ORDER BY created_at DESC LIMIT 30`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -135,6 +153,12 @@ async function commandCenterBusinessTruth(request,env){
   const w=gsc?.searchPerformance?.window28d||gsc?.window28d||{};
   const idx=gsc?.indexHealth||{};
   const sitemap=gsc?.sitemaps||{};
+  const recentResults=[
+    ...audienceRows.map(x=>({id:x.event_id,at:x.created_at,engine:x.event_type==='content_published'?'content':'audience',type:x.event_type,status:'verified',label:x.event_type==='content_published'?'Content published':'Audience reply published',detail:x.platform||'external publication',url:x.post_uri||null})),
+    ...submissionRows.map(x=>({id:x.submission_id,at:x.at,engine:'distribution',type:'external_submission',status:x.status||'attempted',label:'External submission: '+String(x.surface_slug||'surface'),detail:x.error||('Attempt '+truthNum(x.attempts)),url:x.response_url||null})),
+    ...placementRows.map(x=>({id:'placement:'+x.surface_slug,at:x.first_verified_at||x.last_checked_at,engine:'authority',type:x.backlink_verified?'backlink_verified':'placement_verified',status:'verified',label:(x.backlink_verified?'Backlink verified: ':'Placement verified: ')+String(x.surface_slug||'surface'),detail:x.backlink_verified?'Verified backlink':'Verified public placement',url:x.public_url||null})),
+    ...actionRows.map(x=>({id:x.action_id,at:x.created_at,engine:x.engine||'growth',type:x.channel||'external_action',status:x.status||'observed',label:x.opportunity_key||x.action_id,detail:x.channel||x.engine||'external action',url:x.target_url||null}))
+  ].filter(x=>x.at).sort((a,b)=>Date.parse(String(b.at).replace(' ','T')+'Z')-Date.parse(String(a.at).replace(' ','T')+'Z')).slice(0,20);
   const engines=supervisorRows.filter(x=>x.engine!=='growth_brain').map(x=>({
     engine:x.engine,status:x.status,directive:x.directive,lastEvaluatedAt:x.last_evaluated_at
   }));
@@ -192,6 +216,7 @@ async function commandCenterBusinessTruth(request,env){
       indexRecoveryCandidates:truthMaybeNum(idx.recoveryCandidates??idx.indexRecoveryCandidates),
       sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps)
     },
+    recentResults,
     executionContract:contract,
     architecture:{
       openIncidents:truthNum(architecture.open_incidents),
