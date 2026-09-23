@@ -230,6 +230,7 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/api/audience-event'&&request.method==='POST')return ingestAudienceEvent(request,env);
+    if(url.pathname==='/api/audience/bluesky-reply/health'&&request.method==='GET')return Response.json({ok:true,version:'complete-sentence-no-hard-cut-v1',maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,requiresPrepareBeforePublish:true},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
     if(url.pathname==='/api/audience/bluesky-reply/prepare'&&request.method==='POST')return prepareBlueskyReply(request,env);
     if(url.pathname==='/api/stats'&&request.method==='GET')return augmentStats(request,env,ctx);
     if(url.pathname==='/analytics.html'&&request.method==='GET'){
