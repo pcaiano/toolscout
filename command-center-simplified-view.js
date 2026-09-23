@@ -50,7 +50,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&
 const n=v=>Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable';
 const dec=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'Unavailable';
 const money=(v,c)=>{if(v===null||v===undefined||!Number.isFinite(Number(v)))return 'Unknown';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:c||'EUR',maximumFractionDigits:2}).format(Number(v))}catch{return String(v)}};
-const dt=v=>{if(!v)return 'Unavailable';try{let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';const d=new Date(s);const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d);const m=Object.fromEntries(p.map(x=>[x.type,x.value]));return m.day+' '+m.month+' '+m.year+', '+m.hour+':'+m.minute}catch{return String(v)}};
+const dt=v=>{if(!v)return 'Unavailable';try{let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';const d=new Date(s);return new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)}catch{return String(v)}};
 const ageHours=v=>{if(!v)return null;let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';const t=Date.parse(s);return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):null};
 const human=v=>String(v||'').replaceAll('_',' ');
 const pill=(v,state)=>'<span class="pill '+(state||'')+'">'+esc(v)+'</span>';
@@ -127,13 +127,19 @@ function trafficProgress(){
   '<div class="sourceLine">Traffic line is GA4 canonical acquisition. Green proof points are strict verified human evidence used by the Growth Brain.</div>';
 }
 function authorityProgress(){
- const b=data?.truth?.authority||{},rows=Array.isArray(b.history30)?b.history30:[];
- document.getElementById('authorityProgressMeta').textContent=b.latestPlacementVerifiedAt?'Latest authority placement '+dt(b.latestPlacementVerifiedAt):(b.lastVerifiedAt?'Last backlink verified '+dt(b.lastVerifiedAt):'Verified authority history');
+ const b=data?.truth?.authority||{},live=data?.authority||{},rows=Array.isArray(b.history30)?b.history30:[];
+ const queue=live.queue!=null?live.queue:b.authorityQueue,attempts24=live.attempts24!=null?live.attempts24:b.attempts24,min24=live.attemptMin24h!=null?live.attemptMin24h:b.attemptMin24h;
+ const handoff=live.senderFreshClaim&&Number(live.senderClaimed||0)>0;
+ document.getElementById('authorityProgressMeta').textContent=b.latestPlacementVerifiedAt?'Latest placement '+dt(b.latestPlacementVerifiedAt):(b.lastVerifiedAt?'Last backlink '+dt(b.lastVerifiedAt):'Verified authority history');
  document.getElementById('authorityProgressBody').innerHTML=
-  '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Verified backlinks</small><b>'+n(b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(b.authorityQueue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(b.attempts24h)+' / '+n(b.attemptMin24h)+'</b></div></div>'+donut(b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
+  '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Verified backlinks</small><b>'+n(b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(queue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(attempts24)+' / '+n(min24)+'</b></div></div>'+donut(b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'placements',label:'Verified placements',cls:'primary'},{key:'backlinks',label:'Verified backlinks',cls:'good'},{key:'referringDomains',label:'Referring domains',cls:'warn'}])+'</div>'+
-  '<div class="section">'+row('Latest authority placement',b.latestPlacementVerifiedAt?dt(b.latestPlacementVerifiedAt):'Unavailable','Any verified public authority placement')+row('Last backlink verified',b.lastVerifiedAt?dt(b.lastVerifiedAt):'Unavailable','Backlink-specific evidence')+'</div>'+
-  '<div class="sourceLine">Cumulative lines count verified backlinks and referring domains only. Authority placement freshness is shown separately so recent directory or registry verification is not confused with backlink acquisition.</div>';
+  '<div class="section">'+
+    row('Latest authority placement',b.latestPlacementVerifiedAt?dt(b.latestPlacementVerifiedAt):'Unavailable','Any verified public authority placement')+
+    row('Last backlink verified',b.lastVerifiedAt?dt(b.lastVerifiedAt):'Unavailable','Backlink-specific evidence')+
+    (handoff?row('Authority handoff','In progress',n(live.senderClaimed)+' sender task claimed at '+dt(live.senderNewestClaimedAt)):'')+
+  '</div>'+
+  '<div class="sourceLine">Placement and backlink dates are intentionally separate. The live queue and handoff status come from the Authority closed loop.</div>';
 }
 function gscProgress(){
  const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{};
@@ -183,9 +189,14 @@ function queue(){
  document.getElementById('queueBody').innerHTML=items.length?items.map(taskHtml).join(''):'<div class="empty"><b>No owner action is ready.</b><br><br>Incomplete or machine-resolvable tasks stay out of this queue.</div>';
 }
 function results(){
- const items=Array.isArray(data?.truth?.recentResults)?data.truth.recentResults.slice(0,14):[];
- if(!items.length){document.getElementById('resultsBody').innerHTML='<div class="empty">No verified external result has been recorded in the last 7 days.</div>';return}
- document.getElementById('resultsBody').innerHTML=items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
+ const t=data?.truth||{},items=Array.isArray(t.recentResults)?t.recentResults.slice(0,14):[],activity=Array.isArray(t.growthActivity)?t.growthActivity[0]:null,action=Array.isArray(t.growthActions)?t.growthActions[0]:null;
+ let summary='<div class="section"><div class="sectionTitle">Freshness</div>'+
+   row('Latest autonomous engine activity',activity?.at?dt(activity.at):'Unavailable',activity?human((activity.engine||'engine')+' - '+(activity.mission||'cycle')+' - '+(activity.status||'unknown')):'No activity evidence')+
+   row('Latest action pipeline change',action?.at?dt(action.at):'Unavailable',action?human((action.engine||'growth')+' - '+(action.channel||'action')+' - '+(action.status||'unknown')):'No action evidence')+
+   row('Latest verified external result',items[0]?.at?dt(items[0].at):'Unavailable',items[0]?.label||'No verified result')+
+ '</div>';
+ if(!items.length){document.getElementById('resultsBody').innerHTML=summary+'<div class="empty">No verified external result has been recorded in the last 7 days.</div>';return}
+ document.getElementById('resultsBody').innerHTML=summary+items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
 }
 function searchAuthority(){
  const t=data.truth||{},g=t.search||{},b=t.authority||{},rt=data.runtime||{},rh=rt.seo?.gscRuntimeHealth||{};
@@ -212,8 +223,9 @@ function health(){
  if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
  if(a.status&&a.status!=='healthy'){
    const floorMet=Number(a.attempts24||0)>=Number(a.attemptMin24h||6);
-   if(a.status==='executing_backlog'&&floorMet)issues.push({level:'warn',title:'Authority backlog is not draining fast enough',detail:n(a.queue)+' opportunities remain. The '+n(a.attempts24)+' / '+n(a.attemptMin24h)+' daily attempt floor is met, but the latest recovery cycle found no new external handoff candidate.'});
-   else issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+a.status+'.'});
+   if(a.senderFreshClaim&&Number(a.senderClaimed||0)>0)issues.push({level:'warn',title:'Authority handoff in progress',detail:n(a.senderClaimed)+' sender task is claimed since '+dt(a.senderNewestClaimedAt)+'. Queue '+n(a.queue)+' remains. Waiting for external callback evidence, so no extra attempt is counted yet.'});
+   else if(a.status==='executing_backlog'&&floorMet)issues.push({level:'warn',title:'Authority backlog needs new executable routes',detail:n(a.queue)+' opportunities remain and the daily attempt floor is met. The latest cycle found no new externally executable candidate.'});
+   else issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+human(a.status)+'.'});
  }
  const latestExternal=Array.isArray(t.recentResults)&&t.recentResults.length?t.recentResults[0]:null;
  const externalAge=latestExternal?.at?ageHours(latestExternal.at):null;
