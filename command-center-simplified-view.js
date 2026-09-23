@@ -74,7 +74,7 @@ function business(){
    metric('External executions - 24h',n(g.externalExecutions24h),n(g.externalExecutions7d)+' / 7d')+
    metric('Affiliate production routes',n(aff.productionRoutes),n(aff.pipelineActivePrograms)+' active programmes in pipeline')+
    metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
-   metric('Confirmed revenue',r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected')+
+   metric('Confirmed revenue',data.stats==null?'Source unavailable':(r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency)),data.stats==null?'Stats source did not respond':(r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected'))+
    metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
@@ -118,11 +118,8 @@ function queue(){
  document.getElementById('queueBody').innerHTML=items.length?items.map(taskHtml).join(''):'<div class="empty"><b>No owner action is ready.</b><br><br>Incomplete or machine-resolvable tasks stay out of this queue.</div>';
 }
 function results(){
- const x=data?.stats?.growthOps?.autonomousGrowth||{},ledger=data?.stats?.growthOps?.ledger||[];
- let items=Array.isArray(x.external_execution_items)?x.external_execution_items:[];
- if(!items.length&&Array.isArray(ledger))items=ledger.map(i=>({at:i.at,engine:i.engine,label:(i.subject||'')+' '+(i.action||''),detail:i.result,status:i.result}));
- items=items.slice(0,12);
- if(!items.length){document.getElementById('resultsBody').innerHTML='<div class="empty">No recent external execution evidence is available.</div>';return}
+ const items=Array.isArray(data?.truth?.recentResults)?data.truth.recentResults.slice(0,14):[];
+ if(!items.length){document.getElementById('resultsBody').innerHTML='<div class="empty">No verified external result has been recorded in the last 7 days.</div>';return}
  document.getElementById('resultsBody').innerHTML=items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
 }
 function searchAuthority(){
@@ -137,7 +134,6 @@ function searchAuthority(){
  html+='<div class="section">'+
   row('Authority queue',n(b.authorityQueue),b.throughputGap?'Throughput below target':(b.stagnating?'Stagnating':'Throughput healthy'))+
   row('GSC runtime',g.runtimeStatus||rh.status||'Unavailable',(g.runtimeOk||rh.ok)?'Cloudflare refresh verified':'Search refresh needs attention')+
-  row('Index recovery candidates',g.indexRecoveryCandidates==null?'Unavailable':n(g.indexRecoveryCandidates),(g.indexed!=null&&g.inspected!=null)?n(g.indexed)+' / '+n(g.inspected)+' inspection pass':'Inspection snapshot unavailable')+
   row('Last verified backlink',b.lastVerifiedAt?dt(b.lastVerifiedAt):'No recent verification',b.lastVerifiedAgeHours==null?'':dec(b.lastVerifiedAgeHours,1)+' hours ago')+
  '</div>';
  document.getElementById('searchBody').innerHTML=html;
