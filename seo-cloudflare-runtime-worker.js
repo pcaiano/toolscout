@@ -100,21 +100,26 @@ function validate(html,pathname,cfg){
 async function transformPage(request,response,env){
   if(request.method!=='GET'||!response.ok||!String(response.headers.get('content-type')||'').includes('text/html'))return response;
   const pathname=canonicalPath(request.url);if(!pathname||pathname.startsWith('/analytics')||pathname.startsWith('/admin'))return response;
-  let html=await response.text(),original=html;
-  const cfg=await config(request,env);
-  html=ensureFavicon(html);
-  html=shortenTitle(html,pathname);
-  html=ensureCanonical(html,pathname,cfg);
-  const state=await activeState(env,pathname);
-  if(state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)]&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
-    const block=decisionBlock(pathname.slice(1),criteriaFor(cfg,pathname.slice(1)));
-    const marker='<section class="section"><h2>How ToolScout chooses</h2>';
-    html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
+  try{
+    const clone=response.clone();
+    let html=await clone.text(),original=html;
+    const cfg=await config(request,env);
+    html=ensureFavicon(html);
+    html=shortenTitle(html,pathname);
+    html=ensureCanonical(html,pathname,cfg);
+    const state=await activeState(env,pathname);
+    if(state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)]&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
+      const block=decisionBlock(pathname.slice(1),criteriaFor(cfg,pathname.slice(1)));
+      const marker='<section class="section"><h2>How ToolScout chooses</h2>';
+      html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
+    }
+    if(html===original)return response;
+    const gate=validate(html,pathname,cfg);
+    if(!gate.ok)return response;
+    return htmlResponse(response,html);
+  }catch{
+    return response;
   }
-  if(html===original)return response;
-  const gate=validate(html,pathname,cfg);
-  if(!gate.ok)return response;
-  return htmlResponse(response,html);
 }
 async function queueIndexNow(request,env,pathname,cfg){
   const adapter=cfg.adapters.find(x=>x?.surface_slug==='indexnow'&&x?.enabled&&x?.allow_automatic);
