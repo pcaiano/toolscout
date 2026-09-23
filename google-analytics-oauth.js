@@ -1,5 +1,7 @@
 const OWNER_EMAIL='pcaiano@gmail.com';
 const GA_SCOPE='https://www.googleapis.com/auth/analytics.readonly';
+const GSC_SCOPE='https://www.googleapis.com/auth/webmasters.readonly';
+const GOOGLE_SCOPES=`${GA_SCOPE} ${GSC_SCOPE}`;
 const GOOGLE_AUTH_URL='https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_TOKEN_URL='https://oauth2.googleapis.com/token';
 const GOOGLE_REVOKE_URL='https://oauth2.googleapis.com/revoke';
@@ -89,7 +91,7 @@ export async function googleAnalyticsConnectResponse(request,env,ctx){
   if(!(await ownerAuthenticated(request,ctx)))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
   const config=oauthConfig(env);if(!config.clientId||!config.clientSecret)return Response.json({ok:false,error:'google_oauth_app_not_configured'},{status:503,headers:{'Cache-Control':'no-store'}});
   const state=randomToken(24),verifier=randomToken(48),challenge=b64urlBytes(new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(verifier)))),payload=await encryptText(env,JSON.stringify({state,verifier,exp:Date.now()+OAUTH_TTL_SECONDS*1000}));
-  const params=new URLSearchParams({client_id:config.clientId,redirect_uri:config.redirectUri,response_type:'code',scope:`openid email ${GA_SCOPE}`,access_type:'offline',prompt:'consent',include_granted_scopes:'true',state,code_challenge:challenge,code_challenge_method:'S256',login_hint:OWNER_EMAIL});
+  const params=new URLSearchParams({client_id:config.clientId,redirect_uri:config.redirectUri,response_type:'code',scope:`openid email ${GOOGLE_SCOPES}`,access_type:'offline',prompt:'consent',include_granted_scopes:'true',state,code_challenge:challenge,code_challenge_method:'S256',login_hint:OWNER_EMAIL});
   return redirect(`${GOOGLE_AUTH_URL}?${params.toString()}`,oauthCookie(payload));
 }
 export async function googleAnalyticsCallbackResponse(request,env){
@@ -102,7 +104,7 @@ export async function googleAnalyticsCallbackResponse(request,env){
     if(String(user.email||'').toLowerCase()!==OWNER_EMAIL||user.email_verified===false)throw new Error('oauth_google_account_not_owner');
     const existing=await loadConnection(env,request);let ciphertext=existing?.refresh_token_ciphertext||null;if(tokens.refresh_token)ciphertext=await encryptText(env,tokens.refresh_token);if(!ciphertext)throw new Error('google_refresh_token_missing');
     let propertyId=config.propertyId||existing?.property_id||null,discoveryError=null;if(!propertyId){try{propertyId=await discoverPropertyId(tokens.access_token,config.measurementId)}catch(error){discoveryError=String(error?.message||error)}}
-    const scopes=tokens.scope||`${GA_SCOPE} openid email`,connectedAt=new Date().toISOString();let persistenceError=null;
+    const scopes=tokens.scope||`${GOOGLE_SCOPES} openid email`,connectedAt=new Date().toISOString();let persistenceError=null;
     try{await saveConnection(env,{ownerEmail:OWNER_EMAIL,propertyId,measurementId:config.measurementId,ciphertext,scopes,lastError:discoveryError})}catch(error){persistenceError=String(error?.message||error).slice(0,500)}
     const fallbackPayload=await encryptText(env,JSON.stringify({ownerEmail:OWNER_EMAIL,propertyId,measurementId:config.measurementId,refreshTokenCiphertext:ciphertext,scopes,connectedAt,persistenceError,exp:Date.now()+CONNECTION_TTL_SECONDS*1000}));
     oauthAccessCache=null;
