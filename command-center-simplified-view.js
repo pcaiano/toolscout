@@ -158,6 +158,8 @@ function brain(){
    '</div>');
  const activity=Array.isArray(t.growthActivity)?t.growthActivity.slice(0,7):[];
  if(activity.length)body.push('<div class="section"><div class="sectionTitle">Latest engine activity</div>'+activity.map(x=>row(human((x.engine||'engine')+' - '+(x.mission||'cycle')),human(x.status||'unknown'),dt(x.at)+(x.detail?' - '+human(x.detail):''))).join('')+'</div>');
+ const actions=Array.isArray(t.growthActions)?t.growthActions.slice(0,6):[];
+ if(actions.length)body.push('<div class="section"><div class="sectionTitle">Latest external action pipeline</div>'+actions.map(x=>row(human((x.engine||'growth')+' - '+(x.channel||'action')),human(x.status||'unknown'),dt(x.at)+' - '+human(x.opportunityKey||x.id||''))).join('')+'</div>');
  document.getElementById('brainMeta').textContent='Evaluated '+dt(growth.lastEvaluatedAt||t.generatedAt);
  document.getElementById('brainBody').innerHTML=body.join('');
 }
