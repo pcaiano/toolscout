@@ -288,10 +288,10 @@ export default{
     if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth')return Response.json(await commandCenterBusinessTruth(request,env),{headers:{'Cache-Control':'no-store'}});
     if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
       ok:true,
-      version:'business-truth-v3',
+      version:'business-truth-v4',
       canonicalView:'command-center-simplified-view',
-      cards:['Business State','Growth Brain','Needs You','Recent Results','Search + Authority','System Truth'],
-      suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','Google Search trend chart','Traffic truth charts','visitor country charts','product behavior card'],
+      cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Growth Brain','Needs You','Recent Results','Search + Authority','System Truth'],
+      suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],
       canonicalSources:['Growth Supervisor','GA4','ToolScout redirect ledger','Google Search Console','verified backlink ledger','Chairman Queue','Cloudflare runtime'],
       refreshSeconds:60,
       unavailableIsNeverZero:true,
