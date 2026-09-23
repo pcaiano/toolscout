@@ -400,6 +400,48 @@ export async function rebalanceExecutionAdmission(env){
   for(const [executor,spec] of Object.entries(EXECUTORS)){
     if(spec.mode==='human')continue;
     const cap=Math.max(1,Number(READY_CAPS[executor]||1));
+    const senderReadySql=` AND (
+      (subject_type='tool' AND EXISTS (
+        SELECT 1 FROM distribution_vendor_amplification v
+        WHERE v.tool_slug=growth_execution_contract.subject_key
+          AND v.status='contact_found' AND v.contact_method='public_role_email' AND v.contact_email IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM distribution_vendor_amplification prior
+            WHERE prior.status='sent' AND prior.outreach_sent_at>=datetime('now','-30 days')
+              AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
+          )
+      ))
+      OR
+      (subject_type='surface' AND EXISTS (
+        SELECT 1 FROM distribution_network_outreach n
+        WHERE n.surface_slug=growth_execution_contract.subject_key
+          AND n.status='contact_found' AND n.contact_email IS NOT NULL
+      ))
+    )`;
+    if(executor==='make_sender'){
+      await env.DB.prepare(`UPDATE growth_execution_contract
+        SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+            claimed_at=NULL,attempted_at=NULL,last_result='make_sender_waiting_for_executable_contact',updated_at=datetime('now')
+        WHERE executor='make_sender' AND status IN ('pending','claimed','stalled')
+          AND NOT (
+            (subject_type='tool' AND EXISTS (
+              SELECT 1 FROM distribution_vendor_amplification v
+              WHERE v.tool_slug=growth_execution_contract.subject_key
+                AND v.status='contact_found' AND v.contact_method='public_role_email' AND v.contact_email IS NOT NULL
+                AND NOT EXISTS (
+                  SELECT 1 FROM distribution_vendor_amplification prior
+                  WHERE prior.status='sent' AND prior.outreach_sent_at>=datetime('now','-30 days')
+                    AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
+                )
+            ))
+            OR
+            (subject_type='surface' AND EXISTS (
+              SELECT 1 FROM distribution_network_outreach n
+              WHERE n.surface_slug=growth_execution_contract.subject_key
+                AND n.status='contact_found' AND n.contact_email IS NOT NULL
+            ))
+          )`).run().catch(()=>{});
+    }
     if(executor==='seo_cloudflare'&&availability?.seo_cloudflare?.available===false){
       result.executors[executor]={cap,available:false,reason:availability.seo_cloudflare.reason||'cloudflare_runtime_unavailable',inFlight:0,pendingKept:0,promoted:0};
       continue;
@@ -407,7 +449,7 @@ export async function rebalanceExecutionAdmission(env){
     const inFlightRow=await first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted')`,[executor]);
     const inFlight=n(inFlightRow?.n),readySlots=Math.max(0,cap-inFlight);
 
-    const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
+    const pendingWhere=(GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"")+(executor==='make_sender'?senderReadySql:"");
     const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC`).bind(executor).all();
     const pendingIds=(pending.results||[]).map(x=>x.task_id);
     const keep=pendingIds.slice(0,readySlots),demote=pendingIds.slice(readySlots);
@@ -421,7 +463,7 @@ export async function rebalanceExecutionAdmission(env){
     let promoted=0;
     const remaining=Math.max(0,readySlots-keep.length);
     if(remaining>0){
-      const deferredWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
+      const deferredWhere=(GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"")+(executor==='make_sender'?senderReadySql:"");
       const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
@@ -447,7 +489,25 @@ export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null
     effective=Math.max(0,Math.min(effective,Math.max(0,Number(maxInFlight)-inFlight)));
   }
   if(effective<=0)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
-  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
+  const senderReadyWhere=executor==='make_sender'?` AND (
+    (subject_type='tool' AND EXISTS (
+      SELECT 1 FROM distribution_vendor_amplification v
+      WHERE v.tool_slug=growth_execution_contract.subject_key
+        AND v.status='contact_found' AND v.contact_method='public_role_email' AND v.contact_email IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM distribution_vendor_amplification prior
+          WHERE prior.status='sent' AND prior.outreach_sent_at>=datetime('now','-30 days')
+            AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
+        )
+    ))
+    OR
+    (subject_type='surface' AND EXISTS (
+      SELECT 1 FROM distribution_network_outreach n
+      WHERE n.surface_slug=growth_execution_contract.subject_key
+        AND n.status='contact_found' AND n.contact_email IS NOT NULL
+    ))
+  )`:'';
+  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled')${senderReadyWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
   const tasks=rows.results||[],ids=tasks.map(x=>x.task_id);
   if(!ids.length)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   const qs=ids.map(()=>'?').join(',');
