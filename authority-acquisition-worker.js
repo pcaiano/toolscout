@@ -1,4 +1,5 @@
 import base from './seo-cloudflare-runtime-worker.js';
+import {runtimeGscRefresh} from './cloudflare-primary-runtime-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const ROUTES=[
@@ -192,6 +193,7 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/gsc-progress-refresh-20260923')return Response.json(await runtimeGscRefresh(env,request),{headers:H});
     if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
       return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
