@@ -59,6 +59,29 @@ function publisherAffiliateEvidence(page){
 }
 async function boundedFetch(url){const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);try{const r=await fetch(url,{method:'GET',redirect:'follow',headers:{'User-Agent':'ToolScout-Affiliate-Coverage/1.0 (+https://trytoolscout.org/)'},signal:ctl.signal});if(!r.ok)return null;const type=r.headers.get('content-type')||'';if(!type.includes('text/html')&&!type.includes('text/plain'))return null;const text=(await r.text()).slice(0,600000),final=publicHttpUrl(r.url);if(!final)return null;return {url:final.href,html:text,text:stripHtml(text)}}catch{return null}finally{clearTimeout(timer)}}
 async function loadTools(env){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/tools.json'));return r.ok?await r.json():[]}catch{return []}}
+async function loadAffiliateRegistry(env){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/affiliate.json'));return r.ok?await r.json():{}}catch{return {}}}
+async function reconcileProductionAffiliateRoutes(env){
+  const registry=await loadAffiliateRegistry(env);
+  let reconciled=0;
+  for(const [slug,entry] of Object.entries(registry||{})){
+    const url=String(entry?.url||'').trim();
+    if(!entry?.enabled||!url)continue;
+    const result=await env.DB.prepare(`INSERT INTO affiliate_workflow(tool_slug,status,affiliate_url,notes,source_actor,last_verified,updated_at)
+      VALUES(?,'active',?,'Reconciled from active production affiliate registry.','production_registry',datetime('now'),datetime('now'))
+      ON CONFLICT(tool_slug) DO UPDATE SET
+        status=CASE WHEN affiliate_workflow.status='verified' THEN 'verified' ELSE 'active' END,
+        affiliate_url=excluded.affiliate_url,
+        notes=excluded.notes,
+        source_actor='production_registry',
+        last_verified=datetime('now'),
+        updated_at=datetime('now')
+      WHERE affiliate_workflow.affiliate_url IS NOT excluded.affiliate_url
+         OR affiliate_workflow.status NOT IN ('active','verified')`).bind(slug,url).run();
+    reconciled+=Number(result?.meta?.changes||result?.changes||0);
+  }
+  return {reconciled,production_routes:Object.values(registry||{}).filter(x=>x?.enabled&&x?.url).length};
+}
+
 async function safeAll(env,sql){try{return await env.DB.prepare(sql).all()}catch{return {results:[]}}}
 function recentlyChecked(lastChecked){if(!lastChecked)return false;const t=Date.parse(String(lastChecked).replace(' ','T')+'Z');return Number.isFinite(t)&&Date.now()-t<RESEARCH_COOLDOWN_HOURS*3600000}
 async function ensureAffiliateAutonomySchema(env){
@@ -220,6 +243,7 @@ async function downgradeUnqualifiedHumanDiscovery(env,row,reason){
 
 export async function runAffiliateCoverageCycle(env){
   await ensureAffiliateAutonomySchema(env);
+  const production_reconciliation=await reconcileProductionAffiliateRoutes(env);
   const [tools,workflow,clicks,discoveries]=await Promise.all([
     loadTools(env),
     safeAll(env,'SELECT * FROM affiliate_workflow'),
@@ -270,5 +294,5 @@ export async function runAffiliateCoverageCycle(env){
     found++;if(result.automation_mode==='human')human++;await persistDiscovery(env,tool.slug,result);
   }
   const route_activation=await activateAcquiredLinks(env);
-  return {ok:true,coverage:{human_outbound:snapshot.human_outbound_clicks,monetized:snapshot.monetized_human_outbound_clicks,unmonetized:snapshot.unmonetized_human_outbound_clicks,weighted:snapshot.weighted_coverage,traffic_truth:snapshot.traffic_truth},queue_size:snapshot.recoverable_queue.length,application_packs_prepared,route_activation,watchlist:{checked:watchlist_checked,promoted:watchlist_promoted},qualification_guardrail:{revalidated:human_revalidated,downgraded:human_downgraded,per_cycle_limit:MAX_HUMAN_REVALIDATIONS_PER_CYCLE},research:{processed:researched,programs_found:found,human_actions:human,cooldown_skipped,per_cycle_limit:MAX_TOOLS_PER_CYCLE,cooldown_hours:RESEARCH_COOLDOWN_HOURS},guardrail:'The engine prepares all truthful application data automatically and activates approved links automatically. Human Action is limited to authentication, CAPTCHA, legal/terms acceptance, identity/tax/payment data or final third-party submission when required.'};
+  return {ok:true,production_reconciliation,coverage:{human_outbound:snapshot.human_outbound_clicks,monetized:snapshot.monetized_human_outbound_clicks,unmonetized:snapshot.unmonetized_human_outbound_clicks,weighted:snapshot.weighted_coverage,traffic_truth:snapshot.traffic_truth},queue_size:snapshot.recoverable_queue.length,application_packs_prepared,route_activation,watchlist:{checked:watchlist_checked,promoted:watchlist_promoted},qualification_guardrail:{revalidated:human_revalidated,downgraded:human_downgraded,per_cycle_limit:MAX_HUMAN_REVALIDATIONS_PER_CYCLE},research:{processed:researched,programs_found:found,human_actions:human,cooldown_skipped,per_cycle_limit:MAX_TOOLS_PER_CYCLE,cooldown_hours:RESEARCH_COOLDOWN_HOURS},guardrail:'The production affiliate registry is canonical for active monetized routes. Any enabled route with an affiliate URL is reconciled into D1 before coverage is calculated. Human Action is limited to authentication, CAPTCHA, legal/terms acceptance, identity/tax/payment data or final third-party submission when required.'};
 }
