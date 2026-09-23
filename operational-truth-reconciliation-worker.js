@@ -86,6 +86,17 @@ function simplifiedPage(response){
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
+    if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
+      ok:true,
+      version:'business-truth-v3',
+      canonicalView:'command-center-simplified-view',
+      cards:['Business State','Growth Brain','Needs You','Recent Results','Search + Authority','System Truth'],
+      suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','Google Search trend chart','Traffic truth charts','visitor country charts','product behavior card'],
+      canonicalSources:['Growth Supervisor','GA4','ToolScout redirect ledger','Google Search Console','verified backlink ledger','Chairman Queue','Cloudflare runtime'],
+      refreshSeconds:60,
+      unavailableIsNeverZero:true,
+      generatedAt:new Date().toISOString()
+    },{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
     if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname))return simplifiedPage(response);
