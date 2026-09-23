@@ -75,7 +75,7 @@ function business(){
    metric('Affiliate production routes',n(aff.productionRoutes),n(aff.pipelineActivePrograms)+' active programmes in pipeline')+
    metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
    metric('Confirmed revenue',r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected')+
-   metric('Needs you',q.total==null?'0':n(q.total),(q.estimated_minutes==null?'':n(q.estimated_minutes)+' min estimated'))+
+   metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
    (a.status==='connected'?row('GA4 sessions - 24h',n(ga.last24Hours),n(ga.monthToDate)+' MTD - canonical GA4 population'):'')+
@@ -130,14 +130,14 @@ function searchAuthority(){
  document.getElementById('searchMeta').textContent='GSC refreshed '+dt(g.runtimeGeneratedAt||g.generatedAt);
  let html='<div class="metrics">'+
   metric('Impressions - 28d',n(g.impressions),n(g.clicks)+' clicks')+
-  metric('Observed search pages',n(g.observedPages),g.indexed||g.inspected?n(g.indexed)+' indexed / '+n(g.inspected)+' inspected':'Live GSC pages')+
+  metric('Observed search pages',n(g.observedPages),(g.indexed!=null&&g.inspected!=null)?n(g.indexed)+' indexed / '+n(g.inspected)+' inspected':'URL Inspection not refreshed in this source')+
   metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
   metric('Authority attempts - 24h',n(b.attempts24h),n(b.attemptMin24h)+' minimum')+
  '</div>';
  html+='<div class="section">'+
   row('Authority queue',n(b.authorityQueue),b.throughputGap?'Throughput below target':(b.stagnating?'Stagnating':'Throughput healthy'))+
   row('GSC runtime',g.runtimeStatus||rh.status||'Unavailable',(g.runtimeOk||rh.ok)?'Cloudflare refresh verified':'Search refresh needs attention')+
-  row('Index recovery candidates',n(g.indexRecoveryCandidates),g.inspected?n(g.indexed)+' / '+n(g.inspected)+' inspection pass':'Inspection snapshot unavailable')+
+  row('Index recovery candidates',g.indexRecoveryCandidates==null?'Unavailable':n(g.indexRecoveryCandidates),(g.indexed!=null&&g.inspected!=null)?n(g.indexed)+' / '+n(g.inspected)+' inspection pass':'Inspection snapshot unavailable')+
   row('Last verified backlink',b.lastVerifiedAt?dt(b.lastVerifiedAt):'No recent verification',b.lastVerifiedAgeHours==null?'':dec(b.lastVerifiedAgeHours,1)+' hours ago')+
  '</div>';
  document.getElementById('searchBody').innerHTML=html;
