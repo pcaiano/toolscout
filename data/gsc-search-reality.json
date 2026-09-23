@@ -1,87 +1,87 @@
 {
-  "generatedAt": "2026-09-22T11:53:23.074Z",
+  "generatedAt": "2026-09-23T11:55:41.130Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
   "searchPerformance": {
     "window28d": {
-      "startDate": "2026-08-26",
-      "endDate": "2026-09-22",
+      "startDate": "2026-08-27",
+      "endDate": "2026-09-23",
       "clicks": 1,
-      "impressions": 3914,
-      "ctr": 0.0255,
-      "position": 63.7892
+      "impressions": 4066,
+      "ctr": 0.0246,
+      "position": 63.654
     },
     "recent7": {
-      "startDate": "2026-09-16",
-      "endDate": "2026-09-22",
+      "startDate": "2026-09-17",
+      "endDate": "2026-09-23",
       "clicks": 0,
-      "impressions": 844,
+      "impressions": 772,
       "ctr": 0,
-      "position": 63.7441
+      "position": 62.9365
     },
     "previous7": {
-      "startDate": "2026-09-09",
-      "endDate": "2026-09-15",
+      "startDate": "2026-09-10",
+      "endDate": "2026-09-16",
       "clicks": 0,
-      "impressions": 1463,
+      "impressions": 1436,
       "ctr": 0,
-      "position": 66.9207
+      "position": 66.3148
     },
     "change7d": {
       "clicksPct": 0,
-      "impressionsPct": -42.31,
-      "positionDelta": -3.1766
+      "impressionsPct": -46.24,
+      "positionDelta": -3.3783
     },
     "countries": [
       {
         "country": "usa",
         "clicks": 0,
-        "impressions": 2240,
+        "impressions": 2341,
         "ctr": 0,
-        "position": 67.5362
+        "position": 67.1337
       },
       {
         "country": "gbr",
         "clicks": 0,
-        "impressions": 362,
+        "impressions": 373,
         "ctr": 0,
-        "position": 71.4807
+        "position": 71.3673
       },
       {
         "country": "aus",
         "clicks": 0,
-        "impressions": 180,
+        "impressions": 187,
         "ctr": 0,
-        "position": 72.5667
+        "position": 72.4064
       },
       {
         "country": "fra",
         "clicks": 0,
-        "impressions": 141,
+        "impressions": 145,
         "ctr": 0,
-        "position": 79.7872
+        "position": 79.4483
       },
       {
         "country": "nld",
         "clicks": 0,
-        "impressions": 100,
+        "impressions": 106,
         "ctr": 0,
-        "position": 67.45
+        "position": 67.6132
       },
       {
         "country": "ind",
         "clicks": 0,
-        "impressions": 64,
+        "impressions": 72,
         "ctr": 0,
-        "position": 53.2813
+        "position": 54.2639
       },
       {
         "country": "can",
         "clicks": 0,
-        "impressions": 45,
+        "impressions": 46,
         "ctr": 0,
-        "position": 61.9778
+        "position": 62.5
       },
       {
         "country": "nzl",
@@ -114,9 +114,9 @@
       {
         "country": "ukr",
         "clicks": 0,
-        "impressions": 21,
+        "impressions": 22,
         "ctr": 0,
-        "position": 61.8095
+        "position": 61.8182
       },
       {
         "country": "bel",
@@ -126,34 +126,34 @@
         "position": 59.6111
       },
       {
+        "country": "idn",
+        "clicks": 0,
+        "impressions": 17,
+        "ctr": 0,
+        "position": 51.2941
+      },
+      {
         "country": "svn",
         "clicks": 0,
         "impressions": 17,
         "ctr": 0,
         "position": 8.6471
-      },
-      {
-        "country": "idn",
-        "clicks": 0,
-        "impressions": 16,
-        "ctr": 0,
-        "position": 54.0625
       }
     ],
     "devices": [
       {
         "device": "DESKTOP",
         "clicks": 0,
-        "impressions": 2918,
+        "impressions": 3033,
         "ctr": 0,
-        "position": 65.6014
+        "position": 65.4289
       },
       {
         "device": "MOBILE",
         "clicks": 1,
-        "impressions": 658,
-        "ctr": 0.152,
-        "position": 69.9757
+        "impressions": 694,
+        "ctr": 0.1441,
+        "position": 69.2824
       },
       {
         "device": "TABLET",
@@ -163,7 +163,7 @@
         "position": 75.5385
       }
     ],
-    "observedPages": 124
+    "observedPages": 127
   },
   "indexHealth": {
     "inspectionUniverseUrls": 169,
@@ -191,10 +191,10 @@
     "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
     "preservedFromPrevious": true,
     "preservedFromGeneratedAt": "2026-09-21T21:02:54.858Z",
-    "lastInspectionAttemptAt": "2026-09-22T11:53:23.074Z",
-    "lastInspectionAttemptCoveragePct": 0,
-    "lastInspectionAttemptErrors": 250,
-    "quotaLimited": true
+    "lastInspectionAttemptAt": "2026-09-23T11:55:41.130Z",
+    "lastInspectionAttemptCoveragePct": 78.4,
+    "lastInspectionAttemptErrors": 0,
+    "quotaLimited": false
   },
   "sitemaps": {
     "apiOk": true,
@@ -210,7 +210,7 @@
         "isSitemapsIndex": false,
         "lastDownloaded": "2026-09-21T15:15:25.967Z",
         "warnings": 0,
-        "errors": 0,
+        "errors": 1,
         "contents": [
           {
             "type": "web",
@@ -332,99 +332,8 @@
       ]
     },
     "ranking_opportunities": {
-      "count": 17,
-      "top": [
-        {
-          "page": "/tools",
-          "url": "https://trytoolscout.org/tools",
-          "kind": "striking_distance",
-          "score": 92.7,
-          "impressions": 34,
-          "position": 11.6176,
-          "action": "authority_and_content_amplification"
-        },
-        {
-          "page": "/best-seo-tools-for-agencies",
-          "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
-          "kind": "high_impression_low_rank",
-          "score": 88.8,
-          "impressions": 817,
-          "position": 75.8237,
-          "action": "authority_depth_and_query_alignment"
-        },
-        {
-          "page": "/best-project-management-tools",
-          "url": "https://trytoolscout.org/best-project-management-tools",
-          "kind": "striking_distance",
-          "score": 85.3,
-          "impressions": 121,
-          "position": 39.3802,
-          "action": "authority_and_content_amplification"
-        },
-        {
-          "page": "/best-seo-keyword-research-tools",
-          "url": "https://trytoolscout.org/best-seo-keyword-research-tools",
-          "kind": "high_impression_low_rank",
-          "score": 83.2,
-          "impressions": 328,
-          "position": 75.622,
-          "action": "authority_depth_and_query_alignment"
-        },
-        {
-          "page": "/tools/semrush",
-          "url": "https://trytoolscout.org/tools/semrush",
-          "kind": "high_impression_low_rank",
-          "score": 83.2,
-          "impressions": 327,
-          "position": 55.4985,
-          "action": "authority_depth_and_query_alignment"
-        },
-        {
-          "page": "/tools/airtable",
-          "url": "https://trytoolscout.org/tools/airtable",
-          "kind": "high_impression_low_rank",
-          "score": 82.8,
-          "impressions": 307,
-          "position": 74.2085,
-          "action": "authority_depth_and_query_alignment"
-        },
-        {
-          "page": "/tools/tally",
-          "url": "https://trytoolscout.org/tools/tally",
-          "kind": "striking_distance",
-          "score": 82.1,
-          "impressions": 67,
-          "position": 39.7164,
-          "action": "authority_and_content_amplification"
-        },
-        {
-          "page": "/best-no-code-automation-tools",
-          "url": "https://trytoolscout.org/best-no-code-automation-tools",
-          "kind": "high_impression_low_rank",
-          "score": 82,
-          "impressions": 268,
-          "position": 74.056,
-          "action": "authority_depth_and_query_alignment"
-        },
-        {
-          "page": "/",
-          "url": "https://trytoolscout.org/",
-          "kind": "ctr_opportunity",
-          "score": 81,
-          "impressions": 126,
-          "position": 7.5476,
-          "action": "improve_search_snippet_and_click_capture"
-        },
-        {
-          "page": "/best-funnel-builder",
-          "url": "https://trytoolscout.org/best-funnel-builder",
-          "kind": "high_impression_low_rank",
-          "score": 80.4,
-          "impressions": 205,
-          "position": 75.9805,
-          "action": "authority_depth_and_query_alignment"
-        }
-      ]
+      "count": 0,
+      "top": []
     },
     "protect": {
       "count": 0,
@@ -432,138 +341,6 @@
     }
   },
   "opportunities": [
-    {
-      "kind": "striking_distance",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools",
-      "page": "/tools",
-      "score": 92.7,
-      "impressions": 34,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 11.6176,
-      "action": "authority_and_content_amplification"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
-      "page": "/best-seo-tools-for-agencies",
-      "score": 88.8,
-      "impressions": 817,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 75.8237,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "striking_distance",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-project-management-tools",
-      "page": "/best-project-management-tools",
-      "score": 85.3,
-      "impressions": 121,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 39.3802,
-      "action": "authority_and_content_amplification"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-seo-keyword-research-tools",
-      "page": "/best-seo-keyword-research-tools",
-      "score": 83.2,
-      "impressions": 328,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 75.622,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/semrush",
-      "page": "/tools/semrush",
-      "score": 83.2,
-      "impressions": 327,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 55.4985,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/airtable",
-      "page": "/tools/airtable",
-      "score": 82.8,
-      "impressions": 307,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 74.2085,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "striking_distance",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/tally",
-      "page": "/tools/tally",
-      "score": 82.1,
-      "impressions": 67,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 39.7164,
-      "action": "authority_and_content_amplification"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-no-code-automation-tools",
-      "page": "/best-no-code-automation-tools",
-      "score": 82,
-      "impressions": 268,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 74.056,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "ctr_opportunity",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/",
-      "page": "/",
-      "score": 81,
-      "impressions": 126,
-      "clicks": 1,
-      "ctr": 0.7937,
-      "position": 7.5476,
-      "action": "improve_search_snippet_and_click_capture"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-funnel-builder",
-      "page": "/best-funnel-builder",
-      "score": 80.4,
-      "impressions": 205,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 75.9805,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/klaviyo",
-      "page": "/tools/klaviyo",
-      "score": 80.2,
-      "impressions": 197,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 61.0914,
-      "action": "authority_depth_and_query_alignment"
-    },
     {
       "kind": "index_issue",
       "queue": "index_recovery",
@@ -941,78 +718,6 @@
       "action": "strengthen_internal_links_and_index_worthiness",
       "coverageState": "Discovered - currently not indexed",
       "verdict": "NEUTRAL"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/moz-pro",
-      "page": "/tools/moz-pro",
-      "score": 77.9,
-      "impressions": 136,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 68.8162,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-free-crm",
-      "page": "/best-free-crm",
-      "score": 75.1,
-      "impressions": 85,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 73.9529,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-free-project-management-tools",
-      "page": "/best-free-project-management-tools",
-      "score": 74.7,
-      "impressions": 80,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 58,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-keyword-research-tools",
-      "page": "/best-keyword-research-tools",
-      "score": 74.6,
-      "impressions": 78,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 71.5128,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "striking_distance",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/miro",
-      "page": "/tools/miro",
-      "score": 72.6,
-      "impressions": 21,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 46.9524,
-      "action": "authority_and_content_amplification"
-    },
-    {
-      "kind": "high_impression_low_rank",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-crm-for-sales-teams",
-      "page": "/best-crm-for-sales-teams",
-      "score": 72.5,
-      "impressions": 55,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 74.8364,
-      "action": "authority_depth_and_query_alignment"
     }
   ],
   "inspections": [
@@ -6304,11 +6009,11 @@
     "This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed."
   ],
   "inspectionRun": {
-    "attempted": 250,
-    "succeeded": 0,
-    "errors": 250,
-    "coveragePct": 0,
-    "quotaLimited": true,
+    "attempted": 134,
+    "succeeded": 134,
+    "errors": 0,
+    "coveragePct": 78.4,
+    "quotaLimited": false,
     "preservedPriorHealthySnapshot": true
   }
 }
