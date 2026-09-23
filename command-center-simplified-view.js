@@ -92,19 +92,21 @@ function brain(){
    body.push('<div class="engine"><div class="engineName">'+esc(human(x.engine))+'</div><div>'+pill(human(x.status||'unknown'),statusState(x.status))+'</div><div class="engineText">'+esc(human(x.directive||'No directive'))+'</div><div class="engineTime">'+esc(dt(x.lastEvaluatedAt))+'</div></div>');
  }
  const ec=s.executionContract||{};
- body.push('<div class="section">'+row('Execution contract',n(ec.verified)+' verified',n(ec.missingExecutors)+' missing executors - '+n(ec.stalled)+' stalled')+row('Architecture incidents',n(s?.architectureEscalation?.openIncidents||0),s?.architectureEscalation?.approvalRequired?'Approval required':'No architecture approval required')+'</div>');
+ const architectureCount=s?.architectureEscalation?.openIncidents;
+ body.push('<div class="section">'+row('Execution contract',n(ec.verified)+' verified',n(ec.missingExecutors)+' missing executors - '+n(ec.stalled)+' stalled')+row('Architecture incidents',architectureCount==null?'Unavailable':n(architectureCount),architectureCount==null?'Architecture source unavailable':(s?.architectureEscalation?.approvalRequired?'Approval required':'No architecture approval required'))+'</div>');
  document.getElementById('brainMeta').textContent='Evaluated '+dt(growth.lastEvaluatedAt||s.generatedAt);
  document.getElementById('brainBody').innerHTML=body.join('');
 }
 function taskHtml(x){
  const url=safeUrl(x.action_url),canConfirm=x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status));
  const label=x.gate_key?'Mark done':x.editorial_queue_id?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
+ const copy=(label,value)=>value?'<button class="btn" data-copy="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
  let payload='';
- if(x.prepared_body||x.prepared_title){payload='<details class="payload"><summary>Prepared payload</summary>'+(x.prepared_title?'<pre>'+esc(x.prepared_title)+'</pre>':'')+(x.prepared_body?'<pre>'+esc(x.prepared_body)+'</pre>':'')+'</details>'}
+ if(x.prepared_body||x.prepared_title){payload='<details class="payload"><summary>Prepared payload</summary>'+(x.prepared_title?'<pre>'+esc(x.prepared_title)+'</pre>'+copy('Copy title',x.prepared_title):'')+(x.prepared_body?'<pre>'+esc(x.prepared_body)+'</pre>'+copy('Copy content',x.prepared_body):'')+'</details>'}
  return '<div class="task"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id)+'</div><div class="taskMeta">'+esc(x.engine||'human gate')+' - '+esc(x.status||'ready')+' - about '+esc(x.estimated_minutes||0)+' min</div></div>'+pill(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate','warn')+'</div>'+
   '<div class="taskText"><b>Do:</b> '+esc(x.instructions||x.reason||'Complete the linked external step.')+'</div>'+
   (x.expected_impact?'<div class="taskText"><b>Expected result:</b> '+esc(x.expected_impact)+'</div>':'')+payload+
-  '<div class="taskActions">'+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+
+  '<div class="taskActions">'+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+copy('Copy steps',x.instructions||x.reason||'')+
   (canConfirm?'<button class="btn" data-resolve="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status||'')+'" data-gate="'+esc(x.gate_key||'')+'">'+esc(label)+'</button>':'')+
   (x.engine==='distribution'?'<button class="btn danger" data-resolve="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+'</div></div>';
 }
@@ -172,7 +174,10 @@ async function resolveTask(button){
   if(!r.ok||j.ok===false)throw new Error(j.error||'save_failed');data.queue=await get(endpoints.queue);queue();health();
  }catch(e){button.textContent='Save failed';setTimeout(()=>{button.disabled=false;button.textContent=old},1500)}
 }
-document.addEventListener('click',e=>{const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}});
+document.addEventListener('click',e=>{
+ const c=e.target.closest('[data-copy]');if(c){e.preventDefault();const old=c.textContent,value=decodeURIComponent(c.dataset.copy||'');navigator.clipboard.writeText(value).then(()=>{c.textContent='Copied';setTimeout(()=>c.textContent=old,1200)}).catch(()=>{c.textContent='Copy failed';setTimeout(()=>c.textContent=old,1500)});return}
+ const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
+});
 async function load(){
  const btn=document.getElementById('refresh');btn.disabled=true;document.getElementById('status').innerHTML='<strong>Refreshing current evidence...</strong>';
  const entries=Object.entries(endpoints);const results=await Promise.all(entries.map(async([k,u])=>{try{return[k,await get(u),null]}catch(e){return[k,null,String(e?.message||e)]}}));
