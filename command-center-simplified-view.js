@@ -57,7 +57,7 @@ const pill=(v,state)=>'<span class="pill '+(state||'')+'">'+esc(v)+'</span>';
 const metric=(label,value,meta)=>'<div class="metric"><small>'+esc(label)+'</small><b>'+esc(value)+'</b><span>'+esc(meta||'')+'</span></div>';
 const row=(name,value,meta)=>'<div class="row"><div><div class="rowName">'+esc(name)+'</div>'+(meta?'<div class="rowMeta">'+esc(meta)+'</div>':'')+'</div><div class="rowValue">'+esc(value)+'</div></div>';
 
-const compactDate=v=>{const s=String(v||'');if(/^\d{8}$/.test(s))return s.slice(4,6)+'/'+s.slice(6,8);if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(5,10).replace('-','/');return s};
+const compactDate=v=>{const s=String(v||'');if(/^\d{8}$/.test(s))return s.slice(6,8)+'/'+s.slice(4,6);if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(8,10)+'/'+s.slice(5,7);return s};
 const deltaClass=v=>Number(v)>0?'deltaUp':Number(v)<0?'deltaDown':'deltaFlat';
 const signedPct=v=>v==null?'Unavailable':(Number(v)>0?'+':'')+Number(v).toFixed(1)+'%';
 function seriesChart(rows,lines){
