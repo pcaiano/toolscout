@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "cloudflare-primary-runtime-worker.js"
+main = "seo-cloudflare-runtime-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
