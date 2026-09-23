@@ -65,6 +65,16 @@ export async function runWithLedger(env,{engine,mission,triggerName=null,singleF
   const singleFlight=Math.max(0,Number(singleFlightMinutes)||0);
   let leased=false;
   if(singleFlight>0){
+    // A prior run older than its lease plus a small grace period cannot still
+    // legitimately own the mission. Close it before acquiring the next lease
+    // so observability never leaves orphaned "running" rows for hours.
+    const staleMinutes=singleFlight+5;
+    await env.DB.prepare(`UPDATE engine_runs
+      SET status='failed',completed_at=datetime('now'),detail='single_flight_lease_expired',
+          evidence_json='{"reason":"single_flight_lease_expired"}',updated_at=datetime('now')
+      WHERE engine=? AND mission=? AND status='running' AND started_at<datetime('now', ?)`)
+      .bind(String(engine||'unknown'),String(mission||'unknown'),`-${staleMinutes} minutes`).run().catch(()=>{});
+
     await env.DB.prepare(`DELETE FROM engine_run_leases WHERE engine=? AND mission=? AND expires_at<=datetime('now')`).bind(String(engine||'unknown'),String(mission||'unknown')).run().catch(()=>{});
     const expiresAt=new Date(Date.now()+singleFlight*60000).toISOString().replace('T',' ').slice(0,19);
     const lease=await env.DB.prepare(`INSERT OR IGNORE INTO engine_run_leases(engine,mission,run_id,acquired_at,expires_at) VALUES(?,?,?,datetime('now'),?)`)
