@@ -155,7 +155,9 @@ async function runtimeMatrix(env,request=null){
     seo:{
       controlPlane:'cloudflare',
       demandAndPriority:'cloudflare',
-      staticMutation:'repository_content_path',
+      mutationLayer:'cloudflare_runtime_html',
+      state:'cloudflare_d1',
+      indexNotification:'cloudflare_indexnow',
       githubActionsRole:'fallback_only',
       gscAuth:'google_oauth',
       googleOAuthConfigured:Boolean(env.GOOGLE_OAUTH_CLIENT_ID&&env.GOOGLE_OAUTH_CLIENT_SECRET),
@@ -164,7 +166,8 @@ async function runtimeMatrix(env,request=null){
       searchConsoleScopeGranted:Boolean(googleOAuth.searchConsoleScopeGranted),
       oauthStorage:googleOAuth.storage||null,
       repositoryWriteCredentialConfigured:Boolean(env.GITHUB_CONTENT_TOKEN||env.GITHUB_TOKEN),
-      note:'SEO scheduling, GSC evidence and prioritization are Cloudflare-owned. Existing Google OAuth connections must be reauthorized once for Search Console scope. Static repository mutations still require a repository write credential until SEO pages are fully runtime-rendered.'
+      repositoryWriteRole:'fallback_manual_recovery_only',
+      note:'SEO scheduling, GSC evidence, prioritization and safe technical/page-depth corrections run in Cloudflare. GitHub repository writes and GitHub Actions are fallback/manual recovery paths, not normal scheduling.'
     },
     githubActions:{role:'fallback_only',scheduledPrimary:false,conservationStubsExpected:true},
     recentRuns:recent
