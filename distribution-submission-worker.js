@@ -152,7 +152,7 @@ async function packageQueue(request,env){
 
 async function execute(request,env){
   const p=await cfg(request,env),max=Math.max(1,Math.min(8,Number(p.policy?.max_automatic_per_run)||8)),maxAttempts=Math.max(1,Math.min(5,Number(p.policy?.max_attempts)||3));
-  const r=await env.DB.prepare(`SELECT * FROM distribution_submissions WHERE human_required=0 AND surface_slug<>'indexnow' AND ((status='ready') OR (status='failed' AND error LIKE 'retryable:%' AND attempts<? AND last_attempt_at<=datetime('now','-1 hour'))) ORDER BY CASE status WHEN 'ready' THEN 0 ELSE 1 END,created_at LIMIT ?`).bind(maxAttempts,Math.max(max,100)).all();
+  const r=await env.DB.prepare(`SELECT * FROM distribution_submissions WHERE human_required=0 AND ((status='ready') OR (status='failed' AND error LIKE 'retryable:%' AND attempts<? AND last_attempt_at<=datetime('now','-1 hour'))) ORDER BY CASE status WHEN 'ready' THEN 0 ELSE 1 END,created_at LIMIT ?`).bind(maxAttempts,Math.max(max,100)).all();
   let sent=0,failed=0,blocked=0,retried=0,terminal=0,batched=0,cooldown=0;
   const rows=r.results||[],otherRows=rows.slice(0,max);
   for(const row of otherRows){
