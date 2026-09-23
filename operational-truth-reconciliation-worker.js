@@ -409,7 +409,7 @@ export default{
     }
     if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
       ok:true,
-      version:'business-truth-v7',
+      version:'business-truth-v8',
       canonicalView:'command-center-simplified-view',
       cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Growth Brain','Needs You','Recent Results','Search + Authority','System Truth'],
       suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],
@@ -418,6 +418,7 @@ export default{
       heavyRefreshSeconds:180,
       hiddenTabPolling:false,
       d1ReadConservation:'observability_only_authority_execution_unchanged',
+      growthRndFrontier:'net_new_acquisition_v1',
       unavailableIsNeverZero:true,
       generatedAt:new Date().toISOString()
     },{headers:{'Cache-Control':'no-store'}});
