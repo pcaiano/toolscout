@@ -6,7 +6,7 @@ const EXECUTORS=Object.freeze({
   make_sender:{engine:'distribution',mode:'external',claim:360,attempt:300,verify:720},
   content_issue:{engine:'content',mode:'internal',claim:90,attempt:240,verify:1440},
   audience_make:{engine:'audience',mode:'external',claim:90,attempt:300,verify:720},
-  seo_cloudflare:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:300,verify:720},
+  seo_cloudflare:{engine:'seo_geo_aio',mode:'internal',claim:90,attempt:180,verify:720},
   affiliate_cycle:{engine:'affiliate',mode:'internal',claim:180,attempt:360,verify:2880},
   catalog_cycle:{engine:'catalog',mode:'internal',claim:360,attempt:360,verify:2880},
   growth_supervisor:{engine:'growth',mode:'internal',claim:90,attempt:180,verify:360},
@@ -87,7 +87,7 @@ const READY_CAPS=Object.freeze({
   make_sender:1,
   content_issue:1,
   audience_make:1,
-  seo_cloudflare:1,
+  seo_cloudflare:4,
   affiliate_cycle:1,
   catalog_cycle:1,
   growth_supervisor:1
