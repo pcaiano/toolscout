@@ -129,8 +129,29 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
     return {ok:false,status:'failed',reason:'authority_external_handoff_timeout',pipelineClosed:false,before,after:before};
   }
 
-  const network=await internalJson(request,env,ctx,'/api/distribution/network/refresh');
+  // Authority acquisition is Cloudflare-first. Exhaust verified no-auth machine routes
+  // before falling back to email/outreach handoffs that depend on an external sender.
+  const submissionPackage=await internalJson(request,env,ctx,'/api/distribution/submissions/package');
+  const submissionExecute=await internalJson(request,env,ctx,'/api/distribution/submissions/execute');
+  const submissionVerify=await internalJson(request,env,ctx,'/api/distribution/submissions/verify');
   const autonomous=await internalJson(request,env,ctx,'/api/distribution/autonomous/refresh');
+
+  const afterMachine=await authoritySnapshot(env);
+  if(afterMachine.attempts24>before.attempts24){
+    await recordEvent(env,'authority_closed_loop_external_attempt','completed',`Cloudflare-native authority execution increased real external attempts from ${before.attempts24} to ${afterMachine.attempts24} through verified automatic submission routes.`);
+    return {
+      ok:true,status:'external_attempt_confirmed',pipelineClosed:true,externalAttemptObserved:true,handoffReady:false,
+      stages:{submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,autonomous:autonomous.ok},
+      before,after:afterMachine,
+      submissionPackage:submissionPackage.payload||submissionPackage.error||null,
+      submissionExecute:submissionExecute.payload||submissionExecute.error||null,
+      submissionVerify:submissionVerify.payload||submissionVerify.error||null,
+      autonomous:autonomous.payload||autonomous.error||null,
+      executor:'cloudflare'
+    };
+  }
+
+  const network=await internalJson(request,env,ctx,'/api/distribution/network/refresh');
   const coordination=await internalJson(request,env,ctx,'/api/growth/opportunities/refresh');
   const execution=await internalJson(request,env,ctx,'/api/growth/execution/dispatch');
   const senderHandoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=1',{method:'GET'});
@@ -139,8 +160,11 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   const externalAttemptObserved=after.attempts24>before.attempts24;
   const handoffItems=Array.isArray(senderHandoff?.payload?.items)?senderHandoff.payload.items:[];
   const handoffReady=handoffItems.length>0||after.senderFreshClaim;
-  const stages={network:network.ok,autonomous:autonomous.ok,coordination:coordination.ok,execution:execution.ok,senderHandoff:senderHandoff.ok};
-  const coreStagesOk=stages.network&&stages.autonomous&&stages.coordination&&stages.execution&&stages.senderHandoff;
+  const stages={
+    submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,
+    autonomous:autonomous.ok,network:network.ok,coordination:coordination.ok,execution:execution.ok,senderHandoff:senderHandoff.ok
+  };
+  const coreStagesOk=stages.submissionPackage&&stages.submissionExecute&&stages.submissionVerify&&stages.autonomous&&stages.network&&stages.coordination&&stages.execution&&stages.senderHandoff;
 
   if(externalAttemptObserved){
     await recordEvent(env,'authority_closed_loop_external_attempt','completed',`Closed-loop authority recovery increased real external attempts from ${before.attempts24} to ${after.attempts24}.`);
@@ -158,8 +182,10 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
     reason:(!externalAttemptObserved&&!handoffReady)?'authority_queue_without_external_handoff':null,
     pendingExternalConfirmation:!externalAttemptObserved&&handoffReady,
     pipelineClosed:coreStagesOk,externalAttemptObserved,handoffReady,handoffCandidateCount:handoffItems.length,stages,before,after,
+    submissionPackage:submissionPackage.payload||submissionPackage.error||null,submissionExecute:submissionExecute.payload||submissionExecute.error||null,submissionVerify:submissionVerify.payload||submissionVerify.error||null,
     network:network.payload||network.error||null,autonomous:autonomous.payload||autonomous.error||null,coordination:coordination.payload||coordination.error||null,execution:execution.payload||execution.error||null,
-    senderHandoff:{ok:senderHandoff.ok,httpStatus:senderHandoff.httpStatus,status:senderHandoff?.payload?.status||null,reason:senderHandoff?.payload?.reason||null,items:handoffItems.map(x=>({kind:x.kind||null,task_id:x.task_id||null,task_action:x.task_action||null,tool_slug:x.tool_slug||null,asset_url:x.asset_url||null,vendor_domain:x.vendor_domain||null}))}
+    senderHandoff:{ok:senderHandoff.ok,httpStatus:senderHandoff.httpStatus,status:senderHandoff?.payload?.status||null,reason:senderHandoff?.payload?.reason||null,items:handoffItems.map(x=>({kind:x.kind||null,task_id:x.task_id||null,task_action:x.task_action||null,tool_slug:x.tool_slug||null,asset_url:x.asset_url||null,vendor_domain:x.vendor_domain||null}))},
+    executor:'cloudflare'
   };
 }
 function analyticsPath(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/analytics-v2'||path==='/analytics-v2/'||path==='/analytics-v2.html'}
