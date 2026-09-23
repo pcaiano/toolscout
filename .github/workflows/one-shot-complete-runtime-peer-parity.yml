@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event.head_commit.message == 'Deploy complete runtime peer parity'
+    if: github.event.head_commit.message == 'Deploy runtime profile entrypoint'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current main
@@ -25,6 +25,7 @@ jobs:
         run: |
           node --check catalog-autonomy-worker.js
           node --check dynamic-worker.js
+          node --check operational-truth-reconciliation-worker.js
 
       - name: Deploy Worker
         run: npx wrangler deploy --config wrangler.toml --latest
