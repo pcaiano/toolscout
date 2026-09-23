@@ -15,6 +15,8 @@ const FETCH_TIMEOUT_MS=6000;
 let schemaReady=null;
 let runtimeCache={at:0,candidates:[],candidateMap:new Map(),stateMap:new Map(),suppressed:new Set()};
 const RUNTIME_CACHE_MS=60000;
+const RUNTIME_EDGE_CACHE_KEY='https://trytoolscout.org/__cache/catalog-runtime-snapshot-v1';
+const RUNTIME_EDGE_CACHE_TTL=604800;
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const safeText=(v,n=4000)=>String(v??'').slice(0,n);
@@ -187,6 +189,26 @@ async function logEvent(env,slug,type,status,detail,evidence=null){
   await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
     .bind(`cat_${crypto.randomUUID()}`,slug||null,type,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run().catch(()=>{});
 }
+function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
+  const stateMap=new Map((stateRows||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
+  for(const row of candidateRows||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
+  return{at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:Boolean(meta.degraded),lastError:meta.lastError||null,source:meta.source||'d1'};
+}
+async function writeRuntimeEdgeSnapshot(stateRows,candidateRows){
+  try{
+    if(typeof caches==='undefined'||!caches.default)return;
+    const body=JSON.stringify({version:1,storedAt:new Date().toISOString(),states:stateRows||[],candidates:candidateRows||[]});
+    await caches.default.put(new Request(RUNTIME_EDGE_CACHE_KEY),new Response(body,{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':`public, max-age=${RUNTIME_EDGE_CACHE_TTL}`}}));
+  }catch{}
+}
+async function readRuntimeEdgeSnapshot(){
+  try{
+    if(typeof caches==='undefined'||!caches.default)return null;
+    const r=await caches.default.match(new Request(RUNTIME_EDGE_CACHE_KEY));if(!r)return null;
+    const body=await r.json();if(!body||body.version!==1)return null;
+    return compileRuntimeSnapshot(body.states||[],body.candidates||[],{degraded:true,source:'edge_cache'});
+  }catch{return null}
+}
 async function runtimeSnapshot(env,{force=false}={}){
   if(!force&&Date.now()-runtimeCache.at<RUNTIME_CACHE_MS)return runtimeCache;
   try{
@@ -194,11 +216,12 @@ async function runtimeSnapshot(env,{force=false}={}){
       env.DB.prepare(`SELECT * FROM catalog_runtime_state`).all(),
       env.DB.prepare(`SELECT tool_slug,profile_json,status,source_status,verified_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold') ORDER BY verified_at DESC`).all()
     ]);
-    const stateMap=new Map((states.results||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
-    for(const row of candidates.results||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
-    runtimeCache={at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:false,lastError:null};
+    const stateRows=states.results||[],candidateRows=candidates.results||[];
+    runtimeCache=compileRuntimeSnapshot(stateRows,candidateRows,{source:'d1'});
+    await writeRuntimeEdgeSnapshot(stateRows,candidateRows);
   }catch(error){
-    runtimeCache={...runtimeCache,at:Date.now(),degraded:true,lastError:safeText(error?.message||error,500)};
+    const cached=await readRuntimeEdgeSnapshot();
+    runtimeCache=cached?{...cached,lastError:safeText(error?.message||error,500)}:{...runtimeCache,at:Date.now(),degraded:true,lastError:safeText(error?.message||error,500),source:runtimeCache.candidates.length?'memory_cache':'static_only'};
   }
   return runtimeCache;
 }
