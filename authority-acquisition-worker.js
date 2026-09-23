@@ -220,9 +220,6 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
-    if(request.method==='GET'&&u.pathname==='/api/runtime/authority-sender-recovery-20260923'){
-      return Response.json(await recoverAuthorityPipeline(request,env,ctx),{headers:H});
-    }
     if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
       return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
