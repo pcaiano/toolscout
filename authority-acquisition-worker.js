@@ -194,7 +194,12 @@ async function finalAuditCycle(request,env,ctx){
   };
   const execution=await call('/api/growth/execution/dispatch');
   const supervisor=await call('/api/growth/supervisor/audit');
-  return {ok:execution.ok&&supervisor.ok,execution,supervisor};
+  let contentPublications=[];
+  try{
+    const q=await env.DB.prepare("SELECT event_id,platform,event_type,status,post_uri,content_id,observed_at,created_at,source FROM audience_events WHERE event_type='content_published' AND status='published' ORDER BY created_at DESC LIMIT 5").all();
+    contentPublications=q.results||[];
+  }catch{}
+  return {ok:execution.ok&&supervisor.ok,execution,supervisor,contentPublications};
 }
 function authorized(request,env){
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
