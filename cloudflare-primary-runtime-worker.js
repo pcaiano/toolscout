@@ -59,12 +59,28 @@ async function cacheAsset(env,path,payload){
     ON CONFLICT(path) DO UPDATE SET payload_json=excluded.payload_json,source_generated_at=excluded.source_generated_at,cached_at=datetime('now'),updated_at=datetime('now')`)
     .bind(path,JSON.stringify(payload),generatedAt).run();
 }
-async function runtimeGscRefresh(env,request){
+async function cacheGscRuntimeHealth(env,payload){
+  const data={generatedAt:new Date().toISOString(),executor:'cloudflare',...payload};
+  try{await cacheAsset(env,'/runtime/gsc-refresh-health.json',data)}catch{}
+  return data;
+}
+export async function runtimeGscRefresh(env,request){
   const oauth=await googleAnalyticsOAuthStatus(env,request);
-  if(!oauth.connected)return {ok:false,status:'reauthorization_required',reason:'google_oauth_not_connected',oauth};
+  if(!oauth.connected){
+    const out={ok:false,status:'reauthorization_required',reason:'google_oauth_not_connected',oauth};
+    await cacheGscRuntimeHealth(env,{ok:false,status:out.status,reason:out.reason,oauthLastRefreshAt:oauth.lastRefreshAt||null,oauthLastError:oauth.lastError||null});
+    return out;
+  }
   let access;
-  try{access=await googleAnalyticsOAuthAccess(env,request)}catch(error){return {ok:false,status:'reauthorization_required',reason:String(error?.message||error),oauth}};
-  if(!access?.token)return {ok:false,status:'reauthorization_required',reason:'google_oauth_access_unavailable',oauth};
+  try{access=await googleAnalyticsOAuthAccess(env,request)}catch(error){
+    const reason=String(error?.message||error);
+    await cacheGscRuntimeHealth(env,{ok:false,status:'reauthorization_required',reason,oauthLastRefreshAt:oauth.lastRefreshAt||null,oauthLastError:reason});
+    return {ok:false,status:'reauthorization_required',reason,oauth};
+  }
+  if(!access?.token){
+    await cacheGscRuntimeHealth(env,{ok:false,status:'reauthorization_required',reason:'google_oauth_access_unavailable',oauthLastRefreshAt:oauth.lastRefreshAt||null,oauthLastError:oauth.lastError||null});
+    return {ok:false,status:'reauthorization_required',reason:'google_oauth_access_unavailable',oauth};
+  }
   const endDate=isoDate(new Date()),startDate=addDays(endDate,-27),recentStart=addDays(endDate,-6),previousEnd=addDays(recentStart,-1),previousStart=addDays(previousEnd,-6);
   try{
     const [pagesJson,recentJson,previousJson,sitemapsJson]=await Promise.all([
@@ -86,10 +102,13 @@ async function runtimeGscRefresh(env,request){
       runtime:{executor:'cloudflare',freshSearchPerformance:true,indexInspectionPreservedFromPriorSnapshot:true}
     };
     await Promise.all([cacheAsset(env,'/reports/gsc-signals.json',signals),cacheAsset(env,'/data/gsc-search-reality.json',reality)]);
+    await cacheGscRuntimeHealth(env,{ok:true,status:'refreshed',sourceGeneratedAt:generatedAt,observedPages:pages.length,impressions:siteTotals.impressions,clicks:siteTotals.clicks,sitemaps:reality.sitemaps.submittedCount});
     return {ok:true,status:'refreshed',executor:'cloudflare',generatedAt,siteTotals,recent7,observedPages:pages.length,sitemaps:reality.sitemaps.submittedCount};
   }catch(error){
     const msg=String(error?.message||error);
-    return {ok:false,status:/403|insufficient|scope|permission/i.test(msg)?'reauthorization_required':'failed',reason:msg,executor:'cloudflare',oauth};
+    const status=/403|insufficient|scope|permission/i.test(msg)?'reauthorization_required':'failed';
+    await cacheGscRuntimeHealth(env,{ok:false,status,reason:msg,oauthLastRefreshAt:(await googleAnalyticsOAuthStatus(env,request).catch(()=>({}))).lastRefreshAt||null});
+    return {ok:false,status,reason:msg,executor:'cloudflare',oauth};
   }
 }
 
@@ -134,10 +153,16 @@ async function runPrimaryCycle(env,ctx,trigger){
 }
 
 async function runtimeMatrix(env,request=null){
-  let recent=[];
+  let recent=[],gscRuntimeHealth=null,gscSignalsGeneratedAt=null;
   try{
     recent=(await env.DB.prepare(`SELECT engine,mission,status,trigger_name,started_at,completed_at,detail
       FROM engine_runs ORDER BY started_at DESC LIMIT 30`).all()).results||[];
+    const [healthRow,signalsRow]=await Promise.all([
+      env.DB.prepare("SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1").first().catch(()=>null),
+      env.DB.prepare("SELECT source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1").first().catch(()=>null)
+    ]);
+    if(healthRow?.payload_json){try{gscRuntimeHealth=JSON.parse(healthRow.payload_json)}catch{}}
+    gscSignalsGeneratedAt=signalsRow?.source_generated_at||null;
   }catch{}
   const googleOAuth=await googleAnalyticsOAuthStatus(env,request);
   return {
@@ -170,6 +195,10 @@ async function runtimeMatrix(env,request=null){
       oauthStorage:googleOAuth.storage||null,
       repositoryWriteCredentialConfigured:Boolean(env.GITHUB_CONTENT_TOKEN||env.GITHUB_TOKEN),
       repositoryWriteRole:'fallback_manual_recovery_only',
+      gscSignalsGeneratedAt,
+      gscRuntimeHealth,
+      oauthLastRefreshAt:googleOAuth.lastRefreshAt||null,
+      oauthLastError:googleOAuth.lastError||null,
       note:'SEO scheduling, GSC evidence, prioritization and safe technical/page-depth corrections run in Cloudflare. GitHub repository writes and GitHub Actions are fallback/manual recovery paths, not normal scheduling.'
     },
     githubActions:{role:'fallback_only',scheduledPrimary:false,conservationStubsExpected:true},
