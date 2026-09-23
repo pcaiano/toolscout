@@ -51,7 +51,7 @@ export default{
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/runtime/e2e-primary-cycle-20260923-owner-authorized'){
       if(!env.ADMIN_TOKEN)return Response.json({ok:false,error:'admin_token_unavailable'},{status:503});
-      const cutoff='2026-09-23 10:47:00';
+      const cutoff='2026-09-23 11:02:00';
       const stale=await env.DB.prepare(`UPDATE engine_runs
         SET status='failed',completed_at=datetime('now'),detail='superseded_by_single_path_scheduler_fix',
             evidence_json='{"reason":"superseded_by_single_path_scheduler_fix"}',updated_at=datetime('now')
