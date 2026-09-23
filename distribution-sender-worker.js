@@ -222,19 +222,8 @@ export default {
         const refreshed=await base.fetch(refreshRequest,env,ctx);
         contactRefresh=refreshed.ok?await refreshed.json():{ok:false,http_status:refreshed.status};
       }catch(e){contactRefresh={ok:false,error:String(e?.message||e).slice(0,300)}}
-      let result=await publicCandidates(env,url.searchParams.get('limit'));
-      let authority_replenishment=null,redispatch=null,retried_after_replenishment=false;
-      if(!(result.items||[]).length&&Boolean(env.ADMIN_TOKEN)){
-        authority_replenishment=await replenishAuthorityPipeline(request,env,ctx).catch(error=>({scheduled:false,error:String(error?.message||error).slice(0,300)}));
-        try{
-          const rr=await base.fetch(new Request(new URL('/api/growth/execution/dispatch',request.url),{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'}}),env,ctx);
-          redispatch={ok:rr.ok,status:rr.status};
-        }catch(error){redispatch={ok:false,status:0,error:String(error?.message||error).slice(0,300)}}
-        const retry=await publicCandidates(env,url.searchParams.get('limit'));
-        retried_after_replenishment=true;
-        if((retry.items||[]).length)result=retry;
-      }
-      return Response.json({...result,contact_refresh:contactRefresh,authority_replenishment:authority_replenishment,redispatch,retried_after_replenishment},{headers:JSON_HEADERS});
+      const result=await publicCandidates(env,url.searchParams.get('limit'));
+      return Response.json({...result,contact_refresh:contactRefresh,replenishment_required:!(result.items||[]).length},{headers:JSON_HEADERS});
     }
     if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
     return base.fetch(request,env,ctx);
