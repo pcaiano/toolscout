@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const src=fs.readFileSync(new URL('../audience-worker.js',import.meta.url),'utf8');
+const wrangler=fs.readFileSync(new URL('../wrangler.toml',import.meta.url),'utf8');
 assert.match(src,/const BLUESKY_MAX_GRAPHEMES=300;/);
 assert.match(src,/const BLUESKY_REPLY_TARGET_GRAPHEMES=280;/);
 assert.match(src,/new Intl\.Segmenter\('en',\{granularity:'grapheme'\}\)/);
@@ -8,5 +9,6 @@ assert.match(src,/rewritten_to_complete_limit/);
 assert.match(src,/complete-sentence-no-hard-cut-v1/);
 assert.match(src,/\/api\/audience\/bluesky-reply\/prepare/);
 assert.match(src,/bluesky_reply_possible_hard_cut/);
+assert.match(wrangler,/"\/api\/audience\/\*"/,'Bluesky reply preparation endpoint must route through the Worker');
 assert.match(src,/replace\(\[\\u2013\\u2014\]\/g,'-'\)/,'ToolScout social copy must normalize em/en dashes');
 console.log('Bluesky reply guard keeps replies complete and inside platform limits.');

@@ -36,6 +36,7 @@ run_worker_first = [
   "/api/confirmed-visitor*",
   "/api/traffic-integrity-health*",
   "/api/audience-event*",
+  "/api/audience/*",
   "/api/engine-evidence*",
   "/api/distribution-event*",
   "/api/distribution/*",
