@@ -1,5 +1,5 @@
 export function commandCenterHtml(){
-return String.raw\`<!doctype html>
+return String.raw`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -187,5 +187,5 @@ document.getElementById('refresh').addEventListener('click',load);
 load();setInterval(load,60000);
 </script>
 </body>
-</html>\`;
+</html>`;
 }
