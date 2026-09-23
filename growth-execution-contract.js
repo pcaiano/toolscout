@@ -6,7 +6,7 @@ const EXECUTORS=Object.freeze({
   make_sender:{engine:'distribution',mode:'external',claim:360,attempt:300,verify:720},
   content_issue:{engine:'content',mode:'internal',claim:90,attempt:240,verify:1440},
   audience_make:{engine:'audience',mode:'external',claim:90,attempt:300,verify:720},
-  seo_github:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:300,verify:720},
+  seo_cloudflare:{engine:'seo_geo_aio',mode:'external',claim:360,attempt:300,verify:720},
   affiliate_cycle:{engine:'affiliate',mode:'internal',claim:180,attempt:360,verify:2880},
   catalog_cycle:{engine:'catalog',mode:'internal',claim:360,attempt:360,verify:2880},
   growth_supervisor:{engine:'growth',mode:'internal',claim:90,attempt:180,verify:360},
@@ -31,13 +31,13 @@ const ACTION_EXECUTOR=Object.freeze({
   surface_only_true_human_gate:'human_gate',
   surface_only_true_human_route_gate:'human_gate',
 
-  deepen_existing_search_asset:'seo_github',
-  improve_click_capture:'seo_github',
-  protect_current_ranking:'seo_github',
-  strengthen_internal_links:'seo_github',
-  observe_low_sample_ranking:'seo_github',
-  repair_indexing:'seo_github',
-  repair_canonical_alignment:'seo_github',
+  deepen_existing_search_asset:'seo_cloudflare',
+  improve_click_capture:'seo_cloudflare',
+  protect_current_ranking:'seo_cloudflare',
+  strengthen_internal_links:'seo_cloudflare',
+  observe_low_sample_ranking:'seo_cloudflare',
+  repair_indexing:'seo_cloudflare',
+  repair_canonical_alignment:'seo_cloudflare',
 
   activate_affiliate_route:'affiliate_cycle',
   capture_approved_referral_link:'affiliate_cycle',
@@ -62,7 +62,7 @@ const ACTION_EXECUTOR=Object.freeze({
   verify_changed_catalog_facts:'catalog_cycle',
 
   distribution_measurement:'growth_supervisor',
-  search_measurement:'seo_github',
+  search_measurement:'seo_cloudflare',
   catalog_impact_review:'catalog_cycle',
   discover_catalog_candidates:'catalog_cycle',
   admit_only_after_quality_gates:'catalog_cycle',
@@ -77,7 +77,7 @@ const SUPERVISOR_EXECUTOR=Object.freeze({
   distribution:'distribution_network',
   content:'content_issue',
   audience:'audience_make',
-  seo_geo_aio:'seo_github',
+  seo_geo_aio:'seo_cloudflare',
   affiliate:'affiliate_cycle',
   catalog:'catalog_cycle'
 });
@@ -87,7 +87,7 @@ const READY_CAPS=Object.freeze({
   make_sender:1,
   content_issue:1,
   audience_make:1,
-  seo_github:1,
+  seo_cloudflare:1,
   affiliate_cycle:1,
   catalog_cycle:1,
   growth_supervisor:1
@@ -105,10 +105,7 @@ async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(n
 let availabilityCache={at:0,value:null};
 async function executionAvailability(env){
   if(availabilityCache.value&&Date.now()-availabilityCache.at<60000)return availabilityCache.value;
-  const github=await assetJson(env,'/data/github-actions-resume-policy.json',{enabled:true,reason:null});
-  const value={
-    seo_github:{available:github?.enabled!==false,reason:github?.enabled===false?String(github?.reason||'github_actions_disabled'):null}
-  };
+  const value={seo_cloudflare:{available:true,reason:null}};
   availabilityCache={at:Date.now(),value};return value;
 }
 async function hash(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32)}
@@ -157,7 +154,18 @@ export async function ensureExecutionContractSchema(env){
       detail TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_execution_events_task ON growth_execution_events(task_id,created_at DESC)`)
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_execution_events_task ON growth_execution_events(task_id,created_at DESC)`),
+    env.DB.prepare(`UPDATE growth_execution_contract
+      SET executor='seo_cloudflare',engine='seo_geo_aio',execution_mode='internal',
+          status=CASE WHEN status IN ('claimed','attempted','stalled') THEN 'deferred' ELSE status END,
+          claimed_at=CASE WHEN status IN ('claimed','attempted','stalled') THEN NULL ELSE claimed_at END,
+          attempted_at=CASE WHEN status IN ('claimed','attempted','stalled') THEN NULL ELSE attempted_at END,
+          claim_deadline=CASE WHEN status IN ('claimed','attempted','stalled') THEN NULL ELSE claim_deadline END,
+          attempt_deadline=CASE WHEN status IN ('claimed','attempted','stalled') THEN NULL ELSE attempt_deadline END,
+          verify_deadline=CASE WHEN status IN ('claimed','attempted','stalled') THEN NULL ELSE verify_deadline END,
+          last_result=CASE WHEN status IN ('claimed','attempted','stalled') THEN 'migrated_to_cloudflare_executor' ELSE last_result END,
+          updated_at=datetime('now')
+      WHERE executor='seo_github'`)
   ]).catch(error=>{executionSchemaReady=null;throw error});
   return executionSchemaReady;
 }
@@ -213,7 +221,7 @@ export async function syncExecutionContracts(env){
   const verifyCase=Object.entries(EXECUTORS).filter(([,s])=>s.verify!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.verify)} minutes')`).join(' ');
   const mapped=`CASE
     WHEN g.subject_type='search' AND j.value IN ('distribution_amplification','backlink_reference_outreach') THEN 'distribution_network'
-    ELSE CASE j.value ${executorCase} ELSE CASE WHEN g.subject_type='search' THEN 'seo_github' ELSE NULL END END
+    ELSE CASE j.value ${executorCase} ELSE CASE WHEN g.subject_type='search' THEN 'seo_cloudflare' ELSE NULL END END
   END`;
 
   await env.DB.prepare(`INSERT INTO growth_execution_contract(
@@ -369,13 +377,13 @@ export async function rebalanceExecutionAdmission(env){
       AND COALESCE(last_result,'') NOT LIKE 'executor_error:%'`).run();
 
   let unavailableReleased=0;
-  if(availability?.seo_github?.available===false){
-    const reason=String(availability.seo_github.reason||'github_actions_disabled').slice(0,600);
+  if(availability?.seo_cloudflare?.available===false){
+    const reason=String(availability.seo_cloudflare.reason||'github_actions_disabled').slice(0,600);
     const w=await env.DB.prepare(`UPDATE growth_execution_contract
       SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
           claimed_at=NULL,attempted_at=NULL,last_result=?,updated_at=datetime('now')
-      WHERE executor='seo_github'
-        AND status IN ('pending','claimed','attempted','stalled')`).bind(`executor_unavailable:seo_github:${reason}`).run();
+      WHERE executor='seo_cloudflare'
+        AND status IN ('pending','claimed','attempted','stalled')`).bind(`executor_unavailable:seo_cloudflare:${reason}`).run();
     unavailableReleased=Number(w?.meta?.changes||w?.changes||0);
   }
 
@@ -392,8 +400,8 @@ export async function rebalanceExecutionAdmission(env){
   for(const [executor,spec] of Object.entries(EXECUTORS)){
     if(spec.mode==='human')continue;
     const cap=Math.max(1,Number(READY_CAPS[executor]||1));
-    if(executor==='seo_github'&&availability?.seo_github?.available===false){
-      result.executors[executor]={cap,available:false,reason:availability.seo_github.reason||'github_actions_disabled',inFlight:0,pendingKept:0,promoted:0};
+    if(executor==='seo_cloudflare'&&availability?.seo_cloudflare?.available===false){
+      result.executors[executor]={cap,available:false,reason:availability.seo_cloudflare.reason||'cloudflare_runtime_unavailable',inFlight:0,pendingKept:0,promoted:0};
       continue;
     }
     const inFlightRow=await first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted')`,[executor]);
@@ -430,18 +438,6 @@ export async function rebalanceExecutionAdmission(env){
 
 export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null,result='executor_claimed'}={}){
   await ensureExecutionContractSchema(env);
-  if(executor==='seo_github'){
-    const github=await assetJson(env,'/data/github-actions-resume-policy.json',{enabled:true,reason:null});
-    if(github?.enabled===false){
-      const reason=String(github?.reason||'github_actions_disabled').slice(0,600);
-      await env.DB.prepare(`UPDATE growth_execution_contract
-        SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
-            claimed_at=NULL,attempted_at=NULL,last_result=?,updated_at=datetime('now')
-        WHERE executor='seo_github' AND status IN ('pending','claimed','attempted','stalled')`)
-        .bind(`executor_unavailable:seo_github:${reason}`).run();
-      return{claimed:0,taskIds:[],tasks:[],inFlight:0,capacity:Number(maxInFlight||limit||0),available:false,reason};
-    }
-  }
   await rebalanceExecutionAdmission(env);
   const spec=EXECUTORS[executor]||null;
   let effective=Math.max(0,Math.min(100,Number(limit)||0)),inFlight=0;
@@ -631,7 +627,7 @@ export async function reconcileExecutionContracts(env){
     }else if(t.executor==='audience_make'&&t.source_kind==='supervisor'){
       evidence=await first(env,`SELECT event_id,event_type,created_at,post_uri FROM audience_events WHERE status='published' AND event_type='outbound_reply' AND created_at>=COALESCE(?,?) ORDER BY created_at ASC LIMIT 1`,[sqlTime(t.claimed_at),created]);
       if(evidence)evidence={...evidence,verified:true,proof_scope:'single_inflight_supervisor_task'};
-    }else if(t.executor==='seo_github'){
+    }else if(t.executor==='seo_cloudflare'){
       if(!seoReport)seoReport=await assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]});
       const report=seoReport;
       const generated=Date.parse(String(report.generatedAt||'')),createdAt=Date.parse(String(t.created_at||'').replace(' ','T')+'Z');
