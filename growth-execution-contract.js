@@ -620,10 +620,14 @@ export async function reconcileExecutionContracts(env){
       evidence=await first(env,`SELECT result,created_at FROM distribution_qualification_events WHERE surface_slug=? AND created_at>=? ORDER BY created_at DESC LIMIT 1`,[subject,created]);
       if(evidence)evidence={...evidence,verified:true};
     }else if(t.executor==='content_issue'){
-      if(t.subject_type==='tool')evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? AND selected_tool_slug=? ORDER BY created_at DESC LIMIT 1`,[created,subject]);
-      else if(t.subject_type==='search')evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? AND target_json LIKE ? ORDER BY created_at DESC LIMIT 1`,[created,`%${subject.replaceAll('%','')}%`]);
-      else evidence=await first(env,`SELECT brief_id,created_at FROM content_engine_briefs WHERE created_at>=? ORDER BY created_at DESC LIMIT 1`,[created]);
-      if(evidence)evidence={...evidence,verified:true};
+      // Preparing a brief is not external content execution. A content task is only
+      // verified after a real publication event has been recorded by the publisher.
+      evidence=await first(env,`SELECT event_id,platform,post_uri,content_id,created_at
+        FROM audience_events
+        WHERE source='make_content_engine' AND event_type='content_published' AND status='published'
+          AND created_at>=?
+        ORDER BY created_at ASC LIMIT 1`,[created]);
+      if(evidence)evidence={...evidence,verified:true,proof_scope:'published_content'};
     }else if(t.executor==='audience_make'&&t.source_kind==='supervisor'){
       evidence=await first(env,`SELECT event_id,event_type,created_at,post_uri FROM audience_events WHERE status='published' AND event_type='outbound_reply' AND created_at>=COALESCE(?,?) ORDER BY created_at ASC LIMIT 1`,[sqlTime(t.claimed_at),created]);
       if(evidence)evidence={...evidence,verified:true,proof_scope:'single_inflight_supervisor_task'};
