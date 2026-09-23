@@ -41,6 +41,7 @@ run_worker_first = [
   "/api/distribution/*",
   "/api/growth/*",
   "/api/runtime/*",
+  "/api/seo/*",
   "/api/affiliate-coverage*",
   "/api/affiliate-replies*",
   "/api/catalog-autonomy*",
