@@ -95,7 +95,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function commandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,engineActivityRows,actionPipelineRows]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,engineActivityRows,actionPipelineRows,authorityRuntimeRow]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -140,7 +140,15 @@ async function commandCenterBusinessTruth(request,env){
     env.DB.prepare(`SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at
       FROM growth_action_events
       WHERE created_at>=datetime('now','-12 hours')
-      ORDER BY updated_at DESC,created_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[])
+      ORDER BY updated_at DESC,created_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
+      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24,
+      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days'))+
+      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-7 days')) attempts7d,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) queue,
+      (SELECT COUNT(*) FROM growth_action_events WHERE status IN ('prepared','leased','issued') AND engine IN ('distribution_route','distribution_network','vendor_amplification')) prepared,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_claimed`).first().catch(()=>null)
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -263,10 +271,12 @@ async function commandCenterBusinessTruth(request,env){
       verifiedBacklinks:truthNum(backlink.verified_backlinks),
       verifiedReferringDomains:truthNum(backlink.verified_referring_domains),
       bootstrapFloor:truthNum(backlink.bootstrap_referring_domain_floor),
-      attempts24h:truthNum(backlink.attempts_24h),
-      attempts7d:truthNum(backlink.attempts_7d),
+      attempts24h:truthMaybeNum(authorityRuntimeRow?.attempts24)??truthNum(backlink.attempts_24h),
+      attempts7d:truthMaybeNum(authorityRuntimeRow?.attempts7d)??truthNum(backlink.attempts_7d),
       attemptMin24h:truthNum(backlink.attempt_min_24h),
-      authorityQueue:truthNum(backlink.authority_queue),
+      authorityQueue:truthMaybeNum(authorityRuntimeRow?.queue)??truthNum(backlink.authority_queue),
+      preparedActions:truthMaybeNum(authorityRuntimeRow?.prepared),
+      senderClaimed:truthMaybeNum(authorityRuntimeRow?.sender_claimed),
       lastVerifiedAt:backlink.last_verified_at||null,
       latestPlacementVerifiedAt:latestAuthorityPlacementAt,
       lastVerifiedAgeHours:backlink.last_verified_age_hours==null?null:Number(backlink.last_verified_age_hours),
