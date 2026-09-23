@@ -95,11 +95,12 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function commandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1`).first().catch(()=>null),
+    env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/data/gsc-search-reality.json' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/data/affiliate.json',{}),
     ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
@@ -121,7 +122,17 @@ async function commandCenterBusinessTruth(request,env){
       FROM growth_action_events
       WHERE created_at>=datetime('now','-7 days') AND status IN ('sent','verified','completed','attributed')
         AND (engine='vendor_amplification' OR engine LIKE 'distribution%' OR engine='content' OR engine='audience')
-      ORDER BY created_at DESC LIMIT 30`).all().then(r=>r.results||[]).catch(()=>[])
+      ORDER BY created_at DESC LIMIT 30`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT substr(first_evidence_at,1,10) day,COUNT(*) humans
+      FROM traffic_human_evidence
+      WHERE first_evidence_at>=datetime('now','-29 days')
+      GROUP BY substr(first_evidence_at,1,10)
+      ORDER BY day`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT surface_slug,public_url,first_verified_at
+      FROM distribution_placements
+      WHERE placement_verified=1 AND backlink_verified=1
+        AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')
+      ORDER BY first_verified_at`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -159,10 +170,26 @@ async function commandCenterBusinessTruth(request,env){
 
 
   const gsc=parse(gscSignals?.payload_json,{});
+  const reality=parse(gscReality?.payload_json,{});
   const gh=parse(gscHealth?.payload_json,{});
-  const w=gsc?.searchPerformance?.window28d||gsc?.window28d||{};
-  const idx=gsc?.indexHealth||{};
-  const sitemap=gsc?.sitemaps||{};
+  const w=reality?.searchPerformance?.window28d||gsc?.siteTotals||{};
+  const idx=reality?.indexHealth||{};
+  const sitemap=reality?.sitemaps||{};
+  const daily28=Array.isArray(reality?.searchPerformance?.daily28)?reality.searchPerformance.daily28:[];
+  const recent7=reality?.searchPerformance?.recent7||{};
+  const previous7=reality?.searchPerformance?.previous7||{};
+  const change7d=reality?.searchPerformance?.change7d||{};
+  const strictDaily=Array.isArray(strictDailyRows)?strictDailyRows.map(x=>({date:x.day,humans:truthNum(x.humans)})):[];
+  const dayKeys=[];for(let i=29;i>=0;i--){const d=new Date(Date.now()-i*86400000);dayKeys.push(d.toISOString().slice(0,10))}
+  const authorityHistory=dayKeys.map(day=>{
+    const end=day+'T23:59:59Z',domains=new Set();let backlinks=0;
+    for(const row of verifiedBacklinkRows||[]){
+      const at=String(row.first_verified_at||'');const iso=at.includes('T')?at:at.replace(' ','T')+'Z';
+      if(!at||iso>end)continue;backlinks++;
+      try{const host=new URL(String(row.public_url||'')).hostname.replace(/^www\./,'').toLowerCase();if(host&&host!=='trytoolscout.org'&&!host.endsWith('.trytoolscout.org'))domains.add(host)}catch{}
+    }
+    return {date:day,backlinks,referringDomains:domains.size};
+  });
   const recentResults=[
     ...audienceRows.map(x=>({id:x.event_id,at:x.created_at,engine:x.event_type==='content_published'?'content':'audience',type:x.event_type,status:'verified',label:x.event_type==='content_published'?'Content published':'Audience reply published',detail:x.platform||'external publication',url:x.post_uri||null})),
     ...submissionRows.map(x=>({id:x.submission_id,at:x.at,engine:'distribution',type:'external_submission',status:x.status||'attempted',label:'External submission: '+String(x.surface_slug||'surface'),detail:x.error||('Attempt '+truthNum(x.attempts)),url:x.response_url||null})),
@@ -191,6 +218,7 @@ async function commandCenterBusinessTruth(request,env){
       monetizedOutbound7d:truthNum(cfg.monetized_outbound_7d),
       corrections:truthNum(growth.correction_count)
     },
+    traffic:{strictDaily},
     authority:{
       required:Boolean(backlink.required),
       verifiedBacklinks:truthNum(backlink.verified_backlinks),
@@ -203,7 +231,8 @@ async function commandCenterBusinessTruth(request,env){
       lastVerifiedAt:backlink.last_verified_at||null,
       lastVerifiedAgeHours:backlink.last_verified_age_hours==null?null:Number(backlink.last_verified_age_hours),
       throughputGap:Boolean(backlink.throughput_gap),
-      stagnating:Boolean(backlink.stagnating)
+      stagnating:Boolean(backlink.stagnating),
+      history30:authorityHistory
     },
     affiliate:{
       productionRoutes:productionRoutes.length,
@@ -230,7 +259,11 @@ async function commandCenterBusinessTruth(request,env){
       indexed:truthMaybeNum(idx.indexed),
       inspected:truthMaybeNum(idx.inspected),
       indexRecoveryCandidates:truthMaybeNum(idx.recoveryCandidates??idx.indexRecoveryCandidates),
-      sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps)
+      sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps),
+      daily28,
+      recent7,
+      previous7,
+      change7d
     },
     recentResults,
     executionContract:contract,
