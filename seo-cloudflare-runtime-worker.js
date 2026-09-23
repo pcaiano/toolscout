@@ -163,6 +163,26 @@ async function health(env){
   return {status:'active',executor:'cloudflare',qualityGate:'runtime-safe-v1',state:{total:Number(summary?.total||0),active:Number(summary?.active||0),indexNowQueued24h:Number(summary?.indexnow_queued_24h||0),updatedAt:summary?.updated_at||null},items};
 }
 
+async function internalPost(path,env,ctx){
+  if(!env.ADMIN_TOKEN)return {ok:false,status:0,error:'admin_token_unavailable'};
+  try{
+    const r=await base.fetch(new Request('https://trytoolscout.org'+path,{method:'POST',headers:{Authorization:'Bearer '+env.ADMIN_TOKEN,'Content-Type':'application/json'}}),env,ctx);
+    let body=null;try{body=await r.json()}catch{}
+    return {ok:r.ok,status:r.status,body};
+  }catch(error){return {ok:false,status:0,error:String(error?.message||error).slice(0,500)}}
+}
+async function validationPulse(env,ctx){
+  const paths=['/api/distribution/submissions/package','/api/distribution/submissions/execute','/api/distribution/submissions/verify','/api/distribution/authority/close-loop','/api/growth/supervisor/audit'];
+  const out={};
+  for(const path of paths)out[path]=await internalPost(path,env,ctx);
+  try{
+    await env.DB.prepare(`INSERT INTO engine_runs(run_id,engine,mission,trigger_name,status,started_at,completed_at,detail,evidence_json,updated_at)
+      VALUES(?,?,?,?,?,datetime('now'),datetime('now'),?,?,datetime('now'))`)
+      .bind('validation_'+crypto.randomUUID(),'runtime','cloudflare_migration_validation','temporary_validation_cron',Object.values(out).every(x=>x.ok)?'completed':'failed','Temporary Cloudflare migration validation pulse.',JSON.stringify(out).slice(0,60000)).run();
+  }catch{}
+  return out;
+}
+
 export default{
   async fetch(request,env,ctx){
     const url=new URL(request.url);
@@ -174,8 +194,14 @@ export default{
     return transformPage(request,response,env);
   },
   async scheduled(event,env,ctx){
+    const trigger=event?.cron||'scheduled';
+    if(trigger==='* * * * *'){
+      const task=validationPulse(env,ctx).catch(()=>{});
+      if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
+      return;
+    }
     if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
-    if(event?.cron==='15 * * * *'||event?.cron==='35 3 * * *'){
+    if(trigger==='15 * * * *'||trigger==='35 3 * * *'){
       const task=refreshState(new Request('https://trytoolscout.org/'),env).catch(()=>{});
       if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }
