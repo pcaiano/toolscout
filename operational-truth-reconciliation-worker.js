@@ -95,7 +95,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function commandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscHealth,affiliateRegistry,affiliatePipeline,audienceRows,submissionRows,placementRows,actionRows]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -103,6 +103,7 @@ async function commandCenterBusinessTruth(request,env){
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/data/affiliate.json',{}),
     ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
+    env.DB.prepare(`SELECT tool_slug,status,updated_at FROM affiliate_workflow ORDER BY tool_slug`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT event_id,platform,event_type,status,post_uri,content_id,created_at
       FROM audience_events WHERE status='published' AND created_at>=datetime('now','-7 days')
         AND event_type IN ('content_published','outbound_reply')
@@ -146,7 +147,16 @@ async function commandCenterBusinessTruth(request,env){
   const programmes=Array.isArray(affiliatePipeline?.verified_programs)?affiliatePipeline.verified_programs:[];
   const programmeStates={};
   for(const p of programmes){const k=String(p?.status||'unknown');programmeStates[k]=(programmeStates[k]||0)+1}
-  const activePipeline=programmes.filter(p=>String(p?.status||'')==='active').length;
+  const activePipelineRows=programmes.filter(p=>String(p?.status||'')==='active');
+  const activePipeline=activePipelineRows.length;
+  const productionSlugs=productionRoutes.map(([slug])=>slug).sort();
+  const activePipelineSlugs=activePipelineRows.map(p=>String(p.slug||'')).filter(Boolean).sort();
+  const productionSet=new Set(productionSlugs),activePipelineSet=new Set(activePipelineSlugs);
+  const productionWithoutActivePipeline=productionSlugs.filter(slug=>!activePipelineSet.has(slug));
+  const activePipelineWithoutProduction=activePipelineSlugs.filter(slug=>!productionSet.has(slug));
+  const workflowStates={};for(const row of affiliateWorkflow){const k=String(row.status||'unknown');workflowStates[k]=(workflowStates[k]||0)+1}
+  const workflowBySlug=Object.fromEntries(affiliateWorkflow.map(row=>[row.tool_slug,{status:row.status,updatedAt:row.updated_at}]));
+
 
   const gsc=parse(gscSignals?.payload_json,{});
   const gh=parse(gscHealth?.payload_json,{});
@@ -200,8 +210,14 @@ async function commandCenterBusinessTruth(request,env){
       pipelineActivePrograms:activePipeline,
       pipelineTrackedPrograms:programmes.length,
       pipelineStates:programmeStates,
-      productionSlugs:productionRoutes.map(([slug])=>slug).sort(),
-      source:'canonical affiliate registry + affiliate pipeline'
+      workflowStates,
+      productionSlugs,
+      activePipelineSlugs,
+      productionWithoutActivePipeline,
+      activePipelineWithoutProduction,
+      workflowBySlug,
+      reconciled:productionWithoutActivePipeline.length===0&&activePipelineWithoutProduction.length===0,
+      source:'canonical affiliate registry + affiliate pipeline + D1 workflow'
     },
     search:{
       generatedAt:gscSignals?.source_generated_at||gsc?.generatedAt||null,
