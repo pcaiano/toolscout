@@ -1,5 +1,6 @@
 import base from './authority-acquisition-worker.js';
 import {commandCenterHtml} from './command-center-simplified-view.js';
+import {publicRuntimeToolResponse} from './catalog-autonomy-worker.js';
 
 function jsonHeaders(response){
   const h=new Headers(response.headers);
@@ -403,6 +404,10 @@ async function commandCenterBusinessTruth(request,env,{fresh=false}={}){
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
+    if(request.method==='GET'&&u.pathname.startsWith('/tools/')){
+      const m=u.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)(?:\.html)?\/?$/i);
+      if(m){const runtime=await publicRuntimeToolResponse(env,m[1]).catch(()=>null);if(runtime)return runtime;}
+    }
     if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
       const fresh=u.searchParams.get('fresh')==='1';
       return Response.json(await commandCenterBusinessTruth(request,env,{fresh}),{headers:{'Cache-Control':'private, no-store, max-age=0','X-ToolScout-Read-Mode':fresh?'fresh':'observability-cache'}});
