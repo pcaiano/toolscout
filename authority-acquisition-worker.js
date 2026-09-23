@@ -183,6 +183,19 @@ async function health(env){
   }
   return {status:'active',executor:'cloudflare',routeCount:ROUTES.length,reconciliation,items};
 }
+async function finalAuditCycle(request,env,ctx){
+  if(!env.ADMIN_TOKEN)return {ok:false,error:'admin_token_unavailable'};
+  const call=async(path)=>{
+    try{
+      const r=await base.fetch(new Request(new URL(path,request.url),{method:'POST',headers:{Authorization:'Bearer '+env.ADMIN_TOKEN,'Content-Type':'application/json'}}),env,ctx);
+      let body=null;try{body=await r.json()}catch{}
+      return {ok:r.ok,status:r.status,body};
+    }catch(error){return {ok:false,status:0,error:String(error?.message||error).slice(0,500)}}
+  };
+  const execution=await call('/api/growth/execution/dispatch');
+  const supervisor=await call('/api/growth/supervisor/audit');
+  return {ok:execution.ok&&supervisor.ok,execution,supervisor};
+}
 function authorized(request,env){
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
@@ -192,6 +205,7 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/final-audit-cycle-20260923')return Response.json(await finalAuditCycle(request,env,ctx),{headers:H});
     if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
       return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
