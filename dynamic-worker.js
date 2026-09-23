@@ -4,17 +4,30 @@ import { appendVerifiedSubId, createClickRef } from './revenue-attribution.js';
 import { classifySessionRequest, SESSION_CLASSIFICATIONS, SESSION_UPSERT_SQL } from './session-classification.js';
 
 const BASE = 'https://trytoolscout.org';
+const RUNTIME_EDGE_CACHE_KEY='https://trytoolscout.org/__cache/catalog-runtime-snapshot-v1';
 const xmlEscape = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&apos;');
 const slugFromPath = pathname => { const match=pathname.match(/^\/([a-z0-9][a-z0-9-]*)\.html$/i); return match ? decodeURIComponent(match[1]) : null; };
 async function staticAsset(request,env){ try { const response=await env.ASSETS.fetch(request); return response.ok?response:null; } catch { return null; } }
-async function catalogToolsForOpportunity(request,env){
-  const response=await env.ASSETS.fetch(new Request(new URL('/data/tools.json',request.url)));if(!response.ok)return[];
-  const base=await response.json(),out=[],seen=new Set();
-  for(const tool of Array.isArray(base)?base:[]){if(tool?.slug&&!seen.has(tool.slug)){seen.add(tool.slug);out.push(tool)}}
+async function runtimeCatalogProfiles(env){
   try{
     const rows=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold') ORDER BY verified_at DESC").all();
-    for(const row of rows.results||[]){let tool=null;try{tool=JSON.parse(row.profile_json||'{}')}catch{}if(tool?.slug&&!seen.has(tool.slug)){seen.add(tool.slug);out.push(tool)}}
-  }catch{}
+    return (rows.results||[]).map(row=>{try{return JSON.parse(row.profile_json||'{}')}catch{return null}}).filter(Boolean);
+  }catch{
+    try{
+      if(typeof caches==='undefined'||!caches.default)return[];
+      const cached=await caches.default.match(new Request(RUNTIME_EDGE_CACHE_KEY));if(!cached)return[];
+      const body=await cached.json();
+      return (body?.candidates||[]).map(row=>{try{return JSON.parse(row.profile_json||'{}')}catch{return null}}).filter(Boolean);
+    }catch{return[]}
+  }
+}
+async function catalogToolsForOpportunity(request,env){
+  const response=await env.ASSETS.fetch(new Request(new URL('/data/tools.json',request.url)));if(!response.ok)return[];
+  const [base,runtime]=await Promise.all([response.json(),runtimeCatalogProfiles(env)]),out=[],seen=new Set();
+  for(const tool of [...(Array.isArray(base)?base:[]),...runtime]){
+    const slug=String(tool?.slug||'').toLowerCase();if(!slug||seen.has(slug))continue;
+    seen.add(slug);out.push(tool);
+  }
   return out;
 }
 async function dynamicOpportunity(request,env,slug){ const row=await env.DB.prepare("SELECT intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status,updated_at FROM seo_opportunities WHERE intent_slug=? LIMIT 1").bind(slug).first(); if(!row||!['ready','published'].includes(String(row.status))) return null; const tools=await catalogToolsForOpportunity(request,env); if(!tools.length)return null; const html=renderOpportunityPage({slug,opportunity:row,tools}); return new Response(html,{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300, s-maxage=3600','X-ToolScout-Source':'dynamic-opportunity'}}); }
@@ -47,10 +60,9 @@ async function d1AffiliateRoute(env,tool){
   return null;
 }
 async function d1CatalogPublicRoute(env,tool){
-  try{
-    const row=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status IN ('published','admitted_coverage','quality_hold') LIMIT 1").bind(tool).first();
-    if(!row)return null;const profile=JSON.parse(row.profile_json||'{}'),url=safeAffiliateUrl(profile?.sourceUrl);return url||null;
-  }catch{return null}
+  const key=String(tool||'').toLowerCase();
+  const profile=(await runtimeCatalogProfiles(env)).find(x=>String(x?.slug||'').toLowerCase()===key);
+  return safeAffiliateUrl(profile?.sourceUrl)||null;
 }
 async function trackedRedirect(request,env,tool){
   try{
