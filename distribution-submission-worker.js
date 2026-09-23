@@ -206,8 +206,8 @@ export default {
   },
   async scheduled(event,env,ctx){
     const hourly=event?.cron==='15 * * * *';
-    const daily=event?.cron==='15 3 * * *';
-    if(daily&&base.scheduled)await base.scheduled(event,env,ctx);
+    const daily=event?.cron==='35 3 * * *';
+    if(base.scheduled)await base.scheduled(event,env,ctx);
     if(hourly||daily){
       await packageQueue(new Request('https://trytoolscout.org/'),env);
       await execute(new Request('https://trytoolscout.org/'),env);
