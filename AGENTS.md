@@ -11,6 +11,19 @@ Before planning or executing ToolScout work, every agent, Codex session, Work se
 
 `docs/COMMAND-CENTER.md` is the canonical operational memory across ChatGPT chats, Work, Codex, GitHub sessions, and human actions. Do not rely on conversational memory or stale checkpoints when repository state can be inspected. After substantial execution, reconcile meaningful operational changes back into the Command Center and relevant source-of-truth files.
 
+## Development MCP and verification policy
+
+ToolScout development uses project-scoped MCP tooling to reduce stale API usage and require real browser verification before work is declared complete.
+
+1. For code generation, setup, configuration, framework/library usage, or API syntax that may have changed, consult the Context7 MCP server before implementation. Prefer current first-party documentation surfaced through Context7 over remembered syntax.
+2. After any user-facing HTML, CSS, JavaScript, responsive-layout, navigation, form, comparator, Command Center, or other browser-surface change, use the Chrome DevTools MCP server to verify the affected experience before declaring the task complete.
+3. Browser verification must cover the changed interaction, relevant console errors, failed network requests, and at least one desktop and one mobile-sized viewport when responsiveness can be affected.
+4. The project Chrome DevTools MCP configuration runs headless and isolated. Do not attach it to the owner's personal browser profile or authenticated personal sessions unless the owner explicitly requests that for a specific task.
+5. For Worker/API/backend changes with a browser-visible effect, combine automated tests or endpoint checks with Chrome DevTools verification of the resulting browser behavior. Backend-only work does not require browser testing when no browser surface is affected.
+6. If either MCP server is unavailable, do not silently skip the check and do not claim that MCP-backed verification occurred. Use the best available automated fallback and state the tooling blocker explicitly.
+7. Context7 is a documentation aid, not an infrastructure source of truth. Cloudflare resource names, IDs, bindings, secrets, deployment state, and ToolScout production ownership must still be verified against repository and live infrastructure sources.
+8. Keep MCP configuration credential-free in git. API keys, tokens, browser credentials, and other secrets must never be committed to the repository.
+
 ## Project Isolation Guardrails
 
 These rules are permanent safety constraints for every agent, automation, migration, deployment, and infrastructure change performed from this repository.
