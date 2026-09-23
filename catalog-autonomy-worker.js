@@ -189,14 +189,17 @@ async function logEvent(env,slug,type,status,detail,evidence=null){
 }
 async function runtimeSnapshot(env,{force=false}={}){
   if(!force&&Date.now()-runtimeCache.at<RUNTIME_CACHE_MS)return runtimeCache;
-  await ensureSchema(env);
-  const [states,candidates]=await Promise.all([
-    env.DB.prepare(`SELECT * FROM catalog_runtime_state`).all(),
-    env.DB.prepare(`SELECT tool_slug,profile_json,status,source_status,verified_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage') ORDER BY verified_at DESC`).all()
-  ]);
-  const stateMap=new Map((states.results||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
-  for(const row of candidates.results||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
-  runtimeCache={at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k))};
+  try{
+    const [states,candidates]=await Promise.all([
+      env.DB.prepare(`SELECT * FROM catalog_runtime_state`).all(),
+      env.DB.prepare(`SELECT tool_slug,profile_json,status,source_status,verified_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage') ORDER BY verified_at DESC`).all()
+    ]);
+    const stateMap=new Map((states.results||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
+    for(const row of candidates.results||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
+    runtimeCache={at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:false,lastError:null};
+  }catch(error){
+    runtimeCache={...runtimeCache,at:Date.now(),degraded:true,lastError:safeText(error?.message||error,500)};
+  }
   return runtimeCache;
 }
 async function runtimeCandidates(env){return (await runtimeSnapshot(env)).candidates}
@@ -209,6 +212,43 @@ async function mergedTools(env){
     seen.add(slug);out.push(tool);
   }
   return out;
+}
+async function affiliateStateMap(env){
+  const map=new Map();
+  try{
+    const rows=await env.DB.prepare(`SELECT tool_slug,status FROM affiliate_workflow`).all();
+    for(const row of rows.results||[])map.set(String(row.tool_slug||'').toLowerCase(),String(row.status||'research_required'));
+  }catch{}
+  const registry=await assetJson(env,'/data/affiliate.json',{});
+  for(const [slug,entry] of Object.entries(registry||{}))if(entry?.enabled&&entry?.url){
+    const key=String(slug||'').toLowerCase();
+    if(!['verified','earning'].includes(map.get(key)))map.set(key,'active');
+  }
+  return map;
+}
+const AFFILIATE_MONETIZED_STATES=new Set(['active','verified','earning']);
+export async function publicCatalogInventory(env){
+  const [staticTools,tools,affiliateStates]=await Promise.all([
+    assetJson(env,'/data/tools.json',[]),
+    mergedTools(env),
+    affiliateStateMap(env)
+  ]);
+  const staticSet=new Set((Array.isArray(staticTools)?staticTools:[]).map(x=>String(x?.slug||'').toLowerCase()).filter(Boolean));
+  const rows=tools.map(tool=>{
+    const slug=String(tool?.slug||'').toLowerCase(),status=affiliateStates.get(slug)||'research_required';
+    return {slug,name:tool?.name||slug,category:tool?.category||null,origin:staticSet.has(slug)?'static':'runtime',affiliate_status:status,affiliate_active:AFFILIATE_MONETIZED_STATES.has(status)};
+  });
+  const active=rows.filter(x=>x.affiliate_active).length;
+  return {
+    ok:true,
+    version:'canonical-catalog-v1',
+    total:rows.length,
+    static_unique:rows.filter(x=>x.origin==='static').length,
+    runtime_unique:rows.filter(x=>x.origin==='runtime').length,
+    affiliate:{active_tools:active,uncovered_tools:Math.max(0,rows.length-active),catalog_coverage_pct:rows.length?Number((active/rows.length*100).toFixed(1)):0},
+    tools:rows,
+    generated_at:new Date().toISOString()
+  };
 }
 export async function verifyBatch(env){
   await ensureSchema(env);
@@ -477,7 +517,14 @@ export default {
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/catalog-autonomy/status'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});return Response.json(await status(env),{headers:JSON_H})}
     if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/run'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api'},()=>verifyBatch(env));const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api'},()=>admitTrustedCandidates(env));return Response.json({ok:true,verify,admit},{headers:JSON_H})}
-    if(request.method==='GET'&&u.pathname==='/data/tools.json')return Response.json(await mergedTools(env),{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+    if(request.method==='GET'&&u.pathname==='/data/tools.json'){
+      const tools=await mergedTools(env).catch(()=>assetJson(env,'/data/tools.json',[]));
+      return Response.json(Array.isArray(tools)?tools:[],{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60','X-ToolScout-Catalog':'canonical-merged'}});
+    }
+    if(request.method==='GET'&&(u.pathname==='/data/catalog-inventory.json'||u.pathname==='/api/catalog-inventory')){
+      const inventory=await publicCatalogInventory(env).catch(async()=>{const tools=await assetJson(env,'/data/tools.json',[]);return{ok:false,version:'canonical-catalog-v1',degraded:true,total:Array.isArray(tools)?tools.length:0,static_unique:Array.isArray(tools)?tools.length:0,runtime_unique:0,affiliate:{active_tools:0,uncovered_tools:Array.isArray(tools)?tools.length:0,catalog_coverage_pct:0},tools:(Array.isArray(tools)?tools:[]).map(x=>({slug:x.slug,name:x.name,category:x.category||null,origin:'static',affiliate_status:'unknown',affiliate_active:false})),generated_at:new Date().toISOString()}}); 
+      return Response.json(inventory,{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60','X-ToolScout-Catalog':'canonical-inventory'}});
+    }
     const slug=toolSlug(u.pathname);
     if(request.method==='GET'&&slug){
       const [state,candidate]=await Promise.all([toolState(env,slug),runtimeCandidate(env,slug)]);
