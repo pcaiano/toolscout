@@ -158,6 +158,21 @@
       "public_url": "https://ora.ai/score/trytoolscout.org",
       "verification_kind": "http_200_score_page",
       "note": "Official Ora API verified 2026-09-07. Public free scan requires only a domain/URL, no signup or PII. Scan data powers Ora product discovery and public score surfaces. include=essentials returns agent-readiness essentials alongside the standard result."
+    },
+    {
+      "surface_slug": "a2a-registry",
+      "enabled": true,
+      "allow_automatic": true,
+      "requires_payment": false,
+      "method": "POST",
+      "content_type": "application/json",
+      "endpoint": "https://api.a2a-registry.org/public/ingest",
+      "auth_type": "none",
+      "payload_kind": "a2a_manifest_ingest",
+      "asset_scope": "agent_manifest",
+      "manifest_url": "https://trytoolscout.org/.well-known/agent-card.json",
+      "public_directory": "https://www.a2a-registry.org/",
+      "note": "Public A2A Registry ingest endpoint. No account required. ToolScout publishes a live A2A v1.0 Agent Card; submission remains pending until public directory verification confirms the listing."
     }
   ],
   "policy": {
