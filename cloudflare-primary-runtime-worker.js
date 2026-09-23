@@ -130,12 +130,13 @@ async function runPrimaryCycle(env,ctx,trigger){
   return {ok:failed.length===0,executor:'cloudflare',trigger,failed,stages:summary};
 }
 
-async function runtimeMatrix(env){
+async function runtimeMatrix(env,request=null){
   let recent=[];
   try{
     recent=(await env.DB.prepare(`SELECT engine,mission,status,trigger_name,started_at,completed_at,detail
       FROM engine_runs ORDER BY started_at DESC LIMIT 30`).all()).results||[];
   }catch{}
+  const googleOAuth=await googleAnalyticsOAuthStatus(env,request);
   return {
     status:'active',
     architecture:'cloudflare-primary-v1',
@@ -158,6 +159,10 @@ async function runtimeMatrix(env){
       githubActionsRole:'fallback_only',
       gscAuth:'google_oauth',
       googleOAuthConfigured:Boolean(env.GOOGLE_OAUTH_CLIENT_ID&&env.GOOGLE_OAUTH_CLIENT_SECRET),
+      googleOAuthConnected:Boolean(googleOAuth.connected),
+      analyticsScopeGranted:Boolean(googleOAuth.analyticsScopeGranted),
+      searchConsoleScopeGranted:Boolean(googleOAuth.searchConsoleScopeGranted),
+      oauthStorage:googleOAuth.storage||null,
       repositoryWriteCredentialConfigured:Boolean(env.GITHUB_CONTENT_TOKEN||env.GITHUB_TOKEN),
       note:'SEO scheduling, GSC evidence and prioritization are Cloudflare-owned. Existing Google OAuth connections must be reauthorized once for Search Console scope. Static repository mutations still require a repository write credential until SEO pages are fully runtime-rendered.'
     },
@@ -170,7 +175,7 @@ export default{
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(request.method==='GET'&&url.pathname==='/api/runtime/executors'){
-      return Response.json(await runtimeMatrix(env),{headers:H});
+      return Response.json(await runtimeMatrix(env,request),{headers:H});
     }
     if(request.method==='POST'&&url.pathname==='/api/runtime/cloudflare-primary-cycle'){
       const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
