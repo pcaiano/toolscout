@@ -12,7 +12,7 @@ async function catalogToolsForOpportunity(request,env){
   const base=await response.json(),out=[],seen=new Set();
   for(const tool of Array.isArray(base)?base:[]){if(tool?.slug&&!seen.has(tool.slug)){seen.add(tool.slug);out.push(tool)}}
   try{
-    const rows=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage') ORDER BY verified_at DESC").all();
+    const rows=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold') ORDER BY verified_at DESC").all();
     for(const row of rows.results||[]){let tool=null;try{tool=JSON.parse(row.profile_json||'{}')}catch{}if(tool?.slug&&!seen.has(tool.slug)){seen.add(tool.slug);out.push(tool)}}
   }catch{}
   return out;
@@ -48,7 +48,7 @@ async function d1AffiliateRoute(env,tool){
 }
 async function d1CatalogPublicRoute(env,tool){
   try{
-    const row=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status IN ('published','admitted_coverage') LIMIT 1").bind(tool).first();
+    const row=await env.DB.prepare("SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? AND status IN ('published','admitted_coverage','quality_hold') LIMIT 1").bind(tool).first();
     if(!row)return null;const profile=JSON.parse(row.profile_json||'{}'),url=safeAffiliateUrl(profile?.sourceUrl);return url||null;
   }catch{return null}
 }
