@@ -72,14 +72,15 @@ function business(){
    metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d')+
    metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d')+
    metric('External executions - 24h',n(g.externalExecutions24h),n(g.externalExecutions7d)+' / 7d')+
-   metric('Affiliate production routes',n(aff.productionRoutes),n(aff.pipelineActivePrograms)+' active programmes in pipeline')+
+   metric('Affiliate routes in production',n(aff.productionRoutes),n(aff.pipelineActivePrograms)+' pipeline-active - '+n((aff.productionWithoutActivePipeline||[]).length)+' metadata gap(s)')+
    metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
    metric('Confirmed revenue',data.stats==null?'Source unavailable':(r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency)),data.stats==null?'Stats source did not respond':(r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected'))+
    metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
    (a.status==='connected'?row('GA4 sessions - 24h',n(ga.last24Hours),n(ga.monthToDate)+' MTD - canonical GA4 population'):'')+
-   row('Affiliate programme truth',n(aff.pipelineActivePrograms)+' active',n(aff.productionRoutes)+' live production routes - '+n(aff.pipelineTrackedPrograms)+' programmes tracked')+
+   row('Affiliate programme truth',n(aff.productionRoutes)+' live routes',n(aff.pipelineActivePrograms)+' pipeline-active - '+n(aff.pipelineTrackedPrograms)+' tracked')+
+   ((aff.productionWithoutActivePipeline||[]).length?row('Affiliate metadata to reconcile',n(aff.productionWithoutActivePipeline.length),aff.productionWithoutActivePipeline.join(', ')):'')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
 }
@@ -146,6 +147,7 @@ function health(){
  if(Number(arch.openIncidents||0)>0)issues.push({level:'bad',title:'Architecture incidents',detail:n(arch.openIncidents)+' open architecture incidents.'});
  if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
  if(a.status&&a.status!=='healthy')issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+a.status+'.'});
+ if(t.affiliate&&t.affiliate.reconciled===false)issues.push({level:'warn',title:'Affiliate metadata reconciliation',detail:n((t.affiliate.productionWithoutActivePipeline||[]).length)+' live production route(s) are not marked active in pipeline metadata: '+(t.affiliate.productionWithoutActivePipeline||[]).join(', ')+'. Production registry remains canonical.'});
  if(Number(growth.externalExecutions24h||0)<10)issues.push({level:'warn',title:'Acquisition execution below operating floor',detail:n(growth.externalExecutions24h)+' external executions in 24h. Floor is 10; target is 15.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh and authority loop have no current measurable failure.'});
  const rows=[
