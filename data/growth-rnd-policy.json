@@ -76,7 +76,7 @@
   "resourcePolicy": {
     "freeFirst": true,
     "d1HeavyStrategicAuditCadence": "12h_lightweight",
-    "maxNewExperimentsPerAudit": 8,
+    "maxNewExperimentsPerAudit": 12,
     "evidenceRequiredBeforeScaling": true,
     "evidenceNotRequiredBeforeExploration": true,
     "missingEvidenceMeansZeroImpact": false,

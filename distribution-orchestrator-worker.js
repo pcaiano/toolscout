@@ -979,19 +979,46 @@ async function growthRndAuditDue(env,maxAgeHours=26){
 }
 async function runGrowthRndAudit(env){
   await ensureGrowthSchema(env);
-  const policy=await growthAssetJson(env,'/data/growth-rnd-policy.json',{mode:'locked',autonomousPrimitives:[],resourcePolicy:{maxNewExperimentsPerAudit:0}});
-  const playbook=await growthAssetJson(env,'/data/growth-acquisition-playbook.json',{version:0,plays:[]});
+  const [policy,frontier,playbook]=await Promise.all([
+    growthAssetJson(env,'/data/growth-rnd-policy.json',{mode:'locked',autonomousPrimitives:[],resourcePolicy:{maxNewExperimentsPerAudit:0},frontierDiscovery:{enabled:false}}),
+    growthAssetJson(env,'/data/growth-rnd-frontier.json',{ideas:[]}),
+    growthAssetJson(env,'/data/growth-acquisition-playbook.json',{version:0,plays:[]})
+  ]);
   const allowed=new Set(Array.isArray(policy?.autonomousPrimitives)?policy.autonomousPrimitives:[]);
-  const maxExperiments=Math.max(0,Math.min(12,Number(policy?.resourcePolicy?.maxNewExperimentsPerAudit||0)));
-  const maxTargets=Math.max(1,Math.min(5,Number(policy?.resourcePolicy?.maxTargetsPerExperiment||playbook?.rules?.maxTargetsPerPlay||3)));
-  const [types,human,actions,sourceRows,supervisorRows]=await Promise.all([
+  const existingCapabilities=new Set(Array.isArray(policy?.existingCapabilities)?policy.existingCapabilities:[]);
+  const maxExperiments=Math.max(0,Math.min(10,Number(policy?.resourcePolicy?.maxNewExperimentsPerAudit||0)));
+  const frontierCfg=policy?.frontierDiscovery||{};
+  const maxFrontier=Math.max(0,Math.min(30,Number(frontierCfg?.maxFrontierIdeasPerAudit||12)));
+  const minAutomation=Math.max(0,Math.min(100,Number(frontierCfg?.minAutomationScore||70)));
+  const [types,human,actions,channels,surfaceFamilies,sourceRows,supervisorRows]=await Promise.all([
     growthRows(env,`SELECT subject_type,COUNT(*) n,MAX(priority_score) max_score FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`),
     growthRows(env,`SELECT event_type,COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved') GROUP BY event_type`),
     growthRows(env,`SELECT engine,COUNT(*) actions,SUM(CASE WHEN status IN ('sent','verified','completed') THEN 1 ELSE 0 END) completed FROM growth_action_events WHERE created_at>=datetime('now','-7 days') GROUP BY engine`),
+    growthRows(env,`SELECT channel,COUNT(*) n FROM growth_action_events WHERE created_at>=datetime('now','-30 days') GROUP BY channel`),
+    growthRows(env,`SELECT COALESCE(NULLIF(surface_type,''),'unknown') surface_type,COUNT(*) n,MAX(distribution_score) max_score FROM distribution_opportunities WHERE status NOT IN ('skipped','rejected','unavailable_free','skipped_low_quality') GROUP BY COALESCE(NULLIF(surface_type,''),'unknown') ORDER BY max_score DESC LIMIT 30`),
     growthRows(env,`SELECT opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json FROM growth_opportunity_state WHERE status='active' ORDER BY priority_score DESC LIMIT 240`),
     growthRows(env,`SELECT engine,status,directive,directive_json,external_executions_24h FROM growth_supervisor_state WHERE engine IN ('growth_brain','distribution','seo_geo_aio')`)
   ]);
   const counts=Object.fromEntries(types.map(x=>[x.subject_type,{count:Number(x.n||0),max:Number(x.max_score||0)}]));
+  const experiments=[];
+  const add=(key,type,subject,hypothesis,steps,signal)=>experiments.push({key,type,subject,hypothesis,steps,signal});
+  if((counts.search?.max||0)>=65)add('rnd:search-amplification','search_amplification','search',humanSprintActive()?'Observed GSC demand should compound faster when Content and Distribution reinforce the same intent during the Human Acquisition Sprint.':'Observed search demand should compound faster when Content and Distribution reinforce the same intent.',['content_amplification','distribution_amplification','measure_search_lift'],humanSprintActive()?'strict_verified_human_sessions':'search_sessions_and_impressions');
+  if((counts.news_update?.count||0)>0)add('rnd:news-compounding','news_compounding','whats_new','Verified product changes can create timely search, content, catalog and vendor-distribution opportunities.',['catalog_impact_review','content_amplification','search_update_angle','vendor_amplification'],'attributed_sessions_from_news');
+  if(!humanSprintActive()&&(counts.affiliate?.max||0)>=70)add('rnd:affiliate-leakage','affiliate_leakage_recovery','affiliate','High-priority affiliate leakage should be closed before lower-value coverage work.',['prepare_application','capture_link','activate_route','verify_route'],'monetized_outbound');
+  if(!humanSprintActive()&&((counts.catalog_category?.count||0)>0||(counts.catalog_gap?.count||0)>0))add('rnd:catalog-expansion','catalog_expansion','catalog','Coverage gaps can create new searchable and monetizable decision surfaces when official-source quality gates pass.',['discover_candidates','verify_first_party','admit_coverage_only'],'qualified_catalog_coverage');
+  const humanCount=human.reduce((s,x)=>s+Number(x.n||0),0);
+  if(humanCount>=3)add('rnd:human-gate-reduction','automation_gap_reduction','operations','Repeated human gates are candidates for automation when identity, legal and paid-action boundaries are not involved.',['audit_human_gates','convert_machine_resolvable_gates'],'owner_minutes_reduced');
+
+  let upserted=0,blocked=0;
+  for(const x of experiments.slice(0,maxExperiments)){
+    const permitted=policy?.mode==='bounded_autonomy'&&x.steps.every(step=>allowed.has(step));
+    if(!permitted){blocked++;continue}
+    await env.DB.prepare(`INSERT INTO growth_rnd_experiments(experiment_key,experiment_type,subject_key,hypothesis,action_json,status,risk_class,expected_signal,created_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,'active','bounded',?,datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(experiment_key) DO UPDATE SET hypothesis=excluded.hypothesis,action_json=excluded.action_json,status='active',expected_signal=excluded.expected_signal,last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(x.key,x.type,x.subject,x.hypothesis,JSON.stringify(x.steps),x.signal).run();upserted++;
+  }
+
   const supervisors=new Map(supervisorRows.map(row=>{let cfg={};try{cfg=JSON.parse(row.directive_json||'{}')}catch{}return[String(row.engine),{...row,cfg}]}));
   const growthCfg=supervisors.get('growth_brain')?.cfg||{};
   const distCfg=supervisors.get('distribution')?.cfg||{};
@@ -1002,32 +1029,32 @@ async function runGrowthRndAudit(env){
   const authorityRequired=Boolean(backlinkCfg.backlink_acquisition)
     ||Number(backlinkCfg.verified_referring_domains||0)<Math.max(1,Number(backlinkCfg.referring_domain_bootstrap_floor||10))
     ||Number(backlinkCfg.authority_queue||0)>0;
-  const sourceActions=row=>{try{const a=JSON.parse(row?.action_json||'[]');return Array.isArray(a)?a:[]}catch{return[]}};
-  const matchesTrigger=(play,rows)=>{
+  const sourceActions=row=>{try{const parsed=JSON.parse(row?.action_json||'[]');return Array.isArray(parsed)?parsed:[]}catch{return[]}};
+  const playTriggerMatches=(play,rows)=>{
     const trigger=play?.trigger||{};
     if(trigger.authorityRequired&&!authorityRequired)return false;
     if(trigger.acquisitionUnderpowered&&external24>=acquisitionMin)return false;
     if(trigger.newsAvailable&&!rows.some(x=>x.subject_type==='news_update'))return false;
     if(Number(trigger.searchPriorityAtLeast||0)>0&&!rows.some(x=>x.subject_type==='search'&&Number(x.priority_score||0)>=Number(trigger.searchPriorityAtLeast)))return false;
     if(Array.isArray(trigger.sourceActionAny)&&trigger.sourceActionAny.length&&!rows.some(row=>sourceActions(row).some(a=>trigger.sourceActionAny.includes(a))))return false;
-    return trigger.alwaysWhenSource||Object.keys(trigger).length>0;
+    return Boolean(trigger.alwaysWhenSource)||Object.keys(trigger).length>0;
   };
-  const candidates=(Array.isArray(playbook?.plays)?playbook.plays:[])
+  const playCandidates=(Array.isArray(playbook?.plays)?playbook.plays:[])
     .map(play=>{
       const sourceTypes=new Set(Array.isArray(play.sourceTypes)?play.sourceTypes:[]);
       const rows=sourceRows.filter(row=>sourceTypes.has(String(row.subject_type||'')));
-      return{play,rows,triggered:rows.length>0&&matchesTrigger(play,rows)};
+      return{play,rows,triggered:rows.length>0&&playTriggerMatches(play,rows)};
     })
-    .filter(x=>x.triggered)
+    .filter(item=>item.triggered)
     .sort((a,b)=>Number(b.play.priority||0)-Number(a.play.priority||0));
-  const selected=candidates.slice(0,maxExperiments);
-  let upserted=0,blocked=0,boundOpportunities=0,newActionsAdded=0;
-  const activated=[],skipped=[];
-  for(const item of selected){
-    const play=item.play;
-    const steps=(Array.isArray(play.steps)?play.steps:[]).filter(Boolean);
+  const maxTargets=Math.max(1,Math.min(5,Number(policy?.resourcePolicy?.maxTargetsPerExperiment||playbook?.rules?.maxTargetsPerPlay||3)));
+  const acquisitionSlots=Math.max(0,maxExperiments-upserted);
+  let playbookActivated=0,playbookBlocked=0,boundOpportunities=0,newActionsAdded=0;
+  const activatedPlayIds=[];
+  for(const item of playCandidates.slice(0,acquisitionSlots)){
+    const play=item.play,steps=(Array.isArray(play.steps)?play.steps:[]).filter(Boolean);
     const permitted=policy?.mode==='bounded_autonomy'&&steps.length>0&&steps.every(step=>allowed.has(step));
-    if(!permitted){blocked++;skipped.push({id:play.id,reason:'primitive_not_approved'});continue}
+    if(!permitted){playbookBlocked++;continue}
     const key='rnd:acquisition:'+String(play.id||play.experimentType||'play');
     await env.DB.prepare(`INSERT INTO growth_rnd_experiments(experiment_key,experiment_type,subject_key,hypothesis,action_json,status,risk_class,expected_signal,created_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,'active','bounded',?,datetime('now'),datetime('now'),datetime('now'))
@@ -1039,44 +1066,97 @@ async function runGrowthRndAudit(env){
          OR growth_rnd_experiments.status<>'active'
          OR growth_rnd_experiments.expected_signal IS NOT excluded.expected_signal`)
       .bind(key,String(play.experimentType||play.id),String(play.id||''),String(play.hypothesis||''),JSON.stringify(steps),String(play.expectedSignal||'ga4_sessions')).run();
-    upserted++;
-    const targets=item.rows.slice(0,maxTargets);
-    for(const row of targets){
-      const current=sourceActions(row),merged=[...new Set([...current,...steps])];
-      if(merged.length===current.length)continue;
+    upserted++;playbookActivated++;activatedPlayIds.push(String(play.id||play.experimentType||'play'));
+    for(const row of item.rows.slice(0,maxTargets)){
+      const currentActions=sourceActions(row),merged=[...new Set([...currentActions,...steps])];
+      if(merged.length===currentActions.length)continue;
       const w=await env.DB.prepare(`UPDATE growth_opportunity_state SET action_json=?,last_evaluated_at=datetime('now'),updated_at=datetime('now') WHERE opportunity_key=? AND status='active' AND action_json=?`)
         .bind(JSON.stringify(merged),row.opportunity_key,row.action_json).run();
-      if(Number(w?.meta?.changes||w?.changes||0)>0){newActionsAdded+=merged.length-current.length;boundOpportunities++}
-    }
-    activated.push({id:play.id,type:play.experimentType,priority:Number(play.priority||0),targets:targets.map(x=>x.opportunity_key),steps});
-  }
-  const humanCount=human.reduce((sum,x)=>sum+Number(x.n||0),0);
-  if(humanCount>=3&&upserted<maxExperiments){
-    const steps=['audit_human_gates','convert_machine_resolvable_gates'];
-    if(policy?.mode==='bounded_autonomy'&&steps.every(step=>allowed.has(step))){
-      await env.DB.prepare(`INSERT INTO growth_rnd_experiments(experiment_key,experiment_type,subject_key,hypothesis,action_json,status,risk_class,expected_signal,created_at,last_evaluated_at,updated_at)
-        VALUES('rnd:human-gate-reduction','automation_gap_reduction','operations','Repeated human gates are candidates for automation when identity, legal and paid-action boundaries are not involved.',?,'active','bounded','owner_minutes_reduced',datetime('now'),datetime('now'),datetime('now'))
-        ON CONFLICT(experiment_key) DO UPDATE SET action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')`).bind(JSON.stringify(steps)).run();
-      upserted++;
+      if(Number(w?.meta?.changes||w?.changes||0)>0){boundOpportunities++;newActionsAdded+=merged.length-currentActions.length}
     }
   }
-  return{
+
+  const observedChannels=new Set(channels.map(x=>String(x.channel||'')).filter(Boolean));
+  const frontierIdeas=Array.isArray(frontier?.ideas)?frontier.ideas:[];
+  const eligible=frontierIdeas.filter(idea=>{
+    if(frontierCfg?.enabled===false)return false;
+    if(Number(idea?.automationScore||0)<minAutomation)return false;
+    if(frontierCfg?.freeFirst!==false&&String(idea?.costClass||'free')!=='free')return false;
+    return true;
+  }).sort((a,b)=>(Number(b.priority||0)+Number(b.automationScore||0)+Number(b.semiPassiveScore||0))-(Number(a.priority||0)+Number(a.automationScore||0)+Number(a.semiPassiveScore||0)));
+
+  let frontierCandidates=0,frontierImplemented=0,frontierWrites=0;
+  for(const idea of eligible.slice(0,maxFrontier)){
+    const dedupe=[...(Array.isArray(idea?.dedupeActions)?idea.dedupeActions:[]),...(Array.isArray(idea?.dedupeCapabilities)?idea.dedupeCapabilities:[])];
+    const implemented=dedupe.length>0&&dedupe.every(marker=>observedChannels.has(String(marker))||existingCapabilities.has(String(marker)));
+    const status=implemented?'implemented':'candidate';
+    if(implemented)frontierImplemented++;else frontierCandidates++;
+    const actionJson=JSON.stringify(Array.isArray(idea?.steps)?idea.steps:[]);
+    const evidenceJson=JSON.stringify({source:'curated_frontier_plus_runtime_dedupe',priority:Number(idea?.priority||0),cost_class:idea?.costClass||'free',dedupe_markers:dedupe,observed_channels:[...observedChannels].slice(0,80)});
+    const result=await env.DB.prepare(`INSERT INTO growth_rnd_frontier(idea_key,title,mechanism,hypothesis,automation_score,semi_passive_score,implementation_mode,status,expected_signal,next_step,action_json,evidence_json,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(idea_key) DO UPDATE SET
+        title=excluded.title,mechanism=excluded.mechanism,hypothesis=excluded.hypothesis,
+        automation_score=excluded.automation_score,semi_passive_score=excluded.semi_passive_score,
+        implementation_mode=excluded.implementation_mode,status=excluded.status,
+        expected_signal=excluded.expected_signal,next_step=excluded.next_step,
+        action_json=excluded.action_json,evidence_json=excluded.evidence_json,
+        last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_rnd_frontier.title IS NOT excluded.title
+         OR growth_rnd_frontier.mechanism IS NOT excluded.mechanism
+         OR growth_rnd_frontier.hypothesis IS NOT excluded.hypothesis
+         OR growth_rnd_frontier.automation_score IS NOT excluded.automation_score
+         OR growth_rnd_frontier.semi_passive_score IS NOT excluded.semi_passive_score
+         OR growth_rnd_frontier.implementation_mode IS NOT excluded.implementation_mode
+         OR growth_rnd_frontier.status IS NOT excluded.status
+         OR growth_rnd_frontier.expected_signal IS NOT excluded.expected_signal
+         OR growth_rnd_frontier.next_step IS NOT excluded.next_step
+         OR growth_rnd_frontier.action_json IS NOT excluded.action_json`)
+      .bind(String(idea.ideaKey),String(idea.title),String(idea.mechanism),String(idea.hypothesis),Number(idea.automationScore||0),Number(idea.semiPassiveScore||0),String(idea.implementationMode||'one_time_build'),status,String(idea.expectedSignal||''),String(idea.nextStep||''),actionJson,evidenceJson).run();
+    frontierWrites+=Number(result?.meta?.changes||result?.changes||0);
+  }
+
+  const knownSurfaceFamilies=new Set(Array.isArray(frontier?.knownSurfaceFamilies)?frontier.knownSurfaceFamilies.map(String):[]);
+  let dynamicSurfaceIdeas=0;
+  for(const row of surfaceFamilies.slice(0,8)){
+    const family=String(row.surface_type||'unknown').trim().toLowerCase();
+    if(!family||family==='unknown'||knownSurfaceFamilies.has(family))continue;
+    const slug=family.replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80);
+    if(!slug)continue;
+    const key='frontier:surface-family:'+slug;
+    const title='Automate acquisition on '+family.replaceAll('_',' ')+' surfaces';
+    const hypothesis='A newly observed external surface family may provide incremental referral traffic, authority or both if ToolScout can qualify and execute it safely at scale.';
+    const next='Research a no-auth or safely authenticated execution path, then bind it to Distribution if the route is free, relevant and policy-compliant.';
+    const result=await env.DB.prepare(`INSERT INTO growth_rnd_frontier(idea_key,title,mechanism,hypothesis,automation_score,semi_passive_score,implementation_mode,status,expected_signal,next_step,action_json,evidence_json,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,88,92,'existing_primitives','candidate','referral_sessions_or_referring_domains',?,? ,?,datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(idea_key) DO UPDATE SET evidence_json=excluded.evidence_json,last_evaluated_at=datetime('now')
+      WHERE growth_rnd_frontier.evidence_json IS NOT excluded.evidence_json`)
+      .bind(key,title,family,hypothesis,next,JSON.stringify(['autonomous_route_qualification','distribution_amplification']),JSON.stringify({source:'runtime_surface_family',surface_type:family,opportunities:Number(row.n||0),max_score:Number(row.max_score||0)})).run();
+    if(Number(result?.meta?.changes||result?.changes||0)>0)dynamicSurfaceIdeas++;
+  }
+
+  return {
     ok:true,
     policy_mode:policy?.mode||'locked',
-    idea_discovery:Boolean(policy?.ideaDiscovery?.enabled),
-    playbook_version:Number(playbook?.version||0),
-    candidate_plays:candidates.length,
-    activated_plays:activated,
     active_experiments:upserted,
     blocked_by_policy:blocked,
+    frontier_mode:frontierCfg?.enabled===false?'disabled':'net_new_acquisition_discovery',
+    frontier_candidates:frontierCandidates,
+    frontier_already_implemented:frontierImplemented,
+    frontier_material_writes:frontierWrites,
+    dynamic_surface_ideas:dynamicSurfaceIdeas,
+    acquisition_playbook_version:Number(playbook?.version||0),
+    acquisition_play_candidates:playCandidates.length,
+    acquisition_plays_activated:playbookActivated,
+    acquisition_plays_blocked:playbookBlocked,
+    acquisition_play_ids:activatedPlayIds,
     bound_opportunities:boundOpportunities,
     new_actions_added:newActionsAdded,
     acquisition_state:{external_executions_24h:external24,minimum_24h:acquisitionMin,underpowered:external24<acquisitionMin,authority_required:authorityRequired},
     opportunity_types:counts,
     human_gates_7d:humanCount,
     observed_action_engines:actions,
-    skipped,
-    guardrail:'Growth R&D discovers additional acquisition plays but executes only pre-approved bounded primitives. Free-first and automation-first apply. Paid spend, credentials, legal commitments, spam, ranking manipulation and irreversible third-party actions remain gated.'
+    guardrail:'Growth R&D discovers net-new free-first acquisition mechanisms and classifies them by automation potential. Existing bounded experiments can execute automatically. One-time-build ideas remain proposals until a safe executor exists. Paid spend, credentials, legal commitments, spam and affiliate-driven editorial ranking remain gated.'
   };
 }
 function paidPolicy(metric,cost){
