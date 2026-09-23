@@ -1,5 +1,5 @@
 name = "toolscout"
-main = "authority-acquisition-worker.js"
+main = "operational-truth-reconciliation-worker.js"
 compatibility_date = "2026-08-29"
 
 [assets]
