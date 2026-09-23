@@ -4169,5 +4169,197 @@
       "content": 8,
       "agency": 10
     }
+  },
+  {
+    "slug": "character-ai",
+    "name": "Character.AI",
+    "category": "ai-assistant",
+    "description": "AI conversational platform for creating and chatting with customizable AI characters, with free messaging and paid plans for enhanced chat styles, memory and an ad-free experience.",
+    "pricing": "Free plan available; paid lite and c.ai+ subscriptions vary by region",
+    "freePlan": true,
+    "freePlanKnown": true,
+    "features": [
+      "AI character chat",
+      "custom character creation",
+      "premium chat styles",
+      "memory",
+      "chat customization",
+      "web and mobile apps"
+    ],
+    "bestFor": [
+      "users exploring AI character conversations",
+      "creators building conversational characters",
+      "entertainment-focused AI chat"
+    ],
+    "affiliateUrl": "",
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://character.ai/",
+    "lastVerified": "2026-09-23",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "scores": {
+      "price": 8,
+      "ease": 9,
+      "automation": 4,
+      "integrations": 3,
+      "sales": 2,
+      "ai": 9,
+      "marketing": 4,
+      "seo": 1,
+      "research": 3,
+      "content": 7,
+      "agency": 2
+    },
+    "provenance": {
+      "mode": "reconciled_runtime_peer",
+      "admittedAt": "2026-09-23T00:00:00Z",
+      "affiliateNeutral": true,
+      "reviewMethod": "first_party_verified_structured_profile_v2"
+    }
+  },
+  {
+    "slug": "google-ai-studio",
+    "name": "Google AI Studio",
+    "category": "developer",
+    "description": "Google's browser-based workspace for prototyping with Gemini models, testing multimodal prompts, managing API keys and moving experiments into Gemini API applications.",
+    "pricing": "Free tier available; paid Gemini API usage varies by model and usage",
+    "freePlan": true,
+    "freePlanKnown": true,
+    "features": [
+      "Gemini model playground",
+      "multimodal prompting",
+      "API key management",
+      "prompt prototyping",
+      "code export and API integration",
+      "usage monitoring"
+    ],
+    "bestFor": [
+      "developers prototyping Gemini applications",
+      "AI product teams",
+      "technical users evaluating multimodal models"
+    ],
+    "affiliateUrl": "",
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://aistudio.google.com/",
+    "lastVerified": "2026-09-23",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "scores": {
+      "price": 9,
+      "ease": 8,
+      "automation": 7,
+      "integrations": 9,
+      "sales": 2,
+      "ai": 10,
+      "marketing": 3,
+      "seo": 2,
+      "research": 9,
+      "content": 8,
+      "agency": 6
+    },
+    "provenance": {
+      "mode": "reconciled_runtime_peer",
+      "admittedAt": "2026-09-23T00:00:00Z",
+      "affiliateNeutral": true,
+      "reviewMethod": "first_party_verified_structured_profile_v2"
+    }
+  },
+  {
+    "slug": "kling-ai",
+    "name": "Kling AI",
+    "category": "design",
+    "description": "AI creative platform for generating and editing video and images from text, images and references, with motion controls, native audio features and API access.",
+    "pricing": "Free tier available; paid plans and API resource packages vary",
+    "freePlan": true,
+    "freePlanKnown": true,
+    "features": [
+      "text-to-video",
+      "image-to-video",
+      "AI image generation",
+      "motion control",
+      "native audio and lip sync",
+      "API platform"
+    ],
+    "bestFor": [
+      "video creators",
+      "creative teams",
+      "marketers producing visual content"
+    ],
+    "affiliateUrl": "",
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://kling.ai/",
+    "lastVerified": "2026-09-23",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "scores": {
+      "price": 7,
+      "ease": 8,
+      "automation": 7,
+      "integrations": 6,
+      "sales": 4,
+      "ai": 10,
+      "marketing": 8,
+      "seo": 1,
+      "research": 3,
+      "content": 10,
+      "agency": 8
+    },
+    "provenance": {
+      "mode": "reconciled_runtime_peer",
+      "admittedAt": "2026-09-23T00:00:00Z",
+      "affiliateNeutral": true,
+      "reviewMethod": "first_party_verified_structured_profile_v2"
+    }
+  },
+  {
+    "slug": "otter-ai",
+    "name": "Otter.ai",
+    "category": "business",
+    "description": "AI meeting assistant for recording, transcribing and summarizing meetings, with AI chat, collaboration, integrations and workspace administration.",
+    "pricing": "Free Basic plan available; paid Pro, Business and Enterprise plans vary",
+    "freePlan": true,
+    "freePlanKnown": true,
+    "features": [
+      "live transcription",
+      "meeting recording",
+      "automated summaries",
+      "Otter AI Chat",
+      "calendar and meeting integrations",
+      "audio and text export"
+    ],
+    "bestFor": [
+      "professionals with frequent meetings",
+      "teams needing searchable meeting notes",
+      "sales and operations teams"
+    ],
+    "affiliateUrl": "",
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://otter.ai/",
+    "lastVerified": "2026-09-23",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "scores": {
+      "price": 8,
+      "ease": 9,
+      "automation": 9,
+      "integrations": 8,
+      "sales": 7,
+      "ai": 8,
+      "marketing": 2,
+      "seo": 1,
+      "research": 7,
+      "content": 8,
+      "agency": 6
+    },
+    "provenance": {
+      "mode": "reconciled_runtime_peer",
+      "admittedAt": "2026-09-23T00:00:00Z",
+      "affiliateNeutral": true,
+      "reviewMethod": "first_party_verified_structured_profile_v2"
+    }
   }
 ]
