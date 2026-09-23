@@ -113,13 +113,13 @@ async function recordAuthorityNoOutput(env,reason,taskId=null){
   const detail=`Authority handoff produced no external action: ${String(reason||'unknown').slice(0,180)}${taskId?` · task ${String(taskId).slice(0,180)}`:''}. This is a no-output acquisition cycle, not a growth success. Discovery/network replenishment is requested automatically.`;
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authnoop_${crypto.randomUUID()}`,'authority_handoff_no_output','no_output','backlink_acquisition',detail).run().catch(()=>{});
 }
-async function replenishAuthorityPipeline(env){
+async function replenishAuthorityPipeline(request,env,ctx){
   if(!env.ADMIN_TOKEN)return {scheduled:false,reason:'admin_token_unavailable'};
-  const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`};
+  const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
   const results=[];
   for(const target of ['/api/distribution/discovery/refresh','/api/distribution/network/refresh']){
     try{
-      const r=await fetch('https://trytoolscout.org'+target,{method:'POST',headers,signal:AbortSignal.timeout(15000)});
+      const r=await base.fetch(new Request(new URL(target,request.url),{method:'POST',headers}),env,ctx);
       results.push({target,status:r.status,ok:r.ok});
     }catch(e){results.push({target,status:0,ok:false,error:String(e?.message||e).slice(0,200)})}
   }
@@ -212,18 +212,22 @@ export default {
     if(url.pathname==='/api/distribution/vendor-amplification/public-candidates'&&request.method==='GET'){
       if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
       const handoff=request.headers.get('X-ToolScout-Handoff')||'';
+      const bearer=request.headers.get('Authorization')||'';
       let contactRefresh=null;
       try{
-        const refreshRequest=new Request('https://trytoolscout.org/api/distribution/vendor-amplification/contact-scan',{method:'POST',headers:{'X-ToolScout-Handoff':handoff}});
+        const headers={};
+        if(bearer)headers.Authorization=bearer;
+        if(handoff)headers['X-ToolScout-Handoff']=handoff;
+        const refreshRequest=new Request(new URL('/api/distribution/vendor-amplification/contact-scan',request.url),{method:'POST',headers});
         const refreshed=await base.fetch(refreshRequest,env,ctx);
         contactRefresh=refreshed.ok?await refreshed.json():{ok:false,http_status:refreshed.status};
       }catch(e){contactRefresh={ok:false,error:String(e?.message||e).slice(0,300)}}
       let result=await publicCandidates(env,url.searchParams.get('limit'));
       let authority_replenishment=null,redispatch=null,retried_after_replenishment=false;
       if(!(result.items||[]).length&&Boolean(env.ADMIN_TOKEN)){
-        authority_replenishment=await replenishAuthorityPipeline(env).catch(error=>({scheduled:false,error:String(error?.message||error).slice(0,300)}));
+        authority_replenishment=await replenishAuthorityPipeline(request,env,ctx).catch(error=>({scheduled:false,error:String(error?.message||error).slice(0,300)}));
         try{
-          const rr=await fetch('https://trytoolscout.org/api/growth/execution/dispatch',{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(30000)});
+          const rr=await base.fetch(new Request(new URL('/api/growth/execution/dispatch',request.url),{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'}}),env,ctx);
           redispatch={ok:rr.ok,status:rr.status};
         }catch(error){redispatch={ok:false,status:0,error:String(error?.message||error).slice(0,300)}}
         const retry=await publicCandidates(env,url.searchParams.get('limit'));
