@@ -95,11 +95,11 @@ async function ccAssetJson(request,env,path,fallback){
 }
 async function commandCenterBusinessTruth(request,env){
   const [supervisorRows,contractRows,gscSignals,gscHealth,affiliateRegistry,affiliatePipeline]=await Promise.all([
-    env.DB.prepare(\`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
-      FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine\`).all().then(r=>r.results||[]).catch(()=>[]),
-    env.DB.prepare(\`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status\`).all().then(r=>r.results||[]).catch(()=>[]),
-    env.DB.prepare(\`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1\`).first().catch(()=>null),
-    env.DB.prepare(\`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1\`).first().catch(()=>null),
+    env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
+      FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1`).first().catch(()=>null),
+    env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/data/affiliate.json',{}),
     ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]})
   ]);
