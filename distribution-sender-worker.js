@@ -98,8 +98,21 @@ async function leaseQueue(env,limit=3){
   return {status:'connected',leaseHours:24,items:raw.map(cordialOutreach)};
 }
 
-async function currentMakeSenderTask(env){
-  try{return await env.DB.prepare(`SELECT task_id,subject_type,subject_key,action,priority_score,claimed_at FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed' ORDER BY priority_score DESC,claimed_at ASC LIMIT 1`).first()}catch{return null}
+async function claimedMakeSenderTasks(env,limit=4){
+  const n=Math.max(1,Math.min(4,Number(limit)||4));
+  try{
+    const q=await env.DB.prepare(`SELECT task_id,subject_type,subject_key,action,priority_score,claimed_at
+      FROM growth_execution_contract
+      WHERE executor='make_sender' AND status='claimed'
+      ORDER BY priority_score DESC,claimed_at ASC
+      LIMIT ?`).bind(n).all();
+    return q.results||[];
+  }catch{return[]}
+}
+function freshDispatchLease(value,minutes=20){
+  if(!value)return false;
+  const t=Date.parse(String(value).includes('T')?String(value):String(value).replace(' ','T')+'Z');
+  return Number.isFinite(t)&&Date.now()-t<minutes*60000;
 }
 async function validateMakeSenderTask(env,taskId,subjectType,subjectKey){
   if(!taskId)return null;
@@ -113,53 +126,122 @@ async function recordAuthorityNoOutput(env,reason,taskId=null){
   const detail=`Authority handoff produced no external action: ${String(reason||'unknown').slice(0,180)}${taskId?` · task ${String(taskId).slice(0,180)}`:''}. This is a no-output acquisition cycle, not a growth success. Discovery/network replenishment is requested automatically.`;
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authnoop_${crypto.randomUUID()}`,'authority_handoff_no_output','no_output','backlink_acquisition',detail).run().catch(()=>{});
 }
-async function publicCandidates(env,limit=3){
+async function publicCandidates(env,limit=4){
   await ensureNetworkSchema(env);
-  const n=Math.max(1,Math.min(3,Number(limit)||3));
-  const task=await currentMakeSenderTask(env);
-  if(!task){await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-bounded-v3'};}
-  const items=[];
-  if(task.subject_type==='tool'){
-    const row=await env.DB.prepare(`SELECT v.tool_slug,v.asset_url,v.priority_score,v.vendor_domain,v.contact_email,v.contact_source_url,v.suggested_subject,v.suggested_body,v.public_dispatch_token
-      FROM distribution_vendor_amplification v
-      WHERE v.tool_slug=?
-        AND v.status='contact_found'
-        AND v.contact_method='public_role_email'
-        AND v.contact_email IS NOT NULL
-        AND NOT EXISTS (
-          SELECT 1 FROM distribution_vendor_amplification prior
-          WHERE prior.status='sent'
-            AND prior.outreach_sent_at>=datetime('now','-30 days')
-            AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
-        )
-      ORDER BY v.priority_score DESC LIMIT 1`).bind(task.subject_key).first();
-    if(!row){
-      const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_vendor_candidate');
-      await recordAuthorityNoOutput(env,'claimed_task_has_no_ready_vendor_candidate',task.task_id);
-      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_vendor_candidate',task_id:task.task_id,integrity:'task-specific-bounded-v3',release};
-    }
-    const token=row.public_dispatch_token||crypto.randomUUID();
-    if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_vendor_amplification SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
-    const copy=cordialOutreach(row);
-    await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now')) ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`).bind(copy.growth_action_id,copy.growth_opportunity_key,'vendor_amplification','email',copy.tracked_asset_url).run().catch(()=>{});
-    items.push({kind:'vendor',task_id:task.task_id,task_action:task.action,tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
-  }else if(task.subject_type==='surface'){
-    const row=await env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token FROM distribution_network_outreach WHERE surface_slug=? AND status='contact_found' AND contact_email IS NOT NULL LIMIT 1`).bind(task.subject_key).first();
-    if(!row){
-      const release=await deferExecutionTask(env,task.task_id,'make_sender_no_ready_surface_candidate');
-      await recordAuthorityNoOutput(env,'claimed_task_has_no_ready_surface_candidate',task.task_id);
-      return {status:'connected',limit:n,items:[],reason:'claimed_task_has_no_ready_surface_candidate',task_id:task.task_id,integrity:'task-specific-bounded-v3',release};
-    }
-    const token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
-    if(!row.public_dispatch_token)await env.DB.prepare(`UPDATE distribution_network_outreach SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(token,row.surface_slug).run();
-    const action=`network:${row.surface_slug}`,growth=`surface:${row.surface_slug}`;
-    const kit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
-    const feed=taggedOwned('https://trytoolscout.org/api/distribution/feed.json',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
-    const body=String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit).replaceAll('https://trytoolscout.org/api/distribution/feed.json',feed);
-    await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at) VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now')) ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`).bind(action,growth,'distribution_network','email',kit).run().catch(()=>{});
-    items.push({kind:'network',task_id:task.task_id,task_action:task.action,tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:body,dispatch_token:token});
+  const n=Math.max(1,Math.min(4,Number(limit)||4));
+  const tasks=await claimedMakeSenderTasks(env,n);
+  if(!tasks.length){
+    await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');
+    return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-batch-v4'};
   }
-  return {status:'connected',limit:n,items,task_id:task.task_id,integrity:'task-specific-bounded-v3'};
+
+  const items=[],deferredTasks=[],leasedPending=[],seenSubjects=new Set();
+
+  for(const task of tasks){
+    if(items.length>=n)break;
+    const subjectKey=`${task.subject_type}:${task.subject_key}`;
+    if(seenSubjects.has(subjectKey)){
+      await deferExecutionTask(env,task.task_id,'make_sender_duplicate_subject_in_active_batch');
+      deferredTasks.push({task_id:task.task_id,reason:'duplicate_subject_in_active_batch'});
+      continue;
+    }
+    seenSubjects.add(subjectKey);
+
+    if(task.subject_type==='tool'){
+      const row=await env.DB.prepare(`SELECT v.tool_slug,v.asset_url,v.priority_score,v.vendor_domain,v.contact_email,v.contact_source_url,v.suggested_subject,v.suggested_body,v.public_dispatch_token,v.public_dispatch_leased_at
+        FROM distribution_vendor_amplification v
+        WHERE v.tool_slug=?
+          AND v.status='contact_found'
+          AND v.contact_method='public_role_email'
+          AND v.contact_email IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM distribution_vendor_amplification prior
+            WHERE prior.status='sent'
+              AND prior.outreach_sent_at>=datetime('now','-30 days')
+              AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
+          )
+        ORDER BY v.priority_score DESC LIMIT 1`).bind(task.subject_key).first();
+
+      if(!row){
+        await deferExecutionTask(env,task.task_id,'make_sender_no_ready_vendor_candidate');
+        deferredTasks.push({task_id:task.task_id,reason:'no_ready_vendor_candidate'});
+        continue;
+      }
+      if(freshDispatchLease(row.public_dispatch_leased_at)){
+        leasedPending.push(task.task_id);
+        continue;
+      }
+
+      const token=row.public_dispatch_token||crypto.randomUUID();
+      await env.DB.prepare(`UPDATE distribution_vendor_amplification
+        SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now')
+        WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
+
+      const copy=cordialOutreach(row);
+      await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at)
+        VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now'))
+        ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`)
+        .bind(copy.growth_action_id,copy.growth_opportunity_key,'vendor_amplification','email',copy.tracked_asset_url).run().catch(()=>{});
+
+      items.push({kind:'vendor',task_id:task.task_id,task_action:task.action,tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
+      continue;
+    }
+
+    if(task.subject_type==='surface'){
+      const row=await env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token,public_dispatch_leased_at
+        FROM distribution_network_outreach
+        WHERE surface_slug=? AND status='contact_found' AND contact_email IS NOT NULL
+        LIMIT 1`).bind(task.subject_key).first();
+
+      if(!row){
+        await deferExecutionTask(env,task.task_id,'make_sender_no_ready_surface_candidate');
+        deferredTasks.push({task_id:task.task_id,reason:'no_ready_surface_candidate'});
+        continue;
+      }
+      if(freshDispatchLease(row.public_dispatch_leased_at)){
+        leasedPending.push(task.task_id);
+        continue;
+      }
+
+      const token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
+      await env.DB.prepare(`UPDATE distribution_network_outreach
+        SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now')
+        WHERE surface_slug=?`).bind(token,row.surface_slug).run();
+
+      const action=`network:${row.surface_slug}`,growth=`surface:${row.surface_slug}`;
+      const kit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
+      const feed=taggedOwned('https://trytoolscout.org/api/distribution/feed.json',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
+      const body=String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit).replaceAll('https://trytoolscout.org/api/distribution/feed.json',feed);
+      await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at)
+        VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now'))
+        ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`)
+        .bind(action,growth,'distribution_network','email',kit).run().catch(()=>{});
+
+      items.push({kind:'network',task_id:task.task_id,task_action:task.action,tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:body,dispatch_token:token});
+      continue;
+    }
+
+    await deferExecutionTask(env,task.task_id,'make_sender_unsupported_subject_type');
+    deferredTasks.push({task_id:task.task_id,reason:'unsupported_subject_type'});
+  }
+
+  if(!items.length){
+    const reason=leasedPending.length?'all_ready_candidates_already_leased':'claimed_tasks_yielded_no_ready_candidate';
+    await recordAuthorityNoOutput(env,reason,tasks[0]?.task_id||null);
+  }
+
+  return {
+    status:'connected',
+    limit:n,
+    items,
+    task_id:items[0]?.task_id||null,
+    task_ids:items.map(x=>x.task_id),
+    claimed_scanned:tasks.length,
+    deferred_tasks:deferredTasks,
+    leased_pending:leasedPending,
+    reason:items.length?null:(leasedPending.length?'leased_candidates_pending_callback':'no_ready_candidate_after_batch_scan'),
+    integrity:'task-specific-batch-v4'
+  };
 }
 async function publicStatus(request,env){
   let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_HEADERS})}

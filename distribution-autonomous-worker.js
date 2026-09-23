@@ -14,7 +14,8 @@ const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|r
 const QUALIFY_LIMIT=24;
 const EXECUTION_LIMIT=12;
 const RESEARCH_COOLDOWN_HOURS=6;
-const AUTHORITY_ATTEMPT_MIN_24H=6;
+const AUTHORITY_ATTEMPT_MIN_24H=10;
+const AUTHORITY_ATTEMPT_TARGET_24H=15;
 const AUTHORITY_STAGNATION_HOURS=24;
 const AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D=12;
 const AUTHORITY_RECOVERY_COOLDOWN_HOURS=6;
@@ -791,7 +792,7 @@ async function authorityLoopState(env){
   const throughputGap=required&&attempts24<AUTHORITY_ATTEMPT_MIN_24H;
   const stagnating=required&&attempts7>=AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D&&(lastVerifiedAgeHours==null||lastVerifiedAgeHours>=AUTHORITY_STAGNATION_HOURS);
   const recoveryDue=required&&(throughputGap||stagnating)&&(!Number.isFinite(lastRecoveryMs)||(now-lastRecoveryMs)>=AUTHORITY_RECOVERY_COOLDOWN_HOURS*3600000);
-  return {required,bootstrapIncomplete,backlogActive,acquisitionMode:'exhaustive_backlog',slowdownAllowed:!bootstrapIncomplete&&!backlogActive,verifiedReferringDomains,bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
+  return {required,bootstrapIncomplete,backlogActive,acquisitionMode:'exhaustive_backlog',slowdownAllowed:!bootstrapIncomplete&&!backlogActive,verifiedReferringDomains,bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);

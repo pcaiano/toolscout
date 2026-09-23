@@ -2,7 +2,8 @@ import base from './growth-runtime-integrity-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
-const AUTHORITY_ATTEMPT_MIN_24H=6;
+const AUTHORITY_ATTEMPT_MIN_24H=10;
+const AUTHORITY_ATTEMPT_TARGET_24H=15;
 const SENDER_HANDOFF_WARN_MINUTES=120;
 const SENDER_HANDOFF_TIMEOUT_MINUTES=300;
 
@@ -128,49 +129,24 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   const autonomous=await internalJson(request,env,ctx,'/api/distribution/autonomous/refresh');
 
   const afterMachine=await authoritySnapshot(env);
-  if(afterMachine.attempts24>before.attempts24){
-    await recordEvent(env,'authority_closed_loop_external_attempt','completed',`Cloudflare-native authority execution increased real external attempts from ${before.attempts24} to ${afterMachine.attempts24} through verified automatic submission routes.`);
-    return {
-      ok:true,status:'external_attempt_confirmed',pipelineClosed:true,externalAttemptObserved:true,handoffReady:false,
-      stages:{submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,autonomous:autonomous.ok},
-      before,after:afterMachine,
-      submissionPackage:submissionPackage.payload||submissionPackage.error||null,
-      submissionExecute:submissionExecute.payload||submissionExecute.error||null,
-      submissionVerify:submissionVerify.payload||submissionVerify.error||null,
-      autonomous:autonomous.payload||autonomous.error||null,
-      executor:'cloudflare'
-    };
+  const machineAttemptObserved=afterMachine.attempts24>before.attempts24;
+  if(machineAttemptObserved){
+    await recordEvent(env,'authority_closed_loop_external_attempt','completed',`Cloudflare-native authority execution increased real external attempts from ${before.attempts24} to ${afterMachine.attempts24}. The loop will continue into network, coordination and sender lanes while backlog remains.`);
   }
 
-  // Only after exhausting Cloudflare-native machine routes do we respect the
-  // external sender handoff state.
+  // A live sender handoff is evidence of pending external work, not a reason to stop
+  // replenishing and dispatching other independent authority routes.
   if(before.senderFreshClaim){
     await normalizeFalseAsyncFailure(env,before);
-    await recordEvent(env,'authority_external_handoff_pending','pending',`Authority machine routes were exhausted first. External sender handoff is awaiting callback. ${before.senderClaimed} claimed task(s); oldest claim age ${before.senderClaimAgeMinutes} min; hard timeout ${SENDER_HANDOFF_TIMEOUT_MINUTES} min. No external attempt is counted before callback evidence.`);
-    return {
-      ok:true,status:'pending_external_confirmation',pendingExternalConfirmation:true,pipelineClosed:true,
-      externalAttemptObserved:false,handoffReady:true,before,after:afterMachine,
-      stages:{submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,autonomous:autonomous.ok},
-      submissionPackage:submissionPackage.payload||submissionPackage.error||null,
-      submissionExecute:submissionExecute.payload||submissionExecute.error||null,
-      submissionVerify:submissionVerify.payload||submissionVerify.error||null,
-      autonomous:autonomous.payload||autonomous.error||null,
-      executor:'cloudflare'
-    };
-  }
-  if(before.senderClaimed>0&&!before.senderFreshClaim){
-    await recordEvent(env,'authority_external_handoff_timeout','failed',`Authority machine routes were exhausted first. External sender handoff exceeded ${SENDER_HANDOFF_TIMEOUT_MINUTES} min without callback. Claimed tasks ${before.senderClaimed}; oldest age ${before.senderClaimAgeMinutes} min.`);
-    return {
-      ok:false,status:'failed',reason:'authority_external_handoff_timeout',pipelineClosed:false,before,after:afterMachine,
-      stages:{submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,autonomous:autonomous.ok},
-      executor:'cloudflare'
-    };
+    await recordEvent(env,'authority_external_handoff_pending','pending',`Authority sender has ${before.senderClaimed} claimed task(s) awaiting callback. The authority loop continues replenishment and bounded parallel dispatch while backlog remains.`);
+  }else if(before.senderClaimed>0){
+    await recordEvent(env,'authority_external_handoff_timeout','failed',`Authority sender has ${before.senderClaimed} stale claimed task(s), oldest age ${before.senderClaimAgeMinutes} min. Reconciliation and redispatch continue instead of terminating the authority cycle.`);
   }
 
   const network=await internalJson(request,env,ctx,'/api/distribution/network/refresh');
   const coordination=await internalJson(request,env,ctx,'/api/growth/opportunities/refresh');
   const execution=await internalJson(request,env,ctx,'/api/growth/execution/dispatch');
-  const senderHandoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=1',{method:'GET'});
+  const senderHandoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=4',{method:'GET'});
 
   const after=await authoritySnapshot(env);
   const externalAttemptObserved=after.attempts24>before.attempts24;
@@ -216,7 +192,7 @@ async function augmentStats(request,response,env){
   data.growthOps.footprint=data.growthOps.footprint||{};
   data.growthOps.footprint.distribution={...(data.growthOps.footprint.distribution||{}),...discovery.footprint.distribution};
   data.growthOps.footprint.machine=discovery.footprint.machine;
-  data.growthOps.authorityClosedLoop={...authority,status:authorityStatus(authority),attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H};
+  data.growthOps.authorityClosedLoop={...authority,status:authorityStatus(authority),attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H};
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers:responseHeaders(response,'application/json; charset=UTF-8')});
 }
 const UI_PATCH=`<style id="toolscout-closed-loop-v2-style">#tsAuthorityConcreteActions{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;font-size:9px;color:var(--muted);line-height:1.45}#tsAuthorityConcreteActions b{color:var(--text);font-size:10px}.tsPendingExternal{color:#8a6b24}</style><script id="toolscout-closed-loop-v2-ui">(function(){if(window.__toolscoutClosedLoopV2)return;window.__toolscoutClosedLoopV2=true;function n(v){var x=Number(v);return Number.isFinite(x)?x:0}function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}function setMetric(label,value,meta){document.querySelectorAll('.metric').forEach(function(m){var s=m.querySelector('small');if(!s||s.textContent.trim()!==label)return;var b=m.querySelector('b'),sp=m.querySelector('span');if(b)b.textContent=value;if(sp&&meta!=null)sp.textContent=meta})}function setRow(label,value,meta){document.querySelectorAll('.row').forEach(function(r){var name=r.querySelector('.rowName');if(!name||name.textContent.trim()!==label)return;var val=r.querySelector('.rowValue'),desc=r.querySelector('.rowMeta');if(val&&value!=null)val.textContent=value;if(desc&&meta!=null)desc.textContent=meta})}function authorityActions(a){var rows=Array.isArray(a.recentTasks)?a.recentTasks:[],events=Array.isArray(a.recentEvents)?a.recentEvents:[];var host=null;document.querySelectorAll('.row').forEach(function(r){var x=r.querySelector('.rowName');if(x&&x.textContent.trim()==='Authority loop')host=r});if(!host)return;var old=document.getElementById('tsAuthorityConcreteActions');if(old)old.remove();var parts=[];rows.slice(0,2).forEach(function(x){parts.push('<div><b>'+esc(String(x.action||'authority task').replaceAll('_',' '))+'</b> · '+esc(x.status||'')+' · '+esc(x.subject_key||'')+(x.claimed_at?' · claimed '+esc(x.claimed_at):'')+'</div>')});events.slice(0,2).forEach(function(x){parts.push('<div><b>'+esc(String(x.event_type||'authority event').replaceAll('_',' '))+'</b> · '+esc(x.status||'')+(x.created_at?' · '+esc(x.created_at):'')+'</div>')});if(parts.length)host.insertAdjacentHTML('afterend','<div id="tsAuthorityConcreteActions"><b>Latest authority actions</b>'+parts.join('')+'</div>')}async function load(){try{var rs=await Promise.all([fetch('/api/distribution/discovery-health',{cache:'no-store'}),fetch('/api/distribution/authority/closed-loop-health',{cache:'no-store'})]);if(!rs[0].ok||!rs[1].ok)return;var d=await rs[0].json(),a=await rs[1].json();setMetric('AI surfaces verified',n(d.machine&&d.machine.verified),n(d.machine&&d.machine.eligible)+' machine eligible');setMetric('Submitted / pending',n(d.pipeline&&d.pipeline.submittedPending),'Current D1 pipeline');setMetric('Directories found',n(d.discovery&&d.discovery.directoryLike),n(d.discovery&&d.discovery.noHumanCandidates)+' no-human candidates');setMetric('Automatic directory pipeline',n(d.pipeline&&d.pipeline.automaticVerified),n(d.pipeline&&d.pipeline.autoAdaptersReady)+' adapters ready');setMetric('Auto adapters verified',n(d.pipeline&&d.pipeline.autoAdaptersReady),'Autonomous route adapters');setRow('Discovery sources',String(n(d.discovery&&d.discovery.sources)),d.discovery&&d.discovery.lastScanAt?'Last scan '+d.discovery.lastScanAt:'No recent scan event');setRow('AgentReady',d.machine&&d.machine.agentReady?'recorded':'not recorded',n(d.machine&&d.machine.agentAssetCount)+'/4 public machine assets reachable');var st=String(a.status||'');if(st==='waiting_external_confirmation')setRow('Authority loop','pending external confirmation',n(a.senderClaimed)+' sender task(s) claimed · '+n(a.senderClaimAgeMinutes)+' min old · attempts remain '+n(a.attempts24)+'/'+n(a.attemptMin24h));authorityActions(a)}catch(e){}}function boot(){load();setTimeout(load,1500);setInterval(load,30000)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot()})();</script>`;
@@ -227,7 +203,7 @@ export default {
     const url=new URL(request.url);
     if(url.pathname==='/api/distribution/authority/closed-loop-health'&&request.method==='GET'){
       const state=await authoritySnapshot(env);await normalizeFalseAsyncFailure(env,state);
-      return Response.json({status:authorityStatus(state),...state,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptFloorIsMinimumNotCap:true,drainBacklogBeforeSlowdown:true,preparedDoesNotCountAsExecution:true,externalCallbackRequiredForEmailAttempt:true},{headers:JSON_H});
+      return Response.json({status:authorityStatus(state),...state,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,attemptFloorIsMinimumNotCap:true,drainBacklogBeforeSlowdown:true,preparedDoesNotCountAsExecution:true,externalCallbackRequiredForEmailAttempt:true},{headers:JSON_H});
     }
     if(url.pathname==='/api/distribution/discovery-health'&&request.method==='GET')return Response.json(await discoverySnapshot(request,env),{headers:JSON_H});
     if(url.pathname==='/api/distribution/authority/close-loop'&&request.method==='POST'){
