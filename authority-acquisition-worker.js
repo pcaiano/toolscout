@@ -3,6 +3,7 @@ import {syncExecutionContracts,claimExecutorTasks,markExecutorAttempt,recordExec
 import {executeCloudflareSeoTask} from './seo-execution-runtime.js';
 import {issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
 import {auditArchitectureEscalations} from './growth-architecture-escalation.js';
+import {runGrowthSupervisorAudit} from './growth-supervisor.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const ROUTES=[
@@ -188,7 +189,7 @@ async function health(env){
   return {status:'active',executor:'cloudflare',routeCount:ROUTES.length,reconciliation,items};
 }
 async function migrationBootstrap(env){
-  const out={synced:null,content:null,seo:null,architecture:null};
+  const out={synced:null,content:null,seo:null,architecture:null,supervisor:null};
   out.synced=await syncExecutionContracts(env);
 
   const contentClaim=await claimExecutorTasks(env,'content_issue',{limit:1,maxInFlight:1,result:'content_recovery_bootstrap_waiting_for_publication'});
@@ -207,27 +208,29 @@ async function migrationBootstrap(env){
       await deferExecutionTask(env,task?.task_id,'content_bootstrap_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
       out.content={claimed:1,task_id:task?.task_id||null,status:'error',error:String(error?.message||error).slice(0,500)};
     }
-  }else out.content={claimed:0,status:'no_ready_task'};
+  }else out.content={claimed:0,status:'existing_in_flight_or_no_ready_task'};
 
-  const seoClaim=await claimExecutorTasks(env,'seo_cloudflare',{limit:1,maxInFlight:1,result:'seo_cloudflare_recovery_bootstrap'});
-  if(seoClaim.claimed){
-    const task=seoClaim.tasks?.[0]||null;
+  const seoClaim=await claimExecutorTasks(env,'seo_cloudflare',{limit:4,maxInFlight:4,result:'seo_cloudflare_recovery_bootstrap_batch'});
+  const seoItems=[];
+  for(const task of seoClaim.tasks||[]){
     try{
       const result=await executeCloudflareSeoTask(env,task);
       if(result?.verified){
         const proof=await recordExecutionProof(env,{taskId:task.task_id,executor:'seo_cloudflare',status:'verified',detail:'cloudflare_seo_bootstrap_verified',externalId:result.pathname,evidence:result});
-        out.seo={claimed:1,task_id:task.task_id,status:'verified',result,proof};
+        seoItems.push({task_id:task.task_id,status:'verified',pathname:result.pathname,action:task.action,indexNow:Boolean(result?.indexNow?.queued),proof:Boolean(proof?.ok)});
       }else{
-        await deferExecutionTask(env,task?.task_id,'seo_bootstrap_not_verified:'+String(result?.reason||'unknown'));
-        out.seo={claimed:1,task_id:task?.task_id||null,status:'deferred',result};
+        await deferExecutionTask(env,task.task_id,'seo_bootstrap_not_verified:'+String(result?.reason||'unknown'));
+        seoItems.push({task_id:task.task_id,status:'deferred',reason:result?.reason||'not_verified'});
       }
     }catch(error){
-      await deferExecutionTask(env,task?.task_id,'seo_bootstrap_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
-      out.seo={claimed:1,task_id:task?.task_id||null,status:'error',error:String(error?.message||error).slice(0,500)};
+      await deferExecutionTask(env,task.task_id,'seo_bootstrap_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
+      seoItems.push({task_id:task.task_id,status:'error',error:String(error?.message||error).slice(0,500)});
     }
-  }else out.seo={claimed:0,status:'no_ready_task'};
+  }
+  out.seo={claimed:seoClaim.claimed,verified:seoItems.filter(x=>x.status==='verified').length,items:seoItems};
 
   out.architecture=await auditArchitectureEscalations(env).catch(error=>({ok:false,error:String(error?.message||error).slice(0,500)}));
+  out.supervisor=await runGrowthSupervisorAudit(env).catch(error=>({ok:false,error:String(error?.message||error).slice(0,500)}));
   return {ok:true,mode:'temporary_migration_bootstrap',...out};
 }
 function authorized(request,env){
