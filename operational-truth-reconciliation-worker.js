@@ -73,17 +73,6 @@ async function reconcile(response,env){
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(request.method==='GET'&&u.pathname==='/api/runtime/e2e-primary-cycle-20260923-owner-authorized'){
-      const runs=await env.DB.prepare(`UPDATE engine_runs
-        SET status='cancelled',completed_at=datetime('now'),detail='audit_probe_cancelled_after_client_disconnect',
-            evidence_json='{"reason":"audit_probe_cancelled_after_client_disconnect"}',updated_at=datetime('now')
-        WHERE engine='runtime' AND mission='primary_growth_cycle' AND status='running' AND trigger_name='manual_cloudflare_primary'`).run().catch(()=>null);
-      const leases=await env.DB.prepare(`DELETE FROM engine_run_leases
-        WHERE engine='runtime' AND mission='primary_growth_cycle'`).run().catch(()=>null);
-      await env.DB.prepare(`UPDATE engine_runs SET status='cancelled',updated_at=datetime('now')
-        WHERE detail='superseded_by_single_path_scheduler_fix' AND status='failed'`).run().catch(()=>null);
-      return Response.json({ok:true,cancelledRuns:Number(runs?.meta?.changes||runs?.changes||0),releasedLeases:Number(leases?.meta?.changes||leases?.changes||0)});
-    }
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
     return response;
