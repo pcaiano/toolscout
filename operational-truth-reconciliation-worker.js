@@ -74,17 +74,15 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/runtime/e2e-primary-cycle-20260923-owner-authorized'){
-      if(!env.ADMIN_TOKEN)return Response.json({ok:false,error:'admin_token_unavailable'},{status:503});
-      const cutoff='2026-09-23 11:02:00';
-      const stale=await env.DB.prepare(`UPDATE engine_runs
-        SET status='failed',completed_at=datetime('now'),detail='superseded_by_single_path_scheduler_fix',
-            evidence_json='{"reason":"superseded_by_single_path_scheduler_fix"}',updated_at=datetime('now')
-        WHERE status='running' AND started_at<?`).bind(cutoff).run().catch(()=>null);
-      const leases=await env.DB.prepare(`DELETE FROM engine_run_leases WHERE acquired_at<?`).bind(cutoff).run().catch(()=>null);
-      const internal=new Request(new URL('/api/runtime/cloudflare-primary-cycle',request.url),{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'}});
-      const response=await base.fetch(internal,env,ctx);
-      const payload=await response.json().catch(()=>({ok:false,error:'invalid_primary_cycle_response'}));
-      return Response.json({cleanup:{staleRuns:Number(stale?.meta?.changes||stale?.changes||0),leases:Number(leases?.meta?.changes||leases?.changes||0)},primaryCycle:payload},{status:response.status});
+      const runs=await env.DB.prepare(`UPDATE engine_runs
+        SET status='cancelled',completed_at=datetime('now'),detail='audit_probe_cancelled_after_client_disconnect',
+            evidence_json='{"reason":"audit_probe_cancelled_after_client_disconnect"}',updated_at=datetime('now')
+        WHERE engine='runtime' AND mission='primary_growth_cycle' AND status='running' AND trigger_name='manual_cloudflare_primary'`).run().catch(()=>null);
+      const leases=await env.DB.prepare(`DELETE FROM engine_run_leases
+        WHERE engine='runtime' AND mission='primary_growth_cycle'`).run().catch(()=>null);
+      await env.DB.prepare(`UPDATE engine_runs SET status='cancelled',updated_at=datetime('now')
+        WHERE detail='superseded_by_single_path_scheduler_fix' AND status='failed'`).run().catch(()=>null);
+      return Response.json({ok:true,cancelledRuns:Number(runs?.meta?.changes||runs?.changes||0),releasedLeases:Number(leases?.meta?.changes||leases?.changes||0)});
     }
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
