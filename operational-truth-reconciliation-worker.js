@@ -83,9 +83,134 @@ function simplifiedPage(response){
   return new Response(commandCenterHtml(),{status:response.status,statusText:response.statusText,headers});
 }
 
+
+const truthNum=v=>Number.isFinite(Number(v))?Number(v):0;
+async function ccAssetJson(request,env,path,fallback){
+  try{
+    const url=new URL(path,request.url);
+    const r=env.ASSETS?await env.ASSETS.fetch(new Request(url.toString(),{headers:{Accept:'application/json'}})):null;
+    if(!r||!r.ok)return fallback;
+    return await r.json();
+  }catch{return fallback}
+}
+async function commandCenterBusinessTruth(request,env){
+  const [supervisorRows,contractRows,gscSignals,gscHealth,affiliateRegistry,affiliatePipeline]=await Promise.all([
+    env.DB.prepare(\`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
+      FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine\`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(\`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status\`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(\`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1\`).first().catch(()=>null),
+    env.DB.prepare(\`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1\`).first().catch(()=>null),
+    ccAssetJson(request,env,'/data/affiliate.json',{}),
+    ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]})
+  ]);
+  const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
+  const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
+  const growth=byEngine.get('growth_brain')||{};
+  const cfg=parse(growth.directive_json,{});
+  const backlink=cfg.backlink_acquisition||{};
+  const architecture=cfg.architecture_escalation||{};
+  const contract={states:{},executors:{},verified:0,ready:0,inFlight:0,deferred:0,missingExecutors:0,stalled:0};
+  for(const row of contractRows){
+    const status=String(row.status||'unknown'),count=truthNum(row.n),executor=row.executor||'unassigned';
+    contract.states[status]=(contract.states[status]||0)+count;
+    contract.executors[executor]=contract.executors[executor]||{};
+    contract.executors[executor][status]=count;
+  }
+  contract.verified=truthNum(contract.states.verified);
+  contract.ready=truthNum(contract.states.pending);
+  contract.inFlight=truthNum(contract.states.claimed)+truthNum(contract.states.attempted);
+  contract.deferred=truthNum(contract.states.deferred);
+  contract.missingExecutors=truthNum(contract.states.executor_missing);
+  contract.stalled=truthNum(contract.states.stalled);
+
+  const productionRoutes=Object.entries(affiliateRegistry||{}).filter(([,v])=>Boolean(v?.enabled&&v?.url));
+  const programmes=Array.isArray(affiliatePipeline?.verified_programs)?affiliatePipeline.verified_programs:[];
+  const programmeStates={};
+  for(const p of programmes){const k=String(p?.status||'unknown');programmeStates[k]=(programmeStates[k]||0)+1}
+  const activePipeline=programmes.filter(p=>String(p?.status||'')==='active').length;
+
+  const gsc=parse(gscSignals?.payload_json,{});
+  const gh=parse(gscHealth?.payload_json,{});
+  const w=gsc?.searchPerformance?.window28d||gsc?.window28d||{};
+  const idx=gsc?.indexHealth||{};
+  const sitemap=gsc?.sitemaps||{};
+  const engines=supervisorRows.filter(x=>x.engine!=='growth_brain').map(x=>({
+    engine:x.engine,status:x.status,directive:x.directive,lastEvaluatedAt:x.last_evaluated_at
+  }));
+  return {
+    ok:true,
+    version:'command-center-business-truth-v1',
+    generatedAt:new Date().toISOString(),
+    growth:{
+      status:growth.status||null,
+      directive:growth.directive||null,
+      lastEvaluatedAt:growth.last_evaluated_at||null,
+      strictHumans24h:truthNum(growth.strict_humans_24h),
+      strictHumans7d:truthNum(growth.strict_humans_7d),
+      attributedHumans7d:truthNum(growth.attributed_humans_7d),
+      externalExecutions24h:truthNum(growth.external_executions_24h),
+      externalExecutions7d:truthNum(growth.external_executions_7d),
+      verifiedOutbound24h:truthNum(cfg.verified_outbound_24h),
+      verifiedOutbound7d:truthNum(cfg.verified_outbound_7d),
+      monetizedOutbound24h:truthNum(cfg.monetized_outbound_24h),
+      monetizedOutbound7d:truthNum(cfg.monetized_outbound_7d),
+      corrections:truthNum(growth.correction_count)
+    },
+    authority:{
+      required:Boolean(backlink.required),
+      verifiedBacklinks:truthNum(backlink.verified_backlinks),
+      verifiedReferringDomains:truthNum(backlink.verified_referring_domains),
+      bootstrapFloor:truthNum(backlink.bootstrap_referring_domain_floor),
+      attempts24h:truthNum(backlink.attempts_24h),
+      attempts7d:truthNum(backlink.attempts_7d),
+      attemptMin24h:truthNum(backlink.attempt_min_24h),
+      authorityQueue:truthNum(backlink.authority_queue),
+      lastVerifiedAt:backlink.last_verified_at||null,
+      lastVerifiedAgeHours:backlink.last_verified_age_hours==null?null:Number(backlink.last_verified_age_hours),
+      throughputGap:Boolean(backlink.throughput_gap),
+      stagnating:Boolean(backlink.stagnating)
+    },
+    affiliate:{
+      productionRoutes:productionRoutes.length,
+      pipelineActivePrograms:activePipeline,
+      pipelineTrackedPrograms:programmes.length,
+      pipelineStates:programmeStates,
+      productionSlugs:productionRoutes.map(([slug])=>slug).sort(),
+      source:'canonical affiliate registry + affiliate pipeline'
+    },
+    search:{
+      generatedAt:gscSignals?.source_generated_at||gsc?.generatedAt||null,
+      runtimeGeneratedAt:gh?.generatedAt||gscHealth?.source_generated_at||null,
+      runtimeOk:gh?.ok===true,
+      runtimeStatus:gh?.status||null,
+      impressions:truthNum(w.impressions||gh?.impressions),
+      clicks:truthNum(w.clicks||gh?.clicks),
+      observedPages:truthNum(gsc?.searchPerformance?.observedPages||gh?.observedPages),
+      indexed:truthNum(idx.indexed),
+      inspected:truthNum(idx.inspected),
+      indexRecoveryCandidates:truthNum(idx.recoveryCandidates||idx.indexRecoveryCandidates),
+      sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps)
+    },
+    executionContract:contract,
+    architecture:{
+      openIncidents:truthNum(architecture.open_incidents),
+      approvalRequired:Boolean(architecture.approval_required)
+    },
+    engines,
+    sourceProof:{
+      growth:'growth_supervisor_state',
+      affiliateRoutes:'/data/affiliate.json enabled+url',
+      affiliatePrograms:'/data/affiliate-pipeline.json status=active',
+      search:"growth_asset_cache /reports/gsc-signals.json",
+      searchRuntime:"growth_asset_cache /runtime/gsc-refresh-health.json",
+      execution:'growth_execution_contract'
+    }
+  };
+}
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
+    if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth')return Response.json(await commandCenterBusinessTruth(request,env),{headers:{'Cache-Control':'no-store'}});
     if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
       ok:true,
       version:'business-truth-v3',
