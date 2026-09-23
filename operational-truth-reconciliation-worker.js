@@ -1,4 +1,5 @@
 import base from './authority-acquisition-worker.js';
+import {commandCenterHtml} from './command-center-simplified-view.js';
 
 function jsonHeaders(response){
   const h=new Headers(response.headers);
@@ -70,11 +71,24 @@ async function reconcile(response,env){
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:jsonHeaders(response)});
 }
 
+const COMMAND_CENTER_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html','/command-center','/command-center/']);
+function simplifiedPage(response){
+  if(!response?.ok)return response;
+  const type=String(response.headers.get('Content-Type')||'').toLowerCase();
+  if(!type.includes('text/html'))return response;
+  const headers=new Headers(response.headers);
+  headers.set('Content-Type','text/html; charset=UTF-8');
+  headers.set('Cache-Control','private, no-store, max-age=0');
+  headers.delete('Content-Length');headers.delete('Content-Encoding');
+  return new Response(commandCenterHtml(),{status:response.status,statusText:response.statusText,headers});
+}
+
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
+    if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname))return simplifiedPage(response);
     return response;
   },
   async scheduled(event,env,ctx){
