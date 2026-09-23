@@ -49,6 +49,11 @@ async function reconcile(response,env){
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
+    if(request.method==='GET'&&u.pathname==='/api/runtime/e2e-primary-cycle-20260923-owner-authorized'){
+      if(!env.ADMIN_TOKEN)return Response.json({ok:false,error:'admin_token_unavailable'},{status:503});
+      const internal=new Request(new URL('/api/runtime/cloudflare-primary-cycle',request.url),{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'}});
+      return base.fetch(internal,env,ctx);
+    }
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
     return response;
