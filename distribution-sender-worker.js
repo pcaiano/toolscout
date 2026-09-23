@@ -113,18 +113,6 @@ async function recordAuthorityNoOutput(env,reason,taskId=null){
   const detail=`Authority handoff produced no external action: ${String(reason||'unknown').slice(0,180)}${taskId?` · task ${String(taskId).slice(0,180)}`:''}. This is a no-output acquisition cycle, not a growth success. Discovery/network replenishment is requested automatically.`;
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authnoop_${crypto.randomUUID()}`,'authority_handoff_no_output','no_output','backlink_acquisition',detail).run().catch(()=>{});
 }
-async function replenishAuthorityPipeline(request,env,ctx){
-  if(!env.ADMIN_TOKEN)return {scheduled:false,reason:'admin_token_unavailable'};
-  const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
-  const results=[];
-  for(const target of ['/api/distribution/discovery/refresh','/api/distribution/network/refresh']){
-    try{
-      const r=await base.fetch(new Request(new URL(target,request.url),{method:'POST',headers}),env,ctx);
-      results.push({target,status:r.status,ok:r.ok});
-    }catch(e){results.push({target,status:0,ok:false,error:String(e?.message||e).slice(0,200)})}
-  }
-  return {scheduled:true,results};
-}
 async function publicCandidates(env,limit=3){
   await ensureNetworkSchema(env);
   const n=Math.max(1,Math.min(3,Number(limit)||3));
