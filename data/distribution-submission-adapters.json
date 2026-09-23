@@ -161,8 +161,8 @@
     },
     {
       "surface_slug": "a2a-registry",
-      "enabled": true,
-      "allow_automatic": true,
+      "enabled": false,
+      "allow_automatic": false,
       "requires_payment": false,
       "method": "POST",
       "content_type": "application/json",
@@ -172,7 +172,8 @@
       "asset_scope": "agent_manifest",
       "manifest_url": "https://trytoolscout.org/.well-known/agent-card.json",
       "public_directory": "https://www.a2a-registry.org/",
-      "note": "Public A2A Registry ingest endpoint. No account required. ToolScout publishes a live A2A v1.0 Agent Card; submission remains pending until public directory verification confirms the listing."
+      "note": "Public A2A Registry ingest endpoint verified. Adapter is deliberately disabled until the Cloudflare submission executor has first-class manifestUrl payload support and public listing verification.",
+      "setup_state": "executor_support_required"
     }
   ],
   "policy": {
