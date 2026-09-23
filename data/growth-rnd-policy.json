@@ -1,7 +1,7 @@
 {
   "version": 2,
   "mode": "bounded_autonomy",
-  "objective": "Continuously discover net-new free-first acquisition mechanisms for ToolScout, separate them from already implemented growth loops, and prioritize ideas that can become semi-passive after one-time setup.",
+  "objective": "Continuously discover net-new acquisition mechanisms as well as optimize existing ones, then instantiate free-first, automation-first, evidence-backed experiments that feed ToolScout's execution contract without waiting for traffic thresholds.",
   "autonomousPrimitives": [
     "content_amplification",
     "distribution_amplification",
@@ -18,7 +18,20 @@
     "verify_route",
     "measure_search_lift",
     "audit_human_gates",
-    "convert_machine_resolvable_gates"
+    "convert_machine_resolvable_gates",
+    "improve_click_capture",
+    "deepen_existing_search_asset",
+    "strengthen_internal_links",
+    "publisher_contact_discovery",
+    "backlink_reference_outreach",
+    "verify_backlink_acquisition",
+    "execute_alternate_routes",
+    "autonomous_route_qualification",
+    "content_mention",
+    "content_relevance_amplification",
+    "scale_proven_surface",
+    "repair_indexing",
+    "repair_canonical_alignment"
   ],
   "existingCapabilities": [
     "search_amplification",
@@ -62,10 +75,20 @@
   },
   "resourcePolicy": {
     "freeFirst": true,
-    "d1HeavyStrategicAuditCadence": "daily",
-    "maxNewExperimentsPerAudit": 5,
+    "d1HeavyStrategicAuditCadence": "12h_lightweight",
+    "maxNewExperimentsPerAudit": 8,
     "evidenceRequiredBeforeScaling": true,
     "evidenceNotRequiredBeforeExploration": true,
-    "missingEvidenceMeansZeroImpact": false
+    "missingEvidenceMeansZeroImpact": false,
+    "maxTargetsPerExperiment": 3,
+    "netNewAcquisitionPlayDiscovery": true,
+    "scaleAndExploreInParallel": true,
+    "noWaitForTrafficThreshold": true
+  },
+  "ideaDiscovery": {
+    "enabled": true,
+    "source": "/data/growth-acquisition-playbook.json",
+    "purpose": "Find additional traffic-acquisition plays beyond the already-running baseline and bind safe plays to canonical opportunities automatically.",
+    "unsupportedIdeas": "Keep visible as research candidates; never claim execution until an approved executor exists."
   }
 }

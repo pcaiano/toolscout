@@ -66,7 +66,15 @@ const GROWTH_RND_EXECUTION_BINDINGS=Object.freeze({
   news_compounding:['catalog_impact_review','content_amplification','search_update_angle','vendor_amplification','verify_news_materiality','verify_official_source'],
   affiliate_leakage_recovery:['prepare_affiliate_application_pack','capture_approved_referral_link','activate_affiliate_route','production_verify_affiliate_route','monitor_affiliate_decision'],
   catalog_expansion:['discover_catalog_candidates','verify_first_party_sources','admit_only_after_quality_gates','research_first_party_candidate_profile','monitor_runtime_coverage_profile'],
-  automation_gap_reduction:['autonomous_route_qualification','repair_stalled_route_execution','resolve_supported_route_auth','surface_only_true_human_route_gate','surface_only_true_human_gate']
+  automation_gap_reduction:['autonomous_route_qualification','repair_stalled_route_execution','resolve_supported_route_auth','surface_only_true_human_route_gate','surface_only_true_human_gate'],
+  serp_zero_click_capture:['improve_click_capture','deepen_existing_search_asset','content_amplification','distribution_amplification','search_measurement'],
+  authority_publisher_outreach:['publisher_contact_discovery','backlink_reference_outreach','verify_backlink_acquisition','execute_alternate_routes'],
+  surface_family_expansion:['autonomous_route_qualification','execute_alternate_routes','publisher_contact_discovery'],
+  vendor_distribution_flywheel:['vendor_amplification','content_mention','content_relevance_amplification'],
+  ranking_cluster_compounding:['strengthen_internal_links','deepen_existing_search_asset','content_amplification','search_measurement'],
+  news_demand_capture:['verify_news_materiality','search_update_angle','content_amplification','vendor_amplification'],
+  index_recovery_amplification:['repair_indexing','repair_canonical_alignment','distribution_amplification','search_measurement'],
+  proven_surface_scaling:['scale_proven_surface','distribution_amplification','execute_alternate_routes']
 });
 function parseJson(value,fallback){try{return JSON.parse(value)}catch{return fallback}}
 function growthRndTitle(type){
@@ -75,6 +83,14 @@ function growthRndTitle(type){
   if(type==='affiliate_leakage_recovery')return 'Affiliate leakage recovery';
   if(type==='catalog_expansion')return 'Catalog expansion';
   if(type==='automation_gap_reduction')return 'Human gate reduction';
+  if(type==='serp_zero_click_capture')return 'SERP zero-click capture';
+  if(type==='authority_publisher_outreach')return 'Authority publisher outreach';
+  if(type==='surface_family_expansion')return 'Distribution surface family expansion';
+  if(type==='vendor_distribution_flywheel')return 'Vendor co-distribution flywheel';
+  if(type==='ranking_cluster_compounding')return 'Ranking cluster compounding';
+  if(type==='news_demand_capture')return 'Timely software-demand capture';
+  if(type==='index_recovery_amplification')return 'Index recovery plus external amplification';
+  if(type==='proven_surface_scaling')return 'Proven surface scaling';
   return String(type||'Growth experiment').replaceAll('_',' ');
 }
 function growthRndSubjectMatch(type,subjectType){
@@ -84,6 +100,10 @@ function growthRndSubjectMatch(type,subjectType){
   if(type==='affiliate_leakage_recovery')return s==='affiliate';
   if(type==='catalog_expansion')return s.startsWith('catalog_');
   if(type==='automation_gap_reduction')return s==='surface';
+  if(type==='serp_zero_click_capture'||type==='ranking_cluster_compounding'||type==='index_recovery_amplification')return s==='search';
+  if(type==='authority_publisher_outreach'||type==='surface_family_expansion'||type==='proven_surface_scaling')return s==='surface';
+  if(type==='vendor_distribution_flywheel')return s==='tool';
+  if(type==='news_demand_capture')return s==='news_update';
   return true;
 }
 function growthRndEvidenceItem(row){

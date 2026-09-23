@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "objective": "Continuously discover and execute additional free-first, automation-first acquisition plays beyond ToolScout's already-running baseline channels.",
+  "rules": {
+    "netNewIdeasRequired": true,
+    "automationFirst": true,
+    "freeFirst": true,
+    "noWaitForTrafficThreshold": true,
+    "bindOnlyToCanonicalOpportunities": true,
+    "scaleAndExploreInParallel": true,
+    "maxTargetsPerPlay": 3
+  },
+  "plays": [
+    {
+      "id": "serp-zero-click-capture",
+      "experimentType": "serp_zero_click_capture",
+      "title": "SERP zero-click capture",
+      "sourceTypes": [
+        "search"
+      ],
+      "priority": 100,
+      "trigger": {
+        "searchPriorityAtLeast": 65
+      },
+      "hypothesis": "Search impressions that are already visible but not earning clicks can be converted faster by improving click capture, deepening the decision asset and amplifying the same intent externally.",
+      "steps": [
+        "improve_click_capture",
+        "deepen_existing_search_asset",
+        "content_amplification",
+        "distribution_amplification"
+      ],
+      "expectedSignal": "ga4_organic_sessions_and_gsc_clicks"
+    },
+    {
+      "id": "authority-publisher-outreach",
+      "experimentType": "authority_publisher_outreach",
+      "title": "Authority publisher outreach",
+      "sourceTypes": [
+        "surface"
+      ],
+      "priority": 99,
+      "trigger": {
+        "authorityRequired": true
+      },
+      "hypothesis": "Publisher and directory opportunities can produce new referring domains faster when contact discovery, reference outreach and backlink verification are treated as one automated acquisition play.",
+      "steps": [
+        "publisher_contact_discovery",
+        "backlink_reference_outreach",
+        "verify_backlink_acquisition",
+        "execute_alternate_routes"
+      ],
+      "expectedSignal": "new_verified_referring_domains"
+    },
+    {
+      "id": "surface-family-expansion",
+      "experimentType": "surface_family_expansion",
+      "title": "Distribution surface family expansion",
+      "sourceTypes": [
+        "surface"
+      ],
+      "priority": 97,
+      "trigger": {
+        "acquisitionUnderpowered": true
+      },
+      "hypothesis": "When acquisition throughput is below target, ToolScout should expand into additional qualified external surface families instead of repeating the current route mix.",
+      "steps": [
+        "autonomous_route_qualification",
+        "execute_alternate_routes",
+        "publisher_contact_discovery"
+      ],
+      "expectedSignal": "new_external_executions_and_ga4_referral_sessions"
+    },
+    {
+      "id": "vendor-distribution-flywheel",
+      "experimentType": "vendor_distribution_flywheel",
+      "title": "Vendor co-distribution flywheel",
+      "sourceTypes": [
+        "tool"
+      ],
+      "priority": 95,
+      "trigger": {
+        "alwaysWhenSource": true
+      },
+      "hypothesis": "Vendors have existing audiences. Automatically packaging ToolScout reviews, comparisons and mentions for relevant vendor amplification can borrow that audience and create referral traffic and links.",
+      "steps": [
+        "vendor_amplification",
+        "content_mention",
+        "content_relevance_amplification"
+      ],
+      "expectedSignal": "ga4_vendor_referral_sessions"
+    },
+    {
+      "id": "ranking-cluster-compounding",
+      "experimentType": "ranking_cluster_compounding",
+      "title": "Ranking cluster compounding",
+      "sourceTypes": [
+        "search"
+      ],
+      "priority": 94,
+      "trigger": {
+        "searchPriorityAtLeast": 55
+      },
+      "hypothesis": "Search assets with observed demand should reinforce one another through stronger internal links, deeper decision coverage and external amplification rather than being optimized in isolation.",
+      "steps": [
+        "strengthen_internal_links",
+        "deepen_existing_search_asset",
+        "content_amplification",
+        "search_measurement"
+      ],
+      "expectedSignal": "gsc_position_and_ga4_organic_sessions"
+    },
+    {
+      "id": "news-demand-capture",
+      "experimentType": "news_demand_capture",
+      "title": "Timely software-demand capture",
+      "sourceTypes": [
+        "news_update"
+      ],
+      "priority": 92,
+      "trigger": {
+        "newsAvailable": true
+      },
+      "hypothesis": "Verified software changes can be turned into timely search and borrowed-audience acquisition by publishing the search angle and amplifying it through the vendor while interest is fresh.",
+      "steps": [
+        "verify_news_materiality",
+        "search_update_angle",
+        "content_amplification",
+        "vendor_amplification"
+      ],
+      "expectedSignal": "ga4_sessions_from_timely_assets"
+    },
+    {
+      "id": "index-recovery-amplification",
+      "experimentType": "index_recovery_amplification",
+      "title": "Index recovery plus external amplification",
+      "sourceTypes": [
+        "search"
+      ],
+      "priority": 90,
+      "trigger": {
+        "sourceActionAny": [
+          "repair_indexing",
+          "repair_canonical_alignment"
+        ]
+      },
+      "hypothesis": "Pages already worth repairing for Google should receive distribution support in the same cycle so technical recovery is paired with external discovery signals.",
+      "steps": [
+        "repair_indexing",
+        "repair_canonical_alignment",
+        "distribution_amplification",
+        "search_measurement"
+      ],
+      "expectedSignal": "indexed_pages_and_ga4_organic_sessions"
+    },
+    {
+      "id": "proven-surface-scaling",
+      "experimentType": "proven_surface_scaling",
+      "title": "Proven surface scaling",
+      "sourceTypes": [
+        "surface"
+      ],
+      "priority": 88,
+      "trigger": {
+        "sourceActionAny": [
+          "scale_proven_surface"
+        ]
+      },
+      "hypothesis": "Any external surface already showing evidence should be scaled while new surfaces continue to be explored, instead of replacing exploration with exploitation.",
+      "steps": [
+        "scale_proven_surface",
+        "distribution_amplification",
+        "execute_alternate_routes"
+      ],
+      "expectedSignal": "ga4_referral_sessions_from_proven_surfaces"
+    }
+  ]
+}
