@@ -1,0 +1,60 @@
+name: One Shot Runtime Peer Fallback Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/one-shot-runtime-peer-fallback-deploy.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: one-shot-runtime-peer-fallback-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event.head_commit.message == 'Deploy runtime peer fallback'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate syntax and persistent catalog
+        run: |
+          node --check catalog-autonomy-worker.js
+          node --check dynamic-worker.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const tools=JSON.parse(fs.readFileSync('data/tools.json','utf8'));
+          const expected=['character-ai','google-ai-studio','kling-ai','otter-ai'];
+          if(tools.length!==106)throw new Error('expected 106 tools, got '+tools.length);
+          for(const slug of expected){
+            const t=tools.find(x=>x.slug===slug);
+            if(!t||t.rankingEligible!==true||t.comparisonEligible!==true)throw new Error('peer parity missing '+slug);
+            if(!fs.existsSync('tools/'+slug+'.html'))throw new Error('profile missing '+slug);
+          }
+          NODE
+
+      - name: Deploy Worker
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Smoke test catalog parity
+        run: |
+          node - <<'NODE'
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms)); await sleep(12000);
+          const invRes=await fetch('https://trytoolscout.org/data/catalog-inventory.json',{cache:'no-store'});
+          if(!invRes.ok)throw new Error('inventory '+invRes.status);
+          const inv=await invRes.json();
+          if(Number(inv.total)!==106||Number(inv.static_unique)!==106)throw new Error('canonical count mismatch '+JSON.stringify({total:inv.total,static_unique:inv.static_unique}));
+          const expected=['character-ai','google-ai-studio','kling-ai','otter-ai'];
+          const profiles={};
+          for(const slug of expected){
+            const r=await fetch('https://trytoolscout.org/tools/'+slug,{cache:'no-store'});
+            profiles[slug]=r.status;
+            if(r.status!==200)throw new Error(slug+' profile '+r.status);
+          }
+          console.log(JSON.stringify({total:inv.total,static_unique:inv.static_unique,runtime_unique:inv.runtime_unique,affiliate:inv.affiliate,profiles}));
+          NODE
