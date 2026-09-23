@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "mode": "auto_deploy_safe_bounded",
+  "preApprovalRequired": false,
+  "objective": "Turn high-value Growth R&D acquisition ideas into production capabilities with minimal recurring owner work, then measure them against traffic, authority, outbound and revenue evidence.",
+  "automaticLanes": {
+    "existingPrimitives": "activate_and_execute_without_preapproval",
+    "reversibleOneTimeBuilds": "implement_deploy_verify_without_preapproval_when_safe_and_bounded",
+    "unsafeOrExternalCommitments": "do_not_execute_automatically"
+  },
+  "hardGates": [
+    "paid_spend_without_existing_policy",
+    "credential_or_secret_change",
+    "legal_or_contractual_acceptance",
+    "identity_tax_or_payment_submission",
+    "unsolicited_bulk_messaging",
+    "platform_policy_violation",
+    "ranking_manipulation_or_paid_links",
+    "irreversible_third_party_action"
+  ],
+  "reporting": {
+    "commandCenter": true,
+    "deploymentLedger": "/data/growth-rnd-deployments.json",
+    "emailAfterSuccessfulDeployment": true,
+    "emailAfterMaterialOutcome": true,
+    "noEmailForNoChangeCycles": true,
+    "approvalEmailBeforeSafeDeployment": false
+  },
+  "measurement": {
+    "primary": [
+      "ga4_sessions",
+      "gsc_clicks",
+      "verified_referring_domains",
+      "verified_outbound",
+      "monetized_outbound",
+      "confirmed_revenue"
+    ],
+    "baselineRequired": true,
+    "keepMeasuringAfterDeployment": true,
+    "scaleAndExploreInParallel": true
+  }
+}

@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const policy=JSON.parse(fs.readFileSync(new URL('../data/growth-rnd-deployment-policy.json',import.meta.url),'utf8'));
+const ledger=JSON.parse(fs.readFileSync(new URL('../data/growth-rnd-deployments.json',import.meta.url),'utf8'));
+const cc=fs.readFileSync(new URL('../growth-command-center-v2-worker.js',import.meta.url),'utf8');
+assert.equal(policy.mode,'auto_deploy_safe_bounded');
+assert.equal(policy.preApprovalRequired,false);
+assert.equal(policy.reporting.commandCenter,true);
+assert.equal(policy.reporting.emailAfterSuccessfulDeployment,true);
+assert.equal(ledger.preApprovalRequired,false);
+assert.match(cc,/growth-rnd-deployments\.json/);
+assert.match(cc,/rnd_deployment_mode/);
+assert.match(cc,/rnd_deployment_items/);
+assert.match(cc,/Growth R&D deployments/);
+assert.match(cc,/safe builds auto-deploy without pre-approval/);
+console.log('Growth R&D safe auto-deploy reporting is visible in Command Center.');

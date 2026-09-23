@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-23T20:35:41.312Z",
+  "policy": "auto_deploy_safe_bounded",
+  "preApprovalRequired": false,
+  "reporting": "command_center_plus_post_deploy_email",
+  "items": []
+}
