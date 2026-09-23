@@ -164,14 +164,14 @@ async function activateAcquiredLinks(env){
     }
     const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);
     try{
-      const r=await fetch(`https://trytoolscout.org/go/${encodeURIComponent(row.tool_slug)}`,{method:'GET',redirect:'manual',headers:{'User-Agent':'ToolScout-Affiliate-Route-Health/1.0','X-ToolScout-Health-Check':'affiliate-route'},signal:ctl.signal});
-      const location=r.headers.get('Location')||'',targetHost=publicHttpUrl(row.affiliate_url)?.hostname||'',locationHost=publicHttpUrl(location)?.hostname||'';
-      const ok=r.status>=300&&r.status<400&&Boolean(location)&&Boolean(targetHost)&&locationHost===targetHost;
+      const r=await fetch(`https://trytoolscout.org/go/${encodeURIComponent(row.tool_slug)}`,{method:'GET',redirect:'follow',headers:{'User-Agent':'ToolScout-Affiliate-Route-Health/1.0','X-ToolScout-Health-Check':'affiliate-route'},signal:ctl.signal});
+      const finalUrl=r.url||'',expectedFinalHost=publicHttpUrl(external.finalUrl||row.affiliate_url)?.hostname||'',productionFinalHost=publicHttpUrl(finalUrl)?.hostname||'';
+      const ok=r.status>=200&&r.status<400&&Boolean(expectedFinalHost)&&productionFinalHost===expectedFinalHost;
       await env.DB.prepare(`UPDATE affiliate_route_verification
         SET production_status=?,production_http_status=?,production_location=?,verified_at=CASE WHEN ?='verified' THEN COALESCE(verified_at,datetime('now')) ELSE verified_at END,updated_at=datetime('now')
         WHERE tool_slug=?
           AND (production_status IS NOT ? OR production_http_status IS NOT ? OR production_location IS NOT ?)`)
-        .bind(ok?'verified':'failed',r.status,location,ok?'verified':'failed',row.tool_slug,ok?'verified':'failed',r.status,location).run();
+        .bind(ok?'verified':'failed',r.status,finalUrl,ok?'verified':'failed',row.tool_slug,ok?'verified':'failed',r.status,finalUrl).run();
       if(ok){
         await env.DB.prepare(`UPDATE affiliate_workflow SET status='verified',source_actor='affiliate_autonomy',last_verified=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND status IN ('active','link_acquired')`).bind(row.tool_slug).run();
         await env.DB.prepare(`INSERT INTO affiliate_workflow_history(tool_slug,previous_state,new_state,evidence_source,actor_source,notes,created_at) VALUES(?,'active','verified','production_go_redirect','affiliate_autonomy','Production /go route verified against the approved affiliate destination.',datetime('now'))`).bind(row.tool_slug).run().catch(()=>{});
