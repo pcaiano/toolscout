@@ -44,6 +44,12 @@ async function ingestAudienceEvent(request,env){
       if(tasks.length===1){
         executionProof=await recordExecutionProof(env,{taskId:tasks[0].task_id,executor:'audience_make',status:'verified',detail:'exact_published_reply_verified',externalId:eventId,evidence:{platform,event_type:eventType,post_uri:postUri,parent_uri:safeText(body.parent_uri,500)||null}});
       }
+    }else if(eventType==='content_published'&&status==='published'){
+      const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='content_issue' AND status IN ('claimed','attempted','stalled') ORDER BY COALESCE(attempted_at,claimed_at) DESC,priority_score DESC LIMIT 2`).all().catch(()=>({results:[]}));
+      const tasks=q.results||[];
+      if(tasks.length===1){
+        executionProof=await recordExecutionProof(env,{taskId:tasks[0].task_id,executor:'content_issue',status:'verified',detail:'exact_content_publication_verified',externalId:eventId,evidence:{platform,event_type:eventType,post_uri:postUri,content_id:safeText(body.content_id,120)||null}});
+      }
     }
     return Response.json({ok:true,event_id:eventId,verified:true,execution_proof:executionProof},{headers:jsonHeaders});
   }catch(e){return Response.json({error:'audience_event_store_failed',message:String(e?.message||e)},{status:500,headers:jsonHeaders});}
