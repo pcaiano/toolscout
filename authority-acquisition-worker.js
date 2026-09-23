@@ -130,13 +130,58 @@ async function runVetted(env,{force=false}={}){
   const accepted=results.filter(x=>x.accepted).length;
   return {ok:attempted>0,executor:'cloudflare',attempted,accepted,routes:results,generatedAt:new Date().toISOString()};
 }
+
+async function upsertVerifiedPlacement(env,slug,publicUrl){
+  try{
+    await env.DB.prepare(`INSERT INTO distribution_placements(surface_slug,public_url,placement_verified,backlink_verified,first_verified_at,last_checked_at,created_at,updated_at)
+      VALUES(?,?,1,0,datetime('now'),datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(surface_slug) DO UPDATE SET public_url=excluded.public_url,placement_verified=1,
+        first_verified_at=COALESCE(distribution_placements.first_verified_at,datetime('now')),
+        last_checked_at=datetime('now'),updated_at=datetime('now')`).bind(slug,publicUrl).run();
+    await env.DB.prepare(`UPDATE distribution_submissions SET status='verified',response_url=?,error=NULL,updated_at=datetime('now')
+      WHERE surface_slug=?`).bind(publicUrl,slug).run();
+    return true;
+  }catch{return false}
+}
+async function reconcilePublicPlacements(env){
+  const out={checked:0,verified:0,items:[]};
+  const checks=[
+    {
+      slug:'a2a-community-registry',
+      publicUrl:'https://a2aregistry.org/api/agents?search=ToolScout',
+      match:async()=>{const r=await fetch('https://a2aregistry.org/api/agents?search=ToolScout',{headers:{Accept:'application/json'},signal:AbortSignal.timeout(8000)});if(!r.ok)return false;const d=await r.json();return Array.isArray(d?.agents)&&d.agents.some(x=>String(x?.wellKnownURI||'')==='https://trytoolscout.org/.well-known/agent-card.json'&&x?.hidden!==true)}
+    },
+    {
+      slug:'mcp-harbor',
+      publicUrl:'https://ai.mcpharbor.dev/api/v0/servers/io.github.pcaiano%2Ftoolscout',
+      match:async()=>{const r=await fetch('https://ai.mcpharbor.dev/api/v0/servers/io.github.pcaiano%2Ftoolscout',{headers:{Accept:'application/json'},signal:AbortSignal.timeout(8000)});if(!r.ok)return false;const d=await r.json();return String(d?.server?.name||'')==='io.github.pcaiano/toolscout'}
+    },
+    {
+      slug:'botmarket-mcp',
+      publicUrl:'https://botmarket.bot/v1/search?q=toolscout',
+      match:async()=>{const r=await fetch('https://botmarket.bot/v1/search?q=toolscout',{headers:{Accept:'application/json'},signal:AbortSignal.timeout(8000)});if(!r.ok)return false;const d=await r.json();return Array.isArray(d?.mcps)&&d.mcps.some(x=>String(x?.canonical_key||'').toLowerCase()==='pcaiano/toolscout'||String(x?.url||'').includes('trytoolscout.org'))}
+    }
+  ];
+  for(const check of checks){
+    out.checked++;
+    let ok=false;try{ok=await check.match()}catch{}
+    if(ok){
+      const saved=await upsertVerifiedPlacement(env,check.slug,check.publicUrl);
+      if(saved)out.verified++;
+    }
+    out.items.push({slug:check.slug,verified:ok,publicUrl:check.publicUrl});
+  }
+  return out;
+}
+
 async function health(env){
+  const reconciliation=await reconcilePublicPlacements(env);
   const items=[];
   for(const route of ROUTES){
     const row=await existing(env,route);
     items.push({slug:route.slug,endpoint:route.endpoint,asset:route.asset,status:row?.status||'not_attempted',attempts:Number(row?.attempts||0),lastAttemptAt:row?.last_attempt_at||null,submittedAt:row?.submitted_at||null,responseUrl:row?.response_url||null,error:row?.error||null});
   }
-  return {status:'active',executor:'cloudflare',routeCount:ROUTES.length,items};
+  return {status:'active',executor:'cloudflare',routeCount:ROUTES.length,reconciliation,items};
 }
 function authorized(request,env){
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
@@ -157,7 +202,7 @@ export default{
     const trigger=event?.cron||'scheduled';
     if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
     if(trigger==='15 * * * *'){
-      const task=runVetted(env).catch(()=>null);
+      const task=Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
       if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }
   }
