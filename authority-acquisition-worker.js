@@ -1,4 +1,8 @@
 import base from './seo-cloudflare-runtime-worker.js';
+import {syncExecutionContracts,claimExecutorTasks,markExecutorAttempt,recordExecutionProof,deferExecutionTask} from './growth-execution-contract.js';
+import {executeCloudflareSeoTask} from './seo-execution-runtime.js';
+import {issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
+import {auditArchitectureEscalations} from './growth-architecture-escalation.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const ROUTES=[
@@ -183,6 +187,49 @@ async function health(env){
   }
   return {status:'active',executor:'cloudflare',routeCount:ROUTES.length,reconciliation,items};
 }
+async function migrationBootstrap(env){
+  const out={synced:null,content:null,seo:null,architecture:null};
+  out.synced=await syncExecutionContracts(env);
+
+  const contentClaim=await claimExecutorTasks(env,'content_issue',{limit:1,maxInFlight:1,result:'content_recovery_bootstrap_waiting_for_publication'});
+  if(contentClaim.claimed){
+    const task=contentClaim.tasks?.[0]||null;
+    try{
+      const brief=await issueGrowthContentBrief(env,task);
+      if(brief?.issued&&brief?.execution_task_id===task?.task_id){
+        await markExecutorAttempt(env,'content_issue','content_brief_issued_waiting_for_publication',{taskIds:contentClaim.taskIds});
+        out.content={claimed:1,task_id:task?.task_id||null,brief_id:brief?.brief_id||null,status:'attempted_waiting_publication'};
+      }else{
+        await deferExecutionTask(env,task?.task_id,'content_bootstrap_no_task_specific_brief');
+        out.content={claimed:1,task_id:task?.task_id||null,status:'deferred',reason:'no_task_specific_brief'};
+      }
+    }catch(error){
+      await deferExecutionTask(env,task?.task_id,'content_bootstrap_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
+      out.content={claimed:1,task_id:task?.task_id||null,status:'error',error:String(error?.message||error).slice(0,500)};
+    }
+  }else out.content={claimed:0,status:'no_ready_task'};
+
+  const seoClaim=await claimExecutorTasks(env,'seo_cloudflare',{limit:1,maxInFlight:1,result:'seo_cloudflare_recovery_bootstrap'});
+  if(seoClaim.claimed){
+    const task=seoClaim.tasks?.[0]||null;
+    try{
+      const result=await executeCloudflareSeoTask(env,task);
+      if(result?.verified){
+        const proof=await recordExecutionProof(env,{taskId:task.task_id,executor:'seo_cloudflare',status:'verified',detail:'cloudflare_seo_bootstrap_verified',externalId:result.pathname,evidence:result});
+        out.seo={claimed:1,task_id:task.task_id,status:'verified',result,proof};
+      }else{
+        await deferExecutionTask(env,task?.task_id,'seo_bootstrap_not_verified:'+String(result?.reason||'unknown'));
+        out.seo={claimed:1,task_id:task?.task_id||null,status:'deferred',result};
+      }
+    }catch(error){
+      await deferExecutionTask(env,task?.task_id,'seo_bootstrap_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
+      out.seo={claimed:1,task_id:task?.task_id||null,status:'error',error:String(error?.message||error).slice(0,500)};
+    }
+  }else out.seo={claimed:0,status:'no_ready_task'};
+
+  out.architecture=await auditArchitectureEscalations(env).catch(error=>({ok:false,error:String(error?.message||error).slice(0,500)}));
+  return {ok:true,mode:'temporary_migration_bootstrap',...out};
+}
 function authorized(request,env){
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
@@ -192,6 +239,7 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/migration-bootstrap-20260923')return Response.json(await migrationBootstrap(env),{headers:H});
     if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
       return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
