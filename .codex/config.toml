@@ -1,0 +1,17 @@
+# ToolScout project-scoped Codex MCP configuration.
+# Keep this file credential-free. Project config is loaded only after the repo is trusted.
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@4.1.1"]
+startup_timeout_ms = 20_000
+
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = [
+  "-y",
+  "chrome-devtools-mcp@1.10.1",
+  "--headless=true",
+  "--isolated=true",
+]
+startup_timeout_ms = 20_000
