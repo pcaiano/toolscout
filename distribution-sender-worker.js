@@ -98,8 +98,8 @@ async function leaseQueue(env,limit=3){
   return {status:'connected',leaseHours:24,items:raw.map(cordialOutreach)};
 }
 
-async function claimedMakeSenderTasks(env,limit=4){
-  const n=Math.max(1,Math.min(4,Number(limit)||4));
+async function claimedMakeSenderTasks(env,limit=8){
+  const n=Math.max(1,Math.min(8,Number(limit)||8));
   try{
     const q=await env.DB.prepare(`SELECT task_id,subject_type,subject_key,action,priority_score,claimed_at
       FROM growth_execution_contract
@@ -126,13 +126,13 @@ async function recordAuthorityNoOutput(env,reason,taskId=null){
   const detail=`Authority handoff produced no external action: ${String(reason||'unknown').slice(0,180)}${taskId?` · task ${String(taskId).slice(0,180)}`:''}. This is a no-output acquisition cycle, not a growth success. Discovery/network replenishment is requested automatically.`;
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authnoop_${crypto.randomUUID()}`,'authority_handoff_no_output','no_output','backlink_acquisition',detail).run().catch(()=>{});
 }
-async function publicCandidates(env,limit=4){
+async function publicCandidates(env,limit=8){
   await ensureNetworkSchema(env);
-  const n=Math.max(1,Math.min(4,Number(limit)||4));
+  const n=Math.max(1,Math.min(8,Number(limit)||8));
   const tasks=await claimedMakeSenderTasks(env,n);
   if(!tasks.length){
     await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');
-    return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-batch-v4'};
+    return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-batch-v8'};
   }
 
   const items=[],deferredTasks=[],leasedPending=[],seenSubjects=new Set();
@@ -240,7 +240,7 @@ async function publicCandidates(env,limit=4){
     deferred_tasks:deferredTasks,
     leased_pending:leasedPending,
     reason:items.length?null:(leasedPending.length?'leased_candidates_pending_callback':'no_ready_candidate_after_batch_scan'),
-    integrity:'task-specific-batch-v4'
+    integrity:'task-specific-batch-v8'
   };
 }
 async function publicStatus(request,env){

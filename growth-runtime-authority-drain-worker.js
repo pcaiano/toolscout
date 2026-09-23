@@ -2,7 +2,7 @@ import base from './growth-runtime-observability-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const MAX_DRAIN_PASSES=4;
-const HANDOFF_BATCH_LIMIT=4;
+const HANDOFF_BATCH_LIMIT=8;
 
 async function first(env,sql,bindings=[]){try{let q=env.DB.prepare(sql);if(bindings.length)q=q.bind(...bindings);return await q.first()}catch{return null}}
 async function all(env,sql,bindings=[]){try{let q=env.DB.prepare(sql);if(bindings.length)q=q.bind(...bindings);return (await q.all()).results||[]}catch{return[]}}
@@ -36,12 +36,12 @@ async function drainSender(request,env,ctx){
   for(let i=0;i<MAX_DRAIN_PASSES;i++){
     let state=await senderState(env);
     if(state.dispatchReady>0){
-      const handoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=4',{method:'GET'});
+      const handoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=8',{method:'GET'});
       const items=Array.isArray(handoff?.payload?.items)?handoff.payload.items:[];
       passes.push({pass:i+1,phase:'handoff_ready',claimed:state.claimed,dispatchReady:state.dispatchReady,handoffStatus:handoff.status,candidates:items.length});
       if(items.length){await record(env,'authority_sender_handoff_ready','ready',`Post-schedule sender drain exposed ${items.length} executable authority candidate(s) after ${i+1} pass(es).`);return {ok:true,status:'pending_external_confirmation',passes,candidates:items.map(x=>({kind:x.kind||null,task_id:x.task_id||null,task_action:x.task_action||null,tool_slug:x.tool_slug||null,vendor_domain:x.vendor_domain||null}))}}
     }else if(state.claimed>0){
-      const handoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=4',{method:'GET'});
+      const handoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=8',{method:'GET'});
       passes.push({pass:i+1,phase:'claimed_not_executable',claimed:state.claimed,dispatchReady:0,handoffStatus:handoff.status,reason:handoff?.payload?.reason||null});
       // The sender endpoint defers a claimed task that has no matching ready candidate.
     }

@@ -833,8 +833,8 @@ async function runGrowthExecutionContractCycle(env){
   if(selectedInternalLane==='distribution_network')await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
   if(selectedInternalLane==='distribution_autonomous')await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
 
-  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:4,maxInFlight:4,result:'make_sender_waiting_for_exact_external_send'});
-  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:4};
+  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:8,maxInFlight:8,result:'make_sender_waiting_for_exact_external_send'});
+  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:8};
 
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
   await runSeoBatch(4);

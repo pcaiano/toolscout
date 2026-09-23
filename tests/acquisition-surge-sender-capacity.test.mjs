@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const contract=fs.readFileSync(new URL('../growth-execution-contract.js',import.meta.url),'utf8');
+const orchestrator=fs.readFileSync(new URL('../distribution-orchestrator-worker.js',import.meta.url),'utf8');
+const sender=fs.readFileSync(new URL('../distribution-sender-worker.js',import.meta.url),'utf8');
+const drain=fs.readFileSync(new URL('../growth-runtime-authority-drain-worker.js',import.meta.url),'utf8');
+assert.match(contract,/make_sender:8/);
+assert.match(orchestrator,/limit:8,maxInFlight:8/);
+assert.match(orchestrator,/batchCapacity:8/);
+assert.match(sender,/claimedMakeSenderTasks\(env,limit=8\)/);
+assert.match(sender,/Math\.min\(8,Number\(limit\)\|\|8\)/);
+assert.match(sender,/task-specific-batch-v8/);
+assert.match(drain,/HANDOFF_BATCH_LIMIT=8/);
+assert.match(drain,/public-candidates\?limit=8/);
+console.log('Acquisition surge sender capacity is eight concurrent exact-task handoffs.');
