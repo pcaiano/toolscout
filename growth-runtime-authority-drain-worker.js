@@ -58,14 +58,16 @@ async function correctAuthorityHealth(response,env){
   if(!response.ok||!String(response.headers.get('content-type')||'').includes('application/json'))return response;
   let d;try{d=await response.json()}catch{return response}
   const s=await senderState(env);d.senderDispatchReady=s.dispatchReady;d.senderClaimed=s.claimed;d.senderReadyTasks=s.readyTasks.map(x=>({task_id:x.task_id,subject_type:x.subject_type,subject_key:x.subject_key,action:x.action,claimed_at:x.claimed_at}));
-  if(s.dispatchReady>0)d.status='waiting_external_confirmation';else if(s.claimed>0)d.status='handoff_reconciliation_required';else if(Number(d.attempts24||0)<Number(d.attemptMin24h||6)&&Number(d.queue||0)>0)d.status='execution_required';
+  const floorMet=Number(d.attempts24||0)>=Number(d.attemptMin24h||6);
+  if(floorMet)d.status='healthy';else if(s.dispatchReady>0)d.status='waiting_external_confirmation';else if(s.claimed>0)d.status='handoff_reconciliation_required';else if(Number(d.queue||0)>0)d.status='execution_required';
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:JSON_H});
 }
 async function correctAutonomous(response,env){
   if(!response.ok||!String(response.headers.get('content-type')||'').includes('application/json'))return response;
   let d;try{d=await response.json()}catch{return response}
   const s=await senderState(env);
-  const status=s.dispatchReady>0?'waiting_external_confirmation':s.claimed>0?'handoff_reconciliation_required':d?.authorityExecution?.status;
+  const attempts=Number(d?.authorityExecution?.attempts24??d?.attempts24??0),floor=Number(d?.authorityExecution?.attemptMin24h??d?.attemptMin24h??6);
+  const status=attempts>=floor?'healthy':s.dispatchReady>0?'waiting_external_confirmation':s.claimed>0?'handoff_reconciliation_required':d?.authorityExecution?.status;
   if(status){d.authority_execution_status=status;d.authorityExecution={...(d.authorityExecution||{}),status,senderClaimed:s.claimed,senderDispatchReady:s.dispatchReady,detail:s.dispatchReady>0?`${s.dispatchReady} executable authority handoff(s) are ready for the external sender. External attempts remain evidence-only until callback.`:s.claimed>0?`${s.claimed} sender task(s) are claimed but currently have no executable candidate. The post-schedule drain will defer and rotate these claims.`:d?.authorityExecution?.detail};if(d.overallHealth)d.overallHealth={...d.overallHealth,authorityStatus:status}}
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:JSON_H});
 }
@@ -74,7 +76,8 @@ async function correctStats(response,env){
   let d;try{d=await response.json()}catch{return response}
   const s=await senderState(env),g=d.growthOps||(d.growthOps={}),a=g.autonomousGrowth||(g.autonomousGrowth={});
   a.authority_sender_state={claimed:s.claimed,dispatch_ready:s.dispatchReady,ready_tasks:s.readyTasks.map(x=>({task_id:x.task_id,subject_key:x.subject_key,action:x.action,claimed_at:x.claimed_at}))};
-  if(s.dispatchReady>0)a.authority_execution_status='waiting_external_confirmation';else if(s.claimed>0)a.authority_execution_status='handoff_reconciliation_required';
+  const attempts=Number(g?.authorityClosedLoop?.attempts24??a?.authority_attempts_24h??0),floor=Number(g?.authorityClosedLoop?.attemptMin24h??6);
+  if(attempts>=floor)a.authority_execution_status='healthy';else if(s.dispatchReady>0)a.authority_execution_status='waiting_external_confirmation';else if(s.claimed>0)a.authority_execution_status='handoff_reconciliation_required';
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:JSON_H});
 }
 
