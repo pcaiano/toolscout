@@ -2,24 +2,88 @@ import base from './affiliate-workflow-worker.js';
 import {recordExecutionProof} from './growth-execution-contract.js';
 
 const TOOLSCOUT_BLUESKY_DID='did:plc:hjawfnxtifnuqcgidlvmas76';
+const BLUESKY_MAX_GRAPHEMES=300;
+const BLUESKY_MAX_BYTES=3000;
+const BLUESKY_REPLY_TARGET_GRAPHEMES=280;
+const AUDIENCE_INGEST_TOKEN_SHA256='2cae5760a1a416aa3bbe14128c10539e157d527b1daa2f2a1df456c35099d770';
 const jsonHeaders={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const safeText=(v,n=1000)=>String(v??'').slice(0,n);
+const utf8Bytes=v=>new TextEncoder().encode(String(v??'')).length;
+function graphemeSegments(value){
+  const text=String(value??'');
+  try{return [...new Intl.Segmenter('en',{granularity:'grapheme'}).segment(text)].map(x=>x.segment)}
+  catch{return Array.from(text)}
+}
+const graphemeLength=v=>graphemeSegments(v).length;
+function normalizeBlueskyCopy(value){
+  return String(value??'')
+    .replace(/[\u2013\u2014]/g,'-')
+    .replace(/[ \t]+/g,' ')
+    .replace(/\s*\n\s*/g,' ')
+    .replace(/\s{2,}/g,' ')
+    .trim();
+}
+function withinBlueskyLimits(text,maxGraphemes=BLUESKY_MAX_GRAPHEMES){
+  return graphemeLength(text)<=maxGraphemes&&utf8Bytes(text)<=BLUESKY_MAX_BYTES;
+}
+function takeGraphemes(text,max){
+  return graphemeSegments(text).slice(0,Math.max(0,max)).join('');
+}
+function completeBlueskyReply(value,{target=BLUESKY_REPLY_TARGET_GRAPHEMES}={}){
+  const original=normalizeBlueskyCopy(value);
+  if(!original)return {text:'',changed:false,reason:'empty',originalGraphemes:0,graphemes:0,bytes:0};
+  const originalGraphemes=graphemeLength(original);
+  if(withinBlueskyLimits(original,target))return {text:original,changed:false,reason:'within_target',originalGraphemes,graphemes:originalGraphemes,bytes:utf8Bytes(original)};
+
+  const hard=takeGraphemes(original,target).trim();
+  const sentenceMatches=[...hard.matchAll(/(?:^|.*?)(?:[.!?](?=\s|$))/g)].map(m=>m[0].trim()).filter(Boolean);
+  let text=sentenceMatches.length?sentenceMatches.at(-1):'';
+
+  if(graphemeLength(text)<Math.min(80,Math.floor(target*0.35))){
+    const words=hard.split(/\s+/).filter(Boolean);
+    if(words.length){
+      words.pop();
+      text=words.join(' ').trim();
+      text=text.replace(/[,:;\-]+$/,'').trim();
+      if(text&&!/[.!?]$/.test(text))text+='.';
+    }
+  }
+  if(!text)text=hard.replace(/[,:;\-]+$/,'').trim();
+  while(text&&!withinBlueskyLimits(text,target)){
+    const parts=text.replace(/[.!?]$/,'').trim().split(/\s+/);
+    parts.pop();
+    text=parts.join(' ').trim();
+    if(text)text+='.';
+  }
+  return {text,changed:text!==original,reason:'rewritten_to_complete_limit',originalGraphemes,graphemes:graphemeLength(text),bytes:utf8Bytes(text)};
+}
+async function digestHex(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+async function validAudienceIngest(request){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(token&&(await digestHex(token))===AUDIENCE_INGEST_TOKEN_SHA256)}
 const publicVerifiedType=new Set(['outbound_reply','inbound_reply','content_published']);
 const allowedStatus=new Set(['published','observed']);
 const allowedRisk=new Set(['green','amber','red','none']);
 const rows=result=>result?.results||[];
 
-async function verifyToolScoutBlueskyPost(uri){
-  if(!uri||!String(uri).startsWith('at://'))return false;
+async function fetchToolScoutBlueskyPost(uri){
+  if(!uri||!String(uri).startsWith('at://'))return null;
   try{
     const endpoint=new URL('https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts');
     endpoint.searchParams.append('uris',String(uri));
     const res=await fetch(endpoint,{headers:{Accept:'application/json'}});
-    if(!res.ok)return false;
+    if(!res.ok)return null;
     const body=await res.json();
     const post=Array.isArray(body.posts)?body.posts[0]:null;
-    return Boolean(post&&post.uri===uri&&post.author?.did===TOOLSCOUT_BLUESKY_DID);
-  }catch{return false;}
+    return post&&post.uri===uri&&post.author?.did===TOOLSCOUT_BLUESKY_DID?post:null;
+  }catch{return null;}
+}
+async function prepareBlueskyReply(request,env){
+  if(!(await validAudienceIngest(request)))return Response.json({ok:false,error:'unauthorized'},{status:401,headers:jsonHeaders});
+  let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:jsonHeaders})}
+  const result=completeBlueskyReply(body.text,{target:Math.min(BLUESKY_REPLY_TARGET_GRAPHEMES,Math.max(120,Number(body.target_graphemes)||BLUESKY_REPLY_TARGET_GRAPHEMES))});
+  if(!result.text)return Response.json({ok:false,error:'empty_reply'},{status:422,headers:jsonHeaders});
+  const valid=withinBlueskyLimits(result.text,BLUESKY_MAX_GRAPHEMES);
+  if(!valid)return Response.json({ok:false,error:'reply_still_over_limit',...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES},{status:422,headers:jsonHeaders});
+  return Response.json({ok:true,...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,policy:'complete-sentence-no-hard-cut-v1'},{headers:jsonHeaders});
 }
 
 async function ingestAudienceEvent(request,env){
@@ -32,11 +96,19 @@ async function ingestAudienceEvent(request,env){
   const postUri=safeText(body.post_uri,500);
   if(platform!=='bluesky')return Response.json({error:'unsupported_platform'},{status:422,headers:jsonHeaders});
   if(!publicVerifiedType.has(eventType))return Response.json({error:'unsupported_public_event_type'},{status:422,headers:jsonHeaders});
-  if(!(await verifyToolScoutBlueskyPost(postUri)))return Response.json({error:'unverified_toolscout_post'},{status:422,headers:jsonHeaders});
+  const verifiedPost=await fetchToolScoutBlueskyPost(postUri);
+  if(!verifiedPost)return Response.json({error:'unverified_toolscout_post'},{status:422,headers:jsonHeaders});
+  const publishedText=normalizeBlueskyCopy(verifiedPost?.record?.text||'');
+  const publishedGraphemes=graphemeLength(publishedText);
+  const likelyHardCut=eventType==='outbound_reply'&&publishedGraphemes>=BLUESKY_REPLY_TARGET_GRAPHEMES&&!/[.!?)]$/.test(publishedText);
   const eventId=safeText(body.event_id,120)||`aud_${crypto.randomUUID()}`;
   try{
     await env.DB.prepare(`INSERT INTO audience_events(event_id,platform,event_type,direction,status,actor_handle,post_uri,parent_uri,content_id,context_text,suggestion_text,risk,followers,impressions,reactions,replies,reposts,source,observed_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(event_id) DO NOTHING`)
-      .bind(eventId,platform,eventType,safeText(body.direction,20)||null,status,safeText(body.actor_handle,120)||null,postUri||null,safeText(body.parent_uri,500)||null,safeText(body.content_id,120)||null,safeText(body.context_text,2000)||null,safeText(body.suggestion_text,2000)||null,risk,null,null,null,null,null,safeText(body.source,80)||'make',safeText(body.observed_at,80)||new Date().toISOString()).run();
+      .bind(eventId,platform,eventType,safeText(body.direction,20)||null,status,safeText(body.actor_handle,120)||null,postUri||null,safeText(body.parent_uri,500)||null,safeText(body.content_id,120)||null,safeText(body.context_text,2000)||null,safeText(body.suggestion_text||publishedText,2000)||null,likelyHardCut?'amber':risk,null,null,null,null,null,safeText(body.source,80)||'make',safeText(body.observed_at,80)||new Date().toISOString()).run();
+    if(likelyHardCut){
+      await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+        .bind(`bskycut_${crypto.randomUUID()}`,'bluesky_reply_possible_hard_cut','warning','audience_reply',eventId,postUri,`Published Bluesky reply reached ${publishedGraphemes} graphemes without a natural terminal boundary. Future drafts must pass /api/audience/bluesky-reply/prepare before publication.`).run().catch(()=>{});
+    }
     let executionProof=null;
     if(eventType==='outbound_reply'&&status==='published'){
       const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='audience_make' AND source_kind='supervisor' AND status IN ('claimed','attempted','stalled') ORDER BY claimed_at DESC,priority_score DESC LIMIT 2`).all().catch(()=>({results:[]}));
@@ -158,6 +230,7 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/api/audience-event'&&request.method==='POST')return ingestAudienceEvent(request,env);
+    if(url.pathname==='/api/audience/bluesky-reply/prepare'&&request.method==='POST')return prepareBlueskyReply(request,env);
     if(url.pathname==='/api/stats'&&request.method==='GET')return augmentStats(request,env,ctx);
     if(url.pathname==='/analytics.html'&&request.method==='GET'){
       const response=await base.fetch(request,env,ctx);

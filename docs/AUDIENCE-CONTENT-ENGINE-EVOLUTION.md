@@ -54,6 +54,8 @@ High autonomy through the official API, with bot/aggregator filtering and GREEN 
 
 As of 2026-09-08, autonomous outbound replies are forwarded from the active Make scenario to ToolScout's verified audience-event endpoint and stored in `audience_events`. A verified published Bluesky reply was backfilled successfully to prove the ingestion path. The protected Command Center now reads these events through `/analytics/api/stats`, so Audience View no longer bypasses the audience layer.
 
+As of 2026-09-23, every autonomous Bluesky reply draft must pass through `POST /api/audience/bluesky-reply/prepare` before the Bluesky publish module. The endpoint uses Unicode grapheme counting, a 280-grapheme operating target under Bluesky's 300-grapheme ceiling, the 3000-byte ceiling, removes ToolScout-prohibited em/en dashes, and rewrites over-limit copy at a sentence or word boundary instead of hard-cutting it. The publish module must map only the returned `text` field. Published replies that still appear hard-cut are recorded as warnings and must not be treated as copy-quality success.
+
 ### X
 Do not auto-reply to keyword-search discoveries. X prohibits unsolicited automated replies based only on keyword search and requires prior written approval for AI-powered automated reply bots. Use intelligence automation only: discover permitted opportunities -> score -> draft -> Engagement Inbox -> human approval / edit / skip. Do not automate likes or proactive follow/unfollow.
 
