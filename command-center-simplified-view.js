@@ -72,15 +72,14 @@ function business(){
    metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d')+
    metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d')+
    metric('External executions - 24h',n(g.externalExecutions24h),n(g.externalExecutions7d)+' / 7d')+
-   metric('Affiliate routes in production',n(aff.productionRoutes),n(aff.pipelineActivePrograms)+' pipeline-active - '+n((aff.productionWithoutActivePipeline||[]).length)+' metadata gap(s)')+
+   metric('Active affiliates',n(aff.productionRoutes),'Live ToolScout affiliate routes')+
    metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
    metric('Confirmed revenue',data.stats==null?'Source unavailable':(r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency)),data.stats==null?'Stats source did not respond':(r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected'))+
    metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
    (a.status==='connected'?row('GA4 sessions - 24h',n(ga.last24Hours),n(ga.monthToDate)+' MTD - canonical GA4 population'):'')+
-   row('Affiliate programme truth',n(aff.productionRoutes)+' live routes',n(aff.pipelineActivePrograms)+' pipeline-active - '+n(aff.pipelineTrackedPrograms)+' tracked')+
-   ((aff.productionWithoutActivePipeline||[]).length?row('Affiliate metadata to reconcile',n(aff.productionWithoutActivePipeline.length),aff.productionWithoutActivePipeline.join(', ')):'')+
+   row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
 }
@@ -156,7 +155,7 @@ function health(){
   ['GSC evidence',g.runtimeStatus||'Unavailable',g.runtimeGeneratedAt?dt(g.runtimeGeneratedAt):'No runtime timestamp'],
   ['Authority',a.status||'Unavailable',n(a.attempts24)+' attempts / 24h'],
   ['Execution contract',n(ec.verified)+' verified',n(ec.ready)+' ready - '+n(ec.inFlight)+' in flight - '+n(ec.deferred)+' deferred'],
-  ['Affiliate registry',n(t.affiliate?.productionRoutes)+' production routes',n(t.affiliate?.pipelineActivePrograms)+' active programmes - '+n(t.affiliate?.pipelineTrackedPrograms)+' tracked']
+  ['Affiliate programmes',n(t.affiliate?.productionRoutes)+' active','Canonical production registry']
  ];
  document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
