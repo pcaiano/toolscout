@@ -447,24 +447,7 @@ export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null
     effective=Math.max(0,Math.min(effective,Math.max(0,Number(maxInFlight)-inFlight)));
   }
   if(effective<=0)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
-  const senderReady=executor==='make_sender'?` AND (
-    (subject_type='tool' AND EXISTS (
-      SELECT 1 FROM distribution_vendor_amplification v
-      WHERE v.tool_slug=growth_execution_contract.subject_key
-        AND v.status='contact_found' AND v.contact_method='public_role_email' AND v.contact_email IS NOT NULL
-        AND NOT EXISTS (
-          SELECT 1 FROM distribution_vendor_amplification sent
-          WHERE sent.status='sent' AND sent.outreach_sent_at>=datetime('now','-30 days')
-            AND (sent.tool_slug=v.tool_slug OR lower(COALESCE(sent.contact_email,''))=lower(COALESCE(v.contact_email,'')))
-        )
-    ))
-    OR (subject_type='surface' AND EXISTS (
-      SELECT 1 FROM distribution_network_outreach n
-      WHERE n.surface_slug=growth_execution_contract.subject_key AND n.status='contact_found' AND n.contact_email IS NOT NULL
-    ))
-  )`:'';
-  const claimStates=executor==='make_sender'?"('pending','stalled','deferred')":"('pending','stalled')";
-  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ${claimStates}${senderReady} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
+  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled') ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
   const tasks=rows.results||[],ids=tasks.map(x=>x.task_id);
   if(!ids.length)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   const qs=ids.map(()=>'?').join(',');
