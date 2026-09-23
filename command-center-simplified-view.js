@@ -13,7 +13,7 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:850;color:var(--muted)}h1{font-size:38px;line-height:1;margin:7px 0 7px;letter-spacing:-.045em}.sub{margin:0;color:var(--muted);font-size:14px;line-height:1.5;max-width:850px}
 .btn{border:1px solid #cfd7e3;background:#fff;color:var(--ink);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}.btn:hover{background:#f8fafc}.btn.primary{background:#17212b;color:#fff;border-color:#17212b}.btn.danger{color:var(--bad)}
 .statusbar{display:flex;justify-content:space-between;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:var(--muted)}.statusbar strong{color:var(--ink)}
-.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);min-width:0}.span12{grid-column:span 12}.span7{grid-column:span 7}.span5{grid-column:span 5}.span6{grid-column:span 6}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);min-width:0}.span12{grid-column:span 12}.span7{grid-column:span 7}.span5{grid-column:span 5}.span6{grid-column:span 6}.span4{grid-column:span 4}
 .head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:16px 17px 10px}.kicker{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:850;color:var(--muted)}.title{font-size:17px;font-weight:850;letter-spacing:-.02em;margin-top:3px}.meta{font-size:10px;color:var(--muted);text-align:right;line-height:1.4}.body{padding:0 17px 17px}
 .headline{border:1px solid var(--line);background:var(--soft);border-radius:13px;padding:13px 14px;margin-bottom:10px}.headline b{display:block;font-size:18px;letter-spacing:-.025em}.headline span{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:4px}
 .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.metric{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:11px;min-width:0}.metric small{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.075em;font-weight:850;color:var(--muted)}.metric b{display:block;font-size:24px;letter-spacing:-.035em;margin:4px 0 2px;overflow:hidden;text-overflow:ellipsis}.metric span{display:block;font-size:10px;color:var(--muted);line-height:1.35}
@@ -22,8 +22,8 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 .engine{display:grid;grid-template-columns:120px 105px minmax(0,1fr) 145px;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}.engine:first-child{border-top:0}.engineName{font-size:12px;font-weight:850}.engineText{font-size:10px;color:var(--muted);line-height:1.4}.engineTime{font-size:10px;color:var(--muted);text-align:right}
 .log{display:grid;grid-template-columns:105px 90px minmax(0,1fr) 92px;gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:start}.log:first-child{border-top:0}.logTime,.logEngine{font-size:10px;color:var(--muted)}.logMain b{display:block;font-size:11px}.logMain span{display:block;font-size:10px;color:var(--muted);line-height:1.4;margin-top:2px}.logStatus{text-align:right}
 .task{padding:12px 0;border-top:1px solid var(--line)}.task:first-child{border-top:0}.taskTop{display:flex;justify-content:space-between;gap:12px}.taskTitle{font-size:13px;font-weight:850}.taskMeta,.taskText{font-size:10px;color:var(--muted);line-height:1.45;margin-top:4px}.taskActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.payload{margin-top:10px;background:var(--soft);border:1px solid var(--line);border-radius:11px;padding:10px}.payload summary{cursor:pointer;font-weight:800;font-size:11px}.payload pre{white-space:pre-wrap;font:inherit;font-size:10px;color:var(--muted);max-height:260px;overflow:auto}
-.empty{padding:24px 8px;text-align:center;color:var(--muted);font-size:11px}.issue{border:1px solid #f1b6b0;background:#fff5f4;border-radius:11px;padding:10px;margin-top:8px;font-size:11px;line-height:1.45}.issue.warn{border-color:#ead69b;background:#fffaf0}.issue.good{border-color:#b9dfca;background:#f3fbf6}.issue b{display:block;margin-bottom:3px}.small{font-size:10px;color:var(--muted);line-height:1.4}.sourceLine{font-size:9px;color:var(--muted);margin-top:8px}
-@media(max-width:1000px){.span7,.span5,.span6{grid-column:span 12}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.engine{grid-template-columns:100px 95px minmax(0,1fr)}.engineTime{display:none}}
+.chartBox{border:1px solid var(--line);background:var(--soft);border-radius:13px;padding:10px;margin-top:9px}.chartSvg{width:100%;height:210px;display:block}.chartGrid{stroke:var(--line);stroke-width:1}.chartAxis{fill:var(--muted);font-size:9px}.chartLine{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.chartLine.primary{stroke:var(--info)}.chartLine.good{stroke:var(--good)}.chartDot.primary{fill:var(--info)}.chartDot.good{fill:var(--good)}.chartLegend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--muted);margin-top:5px}.legendKey{display:inline-flex;align-items:center;gap:5px}.legendKey i{width:9px;height:3px;border-radius:99px;display:inline-block}.legendKey i.primary{background:var(--info)}.legendKey i.good{background:var(--good)}.progressTop{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.progressStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px}.progressStat{border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff}.progressStat small{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:850}.progressStat b{display:block;font-size:17px;margin-top:3px}.deltaUp{color:var(--good)}.deltaDown{color:var(--bad)}.deltaFlat{color:var(--muted)}.donut{width:92px;height:92px;position:relative}.donut svg{width:92px;height:92px;transform:rotate(-90deg)}.donutTrack{fill:none;stroke:var(--line);stroke-width:9}.donutValue{fill:none;stroke:var(--good);stroke-width:9;stroke-linecap:round}.donutText{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;font-weight:850;font-size:16px}.donutText small{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.empty{padding:24px 8px;text-align:center;color:var(--muted);font-size:11px}.issue{border:1px solid #f1b6b0;background:#fff5f4;border-radius:11px;padding:10px;margin-top:8px;font-size:11px;line-height:1.45}.issue.warn{border-color:#ead69b;background:#fffaf0}.issue.good{border-color:#b9dfca;background:#f3fbf6}.issue b{display:block;margin-bottom:3px}.small{font-size:10px;color:var(--muted);line-height:1.4}.sourceLine{font-size:9px;color:var(--muted);margin-top:8px}
+@media(max-width:1000px){.span7,.span5,.span6,.span4{grid-column:span 12}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.engine{grid-template-columns:100px 95px minmax(0,1fr)}.engineTime{display:none}}
 @media(max-width:650px){.wrap{padding:20px 12px 48px}.top{display:block}h1{font-size:32px}.top .btn{margin-top:12px}.metrics{grid-template-columns:1fr 1fr}.engine{grid-template-columns:1fr}.log{grid-template-columns:74px minmax(0,1fr)}.logEngine,.logStatus{display:none}.statusbar{display:block}.statusbar span{display:block;margin-top:4px}}
 </style>
 </head>
@@ -33,6 +33,9 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 <div class="statusbar"><div id="status"><strong>Loading current state...</strong></div><span id="sourceStatus">Live sources</span></div>
 <main class="grid">
 <section class="card span12"><div class="head"><div><div class="kicker">Business</div><div class="title">Business State</div></div><div class="meta" id="businessMeta">Current verified evidence</div></div><div class="body" id="businessBody"><div class="empty">Loading...</div></div></section>
+<section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Traffic Progress</div></div><div class="meta" id="trafficProgressMeta">GA4 + strict human proof</div></div><div class="body" id="trafficProgressBody"><div class="empty">Loading...</div></div></section>
+<section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Authority Progress</div></div><div class="meta" id="authorityProgressMeta">Backlinks + referring domains</div></div><div class="body" id="authorityProgressBody"><div class="empty">Loading...</div></div></section>
+<section class="card span4"><div class="head"><div><div class="kicker">28 day trend</div><div class="title">Google Search Progress</div></div><div class="meta" id="gscProgressMeta">Search Console</div></div><div class="body" id="gscProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Autonomous execution</div><div class="title">Growth Brain</div></div><div class="meta" id="brainMeta">What it is doing now</div></div><div class="body" id="brainBody"><div class="empty">Loading...</div></div></section>
 <section class="card span5"><div class="head"><div><div class="kicker">Human exceptions only</div><div class="title">Needs You</div></div><div class="meta" id="queueMeta">Chairman Queue</div></div><div class="body" id="queueBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Actions and outcomes</div><div class="title">Recent Results</div></div><div class="meta">External evidence only</div></div><div class="body" id="resultsBody"><div class="empty">Loading...</div></div></section>
@@ -53,6 +56,33 @@ const human=v=>String(v||'').replaceAll('_',' ');
 const pill=(v,state)=>'<span class="pill '+(state||'')+'">'+esc(v)+'</span>';
 const metric=(label,value,meta)=>'<div class="metric"><small>'+esc(label)+'</small><b>'+esc(value)+'</b><span>'+esc(meta||'')+'</span></div>';
 const row=(name,value,meta)=>'<div class="row"><div><div class="rowName">'+esc(name)+'</div>'+(meta?'<div class="rowMeta">'+esc(meta)+'</div>':'')+'</div><div class="rowValue">'+esc(value)+'</div></div>';
+
+const compactDate=v=>{const s=String(v||'');if(/^\d{8}$/.test(s))return s.slice(4,6)+'/'+s.slice(6,8);if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(5,10).replace('-','/');return s};
+const deltaClass=v=>Number(v)>0?'deltaUp':Number(v)<0?'deltaDown':'deltaFlat';
+const signedPct=v=>v==null?'Unavailable':(Number(v)>0?'+':'')+Number(v).toFixed(1)+'%';
+function seriesChart(rows,lines){
+ if(!Array.isArray(rows)||rows.length<2)return '<div class="empty">Not enough historical observations yet.</div>';
+ const W=620,H=205,L=34,R=10,T=12,B=27,plotW=W-L-R,plotH=H-T-B;
+ const values=[];for(const line of lines)for(const row of rows){const x=Number(row[line.key]);if(Number.isFinite(x))values.push(x)}
+ const max=Math.max(1,...values),min=0,range=Math.max(1,max-min);
+ const x=i=>L+(rows.length===1?0:i/(rows.length-1))*plotW;
+ const y=v=>T+plotH-(Math.max(min,Number(v)||0)-min)/range*plotH;
+ let svg='<svg class="chartSvg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">';
+ for(let g=0;g<=3;g++){const yy=T+plotH*g/3;const val=Math.round(max*(1-g/3));svg+='<line class="chartGrid" x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'"></line><text class="chartAxis" x="2" y="'+(yy+3)+'">'+val+'</text>'}
+ const ticks=[0,Math.floor((rows.length-1)/2),rows.length-1];for(const i of ticks)svg+='<text class="chartAxis" text-anchor="'+(i===0?'start':i===rows.length-1?'end':'middle')+'" x="'+x(i)+'" y="'+(H-5)+'">'+esc(compactDate(rows[i]?.date))+'</text>';
+ for(const line of lines){
+   const points=rows.map((r,i)=>Number.isFinite(Number(r[line.key]))?x(i)+','+y(r[line.key]):null).filter(Boolean);
+   if(points.length>1)svg+='<polyline class="chartLine '+line.cls+'" points="'+points.join(' ')+'"></polyline>';
+   if(line.dots)for(let i=0;i<rows.length;i++){const v=Number(rows[i]?.[line.key]);if(Number.isFinite(v)&&v>0)svg+='<circle class="chartDot '+line.cls+'" cx="'+x(i)+'" cy="'+y(v)+'" r="3"></circle>'}
+ }
+ svg+='</svg><div class="chartLegend">'+lines.map(line=>'<span class="legendKey"><i class="'+line.cls+'"></i>'+esc(line.label)+'</span>').join('')+'</div>';
+ return svg;
+}
+function donut(value,target){
+ const v=Math.max(0,Number(value)||0),t=Math.max(1,Number(target)||1),pct=Math.min(1,v/t),r=34,c=2*Math.PI*r,dash=(c*pct).toFixed(2);
+ return '<div class="donut"><svg viewBox="0 0 92 92"><circle class="donutTrack" cx="46" cy="46" r="'+r+'"></circle><circle class="donutValue" cx="46" cy="46" r="'+r+'" stroke-dasharray="'+dash+' '+c.toFixed(2)+'"></circle></svg><div class="donutText">'+esc(v)+' / '+esc(t)+'<small>domains</small></div></div>';
+}
+
 function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale'].includes(v))return'bad';return'warn'}
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
 async function get(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{credentials:'same-origin',cache:'no-store'});if(!r.ok)throw new Error(String(r.status));return r.json()}
@@ -83,6 +113,36 @@ function business(){
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
 }
+
+function trafficProgress(){
+ const a=data?.stats?.acquisition||{},rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),humans:0})):[];
+ const strict=Array.isArray(data?.truth?.traffic?.strictDaily)?data.truth.traffic.strictDaily:[];
+ const map=new Map(rows.map((x,i)=>[String(x.date),i]));
+ for(const h of strict){const key=String(h.date||'').replaceAll('-','');let idx=map.get(key);if(idx==null)idx=map.get(String(h.date||''));if(idx!=null)rows[idx].humans=Number(h.humans||0)}
+ const last7=rows.slice(-7),prev7=rows.slice(-14,-7),sum=x=>x.reduce((a,b)=>a+Number(b.sessions||0),0),cur=sum(last7),prev=sum(prev7),chg=prev?((cur-prev)/prev*100):null;
+ document.getElementById('trafficProgressMeta').textContent=a.fetchedAt?'GA4 refreshed '+dt(a.fetchedAt):'GA4 history';
+ document.getElementById('trafficProgressBody').innerHTML=
+  '<div class="progressStats"><div class="progressStat"><small>Sessions last 7d</small><b>'+n(cur)+'</b></div><div class="progressStat"><small>7d vs prior 7d</small><b class="'+deltaClass(chg)+'">'+signedPct(chg)+'</b></div><div class="progressStat"><small>Strict humans 7d</small><b>'+n(data?.truth?.growth?.strictHumans7d)+'</b></div><div class="progressStat"><small>Sessions MTD</small><b>'+n(a?.sessions?.monthToDate)+'</b></div></div>'+
+  '<div class="chartBox">'+seriesChart(rows,[{key:'sessions',label:'GA4 sessions',cls:'primary'},{key:'humans',label:'Strict verified humans',cls:'good',dots:true}])+'</div>'+
+  '<div class="sourceLine">Traffic line is GA4 canonical acquisition. Green proof points are strict verified human evidence used by the Growth Brain.</div>';
+}
+function authorityProgress(){
+ const b=data?.truth?.authority||{},rows=Array.isArray(b.history30)?b.history30:[];
+ document.getElementById('authorityProgressMeta').textContent=b.lastVerifiedAt?'Last verified '+dt(b.lastVerifiedAt):'Verified authority history';
+ document.getElementById('authorityProgressBody').innerHTML=
+  '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Verified backlinks</small><b>'+n(b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(b.authorityQueue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(b.attempts24h)+' / '+n(b.attemptMin24h)+'</b></div></div>'+donut(b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
+  '<div class="chartBox">'+seriesChart(rows,[{key:'backlinks',label:'Verified backlinks',cls:'primary'},{key:'referringDomains',label:'Referring domains',cls:'good'}])+'</div>'+
+  '<div class="sourceLine">Cumulative authority is built only from verified public backlink placements. The donut tracks the 10-domain bootstrap floor.</div>';
+}
+function gscProgress(){
+ const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{},recent=g.recent7||{},prev=g.previous7||{};
+ document.getElementById('gscProgressMeta').textContent='GSC refreshed '+dt(g.runtimeGeneratedAt||g.generatedAt);
+ document.getElementById('gscProgressBody').innerHTML=
+  '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Impressions 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>Avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1))+'</b></div></div>'+
+  '<div class="chartBox">'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
+  '<div class="sourceLine">Search Console trend uses daily first-party API data. Lower average position is better; the comparison is recent 7 days versus the prior 7.</div>';
+}
+
 function brain(){
  const t=data.truth||{},eng=Array.isArray(t.engines)?t.engines:[],primary=eng.filter(x=>['distribution','content','audience','seo_geo_aio','affiliate','catalog'].includes(x.engine));
  const growth=t.growth||{},body=[];
@@ -159,7 +219,7 @@ function health(){
  ];
  document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
-function render(){business();brain();queue();results();searchAuthority();health()}
+function render(){business();trafficProgress();authorityProgress();gscProgress();brain();queue();results();searchAuthority();health()}
 async function resolveTask(button){
  const engine=button.dataset.engine,id=button.dataset.id,action=button.dataset.resolve,status=button.dataset.status||'',gate=button.dataset.gate||'';
  if(!engine||!id||!action)return;const old=button.textContent;button.disabled=true;button.textContent='Saving';
