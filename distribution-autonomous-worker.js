@@ -15,7 +15,7 @@ const QUALIFY_LIMIT=24;
 const EXECUTION_LIMIT=12;
 const RESEARCH_COOLDOWN_HOURS=6;
 const AUTHORITY_ATTEMPT_MIN_24H=6;
-const AUTHORITY_STAGNATION_HOURS=72;
+const AUTHORITY_STAGNATION_HOURS=24;
 const AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D=12;
 const AUTHORITY_RECOVERY_COOLDOWN_HOURS=6;
 async function runDiscoveryRefresh(env){
@@ -785,13 +785,13 @@ async function authorityLoopState(env){
     const q=await env.DB.prepare(`SELECT public_url FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1 AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`).all();placements=q.results||[];
   }catch{}
   const domains=new Set();for(const row of placements){try{const h=new URL(String(row.public_url||'')).hostname.toLowerCase().replace(/^www\./,'');if(h&&h!=='trytoolscout.org'&&!h.endsWith('.trytoolscout.org'))domains.add(h)}catch{}}
-  const verifiedReferringDomains=domains.size,required=verifiedReferringDomains<10;
+  const verifiedReferringDomains=domains.size,bootstrapIncomplete=verifiedReferringDomains<10,backlogActive=authorityQueue>0,required=bootstrapIncomplete||backlogActive;
   const now=Date.now(),lastVerifiedMs=lastVerifiedAt?Date.parse(String(lastVerifiedAt).replace(' ','T')+'Z'):NaN,lastRecoveryMs=lastRecoveryAt?Date.parse(String(lastRecoveryAt).replace(' ','T')+'Z'):NaN;
   const lastVerifiedAgeHours=Number.isFinite(lastVerifiedMs)?Math.max(0,(now-lastVerifiedMs)/3600000):null;
   const throughputGap=required&&attempts24<AUTHORITY_ATTEMPT_MIN_24H;
   const stagnating=required&&attempts7>=AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D&&(lastVerifiedAgeHours==null||lastVerifiedAgeHours>=AUTHORITY_STAGNATION_HOURS);
   const recoveryDue=required&&(throughputGap||stagnating)&&(!Number.isFinite(lastRecoveryMs)||(now-lastRecoveryMs)>=AUTHORITY_RECOVERY_COOLDOWN_HOURS*3600000);
-  return {required,verifiedReferringDomains,bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
+  return {required,bootstrapIncomplete,backlogActive,acquisitionMode:'exhaustive_backlog',slowdownAllowed:!bootstrapIncomplete&&!backlogActive,verifiedReferringDomains,bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
