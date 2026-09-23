@@ -287,13 +287,21 @@ async function buildCommandCenterBusinessTruth(request,env){
   const engines=supervisorRows.filter(x=>x.engine!=='growth_brain').map(x=>({
     engine:x.engine,status:x.status,directive:x.directive,lastEvaluatedAt:x.last_evaluated_at
   }));
+  const persistedGrowthStatus=growth.status||null,persistedGrowthDirective=growth.directive||null;
+  const externalExecutions24h=truthNum(growth.external_executions_24h);
+  let currentGrowthStatus='acquisition_surge',currentGrowthDirective='maximum_safe_acquisition_execute_expand_measure_reallocate';
+  if(truthNum(architecture.open_incidents)>0){currentGrowthStatus='critical';currentGrowthDirective='repair_architecture_and_continue_maximum_safe_acquisition'}
+  else if(contract.missingExecutors>0||contract.stalled>0){currentGrowthStatus='critical';currentGrowthDirective='repair_execution_contract_and_continue_maximum_safe_acquisition'}
+  else if(externalExecutions24h<ACQUISITION_SURGE_MIN_24H){currentGrowthStatus='underpowered';currentGrowthDirective='increase_external_execution_to_acquisition_surge_floor'}
   return {
     ok:true,
     version:'command-center-business-truth-v1',
     generatedAt:new Date().toISOString(),
     growth:{
-      status:growth.status||null,
-      directive:growth.directive||null,
+      status:currentGrowthStatus,
+      directive:currentGrowthDirective,
+      supervisorPersistedStatus:persistedGrowthStatus,
+      supervisorPersistedDirective:persistedGrowthDirective,
       lastEvaluatedAt:growth.last_evaluated_at||null,
       strictHumans24h:truthNum(growth.strict_humans_24h),
       strictHumans7d:truthNum(growth.strict_humans_7d),
