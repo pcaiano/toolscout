@@ -132,7 +132,11 @@ async function commandCenterBusinessTruth(request,env){
       FROM distribution_placements
       WHERE placement_verified=1 AND backlink_verified=1
         AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')
-      ORDER BY first_verified_at`).all().then(r=>r.results||[]).catch(()=>[])
+      ORDER BY first_verified_at`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT engine,mission,status,trigger_name,started_at,completed_at,detail
+      FROM engine_runs
+      WHERE started_at>=datetime('now','-12 hours')
+      ORDER BY started_at DESC LIMIT 30`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -175,10 +179,22 @@ async function commandCenterBusinessTruth(request,env){
   const w=reality?.searchPerformance?.window28d||gsc?.siteTotals||{};
   const idx=reality?.indexHealth||{};
   const sitemap=reality?.sitemaps||{};
-  const daily28=Array.isArray(reality?.searchPerformance?.daily28)?reality.searchPerformance.daily28:[];
-  const recent7=reality?.searchPerformance?.recent7||{};
-  const previous7=reality?.searchPerformance?.previous7||{};
-  const change7d=reality?.searchPerformance?.change7d||{};
+  const rawDaily28=Array.isArray(reality?.searchPerformance?.daily28)?reality.searchPerformance.daily28:[];
+  const lisbonDate=(()=>{try{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const map=Object.fromEntries(parts.map(p=>[p.type,p.value]));return map.year+'-'+map.month+'-'+map.day}catch{return new Date().toISOString().slice(0,10)}})();
+  const daily28=rawDaily28.filter(row=>String(row?.date||'')<lisbonDate);
+  const aggregateDays=rows=>{
+    const clicks=rows.reduce((a,x)=>a+truthNum(x?.clicks),0),impressions=rows.reduce((a,x)=>a+truthNum(x?.impressions),0);
+    const weighted=rows.reduce((a,x)=>a+truthNum(x?.position)*truthNum(x?.impressions),0);
+    return {startDate:rows[0]?.date||null,endDate:rows.at(-1)?.date||null,clicks,impressions,ctr:impressions?clicks/impressions*100:0,position:impressions?weighted/impressions:null};
+  };
+  const recentRows=daily28.slice(-7),previousRows=daily28.slice(-14,-7),recent7=aggregateDays(recentRows),previous7=aggregateDays(previousRows);
+  const pct=(cur,prev)=>prev?((cur-prev)/prev*100):(cur?100:0);
+  const change7d={
+    clicksPct:pct(recent7.clicks,previous7.clicks),
+    impressionsPct:pct(recent7.impressions,previous7.impressions),
+    positionDelta:recent7.position==null||previous7.position==null?null:recent7.position-previous7.position
+  };
+  const verifiedThroughDate=daily28.at(-1)?.date||null;
   const strictDaily=Array.isArray(strictDailyRows)?strictDailyRows.map(x=>({date:x.day,humans:truthNum(x.humans)})):[];
   const dayKeys=[];for(let i=29;i>=0;i--){const d=new Date(Date.now()-i*86400000);dayKeys.push(d.toISOString().slice(0,10))}
   const authorityHistory=dayKeys.map(day=>{
@@ -190,6 +206,15 @@ async function commandCenterBusinessTruth(request,env){
     }
     return {date:day,backlinks,referringDomains:domains.size};
   });
+  const latestAuthorityPlacementAt=(placementRows||[]).map(x=>x.first_verified_at||x.last_checked_at).filter(Boolean).sort().at(-1)||null;
+  const growthActivity=(engineActivityRows||[]).map(x=>({
+    at:x.completed_at||x.started_at,
+    engine:x.engine,
+    mission:x.mission,
+    status:x.status,
+    trigger:x.trigger_name,
+    detail:x.detail||null
+  })).filter(x=>x.at).slice(0,14);
   const recentResults=[
     ...audienceRows.map(x=>({id:x.event_id,at:x.created_at,engine:x.event_type==='content_published'?'content':'audience',type:x.event_type,status:'verified',label:x.event_type==='content_published'?'Content published':'Audience reply published',detail:x.platform||'external publication',url:x.post_uri||null})),
     ...submissionRows.map(x=>({id:x.submission_id,at:x.at,engine:'distribution',type:'external_submission',status:x.status||'attempted',label:'External submission: '+String(x.surface_slug||'surface'),detail:x.error||('Attempt '+truthNum(x.attempts)),url:x.response_url||null})),
@@ -229,6 +254,7 @@ async function commandCenterBusinessTruth(request,env){
       attemptMin24h:truthNum(backlink.attempt_min_24h),
       authorityQueue:truthNum(backlink.authority_queue),
       lastVerifiedAt:backlink.last_verified_at||null,
+      latestPlacementVerifiedAt:latestAuthorityPlacementAt,
       lastVerifiedAgeHours:backlink.last_verified_age_hours==null?null:Number(backlink.last_verified_age_hours),
       throughputGap:Boolean(backlink.throughput_gap),
       stagnating:Boolean(backlink.stagnating),
@@ -261,11 +287,13 @@ async function commandCenterBusinessTruth(request,env){
       indexRecoveryCandidates:truthMaybeNum(idx.recoveryCandidates??idx.indexRecoveryCandidates),
       sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps),
       daily28,
+      verifiedThroughDate,
       recent7,
       previous7,
       change7d
     },
     recentResults,
+    growthActivity,
     executionContract:contract,
     architecture:{
       openIncidents:truthNum(architecture.open_incidents),
