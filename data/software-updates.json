@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-22T09:35:26Z",
+  "updatedAt": "2026-09-23T09:10:33Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "github-ssh-security-changes-2026",
+      "publishedAt": "2026-09-23",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "GitHub sets new SSH security requirements for keys and clients",
+      "summary": "GitHub is phasing out older SSH cryptography, raising the minimum size for newly uploaded RSA keys and adding a post-quantum key exchange option.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-22-security-improvements-for-ssh/",
+      "articleUrl": "/news/github-ssh-security-changes-2026.html",
+      "profileUrl": "/news/github-ssh-security-changes-2026.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "notion-mail-shuts-down",
       "publishedAt": "2026-09-22",
