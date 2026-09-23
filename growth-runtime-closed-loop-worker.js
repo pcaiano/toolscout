@@ -47,10 +47,10 @@ async function authoritySnapshot(env){
   };
 }
 function authorityStatus(state){
-  if(state.attempts24>=AUTHORITY_ATTEMPT_MIN_24H)return'healthy';
-  if(state.queue<=0)return'idle';
   if(state.senderFreshClaim)return'waiting_external_confirmation';
   if(state.senderClaimed>0)return'external_handoff_timeout';
+  if(state.queue<=0)return'queue_drained';
+  if(state.attempts24>=AUTHORITY_ATTEMPT_MIN_24H)return'executing_backlog';
   return'execution_required';
 }
 async function normalizeFalseAsyncFailure(env,state){
@@ -116,8 +116,8 @@ async function discoverySnapshot(request,env){
 }
 async function closeAuthorityExecutionLoop(request,env,ctx){
   const before=await authoritySnapshot(env);
-  if(before.queue<=0||before.attempts24>=AUTHORITY_ATTEMPT_MIN_24H){
-    return {ok:true,skipped:true,reason:before.queue<=0?'no_authority_queue':'throughput_floor_met',status:authorityStatus(before),before,after:before,pipelineClosed:true};
+  if(before.queue<=0){
+    return {ok:true,skipped:true,reason:'authority_queue_drained',status:authorityStatus(before),before,after:before,pipelineClosed:true,throughputFloorMet:before.attempts24>=AUTHORITY_ATTEMPT_MIN_24H};
   }
   // Authority acquisition is Cloudflare-first. A pending external sender handoff must
   // never block no-auth/API/MCP submission routes. Machine routes are always attempted first.
@@ -227,7 +227,7 @@ export default {
     const url=new URL(request.url);
     if(url.pathname==='/api/distribution/authority/closed-loop-health'&&request.method==='GET'){
       const state=await authoritySnapshot(env);await normalizeFalseAsyncFailure(env,state);
-      return Response.json({status:authorityStatus(state),...state,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,preparedDoesNotCountAsExecution:true,externalCallbackRequiredForEmailAttempt:true},{headers:JSON_H});
+      return Response.json({status:authorityStatus(state),...state,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptFloorIsMinimumNotCap:true,drainBacklogBeforeSlowdown:true,preparedDoesNotCountAsExecution:true,externalCallbackRequiredForEmailAttempt:true},{headers:JSON_H});
     }
     if(url.pathname==='/api/distribution/discovery-health'&&request.method==='GET')return Response.json(await discoverySnapshot(request,env),{headers:JSON_H});
     if(url.pathname==='/api/distribution/authority/close-loop'&&request.method==='POST'){
