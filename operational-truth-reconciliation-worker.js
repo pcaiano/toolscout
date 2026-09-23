@@ -9,6 +9,10 @@ function jsonHeaders(response){
   return h;
 }
 const FACTS_CACHE_MS=60000;
+const AUTHORITY_POLICY_MIN_24H=15;
+const AUTHORITY_POLICY_TARGET_24H=25;
+const ACQUISITION_SURGE_MIN_24H=15;
+const ACQUISITION_SURGE_TARGET_24H=25;
 let factsCache={at:0,value:null,promise:null};
 async function facts(env){
   const [oauth,authority,content,distributionRuns]=await Promise.all([
@@ -39,7 +43,7 @@ function keepIssue(issue,f){
   const metric=String(issue?.metric||''),reason=String(issue?.reason||'');
   if(reason==='superseded_by_single_path_scheduler_fix')return false;
   if(f.ga4Connected&&metric==='ga4')return false;
-  if(f.authorityAttempts24>=6&&metric==='engine:distribution:authority_execution_recovery')return false;
+  if(f.authorityAttempts24>=AUTHORITY_POLICY_MIN_24H&&metric==='engine:distribution:authority_execution_recovery')return false;
   if(metric==='engine:distribution'||metric==='engine:distribution:autonomous_cycle'||metric==='engine:distribution:network_cycle'){
     const completed=f.distributionCompleted||{};
     if(completed.autonomous_cycle&&completed.network_cycle)return false;
@@ -77,7 +81,7 @@ async function reconcile(response,env){
     d.growthOps={...d.growthOps,health:{...d.growthOps.health,issues}};
   }
   if(d.resilientCommandCenter&&d.measurementAudit)d.resilientCommandCenter={...d.resilientCommandCenter,integrityStatus:d.measurementAudit.status};
-  d.operationalTruthReconciliation={version:'live-runtime-v1',ga4Connected:f.ga4Connected,authorityAttempts24:f.authorityAttempts24,authorityThroughputHealthy:f.authorityAttempts24>=6,contentStatus:f.contentStatus,generatedAt:new Date().toISOString()};
+  d.operationalTruthReconciliation={version:'live-runtime-v1',ga4Connected:f.ga4Connected,authorityAttempts24:f.authorityAttempts24,authorityThroughputHealthy:f.authorityAttempts24>=AUTHORITY_POLICY_MIN_24H,contentStatus:f.contentStatus,generatedAt:new Date().toISOString()};
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:jsonHeaders(response)});
 }
 
@@ -168,6 +172,11 @@ async function buildCommandCenterBusinessTruth(request,env){
   const growth=byEngine.get('growth_brain')||{};
   const cfg=parse(growth.directive_json,{});
   const backlink=cfg.backlink_acquisition||{};
+  const authorityAttempts24=truthNum(backlink.attempts_24h);
+  const authorityQueueNow=truthNum(backlink.authority_queue);
+  const authorityVerifiedDomains=truthNum(backlink.verified_referring_domains);
+  const authorityRequired=authorityVerifiedDomains<10||authorityQueueNow>0;
+  const authorityThroughputGap=authorityRequired&&authorityAttempts24<AUTHORITY_POLICY_MIN_24H;
   const architecture=cfg.architecture_escalation||{};
   const contract={states:{},executors:{},verified:0,ready:0,inFlight:0,deferred:0,missingExecutors:0,stalled:0};
   for(const row of contractRows){
@@ -295,24 +304,32 @@ async function buildCommandCenterBusinessTruth(request,env){
       verifiedOutbound7d:truthNum(cfg.verified_outbound_7d),
       monetizedOutbound24h:truthNum(cfg.monetized_outbound_24h),
       monetizedOutbound7d:truthNum(cfg.monetized_outbound_7d),
-      corrections:truthNum(growth.correction_count)
+      corrections:truthNum(growth.correction_count),
+      acquisitionPolicy:'maximum_safe_always_on',
+      acquisitionMin24h:ACQUISITION_SURGE_MIN_24H,
+      acquisitionTarget24h:ACQUISITION_SURGE_TARGET_24H,
+      canonicalAcquisitionSource:'ga4',
+      strictHumanRole:'diagnostic_only',
+      waitForTrafficThreshold:false
     },
     traffic:{strictDaily},
     authority:{
-      required:Boolean(backlink.required),
+      required:authorityRequired,
       verifiedBacklinks:truthNum(backlink.verified_backlinks),
-      verifiedReferringDomains:truthNum(backlink.verified_referring_domains),
-      bootstrapFloor:truthNum(backlink.bootstrap_referring_domain_floor),
-      attempts24h:truthNum(backlink.attempts_24h),
+      verifiedReferringDomains:authorityVerifiedDomains,
+      bootstrapFloor:truthNum(backlink.bootstrap_referring_domain_floor)||10,
+      attempts24h:authorityAttempts24,
       attempts7d:truthNum(backlink.attempts_7d),
-      attemptMin24h:truthNum(backlink.attempt_min_24h),
-      authorityQueue:truthNum(backlink.authority_queue),
+      attemptMin24h:AUTHORITY_POLICY_MIN_24H,
+      attemptTarget24h:AUTHORITY_POLICY_TARGET_24H,
+      authorityQueue:authorityQueueNow,
       preparedActions:null,
       senderClaimed:null,
       lastVerifiedAt:backlink.last_verified_at||null,
       latestPlacementVerifiedAt:latestAuthorityPlacementAt,
       lastVerifiedAgeHours:backlink.last_verified_age_hours==null?null:Number(backlink.last_verified_age_hours),
-      throughputGap:Boolean(backlink.throughput_gap),
+      throughputGap:authorityThroughputGap,
+      policySource:'current_runtime_policy',
       stagnating:Boolean(backlink.stagnating),
       history30:authorityHistory
     },
@@ -384,7 +401,7 @@ export default{
     }
     if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
       ok:true,
-      version:'business-truth-v5',
+      version:'business-truth-v6',
       canonicalView:'command-center-simplified-view',
       cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Growth Brain','Needs You','Recent Results','Search + Authority','System Truth'],
       suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],

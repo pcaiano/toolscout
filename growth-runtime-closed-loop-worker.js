@@ -2,8 +2,8 @@ import base from './growth-runtime-integrity-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
-const AUTHORITY_ATTEMPT_MIN_24H=10;
-const AUTHORITY_ATTEMPT_TARGET_24H=15;
+const AUTHORITY_ATTEMPT_MIN_24H=15;
+const AUTHORITY_ATTEMPT_TARGET_24H=25;
 const SENDER_HANDOFF_WARN_MINUTES=120;
 const SENDER_HANDOFF_TIMEOUT_MINUTES=300;
 const AUTHORITY_HEALTH_CACHE_MS=90000;
@@ -162,7 +162,7 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   const network=await internalJson(request,env,ctx,'/api/distribution/network/refresh');
   const coordination=await internalJson(request,env,ctx,'/api/growth/opportunities/refresh');
   const execution=await internalJson(request,env,ctx,'/api/growth/execution/dispatch');
-  const senderHandoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=4',{method:'GET'});
+  const senderHandoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=8',{method:'GET'});
 
   const after=await authoritySnapshot(env);
   const externalAttemptObserved=after.attempts24>before.attempts24;
