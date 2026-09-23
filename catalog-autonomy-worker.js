@@ -394,6 +394,7 @@ export async function admitTrustedCandidates(env){
   }
   const market_gaps=await syncMarketGaps(env);
   runtimeCache.at=0;
+  if(admitted>0)await runtimeSnapshot(env,{force:true}).catch(()=>null);
   return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,rule:'Affiliate economics cannot increase catalog admission or ranking eligibility.'};
 }
 export async function auditCatalogQualityBatch(env,{limit=12}={}){
