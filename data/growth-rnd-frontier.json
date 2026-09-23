@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-23",
+  "objective": "Net-new automatable acquisition ideas that can add traffic, authority or both without turning ToolScout into a manual operating job.",
+  "knownSurfaceFamilies": [
+    "directory",
+    "ai_directory",
+    "startup_directory",
+    "mcp_registry",
+    "a2a_registry",
+    "distribution_surface",
+    "community",
+    "newsletter",
+    "editorial",
+    "media",
+    "journal",
+    "syndication",
+    "resource"
+  ],
+  "ideas": [
+    {
+      "ideaKey": "frontier:embed-recommendation-widget",
+      "title": "Embeddable ToolScout recommendation widget",
+      "mechanism": "Third-party embeds create referral traffic and optional editorially neutral attribution links.",
+      "hypothesis": "A lightweight recommendation widget that publishers can embed should create recurring referral sessions and referring domains without recurring owner work.",
+      "automationScore": 97,
+      "semiPassiveScore": 98,
+      "priority": 98,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "referral_sessions_and_referring_domains",
+      "nextStep": "Build a copy-paste JavaScript embed backed by ToolScout recommendation data, with optional attribution that is never required for ranking or inclusion.",
+      "steps": [
+        "build_embed_endpoint",
+        "publish_embed_docs",
+        "distribution_amplification",
+        "measure_referral_sessions"
+      ],
+      "dedupeCapabilities": [
+        "embed_recommendation_widget"
+      ],
+      "dedupeActions": [
+        "embed_recommendation_widget"
+      ]
+    },
+    {
+      "ideaKey": "frontier:embed-comparison-widget",
+      "title": "Embeddable software comparison widget",
+      "mechanism": "Publishers embed compact A-vs-B comparisons that link users back to the full ToolScout comparison.",
+      "hypothesis": "A comparison embed can convert ToolScout's existing comparison data into distributed referral surfaces and backlinks.",
+      "automationScore": 96,
+      "semiPassiveScore": 98,
+      "priority": 96,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "comparison_referral_sessions_and_referring_domains",
+      "nextStep": "Generate a responsive embed for any valid comparison pair and a public embed code generator.",
+      "steps": [
+        "build_comparison_embed",
+        "publish_embed_generator",
+        "distribution_amplification",
+        "measure_referral_sessions"
+      ],
+      "dedupeCapabilities": [
+        "embed_comparison_widget"
+      ],
+      "dedupeActions": [
+        "embed_comparison_widget"
+      ]
+    },
+    {
+      "ideaKey": "frontier:software-index-data-reports",
+      "title": "Automated ToolScout Software Index",
+      "mechanism": "Original category and market data becomes a linkable report that can be cited by publishers, vendors and AI systems.",
+      "hypothesis": "Regular first-party software trend reports can earn natural links and search demand more reliably than generic blog content.",
+      "automationScore": 94,
+      "semiPassiveScore": 95,
+      "priority": 97,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "earned_referring_domains_and_search_sessions",
+      "nextStep": "Create a repeatable report generator from catalog changes, pricing, category coverage and verified ToolScout data, then distribute each release automatically.",
+      "steps": [
+        "build_data_report_generator",
+        "publish_periodic_report",
+        "publisher_outreach",
+        "vendor_amplification",
+        "measure_earned_links"
+      ],
+      "dedupeCapabilities": [
+        "software_index_report"
+      ],
+      "dedupeActions": [
+        "software_index_report"
+      ]
+    },
+    {
+      "ideaKey": "frontier:micro-tool-calculators",
+      "title": "Free software decision micro-tools",
+      "mechanism": "Small calculators and decision helpers target high-intent searches and naturally point users into ToolScout recommendations.",
+      "hypothesis": "Useful free micro-tools such as stack cost estimators and software shortlisting calculators can acquire search traffic that ordinary catalog pages miss.",
+      "automationScore": 91,
+      "semiPassiveScore": 94,
+      "priority": 92,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "organic_sessions_to_microtools_and_recommendations",
+      "nextStep": "Build one reusable micro-tool framework, start with a software stack cost calculator, and generate only pages with clear user utility and observed demand.",
+      "steps": [
+        "build_microtool_framework",
+        "publish_demand_led_tool",
+        "search_measurement",
+        "distribution_amplification"
+      ],
+      "dedupeCapabilities": [
+        "decision_microtools"
+      ],
+      "dedupeActions": [
+        "decision_microtool"
+      ]
+    },
+    {
+      "ideaKey": "frontier:vendor-share-kit",
+      "title": "Automated vendor share kit and optional badge",
+      "mechanism": "Every reviewed vendor receives ready-to-share assets that can send referral traffic and voluntary backlinks to its ToolScout profile or comparison.",
+      "hypothesis": "Vendors have an incentive to share credible independent coverage when the assets are ready-made and editorial independence is explicit.",
+      "automationScore": 95,
+      "semiPassiveScore": 96,
+      "priority": 94,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "vendor_referral_sessions_and_voluntary_links",
+      "nextStep": "Generate a vendor-specific share page, social copy and optional badge after profile or comparison publication, then feed it into Vendor Amplification.",
+      "steps": [
+        "build_vendor_share_kit",
+        "vendor_amplification",
+        "measure_vendor_referrals"
+      ],
+      "dedupeCapabilities": [
+        "vendor_share_kit"
+      ],
+      "dedupeActions": [
+        "vendor_share_kit"
+      ]
+    },
+    {
+      "ideaKey": "frontier:github-open-data-releases",
+      "title": "Versioned open software dataset releases",
+      "mechanism": "Publish a useful subset of ToolScout's catalog as versioned open data on GitHub with canonical links to the live profiles.",
+      "hypothesis": "Developers, researchers and agents can cite and reuse a maintained dataset, creating discovery, links and branded search demand.",
+      "automationScore": 93,
+      "semiPassiveScore": 97,
+      "priority": 88,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "github_referrals_citations_and_referring_domains",
+      "nextStep": "Create a sanitized public dataset export and automated release notes without exposing proprietary scoring logic or affiliate data.",
+      "steps": [
+        "build_public_dataset_export",
+        "publish_github_release",
+        "measure_referrals_and_links"
+      ],
+      "dedupeCapabilities": [
+        "open_dataset_releases"
+      ],
+      "dedupeActions": [
+        "open_dataset_release"
+      ]
+    },
+    {
+      "ideaKey": "frontier:youtube-repurpose",
+      "title": "Automated YouTube explainer pipeline",
+      "mechanism": "Turn high-demand ToolScout pages into concise videos that capture YouTube search and send viewers to the decision page.",
+      "hypothesis": "Repurposing proven search topics into video can create a second search engine acquisition channel without a recurring manual production workload.",
+      "automationScore": 84,
+      "semiPassiveScore": 88,
+      "priority": 86,
+      "costClass": "free",
+      "implementationMode": "external_account_once",
+      "expectedSignal": "youtube_referral_sessions",
+      "nextStep": "Connect a free or near-free video generation and YouTube publishing path, then select topics from GSC demand and ToolScout conversion value.",
+      "steps": [
+        "generate_video_from_search_demand",
+        "publish_youtube",
+        "link_decision_asset",
+        "measure_referrals"
+      ],
+      "dedupeCapabilities": [
+        "youtube_content_pipeline"
+      ],
+      "dedupeActions": [
+        "youtube_publish"
+      ]
+    },
+    {
+      "ideaKey": "frontier:comparison-share-cards",
+      "title": "Shareable comparison result cards",
+      "mechanism": "Generate compact visual result cards for comparisons and recommendations that users and vendors can share with a tracked ToolScout link.",
+      "hypothesis": "Making every decision result shareable can turn existing users, vendors and social posts into a distributed referral loop.",
+      "automationScore": 96,
+      "semiPassiveScore": 98,
+      "priority": 91,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "shared_link_referral_sessions",
+      "nextStep": "Generate deterministic social cards for each comparison and recommendation result with canonical tracked links and one-click share actions.",
+      "steps": [
+        "build_share_card_generator",
+        "add_share_actions",
+        "measure_shared_referrals"
+      ],
+      "dedupeCapabilities": [
+        "comparison_share_cards"
+      ],
+      "dedupeActions": [
+        "comparison_share_card"
+      ]
+    },
+    {
+      "ideaKey": "frontier:resource-newsletter-radar",
+      "title": "Resource page and newsletter inclusion radar",
+      "mechanism": "Continuously find software resource pages, newsletters and curated roundups that accept relevant tools or references, then route safe opportunities into Distribution.",
+      "hypothesis": "A dedicated radar for editorial resource pages can produce both referral traffic and authority from surfaces that generic directory discovery misses.",
+      "automationScore": 92,
+      "semiPassiveScore": 94,
+      "priority": 99,
+      "costClass": "free",
+      "implementationMode": "existing_primitives",
+      "expectedSignal": "referral_sessions_and_referring_domains",
+      "nextStep": "Add discovery patterns for resource pages, newsletters and curated software roundups, qualify public contact routes, and use existing sender and verification loops.",
+      "steps": [
+        "discover_resource_surfaces",
+        "autonomous_route_qualification",
+        "publisher_outreach",
+        "verify_backlink_acquisition"
+      ],
+      "dedupeCapabilities": [
+        "resource_newsletter_radar"
+      ],
+      "dedupeActions": [
+        "resource_newsletter_radar"
+      ]
+    },
+    {
+      "ideaKey": "frontier:self-serve-vendor-submission-loop",
+      "title": "Self-serve vendor submission and share loop",
+      "mechanism": "Vendors submit factual updates to ToolScout, then receive a verified profile link and share kit after quality review.",
+      "hypothesis": "Vendor participation can create a scalable inbound acquisition loop while reducing catalog research cost and encouraging voluntary promotion.",
+      "automationScore": 90,
+      "semiPassiveScore": 93,
+      "priority": 84,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "vendor_referrals_submissions_and_links",
+      "nextStep": "Create a factual submission form with automated source verification, quarantine and approval gates, followed by a share kit only after admission.",
+      "steps": [
+        "build_vendor_submission",
+        "verify_first_party",
+        "quality_gate",
+        "vendor_share_kit"
+      ],
+      "dedupeCapabilities": [
+        "self_serve_vendor_submission"
+      ],
+      "dedupeActions": [
+        "vendor_submission_inbound"
+      ]
+    },
+    {
+      "ideaKey": "frontier:demand-led-stack-pages",
+      "title": "Demand-led software stack pages",
+      "mechanism": "Combine complementary tools into useful workflow stacks only where search or ToolScout demand shows a real task to solve.",
+      "hypothesis": "Users often search for a complete stack rather than one product, creating new high-intent entry pages and multiple monetizable outbound paths.",
+      "automationScore": 89,
+      "semiPassiveScore": 95,
+      "priority": 89,
+      "costClass": "free",
+      "implementationMode": "one_time_build",
+      "expectedSignal": "organic_sessions_and_multi_tool_outbound",
+      "nextStep": "Create a reusable stack-page generator grounded in catalog capabilities and GSC demand, with quality thresholds that prevent thin programmatic pages.",
+      "steps": [
+        "build_stack_page_generator",
+        "search_measurement",
+        "content_amplification",
+        "distribution_amplification"
+      ],
+      "dedupeCapabilities": [
+        "demand_led_stack_pages"
+      ],
+      "dedupeActions": [
+        "stack_page_publish"
+      ]
+    },
+    {
+      "ideaKey": "frontier:rising-alternatives-expansion",
+      "title": "Rising alternatives page expansion",
+      "mechanism": "Detect products and queries gaining impressions, then create or deepen high-quality alternatives pages before demand matures.",
+      "hypothesis": "Early capture of rising alternatives intent can move ToolScout into useful rankings faster than waiting for mature head terms.",
+      "automationScore": 94,
+      "semiPassiveScore": 96,
+      "priority": 95,
+      "costClass": "free",
+      "implementationMode": "existing_primitives",
+      "expectedSignal": "non_brand_search_sessions",
+      "nextStep": "Use GSC trend deltas plus catalog evidence to identify rising alternatives intent, create only evidence-backed pages, distribute them and measure lift.",
+      "steps": [
+        "detect_rising_alternatives",
+        "content_amplification",
+        "distribution_amplification",
+        "measure_search_lift"
+      ],
+      "dedupeCapabilities": [
+        "rising_alternatives_expansion"
+      ],
+      "dedupeActions": [
+        "rising_alternatives_expansion"
+      ]
+    }
+  ]
+}

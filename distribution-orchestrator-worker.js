@@ -119,6 +119,24 @@ async function ensureGrowthSchema(env){
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_rnd_status ON growth_rnd_experiments(status,updated_at DESC)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_rnd_frontier(
+      idea_key TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      mechanism TEXT NOT NULL,
+      hypothesis TEXT NOT NULL,
+      automation_score INTEGER NOT NULL DEFAULT 0,
+      semi_passive_score INTEGER NOT NULL DEFAULT 0,
+      implementation_mode TEXT NOT NULL DEFAULT 'one_time_build',
+      status TEXT NOT NULL DEFAULT 'candidate',
+      expected_signal TEXT,
+      next_step TEXT,
+      action_json TEXT NOT NULL DEFAULT '[]',
+      evidence_json TEXT NOT NULL DEFAULT '{}',
+      first_seen_at TEXT NOT NULL DEFAULT (datetime('now')),
+      last_evaluated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_rnd_frontier_status ON growth_rnd_frontier(status,automation_score DESC,updated_at DESC)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_asset_cache(
       path TEXT PRIMARY KEY,
       payload_json TEXT NOT NULL,
@@ -961,13 +979,22 @@ async function growthRndAuditDue(env,maxAgeHours=26){
 }
 async function runGrowthRndAudit(env){
   await ensureGrowthSchema(env);
-  const policy=await growthAssetJson(env,'/data/growth-rnd-policy.json',{mode:'locked',autonomousPrimitives:[],resourcePolicy:{maxNewExperimentsPerAudit:0}});
+  const [policy,frontier]=await Promise.all([
+    growthAssetJson(env,'/data/growth-rnd-policy.json',{mode:'locked',autonomousPrimitives:[],resourcePolicy:{maxNewExperimentsPerAudit:0},frontierDiscovery:{enabled:false}}),
+    growthAssetJson(env,'/data/growth-rnd-frontier.json',{ideas:[]})
+  ]);
   const allowed=new Set(Array.isArray(policy?.autonomousPrimitives)?policy.autonomousPrimitives:[]);
+  const existingCapabilities=new Set(Array.isArray(policy?.existingCapabilities)?policy.existingCapabilities:[]);
   const maxExperiments=Math.max(0,Math.min(10,Number(policy?.resourcePolicy?.maxNewExperimentsPerAudit||0)));
-  const [types,human,actions]=await Promise.all([
+  const frontierCfg=policy?.frontierDiscovery||{};
+  const maxFrontier=Math.max(0,Math.min(30,Number(frontierCfg?.maxFrontierIdeasPerAudit||12)));
+  const minAutomation=Math.max(0,Math.min(100,Number(frontierCfg?.minAutomationScore||70)));
+  const [types,human,actions,channels,surfaceFamilies]=await Promise.all([
     growthRows(env,`SELECT subject_type,COUNT(*) n,MAX(priority_score) max_score FROM growth_opportunity_state WHERE status='active' GROUP BY subject_type`),
     growthRows(env,`SELECT event_type,COUNT(*) n FROM distribution_events WHERE created_at>=datetime('now','-7 days') AND event_type IN ('human_gate_resolved','editorial_human_resolved') GROUP BY event_type`),
-    growthRows(env,`SELECT engine,COUNT(*) actions,SUM(CASE WHEN status IN ('sent','verified','completed') THEN 1 ELSE 0 END) completed FROM growth_action_events WHERE created_at>=datetime('now','-7 days') GROUP BY engine`)
+    growthRows(env,`SELECT engine,COUNT(*) actions,SUM(CASE WHEN status IN ('sent','verified','completed') THEN 1 ELSE 0 END) completed FROM growth_action_events WHERE created_at>=datetime('now','-7 days') GROUP BY engine`),
+    growthRows(env,`SELECT channel,COUNT(*) n FROM growth_action_events WHERE created_at>=datetime('now','-30 days') GROUP BY channel`),
+    growthRows(env,`SELECT COALESCE(NULLIF(surface_type,''),'unknown') surface_type,COUNT(*) n,MAX(distribution_score) max_score FROM distribution_opportunities WHERE status NOT IN ('skipped','rejected','unavailable_free','skipped_low_quality') GROUP BY COALESCE(NULLIF(surface_type,''),'unknown') ORDER BY max_score DESC LIMIT 30`)
   ]);
   const counts=Object.fromEntries(types.map(x=>[x.subject_type,{count:Number(x.n||0),max:Number(x.max_score||0)}]));
   const experiments=[];
@@ -978,6 +1005,7 @@ async function runGrowthRndAudit(env){
   if(!humanSprintActive()&&((counts.catalog_category?.count||0)>0||(counts.catalog_gap?.count||0)>0))add('rnd:catalog-expansion','catalog_expansion','catalog','Coverage gaps can create new searchable and monetizable decision surfaces when official-source quality gates pass.',['discover_candidates','verify_first_party','admit_coverage_only'],'qualified_catalog_coverage');
   const humanCount=human.reduce((s,x)=>s+Number(x.n||0),0);
   if(humanCount>=3)add('rnd:human-gate-reduction','automation_gap_reduction','operations','Repeated human gates are candidates for automation when identity, legal and paid-action boundaries are not involved.',['audit_human_gates','convert_machine_resolvable_gates'],'owner_minutes_reduced');
+
   let upserted=0,blocked=0;
   for(const x of experiments.slice(0,maxExperiments)){
     const permitted=policy?.mode==='bounded_autonomy'&&x.steps.every(step=>allowed.has(step));
@@ -987,9 +1015,82 @@ async function runGrowthRndAudit(env){
       ON CONFLICT(experiment_key) DO UPDATE SET hypothesis=excluded.hypothesis,action_json=excluded.action_json,status='active',expected_signal=excluded.expected_signal,last_evaluated_at=datetime('now'),updated_at=datetime('now')`)
       .bind(x.key,x.type,x.subject,x.hypothesis,JSON.stringify(x.steps),x.signal).run();upserted++;
   }
-  return {ok:true,policy_mode:policy?.mode||'locked',active_experiments:upserted,blocked_by_policy:blocked,opportunity_types:counts,human_gates_7d:humanCount,observed_action_engines:actions,guardrail:'Growth R&D may instantiate only pre-approved bounded action classes. Arbitrary code changes, new paid spend, credentials, legal commitments and irreversible third-party actions remain gated.'};
-}
 
+  const observedChannels=new Set(channels.map(x=>String(x.channel||'')).filter(Boolean));
+  const frontierIdeas=Array.isArray(frontier?.ideas)?frontier.ideas:[];
+  const eligible=frontierIdeas.filter(idea=>{
+    if(frontierCfg?.enabled===false)return false;
+    if(Number(idea?.automationScore||0)<minAutomation)return false;
+    if(frontierCfg?.freeFirst!==false&&String(idea?.costClass||'free')!=='free')return false;
+    return true;
+  }).sort((a,b)=>(Number(b.priority||0)+Number(b.automationScore||0)+Number(b.semiPassiveScore||0))-(Number(a.priority||0)+Number(a.automationScore||0)+Number(a.semiPassiveScore||0)));
+
+  let frontierCandidates=0,frontierImplemented=0,frontierWrites=0;
+  for(const idea of eligible.slice(0,maxFrontier)){
+    const dedupe=[...(Array.isArray(idea?.dedupeActions)?idea.dedupeActions:[]),...(Array.isArray(idea?.dedupeCapabilities)?idea.dedupeCapabilities:[])];
+    const implemented=dedupe.length>0&&dedupe.every(marker=>observedChannels.has(String(marker))||existingCapabilities.has(String(marker)));
+    const status=implemented?'implemented':'candidate';
+    if(implemented)frontierImplemented++;else frontierCandidates++;
+    const actionJson=JSON.stringify(Array.isArray(idea?.steps)?idea.steps:[]);
+    const evidenceJson=JSON.stringify({source:'curated_frontier_plus_runtime_dedupe',priority:Number(idea?.priority||0),cost_class:idea?.costClass||'free',dedupe_markers:dedupe,observed_channels:[...observedChannels].slice(0,80)});
+    const result=await env.DB.prepare(`INSERT INTO growth_rnd_frontier(idea_key,title,mechanism,hypothesis,automation_score,semi_passive_score,implementation_mode,status,expected_signal,next_step,action_json,evidence_json,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(idea_key) DO UPDATE SET
+        title=excluded.title,mechanism=excluded.mechanism,hypothesis=excluded.hypothesis,
+        automation_score=excluded.automation_score,semi_passive_score=excluded.semi_passive_score,
+        implementation_mode=excluded.implementation_mode,status=excluded.status,
+        expected_signal=excluded.expected_signal,next_step=excluded.next_step,
+        action_json=excluded.action_json,evidence_json=excluded.evidence_json,
+        last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_rnd_frontier.title IS NOT excluded.title
+         OR growth_rnd_frontier.mechanism IS NOT excluded.mechanism
+         OR growth_rnd_frontier.hypothesis IS NOT excluded.hypothesis
+         OR growth_rnd_frontier.automation_score IS NOT excluded.automation_score
+         OR growth_rnd_frontier.semi_passive_score IS NOT excluded.semi_passive_score
+         OR growth_rnd_frontier.implementation_mode IS NOT excluded.implementation_mode
+         OR growth_rnd_frontier.status IS NOT excluded.status
+         OR growth_rnd_frontier.expected_signal IS NOT excluded.expected_signal
+         OR growth_rnd_frontier.next_step IS NOT excluded.next_step
+         OR growth_rnd_frontier.action_json IS NOT excluded.action_json`)
+      .bind(String(idea.ideaKey),String(idea.title),String(idea.mechanism),String(idea.hypothesis),Number(idea.automationScore||0),Number(idea.semiPassiveScore||0),String(idea.implementationMode||'one_time_build'),status,String(idea.expectedSignal||''),String(idea.nextStep||''),actionJson,evidenceJson).run();
+    frontierWrites+=Number(result?.meta?.changes||result?.changes||0);
+  }
+
+  const knownSurfaceFamilies=new Set(Array.isArray(frontier?.knownSurfaceFamilies)?frontier.knownSurfaceFamilies.map(String):[]);
+  let dynamicSurfaceIdeas=0;
+  for(const row of surfaceFamilies.slice(0,8)){
+    const family=String(row.surface_type||'unknown').trim().toLowerCase();
+    if(!family||family==='unknown'||knownSurfaceFamilies.has(family))continue;
+    const slug=family.replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80);
+    if(!slug)continue;
+    const key='frontier:surface-family:'+slug;
+    const title='Automate acquisition on '+family.replaceAll('_',' ')+' surfaces';
+    const hypothesis='A newly observed external surface family may provide incremental referral traffic, authority or both if ToolScout can qualify and execute it safely at scale.';
+    const next='Research a no-auth or safely authenticated execution path, then bind it to Distribution if the route is free, relevant and policy-compliant.';
+    const result=await env.DB.prepare(`INSERT INTO growth_rnd_frontier(idea_key,title,mechanism,hypothesis,automation_score,semi_passive_score,implementation_mode,status,expected_signal,next_step,action_json,evidence_json,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,88,92,'existing_primitives','candidate','referral_sessions_or_referring_domains',?,? ,?,datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(idea_key) DO UPDATE SET evidence_json=excluded.evidence_json,last_evaluated_at=datetime('now')
+      WHERE growth_rnd_frontier.evidence_json IS NOT excluded.evidence_json`)
+      .bind(key,title,family,hypothesis,next,JSON.stringify(['autonomous_route_qualification','distribution_amplification']),JSON.stringify({source:'runtime_surface_family',surface_type:family,opportunities:Number(row.n||0),max_score:Number(row.max_score||0)})).run();
+    if(Number(result?.meta?.changes||result?.changes||0)>0)dynamicSurfaceIdeas++;
+  }
+
+  return {
+    ok:true,
+    policy_mode:policy?.mode||'locked',
+    active_experiments:upserted,
+    blocked_by_policy:blocked,
+    frontier_mode:frontierCfg?.enabled===false?'disabled':'net_new_acquisition_discovery',
+    frontier_candidates:frontierCandidates,
+    frontier_already_implemented:frontierImplemented,
+    frontier_material_writes:frontierWrites,
+    dynamic_surface_ideas:dynamicSurfaceIdeas,
+    opportunity_types:counts,
+    human_gates_7d:humanCount,
+    observed_action_engines:actions,
+    guardrail:'Growth R&D discovers net-new free-first acquisition mechanisms and classifies them by automation potential. Existing bounded experiments can execute automatically. One-time-build ideas remain proposals until a safe executor exists. Paid spend, credentials, legal commitments, spam and affiliate-driven editorial ranking remain gated.'
+  };
+}
 function paidPolicy(metric,cost){
   if(!cost)return{decision:'free_default',roi:null};
   const sessions=confirmedSessions(metric),revenue=metric?.revenue==null?null:Number(metric.revenue),sameCurrency=Boolean(metric?.currency&&cost.currency&&metric.currency===cost.currency);

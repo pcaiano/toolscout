@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "mode": "bounded_autonomy",
-  "objective": "Continuously audit ToolScout for evidence-backed growth and monetization opportunities, then instantiate low-risk experiments using existing approved primitives.",
+  "objective": "Continuously discover net-new free-first acquisition mechanisms for ToolScout, separate them from already implemented growth loops, and prioritize ideas that can become semi-passive after one-time setup.",
   "autonomousPrimitives": [
     "content_amplification",
     "distribution_amplification",
@@ -20,6 +20,25 @@
     "audit_human_gates",
     "convert_machine_resolvable_gates"
   ],
+  "existingCapabilities": [
+    "search_amplification",
+    "news_compounding",
+    "affiliate_leakage_recovery",
+    "catalog_expansion",
+    "automation_gap_reduction",
+    "content_amplification",
+    "distribution_amplification",
+    "vendor_amplification",
+    "indexnow",
+    "rss_websub",
+    "mcp_a2a_registry_distribution",
+    "bluesky_outbound_replies",
+    "x_linkedin_content",
+    "comparison_pages",
+    "tool_profiles",
+    "affiliate_coverage",
+    "machine_discovery_assets"
+  ],
   "hardGates": [
     "arbitrary_code_change",
     "new_paid_spend",
@@ -27,13 +46,26 @@
     "legal_or_contractual_acceptance",
     "identity_tax_or_payment_submission",
     "irreversible_third_party_action",
-    "editorial_ranking_change_based_on_affiliate_economics"
+    "editorial_ranking_change_based_on_affiliate_economics",
+    "unsolicited_bulk_messaging",
+    "platform_policy_violation"
   ],
+  "frontierDiscovery": {
+    "enabled": true,
+    "freeFirst": true,
+    "noveltyRequired": true,
+    "maxFrontierIdeasPerAudit": 12,
+    "minAutomationScore": 70,
+    "oneTimeBuildIdeasAllowed": true,
+    "dynamicSurfaceFamilyDiscovery": true,
+    "objective": "Find acquisition mechanisms ToolScout is not already using, especially mechanisms that can run with little or no recurring owner work."
+  },
   "resourcePolicy": {
     "freeFirst": true,
     "d1HeavyStrategicAuditCadence": "daily",
     "maxNewExperimentsPerAudit": 5,
     "evidenceRequiredBeforeScaling": true,
+    "evidenceNotRequiredBeforeExploration": true,
     "missingEvidenceMeansZeroImpact": false
   }
 }

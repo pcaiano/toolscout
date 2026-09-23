@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const orch=fs.readFileSync(new URL('../distribution-orchestrator-worker.js',import.meta.url),'utf8');
+const policy=JSON.parse(fs.readFileSync(new URL('../data/growth-rnd-policy.json',import.meta.url),'utf8'));
+const frontier=JSON.parse(fs.readFileSync(new URL('../data/growth-rnd-frontier.json',import.meta.url),'utf8'));
+assert.match(orch,/CREATE TABLE IF NOT EXISTS growth_rnd_frontier/);
+assert.match(orch,/frontier_mode/);
+assert.match(orch,/dynamic_surface_ideas/);
+assert.equal(policy.frontierDiscovery.enabled,true);
+assert.equal(policy.frontierDiscovery.noveltyRequired,true);
+assert.equal(policy.resourcePolicy.evidenceNotRequiredBeforeExploration,true);
+assert.ok(frontier.ideas.length>=10);
+assert.ok(frontier.ideas.every(x=>Number(x.automationScore)>=70));
+assert.ok(frontier.ideas.every(x=>x.costClass==='free'));
+assert.ok(frontier.ideas.some(x=>x.implementationMode==='existing_primitives'));
+assert.ok(frontier.ideas.some(x=>x.implementationMode==='one_time_build'));
+console.log('Growth R&D frontier discovers net-new free-first automatable acquisition ideas.');
