@@ -16,7 +16,23 @@ const ageHours=v=>{const t=Date.parse(String(v||''));return Number.isFinite(t)?M
 
 async function first(env,sql){try{return await env.DB.prepare(sql).first()}catch{return null}}
 async function all(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
-async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
+async function assetJson(env,path,fallback){
+  // Cloudflare runtime evidence is authoritative for GSC when it is newer than the
+  // immutable asset snapshot. This lets SEO operate without waiting for a GitHub build.
+  if(path==='/reports/gsc-signals.json'||path==='/data/gsc-search-reality.json'){
+    try{
+      const row=await env.DB.prepare('SELECT payload_json,source_generated_at FROM growth_asset_cache WHERE path=? LIMIT 1').bind(path).first();
+      if(row?.payload_json){
+        const runtime=JSON.parse(row.payload_json),rt=Date.parse(String(row.source_generated_at||runtime?.generatedAt||''));
+        let asset=null;try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));if(r.ok)asset=await r.json()}catch{}
+        const at=Date.parse(String(asset?.generatedAt||''));
+        if(!asset||!Number.isFinite(at)||(Number.isFinite(rt)&&rt>=at))return runtime;
+        return asset;
+      }
+    }catch{}
+  }
+  try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}
+}
 
 async function ensureSchema(env){
   await env.DB.batch([
