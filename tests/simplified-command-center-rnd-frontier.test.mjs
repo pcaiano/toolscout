@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const src=fs.readFileSync(new URL('../command-center-simplified-view.js',import.meta.url),'utf8');
+assert.match(src,/Growth R&D - new acquisition ideas/);
+assert.match(src,/rnd_frontier_items/);
+assert.match(src,/semi-passive/);
+assert.match(src,/GA4 is the canonical traffic population/);
+assert.match(src,/strict human diagnostics and do not override or erase GA4 sessions/);
+assert.match(src,/growth\.acquisitionMin24h\|\|15/);
+assert.match(src,/growth\.acquisitionTarget24h\|\|25/);
+console.log('Simplified Command Center shows net-new Growth R&D ideas and current acquisition policy.');

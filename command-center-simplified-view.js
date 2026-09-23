@@ -36,7 +36,7 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 <section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Traffic Progress</div></div><div class="meta" id="trafficProgressMeta">GA4 + strict human proof</div></div><div class="body" id="trafficProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Authority Progress</div></div><div class="meta" id="authorityProgressMeta">Backlinks + referring domains</div></div><div class="body" id="authorityProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span4"><div class="head"><div><div class="kicker">28 day trend</div><div class="title">Google Search Progress</div></div><div class="meta" id="gscProgressMeta">Search Console</div></div><div class="body" id="gscProgressBody"><div class="empty">Loading...</div></div></section>
-<section class="card span7"><div class="head"><div><div class="kicker">Autonomous execution</div><div class="title">Growth Brain</div></div><div class="meta" id="brainMeta">What it is doing now</div></div><div class="body" id="brainBody"><div class="empty">Loading...</div></div></section>
+<section class="card span7"><div class="head"><div><div class="kicker">Autonomous execution + R&D</div><div class="title">Growth Brain</div></div><div class="meta" id="brainMeta">What it is doing now and what it is exploring next</div></div><div class="body" id="brainBody"><div class="empty">Loading...</div></div></section>
 <section class="card span5"><div class="head"><div><div class="kicker">Human exceptions only</div><div class="title">Needs You</div></div><div class="meta" id="queueMeta">Chairman Queue</div></div><div class="body" id="queueBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Actions and outcomes</div><div class="title">Recent Results</div></div><div class="meta">External evidence only</div></div><div class="body" id="resultsBody"><div class="empty">Loading...</div></div></section>
 <section class="card span5"><div class="head"><div><div class="kicker">Organic demand and authority</div><div class="title">Search + Authority</div></div><div class="meta" id="searchMeta">GSC + verified backlinks</div></div><div class="body" id="searchBody"><div class="empty">Loading...</div></div></section>
@@ -83,7 +83,7 @@ function donut(value,target){
  return '<div class="donut"><svg viewBox="0 0 92 92"><circle class="donutTrack" cx="46" cy="46" r="'+r+'"></circle><circle class="donutValue" cx="46" cy="46" r="'+r+'" stroke-dasharray="'+dash+' '+c.toFixed(2)+'"></circle></svg><div class="donutText">'+esc(v)+' / '+esc(t)+'<small>domains</small></div></div>';
 }
 
-function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale'].includes(v))return'bad';return'warn'}
+function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed','acquisition_surge'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale'].includes(v))return'bad';return'warn'}
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
 async function get(url,fresh=false){
  const target=fresh?url+(url.includes('?')?'&':'?')+'fresh=1':url;
@@ -94,7 +94,7 @@ async function get(url,fresh=false){
 function business(){
  const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
  let headline='Execution is running, but business results are not yet proven.';
- let detail='Growth Brain is prioritizing strict verified human acquisition and measurable downstream conversion.';
+ let detail='Growth Brain is running maximum-safe acquisition. GA4 is the canonical traffic population; strict human proof is diagnostic, not a gate on growth.';
  if(Number(g.strictHumans24h)>0)headline='Verified humans are arriving. Conversion is now the next proof point.';
  if(Number(g.verifiedOutbound24h)>0)headline='Verified humans are reaching vendors. Monetization is now the next proof point.';
  if(Number(g.monetizedOutbound24h)>0)headline='Monetized outbound is active. Scale only sources that preserve verified human quality.';
@@ -129,7 +129,7 @@ function trafficProgress(){
  document.getElementById('trafficProgressBody').innerHTML=
   '<div class="progressStats"><div class="progressStat"><small>Sessions last 7d</small><b>'+n(cur)+'</b></div><div class="progressStat"><small>7d vs prior 7d</small><b class="'+deltaClass(chg)+'">'+signedPct(chg)+'</b></div><div class="progressStat"><small>Strict humans 7d</small><b>'+n(data?.truth?.growth?.strictHumans7d)+'</b></div><div class="progressStat"><small>Sessions MTD</small><b>'+n(a?.sessions?.monthToDate)+'</b></div></div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'sessions',label:'GA4 sessions',cls:'primary'},{key:'humans',label:'Strict verified humans',cls:'good',dots:true}])+'</div>'+
-  '<div class="sourceLine">Traffic line is GA4 canonical acquisition. Green proof points are strict verified human evidence used by the Growth Brain.</div>';
+  '<div class="sourceLine">Traffic line is GA4 canonical acquisition. Green proof points are strict human diagnostics and do not override or erase GA4 sessions.</div>';
 }
 function authorityProgress(){
  const b=data?.truth?.authority||{},live=data?.authority||{},rows=Array.isArray(b.history30)?b.history30:[];
@@ -171,6 +171,10 @@ function brain(){
  if(activity.length)body.push('<div class="section"><div class="sectionTitle">Latest engine activity</div>'+activity.map(x=>row(human((x.engine||'engine')+' - '+(x.mission||'cycle')),human(x.status||'unknown'),dt(x.at)+(x.detail?' - '+human(x.detail):''))).join('')+'</div>');
  const actions=Array.isArray(t.growthActions)?t.growthActions.slice(0,6):[];
  if(actions.length)body.push('<div class="section"><div class="sectionTitle">Latest external action pipeline</div>'+actions.map(x=>row(human((x.engine||'growth')+' - '+(x.channel||'action')),human(x.status||'unknown'),dt(x.at)+' - '+human(x.opportunityKey||x.id||''))).join('')+'</div>');
+ const frontier=Array.isArray(data?.stats?.growthOps?.autonomousGrowth?.rnd_frontier_items)?data.stats.growthOps.autonomousGrowth.rnd_frontier_items.slice(0,6):[];
+ if(frontier.length)body.push('<div class="section"><div class="sectionTitle">Growth R&D - new acquisition ideas</div>'+
+   frontier.map(x=>'<div class="task" style="margin-top:8px"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id||'Acquisition idea')+'</div><div class="taskMeta">'+esc(human(x.implementation_mode||'candidate'))+' - automation '+n(x.automation_score)+'/100 - semi-passive '+n(x.semi_passive_score)+'/100</div></div>'+pill(human(x.status||'candidate'),'warn')+'</div><div class="taskText"><b>Mechanism:</b> '+esc(x.mechanism||'')+'</div><div class="taskText"><b>Next:</b> '+esc(x.next_step||'Research and bind a safe executor.')+'</div><div class="taskText"><b>Signal:</b> '+esc(human(x.expected_signal||'traffic impact'))+'</div></div>').join('')+
+ '</div>');
  document.getElementById('brainMeta').textContent='Evaluated '+dt(growth.lastEvaluatedAt||t.generatedAt);
  document.getElementById('brainBody').innerHTML=body.join('');
 }
@@ -227,7 +231,7 @@ function health(){
  if(Number(arch.openIncidents||0)>0)issues.push({level:'bad',title:'Architecture incidents',detail:n(arch.openIncidents)+' open architecture incidents.'});
  if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
  if(a.status&&a.status!=='healthy'){
-   const floorMet=Number(a.attempts24||0)>=Number(a.attemptMin24h||6);
+   const floorMet=Number(a.attempts24||0)>=Number(a.attemptMin24h||15);
    if(a.senderFreshClaim&&Number(a.senderClaimed||0)>0)issues.push({level:'warn',title:'Authority handoff in progress',detail:n(a.senderClaimed)+' sender task is claimed since '+dt(a.senderNewestClaimedAt)+'. Queue '+n(a.queue)+' remains. Waiting for external callback evidence, so no extra attempt is counted yet.'});
    else if(a.status==='executing_backlog'&&floorMet)issues.push({level:'warn',title:'Authority backlog needs new executable routes',detail:n(a.queue)+' opportunities remain and the daily attempt floor is met. The latest cycle found no new externally executable candidate.'});
    else issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+human(a.status)+'.'});
@@ -236,7 +240,8 @@ function health(){
  const externalAge=latestExternal?.at?ageHours(latestExternal.at):null;
  if(externalAge!=null&&externalAge>2)issues.push({level:'warn',title:'No new verified external result',detail:'Latest verified external outcome was '+dt(latestExternal.at)+' ('+dec(externalAge,1)+'h ago). Engines are still running; this warning is about outcome freshness, not scheduler activity.'});
  if(t.affiliate&&t.affiliate.reconciled===false)issues.push({level:'warn',title:'Affiliate metadata reconciliation',detail:n((t.affiliate.productionWithoutActivePipeline||[]).length)+' live production route(s) are not marked active in pipeline metadata: '+(t.affiliate.productionWithoutActivePipeline||[]).join(', ')+'. Production registry remains canonical.'});
- if(Number(growth.externalExecutions24h||0)<10)issues.push({level:'warn',title:'Acquisition execution below operating floor',detail:n(growth.externalExecutions24h)+' external executions in 24h. Floor is 10; target is 15.'});
+ const acquisitionFloor=Number(growth.acquisitionMin24h||15),acquisitionTarget=Number(growth.acquisitionTarget24h||25);
+ if(Number(growth.externalExecutions24h||0)<acquisitionFloor)issues.push({level:'warn',title:'Acquisition execution below operating floor',detail:n(growth.externalExecutions24h)+' external executions in 24h. Floor is '+n(acquisitionFloor)+'; target is '+n(acquisitionTarget)+'.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh and authority loop have no current measurable failure.'});
  const rows=[
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
