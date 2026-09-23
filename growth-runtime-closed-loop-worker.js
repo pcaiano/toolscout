@@ -6,6 +6,8 @@ const AUTHORITY_ATTEMPT_MIN_24H=10;
 const AUTHORITY_ATTEMPT_TARGET_24H=15;
 const SENDER_HANDOFF_WARN_MINUTES=120;
 const SENDER_HANDOFF_TIMEOUT_MINUTES=300;
+const AUTHORITY_HEALTH_CACHE_MS=90000;
+let authorityHealthCache={at:0,value:null,promise:null};
 
 async function first(env,sql){try{return await env.DB.prepare(sql).first()}catch{return null}}
 async function all(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
@@ -53,6 +55,20 @@ function authorityStatus(state){
   if(state.queue<=0)return'queue_drained';
   if(state.attempts24>=AUTHORITY_ATTEMPT_MIN_24H)return'executing_backlog';
   return'execution_required';
+}
+async function authorityHealthSnapshot(env,{fresh=false}={}){
+  const now=Date.now();
+  if(!fresh&&authorityHealthCache.value&&now-authorityHealthCache.at<AUTHORITY_HEALTH_CACHE_MS)return authorityHealthCache.value;
+  if(!fresh&&authorityHealthCache.promise)return authorityHealthCache.promise;
+  const work=(async()=>{
+    const state=await authoritySnapshot(env);
+    await normalizeFalseAsyncFailure(env,state);
+    const value={status:authorityStatus(state),...state,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,attemptFloorIsMinimumNotCap:true,drainBacklogBeforeSlowdown:true,preparedDoesNotCountAsExecution:true,externalCallbackRequiredForEmailAttempt:true};
+    authorityHealthCache={at:Date.now(),value,promise:null};
+    return value;
+  })().catch(error=>{authorityHealthCache.promise=null;throw error});
+  authorityHealthCache.promise=work;
+  return work;
 }
 async function normalizeFalseAsyncFailure(env,state){
   if(!state.senderFreshClaim)return 0;
@@ -185,8 +201,7 @@ function responseHeaders(response,type){const h=new Headers(response.headers);h.
 async function augmentStats(request,response,env){
   if(!response?.ok||(response.headers.get('Content-Type')||'').toLowerCase().indexOf('application/json')<0)return response;
   let data;try{data=await response.json()}catch{return response}
-  const [authority,discovery]=await Promise.all([authoritySnapshot(env),discoverySnapshot(request,env)]);
-  await normalizeFalseAsyncFailure(env,authority);
+  const [authority,discovery]=await Promise.all([authorityHealthSnapshot(env),discoverySnapshot(request,env)]);
   data.growthOps=data.growthOps||{};
   data.growthOps.machineDiscovery=discovery;
   data.growthOps.footprint=data.growthOps.footprint||{};
@@ -202,8 +217,9 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/api/distribution/authority/closed-loop-health'&&request.method==='GET'){
-      const state=await authoritySnapshot(env);await normalizeFalseAsyncFailure(env,state);
-      return Response.json({status:authorityStatus(state),...state,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,attemptFloorIsMinimumNotCap:true,drainBacklogBeforeSlowdown:true,preparedDoesNotCountAsExecution:true,externalCallbackRequiredForEmailAttempt:true},{headers:JSON_H});
+      const fresh=url.searchParams.get('fresh')==='1';
+      const state=await authorityHealthSnapshot(env,{fresh});
+      return Response.json(state,{headers:{...JSON_H,'X-ToolScout-Read-Mode':fresh?'fresh':'observability-cache'}});
     }
     if(url.pathname==='/api/distribution/discovery-health'&&request.method==='GET')return Response.json(await discoverySnapshot(request,env),{headers:JSON_H});
     if(url.pathname==='/api/distribution/authority/close-loop'&&request.method==='POST'){

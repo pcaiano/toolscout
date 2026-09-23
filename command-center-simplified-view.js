@@ -85,7 +85,12 @@ function donut(value,target){
 
 function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale'].includes(v))return'bad';return'warn'}
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
-async function get(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{credentials:'same-origin',cache:'no-store'});if(!r.ok)throw new Error(String(r.status));return r.json()}
+async function get(url,fresh=false){
+ const target=fresh?url+(url.includes('?')?'&':'?')+'fresh=1':url;
+ const r=await fetch(target,{credentials:'same-origin',cache:'no-store'});
+ if(!r.ok)throw new Error(String(r.status));
+ return r.json();
+}
 function business(){
  const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
  let headline='Execution is running, but business results are not yet proven.';
@@ -261,18 +266,51 @@ document.addEventListener('click',e=>{
  const c=e.target.closest('[data-copy]');if(c){e.preventDefault();const old=c.textContent,value=decodeURIComponent(c.dataset.copy||'');navigator.clipboard.writeText(value).then(()=>{c.textContent='Copied';setTimeout(()=>c.textContent=old,1200)}).catch(()=>{c.textContent='Copy failed';setTimeout(()=>c.textContent=old,1500)});return}
  const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
 });
-async function load(){
- const btn=document.getElementById('refresh');btn.disabled=true;document.getElementById('status').innerHTML='<strong>Refreshing current evidence...</strong>';
- const entries=Object.entries(endpoints);const results=await Promise.all(entries.map(async([k,u])=>{try{return[k,await get(u),null]}catch(e){return[k,null,String(e?.message||e)]}}));
- let failures=[];for(const [k,v,e] of results){data[k]=v;if(e)failures.push(k)}
+const FAST_KEYS=['queue','runtime','authority'];
+const HEAVY_KEYS=['stats','truth'];
+let fastBusy=false,heavyBusy=false,lastFast=0,lastHeavy=0;
+
+async function fetchKeys(keys,{fresh=false,announce=false}={}){
+ const btn=document.getElementById('refresh');
+ if(announce){btn.disabled=true;document.getElementById('status').innerHTML='<strong>Refreshing current evidence...</strong>'}
+ const results=await Promise.all(keys.map(async k=>{try{return[k,await get(endpoints[k],fresh),null]}catch(e){return[k,null,String(e?.message||e)]}}));
+ const failures=[];
+ for(const [k,v,e] of results){if(v!==null)data[k]=v;if(e)failures.push(k)}
  render();
- const stamp=new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'});
- document.getElementById('status').innerHTML='<strong>Updated '+esc(stamp)+'</strong> - '+(failures.length?'Some sources unavailable: '+esc(failures.join(', ')):'All canonical sources responded.');
- document.getElementById('sourceStatus').textContent=failures.length?(entries.length-failures.length)+' / '+entries.length+' sources live':entries.length+' / '+entries.length+' sources live';
- btn.disabled=false;
+ if(announce){
+   const stamp=new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'});
+   document.getElementById('status').innerHTML='<strong>Updated '+esc(stamp)+'</strong> - '+(failures.length?'Some sources unavailable: '+esc(failures.join(', ')):'All canonical sources responded.');
+   document.getElementById('sourceStatus').textContent=failures.length?(keys.length-failures.length)+' / '+keys.length+' refreshed sources live':keys.length+' / '+keys.length+' refreshed sources live';
+   btn.disabled=false;
+ }
+ return failures;
 }
-document.getElementById('refresh').addEventListener('click',load);
-load();setInterval(load,60000);
+async function loadFast(){
+ if(document.hidden||fastBusy)return;
+ fastBusy=true;try{await fetchKeys(FAST_KEYS);lastFast=Date.now()}finally{fastBusy=false}
+}
+async function loadHeavy(){
+ if(document.hidden||heavyBusy)return;
+ heavyBusy=true;try{await fetchKeys(HEAVY_KEYS);lastHeavy=Date.now()}finally{heavyBusy=false}
+}
+async function loadAll(fresh=false){
+ if(fastBusy||heavyBusy)return;
+ fastBusy=heavyBusy=true;
+ try{
+   await fetchKeys(Object.keys(endpoints),{fresh,announce:true});
+   lastFast=lastHeavy=Date.now();
+ }finally{fastBusy=heavyBusy=false}
+}
+document.getElementById('refresh').addEventListener('click',()=>loadAll(true));
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden)return;
+ const now=Date.now();
+ if(now-lastFast>=60000)loadFast();
+ if(now-lastHeavy>=180000)loadHeavy();
+});
+loadAll(false);
+setInterval(loadFast,60000);
+setInterval(loadHeavy,180000);
 </script>
 </body>
 </html>`;

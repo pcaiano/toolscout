@@ -8,6 +8,8 @@ function jsonHeaders(response){
   h.delete('Content-Length');h.delete('Content-Encoding');
   return h;
 }
+const FACTS_CACHE_MS=60000;
+let factsCache={at:0,value:null,promise:null};
 async function facts(env){
   const [oauth,authority,content,distributionRuns]=await Promise.all([
     env.DB.prepare(`SELECT provider,updated_at,last_refresh_at,last_error
@@ -24,6 +26,14 @@ async function facts(env){
   const latestCompleted={};
   for(const row of distributionRuns||[])if(!latestCompleted[row.mission])latestCompleted[row.mission]=row;
   return {ga4Connected:Boolean(oauth?.provider==='google_analytics'),authorityAttempts24:Number(authority?.attempts24||0),contentStatus:content?.status||null,contentDirective:content?.directive||null,contentEvaluatedAt:content?.last_evaluated_at||null,distributionCompleted:latestCompleted};
+}
+async function cachedFacts(env,{fresh=false}={}){
+  const now=Date.now();
+  if(!fresh&&factsCache.value&&now-factsCache.at<FACTS_CACHE_MS)return factsCache.value;
+  if(!fresh&&factsCache.promise)return factsCache.promise;
+  const work=facts(env).then(value=>{factsCache={at:Date.now(),value,promise:null};return value}).catch(error=>{factsCache.promise=null;throw error});
+  factsCache.promise=work;
+  return work;
 }
 function keepIssue(issue,f){
   const metric=String(issue?.metric||''),reason=String(issue?.reason||'');
@@ -59,7 +69,7 @@ function reconcileAudit(a,f){
 async function reconcile(response,env){
   if(!response?.ok||!String(response.headers.get('Content-Type')||'').toLowerCase().includes('application/json'))return response;
   let d;try{d=await response.json()}catch{return response}
-  const f=await facts(env);
+  const f=await cachedFacts(env);
   if(d.commandCenterIntegrity)d.commandCenterIntegrity=reconcileAudit(d.commandCenterIntegrity,f);
   if(d.measurementAudit)d.measurementAudit=reconcileAudit(d.measurementAudit,f);
   if(d?.growthOps?.health?.issues){
@@ -86,6 +96,8 @@ function simplifiedPage(response){
 
 const truthNum=v=>Number.isFinite(Number(v))?Number(v):0;
 const truthMaybeNum=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
+const BUSINESS_TRUTH_CACHE_MS=120000;
+let businessTruthCache={at:0,value:null,promise:null};
 async function ccAssetJson(request,env,path,fallback){
   try{
     const url=new URL(path,request.url);
@@ -94,8 +106,8 @@ async function ccAssetJson(request,env,path,fallback){
     return await r.json();
   }catch{return fallback}
 }
-async function commandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,authorityRuntimeRow]=await Promise.all([
+async function buildCommandCenterBusinessTruth(request,env){
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -150,14 +162,6 @@ async function commandCenterBusinessTruth(request,env){
       FROM growth_execution_contract
       WHERE updated_at>=datetime('now','-12 hours') AND status IN ('pending','claimed','attempted','verified','human_required')
       ORDER BY updated_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
-    env.DB.prepare(`SELECT
-      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
-      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24,
-      (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days'))+
-      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-7 days')) attempts7d,
-      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) queue,
-      (SELECT COUNT(*) FROM growth_action_events WHERE status IN ('prepared','leased','issued') AND engine IN ('distribution_route','distribution_network','vendor_amplification')) prepared,
-      (SELECT COUNT(*) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_claimed`).first().catch(()=>null)
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -299,12 +303,12 @@ async function commandCenterBusinessTruth(request,env){
       verifiedBacklinks:truthNum(backlink.verified_backlinks),
       verifiedReferringDomains:truthNum(backlink.verified_referring_domains),
       bootstrapFloor:truthNum(backlink.bootstrap_referring_domain_floor),
-      attempts24h:truthMaybeNum(authorityRuntimeRow?.attempts24)??truthNum(backlink.attempts_24h),
-      attempts7d:truthMaybeNum(authorityRuntimeRow?.attempts7d)??truthNum(backlink.attempts_7d),
+      attempts24h:truthNum(backlink.attempts_24h),
+      attempts7d:truthNum(backlink.attempts_7d),
       attemptMin24h:truthNum(backlink.attempt_min_24h),
-      authorityQueue:truthMaybeNum(authorityRuntimeRow?.queue)??truthNum(backlink.authority_queue),
-      preparedActions:truthMaybeNum(authorityRuntimeRow?.prepared),
-      senderClaimed:truthMaybeNum(authorityRuntimeRow?.sender_claimed),
+      authorityQueue:truthNum(backlink.authority_queue),
+      preparedActions:null,
+      senderClaimed:null,
       lastVerifiedAt:backlink.last_verified_at||null,
       latestPlacementVerifiedAt:latestAuthorityPlacementAt,
       lastVerifiedAgeHours:backlink.last_verified_age_hours==null?null:Number(backlink.last_verified_age_hours),
@@ -363,10 +367,21 @@ async function commandCenterBusinessTruth(request,env){
     }
   };
 }
+async function commandCenterBusinessTruth(request,env,{fresh=false}={}){
+  const now=Date.now();
+  if(!fresh&&businessTruthCache.value&&now-businessTruthCache.at<BUSINESS_TRUTH_CACHE_MS)return businessTruthCache.value;
+  if(!fresh&&businessTruthCache.promise)return businessTruthCache.promise;
+  const work=buildCommandCenterBusinessTruth(request,env).then(value=>{businessTruthCache={at:Date.now(),value,promise:null};return value}).catch(error=>{businessTruthCache.promise=null;throw error});
+  businessTruthCache.promise=work;
+  return work;
+}
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth')return Response.json(await commandCenterBusinessTruth(request,env),{headers:{'Cache-Control':'no-store'}});
+    if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
+      const fresh=u.searchParams.get('fresh')==='1';
+      return Response.json(await commandCenterBusinessTruth(request,env,{fresh}),{headers:{'Cache-Control':'private, no-store, max-age=0','X-ToolScout-Read-Mode':fresh?'fresh':'observability-cache'}});
+    }
     if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
       ok:true,
       version:'business-truth-v4',
