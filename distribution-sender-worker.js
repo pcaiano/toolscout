@@ -218,10 +218,19 @@ export default {
         const refreshed=await base.fetch(refreshRequest,env,ctx);
         contactRefresh=refreshed.ok?await refreshed.json():{ok:false,http_status:refreshed.status};
       }catch(e){contactRefresh={ok:false,error:String(e?.message||e).slice(0,300)}}
-      const result=await publicCandidates(env,url.searchParams.get('limit'));
-      const replenish=!(result.items||[]).length&&Boolean(env.ADMIN_TOKEN);
-      if(replenish&&ctx?.waitUntil)ctx.waitUntil(replenishAuthorityPipeline(env).catch(()=>null));
-      return Response.json({...result,contact_refresh:contactRefresh,authority_replenishment_scheduled:replenish},{headers:JSON_HEADERS});
+      let result=await publicCandidates(env,url.searchParams.get('limit'));
+      let authority_replenishment=null,redispatch=null,retried_after_replenishment=false;
+      if(!(result.items||[]).length&&Boolean(env.ADMIN_TOKEN)){
+        authority_replenishment=await replenishAuthorityPipeline(env).catch(error=>({scheduled:false,error:String(error?.message||error).slice(0,300)}));
+        try{
+          const rr=await fetch('https://trytoolscout.org/api/growth/execution/dispatch',{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(30000)});
+          redispatch={ok:rr.ok,status:rr.status};
+        }catch(error){redispatch={ok:false,status:0,error:String(error?.message||error).slice(0,300)}}
+        const retry=await publicCandidates(env,url.searchParams.get('limit'));
+        retried_after_replenishment=true;
+        if((retry.items||[]).length)result=retry;
+      }
+      return Response.json({...result,contact_refresh:contactRefresh,authority_replenishment:authority_replenishment,redispatch,retried_after_replenishment},{headers:JSON_HEADERS});
     }
     if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
     return base.fetch(request,env,ctx);
