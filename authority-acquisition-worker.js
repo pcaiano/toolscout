@@ -192,6 +192,12 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/authority-sender-recovery-20260923'){
+      if(!env.ADMIN_TOKEN)return Response.json({ok:false,error:'admin_token_unavailable'},{status:503,headers:H});
+      const rr=await base.fetch(new Request(new URL('/api/distribution/vendor-amplification/public-candidates?limit=1',request.url),{method:'GET',headers:{Authorization:'Bearer '+env.ADMIN_TOKEN}}),env,ctx);
+      let body=null;try{body=await rr.json()}catch{}
+      return Response.json({ok:rr.ok,status:rr.status,body},{headers:H});
+    }
     if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
       return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
