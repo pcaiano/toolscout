@@ -191,7 +191,10 @@ export default {
     if (url.pathname === '/analytics/api/ga4-health') {
       return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
     }
-    if (request.method === 'GET' && (url.pathname === '/analytics/api/google/connect' || url.pathname === '/analytics/api/google/acquisition')) {
+    if (
+      (request.method === 'GET' && (url.pathname === '/analytics/api/google/connect' || url.pathname === '/analytics/api/google/acquisition')) ||
+      (request.method === 'POST' && url.pathname === '/analytics/api/google/disconnect')
+    ) {
       const forwarded = await validCommandCenterSession(request, env) ? withOwnerAccessHeader(request) : request;
       return base.fetch(forwarded, env, ctx);
     }
