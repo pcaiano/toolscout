@@ -9,6 +9,7 @@ import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
 import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates,executeCatalogGrowthTask,auditCatalogQualityBatch,catalogQualitySnapshot} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
+import {executeCloudflareSeoTask} from './seo-execution-runtime.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 
@@ -761,8 +762,16 @@ async function runGrowthExecutionContractCycle(env){
   const results={};
   let selectedInternalLane=null;
   try{
-    const next=await env.DB.prepare("SELECT executor FROM growth_execution_contract WHERE executor IN ('distribution_network','distribution_autonomous','content_issue','affiliate_cycle','catalog_cycle') AND status IN ('pending','stalled') ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT 1").first();
-    selectedInternalLane=String(next?.executor||'')||null;
+    const [contentState,contentReady]=await Promise.all([
+      env.DB.prepare("SELECT status FROM growth_supervisor_state WHERE engine='content' LIMIT 1").first().catch(()=>null),
+      env.DB.prepare("SELECT 1 ok FROM growth_execution_contract WHERE executor='content_issue' AND status IN ('pending','stalled') LIMIT 1").first().catch(()=>null)
+    ]);
+    if(contentState?.status==='execution_gap'&&contentReady?.ok){
+      selectedInternalLane='content_issue';
+    }else{
+      const next=await env.DB.prepare("SELECT executor FROM growth_execution_contract WHERE executor IN ('distribution_network','distribution_autonomous','content_issue','seo_cloudflare','affiliate_cycle','catalog_cycle') AND status IN ('pending','stalled') ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT 1").first();
+      selectedInternalLane=String(next?.executor||'')||null;
+    }
   }catch{}
 
   const runInternal=async(executor,fn)=>{
@@ -772,12 +781,16 @@ async function runGrowthExecutionContractCycle(env){
     try{
       const out=await fn(task);
       let supervisorProof={verified:0},attemptRecorded=false,directProof=null,deferred=null;
-      if(task?.source_kind==='supervisor'){
+      if(executor==='content_issue'&&out?.brief?.issued===true&&out?.brief?.execution_task_id===task?.task_id){
+        await markExecutorAttempt(env,executor,'content_brief_issued_waiting_for_publication',{taskIds:claim.taskIds});
+        attemptRecorded=true;
+        directProof={verified:false,pendingPublication:true,brief_id:out.brief.brief_id||null,growth_opportunity_key:out.brief.growth_opportunity_key||null};
+      }else if(executor==='seo_cloudflare'&&out?.verified===true&&out?.pathname){
+        directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
+      }else if(task?.source_kind==='supervisor'){
         await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
         attemptRecorded=true;
         supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v3',claim.taskIds);
-      }else if(executor==='content_issue'&&out?.brief?.issued===true&&out?.brief?.execution_task_id===task?.task_id){
-        directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'content_brief_task_specific_v3',externalId:out.brief.brief_id||null,evidence:{brief_id:out.brief.brief_id||null,growth_opportunity_key:out.brief.growth_opportunity_key||null}});
       }else if(executor==='catalog_cycle'&&out?.task?.verified===true&&task?.subject_type==='catalog_gap'){
         const related=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='catalog_cycle' AND subject_type='catalog_gap' AND subject_key=? AND status NOT IN ('verified','blocked','cancelled','human_required')`).bind(task.subject_key).all();
         const ids=(related.results||[]).map(x=>x.task_id);
@@ -802,6 +815,7 @@ async function runGrowthExecutionContractCycle(env){
   results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null};
 
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
+  if(selectedInternalLane==='seo_cloudflare')await runInternal('seo_cloudflare',(task)=>executeCloudflareSeoTask(env,task));
   if(selectedInternalLane==='affiliate_cycle')await runInternal('affiliate_cycle',(task)=>runAffiliateCoverageCycle(env,task));
   if(selectedInternalLane==='catalog_cycle')await runInternal('catalog_cycle',async(task)=>{
     if(task?.source_kind==='opportunity'&&task?.subject_type==='catalog_gap')return{task:await executeCatalogGrowthTask(env,task)};
@@ -811,13 +825,12 @@ async function runGrowthExecutionContractCycle(env){
   });
 
   const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_waiting_for_exact_published_reply'});
-  const seoClaim=await claimExecutorTasks(env,'seo_github',{limit:1,maxInFlight:1,result:'seo_github_waiting_for_exact_evidence'});
   results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
-  results.seo_github={claimed:seoClaim.claimed,external:true,task:seoClaim.tasks?.[0]||null};
+  if(!results.seo_cloudflare)results.seo_cloudflare={claimed:0,internal:true};
 
   const after=await reconcileExecutionContracts(env);
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,boundedExecution:{maxInternalLanesPerRun:1,selectedInternalLane,externalExecutorsClaimOnly:true,duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
+  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,boundedExecution:{maxInternalLanesPerRun:1,selectedInternalLane,externalExecutorsClaimOnly:true,seoExecutor:'cloudflare_internal',contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
 }
 async function runBoundedPublicExecutionReconcile(env){
   const synced=await syncExecutionContracts(env);
@@ -897,7 +910,7 @@ async function publicAudienceBrief(env){
 
 async function recordExternalExecutorStatus(env,body={}){
   const executor=String(body.executor||'');
-  if(!['audience_make','make_sender','seo_github'].includes(executor))return{ok:false,error:'unsupported_executor'};
+  if(!['audience_make','make_sender'].includes(executor))return{ok:false,error:'unsupported_executor'};
   let taskId=String(body.task_id||'').trim();
   if(!taskId){
     const q=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted') ORDER BY claimed_at DESC,priority_score DESC LIMIT 2`).bind(executor).all();
