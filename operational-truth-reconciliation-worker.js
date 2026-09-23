@@ -95,7 +95,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function commandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,authorityRuntimeRow]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,authorityRuntimeRow]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -146,6 +146,10 @@ async function commandCenterBusinessTruth(request,env){
       FROM growth_action_events
       WHERE created_at>=datetime('now','-12 hours')
       ORDER BY updated_at DESC,created_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT task_id,opportunity_key,subject_type,subject_key,action,executor,engine,status,claimed_at,attempted_at,updated_at
+      FROM growth_execution_contract
+      WHERE updated_at>=datetime('now','-12 hours') AND status IN ('pending','claimed','attempted','verified','human_required')
+      ORDER BY updated_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT
       (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
       (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24,
@@ -198,7 +202,10 @@ async function commandCenterBusinessTruth(request,env){
   const sitemap=reality?.sitemaps||{};
   const rawDaily28=Array.isArray(reality?.searchPerformance?.daily28)?reality.searchPerformance.daily28:[];
   const lisbonDate=(()=>{try{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const map=Object.fromEntries(parts.map(p=>[p.type,p.value]));return map.year+'-'+map.month+'-'+map.day}catch{return new Date().toISOString().slice(0,10)}})();
-  const daily28=rawDaily28.filter(row=>String(row?.date||'')<lisbonDate);
+  const completedDaily=rawDaily28.filter(row=>String(row?.date||'')<lisbonDate);
+  let lastEvidenceIndex=completedDaily.length-1;
+  while(lastEvidenceIndex>=0){const row=completedDaily[lastEvidenceIndex];if(truthNum(row?.impressions)>0||truthNum(row?.clicks)>0||truthNum(row?.position)>0)break;lastEvidenceIndex--}
+  const daily28=lastEvidenceIndex>=0?completedDaily.slice(0,lastEvidenceIndex+1):[];
   const aggregateDays=rows=>{
     const clicks=rows.reduce((a,x)=>a+truthNum(x?.clicks),0),impressions=rows.reduce((a,x)=>a+truthNum(x?.impressions),0);
     const weighted=rows.reduce((a,x)=>a+truthNum(x?.position)*truthNum(x?.impressions),0);
@@ -236,16 +243,28 @@ async function commandCenterBusinessTruth(request,env){
     trigger:x.trigger_name,
     detail:x.detail||null
   })).filter(x=>x.at).slice(0,14);
-  const growthActions=(actionPipelineRows||[]).map(x=>({
-    id:x.action_id,
-    at:x.updated_at||x.created_at,
-    createdAt:x.created_at,
-    engine:x.engine,
-    channel:x.channel,
-    status:x.status,
-    opportunityKey:x.opportunity_key,
-    targetUrl:x.target_url||null
-  })).filter(x=>x.at).slice(0,12);
+  const growthActions=[
+    ...(executionActionRows||[]).map(x=>({
+      id:x.task_id,
+      at:x.updated_at||x.attempted_at||x.claimed_at,
+      createdAt:x.claimed_at||x.updated_at,
+      engine:x.engine||x.executor||'growth',
+      channel:x.action||x.executor||'execution',
+      status:x.status,
+      opportunityKey:x.opportunity_key||[x.subject_type,x.subject_key].filter(Boolean).join(':'),
+      targetUrl:null
+    })),
+    ...(actionPipelineRows||[]).map(x=>({
+      id:x.action_id,
+      at:x.updated_at||x.created_at,
+      createdAt:x.created_at,
+      engine:x.engine,
+      channel:x.channel,
+      status:x.status,
+      opportunityKey:x.opportunity_key,
+      targetUrl:x.target_url||null
+    }))
+  ].filter(x=>x.at).sort((a,b)=>Date.parse(String(b.at).replace(' ','T')+'Z')-Date.parse(String(a.at).replace(' ','T')+'Z')).slice(0,16);
   const recentResults=[
     ...audienceRows.map(x=>({id:x.event_id,at:x.created_at,engine:x.event_type==='content_published'?'content':'audience',type:x.event_type,status:'verified',label:x.event_type==='content_published'?'Content published':'Audience reply published',detail:x.platform||'external publication',url:x.post_uri||null})),
     ...submissionRows.map(x=>({id:x.submission_id,at:x.at,engine:'distribution',type:'external_submission',status:x.status||'attempted',label:'External submission: '+String(x.surface_slug||'surface'),detail:x.error||('Attempt '+truthNum(x.attempts)),url:x.response_url||null})),
