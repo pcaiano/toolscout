@@ -8,14 +8,15 @@ function jsonHeaders(response){
   return h;
 }
 async function facts(env){
-  const [oauth,authority]=await Promise.all([
+  const [oauth,authority,content]=await Promise.all([
     env.DB.prepare(`SELECT provider,updated_at,last_refresh_at,last_error
       FROM google_oauth_connections WHERE provider='google_analytics' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT
       (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
-      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24`).first().catch(()=>null)
+      (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24`).first().catch(()=>null),
+    env.DB.prepare(`SELECT status,directive,last_evaluated_at FROM growth_supervisor_state WHERE engine='content' LIMIT 1`).first().catch(()=>null)
   ]);
-  return {ga4Connected:Boolean(oauth?.provider==='google_analytics'),authorityAttempts24:Number(authority?.attempts24||0)};
+  return {ga4Connected:Boolean(oauth?.provider==='google_analytics'),authorityAttempts24:Number(authority?.attempts24||0),contentStatus:content?.status||null,contentDirective:content?.directive||null,contentEvaluatedAt:content?.last_evaluated_at||null};
 }
 function keepIssue(issue,f){
   const metric=String(issue?.metric||'');
@@ -28,8 +29,13 @@ function reconcileAudit(a,f){
   const issues=(Array.isArray(a.issues)?a.issues:[]).filter(x=>keepIssue(x,f));
   const sources={...(a.sources||{})};
   if(f.ga4Connected)sources.ga4={status:'live_on_demand',generated_at:new Date().toISOString(),age_minutes:0,source:'Google Analytics 4 Data API via OAuth'};
+  const engines={...(a.engines||{})};
+  if(f.contentStatus==='execution_gap'&&engines.content){
+    engines.content={...engines.content,status:'degraded',detail:`Growth Brain content execution gap: ${f.contentDirective||'publication overdue'}`,supervisor_evaluated_at:f.contentEvaluatedAt};
+    if(!issues.some(x=>x?.metric==='engine:content'))issues.push({metric:'engine:content',severity:'error',reason:'execution_gap'});
+  }
   const status=issues.some(x=>x?.severity==='error')?'degraded':issues.length?'warning':'healthy';
-  return {...a,status,issues,sources};
+  return {...a,status,issues,sources,engines};
 }
 async function reconcile(response,env){
   if(!response?.ok||!String(response.headers.get('Content-Type')||'').toLowerCase().includes('application/json'))return response;
@@ -42,7 +48,7 @@ async function reconcile(response,env){
     d.growthOps={...d.growthOps,health:{...d.growthOps.health,issues}};
   }
   if(d.resilientCommandCenter&&d.measurementAudit)d.resilientCommandCenter={...d.resilientCommandCenter,integrityStatus:d.measurementAudit.status};
-  d.operationalTruthReconciliation={version:'live-runtime-v1',ga4Connected:f.ga4Connected,authorityAttempts24:f.authorityAttempts24,authorityThroughputHealthy:f.authorityAttempts24>=6,generatedAt:new Date().toISOString()};
+  d.operationalTruthReconciliation={version:'live-runtime-v1',ga4Connected:f.ga4Connected,authorityAttempts24:f.authorityAttempts24,authorityThroughputHealthy:f.authorityAttempts24>=6,contentStatus:f.contentStatus,generatedAt:new Date().toISOString()};
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:jsonHeaders(response)});
 }
 
