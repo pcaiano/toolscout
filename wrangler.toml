@@ -74,7 +74,7 @@ run_worker_first = [
 GA4_PROPERTY_ID = "554080029"
 
 [triggers]
-crons = ["15 * * * *", "35 3 * * *"]
+crons = ["* * * * *", "15 * * * *", "35 3 * * *"]
 
 [[d1_databases]]
 binding = "DB"
