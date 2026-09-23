@@ -1,5 +1,6 @@
 import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
 import {normalizeAffiliateState} from './affiliate-operations.js';
+import {publicMergedTools} from './catalog-autonomy-worker.js';
 
 const MAX_TOOLS_PER_CYCLE=8;
 const MAX_CANDIDATES_PER_TOOL=8;
@@ -58,7 +59,7 @@ function publisherAffiliateEvidence(page){
   return !serviceOnly&&(publisherFit||economics);
 }
 async function boundedFetch(url){const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);try{const r=await fetch(url,{method:'GET',redirect:'follow',headers:{'User-Agent':'ToolScout-Affiliate-Coverage/1.0 (+https://trytoolscout.org/)'},signal:ctl.signal});if(!r.ok)return null;const type=r.headers.get('content-type')||'';if(!type.includes('text/html')&&!type.includes('text/plain'))return null;const text=(await r.text()).slice(0,600000),final=publicHttpUrl(r.url);if(!final)return null;return {url:final.href,html:text,text:stripHtml(text)}}catch{return null}finally{clearTimeout(timer)}}
-async function loadTools(env){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/tools.json'));return r.ok?await r.json():[]}catch{return []}}
+async function loadTools(env){try{return await publicMergedTools(env)}catch{try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/tools.json'));return r.ok?await r.json():[]}catch{return []}}}
 async function loadAffiliateRegistry(env){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/affiliate.json'));return r.ok?await r.json():{}}catch{return {}}}
 async function reconcileProductionAffiliateRoutes(env){
   const registry=await loadAffiliateRegistry(env);
