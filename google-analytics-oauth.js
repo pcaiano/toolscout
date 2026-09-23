@@ -47,6 +47,16 @@ async function decryptText(env,value){
 function cookieValue(request,name){const raw=String(request?.headers?.get('Cookie')||'');const match=raw.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));return match?decodeURIComponent(match[1]):''}
 function oauthCookie(value,maxAge=OAUTH_TTL_SECONDS){return `${OAUTH_COOKIE}=${encodeURIComponent(value)}; Path=/api/google-analytics/callback; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`}
 function connectionCookie(value,maxAge=CONNECTION_TTL_SECONDS){return `${CONNECTION_COOKIE}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`}
+const COMMAND_CENTER_SESSION_COOKIE='toolscout_cc';
+const COMMAND_CENTER_SESSION_TTL_SECONDS=86400;
+async function digestHex(value){const digest=await crypto.subtle.digest('SHA-256',enc.encode(String(value||'')));return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('')}
+function commandCenterSessionBucket(now=Date.now()){return Math.floor(now/(COMMAND_CENTER_SESSION_TTL_SECONDS*1000))}
+async function commandCenterSessionCookie(env){
+  if(!env.ADMIN_TOKEN)return null;
+  const bucket=commandCenterSessionBucket();
+  const value=await digestHex(`toolscout-command-center:${env.ADMIN_TOKEN}:${bucket}`);
+  return `${COMMAND_CENTER_SESSION_COOKIE}=${encodeURIComponent(value)}; Path=/; Max-Age=${COMMAND_CENTER_SESSION_TTL_SECONDS}; HttpOnly; Secure; SameSite=Lax`;
+}
 function redirect(location,cookies=null){const headers=new Headers({Location:location,'Cache-Control':'no-store'});for(const cookie of (Array.isArray(cookies)?cookies:cookies?[cookies]:[]))headers.append('Set-Cookie',cookie);return new Response(null,{status:303,headers})}
 async function googleJson(url,token,init={}){const headers=new Headers(init.headers||{});headers.set('Authorization',`Bearer ${token}`);if(init.body)headers.set('Content-Type','application/json');const response=await fetch(url,{...init,headers});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(`google_api_${response.status}:${body?.error?.message||'request_failed'}`);return body}
 async function discoverPropertyId(token,measurementId){
@@ -109,7 +119,8 @@ export async function googleAnalyticsCallbackResponse(request,env){
     const fallbackPayload=await encryptText(env,JSON.stringify({ownerEmail:OWNER_EMAIL,propertyId,measurementId:config.measurementId,refreshTokenCiphertext:ciphertext,scopes,connectedAt,persistenceError,exp:Date.now()+CONNECTION_TTL_SECONDS*1000}));
     oauthAccessCache=null;
     const target=discoveryError?'/analytics?google=connected&property=unresolved':persistenceError?'/analytics?google=connected&storage=cookie':'/analytics?google=connected';
-    return redirect(target,[clear,connectionCookie(fallbackPayload)]);
+    const ccSession=await commandCenterSessionCookie(env);
+    return redirect(target,[clear,connectionCookie(fallbackPayload),...(ccSession?[ccSession]:[])]);
   }catch(error){return redirect(`/analytics?google=error&reason=${encodeURIComponent(String(error?.message||error).slice(0,160))}`,clear)}
 }
 export async function googleAnalyticsOAuthAccess(env,request=null){
