@@ -147,7 +147,6 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
-    if(request.method==='GET'&&u.pathname==='/api/distribution/authority/bootstrap-20260923-owner-authorized')return Response.json(await runVetted(env),{headers:H});
     if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
       if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
       return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
@@ -157,7 +156,7 @@ export default{
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
     if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
-    if(trigger==='15 * * * *'||trigger==='* * * * *'){
+    if(trigger==='15 * * * *'){
       const task=runVetted(env).catch(()=>null);
       if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }
