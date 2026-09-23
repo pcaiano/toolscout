@@ -126,7 +126,6 @@ async function runPrimaryCycle(env,ctx,trigger){
 
   const summary=Object.fromEntries(Object.entries(stages).map(([k,v])=>[k,k==='gsc'?{ok:Boolean(v?.ok),httpStatus:v?.ok?200:0,status:v?.status||null,reason:v?.reason||null}:compactStage(v)]));
   const failed=Object.entries(summary).filter(([,v])=>!v.ok).map(([k])=>k);
-  await recordRuntime(env,'primary_growth_cycle',failed.length?'failed':'completed',{trigger,executor:'cloudflare',failed,stages:summary});
   return {ok:failed.length===0,executor:'cloudflare',trigger,failed,stages:summary};
 }
 
@@ -190,14 +189,24 @@ export default{
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
-    // Preserve all existing Cloudflare-native scheduled handlers in the worker chain.
-    const inherited=typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
     if(trigger===HOURLY||trigger===DAILY){
-      const task=runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:trigger,singleFlightMinutes:50},()=>runPrimaryCycle(env,ctx,trigger)).catch(async error=>{
-        await recordRuntime(env,'primary_growth_cycle','failed',{trigger,executor:'cloudflare',error:String(error?.message||error).slice(0,1200)});
+      // One normal production path only. Refresh GSC first, execute the inherited
+      // Cloudflare-native engine chain once, then re-audit the supervisor.
+      return runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:trigger,singleFlightMinutes:50},async()=>{
+        const req=new Request('https://trytoolscout.org/api/runtime/cloudflare-primary-cycle');
+        const gsc=await runtimeGscRefresh(env,req);
+        let inherited=null;
+        if(typeof base.scheduled==='function')inherited=await base.scheduled(event,env,ctx);
+        const supervisorPost=await internalJson(req,env,ctx,'/api/growth/supervisor/audit');
+        const stages={
+          gsc:{ok:Boolean(gsc?.ok),status:gsc?.status||null,reason:gsc?.reason||null},
+          inherited:{ok:true,status:'completed'},
+          supervisorPost:compactStage(supervisorPost)
+        };
+        const failed=Object.entries(stages).filter(([,v])=>!v.ok).map(([k])=>k);
+        return {ok:failed.length===0,executor:'cloudflare',trigger,failed,stages};
       });
-      if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }
-    return inherited;
+    return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
   }
 };
