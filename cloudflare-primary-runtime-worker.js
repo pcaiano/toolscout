@@ -83,21 +83,22 @@ export async function runtimeGscRefresh(env,request){
   }
   const endDate=isoDate(new Date()),startDate=addDays(endDate,-27),recentStart=addDays(endDate,-6),previousEnd=addDays(recentStart,-1),previousStart=addDays(previousEnd,-6);
   try{
-    const [pagesJson,recentJson,previousJson,sitemapsJson]=await Promise.all([
+    const [pagesJson,dailyJson,recentJson,previousJson,sitemapsJson]=await Promise.all([
       gscQuery(access.token,startDate,endDate,['page']),
+      gscQuery(access.token,startDate,endDate,['date']),
       gscQuery(access.token,recentStart,endDate,['date']),
       gscQuery(access.token,previousStart,previousEnd,['date']),
       googleGscJson(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(GSC_PROPERTY)}/sitemaps`,access.token)
     ]);
     const pages=(pagesJson.rows||[]).map(r=>({page:String(r.keys?.[0]||''),clicks:Number(r.clicks||0),impressions:Number(r.impressions||0),ctr:Number((Number(r.ctr||0)*100).toFixed(4)),position:Number(Number(r.position||0).toFixed(4))})).filter(x=>x.page.includes('trytoolscout.org')).sort((a,b)=>b.impressions-a.impressions);
-    const siteTotals=aggregateRows(pagesJson.rows||[]),recent7={startDate:recentStart,endDate,...aggregateRows(recentJson.rows||[])},previous7={startDate:previousStart,endDate:previousEnd,...aggregateRows(previousJson.rows||[])};
+    const siteTotals=aggregateRows(pagesJson.rows||[]),daily28=(dailyJson.rows||[]).map(r=>({date:String(r.keys?.[0]||''),clicks:Number(r.clicks||0),impressions:Number(r.impressions||0),ctr:Number((Number(r.ctr||0)*100).toFixed(4)),position:Number(Number(r.position||0).toFixed(4))})).filter(x=>x.date),recent7={startDate:recentStart,endDate,...aggregateRows(recentJson.rows||[])},previous7={startDate:previousStart,endDate:previousEnd,...aggregateRows(previousJson.rows||[])};
     let prior={};try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/gsc-search-reality.json'));if(r.ok)prior=await r.json()}catch{}
     const generatedAt=new Date().toISOString();
     const signals={generatedAt,source:'Google Search Console API via Cloudflare OAuth',property:GSC_PROPERTY,dataState:'all',includesFreshData:true,startDate,endDate,siteTotals,pageCount:pages.length,pages};
     const reality={
       ...prior,generatedAt,source:'Google Search Console API via Cloudflare OAuth',property:GSC_PROPERTY,
       authorizationScope:GSC_SCOPE,
-      searchPerformance:{...(prior.searchPerformance||{}),window28d:{startDate,endDate,...siteTotals},recent7,previous7,change7d:{clicksPct:deltaPct(recent7.clicks,previous7.clicks),impressionsPct:deltaPct(recent7.impressions,previous7.impressions),positionDelta:Number((recent7.position-previous7.position).toFixed(4))},observedPages:pages.length},
+      searchPerformance:{...(prior.searchPerformance||{}),window28d:{startDate,endDate,...siteTotals},daily28,recent7,previous7,change7d:{clicksPct:deltaPct(recent7.clicks,previous7.clicks),impressionsPct:deltaPct(recent7.impressions,previous7.impressions),positionDelta:Number((recent7.position-previous7.position).toFixed(4))},observedPages:pages.length},
       sitemaps:{...(prior.sitemaps||{}),apiOk:true,submittedCount:(sitemapsJson.sitemap||[]).length,items:(sitemapsJson.sitemap||[]).map(x=>({path:x.path||null,lastSubmitted:x.lastSubmitted||null,lastDownloaded:x.lastDownloaded||null,isPending:Boolean(x.isPending),warnings:Number(x.warnings||0),errors:Number(x.errors||0)}))},
       runtime:{executor:'cloudflare',freshSearchPerformance:true,indexInspectionPreservedFromPriorSnapshot:true}
     };
