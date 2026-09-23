@@ -85,6 +85,7 @@ function simplifiedPage(response){
 
 
 const truthNum=v=>Number.isFinite(Number(v))?Number(v):0;
+const truthMaybeNum=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
 async function ccAssetJson(request,env,path,fallback){
   try{
     const url=new URL(path,request.url);
@@ -186,9 +187,9 @@ async function commandCenterBusinessTruth(request,env){
       impressions:truthNum(w.impressions||gh?.impressions),
       clicks:truthNum(w.clicks||gh?.clicks),
       observedPages:truthNum(gsc?.searchPerformance?.observedPages||gh?.observedPages),
-      indexed:truthNum(idx.indexed),
-      inspected:truthNum(idx.inspected),
-      indexRecoveryCandidates:truthNum(idx.recoveryCandidates||idx.indexRecoveryCandidates),
+      indexed:truthMaybeNum(idx.indexed),
+      inspected:truthMaybeNum(idx.inspected),
+      indexRecoveryCandidates:truthMaybeNum(idx.recoveryCandidates??idx.indexRecoveryCandidates),
       sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps)
     },
     executionContract:contract,
