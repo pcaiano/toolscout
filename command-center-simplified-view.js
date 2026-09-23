@@ -41,8 +41,8 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </main>
 </div>
 <script>
-const endpoints={stats:'/analytics/api/stats',queue:'/analytics/api/chairman-queue',supervisor:'/api/growth/supervisor/public',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health'};
-let data={stats:null,queue:null,supervisor:null,runtime:null,authority:null};
+const endpoints={stats:'/analytics/api/stats',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health'};
+let data={stats:null,queue:null,truth:null,runtime:null,authority:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const n=v=>Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable';
 const dec=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'Unavailable';
@@ -57,44 +57,45 @@ function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','a
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
 async function get(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{credentials:'same-origin',cache:'no-store'});if(!r.ok)throw new Error(String(r.status));return r.json()}
 function business(){
- const s=data.supervisor||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},b=s.backlinkAcquisition||{},g=s.gsc||{},aff=st.affiliateCoverageStatus||{};
- const ga=a.sessions||{},activeAff=aff?.active?.count,coverage=st?.growthOps?.engines?.affiliate?.weighted_coverage_pct;
+ const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
  let headline='Execution is running, but business results are not yet proven.';
  let detail='Growth Brain is prioritizing strict verified human acquisition and measurable downstream conversion.';
- if(Number(s.strictHumans24h)>0)headline='Verified humans are arriving. Conversion is now the next proof point.';
- if(Number(s.verifiedOutbound24h)>0)headline='Verified humans are reaching vendors. Monetization is the next proof point.';
- if(Number(s.monetizedOutbound24h)>0)headline='Monetized outbound is active. Scale only sources that preserve verified human quality.';
+ if(Number(g.strictHumans24h)>0)headline='Verified humans are arriving. Conversion is now the next proof point.';
+ if(Number(g.verifiedOutbound24h)>0)headline='Verified humans are reaching vendors. Monetization is now the next proof point.';
+ if(Number(g.monetizedOutbound24h)>0)headline='Monetized outbound is active. Scale only sources that preserve verified human quality.';
  if(Number(r.confirmedRevenue||0)>0)headline='Confirmed revenue is now present. Focus on repeatable acquisition and monetized conversion.';
- document.getElementById('businessMeta').textContent='Supervisor '+dt(s?.growth?.lastEvaluatedAt||s.generatedAt);
+ document.getElementById('businessMeta').textContent='Business truth '+dt(t.generatedAt);
  document.getElementById('businessBody').innerHTML=
   '<div class="headline"><b>'+esc(headline)+'</b><span>'+esc(detail)+'</span></div>'+
   '<div class="metrics">'+
-   metric('Strict humans - 24h',s.strictHumans24h==null?'Unavailable':n(s.strictHumans24h),(s.strictHumans7d==null?'Unavailable':n(s.strictHumans7d))+' / 7d')+
-   metric('Verified outbound - 24h',s.verifiedOutbound24h==null?'Unavailable':n(s.verifiedOutbound24h),'Strict verified business funnel')+
-   metric('Monetized outbound - 24h',s.monetizedOutbound24h==null?'Unavailable':n(s.monetizedOutbound24h),'Verified monetized clicks')+
-   metric('Confirmed revenue',money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'No confirmed vendor evidence')+
-   metric('External executions - 24h',s.acquisitionExecutions24h==null?'Unavailable':n(s.acquisitionExecutions24h),(s.acquisitionExecutions7d==null?'Unavailable':n(s.acquisitionExecutions7d))+' / 7d')+
-   metric('Referring domains',b.verifiedReferringDomains==null?'Unavailable':n(b.verifiedReferringDomains),(b.bootstrapReferringDomainFloor==null?'':n(b.bootstrapReferringDomainFloor)+' bootstrap floor'))+
-   metric('Google impressions - 28d',g.impressions==null?'Unavailable':n(g.impressions),(g.clicks==null?'Unavailable':n(g.clicks))+' clicks')+
-   metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'':n(q.estimated_minutes)+' min estimated'))+
+   metric('Strict humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d')+
+   metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d')+
+   metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d')+
+   metric('External executions - 24h',n(g.externalExecutions24h),n(g.externalExecutions7d)+' / 7d')+
+   metric('Affiliate production routes',n(aff.productionRoutes),n(aff.pipelineActivePrograms)+' active programmes in pipeline')+
+   metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
+   metric('Confirmed revenue',r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected')+
+   metric('Needs you',q.total==null?'0':n(q.total),(q.estimated_minutes==null?'':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
-  '<div class="section"><div class="sectionTitle">Acquisition context</div>'+
-   row('GA4 sessions - 24h',ga.last24Hours==null?'Unavailable':n(ga.last24Hours),a.status==='connected'?'Canonical GA4 reporting population':'GA4 unavailable')+
-   row('GA4 sessions - MTD',ga.monthToDate==null?'Unavailable':n(ga.monthToDate),ga.dailyAverageMTD==null?'':dec(ga.dailyAverageMTD,1)+' average per day')+
-   row('Affiliate coverage',coverage==null?(activeAff==null?'Unavailable':n(activeAff)+' active routes'):dec(coverage,1)+'%',activeAff==null?'Observed monetization coverage':n(activeAff)+' active affiliate programmes')+
+  '<div class="section"><div class="sectionTitle">Business context</div>'+
+   (a.status==='connected'?row('GA4 sessions - 24h',n(ga.last24Hours),n(ga.monthToDate)+' MTD - canonical GA4 population'):'')+
+   row('Affiliate programme truth',n(aff.pipelineActivePrograms)+' active',n(aff.productionRoutes)+' live production routes - '+n(aff.pipelineTrackedPrograms)+' programmes tracked')+
+   row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
 }
 function brain(){
- const s=data.supervisor||{},eng=Array.isArray(s.engines)?s.engines:[],primary=eng.filter(x=>['distribution','content','audience','seo_geo_aio'].includes(x.engine));
- const growth=s.growth||{},body=[];
- body.push('<div class="headline"><b>'+esc(human(growth.directive||s.directive||'No current directive'))+'</b><span>Status '+esc(growth.status||s.status||'unavailable')+'. The Growth Brain should remain critical when verified humans are not arriving even if infrastructure is healthy.</span></div>');
+ const t=data.truth||{},eng=Array.isArray(t.engines)?t.engines:[],primary=eng.filter(x=>['distribution','content','audience','seo_geo_aio','affiliate','catalog'].includes(x.engine));
+ const growth=t.growth||{},body=[];
+ body.push('<div class="headline"><b>'+esc(human(growth.directive||'No current directive'))+'</b><span>Status '+esc(growth.status||'unavailable')+'. Infrastructure health and business performance are intentionally separate.</span></div>');
  for(const x of primary){
    body.push('<div class="engine"><div class="engineName">'+esc(human(x.engine))+'</div><div>'+pill(human(x.status||'unknown'),statusState(x.status))+'</div><div class="engineText">'+esc(human(x.directive||'No directive'))+'</div><div class="engineTime">'+esc(dt(x.lastEvaluatedAt))+'</div></div>');
  }
- const ec=s.executionContract||{};
- const architectureCount=s?.architectureEscalation?.openIncidents;
- body.push('<div class="section">'+row('Execution contract',n(ec.verified)+' verified',n(ec.missingExecutors)+' missing executors - '+n(ec.stalled)+' stalled')+row('Architecture incidents',architectureCount==null?'Unavailable':n(architectureCount),architectureCount==null?'Architecture source unavailable':(s?.architectureEscalation?.approvalRequired?'Approval required':'No architecture approval required'))+'</div>');
- document.getElementById('brainMeta').textContent='Evaluated '+dt(growth.lastEvaluatedAt||s.generatedAt);
+ const ec=t.executionContract||{},arch=t.architecture||{};
+ body.push('<div class="section">'+
+   row('Execution contract',n(ec.verified)+' verified',n(ec.missingExecutors)+' missing executors - '+n(ec.stalled)+' stalled - '+n(ec.inFlight)+' in flight')+
+   row('Architecture incidents',n(arch.openIncidents),arch.approvalRequired?'Approval required':'No architecture approval required')+
+   '</div>');
+ document.getElementById('brainMeta').textContent='Evaluated '+dt(growth.lastEvaluatedAt||t.generatedAt);
  document.getElementById('brainBody').innerHTML=body.join('');
 }
 function taskHtml(x){
@@ -125,40 +126,41 @@ function results(){
  document.getElementById('resultsBody').innerHTML=items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
 }
 function searchAuthority(){
- const s=data.supervisor||{},g=s.gsc||{},b=s.backlinkAcquisition||{},rt=data.runtime||{},rh=rt.seo?.gscRuntimeHealth||{},targets=Array.isArray(s.topSearchTargets)?s.topSearchTargets.slice(0,5):[];
- const gAge=ageHours(rt.seo?.gscSignalsGeneratedAt||g.generatedAt),fresh=gAge!==null&&gAge<=36;
- document.getElementById('searchMeta').textContent='GSC '+(fresh?'fresh':'needs attention')+' - '+dt(rt.seo?.gscSignalsGeneratedAt||g.generatedAt);
+ const t=data.truth||{},g=t.search||{},b=t.authority||{},rt=data.runtime||{},rh=rt.seo?.gscRuntimeHealth||{};
+ document.getElementById('searchMeta').textContent='GSC refreshed '+dt(g.runtimeGeneratedAt||g.generatedAt);
  let html='<div class="metrics">'+
-  metric('Impressions - 28d',g.impressions==null?'Unavailable':n(g.impressions),(g.clicks==null?'Unavailable':n(g.clicks))+' clicks')+
-  metric('Indexed / inspected',(g.indexed==null||g.inspected==null)?'Unavailable':n(g.indexed)+' / '+n(g.inspected),n(g.indexRecoveryCandidates)+' recovery candidates')+
-  metric('Referring domains',b.verifiedReferringDomains==null?'Unavailable':n(b.verifiedReferringDomains),(b.verifiedBacklinks==null?'Unavailable':n(b.verifiedBacklinks))+' verified backlinks')+
-  metric('Authority attempts - 24h',b.attempts24h==null?'Unavailable':n(b.attempts24h),(b.attemptMin24h==null?'':n(b.attemptMin24h)+' minimum'))+
+  metric('Impressions - 28d',n(g.impressions),n(g.clicks)+' clicks')+
+  metric('Observed search pages',n(g.observedPages),g.indexed||g.inspected?n(g.indexed)+' indexed / '+n(g.inspected)+' inspected':'Live GSC pages')+
+  metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
+  metric('Authority attempts - 24h',n(b.attempts24h),n(b.attemptMin24h)+' minimum')+
  '</div>';
  html+='<div class="section">'+
-  row('Authority queue',b.authorityQueue==null?'Unavailable':n(b.authorityQueue),b.throughputGap?'Throughput below target':(b.stagnating?'Stagnating':'Throughput healthy'))+
-  row('GSC runtime',rh.status||'Unavailable',rh.ok?'Cloudflare refresh verified':'No fresh runtime proof')+
-  row('Last verified backlink',b.lastVerifiedAt?dt(b.lastVerifiedAt):'Unavailable',b.lastVerifiedAgeHours==null?'':dec(b.lastVerifiedAgeHours,1)+' hours ago')+
+  row('Authority queue',n(b.authorityQueue),b.throughputGap?'Throughput below target':(b.stagnating?'Stagnating':'Throughput healthy'))+
+  row('GSC runtime',g.runtimeStatus||rh.status||'Unavailable',(g.runtimeOk||rh.ok)?'Cloudflare refresh verified':'Search refresh needs attention')+
+  row('Index recovery candidates',n(g.indexRecoveryCandidates),g.inspected?n(g.indexed)+' / '+n(g.inspected)+' inspection pass':'Inspection snapshot unavailable')+
+  row('Last verified backlink',b.lastVerifiedAt?dt(b.lastVerifiedAt):'No recent verification',b.lastVerifiedAgeHours==null?'':dec(b.lastVerifiedAgeHours,1)+' hours ago')+
  '</div>';
- if(targets.length)html+='<div class="section"><div class="sectionTitle">Top observed search targets</div>'+targets.map(t=>row(t.title||t.path,n(t.impressions)+' impressions','Avg position '+dec(t.position,1)+' - '+(t.path||''))).join('')+'</div>';
  document.getElementById('searchBody').innerHTML=html;
 }
 function health(){
- const s=data.supervisor||{},rt=data.runtime||{},a=data.authority||{},issues=[];
- const ec=s.executionContract||{},arch=s.architectureEscalation||{},gsc=rt.seo?.gscRuntimeHealth||{};
+ const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},issues=[];
+ const ec=t.executionContract||{},arch=t.architecture||{},g=t.search||{},growth=t.growth||{};
  if(Number(ec.missingExecutors||0)>0)issues.push({level:'bad',title:'Missing execution contracts',detail:n(ec.missingExecutors)+' executor mappings are missing.'});
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
  if(Number(arch.openIncidents||0)>0)issues.push({level:'bad',title:'Architecture incidents',detail:n(arch.openIncidents)+' open architecture incidents.'});
- if(gsc.ok===false)issues.push({level:'bad',title:'GSC refresh failed',detail:gsc.reason||gsc.status||'Search evidence refresh failed.'});
+ if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
  if(a.status&&a.status!=='healthy')issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+a.status+'.'});
+ if(Number(growth.externalExecutions24h||0)<10)issues.push({level:'warn',title:'Acquisition execution below operating floor',detail:n(growth.externalExecutions24h)+' external executions in 24h. Floor is 10; target is 15.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh and authority loop have no current measurable failure.'});
  const rows=[
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
   ['GitHub Actions',rt.githubActions?.role||'Unavailable',rt.githubActions?.scheduledPrimary===false?'Fallback only':'Check scheduling role'],
-  ['GSC evidence',gsc.status||'Unavailable',gsc.generatedAt?dt(gsc.generatedAt):'No runtime timestamp'],
-  ['Authority',a.status||'Unavailable',(a.attempts24==null?'Unavailable':n(a.attempts24))+' attempts / 24h'],
-  ['Execution contract',n(ec.verified)+' verified',n(ec.ready)+' ready - '+n(ec.inFlight)+' in flight - '+n(ec.deferred)+' deferred']
+  ['GSC evidence',g.runtimeStatus||'Unavailable',g.runtimeGeneratedAt?dt(g.runtimeGeneratedAt):'No runtime timestamp'],
+  ['Authority',a.status||'Unavailable',n(a.attempts24)+' attempts / 24h'],
+  ['Execution contract',n(ec.verified)+' verified',n(ec.ready)+' ready - '+n(ec.inFlight)+' in flight - '+n(ec.deferred)+' deferred'],
+  ['Affiliate registry',n(t.affiliate?.productionRoutes)+' production routes',n(t.affiliate?.pipelineActivePrograms)+' active programmes - '+n(t.affiliate?.pipelineTrackedPrograms)+' tracked']
  ];
- document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Freshness is shown explicitly. Unavailable data is never converted to zero.</div>';
+ document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
 function render(){business();brain();queue();results();searchAuthority();health()}
 async function resolveTask(button){
