@@ -20,21 +20,47 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read Growth Brain supervisor
+      - name: Gate manual fallback against healthy Cloudflare runtime
         id: supervisor
         run: |
-          curl -fsS --retry 3 --retry-delay 2 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth-supervisor.json
-          node - <<'NODE'
+          set -euo pipefail
+          RUN=true
+          REASON=cloudflare_runtime_unavailable
+          if curl -fsS --connect-timeout 5 --max-time 15 https://trytoolscout.org/api/runtime/executors > /tmp/runtime.json; then
+            node - <<'NODE' > /tmp/runtime-gate.txt
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/runtime.json','utf8'));
+          const age=Date.now()-Date.parse(x.generatedAt||0);
+          const healthy=x?.status==='active' &&
+            x?.architecture==='cloudflare-primary-v1' &&
+            x?.primary?.scheduler==='cloudflare_cron' &&
+            x?.primary?.runtime==='cloudflare_workers' &&
+            x?.githubActions?.role==='fallback_only' &&
+            Number.isFinite(age) && age < 15*60*1000;
+          process.stdout.write(healthy?'healthy':'degraded');
+          NODE
+            if [ "$(cat /tmp/runtime-gate.txt)" = "healthy" ]; then
+              RUN=false
+              REASON=cloudflare_primary_healthy
+            else
+              REASON=cloudflare_primary_degraded
+            fi
+          fi
+
+          if [ "$RUN" = "true" ]; then
+            if curl -fsS --retry 2 --retry-delay 2 --connect-timeout 5 --max-time 20 https://trytoolscout.org/api/growth/supervisor/public > /tmp/growth-supervisor.json; then
+              node - <<'NODE'
           const fs=require('fs');
           const x=JSON.parse(fs.readFileSync('/tmp/growth-supervisor.json','utf8'));
           if(x?.brain!=='shared-growth-v3') throw new Error('growth_supervisor_unavailable');
           const seo=(x.directives||[]).find(d=>d.engine==='seo_geo_aio');
-          const growth=(x.directives||[]).find(d=>d.engine==='growth_brain');
-          const run=Boolean(seo?.directiveConfig?.run_executor);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`run=${run?'true':'false'}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`seo_status=${seo?.status||'unknown'}\n`);
-          console.log(JSON.stringify({northStar:x.northStar,growth:growth?.status,seo:seo?.status,directive:seo?.directive,run}));
+          console.log(JSON.stringify({northStar:x.northStar,seo:seo?.status,directive:seo?.directive,fallback:true}));
           NODE
+            fi
+          fi
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          echo "Fallback gate: run=$RUN reason=$REASON"
 
       - name: Refresh GSC evidence
         if: steps.supervisor.outputs.run == 'true'
