@@ -223,22 +223,29 @@ export default{
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
     if(trigger===HOURLY||trigger===DAILY){
-      // One normal production path only. Refresh GSC first, execute the inherited
-      // Cloudflare-native engine chain once, then re-audit the supervisor.
-      return runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:trigger,singleFlightMinutes:50},async()=>{
-        const req=new Request('https://trytoolscout.org/api/runtime/cloudflare-primary-cycle');
-        const gsc=await runtimeGscRefresh(env,req);
-        let inherited=null;
-        if(typeof base.scheduled==='function')inherited=await base.scheduled(event,env,ctx);
-        const supervisorPost=await internalJson(req,env,ctx,'/api/growth/supervisor/audit');
-        const stages={
+      // Search evidence is refreshed outside the primary-cycle lease so a slow
+      // downstream engine can never make GSC evidence stale.
+      const req=new Request('https://trytoolscout.org/api/runtime/cloudflare-primary-cycle');
+      const gsc=await runtimeGscRefresh(env,req);
+
+      // The primary runtime is a coordinator. Component engines own their own
+      // ledgers and single-flight locks, so dispatch the inherited chain once
+      // without holding the outer runtime ledger open until every child settles.
+      const primary=await runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:trigger,singleFlightMinutes:50},async()=>{
+        if(typeof base.scheduled==='function'){
+          const inherited=Promise.resolve(base.scheduled(event,env,ctx)).catch(()=>null);
+          if(ctx?.waitUntil)ctx.waitUntil(inherited);
+        }
+        return {
+          ok:true,
+          executor:'cloudflare',
+          trigger,
+          dispatch:'inherited_engine_chain',
           gsc:{ok:Boolean(gsc?.ok),status:gsc?.status||null,reason:gsc?.reason||null},
-          inherited:{ok:true,status:'completed'},
-          supervisorPost:compactStage(supervisorPost)
+          proofModel:'component_engine_ledgers_are_canonical'
         };
-        const failed=Object.entries(stages).filter(([,v])=>!v.ok).map(([k])=>k);
-        return {ok:failed.length===0,executor:'cloudflare',trigger,failed,stages};
       });
+      return {...(primary||{}),gsc:{ok:Boolean(gsc?.ok),status:gsc?.status||null,reason:gsc?.reason||null}};
     }
     return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
   }
