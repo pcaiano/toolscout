@@ -102,6 +102,11 @@ async function ensureSchema(env){
       disclosure_required INTEGER NOT NULL DEFAULT 1,policy_status TEXT NOT NULL DEFAULT 'unknown',evidence_url TEXT,evidence_detail TEXT,
       last_checked_at TEXT,created_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_social_evidence_registry(
+      tool_slug TEXT PRIMARY KEY,evidence_url TEXT NOT NULL,classification_hint TEXT NOT NULL,
+      evidence_note TEXT,active INTEGER NOT NULL DEFAULT 1,verified_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS social_affiliate_redirects(
       redirect_id TEXT PRIMARY KEY,tool_slug TEXT NOT NULL,platform TEXT,utm_campaign TEXT,user_agent_hash TEXT,country TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -168,6 +173,8 @@ async function refreshPolicies(env){
   const tools=await assetJson(env,'/data/tools.json',[]);
   const toolBySlug=new Map((Array.isArray(tools)?tools:[]).map(x=>[x.slug,x]));
   const activeRows=await env.DB.prepare(`SELECT tool_slug,status,program_url,application_url,evidence_json FROM affiliate_workflow WHERE status IN ('verified','active','earning','link_acquired') ORDER BY tool_slug`).all();
+  const evidenceRows=await env.DB.prepare(`SELECT tool_slug,evidence_url,classification_hint,evidence_note FROM affiliate_social_evidence_registry WHERE active=1`).all().catch(()=>({results:[]}));
+  const evidenceBySlug=new Map((evidenceRows.results||[]).map(x=>[x.tool_slug,x]));
   const rows=await env.DB.prepare(`SELECT tool_slug,last_checked_at FROM affiliate_social_policy`).all(),by=new Map((rows.results||[]).map(x=>[x.tool_slug,x]));
   const due=(activeRows.results||[]).filter(x=>{const r=by.get(x.tool_slug);if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).slice(0,MAX_POLICY_SCANS);
   let scanned=0,allowed=0,unknown=0,blocked=0;
@@ -176,7 +183,10 @@ async function refreshPolicies(env){
     const tool=toolBySlug.get(item.tool_slug)||{};
     const home=publicUrl(tool.sourceUrl||tool.website||tool.url);
     const direct=publicUrl(item.program_url);
+    const registered=evidenceBySlug.get(item.tool_slug)||null;
+    const registeredUrl=publicUrl(registered?.evidence_url);
     const candidates=[];
+    if(registeredUrl)candidates.push(registeredUrl.href);
     if(direct)candidates.push(direct.href);
     if(home){
       const homePage=await fetchText(home.href);
@@ -215,9 +225,12 @@ async function refreshPolicies(env){
     const text=pageTexts.map(p=>p.text).join(' ').slice(0,400000);
     const socialGeneral=SOCIAL_GENERAL.test(text),paidBan=PAID_ONLY_BAN.test(text),cloakBan=CLOAK_BAN.test(text),disclosure=DISCLOSURE.test(text);
     const signals=socialSignals(text);
-    const termsVerified=pageTexts.some(p=>TERMS_SIGNAL.test(p.text)||/(terms|conditions|agreement|policy|guidelines|rules|acceptable-use|affiliate-terms|program-terms|programme-terms|referral-agreement|legal\/affiliate)/i.test(String(p.url||'')));
+    const registryFetched=registeredUrl?pages.some(p=>{try{return new URL(p.url).href.replace(/\/$/,'')===registeredUrl.href.replace(/\/$/,'')}catch{return false}}):false;
+    const registryExplicit=registryFetched&&registered?.classification_hint==='explicit_social';
+    const registrySilent=registryFetched&&registered?.classification_hint==='silent_verified';
+    const termsVerified=registrySilent||pageTexts.some(p=>TERMS_SIGNAL.test(p.text)||/(terms|conditions|agreement|policy|guidelines|rules|acceptable-use|affiliate-terms|program-terms|programme-terms|referral-agreement|legal\/affiliate)/i.test(String(p.url||'')));
     let organic=null,directLink=null,redirect=null,status='terms_unverified',detail='No sufficiently complete official programme terms could be verified automatically.';
-    if(signals.explicit&&!signals.ban){
+    if((signals.explicit||registryExplicit)&&!signals.ban){
       organic=1;directLink=1;redirect=cloakBan?0:1;status=cloakBan?'explicit_allowed_direct_only':'explicit_allowed';
       detail=`Official programme material explicitly permits organic-social affiliate/referral-link promotion. Paid-social restriction: ${paidBan?'yes':'default_off'}. Redirect/cloaking restriction: ${cloakBan?'yes':'no'}.`;allowed++;
     }else if(!pages.length||!termsVerified){
@@ -234,7 +247,7 @@ async function refreshPolicies(env){
     await env.DB.prepare(`INSERT INTO affiliate_social_policy(tool_slug,organic_social_allowed,direct_affiliate_link_allowed,redirect_allowed,disclosure_required,policy_status,evidence_url,evidence_detail,last_checked_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET organic_social_allowed=excluded.organic_social_allowed,direct_affiliate_link_allowed=excluded.direct_affiliate_link_allowed,redirect_allowed=excluded.redirect_allowed,disclosure_required=excluded.disclosure_required,policy_status=excluded.policy_status,evidence_url=excluded.evidence_url,evidence_detail=excluded.evidence_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
-      .bind(item.tool_slug,organic,directLink,redirect,disclosure?1:1,status,pages[0]?.url||direct?.href||home?.href||null,safe(detail,1200)).run();
+      .bind(item.tool_slug,organic,directLink,redirect,disclosure?1:1,status,registryFetched?registeredUrl.href:(pages[0]?.url||direct?.href||home?.href||null),safe(detail+(registered?.evidence_note?` Evidence registry: ${registered.evidence_note}`:'') ,1200)).run();
   }
   return {scanned,allowed,unknown,blocked};
 }
