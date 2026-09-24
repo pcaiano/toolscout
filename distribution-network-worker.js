@@ -4,13 +4,13 @@ import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromReques
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const NETWORK_TYPES=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface)/i;
 const ROLE_PRIORITY=['editorial','editor','partnerships','partners','partner','submissions','submit','newsletter','press','media','growth','marketing','hello','contact'];
-const MAX_CANDIDATES_PER_CYCLE=48;
-const MAX_CONTACT_SCANS=16;
+const MAX_CANDIDATES_PER_CYCLE=16;
+const MAX_CONTACT_SCANS=6;
 const MAX_PAGES_PER_SITE=6;
 const COMMON_CONTACT_PATHS=['/contact','/contact-us','/submit','/submit-tool','/partners','/partnerships','/press','/media','/about'];
 const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets?|img|images|media|js|css|fonts|edge|storage)\.|(?:^|\.)(?:googleapis\.com|githubassets\.com|githubusercontent\.com|tailwindcss\.com)$/i;
 const ROUTE_PRIORITY={form:0,linkedin:1,x:2,bluesky:3,github:4};
-const MAX_ROUTE_ACTIONS_PER_CYCLE=32;
+const MAX_ROUTE_ACTIONS_PER_CYCLE=8;
 const ROUTE_CONTENT_RETRY_HOURS=72;
 const MAX_ROUTE_CONTENT_ATTEMPTS=2;
 let schemaReady=null;
