@@ -250,7 +250,7 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     ORDER BY n.priority_score DESC,a.updated_at ASC LIMIT 12`).all().catch(()=>({results:[]}));
   const catalogTools=await assetJson(env,'/data/tools.json',[]);
   const catalogBySlug=new Map((Array.isArray(catalogTools)?catalogTools:[]).map(x=>[x.slug,x]));
-  const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=(commercial.results||[]).map(x=>({...x,catalog:catalogBySlug.get(x.tool_slug)||null})),briefId=`brief_${crypto.randomUUID()}`;
+  const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=(commercial.results||[]).map(x=>{const catalog=catalogBySlug.get(x.tool_slug)||null;return{...x,catalog,tool_name:catalog?.name||x.tool_name}}),briefId=`brief_${crypto.randomUUID()}`;
   const profileBySlug=new Map(all.map(x=>[x.tool_slug,x]));
   const growthTools=[],growthRank=new Map();for(const x of growth.results||[]){if(!x.subject_key||growthRank.has(x.subject_key))continue;const row={...x,rank:growthTools.length};growthTools.push(row);growthRank.set(x.subject_key,{rank:row.rank,score:Number(x.priority_score||0),key:x.opportunity_key,type:x.subject_type});}
   const observedSprintRows=(sprintGrowth.results||[]).map(x=>{let signals={};try{signals=JSON.parse(x.signal_json||'{}')}catch{}return{...x,signals};});
