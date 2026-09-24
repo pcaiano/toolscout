@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "objective": "Continuously discover and execute additional free-first, automation-first acquisition plays beyond ToolScout's already-running baseline channels.",
+  "version": 2,
+  "objective": "Continuously acquire qualified human traffic from existing demand and borrowed audiences, convert that traffic into software decisions and monetized outbound, and reallocate resources only from measured outcomes.",
   "rules": {
     "netNewIdeasRequired": true,
     "automationFirst": true,
@@ -173,5 +173,26 @@
       ],
       "expectedSignal": "ga4_referral_sessions_from_proven_surfaces"
     }
-  ]
+  ],
+  "strategy": {
+    "id": "human-acquisition-v4",
+    "allocationPercent": {
+      "existingDemandSearch": 60,
+      "authorityVendorNetwork": 25,
+      "aiAeoDiscovery": 10,
+      "growthRnd": 5
+    },
+    "successChain": [
+      "ga4_sessions",
+      "strict_attributed_humans",
+      "verified_outbound",
+      "monetized_outbound",
+      "confirmed_revenue"
+    ],
+    "activityIsNotSuccess": true,
+    "competitiveAcquisitionGap": true,
+    "vendorAmplificationLoop": true,
+    "channelKillScale": true,
+    "boundedResourceUse": true
+  }
 }
