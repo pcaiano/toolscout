@@ -5,7 +5,8 @@ export const SOCIAL_PLATFORM_CAPABILITIES=Object.freeze({
   x:Object.freeze({publish:true,inbound_monitor:false,reply_write:false,reaction_write:false,attribution:true,audience_mode:'not_connected'}),
   bluesky:Object.freeze({publish:true,inbound_monitor:true,reply_write:true,reaction_write:false,attribution:true,audience_mode:'autonomous_reply'}),
   devto:Object.freeze({publish:true,inbound_monitor:true,reply_write:false,reaction_write:true,attribution:true,audience_mode:'monitor_and_human_reply'}),
-  pinterest:Object.freeze({publish:true,inbound_monitor:false,reply_write:false,reaction_write:false,attribution:true,audience_mode:'analytics_only'})
+  pinterest:Object.freeze({publish:true,inbound_monitor:false,reply_write:false,reaction_write:false,attribution:true,audience_mode:'analytics_only'}),
+  threads:Object.freeze({publish:true,inbound_monitor:true,reply_write:true,reaction_write:false,attribution:true,audience_mode:'autonomous_reply',mentions_read:true,keyword_search:true,insights:true})
 });
 
 export function socialPlatformCapabilityHealth(){
