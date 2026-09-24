@@ -120,8 +120,8 @@ async function ensureSchema(env){
 
 function outreachCopy(row){
   const name=safe(row.surface_name||row.domain,180);
-  const subject=`Free ToolScout software decision feed for ${name}`;
-  const body=`<p>Hello,</p><p>I'm Pedro Caiano from ToolScout. We publish independent software comparisons, buying guides and tool recommendations for people choosing software for a specific job.</p><p>We make the ToolScout decision feed and embeddable Finder, Compare and Pick components available free to publishers. There is no paid placement, reciprocal link or exclusivity requirement.</p><p>If this is useful for ${safe(name,180)}, the publisher kit is here:<br><a href="https://trytoolscout.org/distribution/publisher-kit">https://trytoolscout.org/distribution/publisher-kit</a></p><p>Decision feed:<br><a href="https://trytoolscout.org/api/distribution/feed.json">https://trytoolscout.org/api/distribution/feed.json</a></p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
+  const subject=`ToolScout publisher resources for ${name}`;
+  const body=`<p>Hello,</p><p>I'm Pedro Caiano from ToolScout. We publish independent software comparisons, buying guides and tool recommendations for people choosing software for a specific job.</p><p>We make our embeddable Finder, Compare and Pick components available free to publishers. There is no paid placement, reciprocal link or exclusivity requirement.</p><p>If this is useful for ${safe(name,180)}, the public publisher kit is here:<br><a href="https://trytoolscout.org/distribution/publisher-kit">https://trytoolscout.org/distribution/publisher-kit</a></p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
   return {subject,body};
 }
 
