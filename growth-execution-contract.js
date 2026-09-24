@@ -93,6 +93,40 @@ const READY_CAPS=Object.freeze({
   growth_supervisor:1
 });
 const GENERIC_BATCH_EXECUTORS=new Set(['distribution_network','distribution_autonomous','affiliate_cycle']);
+const MAKE_SENDER_READY_CONDITION=`(
+  (
+    growth_execution_contract.subject_type='tool'
+    AND EXISTS (
+      SELECT 1
+      FROM distribution_vendor_amplification v
+      WHERE v.tool_slug=growth_execution_contract.subject_key
+        AND v.status='contact_found'
+        AND v.contact_method='public_role_email'
+        AND v.contact_email IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1
+          FROM distribution_vendor_amplification prior
+          WHERE prior.status='sent'
+            AND prior.outreach_sent_at>=datetime('now','-30 days')
+            AND (
+              prior.tool_slug=v.tool_slug
+              OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,''))
+            )
+        )
+    )
+  )
+  OR
+  (
+    growth_execution_contract.subject_type='surface'
+    AND EXISTS (
+      SELECT 1
+      FROM distribution_network_outreach n
+      WHERE n.surface_slug=growth_execution_contract.subject_key
+        AND n.status='contact_found'
+        AND n.contact_email IS NOT NULL
+    )
+  )
+)`;
 const RECONCILE_ACTIVE_LIMIT=16;
 const RECONCILE_DEFERRED_PROOF_LIMIT=4;
 
@@ -358,6 +392,8 @@ export async function syncExecutionContracts(env){
 export async function rebalanceExecutionAdmission(env){
   await ensureExecutionContractSchema(env);
   const availability=await executionAvailability(env);
+  const senderTables=await first(env,`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN ('distribution_vendor_amplification','distribution_network_outreach')`);
+  const makeSenderReadinessAvailable=n(senderTables?.n)===2;
 
   const legacy=await env.DB.prepare(`UPDATE growth_execution_contract
     SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
@@ -376,6 +412,17 @@ export async function rebalanceExecutionAdmission(env){
       AND status IN ('pending','claimed','attempted','stalled')
       AND COALESCE(last_result,'') NOT LIKE 'executor_error:%'`).run();
 
+  let senderUnreadyReleased=0;
+  if(makeSenderReadinessAvailable){
+    const w=await env.DB.prepare(`UPDATE growth_execution_contract
+      SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+          claimed_at=NULL,attempted_at=NULL,last_result='make_sender_waiting_for_dispatch_evidence_v4',updated_at=datetime('now')
+      WHERE executor='make_sender'
+        AND status='pending'
+        AND NOT ${MAKE_SENDER_READY_CONDITION}`).run();
+    senderUnreadyReleased=Number(w?.meta?.changes||w?.changes||0);
+  }
+
   let unavailableReleased=0;
   if(availability?.seo_cloudflare?.available===false){
     const reason=String(availability.seo_cloudflare.reason||'github_actions_disabled').slice(0,600);
@@ -389,9 +436,10 @@ export async function rebalanceExecutionAdmission(env){
 
   const result={
     promoted:0,
-    deferred:Number(legacy?.meta?.changes||legacy?.changes||0)+Number(batchRelease?.meta?.changes||batchRelease?.changes||0)+unavailableReleased,
+    deferred:Number(legacy?.meta?.changes||legacy?.changes||0)+Number(batchRelease?.meta?.changes||batchRelease?.changes||0)+senderUnreadyReleased+unavailableReleased,
     legacyRequeued:Number(legacy?.meta?.changes||legacy?.changes||0),
     batchOpportunityReleased:Number(batchRelease?.meta?.changes||batchRelease?.changes||0),
+    senderUnreadyReleased,
     unavailableReleased,
     availability,
     executors:{}
@@ -407,7 +455,8 @@ export async function rebalanceExecutionAdmission(env){
     const inFlightRow=await first(env,`SELECT COUNT(*) n FROM growth_execution_contract WHERE executor=? AND status IN ('claimed','attempted')`,[executor]);
     const inFlight=n(inFlightRow?.n),readySlots=Math.max(0,cap-inFlight);
 
-    const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
+    const senderReadyWhere=executor==='make_sender'&&makeSenderReadinessAvailable?` AND ${MAKE_SENDER_READY_CONDITION}`:"";
+    const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":senderReadyWhere;
     const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC`).bind(executor).all();
     const pendingIds=(pending.results||[]).map(x=>x.task_id);
     const keep=pendingIds.slice(0,readySlots),demote=pendingIds.slice(readySlots);
@@ -421,7 +470,7 @@ export async function rebalanceExecutionAdmission(env){
     let promoted=0;
     const remaining=Math.max(0,readySlots-keep.length);
     if(remaining>0){
-      const deferredWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":"";
+      const deferredWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":senderReadyWhere;
       const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
