@@ -2,8 +2,8 @@ import base from './growth-runtime-integrity-worker.js';
 import {runWithLedger,missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
-const AUTHORITY_ATTEMPT_MIN_24H=15;
-const AUTHORITY_ATTEMPT_TARGET_24H=25;
+const AUTHORITY_ATTEMPT_MIN_24H=4;
+const AUTHORITY_ATTEMPT_TARGET_24H=8;
 const SENDER_HANDOFF_WARN_MINUTES=120;
 const SENDER_HANDOFF_TIMEOUT_MINUTES=300;
 const AUTHORITY_HEALTH_CACHE_MS=90000;
