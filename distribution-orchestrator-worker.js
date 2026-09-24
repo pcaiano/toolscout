@@ -243,7 +243,7 @@ async function coordinateGrowthOpportunities(env){
   const authorityUrgencyBoost=backlinkAcquisition?Math.min(22,(backlinkConfig.backlink_stagnating?14:0)+(backlinkConfig.backlink_throughput_gap?8:0)):0;
   const affiliateCap=Math.max(5,Math.min(45,Number(supervisor.get('affiliate')?.config?.priority_cap||45)));
   const catalogCap=Math.max(15,Math.min(55,Number(supervisor.get('catalog')?.config?.priority_cap||55)));
-  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,gscReality,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates]=await Promise.all([
+  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,gscReality,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates,strictSearchHumans]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.distribution_score,o.backlink_value,
       EXISTS(SELECT 1 FROM distribution_placements bp WHERE bp.surface_slug=o.surface_slug AND bp.backlink_verified=1) backlink_verified,
       l.evidence_grade,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,
@@ -296,7 +296,21 @@ async function coordinateGrowthOpportunities(env){
     growthAssetJson(env,'/reports/tool-profile-holds.json',{generatedAt:null,count:0,items:[]}),
     growthAssetJson(env,'/data/catalog-engine.json',{cadence:{freshnessTargetDays:7},coverage:{minimumToolsPerIntentCategory:5}}),
     growthAssetJson(env,'/data/tools.json',[]),
-    growthAssetJson(env,'/data/software-updates.json',{updatedAt:null,items:[]})
+    growthAssetJson(env,'/data/software-updates.json',{updatedAt:null,items:[]}),
+    growthRows(env,`SELECT
+        COALESCE(NULLIF(first_path,''),NULLIF(last_path,''),'/') path,
+        COUNT(DISTINCT session_id) strict_sessions_7d,
+        COUNT(DISTINCT CASE WHEN first_evidence_at>=datetime('now','-24 hours') THEN session_id END) strict_sessions_24h,
+        MAX(first_evidence_at) last_evidence_at
+      FROM traffic_human_evidence
+      WHERE first_evidence_at>=datetime('now','-7 days')
+        AND (
+          LOWER(COALESCE(referrer_host,'')) LIKE '%google.%'
+          OR LOWER(COALESCE(source,'')) LIKE 'ref:google%'
+        )
+      GROUP BY COALESCE(NULLIF(first_path,''),NULLIF(last_path,''),'/')
+      ORDER BY strict_sessions_7d DESC,last_evidence_at DESC
+      LIMIT 20`)
   ]);
   const inputFreshness={
     organicGrowth:{ageHours:assetAgeHours(organicGrowth?.generatedAt),fresh:false},
@@ -355,6 +369,44 @@ async function coordinateGrowthOpportunities(env){
     .filter(row=>row.impressions>=20&&row.position>10)
     .sort((a,b)=>b.priority-a.priority||b.impressions-a.impressions)
     .slice(0,20);
+  for(const row of strictSearchHumans||[]){
+    const path=String(row?.path||'/').split('?')[0]||'/';
+    if(!path.startsWith('/')||path==='/analytics'||path.startsWith('/api/'))continue;
+    const strict7=Math.max(0,Number(row?.strict_sessions_7d||0));
+    const strict24=Math.max(0,Number(row?.strict_sessions_24h||0));
+    if(strict7<1)continue;
+    const isNews=path.startsWith('/news/');
+    const key=`strict-search-human:${path}`.slice(0,480);
+    const priority=Math.min(100,88+Math.min(6,Math.max(0,strict7-1)*3)+(strict24>0?3:0));
+    const actions=['deepen_existing_search_asset','strengthen_internal_links','search_measurement'];
+    if(isNews)actions.push('content_amplification');
+    const signals={
+      lane:'strict_human_search_proof',
+      action:isNews?'compound_editorial_search_demand':'compound_proven_search_landing',
+      evidence_confidence:strict7>=3?'emerging_human_proof':'directional_human_proof',
+      source:'D1 strict-human acquisition evidence',
+      asset_path:path,
+      asset_url:'https://trytoolscout.org'+path,
+      content_type:isNews?'news_editorial':'search_landing',
+      strict_humans_7d:strict7,
+      strict_humans_24h:strict24,
+      last_strict_human_at:row?.last_evidence_at||null,
+      acquisition_source:'google_organic',
+      north_star:HUMAN_ACQUISITION_SPRINT.northStar,
+      acquisition_mode:'existing_demand_search',
+      learning:isNews?'news_can_capture_existing_google_demand':'landing_page_has_verified_google_human_demand',
+      sample_caution:true,
+      conversion_goal:'route_search_humans_to_relevant_decision_assets_without_reducing_editorial_quality'
+    };
+    growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
+      VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
+      ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
+      WHERE growth_opportunity_state.priority_score IS NOT excluded.priority_score
+         OR growth_opportunity_state.signal_json IS NOT excluded.signal_json
+         OR growth_opportunity_state.action_json IS NOT excluded.action_json
+         OR growth_opportunity_state.status IS NOT 'active'`).bind(key,'search',path,coordinatedGrowthPriority('search',priority,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));
+    activeKeys.push(key);active++;searchCount++;
+  }
   const authorityConcentrationRank=new Map(authorityConcentration.map((row,index)=>[row.pathname,index+1]));
   const searchBoostByTool=new Map();
   for(const op of searchOpportunities){
