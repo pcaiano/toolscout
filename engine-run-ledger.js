@@ -7,6 +7,9 @@ const CYCLE_OWNED_MISSIONS=new Map([
   ['growth:opportunity_coordination',{minutes:60,anchorMinute:15}]
 ]);
 const CYCLE_STALE_TAKEOVER_MINUTES=30;
+const MISSION_CYCLE_AT_HEADER='X-ToolScout-Scheduled-Cycle-At';
+const MISSION_CYCLE_OWNER_HEADER='X-ToolScout-Cycle-Owner';
+
 
 export function missionCycleContext(engine,mission,now=Date.now()){
   const spec=CYCLE_OWNED_MISSIONS.get(`${String(engine||'unknown')}:${String(mission||'unknown')}`);
@@ -22,6 +25,35 @@ export function missionCycleContext(engine,mission,now=Date.now()){
     startsAt:new Date(startMs).toISOString(),
     endsAt:new Date(endMs).toISOString()
   };
+}
+
+export function missionCycleHeaders(event,owner){
+  const scheduledTime=Number(event?.scheduledTime);
+  const at=new Date(Number.isFinite(scheduledTime)&&scheduledTime>0?scheduledTime:Date.now()).toISOString();
+  return {
+    [MISSION_CYCLE_AT_HEADER]:at,
+    [MISSION_CYCLE_OWNER_HEADER]:String(owner||'scheduled_runtime').slice(0,120)
+  };
+}
+
+export function missionCycleContextFromRequest(request,engine,mission){
+  const raw=request?.headers?.get?.(MISSION_CYCLE_AT_HEADER);
+  if(!raw)return null;
+  const at=Date.parse(raw);
+  return Number.isFinite(at)?missionCycleContext(engine,mission,at):null;
+}
+
+export function missionCycleOwnerFromRequest(request,fallback=null){
+  const owner=request?.headers?.get?.(MISSION_CYCLE_OWNER_HEADER);
+  return owner?String(owner).slice(0,120):(fallback==null?null:String(fallback).slice(0,120));
+}
+
+export function copyMissionCycleHeaders(fromRequest,toHeaders){
+  for(const name of [MISSION_CYCLE_AT_HEADER,MISSION_CYCLE_OWNER_HEADER]){
+    const value=fromRequest?.headers?.get?.(name);
+    if(value)toHeaders.set(name,value);
+  }
+  return toHeaders;
 }
 
 
