@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const src=fs.readFileSync(new URL('../growth-command-center-v2-worker.js',import.meta.url),'utf8');
-assert.match(src,/BACKLINK_ATTEMPT_MIN_24H=15/);
+assert.match(src,/BACKLINK_ATTEMPT_MIN_24H=4/);
 assert.match(src,/BACKLINK_STAGNATION_HOURS=24/);
 assert.match(src,/growth_rnd_frontier/);
 assert.match(src,/rnd_frontier_count/);
