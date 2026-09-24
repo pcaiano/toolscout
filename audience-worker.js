@@ -118,6 +118,7 @@ async function devCommentCandidates(env){
         article_title:safeText(article.title,240),
         article_url:safeText(article.url,500),
         comment_id:id,
+        reaction_id:Number.isInteger(Number(comment?.id))&&Number(comment.id)>0?Number(comment.id):null,
         actor_handle:actor,
         context_text:context,
         created_at:safeText(comment.created_at,80)
