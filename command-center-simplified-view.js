@@ -184,7 +184,7 @@ function taskHtml(x){
  const copy=(label,value)=>value?'<button class="btn" data-copy="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
  let payload='';
  if(x.prepared_body||x.prepared_title){payload='<details class="payload" '+(isReputation?'open':'')+'><summary>'+(isReputation?'Blocked email':'Prepared payload')+'</summary>'+(x.recipient?'<div class="taskText"><b>To:</b> '+esc(x.recipient)+'</div>':'')+(x.blocked_reasons?'<div class="taskText"><b>Blocked because:</b> '+esc(x.blocked_reasons)+'</div>':'')+(x.prepared_title?'<pre>'+esc(x.prepared_title)+'</pre>'+copy('Copy subject',x.prepared_title):'')+(x.prepared_body?'<pre>'+esc(x.prepared_body)+'</pre>'+copy('Copy body',x.prepared_body):'')+'</details>'}
- const reputationActions=isReputation?'<button class="btn danger" data-reputation="correct_block" data-kind="'+esc(x.reputation_kind||'')+'" data-key="'+esc(x.reputation_key||'')+'">Block correct</button><button class="btn" data-reputation="false_positive" data-kind="'+esc(x.reputation_kind||'')+'" data-key="'+esc(x.reputation_key||'')+'">False positive</button>':'';
+ const reputationActions=isReputation?'<button class="btn danger" data-reputation="correct_block" data-kind="'+esc(x.reputation_kind||'')+'" data-key="'+esc(x.reputation_key||'')+'">Block correct</button><button class="btn primary" data-reputation="false_positive" data-kind="'+esc(x.reputation_kind||'')+'" data-key="'+esc(x.reputation_key||'')+'">Send now + learn</button>':'';
  return '<div class="task"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id)+'</div><div class="taskMeta">'+esc(x.engine||'human gate')+' - '+esc(x.status||'ready')+' - about '+esc(x.estimated_minutes||0)+' min</div></div>'+pill(isReputation?'reputation review':(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate'),isReputation?'bad':'warn')+'</div>'+
   '<div class="taskText"><b>Do:</b> '+esc(x.instructions||x.reason||'Complete the linked external step.')+'</div>'+
   (x.expected_impact?'<div class="taskText"><b>Expected result:</b> '+esc(x.expected_impact)+'</div>':'')+payload+
@@ -258,7 +258,7 @@ function render(){business();trafficProgress();authorityProgress();gscProgress()
 async function reviewReputation(button){
  const kind=button.dataset.kind,key=button.dataset.key,verdict=button.dataset.reputation;
  if(!kind||!key||!verdict)return;
- const old=button.textContent;button.disabled=true;button.textContent='Saving';
+ const old=button.textContent;button.disabled=true;button.textContent=verdict==='false_positive'?'Sending…':'Saving';
  try{
   const r=await fetch('/analytics/api/reputation-review',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind,key,verdict})});
   const j=await r.json().catch(()=>({}));
