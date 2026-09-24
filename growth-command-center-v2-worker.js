@@ -862,9 +862,23 @@ async function reputationReview(request,env){
     }
     return Response.json({ok:false,error:'reputation_override_send_failed',http_status:dispatch.status,delivery_state:state?.status||'unknown'},{status:502,headers:JSON_H});
   }
-  const sent=await env.DB.prepare(`SELECT status,gmail_message_id,sent_at FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
-  if(sent?.status!=='sent_and_learned')return Response.json({ok:false,error:'reputation_override_not_confirmed',override_token:token},{status:502,headers:JSON_H});
-  return Response.json({ok:true,kind,key,verdict:'false_positive',status:sent.status,sent:true,learned:true,gmail_message_id:sent.gmail_message_id||null,sent_at:sent.sent_at||null},{headers:JSON_H});
+  let dispatchJson={};try{dispatchJson=JSON.parse(dispatchText||'{}')}catch{}
+  const gmailMessageId=String(dispatchJson.gmail_message_id||'').slice(0,300);
+  if(!gmailMessageId)return Response.json({ok:false,error:'reputation_override_missing_gmail_proof',override_token:token},{status:502,headers:JSON_H});
+  const hardIssues=new Set(['internal_api_url','internal_handoff_header','internal_runtime_identifier','raw_json_payload','unresolved_template_or_object','non_public_runtime_url']);
+  for(const issue of issues){
+    const scope=hardIssues.has(issue)?'exact_fingerprint':'template_issue';
+    const ruleKey=scope==='exact_fingerprint'?`${templateId}|${issue}|exact|${contentHash}`:`${templateId}|${issue}|template`;
+    await env.DB.prepare(`INSERT INTO outbound_reputation_learning(rule_key,template_id,issue_code,scope_type,content_hash,enabled,learned_at,source_override_token)
+      VALUES(?,?,?,?,?,1,datetime('now'),?)
+      ON CONFLICT(rule_key) DO UPDATE SET enabled=1,learned_at=datetime('now'),source_override_token=excluded.source_override_token`)
+      .bind(ruleKey,templateId,issue,scope,scope==='exact_fingerprint'?contentHash:null,token).run();
+  }
+  await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='sent_and_learned',sent_at=datetime('now'),gmail_message_id=?,error=NULL WHERE override_token=? AND status='validated'`).bind(gmailMessageId,token).run();
+  await env.DB.prepare(`UPDATE ${table} SET status='sent',attempts=attempts+1,outreach_sent_at=datetime('now'),outreach_error=NULL,updated_at=datetime('now') WHERE ${keyColumn}=? AND status='owner_override_dispatching'`).bind(key).run();
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at)
+    VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`repsend_${crypto.randomUUID()}`,'outbound_reputation_override_sent','completed','reputation_boundary',`${kind}:${key}`,`Owner-approved quarantined email sent immediately and reputation learning applied. Gmail message ${gmailMessageId}.`).run().catch(()=>{});
+  return Response.json({ok:true,kind,key,verdict:'false_positive',status:'sent_and_learned',sent:true,learned:true,gmail_message_id:gmailMessageId},{headers:JSON_H});
 }
 
 async function distributionHumanAction(request,env){
