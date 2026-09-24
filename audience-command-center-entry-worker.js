@@ -3,7 +3,7 @@ import base from './affiliate-human-action-entry-worker.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const SESSION_COOKIE='toolscout_cc';
 const SESSION_TTL_SECONDS=86400;
-const HUMAN_PLATFORMS=new Set(['x','linkedin']);
+const HUMAN_PLATFORMS=new Set(['x','linkedin','devto']);
 const HUMAN_ACTIONS=new Set(['completed','skipped']);
 const AUDIENCE_INGEST_TOKEN_SHA256='2cae5760a1a416aa3bbe14128c10539e157d527b1daa2f2a1df456c35099d770';
 
@@ -13,7 +13,7 @@ async function sessionValue(secret,bucket){return digestHex(`toolscout-command-c
 async function validSession(request,env){if(!env.ADMIN_TOKEN)return false;const cookie=request.headers.get('Cookie')||'';const match=cookie.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`));if(!match)return false;const supplied=decodeURIComponent(match[1]);const bucket=sessionBucket();for(const candidate of [bucket,bucket-1])if(supplied===await sessionValue(env.ADMIN_TOKEN,candidate))return true;return false;}
 async function validAudienceIngest(request){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(token&&(await digestHex(token))===AUDIENCE_INGEST_TOKEN_SHA256);}
 function safeText(v,n=2000){return String(v??'').slice(0,n);}
-function safeActionUrl(v,platform){try{const u=new URL(String(v||''));if(u.protocol!=='https:')return null;const h=u.hostname.toLowerCase().replace(/^www\./,'');if(platform==='linkedin'&&(h==='linkedin.com'||h.endsWith('.linkedin.com')))return u.toString();if(platform==='x'&&(h==='x.com'||h==='twitter.com'||h==='t.co'||h.endsWith('.x.com')||h.endsWith('.twitter.com')))return u.toString();return null;}catch{return null;}}
+function safeActionUrl(v,platform){try{const u=new URL(String(v||''));if(u.protocol!=='https:')return null;const h=u.hostname.toLowerCase().replace(/^www\./,'');if(platform==='linkedin'&&(h==='linkedin.com'||h.endsWith('.linkedin.com')))return u.toString();if(platform==='x'&&(h==='x.com'||h==='twitter.com'||h==='t.co'||h.endsWith('.x.com')||h.endsWith('.twitter.com')))return u.toString();if(platform==='devto'&&(h==='dev.to'||h.endsWith('.dev.to')))return u.toString();return null;}catch{return null;}}
 
 async function audienceSnapshot(env){
   try{
