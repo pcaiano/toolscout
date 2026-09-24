@@ -179,17 +179,18 @@ function brain(){
  document.getElementById('brainBody').innerHTML=body.join('');
 }
 function taskHtml(x){
- const url=safeUrl(x.action_url),canConfirm=x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status));
+ const url=safeUrl(x.action_url),isReputation=x.engine==='reputation',canConfirm=!isReputation&&(x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status)));
  const label=x.gate_key?'Mark done':x.editorial_queue_id?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
  const copy=(label,value)=>value?'<button class="btn" data-copy="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
  let payload='';
- if(x.prepared_body||x.prepared_title){payload='<details class="payload"><summary>Prepared payload</summary>'+(x.prepared_title?'<pre>'+esc(x.prepared_title)+'</pre>'+copy('Copy title',x.prepared_title):'')+(x.prepared_body?'<pre>'+esc(x.prepared_body)+'</pre>'+copy('Copy content',x.prepared_body):'')+'</details>'}
- return '<div class="task"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id)+'</div><div class="taskMeta">'+esc(x.engine||'human gate')+' - '+esc(x.status||'ready')+' - about '+esc(x.estimated_minutes||0)+' min</div></div>'+pill(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate','warn')+'</div>'+
+ if(x.prepared_body||x.prepared_title){payload='<details class="payload" '+(isReputation?'open':'')+'><summary>'+(isReputation?'Blocked email':'Prepared payload')+'</summary>'+(x.recipient?'<div class="taskText"><b>To:</b> '+esc(x.recipient)+'</div>':'')+(x.blocked_reasons?'<div class="taskText"><b>Blocked because:</b> '+esc(x.blocked_reasons)+'</div>':'')+(x.prepared_title?'<pre>'+esc(x.prepared_title)+'</pre>'+copy('Copy subject',x.prepared_title):'')+(x.prepared_body?'<pre>'+esc(x.prepared_body)+'</pre>'+copy('Copy body',x.prepared_body):'')+'</details>'}
+ const reputationActions=isReputation?'<button class="btn danger" data-reputation="correct_block" data-kind="'+esc(x.reputation_kind||'')+'" data-key="'+esc(x.reputation_key||'')+'">Block correct</button><button class="btn" data-reputation="false_positive" data-kind="'+esc(x.reputation_kind||'')+'" data-key="'+esc(x.reputation_key||'')+'">False positive</button>':'';
+ return '<div class="task"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id)+'</div><div class="taskMeta">'+esc(x.engine||'human gate')+' - '+esc(x.status||'ready')+' - about '+esc(x.estimated_minutes||0)+' min</div></div>'+pill(isReputation?'reputation review':(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate'),isReputation?'bad':'warn')+'</div>'+
   '<div class="taskText"><b>Do:</b> '+esc(x.instructions||x.reason||'Complete the linked external step.')+'</div>'+
   (x.expected_impact?'<div class="taskText"><b>Expected result:</b> '+esc(x.expected_impact)+'</div>':'')+payload+
-  '<div class="taskActions">'+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+copy('Copy steps',x.instructions||x.reason||'')+
+  '<div class="taskActions">'+reputationActions+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+copy('Copy steps',x.instructions||x.reason||'')+
   (canConfirm?'<button class="btn" data-resolve="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status||'')+'" data-gate="'+esc(x.gate_key||'')+'">'+esc(label)+'</button>':'')+
-  (x.engine==='distribution'?'<button class="btn danger" data-resolve="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+'</div></div>';
+  (!isReputation&&x.engine==='distribution'?'<button class="btn danger" data-resolve="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+'</div></div>';
 }
 function queue(){
  const q=data.queue||data?.stats?.growthOps?.chairmanQueue||{items:[],total:0,estimated_minutes:0};
@@ -254,6 +255,17 @@ function health(){
  document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
 function render(){business();trafficProgress();authorityProgress();gscProgress();brain();queue();results();searchAuthority();health()}
+async function reviewReputation(button){
+ const kind=button.dataset.kind,key=button.dataset.key,verdict=button.dataset.reputation;
+ if(!kind||!key||!verdict)return;
+ const old=button.textContent;button.disabled=true;button.textContent='Saving';
+ try{
+  const r=await fetch('/analytics/api/reputation-review',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind,key,verdict})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||j.ok===false)throw new Error(j.error||'review_failed');
+  data.queue=await get(endpoints.queue);queue();health();
+ }catch(e){button.textContent='Save failed';setTimeout(()=>{button.disabled=false;button.textContent=old},1500)}
+}
 async function resolveTask(button){
  const engine=button.dataset.engine,id=button.dataset.id,action=button.dataset.resolve,status=button.dataset.status||'',gate=button.dataset.gate||'';
  if(!engine||!id||!action)return;const old=button.textContent;button.disabled=true;button.textContent='Saving';
@@ -269,6 +281,7 @@ async function resolveTask(button){
 }
 document.addEventListener('click',e=>{
  const c=e.target.closest('[data-copy]');if(c){e.preventDefault();const old=c.textContent,value=decodeURIComponent(c.dataset.copy||'');navigator.clipboard.writeText(value).then(()=>{c.textContent='Copied';setTimeout(()=>c.textContent=old,1200)}).catch(()=>{c.textContent='Copy failed';setTimeout(()=>c.textContent=old,1500)});return}
+ const rep=e.target.closest('[data-reputation]');if(rep){e.preventDefault();reviewReputation(rep);return}
  const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
 });
 const FAST_KEYS=['queue','runtime','authority'];
