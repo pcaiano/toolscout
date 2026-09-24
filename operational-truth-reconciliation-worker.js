@@ -111,7 +111,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,seRankingBacklinkTruth]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -166,6 +166,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       FROM growth_execution_contract
       WHERE updated_at>=datetime('now','-12 hours') AND status IN ('pending','claimed','attempted','verified','human_required')
       ORDER BY updated_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
+    ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]})
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -174,7 +175,12 @@ async function buildCommandCenterBusinessTruth(request,env){
   const backlink=cfg.backlink_acquisition||{};
   const authorityAttempts24=truthNum(backlink.attempts_24h);
   const authorityQueueNow=truthNum(backlink.authority_queue);
-  const authorityVerifiedDomains=truthNum(backlink.verified_referring_domains);
+  const internalAuthorityVerifiedDomains=truthNum(backlink.internal_verified_referring_domains??backlink.verified_referring_domains);
+  const seRankingObservedAt=seRankingBacklinkTruth?.observedAt||null;
+  const seRankingObservedMs=Date.parse(String(seRankingObservedAt||''));
+  const seRankingFresh=Number.isFinite(seRankingObservedMs)&&(Date.now()-seRankingObservedMs)<=168*3600000;
+  const seRankingReferringDomains=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.referringDomains):0;
+  const authorityVerifiedDomains=Math.max(truthNum(backlink.verified_referring_domains),internalAuthorityVerifiedDomains,seRankingReferringDomains);
   const authorityRequired=authorityVerifiedDomains<10||authorityQueueNow>0;
   const authorityThroughputGap=authorityRequired&&authorityAttempts24<AUTHORITY_POLICY_MIN_24H;
   const architecture=cfg.architecture_escalation||{};
@@ -247,6 +253,7 @@ async function buildCommandCenterBusinessTruth(request,env){
     }
     return {date:day,placements,backlinks,referringDomains:domains.size};
   });
+  if(authorityHistory.length){const last=authorityHistory[authorityHistory.length-1];last.referringDomains=Math.max(truthNum(last.referringDomains),authorityVerifiedDomains);}
   const latestAuthorityPlacementAt=(placementRows||[]).map(x=>x.first_verified_at||x.last_checked_at).filter(Boolean).sort().at(-1)||null;
   const growthActivity=(engineActivityRows||[]).map(x=>({
     at:x.completed_at||x.started_at,
@@ -296,7 +303,7 @@ async function buildCommandCenterBusinessTruth(request,env){
   else if(externalExecutions24h>=ACQUISITION_SURGE_MAX_24H){currentGrowthStatus='ineffective';currentGrowthDirective='stop_repetitive_activity_and_rotate_to_competitive_acquisition_gap'}
   return {
     ok:true,
-    version:'command-center-business-truth-v2',
+    version:'command-center-business-truth-v3',
     generatedAt:new Date().toISOString(),
     growth:{
       status:currentGrowthStatus,
@@ -328,7 +335,14 @@ async function buildCommandCenterBusinessTruth(request,env){
     authority:{
       required:authorityRequired,
       verifiedBacklinks:truthNum(backlink.verified_backlinks),
+      referringDomains:authorityVerifiedDomains,
       verifiedReferringDomains:authorityVerifiedDomains,
+      internalVerifiedReferringDomains:internalAuthorityVerifiedDomains,
+      seRankingReferringDomains,
+      seRankingBacklinks:seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.backlinks):null,
+      seRankingObservedAt:seRankingFresh?seRankingObservedAt:null,
+      referringDomainSource:seRankingFresh?'SE Ranking + internal verified ledger':'internal verified ledger',
+      reconciliationGap:Math.max(0,authorityVerifiedDomains-internalAuthorityVerifiedDomains),
       bootstrapFloor:truthNum(backlink.bootstrap_referring_domain_floor)||10,
       attempts24h:authorityAttempts24,
       attempts7d:truthNum(backlink.attempts_7d),
