@@ -233,6 +233,8 @@ function platformCase(alias='f'){
     WHEN lower(${alias}.source) LIKE '%utm_source=linkedin%' OR lower(COALESCE(${alias}.referrer_host,'')) LIKE '%linkedin.com%' THEN 'linkedin'
     WHEN lower(${alias}.source) LIKE '%utm_source=bluesky%' OR lower(COALESCE(${alias}.referrer_host,'')) IN ('bsky.app','bluesky.app') THEN 'bluesky'
     WHEN lower(${alias}.source) LIKE '%utm_source=x%' OR lower(COALESCE(${alias}.referrer_host,'')) IN ('x.com','twitter.com','t.co') THEN 'x'
+    WHEN lower(${alias}.source) LIKE '%utm_source=devto%' OR lower(COALESCE(${alias}.referrer_host,''))='dev.to' THEN 'devto'
+    WHEN lower(${alias}.source) LIKE '%utm_source=pinterest%' OR lower(COALESCE(${alias}.referrer_host,'')) IN ('pinterest.com','www.pinterest.com','pin.it') THEN 'pinterest'
     ELSE NULL END`;
 }
 
