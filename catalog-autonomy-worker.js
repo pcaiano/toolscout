@@ -302,7 +302,7 @@ export async function verifyBatch(env){
     ...regular.map(x=>x.tool)
   ].slice(0,MAX_VERIFY_PER_CYCLE);
   let checked=0,healthy=0,changed=0,suppressed=0,warnings=0;
-  for(const tool of chosen){
+  await mapLimit(chosen,2,async tool=>{
     const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     const staticVerifiedMs=staticVerified?Date.parse(/T/.test(staticVerified)?staticVerified:`${staticVerified}T00:00:00Z`):NaN;
     const staticVerificationFresh=Number.isFinite(staticVerifiedMs)&&Date.now()-staticVerifiedMs<=45*86400000;
@@ -336,7 +336,7 @@ export async function verifyBatch(env){
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status=excluded.source_status,http_status=excluded.http_status,final_url=excluded.final_url,fingerprint=COALESCE(excluded.fingerprint,catalog_runtime_state.fingerprint),pending_fingerprint=excluded.pending_fingerprint,change_confirmations=excluded.change_confirmations,content_changed=excluded.content_changed,broken_consecutive=excluded.broken_consecutive,quality_status=excluded.quality_status,static_last_verified=excluded.static_last_verified,last_checked_at=datetime('now'),last_change_at=excluded.last_change_at,updated_at=datetime('now')`)
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
-  }
+  });
   runtimeCache.at=0;
   return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_source_runtime',write_policy:'due_check_only'};
 }
