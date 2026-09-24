@@ -35,11 +35,16 @@ export function operatingDecision(row){
 export function priorityWeight(row,decision,{explorationSlot=false}={}){
   if(decision==='suspend')return 0;
   const learned=Math.max(0,Math.min(100,number(row?.learned_score,row?.distribution_score)));
+  const baseline=Math.max(0,Math.min(100,number(row?.baseline_score,row?.distribution_score)));
   const humans=strictHumanSessions(row);
-  if(explorationSlot)return 78;
-  if(decision==='scale')return Number(Math.min(100,96+Math.min(4,humans)).toFixed(2));
-  if(decision==='measure')return Number(Math.min(92,58+Math.min(24,humans*8)+learned*0.08).toFixed(2));
-  return Number(Math.min(72,24+learned*0.12).toFixed(2));
+  const humanGate=number(row?.human_required)>0||['human_action_required','auth_required','approval_required'].includes(String(row?.status||''));
+  let calculated;
+  if(explorationSlot)calculated=78;
+  else if(decision==='scale')calculated=Math.min(100,96+Math.min(4,humans));
+  else if(decision==='measure')calculated=Math.min(92,58+Math.min(24,humans*8)+learned*0.08);
+  else calculated=Math.min(72,24+learned*0.12);
+  if(humanGate)calculated=Math.max(calculated,baseline,learned,number(row?.distribution_score));
+  return Number(Math.min(100,calculated).toFixed(2));
 }
 
 function oldestFirst(a,b){
