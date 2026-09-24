@@ -59,6 +59,109 @@ async function ensureNetworkSchema(env){
   ]).catch(error=>{networkSchemaReady=null;throw error});
   return networkSchemaReady;
 }
+
+let reputationSchemaReady=null;
+async function ensureReputationSchema(env){
+  if(reputationSchemaReady)return reputationSchemaReady;
+  reputationSchemaReady=env.DB.batch([
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_overrides (
+      override_token TEXT PRIMARY KEY,
+      kind TEXT NOT NULL,
+      item_key TEXT NOT NULL,
+      recipient TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      body TEXT NOT NULL,
+      payload_hash TEXT NOT NULL,
+      content_hash TEXT NOT NULL,
+      issue_codes TEXT,
+      template_id TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      sent_at TEXT,
+      gmail_message_id TEXT,
+      error TEXT
+    )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_learning (
+      rule_key TEXT PRIMARY KEY,
+      template_id TEXT NOT NULL,
+      issue_code TEXT NOT NULL,
+      scope_type TEXT NOT NULL,
+      content_hash TEXT,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      learned_at TEXT NOT NULL DEFAULT (datetime('now')),
+      source_override_token TEXT
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_reputation_learning_lookup ON outbound_reputation_learning(template_id,issue_code,scope_type,enabled)`)
+  ]).catch(error=>{reputationSchemaReady=null;throw error});
+  return reputationSchemaReady;
+}
+const HARD_REPUTATION_ISSUES=new Set(['internal_api_url','internal_handoff_header','internal_runtime_identifier','raw_json_payload','unresolved_template_or_object','non_public_runtime_url']);
+async function reputationContentHash(subject,body){return sha256(`${String(subject||'').trim()}\n---BODY---\n${String(body||'').trim()}`)}
+async function reputationPayloadHash(to,subject,body){return sha256(`${String(to||'').trim().toLowerCase()}\n---SUBJECT---\n${String(subject||'').trim()}\n---BODY---\n${String(body||'').trim()}`)}
+async function applyLearnedReputationExceptions(env,review,{subject,body,template_id}){
+  if(!review?.issues?.length)return review;
+  await ensureReputationSchema(env);
+  const contentHash=await reputationContentHash(subject,body);
+  const q=await env.DB.prepare(`SELECT issue_code,scope_type,content_hash FROM outbound_reputation_learning
+    WHERE enabled=1 AND template_id=?`).bind(String(template_id||'')).all().catch(()=>({results:[]}));
+  const learned=new Set();
+  for(const row of q.results||[]){
+    if(!review.issues.includes(row.issue_code))continue;
+    if(row.scope_type==='template_issue')learned.add(row.issue_code);
+    else if(row.scope_type==='exact_fingerprint'&&row.content_hash===contentHash)learned.add(row.issue_code);
+  }
+  const issues=review.issues.filter(x=>!learned.has(x));
+  return {...review,approved:issues.length===0,issues,learned_exceptions:[...learned],content_hash:contentHash};
+}
+async function createReputationOverride(env,{kind,key,to,subject,body,issue_codes,template_id}){
+  await ensureReputationSchema(env);
+  const token=`repovr_${crypto.randomUUID()}`;
+  const payloadHash=await reputationPayloadHash(to,subject,body);
+  const contentHash=await reputationContentHash(subject,body);
+  await env.DB.prepare(`INSERT INTO outbound_reputation_overrides
+    (override_token,kind,item_key,recipient,subject,body,payload_hash,content_hash,issue_codes,template_id,status,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?, 'pending', datetime('now'))`)
+    .bind(token,kind,key,to,subject,body,payloadHash,contentHash,String(issue_codes||''),String(template_id||'')).run();
+  return {token,payloadHash,contentHash};
+}
+async function validateReputationOverride(request,env){
+  let b={};try{b=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_HEADERS})}
+  await ensureReputationSchema(env);
+  const token=String(b.override_token||'');
+  const row=await env.DB.prepare(`SELECT * FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
+  if(!row||row.status!=='pending')return Response.json({ok:false,error:'override_not_pending'},{status:409,headers:JSON_HEADERS});
+  const payloadHash=await reputationPayloadHash(b.to,b.subject,b.body);
+  if(payloadHash!==row.payload_hash||String(b.kind||'')!==row.kind||String(b.key||'')!==row.item_key)return Response.json({ok:false,error:'override_payload_mismatch'},{status:409,headers:JSON_HEADERS});
+  return Response.json({ok:true,override_token:token,kind:row.kind,key:row.item_key},{headers:JSON_HEADERS});
+}
+async function finalizeReputationOverride(request,env){
+  let b={};try{b=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_HEADERS})}
+  await ensureReputationSchema(env);
+  const token=String(b.override_token||''),gmailId=String(b.gmail_message_id||'').slice(0,300);
+  const row=await env.DB.prepare(`SELECT * FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
+  if(!row||row.status!=='pending')return Response.json({ok:false,error:'override_not_pending'},{status:409,headers:JSON_HEADERS});
+  const issues=String(row.issue_codes||'').split('|').filter(Boolean);
+  for(const issue of issues){
+    const scope=HARD_REPUTATION_ISSUES.has(issue)?'exact_fingerprint':'template_issue';
+    const ruleKey=scope==='exact_fingerprint'
+      ?`${row.template_id}|${issue}|exact|${row.content_hash}`
+      :`${row.template_id}|${issue}|template`;
+    await env.DB.prepare(`INSERT INTO outbound_reputation_learning(rule_key,template_id,issue_code,scope_type,content_hash,enabled,learned_at,source_override_token)
+      VALUES(?,?,?,?,?,1,datetime('now'),?)
+      ON CONFLICT(rule_key) DO UPDATE SET enabled=1,learned_at=datetime('now'),source_override_token=excluded.source_override_token`)
+      .bind(ruleKey,row.template_id,issue,scope,scope==='exact_fingerprint'?row.content_hash:null,token).run();
+  }
+  await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='sent_and_learned',sent_at=datetime('now'),gmail_message_id=?,error=NULL WHERE override_token=?`)
+    .bind(gmailId||null,token).run();
+  if(row.kind==='vendor'){
+    await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='sent',attempts=attempts+1,outreach_sent_at=datetime('now'),outreach_error=NULL,updated_at=datetime('now') WHERE tool_slug=? AND status='reputation_quarantine'`).bind(row.item_key).run().catch(()=>{});
+  }else if(row.kind==='network'){
+    await env.DB.prepare(`UPDATE distribution_network_outreach SET status='sent',attempts=attempts+1,outreach_sent_at=datetime('now'),outreach_error=NULL,updated_at=datetime('now') WHERE surface_slug=? AND status='reputation_quarantine'`).bind(row.item_key).run().catch(()=>{});
+  }
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at)
+    VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`repsend_${crypto.randomUUID()}`,'outbound_reputation_override_sent','completed','reputation_boundary',`${row.kind}:${row.item_key}`,`Owner-approved quarantined email sent immediately and filter learning applied. Gmail message ${gmailId||'recorded'}.`).run().catch(()=>{});
+  return Response.json({ok:true,sent:true,learned:true,override_token:token,gmail_message_id:gmailId||null},{headers:JSON_HEADERS});
+}
 function taggedOwned(value,{source,campaign,action,growth}){
   try{
     const u=new URL(String(value||''),'https://trytoolscout.org');
@@ -139,7 +242,8 @@ async function reputationCheck(request,env){
     if(contentType.includes('application/json'))b=await request.json();
     else{const form=await request.formData();b=Object.fromEntries([...form.entries()].map(([k,v])=>[k,String(v)]))}
   }catch{return Response.json({approved:false,contract:OUTBOUND_REPUTATION_CONTRACT,issues:['invalid_payload']},{status:400,headers:JSON_HEADERS})}
-  const result=evaluateOutboundReputation({to:b.to,subject:b.subject,body:b.body,mode:'manual_authorized',template_id:'manual_authorized'});
+  let result=evaluateOutboundReputation({to:b.to,subject:b.subject,body:b.body,mode:'manual_authorized',template_id:'manual_authorized'});
+  result=await applyLearnedReputationExceptions(env,result,{subject:b.subject,body:b.body,template_id:'manual_authorized'});
   if(!result.approved)await recordReputationBlock(env,{to:b.to,issues:result.issues,source:String(b.source||'manual_sender')});
   return Response.json(result,{status:result.approved?200:422,headers:JSON_HEADERS});
 }
@@ -243,7 +347,8 @@ async function publicCandidates(env,limit=8){
       }
 
       const copy=cordialOutreach(row);
-      const review=evaluateOutboundReputation({to:row.contact_email,subject:copy.suggested_subject,body:copy.suggested_body,mode:'autonomous',template_id:'vendor_reference_v23'});
+      let review=evaluateOutboundReputation({to:row.contact_email,subject:copy.suggested_subject,body:copy.suggested_body,mode:'autonomous',template_id:'vendor_reference_v23'});
+      review=await applyLearnedReputationExceptions(env,review,{subject:copy.suggested_subject,body:copy.suggested_body,template_id:'vendor_reference_v23'});
       if(!review.approved){
         await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='reputation_quarantine',outreach_error=?,updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(`reputation_boundary:${review.issues.join('|')}`.slice(0,1000),row.tool_slug,row.asset_url).run().catch(()=>{});
         await deferExecutionTask(env,task.task_id,'reputation_boundary_quarantine');
@@ -285,7 +390,8 @@ async function publicCandidates(env,limit=8){
       const kit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
       const subject=sanitizeExternalOutreachSubject(row.suggested_subject,row.domain);
       const body=sanitizeExternalOutreachBody(String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit));
-      const review=evaluateOutboundReputation({to:row.contact_email,subject,body,mode:'autonomous',template_id:'publisher_resources_v22'});
+      let review=evaluateOutboundReputation({to:row.contact_email,subject,body,mode:'autonomous',template_id:'publisher_resources_v22'});
+      review=await applyLearnedReputationExceptions(env,review,{subject,body,template_id:'publisher_resources_v22'});
       if(!review.approved){
         await env.DB.prepare(`UPDATE distribution_network_outreach SET status='reputation_quarantine',outreach_error=?,updated_at=datetime('now') WHERE surface_slug=?`).bind(`reputation_boundary:${review.issues.join('|')}`.slice(0,1000),row.surface_slug).run().catch(()=>{});
         await deferExecutionTask(env,task.task_id,'reputation_boundary_quarantine');
@@ -382,6 +488,8 @@ export default {
       return Response.json({...result,contact_refresh:contactRefresh,replenishment_required:!(result.items||[]).length},{headers:JSON_HEADERS});
     }
     if(url.pathname==='/api/distribution/outbound-reputation/check'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return reputationCheck(request,env);}
+    if(url.pathname==='/api/distribution/outbound-reputation/override-validate'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return validateReputationOverride(request,env);}
+    if(url.pathname==='/api/distribution/outbound-reputation/override-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return finalizeReputationOverride(request,env);}
     if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
     return base.fetch(request,env,ctx);
   },
