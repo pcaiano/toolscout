@@ -387,16 +387,20 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
   const mode=selected?'affiliate_social_verified':'editorial';
   const targetMode=selected?'direct_vendor':'editorial';
   let t=selected?{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}:(effectiveSprintTarget?editorialTargets(family,effectiveSprintTarget.subject_key,humanAcquisitionSprintActive()?'human_acquisition_sprint':'growth_supervisor_search_demand'):editorialTargets(family));
+  const ownedPinterestBase=effectiveSprintTarget?.subject_key
+    ?`https://trytoolscout.org${String(effectiveSprintTarget.subject_key).startsWith('/')?'':'/'}${effectiveSprintTarget.subject_key}`
+    :(selected?.tool_slug?`https://trytoolscout.org/tools/${selected.tool_slug}`:'https://trytoolscout.org/');
+  t.pinterest=ownedPinterestBase;
   const growthKey=effectiveSprintTarget?effectiveSprintTarget.opportunity_key:(selected?(growthRank.get(selected.tool_slug)?.key||`tool:${selected.tool_slug}`):(comparison?(growthRank.get(comparison[0])?.key||growthRank.get(comparison[1])?.key||null):(topGrowthProfile?(growthRank.get(topGrowthProfile.tool_slug)?.key||`tool:${topGrowthProfile.tool_slug}`):null)));
   let comparisonContext=null;
   if(comparison){
     const slug=`${comparison[0]}-vs-${comparison[1]}`;
     comparisonContext={slug,tool_a:comparison[0],tool_b:comparison[1]};
     const base=`https://trytoolscout.org/${slug}.html`,common='utm_medium=organic_social&utm_campaign=content_engine_v21&utm_content=wednesday_comparison';
-    t={linkedin:`${base}?utm_source=linkedin&${common}`,x:`${base}?utm_source=x&${common}`,bluesky:`${base}?utm_source=bluesky&${common}`};
+    t={linkedin:`${base}?utm_source=linkedin&${common}`,x:`${base}?utm_source=x&${common}`,bluesky:`${base}?utm_source=bluesky&${common}`,pinterest:`${base}?utm_source=pinterest&${common}`};
   }
   const tagOwned=(value,channel)=>{try{const u=new URL(String(value||''));if(u.hostname!=='trytoolscout.org')return value;u.searchParams.set('ts_action',`${briefId}:${channel}`);if(growthKey)u.searchParams.set('ts_growth',growthKey);u.searchParams.set('ts_channel',channel);return u.toString()}catch{return value}};
-  t={linkedin:tagOwned(t.linkedin,'linkedin'),x:tagOwned(t.x,'x'),bluesky:tagOwned(t.bluesky,'bluesky')};
+  t={linkedin:tagOwned(t.linkedin,'linkedin'),x:tagOwned(t.x,'x'),bluesky:tagOwned(t.bluesky,'bluesky'),pinterest:tagOwned((()=>{try{const u=new URL(String(t.pinterest||'https://trytoolscout.org/'));u.searchParams.set('utm_source','pinterest');u.searchParams.set('utm_medium','organic_social');u.searchParams.set('utm_campaign',humanAcquisitionSprintActive()?'human_acquisition_sprint':'content_engine_v21');u.searchParams.set('utm_content',family);return u.toString()}catch{return 'https://trytoolscout.org/'}})(),'pinterest')};
   const prompt=[
     `CONTENT ENGINE INTELLIGENCE BRIEF (${family})`,
     `Commercial mode: ${mode}.`,
@@ -410,7 +414,8 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     selected?'Disclosure required. Use plain, conspicuous wording such as "Affiliate link: ToolScout may earn a commission if you buy through this link. This does not affect our recommendations." For X/Bluesky, "Affiliate link" is the minimum short disclosure when space is constrained.':'No affiliate disclosure is needed unless the post contains an affiliate target.',
     `LinkedIn target: ${t.linkedin}`,
     `X target: ${t.x}`,
-    `Bluesky target: ${t.bluesky}`
+    `Bluesky target: ${t.bluesky}`,
+    `Pinterest target: ${t.pinterest}. Pinterest is always editorial and must never use a direct affiliate URL.`
   ].filter(Boolean).join('\n');
   if(issue){
     await env.DB.prepare(`INSERT INTO content_engine_briefs(brief_id,family,commercial_mode,selected_tool_slug,mention_json,target_json,policy_status,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))`).bind(briefId,family,mode,selected?.tool_slug||(task?.subject_type==='tool'?String(task.subject_key||''):null),JSON.stringify(mentions),JSON.stringify(t),selected?.policy_status||'editorial').run();
@@ -421,7 +426,7 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     }
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentbrief_${crypto.randomUUID()}`,'growth_content_brief_issued','completed','content_engine',briefId,`Content brief issued to the publishing pipeline with autonomous growth priority ${growthKey||'none'}, verified manufacturer mentions only, and ${routeCandidate?'one borrowed-audience route candidate':'no borrowed-audience route candidate'}.`).run().catch(()=>{});
   }
-  return {issued:Boolean(issue),brief_id:briefId,execution_task_id:task?.task_id||null,growth_opportunity_key:growthKey,growth_priority_score:effectiveSprintTarget?Number(effectiveSprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:effectiveSprintTarget?{path:effectiveSprintTarget.subject_key,title:effectiveSprintTarget.signals?.title||null,impressions:Number(effectiveSprintTarget.signals?.impressions||0),position:Number(effectiveSprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,commercial_selection_reason:commercialSelectionReason,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,preferred_mention:preferredMention?{name:preferredMention.name,tool_slug:preferredMention.tool_slug,x_handle:preferredMention.x_handle,bluesky_handle:preferredMention.bluesky_handle,bluesky_did:preferredMention.bluesky_did,bluesky_facets:preferredMention.bluesky_facets,linkedin_url:preferredMention.linkedin_url,linkedin_vanity:preferredMention.linkedin_vanity}:null,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
+  return {issued:Boolean(issue),brief_id:briefId,execution_task_id:task?.task_id||null,growth_opportunity_key:growthKey,growth_priority_score:effectiveSprintTarget?Number(effectiveSprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:effectiveSprintTarget?{path:effectiveSprintTarget.subject_key,title:effectiveSprintTarget.signals?.title||null,impressions:Number(effectiveSprintTarget.signals?.impressions||0),position:Number(effectiveSprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,commercial_selection_reason:commercialSelectionReason,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,preferred_mention:preferredMention?{name:preferredMention.name,tool_slug:preferredMention.tool_slug,x_handle:preferredMention.x_handle,bluesky_handle:preferredMention.bluesky_handle,bluesky_did:preferredMention.bluesky_did,bluesky_facets:preferredMention.bluesky_facets,linkedin_url:preferredMention.linkedin_url,linkedin_vanity:preferredMention.linkedin_vanity}:null,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,pinterest_target_url:t.pinterest,pinterest_target_mode:'editorial',pinterest_affiliate_disclosure_required:false,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
 export async function issueGrowthContentBrief(env,task=null){
