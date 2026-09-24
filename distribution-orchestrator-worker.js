@@ -1343,7 +1343,6 @@ if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){if(!(
 if(u.pathname==='/api/growth/execution'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await executionContractSnapshot(env),{headers:H});}
 if(u.pathname==='/api/growth/architecture-escalations/public-candidates'&&request.method==='GET'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
-  await auditArchitectureEscalations(env).catch(()=>null);
   return Response.json(await publicEscalationCandidates(env,u.searchParams.get('limit')),{headers:H});
 }
 if(u.pathname==='/api/growth/architecture-escalations/public-status'&&request.method==='POST'){
