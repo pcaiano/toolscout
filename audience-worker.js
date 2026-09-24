@@ -97,14 +97,45 @@ async function fetchDevJson(url){
     return await r.json();
   }catch{return null;}
 }
+async function devCommentCandidates(env){
+  const feed=await fetchDevJson('https://dev.to/api/articles?username=trytoolscout&per_page=30');
+  const articles=(Array.isArray(feed)?feed:[]).filter(x=>Number(x?.comments_count||0)>0).slice(0,12);
+  const existing=await env.DB.prepare(`SELECT event_id FROM audience_events WHERE platform='devto' AND event_id LIKE 'devto-comment-%'`).all().catch(()=>({results:[]}));
+  const seen=new Set((existing.results||[]).map(x=>String(x.event_id||'')));
+  const out=[];
+  for(const article of articles){
+    if(out.length>=12)break;
+    const thread=await fetchDevJson(`https://dev.to/api/comments?a_id=${Number(article.id)}&per_page=1000`);
+    for(const comment of flattenDevComments(thread)){
+      if(out.length>=12)break;
+      const id=String(comment?.id_code||'');
+      const actor=String(comment?.user?.username||'').toLowerCase();
+      if(!id||!actor||actor==='trytoolscout'||seen.has(`devto-comment-${id}`))continue;
+      const context=devPlainText(comment.body_html||comment.body_markdown||comment.body||'').slice(0,2000);
+      if(!context)continue;
+      out.push({
+        article_id:Number(article.id),
+        article_title:safeText(article.title,240),
+        article_url:safeText(article.url,500),
+        comment_id:id,
+        actor_handle:actor,
+        context_text:context,
+        created_at:safeText(comment.created_at,80)
+      });
+    }
+  }
+  return{ok:true,platform:'devto',mode:'monitor_and_human_reply',reply_write:false,candidates:out,checked_articles:articles.length};
+}
+
 async function observeDevComment(request,env){
   let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:jsonHeaders})}
   const articleId=Number(body.article_id||0);
   const commentId=safeText(body.comment_id,80).trim();
+  const decision=String(body.decision||'suggest').toLowerCase()==='skip'?'skip':'suggest';
   const suggested=safeText(body.suggestion_text,900).trim().replace(/https?:\/\/\S+/gi,'').trim();
   const suppliedRisk=String(body.risk||'green').toLowerCase();
   const risk=allowedRisk.has(suppliedRisk)?suppliedRisk:'amber';
-  if(!Number.isInteger(articleId)||articleId<1||!commentId||!suggested)return Response.json({ok:false,error:'invalid_dev_comment_observation'},{status:422,headers:jsonHeaders});
+  if(!Number.isInteger(articleId)||articleId<1||!commentId||(decision==='suggest'&&!suggested))return Response.json({ok:false,error:'invalid_dev_comment_observation'},{status:422,headers:jsonHeaders});
   const article=await fetchDevJson(`https://dev.to/api/articles/${articleId}`);
   const owner=String(article?.user?.username||article?.organization?.username||'').toLowerCase();
   if(!article||owner!=='trytoolscout')return Response.json({ok:false,error:'unverified_toolscout_dev_article'},{status:422,headers:jsonHeaders});
@@ -116,18 +147,20 @@ async function observeDevComment(request,env){
   const context=devPlainText(comment.body_html||comment.body_markdown||comment.body||'').slice(0,2000);
   if(!context)return Response.json({ok:false,error:'empty_comment_context'},{status:422,headers:jsonHeaders});
   const eventId=`devto-comment-${commentId}`;
-  const articleUrl=String(article.url||`https://dev.to/trytoolscout`).slice(0,500);
+  const articleUrl=String(article.url||'https://dev.to/trytoolscout').slice(0,500);
+  const status=decision==='skip'?'skipped':'suggested';
   await env.DB.prepare(`INSERT INTO audience_events(event_id,platform,event_type,direction,status,actor_handle,post_uri,parent_uri,content_id,context_text,suggestion_text,risk,source,observed_at,created_at)
-    VALUES(?,'devto','engagement_suggestion','inbound','suggested',?,?,?,?,?,?,?,'make-audience-engine',?,datetime('now'))
+    VALUES(?,'devto','engagement_suggestion','inbound',?,?,?,?,?,?,?,?,?,'make-audience-engine',?,datetime('now'))
     ON CONFLICT(event_id) DO UPDATE SET
       context_text=excluded.context_text,
       suggestion_text=CASE WHEN audience_events.status='suggested' THEN excluded.suggestion_text ELSE audience_events.suggestion_text END,
       risk=CASE WHEN audience_events.status='suggested' THEN excluded.risk ELSE audience_events.risk END,
       observed_at=excluded.observed_at
     WHERE audience_events.status='suggested'`)
-    .bind(eventId,actor,articleUrl,`dev-comment:${commentId}`,String(articleId),context,suggested,risk,String(comment.created_at||new Date().toISOString()).slice(0,80)).run();
-  return Response.json({ok:true,event_id:eventId,platform:'devto',mode:'monitor_and_human_reply',reply_write:false,verified:true},{headers:jsonHeaders});
+    .bind(eventId,status,actor,articleUrl,`dev-comment:${commentId}`,String(articleId),context,decision==='suggest'?suggested:null,risk,String(comment.created_at||new Date().toISOString()).slice(0,80)).run();
+  return Response.json({ok:true,event_id:eventId,platform:'devto',mode:'monitor_and_human_reply',decision,status,reply_write:false,verified:true},{headers:jsonHeaders});
 }
+
 async function prepareBlueskyReply(request,env){
   if(!(await validAudienceIngest(request)))return Response.json({ok:false,error:'unauthorized'},{status:401,headers:jsonHeaders});
   let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:jsonHeaders})}
@@ -283,6 +316,7 @@ export default {
     const url=new URL(request.url);
     if(url.pathname==='/api/audience-event'&&request.method==='POST')return ingestAudienceEvent(request,env);
     if(url.pathname==='/api/audience/platform-capabilities'&&request.method==='GET')return Response.json({ok:true,health:socialPlatformCapabilityHealth(),platforms:SOCIAL_PLATFORM_CAPABILITIES},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
+    if(url.pathname==='/api/audience/dev-comments/candidates'&&request.method==='GET')return Response.json(await devCommentCandidates(env),{headers:{...jsonHeaders,'Cache-Control':'no-store'}});
     if(url.pathname==='/api/audience/dev-comment/observe'&&request.method==='POST')return observeDevComment(request,env);
     if(url.pathname==='/api/audience/bluesky-reply/health'&&request.method==='GET')return Response.json({ok:true,version:'complete-sentence-no-hard-cut-v1',maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,requiresPrepareBeforePublish:true},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
     if(url.pathname==='/api/audience/bluesky-reply/prepare'&&request.method==='POST')return prepareBlueskyReply(request,env);
