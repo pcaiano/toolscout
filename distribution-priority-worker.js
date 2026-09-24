@@ -5,14 +5,16 @@ const TERMINAL=new Set(['policy_blocked','rejected','skipped','unavailable_free'
 const ACTIVE_MEASUREMENT=new Set(['live','verified','submitted','pending_review','scheduled']);
 const EXECUTABLE_STATUS='ready_to_submit';
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
-  id:'human-acquisition-sprint-2026-09',
-  startAt:'2026-09-18T23:00:00.000Z',
-  endAt:'2026-09-28T23:00:00.000Z',
+  id:'human-acquisition-v4',
+  startAt:'2026-09-24T00:00:00.000Z',
+  endAt:null,
   northStar:'strict_verified_human_sessions',
   scaleThreshold:3,
-  explorationSlots:3
+  explorationSlots:2,
+  permanent:true,
+  allocation:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5}
 });
-function humanSprintActive(now=Date.now()){return now>=Date.parse(HUMAN_ACQUISITION_SPRINT.startAt)&&now<Date.parse(HUMAN_ACQUISITION_SPRINT.endAt);}
+function humanSprintActive(){return true;}
 function strictHumanSessions(row){return Math.max(0,number(row?.browser_confirmed_sessions_30d,row?.human_sessions_30d));}
 
 function authorized(request,env){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);}
@@ -23,35 +25,21 @@ export function operatingDecision(row){
   if(TERMINAL.has(String(row?.status||'')))return{s:'suspend',reason:`Surface status ${row.status} blocks or closes further automatic distribution.`};
   if(String(row?.paid_policy_decision||'')==='hold_no_return')return{s:'suspend',reason:'Paid surface has sufficient measurement with no positive return.'};
   const humans=strictHumanSessions(row);
-  if(humanSprintActive()){
-    if(humans>=HUMAN_ACQUISITION_SPRINT.scaleThreshold)return{s:'scale',reason:`Human Acquisition Sprint: ${humans} strict verified human session(s) in the attribution window. Proven human acquisition scales before monetization signals.`};
-    if(number(row?.cost_amount)>0&&String(row?.paid_policy_decision||'')==='experiment_measuring')return{s:'measure',reason:'Human Acquisition Sprint: paid experiments remain measurement-only and never auto-scale.'};
-    if(ACTIVE_MEASUREMENT.has(String(row?.status||'')))return{s:'measure',reason:`Human Acquisition Sprint: active surface remains in measurement until it produces at least ${HUMAN_ACQUISITION_SPRINT.scaleThreshold} strict verified human sessions.`};
-    if(humans>=1)return{s:'measure',reason:`Human Acquisition Sprint: ${humans} strict verified human session(s) are directional evidence and must be measured again before scaling.`};
-    return{s:'explore',reason:'Human Acquisition Sprint: no strict verified human acquisition evidence yet. Keep only bounded free exploration.'};
-  }
-  const rank=gradeRank(row?.evidence_grade);
-  if(rank>=3)return{s:'scale',reason:`Evidence grade ${row.evidence_grade} supports higher operating priority.`};
-  if(number(row?.cost_amount)>0&&String(row?.paid_policy_decision||'')==='experiment_measuring')return{s:'measure',reason:'Paid experiment is already committed and remains measurement-only. No additional spend is authorized.'};
-  if(ACTIVE_MEASUREMENT.has(String(row?.status||'')))return{s:'measure',reason:'Surface is already activated. Measure strict verified human impact before scaling or suspending it.'};
-  if(rank>=1)return{s:'measure',reason:`Evidence grade ${row.evidence_grade} is directional and needs more strict verified human observations.`};
-  return{s:'explore',reason:'No strict verified human evidence yet. Keep a bounded exploration allocation.'};
+  if(humans>=HUMAN_ACQUISITION_SPRINT.scaleThreshold)return{s:'scale',reason:`Human Acquisition v4: ${humans} strict verified human session(s). Proven acquisition scales.`};
+  if(number(row?.cost_amount)>0&&String(row?.paid_policy_decision||'')==='experiment_measuring')return{s:'measure',reason:'Paid experiments remain measurement-only and never auto-scale.'};
+  if(humans>=1)return{s:'measure',reason:`Human Acquisition v4: ${humans} strict verified human session(s) are directional evidence.`};
+  if(ACTIVE_MEASUREMENT.has(String(row?.status||'')))return{s:'measure',reason:'Active surface remains under measurement. Placement alone is not a reason to scale.'};
+  return{s:'explore',reason:'No verified human acquisition evidence yet. Keep only bounded, high-signal exploration.'};
 }
 
 export function priorityWeight(row,decision,{explorationSlot=false}={}){
   if(decision==='suspend')return 0;
   const learned=Math.max(0,Math.min(100,number(row?.learned_score,row?.distribution_score)));
-  if(humanSprintActive()){
-    const humans=strictHumanSessions(row);
-    if(explorationSlot)return 88;
-    if(decision==='scale')return Number(Math.min(100,95+Math.min(5,humans)).toFixed(2));
-    if(decision==='measure')return Number(Math.min(94,62+Math.min(27,humans*9)+learned*0.05).toFixed(2));
-    return Number(Math.min(87,35+learned*0.12).toFixed(2));
-  }
-  if(explorationSlot)return 100;
-  if(decision==='scale')return Number((90+learned*0.095).toFixed(2));
-  if(decision==='measure')return Number((60+learned*0.19).toFixed(2));
-  return Number((30+learned*0.19).toFixed(2));
+  const humans=strictHumanSessions(row);
+  if(explorationSlot)return 78;
+  if(decision==='scale')return Number(Math.min(100,96+Math.min(4,humans)).toFixed(2));
+  if(decision==='measure')return Number(Math.min(92,58+Math.min(24,humans*8)+learned*0.08).toFixed(2));
+  return Number(Math.min(72,24+learned*0.12).toFixed(2));
 }
 
 function oldestFirst(a,b){
@@ -80,8 +68,8 @@ export async function rebalanceDistributionPriorities(env){
   }catch(error){return{ok:false,updated:0,reason:'operating_decision_schema_unavailable',detail:String(error?.message||error).slice(0,500)};}
 
   const staged=rows.map(row=>({...row,decision:operatingDecision(row)}));
-  const supervisorSlots=Math.max(0,Math.min(8,number(supervisor?.config?.exploration_slots,0)));
-  const explorationLimit=Math.max(humanSprintActive()?HUMAN_ACQUISITION_SPRINT.explorationSlots:1,supervisorSlots);
+  const supervisorSlots=Math.max(0,Math.min(3,number(supervisor?.config?.exploration_slots,0)));
+  const explorationLimit=Math.max(1,Math.min(3,supervisorSlots||HUMAN_ACQUISITION_SPRINT.explorationSlots));
   const explorationCandidates=staged.filter(eligibleForExploration).sort(oldestFirst).slice(0,explorationLimit);
   const explorationSlugs=new Set(explorationCandidates.map(x=>x.surface_slug));
 
