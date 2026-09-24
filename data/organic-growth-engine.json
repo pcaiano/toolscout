@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "principles": {
     "fullyAutonomous": true,
     "ownerContentInterventionRequired": false,
@@ -20,7 +20,12 @@
     "demandLedOptimization": true,
     "legitimateBacklinkAcquisitionPrimarySeoObjective": true,
     "neverBuyRankingLinks": true,
-    "neverRequireReciprocalLinks": true
+    "neverRequireReciprocalLinks": true,
+    "humanAcquisitionIsPrimary": true,
+    "activityIsNotSuccess": true,
+    "scaleOnlyOnHumanOrCommercialEvidence": true,
+    "competitiveAcquisitionGapAlwaysOn": true,
+    "resourceBudgetedAlwaysOn": true
   },
   "autonomy": {
     "mode": "closed-loop",
@@ -40,7 +45,7 @@
     "target": "continuously improve qualified rankings and search clicks without claiming control over Google positions"
   },
   "closedLoop": {
-    "maxNewInterventionsPerCycle": 3,
+    "maxNewInterventionsPerCycle": 2,
     "minimumDaysBetweenInterventions": 7,
     "minimumEvaluationAgeDays": 14,
     "minimumImpressionsForIntervention": 40,
@@ -51,7 +56,7 @@
     "automaticRollbackOnClearLoss": true
   },
   "competitiveGapLoop": {
-    "maxNewContentIntentsPerCycle": 2,
+    "maxNewContentIntentsPerCycle": 1,
     "minimumEligibleToolsForNewContentIntent": 3,
     "minimumParentMatchScore": 3,
     "minimumParentMatchMargin": 1,
@@ -109,6 +114,41 @@
       "sitemapCandidates": [
         "https://theresanaiforthat.com/sitemap.xml"
       ]
+    },
+    {
+      "name": "FutureTools",
+      "baseUrl": "https://www.futuretools.io",
+      "sitemapCandidates": [
+        "https://www.futuretools.io/sitemap.xml"
+      ]
+    },
+    {
+      "name": "Toolify",
+      "baseUrl": "https://www.toolify.ai",
+      "sitemapCandidates": [
+        "https://www.toolify.ai/sitemap.xml"
+      ]
+    },
+    {
+      "name": "Aixploria",
+      "baseUrl": "https://www.aixploria.com",
+      "sitemapCandidates": [
+        "https://www.aixploria.com/sitemap.xml"
+      ]
+    },
+    {
+      "name": "TopAI.tools",
+      "baseUrl": "https://topai.tools",
+      "sitemapCandidates": [
+        "https://topai.tools/sitemap.xml"
+      ]
+    },
+    {
+      "name": "Dynamite AI",
+      "baseUrl": "https://www.dynamite-ai.com",
+      "sitemapCandidates": [
+        "https://www.dynamite-ai.com/sitemap.xml"
+      ]
     }
   ],
   "opportunityTerms": [
@@ -135,13 +175,13 @@
   ],
   "thresholds": {
     "minimumCompetitorMentionsForGap": 2,
-    "maximumCompetitorUrlsPerSource": 1500,
+    "maximumCompetitorUrlsPerSource": 750,
     "minimumGscImpressionsForCtrAction": 20,
     "strikingDistanceMaxPosition": 20,
     "firstPageMaxPosition": 10
   },
   "backlinkAuthority": {
-    "mode": "quality-first",
+    "mode": "human-referral-and-relevance-first",
     "bootstrapReferringDomainFloor": 10,
     "prioritizeObservedDemandAssets": true,
     "vendorReferenceOutreach": true,
@@ -150,6 +190,36 @@
     "countDistinctReferringDomains": true,
     "allowPaidRankingLinks": false,
     "requireReciprocalLinks": false,
-    "target": "grow relevant verified referring domains and human referral potential without link schemes"
+    "target": "grow relevant referring domains that strengthen observed search demand or can send qualified humans; backlink counts alone are not success",
+    "competitorGapDiscovery": true,
+    "scaleOnlyWithReferralOrSearchEvidence": true
+  },
+  "humanAcquisitionStrategy": {
+    "version": "human-acquisition-v4",
+    "allocationPercent": {
+      "existingDemandSearch": 60,
+      "authorityVendorNetwork": 25,
+      "aiAeoDiscovery": 10,
+      "growthRnd": 5
+    },
+    "successChain": [
+      "ga4_sessions",
+      "strict_attributed_humans",
+      "verified_outbound",
+      "monetized_outbound",
+      "confirmed_revenue"
+    ],
+    "searchLanes": [
+      "comparison",
+      "alternatives",
+      "best_for",
+      "best_free",
+      "use_case",
+      "high_intent_tool_profile"
+    ],
+    "demandMapRequiredBeforeNewPage": true,
+    "scaleOnlyAfterObservedDemandOrHumanEvidence": true,
+    "maxNewSearchInterventionsPerCycle": 2,
+    "maxNewCompetitiveContentIntentsPerCycle": 1
   }
 }
