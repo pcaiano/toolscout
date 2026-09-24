@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-23T09:10:33Z",
+  "updatedAt": "2026-09-24T09:50:42Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
     {
@@ -57,10 +57,10 @@
       "toolSlug": "zapier",
       "toolName": "Zapier",
       "label": "Official product update",
-      "title": "Zapier lets AI agents build and deploy Zaps through MCP",
-      "summary": "Next Gen Zaps lets supported MCP clients build and deploy Zapier automations from plain-language instructions, currently in early access.",
-      "sourceName": "Zapier Help Center",
-      "sourceUrl": "https://help.zapier.com/hc/en-us/articles/48391476448141-Get-started-with-Next-Gen-Zaps",
+      "title": "Zapier expands Next Gen Zaps with branching, recovery and agentic management",
+      "summary": "Next Gen Zaps adds richer branching, nested loops, resilient error handling, human pauses and agent managed diagnosis and repair to Zapier's new automation model.",
+      "sourceName": "Zapier Product Updates",
+      "sourceUrl": "https://community.zapier.com/product-updates/the-next-generation-of-zaps-is-here-53832",
       "articleUrl": "/news/zapier-next-gen-zaps-mcp.html",
       "profileUrl": "/news/zapier-next-gen-zaps-mcp.html",
       "outboundUrl": null,
