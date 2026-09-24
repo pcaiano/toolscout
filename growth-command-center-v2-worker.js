@@ -330,7 +330,11 @@ async function baseHumanActions(request,env,ctx){
 }
 async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
   const raw=await baseHumanActions(request,env,ctx);
-  const editorialRows=await safeAll(env,`SELECT queue_id,asset_url,channel_type,target_name,target_url,angle,suggested_title,suggested_body,status,created_at,updated_at FROM distribution_editorial_queue WHERE human_required=1 AND status='prepared' AND target_url IS NOT NULL ORDER BY CASE WHEN target_name='Stremit' THEN 0 ELSE 1 END,updated_at DESC LIMIT 20`);
+  const [editorialRows,vendorReputationRows,networkReputationRows]=await Promise.all([
+    safeAll(env,`SELECT queue_id,asset_url,channel_type,target_name,target_url,angle,suggested_title,suggested_body,status,created_at,updated_at FROM distribution_editorial_queue WHERE human_required=1 AND status='prepared' AND target_url IS NOT NULL ORDER BY CASE WHEN target_name='Stremit' THEN 0 ELSE 1 END,updated_at DESC LIMIT 20`),
+    safeAll(env,`SELECT tool_slug item_key,contact_email,vendor_domain domain,suggested_subject,suggested_body,outreach_error,updated_at FROM distribution_vendor_amplification WHERE status='reputation_quarantine' ORDER BY updated_at DESC LIMIT 20`),
+    safeAll(env,`SELECT surface_slug item_key,contact_email,domain,suggested_subject,suggested_body,outreach_error,updated_at FROM distribution_network_outreach WHERE status='reputation_quarantine' ORDER BY updated_at DESC LIMIT 20`)
+  ]);
   const editorial=editorialRows.map(row=>{
     const target=String(row.target_name||'Community');
     const publicationType=row.channel_type==='community_stack'?'Stack':'Post';
@@ -358,6 +362,33 @@ async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
       source_asset_url:row.asset_url||null
     };
   });
+  const reputation=[...vendorReputationRows.map(row=>({...row,reputation_kind:'vendor'})),...networkReputationRows.map(row=>({...row,reputation_kind:'network'}))]
+    .sort((a,b)=>timeMs(b.updated_at)-timeMs(a.updated_at))
+    .map(row=>{
+      const recipient=row.contact_email||row.domain||row.item_key;
+      const issues=String(row.outreach_error||'reputation_boundary').replace(/^reputation_boundary:/,'').split('|').filter(Boolean).join(', ');
+      return {
+        engine:'reputation',
+        id:`reputation:${row.reputation_kind}:${row.item_key}`,
+        reputation_kind:row.reputation_kind,
+        reputation_key:row.item_key,
+        title:`Blocked outbound email · ${recipient}`,
+        status:'reputation_quarantine',
+        reason:`Pedro reputation boundary blocked this email: ${issues||'review required'}.`,
+        instructions:'Read the full subject and body. Choose “Block correct” if the email should never have gone out, or “False positive” if the message is legitimate distribution outreach. A false-positive decision records feedback only; it does not send the email.',
+        why_human:'This is a reputation-boundary judgement about an email that would otherwise be sent externally in Pedro Caiano’s name.',
+        after_action:'The review is recorded for filter tuning. No reviewed email is sent automatically from this queue.',
+        estimated_minutes:2,
+        expected_impact:'Protect Pedro’s reputation while measuring and reducing false-positive blocks on legitimate distribution email.',
+        expected_impact_score:100,
+        prepared_title:row.suggested_subject||'',
+        prepared_body:row.suggested_body||'',
+        recipient,
+        blocked_reasons:issues||'review required',
+        blocked_at:row.updated_at,
+        link_verification:{ok:true,http_status:null,checked_at:new Date().toISOString(),reason:'reputation_review_no_external_link_required',failure_scope:null}
+      };
+    });
   const input=[...(raw.affiliate||[]),...(raw.distribution||[]),...editorial];
   const rows=await Promise.all(input.map(async action=>{
     const minutes=action.editorial_queue_id?6:estimateMinutes(action);
@@ -368,10 +399,11 @@ async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
     return {...action,estimated_minutes:minutes,expected_impact:expectedImpact(action),expected_impact_score:Number(impactScore.toFixed(1)),why_human:whyHuman,after_action:after,link_verification:verification};
   }));
   const quality=partitionChairmanTasks(rows);
-  const actionable=quality.items.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,HUMAN_ACTION_LIMIT);
+  const standardActionable=quality.items.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes)));
+  const actionable=[...reputation,...standardActionable].slice(0,HUMAN_ACTION_LIMIT);
   const brokenLinks=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='internal');
   const externalVerificationIssues=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='external');
-  return {status:'connected',quality_holds:[...(raw.quality_holds||[]),...quality.quality_holds],quality_version:quality.quality_version,total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Only current engine states with a reachable HTTPS action URL enter the Chairman Queue. Prepared community publication tasks include the exact payload needed to complete the human action.'};
+  return {status:'connected',quality_holds:[...(raw.quality_holds||[]),...quality.quality_holds],quality_version:quality.quality_version,total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,reputation_quarantine:reputation.length,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Reputation quarantine is reviewed directly in the Chairman Queue. Other human tasks require current engine state and a reachable HTTPS action URL. Reputation review never sends the email automatically.'};
 }
 async function growthOpsSnapshot(request,env,ctx,stats){
   const [affiliateLatest,affiliateWeekOld,affiliateStatuses,affiliateDiscovery,affiliatePacks,affiliateRoutes,distributionStatuses,distribution24,distribution7,deliveryStates,distEvents,affiliateHistory,gsc,gscReality,sitemap,contentIntel,organicGrowth,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogRuntimeState,catalogRuntimeCandidates,catalogInventory,catalogRuntimeGaps,catalogRecentAdmissions,latestAudienceEvent,latestContentPublish,distributionNetworkStates,distributionPlacements]=await Promise.all([
@@ -764,6 +796,23 @@ async function protectedStats(request,env,ctx){
   const [growthOps,affiliateCoverageStatus]=await Promise.all([growthOpsSnapshot(request,env,ctx,data),affiliateCoverageStatusSnapshot(request,env)]);
   return Response.json({...data,growthOps,affiliateCoverageStatus},{headers:JSON_H});
 }
+async function reputationReview(request,env){
+  if(!(await validSession(request,env)))return Response.json({ok:false,error:'command_center_session_expired'},{status:401,headers:JSON_H});
+  let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_H})}
+  const kind=String(body.kind||'').trim(),key=String(body.key||'').trim().slice(0,180),verdict=String(body.verdict||'').trim();
+  if(!['vendor','network'].includes(kind)||!key||!['correct_block','false_positive'].includes(verdict))return Response.json({ok:false,error:'invalid_reputation_review'},{status:400,headers:JSON_H});
+  const table=kind==='vendor'?'distribution_vendor_amplification':'distribution_network_outreach';
+  const keyColumn=kind==='vendor'?'tool_slug':'surface_slug';
+  const row=await env.DB.prepare(`SELECT contact_email,suggested_subject,outreach_error,status FROM ${table} WHERE ${keyColumn}=?`).bind(key).first();
+  if(!row||row.status!=='reputation_quarantine')return Response.json({ok:false,error:'reputation_item_not_active'},{status:409,headers:JSON_H});
+  const next=verdict==='correct_block'?'reputation_block_confirmed':'reputation_false_positive';
+  const note=`${verdict}; prior=${String(row.outreach_error||'').slice(0,700)}`;
+  await env.DB.prepare(`UPDATE ${table} SET status=?,outreach_error=?,updated_at=datetime('now') WHERE ${keyColumn}=? AND status='reputation_quarantine'`).bind(next,note.slice(0,1000),key).run();
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+    .bind(`repreview_${crypto.randomUUID()}`,'outbound_reputation_reviewed',verdict,'reputation_boundary',`${kind}:${key}`,`Pedro reviewed blocked outbound to ${row.contact_email||'unknown'} as ${verdict}. No email was sent by this review.`).run().catch(()=>{});
+  return Response.json({ok:true,kind,key,verdict,status:next,sent:false},{headers:JSON_H});
+}
+
 async function distributionHumanAction(request,env){
   if(!(await validSession(request,env)))return Response.json({ok:false,error:'command_center_session_expired'},{status:401,headers:JSON_H});
   let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_H})}
@@ -788,4 +837,4 @@ async function distributionHumanAction(request,env){
   return Response.json({ok:true,surface_slug:slug,status:next,resume:'verification_measurement'},{headers:JSON_H});
 }
 
-export default {async fetch(request,env,ctx){const url=new URL(request.url);if(request.method==='GET'&&analyticsPath(url.pathname))return servePage(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return protectedStats(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/chairman-queue'){if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});return Response.json(await chairmanQueue(request,env,ctx,{verifyLinks:true}),{headers:JSON_H})}if(request.method==='POST'&&url.pathname==='/analytics/api/distribution-human-action')return distributionHumanAction(request,env);return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined}};
+export default {async fetch(request,env,ctx){const url=new URL(request.url);if(request.method==='GET'&&analyticsPath(url.pathname))return servePage(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return protectedStats(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/chairman-queue'){if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});return Response.json(await chairmanQueue(request,env,ctx,{verifyLinks:true}),{headers:JSON_H})}if(request.method==='POST'&&url.pathname==='/analytics/api/reputation-review')return reputationReview(request,env);if(request.method==='POST'&&url.pathname==='/analytics/api/distribution-human-action')return distributionHumanAction(request,env);return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined}};
