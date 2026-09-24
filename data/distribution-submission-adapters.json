@@ -184,7 +184,7 @@
     "automatic_content_types": [
       "application/json"
     ],
-    "max_automatic_per_run": 16,
+    "max_automatic_per_run": 6,
     "max_attempts": 3,
     "never_automatic": [
       "captcha",
@@ -195,6 +195,8 @@
       "terms_acceptance",
       "explicit_third_party_approval"
     ],
-    "zero_cost_only": true
+    "zero_cost_only": true,
+    "execution_strategy": "outcome_weighted_bounded",
+    "scale_only_after_verified_human_or_commercial_evidence": true
   }
 }
