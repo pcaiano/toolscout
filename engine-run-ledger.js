@@ -8,7 +8,7 @@ const CYCLE_OWNED_MISSIONS=new Map([
 ]);
 const CYCLE_STALE_TAKEOVER_MINUTES=30;
 
-function missionCycleSpec(engine,mission,now=Date.now()){
+export function missionCycleContext(engine,mission,now=Date.now()){
   const spec=CYCLE_OWNED_MISSIONS.get(`${String(engine||'unknown')}:${String(mission||'unknown')}`);
   if(!spec)return null;
   const minutes=Math.max(1,Number(spec.minutes)||60);
@@ -72,10 +72,10 @@ export async function ensureEngineRunSchema(env){
   return schemaReady;
 }
 
-async function acquireMissionCycleClaim(env,{runId,engine,mission,triggerName=null}){
-  const cycle=missionCycleSpec(engine,mission);
-  if(!cycle)return null;
-  const e=String(engine||'unknown'),m=String(mission||'unknown'),owner=String(triggerName||'unspecified').slice(0,120);
+async function acquireMissionCycleClaim(env,{runId,engine,mission,triggerName=null,cycleContext=null,cycleOwner=null}){
+  const cycle=cycleContext;
+  if(!cycle?.key)return null;
+  const e=String(engine||'unknown'),m=String(mission||'unknown'),owner=String(cycleOwner||triggerName||'unspecified').slice(0,120);
   const inserted=await env.DB.prepare(`INSERT OR IGNORE INTO engine_cycle_claims(engine,mission,cycle_key,owner,run_id,status,attempts,acquired_at,updated_at)
     VALUES(?,?,?,?,?,'running',1,datetime('now'),datetime('now'))`).bind(e,m,cycle.key,owner,runId).run();
   if(Number(inserted?.meta?.changes||inserted?.changes||0)>0)return{owned:true,recovered:false,cycle,owner,runId,status:'running'};
@@ -139,7 +139,7 @@ export async function reapStaleEngineRuns(env,minutes=120){
   }catch{return 0}
 }
 
-export async function runWithLedger(env,{engine,mission,triggerName=null,singleFlightMinutes=0},fn){
+export async function runWithLedger(env,{engine,mission,triggerName=null,singleFlightMinutes=0,cycleContext=null,cycleOwner=null},fn){
   await reapStaleEngineRuns(env,120);
   await ensureEngineRunSchema(env);
   const runId=`run_${crypto.randomUUID()}`;
@@ -169,7 +169,7 @@ export async function runWithLedger(env,{engine,mission,triggerName=null,singleF
     }
   }
 
-  cycleClaim=await acquireMissionCycleClaim(env,{runId,engine:e,mission:m,triggerName});
+  cycleClaim=await acquireMissionCycleClaim(env,{runId,engine:e,mission:m,triggerName,cycleContext,cycleOwner});
   if(cycleClaim&&!cycleClaim.owned){
     if(leased)await env.DB.prepare(`DELETE FROM engine_run_leases WHERE engine=? AND mission=? AND run_id=?`).bind(e,m,runId).run().catch(()=>{});
     return{
