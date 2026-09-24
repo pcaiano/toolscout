@@ -36,6 +36,7 @@ function sameHostFamily(a,b){const x=host(a),y=host(b);return x===y||x.endsWith(
 async function text(url,timeout=4000){try{const r=await fetch(url,{headers:{'User-Agent':'ToolScout-Distribution-Qualifier/1.0','Accept':'text/html,application/json;q=0.9,*/*;q=0.8'},redirect:'follow',signal:AbortSignal.timeout(timeout)});if(!r.ok)return null;return {url:r.url,contentType:r.headers.get('content-type')||'',body:(await r.text()).slice(0,800000)}}catch{return null}}
 function links(html,base){const out=new Set();for(const m of String(html||'').matchAll(/href=["']([^"']+)["']/gi)){try{const u=new URL(m[1],base);if(u.protocol==='https:')out.add(u.href)}catch{}}return [...out]}
 const ACTION_ROUTE_RE=/(submit|submission|add(?:-|_|\/)?(?:tool|startup|product)|new(?:-|_|\/)?(?:tool|startup|product)|register|sign(?:-|_|\/)?up|list(?:-|_|\/)?your)/i;
+const MANUAL_ACTION_RE=/(submit (?:your |a )?(?:tool|startup|product)|add (?:your |a )?(?:tool|startup|product)|list your (?:tool|startup|product))/i;
 async function externalRouteFailureCount(env,surfaceSlug){
   try{
     const row=await env.DB.prepare(`SELECT COUNT(*) AS count FROM distribution_qualification_events WHERE surface_slug=? AND result='external_verification_failed' AND created_at>=datetime('now','-72 hours')`).bind(surfaceSlug).first();
@@ -280,7 +281,7 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
   const authProof=page&&(/<input[^>]+type=["']password["']/i.test(page.body)||/(?:must|need to|required to) (?:be logged|sign|log) in|login required|account required/i.test(page.body));
   const captchaProof=page&&/<(?:div|iframe|input)[^>]+(?:g-recaptcha|h-captcha|cf-turnstile|captcha)/i.test(page.body);
   const humanProof=page&&(captchaProof||HUMAN_BLOCK_RE.test(page.body));
-  const manualProof=page&&(ACTION_ROUTE_RE.test(page.url)||/<form\b/i.test(page.body)||/(submit (?:a )?(?:tool|startup|product)|add (?:a )?(?:tool|startup|product)|list your (?:tool|startup|product))/i.test(page.body));
+  const manualProof=page&&(ACTION_ROUTE_RE.test(page.url)||MANUAL_ACTION_RE.test(page.body));
   if(!page||!(isAuth?authProof:(isManual||isOwnerApproval)?manualProof:humanProof)){
     const detail='Chairman quality hold: no verified, actionable owner-only step on the destination. Engine must research the route and prepare exact instructions.';
     await env.DB.batch([
@@ -404,7 +405,7 @@ async function qualifyOne(env,row){
         return 'ready_to_submit';
       }
       if(AUTH_RE.test(page.body)){linkedAuth=true;linkedAuthUrl=page.url;continue}
-      if(ACTION_ROUTE_RE.test(page.url)||/<form\b/i.test(page.body))linkedManualUrl=linkedManualUrl||page.url;
+      if(ACTION_ROUTE_RE.test(page.url)||MANUAL_ACTION_RE.test(page.body))linkedManualUrl=linkedManualUrl||page.url;
     }
   }
   if(linkedHuman){
@@ -437,7 +438,7 @@ async function qualifyOne(env,row){
     return 'auth_required';
   }
   const priorityScore=Number(effectiveRow.distribution_score||0);
-  const priorityManualUrl=linkedManualUrl||((ACTION_ROUTE_RE.test(h.url)||/<form\b/i.test(h.body))?h.url:null);
+  const priorityManualUrl=linkedManualUrl||((ACTION_ROUTE_RE.test(h.url)||MANUAL_ACTION_RE.test(h.body))?h.url:null);
   if(priorityScore>=PRIORITY_HUMAN_GATE_THRESHOLD&&priorityManualUrl){
     const reason=`Priority acquisition opportunity (${priorityScore.toFixed(0)}/100) has an exact manual submission route, but no safe automatic adapter was verified. Preserve its priority and request the owner step instead of leaving it in research.`;
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(priorityManualUrl,reason,effectiveRow.surface_slug).run();
