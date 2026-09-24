@@ -2,7 +2,8 @@ export const TOOLSCOUT_SOCIAL_PROFILES=Object.freeze([
   {key:'linkedin',label:'LinkedIn',url:'https://www.linkedin.com/company/146229906/'},
   {key:'x',label:'X / Twitter',url:'https://x.com/trytoolscout'},
   {key:'bluesky',label:'Bluesky',url:'https://bsky.app/profile/trytoolscout.bsky.social'},
-  {key:'devto',label:'DEV Community',url:'https://dev.to/trytoolscout'}
+  {key:'devto',label:'DEV Community',url:'https://dev.to/trytoolscout'},
+  {key:'pinterest',label:'Pinterest',url:'https://www.pinterest.com/trytoolscout/'}
 ]);
 
 function footerHtml(){
