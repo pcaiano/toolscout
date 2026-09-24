@@ -239,7 +239,7 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     LEFT JOIN content_social_profiles p ON p.tool_slug=a.tool_slug AND p.status='verified'
     WHERE a.organic_social_allowed=1 AND a.direct_affiliate_link_allowed=1
       AND a.policy_status IN ('verified_social_allowed','social_allowed_direct_only')
-      AND (a.redirect_allowed=1 OR w.affiliate_url IS NOT NULL)
+      AND w.affiliate_url IS NOT NULL AND trim(w.affiliate_url)<>''
       AND w.status IN ('verified','active','earning','link_acquired')
     ORDER BY COALESCE(p.tool_name,a.tool_slug)`).all();
   const routeCandidates=await env.DB.prepare(`SELECT a.route_id,a.surface_slug,a.route_type,a.route_url,a.attempts,n.surface_name,n.priority_score
@@ -248,7 +248,9 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     WHERE a.execution_mode='content_amplification' AND a.status IN ('queued','retry_due')
       AND a.attempts<2
     ORDER BY n.priority_score DESC,a.updated_at ASC LIMIT 12`).all().catch(()=>({results:[]}));
-  const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=commercial.results||[],briefId=`brief_${crypto.randomUUID()}`;
+  const catalogTools=await assetJson(env,'/data/tools.json',[]);
+  const catalogBySlug=new Map((Array.isArray(catalogTools)?catalogTools:[]).map(x=>[x.slug,x]));
+  const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=(commercial.results||[]).map(x=>({...x,catalog:catalogBySlug.get(x.tool_slug)||null})),briefId=`brief_${crypto.randomUUID()}`;
   const profileBySlug=new Map(all.map(x=>[x.tool_slug,x]));
   const growthTools=[],growthRank=new Map();for(const x of growth.results||[]){if(!x.subject_key||growthRank.has(x.subject_key))continue;const row={...x,rank:growthTools.length};growthTools.push(row);growthRank.set(x.subject_key,{rank:row.rank,score:Number(x.priority_score||0),key:x.opportunity_key,type:x.subject_type});}
   const observedSprintRows=(sprintGrowth.results||[]).map(x=>{let signals={};try{signals=JSON.parse(x.signal_json||'{}')}catch{}return{...x,signals};});
@@ -283,15 +285,32 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     ['notion','clickup'],['asana','clickup'],['airtable','notion'],['n8n','make'],['tally','typeform'],
     ['brevo','mailchimp'],['activecampaign','mailchimp'],['webflow','framer'],['shopify','webflow'],['apollo','lemlist']
   ];
-  const commercialAllowed=!sprintTarget&&family==='friday_practical'&&eligible.length>0;
   const growthCommercial=growthTools.map(g=>eligible.find(x=>x.tool_slug===g.subject_key)).find(Boolean)||null;
-  const selected=commercialAllowed?(growthCommercial||eligible[pickIndex('commercial'+date,eligible.length)]):null;
+  const STOP=new Set(['best','top','tool','tools','software','for','and','the','guide','guides','comparison','compare','profile','profiles','platform','platforms']);
+  const stem=v=>{const x=String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();return x.endsWith('s')&&x.length>4?x.slice(0,-1):x};
+  const tokenSet=v=>new Set(String(v||'').toLowerCase().split(/[^a-z0-9]+/).map(stem).filter(x=>x&&x.length>2&&!STOP.has(x)));
+  const commercialRelevance=(candidate,target)=>{
+    if(!candidate||!target)return 0;
+    if(String(target?.signals?.tool_slug||'')===String(candidate.tool_slug))return 100;
+    const topic=tokenSet([target.subject_key,target?.signals?.title].filter(Boolean).join(' '));
+    if(!topic.size)return 0;
+    const c=candidate.catalog||{};
+    const hay=[candidate.tool_slug,candidate.tool_name,c.category,c.description,...(Array.isArray(c.features)?c.features:[]),...(Array.isArray(c.bestFor)?c.bestFor:[])].filter(Boolean).join(' ');
+    const cand=tokenSet(hay);
+    let score=0;for(const t of topic)if(cand.has(t))score++;
+    return score;
+  };
+  const sprintCommercial=sprintTarget?eligible.map(x=>({x,score:commercialRelevance(x,sprintTarget)})).sort((a,b)=>b.score-a.score)[0]:null;
+  const relevantSprintCommercial=sprintCommercial&&sprintCommercial.score>0?sprintCommercial.x:null;
+  const selected=family==='wednesday_comparison'
+    ? null
+    : (relevantSprintCommercial||(family==='friday_practical'&&!sprintTarget&&eligible.length?(growthCommercial||eligible[pickIndex('commercial'+date,eligible.length)]):null));
   const growthComparison=growthTools.map(g=>comparisonPairs.find(pair=>pair.includes(g.subject_key))).find(Boolean)||null;
   const comparison=family==='wednesday_comparison'&&!sprintTarget?(growthComparison||comparisonPairs[pickIndex('comparison'+date,comparisonPairs.length)]):null;
   let mentionRows=[];
   if(sprintTarget?.signals?.tool_slug)mentionRows=[profileBySlug.get(String(sprintTarget.signals.tool_slug))].filter(Boolean);
-  else if(sprintTarget)mentionRows=[];
   else if(selected)mentionRows=[profileBySlug.get(selected.tool_slug)].filter(Boolean);
+  else if(sprintTarget)mentionRows=[];
   else if(comparison)mentionRows=comparison.map(slug=>profileBySlug.get(slug)).filter(Boolean);
   else if(all.length){const start=pickIndex(family+date,all.length);mentionRows=[topGrowthProfile,all[start],all[(start+1)%all.length]].filter((x,i,a)=>x&&a.findIndex(y=>y.tool_slug===x.tool_slug)===i).slice(0,2);}
   const mentions=mentionRows.map(x=>{
@@ -301,8 +320,8 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
   const preferredMention=(sprintTarget?.signals?.tool_slug||selected||comparison)?(mentions[0]||null):null;
   const routeCandidate=(routeCandidates.results||[])[0]||null;
   const mode=selected?'affiliate_social_verified':'editorial';
-  const targetMode=selected?(Number(selected.redirect_allowed)===1?'toolscout_redirect':'direct_vendor'):'editorial';
-  let t=selected?(targetMode==='toolscout_redirect'?targets(selected.tool_slug):{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}):(sprintTarget?editorialTargets(family,sprintTarget.subject_key,humanAcquisitionSprintActive()?'human_acquisition_sprint':'growth_supervisor_search_demand'):editorialTargets(family));
+  const targetMode=selected?'direct_vendor':'editorial';
+  let t=selected?{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}:(sprintTarget?editorialTargets(family,sprintTarget.subject_key,humanAcquisitionSprintActive()?'human_acquisition_sprint':'growth_supervisor_search_demand'):editorialTargets(family));
   const growthKey=sprintTarget?sprintTarget.opportunity_key:(selected?(growthRank.get(selected.tool_slug)?.key||`tool:${selected.tool_slug}`):(comparison?(growthRank.get(comparison[0])?.key||growthRank.get(comparison[1])?.key||null):(topGrowthProfile?(growthRank.get(topGrowthProfile.tool_slug)?.key||`tool:${topGrowthProfile.tool_slug}`):null)));
   let comparisonContext=null;
   if(comparison){
@@ -316,9 +335,9 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
   const prompt=[
     `CONTENT ENGINE INTELLIGENCE BRIEF (${family})`,
     `Commercial mode: ${mode}.`,
-    sprintTarget?`${humanAcquisitionSprintActive()?'Human Acquisition Sprint':'Growth Supervisor'} focus: ${sprintTarget.signals?.title||sprintTarget.subject_key}. GSC observed ${Number(sprintTarget.signals?.impressions||0)} impressions at average position ${Number(sprintTarget.signals?.position||0).toFixed(1)}. Build the post around the practical user problem behind this page and send readers to the exact ToolScout target below. Optimize for a qualified human visit, not vanity reach. Supervisor directive: ${supervisor.directive||'observed demand first'}.`:null,
+    sprintTarget?`${humanAcquisitionSprintActive()?'Human Acquisition Sprint':'Growth Supervisor'} focus: ${sprintTarget.signals?.title||sprintTarget.subject_key}. GSC observed ${Number(sprintTarget.signals?.impressions||0)} impressions at average position ${Number(sprintTarget.signals?.position||0).toFixed(1)}. Build the post around the practical user problem behind this page and use the exact platform target below. If a policy-approved commercial candidate is selected, that target is the direct vendor referral URL; otherwise it is a ToolScout editorial URL. Optimize for a qualified human visit and useful commercial intent, not vanity reach. Supervisor directive: ${supervisor.directive||'observed demand first'}.`:null,
     comparisonContext?`Comparison selected for this run: ${comparisonContext.tool_a} vs ${comparisonContext.tool_b}. Use this exact comparison pair and the exact platform URL supplied below. Present practical tradeoffs, never a universal winner.`:null,
-    selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Official programme material explicitly permits organic-social affiliate/referral-link promotion. Target mode: ${targetMode}. ${targetMode==='direct_vendor'?'The programme restricts redirects/cloaking, so use the exact vendor affiliate URL supplied below without modification.':'The checked material allows the ToolScout redirect route.'} Include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
+    selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Official programme material explicitly permits organic-social affiliate/referral-link promotion and this tool is materially relevant to the current content target. Target mode: direct_vendor. Use the exact vendor affiliate/referral URL supplied below directly on the social platform, even when the programme would also allow redirects. Include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
     mentions.length?`Verified manufacturer/profile candidates discovered from links on their official websites: ${mentions.map(m=>`${m.name} | X ${m.x_handle||'none'} | Bluesky ${m.bluesky_handle||'none'} | LinkedIn company URL ${m.linkedin_url||'none'} | LinkedIn vanity ${m.linkedin_vanity||'none'}`).join(' ; ')}. When at least one candidate is materially relevant, prefer one verified native mention to increase qualified borrowed-audience reach. Use at most two manufacturer mentions in comparison content and at most one in discovery/practical content. Never invent or guess a handle or identity.`:'No verified manufacturer social handles are currently available. Do not invent mentions.',
     preferredMention?`Preferred native mention for this run: ${preferredMention.name}. X ${preferredMention.x_handle||'none'}; Bluesky ${preferredMention.bluesky_handle||'none'}; LinkedIn vanity ${preferredMention.linkedin_vanity||'none'}. This preferred identity is directly tied to the selected tool/comparison, so use the platform-specific verified mention exactly once when that identity exists.`:'No preferred native mention is designated for this run; do not force a tag.',
     routeCandidate?`Borrowed-audience amplification candidate from the Distribution Network: ${routeCandidate.surface_name||routeCandidate.surface_slug} via ${routeCandidate.route_type} at ${routeCandidate.route_url}. This is an alternate route, not proof of placement. Use or mention this external profile only if it is directly relevant to the post topic and the interaction is useful rather than promotional noise. Do not invent a handle, do not send a direct message, and do not force a tag when relevance is weak.`:'No alternate social distribution route is queued for this brief.',
