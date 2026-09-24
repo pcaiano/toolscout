@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "source": "SE Ranking Data API",
+  "target": "trytoolscout.org",
+  "mode": "domain",
+  "observedAt": "2026-09-24T23:32:15Z",
+  "freshnessHours": 168,
+  "metrics": {
+    "backlinks": 16,
+    "referringDomains": 10,
+    "subnets": 10,
+    "ips": 10,
+    "dofollowBacklinks": 5,
+    "nofollowBacklinks": 11,
+    "eduBacklinks": 0,
+    "govBacklinks": 0
+  },
+  "referringDomains": [
+    {
+      "domain": "www.claudemcp.org",
+      "backlinks": 2,
+      "dofollowBacklinks": 2,
+      "domainInlinkRank": 37,
+      "firstSeen": "2026-09-24"
+    },
+    {
+      "domain": "launches.uicomet.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 20,
+      "firstSeen": "2026-09-22"
+    },
+    {
+      "domain": "epicsaas.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 20,
+      "firstSeen": "2026-09-22"
+    },
+    {
+      "domain": "mcpindex.ai",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 13,
+      "firstSeen": "2026-09-10"
+    },
+    {
+      "domain": "odel.app",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 10,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "mcpcensus.com",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 8,
+      "firstSeen": "2026-09-24"
+    },
+    {
+      "domain": "finderlaunch.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 6,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "connectors.fun",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 1,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "wellknown.network",
+      "backlinks": 4,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 1,
+      "firstSeen": "2026-09-11"
+    },
+    {
+      "domain": "viralrank.lol",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-09-23"
+    }
+  ],
+  "reconciliationPolicy": {
+    "primaryDisplay": "max(fresh SE Ranking referring domains, internal verified referring domains)",
+    "internalLedgerRetained": true,
+    "externalSnapshotExpiresAfterHours": 168,
+    "backlinkCountRemainsInternalInCommandCenter": true
+  }
+}
