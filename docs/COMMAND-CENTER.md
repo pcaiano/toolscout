@@ -418,3 +418,15 @@ The owner changed the repository to private on 2026-09-08. GitHub connector meta
 - Unbounce is now a canonical catalog tool with normal ranking and comparison eligibility, a generated public profile at `/tools/unbounce.html`, a verified first-party logo asset, and the active vendor CTA routed through `/go/unbounce` to the approved PartnerStack link.
 - The pending affiliate-only record was removed to avoid split catalog state.
 - Catalog health now treats any canonical tool without a generated profile as a hard failure, preventing future public catalog entries from silently pointing to 404 profiles.
+
+## Human Acquisition v4 - 2026-09-24
+
+ToolScout now runs an outcome-weighted, resource-bounded acquisition strategy. The business objective is qualified human acquisition that progresses through verified outbound, monetized outbound and evidence-backed revenue. GA4 remains the canonical headline acquisition population; strict-human evidence is used for attribution quality and channel learning, never to erase or replace GA4 sessions.
+
+Operating allocation is 60% existing search demand and decision-intent SEO, 25% relevant authority plus vendor/publisher distribution, 10% AI/AEO/agent discovery, and 5% Growth R&D. Activity counts are operational cost signals rather than success metrics. Distribution and authority exploration are capped per cycle, repeated zero-human routes are suppressed/rotated, and scaling requires verified human or commercial evidence.
+
+The continuous loop is now: `observe demand -> compare competitor acquisition gaps -> prioritize -> execute bounded work -> verify external evidence -> attribute GA4/strict-human quality -> outbound -> monetized outbound -> revenue -> scale or rotate -> repeat`.
+
+Resource policy: distribution qualification 12/cycle, automatic external execution 4/cycle, network candidate evaluation 16/cycle, contact scans 6/cycle, route actions 8/cycle, discovery source fetches 6/run, submission adapters 6/run, authority attempt target 8/24h, and general external-action target 8/24h with a 12/24h budget. These are budgets, not quotas: the engines may do less when high-signal work is unavailable.
+
+The Command Center is business-first. The first row is GA4 sessions, strict attributed humans, verified outbound, monetized outbound, relevant referring domains, affiliate routes, confirmed revenue and human exceptions. External execution counts are shown only as an operating-cost/context signal. Competitive acquisition intelligence now includes Futurepedia, FutureTools, Toolify, TAAFT, Aixploria, TopAI.tools and Dynamite AI alongside the established software directories, and observed competitor referring-domain gaps are fed into research rather than treated as automatic backlink targets.
