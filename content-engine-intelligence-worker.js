@@ -49,10 +49,10 @@ function termsLinks(html,base){
   for(const m of String(html||'').matchAll(/href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/ig)){
     try{
       const u=new URL(m[1],base),label=(stripHtml(m[2])+' '+u.pathname).toLowerCase();
-      if(/affiliate.*terms|program.*terms|terms.*affiliate|terms.*partner|affiliate.*agreement|marketing.*guidelines/.test(label))out.push(u.href);
+      if(/affiliate.*(?:terms|agreement)|(?:terms|agreement).*affiliate|program.*(?:terms|agreement)|partner.*(?:terms|agreement)|referral.*(?:terms|agreement)|marketing.*guidelines|legal.*affiliate|affiliate.*legal|terms of service|\btos\b/.test(label))out.push(u.href);
     }catch{}
   }
-  return [...new Set(out)].slice(0,2);
+  return [...new Set(out)].slice(0,4);
 }
 function affiliateProgramLinks(html,base){
   const out=[];
@@ -64,15 +64,30 @@ function affiliateProgramLinks(html,base){
   }
   return [...new Set(out)].slice(0,4);
 }
-const SOCIAL_ALLOW=/(social media|social channels|social networks|social posts?|instagram|linkedin|twitter|\bx\b|facebook|tiktok|youtube).{0,160}(affiliate link|referral link|tracking link|unique link|promotion|promote|share)|(?:affiliate link|referral link|tracking link|unique link).{0,160}(social media|social channels|social networks|instagram|linkedin|twitter|facebook|tiktok|youtube)/i;
-const SOCIAL_GENERAL=/(social media|social channels|social networks|influencer|creator|content creator)/i;
-const SOCIAL_ALL_BAN=/(may not|must not|prohibited|not permitted|do not).{0,120}(post|promote|share|advertise).{0,80}(social media|social networks|social channels)|(?:social media|social networks|social channels).{0,100}(prohibited|not permitted|forbidden)/i;
-const PAID_ONLY_BAN=/(paid social|paid advertising|social ads|facebook ads|instagram ads|twitter ads|linkedin ads|ppc).{0,140}(prohibited|not permitted|may not|must not|forbidden)/i;
+const SOCIAL_GENERAL=/(social media|social channels|social networks|influencer|creator|content creator|linkedin|twitter|facebook|instagram|tiktok|youtube)/i;
+const PAID_ONLY_BAN=/(paid social|paid advertising|social ads|facebook ads|instagram ads|twitter ads|linkedin ads|ppc|media buying).{0,160}(prohibited|not permitted|may not|must not|forbidden)|(?:prohibited|not permitted|may not|must not|forbidden).{0,160}(paid social|paid advertising|social ads|facebook ads|instagram ads|twitter ads|linkedin ads|ppc|media buying)/i;
 const CLOAK_BAN=/(cloak|mask|hide|obscure|redirect|link shortener|shorten).{0,120}(affiliate|referral|tracking|link)|(?:affiliate|referral|tracking).{0,120}(cloak|mask|hide|obscure|redirect|link shortener|shorten)/i;
-const DISCLOSURE=/(disclos|#ad|advertis|affiliate relationship|affiliate link)/i;
-const APPROVAL_REQUIRED=/(prior written approval|prior approval|written consent|written permission|pre[- ]?approval|must be approved|subject to approval|approved promotional methods|approved marketing methods|approved traffic sources|approved channels|unless approved)/i;
-const CHANNEL_LIMIT=/(only|solely|exclusively).{0,120}(website|blog|email|newsletter|search|content site|your site|owned media)|(?:promotion|promotional methods|traffic sources?|marketing channels?).{0,120}(limited to|restricted to|only)/i;
-const TERMS_SIGNAL=/(affiliate agreement|affiliate terms|program terms|programme terms|terms (?:and|&) conditions|publisher terms|promotional methods|prohibited activities|acceptable use|compliance requirements|you may not|you must not|affiliate(?:s)? (?:may|must|shall))/i;
+const DISCLOSURE=/(disclos|#ad|advertis|affiliate relationship|affiliate link|paid partnership|sponsored)/i;
+const TERMS_SIGNAL=/(affiliate agreement|affiliate terms|program terms|programme terms|terms (?:and|&) conditions|publisher terms|promotional methods|prohibited activities|acceptable use|compliance requirements|you may not|you must not|affiliate(?:s)? (?:may|must|shall)|referrer(?:s)? (?:may|must|shall))/i;
+function policySentences(text){return String(text||'').split(/(?:\r?\n)+|(?<=[.!?])\s+/).map(x=>x.replace(/\s+/g,' ').trim()).filter(x=>x.length>15)}
+function socialSignals(text){
+  let explicit=false,ban=false,approval=false,closedChannels=false;
+  for(const line of policySentences(text)){
+    const social=/(social media|social channels|social networks|linkedin|twitter|facebook|instagram|tiktok|youtube|followers)/i.test(line);
+    const affiliate=/(affiliate|referral|tracking|partner)\s*(?:link|url)?|unique link|partner link/i.test(line);
+    const promo=/(promot|advertis|marketing|share|post|display|publish|channel|traffic source)/i.test(line);
+    const neg=/(may not|must not|prohibited|not permitted|forbidden|do not|cannot|can't)/i.test(line);
+    const positive=/(may|can|allowed|permitted|share|display|place|post|publish|promote|use|via|through|include|embed)/i.test(line);
+    const thirdPartyOnly=/(our|company|vendor).{0,50}(social media|page|account)|third part(?:y|ies).{0,50}(social media|page|account)/i.test(line);
+    if(social&&affiliate&&positive&&!neg)explicit=true;
+    if(social&&promo&&affiliate&&neg&&!thirdPartyOnly)ban=true;
+    const approvalWord=/(prior written approval|prior approval|written consent|written permission|pre[- ]?approval|must be approved|subject to approval)/i.test(line);
+    if(approvalWord&&/(social media|promotional method|marketing channel|traffic source|online promotion|digital promotion)/i.test(line)&&!/offline/i.test(line))approval=true;
+    const limited=/(only|solely|exclusively|limited to|restricted to)/i.test(line);
+    if(limited&&/(affiliate|referral|promotion|marketing channel|traffic source)/i.test(line)&&/(website|blog|email|newsletter)/i.test(line)&&!social)closedChannels=true;
+  }
+  return {explicit,ban,approval,closedChannels};
+}
 
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
@@ -181,24 +196,37 @@ async function refreshPolicies(env){
       for(const link of termsLinks(p.html,p.url)){
         const t=await fetchText(link);if(t)pages.push(t);
       }
-      if(pages.length>=4)break;
+      if(pages.length>=5)break;
+    }
+    let provisionalTexts=pages.map(p=>({url:p.url,text:stripHtml(p.html)}));
+    if(home&&!provisionalTexts.some(p=>TERMS_SIGNAL.test(p.text))){
+      const legalPaths=['/affiliate-terms/','/affiliate-agreement','/legal/affiliate-program-terms','/legal/affiliate.html','/terms/affiliate-partner-program','/affiliate/program-agreement.html','/en/affiliate-program-terms'];
+      for(const path of legalPaths){
+        let url;try{url=new URL(path,home.origin).href}catch{continue}
+        if(pages.some(p=>p.url===url))continue;
+        const t=await fetchText(url);if(!t)continue;
+        const txt=stripHtml(t.html);
+        if(!/(affiliate|referral|partner)/i.test(txt+' '+t.url))continue;
+        pages.push(t);
+        if(TERMS_SIGNAL.test(txt))break;
+      }
     }
     const pageTexts=pages.map(p=>({url:p.url,text:stripHtml(p.html)}));
     const text=pageTexts.map(p=>p.text).join(' ').slice(0,400000);
-    const socialBan=SOCIAL_ALL_BAN.test(text),explicit=SOCIAL_ALLOW.test(text),socialGeneral=SOCIAL_GENERAL.test(text),paidBan=PAID_ONLY_BAN.test(text),cloakBan=CLOAK_BAN.test(text),disclosure=DISCLOSURE.test(text);
-    const approvalRequired=APPROVAL_REQUIRED.test(text),channelLimit=CHANNEL_LIMIT.test(text);
-    const termsVerified=pageTexts.some(p=>TERMS_SIGNAL.test(p.text)||/(terms|conditions|agreement|policy|guidelines|rules|acceptable-use|affiliate-terms|program-terms|programme-terms)/i.test(String(p.url||'')));
+    const socialGeneral=SOCIAL_GENERAL.test(text),paidBan=PAID_ONLY_BAN.test(text),cloakBan=CLOAK_BAN.test(text),disclosure=DISCLOSURE.test(text);
+    const signals=socialSignals(text);
+    const termsVerified=pageTexts.some(p=>TERMS_SIGNAL.test(p.text)||/(terms|conditions|agreement|policy|guidelines|rules|acceptable-use|affiliate-terms|program-terms|programme-terms|referral-agreement|legal\/affiliate)/i.test(String(p.url||'')));
     let organic=null,directLink=null,redirect=null,status='terms_unverified',detail='No sufficiently complete official programme terms could be verified automatically.';
-    if(!pages.length||!termsVerified){
-      unknown++;
-      if(pages.length&&socialGeneral)detail='Official programme material was found, but sufficiently complete contractual terms were not verified. Social use remains blocked pending verification.';
-    }else if(socialBan||channelLimit){
-      organic=0;directLink=0;redirect=0;status='explicitly_blocked';detail=`Verified programme terms restrict organic-social promotion or limit promotional channels. Paid-social restriction: ${paidBan?'yes':'no'}.`;blocked++;
-    }else if(approvalRequired&&!explicit){
-      organic=0;directLink=0;redirect=0;status='approval_required';detail='Verified programme terms require approval/consent for promotional methods or channels before use. Human approval gate required.';
-    }else if(explicit){
+    if(signals.explicit&&!signals.ban){
       organic=1;directLink=1;redirect=cloakBan?0:1;status=cloakBan?'explicit_allowed_direct_only':'explicit_allowed';
-      detail=`Verified programme terms explicitly permit organic-social affiliate/referral-link promotion. Paid-social restriction: ${paidBan?'yes':'no'}. Redirect/cloaking restriction: ${cloakBan?'yes':'no'}.`;allowed++;
+      detail=`Official programme material explicitly permits organic-social affiliate/referral-link promotion. Paid-social restriction: ${paidBan?'yes':'default_off'}. Redirect/cloaking restriction: ${cloakBan?'yes':'no'}.`;allowed++;
+    }else if(!pages.length||!termsVerified){
+      unknown++;
+      if(pages.length&&socialGeneral)detail='Official programme material was found, but sufficiently complete contractual terms were not verified and no explicit organic-social permission was found. Social use remains blocked pending verification.';
+    }else if(signals.ban||signals.closedChannels){
+      organic=0;directLink=0;redirect=0;status='explicitly_blocked';detail=`Verified programme terms explicitly prohibit organic-social affiliate promotion or restrict promotion to channels that exclude social media. Paid-social restriction: ${paidBan?'yes':'no'}.`;blocked++;
+    }else if(signals.approval){
+      organic=0;directLink=0;redirect=0;status='approval_required';detail='Verified programme terms require prior approval for social/digital promotional channels or methods. Human approval gate required.';
     }else{
       organic=1;directLink=1;redirect=cloakBan?0:1;status=cloakBan?'silent_verified_direct_only':'silent_verified';
       detail=`Verified programme terms contain no organic-social prohibition, no closed-channel restriction, and no prior-approval requirement. Organic social allowed by verified silence. Paid-social remains disallowed by default. Redirect/cloaking restriction: ${cloakBan?'yes':'no'}.`;allowed++;
