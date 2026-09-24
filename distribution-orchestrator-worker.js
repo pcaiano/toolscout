@@ -36,7 +36,8 @@ function humanSprintActive(){return true;}
 function coordinatedGrowthPriority(subjectType,score,audienceStrategy){
   let priority=Math.max(0,Math.min(100,Number(score)||0));
   const apply=()=>{
-    if(subjectType==='surface')priority=Math.min(100,priority+10);
+    if(subjectType==='search')priority=Math.min(100,priority+20);
+    else if(subjectType==='surface')priority=Math.min(100,priority+10);
     else if(subjectType==='tool')priority=Math.min(100,priority+8);
     else if(subjectType==='news_update')priority=Math.min(100,priority+4);
     else if(subjectType==='affiliate')priority=Math.min(priority,35);
