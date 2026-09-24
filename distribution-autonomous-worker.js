@@ -463,7 +463,7 @@ async function qualify(env){
           WHERE a.surface_slug=o.surface_slug AND a.policy_state='verified' AND a.confidence>=95
         ))
       )
-    ORDER BY CASE WHEN o.status='ready_to_submit' THEN 0 WHEN o.status IN ('discovered','candidate') THEN 1 ELSE 2 END,o.distribution_score DESC,o.last_checked_at ASC
+    ORDER BY CASE WHEN o.status='ready_to_submit' THEN 0 ELSE 1 END,o.distribution_score DESC,CASE WHEN o.status IN ('discovered','candidate') THEN 0 ELSE 1 END,o.last_checked_at ASC
     LIMIT ${QUALIFY_LIMIT}`).all();
   const outcomes=await Promise.all((q.results||[]).map(row=>qualifyOne(env,row)));
   let checked=outcomes.length,ready=0,auth=0,blocked=0,human=0,research=0,skipped=0;
