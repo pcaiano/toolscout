@@ -1,0 +1,35 @@
+name: One Shot Strict Human Learning Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-strict-human-learning-deploy.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-one-shot-strict-human-learning
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate strict-human learning policy
+        run: node tests/growth-strict-human-learning.test.mjs
+      - name: Validate distribution copy guard
+        run: node scripts/check-distribution-copy.mjs
+      - name: Deploy current ToolScout Worker
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
