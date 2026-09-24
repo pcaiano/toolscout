@@ -6,7 +6,7 @@ const TOOLSCOUT_BLUESKY_DID='did:plc:hjawfnxtifnuqcgidlvmas76';
 const BLUESKY_MAX_GRAPHEMES=300;
 const BLUESKY_MAX_BYTES=3000;
 const BLUESKY_REPLY_TARGET_GRAPHEMES=280;
-const AUDIENCE_INGEST_TOKEN_SHA256='2cae5760a1a416aa3bbe14128c10539e157d527b1daa2f2a1df456c35099d770';
+const AUDIENCE_INGEST_TOKEN_SHA256='6e19bfed6e6a9c3387a7a3cbe9d13cd88cb7567513829c7881d4cddc5a5d6daa';
 const jsonHeaders={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const safeText=(v,n=1000)=>String(v??'').slice(0,n);
 const utf8Bytes=v=>new TextEncoder().encode(String(v??'')).length;
