@@ -1,4 +1,5 @@
 import base from './authority-acquisition-worker.js';
+import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {commandCenterHtml} from './command-center-simplified-view.js';
 import {publicRuntimeToolResponse} from './catalog-autonomy-worker.js';
 
