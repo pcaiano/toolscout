@@ -85,13 +85,66 @@ function sanitizeExternalOutreachBody(value){
   body=body.replace(/https:\/\/trytoolscout\.org\/api\/[^<>"'\s]*/gi,'');
   return body;
 }
+const OUTBOUND_REPUTATION_CONTRACT='pedro-outbound-reputation-v1';
+function reviewText(value){return String(value||'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim()}
+function recipientDomain(value){
+  const email=String(value||'').trim().toLowerCase();
+  const m=email.match(/^[^@\s]+@([^@\s]+)$/);
+  return m?m[1]:'';
+}
+function evaluateOutboundReputation({to,subject,body,mode='manual_authorized',template_id=''}) {
+  const issues=[];
+  const recipient=String(to||'').trim();
+  const domain=recipientDomain(recipient);
+  const subj=String(subject||'').trim();
+  const raw=String(body||'').trim();
+  const text=reviewText(raw);
+  const internalRecipient=recipient.toLowerCase()==='pcaiano@gmail.com'||domain==='trytoolscout.org';
+  if(!domain)issues.push('invalid_recipient');
+  if(subj.length<3||subj.length>140)issues.push('subject_length');
+  if(text.length<20||text.length>12000)issues.push('body_length');
+  const forbidden=[
+    [/https?:\/\/trytoolscout\.org\/api\//i,'internal_api_url'],
+    [/\bX-ToolScout-Handoff\b/i,'internal_handoff_header'],
+    [/\b(dispatch_token|public_dispatch_token|task_id|growth_action_events|public-candidates|public-status)\b/i,'internal_runtime_identifier'],
+    [/\b(Growth Brain|Distribution Engine|Chairman Queue|D1 database|Cloudflare Worker|Make scenario)\b/i,'internal_system_jargon'],
+    [/\bdecision\s+feed\b/i,'internal_decision_feed'],
+    [/\{\{[^}]+\}\}|\$\{[^}]+\}|\[object Object\]|\bundefined\b/i,'unresolved_template_or_object'],
+    [/https?:\/\/(?:localhost|127\.0\.0\.1|[^\s"'<>]*workers\.dev)\b/i,'non_public_runtime_url']
+  ];
+  for(const [pattern,code] of forbidden)if(pattern.test(subj)||pattern.test(raw))issues.push(code);
+  if(/\{\s*"[^"]+"\s*:\s*/.test(text)&&/\}/.test(text))issues.push('raw_json_payload');
+  if(!internalRecipient&&!/\b(ToolScout|Pedro Caiano)\b/i.test(text))issues.push('identity_missing');
+  if(mode==='autonomous'){
+    if(template_id==='vendor_reference_v23'){
+      if(!/featured on ToolScout/i.test(subj))issues.push('vendor_subject_contract');
+      if(!/Your ToolScout profile:/i.test(raw))issues.push('vendor_profile_context_missing');
+      if(!/distribution\/publisher-kit/i.test(raw))issues.push('public_publisher_resource_missing');
+    }else if(template_id==='publisher_resources_v22'){
+      if(!/ToolScout publisher resources/i.test(subj))issues.push('publisher_subject_contract');
+      if(!/distribution\/publisher-kit/i.test(raw))issues.push('publisher_kit_missing');
+    }else issues.push('unapproved_autonomous_template');
+  }
+  return {approved:issues.length===0,issues:[...new Set(issues)],contract:OUTBOUND_REPUTATION_CONTRACT,mode,template_id,recipient_domain:domain,subject:subj,body:raw};
+}
+async function recordReputationBlock(env,{to,issues,source='unknown'}){
+  const domain=recipientDomain(to)||'invalid-recipient';
+  const detail=`Pedro reputation boundary blocked outbound to ${domain} from ${source}: ${(issues||[]).join(', ')||'unspecified'}.`;
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`rep_${crypto.randomUUID()}`,'outbound_reputation_blocked','quarantined','reputation_boundary',domain,detail.slice(0,1000)).run().catch(()=>{});
+}
+async function reputationCheck(request,env){
+  let b={};try{b=await request.json()}catch{return Response.json({approved:false,contract:OUTBOUND_REPUTATION_CONTRACT,issues:['invalid_json']},{status:400,headers:JSON_HEADERS})}
+  const result=evaluateOutboundReputation({to:b.to,subject:b.subject,body:b.body,mode:'manual_authorized',template_id:'manual_authorized'});
+  if(!result.approved)await recordReputationBlock(env,{to:b.to,issues:result.issues,source:String(b.source||'manual_sender')});
+  return Response.json(result,{status:result.approved?200:422,headers:JSON_HEADERS});
+}
 function cordialOutreach(row){
   const name=displayToolName(row),slug=String(row?.tool_slug||'').toLowerCase();
   const subject=`${name} featured on ToolScout`,action=`vendor:${slug}`,growth=`tool:${slug}`;
   const asset=taggedOwned(row?.asset_url||'https://trytoolscout.org',{source:'vendor_outreach',campaign:'vendor_reference_v22',action,growth});
   const profile=taggedOwned(`https://trytoolscout.org/tools/${encodeURIComponent(slug)}`,{source:'vendor_outreach',campaign:'vendor_reference_v22',action,growth});
   const publisherKit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:'vendor_outreach',campaign:'vendor_reference_v22',action,growth});
-  const body=`<p>Hello,</p><p>I hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${html(name)} in one of our software buying pages for people comparing tools for a specific job to be done.</p><p>Featured page:<br><a href="${html(asset)}">${html(asset)}</a></p><p>Your ToolScout profile:<br><a href="${html(profile)}">${html(profile)}</a></p><p>If either resource is genuinely useful to your team or audience, you are welcome to share it or cite the relevant ToolScout page from an appropriate resources, press, community or partner page. We do not request reciprocal links and we do not pay for ranking links.</p><p>If your team publishes software resources, our free feed and embed kit is here:<br><a href="${html(publisherKit)}">${html(publisherKit)}</a></p><p>ToolScout rankings are based on product fit and editorial criteria. Placements are not sold, and affiliate relationships do not change ranking or recommendation eligibility.</p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
+  const body=`<p>Hello,</p><p>I hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${html(name)} in one of our software buying pages for people comparing tools for a specific job to be done.</p><p>Featured page:<br><a href="${html(asset)}">${html(asset)}</a></p><p>Your ToolScout profile:<br><a href="${html(profile)}">${html(profile)}</a></p><p>If either resource is genuinely useful to your team or audience, you are welcome to share it or cite the relevant ToolScout page from an appropriate resources, press, community or partner page. We do not request reciprocal links and we do not pay for ranking links.</p><p>If your team publishes software resources, our public publisher resources and embed kit are here:<br><a href="${html(publisherKit)}">${html(publisherKit)}</a></p><p>ToolScout rankings are based on product fit and editorial criteria. Placements are not sold, and affiliate relationships do not change ranking or recommendation eligibility.</p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
   return {...row,suggested_subject:sanitizeExternalOutreachSubject(subject,row?.vendor_domain),suggested_body:sanitizeExternalOutreachBody(body),growth_action_id:action,growth_opportunity_key:growth,tracked_asset_url:asset,acquisition_objective:'relevant_editorial_reference'};
 }
 
@@ -144,7 +197,7 @@ async function publicCandidates(env,limit=8){
   const tasks=await claimedMakeSenderTasks(env,n);
   if(!tasks.length){
     await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');
-    return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-batch-v8'};
+    return {status:'connected',limit:n,items:[],reason:'no_claimed_make_sender_task',integrity:'task-specific-batch-v9-reputation-boundary'};
   }
 
   const items=[],deferredTasks=[],leasedPending=[],seenSubjects=new Set();
@@ -184,18 +237,26 @@ async function publicCandidates(env,limit=8){
         continue;
       }
 
+      const copy=cordialOutreach(row);
+      const review=evaluateOutboundReputation({to:row.contact_email,subject:copy.suggested_subject,body:copy.suggested_body,mode:'autonomous',template_id:'vendor_reference_v23'});
+      if(!review.approved){
+        await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='reputation_quarantine',outreach_error=?,updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(`reputation_boundary:${review.issues.join('|')}`.slice(0,1000),row.tool_slug,row.asset_url).run().catch(()=>{});
+        await deferExecutionTask(env,task.task_id,'reputation_boundary_quarantine');
+        await recordReputationBlock(env,{to:row.contact_email,issues:review.issues,source:'vendor_amplification'});
+        deferredTasks.push({task_id:task.task_id,reason:'reputation_boundary_quarantine',issues:review.issues});
+        continue;
+      }
       const token=row.public_dispatch_token||crypto.randomUUID();
       await env.DB.prepare(`UPDATE distribution_vendor_amplification
         SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now')
         WHERE tool_slug=? AND asset_url=?`).bind(token,row.tool_slug,row.asset_url).run();
 
-      const copy=cordialOutreach(row);
       await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at)
         VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now'))
         ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`)
         .bind(copy.growth_action_id,copy.growth_opportunity_key,'vendor_amplification','email',copy.tracked_asset_url).run().catch(()=>{});
 
-      items.push({kind:'vendor',task_id:task.task_id,task_action:task.action,tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token});
+      items.push({kind:'vendor',task_id:task.task_id,task_action:task.action,tool_slug:row.tool_slug,asset_url:row.asset_url,priority_score:row.priority_score,vendor_domain:row.vendor_domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:copy.suggested_subject,suggested_body:copy.suggested_body,dispatch_token:token,reputation_contract:review.contract,reputation_approved:true,template_id:'vendor_reference_v23'});
       continue;
     }
 
@@ -215,21 +276,29 @@ async function publicCandidates(env,limit=8){
         continue;
       }
 
+      const action=`network:${row.surface_slug}`,growth=`surface:${row.surface_slug}`;
+      const kit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
+      const subject=sanitizeExternalOutreachSubject(row.suggested_subject,row.domain);
+      const body=sanitizeExternalOutreachBody(String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit));
+      const review=evaluateOutboundReputation({to:row.contact_email,subject,body,mode:'autonomous',template_id:'publisher_resources_v22'});
+      if(!review.approved){
+        await env.DB.prepare(`UPDATE distribution_network_outreach SET status='reputation_quarantine',outreach_error=?,updated_at=datetime('now') WHERE surface_slug=?`).bind(`reputation_boundary:${review.issues.join('|')}`.slice(0,1000),row.surface_slug).run().catch(()=>{});
+        await deferExecutionTask(env,task.task_id,'reputation_boundary_quarantine');
+        await recordReputationBlock(env,{to:row.contact_email,issues:review.issues,source:'distribution_network'});
+        deferredTasks.push({task_id:task.task_id,reason:'reputation_boundary_quarantine',issues:review.issues});
+        continue;
+      }
       const token=row.public_dispatch_token||`net_${crypto.randomUUID()}`;
       await env.DB.prepare(`UPDATE distribution_network_outreach
         SET public_dispatch_token=?,public_dispatch_leased_at=datetime('now'),updated_at=datetime('now')
         WHERE surface_slug=?`).bind(token,row.surface_slug).run();
 
-      const action=`network:${row.surface_slug}`,growth=`surface:${row.surface_slug}`;
-      const kit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
-      const subject=sanitizeExternalOutreachSubject(row.suggested_subject,row.domain);
-      const body=sanitizeExternalOutreachBody(String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit));
       await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at)
         VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now'))
         ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`)
         .bind(action,growth,'distribution_network','email',kit).run().catch(()=>{});
 
-      items.push({kind:'network',task_id:task.task_id,task_action:task.action,tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:subject,suggested_body:body,dispatch_token:token});
+      items.push({kind:'network',task_id:task.task_id,task_action:task.action,tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:subject,suggested_body:body,dispatch_token:token,reputation_contract:review.contract,reputation_approved:true,template_id:'publisher_resources_v22'});
       continue;
     }
 
@@ -252,7 +321,7 @@ async function publicCandidates(env,limit=8){
     deferred_tasks:deferredTasks,
     leased_pending:leasedPending,
     reason:items.length?null:(leasedPending.length?'leased_candidates_pending_callback':'no_ready_candidate_after_batch_scan'),
-    integrity:'task-specific-batch-v8'
+    integrity:'task-specific-batch-v9-reputation-boundary'
   };
 }
 async function publicStatus(request,env){
@@ -307,6 +376,7 @@ export default {
       const result=await publicCandidates(env,url.searchParams.get('limit'));
       return Response.json({...result,contact_refresh:contactRefresh,replenishment_required:!(result.items||[]).length},{headers:JSON_HEADERS});
     }
+    if(url.pathname==='/api/distribution/outbound-reputation/check'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return reputationCheck(request,env);}
     if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
     return base.fetch(request,env,ctx);
   },
