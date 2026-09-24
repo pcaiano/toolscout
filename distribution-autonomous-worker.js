@@ -19,6 +19,7 @@ const AUTHORITY_ATTEMPT_TARGET_24H=8;
 const AUTHORITY_STAGNATION_HOURS=24;
 const AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D=12;
 const AUTHORITY_RECOVERY_COOLDOWN_HOURS=6;
+const PRIORITY_HUMAN_GATE_THRESHOLD=70;
 async function runDiscoveryRefresh(env){
   if(!env.ADMIN_TOKEN)return {ok:false,reason:'admin_token_unavailable'};
   try{
@@ -268,6 +269,8 @@ async function resolveHumanActionUrl(value){
 async function openDistributionHumanGate(env,row,{gateType='human_confirmation',actionUrl=null,reason=null,verificationUrl=null}={}){
   const target=row.surface_name||row.surface_slug;
   const isAuth=gateType==='authentication';
+  const isManual=gateType==='manual_submission';
+  const isOwnerApproval=gateType==='owner_approval';
   const humanActionUrl=await resolveHumanActionUrl(actionUrl||row.action_url);
   if(await existingParentSubmission(env,row.surface_slug)){await reconcileDuplicateSubmissionGates(env);return null;}
   const previous=await env.DB.prepare('SELECT status FROM human_gate_contract WHERE gate_key=?').bind(humanGateKey('distribution','surface',row.surface_slug)).first();
@@ -276,7 +279,9 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
   // A sign-in link in a navigation bar is not proof that submission requires login.
   const authProof=page&&(/<input[^>]+type=["']password["']/i.test(page.body)||/(?:must|need to|required to) (?:be logged|sign|log) in|login required|account required/i.test(page.body));
   const captchaProof=page&&/<(?:div|iframe|input)[^>]+(?:g-recaptcha|h-captcha|cf-turnstile|captcha)/i.test(page.body);
-  if(!page||!(isAuth?authProof:captchaProof)){
+  const humanProof=page&&(captchaProof||HUMAN_BLOCK_RE.test(page.body));
+  const manualProof=page&&(ACTION_ROUTE_RE.test(page.url)||/<form\b/i.test(page.body)||/(submit (?:a )?(?:tool|startup|product)|add (?:a )?(?:tool|startup|product)|list your (?:tool|startup|product))/i.test(page.body));
+  if(!page||!(isAuth?authProof:(isManual||isOwnerApproval)?manualProof:humanProof)){
     const detail='Chairman quality hold: no verified, actionable owner-only step on the destination. Engine must research the route and prepare exact instructions.';
     await env.DB.batch([
       env.DB.prepare("UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,updated_at=datetime('now') WHERE surface_slug=?").bind(detail,row.surface_slug),
@@ -286,11 +291,21 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
     return null;
   }
   const finalActionUrl=page.url;
-  const evidenceDetail=isAuth?'The destination displays a password form or an explicit login requirement.':'The destination displays an interactive CAPTCHA widget.';
-  const humanReason=`${target}: ${evidenceDetail} Only the owner can complete this account or browser challenge.`;
+  const evidenceDetail=isAuth
+    ?'The destination displays a password form or an explicit login requirement.'
+    :isManual
+      ?'The destination exposes an exact ToolScout submission/listing route, but no safe automatic adapter was verified.'
+      :isOwnerApproval
+        ?'The destination exposes an exact action route that requires owner approval before execution.'
+        :(captchaProof?'The destination displays an interactive CAPTCHA widget.':'The destination explicitly requires a human confirmation or terms step.');
+  const humanReason=`${target}: ${evidenceDetail} Owner action is required before autonomous execution can continue.`;
   const instructions=isAuth
     ?`Open ${finalActionUrl}. Sign in to your ${target} account. Complete the ToolScout submission with the prepared name, website, tagline and description below. If a submission already exists, do not submit again; copy its result URL instead. Return here and mark the step done with that URL. Do not buy promotion or add a reciprocal badge.`
-    :`Open ${finalActionUrl}. Complete the CAPTCHA shown on the submission form. Fill the ToolScout fields with the prepared details below and submit once. Return here and mark the step done with the result URL. Do not buy promotion or add a reciprocal badge.`;
+    :isOwnerApproval
+      ?`Open ${finalActionUrl}. Review the exact action requested for ${target}. Proceed only if it is a legitimate ToolScout distribution step and does not require paid promotion, reciprocal badges or unsupported claims. Complete the approved step once, then return here and mark it done with the result URL if available.`
+      :isManual
+        ?`Open ${finalActionUrl}. Complete the ToolScout submission manually with the prepared name, website, tagline and description below. Submit once only. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion, add a reciprocal badge, or invent claims. Return here and mark the step done with the result URL if available.`
+        :`Open ${finalActionUrl}. Complete the human-only confirmation, CAPTCHA or required terms step shown on the submission form. Fill the ToolScout fields with the prepared details below and submit once. Return here and mark the step done with the result URL. Do not buy promotion or add a reciprocal badge.`;
   const gateKey=await upsertHumanGate(env,{
     engine:'distribution',
     subjectType:'surface',
@@ -365,7 +380,7 @@ async function qualifyOne(env,row){
     .filter(u=>u!==h.url&&sameHostFamily(u,h.url)&&ACTION_ROUTE_RE.test(u))
     .filter(u=>!/(privacy|terms|legal|blog|docs|help|support|pricing)(?:[\\/?#]|$)/i.test(new URL(u).pathname))
   )].slice(0,5);
-  let linkedAuth=false,linkedHuman=false,linkedPolicy=false,linkedAuthUrl=null,linkedHumanUrl=null;
+  let linkedAuth=false,linkedHuman=false,linkedPolicy=false,linkedAuthUrl=null,linkedHumanUrl=null,linkedManualUrl=null;
   if(linkedActionUrls.length){
     const linkedPages=await Promise.all(linkedActionUrls.map(async u=>({u,page:await text(u,3500)})));
     for(const item of linkedPages){
@@ -388,7 +403,8 @@ async function qualifyOne(env,row){
         await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_safe_form_adapter:${linkedForm.endpoint}`);
         return 'ready_to_submit';
       }
-      if(AUTH_RE.test(page.body)){linkedAuth=true;linkedAuthUrl=page.url;}
+      if(AUTH_RE.test(page.body)){linkedAuth=true;linkedAuthUrl=page.url;continue}
+      if(ACTION_ROUTE_RE.test(page.url)||/<form\b/i.test(page.body))linkedManualUrl=linkedManualUrl||page.url;
     }
   }
   if(linkedHuman){
@@ -419,6 +435,17 @@ async function qualifyOne(env,row){
     await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason});
     await mark(env,{...effectiveRow,action_url:h.url},'auth_required','authentication_route_without_safe_adapter');
     return 'auth_required';
+  }
+  const priorityScore=Number(effectiveRow.distribution_score||0);
+  const priorityManualUrl=linkedManualUrl||((ACTION_ROUTE_RE.test(h.url)||/<form\b/i.test(h.body))?h.url:null);
+  if(priorityScore>=PRIORITY_HUMAN_GATE_THRESHOLD&&priorityManualUrl){
+    const reason=`Priority acquisition opportunity (${priorityScore.toFixed(0)}/100) has an exact manual submission route, but no safe automatic adapter was verified. Preserve its priority and request the owner step instead of leaving it in research.`;
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(priorityManualUrl,reason,effectiveRow.surface_slug).run();
+    const gateKey=await openDistributionHumanGate(env,{...effectiveRow,action_url:priorityManualUrl},{gateType:'manual_submission',actionUrl:priorityManualUrl,reason});
+    if(gateKey){
+      await mark(env,{...effectiveRow,action_url:priorityManualUrl},'human_action_required','priority_manual_submission_gate');
+      return 'human_action_required';
+    }
   }
   await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action='No safe automatic submission route found yet. Continue autonomous protocol and action-route research; do not escalate to Chairman.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
   await mark(env,effectiveRow,'research_required',/<form\b/i.test(h.body)?'safe_form_adapter_not_yet_resolved':'no_verified_submission_protocol');
@@ -495,7 +522,8 @@ async function syncExistingHumanGates(env){
     LIMIT 40`).all();
   let synced=0;
   for(const row of q.results||[]){
-    const gateType=row.status==='auth_required'?'authentication':(row.status==='approval_required'?'owner_approval':'human_confirmation');
+    const existing=await env.DB.prepare(`SELECT gate_type FROM human_gate_contract WHERE gate_key=? AND status='open' LIMIT 1`).bind(humanGateKey('distribution','surface',row.surface_slug)).first().catch(()=>null);
+    const gateType=existing?.gate_type||(row.status==='auth_required'?'authentication':(row.status==='approval_required'?'owner_approval':'manual_submission'));
     const reason=row.next_action||(
       gateType==='authentication'
         ?'Owner authentication is required before ToolScout can be submitted.'
