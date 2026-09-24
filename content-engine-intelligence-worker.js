@@ -37,6 +37,13 @@ function socialLinks(html,baseHost){
   }
   return out;
 }
+async function resolveBlueskyDid(handle){
+  const h=cleanHandle(handle);if(!h)return null;
+  try{
+    const r=await fetch('https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle='+encodeURIComponent(h),{headers:{'User-Agent':'ToolScout Content Intelligence/2.2 (+https://trytoolscout.org)','Accept':'application/json'}});
+    if(!r.ok)return null;const j=await r.json();return /^did:[a-z0-9]+:/i.test(String(j?.did||''))?String(j.did):null;
+  }catch{return null}
+}
 function termsLinks(html,base){
   const out=[];
   for(const m of String(html||'').matchAll(/href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/ig)){
@@ -66,9 +73,9 @@ const DISCLOSURE=/(disclos|#ad|advertis|affiliate relationship|affiliate link)/i
 
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=env.DB.batch([
+  schemaReady=(async()=>{await env.DB.batch([
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS content_social_profiles(
-      tool_slug TEXT PRIMARY KEY,tool_name TEXT NOT NULL,source_url TEXT,x_handle TEXT,bluesky_handle TEXT,linkedin_url TEXT,
+      tool_slug TEXT PRIMARY KEY,tool_name TEXT NOT NULL,source_url TEXT,x_handle TEXT,bluesky_handle TEXT,bluesky_did TEXT,linkedin_url TEXT,
       status TEXT NOT NULL DEFAULT 'unknown',attempts INTEGER NOT NULL DEFAULT 0,last_error TEXT,last_checked_at TEXT,verified_at TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
@@ -108,7 +115,9 @@ async function ensureSchema(env){
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_route_actions_content ON distribution_contact_route_actions(execution_mode,status,updated_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_content_briefs_created ON content_engine_briefs(created_at DESC)`)
-  ]).catch(error=>{schemaReady=null;throw error});
+  ]);
+  await env.DB.prepare(`ALTER TABLE content_social_profiles ADD COLUMN bluesky_did TEXT`).run().catch(()=>{});
+  })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
 async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
@@ -126,12 +135,12 @@ async function refreshProfiles(env){
     if(!page){
       await env.DB.prepare(`INSERT INTO content_social_profiles(tool_slug,tool_name,source_url,status,attempts,last_error,last_checked_at,created_at,updated_at) VALUES(?,?,?,'fetch_failed',1,'official_site_fetch_failed',datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET attempts=content_social_profiles.attempts+1,last_error='official_site_fetch_failed',last_checked_at=datetime('now'),updated_at=datetime('now')`).bind(tool.slug,safe(tool.name,160),tool.sourceUrl).run();continue;
     }
-    const s=socialLinks(page.html,hostOf(page.url)),ok=Boolean(s.x||s.bluesky||s.linkedin);
+    const s=socialLinks(page.html,hostOf(page.url)),blueskyDid=s.bluesky?await resolveBlueskyDid(s.bluesky):null,ok=Boolean(s.x||s.bluesky||s.linkedin);
     if(ok)verified++;
-    await env.DB.prepare(`INSERT INTO content_social_profiles(tool_slug,tool_name,source_url,x_handle,bluesky_handle,linkedin_url,status,attempts,last_error,last_checked_at,verified_at,created_at,updated_at)
-      VALUES(?,?,?,?,?,?,?,1,NULL,datetime('now'),CASE WHEN ? THEN datetime('now') ELSE NULL END,datetime('now'),datetime('now'))
-      ON CONFLICT(tool_slug) DO UPDATE SET tool_name=excluded.tool_name,source_url=excluded.source_url,x_handle=COALESCE(excluded.x_handle,content_social_profiles.x_handle),bluesky_handle=COALESCE(excluded.bluesky_handle,content_social_profiles.bluesky_handle),linkedin_url=COALESCE(excluded.linkedin_url,content_social_profiles.linkedin_url),status=excluded.status,attempts=content_social_profiles.attempts+1,last_error=NULL,last_checked_at=datetime('now'),verified_at=CASE WHEN excluded.status='verified' THEN datetime('now') ELSE content_social_profiles.verified_at END,updated_at=datetime('now')`)
-      .bind(tool.slug,safe(tool.name,160),tool.sourceUrl,s.x,s.bluesky,s.linkedin,ok?'verified':'no_official_social_link',ok?1:0).run();
+    await env.DB.prepare(`INSERT INTO content_social_profiles(tool_slug,tool_name,source_url,x_handle,bluesky_handle,bluesky_did,linkedin_url,status,attempts,last_error,last_checked_at,verified_at,created_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,1,NULL,datetime('now'),CASE WHEN ? THEN datetime('now') ELSE NULL END,datetime('now'),datetime('now'))
+      ON CONFLICT(tool_slug) DO UPDATE SET tool_name=excluded.tool_name,source_url=excluded.source_url,x_handle=COALESCE(excluded.x_handle,content_social_profiles.x_handle),bluesky_handle=COALESCE(excluded.bluesky_handle,content_social_profiles.bluesky_handle),bluesky_did=COALESCE(excluded.bluesky_did,content_social_profiles.bluesky_did),linkedin_url=COALESCE(excluded.linkedin_url,content_social_profiles.linkedin_url),status=excluded.status,attempts=content_social_profiles.attempts+1,last_error=NULL,last_checked_at=datetime('now'),verified_at=CASE WHEN excluded.status='verified' THEN datetime('now') ELSE content_social_profiles.verified_at END,updated_at=datetime('now')`)
+      .bind(tool.slug,safe(tool.name,160),tool.sourceUrl,s.x,s.bluesky,blueskyDid,s.linkedin,ok?'verified':'no_official_social_link',ok?1:0).run();
   }
   return {scanned,verified};
 }
@@ -215,7 +224,7 @@ function editorialTargets(family,path='/',campaign='content_engine_v21'){
 async function buildBrief(env,family,{issue=false,task=null}={}){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE growth_action_events SET status='legacy_unverified',updated_at=datetime('now') WHERE status='prepared'`).run().catch(()=>{});
-  const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
+  const profiles=await env.DB.prepare(`SELECT tool_slug,tool_name,x_handle,bluesky_handle,bluesky_did,linkedin_url,verified_at FROM content_social_profiles WHERE status='verified' ORDER BY tool_name`).all();
   let supervisor={status:null,directive:null,config:{}};
   try{const row=await env.DB.prepare(`SELECT status,directive,directive_json FROM growth_supervisor_state WHERE engine='content'`).first();if(row){let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}supervisor={status:row.status,directive:row.directive,config}}}catch{}
   const growth=await env.DB.prepare(`SELECT subject_type,subject_key,priority_score,opportunity_key FROM growth_opportunity_state WHERE status='active' AND subject_type IN ('tool','news_update') ORDER BY priority_score DESC LIMIT 80`).all().catch(()=>({results:[]}));
@@ -224,7 +233,7 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
       AND (opportunity_key LIKE 'sprint-search:%' OR (opportunity_key LIKE 'gsc-page:%' AND COALESCE(json_extract(signal_json,'$.evidence_confidence'),'')='meaningful'))
     ORDER BY priority_score DESC,COALESCE(CAST(json_extract(signal_json,'$.impressions') AS INTEGER),0) DESC
     LIMIT 18`).all().catch(()=>({results:[]}));
-  const commercial=await env.DB.prepare(`SELECT a.tool_slug,COALESCE(p.tool_name,a.tool_slug) tool_name,p.x_handle,p.bluesky_handle,p.linkedin_url,a.policy_status,a.redirect_allowed,w.affiliate_url
+  const commercial=await env.DB.prepare(`SELECT a.tool_slug,COALESCE(p.tool_name,a.tool_slug) tool_name,p.x_handle,p.bluesky_handle,p.bluesky_did,p.linkedin_url,a.policy_status,a.redirect_allowed,w.affiliate_url
     FROM affiliate_social_policy a
     JOIN affiliate_workflow w ON w.tool_slug=a.tool_slug
     LEFT JOIN content_social_profiles p ON p.tool_slug=a.tool_slug AND p.status='verified'
@@ -285,8 +294,11 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
   else if(selected)mentionRows=[profileBySlug.get(selected.tool_slug)].filter(Boolean);
   else if(comparison)mentionRows=comparison.map(slug=>profileBySlug.get(slug)).filter(Boolean);
   else if(all.length){const start=pickIndex(family+date,all.length);mentionRows=[topGrowthProfile,all[start],all[(start+1)%all.length]].filter((x,i,a)=>x&&a.findIndex(y=>y.tool_slug===x.tool_slug)===i).slice(0,2);}
-  const mentions=mentionRows.map(x=>({tool_slug:x.tool_slug,name:x.tool_name,x_handle:x.x_handle?('@'+x.x_handle):null,bluesky_handle:x.bluesky_handle?('@'+x.bluesky_handle):null,linkedin_url:x.linkedin_url||null,linkedin_vanity:linkedinVanity(x.linkedin_url),verified_from_official_site:true}));
-  const preferredMention=mentions[0]||null;
+  const mentions=mentionRows.map(x=>{
+    const blueskyHandle=x.bluesky_handle?('@'+x.bluesky_handle):null,blueskyDid=x.bluesky_did||null;
+    return{tool_slug:x.tool_slug,name:x.tool_name,x_handle:x.x_handle?('@'+x.x_handle):null,bluesky_handle:blueskyHandle,bluesky_did:blueskyDid,bluesky_facets:blueskyHandle&&blueskyDid?[{inputMode:'byKeyword',keyword:blueskyHandle,feature:{$type:'app.bsky.richtext.facet#mention',did:blueskyDid}}]:[],linkedin_url:x.linkedin_url||null,linkedin_vanity:linkedinVanity(x.linkedin_url),verified_from_official_site:true};
+  });
+  const preferredMention=(sprintTarget?.signals?.tool_slug||selected||comparison)?(mentions[0]||null):null;
   const routeCandidate=(routeCandidates.results||[])[0]||null;
   const mode=selected?'affiliate_social_verified':'editorial';
   const targetMode=selected?(Number(selected.redirect_allowed)===1?'toolscout_redirect':'direct_vendor'):'editorial';
@@ -308,6 +320,7 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     comparisonContext?`Comparison selected for this run: ${comparisonContext.tool_a} vs ${comparisonContext.tool_b}. Use this exact comparison pair and the exact platform URL supplied below. Present practical tradeoffs, never a universal winner.`:null,
     selected?`Commercial candidate: ${selected.tool_name} (${selected.tool_slug}). Official programme material explicitly permits organic-social affiliate/referral-link promotion. Target mode: ${targetMode}. ${targetMode==='direct_vendor'?'The programme restricts redirects/cloaking, so use the exact vendor affiliate URL supplied below without modification.':'The checked material allows the ToolScout redirect route.'} Include a clear affiliate disclosure. Never change editorial ranking or make the post a recommendation solely because it is monetized.`:'Do not publish a direct affiliate link in this run. Use an editorial ToolScout URL only.',
     mentions.length?`Verified manufacturer/profile candidates discovered from links on their official websites: ${mentions.map(m=>`${m.name} | X ${m.x_handle||'none'} | Bluesky ${m.bluesky_handle||'none'} | LinkedIn company URL ${m.linkedin_url||'none'} | LinkedIn vanity ${m.linkedin_vanity||'none'}`).join(' ; ')}. When at least one candidate is materially relevant, prefer one verified native mention to increase qualified borrowed-audience reach. Use at most two manufacturer mentions in comparison content and at most one in discovery/practical content. Never invent or guess a handle or identity.`:'No verified manufacturer social handles are currently available. Do not invent mentions.',
+    preferredMention?`Preferred native mention for this run: ${preferredMention.name}. X ${preferredMention.x_handle||'none'}; Bluesky ${preferredMention.bluesky_handle||'none'}; LinkedIn vanity ${preferredMention.linkedin_vanity||'none'}. This preferred identity is directly tied to the selected tool/comparison, so use the platform-specific verified mention exactly once when that identity exists.`:'No preferred native mention is designated for this run; do not force a tag.',
     routeCandidate?`Borrowed-audience amplification candidate from the Distribution Network: ${routeCandidate.surface_name||routeCandidate.surface_slug} via ${routeCandidate.route_type} at ${routeCandidate.route_url}. This is an alternate route, not proof of placement. Use or mention this external profile only if it is directly relevant to the post topic and the interaction is useful rather than promotional noise. Do not invent a handle, do not send a direct message, and do not force a tag when relevance is weak.`:'No alternate social distribution route is queued for this brief.',
     'Mention guardrail: maximum 2 relevant manufacturers plus at most 1 directly relevant borrowed-audience route in an editorial post. Never tag unrelated people or companies. No engagement bait.',
     selected?'Disclosure required. Use plain, conspicuous wording such as "Affiliate link: ToolScout may earn a commission if you buy through this link. This does not affect our recommendations." For X/Bluesky, "Affiliate link" is the minimum short disclosure when space is constrained.':'No affiliate disclosure is needed unless the post contains an affiliate target.',
@@ -324,7 +337,7 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     }
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`contentbrief_${crypto.randomUUID()}`,'growth_content_brief_issued','completed','content_engine',briefId,`Content brief issued to the publishing pipeline with autonomous growth priority ${growthKey||'none'}, verified manufacturer mentions only, and ${routeCandidate?'one borrowed-audience route candidate':'no borrowed-audience route candidate'}.`).run().catch(()=>{});
   }
-  return {issued:Boolean(issue),brief_id:briefId,execution_task_id:task?.task_id||null,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,preferred_mention:preferredMention?{name:preferredMention.name,tool_slug:preferredMention.tool_slug,x_handle:preferredMention.x_handle,bluesky_handle:preferredMention.bluesky_handle,linkedin_url:preferredMention.linkedin_url,linkedin_vanity:preferredMention.linkedin_vanity}:null,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
+  return {issued:Boolean(issue),brief_id:briefId,execution_task_id:task?.task_id||null,growth_opportunity_key:growthKey,growth_priority_score:sprintTarget?Number(sprintTarget.priority_score||0):(selected?Number(growthRank.get(selected.tool_slug)?.score||0):null),family,commercial_mode:mode,human_acquisition_target:sprintTarget?{path:sprintTarget.subject_key,title:sprintTarget.signals?.title||null,impressions:Number(sprintTarget.signals?.impressions||0),position:Number(sprintTarget.signals?.position||0)}:null,affiliate_target_mode:targetMode,selected_tool:selected?{slug:selected.tool_slug,name:selected.tool_name}:null,comparison:comparisonContext,mentions,preferred_mention:preferredMention?{name:preferredMention.name,tool_slug:preferredMention.tool_slug,x_handle:preferredMention.x_handle,bluesky_handle:preferredMention.bluesky_handle,bluesky_did:preferredMention.bluesky_did,bluesky_facets:preferredMention.bluesky_facets,linkedin_url:preferredMention.linkedin_url,linkedin_vanity:preferredMention.linkedin_vanity}:null,alternate_distribution_route:routeCandidate?{route_id:routeCandidate.route_id,surface:routeCandidate.surface_name||routeCandidate.surface_slug,type:routeCandidate.route_type,url:routeCandidate.route_url,attempts:Number(routeCandidate.attempts||0)}:null,linkedin_target_url:t.linkedin,x_target_url:t.x,bluesky_target_url:t.bluesky,affiliate_disclosure_required:Boolean(selected),prompt_context:prompt};
 }
 
 export async function issueGrowthContentBrief(env,task=null){
