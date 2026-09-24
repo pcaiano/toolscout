@@ -2,7 +2,7 @@ let schemaReady=null;
 
 const CYCLE_OWNED_MISSIONS=new Map([
   ['distribution:autonomous_cycle',{minutes:60,anchorMinute:15}],
-  ['distribution:network_cycle',{minutes:60,anchorMinute:15}],
+  ['distribution:network_cycle',{minutes:120,anchorMinute:15}],
   ['growth:execution_contract',{minutes:60,anchorMinute:15}],
   ['growth:opportunity_coordination',{minutes:60,anchorMinute:15}]
 ]);
@@ -191,12 +191,15 @@ export async function runWithLedger(env,{engine,mission,triggerName=null,singleF
     const result=await fn();
     const explicitFailure=result&&result.ok===false;
     const status=explicitFailure?'degraded':'completed';
-    await recordEngineRun(env,{runId,engine:e,mission:m,triggerName,status,startedAt,completedAt:new Date().toISOString().replace('T',' ').slice(0,19),detail:explicitFailure?(result.reason||'Mission returned ok=false'):'Mission completed',evidence:result});
+    const finalEvidence=result&&typeof result==='object'&&!Array.isArray(result)
+      ?{...result,_cycle:{key:cycleClaim?.cycle?.key||null,owner:cycleClaim?.owner||null,recovered:Boolean(cycleClaim?.recovered)}}
+      :{result,_cycle:{key:cycleClaim?.cycle?.key||null,owner:cycleClaim?.owner||null,recovered:Boolean(cycleClaim?.recovered)}};
+    await recordEngineRun(env,{runId,engine:e,mission:m,triggerName,status,startedAt,completedAt:new Date().toISOString().replace('T',' ').slice(0,19),detail:explicitFailure?(result.reason||'Mission returned ok=false'):'Mission completed',evidence:finalEvidence});
     if(explicitFailure){const error=new Error(result.reason||`${e}:${m} returned ok=false`);error.engineResult=result;throw error}
     await completeMissionCycleClaim(env,cycleClaim,runId);
     return result;
   }catch(error){
-    await recordEngineRun(env,{runId,engine:e,mission:m,triggerName,status:'failed',startedAt,completedAt:new Date().toISOString().replace('T',' ').slice(0,19),detail:String(error?.message||error),evidence:{name:error?.name||'Error',message:String(error?.message||error)}}).catch(()=>{});
+    await recordEngineRun(env,{runId,engine:e,mission:m,triggerName,status:'failed',startedAt,completedAt:new Date().toISOString().replace('T',' ').slice(0,19),detail:String(error?.message||error),evidence:{name:error?.name||'Error',message:String(error?.message||error),_cycle:{key:cycleClaim?.cycle?.key||null,owner:cycleClaim?.owner||null,recovered:Boolean(cycleClaim?.recovered)}}}).catch(()=>{});
     await failMissionCycleClaim(env,cycleClaim,runId);
     throw error;
   }finally{
