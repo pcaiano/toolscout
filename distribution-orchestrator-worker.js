@@ -1313,13 +1313,13 @@ if(u.pathname==='/api/distribution/priorities/public-reconcile'&&request.method=
 if(u.pathname==='/api/growth/engine-health/public-reconcile'&&request.method==='POST'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   const results={};
-  const run=async(key,engine,mission,minutes,fn)=>{
-    try{results[key]=await runWithLedger(env,{engine,mission,triggerName:'make_engine_health_recovery',singleFlightMinutes:minutes},fn)}
+  const run=async(key,engine,mission,minutes,fn,ledgerExtra={})=>{
+    try{results[key]=await runWithLedger(env,{engine,mission,triggerName:'make_engine_health_recovery',singleFlightMinutes:minutes,...ledgerExtra},fn)}
     catch(error){results[key]={ok:false,error:String(error?.message||error).slice(0,500)}}
   };
   await run('economicLearning','distribution','economic_learning',20,()=>learnEconomics(env));
   await run('operatingPriorities','distribution','operating_priorities',20,()=>rebalanceDistributionPriorities(env));
-  await run('networkCycle','distribution','network_cycle',20,()=>runDistributionNetworkCycle(env));
+  await run('networkCycle','distribution','network_cycle',20,()=>runDistributionNetworkCycle(env),{cycleContext:missionCycleContext('distribution','network_cycle',Date.now()),cycleOwner:'make_engine_health_recovery'});
   await run('catalogRuntimeQuality','catalog','runtime_quality',20,()=>contractVerifyCatalogBatch(env));
   await run('contentSocialIntelligence','content','social_intelligence',15,()=>runContentSocialIntelligenceCycle(env));
   const ok=Object.values(results).every(x=>x?.ok!==false);
