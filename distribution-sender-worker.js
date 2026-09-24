@@ -125,7 +125,11 @@ async function createReputationOverride(env,{kind,key,to,subject,body,issue_code
   return {token,payloadHash,contentHash};
 }
 async function validateReputationOverride(request,env){
-  let b={};try{b=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_HEADERS})}
+  let b={};try{
+    const contentType=String(request.headers.get('content-type')||'').toLowerCase();
+    if(contentType.includes('application/json'))b=await request.json();
+    else{const form=await request.formData();b=Object.fromEntries([...form.entries()].map(([k,v])=>[k,String(v)]))}
+  }catch{return Response.json({ok:false,error:'invalid_payload'},{status:400,headers:JSON_HEADERS})}
   await ensureReputationSchema(env);
   const token=String(b.override_token||'');
   const row=await env.DB.prepare(`SELECT * FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
@@ -135,7 +139,11 @@ async function validateReputationOverride(request,env){
   return Response.json({ok:true,override_token:token,kind:row.kind,key:row.item_key},{headers:JSON_HEADERS});
 }
 async function finalizeReputationOverride(request,env){
-  let b={};try{b=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_HEADERS})}
+  let b={};try{
+    const contentType=String(request.headers.get('content-type')||'').toLowerCase();
+    if(contentType.includes('application/json'))b=await request.json();
+    else{const form=await request.formData();b=Object.fromEntries([...form.entries()].map(([k,v])=>[k,String(v)]))}
+  }catch{return Response.json({ok:false,error:'invalid_payload'},{status:400,headers:JSON_HEADERS})}
   await ensureReputationSchema(env);
   const token=String(b.override_token||''),gmailId=String(b.gmail_message_id||'').slice(0,300);
   const row=await env.DB.prepare(`SELECT * FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
