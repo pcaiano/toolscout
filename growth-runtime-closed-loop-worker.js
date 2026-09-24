@@ -1,5 +1,5 @@
 import base from './growth-runtime-integrity-worker.js';
-import {runWithLedger} from './engine-run-ledger.js';
+import {runWithLedger,missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const AUTHORITY_ATTEMPT_MIN_24H=15;
@@ -88,7 +88,7 @@ function authorized(request,env){
 }
 async function internalJson(baseRequest,env,ctx,path,{method='POST',body=null}={}){
   if(!env.ADMIN_TOKEN)return {ok:false,httpStatus:0,error:'admin_token_unavailable'};
-  const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
+  const headers=new Headers({Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'});copyMissionCycleHeaders(baseRequest,headers);
   const init={method,headers};
   if(body!=null)init.body=JSON.stringify(body);
   try{
@@ -235,7 +235,7 @@ export default {
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
     if(trigger==='15 * * * *'){
-      const request=new Request('https://trytoolscout.org/api/distribution/authority/close-loop');
+      const request=new Request('https://trytoolscout.org/api/distribution/authority/close-loop',{headers:missionCycleHeaders(event,'authority_closed_loop_scheduler')});
       try{await runWithLedger(env,{engine:'distribution',mission:'authority_execution_recovery',triggerName:'hourly_closed_loop',singleFlightMinutes:75},()=>closeAuthorityExecutionLoop(request,env,ctx));}
       catch(error){await recordEvent(env,'authority_closed_loop_runtime_error','failed',String(error?.message||error).slice(0,1200));}
     }

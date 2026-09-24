@@ -1,7 +1,7 @@
 import {actionUrl as validHumanActionUrl,existingParentSubmission,reconcileDuplicateSubmissionGates} from './chairman-task-quality.js';
 import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
-import {runWithLedger} from './engine-run-ledger.js';
+import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
 import {ensureHumanGateSchema,humanGateKey,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,humanGateSnapshot} from './human-gate-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
@@ -830,7 +830,7 @@ export default {
     const u=new URL(request.url);
     if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){
       if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api'},()=>runAutonomousDistributionCycle(env)),{headers:H});
+      const cycleContext=missionCycleContextFromRequest(request,'distribution','autonomous_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api',cycleContext,cycleOwner},()=>runAutonomousDistributionCycle(env)),{headers:H});
     }
     if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){
       if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});

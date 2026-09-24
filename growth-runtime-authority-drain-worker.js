@@ -1,4 +1,5 @@
 import base from './growth-runtime-observability-worker.js';
+import {missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const MAX_DRAIN_PASSES=4;
@@ -29,7 +30,7 @@ async function senderState(env){
 async function record(env,type,status,detail){try{await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authority_drain_${crypto.randomUUID()}`,type,status,'backlink_acquisition',String(detail||'').slice(0,1800)).run()}catch{}}
 async function internalJson(request,env,ctx,path,{method='POST'}={}){
   if(!env.ADMIN_TOKEN)return {ok:false,status:0,payload:null,error:'admin_token_unavailable'};
-  try{const r=await base.fetch(new Request(new URL(path,request.url),{method,headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'}}),env,ctx);let payload=null;try{payload=await r.json()}catch{}return {ok:r.ok,status:r.status,payload}}catch(error){return {ok:false,status:0,payload:null,error:String(error?.message||error).slice(0,400)}}
+  try{const headers=new Headers({Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'});copyMissionCycleHeaders(request,headers);const r=await base.fetch(new Request(new URL(path,request.url),{method,headers}),env,ctx);let payload=null;try{payload=await r.json()}catch{}return {ok:r.ok,status:r.status,payload}}catch(error){return {ok:false,status:0,payload:null,error:String(error?.message||error).slice(0,400)}}
 }
 async function drainSender(request,env,ctx){
   const passes=[];
@@ -84,7 +85,7 @@ export default{
   async scheduled(event,env,ctx){
     const out=typeof base.scheduled==='function'?await base.scheduled(event,env,ctx):undefined;
     if((event?.cron||'scheduled')==='15 * * * *'){
-      const req=new Request('https://trytoolscout.org/api/distribution/authority/post-schedule-drain');
+      const req=new Request('https://trytoolscout.org/api/distribution/authority/post-schedule-drain',{headers:missionCycleHeaders(event,'authority_drain_scheduler')});
       try{await drainSender(req,env,ctx)}catch(error){await record(env,'authority_sender_drain_error','failed',String(error?.message||error).slice(0,1000))}
     }
     return out;

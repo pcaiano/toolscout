@@ -1,5 +1,5 @@
 import base from './distribution-embed-worker.js';
-import {runWithLedger} from './engine-run-ledger.js';
+import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const NETWORK_TYPES=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface)/i;
@@ -442,7 +442,7 @@ export default {
     const u=new URL(request.url);
     if(u.pathname==='/api/distribution/network/refresh'&&request.method==='POST'){
       if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:'manual_api'},()=>runDistributionNetworkCycle(env)),{headers:JSON_H});
+      const cycleContext=missionCycleContextFromRequest(request,'distribution','network_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:'manual_api',cycleContext,cycleOwner},()=>runDistributionNetworkCycle(env)),{headers:JSON_H});
     }
     if(u.pathname==='/api/distribution/network/metrics'&&request.method==='GET'){
       if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});

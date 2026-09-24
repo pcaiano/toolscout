@@ -1,4 +1,5 @@
 import base from './seo-cloudflare-runtime-worker.js';
+import {missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const ROUTES=[
@@ -186,7 +187,7 @@ async function health(env){
 async function authorityInternal(request,env,ctx,path,{method='POST'}={}){
   if(!env.ADMIN_TOKEN)return {ok:false,status:0,body:null,error:'admin_token_unavailable'};
   try{
-    const r=await base.fetch(new Request(new URL(path,request.url),{method,headers:{Authorization:'Bearer '+env.ADMIN_TOKEN,'Content-Type':'application/json'}}),env,ctx);
+    const headers=new Headers({Authorization:'Bearer '+env.ADMIN_TOKEN,'Content-Type':'application/json'});copyMissionCycleHeaders(request,headers);const r=await base.fetch(new Request(new URL(path,request.url),{method,headers}),env,ctx);
     let body=null;try{body=await r.json()}catch{}
     return {ok:r.ok,status:r.status,body};
   }catch(error){return {ok:false,status:0,body:null,error:String(error?.message||error).slice(0,500)}}
@@ -233,7 +234,7 @@ export default{
     }
     const inherited=typeof base.scheduled==='function'?await base.scheduled(event,env,ctx):undefined;
     if(trigger==='15 * * * *'){
-      const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/'),env,ctx).catch(()=>null);
+      const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/',{headers:missionCycleHeaders(event,'authority_acquisition_scheduler')}),env,ctx).catch(()=>null);
       if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }
     return inherited;
