@@ -164,9 +164,9 @@ async function finalizeReputationOverride(request,env){
   await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='sent_and_learned',sent_at=datetime('now'),gmail_message_id=?,error=NULL WHERE override_token=?`)
     .bind(gmailId||null,token).run();
   if(row.kind==='vendor'){
-    await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='sent',attempts=attempts+1,outreach_sent_at=datetime('now'),outreach_error=NULL,updated_at=datetime('now') WHERE tool_slug=? AND status='reputation_quarantine'`).bind(row.item_key).run().catch(()=>{});
+    await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status='sent',attempts=attempts+1,outreach_sent_at=datetime('now'),outreach_error=NULL,updated_at=datetime('now') WHERE tool_slug=? AND status IN ('reputation_quarantine','owner_override_dispatching')`).bind(row.item_key).run().catch(()=>{});
   }else if(row.kind==='network'){
-    await env.DB.prepare(`UPDATE distribution_network_outreach SET status='sent',attempts=attempts+1,outreach_sent_at=datetime('now'),outreach_error=NULL,updated_at=datetime('now') WHERE surface_slug=? AND status='reputation_quarantine'`).bind(row.item_key).run().catch(()=>{});
+    await env.DB.prepare(`UPDATE distribution_network_outreach SET status='sent',attempts=attempts+1,outreach_sent_at=datetime('now'),outreach_error=NULL,updated_at=datetime('now') WHERE surface_slug=? AND status IN ('reputation_quarantine','owner_override_dispatching')`).bind(row.item_key).run().catch(()=>{});
   }
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at)
     VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`repsend_${crypto.randomUUID()}`,'outbound_reputation_override_sent','completed','reputation_boundary',`${row.kind}:${row.item_key}`,`Owner-approved quarantined email sent immediately and filter learning applied. Gmail message ${gmailId||'recorded'}.`).run().catch(()=>{});
