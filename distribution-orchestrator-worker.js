@@ -856,7 +856,11 @@ async function runGrowthExecutionContractCycle(env){
 
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
   await runSeoBatch(4);
-  if(selectedInternalLane==='affiliate_cycle')await runInternal('affiliate_cycle',(task)=>runAffiliateCoverageCycle(env,task));
+  if(selectedInternalLane==='affiliate_cycle')await runInternal('affiliate_cycle',async(task)=>{
+    const affiliate=await runAffiliateCoverageCycle(env,task);
+    const socialPolicy=await runContentSocialIntelligenceCycle(env);
+    return{affiliate,social_policy_onboarding:socialPolicy};
+  });
   if(selectedInternalLane==='catalog_cycle')await runInternal('catalog_cycle',async(task)=>{
     if(task?.source_kind==='opportunity'&&task?.subject_type==='catalog_gap')return{task:await executeCatalogGrowthTask(env,task)};
     const verify=await contractVerifyCatalogBatch(env);
