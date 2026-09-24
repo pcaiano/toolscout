@@ -107,6 +107,11 @@ async function ensureSchema(env){
       evidence_note TEXT,active INTEGER NOT NULL DEFAULT 1,verified_at TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_social_policy_queue(
+      tool_slug TEXT PRIMARY KEY,status TEXT NOT NULL DEFAULT 'pending',source TEXT,
+      affiliate_url TEXT,queued_at TEXT NOT NULL DEFAULT (datetime('now')),
+      processed_at TEXT,updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS social_affiliate_redirects(
       redirect_id TEXT PRIMARY KEY,tool_slug TEXT NOT NULL,platform TEXT,utm_campaign TEXT,user_agent_hash TEXT,country TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -175,8 +180,10 @@ async function refreshPolicies(env){
   const activeRows=await env.DB.prepare(`SELECT tool_slug,status,program_url,application_url,evidence_json FROM affiliate_workflow WHERE status IN ('verified','active','earning','link_acquired') ORDER BY tool_slug`).all();
   const evidenceRows=await env.DB.prepare(`SELECT tool_slug,evidence_url,classification_hint,evidence_note,verified_at FROM affiliate_social_evidence_registry WHERE active=1`).all().catch(()=>({results:[]}));
   const evidenceBySlug=new Map((evidenceRows.results||[]).map(x=>[x.tool_slug,x]));
+  const queued=await env.DB.prepare(`SELECT tool_slug FROM affiliate_social_policy_queue WHERE status='pending' ORDER BY queued_at ASC`).all().catch(()=>({results:[]}));
+  const queuedSet=new Set((queued.results||[]).map(x=>x.tool_slug));
   const rows=await env.DB.prepare(`SELECT tool_slug,last_checked_at FROM affiliate_social_policy`).all(),by=new Map((rows.results||[]).map(x=>[x.tool_slug,x]));
-  const due=(activeRows.results||[]).filter(x=>{const r=by.get(x.tool_slug);if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).slice(0,MAX_POLICY_SCANS);
+  const due=(activeRows.results||[]).filter(x=>{const r=by.get(x.tool_slug);if(queuedSet.has(x.tool_slug))return true;if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).sort((a,b)=>(queuedSet.has(b.tool_slug)?1:0)-(queuedSet.has(a.tool_slug)?1:0)).slice(0,Math.max(MAX_POLICY_SCANS,queuedSet.size));
   let scanned=0,allowed=0,unknown=0,blocked=0;
   for(const item of due){
     scanned++;
@@ -254,8 +261,9 @@ async function refreshPolicies(env){
       VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET organic_social_allowed=excluded.organic_social_allowed,direct_affiliate_link_allowed=excluded.direct_affiliate_link_allowed,redirect_allowed=excluded.redirect_allowed,disclosure_required=excluded.disclosure_required,policy_status=excluded.policy_status,evidence_url=excluded.evidence_url,evidence_detail=excluded.evidence_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
       .bind(item.tool_slug,organic,directLink,redirect,disclosure?1:1,status,registryTrusted?registeredUrl.href:(pages[0]?.url||direct?.href||home?.href||null),safe(detail+(registered?.evidence_note?` Evidence registry: ${registered.evidence_note}`:'') ,1200)).run();
+    await env.DB.prepare(`UPDATE affiliate_social_policy_queue SET status='processed',processed_at=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND status='pending'`).bind(item.tool_slug).run().catch(()=>{});
   }
-  return {scanned,allowed,unknown,blocked};
+  return {scanned,allowed,unknown,blocked,pending_onboarding:Math.max(0,queuedSet.size-scanned)};
 }
 
 function pickIndex(seed,length){if(!length)return 0;let h=0;for(const c of seed)h=(h*31+c.charCodeAt(0))>>>0;return h%length}
