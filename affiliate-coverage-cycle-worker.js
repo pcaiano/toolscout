@@ -1,6 +1,7 @@
 import {coverageEngineSnapshot,automationBoundary} from './affiliate-coverage-engine.js';
 import {normalizeAffiliateState} from './affiliate-operations.js';
 import {publicMergedTools} from './catalog-autonomy-worker.js';
+import {queueAffiliateSocialPolicyReview} from './affiliate-social-onboarding.js';
 
 const MAX_TOOLS_PER_CYCLE=8;
 const MAX_CANDIDATES_PER_TOOL=8;
@@ -78,7 +79,9 @@ async function reconcileProductionAffiliateRoutes(env){
         updated_at=datetime('now')
       WHERE affiliate_workflow.affiliate_url IS NOT excluded.affiliate_url
          OR affiliate_workflow.status NOT IN ('active','verified')`).bind(slug,url).run();
-    reconciled+=Number(result?.meta?.changes||result?.changes||0);
+    const changed=Number(result?.meta?.changes||result?.changes||0);
+    reconciled+=changed;
+    if(changed>0)await queueAffiliateSocialPolicyReview(env,{toolSlug:slug,status:'active',affiliateUrl:url,source:'production_registry'}).catch(()=>{});
   }
   return {reconciled,production_routes:Object.values(registry||{}).filter(x=>x?.enabled&&x?.url).length};
 }
@@ -159,8 +162,9 @@ async function activateAcquiredLinks(env){
       .bind(row.tool_slug,row.affiliate_url,external.ok?'reachable':'failed',external.status).run();
     if(!external.ok){failed++;continue}
     if(row.status==='link_acquired'){
-      await env.DB.prepare(`UPDATE affiliate_workflow SET status='active',source_actor='affiliate_autonomy',last_verified=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND status='link_acquired'`).bind(row.tool_slug).run();
+      const activationWrite=await env.DB.prepare(`UPDATE affiliate_workflow SET status='active',source_actor='affiliate_autonomy',last_verified=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND status='link_acquired'`).bind(row.tool_slug).run();
       await env.DB.prepare(`INSERT INTO affiliate_workflow_history(tool_slug,previous_state,new_state,evidence_source,actor_source,notes,created_at) VALUES(?,'link_acquired','active','affiliate_url_reachable','affiliate_autonomy','Validated affiliate destination and activated D1-backed /go route.',datetime('now'))`).bind(row.tool_slug).run().catch(()=>{});
+      if(Number(activationWrite?.meta?.changes||activationWrite?.changes||0)>0)await queueAffiliateSocialPolicyReview(env,{toolSlug:row.tool_slug,status:'active',affiliateUrl:row.affiliate_url,source:'affiliate_autonomy'}).catch(()=>{});
       activated++;
     }
     const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);
@@ -174,8 +178,9 @@ async function activateAcquiredLinks(env){
           AND (production_status IS NOT ? OR production_http_status IS NOT ? OR production_location IS NOT ?)`)
         .bind(ok?'verified':'failed',r.status,finalUrl,ok?'verified':'failed',row.tool_slug,ok?'verified':'failed',r.status,finalUrl).run();
       if(ok){
-        await env.DB.prepare(`UPDATE affiliate_workflow SET status='verified',source_actor='affiliate_autonomy',last_verified=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND status IN ('active','link_acquired')`).bind(row.tool_slug).run();
+        const verifyWrite=await env.DB.prepare(`UPDATE affiliate_workflow SET status='verified',source_actor='affiliate_autonomy',last_verified=datetime('now'),updated_at=datetime('now') WHERE tool_slug=? AND status IN ('active','link_acquired')`).bind(row.tool_slug).run();
         await env.DB.prepare(`INSERT INTO affiliate_workflow_history(tool_slug,previous_state,new_state,evidence_source,actor_source,notes,created_at) VALUES(?,'active','verified','production_go_redirect','affiliate_autonomy','Production /go route verified against the approved affiliate destination.',datetime('now'))`).bind(row.tool_slug).run().catch(()=>{});
+        if(Number(verifyWrite?.meta?.changes||verifyWrite?.changes||0)>0)await queueAffiliateSocialPolicyReview(env,{toolSlug:row.tool_slug,status:'verified',affiliateUrl:row.affiliate_url,source:'affiliate_autonomy'}).catch(()=>{});
         verified++;
       }else failed++;
     }catch{failed++}finally{clearTimeout(timer)}
