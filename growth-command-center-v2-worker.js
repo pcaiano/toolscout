@@ -835,6 +835,7 @@ async function reputationReview(request,env){
     (override_token,kind,item_key,recipient,subject,body,payload_hash,content_hash,issue_codes,template_id,status,created_at)
     VALUES(?,?,?,?,?,?,?,?,?,?, 'pending', datetime('now'))`)
     .bind(token,kind,key,to,subject,emailBody,payloadHash,contentHash,issues.join('|'),templateId).run();
+  await env.DB.prepare(`UPDATE ${table} SET status='owner_override_dispatching',updated_at=datetime('now') WHERE ${keyColumn}=? AND status='reputation_quarantine'`).bind(key).run();
 
   let dispatch;
   try{
@@ -845,13 +846,21 @@ async function reputationReview(request,env){
       signal:AbortSignal.timeout(20000)
     });
   }catch(error){
-    await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='dispatch_failed',error=? WHERE override_token=?`).bind(String(error?.message||error).slice(0,1000),token).run().catch(()=>{});
-    return Response.json({ok:false,error:'reputation_override_dispatch_failed'},{status:502,headers:JSON_H});
+    const state=await env.DB.prepare(`SELECT status FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first().catch(()=>null);
+    if(state?.status==='pending'){
+      await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='dispatch_failed',error=? WHERE override_token=?`).bind(String(error?.message||error).slice(0,1000),token).run().catch(()=>{});
+      await env.DB.prepare(`UPDATE ${table} SET status='reputation_quarantine',updated_at=datetime('now') WHERE ${keyColumn}=? AND status='owner_override_dispatching'`).bind(key).run().catch(()=>{});
+    }
+    return Response.json({ok:false,error:'reputation_override_dispatch_failed',delivery_state:state?.status||'unknown'},{status:502,headers:JSON_H});
   }
   const dispatchText=await dispatch.text().catch(()=>'');
   if(!dispatch.ok){
-    await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='dispatch_failed',error=? WHERE override_token=?`).bind(`HTTP ${dispatch.status}: ${dispatchText.slice(0,700)}`,token).run().catch(()=>{});
-    return Response.json({ok:false,error:'reputation_override_send_failed',http_status:dispatch.status},{status:502,headers:JSON_H});
+    const state=await env.DB.prepare(`SELECT status FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first().catch(()=>null);
+    if(state?.status==='pending'){
+      await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='dispatch_failed',error=? WHERE override_token=?`).bind(`HTTP ${dispatch.status}: ${dispatchText.slice(0,700)}`,token).run().catch(()=>{});
+      await env.DB.prepare(`UPDATE ${table} SET status='reputation_quarantine',updated_at=datetime('now') WHERE ${keyColumn}=? AND status='owner_override_dispatching'`).bind(key).run().catch(()=>{});
+    }
+    return Response.json({ok:false,error:'reputation_override_send_failed',http_status:dispatch.status,delivery_state:state?.status||'unknown'},{status:502,headers:JSON_H});
   }
   const sent=await env.DB.prepare(`SELECT status,gmail_message_id,sent_at FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
   if(sent?.status!=='sent_and_learned')return Response.json({ok:false,error:'reputation_override_not_confirmed',override_token:token},{status:502,headers:JSON_H});
