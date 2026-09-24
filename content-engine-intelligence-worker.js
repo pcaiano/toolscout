@@ -173,7 +173,7 @@ async function refreshPolicies(env){
   const tools=await assetJson(env,'/data/tools.json',[]);
   const toolBySlug=new Map((Array.isArray(tools)?tools:[]).map(x=>[x.slug,x]));
   const activeRows=await env.DB.prepare(`SELECT tool_slug,status,program_url,application_url,evidence_json FROM affiliate_workflow WHERE status IN ('verified','active','earning','link_acquired') ORDER BY tool_slug`).all();
-  const evidenceRows=await env.DB.prepare(`SELECT tool_slug,evidence_url,classification_hint,evidence_note FROM affiliate_social_evidence_registry WHERE active=1`).all().catch(()=>({results:[]}));
+  const evidenceRows=await env.DB.prepare(`SELECT tool_slug,evidence_url,classification_hint,evidence_note,verified_at FROM affiliate_social_evidence_registry WHERE active=1`).all().catch(()=>({results:[]}));
   const evidenceBySlug=new Map((evidenceRows.results||[]).map(x=>[x.tool_slug,x]));
   const rows=await env.DB.prepare(`SELECT tool_slug,last_checked_at FROM affiliate_social_policy`).all(),by=new Map((rows.results||[]).map(x=>[x.tool_slug,x]));
   const due=(activeRows.results||[]).filter(x=>{const r=by.get(x.tool_slug);if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).slice(0,MAX_POLICY_SCANS);
@@ -226,8 +226,11 @@ async function refreshPolicies(env){
     const socialGeneral=SOCIAL_GENERAL.test(text),paidBan=PAID_ONLY_BAN.test(text),cloakBan=CLOAK_BAN.test(text),disclosure=DISCLOSURE.test(text);
     const signals=socialSignals(text);
     const registryFetched=registeredUrl?pages.some(p=>{try{return new URL(p.url).href.replace(/\/$/,'')===registeredUrl.href.replace(/\/$/,'')}catch{return false}}):false;
-    const registryExplicit=registryFetched&&registered?.classification_hint==='explicit_social';
-    const registrySilent=registryFetched&&registered?.classification_hint==='silent_verified';
+    const registryVerifiedAt=Date.parse(String(registered?.verified_at||'').replace(' ','T')+'Z');
+    const registryFresh=Number.isFinite(registryVerifiedAt)&&(Date.now()-registryVerifiedAt)<=30*86400000;
+    const registryTrusted=Boolean(registeredUrl&&(registryFetched||registryFresh));
+    const registryExplicit=registryTrusted&&registered?.classification_hint==='explicit_social';
+    const registrySilent=registryTrusted&&registered?.classification_hint==='silent_verified';
     const termsVerified=registrySilent||pageTexts.some(p=>TERMS_SIGNAL.test(p.text)||/(terms|conditions|agreement|policy|guidelines|rules|acceptable-use|affiliate-terms|program-terms|programme-terms|referral-agreement|legal\/affiliate)/i.test(String(p.url||'')));
     let organic=null,directLink=null,redirect=null,status='terms_unverified',detail='No sufficiently complete official programme terms could be verified automatically.';
     if((signals.explicit||registryExplicit)&&!signals.ban){
@@ -247,7 +250,7 @@ async function refreshPolicies(env){
     await env.DB.prepare(`INSERT INTO affiliate_social_policy(tool_slug,organic_social_allowed,direct_affiliate_link_allowed,redirect_allowed,disclosure_required,policy_status,evidence_url,evidence_detail,last_checked_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET organic_social_allowed=excluded.organic_social_allowed,direct_affiliate_link_allowed=excluded.direct_affiliate_link_allowed,redirect_allowed=excluded.redirect_allowed,disclosure_required=excluded.disclosure_required,policy_status=excluded.policy_status,evidence_url=excluded.evidence_url,evidence_detail=excluded.evidence_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
-      .bind(item.tool_slug,organic,directLink,redirect,disclosure?1:1,status,registryFetched?registeredUrl.href:(pages[0]?.url||direct?.href||home?.href||null),safe(detail+(registered?.evidence_note?` Evidence registry: ${registered.evidence_note}`:'') ,1200)).run();
+      .bind(item.tool_slug,organic,directLink,redirect,disclosure?1:1,status,registryTrusted?registeredUrl.href:(pages[0]?.url||direct?.href||home?.href||null),safe(detail+(registered?.evidence_note?` Evidence registry: ${registered.evidence_note}`:'') ,1200)).run();
   }
   return {scanned,allowed,unknown,blocked};
 }
