@@ -11,10 +11,11 @@ function jsonHeaders(response){
   return h;
 }
 const FACTS_CACHE_MS=60000;
-const AUTHORITY_POLICY_MIN_24H=15;
-const AUTHORITY_POLICY_TARGET_24H=25;
-const ACQUISITION_SURGE_MIN_24H=15;
-const ACQUISITION_SURGE_TARGET_24H=25;
+const AUTHORITY_POLICY_MIN_24H=4;
+const AUTHORITY_POLICY_TARGET_24H=8;
+const ACQUISITION_SURGE_MIN_24H=0;
+const ACQUISITION_SURGE_TARGET_24H=8;
+const ACQUISITION_SURGE_MAX_24H=12;
 let factsCache={at:0,value:null,promise:null};
 async function facts(env){
   const [oauth,authority,content,distributionRuns]=await Promise.all([
@@ -288,13 +289,14 @@ async function buildCommandCenterBusinessTruth(request,env){
   }));
   const persistedGrowthStatus=growth.status||null,persistedGrowthDirective=growth.directive||null;
   const externalExecutions24h=truthNum(growth.external_executions_24h);
-  let currentGrowthStatus='acquisition_surge',currentGrowthDirective='maximum_safe_acquisition_execute_expand_measure_reallocate';
-  if(truthNum(architecture.open_incidents)>0){currentGrowthStatus='critical';currentGrowthDirective='repair_architecture_and_continue_maximum_safe_acquisition'}
-  else if(contract.missingExecutors>0||contract.stalled>0){currentGrowthStatus='critical';currentGrowthDirective='repair_execution_contract_and_continue_maximum_safe_acquisition'}
-  else if(externalExecutions24h<ACQUISITION_SURGE_MIN_24H){currentGrowthStatus='underpowered';currentGrowthDirective='increase_external_execution_to_acquisition_surge_floor'}
+  let currentGrowthStatus='learning',currentGrowthDirective='execute_high_signal_demand_within_resource_budget';
+  if(truthNum(architecture.open_incidents)>0){currentGrowthStatus='critical';currentGrowthDirective='repair_architecture_and_continue_bounded_acquisition'}
+  else if(contract.missingExecutors>0||contract.stalled>0){currentGrowthStatus='critical';currentGrowthDirective='repair_execution_contract_and_continue_bounded_acquisition'}
+  else if(truthNum(growth.attributed_humans_7d)>0){currentGrowthStatus='working';currentGrowthDirective='scale_proven_human_sources_and_existing_search_demand'}
+  else if(externalExecutions24h>=ACQUISITION_SURGE_MAX_24H){currentGrowthStatus='ineffective';currentGrowthDirective='stop_repetitive_activity_and_rotate_to_competitive_acquisition_gap'}
   return {
     ok:true,
-    version:'command-center-business-truth-v1',
+    version:'command-center-business-truth-v2',
     generatedAt:new Date().toISOString(),
     growth:{
       status:currentGrowthStatus,
@@ -312,11 +314,14 @@ async function buildCommandCenterBusinessTruth(request,env){
       monetizedOutbound24h:truthNum(cfg.monetized_outbound_24h),
       monetizedOutbound7d:truthNum(cfg.monetized_outbound_7d),
       corrections:truthNum(growth.correction_count),
-      acquisitionPolicy:'maximum_safe_always_on',
+      acquisitionPolicy:'outcome_weighted_bounded_always_on',
       acquisitionMin24h:ACQUISITION_SURGE_MIN_24H,
       acquisitionTarget24h:ACQUISITION_SURGE_TARGET_24H,
+      acquisitionMax24h:ACQUISITION_SURGE_MAX_24H,
+      activityIsNotSuccess:true,
+      channelAllocationPct:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
       canonicalAcquisitionSource:'ga4',
-      strictHumanRole:'diagnostic_only',
+      strictHumanRole:'action_attribution_quality',
       waitForTrafficThreshold:false
     },
     traffic:{strictDaily},
@@ -412,7 +417,7 @@ export default{
     }
     if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
       ok:true,
-      version:'business-truth-v8',
+      version:'business-truth-v9',
       canonicalView:'command-center-simplified-view',
       cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Growth Brain','Needs You','Recent Results','Search + Authority','System Truth'],
       suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],
