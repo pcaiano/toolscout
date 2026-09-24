@@ -125,9 +125,9 @@ async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(n
 async function refreshProfiles(env){
   await ensureSchema(env);
   const arr=await assetJson(env,'/data/tools.json',[]);
-  const existing=await env.DB.prepare(`SELECT tool_slug,last_checked_at,status FROM content_social_profiles`).all();
+  const existing=await env.DB.prepare(`SELECT tool_slug,last_checked_at,status,bluesky_handle,bluesky_did FROM content_social_profiles`).all();
   const by=new Map((existing.results||[]).map(x=>[x.tool_slug,x]));
-  const due=arr.filter(x=>x?.slug&&x?.sourceUrl).filter(x=>{const r=by.get(x.slug);if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).slice(0,MAX_PROFILE_SCANS);
+  const due=arr.filter(x=>x?.slug&&x?.sourceUrl).filter(x=>{const r=by.get(x.slug);if(r?.bluesky_handle&&!r?.bluesky_did)return true;if(!r?.last_checked_at)return true;const t=Date.parse(String(r.last_checked_at).replace(' ','T')+'Z');return !Number.isFinite(t)||Date.now()-t>14*86400000}).slice(0,MAX_PROFILE_SCANS);
   let scanned=0,verified=0;
   for(const tool of due){
     scanned++;
