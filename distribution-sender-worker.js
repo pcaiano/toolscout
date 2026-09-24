@@ -133,7 +133,12 @@ async function recordReputationBlock(env,{to,issues,source='unknown'}){
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`rep_${crypto.randomUUID()}`,'outbound_reputation_blocked','quarantined','reputation_boundary',domain,detail.slice(0,1000)).run().catch(()=>{});
 }
 async function reputationCheck(request,env){
-  let b={};try{b=await request.json()}catch{return Response.json({approved:false,contract:OUTBOUND_REPUTATION_CONTRACT,issues:['invalid_json']},{status:400,headers:JSON_HEADERS})}
+  let b={};
+  try{
+    const contentType=String(request.headers.get('content-type')||'').toLowerCase();
+    if(contentType.includes('application/json'))b=await request.json();
+    else{const form=await request.formData();b=Object.fromEntries([...form.entries()].map(([k,v])=>[k,String(v)]))}
+  }catch{return Response.json({approved:false,contract:OUTBOUND_REPUTATION_CONTRACT,issues:['invalid_payload']},{status:400,headers:JSON_HEADERS})}
   const result=evaluateOutboundReputation({to:b.to,subject:b.subject,body:b.body,mode:'manual_authorized',template_id:'manual_authorized'});
   if(!result.approved)await recordReputationBlock(env,{to:b.to,issues:result.issues,source:String(b.source||'manual_sender')});
   return Response.json(result,{status:result.approved?200:422,headers:JSON_HEADERS});
