@@ -73,6 +73,18 @@ function taggedOwned(value,{source,campaign,action,growth}){
     return u.toString();
   }catch{return String(value||'')}
 }
+function sanitizeExternalOutreachSubject(value,domain=''){
+  const subject=String(value||'').trim();
+  if(!subject||/decision\s+feed/i.test(subject))return `ToolScout publisher resources${domain?` for ${domain}`:''}`;
+  return subject;
+}
+function sanitizeExternalOutreachBody(value){
+  let body=String(value||'');
+  const apiPattern=/https:\/\/trytoolscout\.org\/api\//i;
+  body=body.replace(/<p\b[^>]*>[\s\S]*?<\/p>/gi,block=>(apiPattern.test(block)||/\bdecision\s+feed\b/i.test(block))?'':block);
+  body=body.replace(/https:\/\/trytoolscout\.org\/api\/[^<>"'\s]*/gi,'');
+  return body;
+}
 function cordialOutreach(row){
   const name=displayToolName(row),slug=String(row?.tool_slug||'').toLowerCase();
   const subject=`${name} featured on ToolScout`,action=`vendor:${slug}`,growth=`tool:${slug}`;
@@ -80,7 +92,7 @@ function cordialOutreach(row){
   const profile=taggedOwned(`https://trytoolscout.org/tools/${encodeURIComponent(slug)}`,{source:'vendor_outreach',campaign:'vendor_reference_v22',action,growth});
   const publisherKit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:'vendor_outreach',campaign:'vendor_reference_v22',action,growth});
   const body=`<p>Hello,</p><p>I hope you're well. I'm Pedro Caiano from ToolScout. We recently featured ${html(name)} in one of our software buying pages for people comparing tools for a specific job to be done.</p><p>Featured page:<br><a href="${html(asset)}">${html(asset)}</a></p><p>Your ToolScout profile:<br><a href="${html(profile)}">${html(profile)}</a></p><p>If either resource is genuinely useful to your team or audience, you are welcome to share it or cite the relevant ToolScout page from an appropriate resources, press, community or partner page. We do not request reciprocal links and we do not pay for ranking links.</p><p>If your team publishes software resources, our free feed and embed kit is here:<br><a href="${html(publisherKit)}">${html(publisherKit)}</a></p><p>ToolScout rankings are based on product fit and editorial criteria. Placements are not sold, and affiliate relationships do not change ranking or recommendation eligibility.</p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
-  return {...row,suggested_subject:subject,suggested_body:body,growth_action_id:action,growth_opportunity_key:growth,tracked_asset_url:asset,acquisition_objective:'relevant_editorial_reference'};
+  return {...row,suggested_subject:sanitizeExternalOutreachSubject(subject,row?.vendor_domain),suggested_body:sanitizeExternalOutreachBody(body),growth_action_id:action,growth_opportunity_key:growth,tracked_asset_url:asset,acquisition_objective:'relevant_editorial_reference'};
 }
 
 async function leaseQueue(env,limit=3){
@@ -210,14 +222,14 @@ async function publicCandidates(env,limit=8){
 
       const action=`network:${row.surface_slug}`,growth=`surface:${row.surface_slug}`;
       const kit=taggedOwned('https://trytoolscout.org/distribution/publisher-kit',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
-      const feed=taggedOwned('https://trytoolscout.org/api/distribution/feed.json',{source:row.surface_slug,campaign:'distribution_network_v21',action,growth});
-      const body=String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit).replaceAll('https://trytoolscout.org/api/distribution/feed.json',feed);
+      const subject=sanitizeExternalOutreachSubject(row.suggested_subject,row.domain);
+      const body=sanitizeExternalOutreachBody(String(row.suggested_body||'').replaceAll('https://trytoolscout.org/distribution/publisher-kit',kit));
       await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at)
         VALUES(?,?,?,?,?,'leased',datetime('now'),datetime('now'))
         ON CONFLICT(action_id) DO UPDATE SET target_url=excluded.target_url,status='leased',updated_at=datetime('now')`)
         .bind(action,growth,'distribution_network','email',kit).run().catch(()=>{});
 
-      items.push({kind:'network',task_id:task.task_id,task_action:task.action,tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:row.suggested_subject,suggested_body:body,dispatch_token:token});
+      items.push({kind:'network',task_id:task.task_id,task_action:task.action,tool_slug:`publisher-${row.surface_slug}`,asset_url:row.source_url,priority_score:row.priority_score,vendor_domain:row.domain,contact_email:row.contact_email,contact_source_url:row.contact_source_url,suggested_subject:subject,suggested_body:body,dispatch_token:token});
       continue;
     }
 
