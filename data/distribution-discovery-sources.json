@@ -37,8 +37,8 @@
     }
   ],
   "guardrails": {
-    "max_fetches_per_run": 16,
-    "max_candidates_per_source": 80,
+    "max_fetches_per_run": 6,
+    "max_candidates_per_source": 30,
     "allowed_protocols": [
       "https:"
     ],
@@ -121,5 +121,12 @@
         "next_action": "Free route requires reciprocal badge/backlink; blocked by ToolScout no-reciprocal-badge policy."
       }
     }
+  },
+  "strategy": {
+    "version": "human-acquisition-v4",
+    "mode": "competitive-gap-and-existing-demand",
+    "outcome": "qualified-human-referrals",
+    "activityIsNotSuccess": true,
+    "maxNewFamiliesPerCycle": 2
   }
 }
