@@ -32,8 +32,7 @@ export async function queueAffiliateSocialPolicyReview(env,{toolSlug,status,affi
     VALUES(?,NULL,NULL,NULL,1,'terms_unverified',NULL,'Queued automatically when affiliate route became monetizable. Social use remains blocked until classification completes.',NULL,datetime('now'),datetime('now'))
     ON CONFLICT(tool_slug) DO UPDATE SET
       last_checked_at=NULL,
-      updated_at=datetime('now'),
-      policy_status=CASE WHEN affiliate_social_policy.policy_status IN ('explicit_allowed','explicit_allowed_direct_only','silent_verified','silent_verified_direct_only','explicitly_blocked','approval_required') AND affiliate_social_policy_queue.affiliate_url IS excluded.evidence_url THEN affiliate_social_policy.policy_status ELSE affiliate_social_policy.policy_status END`).bind(slug).run().catch(()=>{});
+      updated_at=datetime('now')`).bind(slug).run().catch(()=>{});
   return{queued:true,tool_slug:slug,status:state};
 }
 
