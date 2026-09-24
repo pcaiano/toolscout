@@ -1,4 +1,5 @@
 import base from './distribution-network-worker.js';
+import {ensureAffiliateSocialOnboardingSchema} from './affiliate-social-onboarding.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'};
 const FETCH_TIMEOUT=6500;
@@ -91,7 +92,7 @@ function socialSignals(text){
 
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=(async()=>{await env.DB.batch([
+  schemaReady=(async()=>{await ensureAffiliateSocialOnboardingSchema(env);await env.DB.batch([
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS content_social_profiles(
       tool_slug TEXT PRIMARY KEY,tool_name TEXT NOT NULL,source_url TEXT,x_handle TEXT,bluesky_handle TEXT,bluesky_did TEXT,linkedin_url TEXT,
       status TEXT NOT NULL DEFAULT 'unknown',attempts INTEGER NOT NULL DEFAULT 0,last_error TEXT,last_checked_at TEXT,verified_at TEXT,
