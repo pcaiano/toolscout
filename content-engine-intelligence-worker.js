@@ -236,7 +236,7 @@ async function refreshPolicies(env){
     if((signals.explicit||registryExplicit)&&!signals.ban){
       organic=1;directLink=1;redirect=cloakBan?0:1;status=cloakBan?'explicit_allowed_direct_only':'explicit_allowed';
       detail=`Official programme material explicitly permits organic-social affiliate/referral-link promotion. Paid-social restriction: ${paidBan?'yes':'default_off'}. Redirect/cloaking restriction: ${cloakBan?'yes':'no'}.`;allowed++;
-    }else if(!pages.length||!termsVerified){
+    }else if((!pages.length&&!registryTrusted)||!termsVerified){
       unknown++;
       if(pages.length&&socialGeneral)detail='Official programme material was found, but sufficiently complete contractual terms were not verified and no explicit organic-social permission was found. Social use remains blocked pending verification.';
     }else if(signals.ban||signals.closedChannels){
