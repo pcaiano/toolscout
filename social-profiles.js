@@ -16,7 +16,7 @@ export async function injectToolScoutSocialFooter(response){
   if(type.includes('json')||type.includes('xml')||type.startsWith('image/')||type.startsWith('video/')||type.startsWith('audio/')||type.includes('pdf'))return response;
   let probe;try{probe=await response.clone().text()}catch{return response}
   if(!/^\s*(?:<!doctype html|<html)/i.test(probe))return response;
-  const html=probe;
+  let html=probe;
   if(html.includes('data-toolscout-social-footer="1"'))return new Response(html,{status:response.status,statusText:response.statusText,headers:response.headers});
   const footer=footerHtml();
   html=html.includes('</body>')?html.replace('</body>',footer+'</body>'):html+footer;
