@@ -1,4 +1,5 @@
 name: One Shot Refdomains Human Priority Deploy
+# rerun after runtime authority reconciliation
 
 on:
   push:
