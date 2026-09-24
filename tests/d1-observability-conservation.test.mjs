@@ -11,6 +11,13 @@ assert.match(view,/setInterval\(loadHeavy,180000\)/,'heavy analytics reads must 
 assert.match(view,/if\(document\.hidden\|\|fastBusy\)return/,'background tabs must not waste D1 reads');
 assert.match(view,/if\(document\.hidden\|\|heavyBusy\)return/,'background tabs must not waste heavy D1 reads');
 
+const ledger=read('engine-run-ledger.js');
+assert.match(ledger,/idx_engine_runs_started ON engine_runs\(started_at DESC\)/,'runtime recent-runs query must have a dedicated started_at index');
+
+const budget=read('d1-read-budget-worker.js');
+assert.match(budget,/\['\/api\/runtime\/executors', 90\]/,'runtime executor snapshot must use a shared read cache');
+assert.match(budget,/PROTECTED_READS = new Set\(\[[^\]]*'\/api\/runtime\/executors'/,'runtime executor cache must remain session-scoped');
+
 const truth=read('operational-truth-reconciliation-worker.js');
 assert.match(truth,/const BUSINESS_TRUTH_CACHE_MS=120000;/,'business truth must use a short observability cache');
 assert.doesNotMatch(truth,/authorityRuntimeRow/,'business truth must not duplicate the live authority count scans');

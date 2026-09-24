@@ -6,9 +6,10 @@ const READ_TTLS = new Map([
   ['/api/stats', 300],
   ['/api/autonomous-growth-health', 300],
   ['/api/distribution/discovery-health', 600],
-  ['/api/distribution/authority/closed-loop-health', 300]
+  ['/api/distribution/authority/closed-loop-health', 300],
+  ['/api/runtime/executors', 90]
 ]);
-const PROTECTED_READS = new Set(['/analytics/api/stats', '/api/stats']);
+const PROTECTED_READS = new Set(['/analytics/api/stats', '/api/stats', '/api/runtime/executors']);
 const CIRCUIT_TTL_SECONDS = 300;
 const COMMAND_CENTER_SESSION_COOKIE = 'toolscout_cc';
 const COMMAND_CENTER_SESSION_TTL_SECONDS = 86400;

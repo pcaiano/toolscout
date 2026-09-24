@@ -19,6 +19,7 @@ export async function ensureEngineRunSchema(env){
       )`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_engine_started ON engine_runs(engine,started_at DESC)`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_status_started ON engine_runs(status,started_at DESC)`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_started ON engine_runs(started_at DESC)`),
       env.DB.prepare(`CREATE TABLE IF NOT EXISTS engine_run_leases (
         engine TEXT NOT NULL,
         mission TEXT NOT NULL,
