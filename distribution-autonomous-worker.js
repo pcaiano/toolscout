@@ -29,6 +29,7 @@ async function runDiscoveryRefresh(env){
   }catch(e){return {ok:false,reason:String(e?.message||e).slice(0,300)}}
 }
 function safe(v,n=4000){return String(v??'').slice(0,n)}
+async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 function host(v){try{return new URL(v).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
 const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets|asset|img|images|media|js|css|fonts|edge|storage)\./i;
 function isTechnicalSurface(value){const h=host(value);return TECHNICAL_HOST_RE.test(h)||/(?:githubassets\.com|githubusercontent\.com)$/i.test(h)}
@@ -815,13 +816,19 @@ async function authorityLoopState(env){
     const q=await env.DB.prepare(`SELECT public_url FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1 AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')`).all();placements=q.results||[];
   }catch{}
   const domains=new Set();for(const row of placements){try{const h=new URL(String(row.public_url||'')).hostname.toLowerCase().replace(/^www\./,'');if(h&&h!=='trytoolscout.org'&&!h.endsWith('.trytoolscout.org'))domains.add(h)}catch{}}
-  const verifiedReferringDomains=domains.size,bootstrapIncomplete=verifiedReferringDomains<10,backlogActive=authorityQueue>0,required=bootstrapIncomplete||backlogActive;
-  const now=Date.now(),lastVerifiedMs=lastVerifiedAt?Date.parse(String(lastVerifiedAt).replace(' ','T')+'Z'):NaN,lastRecoveryMs=lastRecoveryAt?Date.parse(String(lastRecoveryAt).replace(' ','T')+'Z'):NaN;
-  const lastVerifiedAgeHours=Number.isFinite(lastVerifiedMs)?Math.max(0,(now-lastVerifiedMs)/3600000):null;
+  const internalVerifiedReferringDomains=domains.size;
+  const seRanking=await assetJson(env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{}});
+  const now=Date.now(),seObservedMs=Date.parse(String(seRanking?.observedAt||'')),seRankingFresh=Number.isFinite(seObservedMs)&&(now-seObservedMs)<=168*3600000;
+  const seRankingReferringDomains=seRankingFresh?Math.max(0,Number(seRanking?.metrics?.referringDomains||0)):0;
+  const verifiedReferringDomains=Math.max(internalVerifiedReferringDomains,seRankingReferringDomains),bootstrapIncomplete=verifiedReferringDomains<10,backlogActive=authorityQueue>0,required=bootstrapIncomplete||backlogActive;
+  const lastVerifiedMs=lastVerifiedAt?Date.parse(String(lastVerifiedAt).replace(' ','T')+'Z'):NaN,lastRecoveryMs=lastRecoveryAt?Date.parse(String(lastRecoveryAt).replace(' ','T')+'Z'):NaN;
+  const internalLastVerifiedAgeHours=Number.isFinite(lastVerifiedMs)?Math.max(0,(now-lastVerifiedMs)/3600000):null;
+  const seRankingAgeHours=seRankingFresh?Math.max(0,(now-seObservedMs)/3600000):null;
+  const lastVerifiedAgeHours=[internalLastVerifiedAgeHours,seRankingAgeHours].filter(v=>v!=null).reduce((m,v)=>m==null?v:Math.min(m,v),null);
   const throughputGap=required&&attempts24<AUTHORITY_ATTEMPT_MIN_24H;
   const stagnating=required&&attempts7>=AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D&&(lastVerifiedAgeHours==null||lastVerifiedAgeHours>=AUTHORITY_STAGNATION_HOURS);
   const recoveryDue=required&&(throughputGap||stagnating)&&(!Number.isFinite(lastRecoveryMs)||(now-lastRecoveryMs)>=AUTHORITY_RECOVERY_COOLDOWN_HOURS*3600000);
-  return {required,bootstrapIncomplete,backlogActive,acquisitionMode:'exhaustive_backlog',slowdownAllowed:!bootstrapIncomplete&&!backlogActive,verifiedReferringDomains,bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
+  return {required,bootstrapIncomplete,backlogActive,acquisitionMode:'exhaustive_backlog',slowdownAllowed:!bootstrapIncomplete&&!backlogActive,verifiedReferringDomains,internalVerifiedReferringDomains,seRankingReferringDomains,seRankingObservedAt:seRankingFresh?seRanking.observedAt:null,referringDomainSource:seRankingFresh?'SE Ranking + internal verified ledger':'internal verified ledger',bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
