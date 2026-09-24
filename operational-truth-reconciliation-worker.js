@@ -404,7 +404,7 @@ export default{
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname.startsWith('/tools/')){
       const m=u.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)(?:\.html)?\/?$/i);
-      if(m){const runtime=await publicRuntimeToolResponse(env,m[1]).catch(()=>null);if(runtime)return runtime;}
+      if(m){const runtime=await publicRuntimeToolResponse(env,m[1]).catch(()=>null);if(runtime)return injectToolScoutSocialFooter(runtime);}
     }
     if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
       const fresh=u.searchParams.get('fresh')==='1';
@@ -428,6 +428,7 @@ export default{
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
     if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname))return simplifiedPage(response);
+    if(request.method==='GET')return injectToolScoutSocialFooter(response);
     return response;
   },
   async scheduled(event,env,ctx){
