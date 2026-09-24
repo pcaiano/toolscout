@@ -5,7 +5,7 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const PUBLIC_JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'};
 const SESSION_COOKIE='toolscout_cc';
 const SESSION_TTL_SECONDS=86400;
-const HUMAN_PLATFORMS=new Set(['x','linkedin']);
+const HUMAN_PLATFORMS=new Set(['x','linkedin','devto']);
 const HUMAN_ACTIONS=new Set(['completed','skipped']);
 const AUDIENCE_INGEST_TOKEN_SHA256='2cae5760a1a416aa3bbe14128c10539e157d527b1daa2f2a1df456c35099d770';
 function analyticsPath(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'}
