@@ -88,14 +88,11 @@ async function reconcile(response,env){
 
 const COMMAND_CENTER_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html','/command-center','/command-center/']);
 function simplifiedPage(response){
-  if(!response?.ok)return response;
-  const type=String(response.headers.get('Content-Type')||'').toLowerCase();
-  if(!type.includes('text/html'))return response;
-  const headers=new Headers(response.headers);
+  const headers=new Headers(response?.headers||undefined);
   headers.set('Content-Type','text/html; charset=UTF-8');
   headers.set('Cache-Control','private, no-store, max-age=0');
   headers.delete('Content-Length');headers.delete('Content-Encoding');
-  return new Response(commandCenterHtml(),{status:response.status,statusText:response.statusText,headers});
+  return new Response(commandCenterHtml(),{status:200,headers});
 }
 
 
