@@ -1,5 +1,6 @@
 import base from './affiliate-workflow-worker.js';
 import {recordExecutionProof} from './growth-execution-contract.js';
+import {SOCIAL_PLATFORM_CAPABILITIES,socialPlatformCapabilityHealth} from './social-platform-capabilities.js';
 
 const TOOLSCOUT_BLUESKY_DID='did:plc:hjawfnxtifnuqcgidlvmas76';
 const BLUESKY_MAX_GRAPHEMES=300;
@@ -75,6 +76,57 @@ async function fetchToolScoutBlueskyPost(uri){
     const post=Array.isArray(body.posts)?body.posts[0]:null;
     return post&&post.uri===uri&&post.author?.did===TOOLSCOUT_BLUESKY_DID?post:null;
   }catch{return null;}
+}
+
+function flattenDevComments(nodes,out=[]){
+  for(const node of Array.isArray(nodes)?nodes:[]){
+    if(node&&typeof node==='object'){
+      out.push(node);
+      flattenDevComments(node.children,out);
+    }
+  }
+  return out;
+}
+function devPlainText(value){
+  return String(value||'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
+}
+async function fetchDevJson(url){
+  try{
+    const r=await fetch(url,{headers:{Accept:'application/vnd.forem.api-v1+json','User-Agent':'ToolScout-Audience/1.0 (+https://trytoolscout.org/)'}});
+    if(!r.ok)return null;
+    return await r.json();
+  }catch{return null;}
+}
+async function observeDevComment(request,env){
+  let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:jsonHeaders})}
+  const articleId=Number(body.article_id||0);
+  const commentId=safeText(body.comment_id,80).trim();
+  const suggested=safeText(body.suggestion_text,900).trim().replace(/https?:\/\/\S+/gi,'').trim();
+  const suppliedRisk=String(body.risk||'green').toLowerCase();
+  const risk=allowedRisk.has(suppliedRisk)?suppliedRisk:'amber';
+  if(!Number.isInteger(articleId)||articleId<1||!commentId||!suggested)return Response.json({ok:false,error:'invalid_dev_comment_observation'},{status:422,headers:jsonHeaders});
+  const article=await fetchDevJson(`https://dev.to/api/articles/${articleId}`);
+  const owner=String(article?.user?.username||article?.organization?.username||'').toLowerCase();
+  if(!article||owner!=='trytoolscout')return Response.json({ok:false,error:'unverified_toolscout_dev_article'},{status:422,headers:jsonHeaders});
+  const thread=await fetchDevJson(`https://dev.to/api/comments?a_id=${articleId}&per_page=1000`);
+  const comment=flattenDevComments(thread).find(x=>String(x?.id_code||'')===commentId);
+  if(!comment)return Response.json({ok:false,error:'unverified_dev_comment'},{status:422,headers:jsonHeaders});
+  const actor=String(comment?.user?.username||'').toLowerCase();
+  if(!actor||actor==='trytoolscout')return Response.json({ok:false,error:'self_or_unknown_comment'},{status:422,headers:jsonHeaders});
+  const context=devPlainText(comment.body_html||comment.body_markdown||comment.body||'').slice(0,2000);
+  if(!context)return Response.json({ok:false,error:'empty_comment_context'},{status:422,headers:jsonHeaders});
+  const eventId=`devto-comment-${commentId}`;
+  const articleUrl=String(article.url||`https://dev.to/trytoolscout`).slice(0,500);
+  await env.DB.prepare(`INSERT INTO audience_events(event_id,platform,event_type,direction,status,actor_handle,post_uri,parent_uri,content_id,context_text,suggestion_text,risk,source,observed_at,created_at)
+    VALUES(?,'devto','engagement_suggestion','inbound','suggested',?,?,?,?,?,?,?,'make-audience-engine',?,datetime('now'))
+    ON CONFLICT(event_id) DO UPDATE SET
+      context_text=excluded.context_text,
+      suggestion_text=CASE WHEN audience_events.status='suggested' THEN excluded.suggestion_text ELSE audience_events.suggestion_text END,
+      risk=CASE WHEN audience_events.status='suggested' THEN excluded.risk ELSE audience_events.risk END,
+      observed_at=excluded.observed_at
+    WHERE audience_events.status='suggested'`)
+    .bind(eventId,actor,articleUrl,`dev-comment:${commentId}`,String(articleId),context,suggested,risk,String(comment.created_at||new Date().toISOString()).slice(0,80)).run();
+  return Response.json({ok:true,event_id:eventId,platform:'devto',mode:'monitor_and_human_reply',reply_write:false,verified:true},{headers:jsonHeaders});
 }
 async function prepareBlueskyReply(request,env){
   if(!(await validAudienceIngest(request)))return Response.json({ok:false,error:'unauthorized'},{status:401,headers:jsonHeaders});
@@ -230,6 +282,8 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/api/audience-event'&&request.method==='POST')return ingestAudienceEvent(request,env);
+    if(url.pathname==='/api/audience/platform-capabilities'&&request.method==='GET')return Response.json({ok:true,health:socialPlatformCapabilityHealth(),platforms:SOCIAL_PLATFORM_CAPABILITIES},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
+    if(url.pathname==='/api/audience/dev-comment/observe'&&request.method==='POST')return observeDevComment(request,env);
     if(url.pathname==='/api/audience/bluesky-reply/health'&&request.method==='GET')return Response.json({ok:true,version:'complete-sentence-no-hard-cut-v1',maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,requiresPrepareBeforePublish:true},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
     if(url.pathname==='/api/audience/bluesky-reply/prepare'&&request.method==='POST')return prepareBlueskyReply(request,env);
     if(url.pathname==='/api/stats'&&request.method==='GET')return augmentStats(request,env,ctx);
