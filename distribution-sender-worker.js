@@ -136,6 +136,8 @@ async function validateReputationOverride(request,env){
   if(!row||row.status!=='pending')return Response.json({ok:false,error:'override_not_pending'},{status:409,headers:JSON_HEADERS});
   const payloadHash=await reputationPayloadHash(b.to,b.subject,b.body);
   if(payloadHash!==row.payload_hash||String(b.kind||'')!==row.kind||String(b.key||'')!==row.item_key)return Response.json({ok:false,error:'override_payload_mismatch'},{status:409,headers:JSON_HEADERS});
+  const claimed=await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='validated' WHERE override_token=? AND status='pending'`).bind(token).run();
+  if(!Number(claimed?.meta?.changes||0))return Response.json({ok:false,error:'override_already_claimed'},{status:409,headers:JSON_HEADERS});
   return Response.json({ok:true,override_token:token,kind:row.kind,key:row.item_key},{headers:JSON_HEADERS});
 }
 async function finalizeReputationOverride(request,env){
@@ -147,7 +149,7 @@ async function finalizeReputationOverride(request,env){
   await ensureReputationSchema(env);
   const token=String(b.override_token||''),gmailId=String(b.gmail_message_id||'').slice(0,300);
   const row=await env.DB.prepare(`SELECT * FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
-  if(!row||row.status!=='pending')return Response.json({ok:false,error:'override_not_pending'},{status:409,headers:JSON_HEADERS});
+  if(!row||row.status!=='validated')return Response.json({ok:false,error:'override_not_validated'},{status:409,headers:JSON_HEADERS});
   const issues=String(row.issue_codes||'').split('|').filter(Boolean);
   for(const issue of issues){
     const scope=HARD_REPUTATION_ISSUES.has(issue)?'exact_fingerprint':'template_issue';
