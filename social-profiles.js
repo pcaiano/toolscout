@@ -12,8 +12,14 @@ function footerHtml(){
 export async function injectToolScoutSocialFooter(response){
   if(!response?.ok)return response;
   const type=String(response.headers.get('Content-Type')||'').toLowerCase();
-  if(!type.includes('text/html'))return response;
-  let html;try{html=await response.text()}catch{return response}
+  let html=null;
+  if(type.includes('text/html')){
+    try{html=await response.text()}catch{return response}
+  }else if(!type||type.includes('text/plain')){
+    let probe;try{probe=await response.clone().text()}catch{return response}
+    if(!/^\s*<!doctype html|^\s*<html/i.test(probe))return response;
+    html=probe;
+  }else return response;
   if(html.includes('data-toolscout-social-footer="1"'))return new Response(html,{status:response.status,statusText:response.statusText,headers:response.headers});
   const footer=footerHtml();
   html=html.includes('</body>')?html.replace('</body>',footer+'</body>'):html+footer;
