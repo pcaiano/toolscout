@@ -15,39 +15,34 @@ import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEm
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
-  id:'human-acquisition-sprint-2026-09',
-  startAt:'2026-09-18T23:00:00.000Z',
-  endAt:'2026-09-28T23:00:00.000Z',
-  northStar:'strict_verified_human_sessions'
+  id:'human-acquisition-v4',
+  startAt:'2026-09-24T00:00:00.000Z',
+  endAt:null,
+  northStar:'strict_verified_human_sessions',
+  permanent:true
 });
 const AUDIENCE_ACQUISITION_POLICY=Object.freeze({
-  id:'external-demand-first-v2',
-  objective:'Continuously acquire new humans from existing demand and external audiences. Owned channels may support acquisition but never replace external-demand acquisition as the primary engine.',
+  id:'human-demand-first-v4',
+  objective:'Acquire qualified humans from existing search demand, borrowed audiences and vendor audiences; scale only channels that produce verified human or commercial outcomes.',
   primaryModes:['existing_demand_search','borrowed_audience_distribution','vendor_audience_amplification'],
+  allocationPct:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
+  activityIsNotSuccess:true,
   ownedChannelsRole:'support_and_optional_expansion_after_repeatable_external_acquisition',
   externalDemandRemainsPrimary:true,
   ownedExpansionGate:{strictVerifiedHumanSessions30d:100,provenExternalSources:2,strictHumansPerProvenSource30d:3}
 });
-const HUMAN_ACQUISITION_GSC_TARGETS=Object.freeze([
-  {key:'project-management',cluster:'project_management',path:'/best-project-management-tools',title:'Best Project Management Tools',impressions:93,position:38.66,priority:98},
-  {key:'seo-agencies',cluster:'seo_agencies',path:'/best-seo-tools-for-agencies',title:'Best SEO Tools for Agencies',impressions:727,position:76.02,priority:96},
-  {key:'no-code-automation',cluster:'no_code_automation',path:'/best-no-code-automation-tools',title:'Best No Code Automation Tools',impressions:254,position:74.05,priority:94},
-  {key:'semrush-profile',cluster:'semrush_airtable_profiles',path:'/tools/semrush',title:'Semrush',tool_slug:'semrush',impressions:303,position:55.77,priority:92},
-  {key:'airtable-profile',cluster:'semrush_airtable_profiles',path:'/tools/airtable',title:'Airtable',tool_slug:'airtable',impressions:234,position:73.82,priority:90},
-  {key:'funnel-builders',cluster:'funnel_builders',path:'/best-funnel-builder',title:'Best Funnel Builder',impressions:176,position:76.46,priority:88}
-]);
-function humanSprintActive(now=Date.now()){return now>=Date.parse(HUMAN_ACQUISITION_SPRINT.startAt)&&now<Date.parse(HUMAN_ACQUISITION_SPRINT.endAt);}
+const HUMAN_ACQUISITION_GSC_TARGETS=Object.freeze([]);
+function humanSprintActive(){return true;}
 function coordinatedGrowthPriority(subjectType,score,audienceStrategy){
   let priority=Math.max(0,Math.min(100,Number(score)||0));
-  const apply=(mode)=>{
-    if(subjectType==='surface')priority=Math.min(100,priority+(mode==='borrowed'?10:20));
-    else if(subjectType==='tool')priority=Math.min(100,priority+(mode==='borrowed'?6:15));
-    else if(subjectType==='news_update')priority=Math.min(100,priority+(mode==='borrowed'?3:12));
-    else if(subjectType==='affiliate')priority=Math.min(priority,45);
-    else if(['catalog_tool','catalog_category','catalog_gap','catalog_system'].includes(subjectType)&&priority<90)priority=Math.min(priority,55);
+  const apply=()=>{
+    if(subjectType==='surface')priority=Math.min(100,priority+10);
+    else if(subjectType==='tool')priority=Math.min(100,priority+8);
+    else if(subjectType==='news_update')priority=Math.min(100,priority+4);
+    else if(subjectType==='affiliate')priority=Math.min(priority,35);
+    else if(['catalog_tool','catalog_category','catalog_gap','catalog_system'].includes(subjectType)&&priority<90)priority=Math.min(priority,45);
   };
-  if(audienceStrategy?.borrowedFirst)apply('borrowed');
-  if(humanSprintActive())apply('sprint');
+  if(audienceStrategy?.borrowedFirst||humanSprintActive())apply();
   return Number(priority.toFixed(2));
 }
 const safe=(v,n=3000)=>String(v??'').slice(0,n);
