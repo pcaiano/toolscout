@@ -803,14 +803,59 @@ async function reputationReview(request,env){
   if(!['vendor','network'].includes(kind)||!key||!['correct_block','false_positive'].includes(verdict))return Response.json({ok:false,error:'invalid_reputation_review'},{status:400,headers:JSON_H});
   const table=kind==='vendor'?'distribution_vendor_amplification':'distribution_network_outreach';
   const keyColumn=kind==='vendor'?'tool_slug':'surface_slug';
-  const row=await env.DB.prepare(`SELECT contact_email,suggested_subject,outreach_error,status FROM ${table} WHERE ${keyColumn}=?`).bind(key).first();
+  const row=await env.DB.prepare(`SELECT contact_email,suggested_subject,suggested_body,outreach_error,status FROM ${table} WHERE ${keyColumn}=?`).bind(key).first();
   if(!row||row.status!=='reputation_quarantine')return Response.json({ok:false,error:'reputation_item_not_active'},{status:409,headers:JSON_H});
-  const next=verdict==='correct_block'?'reputation_block_confirmed':'reputation_false_positive';
-  const note=`${verdict}; prior=${String(row.outreach_error||'').slice(0,700)}`;
-  await env.DB.prepare(`UPDATE ${table} SET status=?,outreach_error=?,updated_at=datetime('now') WHERE ${keyColumn}=? AND status='reputation_quarantine'`).bind(next,note.slice(0,1000),key).run();
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`)
-    .bind(`repreview_${crypto.randomUUID()}`,'outbound_reputation_reviewed',verdict,'reputation_boundary',`${kind}:${key}`,`Pedro reviewed blocked outbound to ${row.contact_email||'unknown'} as ${verdict}. No email was sent by this review.`).run().catch(()=>{});
-  return Response.json({ok:true,kind,key,verdict,status:next,sent:false},{headers:JSON_H});
+
+  if(verdict==='correct_block'){
+    const note=`correct_block; prior=${String(row.outreach_error||'').slice(0,700)}`;
+    await env.DB.prepare(`UPDATE ${table} SET status='reputation_block_confirmed',outreach_error=?,updated_at=datetime('now') WHERE ${keyColumn}=? AND status='reputation_quarantine'`).bind(note.slice(0,1000),key).run();
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`repreview_${crypto.randomUUID()}`,'outbound_reputation_reviewed','correct_block','reputation_boundary',`${kind}:${key}`,`Pedro confirmed the reputation block for outbound to ${row.contact_email||'unknown'}.`).run().catch(()=>{});
+    return Response.json({ok:true,kind,key,verdict,status:'reputation_block_confirmed',sent:false,learned:false},{headers:JSON_H});
+  }
+
+  if(!env.REPUTATION_OVERRIDE_WEBHOOK_URL)return Response.json({ok:false,error:'reputation_override_sender_unconfigured'},{status:503,headers:JSON_H});
+  const to=String(row.contact_email||'').trim(),subject=String(row.suggested_subject||'').trim(),emailBody=String(row.suggested_body||'');
+  if(!to||!subject||!emailBody)return Response.json({ok:false,error:'quarantined_email_incomplete'},{status:409,headers:JSON_H});
+  const templateId=kind==='vendor'?'vendor_reference_v23':'publisher_resources_v22';
+  const issues=String(row.outreach_error||'').replace(/^reputation_boundary:/,'').split('|').map(x=>x.trim()).filter(Boolean);
+  const token=`repovr_${crypto.randomUUID()}`;
+  const contentHash=await digestHex(`${subject}\n---BODY---\n${emailBody}`);
+  const payloadHash=await digestHex(`${to.toLowerCase()}\n---SUBJECT---\n${subject}\n---BODY---\n${emailBody}`);
+  await env.DB.batch([
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_overrides (
+      override_token TEXT PRIMARY KEY,kind TEXT NOT NULL,item_key TEXT NOT NULL,recipient TEXT NOT NULL,subject TEXT NOT NULL,body TEXT NOT NULL,
+      payload_hash TEXT NOT NULL,content_hash TEXT NOT NULL,issue_codes TEXT,template_id TEXT,status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),sent_at TEXT,gmail_message_id TEXT,error TEXT)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_learning (
+      rule_key TEXT PRIMARY KEY,template_id TEXT NOT NULL,issue_code TEXT NOT NULL,scope_type TEXT NOT NULL,content_hash TEXT,
+      enabled INTEGER NOT NULL DEFAULT 1,learned_at TEXT NOT NULL DEFAULT (datetime('now')),source_override_token TEXT)`)
+  ]);
+  await env.DB.prepare(`INSERT INTO outbound_reputation_overrides
+    (override_token,kind,item_key,recipient,subject,body,payload_hash,content_hash,issue_codes,template_id,status,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?, 'pending', datetime('now'))`)
+    .bind(token,kind,key,to,subject,emailBody,payloadHash,contentHash,issues.join('|'),templateId).run();
+
+  let dispatch;
+  try{
+    dispatch=await fetch(env.REPUTATION_OVERRIDE_WEBHOOK_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({override_token:token,kind,key,to,subject,body:emailBody,learning_codes:issues.join('|')}),
+      signal:AbortSignal.timeout(20000)
+    });
+  }catch(error){
+    await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='dispatch_failed',error=? WHERE override_token=?`).bind(String(error?.message||error).slice(0,1000),token).run().catch(()=>{});
+    return Response.json({ok:false,error:'reputation_override_dispatch_failed'},{status:502,headers:JSON_H});
+  }
+  const dispatchText=await dispatch.text().catch(()=>'');
+  if(!dispatch.ok){
+    await env.DB.prepare(`UPDATE outbound_reputation_overrides SET status='dispatch_failed',error=? WHERE override_token=?`).bind(`HTTP ${dispatch.status}: ${dispatchText.slice(0,700)}`,token).run().catch(()=>{});
+    return Response.json({ok:false,error:'reputation_override_send_failed',http_status:dispatch.status},{status:502,headers:JSON_H});
+  }
+  const sent=await env.DB.prepare(`SELECT status,gmail_message_id,sent_at FROM outbound_reputation_overrides WHERE override_token=?`).bind(token).first();
+  if(sent?.status!=='sent_and_learned')return Response.json({ok:false,error:'reputation_override_not_confirmed',override_token:token},{status:502,headers:JSON_H});
+  return Response.json({ok:true,kind,key,verdict:'false_positive',status:sent.status,sent:true,learned:true,gmail_message_id:sent.gmail_message_id||null,sent_at:sent.sent_at||null},{headers:JSON_H});
 }
 
 async function distributionHumanAction(request,env){
