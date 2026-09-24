@@ -83,7 +83,7 @@ function donut(value,target){
  return '<div class="donut"><svg viewBox="0 0 92 92"><circle class="donutTrack" cx="46" cy="46" r="'+r+'"></circle><circle class="donutValue" cx="46" cy="46" r="'+r+'" stroke-dasharray="'+dash+' '+c.toFixed(2)+'"></circle></svg><div class="donutText">'+esc(v)+' / '+esc(t)+'<small>domains</small></div></div>';
 }
 
-function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed','acquisition_surge'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale'].includes(v))return'bad';return'warn'}
+function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed','emerging'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale','ineffective'].includes(v))return'bad';return'warn'}
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
 async function get(url,fresh=false){
  const target=fresh?url+(url.includes('?')?'&':'?')+'fresh=1':url;
@@ -94,7 +94,7 @@ async function get(url,fresh=false){
 function business(){
  const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
  let headline='Execution is running, but business results are not yet proven.';
- let detail='Growth Brain is running maximum-safe acquisition. GA4 is the canonical traffic population; strict human proof is diagnostic, not a gate on growth.';
+ let detail='Human Acquisition v4 is always on but resource-bounded: 60% existing search demand, 25% authority/vendor network, 10% AI/AEO discovery and 5% Growth R&D. GA4 is canonical traffic; strict-human evidence proves attribution quality. Activity itself is not success.';
  if(Number(g.strictHumans24h)>0)headline='Verified humans are arriving. Conversion is now the next proof point.';
  if(Number(g.verifiedOutbound24h)>0)headline='Verified humans are reaching vendors. Monetization is now the next proof point.';
  if(Number(g.monetizedOutbound24h)>0)headline='Monetized outbound is active. Scale only sources that preserve verified human quality.';
@@ -103,17 +103,18 @@ function business(){
  document.getElementById('businessBody').innerHTML=
   '<div class="headline"><b>'+esc(headline)+'</b><span>'+esc(detail)+'</span></div>'+
   '<div class="metrics">'+
-   metric('Strict humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d')+
+   metric('GA4 sessions - 24h',a.status==='connected'?n(ga.last24Hours):'Unavailable',a.status==='connected'?n(ga.monthToDate)+' MTD · canonical traffic':'GA4 source unavailable')+
+   metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · quality proof')+
    metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d')+
    metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d')+
-   metric('External executions - 24h',n(g.externalExecutions24h),n(g.externalExecutions7d)+' / 7d')+
-   metric('Active affiliates',n(aff.productionRoutes),'Live ToolScout affiliate routes')+
    metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
+   metric('Active affiliates',n(aff.productionRoutes),'Live ToolScout affiliate routes')+
    metric('Confirmed revenue',data.stats==null?'Source unavailable':(r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency)),data.stats==null?'Stats source did not respond':(r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected'))+
    metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
-   (a.status==='connected'?row('GA4 sessions - 24h',n(ga.last24Hours),n(ga.monthToDate)+' MTD - canonical GA4 population'):'')+
+   row('External actions - 24h',n(g.externalExecutions24h),'Target '+n(g.acquisitionTarget24h||8)+' · hard budget '+n(g.acquisitionMax24h||12)+' · activity is a cost, not a KPI')+
+   row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
    row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
@@ -241,8 +242,8 @@ function health(){
  const externalAge=latestExternal?.at?ageHours(latestExternal.at):null;
  if(externalAge!=null&&externalAge>2)issues.push({level:'warn',title:'No new verified external result',detail:'Latest verified external outcome was '+dt(latestExternal.at)+' ('+dec(externalAge,1)+'h ago). Engines are still running; this warning is about outcome freshness, not scheduler activity.'});
  if(t.affiliate&&t.affiliate.reconciled===false)issues.push({level:'warn',title:'Affiliate metadata reconciliation',detail:n((t.affiliate.productionWithoutActivePipeline||[]).length)+' live production route(s) are not marked active in pipeline metadata: '+(t.affiliate.productionWithoutActivePipeline||[]).join(', ')+'. Production registry remains canonical.'});
- const acquisitionFloor=Number(growth.acquisitionMin24h||15),acquisitionTarget=Number(growth.acquisitionTarget24h||25);
- if(Number(growth.externalExecutions24h||0)<acquisitionFloor)issues.push({level:'warn',title:'Acquisition execution below operating floor',detail:n(growth.externalExecutions24h)+' external executions in 24h. Floor is '+n(acquisitionFloor)+'; target is '+n(acquisitionTarget)+'.'});
+ const acquisitionTarget=Number(growth.acquisitionTarget24h||8),acquisitionMax=Number(growth.acquisitionMax24h||12);
+ if(Number(growth.externalExecutions24h||0)>=acquisitionMax&&Number(growth.strictHumans7d||0)===0)issues.push({level:'warn',title:'Acquisition activity without human yield',detail:n(growth.externalExecutions24h)+' external actions in 24h have reached the '+n(acquisitionMax)+' action budget while strict attributed humans remain 0 / 7d. Stop repetition and rotate to competitive acquisition gaps or observed search demand.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh and authority loop have no current measurable failure.'});
  const rows=[
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
