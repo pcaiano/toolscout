@@ -597,6 +597,7 @@ async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
   await ensureHotIndexes(env);
+  await ensureContactSupplySeeded(env);
   const requeued=await requeueStaleBatches(env);
   const execution=await enqueueAuthorizedExecution(env);
   const research=await enqueueDistributionResearch(env);
@@ -914,6 +915,12 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health')return Response.json(await health(env),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/contact-supply/health')return Response.json(await contactSupplyHealth(env),{headers:JSON_H});
+    if(request.method==='POST'&&u.pathname==='/api/contact-supply/refresh'){
+      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+      if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+      return Response.json(await seedContactSupply(env),{headers:JSON_H});
+    }
     if(request.method==='GET'&&u.pathname==='/api/auth-plane/health'){
       if(u.searchParams.get('fresh')==='1')await refreshAuthBrokerRuntimeHealth(env,{force:true}).catch(()=>null);
       return Response.json(await authPlaneHealth(env),{headers:JSON_H});
@@ -950,6 +957,7 @@ export default{
       const work=Promise.allSettled([
         runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null}),
         minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
+        minute%30===0?seedContactSupply(env):Promise.resolve(null),
         minute%15===0?authenticatedResumeSweep(env,{limit:2}):Promise.resolve(null),
         refreshAuthBrokerRuntimeHealth(env).catch(()=>null)
       ]);
