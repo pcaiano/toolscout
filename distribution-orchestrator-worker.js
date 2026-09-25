@@ -47,6 +47,17 @@ function coordinatedGrowthPriority(subjectType,score,audienceStrategy){
   return Number(priority.toFixed(2));
 }
 const safe=(v,n=3000)=>String(v??'').slice(0,n);
+async function boundedExecution(promise,ms,label='execution'){
+  let timer=null;
+  try{
+    return await Promise.race([
+      promise,
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(`${label}_timeout_after_${ms}ms`)),ms)})
+    ]);
+  }finally{
+    if(timer)clearTimeout(timer);
+  }
+}
 let makeSenderWebhookCache={url:null,expiresAt:0};
 async function makeSenderWebhookUrl(env){
   const now=Date.now();
@@ -873,7 +884,7 @@ async function runGrowthExecutionContractCycle(env){
     const items=[];
     for(const task of claim.tasks||[]){
       try{
-        const out=await executeCloudflareSeoTask(env,task);
+        const out=await boundedExecution(executeCloudflareSeoTask(env,task),12000,'seo_cloudflare_task');
         if(out?.verified&&out?.pathname){
           const proof=await recordExecutionProof(env,{taskId:task.task_id,executor:'seo_cloudflare',status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
           items.push({task_id:task.task_id,status:'verified',pathname:out.pathname,action:task.action,indexNow:Boolean(out?.indexNow?.queued),proof:proof?.ok===true});
@@ -894,7 +905,7 @@ async function runGrowthExecutionContractCycle(env){
     if(!claim.claimed){results[executor]={claimed:0};return}
     const task=claim.tasks?.[0]||null;
     try{
-      const out=await fn(task);
+      const out=await boundedExecution(Promise.resolve().then(()=>fn(task)),60000,`executor_${executor}`);
       let supervisorProof={verified:0},attemptRecorded=false,directProof=null,deferred=null;
       if(executor==='content_issue'&&out?.brief?.issued===true&&out?.brief?.execution_task_id===task?.task_id){
         await markExecutorAttempt(env,executor,'content_brief_issued_waiting_for_publication',{taskIds:claim.taskIds});
@@ -923,15 +934,12 @@ async function runGrowthExecutionContractCycle(env){
     }
   };
 
+  // The primary internal lane is the bounded execution-contract work selected above.
+  // Run it before unrelated SEO batch work so a slow SEO asset can never starve a
+  // stalled catalog, affiliate, content or distribution contract.
   if(selectedInternalLane==='distribution_network')await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
   if(selectedInternalLane==='distribution_autonomous')await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
-
-  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:12,maxInFlight:12,result:'make_sender_waiting_for_exact_external_send'});
-  const senderWake=await wakeMakeSender(env,senderClaim.claimed);
-  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:12,deliveryMode:'instant_webhook',wake:senderWake};
-
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
-  await runSeoBatch(4);
   if(selectedInternalLane==='affiliate_cycle')await runInternal('affiliate_cycle',async(task)=>{
     const affiliate=await runAffiliateCoverageCycle(env,task);
     const socialPolicy=await runContentSocialIntelligenceCycle(env);
@@ -943,6 +951,12 @@ async function runGrowthExecutionContractCycle(env){
     const admit=await contractAdmitCatalogCandidates(env);
     return{verify,admit};
   });
+
+  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:12,maxInFlight:12,result:'make_sender_waiting_for_exact_external_send'});
+  const senderWake=await wakeMakeSender(env,senderClaim.claimed);
+  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:12,deliveryMode:'instant_webhook',wake:senderWake};
+
+  await runSeoBatch(4);
 
   const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_waiting_for_exact_published_reply'});
   results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
