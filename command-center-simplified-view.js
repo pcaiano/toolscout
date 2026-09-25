@@ -113,7 +113,7 @@ function business(){
    metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
-   row('Emails - 24h',n(g.emailSent24h)+' sent','Target '+n(g.emailTarget24h||50)+' · hard max '+n(g.emailMax24h||60)+' · '+n(g.emailReadyContacts)+' ready contacts')+
+   row('Emails - 24h',n(g.emailSent24h)+' sent','Target '+n(g.emailTarget24h||50)+' · hard max '+n(g.emailMax24h||60)+' · '+n(g.contactSupplyReadyEmail??g.emailReadyContacts)+' unique domains ready')+
    row('Machine-safe execution - today',n(data?.compute?.executionUsedToday)+' / '+n(data?.compute?.executionDailyJobBudget||g.machineSafeExternalActionMax24h||300),'Cloudflare authorizes · Render executes · Cloudflare verifies')+
    row('Research compute - today',n(data?.compute?.researchUsedToday)+' / '+n(data?.compute?.dailyJobBudget||g.researchExternalJobMax24h||1500),'External research capacity · activity is not success')+
    row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
@@ -187,11 +187,11 @@ function throughput(){
  const researchUsed=Number(c.researchUsedToday||0),researchMax=Number(c.dailyJobBudget||g.researchExternalJobMax24h||1500);
  const execUsed=Number(c.executionUsedToday||0),execMax=Number(c.executionDailyJobBudget||g.machineSafeExternalActionMax24h||300);
  const emailSent=Number(g.emailSent24h||0),emailTarget=Number(g.emailTarget24h||50),emailMax=Number(g.emailMax24h||60);
- const readyContacts=Number(g.emailReadyContacts||0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
+ const supply=c.contactSupply||{},readyContacts=Number(supply.readyEmail??g.contactSupplyReadyEmail??g.emailReadyContacts||0),supplyTarget=Number(supply.targetReady??g.contactSupplyTarget||200),supplyMin=Number(supply.minReady??g.contactSupplyMin||150),readyRoutes=Number(supply.readyRoute??g.contactSupplyReadyRoute||0),researching=Number(supply.researching??g.contactSupplyResearching||0),unresolved=Number(supply.unresolved??g.contactSupplyUnresolved||0),apolloEligible=Number(supply.apolloEligible??g.contactSupplyApolloEligible||0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
  const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
  let bottleneck='No capacity bottleneck proven.';
  let bottleneckMeta='Business outcomes remain the constraint to scale decisions.';
- if(readyContacts<Math.max(5,emailTarget-emailSent)){bottleneck='Qualified email contact supply';bottleneckMeta=n(readyContacts)+' ready contacts for a '+n(emailTarget)+'/day email target.'}
+ if(readyContacts<supplyMin){bottleneck='Qualified email contact supply';bottleneckMeta=n(readyContacts)+' / '+n(supplyTarget)+' unique-domain email buffer · minimum '+n(supplyMin)+'.'}
  else if(Number(c.queued||0)>Number(c.batchSize||25)*4){bottleneck='External compute backlog';bottleneckMeta=n(c.queued)+' jobs queued · '+n(c.activeBatches)+' active batches.'}
  else if(authBootstrap>0&&authActive===0){bottleneck='Authentication bootstrap';bottleneckMeta=n(authBootstrap)+' reusable session(s) need one-time owner login/challenge.'}
  document.getElementById('throughputMeta').textContent='Updated '+dt(t.generatedAt)+' · capacity is not a success KPI';
@@ -201,12 +201,15 @@ function throughput(){
      metric('Research jobs - today',n(researchUsed)+' / '+n(researchMax),n(c.queued)+' queued · Render')+
      metric('Machine-safe actions - today',n(execUsed)+' / '+n(execMax),n(c.completedToday)+' compute jobs completed')+
      metric('Emails - rolling 24h',n(emailSent)+' / '+n(emailTarget),'hard max '+n(emailMax)+' · '+n(leased)+' currently leased')+
+     metric('Recipient buffer',n(readyContacts)+' / '+n(supplyTarget),'minimum '+n(supplyMin)+' · '+n(readyRoutes)+' alternate routes')+
+     metric('Contact discovery',n(researching)+' researching',n(unresolved)+' unresolved · '+n(apolloEligible)+' Apollo-eligible')+
      metric('Auth sessions',n(authActive),n(authBootstrap)+' bootstrap required · '+n(authCaps)+' classified')+
    '</div>'+
    '<div class="section"><div class="sectionTitle">Execution architecture</div>'+
      row('Control plane','Cloudflare','Priorities, policy, leases, canonical D1 state and final verification')+
      row('Research + machine execution',human(c.status||'Unavailable'),(c.providerUrl||'Render overflow')+' · batch '+n(c.batchSize)+' · max '+n(c.maxActiveBatches)+' active')+
      row('Email sender',human(g.emailDeliveryMode||'Unavailable'),'Target '+n(emailTarget)+' · max '+n(emailMax)+' / rolling 24h · reputation boundary retained')+
+     row('Contact Supply Engine',human(supply.status||'active'),n(readyContacts)+' ready emails · '+n(readyRoutes)+' contact routes · '+human(supply.apolloStatus||g.contactSupplyApolloStatus||'provider unavailable'))+
      row('Auth Plane',human(a.status||'Unavailable'),a.brokerRuntime?.ok?'Chromium broker healthy · CAPTCHA/MFA human-only':'Broker health '+human(a.brokerRuntime?.error||'unavailable'))+
      row('GitHub Actions','Disabled until October','Not counted as current execution capacity')+
    '</div>'+
