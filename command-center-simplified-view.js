@@ -38,13 +38,14 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 <section class="card span4"><div class="head"><div><div class="kicker">28 day trend</div><div class="title">Google Search Progress</div></div><div class="meta" id="gscProgressMeta">Search Console</div></div><div class="body" id="gscProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Autonomous execution + R&D</div><div class="title">Growth Brain</div></div><div class="meta" id="brainMeta">What it is doing now and what it is exploring next</div></div><div class="body" id="brainBody"><div class="empty">Loading...</div></div></section>
 <section class="card span5"><div class="head"><div><div class="kicker">Human exceptions only</div><div class="title">Needs You</div></div><div class="meta" id="queueMeta">Chairman Queue</div></div><div class="body" id="queueBody"><div class="empty">Loading...</div></div></section>
+<section class="card span12"><div class="head"><div><div class="kicker">Capacity + throughput</div><div class="title">Growth Execution Plane</div></div><div class="meta" id="throughputMeta">Cloudflare control · Render compute · Make sender · Auth broker</div></div><div class="body" id="throughputBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Actions and outcomes</div><div class="title">Recent Results</div></div><div class="meta">External evidence only</div></div><div class="body" id="resultsBody"><div class="empty">Loading...</div></div></section>
 <section class="card span12"><div class="head"><div><div class="kicker">Reliability</div><div class="title">System Truth</div></div><div class="meta">Only current, measurable issues</div></div><div class="body" id="healthBody"><div class="empty">Loading...</div></div></section>
 </main>
 </div>
 <script>
-const endpoints={stats:'/analytics/api/stats',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health'};
-let data={stats:null,queue:null,truth:null,runtime:null,authority:null};
+const endpoints={stats:'/analytics/api/stats',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
+let data={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const n=v=>Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable';
 const dec=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'Unavailable';
@@ -82,7 +83,7 @@ function donut(value,target){
  return '<div class="donut"><svg viewBox="0 0 92 92"><circle class="donutTrack" cx="46" cy="46" r="'+r+'"></circle><circle class="donutValue" cx="46" cy="46" r="'+r+'" stroke-dasharray="'+dash+' '+c.toFixed(2)+'"></circle></svg><div class="donutText">'+esc(v)+' / '+esc(t)+'<small>domains</small></div></div>';
 }
 
-function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed','emerging'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale','ineffective'].includes(v))return'bad';return'warn'}
+function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed','emerging','configured','live','route_validated','authenticated'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale','ineffective'].includes(v))return'bad';return'warn'}
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
 async function get(url,fresh=false){
  const target=fresh?url+(url.includes('?')?'&':'?')+'fresh=1':url;
@@ -112,7 +113,9 @@ function business(){
    metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
-   row('External actions - 24h',n(g.externalExecutions24h),'Target '+n(g.acquisitionTarget24h||8)+' · hard budget '+n(g.acquisitionMax24h||12)+' · activity is a cost, not a KPI')+
+   row('Emails - 24h',n(g.emailSent24h)+' sent','Target '+n(g.emailTarget24h||50)+' · hard max '+n(g.emailMax24h||60)+' · '+n(g.emailReadyContacts)+' ready contacts')+
+   row('Machine-safe execution - today',n(data?.compute?.executionUsedToday)+' / '+n(data?.compute?.executionDailyJobBudget||g.machineSafeExternalActionMax24h||300),'Cloudflare authorizes · Render executes · Cloudflare verifies')+
+   row('Research compute - today',n(data?.compute?.researchUsedToday)+' / '+n(data?.compute?.dailyJobBudget||g.researchExternalJobMax24h||1500),'External research capacity · activity is not success')+
    row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
    row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
@@ -179,8 +182,38 @@ function brain(){
  document.getElementById('brainMeta').textContent='Evaluated '+dt(growth.lastEvaluatedAt||t.generatedAt);
  document.getElementById('brainBody').innerHTML=body.join('');
 }
+function throughput(){
+ const t=data.truth||{},g=t.growth||{},c=data.compute||{},a=data.auth||{};
+ const researchUsed=Number(c.researchUsedToday||0),researchMax=Number(c.dailyJobBudget||g.researchExternalJobMax24h||1500);
+ const execUsed=Number(c.executionUsedToday||0),execMax=Number(c.executionDailyJobBudget||g.machineSafeExternalActionMax24h||300);
+ const emailSent=Number(g.emailSent24h||0),emailTarget=Number(g.emailTarget24h||50),emailMax=Number(g.emailMax24h||60);
+ const readyContacts=Number(g.emailReadyContacts||0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
+ const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
+ let bottleneck='No capacity bottleneck proven.';
+ let bottleneckMeta='Business outcomes remain the constraint to scale decisions.';
+ if(readyContacts<Math.max(5,emailTarget-emailSent)){bottleneck='Qualified email contact supply';bottleneckMeta=n(readyContacts)+' ready contacts for a '+n(emailTarget)+'/day email target.'}
+ else if(Number(c.queued||0)>Number(c.batchSize||25)*4){bottleneck='External compute backlog';bottleneckMeta=n(c.queued)+' jobs queued · '+n(c.activeBatches)+' active batches.'}
+ else if(authBootstrap>0&&authActive===0){bottleneck='Authentication bootstrap';bottleneckMeta=n(authBootstrap)+' reusable session(s) need one-time owner login/challenge.'}
+ document.getElementById('throughputMeta').textContent='Updated '+dt(t.generatedAt)+' · capacity is not a success KPI';
+ document.getElementById('throughputBody').innerHTML=
+   '<div class="headline"><b>'+esc(bottleneck)+'</b><span>'+esc(bottleneckMeta)+'</span></div>'+
+   '<div class="metrics">'+
+     metric('Research jobs - today',n(researchUsed)+' / '+n(researchMax),n(c.queued)+' queued · Render')+
+     metric('Machine-safe actions - today',n(execUsed)+' / '+n(execMax),n(c.completedToday)+' compute jobs completed')+
+     metric('Emails - rolling 24h',n(emailSent)+' / '+n(emailTarget),'hard max '+n(emailMax)+' · '+n(leased)+' currently leased')+
+     metric('Auth sessions',n(authActive),n(authBootstrap)+' bootstrap required · '+n(authCaps)+' classified')+
+   '</div>'+
+   '<div class="section"><div class="sectionTitle">Execution architecture</div>'+
+     row('Control plane','Cloudflare','Priorities, policy, leases, canonical D1 state and final verification')+
+     row('Research + machine execution',human(c.status||'Unavailable'),(c.providerUrl||'Render overflow')+' · batch '+n(c.batchSize)+' · max '+n(c.maxActiveBatches)+' active')+
+     row('Email sender',human(g.emailDeliveryMode||'Unavailable'),'Target '+n(emailTarget)+' · max '+n(emailMax)+' / rolling 24h · reputation boundary retained')+
+     row('Auth Plane',human(a.status||'Unavailable'),a.brokerRuntime?.ok?'Chromium broker healthy · CAPTCHA/MFA human-only':'Broker health '+human(a.brokerRuntime?.error||'unavailable'))+
+     row('GitHub Actions','Disabled until October','Not counted as current execution capacity')+
+   '</div>'+
+   '<div class="sourceLine">Outcome hierarchy remains GA4 sessions → strict humans → verified outbound → monetized outbound → confirmed revenue. Capacity metrics only explain how fast the Growth Brain can work.</div>';
+}
 function taskHtml(x){
- const url=safeUrl(x.action_url),isReputation=x.engine==='reputation',canConfirm=!isReputation&&(x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status)));
+ const url=safeUrl(x.action_url),isReputation=x.engine==='reputation',isAuth=x.engine==='distribution'&&(x.gate_type==='authentication'||x.status==='auth_required'),canConfirm=!isReputation&&!isAuth&&(x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status)));
  const label=x.gate_key?'Mark done':x.editorial_queue_id?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
  const copy=(label,value)=>value?'<button class="btn" data-copy="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
  let payload='';
@@ -189,7 +222,7 @@ function taskHtml(x){
  return '<div class="task"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id)+'</div><div class="taskMeta">'+esc(x.engine||'human gate')+' - '+esc(x.status||'ready')+' - about '+esc(x.estimated_minutes||0)+' min</div></div>'+pill(isReputation?'reputation review':(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate'),isReputation?'bad':'warn')+'</div>'+
   '<div class="taskText"><b>Do:</b> '+esc(x.instructions||x.reason||'Complete the linked external step.')+'</div>'+
   (x.expected_impact?'<div class="taskText"><b>Expected result:</b> '+esc(x.expected_impact)+'</div>':'')+payload+
-  '<div class="taskActions">'+reputationActions+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+copy('Copy steps',x.instructions||x.reason||'')+
+  '<div class="taskActions">'+reputationActions+(isAuth?'<button class="btn primary" data-auth-handoff="'+esc(x.id)+'">Open secure login session</button>':(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':''))+copy('Copy steps',x.instructions||x.reason||'')+
   (canConfirm?'<button class="btn" data-resolve="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status||'')+'" data-gate="'+esc(x.gate_key||'')+'">'+esc(label)+'</button>':'')+
   (!isReputation&&x.engine==='distribution'?'<button class="btn danger" data-resolve="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+'</div></div>';
 }
@@ -210,7 +243,7 @@ function results(){
  document.getElementById('resultsBody').innerHTML=summary+items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
 }
 function health(){
- const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},issues=[];
+ const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},compute=data.compute||{},auth=data.auth||{},issues=[];
  const ec=t.executionContract||{},arch=t.architecture||{},g=t.search||{},growth=t.growth||{};
  if(Number(ec.missingExecutors||0)>0)issues.push({level:'bad',title:'Missing execution contracts',detail:n(ec.missingExecutors)+' executor mappings are missing.'});
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
@@ -222,12 +255,17 @@ function health(){
    else issues.push({level:a.status==='external_handoff_timeout'?'bad':'warn',title:'Authority loop',detail:'Authority closed loop reports '+human(a.status)+'. Runnable '+n(a.runnableQueue)+' · deferred '+n(a.deferredQueue)+' · total backlog '+n(a.queue)+'.'});
  }
  if(t.affiliate&&t.affiliate.reconciled===false)issues.push({level:'warn',title:'Affiliate metadata reconciliation',detail:n((t.affiliate.productionWithoutActivePipeline||[]).length)+' live production route(s) are not marked active in pipeline metadata: '+(t.affiliate.productionWithoutActivePipeline||[]).join(', ')+'. Production registry remains canonical.'});
- const acquisitionTarget=Number(growth.acquisitionTarget24h||8),acquisitionMax=Number(growth.acquisitionMax24h||12);
- if(Number(growth.externalExecutions24h||0)>=acquisitionMax&&Number(growth.strictHumans7d||0)===0)issues.push({level:'warn',title:'Acquisition activity without human yield',detail:n(growth.externalExecutions24h)+' external actions in 24h have reached the '+n(acquisitionMax)+' action budget while strict attributed humans remain 0 / 7d. Stop repetition and rotate to competitive acquisition gaps or observed search demand.'});
- if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh and authority loop have no current measurable failure.'});
+ const emailMax=Number(growth.emailMax24h||60);
+ if(Number(growth.emailSent24h||0)>=emailMax&&Number(growth.strictHumans7d||0)===0&&Number(growth.verifiedOutbound7d||0)===0)issues.push({level:'warn',title:'Email capacity saturated without measured yield',detail:n(growth.emailSent24h)+' emails in the rolling 24h window reached the '+n(emailMax)+' hard cap while strict humans and verified outbound remain 0 / 7d. Keep quality gates and rotate recipient/source supply before adding more volume.'});
+ if(compute.status&&compute.status!=='configured')issues.push({level:'warn',title:'External compute plane',detail:'Compute overflow reports '+human(compute.status)+'.'});
+ if(auth.status==='configured'&&auth.brokerRuntime&&auth.brokerRuntime.ok===false)issues.push({level:'bad',title:'Auth broker unavailable',detail:human(auth.brokerRuntime.error||'Browser runtime health check failed.')});
+ if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh, authority, external compute and Auth Plane have no current measurable failure.'});
  const rows=[
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
-  ['GitHub Actions',rt.githubActions?.role||'Unavailable',rt.githubActions?.scheduledPrimary===false?'Fallback only':'Check scheduling role'],
+  ['External compute',compute.status||'Unavailable',n(compute.completedToday)+' completed today · '+n(compute.queued)+' queued'],
+  ['Email plane',growth.emailDeliveryMode||'Unavailable',n(growth.emailSent24h)+' sent / 24h · '+n(growth.emailReadyContacts)+' ready contacts'],
+  ['Auth Plane',auth.status||'Unavailable',n(auth.activeSessions)+' active sessions · '+n(auth.bootstrapRequired)+' bootstrap required'],
+  ['GitHub Actions',rt.githubActions?.role||'Unavailable',rt.githubActions?.scheduledPrimary===false?'Disabled/fallback only':'Check scheduling role'],
   ['GSC evidence',g.runtimeStatus||'Unavailable',g.runtimeGeneratedAt?dt(g.runtimeGeneratedAt):'No runtime timestamp'],
   ['Authority',a.status||'Unavailable',n(a.attempts24)+' attempts / 24h'],
   ['Execution contract',n(ec.verified)+' verified',n(ec.ready)+' ready - '+n(ec.inFlight)+' in flight - '+n(ec.deferred)+' deferred'],
@@ -235,7 +273,7 @@ function health(){
  ];
  document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
-function render(){business();trafficProgress();authorityProgress();gscProgress();brain();queue();results();health()}
+function render(){business();trafficProgress();authorityProgress();gscProgress();brain();throughput();queue();results();health()}
 async function reviewReputation(button){
  const kind=button.dataset.kind,key=button.dataset.key,verdict=button.dataset.reputation;
  if(!kind||!key||!verdict)return;
@@ -246,6 +284,16 @@ async function reviewReputation(button){
   if(!r.ok||j.ok===false)throw new Error(j.error||'review_failed');
   data.queue=await get(endpoints.queue);queue();health();
  }catch(e){button.textContent='Save failed';setTimeout(()=>{button.disabled=false;button.textContent=old},1500)}
+}
+async function startAuthHandoff(button){
+ const slug=button.dataset.authHandoff||'';if(!slug)return;
+ const old=button.textContent;button.disabled=true;button.textContent='Starting secure session...';
+ try{
+  const r=await fetch('/analytics/api/human-actions/auth-handoff',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({surface_slug:slug})});
+  const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.error||'auth_handoff_failed');
+  button.disabled=false;button.textContent=old;if(j.handoff_url)window.open(j.handoff_url,'_blank','noopener,noreferrer');
+  data.queue=await get(endpoints.queue);queue();health();
+ }catch(e){button.textContent='Try secure login again';setTimeout(()=>{button.disabled=false;button.textContent=old},1800)}
 }
 async function resolveTask(button){
  const engine=button.dataset.engine,id=button.dataset.id,action=button.dataset.resolve,status=button.dataset.status||'',gate=button.dataset.gate||'';
@@ -263,9 +311,10 @@ async function resolveTask(button){
 document.addEventListener('click',e=>{
  const c=e.target.closest('[data-copy]');if(c){e.preventDefault();const old=c.textContent,value=decodeURIComponent(c.dataset.copy||'');navigator.clipboard.writeText(value).then(()=>{c.textContent='Copied';setTimeout(()=>c.textContent=old,1200)}).catch(()=>{c.textContent='Copy failed';setTimeout(()=>c.textContent=old,1500)});return}
  const rep=e.target.closest('[data-reputation]');if(rep){e.preventDefault();reviewReputation(rep);return}
+ const auth=e.target.closest('[data-auth-handoff]');if(auth){e.preventDefault();startAuthHandoff(auth);return}
  const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
 });
-const FAST_KEYS=['queue','runtime','authority'];
+const FAST_KEYS=['queue','runtime','authority','compute','auth'];
 const HEAVY_KEYS=['stats','truth'];
 let fastBusy=false,heavyBusy=false,lastFast=0,lastHeavy=0;
 
