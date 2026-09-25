@@ -471,7 +471,7 @@ export async function rebalanceExecutionAdmission(env){
     const remaining=Math.max(0,readySlots-keep.length);
     if(remaining>0){
       const deferredWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":senderReadyWhere;
-      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
+      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
         const marks=ids.map(()=>'?').join(',');
