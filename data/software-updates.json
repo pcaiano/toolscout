@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-24T09:50:42Z",
+  "updatedAt": "2026-09-25T09:55:00Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "github-proof-of-presence-enterprise",
+      "publishedAt": "2026-09-25",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "GitHub adds fresh authentication for high-impact enterprise actions",
+      "summary": "GitHub Enterprise Cloud can now require fresh re-authentication or MFA before managed users perform sensitive actions such as creating tokens or editing webhooks.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-24-require-proof-of-presence-for-high-impact-actions/",
+      "articleUrl": "/news/github-proof-of-presence-enterprise.html",
+      "profileUrl": "/news/github-proof-of-presence-enterprise.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "github-ssh-security-changes-2026",
       "publishedAt": "2026-09-23",
