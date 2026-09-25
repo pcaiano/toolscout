@@ -123,8 +123,9 @@ export async function auditArchitectureEscalations(env){
     core=await env.DB.prepare(`SELECT f.engine,f.mission,f.detail,f.evidence_json,COUNT(*) n,MAX(f.started_at) last_failed
       FROM engine_runs f
       WHERE f.started_at>=datetime('now','-24 hours') AND f.status='failed'
-        AND COALESCE(f.detail,'') NOT IN ('superseded_by_single_path_scheduler_fix','audit_probe_cancelled_after_client_disconnect')
+        AND COALESCE(f.detail,'') NOT IN ('superseded_by_single_path_scheduler_fix','superseded_by_healthy_autonomous_cycle','audit_probe_cancelled_after_client_disconnect')
         AND COALESCE(f.evidence_json,'') NOT LIKE '%superseded_by_single_path_scheduler_fix%'
+        AND COALESCE(f.evidence_json,'') NOT LIKE '%superseded_by_healthy_autonomous_cycle%'
         AND COALESCE(f.evidence_json,'') NOT LIKE '%audit_probe_cancelled_after_client_disconnect%'
         AND NOT EXISTS(
           SELECT 1 FROM engine_runs s
