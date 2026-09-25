@@ -433,7 +433,7 @@ export default{
       ok:true,
       version:'business-truth-v9',
       canonicalView:'command-center-simplified-view',
-      cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Growth Brain','Needs You','Recent Results','Search + Authority','System Truth'],
+      cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Growth Brain','Needs You','Recent Results','System Truth'],
       suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],
       canonicalSources:['Growth Supervisor','GA4','ToolScout redirect ledger','Google Search Console','verified backlink ledger','Chairman Queue','Cloudflare runtime'],
       refreshSeconds:60,
