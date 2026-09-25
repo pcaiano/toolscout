@@ -3,6 +3,7 @@ import base from './operational-truth-reconciliation-worker.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/5 * * * *';
 const DAILY_JOB_BUDGET=1500;
+const EXECUTION_DAILY_JOB_BUDGET=300;
 const BATCH_SIZE=25;
 const MAX_ACTIVE_BATCHES=2;
 const BATCH_TIMEOUT_MINUTES=3;
@@ -76,7 +77,15 @@ async function ensureSchema(env){
       last_completed_at TEXT,
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
-    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_metrics(id,metric_day) VALUES('global',date('now'))`)
+    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_metrics(id,metric_day) VALUES('global',date('now'))`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_budget(
+      kind TEXT PRIMARY KEY,
+      metric_day TEXT NOT NULL DEFAULT (date('now')),
+      used_today INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('research',date('now'),0)`),
+    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('execution',date('now'),0)`)
   ]).catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
@@ -127,12 +136,22 @@ async function metricDelta(env,{queued=0,leased=0,completed=0,failed=0,created=0
       updated_at=datetime('now')
     WHERE id='global'`).bind(queued,leased,completed,failed,created,activeBatches,completedBatches,lastDispatched?1:0,lastCompleted?1:0).run().catch(()=>{});
 }
+async function budgetRemaining(env,kind,limit){
+  await ensureSchema(env);
+  await env.DB.prepare(`UPDATE compute_overflow_budget SET metric_day=date('now'),used_today=0,updated_at=datetime('now') WHERE kind=? AND metric_day<>date('now')`).bind(kind).run().catch(()=>{});
+  const row=await env.DB.prepare(`SELECT used_today FROM compute_overflow_budget WHERE kind=? LIMIT 1`).bind(kind).first().catch(()=>null);
+  return Math.max(0,Number(limit||0)-num(row?.used_today));
+}
+async function budgetConsume(env,kind,count){
+  const n=Math.max(0,Number(count||0));if(!n)return;
+  await env.DB.prepare(`UPDATE compute_overflow_budget SET used_today=used_today+?,updated_at=datetime('now') WHERE kind=?`).bind(n,kind).run().catch(()=>{});
+}
 async function health(env){
   const m=await metricRow(env);
   return {
     status:env.OVERFLOW_COMPUTE_URL?'configured':'awaiting_external_runtime',
     providerUrl:env.OVERFLOW_COMPUTE_URL?(()=>{try{return new URL(env.OVERFLOW_COMPUTE_URL).origin}catch{return null}})():null,
-    dailyJobBudget:DAILY_JOB_BUDGET,batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
+    dailyJobBudget:DAILY_JOB_BUDGET,executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     d1ReadModel:'single_row_metrics_no_job_table_scans',
@@ -150,7 +169,7 @@ async function enqueueJob(env,{jobKey,jobType,subjectType,subjectKey,priority,pa
 async function enqueueDistributionResearch(env){
   await ensureSchema(env);
   const m=await metricRow(env);
-  let remaining=Math.max(0,DAILY_JOB_BUDGET-num(m?.created_today));
+  let remaining=await budgetRemaining(env,'research',DAILY_JOB_BUDGET);
   if(!remaining)return{enqueued:0,remaining:0};
   const limit=Math.min(500,remaining);
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action
@@ -171,7 +190,7 @@ async function enqueueDistributionResearch(env){
       enqueued+=contactAdded;remaining=Math.max(0,remaining-contactAdded);
     }
   }
-  if(enqueued>0)await metricDelta(env,{queued:enqueued,created:enqueued});
+  if(enqueued>0){await metricDelta(env,{queued:enqueued,created:enqueued});await budgetConsume(env,'research',enqueued);}
   return{enqueued,remaining};
 }
 async function requeueStaleBatches(env){
