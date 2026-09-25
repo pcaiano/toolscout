@@ -281,6 +281,8 @@ async function enqueueContactSupplyResearch(env,remaining){
     ORDER BY CASE status WHEN 'queued' THEN 0 WHEN 'unresolved' THEN 1 ELSE 2 END,priority_score DESC,updated_at ASC
     LIMIT ?`).bind(Math.min(CONTACT_SUPPLY_RESEARCH_BATCH,need,remaining)).all().catch(()=>({results:[]}));
   let enqueued=0;
+  const supply=await enqueueContactSupplyResearch(env,remaining);
+  enqueued+=num(supply.enqueued);remaining=supply.remaining;
   for(const row of rows(q)){
     if(remaining<=0)break;
     const url=isHttp(row.source_url)?row.source_url:`https://${row.domain}/`;
@@ -358,9 +360,10 @@ async function budgetConsume(env,kind,count){
   await env.DB.prepare(`UPDATE compute_overflow_budget SET used_today=used_today+?,updated_at=datetime('now') WHERE kind=?`).bind(n,kind).run().catch(()=>{});
 }
 async function health(env){
-  const [m,budgets]=await Promise.all([
+  const [m,budgets,contactSupply]=await Promise.all([
     metricRow(env),
-    env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]}))
+    env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]})),
+    contactSupplyHealth(env)
   ]);
   const usage=Object.fromEntries(rows(budgets).map(x=>[String(x.kind),num(x.used_today)]));
   return {
@@ -371,7 +374,8 @@ async function health(env){
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
-    d1ReadModel:'single_row_metrics_plus_two_budget_rows',
+    contactSupply,
+    d1ReadModel:'single_row_metrics_plus_two_budget_rows_plus_contact_supply_single_row',
     githubActionsRole:'disabled_until_october'
   };
 }
@@ -448,7 +452,7 @@ async function enqueueDistributionResearch(env){
     }
   }
   if(enqueued>0){await metricDelta(env,{queued:enqueued,created:enqueued});await budgetConsume(env,'research',enqueued);}
-  return{enqueued,remaining};
+  return{enqueued,remaining,contactSupply:supply};
 }
 
 function encodedAdapterBody(contentType,payload){
