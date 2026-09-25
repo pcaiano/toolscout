@@ -667,17 +667,45 @@ async function triggerBatch(env,batch){
     return{ok:false,error:safe(error?.message||error,500)};
   }
 }
+async function isolatedOverflowStage(env,name,fn,fallback){
+  try{return await fn()}catch(error){
+    const message=safe(error?.message||error,600);
+    await event(env,`overflow_${name}_failed`,'failed',message).catch(()=>{});
+    return {...fallback,ok:false,error:message};
+  }
+}
+async function dispatchAvailableBatches(env){
+  const runs=[];
+  for(let slot=0;slot<MAX_ACTIVE_BATCHES;slot++){
+    const batch=await isolatedOverflowStage(env,'batch_create',()=>createBatch(env),null);
+    if(!batch||batch.ok===false||!batch.count)break;
+    const dispatch=await isolatedOverflowStage(env,'batch_trigger',()=>triggerBatch(env,batch),{ok:false});
+    runs.push({batch:{batchId:batch.batchId,count:batch.count},dispatch});
+    if(dispatch?.reason==='overflow_runtime_not_configured')break;
+  }
+  return runs;
+}
 async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
   await ensureHotIndexes(env);
-  await ensureContactSupplySeeded(env);
-  const requeued=await requeueStaleBatches(env);
-  const execution=await enqueueAuthorizedExecution(env);
-  const research=await enqueueDistributionResearch(env);
-  const batch=await createBatch(env);
-  const dispatch=batch&&batch.count>0?await triggerBatch(env,batch):{ok:true,skipped:true,reason:'no_batch_available'};
-  return{ok:dispatch.ok!==false,status:batch&&batch.count>0?'dispatched':'idle',execution,research,requeued,batch:batch&&batch.count>0?{batchId:batch.batchId,count:batch.count}:null,dispatch};
+  const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
+  const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
+  const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
+  const execution=await isolatedOverflowStage(env,'authorized_execution_enqueue',()=>enqueueAuthorizedExecution(env),{enqueued:0,submissionJobs:0,verificationJobs:0,remaining:0});
+  const research=await isolatedOverflowStage(env,'research_enqueue',()=>enqueueDistributionResearch(env),{enqueued:0,remaining:0,contactSupply:{enqueued:0}});
+  const runs=await dispatchAvailableBatches(env);
+  const first=runs[0]||null;
+  const dispatched=runs.filter(x=>x.dispatch?.ok).length;
+  const failedStages=[contactSupply,execution,research].filter(x=>x&&x.ok===false).length;
+  const ok=dispatched>0||(!runs.length&&failedStages===0);
+  const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
+  return{
+    ok,status,contactSupply,execution,research,requeued,
+    batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
+    batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
+    dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
+  };
 }
 async function batchPayload(env,batchId){
   await ensureSchema(env);
