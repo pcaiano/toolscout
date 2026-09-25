@@ -39,7 +39,6 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 <section class="card span7"><div class="head"><div><div class="kicker">Autonomous execution + R&D</div><div class="title">Growth Brain</div></div><div class="meta" id="brainMeta">What it is doing now and what it is exploring next</div></div><div class="body" id="brainBody"><div class="empty">Loading...</div></div></section>
 <section class="card span5"><div class="head"><div><div class="kicker">Human exceptions only</div><div class="title">Needs You</div></div><div class="meta" id="queueMeta">Chairman Queue</div></div><div class="body" id="queueBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Actions and outcomes</div><div class="title">Recent Results</div></div><div class="meta">External evidence only</div></div><div class="body" id="resultsBody"><div class="empty">Loading...</div></div></section>
-<section class="card span5"><div class="head"><div><div class="kicker">Organic demand and authority</div><div class="title">Search + Authority</div></div><div class="meta" id="searchMeta">GSC + verified backlinks</div></div><div class="body" id="searchBody"><div class="empty">Loading...</div></div></section>
 <section class="card span12"><div class="head"><div><div class="kicker">Reliability</div><div class="title">System Truth</div></div><div class="meta">Only current, measurable issues</div></div><div class="body" id="healthBody"><div class="empty">Loading...</div></div></section>
 </main>
 </div>
@@ -210,22 +209,6 @@ function results(){
  if(!items.length){document.getElementById('resultsBody').innerHTML=summary+'<div class="empty">No verified external result has been recorded in the last 7 days.</div>';return}
  document.getElementById('resultsBody').innerHTML=summary+items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
 }
-function searchAuthority(){
- const t=data.truth||{},g=t.search||{},b=t.authority||{},rt=data.runtime||{},rh=rt.seo?.gscRuntimeHealth||{};
- document.getElementById('searchMeta').textContent='GSC refreshed '+dt(g.runtimeGeneratedAt||g.generatedAt);
- let html='<div class="metrics">'+
-  metric('Impressions - 28d',n(g.impressions),n(g.clicks)+' clicks')+
-  metric('Observed search pages',n(g.observedPages),(g.indexed!=null&&g.inspected!=null)?n(g.indexed)+' indexed / '+n(g.inspected)+' inspected':'URL Inspection not refreshed in this source')+
-  metric('Referring domains',n(b.verifiedReferringDomains),n(b.verifiedBacklinks)+' verified backlinks')+
-  metric('Authority attempts - 24h',n(b.attempts24h),n(b.attemptMin24h)+' minimum')+
- '</div>';
- html+='<div class="section">'+
-  row('Authority queue',n(b.authorityQueue),b.throughputGap?'Throughput below target':(b.stagnating?'Stagnating':'Throughput healthy'))+
-  row('GSC runtime',g.runtimeStatus||rh.status||'Unavailable',(g.runtimeOk||rh.ok)?'Cloudflare refresh verified':'Search refresh needs attention')+
-  row('Last verified backlink',b.lastVerifiedAt?dt(b.lastVerifiedAt):'No recent verification',b.lastVerifiedAgeHours==null?'':dec(b.lastVerifiedAgeHours,1)+' hours ago')+
- '</div>';
- document.getElementById('searchBody').innerHTML=html;
-}
 function health(){
  const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},issues=[];
  const ec=t.executionContract||{},arch=t.architecture||{},g=t.search||{},growth=t.growth||{};
@@ -233,15 +216,11 @@ function health(){
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
  if(Number(arch.openIncidents||0)>0)issues.push({level:'bad',title:'Architecture incidents',detail:n(arch.openIncidents)+' open architecture incidents.'});
  if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
- if(a.status&&a.status!=='healthy'){
-   const floorMet=Number(a.attempts24||0)>=Number(a.attemptMin24h||15);
-   if(a.senderFreshClaim&&Number(a.senderClaimed||0)>0)issues.push({level:'warn',title:'Authority handoff in progress',detail:n(a.senderClaimed)+' sender task is claimed since '+dt(a.senderNewestClaimedAt)+'. Queue '+n(a.queue)+' remains. Waiting for external callback evidence, so no extra attempt is counted yet.'});
-   else if(a.status==='executing_backlog'&&floorMet)issues.push({level:'warn',title:'Authority backlog needs new executable routes',detail:n(a.queue)+' opportunities remain and the daily attempt floor is met. The latest cycle found no new externally executable candidate.'});
-   else issues.push({level:'warn',title:'Authority loop',detail:'Authority closed loop reports '+human(a.status)+'.'});
+ const authorityFailureStates=new Set(['execution_required','external_handoff_timeout','handoff_reconciliation_required','failed']);
+ if(a.status&&authorityFailureStates.has(String(a.status))){
+   if(a.senderFreshClaim&&Number(a.senderClaimed||0)>0)issues.push({level:'warn',title:'Authority handoff in progress',detail:n(a.senderClaimed)+' sender task is claimed since '+dt(a.senderNewestClaimedAt)+'. Waiting for external callback evidence.'});
+   else issues.push({level:a.status==='external_handoff_timeout'?'bad':'warn',title:'Authority loop',detail:'Authority closed loop reports '+human(a.status)+'. Runnable '+n(a.runnableQueue)+' · deferred '+n(a.deferredQueue)+' · total backlog '+n(a.queue)+'.'});
  }
- const latestExternal=Array.isArray(t.recentResults)&&t.recentResults.length?t.recentResults[0]:null;
- const externalAge=latestExternal?.at?ageHours(latestExternal.at):null;
- if(externalAge!=null&&externalAge>2)issues.push({level:'warn',title:'No new verified external result',detail:'Latest verified external outcome was '+dt(latestExternal.at)+' ('+dec(externalAge,1)+'h ago). Engines are still running; this warning is about outcome freshness, not scheduler activity.'});
  if(t.affiliate&&t.affiliate.reconciled===false)issues.push({level:'warn',title:'Affiliate metadata reconciliation',detail:n((t.affiliate.productionWithoutActivePipeline||[]).length)+' live production route(s) are not marked active in pipeline metadata: '+(t.affiliate.productionWithoutActivePipeline||[]).join(', ')+'. Production registry remains canonical.'});
  const acquisitionTarget=Number(growth.acquisitionTarget24h||8),acquisitionMax=Number(growth.acquisitionMax24h||12);
  if(Number(growth.externalExecutions24h||0)>=acquisitionMax&&Number(growth.strictHumans7d||0)===0)issues.push({level:'warn',title:'Acquisition activity without human yield',detail:n(growth.externalExecutions24h)+' external actions in 24h have reached the '+n(acquisitionMax)+' action budget while strict attributed humans remain 0 / 7d. Stop repetition and rotate to competitive acquisition gaps or observed search demand.'});
@@ -256,7 +235,7 @@ function health(){
  ];
  document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
-function render(){business();trafficProgress();authorityProgress();gscProgress();brain();queue();results();searchAuthority();health()}
+function render(){business();trafficProgress();authorityProgress();gscProgress();brain();queue();results();health()}
 async function reviewReputation(button){
  const kind=button.dataset.kind,key=button.dataset.key,verdict=button.dataset.reputation;
  if(!kind||!key||!verdict)return;
