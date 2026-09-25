@@ -644,7 +644,10 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health')return Response.json(await health(env),{headers:JSON_H});
-    if(request.method==='GET'&&u.pathname==='/api/auth-plane/health')return Response.json(await authPlaneHealth(env),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/auth-plane/health'){
+      if(u.searchParams.get('fresh')==='1')await refreshAuthBrokerRuntimeHealth(env,{force:true}).catch(()=>null);
+      return Response.json(await authPlaneHealth(env),{headers:JSON_H});
+    }
     if(request.method==='POST'&&u.pathname==='/api/auth-plane/classify'){
       const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
       if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
