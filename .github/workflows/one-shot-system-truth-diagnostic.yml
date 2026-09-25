@@ -21,15 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Inspect stalled contracts
+      - name: Inspect SEO executor queue
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,attempts,last_result,created_at,claimed_at,attempted_at,updated_at,claim_deadline,attempt_deadline,verify_deadline FROM growth_execution_contract WHERE status='stalled' ORDER BY priority_score DESC,updated_at ASC LIMIT 20;"
-      - name: Inspect authority backlog
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT status,COUNT(*) n,MIN(created_at) oldest_created,MIN(updated_at) oldest_updated FROM growth_execution_contract WHERE executor='seo_cloudflare' GROUP BY status ORDER BY status;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT task_id,subject_key,action,priority_score,status,attempts,last_result,created_at,updated_at,claim_deadline FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status IN ('pending','stalled','deferred') ORDER BY CASE status WHEN 'stalled' THEN 0 WHEN 'pending' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC LIMIT 30;"
+      - name: Inspect human gates
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT task_id,opportunity_key,subject_type,subject_key,action,executor,priority_score,status,attempts,last_result,updated_at FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled') ORDER BY priority_score DESC,updated_at ASC LIMIT 30;"
-      - name: Inspect distribution routes
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT surface_slug,surface_name,status,human_required,distribution_score,action_url,next_action,updated_at FROM distribution_opportunities WHERE surface_slug<>'indexnow' ORDER BY distribution_score DESC,updated_at DESC LIMIT 40;"
-      - name: Inspect open human gates
-        run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT gate_key,engine,subject_type,subject_key,gate_type,status,priority_score,action_url,reason,opened_at,updated_at FROM human_gate_contract WHERE status='open' ORDER BY priority_score DESC,updated_at DESC LIMIT 30;"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT gate_key,engine,subject_type,subject_key,gate_type,status,action_url,reason,opened_at,updated_at FROM human_gate_contract WHERE status='open' ORDER BY updated_at DESC LIMIT 30;"
