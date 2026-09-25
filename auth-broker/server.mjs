@@ -4,8 +4,8 @@ import puppeteer from 'puppeteer';
 
 const PORT=Number(process.env.PORT||10000);
 const SHARED_SECRET=String(process.env.AUTH_BROKER_SHARED_SECRET||'');
-const MAX_SESSIONS=2;
-const SESSION_TTL_MS=20*60*1000;
+const MAX_SESSIONS=1;
+const SESSION_TTL_MS=12*60*1000;
 const VIEWPORT={width:1280,height:800};
 const sessions=new Map();
 let browserPromise=null;
@@ -22,8 +22,20 @@ function tokenHash(v){return crypto.createHash('sha256').update(String(v||'')).d
 function randomToken(){return crypto.randomBytes(32).toString('base64url')}
 async function readJson(req,limit=2_000_000){return new Promise((resolve,reject)=>{let chunks=[],size=0;req.on('data',c=>{size+=c.length;if(size>limit){reject(new Error('body_too_large'));req.destroy();return}chunks.push(c)});req.on('end',()=>{try{resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}'))}catch(e){reject(e)}});req.on('error',reject)})}
 async function browser(){
-  if(!browserPromise)browserPromise=puppeteer.launch({headless:true,args:['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu','--no-first-run','--no-default-browser-check']}).catch(error=>{browserPromise=null;throw error});
+  if(!browserPromise){
+    browserPromise=puppeteer.launch({headless:true,args:[
+      '--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu',
+      '--no-first-run','--no-default-browser-check','--disable-extensions','--disable-background-networking',
+      '--disable-component-update','--disable-default-apps','--disable-sync','--metrics-recording-only',
+      '--renderer-process-limit=2'
+    ]}).then(b=>{b.on('disconnected',()=>{browserPromise=null});return b}).catch(error=>{browserPromise=null;throw error});
+  }
   return browserPromise;
+}
+async function closeBrowserIfIdle(){
+  if(sessions.size>0||!browserPromise)return;
+  const pending=browserPromise;browserPromise=null;
+  try{const b=await pending;await b.close()}catch{}
 }
 async function applyState(context,page,state,target){
   const cookies=Array.isArray(state?.cookies)?state.cookies.filter(c=>c&&c.name&&c.value):[];
@@ -76,6 +88,12 @@ async function inspectPage(page){
 async function newContext(target,state){
   const b=await browser(),context=await b.createBrowserContext();
   const page=await context.newPage();await page.setViewport(VIEWPORT);
+  await page.setRequestInterception(true).catch(()=>{});
+  page.on('request',req=>{
+    const type=req.resourceType();
+    if(type==='media'||type==='font')req.abort().catch(()=>{});
+    else req.continue().catch(()=>{});
+  });
   await applyState(context,page,state,target);
   return{context,page};
 }
@@ -87,14 +105,14 @@ function sessionPage(id,token){
   <div class="bar"><b>ToolScout secure login session</b><span id="status">Ready</span></div><div class="wrap">
   <p class="note">Complete login, MFA or CAPTCHA yourself. ToolScout does not solve CAPTCHA and does not store the password or OTP you type here. When authenticated, press <b>Save session & resume</b>.</p>
   <div class="url" id="url"></div>
-  <div class="controls"><button id="refresh">Refresh view</button><button data-key="Tab">Tab</button><button data-key="Enter">Enter</button><button id="back">Back</button><button id="up">Scroll up</button><button id="down">Scroll down</button></div>
+  <div class="controls"><button id="refresh">Refresh view</button><button data-key="Tab">Tab</button><button data-key="Enter">Enter</button><button id="back">Back</button><button id="up">Scroll up</button><button id="down">Scroll down</button><a id="direct" href="#" target="_blank" rel="noopener noreferrer" style="display:none;text-decoration:none"><button type="button">Open site in normal browser</button></a></div>
   <div class="controls"><select id="field"><option value="">Focused field (fallback)</option></select><input id="text" type="password" autocomplete="off" placeholder="Type securely"><button id="type">Type into selected field</button><button id="clear">Clear</button></div>
   <img id="shot" class="shot" alt="Live browser screenshot">
   <div class="controls"><button class="primary" id="save">Save session & resume automation</button></div></div>
   <script>
   const sid='${sid}',tok='${t}',shot=document.getElementById('shot'),statusEl=document.getElementById('status'),urlEl=document.getElementById('url');
   async function call(action,payload={}){statusEl.textContent='Working…';const r=await fetch('/session/'+sid+'/action?token='+tok,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...payload})});const d=await r.json();if(!r.ok){statusEl.textContent=d.error||'Error';throw new Error(d.error)}statusEl.textContent=d.status||'Ready';if(d.currentUrl)urlEl.textContent=d.currentUrl;await view();return d}
-  async function view(){shot.style.display='';shot.src='/session/'+sid+'/screenshot?token='+tok+'&t='+Date.now();fetch('/session/'+sid+'/state?token='+tok).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'session_unavailable');return d}).then(d=>{if(d.currentUrl)urlEl.textContent=d.currentUrl;if(d.challengeDetected)statusEl.textContent='Human verification detected — complete it manually';const sel=document.getElementById('field');const prev=sel.value;sel.innerHTML='<option value="">Focused field (fallback)</option>';for(const f of (d.form?.fields||[]).filter(x=>x.visible&&!x.disabled)){const o=document.createElement('option');o.value=String(f.index);o.textContent=(f.label||f.placeholder||f.name||f.type||('Field '+f.index)).slice(0,90);sel.appendChild(o)}if([...sel.options].some(o=>o.value===prev))sel.value=prev;}).catch(()=>{statusEl.textContent='This secure browser session has expired or was restarted. Reopen the action from ToolScout to create a fresh session.';shot.style.display='none';})}
+  async function view(){shot.style.display='';shot.src='/session/'+sid+'/screenshot?token='+tok+'&t='+Date.now();fetch('/session/'+sid+'/state?token='+tok).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'session_unavailable');return d}).then(d=>{if(d.currentUrl){urlEl.textContent=d.currentUrl;const direct=document.getElementById('direct');direct.href=d.currentUrl;direct.style.display=d.challengeDetected?'inline-block':'none'}if(d.challengeDetected)statusEl.textContent='Human verification detected. Try it here; if the challenge rejects this remote browser, use Open site in normal browser.';const sel=document.getElementById('field');const prev=sel.value;sel.innerHTML='<option value="">Focused field (fallback)</option>';for(const f of (d.form?.fields||[]).filter(x=>x.visible&&!x.disabled)){const o=document.createElement('option');o.value=String(f.index);o.textContent=(f.label||f.placeholder||f.name||f.type||('Field '+f.index)).slice(0,90);sel.appendChild(o)}if([...sel.options].some(o=>o.value===prev))sel.value=prev;}).catch(()=>{statusEl.textContent='This secure browser session has expired or was restarted. Reopen the action from ToolScout to create a fresh session.';shot.style.display='none';})}
   shot.addEventListener('click',e=>{const r=shot.getBoundingClientRect();call('click',{x:Math.round((e.clientX-r.left)/r.width*1280),y:Math.round((e.clientY-r.top)/r.height*800)})});
   shot.addEventListener('error',()=>{statusEl.textContent='This secure browser session is no longer available. Reopen the action from ToolScout to create a fresh session.';shot.style.display='none';});
   document.getElementById('type').onclick=async()=>{const el=document.getElementById('text');const value=el.value;const field=document.getElementById('field').value;el.value='';await call(field===''?'type':'fillField',field===''?{text:value}:{text:value,index:Number(field)})};
@@ -102,7 +120,7 @@ function sessionPage(id,token){
   document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>call('key',{key:b.dataset.key}));
   document.getElementById('refresh').onclick=()=>call('refresh');document.getElementById('back').onclick=()=>call('back');document.getElementById('up').onclick=()=>call('scroll',{dy:-650});document.getElementById('down').onclick=()=>call('scroll',{dy:650});
   document.getElementById('save').onclick=async()=>{const b=document.getElementById('save');b.disabled=true;try{const d=await call('save');statusEl.textContent=d.status||'Session saved. You may close this tab.'}catch{b.disabled=false}};
-  view();setInterval(()=>{if(!document.hidden)view()},5000);
+  view();setInterval(()=>{if(!document.hidden)view()},8000);
   </script></body></html>`;
 }
 async function completeSession(s){
@@ -111,7 +129,7 @@ async function completeSession(s){
   const sessionState=await exportState(s.context,s.page);
   const response=await fetch(s.completionUrl,{method:'POST',headers:{Authorization:'Bearer '+s.completionToken,'Content-Type':'application/json','User-Agent':'ToolScout-Auth-Broker/1.0'},body:JSON.stringify({sessionState,currentUrl:s.page.url(),challengeDetected:inspection.challengeDetected,challengeResolved:!inspection.loginPresent}),signal:AbortSignal.timeout(15000)});
   if(!response.ok)return{ok:false,error:'toolscout_callback_http_'+response.status};
-  await s.context.close().catch(()=>{});sessions.delete(s.id);
+  await s.context.close().catch(()=>{});sessions.delete(s.id);await closeBrowserIfIdle();
   return{ok:true,status:'Session saved. ToolScout automation resumed.'};
 }
 async function ephemeralInspect(body){
@@ -121,9 +139,9 @@ async function ephemeralInspect(body){
     const inspection=await inspectPage(page);
     const sessionState=await exportState(context,page);
     return{status:200,body:{ok:true,currentUrl:page.url(),sessionState,...inspection}};
-  }finally{await context.close().catch(()=>{})}
+  }finally{await context.close().catch(()=>{});await closeBrowserIfIdle()}
 }
-setInterval(async()=>{const now=Date.now();for(const [id,s] of sessions){if(s.expiresAt<=now){await s.context.close().catch(()=>{});sessions.delete(id)}}},60000).unref();
+setInterval(async()=>{const now=Date.now();for(const [id,s] of sessions){if(s.expiresAt<=now){await s.context.close().catch(()=>{});sessions.delete(id)}}await closeBrowserIfIdle()},60000).unref();
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
@@ -139,6 +157,7 @@ const server=http.createServer(async(req,res)=>{
       await page.goto('about:blank');
       const version=await b.version();
       await context.close();
+      await closeBrowserIfIdle();
       return json(res,200,{ok:true,browser:'chromium',version,viewport:VIEWPORT});
     }catch(error){
       if(context)await context.close().catch(()=>{});
@@ -173,7 +192,7 @@ const server=http.createServer(async(req,res)=>{
   const sm=url.pathname.match(/^\/session\/(ah_[A-Za-z0-9-]+)\/screenshot$/);
   if(req.method==='GET'&&sm){
     const s=validSession(sm[1],url.searchParams.get('token')||'');if(!s)return json(res,403,{error:'invalid_session'});
-    try{const png=await s.page.screenshot({type:'png'});res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'no-store','Content-Length':png.length});return res.end(png)}catch{return json(res,500,{error:'screenshot_failed'})}
+    try{const jpg=await s.page.screenshot({type:'jpeg',quality:72});res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'no-store','Content-Length':jpg.length});return res.end(jpg)}catch{return json(res,500,{error:'screenshot_failed'})}
   }
   const stm=url.pathname.match(/^\/session\/(ah_[A-Za-z0-9-]+)\/state$/);
   if(req.method==='GET'&&stm){
