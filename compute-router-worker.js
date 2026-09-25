@@ -186,7 +186,13 @@ async function upsertContactSupplyDomain(env,{domain,sourceType,sourceKey=null,s
       source_key=CASE WHEN excluded.priority_score>=contact_supply_domain.priority_score THEN COALESCE(excluded.source_key,contact_supply_domain.source_key) ELSE contact_supply_domain.source_key END,
       source_name=COALESCE(contact_supply_domain.source_name,excluded.source_name),
       source_url=COALESCE(contact_supply_domain.source_url,excluded.source_url),
-      updated_at=datetime('now')`)
+      updated_at=datetime('now')
+    WHERE
+      excluded.priority_score>contact_supply_domain.priority_score
+      OR (excluded.priority_score>=contact_supply_domain.priority_score AND excluded.source_type<>contact_supply_domain.source_type)
+      OR (excluded.priority_score>=contact_supply_domain.priority_score AND COALESCE(excluded.source_key,'')<>COALESCE(contact_supply_domain.source_key,''))
+      OR (contact_supply_domain.source_name IS NULL AND excluded.source_name IS NOT NULL)
+      OR (contact_supply_domain.source_url IS NULL AND excluded.source_url IS NOT NULL)`)
     .bind(d,safe(sourceType,60),sourceKey?safe(sourceKey,180):null,sourceName?safe(sourceName,240):null,sourceUrl?safe(sourceUrl,2000):null,Number(priority||0)).run();
   return Number(w?.meta?.changes||w?.changes||0);
 }
@@ -436,7 +442,8 @@ async function health(env){
     activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,
     d1ReadModel:'single_row_metrics_plus_two_budget_rows_plus_contact_supply_single_row',
-    githubActionsRole:'disabled_until_october'
+    githubActionsRole:'disabled_until_october',
+    writeAmplificationGuard:'d1-write-guard-v1'
   };
 }
 async function enqueueJob(env,{jobKey,jobType,subjectType,subjectKey,priority,payload}){
@@ -641,11 +648,9 @@ async function createBatch(env){
   const completionToken=`${crypto.randomUUID()}.${crypto.randomUUID()}`;
   const tokenHash=await sha256(completionToken);
   await env.DB.prepare(`INSERT INTO compute_overflow_batches(batch_id,completion_token_hash,status,job_count,dispatched_at,created_at,updated_at) VALUES(?,?,'dispatched',?,datetime('now'),datetime('now'),datetime('now'))`).bind(batchId,tokenHash,ids.length).run();
-  let leased=0;
-  for(const id of ids){
-    const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='leased',batch_id=?,leased_at=datetime('now'),attempts=attempts+1,updated_at=datetime('now') WHERE job_id=? AND status='queued'`).bind(batchId,id).run();
-    leased+=Number(w?.meta?.changes||w?.changes||0);
-  }
+  const placeholders=ids.map(()=>'?').join(',');
+  const leaseWrite=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='leased',batch_id=?,leased_at=datetime('now'),attempts=attempts+1,updated_at=datetime('now') WHERE job_id IN (${placeholders}) AND status='queued'`).bind(batchId,...ids).run();
+  const leased=Number(leaseWrite?.meta?.changes||leaseWrite?.changes||0);
   if(leased>0)await metricDelta(env,{queued:-leased,leased,activeBatches:1,lastDispatched:true});
   return{batchId,completionToken,count:leased};
 }
@@ -653,7 +658,7 @@ async function triggerBatch(env,batch){
   if(!env.OVERFLOW_COMPUTE_URL||!batch)return{ok:false,reason:'overflow_runtime_not_configured'};
   const endpoint=new URL(`/tick/${encodeURIComponent(batch.batchId)}`,env.OVERFLOW_COMPUTE_URL).toString();
   try{
-    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','User-Agent':'ToolScout-Compute-Router/1.0'},body:JSON.stringify({batchId:batch.batchId,toolscoutBaseUrl:'https://trytoolscout.org'}),signal:AbortSignal.timeout(10000)});
+    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','User-Agent':'ToolScout-Compute-Router/1.0'},body:JSON.stringify({batchId:batch.batchId,completionToken:batch.completionToken,toolscoutBaseUrl:'https://trytoolscout.org'}),signal:AbortSignal.timeout(10000)});
     await env.DB.prepare(`UPDATE compute_overflow_batches SET trigger_http_status=?,last_error=?,updated_at=datetime('now') WHERE batch_id=?`).bind(response.status,response.ok?null:`trigger_http_${response.status}`,batch.batchId).run();
     if(!response.ok)throw new Error(`trigger_http_${response.status}`);
     await event(env,'overflow_batch_dispatched','completed',`Dispatched ${batch.count} external compute job(s).`,{batchId:batch.batchId});
@@ -712,7 +717,7 @@ async function batchPayload(env,batchId){
   const batch=await env.DB.prepare(`SELECT batch_id,status,job_count,completion_token_hash FROM compute_overflow_batches WHERE batch_id=? LIMIT 1`).bind(batchId).first();
   if(!batch||!['dispatched','running'].includes(String(batch.status)))return null;
   const jobs=await env.DB.prepare(`SELECT job_id,job_type,subject_type,subject_key,priority_score,payload_json FROM compute_overflow_jobs WHERE batch_id=? AND status='leased' ORDER BY priority_score DESC,created_at ASC`).bind(batchId).all();
-  await env.DB.prepare(`UPDATE compute_overflow_batches SET status='running',fetched_at=COALESCE(fetched_at,datetime('now')),updated_at=datetime('now') WHERE batch_id=?`).bind(batchId).run();
+  await env.DB.prepare(`UPDATE compute_overflow_batches SET status='running',fetched_at=COALESCE(fetched_at,datetime('now')),updated_at=datetime('now') WHERE batch_id=? AND status='dispatched'`).bind(batchId).run();
   return{batch,jobs:rows(jobs)};
 }
 function sameHostRoute(source,target){
@@ -907,8 +912,7 @@ async function applyContactSupplyResult(env,job,result){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at)
       VALUES(?, 'contact_supply_email_found','completed','contact_supply',?,?,?,datetime('now'),datetime('now'))`)
       .bind(`contact_supply_${crypto.randomUUID()}`,domain,source,`Contact Supply Engine validated a public same-domain role mailbox for ${domain} and propagated it to eligible outreach lanes.`).run().catch(()=>{});
-    await refreshContactSupplyMetrics(env);
-    return{applied:applied>0,email,domain,status:cooldown?'cooldown':'ready_email'};
+      return{applied:applied>0,email,domain,status:cooldown?'cooldown':'ready_email'};
   }
 
   if(bestRoute){
@@ -928,8 +932,7 @@ async function applyContactSupplyResult(env,job,result){
       await env.DB.prepare(`UPDATE distribution_network_outreach SET contact_source_url=COALESCE(contact_source_url,?),status=CASE WHEN status IN ('queued','suppressed_no_contact') THEN 'contact_route_found' ELSE status END,updated_at=datetime('now') WHERE surface_slug=?`)
         .bind(routeUrl,row.surface_slug).run().catch(()=>{});
     }
-    await refreshContactSupplyMetrics(env);
-    return{applied:applied>0,domain,status:'ready_route',route:bestRoute};
+      return{applied:applied>0,domain,status:'ready_route',route:bestRoute};
   }
 
   const attempts=await env.DB.prepare(`SELECT public_attempts FROM contact_supply_domain WHERE domain=? LIMIT 1`).bind(domain).first().catch(()=>({public_attempts:0}));
@@ -941,7 +944,6 @@ async function applyContactSupplyResult(env,job,result){
     apollo_status='plan_blocked',updated_at=datetime('now')
     WHERE domain=? AND contact_email IS NULL`).bind(newStatus,nextAttempts,delay,domain).run().catch(()=>null);
   applied+=Number(w?.meta?.changes||w?.changes||0);
-  await refreshContactSupplyMetrics(env);
   return{applied:applied>0,domain,status:newStatus,reason:'no_public_contact_evidence'};
 }
 async function applyContactSupplyFailure(env,job,result){
@@ -952,7 +954,6 @@ async function applyContactSupplyFailure(env,job,result){
   const delay=attempts>=2?30:1;
   const w=await env.DB.prepare(`UPDATE contact_supply_domain SET status=?,public_attempts=?,last_researched_at=datetime('now'),next_research_at=datetime('now','+'||?||' days'),apollo_status='plan_blocked',updated_at=datetime('now') WHERE domain=? AND contact_email IS NULL`)
     .bind(status,attempts,delay,domain).run().catch(()=>null);
-  await refreshContactSupplyMetrics(env);
   return{applied:Number(w?.meta?.changes||w?.changes||0)>0,status,domain,error:safe(result?.error||'research_failed',300)};
 }
 async function completeBatch(request,env,ctx,batchId){
@@ -964,7 +965,8 @@ async function completeBatch(request,env,ctx,batchId){
   if(!token||(await sha256(token))!==batch.completion_token_hash)return Response.json({error:'invalid_completion_capability'},{status:403,headers:JSON_H});
   let body={};try{body=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_H})}
   const results=Array.isArray(body.results)?body.results.slice(0,BATCH_SIZE):[];
-  let completed=0,failed=0,retried=0,applied=0;
+  let completed=0,failed=0,retried=0,applied=0,contactSupplyTouched=false;
+  let metricQueued=0,metricLeased=0,metricCompleted=0,metricFailed=0;
   for(const result of results){
     const jobId=safe(result?.jobId,120);if(!jobId)continue;
     const job=await env.DB.prepare(`SELECT job_id,job_type,subject_key,payload_json,attempts FROM compute_overflow_jobs WHERE job_id=? AND batch_id=? AND status='leased' LIMIT 1`).bind(jobId,batchId).first();
@@ -973,6 +975,7 @@ async function completeBatch(request,env,ctx,batchId){
     if(job.job_type==='authorized_http_action'){const a=await applyAuthorizedActionResult(env,job,result);applied+=a.applied?1:0}
     else if(job.job_type==='authorized_verification'){const a=await applyAuthorizedVerificationResult(env,job,result);applied+=a.applied?1:0}
     else if(job.job_type==='contact_supply_public_research'){
+      contactSupplyTouched=true;
       const a=ok?await applyContactSupplyResult(env,job,result):await applyContactSupplyFailure(env,job,result);applied+=a.applied?1:0;
     }else if(ok){
       if(job.job_type==='distribution_route_research'){const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0}
@@ -984,16 +987,16 @@ async function completeBatch(request,env,ctx,batchId){
     if(externalUnreachable&&num(job.attempts)<maxExternalAttempts){
       await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,completed_at=NULL,available_at=datetime('now','+24 hours'),result_json=?,last_error='source_unreachable_backoff',updated_at=datetime('now') WHERE job_id=?`)
         .bind(JSON.stringify(result).slice(0,24000),jobId).run();
-      retried++;await metricDelta(env,{leased:-1,queued:1});
+      retried++;metricLeased-=1;metricQueued+=1;
     }else if(externalUnreachable){
       await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='completed',completed_at=datetime('now'),result_json=?,last_error=NULL,updated_at=datetime('now') WHERE job_id=?`)
         .bind(JSON.stringify({...result,outcome:'external_source_unreachable_exhausted'}).slice(0,24000),jobId).run();
-      completed++;await metricDelta(env,{leased:-1,completed:1,lastCompleted:true});
+      completed++;metricLeased-=1;metricCompleted+=1;
     }else{
       await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
         .bind(ok?'completed':'failed',JSON.stringify(result).slice(0,24000),ok?null:safe(result?.error||'external_compute_failed',600),jobId).run();
-      if(ok){completed++;await metricDelta(env,{leased:-1,completed:1,lastCompleted:true});}
-      else{failed++;await metricDelta(env,{leased:-1,failed:1,lastCompleted:true});}
+      if(ok){completed++;metricLeased-=1;metricCompleted+=1;}
+      else{failed++;metricLeased-=1;metricFailed+=1;}
     }
   }
   const unresolved=await env.DB.prepare(`SELECT COUNT(*) n FROM compute_overflow_jobs WHERE batch_id=? AND status='leased'`).bind(batchId).first().catch(()=>({n:0}));
@@ -1003,7 +1006,9 @@ async function completeBatch(request,env,ctx,batchId){
   await env.DB.prepare(`UPDATE compute_overflow_batches SET status='completed',completed_at=datetime('now'),result_summary_json=?,updated_at=datetime('now') WHERE batch_id=?`)
     .bind(JSON.stringify({completed,failed,retried,applied,missing:num(unresolved?.n)}),batchId).run();
   const missing=num(unresolved?.n);
-  await metricDelta(env,{leased:-missing,queued:missing,activeBatches:-1,completedBatches:1,lastCompleted:true});
+  metricLeased-=missing;metricQueued+=missing;
+  await metricDelta(env,{queued:metricQueued,leased:metricLeased,completed:metricCompleted,failed:metricFailed,activeBatches:-1,completedBatches:1,lastCompleted:true});
+  if(contactSupplyTouched)await refreshContactSupplyMetrics(env);
   await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} completed, ${retried} externally-unreachable retry, and ${failed} operationally failed job(s); ${applied} canonical records were advanced.`,{batchId});
   if(ctx&&env.ADMIN_TOKEN&&applied>0){
     const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
@@ -1018,14 +1023,8 @@ async function completeBatch(request,env,ctx,batchId){
 async function serveBatch(env,batchId){
   const out=await batchPayload(env,batchId);
   if(!out)return Response.json({error:'batch_unavailable'},{status:404,headers:JSON_H});
-  const batchRow=await env.DB.prepare(`SELECT completion_token_hash FROM compute_overflow_batches WHERE batch_id=?`).bind(batchId).first();
-  // Completion capability is reconstructed only from the dispatch-time copy kept in memory nowhere,
-  // so create a fresh single-use capability when the worker first fetches the batch.
-  const token=`${crypto.randomUUID()}.${crypto.randomUUID()}`;
-  const tokenHash=await sha256(token);
-  await env.DB.prepare(`UPDATE compute_overflow_batches SET completion_token_hash=?,updated_at=datetime('now') WHERE batch_id=?`).bind(tokenHash,batchId).run();
   return Response.json({
-    batchId,completionToken:token,
+    batchId,
     jobs:out.jobs.map(j=>{let payload={};try{payload=JSON.parse(j.payload_json||'{}')}catch{}return{jobId:j.job_id,type:j.job_type,subjectType:j.subject_type,subjectKey:j.subject_key,priority:num(j.priority_score),payload}})
   },{headers:JSON_H});
 }
@@ -1084,7 +1083,7 @@ export default{
       const work=Promise.allSettled([
         runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null}),
         minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
-        minute%30===0?seedContactSupply(env):Promise.resolve(null),
+        minute===0&&new Date(Number(event?.scheduledTime)||Date.now()).getUTCHours()%6===0?seedContactSupply(env):Promise.resolve(null),
         Promise.resolve(null),
         Promise.resolve(null)
       ]);
