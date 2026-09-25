@@ -1,5 +1,5 @@
 import base from './operational-truth-reconciliation-worker.js';
-import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep} from './auth-session-plane.js';
+import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/5 * * * *';
@@ -677,7 +677,8 @@ export default{
       const work=Promise.allSettled([
         runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null}),
         minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
-        minute%15===0?authenticatedResumeSweep(env,{limit:2}):Promise.resolve(null)
+        minute%15===0?authenticatedResumeSweep(env,{limit:2}):Promise.resolve(null),
+        refreshAuthBrokerRuntimeHealth(env).catch(()=>null)
       ]);
       if(ctx?.waitUntil)ctx.waitUntil(work);
       return;
