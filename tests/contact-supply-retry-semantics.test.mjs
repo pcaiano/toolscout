@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const router=fs.readFileSync(new URL('../compute-router-worker.js',import.meta.url),'utf8');
+assert.match(router,/source_unreachable_backoff/);
+assert.match(router,/external_source_unreachable_exhausted/);
+assert.match(router,/maxExternalAttempts=job\.job_type==='contact_supply_public_research'\?2:3/);
+assert.match(router,/schema\.org/);
+assert.match(router,/DELETE FROM contact_supply_domain/);
+assert.match(router,/retried=0/);
+console.log('Contact supply retries external-unreachable sources without counting them as operational failures.');
