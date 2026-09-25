@@ -39,19 +39,39 @@ async function configRow(env,key){
 }
 export async function refreshAuthBrokerRuntimeHealth(env,{force=false}={}){
   const existing=await configRow(env,'auth_broker_runtime_health');
-  if(!force&&existing?.updated_at&&Date.now()-Date.parse(String(existing.updated_at).replace(' ','T')+'Z')<30*60*1000){
+  if(!force&&existing?.updated_at&&Date.now()-Date.parse(String(existing.updated_at).replace(' ','T')+'Z')<10*60*1000){
     try{return JSON.parse(existing.value||'{}')}catch{}
   }
   const brokerUrl=(await config(env,'auth_broker_url')).replace(/\/$/,'');
   const sharedSecret=await config(env,'auth_broker_shared_secret');
-  if(!httpsUrl(brokerUrl)||sharedSecret.length<32)return{ok:false,error:'auth_broker_not_configured'};
+  if(!httpsUrl(brokerUrl)||sharedSecret.length<32)return{ok:false,serviceOk:false,error:'auth_broker_not_configured'};
+  const checkedAt=new Date().toISOString();
+  let serviceOk=false,serviceStatus=0,serviceError=null;
+  try{
+    const service=await fetch(brokerUrl+'/health',{headers:{'User-Agent':'ToolScout-Auth-Plane/1.0'},signal:AbortSignal.timeout(12000)});
+    serviceStatus=service.status;
+    let data={};try{data=await service.json()}catch{}
+    serviceOk=Boolean(service.ok&&data.ok);
+    if(!serviceOk)serviceError=data.error||'broker_service_health_failed';
+  }catch(error){serviceError=safe(error?.message||error,300)}
+  if(!serviceOk){
+    const result={ok:false,serviceOk:false,httpStatus:serviceStatus,browser:null,version:null,browserVerified:false,checkedAt,error:serviceError||'auth_broker_unreachable'};
+    await env.DB.prepare(`INSERT INTO external_runtime_config(key,value,updated_at) VALUES('auth_broker_runtime_health',?,datetime('now'))
+      ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=datetime('now')`).bind(JSON.stringify(result)).run().catch(()=>{});
+    return result;
+  }
   let result;
   try{
-    const response=await fetch(brokerUrl+'/browser-health',{headers:{Authorization:'Bearer '+sharedSecret,'User-Agent':'ToolScout-Auth-Plane/1.0'},signal:AbortSignal.timeout(30000)});
+    const response=await fetch(brokerUrl+'/browser-health',{headers:{Authorization:'Bearer '+sharedSecret,'User-Agent':'ToolScout-Auth-Plane/1.0'},signal:AbortSignal.timeout(45000)});
     let data={};try{data=await response.json()}catch{}
-    result={ok:Boolean(response.ok&&data.ok),httpStatus:response.status,browser:data.browser||null,version:data.version||null,checkedAt:new Date().toISOString(),error:response.ok?null:(data.error||'browser_health_failed')};
+    const browserVerified=Boolean(response.ok&&data.ok);
+    result={ok:true,serviceOk:true,httpStatus:response.status,browser:data.browser||null,version:data.version||null,browserVerified,checkedAt,
+      diagnosticStatus:browserVerified?'browser_verified':'browser_probe_degraded',
+      warning:browserVerified?null:(data.error||'browser_health_probe_failed'),
+      error:null};
   }catch(error){
-    result={ok:false,httpStatus:0,browser:null,version:null,checkedAt:new Date().toISOString(),error:safe(error?.message||error,300)};
+    result={ok:true,serviceOk:true,httpStatus:serviceStatus,browser:null,version:null,browserVerified:false,checkedAt,
+      diagnosticStatus:'browser_probe_timeout',warning:safe(error?.message||error,300),error:null};
   }
   await env.DB.prepare(`INSERT INTO external_runtime_config(key,value,updated_at) VALUES('auth_broker_runtime_health',?,datetime('now'))
     ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=datetime('now')`).bind(JSON.stringify(result)).run().catch(()=>{});
