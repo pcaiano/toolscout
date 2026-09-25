@@ -314,13 +314,18 @@ async function recordAuthorityNoOutput(env,reason,taskId=null){
 }
 async function publicCandidates(env,limit=8){
   await ensureNetworkSchema(env);
-  const sent=await env.DB.prepare(`SELECT COUNT(*) n FROM distribution_events
-    WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent')
-      AND status='completed' AND created_at>=datetime('now','-24 hours')`).first().catch(()=>({n:0}));
-  const sent24=Number(sent?.n||0),remaining=Math.max(0,EMAIL_MAX_24H-sent24);
+  const capacity=await env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM distribution_events
+        WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent')
+          AND status='completed' AND created_at>=datetime('now','-24 hours')) sent24,
+      (SELECT COUNT(*) FROM distribution_vendor_amplification
+        WHERE public_dispatch_leased_at>=datetime('now','-20 minutes') AND status<>'sent')+
+      (SELECT COUNT(*) FROM distribution_network_outreach
+        WHERE public_dispatch_leased_at>=datetime('now','-20 minutes') AND status NOT IN ('sent','adopted')) leased_recent`).first().catch(()=>({sent24:0,leased_recent:0}));
+  const sent24=Number(capacity?.sent24||0),leasedRecent=Number(capacity?.leased_recent||0),remaining=Math.max(0,EMAIL_MAX_24H-sent24-leasedRecent);
   const requested=Math.max(1,Math.min(8,Number(limit)||8));
   const n=Math.min(requested,remaining);
-  if(n<=0)return {status:'capacity_reached',limit:0,items:[],reason:'rolling_24h_email_cap_reached',emailTarget24h:EMAIL_TARGET_24H,emailMax24h:EMAIL_MAX_24H,sent24h:sent24,remaining24h:0,integrity:'task-specific-batch-v10-email-cap'};
+  if(n<=0)return {status:'capacity_reached',limit:0,items:[],reason:'rolling_24h_email_cap_reached',emailTarget24h:EMAIL_TARGET_24H,emailMax24h:EMAIL_MAX_24H,sent24h:sent24,leasedRecent,remaining24h:0,integrity:'task-specific-batch-v10-email-cap'};
   const tasks=await claimedMakeSenderTasks(env,n);
   if(!tasks.length){
     await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');
@@ -453,7 +458,8 @@ async function publicCandidates(env,limit=8){
     emailTarget24h:EMAIL_TARGET_24H,
     emailMax24h:EMAIL_MAX_24H,
     sent24h:sent24,
-    remaining24h:Math.max(0,EMAIL_MAX_24H-sent24-items.length),
+    leasedRecent,
+    remaining24h:Math.max(0,EMAIL_MAX_24H-sent24-leasedRecent-items.length),
     integrity:'task-specific-batch-v10-email-cap'
   };
 }
