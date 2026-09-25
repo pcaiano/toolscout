@@ -1,0 +1,138 @@
+const UA='ToolScout Overflow Research/1.0 (+https://trytoolscout.org/)';
+const MAX_HTML=500000;
+const ACTION_RE=/(submit|submission|add[-_ /]?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
+const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
+const AUTH_RE=/(login|log in|sign in|create account|register|password)/i;
+const CAPTCHA_RE=/(captcha|g-recaptcha|h-captcha|cf-turnstile|turnstile)/i;
+const PAYMENT_RE=/(paid listing|payment required|sponsored listing|buy a listing|purchase a listing|listing fee|pay to submit)/i;
+const RECIPROCAL_RE=/(reciprocal link|link back|backlink required|add (?:our|this) badge|badge required)/i;
+const AUTOMATION_BLOCK_RE=/(automated submissions? (?:are )?(?:not allowed|prohibited)|no bots|bot submissions? prohibited)/i;
+
+function safe(v,n=2000){return String(v??'').slice(0,n)}
+function stripTags(v){return safe(v,8000).replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
+function validPublicHttp(value){
+  try{
+    const u=new URL(value);
+    if(!['http:','https:'].includes(u.protocol))return false;
+    const h=u.hostname.toLowerCase();
+    if(h==='localhost'||h.endsWith('.local')||h==='::1'||h.startsWith('127.')||h.startsWith('10.')||h.startsWith('192.168.')||h.startsWith('169.254.'))return false;
+    const m=h.match(/^172\.(\d+)\./);if(m&&Number(m[1])>=16&&Number(m[1])<=31)return false;
+    return true;
+  }catch{return false}
+}
+function sameHost(a,b){
+  try{
+    const x=new URL(a),y=new URL(b);
+    const xh=x.hostname.replace(/^www\./,''),yh=y.hostname.replace(/^www\./,'');
+    return xh===yh||xh.endsWith('.'+yh)||yh.endsWith('.'+xh);
+  }catch{return false}
+}
+function absolute(href,base){
+  try{const u=new URL(href,base);u.hash='';return validPublicHttp(u.toString())?u.toString():null}catch{return null}
+}
+function decodeEntities(v){return String(v||'').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"')}
+function extractLinks(html,base){
+  const out=[];const re=/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;let m;
+  while((m=re.exec(html))&&out.length<500){
+    const url=absolute(decodeEntities(m[1]),base);if(!url||!sameHost(base,url))continue;
+    const text=stripTags(m[2]).slice(0,180);
+    out.push({url,text});
+  }
+  return out;
+}
+function extractMailto(html){
+  const out=[];const re=/<a\b[^>]*href=["'](mailto:[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;let m;
+  while((m=re.exec(html))&&out.length<20)out.push({url:decodeEntities(m[1]),text:stripTags(m[2]).slice(0,180),kind:'email'});
+  return out;
+}
+function pageSignals(page){
+  const text=stripTags(page.html).slice(0,120000);
+  const lower=text.toLowerCase();
+  return{
+    auth:AUTH_RE.test(lower)||/<input[^>]+type=["']password["']/i.test(page.html),
+    captcha:CAPTCHA_RE.test(page.html)||CAPTCHA_RE.test(lower),
+    payment:PAYMENT_RE.test(lower),
+    reciprocal:RECIPROCAL_RE.test(lower),
+    automationBlocked:AUTOMATION_BLOCK_RE.test(lower),
+    hasForm:/<form\b/i.test(page.html),
+    title:safe((page.html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)||[])[1]||'',240),
+    canonical:(page.html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)||page.html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)||[])[1]||null
+  };
+}
+async function fetchPage(url){
+  if(!validPublicHttp(url))return null;
+  try{
+    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5'},redirect:'follow',signal:AbortSignal.timeout(12000)});
+    const type=String(r.headers.get('content-type')||'').toLowerCase();
+    if(!r.ok||!type.includes('text/html'))return{ok:false,status:r.status,url:r.url||url,html:'',contentType:type};
+    const text=await r.text();
+    return{ok:true,status:r.status,url:r.url||url,html:text.slice(0,MAX_HTML),contentType:type};
+  }catch(error){return{ok:false,status:0,url,error:safe(error?.message||error,300),html:''}}
+}
+async function mapLimit(items,limit,fn){
+  const out=new Array(items.length);let index=0;
+  const workers=Array.from({length:Math.min(limit,items.length)},async()=>{for(;;){const i=index++;if(i>=items.length)return;try{out[i]=await fn(items[i],i)}catch(error){out[i]={ok:false,error:safe(error?.message||error,500)}}}});
+  await Promise.all(workers);return out;
+}
+function routeKind(link,page){
+  const s=(link.text+' '+link.url).toLowerCase();
+  if(page?.signals?.captcha)return'captcha';
+  if(page?.signals?.auth)return'auth';
+  if(ACTION_RE.test(s))return'submission';
+  if(CONTACT_RE.test(s))return'contact';
+  return'contact';
+}
+async function researchDistribution(job){
+  const source=job?.payload?.url;
+  if(!validPublicHttp(source))return{ok:false,error:'invalid_or_private_url'};
+  const home=await fetchPage(source);
+  if(!home?.ok)return{ok:false,error:'source_unreachable',httpStatus:home?.status||0,targetUrl:source,finalUrl:home?.url||source};
+  home.signals=pageSignals(home);
+  const links=extractLinks(home.html,home.url);
+  const actionCandidates=links.filter(x=>ACTION_RE.test(x.text+' '+x.url)).slice(0,5);
+  const contactCandidates=links.filter(x=>CONTACT_RE.test(x.text+' '+x.url)).slice(0,8);
+  const unique=[...new Map([...actionCandidates,...contactCandidates].map(x=>[x.url,x])).values()].slice(0,8);
+  const pages=await mapLimit(unique,4,async link=>{const p=await fetchPage(link.url);if(!p?.ok)return{link,page:p,signals:null};return{link,page:p,signals:pageSignals(p)}});
+  const routes=[];
+  for(const x of pages){
+    if(!x?.page?.ok)continue;
+    const signals=x.signals||{};
+    if(ACTION_RE.test(x.link.text+' '+x.link.url)||signals.hasForm||signals.auth||signals.captcha){
+      routes.push({url:x.page.url||x.link.url,kind:signals.captcha?'captcha':signals.auth?'auth':ACTION_RE.test(x.link.text+' '+x.link.url)?'submission':'contact',label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),auth:Boolean(signals.auth),captcha:Boolean(signals.captcha)});
+    }
+  }
+  if(!routes.length&&(ACTION_RE.test(home.url)||home.signals.hasForm||home.signals.auth||home.signals.captcha)){
+    routes.push({url:home.url,kind:home.signals.captcha?'captcha':home.signals.auth?'auth':ACTION_RE.test(home.url)?'submission':'contact',label:'source route',hasForm:Boolean(home.signals.hasForm),auth:Boolean(home.signals.auth),captcha:Boolean(home.signals.captcha)});
+  }
+  const mailto=extractMailto(home.html);
+  const contactRoutes=[
+    ...mailto,
+    ...contactCandidates.slice(0,8).map(x=>({url:x.url,text:x.text,kind:'form'}))
+  ];
+  const blockers=[];
+  for(const [name,flag] of Object.entries({payment:home.signals.payment,reciprocal:home.signals.reciprocal,automation_blocked:home.signals.automationBlocked}))if(flag)blockers.push(name);
+  for(const x of pages){
+    if(!x?.signals)continue;
+    if(x.signals.payment&&!blockers.includes('payment'))blockers.push('payment');
+    if(x.signals.reciprocal&&!blockers.includes('reciprocal'))blockers.push('reciprocal');
+    if(x.signals.automationBlocked&&!blockers.includes('automation_blocked'))blockers.push('automation_blocked');
+  }
+  return{
+    ok:true,targetUrl:source,finalUrl:home.url,httpStatus:home.status,
+    classification:blockers.length?'policy_signal':routes.length?'route_found':contactRoutes.length?'contact_found':'no_route_found',
+    routes:routes.slice(0,8),contactRoutes:contactRoutes.slice(0,12),blockers,
+    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length}
+  };
+}
+export async function researchJob(job){
+  const started=Date.now();
+  try{
+    let result;
+    if(job?.type==='distribution_route_research'||job?.type==='contact_route_research')result=await researchDistribution(job);
+    else result={ok:false,error:'unsupported_job_type'};
+    return{jobId:job?.jobId||null,...result,durationMs:Date.now()-started};
+  }catch(error){return{jobId:job?.jobId||null,ok:false,error:safe(error?.message||error,500),durationMs:Date.now()-started}}
+}
+export async function runResearchBatch(jobs,{concurrency=24}={}){
+  return mapLimit(Array.isArray(jobs)?jobs:[],Math.max(1,Math.min(48,Number(concurrency)||24)),researchJob);
+}
