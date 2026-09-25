@@ -2,6 +2,8 @@ import base from './distribution-contact-worker.js';
 import {recordExecutionProof,deferExecutionTask} from './growth-execution-contract.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
+const EMAIL_TARGET_24H=50;
+const EMAIL_MAX_24H=60;
 const MAKE_TOKEN_SHA256='2f9522abe5fb3d87a045b86940f6b5338cc5c9fc3f51ecbc5f5fc31000e3b72c';
 const PUBLIC_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
 
@@ -312,7 +314,13 @@ async function recordAuthorityNoOutput(env,reason,taskId=null){
 }
 async function publicCandidates(env,limit=8){
   await ensureNetworkSchema(env);
-  const n=Math.max(1,Math.min(8,Number(limit)||8));
+  const sent=await env.DB.prepare(`SELECT COUNT(*) n FROM distribution_events
+    WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent')
+      AND status='completed' AND created_at>=datetime('now','-24 hours')`).first().catch(()=>({n:0}));
+  const sent24=Number(sent?.n||0),remaining=Math.max(0,EMAIL_MAX_24H-sent24);
+  const requested=Math.max(1,Math.min(8,Number(limit)||8));
+  const n=Math.min(requested,remaining);
+  if(n<=0)return {status:'capacity_reached',limit:0,items:[],reason:'rolling_24h_email_cap_reached',emailTarget24h:EMAIL_TARGET_24H,emailMax24h:EMAIL_MAX_24H,sent24h:sent24,remaining24h:0,integrity:'task-specific-batch-v10-email-cap'};
   const tasks=await claimedMakeSenderTasks(env,n);
   if(!tasks.length){
     await recordAuthorityNoOutput(env,'no_claimed_make_sender_task');
@@ -442,7 +450,11 @@ async function publicCandidates(env,limit=8){
     deferred_tasks:deferredTasks,
     leased_pending:leasedPending,
     reason:items.length?null:(leasedPending.length?'leased_candidates_pending_callback':'no_ready_candidate_after_batch_scan'),
-    integrity:'task-specific-batch-v9-reputation-boundary'
+    emailTarget24h:EMAIL_TARGET_24H,
+    emailMax24h:EMAIL_MAX_24H,
+    sent24h:sent24,
+    remaining24h:Math.max(0,EMAIL_MAX_24H-sent24-items.length),
+    integrity:'task-specific-batch-v10-email-cap'
   };
 }
 async function publicStatus(request,env){
