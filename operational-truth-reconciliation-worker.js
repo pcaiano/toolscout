@@ -16,6 +16,7 @@ const AUTHORITY_POLICY_TARGET_24H=8;
 const ACQUISITION_SURGE_MIN_24H=0;
 const ACQUISITION_SURGE_TARGET_24H=8;
 const ACQUISITION_SURGE_MAX_24H=12;
+const MACHINE_SAFE_EXTERNAL_MAX_24H=300;
 let factsCache={at:0,value:null,promise:null};
 async function facts(env){
   const [oauth,authority,content,distributionRuns]=await Promise.all([
@@ -325,6 +326,9 @@ async function buildCommandCenterBusinessTruth(request,env){
       acquisitionMin24h:ACQUISITION_SURGE_MIN_24H,
       acquisitionTarget24h:ACQUISITION_SURGE_TARGET_24H,
       acquisitionMax24h:ACQUISITION_SURGE_MAX_24H,
+      reputationSensitiveActionMax24h:ACQUISITION_SURGE_MAX_24H,
+      machineSafeExternalActionMax24h:MACHINE_SAFE_EXTERNAL_MAX_24H,
+      actionPlane:'cloudflare_authorize_external_execute_cloudflare_verify',
       activityIsNotSuccess:true,
       channelAllocationPct:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
       canonicalAcquisitionSource:'ga4',
