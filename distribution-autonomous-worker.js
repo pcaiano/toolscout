@@ -3,6 +3,7 @@ import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
 import {ensureHumanGateSchema,humanGateKey,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,humanGateSnapshot} from './human-gate-contract.js';
+import {reconcileAuthAutomationClasses,machineAuthHeaders,invalidateMachineCredential} from './auth-automation.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
@@ -168,7 +169,7 @@ function authDetail(spec,security){
   if(!Array.isArray(security)||security.length===0)return null;
   const schemes=spec?.components?.securitySchemes||{};
   const names=[...new Set(security.flatMap(x=>Object.keys(x||{})))];
-  return names.map(name=>{const s=schemes[name]||{};return {name,type:s.type||'unknown',scheme:s.scheme||null,in:s.in||null}}); 
+  return names.map(name=>{const s=schemes[name]||{};return {name,type:s.type||'unknown',scheme:s.scheme||null,in:s.in||null,parameter:s.name||null}}); 
 }
 function verificationFromSpec(spec,source,homepage){
   if(!spec||typeof spec!=='object'||!spec.paths)return null;
@@ -637,6 +638,53 @@ async function responseEvidence(res,endpoint){
     return findUrlInJson(json,endpoint);
   }catch{return null}
 }
+async function executeCredentialedAdapters(env){
+  const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url,o.distribution_score
+    FROM distribution_auto_adapters a
+    JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
+    JOIN auth_automation_capability ac ON ac.surface_slug=a.surface_slug
+    LEFT JOIN distribution_surface_costs c ON c.surface_slug=a.surface_slug
+    WHERE ac.automation_class='token_automatic' AND ac.credential_state='active'
+      AND a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
+      AND COALESCE(c.cost_amount,0)=0
+    ORDER BY o.distribution_score DESC LIMIT ${EXECUTION_LIMIT}`).all().catch(()=>({results:[]}));
+  let sent=0,failed=0,deduped=0,authRejected=0;
+  for(const a of q.results||[]){
+    const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first().catch(()=>null);
+    if(prior&&['submitted','ready','queued_external','pending_review','verified'].includes(String(prior.status||''))){deduped++;continue}
+    if(prior&&Number(prior.attempts||0)>=3){deduped++;continue}
+    const headers=await machineAuthHeaders(env,a.surface_slug);
+    if(!headers){await invalidateMachineCredential(env,a.surface_slug,'credential_unavailable_or_decrypt_failed');authRejected++;continue}
+    const id=prior?.submission_id||`sub_${crypto.randomUUID()}`;
+    if(!prior)await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(id,a.surface_slug,'https://trytoolscout.org/','auto_discovered_json','ready',a.payload_template_json,a.endpoint,0).run();
+    try{
+      const payload=JSON.parse(a.payload_template_json||'{}'),contentType=String(a.content_type||'application/json').toLowerCase();
+      const body=contentType==='application/x-www-form-urlencoded'
+        ?new URLSearchParams(Object.entries(payload).map(([k,v])=>[k,Array.isArray(v)?v.join(','):String(v??'')])).toString()
+        :JSON.stringify(payload);
+      const r=await fetch(a.endpoint,{method:String(a.method||'POST').toUpperCase(),headers:{'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout Distribution Engine/1.2',...headers},body,redirect:'follow',signal:AbortSignal.timeout(12000)});
+      if(r.status===401||r.status===403){
+        await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(`credential_rejected_http_${r.status}`,id).run();
+        await invalidateMachineCredential(env,a.surface_slug,`HTTP ${r.status} from authenticated adapter`);
+        authRejected++;continue;
+      }
+      if(r.ok){
+        const evidence=await responseEvidence(r,a.endpoint),responseUrl=evidence||a.verification_endpoint||a.public_url||r.url||a.endpoint;
+        await env.DB.prepare(`UPDATE distribution_submissions SET status='submitted',attempts=attempts+1,last_attempt_at=datetime('now'),submitted_at=datetime('now'),response_url=?,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(responseUrl,id).run();
+        await env.DB.prepare(`UPDATE distribution_opportunities SET status='submitted',human_required=0,next_action='Authenticated automatic submission accepted. Public verification is queued.',updated_at=datetime('now') WHERE surface_slug=?`).bind(a.surface_slug).run();
+        await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at)
+          VALUES(?,?,'authenticated_automatic_submission','completed',?,?,?,datetime('now'),datetime('now'))`).bind(`authsubmit_${crypto.randomUUID()}`,a.surface_slug,a.endpoint,responseUrl,'Cloudflare executed a verified free authenticated adapter using an encrypted machine credential. No browser session or password was used.').run().catch(()=>{});
+        sent++;continue;
+      }
+      await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(`HTTP ${r.status}`,id).run();failed++;
+    }catch(e){
+      await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(safe(e?.message||e,500),id).run().catch(()=>{});failed++;
+    }
+  }
+  return{ok:true,observed:(q.results||[]).length,sent,failed,deduped,authRejected,execution_plane:'cloudflare_secret_safe'};
+}
+
 async function packageAndExecute(env){
   if(env.OVERFLOW_COMPUTE_URL)return {sent:0,failed:0,deduped:0,per_cycle_limit:0,external_execution_plane:true,status:'delegated_to_render'};
   const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url
@@ -865,8 +913,11 @@ export async function runAutonomousDistributionCycle(env){
 
   // Machine-owned work stays on the critical path. Human-only gates are processed
   // later as a sidecar and never consume this route-refresh budget.
+  const authAutomation=await reconcileAuthAutomationClasses(env,{limit:400});
   const routeRefresh=await refreshPersistentActionUrls(env,{statuses:['auth_required','research_required'],limit:3});
   const qualification=await qualify(env);
+  const authAutomationAfterQualification=await reconcileAuthAutomationClasses(env,{limit:400});
+  const credentialExecution=await executeCredentialedAdapters(env);
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
   const footprint=await verifyFootprint(env);
@@ -888,7 +939,7 @@ export async function runAutonomousDistributionCycle(env){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,routeRefresh,qualification,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v1'};
+  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v1'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
