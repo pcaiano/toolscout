@@ -276,7 +276,7 @@ async function enqueueContactSupplyResearch(env,remaining){
   const need=Math.max(0,CONTACT_SUPPLY_TARGET-ready);
   const q=await env.DB.prepare(`SELECT domain,source_type,source_key,source_name,source_url,priority_score,public_attempts,status
     FROM contact_supply_domain
-    WHERE contact_email IS NULL AND status IN ('queued','unresolved','provider_blocked')
+    WHERE contact_email IS NULL AND status IN ('queued','unresolved','provider_blocked','ready_route')
       AND next_research_at<=datetime('now')
     ORDER BY CASE status WHEN 'queued' THEN 0 WHEN 'unresolved' THEN 1 ELSE 2 END,priority_score DESC,updated_at ASC
     LIMIT ?`).bind(Math.min(CONTACT_SUPPLY_RESEARCH_BATCH,need,remaining)).all().catch(()=>({results:[]}));
