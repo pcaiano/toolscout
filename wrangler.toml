@@ -73,6 +73,7 @@ run_worker_first = [
 
 [vars]
 GA4_PROPERTY_ID = "554080029"
+OVERFLOW_COMPUTE_URL = "https://toolscout-overflow.onrender.com"
 
 [triggers]
 crons = ["*/5 * * * *", "15 * * * *", "35 3 * * *"]
