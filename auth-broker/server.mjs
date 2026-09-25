@@ -125,6 +125,22 @@ setInterval(async()=>{const now=Date.now();for(const [id,s] of sessions){if(s.ex
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
   if(req.method==='GET'&&url.pathname==='/health')return json(res,200,{ok:true,service:'toolscout-auth-broker',activeSessions:sessions.size,maxSessions:MAX_SESSIONS,captchaPolicy:'human_only_no_bypass',passwordStorage:false});
+  if(req.method==='GET'&&url.pathname==='/browser-health'){
+    let context=null;
+    try{
+      const b=await browser();
+      context=await b.createBrowserContext();
+      const page=await context.newPage();
+      await page.setViewport(VIEWPORT);
+      await page.goto('about:blank');
+      const version=await b.version();
+      await context.close();
+      return json(res,200,{ok:true,browser:'chromium',version,viewport:VIEWPORT});
+    }catch(error){
+      if(context)await context.close().catch(()=>{});
+      return json(res,500,{ok:false,error:'browser_unavailable',detail:safe(error?.message||error,300)});
+    }
+  }
   if(req.method==='GET'&&url.pathname==='/robots.txt'){res.writeHead(200,{'Content-Type':'text/plain'});return res.end('User-agent: *\\nDisallow: /\\n')}
   if(req.method==='POST'&&url.pathname==='/auth/start'){
     if(!authorized(req))return json(res,401,{error:'unauthorized'});
