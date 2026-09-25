@@ -146,6 +146,26 @@ export async function classifyAuthBacklog(env,{limit=120}={}){
         OR auth_surface_capability.confidence<excluded.confidence`)
       .bind(row.surface_slug,domain,action,c.authMode,c.challengeType,c.state,c.sessionReusable,c.confidence,c.evidence).run().catch(()=>null);
     classified+=Number(w?.meta?.changes||w?.changes||0);
+    if(c.state==='human_bootstrap_required'&&c.confidence>=95){
+      const reason=c.challengeType==='captcha_or_human_verification'
+        ?'This surface requires one-time account bootstrap and a human verification challenge before ToolScout can reuse the authenticated session.'
+        :'This surface requires one-time owner authentication before ToolScout can reuse the authenticated session.';
+      const instructions='Open the secure ToolScout browser session. Sign in or create only the minimum free account. Complete MFA or CAPTCHA yourself if shown. Do not buy promotion or accept optional paid upgrades. When authenticated, press Save session & resume automation.';
+      const gateKey='distribution:surface:'+row.surface_slug;
+      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,action_url=?,next_action=?,updated_at=datetime('now')
+        WHERE surface_slug=? AND status NOT IN ('verified','live','policy_blocked','rejected')`).bind(action,instructions,row.surface_slug).run().catch(()=>{});
+      await env.DB.prepare(`UPDATE human_gate_contract SET status='open',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,next_verification_at=NULL,
+        reason=?,instructions=?,action_url=?,resolution_mode='auth_session_saved',verification_detail=NULL,updated_at=datetime('now')
+        WHERE gate_key=? AND status IN ('cancelled','resolved')`).bind(reason,instructions,action,gateKey).run().catch(()=>{});
+      await upsertHumanGate(env,{
+        engine:'distribution',subjectType:'surface',subjectKey:row.surface_slug,gateType:'authentication',
+        title:`${row.surface_slug}: authenticate once`,reason,instructions,actionUrl:action,resolutionMode:'auth_session_saved',
+        payload:{name:'ToolScout',website:'https://trytoolscout.org/',domain:'trytoolscout.org',
+          description:'ToolScout is an independent software discovery and recommendation platform.',
+          tagline:'Find the right software for the job without the noise.',
+          gate_evidence:{url:action,checked_at:new Date().toISOString(),detail:c.evidence}}
+      }).catch(()=>{});
+    }
   }
   return{ok:true,observed:(q.results||[]).length,classified};
 }
