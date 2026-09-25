@@ -76,10 +76,15 @@ async function rediscoverActionUrl(env,row){
   }
   return null;
 }
-async function refreshPersistentActionUrls(env){
+async function refreshPersistentActionUrls(env,{statuses=['auth_required','research_required'],limit=3}={}){
   let checked=0,recovered=0,externalFailures=0;
+  const allowed=new Set(['human_action_required','auth_required','approval_required','research_required']);
+  const selected=(Array.isArray(statuses)?statuses:[]).map(String).filter(x=>allowed.has(x));
+  const capped=Math.max(1,Math.min(12,Number(limit)||3));
+  if(!selected.length)return {checked,recovered,externalFailures,statuses:[],limit:capped};
   try{
-    const q=await env.DB.prepare(`SELECT surface_slug,action_url,status,last_checked_at FROM distribution_opportunities WHERE action_url IS NOT NULL AND status IN ('human_action_required','auth_required','research_required') AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-6 hours')) ORDER BY last_checked_at ASC LIMIT 3`).all();
+    const placeholders=selected.map(()=>'?').join(',');
+    const q=await env.DB.prepare(`SELECT surface_slug,action_url,status,last_checked_at FROM distribution_opportunities WHERE action_url IS NOT NULL AND status IN (${placeholders}) AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-6 hours')) ORDER BY last_checked_at ASC LIMIT ${capped}`).bind(...selected).all();
     const results=await Promise.all((q.results||[]).map(async row=>{
       if(isTechnicalSurface(row.action_url)){
         await env.DB.prepare(`UPDATE distribution_opportunities SET status='skipped',human_required=0,next_action='Technical infrastructure host excluded from distribution discovery.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run().catch(()=>{});
@@ -98,7 +103,7 @@ async function refreshPersistentActionUrls(env){
     recovered=results.reduce((n,x)=>n+x.recovered,0);
     externalFailures=results.reduce((n,x)=>n+x.externalFailure,0);
   }catch{}
-  return {checked,recovered,externalFailures};
+  return {checked,recovered,externalFailures,statuses:selected,limit:capped};
 }
 function resolveSchemaRef(spec,schema){if(!schema)return null;if(!schema.$ref)return schema;const path=String(schema.$ref).replace(/^#\//,'').split('/');let cur=spec;for(const p of path)cur=cur?.[p];return cur||null}
 function schemaObject(spec,op){const rb=op?.requestBody?.content?.['application/json']?.schema;return resolveSchemaRef(spec,rb)}
@@ -857,9 +862,10 @@ export async function runAutonomousDistributionCycle(env){
   const normalized=await normalizeLegacyHumanEscalations(env);
   const duplicateGates=await reconcileDuplicateSubmissionGates(env);
   const machineGateRecovery=await recoverMachineResolvableAuthGates(env);
-  const humanGateSync=await syncExistingHumanGates(env);
-  const humanGateVerification=await verifyHumanGateResolutions(env);
-  const routeRefresh=await refreshPersistentActionUrls(env);
+
+  // Machine-owned work stays on the critical path. Human-only gates are processed
+  // later as a sidecar and never consume this route-refresh budget.
+  const routeRefresh=await refreshPersistentActionUrls(env,{statuses:['auth_required','research_required'],limit:3});
   const qualification=await qualify(env);
   const execution=await packageAndExecute(env);
   const verification=await verifyAutoSubmitted(env);
@@ -871,7 +877,18 @@ export async function runAutonomousDistributionCycle(env){
     const status=authorityRecovery?.ok===false?'partial':'completed';
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authority_${crypto.randomUUID()}`,'authority_pipeline_replenishment',status,'backlink_acquisition',`Authority loop replenishment triggered automatically. Referring domains ${authority.verifiedReferringDomains}/${authority.bootstrapFloor}; qualified attempts ${authority.attempts24}/${authority.attemptMin24h} in 24h; queue ${authority.authorityQueue}; throughput gap ${authority.throughputGap}; stagnating ${authority.stagnating}. Discovery result: ${JSON.stringify(authorityRecovery).slice(0,900)}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,humanGateSync,humanGateVerification,routeRefresh,qualification,execution,verification,footprint,authority,authorityRecovery};
+  let humanSidecar={ok:true,non_blocking:true,humanGateSync:0,humanGateVerification:{ok:true,checked:0,resolved:0,deferred:0,reopened:0},routeRefresh:{checked:0,recovered:0,externalFailures:0,statuses:['human_action_required','approval_required'],limit:3}};
+  try{
+    const humanGateSync=await syncExistingHumanGates(env);
+    const humanGateVerification=await verifyHumanGateResolutions(env);
+    const humanRouteRefresh=await refreshPersistentActionUrls(env,{statuses:['human_action_required','approval_required'],limit:3});
+    humanSidecar={ok:true,non_blocking:true,humanGateSync,humanGateVerification,routeRefresh:humanRouteRefresh};
+  }catch(error){
+    humanSidecar={ok:false,non_blocking:true,error:safe(error?.message||error,600)};
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
+  }
+  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,routeRefresh,qualification,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v1'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
