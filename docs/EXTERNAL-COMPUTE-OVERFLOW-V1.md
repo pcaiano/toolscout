@@ -18,22 +18,27 @@ Cloudflare remains canonical for:
 - Final validation before any external action.
 - Command Center and business truth.
 
-The external worker performs only network-heavy research:
+The external worker performs network-heavy research and strictly pre-authorized machine-safe execution:
 - distribution-route discovery;
 - public contact-route discovery;
 - HTML inspection and route classification;
-- evidence preparation.
+- evidence preparation;
+- HTTP submission through adapters that Cloudflare has already revalidated as verified, free and confidence >=95;
+- public publication verification.
 
-It never submits forms, sends outreach, changes ToolScout business state directly, or makes reputation-sensitive decisions.
+It never decides which action should happen, never edits ToolScout business state directly and never sends email. Reputation-sensitive email remains Cloudflare-authorized and is delivered by the existing external Make sender. CAPTCHA, login, paid, reciprocal and manual-only routes remain Human Actions.
 
 ## Capacity
 
 Current design budget:
 - 1,500 external research jobs per UTC day.
+- 300 machine-safe execution/verification jobs per UTC day.
+- reputation-sensitive external actions keep their separate 12/day ceiling.
 - 25 jobs per batch to keep Cloudflare/D1 completion commits bounded.
 - at most 2 active batches.
 - external worker concurrency: 24 requests.
 - Cloudflare dispatch cadence: every 5 minutes.
+- authorized execution jobs outrank research jobs in the external queue.
 
 These are maximum processing limits, not a requirement to invent work. Priority and quality gates remain canonical.
 
@@ -76,3 +81,14 @@ If external compute is absent or unavailable:
 - no external research result is trusted as an automatic submission decision.
 
 GitHub Actions remain fallback-disabled until the October quota reset.
+
+
+## Action plane
+
+The canonical action path is:
+
+Cloudflare validates policy, cost, adapter confidence and exact payload -> D1 queues a capability-scoped execution job -> Render executes only the exact authorized HTTP request -> Render returns transport evidence -> Cloudflare revalidates the current adapter and payload -> Cloudflare records submission/verification state.
+
+A Render callback cannot independently mark a placement as canonical if the adapter, payload, method, endpoint or policy changed after authorization.
+
+Email is intentionally not moved into Render. The existing Make sender is already an external execution plane for email and preserves Pedro's outbound reputation boundary.
