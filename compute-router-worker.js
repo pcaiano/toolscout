@@ -774,6 +774,72 @@ async function applyRoleEmailResult(env,job,result){
   }
   return{applied:false,reason:'unsupported_email_research_job'};
 }
+async function applyContactSupplyResult(env,job,result){
+  let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
+  if(payload.authorizationClass!=='public_role_email_discovery_v1')return{applied:false,reason:'contact_supply_contract_mismatch'};
+  const domain=contactDomain(job.subject_key||payload.domain);
+  if(!contactDomainEligible(domain))return{applied:false,reason:'invalid_contact_supply_domain'};
+  const emails=Array.isArray(result?.roleEmails)?result.roleEmails:[];
+  const candidate=emails.map(x=>({...x,parsed:roleMailbox(x?.email)})).find(x=>x.parsed&&domainFamily(x.parsed.domain,domain));
+  const contactRoutes=Array.isArray(result?.contactRoutes)?result.contactRoutes.filter(x=>x?.url&&isHttp(x.url)&&sameHostRoute(`https://${domain}/`,x.url)).slice(0,6):[];
+  const bestRoute=contactRoutes.find(x=>['form','contact_page','submission'].includes(String(x.kind||'')))||contactRoutes[0]||null;
+  let applied=0;
+  if(candidate){
+    const email=candidate.parsed.email,source=safe(candidate.sourceUrl||payload.url||`https://${domain}/`,2000);
+    const w=await env.DB.prepare(`UPDATE contact_supply_domain SET
+      status='ready_email',contact_email=?,contact_source='public_role_email',contact_source_url=?,provider='public_web',
+      public_attempts=public_attempts+1,last_researched_at=datetime('now'),next_research_at=datetime('now','+30 days'),updated_at=datetime('now')
+      WHERE domain=?`).bind(email,source,domain).run().catch(()=>null);
+    applied+=Number(w?.meta?.changes||w?.changes||0);
+
+    await env.DB.prepare(`UPDATE distribution_vendor_amplification SET
+      contact_email=?,contact_source_url=?,contact_method='public_role_email',status='contact_found',updated_at=datetime('now')
+      WHERE lower(vendor_domain)=? AND contact_email IS NULL AND status NOT IN ('sent','reputation_quarantine')`)
+      .bind(email,source,domain).run().catch(()=>{});
+    await env.DB.prepare(`UPDATE distribution_network_outreach SET
+      contact_email=?,contact_source_url=?,contact_checked_at=datetime('now'),status='contact_found',updated_at=datetime('now')
+      WHERE lower(domain)=? AND contact_email IS NULL AND status NOT IN ('sent','adopted','reputation_quarantine')`)
+      .bind(email,source,domain).run().catch(()=>{});
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at)
+      VALUES(?, 'contact_supply_email_found','completed','contact_supply',?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`contact_supply_${crypto.randomUUID()}`,domain,source,`Contact Supply Engine validated a public same-domain role mailbox for ${domain} and propagated it to eligible outreach lanes.`).run().catch(()=>{});
+    await refreshContactSupplyMetrics(env);
+    return{applied:applied>0,email,domain,status:'ready_email'};
+  }
+
+  if(bestRoute){
+    const routeUrl=safe(bestRoute.url,2000),routeType=safe(bestRoute.kind||'contact_page',60);
+    const w=await env.DB.prepare(`UPDATE contact_supply_domain SET
+      status='ready_route',route_type=?,route_url=?,contact_source='public_contact_route',contact_source_url=?,provider='public_web',
+      public_attempts=public_attempts+1,last_researched_at=datetime('now'),next_research_at=datetime('now','+14 days'),updated_at=datetime('now')
+      WHERE domain=? AND contact_email IS NULL`).bind(routeType,routeUrl,routeUrl,domain).run().catch(()=>null);
+    applied+=Number(w?.meta?.changes||w?.changes||0);
+    const networks=await env.DB.prepare(`SELECT surface_slug FROM distribution_network_outreach WHERE lower(domain)=? LIMIT 20`).bind(domain).all().catch(()=>({results:[]}));
+    for(const row of rows(networks)){
+      const routeId=`contact_supply_${await shortHash(`${row.surface_slug}:${routeType}:${routeUrl}`)}`;
+      await env.DB.prepare(`INSERT INTO distribution_contact_routes(route_id,surface_slug,domain,route_type,route_url,source_url,status,first_seen_at,last_seen_at,created_at,updated_at)
+        VALUES(?,?,?,?,?,?,'discovered',datetime('now'),datetime('now'),datetime('now'),datetime('now'))
+        ON CONFLICT(route_id) DO UPDATE SET last_seen_at=datetime('now'),updated_at=datetime('now')`)
+        .bind(routeId,row.surface_slug,domain,routeType,routeUrl,payload.url||routeUrl).run().catch(()=>{});
+      await env.DB.prepare(`UPDATE distribution_network_outreach SET contact_source_url=COALESCE(contact_source_url,?),status=CASE WHEN status IN ('queued','suppressed_no_contact') THEN 'contact_route_found' ELSE status END,updated_at=datetime('now') WHERE surface_slug=?`)
+        .bind(routeUrl,row.surface_slug).run().catch(()=>{});
+    }
+    await refreshContactSupplyMetrics(env);
+    return{applied:applied>0,domain,status:'ready_route',route:bestRoute};
+  }
+
+  const attempts=await env.DB.prepare(`SELECT public_attempts FROM contact_supply_domain WHERE domain=? LIMIT 1`).bind(domain).first().catch(()=>({public_attempts:0}));
+  const nextAttempts=num(attempts?.public_attempts)+1;
+  const newStatus=nextAttempts>=2?'provider_blocked':'unresolved';
+  const delay=nextAttempts>=2?30:3;
+  const w=await env.DB.prepare(`UPDATE contact_supply_domain SET
+    status=?,public_attempts=?,last_researched_at=datetime('now'),next_research_at=datetime('now','+'||?||' days'),
+    apollo_status='plan_blocked',updated_at=datetime('now')
+    WHERE domain=? AND contact_email IS NULL`).bind(newStatus,nextAttempts,delay,domain).run().catch(()=>null);
+  applied+=Number(w?.meta?.changes||w?.changes||0);
+  await refreshContactSupplyMetrics(env);
+  return{applied:applied>0,domain,status:newStatus,reason:'no_public_contact_evidence'};
+}
 async function completeBatch(request,env,ctx,batchId){
   await ensureSchema(env);
   const batch=await env.DB.prepare(`SELECT batch_id,status,completion_token_hash FROM compute_overflow_batches WHERE batch_id=? LIMIT 1`).bind(batchId).first();
@@ -795,6 +861,7 @@ async function completeBatch(request,env,ctx,batchId){
       if(job.job_type==='distribution_route_research'){const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0}
       else if(job.job_type==='contact_route_research'){const a=await applyContactResult(env,job,result);applied+=num(a.applied)}
       else if(job.job_type==='publisher_role_email_research'||job.job_type==='vendor_role_email_research'){const a=await applyRoleEmailResult(env,job,result);applied+=a.applied?1:0}
+      else if(job.job_type==='contact_supply_public_research'){const a=await applyContactSupplyResult(env,job,result);applied+=a.applied?1:0}
     }
     await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
       .bind(ok?'completed':'failed',JSON.stringify(result).slice(0,24000),ok?null:safe(result?.error||'external_compute_failed',600),jobId).run();
