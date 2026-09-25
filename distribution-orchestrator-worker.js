@@ -47,6 +47,33 @@ function coordinatedGrowthPriority(subjectType,score,audienceStrategy){
   return Number(priority.toFixed(2));
 }
 const safe=(v,n=3000)=>String(v??'').slice(0,n);
+let makeSenderWebhookCache={url:null,expiresAt:0};
+async function makeSenderWebhookUrl(env){
+  const now=Date.now();
+  if(makeSenderWebhookCache.url&&makeSenderWebhookCache.expiresAt>now)return makeSenderWebhookCache.url;
+  const row=await env.DB.prepare(`SELECT value FROM external_runtime_config WHERE key='make_sender_webhook_url' LIMIT 1`).first().catch(()=>null);
+  const url=String(row?.value||'');
+  if(!/^https:\/\/hook\.eu1\.make\.com\/[A-Za-z0-9_-]+$/.test(url))return null;
+  makeSenderWebhookCache={url,expiresAt:now+10*60*1000};
+  return url;
+}
+async function wakeMakeSender(env,claimed){
+  if(Number(claimed||0)<=0)return{triggered:false,reason:'no_claimed_sender_work'};
+  const url=await makeSenderWebhookUrl(env);
+  if(!url)return{triggered:false,reason:'make_sender_webhook_unconfigured'};
+  try{
+    const response=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','User-Agent':'ToolScout-Growth-Brain/1.0'},
+      body:JSON.stringify({source:'toolscout_growth_brain',event:'approved_sender_work_available'}),
+      signal:AbortSignal.timeout(4000)
+    });
+    return{triggered:response.ok,status:response.status,mode:'instant_webhook'};
+  }catch(error){
+    return{triggered:false,reason:'make_sender_webhook_error',error:safe(error?.message||error,300)};
+  }
+}
+
 async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 const GROWTH_ESCALATION_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
 async function sha256Hex(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
@@ -900,7 +927,8 @@ async function runGrowthExecutionContractCycle(env){
   if(selectedInternalLane==='distribution_autonomous')await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
 
   const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:12,maxInFlight:12,result:'make_sender_waiting_for_exact_external_send'});
-  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:12};
+  const senderWake=await wakeMakeSender(env,senderClaim.claimed);
+  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:12,deliveryMode:'instant_webhook',wake:senderWake};
 
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
   await runSeoBatch(4);
