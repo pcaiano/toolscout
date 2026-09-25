@@ -7,6 +7,39 @@ const CAPTCHA_RE=/(captcha|g-recaptcha|h-captcha|cf-turnstile|turnstile)/i;
 const PAYMENT_RE=/(paid listing|payment required|sponsored listing|buy a listing|purchase a listing|listing fee|pay to submit)/i;
 const RECIPROCAL_RE=/(reciprocal link|link back|backlink required|add (?:our|this) badge|badge required)/i;
 const AUTOMATION_BLOCK_RE=/(automated submissions? (?:are )?(?:not allowed|prohibited)|no bots|bot submissions? prohibited)/i;
+const PAGE_CACHE_TTL_MS=20*60*1000;
+const PAGE_CACHE_MAX=500;
+const PER_HOST_CONCURRENCY=3;
+const pageCache=new Map();
+const pageInflight=new Map();
+const hostState=new Map();
+
+function cacheGet(key){
+  const item=pageCache.get(key);
+  if(!item)return null;
+  if(item.expiresAt<=Date.now()){pageCache.delete(key);return null}
+  pageCache.delete(key);pageCache.set(key,item);
+  return {...item.value,cacheHit:true};
+}
+function cacheSet(key,value,ttl=PAGE_CACHE_TTL_MS){
+  pageCache.set(key,{value:{...value,cacheHit:false},expiresAt:Date.now()+ttl});
+  while(pageCache.size>PAGE_CACHE_MAX)pageCache.delete(pageCache.keys().next().value);
+}
+function hostKey(url){try{return new URL(url).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
+async function acquireHost(url){
+  const key=hostKey(url);if(!key)return()=>{};
+  let state=hostState.get(key);
+  if(!state){state={active:0,queue:[]};hostState.set(key,state)}
+  if(state.active>=PER_HOST_CONCURRENCY)await new Promise(resolve=>state.queue.push(resolve));
+  state.active++;
+  return()=>{
+    state.active=Math.max(0,state.active-1);
+    const next=state.queue.shift();
+    if(next)next();
+    else if(state.active===0)hostState.delete(key);
+  };
+}
+
 
 function safe(v,n=2000){return String(v??'').slice(0,n)}
 function stripTags(v){return safe(v,8000).replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
@@ -61,13 +94,27 @@ function pageSignals(page){
 }
 async function fetchPage(url){
   if(!validPublicHttp(url))return null;
-  try{
-    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5'},redirect:'follow',signal:AbortSignal.timeout(12000)});
-    const type=String(r.headers.get('content-type')||'').toLowerCase();
-    if(!r.ok||!type.includes('text/html'))return{ok:false,status:r.status,url:r.url||url,html:'',contentType:type};
-    const text=await r.text();
-    return{ok:true,status:r.status,url:r.url||url,html:text.slice(0,MAX_HTML),contentType:type};
-  }catch(error){return{ok:false,status:0,url,error:safe(error?.message||error,300),html:''}}
+  let key;try{const u=new URL(url);u.hash='';key=u.toString()}catch{return null}
+  const cached=cacheGet(key);if(cached)return cached;
+  if(pageInflight.has(key))return {...await pageInflight.get(key),cacheHit:true};
+  const task=(async()=>{
+    const release=await acquireHost(key);
+    try{
+      const r=await fetch(key,{headers:{'User-Agent':UA,'Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5'},redirect:'follow',signal:AbortSignal.timeout(12000)});
+      const type=String(r.headers.get('content-type')||'').toLowerCase();
+      const value=!r.ok||!type.includes('text/html')
+        ?{ok:false,status:r.status,url:r.url||key,html:'',contentType:type}
+        :{ok:true,status:r.status,url:r.url||key,html:(await r.text()).slice(0,MAX_HTML),contentType:type};
+      cacheSet(key,value,value.ok?PAGE_CACHE_TTL_MS:3*60*1000);
+      return value;
+    }catch(error){
+      const value={ok:false,status:0,url:key,error:safe(error?.message||error,300),html:''};
+      cacheSet(key,value,60*1000);
+      return value;
+    }finally{release()}
+  })();
+  pageInflight.set(key,task);
+  try{return {...await task,cacheHit:false}}finally{pageInflight.delete(key)}
 }
 async function mapLimit(items,limit,fn){
   const out=new Array(items.length);let index=0;
@@ -120,7 +167,7 @@ async function researchRoleEmail(job){
       if(seen.has(item.email))continue;seen.add(item.email);roleEmails.push(item);
     }
   }
-  return{ok:true,targetUrl:source,finalUrl:first.url,httpStatus:first.status,roleEmails:roleEmails.slice(0,12),pagesFetched:pages.filter(x=>x?.ok).length,classification:roleEmails.length?'public_role_email_found':'no_public_role_email_found'};
+  return{ok:true,targetUrl:source,finalUrl:first.url,httpStatus:first.status,roleEmails:roleEmails.slice(0,12),pagesFetched:pages.filter(x=>x?.ok).length,cacheHits:pages.filter(x=>x?.cacheHit).length,classification:roleEmails.length?'public_role_email_found':'no_public_role_email_found'};
 }
 async function researchDistribution(job){
   const source=job?.payload?.url;
@@ -161,7 +208,7 @@ async function researchDistribution(job){
     ok:true,targetUrl:source,finalUrl:home.url,httpStatus:home.status,
     classification:blockers.length?'policy_signal':routes.length?'route_found':contactRoutes.length?'contact_found':'no_route_found',
     routes:routes.slice(0,8),contactRoutes:contactRoutes.slice(0,12),blockers,
-    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length}
+    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length}
   };
 }
 
