@@ -1,5 +1,6 @@
 import base from './distribution-contact-worker.js';
 import {recordExecutionProof,deferExecutionTask} from './growth-execution-contract.js';
+import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION} from './distribution-outreach-policy.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const EMAIL_TARGET_24H=50;
@@ -312,6 +313,20 @@ async function recordAuthorityNoOutput(env,reason,taskId=null){
   const detail=`Authority handoff produced no external action: ${String(reason||'unknown').slice(0,180)}${taskId?` · task ${String(taskId).slice(0,180)}`:''}. This is a no-output acquisition cycle, not a growth success. Discovery/network replenishment is requested automatically.`;
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authnoop_${crypto.randomUUID()}`,'authority_handoff_no_output','no_output','backlink_acquisition',detail).run().catch(()=>{});
 }
+async function blockCompetitiveOutreachTask(env,task,row,policy){
+  const detail=`${policy.reason}:${policy.host||row?.domain||task?.subject_key||'unknown'}`;
+  await env.DB.prepare(`UPDATE distribution_network_outreach
+    SET status='suppressed_competitor',public_dispatch_token=NULL,public_dispatch_leased_at=NULL,outreach_error=?,updated_at=datetime('now')
+    WHERE surface_slug=? AND status NOT IN ('sent','adopted')`).bind(detail,task.subject_key).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='blocked',completed_at=datetime('now'),last_result=?,updated_at=datetime('now')
+    WHERE task_id=? AND executor='make_sender' AND status IN ('pending','claimed','attempted','deferred','stalled')`)
+    .bind(`competitive_outreach_suppressed:${detail}`,task.task_id).run().catch(()=>{});
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,source_url,detail,observed_at,created_at)
+    VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+    .bind(`competitor_send_${crypto.randomUUID()}`,task.subject_key,'competitive_outreach_suppressed','completed','reputation_boundary',row?.source_url||null,`Sender hard-stop applied by ${COMPETITIVE_OUTREACH_POLICY_VERSION}: ${detail}. No email was leased or sent.`).run().catch(()=>{});
+  return detail;
+}
 async function publicCandidates(env,limit=8){
   await ensureNetworkSchema(env);
   const capacity=await env.DB.prepare(`SELECT
@@ -400,9 +415,9 @@ async function publicCandidates(env,limit=8){
     }
 
     if(task.subject_type==='surface'){
-      const row=await env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token,public_dispatch_leased_at
+      const row=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,source_url,priority_score,domain,status,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token,public_dispatch_leased_at
         FROM distribution_network_outreach n
-        WHERE n.surface_slug=? AND n.status='contact_found' AND n.contact_email IS NOT NULL
+        WHERE n.surface_slug=? AND n.contact_email IS NOT NULL
           AND NOT EXISTS (
             SELECT 1 FROM distribution_network_outreach prior
             WHERE prior.status IN ('sent','adopted') AND prior.outreach_sent_at>=datetime('now','-30 days')
@@ -418,6 +433,18 @@ async function publicCandidates(env,limit=8){
       if(!row){
         await deferExecutionTask(env,task.task_id,'make_sender_no_ready_surface_candidate');
         deferredTasks.push({task_id:task.task_id,reason:'no_ready_surface_candidate'});
+        continue;
+      }
+      const competitivePolicy=competitiveOutreachExclusion(row);
+      if(row.status==='suppressed_competitor'||competitivePolicy.excluded){
+        const reason=competitivePolicy.excluded?competitivePolicy:{...competitivePolicy,excluded:true,reason:'already_suppressed_competitor'};
+        const detail=await blockCompetitiveOutreachTask(env,task,row,reason);
+        deferredTasks.push({task_id:task.task_id,reason:'competitive_outreach_suppressed',detail});
+        continue;
+      }
+      if(row.status!=='contact_found'){
+        await deferExecutionTask(env,task.task_id,`make_sender_surface_not_ready:${row.status||'unknown'}`);
+        deferredTasks.push({task_id:task.task_id,reason:`surface_not_ready:${row.status||'unknown'}`});
         continue;
       }
       if(freshDispatchLease(row.public_dispatch_leased_at)){
