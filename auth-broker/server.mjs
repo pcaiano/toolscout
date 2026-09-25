@@ -53,11 +53,13 @@ async function inspectPage(page){
     info=await page.evaluate(()=>{
       const text=(document.body?.innerText||'').slice(0,120000);
       const html=(document.documentElement?.innerHTML||'').slice(0,250000);
-      const fields=[...document.querySelectorAll('input,textarea,select')].slice(0,80).map(el=>{
+      const fields=[...document.querySelectorAll('input,textarea,select')].slice(0,80).map((el,index)=>{
         const id=el.id||'',name=el.getAttribute('name')||'',type=(el.getAttribute('type')||el.tagName||'').toLowerCase(),placeholder=el.getAttribute('placeholder')||'';
         let label='';if(id){const lab=document.querySelector('label[for="'+CSS.escape(id)+'"]');if(lab)label=(lab.textContent||'').trim()}
         if(!label){const lab=el.closest('label');if(lab)label=(lab.textContent||'').trim()}
-        return{name,type,placeholder,label:label.slice(0,180),required:Boolean(el.required)};
+        const r=el.getBoundingClientRect(),style=getComputedStyle(el);
+        const visible=r.width>0&&r.height>0&&style.visibility!=='hidden'&&style.display!=='none';
+        return{index,name,type,placeholder,label:label.slice(0,180),required:Boolean(el.required),disabled:Boolean(el.disabled),visible};
       });
       return{text,html,fields,title:document.title||'',forms:document.forms?.length||0,passwordFields:document.querySelectorAll('input[type="password"]').length};
     });
@@ -86,15 +88,15 @@ function sessionPage(id,token){
   <p class="note">Complete login, MFA or CAPTCHA yourself. ToolScout does not solve CAPTCHA and does not store the password or OTP you type here. When authenticated, press <b>Save session & resume</b>.</p>
   <div class="url" id="url"></div>
   <div class="controls"><button id="refresh">Refresh view</button><button data-key="Tab">Tab</button><button data-key="Enter">Enter</button><button id="back">Back</button><button id="up">Scroll up</button><button id="down">Scroll down</button></div>
-  <div class="controls"><input id="text" type="password" autocomplete="off" placeholder="Type into focused browser field"><button id="type">Type into page</button><button id="clear">Clear</button></div>
+  <div class="controls"><select id="field"><option value="">Focused field (fallback)</option></select><input id="text" type="password" autocomplete="off" placeholder="Type securely"><button id="type">Type into selected field</button><button id="clear">Clear</button></div>
   <img id="shot" class="shot" alt="Live browser screenshot">
   <div class="controls"><button class="primary" id="save">Save session & resume automation</button></div></div>
   <script>
   const sid='${sid}',tok='${t}',shot=document.getElementById('shot'),statusEl=document.getElementById('status'),urlEl=document.getElementById('url');
   async function call(action,payload={}){statusEl.textContent='Working…';const r=await fetch('/session/'+sid+'/action?token='+tok,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...payload})});const d=await r.json();if(!r.ok){statusEl.textContent=d.error||'Error';throw new Error(d.error)}statusEl.textContent=d.status||'Ready';if(d.currentUrl)urlEl.textContent=d.currentUrl;await view();return d}
-  async function view(){shot.src='/session/'+sid+'/screenshot?token='+tok+'&t='+Date.now();fetch('/session/'+sid+'/state?token='+tok).then(r=>r.json()).then(d=>{if(d.currentUrl)urlEl.textContent=d.currentUrl;if(d.challengeDetected)statusEl.textContent='Human verification detected — complete it manually';}).catch(()=>{})}
+  async function view(){shot.src='/session/'+sid+'/screenshot?token='+tok+'&t='+Date.now();fetch('/session/'+sid+'/state?token='+tok).then(r=>r.json()).then(d=>{if(d.currentUrl)urlEl.textContent=d.currentUrl;if(d.challengeDetected)statusEl.textContent='Human verification detected — complete it manually';const sel=document.getElementById('field');const prev=sel.value;sel.innerHTML='<option value="">Focused field (fallback)</option>';for(const f of (d.form?.fields||[]).filter(x=>x.visible&&!x.disabled)){const o=document.createElement('option');o.value=String(f.index);o.textContent=(f.label||f.placeholder||f.name||f.type||('Field '+f.index)).slice(0,90);sel.appendChild(o)}if([...sel.options].some(o=>o.value===prev))sel.value=prev;}).catch(()=>{})}
   shot.addEventListener('click',e=>{const r=shot.getBoundingClientRect();call('click',{x:Math.round((e.clientX-r.left)/r.width*1280),y:Math.round((e.clientY-r.top)/r.height*800)})});
-  document.getElementById('type').onclick=async()=>{const el=document.getElementById('text');const value=el.value;el.value='';await call('type',{text:value})};
+  document.getElementById('type').onclick=async()=>{const el=document.getElementById('text');const value=el.value;const field=document.getElementById('field').value;el.value='';await call(field===''?'type':'fillField',field===''?{text:value}:{text:value,index:Number(field)})};
   document.getElementById('clear').onclick=()=>document.getElementById('text').value='';
   document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>call('key',{key:b.dataset.key}));
   document.getElementById('refresh').onclick=()=>call('refresh');document.getElementById('back').onclick=()=>call('back');document.getElementById('up').onclick=()=>call('scroll',{dy:-650});document.getElementById('down').onclick=()=>call('scroll',{dy:650});
@@ -185,6 +187,26 @@ const server=http.createServer(async(req,res)=>{
       const action=String(body?.action||'');
       if(action==='click'){await s.page.mouse.click(Math.max(0,Math.min(VIEWPORT.width,num(body.x))),Math.max(0,Math.min(VIEWPORT.height,num(body.y))))}
       else if(action==='type'){await s.page.keyboard.type(safe(body?.text,1000),{delay:15})}
+      else if(action==='fillField'){
+        const index=Math.max(0,Math.min(79,Math.trunc(num(body.index))));
+        const value=safe(body?.text,1000);
+        const ok=await s.page.evaluate(({index,value})=>{
+          const els=[...document.querySelectorAll('input,textarea,select')].slice(0,80);
+          const el=els[index];if(!el||el.disabled)return false;
+          el.scrollIntoView({block:'center',inline:'nearest'});el.focus();
+          if(el.tagName==='SELECT'){
+            const match=[...el.options].find(o=>o.value===value||o.text===value);
+            if(!match)return false;el.value=match.value;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));return true;
+          }
+          const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;
+          const setter=Object.getOwnPropertyDescriptor(proto,'value')?.set;
+          if(setter)setter.call(el,value);else el.value=value;
+          el.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:value}));
+          el.dispatchEvent(new Event('change',{bubbles:true}));
+          return true;
+        },{index,value});
+        if(!ok)return json(res,409,{error:'field_not_available'});
+      }
       else if(action==='key'){const key=String(body?.key||'');if(!['Tab','Enter','Escape','Backspace','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key))return json(res,400,{error:'key_not_allowed'});await s.page.keyboard.press(key)}
       else if(action==='scroll'){await s.page.mouse.wheel({deltaY:Math.max(-2000,Math.min(2000,num(body.dy)))})}
       else if(action==='refresh'){await s.page.reload({waitUntil:'domcontentloaded',timeout:15000}).catch(()=>null)}
