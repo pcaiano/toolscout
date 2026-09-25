@@ -52,6 +52,20 @@ async function adapter(env){
     return (d.adapters||[]).find(x=>x?.surface_slug==='indexnow'&&x?.enabled&&x?.allow_automatic)||null;
   }catch{return null}
 }
+async function canonicalState(env,pathname){
+  const expected='https://trytoolscout.org'+pathname;
+  try{
+    const response=await env.ASSETS.fetch(new Request(expected,{headers:{'Cache-Control':'no-cache'}}));
+    if(!response.ok)return {verified:false,httpStatus:response.status,expected,reason:'public_asset_not_200'};
+    const type=String(response.headers.get('content-type')||'').toLowerCase();
+    if(!type.includes('text/html'))return {verified:false,httpStatus:response.status,expected,reason:'public_asset_not_html'};
+    const html=await response.text();
+    const canonical=(html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)||[])[1]||null;
+    const normalize=value=>{try{const u=new URL(value,expected);let p=u.pathname||'/';if(p.length>1)p=p.replace(/\/$/,'');return u.origin+p}catch{return null}};
+    const verified=normalize(canonical)===normalize(expected);
+    return {verified,httpStatus:response.status,expected,canonical,reason:verified?'self_canonical_verified':'canonical_not_self'};
+  }catch(error){return {verified:false,expected,reason:'canonical_probe_failed',error:String(error?.message||error).slice(0,300)}}
+}
 async function queueIndexNow(env,pathname){
   const a=await adapter(env);if(!a)return {queued:false,reason:'indexnow_adapter_unavailable'};
   const assetUrl='https://trytoolscout.org'+pathname;
@@ -70,6 +84,11 @@ export async function executeCloudflareSeoTask(env,task){
   await ensureSeoSchema(env);
   const evidence=await opportunityEvidence(env,task);
   const action=String(task.action);
+  let canonicalProof=null;
+  if(action==='repair_canonical_alignment'){
+    canonicalProof=await canonicalState(env,pathname);
+    if(!canonicalProof.verified)return {verified:false,reason:canonicalProof.reason||'canonical_state_not_verified',executor:'seo_cloudflare',pathname,action,canonicalProof,evidence};
+  }
   const mutationActions=new Set(['deepen_existing_search_asset','improve_click_capture','strengthen_internal_links','repair_indexing','repair_canonical_alignment']);
   if(mutationActions.has(action)){
     await env.DB.prepare(`INSERT INTO seo_runtime_state(pathname,reason,impressions,clicks,position,active,source_generated_at,first_activated_at,last_evaluated_at,updated_at)
@@ -90,8 +109,9 @@ export async function executeCloudflareSeoTask(env,task){
     executor:'seo_cloudflare',
     pathname,
     action,
-    proof_kind:mutationActions.has(action)?'cloudflare_runtime_state':'cloudflare_search_measurement',
+    proof_kind:action==='repair_canonical_alignment'?'canonical_current_state_verified':(mutationActions.has(action)?'cloudflare_runtime_state':'cloudflare_search_measurement'),
     evidence,
+    canonicalProof,
     indexNow
   };
 }
