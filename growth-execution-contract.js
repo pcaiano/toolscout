@@ -509,7 +509,7 @@ export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null
     const senderTables=await first(env,`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN ('distribution_vendor_amplification','distribution_network_outreach')`);
     if(n(senderTables?.n)===2)claimReadyWhere=` AND ${MAKE_SENDER_READY_CONDITION}`;
   }
-  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled')${claimReadyWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
+  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled')${claimReadyWhere} ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
   const tasks=rows.results||[],ids=tasks.map(x=>x.task_id);
   if(!ids.length)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   const qs=ids.map(()=>'?').join(',');
