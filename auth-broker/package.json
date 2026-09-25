@@ -3,8 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "engines": {"node": ">=20"},
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "puppeteer": "24.20.0"
+  },
+  "scripts": {
+    "postinstall": "npx puppeteer browsers install chrome"
   }
 }
