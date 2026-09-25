@@ -30,7 +30,7 @@ It never submits forms, sends outreach, changes ToolScout business state directl
 
 Current design budget:
 - 1,500 external research jobs per UTC day.
-- 100 jobs per batch.
+- 25 jobs per batch to keep Cloudflare/D1 completion commits bounded.
 - at most 2 active batches.
 - external worker concurrency: 24 requests.
 - Cloudflare dispatch cadence: every 5 minutes.
@@ -72,7 +72,7 @@ If external compute is absent or unavailable:
 - Cloudflare continues normal Growth Brain operation.
 - Overflow cron does not consume D1 work when no runtime is configured.
 - failed batch dispatches are requeued.
-- stale external batches are requeued after 20 minutes.
+- stale external batches are requeued after 3 minutes.
 - no external research result is trusted as an automatic submission decision.
 
 GitHub Actions remain fallback-disabled until the October quota reset.
