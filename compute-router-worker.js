@@ -5,6 +5,9 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const OVERFLOW_CRON='*/5 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=300;
+const CONTACT_SUPPLY_TARGET=200;
+const CONTACT_SUPPLY_MIN=150;
+const CONTACT_SUPPLY_RESEARCH_BATCH=120;
 const BATCH_SIZE=25;
 const MAX_ACTIVE_BATCHES=2;
 const BATCH_TIMEOUT_MINUTES=3;
@@ -87,7 +90,49 @@ async function ensureSchema(env){
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
     env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('research',date('now'),0)`),
-    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('execution',date('now'),0)`)
+    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('execution',date('now'),0)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS contact_supply_domain(
+      domain TEXT PRIMARY KEY,
+      source_type TEXT NOT NULL,
+      source_key TEXT,
+      source_name TEXT,
+      source_url TEXT,
+      priority_score REAL NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'queued',
+      contact_email TEXT,
+      contact_name TEXT,
+      contact_title TEXT,
+      contact_source TEXT,
+      contact_source_url TEXT,
+      route_type TEXT,
+      route_url TEXT,
+      provider TEXT,
+      provider_person_id TEXT,
+      public_attempts INTEGER NOT NULL DEFAULT 0,
+      apollo_status TEXT NOT NULL DEFAULT 'plan_blocked',
+      next_research_at TEXT NOT NULL DEFAULT (datetime('now')),
+      last_researched_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_contact_supply_status_priority ON contact_supply_domain(status,priority_score DESC,next_research_at)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_contact_supply_email ON contact_supply_domain(contact_email,status)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS contact_supply_metrics(
+      id TEXT PRIMARY KEY,
+      target_ready INTEGER NOT NULL DEFAULT 200,
+      min_ready INTEGER NOT NULL DEFAULT 150,
+      catalog_domains INTEGER NOT NULL DEFAULT 0,
+      network_domains INTEGER NOT NULL DEFAULT 0,
+      vendor_domains INTEGER NOT NULL DEFAULT 0,
+      ready_email INTEGER NOT NULL DEFAULT 0,
+      ready_route INTEGER NOT NULL DEFAULT 0,
+      researching INTEGER NOT NULL DEFAULT 0,
+      unresolved INTEGER NOT NULL DEFAULT 0,
+      apollo_eligible INTEGER NOT NULL DEFAULT 0,
+      apollo_status TEXT NOT NULL DEFAULT 'plan_blocked_people_api',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`INSERT OR IGNORE INTO contact_supply_metrics(id,target_ready,min_ready) VALUES('global',200,150)`)
   ]).catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
@@ -97,7 +142,9 @@ async function ensureHotIndexes(env){
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_opportunities_overflow ON distribution_opportunities(human_required,status,distribution_score DESC,updated_at)`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_lookup ON distribution_submissions(surface_slug,submission_type,asset_url,status)`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_verify ON distribution_submissions(submission_type,status,submitted_at)`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_auto_adapters_policy ON distribution_auto_adapters(policy_state,confidence,surface_slug)`).run()
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_auto_adapters_policy ON distribution_auto_adapters(policy_state,confidence,surface_slug)`).run(),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_vendor_amplification_domain_status ON distribution_vendor_amplification(vendor_domain,status)`).run(),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_network_outreach_domain_status ON distribution_network_outreach(domain,status)`).run()
   ]).catch(error=>{hotIndexesReady=null;throw error});
   return hotIndexesReady;
 }
