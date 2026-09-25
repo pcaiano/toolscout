@@ -5,6 +5,8 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const OVERFLOW_CRON='*/5 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=300;
+const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
+const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
 const CONTACT_SUPPLY_RESEARCH_BATCH=120;
@@ -340,8 +342,6 @@ async function enqueueContactSupplyResearch(env,remaining){
     ORDER BY CASE status WHEN 'queued' THEN 0 WHEN 'unresolved' THEN 1 ELSE 2 END,priority_score DESC,updated_at ASC
     LIMIT ?`).bind(Math.min(CONTACT_SUPPLY_RESEARCH_BATCH,need,remaining)).all().catch(()=>({results:[]}));
   let enqueued=0;
-  const supply=await enqueueContactSupplyResearch(env,remaining);
-  enqueued+=num(supply.enqueued);remaining=supply.remaining;
   for(const row of rows(q)){
     if(remaining<=0)break;
     const url=isHttp(row.source_url)?row.source_url:`https://${row.domain}/`;
@@ -431,6 +431,7 @@ async function health(env){
     dailyJobBudget:DAILY_JOB_BUDGET,researchUsedToday:num(usage.research),
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
+    distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
     queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,
@@ -448,25 +449,35 @@ async function enqueueJob(env,{jobKey,jobType,subjectType,subjectKey,priority,pa
 }
 async function enqueueDistributionResearch(env){
   await ensureSchema(env);
-  const m=await metricRow(env);
   let remaining=await budgetRemaining(env,'research',DAILY_JOB_BUDGET);
-  if(!remaining)return{enqueued:0,remaining:0};
+  if(!remaining)return{enqueued:0,remaining:0,contactSupply:{enqueued:0,remaining:0}};
+  let enqueued=0;
+  const supply=await enqueueContactSupplyResearch(env,remaining);
+  enqueued+=num(supply.enqueued);remaining=num(supply.remaining);
+  if(remaining<=0){
+    if(enqueued>0){await metricDelta(env,{queued:enqueued,created:enqueued});await budgetConsume(env,'research',enqueued);}
+    return{enqueued,remaining:0,contactSupply:supply};
+  }
+  const routeBucket=Math.floor(Date.now()/(DISTRIBUTION_RESEARCH_BUCKET_HOURS*3600000));
+  const roleEmailBucket=Math.floor(Date.now()/(ROLE_EMAIL_RESEARCH_BUCKET_HOURS*3600000));
   const limit=Math.min(500,remaining);
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action
     FROM distribution_opportunities
     WHERE human_required=0 AND action_url IS NOT NULL
-      AND status IN ('candidate','discovered','research_required')
+      AND (
+        status IN ('candidate','discovered')
+        OR (status='research_required' AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')))
+      )
     ORDER BY distribution_score DESC,updated_at ASC LIMIT ?`).bind(limit).all().catch(()=>({results:[]}));
-  let enqueued=0;
   for(const row of rows(q)){
     if(remaining<=0||!isHttp(row.action_url))break;
     const urlHash=await shortHash(row.action_url);
     const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score)};
-    const routeAdded=await enqueueJob(env,{jobKey:`route:${row.surface_slug}:${urlHash}`,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:num(row.distribution_score),payload});
+    const routeAdded=await enqueueJob(env,{jobKey:`route:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:num(row.distribution_score),payload});
     enqueued+=routeAdded;remaining=Math.max(0,remaining-routeAdded);
     if(remaining<=0)break;
     if(num(row.distribution_score)>=55){
-      const contactAdded=await enqueueJob(env,{jobKey:`contact:${row.surface_slug}:${urlHash}`,jobType:'contact_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:Math.max(0,num(row.distribution_score)-5),payload});
+      const contactAdded=await enqueueJob(env,{jobKey:`contact:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`,jobType:'contact_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:Math.max(0,num(row.distribution_score)-5),payload});
       enqueued+=contactAdded;remaining=Math.max(0,remaining-contactAdded);
     }
   }
@@ -481,7 +492,7 @@ async function enqueueDistributionResearch(env){
       if(!isHttp(url)||!row.domain)continue;
       const keyHash=await shortHash(url);
       const added=await enqueueJob(env,{
-        jobKey:`publisher-email:${row.surface_slug}:${keyHash}`,
+        jobKey:`publisher-email:${row.surface_slug}:bucket:${roleEmailBucket}:${keyHash}`,
         jobType:'publisher_role_email_research',
         subjectType:'surface',subjectKey:row.surface_slug,
         priority:900+num(row.priority_score),
@@ -501,7 +512,7 @@ async function enqueueDistributionResearch(env){
       if(!isHttp(url))continue;
       const keyHash=await shortHash(url);
       const added=await enqueueJob(env,{
-        jobKey:`vendor-email:${row.tool_slug}:${keyHash}`,
+        jobKey:`vendor-email:${row.tool_slug}:bucket:${roleEmailBucket}:${keyHash}`,
         jobType:'vendor_role_email_research',
         subjectType:'tool',subjectKey:row.tool_slug,
         priority:880+num(row.priority_score),
@@ -645,7 +656,7 @@ async function triggerBatch(env,batch){
     const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','User-Agent':'ToolScout-Compute-Router/1.0'},body:JSON.stringify({batchId:batch.batchId,toolscoutBaseUrl:'https://trytoolscout.org'}),signal:AbortSignal.timeout(10000)});
     await env.DB.prepare(`UPDATE compute_overflow_batches SET trigger_http_status=?,last_error=?,updated_at=datetime('now') WHERE batch_id=?`).bind(response.status,response.ok?null:`trigger_http_${response.status}`,batch.batchId).run();
     if(!response.ok)throw new Error(`trigger_http_${response.status}`);
-    await event(env,'overflow_batch_dispatched','completed',`Dispatched ${batch.count} research job(s) to external compute.`,{batchId:batch.batchId});
+    await event(env,'overflow_batch_dispatched','completed',`Dispatched ${batch.count} external compute job(s).`,{batchId:batch.batchId});
     return{ok:true,httpStatus:response.status};
   }catch(error){
     const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now','+5 minutes'),last_error=?,updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(safe(error?.message||error,300),batch.batchId).run();
