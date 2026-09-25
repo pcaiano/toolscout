@@ -11,6 +11,7 @@ const sessions=new Map();
 let browserPromise=null;
 
 const safe=(v,n=4000)=>String(v??'').slice(0,n);
+const num=v=>Number.isFinite(Number(v))?Number(v):0;
 function json(res,status,body){const data=JSON.stringify(body);res.writeHead(status,{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Length':Buffer.byteLength(data)});res.end(data)}
 function html(res,status,body){res.writeHead(status,{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'no-store','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'"});res.end(body)}
 function publicHttp(v){try{const u=new URL(String(v||''));if(!['http:','https:'].includes(u.protocol))return null;const h=u.hostname.toLowerCase();if(h==='localhost'||h.endsWith('.local')||h==='::1'||h.startsWith('127.')||h.startsWith('10.')||h.startsWith('192.168.')||h.startsWith('169.254.'))return null;const m=h.match(/^172\.(\d+)\./);if(m&&Number(m[1])>=16&&Number(m[1])<=31)return null;return u.toString()}catch{return null}}
