@@ -1,4 +1,5 @@
 import base from './operational-truth-reconciliation-worker.js';
+import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep} from './auth-session-plane.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/5 * * * *';
@@ -643,6 +644,20 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health')return Response.json(await health(env),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/auth-plane/health')return Response.json(await authPlaneHealth(env),{headers:JSON_H});
+    if(request.method==='POST'&&u.pathname==='/api/auth-plane/classify'){
+      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+      if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+      return Response.json(await classifyAuthBacklog(env,{limit:200}),{headers:JSON_H});
+    }
+    const authComplete=u.pathname.match(/^\/api\/auth-plane\/handoffs\/(ah_[A-Za-z0-9-]+)\/complete$/);
+    if(request.method==='POST'&&authComplete){
+      const response=await completeAuthHandoff(request,env,authComplete[1]);
+      if(response.ok&&ctx?.waitUntil){
+        ctx.waitUntil(authenticatedResumeSweep(env,{limit:1}).catch(()=>null));
+      }
+      return response;
+    }
     if(request.method==='POST'&&u.pathname==='/api/compute/router/refresh'){
       const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
       if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
@@ -658,7 +673,12 @@ export default{
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
     if(trigger===OVERFLOW_CRON){
-      const work=runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null});
+      const minute=new Date(Number(event?.scheduledTime)||Date.now()).getUTCMinutes();
+      const work=Promise.allSettled([
+        runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null}),
+        minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
+        minute%15===0?authenticatedResumeSweep(env,{limit:2}):Promise.resolve(null)
+      ]);
       if(ctx?.waitUntil)ctx.waitUntil(work);
       return;
     }
