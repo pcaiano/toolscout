@@ -144,6 +144,19 @@ async function ensureHotIndexes(env){
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_lookup ON distribution_submissions(surface_slug,submission_type,asset_url,status)`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_verify ON distribution_submissions(submission_type,status,submitted_at)`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_auto_adapters_policy ON distribution_auto_adapters(policy_state,confidence,surface_slug)`).run(),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS auth_automation_capability(
+      surface_slug TEXT PRIMARY KEY,
+      automation_class TEXT NOT NULL,
+      credential_kind TEXT,
+      credential_header TEXT,
+      credential_prefix TEXT,
+      credential_state TEXT NOT NULL DEFAULT 'not_required',
+      human_bootstrap_required INTEGER NOT NULL DEFAULT 0,
+      evidence TEXT,
+      last_verified_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_vendor_amplification_domain_status ON distribution_vendor_amplification(vendor_domain,status)`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_network_outreach_domain_status ON distribution_network_outreach(domain,status)`).run()
   ]).catch(error=>{hotIndexesReady=null;throw error});
@@ -519,7 +532,9 @@ async function enqueueAuthorizedExecution(env){
     JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
     LEFT JOIN distribution_economic_learning l ON l.surface_slug=a.surface_slug
     LEFT JOIN distribution_surface_costs c ON c.surface_slug=a.surface_slug
+    LEFT JOIN auth_automation_capability ac ON ac.surface_slug=a.surface_slug
     WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
+      AND COALESCE(ac.automation_class,'public_automatic')<>'token_automatic'
       AND COALESCE(c.cost_amount,0)=0
       AND COALESCE(l.operating_decision,'explore') IN ('explore','measure','scale')
     ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
