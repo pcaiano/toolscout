@@ -124,11 +124,69 @@ async function researchDistribution(job){
     evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length}
   };
 }
+
+function responseEvidenceFromText(text,endpoint){
+  try{
+    const parsed=JSON.parse(String(text||''));
+    const keys=['public_url','publicUrl','listing_url','listingUrl','profile_url','profileUrl','status_url','statusUrl','resource_url','resourceUrl','url','href'];
+    const walk=(v,depth=0)=>{
+      if(depth>4||v==null)return null;
+      if(typeof v==='string'){try{const u=new URL(v,endpoint);return validPublicHttp(u.href)&&sameHost(endpoint,u.href)?u.href:null}catch{return null}}
+      if(Array.isArray(v)){for(const x of v){const hit=walk(x,depth+1);if(hit)return hit}return null}
+      if(typeof v!=='object')return null;
+      for(const k of keys)if(v[k]){const hit=walk(v[k],depth+1);if(hit)return hit}
+      for(const x of Object.values(v)){const hit=walk(x,depth+1);if(hit)return hit}
+      return null;
+    };
+    return walk(parsed);
+  }catch{return null}
+}
+async function executeAuthorizedHttpAction(job){
+  const p=job?.payload||{},endpoint=String(p.endpoint||''),method=String(p.method||'POST').toUpperCase(),contentType=String(p.contentType||'application/json').toLowerCase(),body=String(p.body||'');
+  if(p.authorizationClass!=='verified_free_auto_adapter_v1')return{ok:false,error:'authorization_class_rejected'};
+  if(!validPublicHttp(endpoint))return{ok:false,error:'invalid_or_private_endpoint'};
+  if(!['POST','PUT','PATCH'].includes(method))return{ok:false,error:'method_not_authorized'};
+  if(!['application/json','application/x-www-form-urlencoded'].includes(contentType))return{ok:false,error:'content_type_not_authorized'};
+  if(body.length>50000)return{ok:false,error:'body_too_large'};
+  try{
+    const response=await fetch(endpoint,{
+      method,
+      headers:{'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout External Execution/1.0 (+https://trytoolscout.org/)'},
+      body,redirect:'manual',signal:AbortSignal.timeout(15000)
+    });
+    const location=response.headers.get('location');
+    let evidenceUrl=null,finalUrl=endpoint;
+    if(location){
+      const next=absolute(location,endpoint);
+      if(next&&sameHost(endpoint,next)){evidenceUrl=next;finalUrl=next;}
+    }
+    let text='';
+    try{text=(await response.text()).slice(0,12000)}catch{}
+    if(!evidenceUrl)evidenceUrl=responseEvidenceFromText(text,endpoint);
+    return{
+      ok:response.ok,httpStatus:response.status,targetUrl:endpoint,finalUrl,evidenceUrl,
+      responseType:safe(response.headers.get('content-type')||'',160),
+      authorizationClass:p.authorizationClass
+    };
+  }catch(error){return{ok:false,httpStatus:0,targetUrl:endpoint,error:safe(error?.message||error,500),authorizationClass:p.authorizationClass}}
+}
+async function executeAuthorizedVerification(job){
+  const p=job?.payload||{},target=String(p.targetUrl||'');
+  if(p.authorizationClass!=='verified_publication_check_v1')return{ok:false,error:'authorization_class_rejected'};
+  if(!validPublicHttp(target))return{ok:false,error:'invalid_or_private_target'};
+  try{
+    const response=await fetch(target,{method:'GET',headers:{'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout External Verifier/1.0 (+https://trytoolscout.org/)'},redirect:'follow',signal:AbortSignal.timeout(12000)});
+    const finalUrl=validPublicHttp(response.url||'')&&sameHost(target,response.url)?response.url:target;
+    return{ok:response.ok,httpStatus:response.status,targetUrl:target,finalUrl,authorizationClass:p.authorizationClass};
+  }catch(error){return{ok:false,httpStatus:0,targetUrl:target,error:safe(error?.message||error,500),authorizationClass:p.authorizationClass}}
+}
 export async function researchJob(job){
   const started=Date.now();
   try{
     let result;
     if(job?.type==='distribution_route_research'||job?.type==='contact_route_research')result=await researchDistribution(job);
+    else if(job?.type==='authorized_http_action')result=await executeAuthorizedHttpAction(job);
+    else if(job?.type==='authorized_verification')result=await executeAuthorizedVerification(job);
     else result={ok:false,error:'unsupported_job_type'};
     return{jobId:job?.jobId||null,...result,durationMs:Date.now()-started};
   }catch(error){return{jobId:job?.jobId||null,ok:false,error:safe(error?.message||error,500),durationMs:Date.now()-started}}
