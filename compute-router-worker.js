@@ -158,7 +158,7 @@ function contactDomain(value){
 function contactDomainEligible(domain){
   const d=String(domain||'').toLowerCase().replace(/^www\./,'');
   if(!d||d==='trytoolscout.org'||d.endsWith('.trytoolscout.org'))return false;
-  if(['x.com','twitter.com','linkedin.com','facebook.com','instagram.com','youtube.com','tiktok.com','github.com','bsky.app','google.com'].includes(d))return false;
+  if(['x.com','twitter.com','linkedin.com','facebook.com','instagram.com','youtube.com','tiktok.com','github.com','bsky.app','google.com','schema.org'].includes(d))return false;
   return !/^(api|cdn|static|assets?|img|images|media|js|css|fonts)\./.test(d);
 }
 async function upsertContactSupplyDomain(env,{domain,sourceType,sourceKey=null,sourceName=null,sourceUrl=null,priority=0}){
@@ -226,6 +226,9 @@ async function domainInOutreachCooldown(env,domain){
 }
 async function seedContactSupply(env){
   await ensureSchema(env);
+  await env.DB.prepare(`DELETE FROM contact_supply_domain
+    WHERE domain IN ('x.com','twitter.com','linkedin.com','facebook.com','instagram.com','youtube.com','tiktok.com','github.com','bsky.app','google.com','schema.org')
+       OR domain LIKE 'api.%' OR domain LIKE 'cdn.%' OR domain LIKE 'static.%' OR domain LIKE 'assets.%' OR domain LIKE 'img.%' OR domain LIKE 'images.%' OR domain LIKE 'fonts.%'`).run().catch(()=>{});
   let seeded=0;
   try{
     const response=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/tools.json',{headers:{'Cache-Control':'no-cache'}}));
@@ -907,10 +910,10 @@ async function completeBatch(request,env,ctx,batchId){
   if(!token||(await sha256(token))!==batch.completion_token_hash)return Response.json({error:'invalid_completion_capability'},{status:403,headers:JSON_H});
   let body={};try{body=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_H})}
   const results=Array.isArray(body.results)?body.results.slice(0,BATCH_SIZE):[];
-  let completed=0,failed=0,applied=0;
+  let completed=0,failed=0,retried=0,applied=0;
   for(const result of results){
     const jobId=safe(result?.jobId,120);if(!jobId)continue;
-    const job=await env.DB.prepare(`SELECT job_id,job_type,subject_key,payload_json FROM compute_overflow_jobs WHERE job_id=? AND batch_id=? AND status='leased' LIMIT 1`).bind(jobId,batchId).first();
+    const job=await env.DB.prepare(`SELECT job_id,job_type,subject_key,payload_json,attempts FROM compute_overflow_jobs WHERE job_id=? AND batch_id=? AND status='leased' LIMIT 1`).bind(jobId,batchId).first();
     if(!job)continue;
     const ok=result?.ok!==false;
     if(job.job_type==='authorized_http_action'){const a=await applyAuthorizedActionResult(env,job,result);applied+=a.applied?1:0}
@@ -922,20 +925,32 @@ async function completeBatch(request,env,ctx,batchId){
       else if(job.job_type==='contact_route_research'){const a=await applyContactResult(env,job,result);applied+=num(a.applied)}
       else if(job.job_type==='publisher_role_email_research'||job.job_type==='vendor_role_email_research'){const a=await applyRoleEmailResult(env,job,result);applied+=a.applied?1:0}
     }
-    await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
-      .bind(ok?'completed':'failed',JSON.stringify(result).slice(0,24000),ok?null:safe(result?.error||'external_compute_failed',600),jobId).run();
-    if(ok){completed++;await metricDelta(env,{leased:-1,completed:1,lastCompleted:true});}
-    else{failed++;await metricDelta(env,{leased:-1,failed:1,lastCompleted:true});}
+    const externalUnreachable=!ok&&String(result?.error||'')==='source_unreachable'&&['distribution_route_research','contact_route_research','publisher_role_email_research','vendor_role_email_research','contact_supply_public_research'].includes(String(job.job_type||''));
+    const maxExternalAttempts=job.job_type==='contact_supply_public_research'?2:3;
+    if(externalUnreachable&&num(job.attempts)<maxExternalAttempts){
+      await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,completed_at=NULL,available_at=datetime('now','+24 hours'),result_json=?,last_error='source_unreachable_backoff',updated_at=datetime('now') WHERE job_id=?`)
+        .bind(JSON.stringify(result).slice(0,24000),jobId).run();
+      retried++;await metricDelta(env,{leased:-1,queued:1});
+    }else if(externalUnreachable){
+      await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='completed',completed_at=datetime('now'),result_json=?,last_error=NULL,updated_at=datetime('now') WHERE job_id=?`)
+        .bind(JSON.stringify({...result,outcome:'external_source_unreachable_exhausted'}).slice(0,24000),jobId).run();
+      completed++;await metricDelta(env,{leased:-1,completed:1,lastCompleted:true});
+    }else{
+      await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
+        .bind(ok?'completed':'failed',JSON.stringify(result).slice(0,24000),ok?null:safe(result?.error||'external_compute_failed',600),jobId).run();
+      if(ok){completed++;await metricDelta(env,{leased:-1,completed:1,lastCompleted:true});}
+      else{failed++;await metricDelta(env,{leased:-1,failed:1,lastCompleted:true});}
+    }
   }
   const unresolved=await env.DB.prepare(`SELECT COUNT(*) n FROM compute_overflow_jobs WHERE batch_id=? AND status='leased'`).bind(batchId).first().catch(()=>({n:0}));
   if(num(unresolved?.n)>0){
     await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now','+5 minutes'),last_error='missing_from_batch_result',updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(batchId).run();
   }
   await env.DB.prepare(`UPDATE compute_overflow_batches SET status='completed',completed_at=datetime('now'),result_summary_json=?,updated_at=datetime('now') WHERE batch_id=?`)
-    .bind(JSON.stringify({completed,failed,applied,missing:num(unresolved?.n)}),batchId).run();
+    .bind(JSON.stringify({completed,failed,retried,applied,missing:num(unresolved?.n)}),batchId).run();
   const missing=num(unresolved?.n);
   await metricDelta(env,{leased:-missing,queued:missing,activeBatches:-1,completedBatches:1,lastCompleted:true});
-  await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} successful and ${failed} failed job(s); ${applied} canonical records were advanced across research and authorized execution.`,{batchId});
+  await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} completed, ${retried} externally-unreachable retry, and ${failed} operationally failed job(s); ${applied} canonical records were advanced.`,{batchId});
   if(ctx&&env.ADMIN_TOKEN&&applied>0){
     const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
     const refresh=Promise.allSettled([
@@ -944,7 +959,7 @@ async function completeBatch(request,env,ctx,batchId){
     ]);
     ctx.waitUntil(refresh);
   }
-  return Response.json({ok:true,batchId,completed,failed,applied,missing},{headers:JSON_H});
+  return Response.json({ok:true,batchId,completed,failed,retried,applied,missing},{headers:JSON_H});
 }
 async function serveBatch(env,batchId){
   const out=await batchPayload(env,batchId);
