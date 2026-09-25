@@ -275,15 +275,24 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
   const isOwnerApproval=gateType==='owner_approval';
   const humanActionUrl=await resolveHumanActionUrl(actionUrl||row.action_url);
   if(await existingParentSubmission(env,row.surface_slug)){await reconcileDuplicateSubmissionGates(env);return null;}
+  const authCapability=isAuth?await env.DB.prepare(`SELECT action_url,auth_mode,challenge_type,automation_state,confidence,evidence,last_verified_at
+    FROM auth_surface_capability WHERE surface_slug=? AND confidence>=95 AND auth_mode='human_bootstrap_session' LIMIT 1`).bind(row.surface_slug).first().catch(()=>null):null;
+  const canonicalAuthProof=Boolean(authCapability&&validHumanActionUrl(authCapability.action_url));
   const previous=await env.DB.prepare('SELECT status FROM human_gate_contract WHERE gate_key=?').bind(humanGateKey('distribution','surface',row.surface_slug)).first();
-  if(previous&&previous.status!=='open')return null;
-  const page=validHumanActionUrl(humanActionUrl)?await text(humanActionUrl,4500):null;
+  if(previous&&previous.status!=='open'&&!canonicalAuthProof)return null;
+  if(previous&&previous.status!=='open'&&canonicalAuthProof){
+    await env.DB.prepare(`UPDATE human_gate_contract SET status='open',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,next_verification_at=NULL,verification_detail=NULL,updated_at=datetime('now') WHERE gate_key=?`)
+      .bind(humanGateKey('distribution','surface',row.surface_slug)).run().catch(()=>{});
+  }
+  const authTarget=canonicalAuthProof?authCapability.action_url:humanActionUrl;
+  const page=validHumanActionUrl(authTarget)?await text(authTarget,4500):null;
   // A sign-in link in a navigation bar is not proof that submission requires login.
-  const authProof=page&&(/<input[^>]+type=["']password["']/i.test(page.body)||/(?:must|need to|required to) (?:be logged|sign|log) in|login required|account required/i.test(page.body));
+  // A high-confidence Auth Plane capability is canonical evidence even when the protected page returns 401 to anonymous fetches.
+  const authProof=canonicalAuthProof||Boolean(page&&(/<input[^>]+type=["']password["']/i.test(page.body)||/(?:must|need to|required to) (?:be logged|sign|log) in|login required|account required/i.test(page.body)));
   const captchaProof=page&&/<(?:div|iframe|input)[^>]+(?:g-recaptcha|h-captcha|cf-turnstile|captcha)/i.test(page.body);
   const humanProof=page&&(captchaProof||HUMAN_BLOCK_RE.test(page.body));
   const manualProof=page&&(ACTION_ROUTE_RE.test(page.url)||MANUAL_ACTION_RE.test(page.body));
-  if(!page||!(isAuth?authProof:(isManual||isOwnerApproval)?manualProof:humanProof)){
+  if((!page&&!canonicalAuthProof)||!(isAuth?authProof:(isManual||isOwnerApproval)?manualProof:humanProof)){
     const detail='Chairman quality hold: no verified, actionable owner-only step on the destination. Engine must research the route and prepare exact instructions.';
     await env.DB.batch([
       env.DB.prepare("UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,updated_at=datetime('now') WHERE surface_slug=?").bind(detail,row.surface_slug),
@@ -292,9 +301,9 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
     ]);
     return null;
   }
-  const finalActionUrl=page.url;
+  const finalActionUrl=canonicalAuthProof?authCapability.action_url:page.url;
   const evidenceDetail=isAuth
-    ?'The destination displays a password form or an explicit login requirement.'
+    ?(canonicalAuthProof?safe(authCapability.evidence,1200):'The destination displays a password form or an explicit login requirement.')
     :isManual
       ?'The destination exposes an exact ToolScout submission/listing route, but no safe automatic adapter was verified.'
       :isOwnerApproval
@@ -302,7 +311,9 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
         :(captchaProof?'The destination displays an interactive CAPTCHA widget.':'The destination explicitly requires a human confirmation or terms step.');
   const humanReason=`${target}: ${evidenceDetail} Owner action is required before autonomous execution can continue.`;
   const instructions=isAuth
-    ?`Open ${finalActionUrl}. Sign in to your ${target} account. Complete the ToolScout submission with the prepared name, website, tagline and description below. If a submission already exists, do not submit again; copy its result URL instead. Return here and mark the step done with that URL. Do not buy promotion or add a reciprocal badge.`
+    ?(canonicalAuthProof
+      ?'Open the secure ToolScout browser session. Sign in or create only the minimum free account. Complete MFA or CAPTCHA yourself if shown. Do not buy promotion or accept optional paid upgrades. When authenticated, press Save session & resume automation.'
+      :`Open ${finalActionUrl}. Sign in to your ${target} account. Complete the ToolScout submission with the prepared name, website, tagline and description below. If a submission already exists, do not submit again; copy its result URL instead. Return here and mark the step done with that URL. Do not buy promotion or add a reciprocal badge.`)
     :isOwnerApproval
       ?`Open ${finalActionUrl}. Review the exact action requested for ${target}. Proceed only if it is a legitimate ToolScout distribution step and does not require paid promotion, reciprocal badges or unsupported claims. Complete the approved step once, then return here and mark it done with the result URL if available.`
       :isManual
@@ -317,7 +328,7 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
     reason:humanReason,
     instructions,
     actionUrl:finalActionUrl,
-    resolutionMode:'verify_publication',
+    resolutionMode:isAuth&&canonicalAuthProof?'auth_session_saved':'verify_publication',
     payload:{...humanGatePayload(),gate_evidence:{url:finalActionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail}},
     verificationUrl
   });
