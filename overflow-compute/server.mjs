@@ -1,5 +1,5 @@
 import http from 'node:http';
-import {runResearchBatch} from './research-core.mjs';
+import {runResearchBatch,runtimeStats} from './research-core.mjs';
 
 const PORT=Number(process.env.PORT||10000);
 const TOOLSCOUT_BASE_URL=String(process.env.TOOLSCOUT_BASE_URL||'https://trytoolscout.org').replace(/\/$/,'');
@@ -37,7 +37,7 @@ async function runBatch(batchId){
 
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
-  if(req.method==='GET'&&url.pathname==='/health')return json(res,200,{ok:true,service:'toolscout-overflow',runtime:'node',activeBatches:active.size,maxConcurrency:MAX_CONCURRENCY});
+  if(req.method==='GET'&&url.pathname==='/health')return json(res,200,{ok:true,service:'toolscout-overflow',runtime:'node',activeBatches:active.size,maxConcurrency:MAX_CONCURRENCY,...runtimeStats()});
   const m=url.pathname.match(/^\/tick\/(cob_[0-9a-f-]{36})$/i);
   if(req.method==='POST'&&m){
     if(!rateAllowed())return json(res,429,{ok:false,error:'rate_limited'});
