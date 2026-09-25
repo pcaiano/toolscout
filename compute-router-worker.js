@@ -120,12 +120,12 @@ async function enqueueDistributionResearch(env){
     if(remaining<=0||!isHttp(row.action_url))break;
     const urlHash=await shortHash(row.action_url);
     const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score)};
-    enqueued+=await enqueueJob(env,{jobKey:`route:${row.surface_slug}:${urlHash}`,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:num(row.distribution_score),payload});
-    remaining=Math.max(0,remaining-1);
+    const routeAdded=await enqueueJob(env,{jobKey:`route:${row.surface_slug}:${urlHash}`,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:num(row.distribution_score),payload});
+    enqueued+=routeAdded;remaining=Math.max(0,remaining-routeAdded);
     if(remaining<=0)break;
     if(num(row.distribution_score)>=55){
-      enqueued+=await enqueueJob(env,{jobKey:`contact:${row.surface_slug}:${urlHash}`,jobType:'contact_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:Math.max(0,num(row.distribution_score)-5),payload});
-      remaining=Math.max(0,remaining-1);
+      const contactAdded=await enqueueJob(env,{jobKey:`contact:${row.surface_slug}:${urlHash}`,jobType:'contact_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:Math.max(0,num(row.distribution_score)-5),payload});
+      enqueued+=contactAdded;remaining=Math.max(0,remaining-contactAdded);
     }
   }
   return{enqueued,remaining};
@@ -203,7 +203,7 @@ async function applyDistributionResult(env,job,result){
   const slug=job.subject_key||payload.surfaceSlug;
   if(!slug)return{applied:false};
   const routes=Array.isArray(result?.routes)?result.routes:[];
-  const best=routes.find(r=>r?.url&&sameHostRoute(payload.url,r.url)&&['submission','auth','captcha','contact'].includes(String(r.kind||'')))||null;
+  const best=routes.find(r=>r?.url&&sameHostRoute(payload.url,r.url)&&['submission','auth','captcha'].includes(String(r.kind||'')))||null;
   const detail=best
     ?`External overflow research discovered a ${best.kind} route. Canonical Cloudflare validation is queued before any execution.`
     :`External overflow research completed without a verified submission route. Canonical engines may continue alternate-route research.`;
