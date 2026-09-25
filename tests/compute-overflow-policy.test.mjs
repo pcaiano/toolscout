@@ -12,6 +12,8 @@ assert.match(router,/DAILY_JOB_BUDGET=1500/);
 assert.match(router,/BATCH_SIZE=100/);
 assert.match(router,/MAX_ACTIVE_BATCHES=2/);
 assert.match(router,/githubActionsRole:'disabled_until_october'/);
+assert.match(router,/d1ReadModel:'single_row_metrics_no_job_table_scans'/);
+assert.match(router,/if\(!env\.OVERFLOW_COMPUTE_URL\)return\{ok:true,status:'awaiting_external_runtime'\}/);
 assert.match(router,/capability-secured|completion_token_hash|invalid_completion_capability/);
 assert.match(router,/distribution_route_research/);
 assert.match(router,/contact_route_research/);
