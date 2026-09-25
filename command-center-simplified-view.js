@@ -197,7 +197,7 @@ function brain(){
  const activity=Array.isArray(t.growthActivity)?t.growthActivity.slice(0,7):[];
  if(activity.length)body.push('<div class="section"><div class="sectionTitle">Latest engine activity</div>'+activity.map(x=>row(human((x.engine||'engine')+' - '+(x.mission||'cycle')),human(x.status||'unknown'),dt(x.at)+(x.detail?' - '+human(x.detail):''))).join('')+'</div>');
  const actions=Array.isArray(t.growthActions)?t.growthActions.slice(0,6):[];
- if(actions.length)body.push('<div class="section"><div class="sectionTitle">Latest external action pipeline</div>'+actions.map(x=>row(human((x.engine||'growth')+' - '+(x.channel||'action')),human(x.status||'unknown'),dt(x.at)+' - '+human(x.opportunityKey||x.id||''))).join('')+'</div>');
+ if(actions.length)body.push('<div class="section"><div class="sectionTitle">Latest external action pipeline · 6 most recent</div>'+actions.map(x=>row(human((x.engine||'growth')+' - '+(x.channel||'action')),human(x.status||'unknown'),dt(x.at)+' - '+human(x.opportunityKey||x.id||''))).join('')+'<div class="sourceLine">This is a recent activity sample, not the size of the executable backlog or the daily capacity.</div></div>');
  const frontier=Array.isArray(data?.stats?.growthOps?.autonomousGrowth?.rnd_frontier_items)?data.stats.growthOps.autonomousGrowth.rnd_frontier_items.slice(0,6):[];
  if(frontier.length)body.push('<div class="section"><div class="sectionTitle">Growth R&D - new acquisition ideas</div>'+
    frontier.map(x=>'<div class="task" style="margin-top:8px"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id||'Acquisition idea')+'</div><div class="taskMeta">'+esc(human(x.implementation_mode||'candidate'))+' - automation '+n(x.automation_score)+'/100 - semi-passive '+n(x.semi_passive_score)+'/100</div></div>'+pill(human(x.status||'candidate'),'warn')+'</div><div class="taskText"><b>Mechanism:</b> '+esc(x.mechanism||'')+'</div><div class="taskText"><b>Next:</b> '+esc(x.next_step||'Research and bind a safe executor.')+'</div><div class="taskText"><b>Signal:</b> '+esc(human(x.expected_signal||'traffic impact'))+'</div></div>').join('')+
@@ -212,10 +212,14 @@ function throughput(){
  const emailSent=Number(g.emailSent24h||0),emailTarget=Number(g.emailTarget24h||50),emailMax=Number(g.emailMax24h||60);
  const supply=c.contactSupply||{},readyContacts=Number(supply.readyEmail??g.contactSupplyReadyEmail??g.emailReadyContacts??0),supplyTarget=Number(supply.targetReady??g.contactSupplyTarget??200),supplyMin=Number(supply.minReady??g.contactSupplyMin??150),readyRoutes=Number(supply.readyRoute??g.contactSupplyReadyRoute??0),cooldown=Number(supply.cooldown??g.contactSupplyCooldown??0),researching=Number(supply.researching??g.contactSupplyResearching??0),unresolved=Number(supply.unresolved??g.contactSupplyUnresolved??0),apolloEligible=Number(supply.apolloEligible??g.contactSupplyApolloEligible??0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
  const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
+ const batchSize=Number(c.batchSize||25),queued=Number(c.queued||0);
+ const now=new Date(),utcHours=now.getUTCHours()+now.getUTCMinutes()/60,expectedExecPace=execMax*(utcHours/24);
+ const machineSupplyUnderfed=String(c.status||'')==='configured'&&execMax>0&&expectedExecPace>=4&&execUsed<Math.max(2,expectedExecPace*0.25)&&queued<=batchSize*2;
  let bottleneck='No capacity bottleneck proven.';
  let bottleneckMeta='Business outcomes remain the constraint to scale decisions.';
- if(readyContacts<supplyMin){bottleneck='Qualified email contact supply';bottleneckMeta=n(readyContacts)+' / '+n(supplyTarget)+' unique-domain email buffer · minimum '+n(supplyMin)+'.'}
- else if(Number(c.queued||0)>Number(c.batchSize||25)*4){bottleneck='External compute backlog';bottleneckMeta=n(c.queued)+' jobs queued · '+n(c.activeBatches)+' active batches.'}
+ if(queued>batchSize*4){bottleneck='External compute backlog';bottleneckMeta=n(queued)+' jobs queued · '+n(c.activeBatches)+' active batches.'}
+ else if(machineSupplyUnderfed){bottleneck='Machine-safe action supply';bottleneckMeta=n(execUsed)+' / '+n(execMax)+' actions used today versus '+n(Math.round(expectedExecPace))+' at linear daily pace. Discovery and qualification must keep Render fed.'}
+ else if(readyContacts<supplyMin){bottleneck='Qualified email contact supply';bottleneckMeta=n(readyContacts)+' / '+n(supplyTarget)+' unique-domain email buffer · minimum '+n(supplyMin)+'.'}
  else if(authBootstrap>0&&authActive===0){bottleneck='Authentication bootstrap';bottleneckMeta=n(authBootstrap)+' reusable session(s) need one-time owner login/challenge.'}
  document.getElementById('throughputMeta').textContent='Updated '+dt(t.generatedAt)+' · capacity is not a success KPI';
  document.getElementById('throughputBody').innerHTML=
@@ -231,6 +235,7 @@ function throughput(){
    '<div class="section"><div class="sectionTitle">Execution architecture</div>'+
      row('Control plane','Cloudflare','Priorities, policy, leases, canonical D1 state and final verification')+
      row('Research + machine execution',human(c.status||'Unavailable'),(c.providerUrl||'Render overflow')+' · batch '+n(c.batchSize)+' · max '+n(c.maxActiveBatches)+' active')+
+     row('Research retry cadence',n(c.distributionResearchBucketHours||6)+'h routes · '+n(c.roleEmailResearchBucketHours||24)+'h contacts','Completed research can be revisited; unique job keys no longer make a surface permanently one-shot')+
      row('Email sender',human(g.emailDeliveryMode||'Unavailable'),'Target '+n(emailTarget)+' · max '+n(emailMax)+' / rolling 24h · reputation boundary retained')+
      row('Contact Supply Engine',human(supply.status||'active'),n(readyContacts)+' ready emails · '+n(readyRoutes)+' contact routes · '+human(supply.apolloStatus||g.contactSupplyApolloStatus||'provider unavailable'))+
      row('Auth Plane',human(a.status||'Unavailable'),a.brokerRuntime?.ok?'Chromium broker healthy · CAPTCHA/MFA human-only':'Broker health '+human(a.brokerRuntime?.error||'unavailable'))+
