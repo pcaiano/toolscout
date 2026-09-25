@@ -339,7 +339,12 @@ async function materializeRouteActions(env){
     LIMIT ?`).bind(MAX_ROUTE_CONTENT_ATTEMPTS,MAX_ROUTE_ACTIONS_PER_CYCLE).all();
   let queued=0,synthetic=0,content=0,retried=0;
   for(const row of q.results||[]){
-    const mode=routeMode(row.route_type),hash=await routeHash(row.route_id),oppSlug=safe(row.opportunity_slug||`route-${hash}`,100),next=routeNextAction(row.route_type);
+    const mode=routeMode(row.route_type);
+    const canonicalRouteIdentity=`${String(row.domain||'').toLowerCase().replace(/^www\\./,'')}|${String(row.route_type||'')}|${String(row.route_url||'')}`;
+    const hash=await routeHash(mode==='autonomous_qualification'?canonicalRouteIdentity:row.route_id);
+    const legacyOpportunitySlug=safe(row.opportunity_slug||'',100);
+    const oppSlug=safe(mode==='autonomous_qualification'?`route-${hash}`:(legacyOpportunitySlug||`route-${hash}`),100);
+    const next=routeNextAction(row.route_type);
     const previous=String(row.action_status||'');
     const write=await env.DB.prepare(`INSERT INTO distribution_contact_route_actions(route_id,surface_slug,route_type,route_url,execution_mode,status,opportunity_slug,attempts,last_result,next_action,created_at,updated_at)
       VALUES(?,?,?,?,?,'queued',?,0,NULL,?,datetime('now'),datetime('now'))
@@ -371,6 +376,23 @@ async function materializeRouteActions(env){
            OR distribution_opportunities.next_action IS NOT excluded.next_action`)
         .bind(oppSlug,`${safe(row.surface_name||row.domain,150)} via ${row.route_type}`,score,row.route_url,next).run();
       if(Number(r?.meta?.changes||r?.changes||0)>0)synthetic++;
+      await env.DB.prepare(`UPDATE distribution_contact_route_actions
+        SET opportunity_slug=?,updated_at=datetime('now')
+        WHERE execution_mode='autonomous_qualification' AND route_url=? AND opportunity_slug IS NOT ?`)
+        .bind(oppSlug,row.route_url,oppSlug).run().catch(()=>{});
+      const duplicateReason=`Duplicate publisher contact route merged into canonical opportunity ${oppSlug}; keep one autonomous qualification path per destination.`;
+      await env.DB.prepare(`UPDATE distribution_opportunities
+        SET status='skipped',human_required=0,next_action=?,updated_at=datetime('now')
+        WHERE surface_type='publisher_contact_route' AND action_url=? AND surface_slug<>?
+          AND status NOT IN ('submitted','pending_review','scheduled','live','verified')`)
+        .bind(duplicateReason,row.route_url,oppSlug).run().catch(()=>{});
+      if(legacyOpportunitySlug&&legacyOpportunitySlug!==oppSlug){
+        await env.DB.prepare(`UPDATE distribution_opportunities
+          SET status='skipped',human_required=0,next_action=?,updated_at=datetime('now')
+          WHERE surface_slug=? AND surface_type='publisher_contact_route'
+            AND status NOT IN ('submitted','pending_review','scheduled','live','verified')`)
+          .bind(duplicateReason,legacyOpportunitySlug).run().catch(()=>{});
+      }
     }else{
       await env.DB.prepare(`INSERT INTO growth_action_events(action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at)
         VALUES(?,?,?,?,?,'prepared',datetime('now'),datetime('now'))
