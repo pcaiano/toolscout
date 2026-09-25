@@ -17,6 +17,9 @@ const ACQUISITION_SURGE_MIN_24H=0;
 const ACQUISITION_SURGE_TARGET_24H=50;
 const ACQUISITION_SURGE_MAX_24H=60;
 const MACHINE_SAFE_EXTERNAL_MAX_24H=300;
+const RESEARCH_EXTERNAL_MAX_24H=1500;
+const EMAIL_TARGET_24H=50;
+const EMAIL_MAX_24H=60;
 let factsCache={at:0,value:null,promise:null};
 async function facts(env){
   const [oauth,authority,content,distributionRuns]=await Promise.all([
@@ -112,7 +115,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,seRankingBacklinkTruth]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,seRankingBacklinkTruth]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -167,6 +170,26 @@ async function buildCommandCenterBusinessTruth(request,env){
       FROM growth_execution_contract
       WHERE updated_at>=datetime('now','-12 hours') AND status IN ('pending','claimed','attempted','verified','human_required')
       ORDER BY updated_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM distribution_events
+        WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent')
+          AND status='completed' AND created_at>=datetime('now','-24 hours')) sent24,
+      (SELECT COUNT(*) FROM distribution_vendor_amplification
+        WHERE public_dispatch_leased_at>=datetime('now','-20 minutes') AND status<>'sent')+
+      (SELECT COUNT(*) FROM distribution_network_outreach
+        WHERE public_dispatch_leased_at>=datetime('now','-20 minutes') AND status NOT IN ('sent','adopted')) leased_recent,
+      (SELECT COUNT(*) FROM distribution_vendor_amplification v
+        WHERE v.status='contact_found' AND v.contact_method='public_role_email' AND v.contact_email IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM distribution_vendor_amplification prior
+            WHERE prior.status='sent' AND prior.outreach_sent_at>=datetime('now','-30 days')
+              AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
+          ))+
+      (SELECT COUNT(*) FROM distribution_network_outreach
+        WHERE status='contact_found' AND contact_email IS NOT NULL) ready_contacts,
+      (SELECT COUNT(*) FROM distribution_vendor_amplification WHERE status='reputation_quarantine')+
+      (SELECT COUNT(*) FROM distribution_network_outreach WHERE status='reputation_quarantine') reputation_quarantine`).first().catch(()=>({sent24:0,leased_recent:0,ready_contacts:0,reputation_quarantine:0})),
+    env.DB.prepare(`SELECT value,updated_at FROM external_runtime_config WHERE key='make_sender_webhook_url' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]})
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
@@ -301,7 +324,6 @@ async function buildCommandCenterBusinessTruth(request,env){
   if(truthNum(architecture.open_incidents)>0){currentGrowthStatus='critical';currentGrowthDirective='repair_architecture_and_continue_bounded_acquisition'}
   else if(contract.missingExecutors>0||contract.stalled>0){currentGrowthStatus='critical';currentGrowthDirective='repair_execution_contract_and_continue_bounded_acquisition'}
   else if(truthNum(growth.attributed_humans_7d)>0){currentGrowthStatus='working';currentGrowthDirective='scale_proven_human_sources_and_existing_search_demand'}
-  else if(externalExecutions24h>=ACQUISITION_SURGE_MAX_24H){currentGrowthStatus='ineffective';currentGrowthDirective='stop_repetitive_activity_and_rotate_to_competitive_acquisition_gap'}
   return {
     ok:true,
     version:'command-center-business-truth-v3',
@@ -326,9 +348,22 @@ async function buildCommandCenterBusinessTruth(request,env){
       acquisitionMin24h:ACQUISITION_SURGE_MIN_24H,
       acquisitionTarget24h:ACQUISITION_SURGE_TARGET_24H,
       acquisitionMax24h:ACQUISITION_SURGE_MAX_24H,
-      reputationSensitiveActionMax24h:ACQUISITION_SURGE_MAX_24H,
+      emailTarget24h:EMAIL_TARGET_24H,
+      emailMax24h:EMAIL_MAX_24H,
+      emailSent24h:truthNum(emailCapacity?.sent24),
+      emailLeasedRecent:truthNum(emailCapacity?.leased_recent),
+      emailReadyContacts:truthNum(emailCapacity?.ready_contacts),
+      emailReputationQuarantine:truthNum(emailCapacity?.reputation_quarantine),
+      emailDeliveryMode:makeSenderConfig?.value?'instant_webhook_plus_3h_fallback':'3h_polling_fallback',
+      emailPushConfigured:Boolean(makeSenderConfig?.value),
+      emailPushConfiguredAt:makeSenderConfig?.updated_at||null,
+      reputationSensitiveActionMax24h:EMAIL_MAX_24H,
       machineSafeExternalActionMax24h:MACHINE_SAFE_EXTERNAL_MAX_24H,
+      researchExternalJobMax24h:RESEARCH_EXTERNAL_MAX_24H,
       actionPlane:'cloudflare_authorize_external_execute_cloudflare_verify',
+      computePlane:'render_external_overflow',
+      emailPlane:'cloudflare_authorize_make_send_cloudflare_confirm',
+      authPlane:'cloudflare_vault_render_browser_human_challenge_resume',
       activityIsNotSuccess:true,
       channelAllocationPct:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
       canonicalAcquisitionSource:'ga4',
