@@ -397,6 +397,79 @@ async function applyContactResult(env,job,result){
   }
   return{applied,slug};
 }
+
+function safeSameHostEvidence(endpoint,value){
+  if(!value)return null;
+  try{
+    const u=new URL(String(value));if(u.protocol!=='https:'||!sameHostRoute(endpoint,u.href))return null;return u.href;
+  }catch{return null}
+}
+async function currentAdapterAuthorization(env,slug,payload){
+  const row=await env.DB.prepare(`SELECT a.endpoint,a.method,a.content_type,a.policy_state,a.confidence,
+      COALESCE(c.cost_amount,0) cost_amount,o.status opportunity_status
+    FROM distribution_auto_adapters a
+    JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
+    LEFT JOIN distribution_surface_costs c ON c.surface_slug=a.surface_slug
+    WHERE a.surface_slug=? LIMIT 1`).bind(slug).first().catch(()=>null);
+  if(!row)return{ok:false,reason:'adapter_missing'};
+  if(row.policy_state!=='verified'||num(row.confidence)<95)return{ok:false,reason:'adapter_no_longer_verified'};
+  if(num(row.cost_amount)>0)return{ok:false,reason:'paid_route_not_authorized'};
+  if(String(row.endpoint||'')!==String(payload.endpoint||''))return{ok:false,reason:'endpoint_changed'};
+  if(String(row.method||'POST').toUpperCase()!==String(payload.method||'POST').toUpperCase())return{ok:false,reason:'method_changed'};
+  if(String(row.content_type||'application/json').toLowerCase()!==String(payload.contentType||'application/json').toLowerCase())return{ok:false,reason:'content_type_changed'};
+  return{ok:true,row};
+}
+async function applyAuthorizedActionResult(env,job,result){
+  let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
+  const slug=job.subject_key||payload.surfaceSlug,submissionId=payload.submissionId;
+  if(!slug||!submissionId)return{applied:false,reason:'missing_action_identity'};
+  const auth=await currentAdapterAuthorization(env,slug,payload);
+  if(!auth.ok){
+    await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`).bind(`authorization_recheck:${auth.reason}`,submissionId).run().catch(()=>{});
+    return{applied:false,reason:auth.reason};
+  }
+  const httpStatus=num(result?.httpStatus);
+  const accepted=result?.ok===true&&httpStatus>=200&&httpStatus<300;
+  if(accepted){
+    const evidence=safeSameHostEvidence(payload.endpoint,result?.evidenceUrl)||safeSameHostEvidence(payload.endpoint,result?.finalUrl)||payload.verificationEndpoint||payload.publicUrl||payload.endpoint;
+    await env.DB.prepare(`UPDATE distribution_submissions SET status='submitted',attempts=attempts+1,last_attempt_at=datetime('now'),submitted_at=COALESCE(submitted_at,datetime('now')),response_url=?,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(evidence,submissionId).run();
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='submitted',next_action='External execution plane completed an authorized machine-safe submission. Verification remains canonical before placement is counted.',updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live')`).bind(slug).run();
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at)
+      VALUES(?,?, 'external_authorized_submission','completed',?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`extsub_${crypto.randomUUID()}`,slug,payload.endpoint,evidence,`Render executed a Cloudflare-authorized verified free adapter. HTTP ${httpStatus}. Cloudflare retained decision and verification authority.`).run().catch(()=>{});
+    return{applied:true,accepted:true,evidence};
+  }
+  await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`)
+    .bind(`external_http_${httpStatus||0}:${safe(result?.error||'submission_failed',300)}`,submissionId).run().catch(()=>{});
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,detail,observed_at,created_at)
+    VALUES(?,?, 'external_authorized_submission','failed',?,?,datetime('now'),datetime('now'))`)
+    .bind(`extsubfail_${crypto.randomUUID()}`,slug,payload.endpoint,`Authorized external submission failed. HTTP ${httpStatus||0}: ${safe(result?.error||'unknown',300)}`).run().catch(()=>{});
+  return{applied:true,accepted:false};
+}
+async function applyAuthorizedVerificationResult(env,job,result){
+  let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
+  const slug=job.subject_key||payload.surfaceSlug,submissionId=payload.submissionId,target=payload.targetUrl;
+  if(!slug||!submissionId||!isHttp(target))return{applied:false,reason:'missing_verification_identity'};
+  const row=await env.DB.prepare(`SELECT ds.status,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url
+    FROM distribution_submissions ds JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug
+    WHERE ds.submission_id=? AND ds.surface_slug=? LIMIT 1`).bind(submissionId,slug).first().catch(()=>null);
+  if(!row)return{applied:false,reason:'submission_missing'};
+  const allowed=[row.response_url,row.verification_endpoint,row.public_url].filter(Boolean);
+  if(!allowed.some(x=>String(x)===String(target)))return{applied:false,reason:'verification_target_changed'};
+  const httpStatus=num(result?.httpStatus);
+  if(result?.ok===true&&httpStatus>=200&&httpStatus<300){
+    const publicUrl=safeSameHostEvidence(target,result?.finalUrl)||target;
+    await env.DB.prepare(`UPDATE distribution_submissions SET response_url=?,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(publicUrl,submissionId).run();
+    await env.DB.prepare(`UPDATE distribution_auto_adapters SET public_url=COALESCE(public_url,?),verification_endpoint=COALESCE(verification_endpoint,?),updated_at=datetime('now') WHERE surface_slug=?`).bind(publicUrl,target,slug).run();
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='verified',live_url=COALESCE(live_url,?),last_checked_at=datetime('now'),next_action='External verification confirmed publication. Continue attribution and performance measurement.',updated_at=datetime('now') WHERE surface_slug=?`).bind(publicUrl,slug).run();
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,destination_url,detail,observed_at,created_at)
+      VALUES(?,?, 'external_publication_verification','verified',?,?,datetime('now'),datetime('now'))`)
+      .bind(`extverify_${crypto.randomUUID()}`,slug,publicUrl,`Render performed the network check; Cloudflare validated the authorized verification target and recorded the public placement. HTTP ${httpStatus}.`).run().catch(()=>{});
+    return{applied:true,verified:true,publicUrl};
+  }
+  await env.DB.prepare(`UPDATE distribution_opportunities SET last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(slug).run().catch(()=>{});
+  return{applied:true,verified:false,httpStatus};
+}
 async function completeBatch(request,env,ctx,batchId){
   await ensureSchema(env);
   const batch=await env.DB.prepare(`SELECT batch_id,status,completion_token_hash FROM compute_overflow_batches WHERE batch_id=? LIMIT 1`).bind(batchId).first();
@@ -412,7 +485,9 @@ async function completeBatch(request,env,ctx,batchId){
     const job=await env.DB.prepare(`SELECT job_id,job_type,subject_key,payload_json FROM compute_overflow_jobs WHERE job_id=? AND batch_id=? AND status='leased' LIMIT 1`).bind(jobId,batchId).first();
     if(!job)continue;
     const ok=result?.ok!==false;
-    if(ok){
+    if(job.job_type==='authorized_http_action'){const a=await applyAuthorizedActionResult(env,job,result);applied+=a.applied?1:0}
+    else if(job.job_type==='authorized_verification'){const a=await applyAuthorizedVerificationResult(env,job,result);applied+=a.applied?1:0}
+    else if(ok){
       if(job.job_type==='distribution_route_research'){const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0}
       else if(job.job_type==='contact_route_research'){const a=await applyContactResult(env,job,result);applied+=num(a.applied)}
     }
@@ -429,7 +504,7 @@ async function completeBatch(request,env,ctx,batchId){
     .bind(JSON.stringify({completed,failed,applied,missing:num(unresolved?.n)}),batchId).run();
   const missing=num(unresolved?.n);
   await metricDelta(env,{leased:-missing,queued:missing,activeBatches:-1,completedBatches:1,lastCompleted:true});
-  await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} successful and ${failed} failed research job(s); ${applied} canonical records were advanced.`,{batchId});
+  await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} successful and ${failed} failed job(s); ${applied} canonical records were advanced across research and authorized execution.`,{batchId});
   if(ctx&&env.ADMIN_TOKEN&&applied>0){
     const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
     const refresh=Promise.allSettled([
