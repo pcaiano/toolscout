@@ -152,22 +152,26 @@ async function researchRoleEmail(job){
   if(!validPublicHttp(source)||!expectedDomain)return{ok:false,error:'invalid_email_discovery_target'};
   const first=await fetchPage(source);
   if(!first?.ok)return{ok:false,error:'source_unreachable',httpStatus:first?.status||0,targetUrl:source};
+  const homepageEmails=publicRoleEmails(first.html,first.url,expectedDomain);
+  if(homepageEmails.length)return{ok:true,targetUrl:source,finalUrl:first.url,httpStatus:first.status,roleEmails:homepageEmails,pagesFetched:1,cacheHits:Number(Boolean(first.cacheHit)),classification:'public_role_email_found'};
   const candidates=[
-    first.url,
     ...extractLinks(first.html,first.url).filter(x=>CONTACT_RE.test(x.text+' '+x.url)).map(x=>x.url),
     ...['/contact','/contact-us','/about','/team','/press','/media','/partners','/partnerships','/submit'].map(path=>absolute(path,first.url)).filter(Boolean)
   ];
   const urls=[...new Set(candidates)].filter(x=>x&&sameHost(first.url,x)).slice(0,10);
-  const pages=await mapLimit(urls,5,async url=>url===first.url?first:await fetchPage(url));
-  const roleEmails=[];
-  const seen=new Set();
-  for(const page of pages){
-    if(!page?.ok)continue;
-    for(const item of publicRoleEmails(page.html,page.url,expectedDomain)){
-      if(seen.has(item.email))continue;seen.add(item.email);roleEmails.push(item);
+  const roleEmails=[];const seen=new Set();let pagesFetched=1,cacheHits=Number(Boolean(first.cacheHit));
+  for(let i=0;i<urls.length;i+=4){
+    const pages=await mapLimit(urls.slice(i,i+4),4,fetchPage);
+    for(const page of pages){
+      if(!page?.ok)continue;
+      pagesFetched++;cacheHits+=Number(Boolean(page.cacheHit));
+      for(const item of publicRoleEmails(page.html,page.url,expectedDomain)){
+        if(seen.has(item.email))continue;seen.add(item.email);roleEmails.push(item);
+      }
     }
+    if(roleEmails.length)break;
   }
-  return{ok:true,targetUrl:source,finalUrl:first.url,httpStatus:first.status,roleEmails:roleEmails.slice(0,12),pagesFetched:pages.filter(x=>x?.ok).length,cacheHits:pages.filter(x=>x?.cacheHit).length,classification:roleEmails.length?'public_role_email_found':'no_public_role_email_found'};
+  return{ok:true,targetUrl:source,finalUrl:first.url,httpStatus:first.status,roleEmails:roleEmails.slice(0,12),pagesFetched,cacheHits,classification:roleEmails.length?'public_role_email_found':'no_public_role_email_found'};
 }
 async function researchDistribution(job){
   const source=job?.payload?.url;
