@@ -34,6 +34,29 @@ async function decryptState(env,domain,row){
 async function config(env,key){
   try{const row=await env.DB.prepare('SELECT value FROM external_runtime_config WHERE key=? LIMIT 1').bind(key).first();return String(row?.value||'')}catch{return''}
 }
+async function configRow(env,key){
+  try{return await env.DB.prepare('SELECT value,updated_at FROM external_runtime_config WHERE key=? LIMIT 1').bind(key).first()}catch{return null}
+}
+export async function refreshAuthBrokerRuntimeHealth(env,{force=false}={}){
+  const existing=await configRow(env,'auth_broker_runtime_health');
+  if(!force&&existing?.updated_at&&Date.now()-Date.parse(String(existing.updated_at).replace(' ','T')+'Z')<30*60*1000){
+    try{return JSON.parse(existing.value||'{}')}catch{}
+  }
+  const brokerUrl=(await config(env,'auth_broker_url')).replace(/\/$/,'');
+  const sharedSecret=await config(env,'auth_broker_shared_secret');
+  if(!httpsUrl(brokerUrl)||sharedSecret.length<32)return{ok:false,error:'auth_broker_not_configured'};
+  let result;
+  try{
+    const response=await fetch(brokerUrl+'/browser-health',{headers:{Authorization:'Bearer '+sharedSecret,'User-Agent':'ToolScout-Auth-Plane/1.0'},signal:AbortSignal.timeout(30000)});
+    let data={};try{data=await response.json()}catch{}
+    result={ok:Boolean(response.ok&&data.ok),httpStatus:response.status,browser:data.browser||null,version:data.version||null,checkedAt:new Date().toISOString(),error:response.ok?null:(data.error||'browser_health_failed')};
+  }catch(error){
+    result={ok:false,httpStatus:0,browser:null,version:null,checkedAt:new Date().toISOString(),error:safe(error?.message||error,300)};
+  }
+  await env.DB.prepare(`INSERT INTO external_runtime_config(key,value,updated_at) VALUES('auth_broker_runtime_health',?,datetime('now'))
+    ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=datetime('now')`).bind(JSON.stringify(result)).run().catch(()=>{});
+  return result;
+}
 export async function ensureAuthPlaneSchema(env){
   if(schemaReady)return schemaReady;
   schemaReady=env.DB.batch([
@@ -129,13 +152,17 @@ export async function classifyAuthBacklog(env,{limit=120}={}){
 async function vaultRow(env,domain){await ensureAuthPlaneSchema(env);return env.DB.prepare(`SELECT * FROM auth_session_vault WHERE domain=? AND status='active' AND (expires_at IS NULL OR expires_at>datetime('now')) LIMIT 1`).bind(domain).first().catch(()=>null)}
 export async function authPlaneHealth(env){
   await ensureAuthPlaneSchema(env);
-  const q=await env.DB.prepare(`SELECT
-    (SELECT COUNT(*) FROM auth_surface_capability) capabilities,
-    (SELECT COUNT(*) FROM auth_surface_capability WHERE automation_state='human_bootstrap_required') bootstrap_required,
-    (SELECT COUNT(*) FROM auth_surface_capability WHERE automation_state IN ('authenticated','route_validated')) authenticated,
-    (SELECT COUNT(*) FROM auth_session_vault WHERE status='active' AND (expires_at IS NULL OR expires_at>datetime('now'))) active_sessions,
-    (SELECT COUNT(*) FROM auth_handoff WHERE status IN ('starting','open') AND expires_at>datetime('now')) open_handoffs`).first().catch(()=>({}));
-  return{ok:true,status:(await config(env,'auth_broker_url'))?'configured':'awaiting_broker',capabilities:num(q?.capabilities),bootstrapRequired:num(q?.bootstrap_required),authenticated:num(q?.authenticated),activeSessions:num(q?.active_sessions),openHandoffs:num(q?.open_handoffs),captchaPolicy:'human_only_no_bypass',credentialStorage:'no_passwords_session_state_aes_gcm'};
+  const [q,runtimeRow]=await Promise.all([
+    env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM auth_surface_capability) capabilities,
+      (SELECT COUNT(*) FROM auth_surface_capability WHERE automation_state='human_bootstrap_required') bootstrap_required,
+      (SELECT COUNT(*) FROM auth_surface_capability WHERE automation_state IN ('authenticated','route_validated')) authenticated,
+      (SELECT COUNT(*) FROM auth_session_vault WHERE status='active' AND (expires_at IS NULL OR expires_at>datetime('now'))) active_sessions,
+      (SELECT COUNT(*) FROM auth_handoff WHERE status IN ('starting','open') AND expires_at>datetime('now')) open_handoffs`).first().catch(()=>({})),
+    configRow(env,'auth_broker_runtime_health')
+  ]);
+  let brokerRuntime=null;try{brokerRuntime=JSON.parse(runtimeRow?.value||'null')}catch{}
+  return{ok:true,status:(await config(env,'auth_broker_url'))?'configured':'awaiting_broker',capabilities:num(q?.capabilities),bootstrapRequired:num(q?.bootstrap_required),authenticated:num(q?.authenticated),activeSessions:num(q?.active_sessions),openHandoffs:num(q?.open_handoffs),brokerRuntime,brokerRuntimeUpdatedAt:runtimeRow?.updated_at||null,captchaPolicy:'human_only_no_bypass',credentialStorage:'no_passwords_session_state_aes_gcm'};
 }
 function sessionExpiry(state){
   const now=Math.floor(Date.now()/1000),max=now+30*86400;
