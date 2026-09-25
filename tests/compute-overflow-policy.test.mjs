@@ -9,8 +9,9 @@ assert.match(wrangler,/crons\s*=\s*\["\*\/5 \* \* \* \*"/);
 
 const router=read('compute-router-worker.js');
 assert.match(router,/DAILY_JOB_BUDGET=1500/);
-assert.match(router,/BATCH_SIZE=100/);
+assert.match(router,/BATCH_SIZE=25/);
 assert.match(router,/MAX_ACTIVE_BATCHES=2/);
+assert.match(router,/BATCH_TIMEOUT_MINUTES=3/);
 assert.match(router,/githubActionsRole:'disabled_until_october'/);
 assert.match(router,/d1ReadModel:'single_row_metrics_no_job_table_scans'/);
 assert.match(router,/if\(!env\.OVERFLOW_COMPUTE_URL\)return\{ok:true,status:'awaiting_external_runtime'\}/);
