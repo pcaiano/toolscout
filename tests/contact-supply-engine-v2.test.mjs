@@ -12,7 +12,7 @@ assert.match(router,/CREATE TABLE IF NOT EXISTS contact_supply_metrics/);
 assert.match(router,/contact_supply_public_research/);
 assert.match(router,/enqueueContactSupplyResearch/);
 assert.match(router,/seedContactSupply/);
-assert.match(router,/source_type='catalog_vendor'/);
+assert.match(router,/sourceType:'catalog_vendor'/);
 assert.match(router,/source_type:'distribution_surface'/);
 assert.match(router,/status='ready_email'/);
 assert.match(router,/status='ready_route'/);
