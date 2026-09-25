@@ -148,6 +148,158 @@ async function ensureHotIndexes(env){
   ]).catch(error=>{hotIndexesReady=null;throw error});
   return hotIndexesReady;
 }
+function contactDomain(value){
+  try{
+    const u=new URL(String(value||'').startsWith('http')?String(value):'https://'+String(value||''));
+    return u.hostname.toLowerCase().replace(/^www\./,'');
+  }catch{return''}
+}
+function contactDomainEligible(domain){
+  const d=String(domain||'').toLowerCase().replace(/^www\./,'');
+  if(!d||d==='trytoolscout.org'||d.endsWith('.trytoolscout.org'))return false;
+  if(['x.com','twitter.com','linkedin.com','facebook.com','instagram.com','youtube.com','tiktok.com','github.com','bsky.app','google.com'].includes(d))return false;
+  return !/^(api|cdn|static|assets?|img|images|media|js|css|fonts)\./.test(d);
+}
+async function upsertContactSupplyDomain(env,{domain,sourceType,sourceKey=null,sourceName=null,sourceUrl=null,priority=0}){
+  const d=contactDomain(domain);if(!contactDomainEligible(d))return 0;
+  const w=await env.DB.prepare(`INSERT INTO contact_supply_domain(domain,source_type,source_key,source_name,source_url,priority_score,status,next_research_at,created_at,updated_at)
+    VALUES(?,?,?,?,?,?,'queued',datetime('now'),datetime('now'),datetime('now'))
+    ON CONFLICT(domain) DO UPDATE SET
+      priority_score=MAX(contact_supply_domain.priority_score,excluded.priority_score),
+      source_type=CASE WHEN excluded.priority_score>=contact_supply_domain.priority_score THEN excluded.source_type ELSE contact_supply_domain.source_type END,
+      source_key=CASE WHEN excluded.priority_score>=contact_supply_domain.priority_score THEN COALESCE(excluded.source_key,contact_supply_domain.source_key) ELSE contact_supply_domain.source_key END,
+      source_name=COALESCE(contact_supply_domain.source_name,excluded.source_name),
+      source_url=COALESCE(contact_supply_domain.source_url,excluded.source_url),
+      updated_at=datetime('now')`)
+    .bind(d,safe(sourceType,60),sourceKey?safe(sourceKey,180):null,sourceName?safe(sourceName,240):null,sourceUrl?safe(sourceUrl,2000):null,Number(priority||0)).run();
+  return Number(w?.meta?.changes||w?.changes||0);
+}
+async function refreshContactSupplyMetrics(env){
+  const row=await env.DB.prepare(`SELECT
+      COUNT(*) total_domains,
+      SUM(CASE WHEN source_type='catalog_vendor' THEN 1 ELSE 0 END) catalog_domains,
+      SUM(CASE WHEN source_type IN ('publisher_network','distribution_surface') THEN 1 ELSE 0 END) network_domains,
+      SUM(CASE WHEN source_type='vendor_amplification' THEN 1 ELSE 0 END) vendor_domains,
+      SUM(CASE WHEN status='ready_email' AND contact_email IS NOT NULL THEN 1 ELSE 0 END) ready_email,
+      SUM(CASE WHEN status='ready_route' AND route_url IS NOT NULL THEN 1 ELSE 0 END) ready_route,
+      SUM(CASE WHEN status='researching' THEN 1 ELSE 0 END) researching,
+      SUM(CASE WHEN status IN ('queued','unresolved','provider_blocked') THEN 1 ELSE 0 END) unresolved,
+      SUM(CASE WHEN status IN ('unresolved','provider_blocked') AND contact_email IS NULL THEN 1 ELSE 0 END) apollo_eligible
+    FROM contact_supply_domain`).first().catch(()=>null);
+  await env.DB.prepare(`UPDATE contact_supply_metrics SET
+      target_ready=?,min_ready=?,catalog_domains=?,network_domains=?,vendor_domains=?,ready_email=?,ready_route=?,researching=?,unresolved=?,apollo_eligible=?,
+      updated_at=datetime('now') WHERE id='global'`)
+    .bind(CONTACT_SUPPLY_TARGET,CONTACT_SUPPLY_MIN,num(row?.catalog_domains),num(row?.network_domains),num(row?.vendor_domains),num(row?.ready_email),num(row?.ready_route),num(row?.researching),num(row?.unresolved),num(row?.apollo_eligible)).run().catch(()=>{});
+  return {...row,targetReady:CONTACT_SUPPLY_TARGET,minReady:CONTACT_SUPPLY_MIN};
+}
+async function contactSupplyHealth(env){
+  await ensureSchema(env);
+  const row=await env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,researching,unresolved,apollo_eligible,apollo_status,updated_at FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+  return {
+    status:'active',
+    targetReady:num(row?.target_ready||CONTACT_SUPPLY_TARGET),
+    minReady:num(row?.min_ready||CONTACT_SUPPLY_MIN),
+    readyEmail:num(row?.ready_email),
+    readyRoute:num(row?.ready_route),
+    researching:num(row?.researching),
+    unresolved:num(row?.unresolved),
+    catalogDomains:num(row?.catalog_domains),
+    networkDomains:num(row?.network_domains),
+    vendorDomains:num(row?.vendor_domains),
+    apolloEligible:num(row?.apollo_eligible),
+    apolloStatus:row?.apollo_status||'plan_blocked_people_api',
+    apolloReason:'Apollo Free plan blocks People API search; public discovery and route fallback remain autonomous.',
+    updatedAt:row?.updated_at||null
+  };
+}
+async function seedContactSupply(env){
+  await ensureSchema(env);
+  let seeded=0;
+  try{
+    const response=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/tools.json',{headers:{'Cache-Control':'no-cache'}}));
+    if(response.ok){
+      const tools=await response.json();
+      for(const tool of Array.isArray(tools)?tools:[]){
+        const domain=contactDomain(tool?.sourceUrl);if(!contactDomainEligible(domain))continue;
+        seeded+=await upsertContactSupplyDomain(env,{
+          domain,sourceType:'catalog_vendor',sourceKey:tool.slug||null,sourceName:tool.name||null,sourceUrl:tool.sourceUrl||null,
+          priority:700+(tool?.affiliateUrl?30:0)+(tool?.affiliateProgram?10:0)
+        });
+      }
+    }
+  }catch{}
+  const [network,vendors,opps]=await Promise.all([
+    env.DB.prepare(`SELECT surface_slug,surface_name,domain,source_url,priority_score FROM distribution_network_outreach
+      WHERE domain IS NOT NULL AND status NOT IN ('suppressed_technical') ORDER BY priority_score DESC LIMIT 300`).all().catch(()=>({results:[]})),
+    env.DB.prepare(`SELECT tool_slug,vendor_domain,asset_url,MAX(priority_score) priority_score FROM distribution_vendor_amplification
+      WHERE vendor_domain IS NOT NULL GROUP BY lower(vendor_domain) ORDER BY priority_score DESC LIMIT 300`).all().catch(()=>({results:[]})),
+    env.DB.prepare(`SELECT surface_slug,surface_name,action_url,distribution_score FROM distribution_opportunities
+      WHERE action_url IS NOT NULL AND status NOT IN ('policy_blocked','rejected','skipped','unavailable_free') ORDER BY distribution_score DESC LIMIT 500`).all().catch(()=>({results:[]}))
+  ]);
+  for(const row of rows(network))seeded+=await upsertContactSupplyDomain(env,{domain:row.domain,sourceType:'publisher_network',sourceKey:row.surface_slug,sourceName:row.surface_name,sourceUrl:row.source_url,priority:820+num(row.priority_score)});
+  for(const row of rows(vendors))seeded+=await upsertContactSupplyDomain(env,{domain:row.vendor_domain,sourceType:'vendor_amplification',sourceKey:row.tool_slug,sourceUrl:row.asset_url,priority:900+num(row.priority_score)});
+  for(const row of rows(opps)){
+    const domain=contactDomain(row.action_url);if(!contactDomainEligible(domain))continue;
+    seeded+=await upsertContactSupplyDomain(env,{domain,sourceType:'distribution_surface',sourceKey:row.surface_slug,sourceName:row.surface_name,sourceUrl:row.action_url,priority:760+num(row.distribution_score)});
+  }
+  await env.DB.prepare(`UPDATE contact_supply_domain SET contact_email=(
+      SELECT v.contact_email FROM distribution_vendor_amplification v
+      WHERE lower(v.vendor_domain)=contact_supply_domain.domain AND v.contact_email IS NOT NULL
+      ORDER BY v.priority_score DESC LIMIT 1
+    ),contact_source='existing_vendor_lane',status='ready_email',updated_at=datetime('now')
+    WHERE contact_email IS NULL AND EXISTS(
+      SELECT 1 FROM distribution_vendor_amplification v WHERE lower(v.vendor_domain)=contact_supply_domain.domain AND v.contact_email IS NOT NULL
+    )`).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE contact_supply_domain SET contact_email=(
+      SELECT n.contact_email FROM distribution_network_outreach n
+      WHERE lower(n.domain)=contact_supply_domain.domain AND n.contact_email IS NOT NULL
+      ORDER BY n.priority_score DESC LIMIT 1
+    ),contact_source='existing_network_lane',status='ready_email',updated_at=datetime('now')
+    WHERE contact_email IS NULL AND EXISTS(
+      SELECT 1 FROM distribution_network_outreach n WHERE lower(n.domain)=contact_supply_domain.domain AND n.contact_email IS NOT NULL
+    )`).run().catch(()=>{});
+  const metrics=await refreshContactSupplyMetrics(env);
+  await event(env,'contact_supply_seeded','completed',`Contact Supply Engine reconciled domain inventory. Ready email buffer ${num(metrics?.ready_email)}/${CONTACT_SUPPLY_TARGET}; catalog/network/vendor sources deduplicated by domain.`);
+  return{seeded,metrics};
+}
+async function ensureContactSupplySeeded(env){
+  await ensureSchema(env);
+  const row=await env.DB.prepare(`SELECT domain FROM contact_supply_domain LIMIT 1`).first().catch(()=>null);
+  if(!row)return seedContactSupply(env);
+  return null;
+}
+async function enqueueContactSupplyResearch(env,remaining){
+  if(remaining<=0)return{enqueued:0,remaining};
+  const m=await env.DB.prepare(`SELECT ready_email FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>({ready_email:0}));
+  const ready=num(m?.ready_email);
+  if(ready>=CONTACT_SUPPLY_TARGET)return{enqueued:0,remaining,ready,target:CONTACT_SUPPLY_TARGET};
+  const need=Math.max(0,CONTACT_SUPPLY_TARGET-ready);
+  const q=await env.DB.prepare(`SELECT domain,source_type,source_key,source_name,source_url,priority_score,public_attempts,status
+    FROM contact_supply_domain
+    WHERE contact_email IS NULL AND status IN ('queued','unresolved','provider_blocked')
+      AND next_research_at<=datetime('now')
+    ORDER BY CASE status WHEN 'queued' THEN 0 WHEN 'unresolved' THEN 1 ELSE 2 END,priority_score DESC,updated_at ASC
+    LIMIT ?`).bind(Math.min(CONTACT_SUPPLY_RESEARCH_BATCH,need,remaining)).all().catch(()=>({results:[]}));
+  let enqueued=0;
+  for(const row of rows(q)){
+    if(remaining<=0)break;
+    const url=isHttp(row.source_url)?row.source_url:`https://${row.domain}/`;
+    const bucket=Math.floor(Date.now()/(24*3600000));
+    const added=await enqueueJob(env,{
+      jobKey:`contact-supply:${row.domain}:attempt:${num(row.public_attempts)+1}:day:${bucket}`,
+      jobType:'contact_supply_public_research',
+      subjectType:'domain',subjectKey:row.domain,
+      priority:1000+num(row.priority_score),
+      payload:{url,domain:row.domain,sourceType:row.source_type,sourceKey:row.source_key,sourceName:row.source_name,authorizationClass:'public_role_email_discovery_v1'}
+    });
+    if(added){
+      enqueued+=added;remaining-=added;
+      await env.DB.prepare(`UPDATE contact_supply_domain SET status='researching',updated_at=datetime('now') WHERE domain=? AND contact_email IS NULL`).bind(row.domain).run().catch(()=>{});
+    }
+  }
+  if(enqueued>0)await refreshContactSupplyMetrics(env);
+  return{enqueued,remaining,ready,target:CONTACT_SUPPLY_TARGET};
+}
 async function event(env,eventType,status,detail,{jobId=null,batchId=null}={}){
   await ensureSchema(env);
   try{await env.DB.prepare(`INSERT INTO compute_overflow_events(event_id,event_type,status,job_id,batch_id,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
