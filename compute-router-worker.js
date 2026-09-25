@@ -193,6 +193,94 @@ async function enqueueDistributionResearch(env){
   if(enqueued>0){await metricDelta(env,{queued:enqueued,created:enqueued});await budgetConsume(env,'research',enqueued);}
   return{enqueued,remaining};
 }
+
+function encodedAdapterBody(contentType,payload){
+  const type=String(contentType||'application/json').toLowerCase();
+  if(type==='application/x-www-form-urlencoded')return new URLSearchParams(Object.entries(payload||{}).map(([k,v])=>[k,Array.isArray(v)?v.join(','):String(v??'')])).toString();
+  return JSON.stringify(payload||{});
+}
+async function enqueueAuthorizedExecution(env){
+  await ensureSchema(env);
+  let remaining=await budgetRemaining(env,'execution',EXECUTION_DAILY_JOB_BUDGET);
+  if(!remaining)return{enqueued:0,submissionJobs:0,verificationJobs:0,remaining:0};
+  let enqueued=0,submissionJobs=0,verificationJobs=0;
+
+  const submitLimit=Math.min(120,remaining);
+  const candidates=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url,
+      o.distribution_score,COALESCE(l.operating_decision,'explore') operating_decision
+    FROM distribution_auto_adapters a
+    JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
+    LEFT JOIN distribution_economic_learning l ON l.surface_slug=a.surface_slug
+    LEFT JOIN distribution_surface_costs c ON c.surface_slug=a.surface_slug
+    WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
+      AND COALESCE(c.cost_amount,0)=0
+      AND COALESCE(l.operating_decision,'explore') IN ('explore','measure','scale')
+    ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
+    LIMIT ?`).bind(submitLimit).all().catch(()=>({results:[]}));
+
+  for(const a of rows(candidates)){
+    if(remaining<=0||!isHttp(a.endpoint))break;
+    const method=String(a.method||'POST').toUpperCase();
+    if(!['POST','PUT','PATCH'].includes(method))continue;
+    let payload={};try{payload=JSON.parse(a.payload_template_json||'{}')}catch{continue}
+    const contentType=String(a.content_type||'application/json').toLowerCase();
+    if(!['application/json','application/x-www-form-urlencoded'].includes(contentType))continue;
+    const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first().catch(()=>null);
+    if(prior&&['submitted','pending_review','verified'].includes(String(prior.status||'')))continue;
+    if(prior&&num(prior.attempts)>=3)continue;
+    const submissionId=prior?.submission_id||`sub_${crypto.randomUUID()}`;
+    if(!prior){
+      await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at)
+        VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+        .bind(submissionId,a.surface_slug,'https://trytoolscout.org/','auto_discovered_json','queued_external',a.payload_template_json,a.endpoint,0).run().catch(()=>{});
+    }else{
+      await env.DB.prepare(`UPDATE distribution_submissions SET status='queued_external',action_url=?,payload_json=?,error=NULL,updated_at=datetime('now') WHERE submission_id=? AND status NOT IN ('submitted','verified')`)
+        .bind(a.endpoint,a.payload_template_json,submissionId).run().catch(()=>{});
+    }
+    const keyHash=await shortHash(`${a.endpoint}|${method}|${contentType}|${a.payload_template_json}`);
+    const added=await enqueueJob(env,{
+      jobKey:`execute:${a.surface_slug}:${submissionId}:${keyHash}`,
+      jobType:'authorized_http_action',
+      subjectType:'surface',subjectKey:a.surface_slug,
+      priority:1200+num(a.distribution_score),
+      payload:{
+        surfaceSlug:a.surface_slug,submissionId,endpoint:a.endpoint,method,contentType,
+        body:encodedAdapterBody(contentType,payload),
+        verificationEndpoint:a.verification_endpoint||null,publicUrl:a.public_url||null,
+        authorizationClass:'verified_free_auto_adapter_v1'
+      }
+    });
+    if(added){enqueued+=added;submissionJobs+=added;remaining-=added;}
+  }
+
+  if(remaining>0){
+    const verifyLimit=Math.min(120,remaining);
+    const pending=await env.DB.prepare(`SELECT ds.submission_id,ds.surface_slug,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url,o.distribution_score
+      FROM distribution_submissions ds
+      JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug
+      LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug
+      WHERE ds.submission_type='auto_discovered_json' AND ds.status='submitted'
+        AND COALESCE(o.status,'') NOT IN ('verified','live')
+      ORDER BY ds.submitted_at ASC LIMIT ?`).bind(verifyLimit).all().catch(()=>({results:[]}));
+    for(const row of rows(pending)){
+      if(remaining<=0)break;
+      const target=[row.response_url,row.verification_endpoint,row.public_url].find(isHttp);
+      if(!target)continue;
+      const keyHash=await shortHash(target);
+      const added=await enqueueJob(env,{
+        jobKey:`verify:${row.surface_slug}:${row.submission_id}:${keyHash}`,
+        jobType:'authorized_verification',
+        subjectType:'surface',subjectKey:row.surface_slug,
+        priority:1100+num(row.distribution_score),
+        payload:{surfaceSlug:row.surface_slug,submissionId:row.submission_id,targetUrl:target,actionUrl:row.action_url||null,authorizationClass:'verified_publication_check_v1'}
+      });
+      if(added){enqueued+=added;verificationJobs+=added;remaining-=added;}
+    }
+  }
+
+  if(enqueued>0){await metricDelta(env,{queued:enqueued,created:enqueued});await budgetConsume(env,'execution',enqueued);}
+  return{enqueued,submissionJobs,verificationJobs,remaining};
+}
 async function requeueStaleBatches(env){
   await ensureSchema(env);
   const stale=await env.DB.prepare(`SELECT batch_id,job_count FROM compute_overflow_batches
@@ -247,10 +335,11 @@ async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
   const requeued=await requeueStaleBatches(env);
-  const enqueue=await enqueueDistributionResearch(env);
+  const execution=await enqueueAuthorizedExecution(env);
+  const research=await enqueueDistributionResearch(env);
   const batch=await createBatch(env);
   const dispatch=batch&&batch.count>0?await triggerBatch(env,batch):{ok:true,skipped:true,reason:'no_batch_available'};
-  return{ok:dispatch.ok!==false,status:batch&&batch.count>0?'dispatched':'idle',enqueue,requeued,batch:batch&&batch.count>0?{batchId:batch.batchId,count:batch.count}:null,dispatch};
+  return{ok:dispatch.ok!==false,status:batch&&batch.count>0?'dispatched':'idle',execution,research,requeued,batch:batch&&batch.count>0?{batchId:batch.batchId,count:batch.count}:null,dispatch};
 }
 async function batchPayload(env,batchId){
   await ensureSchema(env);
