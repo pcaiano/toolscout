@@ -1,5 +1,6 @@
 import base from './distribution-embed-worker.js';
 import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
+import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION} from './distribution-outreach-policy.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const NETWORK_TYPES=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface)/i;
@@ -125,6 +126,39 @@ function outreachCopy(row){
   return {subject,body};
 }
 
+async function suppressCompetitiveOutreach(env){
+  await ensureSchema(env);
+  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,domain,source_url,status
+    FROM distribution_network_outreach
+    WHERE status IN ('queued','contact_route_found','contact_found','send_failed','reputation_quarantine','sending')`).all().catch(()=>({results:[]}));
+  let suppressed=0;
+  for(const row of q.results||[]){
+    const policy=competitiveOutreachExclusion(row);
+    if(!policy.excluded)continue;
+    const detail=`${policy.reason}:${policy.host||row.domain||row.surface_slug}`;
+    const w=await env.DB.prepare(`UPDATE distribution_network_outreach
+      SET status='suppressed_competitor',
+          public_dispatch_token=NULL,
+          public_dispatch_leased_at=NULL,
+          outreach_error=?,
+          updated_at=datetime('now')
+      WHERE surface_slug=? AND status NOT IN ('sent','adopted','suppressed_competitor')`)
+      .bind(detail,row.surface_slug).run();
+    if(Number(w?.meta?.changes||w?.changes||0)>0){
+      suppressed++;
+      await env.DB.prepare(`UPDATE growth_execution_contract
+        SET status='blocked',completed_at=datetime('now'),last_result=?,updated_at=datetime('now')
+        WHERE executor='make_sender' AND subject_type='surface' AND subject_key=?
+          AND status IN ('pending','claimed','attempted','deferred','stalled')`)
+        .bind(`competitive_outreach_suppressed:${detail}`,row.surface_slug).run().catch(()=>{});
+      await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,source_url,detail,observed_at,created_at)
+        VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+        .bind(`competitor_${crypto.randomUUID()}`,row.surface_slug,'competitive_outreach_suppressed','completed','distribution_network',row.source_url||null,`Outbound publisher outreach suppressed by ${COMPETITIVE_OUTREACH_POLICY_VERSION}: ${detail}. Listing/submission routes remain eligible for the separate submission engine.`).run().catch(()=>{});
+    }
+  }
+  return {checked:(q.results||[]).length,suppressed,policy:COMPETITIVE_OUTREACH_POLICY_VERSION};
+}
+
 async function refreshCandidates(env){
   await ensureSchema(env);
   const [opps,vendors]=await Promise.all([
@@ -154,6 +188,8 @@ async function refreshCandidates(env){
     if(!NETWORK_TYPES.test(String(row.surface_type||'')))continue;
     const domain=hostOf(row.action_url);
     if(!domain||domain==='trytoolscout.org'||vendorDomains.has(domain)||isTechnicalHost(domain))continue;
+    const outreachPolicy=competitiveOutreachExclusion({domain,surface_type:row.surface_type,surface_name:row.surface_name,action_url:row.action_url});
+    if(outreachPolicy.excluded)continue;
     considered++;
     const copy=outreachCopy({...row,domain});
     const r=await env.DB.prepare(`INSERT INTO distribution_network_outreach(surface_slug,surface_name,surface_type,domain,source_url,priority_score,status,suggested_subject,suggested_body,created_at,updated_at)
@@ -425,16 +461,17 @@ async function metrics(env){
 }
 
 export async function runDistributionNetworkCycle(env){
+  const competitiveSuppression=await suppressCompetitiveOutreach(env);
   const candidates=await refreshCandidates(env);
   const contacts=await discoverContacts(env);
   const routeActions=await materializeRouteActions(env);
   const routeReconciliation=await reconcileRouteActions(env);
   const adoption=await verifyAdoption(env);
-  const materialChanges=Number(candidates.newQueued||0)+Number(candidates.reopened||0)+Number(contacts.found||0)+Number(contacts.routed||0)+Number(contacts.suppressed||0)+Number(routeActions.queued||0)+Number(routeActions.synthetic||0)+Number(routeActions.content||0)+Number(routeReconciliation.changed||0)+Number(adoption.adopted||0);
+  const materialChanges=Number(competitiveSuppression.suppressed||0)+Number(candidates.newQueued||0)+Number(candidates.reopened||0)+Number(contacts.found||0)+Number(contacts.routed||0)+Number(contacts.suppressed||0)+Number(routeActions.queued||0)+Number(routeActions.synthetic||0)+Number(routeActions.content||0)+Number(routeReconciliation.changed||0)+Number(adoption.adopted||0);
   if(materialChanges>0){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1 materially changed ${materialChanges} item(s): ${candidates.newQueued} newly queued, ${candidates.reopened} reopened, ${contacts.found} role emails found, ${contacts.routed} alternate routes found, ${routeActions.queued} route actions queued, ${routeActions.synthetic} autonomous route opportunities materialized, ${routeActions.content} content-amplification routes prepared, ${routeReconciliation.verifiedHuman} strict-human route impacts verified, ${routeReconciliation.verifiedPlacement} route placements verified, ${routeReconciliation.retryDue} retries due, ${contacts.suppressed} suppressed and ${adoption.adopted} new adoptions verified. No-change cycles are not persisted.`).run().catch(()=>{});
   }
-  return {ok:true,candidates,contacts,routeActions,routeReconciliation,adoption,materialChanges,write_policy:'material_change_only',closed_loop_routes:true};
+  return {ok:true,competitiveSuppression,candidates,contacts,routeActions,routeReconciliation,adoption,materialChanges,write_policy:'material_change_only',closed_loop_routes:true,competitive_outreach_policy:COMPETITIVE_OUTREACH_POLICY_VERSION};
 }
 
 export default {
