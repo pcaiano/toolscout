@@ -82,6 +82,46 @@ function routeKind(link,page){
   if(CONTACT_RE.test(s))return'contact';
   return'contact';
 }
+const ROLE_LOCAL_RE=/^(editorial|editor|partnerships?|partners?|submissions?|submit|newsletter|press|media|growth|marketing|hello|contact|team|info)([._+-].*)?$/i;
+const EMAIL_RE=/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
+function hostFamily(a,b){
+  const x=String(a||'').toLowerCase().replace(/^www\./,''),y=String(b||'').toLowerCase().replace(/^www\./,'');
+  return Boolean(x&&y)&&(x===y||x.endsWith('.'+y)||y.endsWith('.'+x));
+}
+function publicRoleEmails(html,sourceUrl,expectedDomain){
+  const out=[];const seen=new Set();
+  const values=[...String(html||'').matchAll(EMAIL_RE)].map(m=>m[0]);
+  for(const email of values){
+    const [local,domain]=String(email).toLowerCase().split('@');
+    if(!local||!domain||!ROLE_LOCAL_RE.test(local)||!hostFamily(domain,expectedDomain))continue;
+    if(seen.has(email.toLowerCase()))continue;seen.add(email.toLowerCase());
+    out.push({email:email.toLowerCase(),sourceUrl,role:local.split(/[._+-]/)[0]});
+  }
+  return out.slice(0,12);
+}
+async function researchRoleEmail(job){
+  const p=job?.payload||{},source=String(p.url||''),expectedDomain=String(p.domain||'');
+  if(p.authorizationClass!=='public_role_email_discovery_v1')return{ok:false,error:'email_discovery_contract_rejected'};
+  if(!validPublicHttp(source)||!expectedDomain)return{ok:false,error:'invalid_email_discovery_target'};
+  const first=await fetchPage(source);
+  if(!first?.ok)return{ok:false,error:'source_unreachable',httpStatus:first?.status||0,targetUrl:source};
+  const candidates=[
+    first.url,
+    ...extractLinks(first.html,first.url).filter(x=>CONTACT_RE.test(x.text+' '+x.url)).map(x=>x.url),
+    ...['/contact','/contact-us','/about','/team','/press','/media','/partners','/partnerships','/submit'].map(path=>absolute(path,first.url)).filter(Boolean)
+  ];
+  const urls=[...new Set(candidates)].filter(x=>x&&sameHost(first.url,x)).slice(0,10);
+  const pages=await mapLimit(urls,5,async url=>url===first.url?first:await fetchPage(url));
+  const roleEmails=[];
+  const seen=new Set();
+  for(const page of pages){
+    if(!page?.ok)continue;
+    for(const item of publicRoleEmails(page.html,page.url,expectedDomain)){
+      if(seen.has(item.email))continue;seen.add(item.email);roleEmails.push(item);
+    }
+  }
+  return{ok:true,targetUrl:source,finalUrl:first.url,httpStatus:first.status,roleEmails:roleEmails.slice(0,12),pagesFetched:pages.filter(x=>x?.ok).length,classification:roleEmails.length?'public_role_email_found':'no_public_role_email_found'};
+}
 async function researchDistribution(job){
   const source=job?.payload?.url;
   if(!validPublicHttp(source))return{ok:false,error:'invalid_or_private_url'};
@@ -199,6 +239,7 @@ export async function researchJob(job){
   try{
     let result;
     if(job?.type==='distribution_route_research'||job?.type==='contact_route_research')result=await researchDistribution(job);
+    else if(job?.type==='publisher_role_email_research'||job?.type==='vendor_role_email_research')result=await researchRoleEmail(job);
     else if(job?.type==='authorized_http_action')result=await executeAuthorizedHttpAction(job);
     else if(job?.type==='authorized_verification')result=await executeAuthorizedVerification(job);
     else result={ok:false,error:'unsupported_job_type'};
