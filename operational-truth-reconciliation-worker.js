@@ -115,7 +115,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,seRankingBacklinkTruth]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,seRankingBacklinkTruth]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -190,6 +190,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       (SELECT COUNT(*) FROM distribution_vendor_amplification WHERE status='reputation_quarantine')+
       (SELECT COUNT(*) FROM distribution_network_outreach WHERE status='reputation_quarantine') reputation_quarantine`).first().catch(()=>({sent24:0,leased_recent:0,ready_contacts:0,reputation_quarantine:0})),
     env.DB.prepare(`SELECT value,updated_at FROM external_runtime_config WHERE key='make_sender_webhook_url' LIMIT 1`).first().catch(()=>null),
+    env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,researching,unresolved,apollo_eligible,apollo_status,updated_at
+      FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]})
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
@@ -352,8 +354,18 @@ async function buildCommandCenterBusinessTruth(request,env){
       emailMax24h:EMAIL_MAX_24H,
       emailSent24h:truthNum(emailCapacity?.sent24),
       emailLeasedRecent:truthNum(emailCapacity?.leased_recent),
-      emailReadyContacts:truthNum(emailCapacity?.ready_contacts),
+      emailReadyContacts:contactSupplyMetrics?truthNum(contactSupplyMetrics.ready_email):truthNum(emailCapacity?.ready_contacts),
+      emailReadyLaneRows:truthNum(emailCapacity?.ready_contacts),
       emailReputationQuarantine:truthNum(emailCapacity?.reputation_quarantine),
+      contactSupplyTarget:truthNum(contactSupplyMetrics?.target_ready)||200,
+      contactSupplyMin:truthNum(contactSupplyMetrics?.min_ready)||150,
+      contactSupplyReadyEmail:truthNum(contactSupplyMetrics?.ready_email),
+      contactSupplyReadyRoute:truthNum(contactSupplyMetrics?.ready_route),
+      contactSupplyResearching:truthNum(contactSupplyMetrics?.researching),
+      contactSupplyUnresolved:truthNum(contactSupplyMetrics?.unresolved),
+      contactSupplyApolloEligible:truthNum(contactSupplyMetrics?.apollo_eligible),
+      contactSupplyApolloStatus:contactSupplyMetrics?.apollo_status||'plan_blocked_people_api',
+      contactSupplyUpdatedAt:contactSupplyMetrics?.updated_at||null,
       emailDeliveryMode:makeSenderConfig?.value?'instant_webhook_plus_3h_fallback':'3h_polling_fallback',
       emailPushConfigured:Boolean(makeSenderConfig?.value),
       emailPushConfiguredAt:makeSenderConfig?.updated_at||null,
@@ -363,6 +375,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       actionPlane:'cloudflare_authorize_external_execute_cloudflare_verify',
       computePlane:'render_external_overflow',
       emailPlane:'cloudflare_authorize_make_send_cloudflare_confirm',
+      contactSupplyPlane:'catalog_plus_distribution_domains_render_public_discovery_provider_fallback',
       authPlane:'cloudflare_vault_render_browser_human_challenge_resume',
       activityIsNotSuccess:true,
       channelAllocationPct:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
