@@ -32,15 +32,17 @@ async function runBatch(batchId:string){
   finally{active.delete(batchId)}
 }
 
-Deno.serve(async req=>{
+export default {
+  async fetch(req: Request){
   const u=new URL(req.url);
   if(req.method==='GET'&&u.pathname==='/health')return j(200,{ok:true,service:'toolscout-overflow',runtime:'deno',activeBatches:active.size,maxConcurrency:MAX_CONCURRENCY});
   const m=u.pathname.match(/^\/tick\/(cob_[0-9a-f-]{36})$/i);
   if(req.method==='POST'&&m){
     if(!rateAllowed())return j(429,{ok:false,error:'rate_limited'});
     if(active.size>=4)return j(429,{ok:false,error:'worker_busy',activeBatches:active.size});
-    EdgeRuntime.waitUntil(runBatch(m[1]));
-    return j(202,{ok:true,accepted:true,batchId:m[1],activeBatches:active.size+1});
+    await runBatch(m[1]);
+    return j(200,{ok:true,completed:true,batchId:m[1],activeBatches:active.size});
   }
-  return j(404,{ok:false,error:'not_found'});
-});
+    return j(404,{ok:false,error:'not_found'});
+  }
+} satisfies Deno.ServeDefaultExport;
