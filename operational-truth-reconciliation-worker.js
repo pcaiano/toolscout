@@ -190,7 +190,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       (SELECT COUNT(*) FROM distribution_vendor_amplification WHERE status='reputation_quarantine')+
       (SELECT COUNT(*) FROM distribution_network_outreach WHERE status='reputation_quarantine') reputation_quarantine`).first().catch(()=>({sent24:0,leased_recent:0,ready_contacts:0,reputation_quarantine:0})),
     env.DB.prepare(`SELECT value,updated_at FROM external_runtime_config WHERE key='make_sender_webhook_url' LIMIT 1`).first().catch(()=>null),
-    env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,researching,unresolved,apollo_eligible,apollo_status,updated_at
+    env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,updated_at
       FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]})
   ]);
@@ -361,6 +361,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       contactSupplyMin:truthNum(contactSupplyMetrics?.min_ready)||150,
       contactSupplyReadyEmail:truthNum(contactSupplyMetrics?.ready_email),
       contactSupplyReadyRoute:truthNum(contactSupplyMetrics?.ready_route),
+      contactSupplyCooldown:truthNum(contactSupplyMetrics?.cooldown),
       contactSupplyResearching:truthNum(contactSupplyMetrics?.researching),
       contactSupplyUnresolved:truthNum(contactSupplyMetrics?.unresolved),
       contactSupplyApolloEligible:truthNum(contactSupplyMetrics?.apollo_eligible),
