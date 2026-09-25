@@ -3,9 +3,9 @@ import base from './operational-truth-reconciliation-worker.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/5 * * * *';
 const DAILY_JOB_BUDGET=1500;
-const BATCH_SIZE=100;
+const BATCH_SIZE=25;
 const MAX_ACTIVE_BATCHES=2;
-const BATCH_TIMEOUT_MINUTES=20;
+const BATCH_TIMEOUT_MINUTES=3;
 let schemaReady=null;
 
 function safe(v,n=4000){return String(v??'').slice(0,n)}
