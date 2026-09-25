@@ -434,9 +434,17 @@ export async function rebalanceExecutionAdmission(env){
     unavailableReleased=Number(w?.meta?.changes||w?.changes||0);
   }
 
+  const claimSlaRecovery=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+        claimed_at=NULL,attempted_at=NULL,last_result='auto_recovered_unclaimed_sla_miss',updated_at=datetime('now')
+    WHERE status='stalled' AND last_result='claim_sla_missed' AND attempts=0
+      AND claimed_at IS NULL AND attempted_at IS NULL AND executor IS NOT NULL AND executor<>'human_gate'`).run().catch(()=>null);
+  const recoveredUnclaimed=Number(claimSlaRecovery?.meta?.changes||claimSlaRecovery?.changes||0);
+
   const result={
     promoted:0,
     deferred:Number(legacy?.meta?.changes||legacy?.changes||0)+Number(batchRelease?.meta?.changes||batchRelease?.changes||0)+senderUnreadyReleased+unavailableReleased,
+    recoveredUnclaimed,
     legacyRequeued:Number(legacy?.meta?.changes||legacy?.changes||0),
     batchOpportunityReleased:Number(batchRelease?.meta?.changes||batchRelease?.changes||0),
     senderUnreadyReleased,
