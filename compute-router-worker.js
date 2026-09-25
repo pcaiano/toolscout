@@ -592,6 +592,8 @@ async function requeueStaleBatches(env){
     WHERE status IN ('dispatched','running') AND dispatched_at<=datetime('now','-${BATCH_TIMEOUT_MINUTES} minutes') LIMIT 20`).all().catch(()=>({results:[]}));
   let requeued=0;
   for(const row of rows(stale)){
+    await env.DB.prepare(`UPDATE contact_supply_domain SET status='unresolved',next_research_at=datetime('now','+1 hour'),updated_at=datetime('now')
+      WHERE domain IN (SELECT subject_key FROM compute_overflow_jobs WHERE batch_id=? AND job_type='contact_supply_public_research' AND status='leased') AND contact_email IS NULL`).bind(row.batch_id).run().catch(()=>{});
     const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now'),last_error='batch_timeout_requeued',updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(row.batch_id).run();
     const changed=Number(w?.meta?.changes||w?.changes||0);requeued+=changed;
     await env.DB.prepare(`UPDATE compute_overflow_batches SET status='timed_out',last_error='completion_timeout',updated_at=datetime('now') WHERE batch_id=?`).bind(row.batch_id).run();
@@ -885,6 +887,17 @@ async function applyContactSupplyResult(env,job,result){
   await refreshContactSupplyMetrics(env);
   return{applied:applied>0,domain,status:newStatus,reason:'no_public_contact_evidence'};
 }
+async function applyContactSupplyFailure(env,job,result){
+  const domain=contactDomain(job.subject_key);if(!contactDomainEligible(domain))return{applied:false};
+  const row=await env.DB.prepare(`SELECT public_attempts FROM contact_supply_domain WHERE domain=? LIMIT 1`).bind(domain).first().catch(()=>({public_attempts:0}));
+  const attempts=num(row?.public_attempts)+1;
+  const status=attempts>=2?'provider_blocked':'unresolved';
+  const delay=attempts>=2?30:1;
+  const w=await env.DB.prepare(`UPDATE contact_supply_domain SET status=?,public_attempts=?,last_researched_at=datetime('now'),next_research_at=datetime('now','+'||?||' days'),apollo_status='plan_blocked',updated_at=datetime('now') WHERE domain=? AND contact_email IS NULL`)
+    .bind(status,attempts,delay,domain).run().catch(()=>null);
+  await refreshContactSupplyMetrics(env);
+  return{applied:Number(w?.meta?.changes||w?.changes||0)>0,status,domain,error:safe(result?.error||'research_failed',300)};
+}
 async function completeBatch(request,env,ctx,batchId){
   await ensureSchema(env);
   const batch=await env.DB.prepare(`SELECT batch_id,status,completion_token_hash FROM compute_overflow_batches WHERE batch_id=? LIMIT 1`).bind(batchId).first();
@@ -902,11 +915,12 @@ async function completeBatch(request,env,ctx,batchId){
     const ok=result?.ok!==false;
     if(job.job_type==='authorized_http_action'){const a=await applyAuthorizedActionResult(env,job,result);applied+=a.applied?1:0}
     else if(job.job_type==='authorized_verification'){const a=await applyAuthorizedVerificationResult(env,job,result);applied+=a.applied?1:0}
-    else if(ok){
+    else if(job.job_type==='contact_supply_public_research'){
+      const a=ok?await applyContactSupplyResult(env,job,result):await applyContactSupplyFailure(env,job,result);applied+=a.applied?1:0;
+    }else if(ok){
       if(job.job_type==='distribution_route_research'){const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0}
       else if(job.job_type==='contact_route_research'){const a=await applyContactResult(env,job,result);applied+=num(a.applied)}
       else if(job.job_type==='publisher_role_email_research'||job.job_type==='vendor_role_email_research'){const a=await applyRoleEmailResult(env,job,result);applied+=a.applied?1:0}
-      else if(job.job_type==='contact_supply_public_research'){const a=await applyContactSupplyResult(env,job,result);applied+=a.applied?1:0}
     }
     await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
       .bind(ok?'completed':'failed',JSON.stringify(result).slice(0,24000),ok?null:safe(result?.error||'external_compute_failed',600),jobId).run();
