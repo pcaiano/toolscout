@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: toolscout-overflow
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: "node --check overflow-compute/server.mjs && node --check overflow-compute/research-core.mjs"
+    startCommand: "node overflow-compute/server.mjs"
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: TOOLSCOUT_BASE_URL
+        value: https://trytoolscout.org
+      - key: MAX_CONCURRENCY
+        value: "24"
