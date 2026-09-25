@@ -222,7 +222,17 @@ export async function createAuthHandoff(env,surfaceSlug,{origin='https://trytool
   const sharedSecret=await config(env,'auth_broker_shared_secret');
   if(!httpsUrl(brokerUrl)||sharedSecret.length<32)return{ok:false,error:'auth_broker_not_configured'};
   const existing=await env.DB.prepare(`SELECT * FROM auth_handoff WHERE surface_slug=? AND status IN ('starting','open') AND expires_at>datetime('now') ORDER BY created_at DESC LIMIT 1`).bind(surfaceSlug).first().catch(()=>null);
-  if(existing?.handoff_url)return{ok:true,reused:true,handoffId:existing.handoff_id,handoffUrl:existing.handoff_url,expiresAt:existing.expires_at};
+  if(existing?.handoff_url){
+    let alive=false;
+    try{
+      const probe=await fetch(existing.handoff_url,{method:'GET',redirect:'manual',headers:{'User-Agent':'ToolScout-Auth-Plane/1.0'},signal:AbortSignal.timeout(5000)});
+      alive=probe.status===200;
+      try{await probe.body?.cancel()}catch{}
+    }catch{}
+    if(alive)return{ok:true,reused:true,handoffId:existing.handoff_id,handoffUrl:existing.handoff_url,expiresAt:existing.expires_at};
+    await env.DB.prepare(`UPDATE auth_handoff SET status='failed',result_json=?,updated_at=datetime('now') WHERE handoff_id=?`)
+      .bind(JSON.stringify({error:'broker_session_lost',reconciledAt:new Date().toISOString()}),existing.handoff_id).run().catch(()=>{});
+  }
   const vault=await vaultRow(env,cap.domain);
   let initialState=null;
   if(vault){try{initialState=await decryptState(env,cap.domain,vault)}catch{}}
