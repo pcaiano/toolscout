@@ -26,12 +26,14 @@ async function authoritySnapshot(env){
       (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
       (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) queue,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','stalled')) runnable_queue,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status='deferred') deferred_queue,
       (SELECT COUNT(*) FROM growth_action_events WHERE status='prepared' AND engine IN ('distribution_route','distribution_network','vendor_amplification')) prepared,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_claimed,
       (SELECT MAX(claimed_at) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_newest_claimed_at,
       (SELECT MIN(claimed_at) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_oldest_claimed_at`),
     all(env,`SELECT event_type,status,detail,created_at FROM distribution_events
-      WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent','vendor_outreach_failed','publisher_network_outreach_failed','authority_closed_loop_external_attempt','authority_closed_loop_handoff_ready','authority_external_handoff_pending','authority_external_handoff_timeout','authority_queue_without_external_handoff')
+      WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent','vendor_outreach_failed','publisher_network_outreach_failed','authority_closed_loop_external_attempt','authority_closed_loop_handoff_ready','authority_external_handoff_pending','authority_external_handoff_timeout','authority_queue_without_external_handoff','authority_backlog_awaiting_qualification')
       ORDER BY created_at DESC LIMIT 8`),
     all(env,`SELECT task_id,subject_type,subject_key,action,status,claimed_at,attempted_at,updated_at
       FROM growth_execution_contract WHERE executor='make_sender' AND status IN ('claimed','attempted','verified','blocked')
@@ -44,7 +46,7 @@ async function authoritySnapshot(env){
   const senderFreshClaim=senderClaimed>0&&senderClaimAgeMinutes!==null&&senderClaimAgeMinutes<=SENDER_HANDOFF_TIMEOUT_MINUTES;
   const senderWarning=senderFreshClaim&&senderClaimAgeMinutes>SENDER_HANDOFF_WARN_MINUTES;
   return {
-    attempts24:num(row?.attempts24),queue:num(row?.queue),prepared:num(row?.prepared),senderClaimed,
+    attempts24:num(row?.attempts24),queue:num(row?.queue),runnableQueue:num(row?.runnable_queue),deferredQueue:num(row?.deferred_queue),prepared:num(row?.prepared),senderClaimed,
     senderNewestClaimedAt,senderOldestClaimedAt,senderClaimAgeMinutes,senderFreshClaim,senderWarning,
     senderHandoffTimeoutMinutes:SENDER_HANDOFF_TIMEOUT_MINUTES,recentEvents,recentTasks
   };
@@ -53,6 +55,7 @@ function authorityStatus(state){
   if(state.senderFreshClaim)return'waiting_external_confirmation';
   if(state.senderClaimed>0)return'external_handoff_timeout';
   if(state.queue<=0)return'queue_drained';
+  if(state.runnableQueue<=0&&state.deferredQueue>0)return'qualifying_backlog';
   if(state.attempts24>=AUTHORITY_ATTEMPT_MIN_24H)return'executing_backlog';
   return'execution_required';
 }
@@ -174,20 +177,23 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   };
   const coreStagesOk=stages.submissionPackage&&stages.submissionExecute&&stages.submissionVerify&&stages.autonomous&&stages.network&&stages.coordination&&stages.execution&&stages.senderHandoff;
 
+  const qualifyingBacklog=coreStagesOk&&!externalAttemptObserved&&!handoffReady&&after.runnableQueue<=0&&after.deferredQueue>0;
   if(externalAttemptObserved){
     await recordEvent(env,'authority_closed_loop_external_attempt','completed',`Closed-loop authority recovery increased real external attempts from ${before.attempts24} to ${after.attempts24}.`);
   }else if(handoffReady){
     await normalizeFalseAsyncFailure(env,after);
     await recordEvent(env,'authority_external_handoff_pending','pending',`Authority pipeline reached the external sender. ${after.senderClaimed} task(s) claimed; oldest claim age ${after.senderClaimAgeMinutes??0} min. No external attempt is counted until callback confirmation.`);
+  }else if(qualifyingBacklog){
+    await recordEvent(env,'authority_backlog_awaiting_qualification','pending',`Authority backlog contains ${after.deferredQueue} deferred opportunity task(s) and no currently runnable external route. This is acquisition inventory awaiting fresh route/contact evidence, not an execution failure. Total backlog ${after.queue}.`);
   }else{
     const failed=Object.entries(stages).filter(([,ok])=>!ok).map(([name])=>name).join(',')||'external_sender_no_candidate';
-    await recordEvent(env,'authority_queue_without_external_handoff','failed',`Authority pipeline produced no verified external attempt and no sender handoff. Failed or empty stage: ${failed}. Queue ${after.queue}; prepared ${after.prepared}; sender claimed ${after.senderClaimed}.`);
+    await recordEvent(env,'authority_queue_without_external_handoff','failed',`Authority pipeline produced no verified external attempt and no sender handoff while runnable work remained. Failed or empty stage: ${failed}. Queue ${after.queue}; runnable ${after.runnableQueue}; deferred ${after.deferredQueue}; prepared ${after.prepared}; sender claimed ${after.senderClaimed}.`);
   }
 
   return {
-    ok:coreStagesOk&&(externalAttemptObserved||handoffReady),
-    status:externalAttemptObserved?'external_attempt_confirmed':handoffReady?'pending_external_confirmation':'failed',
-    reason:(!externalAttemptObserved&&!handoffReady)?'authority_queue_without_external_handoff':null,
+    ok:coreStagesOk&&(externalAttemptObserved||handoffReady||qualifyingBacklog),
+    status:externalAttemptObserved?'external_attempt_confirmed':handoffReady?'pending_external_confirmation':qualifyingBacklog?'qualifying_backlog':'failed',
+    reason:(!externalAttemptObserved&&!handoffReady&&!qualifyingBacklog)?'authority_queue_without_external_handoff':null,
     pendingExternalConfirmation:!externalAttemptObserved&&handoffReady,
     pipelineClosed:coreStagesOk,externalAttemptObserved,handoffReady,handoffCandidateCount:handoffItems.length,stages,before,after,
     submissionPackage:submissionPackage.payload||submissionPackage.error||null,submissionExecute:submissionExecute.payload||submissionExecute.error||null,submissionVerify:submissionVerify.payload||submissionVerify.error||null,
