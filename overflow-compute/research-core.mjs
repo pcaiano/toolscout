@@ -301,12 +301,16 @@ export function runtimeStats(){
 export async function researchJob(job){
   const started=Date.now();
   try{
-    let result;
-    if(job?.type==='distribution_route_research'||job?.type==='contact_route_research')result=await researchDistribution(job);
-    else if(job?.type==='publisher_role_email_research'||job?.type==='vendor_role_email_research'||job?.type==='contact_supply_public_research')result=await researchRoleEmail(job);
-    else if(job?.type==='authorized_http_action')result=await executeAuthorizedHttpAction(job);
-    else if(job?.type==='authorized_verification')result=await executeAuthorizedVerification(job);
-    else result={ok:false,error:'unsupported_job_type'};
+    const work=(async()=>{
+      if(job?.type==='distribution_route_research'||job?.type==='contact_route_research')return researchDistribution(job);
+      if(job?.type==='publisher_role_email_research'||job?.type==='vendor_role_email_research'||job?.type==='contact_supply_public_research')return researchRoleEmail(job);
+      if(job?.type==='authorized_http_action')return executeAuthorizedHttpAction(job);
+      if(job?.type==='authorized_verification')return executeAuthorizedVerification(job);
+      return {ok:false,error:'unsupported_job_type'};
+    })();
+    const deadlineMs=(job?.type==='contact_supply_public_research'||job?.type==='publisher_role_email_research'||job?.type==='vendor_role_email_research')?45000:60000;
+    const timeout=new Promise(resolve=>setTimeout(()=>resolve({ok:false,error:'job_deadline_exceeded',deadlineMs}),deadlineMs));
+    const result=await Promise.race([work,timeout]);
     return{jobId:job?.jobId||null,...result,durationMs:Date.now()-started};
   }catch(error){return{jobId:job?.jobId||null,ok:false,error:safe(error?.message||error,500),durationMs:Date.now()-started}}
 }
