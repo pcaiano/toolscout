@@ -14,7 +14,7 @@ function rateAllowed(){
   if(recentCalls.length>=30)return false;
   recentCalls.push(now);return true;
 }
-async function runBatch(batchId){
+async function runBatch(batchId,completionToken){
   if(active.has(batchId))return;
   active.add(batchId);
   try{
@@ -25,7 +25,7 @@ async function runBatch(batchId){
     const results=await runResearchBatch(jobs,{concurrency:MAX_CONCURRENCY});
     const complete=await fetch(`${TOOLSCOUT_BASE_URL}/api/compute/batches/${encodeURIComponent(batchId)}/complete`,{
       method:'POST',
-      headers:{'Authorization':`Bearer ${payload.completionToken}`,'Content-Type':'application/json','User-Agent':'ToolScout-Overflow-Render/1.0'},
+      headers:{'Authorization':`Bearer ${completionToken}`,'Content-Type':'application/json','User-Agent':'ToolScout-Overflow-Render/1.0'},
       body:JSON.stringify({results,executor:'render-overflow-v1'}),
       signal:AbortSignal.timeout(45000)
     });
@@ -35,7 +35,12 @@ async function runBatch(batchId){
   }finally{active.delete(batchId)}
 }
 
-const server=http.createServer((req,res)=>{
+async function readJson(req,maxBytes=16384){
+  let data='';for await(const chunk of req){data+=chunk;if(Buffer.byteLength(data)>maxBytes)throw new Error('body_too_large')}
+  if(!data)return{};return JSON.parse(data);
+}
+
+const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
   if(req.method==='GET'&&url.pathname==='/health')return json(res,200,{ok:true,service:'toolscout-overflow',runtime:'node',activeBatches:active.size,maxConcurrency:MAX_CONCURRENCY,...runtimeStats()});
   const m=url.pathname.match(/^\/tick\/(cob_[0-9a-f-]{36})$/i);
@@ -43,7 +48,10 @@ const server=http.createServer((req,res)=>{
     if(!rateAllowed())return json(res,429,{ok:false,error:'rate_limited'});
     if(!allowedBatchId(m[1]))return json(res,400,{ok:false,error:'invalid_batch_id'});
     if(active.size>=4)return json(res,429,{ok:false,error:'worker_busy',activeBatches:active.size});
-    void runBatch(m[1]);
+    let body={};try{body=await readJson(req)}catch(error){return json(res,400,{ok:false,error:String(error?.message||'invalid_json')})}
+    const completionToken=String(body?.completionToken||'');
+    if(!/^[0-9a-f-]{36}\.[0-9a-f-]{36}$/i.test(completionToken))return json(res,400,{ok:false,error:'invalid_completion_capability'});
+    void runBatch(m[1],completionToken);
     return json(res,202,{ok:true,accepted:true,batchId:m[1],activeBatches:active.size+1});
   }
   return json(res,404,{ok:false,error:'not_found'});
