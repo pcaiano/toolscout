@@ -355,7 +355,13 @@ async function publicCandidates(env,limit=8){
             SELECT 1 FROM distribution_vendor_amplification prior
             WHERE prior.status='sent'
               AND prior.outreach_sent_at>=datetime('now','-30 days')
-              AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')))
+              AND (prior.tool_slug=v.tool_slug OR lower(COALESCE(prior.contact_email,''))=lower(COALESCE(v.contact_email,'')) OR lower(COALESCE(prior.vendor_domain,''))=lower(COALESCE(v.vendor_domain,'')))
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM distribution_network_outreach prior_network
+            WHERE prior_network.status IN ('sent','adopted')
+              AND prior_network.outreach_sent_at>=datetime('now','-30 days')
+              AND lower(COALESCE(prior_network.domain,''))=lower(COALESCE(v.vendor_domain,''))
           )
         ORDER BY v.priority_score DESC LIMIT 1`).bind(task.subject_key).first();
 
@@ -395,8 +401,18 @@ async function publicCandidates(env,limit=8){
 
     if(task.subject_type==='surface'){
       const row=await env.DB.prepare(`SELECT surface_slug,surface_name,source_url,priority_score,domain,contact_email,contact_source_url,suggested_subject,suggested_body,public_dispatch_token,public_dispatch_leased_at
-        FROM distribution_network_outreach
-        WHERE surface_slug=? AND status='contact_found' AND contact_email IS NOT NULL
+        FROM distribution_network_outreach n
+        WHERE n.surface_slug=? AND n.status='contact_found' AND n.contact_email IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM distribution_network_outreach prior
+            WHERE prior.status IN ('sent','adopted') AND prior.outreach_sent_at>=datetime('now','-30 days')
+              AND (lower(COALESCE(prior.contact_email,''))=lower(COALESCE(n.contact_email,'')) OR lower(COALESCE(prior.domain,''))=lower(COALESCE(n.domain,'')))
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM distribution_vendor_amplification prior_vendor
+            WHERE prior_vendor.status='sent' AND prior_vendor.outreach_sent_at>=datetime('now','-30 days')
+              AND lower(COALESCE(prior_vendor.vendor_domain,''))=lower(COALESCE(n.domain,''))
+          )
         LIMIT 1`).bind(task.subject_key).first();
 
       if(!row){
