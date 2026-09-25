@@ -84,7 +84,7 @@ const SUPERVISOR_EXECUTOR=Object.freeze({
 const READY_CAPS=Object.freeze({
   distribution_network:1,
   distribution_autonomous:1,
-  make_sender:8,
+  make_sender:12,
   content_issue:1,
   audience_make:1,
   seo_cloudflare:4,
