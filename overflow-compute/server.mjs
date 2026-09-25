@@ -27,7 +27,7 @@ async function runBatch(batchId){
       method:'POST',
       headers:{'Authorization':`Bearer ${payload.completionToken}`,'Content-Type':'application/json','User-Agent':'ToolScout-Overflow-Render/1.0'},
       body:JSON.stringify({results,executor:'render-overflow-v1'}),
-      signal:AbortSignal.timeout(20000)
+      signal:AbortSignal.timeout(45000)
     });
     if(!complete.ok)throw new Error(`batch_complete_http_${complete.status}`);
   }catch(error){
