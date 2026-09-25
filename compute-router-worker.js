@@ -1031,8 +1031,8 @@ export default{
         runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null}),
         minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
         minute%30===0?seedContactSupply(env):Promise.resolve(null),
-        minute%15===0?authenticatedResumeSweep(env,{limit:2}):Promise.resolve(null),
-        refreshAuthBrokerRuntimeHealth(env).catch(()=>null)
+        Promise.resolve(null),
+        Promise.resolve(null)
       ]);
       if(ctx?.waitUntil)ctx.waitUntil(work);
       return;
