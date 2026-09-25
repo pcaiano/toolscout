@@ -93,11 +93,23 @@ async function reconcile(response,env){
 }
 
 const COMMAND_CENTER_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html','/command-center','/command-center/']);
-function simplifiedPage(response){
+const COMMAND_CENTER_SESSION_COOKIE='toolscout_cc';
+const COMMAND_CENTER_SESSION_TTL_SECONDS=86400;
+async function commandCenterDigestHex(value){
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'')));
+  return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+function commandCenterSessionBucket(now=Date.now()){return Math.floor(now/(COMMAND_CENTER_SESSION_TTL_SECONDS*1000))}
+async function commandCenterSessionValue(secret,bucket){return commandCenterDigestHex(`toolscout-command-center:${secret}:${bucket}`)}
+async function simplifiedPage(response,env){
   const headers=new Headers(response?.headers||undefined);
   headers.set('Content-Type','text/html; charset=UTF-8');
   headers.set('Cache-Control','private, no-store, max-age=0');
   headers.delete('Content-Length');headers.delete('Content-Encoding');
+  if(env?.ADMIN_TOKEN){
+    const value=await commandCenterSessionValue(env.ADMIN_TOKEN,commandCenterSessionBucket());
+    headers.append('Set-Cookie',`${COMMAND_CENTER_SESSION_COOKIE}=${value}; Max-Age=${COMMAND_CENTER_SESSION_TTL_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Lax`);
+  }
   return new Response(commandCenterHtml(),{status:200,headers});
 }
 
@@ -499,7 +511,7 @@ export default{
     },{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
-    if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname))return simplifiedPage(response);
+    if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname))return simplifiedPage(response,env);
     if(request.method==='GET')return injectToolScoutSocialFooter(response);
     return response;
   },
