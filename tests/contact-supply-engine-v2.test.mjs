@@ -16,6 +16,8 @@ assert.match(router,/sourceType:'catalog_vendor'/);
 assert.match(router,/source_type:'distribution_surface'/);
 assert.match(router,/status='ready_email'/);
 assert.match(router,/status='ready_route'/);
+assert.match(router,/status='cooldown'/);
+assert.match(router,/domainInOutreachCooldown/);
 assert.match(router,/apollo_status='plan_blocked'/);
 assert.match(router,/plan_blocked_people_api/);
 assert.match(router,/provider_blocked/);
