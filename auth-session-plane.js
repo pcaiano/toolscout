@@ -131,7 +131,7 @@ export async function ensureAuthPlaneSchema(env){
 function classifyRow(row){
   const slug=String(row.surface_slug||''),url=String(row.action_url||''),next=String(row.next_action||''),status=String(row.status||'');
   const lower=(url+' '+next).toLowerCase();
-  if(slug==='open-launch-com')return{authMode:'human_bootstrap_session',challengeType:'captcha_or_human_verification',state:'human_bootstrap_required',sessionReusable:1,confidence:98,evidence:'Live sign-up page verified 2026-09-25; account bootstrap and CAPTCHA/human verification required.'};
+  if(slug==='open-launch-com')return{authMode:'human_browser_only',challengeType:'captcha_or_human_verification',state:'account_bootstrap_complete',sessionReusable:0,confidence:98,evidence:'Owner created the account successfully in a normal browser on 2026-09-25. No reusable machine credential route is proven; remote browser handoff is retired.'};
   if(slug==='best-of-ai')return{authMode:'human_bootstrap_session',challengeType:'login_required',state:'human_bootstrap_required',sessionReusable:1,confidence:98,evidence:'BestOfAI /tool/add verified HTTP 401 with visible "You must be logged in" on 2026-09-25.'};
   if(/api\/|api\./i.test(url)&&/(token|api key|authentication)/i.test(next))return{authMode:'api_credential',challengeType:null,state:'credential_required',sessionReusable:0,confidence:90,evidence:safe(next,1000)};
   if(status==='auth_required'||/(sign[ -]?in|login|log in|register|sign-up|sign up)/i.test(lower))return{authMode:'reusable_session_candidate',challengeType:/captcha|turnstile|human verification/i.test(lower)?'captcha_or_human_verification':'login_required',state:'candidate',sessionReusable:1,confidence:70,evidence:safe(next,1000)};
@@ -159,7 +159,7 @@ export async function classifyAuthBacklog(env,{limit=120}={}){
     const w=await env.DB.prepare(`INSERT INTO auth_surface_capability(surface_slug,domain,action_url,auth_mode,challenge_type,automation_state,session_reusable,confidence,evidence,last_verified_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(surface_slug) DO UPDATE SET domain=excluded.domain,action_url=excluded.action_url,auth_mode=excluded.auth_mode,challenge_type=excluded.challenge_type,
-        automation_state=CASE WHEN auth_surface_capability.automation_state IN ('authenticated','route_validated') THEN auth_surface_capability.automation_state ELSE excluded.automation_state END,
+        automation_state=CASE WHEN auth_surface_capability.automation_state IN ('authenticated','route_validated','account_bootstrap_complete') THEN auth_surface_capability.automation_state ELSE excluded.automation_state END,
         session_reusable=excluded.session_reusable,confidence=MAX(auth_surface_capability.confidence,excluded.confidence),evidence=excluded.evidence,last_verified_at=datetime('now'),updated_at=datetime('now')
       WHERE auth_surface_capability.action_url IS NOT excluded.action_url OR auth_surface_capability.auth_mode IS NOT excluded.auth_mode
         OR auth_surface_capability.challenge_type IS NOT excluded.challenge_type OR auth_surface_capability.evidence IS NOT excluded.evidence
@@ -175,7 +175,7 @@ export async function classifyAuthBacklog(env,{limit=120}={}){
       await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,action_url=?,next_action=?,updated_at=datetime('now')
         WHERE surface_slug=? AND status NOT IN ('verified','live','policy_blocked','rejected')`).bind(action,instructions,row.surface_slug).run().catch(()=>{});
       await env.DB.prepare(`UPDATE human_gate_contract SET status='open',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,next_verification_at=NULL,
-        reason=?,instructions=?,action_url=?,resolution_mode='auth_session_saved',verification_detail=NULL,updated_at=datetime('now')
+        reason=?,instructions=?,action_url=?,resolution_mode='human_browser_completed',verification_detail=NULL,updated_at=datetime('now')
         WHERE gate_key=? AND status IN ('cancelled','resolved')`).bind(reason,instructions,action,gateKey).run().catch(()=>{});
       await upsertHumanGate(env,{
         engine:'distribution',subjectType:'surface',subjectKey:row.surface_slug,gateType:'authentication',
