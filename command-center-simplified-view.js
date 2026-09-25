@@ -258,7 +258,8 @@ function health(){
  const emailMax=Number(growth.emailMax24h||60);
  if(Number(growth.emailSent24h||0)>=emailMax&&Number(growth.strictHumans7d||0)===0&&Number(growth.verifiedOutbound7d||0)===0)issues.push({level:'warn',title:'Email capacity saturated without measured yield',detail:n(growth.emailSent24h)+' emails in the rolling 24h window reached the '+n(emailMax)+' hard cap while strict humans and verified outbound remain 0 / 7d. Keep quality gates and rotate recipient/source supply before adding more volume.'});
  if(compute.status&&compute.status!=='configured')issues.push({level:'warn',title:'External compute plane',detail:'Compute overflow reports '+human(compute.status)+'.'});
- if(auth.status==='configured'&&auth.brokerRuntime&&auth.brokerRuntime.ok===false)issues.push({level:'bad',title:'Auth broker unavailable',detail:human(auth.brokerRuntime.error||'Browser runtime health check failed.')});
+ if(auth.status==='configured'&&auth.brokerRuntime&&auth.brokerRuntime.serviceOk===false)issues.push({level:'bad',title:'Auth broker unavailable',detail:human(auth.brokerRuntime.error||'Auth broker service health check failed.')});
+ if(auth.status==='configured'&&auth.brokerRuntime?.serviceOk===true&&auth.brokerRuntime?.browserVerified===false)issues.push({level:'warn',title:'Auth browser diagnostic delayed',detail:'Auth broker service is live; Chromium diagnostic reports '+human(auth.brokerRuntime.diagnosticStatus||'degraded')+'. This does not block the control plane unless an auth handoff itself fails.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh, authority, external compute and Auth Plane have no current measurable failure.'});
  const rows=[
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
