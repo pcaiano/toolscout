@@ -902,9 +902,6 @@ export async function runAutonomousDistributionCycle(env){
   await env.DB.prepare(`UPDATE distribution_opportunities
     SET status='ready_to_submit',human_required=0,next_action='Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements.',updated_at=datetime('now')
     WHERE surface_slug='indexnow' AND status='skipped' AND next_action='Technical infrastructure host excluded from distribution discovery.'`).run().catch(()=>{});
-  await env.DB.prepare(`UPDATE engine_runs
-    SET status='failed',completed_at=datetime('now'),detail='superseded_by_healthy_autonomous_cycle',evidence_json='{"reason":"superseded_by_healthy_autonomous_cycle"}',updated_at=datetime('now')
-    WHERE engine='distribution' AND mission='autonomous_cycle' AND status='running' AND started_at<datetime('now','-5 minutes')`).run().catch(()=>{});
   await ensureHumanGateSchema(env);
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
@@ -947,7 +944,7 @@ export default {
     const u=new URL(request.url);
     if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){
       if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      const cycleContext=missionCycleContextFromRequest(request,'distribution','autonomous_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api',cycleContext,cycleOwner},()=>runAutonomousDistributionCycle(env)),{headers:H});
+      const cycleContext=missionCycleContextFromRequest(request,'distribution','autonomous_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api',singleFlightMinutes:15,cycleContext,cycleOwner},()=>runAutonomousDistributionCycle(env)),{headers:H});
     }
     if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){
       if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
