@@ -61,7 +61,22 @@ async function ensureSchema(env){
       batch_id TEXT,
       detail TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`)
+    )`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_metrics(
+      id TEXT PRIMARY KEY,
+      metric_day TEXT NOT NULL DEFAULT (date('now')),
+      queued INTEGER NOT NULL DEFAULT 0,
+      leased INTEGER NOT NULL DEFAULT 0,
+      completed_today INTEGER NOT NULL DEFAULT 0,
+      failed_today INTEGER NOT NULL DEFAULT 0,
+      created_today INTEGER NOT NULL DEFAULT 0,
+      active_batches INTEGER NOT NULL DEFAULT 0,
+      completed_batches_today INTEGER NOT NULL DEFAULT 0,
+      last_dispatched_at TEXT,
+      last_completed_at TEXT,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_metrics(id,metric_day) VALUES('global',date('now'))`)
   ]).catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
@@ -70,29 +85,34 @@ async function event(env,eventType,status,detail,{jobId=null,batchId=null}={}){
   try{await env.DB.prepare(`INSERT INTO compute_overflow_events(event_id,event_type,status,job_id,batch_id,detail,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
     .bind(`coe_${crypto.randomUUID()}`,eventType,status,jobId,batchId,safe(detail,1800)).run()}catch{}
 }
-async function health(env){
+async function resetMetricsDay(env){
   await ensureSchema(env);
-  const [jobs,batches]=await Promise.all([
-    env.DB.prepare(`SELECT
-      SUM(CASE WHEN status='queued' THEN 1 ELSE 0 END) queued,
-      SUM(CASE WHEN status='leased' THEN 1 ELSE 0 END) leased,
-      SUM(CASE WHEN status='completed' AND completed_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) completed_24h,
-      SUM(CASE WHEN status='failed' AND updated_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) failed_24h,
-      SUM(CASE WHEN created_at>=date('now') THEN 1 ELSE 0 END) created_today,
-      MAX(completed_at) last_completed_at
-      FROM compute_overflow_jobs`).first().catch(()=>null),
-    env.DB.prepare(`SELECT
-      SUM(CASE WHEN status IN ('dispatched','running') THEN 1 ELSE 0 END) active,
-      SUM(CASE WHEN status='completed' AND completed_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) completed_24h,
-      MAX(dispatched_at) last_dispatched_at
-      FROM compute_overflow_batches`).first().catch(()=>null)
-  ]);
+  await env.DB.prepare(`UPDATE compute_overflow_metrics SET metric_day=date('now'),completed_today=0,failed_today=0,created_today=0,completed_batches_today=0,updated_at=datetime('now') WHERE id='global' AND metric_day<>date('now')`).run().catch(()=>{});
+}
+async function metricRow(env){
+  await resetMetricsDay(env);
+  return env.DB.prepare(`SELECT metric_day,queued,leased,completed_today,failed_today,created_today,active_batches,completed_batches_today,last_dispatched_at,last_completed_at FROM compute_overflow_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+}
+async function metricDelta(env,{queued=0,leased=0,completed=0,failed=0,created=0,activeBatches=0,completedBatches=0,lastDispatched=false,lastCompleted=false}={}){
+  await resetMetricsDay(env);
+  await env.DB.prepare(`UPDATE compute_overflow_metrics SET
+      queued=MAX(0,queued+?),leased=MAX(0,leased+?),
+      completed_today=MAX(0,completed_today+?),failed_today=MAX(0,failed_today+?),created_today=MAX(0,created_today+?),
+      active_batches=MAX(0,active_batches+?),completed_batches_today=MAX(0,completed_batches_today+?),
+      last_dispatched_at=CASE WHEN ? THEN datetime('now') ELSE last_dispatched_at END,
+      last_completed_at=CASE WHEN ? THEN datetime('now') ELSE last_completed_at END,
+      updated_at=datetime('now')
+    WHERE id='global'`).bind(queued,leased,completed,failed,created,activeBatches,completedBatches,lastDispatched?1:0,lastCompleted?1:0).run().catch(()=>{});
+}
+async function health(env){
+  const m=await metricRow(env);
   return {
     status:env.OVERFLOW_COMPUTE_URL?'configured':'awaiting_external_runtime',
     providerUrl:env.OVERFLOW_COMPUTE_URL?(()=>{try{return new URL(env.OVERFLOW_COMPUTE_URL).origin}catch{return null}})():null,
     dailyJobBudget:DAILY_JOB_BUDGET,batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
-    queued:num(jobs?.queued),leased:num(jobs?.leased),completed24h:num(jobs?.completed_24h),failed24h:num(jobs?.failed_24h),createdToday:num(jobs?.created_today),
-    activeBatches:num(batches?.active),completedBatches24h:num(batches?.completed_24h),lastDispatchedAt:batches?.last_dispatched_at||null,lastCompletedAt:jobs?.last_completed_at||null,
+    queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
+    activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
+    d1ReadModel:'single_row_metrics_no_job_table_scans',
     githubActionsRole:'disabled_until_october'
   };
 }
@@ -106,8 +126,8 @@ async function enqueueJob(env,{jobKey,jobType,subjectType,subjectKey,priority,pa
 }
 async function enqueueDistributionResearch(env){
   await ensureSchema(env);
-  const used=await env.DB.prepare(`SELECT COUNT(*) n FROM compute_overflow_jobs WHERE created_at>=date('now')`).first().catch(()=>({n:0}));
-  let remaining=Math.max(0,DAILY_JOB_BUDGET-num(used?.n));
+  const m=await metricRow(env);
+  let remaining=Math.max(0,DAILY_JOB_BUDGET-num(m?.created_today));
   if(!remaining)return{enqueued:0,remaining:0};
   const limit=Math.min(500,remaining);
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action
@@ -128,24 +148,26 @@ async function enqueueDistributionResearch(env){
       enqueued+=contactAdded;remaining=Math.max(0,remaining-contactAdded);
     }
   }
+  if(enqueued>0)await metricDelta(env,{queued:enqueued,created:enqueued});
   return{enqueued,remaining};
 }
 async function requeueStaleBatches(env){
   await ensureSchema(env);
-  const stale=await env.DB.prepare(`SELECT batch_id FROM compute_overflow_batches
+  const stale=await env.DB.prepare(`SELECT batch_id,job_count FROM compute_overflow_batches
     WHERE status IN ('dispatched','running') AND dispatched_at<=datetime('now','-${BATCH_TIMEOUT_MINUTES} minutes') LIMIT 20`).all().catch(()=>({results:[]}));
   let requeued=0;
   for(const row of rows(stale)){
     const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now'),last_error='batch_timeout_requeued',updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(row.batch_id).run();
-    requeued+=Number(w?.meta?.changes||w?.changes||0);
+    const changed=Number(w?.meta?.changes||w?.changes||0);requeued+=changed;
     await env.DB.prepare(`UPDATE compute_overflow_batches SET status='timed_out',last_error='completion_timeout',updated_at=datetime('now') WHERE batch_id=?`).bind(row.batch_id).run();
+    if(changed>0)await metricDelta(env,{queued:changed,leased:-changed,activeBatches:-1});
   }
   return requeued;
 }
 async function createBatch(env){
   await ensureSchema(env);
-  const active=await env.DB.prepare(`SELECT COUNT(*) n FROM compute_overflow_batches WHERE status IN ('dispatched','running') AND dispatched_at>datetime('now','-${BATCH_TIMEOUT_MINUTES} minutes')`).first().catch(()=>({n:0}));
-  if(num(active?.n)>=MAX_ACTIVE_BATCHES)return null;
+  const m=await metricRow(env);
+  if(num(m?.active_batches)>=MAX_ACTIVE_BATCHES)return null;
   const q=await env.DB.prepare(`SELECT job_id FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(BATCH_SIZE).all().catch(()=>({results:[]}));
   const ids=rows(q).map(x=>x.job_id).filter(Boolean);
   if(!ids.length)return null;
@@ -153,10 +175,13 @@ async function createBatch(env){
   const completionToken=`${crypto.randomUUID()}.${crypto.randomUUID()}`;
   const tokenHash=await sha256(completionToken);
   await env.DB.prepare(`INSERT INTO compute_overflow_batches(batch_id,completion_token_hash,status,job_count,dispatched_at,created_at,updated_at) VALUES(?,?,'dispatched',?,datetime('now'),datetime('now'),datetime('now'))`).bind(batchId,tokenHash,ids.length).run();
+  let leased=0;
   for(const id of ids){
-    await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='leased',batch_id=?,leased_at=datetime('now'),attempts=attempts+1,updated_at=datetime('now') WHERE job_id=? AND status='queued'`).bind(batchId,id).run();
+    const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='leased',batch_id=?,leased_at=datetime('now'),attempts=attempts+1,updated_at=datetime('now') WHERE job_id=? AND status='queued'`).bind(batchId,id).run();
+    leased+=Number(w?.meta?.changes||w?.changes||0);
   }
-  return{batchId,completionToken,count:ids.length};
+  if(leased>0)await metricDelta(env,{queued:-leased,leased,activeBatches:1,lastDispatched:true});
+  return{batchId,completionToken,count:leased};
 }
 async function triggerBatch(env,batch){
   if(!env.OVERFLOW_COMPUTE_URL||!batch)return{ok:false,reason:'overflow_runtime_not_configured'};
@@ -168,20 +193,22 @@ async function triggerBatch(env,batch){
     await event(env,'overflow_batch_dispatched','completed',`Dispatched ${batch.count} research job(s) to external compute.`,{batchId:batch.batchId});
     return{ok:true,httpStatus:response.status};
   }catch(error){
-    await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now','+5 minutes'),last_error=?,updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(safe(error?.message||error,300),batch.batchId).run();
+    const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now','+5 minutes'),last_error=?,updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(safe(error?.message||error,300),batch.batchId).run();
+    const restored=Number(w?.meta?.changes||w?.changes||0);
     await env.DB.prepare(`UPDATE compute_overflow_batches SET status='trigger_failed',last_error=?,updated_at=datetime('now') WHERE batch_id=?`).bind(safe(error?.message||error,300),batch.batchId).run();
+    if(restored>0)await metricDelta(env,{queued:restored,leased:-restored,activeBatches:-1});
     await event(env,'overflow_batch_dispatch_failed','failed',safe(error?.message||error,500),{batchId:batch.batchId});
     return{ok:false,error:safe(error?.message||error,500)};
   }
 }
 async function runOverflowTick(env){
+  if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
   const requeued=await requeueStaleBatches(env);
-  if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime',requeued,health:await health(env)};
   const enqueue=await enqueueDistributionResearch(env);
   const batch=await createBatch(env);
-  const dispatch=batch?await triggerBatch(env,batch):{ok:true,skipped:true,reason:'no_batch_available'};
-  return{ok:dispatch.ok!==false,status:batch?'dispatched':'idle',enqueue,requeued,batch:batch?{batchId:batch.batchId,count:batch.count}:null,dispatch,health:await health(env)};
+  const dispatch=batch&&batch.count>0?await triggerBatch(env,batch):{ok:true,skipped:true,reason:'no_batch_available'};
+  return{ok:dispatch.ok!==false,status:batch&&batch.count>0?'dispatched':'idle',enqueue,requeued,batch:batch&&batch.count>0?{batchId:batch.batchId,count:batch.count}:null,dispatch};
 }
 async function batchPayload(env,batchId){
   await ensureSchema(env);
@@ -268,6 +295,8 @@ async function completeBatch(request,env,ctx,batchId){
   }
   await env.DB.prepare(`UPDATE compute_overflow_batches SET status='completed',completed_at=datetime('now'),result_summary_json=?,updated_at=datetime('now') WHERE batch_id=?`)
     .bind(JSON.stringify({completed,failed,applied,missing:num(unresolved?.n)}),batchId).run();
+  const missing=num(unresolved?.n);
+  await metricDelta(env,{leased:-(completed+failed+missing),queued:missing,completed,failed,activeBatches:-1,completedBatches:1,lastCompleted:true});
   await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} successful and ${failed} failed research job(s); ${applied} canonical records were advanced.`,{batchId});
   if(ctx&&env.ADMIN_TOKEN&&applied>0){
     const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
@@ -277,7 +306,7 @@ async function completeBatch(request,env,ctx,batchId){
     ]);
     ctx.waitUntil(refresh);
   }
-  return Response.json({ok:true,batchId,completed,failed,applied,missing:num(unresolved?.n)},{headers:JSON_H});
+  return Response.json({ok:true,batchId,completed,failed,applied,missing},{headers:JSON_H});
 }
 async function serveBatch(env,batchId){
   const out=await batchPayload(env,batchId);
