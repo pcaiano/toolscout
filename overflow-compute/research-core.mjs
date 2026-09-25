@@ -141,6 +141,20 @@ function responseEvidenceFromText(text,endpoint){
     return walk(parsed);
   }catch{return null}
 }
+async function safeSameHostGet(start,headers,maxHops=3){
+  let current=start;
+  for(let i=0;i<=maxHops;i++){
+    if(!validPublicHttp(current)||!sameHost(start,current))return{ok:false,status:0,url:current,error:'unsafe_redirect_target'};
+    const r=await fetch(current,{method:'GET',headers,redirect:'manual',signal:AbortSignal.timeout(12000)});
+    if(r.status>=300&&r.status<400){
+      const next=absolute(r.headers.get('location')||'',current);
+      if(!next||!sameHost(start,next))return{ok:false,status:r.status,url:current,error:'cross_host_redirect_blocked'};
+      current=next;continue;
+    }
+    return{ok:r.ok,status:r.status,url:current,response:r};
+  }
+  return{ok:false,status:0,url:current,error:'redirect_limit'};
+}
 async function executeAuthorizedHttpAction(job){
   const p=job?.payload||{},endpoint=String(p.endpoint||''),method=String(p.method||'POST').toUpperCase(),contentType=String(p.contentType||'application/json').toLowerCase(),body=String(p.body||'');
   if(p.authorizationClass!=='verified_free_auto_adapter_v1')return{ok:false,error:'authorization_class_rejected'};
@@ -149,22 +163,23 @@ async function executeAuthorizedHttpAction(job){
   if(!['application/json','application/x-www-form-urlencoded'].includes(contentType))return{ok:false,error:'content_type_not_authorized'};
   if(body.length>50000)return{ok:false,error:'body_too_large'};
   try{
-    const response=await fetch(endpoint,{
-      method,
-      headers:{'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout External Execution/1.0 (+https://trytoolscout.org/)'},
-      body,redirect:'manual',signal:AbortSignal.timeout(15000)
-    });
+    const headers={'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout External Execution/1.0 (+https://trytoolscout.org/)'};
+    const response=await fetch(endpoint,{method,headers,body,redirect:'manual',signal:AbortSignal.timeout(15000)});
     const location=response.headers.get('location');
-    let evidenceUrl=null,finalUrl=endpoint;
-    if(location){
+    let evidenceUrl=null,finalUrl=endpoint,httpStatus=response.status,accepted=response.ok;
+    if(response.status>=300&&response.status<400&&location){
       const next=absolute(location,endpoint);
-      if(next&&sameHost(endpoint,next)){evidenceUrl=next;finalUrl=next;}
+      if(next&&sameHost(endpoint,next)){
+        evidenceUrl=next;finalUrl=next;
+        const followed=await safeSameHostGet(next,{'Accept':headers.Accept,'User-Agent':headers['User-Agent']},2);
+        accepted=followed.ok;httpStatus=followed.status||response.status;finalUrl=followed.url||next;
+      }
     }
     let text='';
     try{text=(await response.text()).slice(0,12000)}catch{}
     if(!evidenceUrl)evidenceUrl=responseEvidenceFromText(text,endpoint);
     return{
-      ok:response.ok,httpStatus:response.status,targetUrl:endpoint,finalUrl,evidenceUrl,
+      ok:accepted,httpStatus,targetUrl:endpoint,finalUrl,evidenceUrl,
       responseType:safe(response.headers.get('content-type')||'',160),
       authorizationClass:p.authorizationClass
     };
@@ -175,9 +190,8 @@ async function executeAuthorizedVerification(job){
   if(p.authorizationClass!=='verified_publication_check_v1')return{ok:false,error:'authorization_class_rejected'};
   if(!validPublicHttp(target))return{ok:false,error:'invalid_or_private_target'};
   try{
-    const response=await fetch(target,{method:'GET',headers:{'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout External Verifier/1.0 (+https://trytoolscout.org/)'},redirect:'follow',signal:AbortSignal.timeout(12000)});
-    const finalUrl=validPublicHttp(response.url||'')&&sameHost(target,response.url)?response.url:target;
-    return{ok:response.ok,httpStatus:response.status,targetUrl:target,finalUrl,authorizationClass:p.authorizationClass};
+    const r=await safeSameHostGet(target,{'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout External Verifier/1.0 (+https://trytoolscout.org/)'},3);
+    return{ok:r.ok,httpStatus:r.status,targetUrl:target,finalUrl:r.url||target,error:r.error||null,authorizationClass:p.authorizationClass};
   }catch(error){return{ok:false,httpStatus:0,targetUrl:target,error:safe(error?.message||error,500),authorizationClass:p.authorizationClass}}
 }
 export async function researchJob(job){
