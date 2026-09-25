@@ -207,6 +207,46 @@ async function enqueueDistributionResearch(env){
       enqueued+=contactAdded;remaining=Math.max(0,remaining-contactAdded);
     }
   }
+  if(remaining>0){
+    const network=await env.DB.prepare(`SELECT surface_slug,domain,source_url,contact_source_url,priority_score,status
+      FROM distribution_network_outreach
+      WHERE contact_email IS NULL AND status IN ('queued','contact_route_found')
+      ORDER BY priority_score DESC,updated_at ASC LIMIT ?`).bind(Math.min(120,remaining)).all().catch(()=>({results:[]}));
+    for(const row of rows(network)){
+      if(remaining<=0)break;
+      const url=isHttp(row.contact_source_url)?row.contact_source_url:row.source_url;
+      if(!isHttp(url)||!row.domain)continue;
+      const keyHash=await shortHash(url);
+      const added=await enqueueJob(env,{
+        jobKey:`publisher-email:${row.surface_slug}:${keyHash}`,
+        jobType:'publisher_role_email_research',
+        subjectType:'surface',subjectKey:row.surface_slug,
+        priority:900+num(row.priority_score),
+        payload:{url,domain:row.domain,surfaceSlug:row.surface_slug,authorizationClass:'public_role_email_discovery_v1'}
+      });
+      enqueued+=added;remaining=Math.max(0,remaining-added);
+    }
+  }
+  if(remaining>0){
+    const vendors=await env.DB.prepare(`SELECT tool_slug,vendor_domain,asset_url,priority_score,status
+      FROM distribution_vendor_amplification
+      WHERE contact_email IS NULL AND vendor_domain IS NOT NULL AND status='fallback_exhausted'
+      ORDER BY priority_score DESC,updated_at ASC LIMIT ?`).bind(Math.min(120,remaining)).all().catch(()=>({results:[]}));
+    for(const row of rows(vendors)){
+      if(remaining<=0)break;
+      const url=`https://${String(row.vendor_domain||'').replace(/^https?:\/\//,'').replace(/\/$/,'')}/`;
+      if(!isHttp(url))continue;
+      const keyHash=await shortHash(url);
+      const added=await enqueueJob(env,{
+        jobKey:`vendor-email:${row.tool_slug}:${keyHash}`,
+        jobType:'vendor_role_email_research',
+        subjectType:'tool',subjectKey:row.tool_slug,
+        priority:880+num(row.priority_score),
+        payload:{url,domain:row.vendor_domain,toolSlug:row.tool_slug,assetUrl:row.asset_url,authorizationClass:'public_role_email_discovery_v1'}
+      });
+      enqueued+=added;remaining=Math.max(0,remaining-added);
+    }
+  }
   if(enqueued>0){await metricDelta(env,{queued:enqueued,created:enqueued});await budgetConsume(env,'research',enqueued);}
   return{enqueued,remaining};
 }
@@ -492,6 +532,44 @@ async function applyAuthorizedVerificationResult(env,job,result){
   await env.DB.prepare(`UPDATE distribution_opportunities SET last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(slug).run().catch(()=>{});
   return{applied:true,verified:false,httpStatus};
 }
+function roleMailbox(email){
+  const m=String(email||'').trim().toLowerCase().match(/^([^@\s]+)@([^@\s]+)$/);
+  if(!m)return null;
+  if(!/^(editorial|editor|partnerships?|partners?|submissions?|submit|newsletter|press|media|growth|marketing|hello|contact|team|info)([._+-].*)?$/.test(m[1]))return null;
+  return{email:m[0],local:m[1],domain:m[2].replace(/^www\./,'')};
+}
+function domainFamily(a,b){
+  const x=String(a||'').toLowerCase().replace(/^www\./,''),y=String(b||'').toLowerCase().replace(/^www\./,'');
+  return Boolean(x&&y)&&(x===y||x.endsWith('.'+y)||y.endsWith('.'+x));
+}
+async function applyRoleEmailResult(env,job,result){
+  let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
+  if(payload.authorizationClass!=='public_role_email_discovery_v1')return{applied:false,reason:'email_discovery_contract_mismatch'};
+  const emails=Array.isArray(result?.roleEmails)?result.roleEmails:[];
+  const candidate=emails.map(x=>({...x,parsed:roleMailbox(x?.email)})).find(x=>x.parsed&&domainFamily(x.parsed.domain,payload.domain));
+  if(!candidate)return{applied:false,reason:'no_public_same_domain_role_email'};
+  if(job.job_type==='publisher_role_email_research'){
+    const w=await env.DB.prepare(`UPDATE distribution_network_outreach SET contact_email=?,contact_source_url=?,contact_checked_at=datetime('now'),status='contact_found',updated_at=datetime('now')
+      WHERE surface_slug=? AND contact_email IS NULL AND status IN ('queued','contact_route_found')`)
+      .bind(candidate.parsed.email,safe(candidate.sourceUrl||payload.url,2000),job.subject_key).run().catch(()=>null);
+    const changed=Number(w?.meta?.changes||w?.changes||0);
+    if(changed)await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,detail,observed_at,created_at)
+      VALUES(?,?, 'publisher_contact_found','completed',?,?,datetime('now'),datetime('now'))`)
+      .bind(`overflow_email_${crypto.randomUUID()}`,job.subject_key,safe(candidate.sourceUrl||payload.url,2000),'Render discovered a public same-domain role mailbox; Cloudflare validated it before admitting email outreach.').run().catch(()=>{});
+    return{applied:changed>0,email:candidate.parsed.email};
+  }
+  if(job.job_type==='vendor_role_email_research'){
+    const w=await env.DB.prepare(`UPDATE distribution_vendor_amplification SET contact_email=?,contact_source_url=?,contact_method='public_role_email',status='contact_found',updated_at=datetime('now')
+      WHERE tool_slug=? AND contact_email IS NULL AND status='fallback_exhausted'`)
+      .bind(candidate.parsed.email,safe(candidate.sourceUrl||payload.url,2000),job.subject_key).run().catch(()=>null);
+    const changed=Number(w?.meta?.changes||w?.changes||0);
+    if(changed)await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at)
+      VALUES(?, 'vendor_contact_found','completed','vendor_amplification',?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`overflow_vendor_email_${crypto.randomUUID()}`,job.subject_key,safe(candidate.sourceUrl||payload.url,2000),'Render discovered a public same-domain role mailbox; Cloudflare validated it before admitting email outreach.').run().catch(()=>{});
+    return{applied:changed>0,email:candidate.parsed.email};
+  }
+  return{applied:false,reason:'unsupported_email_research_job'};
+}
 async function completeBatch(request,env,ctx,batchId){
   await ensureSchema(env);
   const batch=await env.DB.prepare(`SELECT batch_id,status,completion_token_hash FROM compute_overflow_batches WHERE batch_id=? LIMIT 1`).bind(batchId).first();
@@ -512,6 +590,7 @@ async function completeBatch(request,env,ctx,batchId){
     else if(ok){
       if(job.job_type==='distribution_route_research'){const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0}
       else if(job.job_type==='contact_route_research'){const a=await applyContactResult(env,job,result);applied+=num(a.applied)}
+      else if(job.job_type==='publisher_role_email_research'||job.job_type==='vendor_role_email_research'){const a=await applyRoleEmailResult(env,job,result);applied+=a.applied?1:0}
     }
     await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
       .bind(ok?'completed':'failed',JSON.stringify(result).slice(0,24000),ok?null:safe(result?.error||'external_compute_failed',600),jobId).run();
