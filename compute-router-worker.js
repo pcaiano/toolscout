@@ -147,14 +147,20 @@ async function budgetConsume(env,kind,count){
   await env.DB.prepare(`UPDATE compute_overflow_budget SET used_today=used_today+?,updated_at=datetime('now') WHERE kind=?`).bind(n,kind).run().catch(()=>{});
 }
 async function health(env){
-  const m=await metricRow(env);
+  const [m,budgets]=await Promise.all([
+    metricRow(env),
+    env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]}))
+  ]);
+  const usage=Object.fromEntries(rows(budgets).map(x=>[String(x.kind),num(x.used_today)]));
   return {
     status:env.OVERFLOW_COMPUTE_URL?'configured':'awaiting_external_runtime',
     providerUrl:env.OVERFLOW_COMPUTE_URL?(()=>{try{return new URL(env.OVERFLOW_COMPUTE_URL).origin}catch{return null}})():null,
-    dailyJobBudget:DAILY_JOB_BUDGET,executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
+    dailyJobBudget:DAILY_JOB_BUDGET,researchUsedToday:num(usage.research),
+    executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
+    batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
-    d1ReadModel:'single_row_metrics_no_job_table_scans',
+    d1ReadModel:'single_row_metrics_plus_two_budget_rows',
     githubActionsRole:'disabled_until_october'
   };
 }
