@@ -126,6 +126,7 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
   if(req.method==='GET'&&url.pathname==='/health')return json(res,200,{ok:true,service:'toolscout-auth-broker',activeSessions:sessions.size,maxSessions:MAX_SESSIONS,captchaPolicy:'human_only_no_bypass',passwordStorage:false});
   if(req.method==='GET'&&url.pathname==='/browser-health'){
+    if(!authorized(req))return json(res,401,{error:'unauthorized'});
     let context=null;
     try{
       const b=await browser();
