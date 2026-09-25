@@ -89,9 +89,32 @@ async function resetMetricsDay(env){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE compute_overflow_metrics SET metric_day=date('now'),completed_today=0,failed_today=0,created_today=0,completed_batches_today=0,updated_at=datetime('now') WHERE id='global' AND metric_day<>date('now')`).run().catch(()=>{});
 }
+async function reconcileMetricAnomaly(env,m){
+  const looksImpossible=num(m?.active_batches)===0&&num(m?.leased)>0;
+  if(!looksImpossible)return m;
+  const [jobs,batches]=await Promise.all([
+    env.DB.prepare(`SELECT
+      SUM(CASE WHEN status='queued' THEN 1 ELSE 0 END) queued,
+      SUM(CASE WHEN status='leased' THEN 1 ELSE 0 END) leased,
+      SUM(CASE WHEN status='completed' AND completed_at>=date('now') THEN 1 ELSE 0 END) completed_today,
+      SUM(CASE WHEN status='failed' AND updated_at>=date('now') THEN 1 ELSE 0 END) failed_today,
+      SUM(CASE WHEN created_at>=date('now') THEN 1 ELSE 0 END) created_today,
+      MAX(completed_at) last_completed_at
+      FROM compute_overflow_jobs`).first().catch(()=>null),
+    env.DB.prepare(`SELECT
+      SUM(CASE WHEN status IN ('dispatched','running') THEN 1 ELSE 0 END) active_batches,
+      SUM(CASE WHEN status='completed' AND completed_at>=date('now') THEN 1 ELSE 0 END) completed_batches_today,
+      MAX(dispatched_at) last_dispatched_at
+      FROM compute_overflow_batches`).first().catch(()=>null)
+  ]);
+  await env.DB.prepare(`UPDATE compute_overflow_metrics SET queued=?,leased=?,completed_today=?,failed_today=?,created_today=?,active_batches=?,completed_batches_today=?,last_dispatched_at=COALESCE(?,last_dispatched_at),last_completed_at=COALESCE(?,last_completed_at),updated_at=datetime('now') WHERE id='global'`)
+    .bind(num(jobs?.queued),num(jobs?.leased),num(jobs?.completed_today),num(jobs?.failed_today),num(jobs?.created_today),num(batches?.active_batches),num(batches?.completed_batches_today),batches?.last_dispatched_at||null,jobs?.last_completed_at||null).run().catch(()=>{});
+  return env.DB.prepare(`SELECT metric_day,queued,leased,completed_today,failed_today,created_today,active_batches,completed_batches_today,last_dispatched_at,last_completed_at FROM compute_overflow_metrics WHERE id='global' LIMIT 1`).first().catch(()=>m);
+}
 async function metricRow(env){
   await resetMetricsDay(env);
-  return env.DB.prepare(`SELECT metric_day,queued,leased,completed_today,failed_today,created_today,active_batches,completed_batches_today,last_dispatched_at,last_completed_at FROM compute_overflow_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+  const m=await env.DB.prepare(`SELECT metric_day,queued,leased,completed_today,failed_today,created_today,active_batches,completed_batches_today,last_dispatched_at,last_completed_at FROM compute_overflow_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+  return reconcileMetricAnomaly(env,m);
 }
 async function metricDelta(env,{queued=0,leased=0,completed=0,failed=0,created=0,activeBatches=0,completedBatches=0,lastDispatched=false,lastCompleted=false}={}){
   await resetMetricsDay(env);
@@ -287,7 +310,8 @@ async function completeBatch(request,env,ctx,batchId){
     }
     await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
       .bind(ok?'completed':'failed',JSON.stringify(result).slice(0,24000),ok?null:safe(result?.error||'external_compute_failed',600),jobId).run();
-    if(ok)completed++;else failed++;
+    if(ok){completed++;await metricDelta(env,{leased:-1,completed:1,lastCompleted:true});}
+    else{failed++;await metricDelta(env,{leased:-1,failed:1,lastCompleted:true});}
   }
   const unresolved=await env.DB.prepare(`SELECT COUNT(*) n FROM compute_overflow_jobs WHERE batch_id=? AND status='leased'`).bind(batchId).first().catch(()=>({n:0}));
   if(num(unresolved?.n)>0){
@@ -296,7 +320,7 @@ async function completeBatch(request,env,ctx,batchId){
   await env.DB.prepare(`UPDATE compute_overflow_batches SET status='completed',completed_at=datetime('now'),result_summary_json=?,updated_at=datetime('now') WHERE batch_id=?`)
     .bind(JSON.stringify({completed,failed,applied,missing:num(unresolved?.n)}),batchId).run();
   const missing=num(unresolved?.n);
-  await metricDelta(env,{leased:-(completed+failed+missing),queued:missing,completed,failed,activeBatches:-1,completedBatches:1,lastCompleted:true});
+  await metricDelta(env,{leased:-missing,queued:missing,activeBatches:-1,completedBatches:1,lastCompleted:true});
   await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} successful and ${failed} failed research job(s); ${applied} canonical records were advanced.`,{batchId});
   if(ctx&&env.ADMIN_TOKEN&&applied>0){
     const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
