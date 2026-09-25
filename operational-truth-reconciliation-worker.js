@@ -326,7 +326,7 @@ async function buildCommandCenterBusinessTruth(request,env){
   else if(truthNum(growth.attributed_humans_7d)>0){currentGrowthStatus='working';currentGrowthDirective='scale_proven_human_sources_and_existing_search_demand'}
   return {
     ok:true,
-    version:'command-center-business-truth-v3',
+    version:'command-center-business-truth-v4-hybrid-execution',
     generatedAt:new Date().toISOString(),
     growth:{
       status:currentGrowthStatus,
