@@ -239,7 +239,7 @@ async function enqueueAuthorizedExecution(env){
     }
     const keyHash=await shortHash(`${a.endpoint}|${method}|${contentType}|${a.payload_template_json}`);
     const added=await enqueueJob(env,{
-      jobKey:`execute:${a.surface_slug}:${submissionId}:${keyHash}`,
+      jobKey:`execute:${a.surface_slug}:${submissionId}:attempt:${num(prior?.attempts)+1}:${keyHash}`,
       jobType:'authorized_http_action',
       subjectType:'surface',subjectKey:a.surface_slug,
       priority:1200+num(a.distribution_score),
@@ -267,8 +267,9 @@ async function enqueueAuthorizedExecution(env){
       const target=[row.response_url,row.verification_endpoint,row.public_url].find(isHttp);
       if(!target)continue;
       const keyHash=await shortHash(target);
+      const verifyBucket=Math.floor(Date.now()/(6*3600000));
       const added=await enqueueJob(env,{
-        jobKey:`verify:${row.surface_slug}:${row.submission_id}:${keyHash}`,
+        jobKey:`verify:${row.surface_slug}:${row.submission_id}:bucket:${verifyBucket}:${keyHash}`,
         jobType:'authorized_verification',
         subjectType:'surface',subjectKey:row.surface_slug,
         priority:1100+num(row.distribution_score),
@@ -405,7 +406,7 @@ function safeSameHostEvidence(endpoint,value){
   }catch{return null}
 }
 async function currentAdapterAuthorization(env,slug,payload){
-  const row=await env.DB.prepare(`SELECT a.endpoint,a.method,a.content_type,a.policy_state,a.confidence,
+  const row=await env.DB.prepare(`SELECT a.endpoint,a.method,a.content_type,a.payload_template_json,a.policy_state,a.confidence,
       COALESCE(c.cost_amount,0) cost_amount,o.status opportunity_status
     FROM distribution_auto_adapters a
     JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
@@ -417,6 +418,9 @@ async function currentAdapterAuthorization(env,slug,payload){
   if(String(row.endpoint||'')!==String(payload.endpoint||''))return{ok:false,reason:'endpoint_changed'};
   if(String(row.method||'POST').toUpperCase()!==String(payload.method||'POST').toUpperCase())return{ok:false,reason:'method_changed'};
   if(String(row.content_type||'application/json').toLowerCase()!==String(payload.contentType||'application/json').toLowerCase())return{ok:false,reason:'content_type_changed'};
+  let currentPayload={};try{currentPayload=JSON.parse(row.payload_template_json||'{}')}catch{return{ok:false,reason:'payload_template_invalid'}}
+  if(encodedAdapterBody(row.content_type,currentPayload)!==String(payload.body||''))return{ok:false,reason:'payload_changed'};
+  if(['policy_blocked','rejected','skipped','unavailable_free'].includes(String(row.opportunity_status||'')))return{ok:false,reason:'opportunity_no_longer_authorized'};
   return{ok:true,row};
 }
 async function applyAuthorizedActionResult(env,job,result){
