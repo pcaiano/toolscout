@@ -46,6 +46,8 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 <script>
 const endpoints={stats:'/analytics/api/stats',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
 let data={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+const sourceErrors={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+let sessionRefreshPromise=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const n=v=>Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable';
 const dec=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'Unavailable';
@@ -85,10 +87,31 @@ function donut(value,target){
 
 function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','active','supporting','completed','verified','refreshed','connected','observed','emerging','configured','live','route_validated','authenticated'].includes(v))return'good';if(['critical','failed','stalled','blocked','unavailable','execution_gap','evidence_stale','executor_stale','ineffective'].includes(v))return'bad';return'warn'}
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
+async function refreshCommandCenterSession(){
+ if(sessionRefreshPromise)return sessionRefreshPromise;
+ sessionRefreshPromise=fetch('/analytics?session_refresh='+Date.now(),{method:'GET',credentials:'same-origin',cache:'no-store'})
+  .then(r=>{if(!r.ok)throw new Error('session_refresh_'+r.status);return true})
+  .finally(()=>{sessionRefreshPromise=null});
+ return sessionRefreshPromise;
+}
+async function ccFetch(url,options={},retrySession=true){
+ const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...options});
+ if(r.status===401&&retrySession){
+  let body={};try{body=await r.clone().json()}catch{}
+  if(body?.error==='command_center_session_expired'){
+   await refreshCommandCenterSession();
+   return ccFetch(url,options,false);
+  }
+ }
+ return r;
+}
 async function get(url,fresh=false){
  const target=fresh?url+(url.includes('?')?'&':'?')+'fresh=1':url;
- const r=await fetch(target,{credentials:'same-origin',cache:'no-store'});
- if(!r.ok)throw new Error(String(r.status));
+ const r=await ccFetch(target);
+ if(!r.ok){
+  let body={};try{body=await r.clone().json()}catch{}
+  const err=new Error(body?.error||String(r.status));err.status=r.status;err.code=body?.error||null;throw err;
+ }
  return r.json();
 }
 function business(){
@@ -230,10 +253,17 @@ function taskHtml(x){
   (!isReputation&&x.engine==='distribution'?'<button class="btn danger" data-resolve="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+'</div></div>';
 }
 function queue(){
- const q=data.queue||data?.stats?.growthOps?.chairmanQueue||{items:[],total:0,estimated_minutes:0};
- const items=Array.isArray(q.items)?q.items:[];
- document.getElementById('queueMeta').textContent=items.length?n(q.total)+' current':'Clear';
+ const q=data.queue||data?.stats?.growthOps?.chairmanQueue||null;
+ if(!q&&sourceErrors.queue){
+  document.getElementById('queueMeta').textContent='Unavailable';
+  document.getElementById('queueBody').innerHTML='<div class="issue warn"><b>Chairman Queue could not refresh.</b>This is a source/session error, not an empty queue. The Command Center will retry automatically.</div>';
+  return;
+ }
+ const safeQ=q||{items:[],total:0,estimated_minutes:0};
+ const items=Array.isArray(safeQ.items)?safeQ.items:[];
+ document.getElementById('queueMeta').textContent=items.length?n(safeQ.total)+' current':(sourceErrors.queue?'Last known state':'Clear');
  document.getElementById('queueBody').innerHTML=items.length?items.map(taskHtml).join(''):'<div class="empty"><b>No owner action is ready.</b><br><br>Incomplete or machine-resolvable tasks stay out of this queue.</div>';
+ if(sourceErrors.queue&&items.length)document.getElementById('queueBody').insertAdjacentHTML('afterbegin','<div class="issue warn"><b>Queue refresh delayed.</b>Showing the last successful queue state while the source retries.</div>');
 }
 function results(){
  const t=data?.truth||{},items=Array.isArray(t.recentResults)?t.recentResults.slice(0,14):[],activity=Array.isArray(t.growthActivity)?t.growthActivity[0]:null,action=Array.isArray(t.growthActions)?t.growthActions[0]:null;
@@ -283,7 +313,7 @@ async function reviewReputation(button){
  if(!kind||!key||!verdict)return;
  const old=button.textContent;button.disabled=true;button.textContent=verdict==='false_positive'?'Sending…':'Saving';
  try{
-  const r=await fetch('/analytics/api/reputation-review',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind,key,verdict})});
+  const r=await ccFetch('/analytics/api/reputation-review',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind,key,verdict})});
   const j=await r.json().catch(()=>({}));
   if(!r.ok||j.ok===false)throw new Error(j.error||'review_failed');
   data.queue=await get(endpoints.queue);queue();health();
@@ -293,7 +323,7 @@ async function startAuthHandoff(button){
  const slug=button.dataset.authHandoff||'';if(!slug)return;
  const old=button.textContent;button.disabled=true;button.textContent='Starting secure session...';
  try{
-  const r=await fetch('/analytics/api/human-actions/auth-handoff',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({surface_slug:slug})});
+  const r=await ccFetch('/analytics/api/human-actions/auth-handoff',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({surface_slug:slug})});
   const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.error||'auth_handoff_failed');
   button.disabled=false;button.textContent=old;if(j.handoff_url)window.open(j.handoff_url,'_blank','noopener,noreferrer');
   data.queue=await get(endpoints.queue);queue();health();
@@ -308,7 +338,7 @@ async function resolveTask(button){
   const endpoint=gate?'/analytics/api/human-actions/gate':engine==='distribution'?'/analytics/api/distribution-human-action':'/analytics/api/affiliate-human-action';
   const affiliateEvent=status==='human_action_required'?'completed':'submitted';
   const body=gate?{gate_key:gate,result_url:resultUrl}:engine==='distribution'?{surface_slug:id,action}:{tool_slug:id,event:affiliateEvent,evidence:'Confirmed from simplified Command Center'};
-  const r=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));
+  const r=await ccFetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));
   if(!r.ok||j.ok===false)throw new Error(j.error||'save_failed');data.queue=await get(endpoints.queue);queue();health();
  }catch(e){button.textContent='Save failed';setTimeout(()=>{button.disabled=false;button.textContent=old},1500)}
 }
@@ -327,7 +357,10 @@ async function fetchKeys(keys,{fresh=false,announce=false}={}){
  if(announce){btn.disabled=true;document.getElementById('status').innerHTML='<strong>Refreshing current evidence...</strong>'}
  const results=await Promise.all(keys.map(async k=>{try{return[k,await get(endpoints[k],fresh),null]}catch(e){return[k,null,String(e?.message||e)]}}));
  const failures=[];
- for(const [k,v,e] of results){if(v!==null)data[k]=v;if(e)failures.push(k)}
+ for(const [k,v,e] of results){
+   if(v!==null){data[k]=v;sourceErrors[k]=null}
+   if(e){sourceErrors[k]=e;failures.push(k)}
+ }
  render();
  if(announce){
    const stamp=new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'});
