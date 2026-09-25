@@ -280,6 +280,27 @@ async function seedContactSupply(env){
     WHERE contact_email IS NULL AND EXISTS(
       SELECT 1 FROM distribution_network_outreach n WHERE lower(n.domain)=contact_supply_domain.domain AND n.contact_email IS NOT NULL
     )`).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE contact_supply_domain SET status='cooldown',updated_at=datetime('now')
+    WHERE contact_email IS NOT NULL AND status='ready_email' AND (
+      EXISTS(SELECT 1 FROM distribution_vendor_amplification sent WHERE lower(sent.vendor_domain)=contact_supply_domain.domain AND sent.status='sent' AND sent.outreach_sent_at>=datetime('now','-30 days'))
+      OR EXISTS(SELECT 1 FROM distribution_network_outreach sent WHERE lower(sent.domain)=contact_supply_domain.domain AND sent.status IN ('sent','adopted') AND sent.outreach_sent_at>=datetime('now','-30 days'))
+    )`).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE contact_supply_domain SET status='ready_email',updated_at=datetime('now')
+    WHERE contact_email IS NOT NULL AND status='cooldown'
+      AND NOT EXISTS(SELECT 1 FROM distribution_vendor_amplification sent WHERE lower(sent.vendor_domain)=contact_supply_domain.domain AND sent.status='sent' AND sent.outreach_sent_at>=datetime('now','-30 days'))
+      AND NOT EXISTS(SELECT 1 FROM distribution_network_outreach sent WHERE lower(sent.domain)=contact_supply_domain.domain AND sent.status IN ('sent','adopted') AND sent.outreach_sent_at>=datetime('now','-30 days'))`).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE distribution_vendor_amplification SET
+      contact_email=(SELECT cs.contact_email FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_vendor_amplification.vendor_domain) AND cs.status='ready_email' LIMIT 1),
+      contact_source_url=COALESCE(contact_source_url,(SELECT cs.contact_source_url FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_vendor_amplification.vendor_domain) AND cs.status='ready_email' LIMIT 1)),
+      contact_method='public_role_email',status='contact_found',updated_at=datetime('now')
+    WHERE contact_email IS NULL AND status NOT IN ('sent','reputation_quarantine')
+      AND EXISTS(SELECT 1 FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_vendor_amplification.vendor_domain) AND cs.status='ready_email' AND cs.contact_email IS NOT NULL)`).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE distribution_network_outreach SET
+      contact_email=(SELECT cs.contact_email FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_network_outreach.domain) AND cs.status='ready_email' LIMIT 1),
+      contact_source_url=COALESCE(contact_source_url,(SELECT cs.contact_source_url FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_network_outreach.domain) AND cs.status='ready_email' LIMIT 1)),
+      contact_checked_at=datetime('now'),status='contact_found',updated_at=datetime('now')
+    WHERE contact_email IS NULL AND status NOT IN ('sent','adopted','reputation_quarantine')
+      AND EXISTS(SELECT 1 FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_network_outreach.domain) AND cs.status='ready_email' AND cs.contact_email IS NOT NULL)`).run().catch(()=>{});
   const metrics=await refreshContactSupplyMetrics(env);
   await event(env,'contact_supply_seeded','completed',`Contact Supply Engine reconciled domain inventory. Ready email buffer ${num(metrics?.ready_email)}/${CONTACT_SUPPLY_TARGET}; catalog/network/vendor sources deduplicated by domain.`);
   return{seeded,metrics};
