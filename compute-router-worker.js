@@ -8,6 +8,7 @@ const BATCH_SIZE=25;
 const MAX_ACTIVE_BATCHES=2;
 const BATCH_TIMEOUT_MINUTES=3;
 let schemaReady=null;
+let hotIndexesReady=null;
 
 function safe(v,n=4000){return String(v??'').slice(0,n)}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
@@ -88,6 +89,16 @@ async function ensureSchema(env){
     env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('execution',date('now'),0)`)
   ]).catch(error=>{schemaReady=null;throw error});
   return schemaReady;
+}
+async function ensureHotIndexes(env){
+  if(hotIndexesReady)return hotIndexesReady;
+  hotIndexesReady=Promise.allSettled([
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_opportunities_overflow ON distribution_opportunities(human_required,status,distribution_score DESC,updated_at)`).run(),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_lookup ON distribution_submissions(surface_slug,submission_type,asset_url,status)`).run(),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_verify ON distribution_submissions(submission_type,status,submitted_at)`).run(),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_auto_adapters_policy ON distribution_auto_adapters(policy_state,confidence,surface_slug)`).run()
+  ]).catch(error=>{hotIndexesReady=null;throw error});
+  return hotIndexesReady;
 }
 async function event(env,eventType,status,detail,{jobId=null,batchId=null}={}){
   await ensureSchema(env);
@@ -341,6 +352,7 @@ async function triggerBatch(env,batch){
 async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
+  await ensureHotIndexes(env);
   const requeued=await requeueStaleBatches(env);
   const execution=await enqueueAuthorizedExecution(env);
   const research=await enqueueDistributionResearch(env);
