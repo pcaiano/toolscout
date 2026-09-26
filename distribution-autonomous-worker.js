@@ -369,13 +369,8 @@ async function qualifyOne(env,row){
     await mark(env,effectiveRow,'policy_blocked','policy_blocker');
     return 'policy_blocked';
   }
-  if(HUMAN_BLOCK_RE.test(h.body)||(relatedPolicy&&HUMAN_BLOCK_RE.test(relatedPolicy))){
-    const reason='Autonomous research exhausted safe routes and detected a genuine human-only gate such as CAPTCHA, explicit confirmation or material terms acceptance.';
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
-    await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'human_confirmation',actionUrl:h.url,reason});
-    await mark(env,{...effectiveRow,action_url:h.url},'human_action_required','hard_human_gate');
-    return 'human_action_required';
-  }
+  // Try machine-safe routes before treating page-wide human/auth signals as blockers.
+  // A navigation login link or unrelated CAPTCHA widget must not hide a safe submission form.
   const adapter=await findOpenApi(h.url,h.body);
   if(adapter){
     if(adapter.auth_required){
@@ -397,6 +392,13 @@ async function qualifyOne(env,row){
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=90,acceptance_probability=65,next_action='Verified same-host no-auth form adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
     await mark(env,effectiveRow,'ready_to_submit',`verified_safe_form_adapter:${formAdapter.endpoint}`);
     return 'ready_to_submit';
+  }
+  if(HUMAN_BLOCK_RE.test(h.body)||(relatedPolicy&&HUMAN_BLOCK_RE.test(relatedPolicy))){
+    const reason='Autonomous research exhausted safe machine routes and detected a genuine human-only gate such as CAPTCHA, explicit confirmation or material terms acceptance.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'human_confirmation',actionUrl:h.url,reason});
+    await mark(env,{...effectiveRow,action_url:h.url},'human_action_required','hard_human_gate');
+    return 'human_action_required';
   }
   const linkedActionUrls=[...new Set(links(h.body,h.url)
     .filter(u=>u!==h.url&&sameHostFamily(u,h.url)&&ACTION_ROUTE_RE.test(u))
