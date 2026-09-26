@@ -749,6 +749,20 @@ async function continueDistributionExecutionHandoff(env,surfaceSlugs=[]){
     {surfaceSlugs:slugs.slice(0,25)}).catch(()=>{});
   return{ok:qualification?.ok!==false&&execution?.ok!==false,status:'closed_loop_handoff',surfaceCount:slugs.length,qualification,execution,dispatchSlotsUsed:runs.length,dispatches:runs.map(x=>x.dispatch)};
 }
+async function qualifyResearchReadySweep(env){
+  const q=await env.DB.prepare(`SELECT surface_slug
+    FROM distribution_opportunities
+    WHERE human_required=0
+      AND action_url IS NOT NULL
+      AND status IN ('candidate','discovered','research_required')
+      AND surface_slug<>'indexnow'
+    ORDER BY distribution_score DESC,COALESCE(last_checked_at,'1970-01-01') ASC
+    LIMIT 25`).all().catch(()=>({results:[]}));
+  const slugs=rows(q).map(x=>safe(x.surface_slug,120)).filter(Boolean);
+  if(!slugs.length)return{ok:true,requested:0,checked:0,ready:0};
+  return qualifyDistributionSurfaces(env,slugs);
+}
+
 async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
@@ -756,16 +770,17 @@ async function runOverflowTick(env){
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
   const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
   const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
+  const qualification=await isolatedOverflowStage(env,'canonical_qualification_sweep',()=>qualifyResearchReadySweep(env),{ok:false,requested:0,checked:0,ready:0});
   const execution=await isolatedOverflowStage(env,'authorized_execution_enqueue',()=>enqueueAuthorizedExecution(env),{enqueued:0,submissionJobs:0,verificationJobs:0,remaining:0});
   const research=await isolatedOverflowStage(env,'research_enqueue',()=>enqueueDistributionResearch(env),{enqueued:0,remaining:0,contactSupply:{enqueued:0}});
   const runs=await dispatchAvailableBatches(env);
   const first=runs[0]||null;
   const dispatched=runs.filter(x=>x.dispatch?.ok).length;
-  const failedStages=[contactSupply,execution,research].filter(x=>x&&x.ok===false).length;
+  const failedStages=[contactSupply,qualification,execution,research].filter(x=>x&&x.ok===false).length;
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,execution,research,requeued,
+    ok,status,contactSupply,qualification,execution,research,requeued,
     batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
@@ -786,7 +801,12 @@ function sameHostRoute(source,target){
     return ['http:','https:'].includes(b.protocol)&&(ah===bh||ah.endsWith('.'+bh)||bh.endsWith('.'+ah));
   }catch{return false}
 }
-const OVERFLOW_SAFE_FORM_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
+const OVERFLOW_SAFE_FORM_FIELDS=new Set([
+  'name','title','product_name','tool_name','startup_name','company','company_name',
+  'url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website',
+  'description','short_description','summary','overview','tagline',
+  'category','categories','industry','type','slug','domain'
+]);
 function validatedOverflowMachineCandidate(sourceUrl,route,result){
   const c=route?.machineCandidate;
   if(!c||String(route?.kind||'')!=='submission'||route?.auth||route?.captcha)return null;
@@ -1161,7 +1181,13 @@ async function augmentRuntime(response,env){
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(request.method==='GET'&&u.pathname==='/api/compute/health')return Response.json(await health(env),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/compute/health'){
+      const snapshot=await health(env);
+      if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.queued)>0&&num(snapshot.activeBatches)===0){
+        ctx.waitUntil(runOverflowTick(env).catch(async error=>{await event(env,'health_watchdog_pump_failed','failed',safe(error?.message||error,600)).catch(()=>{});return null;}));
+      }
+      return Response.json(snapshot,{headers:JSON_H});
+    }
     if(request.method==='GET'&&u.pathname==='/api/contact-supply/health')return Response.json(await contactSupplyHealth(env),{headers:JSON_H});
     if(request.method==='POST'&&u.pathname==='/api/contact-supply/refresh'){
       const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
