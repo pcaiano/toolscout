@@ -1,5 +1,6 @@
 import base from './operational-truth-reconciliation-worker.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
+import {qualifyDistributionSurfaces} from './distribution-autonomous-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/5 * * * *';
@@ -147,6 +148,7 @@ async function ensureHotIndexes(env){
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_lookup ON distribution_submissions(surface_slug,submission_type,asset_url,status)`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_verify ON distribution_submissions(submission_type,status,submitted_at)`).run(),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_auto_adapters_policy ON distribution_auto_adapters(policy_state,confidence,surface_slug)`).run(),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_type_status_completed ON compute_overflow_jobs(job_type,status,completed_at)`).run(),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS auth_automation_capability(
       surface_slug TEXT PRIMARY KEY,
       automation_class TEXT NOT NULL,
@@ -426,12 +428,29 @@ async function budgetConsume(env,kind,count){
   await env.DB.prepare(`UPDATE compute_overflow_budget SET used_today=used_today+?,updated_at=datetime('now') WHERE kind=?`).bind(n,kind).run().catch(()=>{});
 }
 async function health(env){
-  const [m,budgets,contactSupply]=await Promise.all([
+  const [m,budgets,contactSupply,funnel]=await Promise.all([
     metricRow(env),
     env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]})),
-    contactSupplyHealth(env)
+    contactSupplyHealth(env),
+    env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) research_completed_today,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"kind":"submission"%') submission_routes_found_today,
+      (SELECT COUNT(*) FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit') adapters_ready,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND created_at>=datetime('now','start of day')) actions_authorized_today,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status='completed' AND completed_at>=datetime('now','start of day')) actions_completed_today,
+      (SELECT COUNT(*) FROM distribution_submissions WHERE submission_type='auto_discovered_json' AND status IN ('submitted','pending_review','verified') AND COALESCE(submitted_at,last_attempt_at,created_at)>=datetime('now','start of day')) submissions_accepted_today,
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE status IN ('verified','live') AND updated_at>=datetime('now','start of day')) placements_verified_today`).first().catch(()=>null)
   ]);
   const usage=Object.fromEntries(rows(budgets).map(x=>[String(x.kind),num(x.used_today)]));
+  const distributionFunnel={
+    researchCompletedToday:num(funnel?.research_completed_today),
+    submissionRoutesFoundToday:num(funnel?.submission_routes_found_today),
+    adaptersReady:num(funnel?.adapters_ready),
+    actionsAuthorizedToday:num(funnel?.actions_authorized_today),
+    actionsCompletedToday:num(funnel?.actions_completed_today),
+    submissionsAcceptedToday:num(funnel?.submissions_accepted_today),
+    placementsVerifiedToday:num(funnel?.placements_verified_today)
+  };
   return {
     status:env.OVERFLOW_COMPUTE_URL?'configured':'awaiting_external_runtime',
     providerUrl:env.OVERFLOW_COMPUTE_URL?(()=>{try{return new URL(env.OVERFLOW_COMPUTE_URL).origin}catch{return null}})():null,
@@ -441,8 +460,8 @@ async function health(env){
     distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
     queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
-    contactSupply,
-    d1ReadModel:'single_row_metrics_plus_two_budget_rows_plus_contact_supply_single_row',
+    contactSupply,distributionFunnel,
+    d1ReadModel:'single_row_metrics_plus_two_budget_rows_plus_contact_supply_single_row_plus_distribution_funnel',
     githubActionsRole:'disabled_until_october',
     writeAmplificationGuard:'d1-write-guard-v1'
   };
@@ -703,6 +722,18 @@ async function dispatchAvailableBatches(env){
     if(dispatch?.reason==='overflow_runtime_not_configured')break;
   }
   return runs;
+}
+
+async function continueDistributionExecutionHandoff(env,surfaceSlugs=[]){
+  const slugs=[...new Set((Array.isArray(surfaceSlugs)?surfaceSlugs:[]).map(x=>safe(x,120)).filter(Boolean))].slice(0,BATCH_SIZE);
+  if(!slugs.length)return{ok:true,status:'no_distribution_handoff',qualified:0,executionEnqueued:0,dispatchSlotsUsed:0};
+  const qualification=await isolatedOverflowStage(env,'research_handoff_qualification',()=>qualifyDistributionSurfaces(env,slugs),{ok:false,checked:0,ready:0});
+  const execution=await isolatedOverflowStage(env,'research_handoff_execution_enqueue',()=>enqueueAuthorizedExecution(env),{ok:false,enqueued:0,submissionJobs:0,verificationJobs:0});
+  const runs=await dispatchAvailableBatches(env);
+  await event(env,'distribution_research_execution_handoff',qualification?.ok===false?'partial':'completed',
+    `Research handoff processed ${slugs.length} surface(s): ${num(qualification?.checked)} canonically qualified, ${num(qualification?.ready)} machine-ready, ${num(execution?.submissionJobs)} machine-safe submission job(s) authorized; ${runs.filter(x=>x.dispatch?.ok).length} batch(es) dispatched.`,
+    {surfaceSlugs:slugs.slice(0,25)}).catch(()=>{});
+  return{ok:qualification?.ok!==false&&execution?.ok!==false,status:'closed_loop_handoff',surfaceCount:slugs.length,qualification,execution,dispatchSlotsUsed:runs.length,dispatches:runs.map(x=>x.dispatch)};
 }
 async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
@@ -980,6 +1011,7 @@ async function completeBatch(request,env,ctx,batchId){
   let body={};try{body=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_H})}
   const results=Array.isArray(body.results)?body.results.slice(0,BATCH_SIZE):[];
   let completed=0,failed=0,retried=0,applied=0,contactSupplyTouched=false;
+  const distributionHandoffSlugs=[];
   let metricQueued=0,metricLeased=0,metricCompleted=0,metricFailed=0;
   for(const result of results){
     const jobId=safe(result?.jobId,120);if(!jobId)continue;
@@ -992,7 +1024,10 @@ async function completeBatch(request,env,ctx,batchId){
       contactSupplyTouched=true;
       const a=ok?await applyContactSupplyResult(env,job,result):await applyContactSupplyFailure(env,job,result);applied+=a.applied?1:0;
     }else if(ok){
-      if(job.job_type==='distribution_route_research'){const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0}
+      if(job.job_type==='distribution_route_research'){
+        const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0;
+        if(a.applied&&a.slug)distributionHandoffSlugs.push(a.slug);
+      }
       else if(job.job_type==='contact_route_research'){const a=await applyContactResult(env,job,result);applied+=num(a.applied)}
       else if(job.job_type==='publisher_role_email_research'||job.job_type==='vendor_role_email_research'){const a=await applyRoleEmailResult(env,job,result);applied+=a.applied?1:0}
     }
@@ -1024,15 +1059,19 @@ async function completeBatch(request,env,ctx,batchId){
   await metricDelta(env,{queued:metricQueued,leased:metricLeased,completed:metricCompleted,failed:metricFailed,activeBatches:-1,completedBatches:1,lastCompleted:true});
   if(contactSupplyTouched)await refreshContactSupplyMetrics(env);
   await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} completed, ${retried} externally-unreachable retry, and ${failed} operationally failed job(s); ${applied} canonical records were advanced.`,{batchId});
+  const handoffSlugs=[...new Set(distributionHandoffSlugs)].slice(0,BATCH_SIZE);
+  if(handoffSlugs.length){
+    const handoffWork=continueDistributionExecutionHandoff(env,handoffSlugs).catch(async error=>{
+      await event(env,'distribution_research_execution_handoff','failed',safe(error?.message||error,600),{batchId}).catch(()=>{});
+      return null;
+    });
+    if(ctx?.waitUntil)ctx.waitUntil(handoffWork);else await handoffWork;
+  }
   if(ctx&&env.ADMIN_TOKEN&&applied>0){
     const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
-    const refresh=Promise.allSettled([
-      base.fetch(new Request('https://trytoolscout.org/api/distribution/autonomous/refresh',{method:'POST',headers}),env,ctx),
-      base.fetch(new Request('https://trytoolscout.org/api/distribution/network/refresh',{method:'POST',headers}),env,ctx)
-    ]);
-    ctx.waitUntil(refresh);
+    ctx.waitUntil(base.fetch(new Request('https://trytoolscout.org/api/distribution/network/refresh',{method:'POST',headers}),env,ctx).catch(()=>null));
   }
-  return Response.json({ok:true,batchId,completed,failed,retried,applied,missing},{headers:JSON_H});
+  return Response.json({ok:true,batchId,completed,failed,retried,applied,missing,distributionHandoff:handoffSlugs.length},{headers:JSON_H});
 }
 async function serveBatch(env,batchId){
   const out=await batchPayload(env,batchId);
