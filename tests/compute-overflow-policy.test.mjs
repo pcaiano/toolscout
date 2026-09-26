@@ -21,6 +21,8 @@ assert.match(router,/continueDistributionExecutionHandoff/);
 assert.match(router,/qualifyResearchReadySweep/);
 assert.match(router,/canonical_qualification_sweep/);
 assert.match(router,/health_watchdog_pump_failed/);
+assert.match(router,/const preRuns=await dispatchAvailableBatches\(env\)/);
+assert.match(router,/const postRuns=await dispatchAvailableBatches\(env\)/);
 assert.match(router,/distributionHandoffSlugs/);
 assert.match(router,/validatedOverflowMachineCandidate/);
 assert.match(router,/machineCandidatesFoundToday/);
