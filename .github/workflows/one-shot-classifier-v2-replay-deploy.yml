@@ -1,4 +1,4 @@
-name: One Shot Qualification Watchdog Deploy
+name: One Shot Qualification Reasons Deploy
 
 on:
   push:
@@ -16,13 +16,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: Validate qualification watchdog
+      - name: Validate qualification diagnostics
         run: |
           set -euo pipefail
           node --check distribution-autonomous-worker.js
@@ -31,29 +29,24 @@ jobs:
           node tests/compute-overflow-policy.test.mjs
           node tests/distribution-executor-lanes.test.mjs
           node tests/command-center-hybrid-architecture.test.mjs
-
       - name: Deploy Cloudflare Worker
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-      - name: Verify qualification watchdog live
+      - name: Probe canonical qualification reasons
         run: |
           set -euo pipefail
-          for i in $(seq 1 18); do
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?qualification_watchdog=$i" -o /tmp/health.json
+          for i in $(seq 1 6); do
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?qual_reasons=$i" -o /tmp/health.json
             cat /tmp/health.json
-            jq -e '(.distributionFunnel.qualificationReady15m|type=="number") and
-                   (.distributionFunnel.qualificationResearch15m|type=="number") and
-                   (.distributionFunnel.qualificationHuman15m|type=="number") and
-                   (.distributionFunnel.qualificationAuth15m|type=="number") and
-                   (.distributionFunnel.qualificationPolicy15m|type=="number")' /tmp/health.json >/dev/null
-            total=$(jq '[.distributionFunnel.qualificationReady15m,
-                          .distributionFunnel.qualificationResearch15m,
-                          .distributionFunnel.qualificationHuman15m,
-                          .distributionFunnel.qualificationAuth15m,
-                          .distributionFunnel.qualificationPolicy15m] | add' /tmp/health.json)
-            if [ "$total" -gt 0 ]; then exit 0; fi
-            sleep 10
+            if jq -e '(.distributionFunnel.qualificationSafeFormUnresolved15m|type=="number") and
+                      (.distributionFunnel.qualificationNoProtocol15m|type=="number") and
+                      (.distributionFunnel.qualificationUnreachable15m|type=="number")' /tmp/health.json >/dev/null; then
+              sleep 10
+              curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?qual_reasons=after" -o /tmp/after.json
+              cat /tmp/after.json
+              exit 0
+            fi
+            sleep 5
           done
           exit 1
