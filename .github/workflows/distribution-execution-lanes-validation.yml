@@ -1,0 +1,30 @@
+name: Distribution execution lanes validation
+
+on:
+  push:
+    branches:
+      - distribution-execution-lanes-v2
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check auth-automation.js
+          node --check distribution-autonomous-worker.js
+          node --check distribution-throughput-worker.js
+          node --check distribution-submission-worker.js
+          node --check compute-router-worker.js
+          node --check distribution-engine-worker.js
+      - name: Run distribution lane contract tests
+        run: |
+          node tests/distribution-executor-lanes.test.mjs
+          node tests/distribution-high-throughput-policy.test.mjs
+          node tests/human-gate-nonblocking.test.mjs
+          node tests/compute-overflow-policy.test.mjs
