@@ -82,8 +82,11 @@ const SAFE_FORM_FIELDS=new Set([
   'name','title','product_name','tool_name','startup_name','company','company_name',
   'url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website',
   'description','short_description','summary','overview','tagline',
+  'email','email_address','contact_email','business_email','work_email','submitter_email',
+  'contact_name','submitter_name','first_name','last_name',
   'category','categories','industry','type','slug','domain'
 ]);
+const FORM_CONTACT={email:'pedro@trytoolscout.org',name:'Pedro Caiano',firstName:'Pedro',lastName:'Caiano'};
 function tagAttr(tag,name){
   const m=String(tag||'').match(new RegExp('\\b'+name+'\\s*=\\s*["\\\']([^"\\\']*)["\\\']','i'));
   return m?decodeEntities(m[1]):null;
@@ -107,6 +110,10 @@ function safeFormPayload(html){
     else if(['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(name))payload[name]='https://trytoolscout.org/';
     else if(['description','short_description','summary','overview'].includes(name))payload[name]='ToolScout is an independent software discovery and recommendation platform.';
     else if(name==='tagline')payload[name]='Find the right software for the job without the noise.';
+    else if(['email','email_address','contact_email','business_email','work_email','submitter_email'].includes(name))payload[name]=FORM_CONTACT.email;
+    else if(['contact_name','submitter_name'].includes(name))payload[name]=FORM_CONTACT.name;
+    else if(name==='first_name')payload[name]=FORM_CONTACT.firstName;
+    else if(name==='last_name')payload[name]=FORM_CONTACT.lastName;
     else if(['category','categories','industry','type'].includes(name))payload[name]='Software';
     else if(name==='slug')payload[name]='toolscout';
     else if(name==='domain')payload[name]='trytoolscout.org';
