@@ -78,7 +78,12 @@ function extractMailto(html){
   while((m=re.exec(html))&&out.length<20)out.push({url:decodeEntities(m[1]),text:stripTags(m[2]).slice(0,180),kind:'email'});
   return out;
 }
-const SAFE_FORM_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
+const SAFE_FORM_FIELDS=new Set([
+  'name','title','product_name','tool_name','startup_name','company','company_name',
+  'url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website',
+  'description','short_description','summary','overview','tagline',
+  'category','categories','industry','type','slug','domain'
+]);
 function tagAttr(tag,name){
   const m=String(tag||'').match(new RegExp('\\b'+name+'\\s*=\\s*["\\\']([^"\\\']*)["\\\']','i'));
   return m?decodeEntities(m[1]):null;
@@ -98,11 +103,11 @@ function safeFormPayload(html){
       payload[name]=String(value);continue;
     }
     if(!SAFE_FORM_FIELDS.has(name)){if(required)return null;continue}
-    if(name==='name'||name==='title')payload[name]='ToolScout';
-    else if(['url','website','website_url','homepage','product_url','tool_url'].includes(name))payload[name]='https://trytoolscout.org/';
-    else if(name==='description')payload[name]='ToolScout is an independent software discovery and recommendation platform.';
+    if(['name','title','product_name','tool_name','startup_name','company','company_name'].includes(name))payload[name]='ToolScout';
+    else if(['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(name))payload[name]='https://trytoolscout.org/';
+    else if(['description','short_description','summary','overview'].includes(name))payload[name]='ToolScout is an independent software discovery and recommendation platform.';
     else if(name==='tagline')payload[name]='Find the right software for the job without the noise.';
-    else if(name==='category'||name==='categories')payload[name]='Software';
+    else if(['category','categories','industry','type'].includes(name))payload[name]='Software';
     else if(name==='slug')payload[name]='toolscout';
     else if(name==='domain')payload[name]='trytoolscout.org';
     useful++;
@@ -111,11 +116,11 @@ function safeFormPayload(html){
 }
 function machineFormCandidate(page){
   const signals=page?.signals||pageSignals(page||{html:'',url:''});
-  if(!page?.ok||signals.auth||signals.captcha||signals.payment||signals.reciprocal||signals.automationBlocked)return null;
+  if(!page?.ok||signals.captcha)return null;
   for(const match of String(page.html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
-    const open=match[1]||'',body=match[2]||'';
+    const open=match[1]||'',body=match[2]||'',formText=stripTags(body);
     const method=String(tagAttr(open,'method')||'GET').toUpperCase();
-    if(method!=='POST'||CAPTCHA_RE.test(body)||AUTH_RE.test(stripTags(body))||/<input[^>]+type=["']password["']/i.test(body)||PAYMENT_RE.test(stripTags(body))||RECIPROCAL_RE.test(stripTags(body))||AUTOMATION_BLOCK_RE.test(stripTags(body)))continue;
+    if(method!=='POST'||CAPTCHA_RE.test(body)||AUTH_RE.test(formText)||/<input[^>]+type=["']password["']/i.test(body)||PAYMENT_RE.test(formText)||RECIPROCAL_RE.test(formText)||AUTOMATION_BLOCK_RE.test(formText))continue;
     const action=tagAttr(open,'action')||page.url;
     const endpoint=absolute(action,page.url);
     if(!endpoint||!sameHost(page.url,endpoint)||!endpoint.startsWith('https://'))continue;
@@ -264,10 +269,19 @@ async function researchDistribution(job){
     if(x.signals.reciprocal&&!blockers.includes('reciprocal'))blockers.push('reciprocal');
     if(x.signals.automationBlocked&&!blockers.includes('automation_blocked'))blockers.push('automation_blocked');
   }
+  const selectedRoutes=routes.slice(0,8);
   return{
     ok:true,targetUrl:source,finalUrl:home.url,httpStatus:home.status,
     classification:blockers.length?'policy_signal':routes.length?'route_found':contactRoutes.length?'contact_found':'no_route_found',
-    routes:routes.slice(0,8),contactRoutes:contactRoutes.slice(0,12),blockers,
+    routes:selectedRoutes,contactRoutes:contactRoutes.slice(0,12),blockers,
+    routeSummary:{
+      submissionRoutes:selectedRoutes.filter(x=>x.kind==='submission').length,
+      formRoutes:selectedRoutes.filter(x=>x.hasForm).length,
+      authRoutes:selectedRoutes.filter(x=>x.kind==='auth'||x.auth).length,
+      captchaRoutes:selectedRoutes.filter(x=>x.kind==='captcha'||x.captcha).length,
+      machineCandidates:selectedRoutes.filter(x=>Boolean(x.machineCandidate)).length,
+      policyBlockers:blockers.length
+    },
     evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length}
   };
 }
