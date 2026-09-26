@@ -1,0 +1,23 @@
+name: One Shot Compute Probe
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-compute-probe.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe compute health and watchdog
+        run: |
+          set -euo pipefail
+          for i in 1 2 3; do
+            echo "PROBE $i"
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?manual_probe=$i" || true
+            echo
+            sleep 5
+          done
