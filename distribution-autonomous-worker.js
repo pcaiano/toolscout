@@ -9,7 +9,7 @@ const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-st
 const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
 const POLICY_BLOCK_RE=/(paid submission|requires? payment|payment required|credit card required|requires? (?:a )?reciprocal (?:link|badge)|must (?:add|place|install) (?:our )?(?:badge|backlink)|automated submissions? (?:are )?(?:not allowed|prohibited|forbidden)|bots? (?:are )?(?:not allowed|prohibited|forbidden))/i;
 const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|accept (?:the )?terms|agree to (?:the )?terms|explicit (?:user|owner) approval|user confirmation required|confirm before submission)/i;
-const AUTH_RE=/(account required|sign in|login required|api key|bearer token|oauth)/i;
+const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
 const ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add)/i;
 const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|registry|submit)/i;
 const QUALIFY_LIMIT=24;
