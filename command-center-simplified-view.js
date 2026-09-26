@@ -89,18 +89,20 @@ function statusState(v){v=String(v||'').toLowerCase();if(['healthy','working','a
 function safeUrl(v){try{const u=new URL(String(v||''));return u.protocol==='https:'?u.toString():''}catch{return''}}
 async function refreshCommandCenterSession(){
  if(sessionRefreshPromise)return sessionRefreshPromise;
- sessionRefreshPromise=fetch('/analytics?session_refresh='+Date.now(),{method:'GET',credentials:'same-origin',cache:'no-store'})
+ sessionRefreshPromise=fetch('/analytics?session_refresh='+Date.now(),{method:'GET',credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(12000)})
   .then(r=>{if(!r.ok)throw new Error('session_refresh_'+r.status);return true})
   .finally(()=>{sessionRefreshPromise=null});
  return sessionRefreshPromise;
 }
 async function ccFetch(url,options={},retrySession=true){
- const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...options});
+ const fetchOptions={...options};const timeoutMs=Math.max(3000,Number(fetchOptions.timeoutMs)||12000);delete fetchOptions.timeoutMs;
+ if(!fetchOptions.signal)fetchOptions.signal=AbortSignal.timeout(timeoutMs);
+ const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...fetchOptions});
  if(r.status===401&&retrySession){
   let body={};try{body=await r.clone().json()}catch{}
   if(body?.error==='command_center_session_expired'){
    await refreshCommandCenterSession();
-   return ccFetch(url,options,false);
+   return ccFetch(url,{...options,timeoutMs},false);
   }
  }
  return r;
@@ -359,15 +361,18 @@ const HEAVY_KEYS=['stats','truth'];
 let fastBusy=false,heavyBusy=false,lastFast=0,lastHeavy=0;
 
 async function fetchKeys(keys,{fresh=false,announce=false}={}){
- const btn=document.getElementById('refresh');
+ const btn=document.getElementById('refresh');const failures=[];let completed=0;
  if(announce){btn.disabled=true;document.getElementById('status').innerHTML='<strong>Refreshing current evidence...</strong>'}
- const results=await Promise.all(keys.map(async k=>{try{return[k,await get(endpoints[k],fresh),null]}catch(e){return[k,null,String(e?.message||e)]}}));
- const failures=[];
- for(const [k,v,e] of results){
-   if(v!==null){data[k]=v;sourceErrors[k]=null}
-   if(e){sourceErrors[k]=e;failures.push(k)}
- }
+ // Never leave the whole page behind a loading barrier while one source is slow.
  render();
+ await Promise.all(keys.map(async k=>{
+   try{data[k]=await get(endpoints[k],fresh);sourceErrors[k]=null}
+   catch(e){sourceErrors[k]=String(e?.name==='TimeoutError'?'timeout':(e?.message||e));failures.push(k)}
+   finally{
+     completed++;render();
+     if(announce)document.getElementById('sourceStatus').textContent=completed+' / '+keys.length+' sources resolved';
+   }
+ }));
  if(announce){
    const stamp=new Date().toLocaleString(undefined,{timeZone:'Europe/Lisbon'});
    document.getElementById('status').innerHTML='<strong>Updated '+esc(stamp)+'</strong> - '+(failures.length?'Some sources unavailable: '+esc(failures.join(', ')):'All canonical sources responded.');
