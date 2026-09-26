@@ -140,8 +140,8 @@ function business(){
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
    row('Emails - 24h',n(g.emailSent24h)+' sent','Target '+n(g.emailTarget24h||50)+' · hard max '+n(g.emailMax24h||60)+' · '+n(g.contactSupplyReadyEmail??g.emailReadyContacts)+' unique domains ready')+
-   row('Machine-safe execution - today',n(data?.compute?.executionUsedToday)+' / '+n(data?.compute?.executionDailyJobBudget||g.machineSafeExternalActionMax24h||300),'Cloudflare authorizes · Render executes · Cloudflare verifies')+
-   row('Research compute - today',n(data?.compute?.researchUsedToday)+' / '+n(data?.compute?.dailyJobBudget||g.researchExternalJobMax24h||1500),'External research capacity · activity is not success')+
+   row('Machine-safe actions - today',n(data?.compute?.distributionFunnel?.actionsCompletedToday)+' completed',n(data?.compute?.distributionFunnel?.actionsAuthorizedToday??data?.compute?.executionUsedToday)+' authorized · '+n(data?.compute?.executionDailyJobBudget||g.machineSafeExternalActionMax24h||800)+' / day capacity')+
+   row('Research jobs - today',n(data?.compute?.distributionFunnel?.researchCompletedToday)+' distribution routes completed',n(data?.compute?.researchUsedToday)+' authorized · '+n(data?.compute?.dailyJobBudget||g.researchExternalJobMax24h||1500)+' / day capacity')+
    row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
    row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
@@ -211,7 +211,8 @@ function brain(){
 function throughput(){
  const t=data.truth||{},g=t.growth||{},c=data.compute||{},a=data.auth||{};
  const researchUsed=Number(c.researchUsedToday||0),researchMax=Number(c.dailyJobBudget||g.researchExternalJobMax24h||1500);
- const execUsed=Number(c.executionUsedToday||0),execMax=Number(c.executionDailyJobBudget||g.machineSafeExternalActionMax24h||300);
+ const execUsed=Number(c.executionUsedToday||0),execMax=Number(c.executionDailyJobBudget||g.machineSafeExternalActionMax24h||800);
+ const funnel=c.distributionFunnel||{},researchCompleted=Number(funnel.researchCompletedToday||0),routesFound=Number(funnel.submissionRoutesFoundToday||0),adaptersReady=Number(funnel.adaptersReady||0),actionsAuthorized=Number(funnel.actionsAuthorizedToday??execUsed),actionsCompleted=Number(funnel.actionsCompletedToday||0),submissionsAccepted=Number(funnel.submissionsAcceptedToday||0),placementsVerified=Number(funnel.placementsVerifiedToday||0);
  const emailSent=Number(g.emailSent24h||0),emailTarget=Number(g.emailTarget24h||50),emailMax=Number(g.emailMax24h||60);
  const supply=c.contactSupply||{},readyContacts=Number(supply.readyEmail??g.contactSupplyReadyEmail??g.emailReadyContacts??0),supplyTarget=Number(supply.targetReady??g.contactSupplyTarget??200),supplyMin=Number(supply.minReady??g.contactSupplyMin??150),readyRoutes=Number(supply.readyRoute??g.contactSupplyReadyRoute??0),cooldown=Number(supply.cooldown??g.contactSupplyCooldown??0),researching=Number(supply.researching??g.contactSupplyResearching??0),unresolved=Number(supply.unresolved??g.contactSupplyUnresolved??0),apolloEligible=Number(supply.apolloEligible??g.contactSupplyApolloEligible??0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
  const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
@@ -228,12 +229,21 @@ function throughput(){
  document.getElementById('throughputBody').innerHTML=
    '<div class="headline"><b>'+esc(bottleneck)+'</b><span>'+esc(bottleneckMeta)+'</span></div>'+
    '<div class="metrics">'+
-     metric('Research jobs - today',n(researchUsed)+' / '+n(researchMax),n(c.queued)+' queued · Render')+
-     metric('Machine-safe actions - today',n(execUsed)+' / '+n(execMax),n(c.completedToday)+' compute jobs completed')+
+     metric('Research jobs - today',n(researchCompleted)+' completed',n(researchUsed)+' authorized · '+n(researchMax)+' daily capacity')+
+     metric('Machine-safe actions - today',n(actionsCompleted)+' completed',n(actionsAuthorized)+' authorized · '+n(execMax)+' daily capacity')+
      metric('Emails - rolling 24h',n(emailSent)+' / '+n(emailTarget),'hard max '+n(emailMax)+' · '+n(leased)+' currently leased')+
      metric('Recipient buffer',n(readyContacts)+' / '+n(supplyTarget),'minimum '+n(supplyMin)+' · '+n(cooldown)+' cooldown · '+n(readyRoutes)+' alternate routes')+
      metric('Contact discovery',n(researching)+' researching',n(unresolved)+' unresolved · '+n(apolloEligible)+' Apollo-eligible')+
      metric('Auth sessions',n(authActive),n(authBootstrap)+' bootstrap required · '+n(authCaps)+' classified')+
+   '</div>'+
+   '<div class="section"><div class="sectionTitle">Distribution execution funnel</div>'+
+     row('Research completed',n(researchCompleted),'External route research completed today')+
+     row('Submission routes found',n(routesFound),'Research found a same-host submission route')+
+     row('Verified adapters ready',n(adaptersReady),'Canonical qualification passed and is ready for machine execution')+
+     row('Actions authorized',n(actionsAuthorized),'Cloudflare authorized machine-safe execution today')+
+     row('Actions completed',n(actionsCompleted),'Render completed authorized submission jobs today')+
+     row('Submissions accepted',n(submissionsAccepted),'External service accepted the ToolScout submission today')+
+     row('Placements verified',n(placementsVerified),'Canonical public verification completed today')+
    '</div>'+
    '<div class="section"><div class="sectionTitle">Execution architecture</div>'+
      row('Control plane','Cloudflare','Priorities, policy, leases, canonical D1 state and final verification')+
