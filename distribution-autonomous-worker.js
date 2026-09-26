@@ -651,7 +651,7 @@ async function executeCredentialedAdapters(env){
   let sent=0,failed=0,deduped=0,authRejected=0;
   for(const a of q.results||[]){
     const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first().catch(()=>null);
-    if(prior&&['submitted','ready','queued_external','pending_review','verified'].includes(String(prior.status||''))){deduped++;continue}
+    if(prior&&['submitted','queued_external','pending_review','verified'].includes(String(prior.status||''))){deduped++;continue}
     if(prior&&Number(prior.attempts||0)>=3){deduped++;continue}
     const headers=await machineAuthHeaders(env,a.surface_slug);
     if(!headers){await invalidateMachineCredential(env,a.surface_slug,'credential_unavailable_or_decrypt_failed');authRejected++;continue}
@@ -698,8 +698,9 @@ async function packageAndExecute(env){
     ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
     LIMIT ${EXECUTION_LIMIT}`).all();
   const outcomes=await Promise.all((q.results||[]).map(async a=>{
-    const prior=await env.DB.prepare(`SELECT submission_id,status FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
-    if(prior&&['submitted','ready'].includes(prior.status))return 'deduped';
+    const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
+    if(prior&&['submitted','queued_external','pending_review','verified'].includes(String(prior.status||'')))return 'deduped';
+    if(prior&&Number(prior.attempts||0)>=3)return 'deduped';
     const id=prior?.submission_id||`sub_${crypto.randomUUID()}`;
     if(!prior)await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(id,a.surface_slug,'https://trytoolscout.org/','auto_discovered_json','ready',a.payload_template_json,a.endpoint,0).run();
     try{
