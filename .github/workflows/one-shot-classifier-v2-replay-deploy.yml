@@ -1,4 +1,4 @@
-name: One Shot Classifier V2 Replay Deploy
+name: One Shot Backlog Recovery Deploy
 
 on:
   push:
@@ -20,12 +20,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate classifier replay
+      - name: Validate backlog recovery
         run: |
           set -euo pipefail
           node --check compute-router-worker.js
+          node --check distribution-autonomous-worker.js
           node --check overflow-compute/research-core.mjs
-          node --check command-center-simplified-view.js
           node tests/compute-overflow-policy.test.mjs
           node tests/distribution-executor-lanes.test.mjs
           node tests/command-center-hybrid-architecture.test.mjs
@@ -33,27 +33,22 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Verify classifier fields live
+      - name: Pump and verify queued backlog
         run: |
           set -euo pipefail
-          for i in 1 2 3 4 5 6; do
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?deploy_probe=$i" -o /tmp/compute.json
-            cat /tmp/compute.json
-            if jq -e '.distributionClassifierVersion==2 and (.distributionFunnel.classifiedResearchJobsToday|type=="number") and .status=="configured"' /tmp/compute.json >/dev/null; then
+          curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?watchdog_probe=1" -o /tmp/before.json
+          cat /tmp/before.json
+          before_q=$(jq -r '.queued // 0' /tmp/before.json)
+          before_d=$(jq -r '.completedToday // 0' /tmp/before.json)
+          for i in $(seq 1 18); do
+            sleep 10
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?watchdog_probe=$i" -o /tmp/after.json
+            cat /tmp/after.json
+            q=$(jq -r '.queued // 0' /tmp/after.json)
+            d=$(jq -r '.completedToday // 0' /tmp/after.json)
+            a=$(jq -r '.activeBatches // 0' /tmp/after.json)
+            if [ "$a" -gt 0 ] || [ "$q" -lt "$before_q" ] || [ "$d" -gt "$before_d" ]; then
               exit 0
             fi
-            sleep 5
-          done
-          exit 1
-      - name: Observe Render classifier v2 rollout
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 20); do
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?classifier_rollout=$i" -o /tmp/compute.json
-            cat /tmp/compute.json
-            if jq -e '(.distributionFunnel.classifiedResearchJobsToday // 0) > 0' /tmp/compute.json >/dev/null; then
-              exit 0
-            fi
-            sleep 15
           done
           exit 1
