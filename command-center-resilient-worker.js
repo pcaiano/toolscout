@@ -237,7 +237,7 @@ async function resilientSnapshot(request,env,ctx){
   await ensureStrictTruthSchema(env);
   const now=new Date(),todayKey=zonedDayKey(now),monthKey=todayKey.slice(0,7),todayStart=zonedMidnight(todayKey),monthStart=zonedMidnight(monthKey+'-01'),last24Start=new Date(now.getTime()-86400000),window30Start=new Date(now.getTime()-30*86400000);
   const todaySql=sqliteUtc(todayStart),monthSql=sqliteUtc(monthStart),last24Sql=sqliteUtc(last24Start),window30Sql=sqliteUtc(window30Start);
-  const [visitors,trackingMeta,sessions,commercial,affiliateByTool,affiliateWorkflowRows,distribution24,distributionStatuses,distributionLive,affiliateStatuses,affiliateRecoverable,trendRows,todayVisitorRows,countryRows,externalTruth,trafficTruthAsset,sitemap,queue]=await Promise.all([
+  const [visitors,trackingMeta,sessions,commercial,affiliateByTool,affiliateWorkflowRows,distribution24,distributionStatuses,distributionLive,affiliateStatuses,affiliateRecoverable,trendRows,todayVisitorRows,countryRows,externalTruth,trafficTruthAsset,gscReality,sitemap,queue]=await Promise.all([
     safeFirst(env,`SELECT COUNT(DISTINCT v.visitor_id) sinceTracking,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) last24,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) today,COUNT(DISTINCT CASE WHEN h.first_evidence_at>=? THEN v.visitor_id END) monthToDate FROM traffic_human_evidence h LEFT JOIN confirmed_visitor_events v ON v.session_id=h.session_id`,[last24Sql,todaySql,monthSql]),
     safeFirst(env,`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`),
     safeFirst(env,`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) last24,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) today,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) monthToDate,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) window30 FROM traffic_human_evidence`,[last24Sql,todaySql,monthSql,window30Sql]),
@@ -254,6 +254,7 @@ async function resilientSnapshot(request,env,ctx){
     safeAll(env,`SELECT v.visitor_id,h.first_evidence_at created_at,COALESCE(vc.country,UPPER(h.country)) country FROM traffic_human_evidence h JOIN confirmed_visitor_events v ON v.session_id=h.session_id LEFT JOIN confirmed_visitor_countries vc ON vc.session_id=h.session_id AND vc.visitor_id=v.visitor_id WHERE h.first_evidence_at>=? ORDER BY h.first_evidence_at ASC`,[monthSql]),
     assetJson(request,env,'/data/external-analytics-truth.json',{}),
     assetJson(request,env,'/data/traffic-truth.json',{}),
+    assetJson(request,env,'/data/gsc-search-reality.json',{}),
     assetText(request,env,'/sitemap.xml',''),
     lightweightQueue(request,env,ctx)
   ]);
@@ -293,10 +294,11 @@ async function resilientSnapshot(request,env,ctx){
   const points=[];for(let i=29;i>=0;i--){const d=new Date(now.getTime()-i*86400000),day=zonedDayKey(d);points.push({day,sessions:trendMap.get(day)?.size||0})}
   const discoveryToday=firstTouchBuckets(todayVisitorRows);
   const countryMonth=countryBuckets(countryRows),countryLast24=countryBuckets(countryRows.filter(x=>String(x.created_at||'')>=last24Sql)),countryToday=countryBuckets(countryRows.filter(x=>String(x.created_at||'')>=todaySql));
-  const gsc=externalTruth?.gsc||trafficTruthAsset?.googleSearchConsole||{};
+  const gscWindow=gscReality?.searchPerformance?.window28d||{};
+  const gsc=(Number.isFinite(Number(gscWindow?.impressions))||Number.isFinite(Number(gscWindow?.clicks)))?{status:'observed',generatedAt:gscReality?.generatedAt||null,startDate:gscWindow?.startDate||null,endDate:gscWindow?.endDate||null,clicks:n(gscWindow?.clicks),impressions:n(gscWindow?.impressions),pageCount:n(gscReality?.searchPerformance?.observedPages)}:(externalTruth?.gsc||trafficTruthAsset?.googleSearchConsole||{});
   const ga4=externalTruth?.ga4||{};
   const sitemapUrls=(sitemap.match(/<loc>/g)||[]).length;
-  const indexedPages=n(trafficTruthAsset?.googleSearchConsole?.pageCount);
+  const indexedPages=n(gsc.pageCount||trafficTruthAsset?.googleSearchConsole?.pageCount);
   const distLiveCount=n(distributionStatusCounts.live)+n(distributionStatusCounts.verified);
   const distPending=n(distributionStatusCounts.submitted)+n(distributionStatusCounts.pending_review)+n(distributionStatusCounts.scheduled);
   const tracking={status:'observed',humanSessionsLast24Hours:n(sessions?.last24)};
