@@ -499,6 +499,38 @@ async function qualify(env){
   }
   return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT,write_policy:'material_or_due_only'};
 }
+
+export async function qualifyDistributionSurfaces(env,surfaceSlugs=[]){
+  await ensureAutonomySchema(env);
+  await ensureHumanGateSchema(env);
+  const slugs=[...new Set((Array.isArray(surfaceSlugs)?surfaceSlugs:[]).map(x=>safe(x,120)).filter(Boolean))].slice(0,25);
+  if(!slugs.length)return {ok:true,checked:0,ready:0,authRequired:0,blocked:0,human:0,research:0,skipped:0,requested:0};
+  const placeholders=slugs.map(()=>'?').join(',');
+  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,o.status,o.last_checked_at
+    FROM distribution_opportunities o
+    WHERE o.surface_slug IN (${placeholders})
+      AND o.human_required=0
+      AND o.action_url IS NOT NULL
+      AND o.surface_slug<>'indexnow'
+      AND o.status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')
+    ORDER BY o.distribution_score DESC`).bind(...slugs).all();
+  const outcomes=await Promise.all((q.results||[]).map(row=>qualifyOne(env,row)));
+  let checked=outcomes.length,ready=0,auth=0,blocked=0,human=0,research=0,skipped=0;
+  for(const r of outcomes){
+    if(r==='ready_to_submit')ready++;
+    else if(r==='auth_required')auth++;
+    else if(r==='policy_blocked')blocked++;
+    else if(r==='human_action_required')human++;
+    else if(r==='skipped')skipped++;
+    else research++;
+  }
+  const authAutomation=await reconcileAuthAutomationClasses(env,{limit:400});
+  if(checked>0){
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`handoffqual_${crypto.randomUUID()}`,'research_execution_handoff_qualification','completed','distribution_engine',`Closed-loop handoff qualified ${checked} freshly researched surface(s): ${ready} machine-ready, ${auth} auth sidecar, ${human} human challenge/manual, ${blocked} policy blocked, ${research} still research-required, ${skipped} skipped.`).run().catch(()=>{});
+  }
+  return {ok:true,requested:slugs.length,checked,ready,authRequired:auth,blocked,human,research,skipped,authAutomation,mode:'research_result_targeted_handoff'};
+}
 async function recoverMachineResolvableAuthGates(env){
   await ensureHumanGateSchema(env);
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,action_url,status,last_checked_at
