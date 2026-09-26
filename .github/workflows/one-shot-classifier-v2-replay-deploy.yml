@@ -1,4 +1,4 @@
-name: One Shot Qualification Samples Deploy
+name: One Shot Contact Form Recovery Deploy
 
 on:
   push:
@@ -20,24 +20,31 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate qualification samples
+      - name: Validate contact form recovery
         run: |
           set -euo pipefail
-          node --check compute-router-worker.js
           node --check distribution-autonomous-worker.js
+          node --check compute-router-worker.js
+          node --check command-center-simplified-view.js
           node tests/compute-overflow-policy.test.mjs
           node tests/distribution-executor-lanes.test.mjs
+          node tests/command-center-hybrid-architecture.test.mjs
       - name: Deploy Cloudflare Worker
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Print qualification samples
+      - name: Observe post-fix qualification
         run: |
           set -euo pipefail
-          for i in 1 2 3 4 5 6; do
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?qual_samples=$i" -o /tmp/health.json
+          for i in $(seq 1 18); do
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?contact_recovery=$i" -o /tmp/health.json
             cat /tmp/health.json
-            if jq -e '(.qualificationSamples|type=="array")' /tmp/health.json >/dev/null; then exit 0; fi
-            sleep 5
+            jq -e '(.distributionFunnel.qualificationReady15m|type=="number") and
+                   (.distributionFunnel.qualificationAuth15m|type=="number")' /tmp/health.json >/dev/null
+            ready=$(jq -r '.distributionFunnel.qualificationReady15m // 0' /tmp/health.json)
+            adapters=$(jq -r '.distributionFunnel.adaptersReady // 0' /tmp/health.json)
+            auth=$(jq -r '.distributionFunnel.qualificationAuth15m // 0' /tmp/health.json)
+            if [ "$ready" -gt 0 ] || [ "$adapters" -gt 0 ] || [ "$auth" -gt 3 ]; then exit 0; fi
+            sleep 10
           done
           exit 1
