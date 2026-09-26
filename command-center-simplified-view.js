@@ -217,12 +217,13 @@ function throughput(){
  const emailSent=Number(g.emailSent24h||0),emailTarget=Number(g.emailTarget24h||50),emailMax=Number(g.emailMax24h||60);
  const supply=c.contactSupply||{},readyContacts=Number(supply.readyEmail??g.contactSupplyReadyEmail??g.emailReadyContacts??0),supplyTarget=Number(supply.targetReady??g.contactSupplyTarget??200),supplyMin=Number(supply.minReady??g.contactSupplyMin??150),readyRoutes=Number(supply.readyRoute??g.contactSupplyReadyRoute??0),cooldown=Number(supply.cooldown??g.contactSupplyCooldown??0),researching=Number(supply.researching??g.contactSupplyResearching??0),unresolved=Number(supply.unresolved??g.contactSupplyUnresolved??0),apolloEligible=Number(supply.apolloEligible??g.contactSupplyApolloEligible??0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
  const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
- const batchSize=Number(c.batchSize||25),queued=Number(c.queued||0);
+ const batchSize=Number(c.batchSize||25),queued=Number(c.queued||0),runnableQueued=Number(c.runnableQueued??queued),deferredQueued=Number(c.deferredQueued||0);
  const now=new Date(),utcHours=now.getUTCHours()+now.getUTCMinutes()/60,expectedExecPace=execMax*(utcHours/24);
- const machineSupplyUnderfed=String(c.status||'')==='configured'&&execMax>0&&expectedExecPace>=4&&execUsed<Math.max(2,expectedExecPace*0.25)&&queued<=batchSize*2;
+ const machineSupplyUnderfed=String(c.status||'')==='configured'&&execMax>0&&expectedExecPace>=4&&execUsed<Math.max(2,expectedExecPace*0.25)&&runnableQueued<=batchSize*2;
  let bottleneck='No capacity bottleneck proven.';
  let bottleneckMeta='Business outcomes remain the constraint to scale decisions.';
- if(queued>batchSize*4){bottleneck='External compute backlog';bottleneckMeta=n(queued)+' jobs queued · '+n(c.activeBatches)+' active batches.'}
+ if(runnableQueued>batchSize*4){bottleneck='Runnable external compute backlog';bottleneckMeta=n(runnableQueued)+' runnable · '+n(deferredQueued)+' deferred retry · '+n(c.activeBatches)+' active batches.'}
+ else if(deferredQueued>0&&runnableQueued===0){bottleneck='No runnable compute backlog';bottleneckMeta=n(deferredQueued)+' jobs are intentionally deferred for retry; next eligible '+(c.nextAvailableAt?dt(c.nextAvailableAt):'later')+'.'}
  else if(machineSupplyUnderfed){bottleneck='Machine-safe action supply';bottleneckMeta=n(execUsed)+' / '+n(execMax)+' actions used today versus '+n(Math.round(expectedExecPace))+' at linear daily pace. Discovery and qualification must keep Render fed.'}
  else if(readyContacts<supplyMin){bottleneck='Qualified email contact supply';bottleneckMeta=n(readyContacts)+' / '+n(supplyTarget)+' unique-domain email buffer · minimum '+n(supplyMin)+'.'}
  else if(authBootstrap>0&&authActive===0){bottleneck='Authentication bootstrap';bottleneckMeta=n(authBootstrap)+' reusable session(s) need one-time owner login/challenge.'}
@@ -231,6 +232,7 @@ function throughput(){
    '<div class="headline"><b>'+esc(bottleneck)+'</b><span>'+esc(bottleneckMeta)+'</span></div>'+
    '<div class="metrics">'+
      metric('Research jobs - today',n(researchCompleted)+' completed',n(researchUsed)+' authorized · '+n(researchMax)+' daily capacity')+
+     metric('Compute queue',n(runnableQueued)+' runnable',n(deferredQueued)+' deferred retry · '+n(c.activeBatches)+' active batches')+
      metric('Machine-safe actions - today',n(actionsCompleted)+' completed',n(actionsAuthorized)+' authorized · '+n(execMax)+' daily capacity')+
      metric('Emails - rolling 24h',n(emailSent)+' / '+n(emailTarget),'hard max '+n(emailMax)+' · '+n(leased)+' currently leased')+
      metric('Recipient buffer',n(readyContacts)+' / '+n(supplyTarget),'minimum '+n(supplyMin)+' · '+n(cooldown)+' cooldown · '+n(readyRoutes)+' alternate routes')+
