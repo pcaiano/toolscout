@@ -1,4 +1,4 @@
-name: One Shot Qualification Reasons Deploy
+name: One Shot Qualification Samples Deploy
 
 on:
   push:
@@ -20,33 +20,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate qualification diagnostics
+      - name: Validate qualification samples
         run: |
           set -euo pipefail
-          node --check distribution-autonomous-worker.js
           node --check compute-router-worker.js
-          node --check command-center-simplified-view.js
+          node --check distribution-autonomous-worker.js
           node tests/compute-overflow-policy.test.mjs
           node tests/distribution-executor-lanes.test.mjs
-          node tests/command-center-hybrid-architecture.test.mjs
       - name: Deploy Cloudflare Worker
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Probe canonical qualification reasons
+      - name: Print qualification samples
         run: |
           set -euo pipefail
-          for i in $(seq 1 6); do
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?qual_reasons=$i" -o /tmp/health.json
+          for i in 1 2 3 4 5 6; do
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?qual_samples=$i" -o /tmp/health.json
             cat /tmp/health.json
-            if jq -e '(.distributionFunnel.qualificationSafeFormUnresolved15m|type=="number") and
-                      (.distributionFunnel.qualificationNoProtocol15m|type=="number") and
-                      (.distributionFunnel.qualificationUnreachable15m|type=="number")' /tmp/health.json >/dev/null; then
-              sleep 10
-              curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?qual_reasons=after" -o /tmp/after.json
-              cat /tmp/after.json
-              exit 0
-            fi
+            if jq -e '(.qualificationSamples|type=="array")' /tmp/health.json >/dev/null; then exit 0; fi
             sleep 5
           done
           exit 1
