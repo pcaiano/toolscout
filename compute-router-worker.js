@@ -434,7 +434,7 @@ async function budgetConsume(env,kind,count){
   await env.DB.prepare(`UPDATE compute_overflow_budget SET used_today=used_today+?,updated_at=datetime('now') WHERE kind=?`).bind(n,kind).run().catch(()=>{});
 }
 async function health(env){
-  const [m,budgets,contactSupply,funnel]=await Promise.all([
+  const [m,budgets,contactSupply,funnel,qualificationSamples]=await Promise.all([
     metricRow(env),
     env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]})),
     contactSupplyHealth(env),
@@ -465,7 +465,15 @@ async function health(env){
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND created_at>=datetime('now','start of day')) actions_authorized_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status='completed' AND completed_at>=datetime('now','start of day')) actions_completed_today,
       (SELECT COUNT(*) FROM distribution_submissions WHERE submission_type='auto_discovered_json' AND status IN ('submitted','pending_review','verified') AND COALESCE(submitted_at,last_attempt_at,created_at)>=datetime('now','start of day')) submissions_accepted_today,
-      (SELECT COUNT(*) FROM distribution_opportunities WHERE status IN ('verified','live') AND updated_at>=datetime('now','start of day')) placements_verified_today`).first().catch(()=>null)
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE status IN ('verified','live') AND updated_at>=datetime('now','start of day')) placements_verified_today`).first().catch(()=>null),
+    env.DB.prepare(`SELECT q.surface_slug,q.detail,q.created_at,o.action_url
+      FROM distribution_qualification_events q
+      LEFT JOIN distribution_opportunities o ON o.surface_slug=q.surface_slug
+      WHERE q.created_at>=datetime('now','-30 minutes')
+        AND q.result='research_required'
+        AND q.detail IN ('safe_form_adapter_not_yet_resolved','homepage_unreachable','no_verified_submission_protocol')
+      ORDER BY q.created_at DESC
+      LIMIT 12`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const usage=Object.fromEntries(rows(budgets).map(x=>[String(x.kind),num(x.used_today)]));
   const distributionFunnel={
@@ -502,6 +510,7 @@ async function health(env){
     leased:num(funnel?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(funnel?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,
+    qualificationSamples:(qualificationSamples||[]).map(x=>({surfaceSlug:x.surface_slug,detail:x.detail,actionUrl:x.action_url,createdAt:x.created_at})),
     d1ReadModel:'canonical_queue_counts_plus_metrics_plus_distribution_funnel',
     githubActionsRole:'disabled_until_october',
     writeAmplificationGuard:'d1-write-guard-v1'
