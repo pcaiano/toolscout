@@ -1412,6 +1412,7 @@ if(u.pathname==='/api/growth/engine-health/public-reconcile'&&request.method==='
     catch(error){results[key]={ok:false,error:String(error?.message||error).slice(0,500)}}
   };
   await run('economicLearning','distribution','economic_learning',20,()=>learnEconomics(env));
+  await run('supervisorAudit','growth','self_audit',20,()=>runGrowthSupervisorAudit(env));
   await run('operatingPriorities','distribution','operating_priorities',20,()=>rebalanceDistributionPriorities(env));
   await run('networkCycle','distribution','network_cycle',20,()=>runDistributionNetworkCycle(env),{cycleContext:missionCycleContext('distribution','network_cycle',Date.now()),cycleOwner:'make_engine_health_recovery'});
   await run('catalogRuntimeQuality','catalog','runtime_quality',20,()=>contractVerifyCatalogBatch(env));
