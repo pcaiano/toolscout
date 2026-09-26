@@ -7,6 +7,7 @@ const OVERFLOW_CRON='*/5 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
+const DISTRIBUTION_CLASSIFIER_VERSION=2;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
@@ -467,7 +468,7 @@ async function health(env){
     dailyJobBudget:DAILY_JOB_BUDGET,researchUsedToday:num(usage.research),
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
-    distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
+    distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
     queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,
@@ -510,13 +511,14 @@ async function enqueueDistributionResearch(env){
         WHERE j.subject_key=distribution_opportunities.surface_slug
           AND j.job_type='distribution_route_research'
           AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
+          AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
       )
     ORDER BY distribution_score DESC,updated_at ASC LIMIT ?`).bind(limit).all().catch(()=>({results:[]}));
   for(const row of rows(q)){
     if(remaining<=0||!isHttp(row.action_url))break;
     const urlHash=await shortHash(row.action_url);
-    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score)};
-    const routeAdded=await enqueueJob(env,{jobKey:`route:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:num(row.distribution_score),payload});
+    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION};
+    const routeAdded=await enqueueJob(env,{jobKey:`route:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:num(row.distribution_score),payload});
     enqueued+=routeAdded;remaining=Math.max(0,remaining-routeAdded);
     if(remaining<=0)break;
     if(num(row.distribution_score)>=55){
