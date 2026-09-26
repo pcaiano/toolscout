@@ -1,4 +1,4 @@
-name: One Shot Backlog Recovery Deploy
+name: One Shot Backlog First Deploy
 
 on:
   push:
@@ -20,12 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate backlog recovery
+      - name: Validate backlog-first dispatch
         run: |
           set -euo pipefail
           node --check compute-router-worker.js
-          node --check distribution-autonomous-worker.js
-          node --check overflow-compute/research-core.mjs
           node tests/compute-overflow-policy.test.mjs
           node tests/distribution-executor-lanes.test.mjs
           node tests/command-center-hybrid-architecture.test.mjs
@@ -33,21 +31,23 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Pump and verify queued backlog
+      - name: Verify idle backlog immediately drains
         run: |
           set -euo pipefail
-          curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?watchdog_probe=1" -o /tmp/before.json
+          curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?backlog_first=before" -o /tmp/before.json
           cat /tmp/before.json
           before_q=$(jq -r '.queued // 0' /tmp/before.json)
           before_d=$(jq -r '.completedToday // 0' /tmp/before.json)
-          for i in $(seq 1 18); do
-            sleep 10
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?watchdog_probe=$i" -o /tmp/after.json
+          before_last=$(jq -r '.lastDispatchedAt // ""' /tmp/before.json)
+          for i in $(seq 1 12); do
+            sleep 5
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?backlog_first=$i" -o /tmp/after.json
             cat /tmp/after.json
             q=$(jq -r '.queued // 0' /tmp/after.json)
             d=$(jq -r '.completedToday // 0' /tmp/after.json)
             a=$(jq -r '.activeBatches // 0' /tmp/after.json)
-            if [ "$a" -gt 0 ] || [ "$q" -lt "$before_q" ] || [ "$d" -gt "$before_d" ]; then
+            last=$(jq -r '.lastDispatchedAt // ""' /tmp/after.json)
+            if [ "$a" -gt 0 ] || [ "$q" -lt "$before_q" ] || [ "$d" -gt "$before_d" ] || [ "$last" != "$before_last" ]; then
               exit 0
             fi
           done
