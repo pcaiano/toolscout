@@ -454,6 +454,11 @@ async function health(env){
       (SELECT COALESCE(SUM(CAST(json_extract(result_json,'$.routeSummary.captchaRoutes') AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) captcha_routes_seen_today,
       (SELECT COALESCE(SUM(CAST(json_extract(result_json,'$.routeSummary.policyBlockers') AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) policy_blockers_seen_today,
       (SELECT COUNT(*) FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit') adapters_ready,
+      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='ready_to_submit' AND created_at>=datetime('now','-15 minutes')) qualification_ready_15m,
+      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='research_required' AND created_at>=datetime('now','-15 minutes')) qualification_research_15m,
+      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='human_action_required' AND created_at>=datetime('now','-15 minutes')) qualification_human_15m,
+      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='auth_required' AND created_at>=datetime('now','-15 minutes')) qualification_auth_15m,
+      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='policy_blocked' AND created_at>=datetime('now','-15 minutes')) qualification_policy_15m,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND created_at>=datetime('now','start of day')) actions_authorized_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status='completed' AND completed_at>=datetime('now','start of day')) actions_completed_today,
       (SELECT COUNT(*) FROM distribution_submissions WHERE submission_type='auto_discovered_json' AND status IN ('submitted','pending_review','verified') AND COALESCE(submitted_at,last_attempt_at,created_at)>=datetime('now','start of day')) submissions_accepted_today,
@@ -470,6 +475,11 @@ async function health(env){
     captchaRoutesSeenToday:num(funnel?.captcha_routes_seen_today),
     policyBlockersSeenToday:num(funnel?.policy_blockers_seen_today),
     adaptersReady:num(funnel?.adapters_ready),
+    qualificationReady15m:num(funnel?.qualification_ready_15m),
+    qualificationResearch15m:num(funnel?.qualification_research_15m),
+    qualificationHuman15m:num(funnel?.qualification_human_15m),
+    qualificationAuth15m:num(funnel?.qualification_auth_15m),
+    qualificationPolicy15m:num(funnel?.qualification_policy_15m),
     actionsAuthorizedToday:num(funnel?.actions_authorized_today),
     actionsCompletedToday:num(funnel?.actions_completed_today),
     submissionsAcceptedToday:num(funnel?.submissions_accepted_today),
@@ -801,11 +811,30 @@ async function qualifyResearchReadySweep(env){
       AND action_url IS NOT NULL
       AND status IN ('candidate','discovered','research_required')
       AND surface_slug<>'indexnow'
-    ORDER BY distribution_score DESC,COALESCE(last_checked_at,'1970-01-01') ASC
+    ORDER BY COALESCE(last_checked_at,'1970-01-01') ASC,distribution_score DESC
     LIMIT 25`).all().catch(()=>({results:[]}));
   const slugs=rows(q).map(x=>safe(x.surface_slug,120)).filter(Boolean);
   if(!slugs.length)return{ok:true,requested:0,checked:0,ready:0};
   return qualifyDistributionSurfaces(env,slugs);
+}
+async function acquireCooldownLock(env,name,seconds=300){
+  await ensureSchema(env);
+  const modifier=`+${Math.max(30,Math.min(1800,Number(seconds)||300))} seconds`;
+  const w=await env.DB.prepare(`INSERT INTO compute_overflow_locks(lock_name,lease_until,updated_at)
+    VALUES(?,datetime('now',?),datetime('now'))
+    ON CONFLICT(lock_name) DO UPDATE SET lease_until=excluded.lease_until,updated_at=datetime('now')
+    WHERE compute_overflow_locks.lease_until<=datetime('now')`).bind(name,modifier).run().catch(()=>null);
+  return Number(w?.meta?.changes||w?.changes||0)>0;
+}
+async function runQualificationWatchdog(env){
+  const locked=await acquireCooldownLock(env,'qualification_watchdog',300);
+  if(!locked)return{ok:true,skipped:true,reason:'qualification_watchdog_cooldown'};
+  const qualification=await isolatedOverflowStage(env,'qualification_watchdog',()=>qualifyResearchReadySweep(env),{ok:false,requested:0,checked:0,ready:0});
+  const execution=await isolatedOverflowStage(env,'qualification_watchdog_execution',()=>enqueueAuthorizedExecution(env),{ok:false,enqueued:0,submissionJobs:0,verificationJobs:0});
+  const dispatches=await dispatchAvailableBatches(env);
+  await event(env,'qualification_watchdog_cycle',qualification?.ok===false?'partial':'completed',
+    `Qualification watchdog checked ${num(qualification?.checked)} surface(s), produced ${num(qualification?.ready)} ready adapter(s), authorized ${num(execution?.submissionJobs)} submission job(s), dispatched ${dispatches.filter(x=>x.dispatch?.ok).length} batch(es).`).catch(()=>{});
+  return{ok:qualification?.ok!==false,qualification,execution,dispatches:dispatches.length};
 }
 
 async function runOverflowTick(env){
@@ -1239,9 +1268,13 @@ export default{
       const snapshot=await health(env);
       if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.runnableQueued)>0&&num(snapshot.activeBatches)===0){
         // Health is polled by the Command Center and operational probes. Use it only
-        // as a lightweight executor watchdog: lease and trigger queued work now,
-        // without waiting for research/qualification stages.
+        // as a lightweight executor watchdog: lease and trigger queued work now.
         ctx.waitUntil(dispatchAvailableBatches(env).catch(async error=>{await event(env,'health_watchdog_pump_failed','failed',safe(error?.message||error,600)).catch(()=>{});return null;}));
+      }
+      if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.distributionFunnel?.submissionRoutesFoundToday)>0){
+        // Five-minute cooldown keeps this bounded while giving the canonical qualifier
+        // a fallback path even if a scheduled cycle is delayed.
+        ctx.waitUntil(runQualificationWatchdog(env).catch(async error=>{await event(env,'qualification_watchdog_failed','failed',safe(error?.message||error,600)).catch(()=>{});return null;}));
       }
       return Response.json(snapshot,{headers:JSON_H});
     }
