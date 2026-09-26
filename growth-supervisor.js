@@ -11,7 +11,7 @@ const CRITICAL_STRICT_HUMANS_24H_MAX=2;
 const BASELINE_EXTERNAL_EXECUTIONS_MIN_24H=0;
 const BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H=50;
 const BASELINE_EXTERNAL_EXECUTIONS_MAX_24H=60;
-const MACHINE_SAFE_EXTERNAL_EXECUTIONS_MAX_24H=300;
+const MACHINE_SAFE_EXTERNAL_EXECUTIONS_MAX_24H=800;
 const BUSINESS_FUNNEL=['strict_verified_human_sessions','verified_outbound_clicks','monetized_verified_outbound_clicks'];
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const safe=(v,m=2000)=>String(v??'').slice(0,m);
