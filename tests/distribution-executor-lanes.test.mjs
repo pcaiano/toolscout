@@ -17,12 +17,16 @@ const autonomous=read('distribution-autonomous-worker.js');
 assert.match(autonomous,/human_gate_execution_policy:'non_blocking_sidecar_v2'/);
 assert.match(autonomous,/const QUALIFY_LIMIT=24;/);
 assert.match(autonomous,/const EXECUTION_LIMIT=12;/);
+assert.match(autonomous,/\['submitted','queued_external','pending_review','verified'\]/);
+assert.doesNotMatch(autonomous,/\['submitted','ready'\]/);
 
 const router=read('compute-router-worker.js');
 assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=800/);
 assert.match(router,/const submitLimit=Math\.min\(300,remaining\);/);
 assert.match(router,/jobType:'authorized_http_action'/);
 assert.match(router,/authorizationClass:'verified_free_auto_adapter_v1'/);
+assert.match(router,/j\.job_type='distribution_route_research'/);
+assert.match(router,/queued\.status IN \('queued_external','submitted','pending_review','verified'\)/);
 
 const dashboard=read('distribution-engine-worker.js');
 assert.match(dashboard,/executionLanes/);
