@@ -127,7 +127,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,seRankingBacklinkTruth]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -204,6 +204,11 @@ async function buildCommandCenterBusinessTruth(request,env){
     env.DB.prepare(`SELECT value,updated_at FROM external_runtime_config WHERE key='make_sender_webhook_url' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,updated_at
       FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null),
+    env.DB.prepare(`SELECT incident_id,severity,title,summary,engine,executor,action,approval_required,last_detected_at
+      FROM growth_architecture_incidents
+      WHERE status='open'
+      ORDER BY CASE severity WHEN 'P1' THEN 0 ELSE 1 END,last_detected_at DESC
+      LIMIT 10`).all().then(r=>r.results||[]).catch(()=>[]),
     ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]})
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
@@ -228,7 +233,11 @@ async function buildCommandCenterBusinessTruth(request,env){
   const authorityVerifiedDomains=Math.max(truthNum(backlink.verified_referring_domains),internalAuthorityVerifiedDomains,seRankingReferringDomains);
   const authorityRequired=true;
   const authorityThroughputGap=authorityRequired&&authorityAttempts24<AUTHORITY_POLICY_MIN_24H;
-  const architecture=cfg.architecture_escalation||{};
+  const architecture={
+    open_incidents:Array.isArray(architectureRows)?architectureRows.length:0,
+    approval_required:Array.isArray(architectureRows)&&architectureRows.some(x=>Number(x?.approval_required||0)===1),
+    items:Array.isArray(architectureRows)?architectureRows:[]
+  };
   const contract={states:{},executors:{},verified:0,ready:0,inFlight:0,deferred:0,missingExecutors:0,stalled:0};
   for(const row of contractRows){
     const status=String(row.status||'unknown'),count=truthNum(row.n),executor=row.executor||'unassigned';
@@ -478,7 +487,18 @@ async function buildCommandCenterBusinessTruth(request,env){
     executionContract:contract,
     architecture:{
       openIncidents:truthNum(architecture.open_incidents),
-      approvalRequired:Boolean(architecture.approval_required)
+      approvalRequired:Boolean(architecture.approval_required),
+      items:(architecture.items||[]).map(x=>({
+        id:x.incident_id,
+        severity:x.severity,
+        title:x.title,
+        summary:x.summary,
+        engine:x.engine,
+        executor:x.executor,
+        action:x.action,
+        approvalRequired:Boolean(x.approval_required),
+        lastDetectedAt:x.last_detected_at
+      }))
     },
     engines,
     sourceProof:{
