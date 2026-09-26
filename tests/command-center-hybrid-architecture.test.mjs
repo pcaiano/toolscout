@@ -13,6 +13,7 @@ assert.match(cc,/Research jobs - today/);
 assert.match(cc,/Distribution execution funnel/);
 assert.match(cc,/Submission routes found/);
 assert.match(cc,/Machine-safe form candidates/);
+assert.match(cc,/Route blockers observed/);
 assert.match(cc,/Placements verified today/);
 assert.match(cc,/Open architecture incident detail/);
 assert.match(cc,/Actions completed/);
