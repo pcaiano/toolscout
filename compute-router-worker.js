@@ -4,7 +4,7 @@ import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedRes
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/5 * * * *';
 const DAILY_JOB_BUDGET=1500;
-const EXECUTION_DAILY_JOB_BUDGET=300;
+const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
@@ -543,7 +543,7 @@ async function enqueueAuthorizedExecution(env){
   if(!remaining)return{enqueued:0,submissionJobs:0,verificationJobs:0,remaining:0};
   let enqueued=0,submissionJobs=0,verificationJobs=0;
 
-  const submitLimit=Math.min(120,remaining);
+  const submitLimit=Math.min(300,remaining);
   const candidates=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url,
       o.distribution_score,COALESCE(l.operating_decision,'explore') operating_decision
     FROM distribution_auto_adapters a
