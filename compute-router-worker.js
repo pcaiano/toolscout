@@ -434,6 +434,9 @@ async function health(env){
     env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]})),
     contactSupplyHealth(env),
     env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued') canonical_queued,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='leased') canonical_leased,
+      (SELECT COUNT(*) FROM compute_overflow_batches WHERE status IN ('dispatched','running')) canonical_active_batches,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) research_completed_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"routeSummary":%') classified_research_jobs_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"kind":"submission"%') submission_routes_found_today,
@@ -471,10 +474,10 @@ async function health(env){
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
-    queued:num(m?.queued),leased:num(m?.leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
-    activeBatches:num(m?.active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
+    queued:num(funnel?.canonical_queued),leased:num(funnel?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
+    activeBatches:num(funnel?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,
-    d1ReadModel:'single_row_metrics_plus_two_budget_rows_plus_contact_supply_single_row_plus_distribution_funnel',
+    d1ReadModel:'canonical_queue_counts_plus_metrics_plus_distribution_funnel',
     githubActionsRole:'disabled_until_october',
     writeAmplificationGuard:'d1-write-guard-v1'
   };
@@ -686,8 +689,8 @@ async function requeueStaleBatches(env){
 }
 async function createBatch(env){
   await ensureSchema(env);
-  const m=await metricRow(env);
-  if(num(m?.active_batches)>=MAX_ACTIVE_BATCHES)return null;
+  const active=await env.DB.prepare(`SELECT COUNT(*) n FROM compute_overflow_batches WHERE status IN ('dispatched','running')`).first().catch(()=>null);
+  if(num(active?.n)>=MAX_ACTIVE_BATCHES)return null;
   const q=await env.DB.prepare(`SELECT job_id FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(BATCH_SIZE).all().catch(()=>({results:[]}));
   const ids=rows(q).map(x=>x.job_id).filter(Boolean);
   if(!ids.length)return null;
