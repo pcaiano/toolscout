@@ -33,15 +33,27 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Verify classifier version live
+      - name: Verify classifier fields live
         run: |
           set -euo pipefail
           for i in 1 2 3 4 5 6; do
             curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?deploy_probe=$i" -o /tmp/compute.json
             cat /tmp/compute.json
-            if jq -e '.distributionClassifierVersion==2 and .status=="configured"' /tmp/compute.json >/dev/null; then
+            if jq -e '.distributionClassifierVersion==2 and (.distributionFunnel.classifiedResearchJobsToday|type=="number") and .status=="configured"' /tmp/compute.json >/dev/null; then
               exit 0
             fi
             sleep 5
+          done
+          exit 1
+      - name: Observe Render classifier v2 rollout
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 20); do
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?classifier_rollout=$i" -o /tmp/compute.json
+            cat /tmp/compute.json
+            if jq -e '(.distributionFunnel.classifiedResearchJobsToday // 0) > 0' /tmp/compute.json >/dev/null; then
+              exit 0
+            fi
+            sleep 15
           done
           exit 1
