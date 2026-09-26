@@ -1,4 +1,5 @@
 name: One Shot Command Center Resilience Deploy
+# root-cause queue fix
 
 on:
   push:
@@ -27,6 +28,7 @@ jobs:
       - name: Validate Command Center runtime
         run: |
           node --check command-center-simplified-view.js
+          node --check command-center-resilient-worker.js
           node --check operational-truth-reconciliation-worker.js
           node --check compute-router-worker.js
           node scripts/check-distribution-copy.mjs
