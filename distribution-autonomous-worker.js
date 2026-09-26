@@ -10,8 +10,11 @@ const SAFE_FIELDS=new Set([
   'name','title','product_name','tool_name','startup_name','company','company_name',
   'url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website',
   'description','short_description','summary','overview','tagline',
+  'email','email_address','contact_email','business_email','work_email','submitter_email',
+  'contact_name','submitter_name','first_name','last_name',
   'category','categories','industry','type','slug','domain'
 ]);
+const FORM_CONTACT={email:'pedro@trytoolscout.org',name:'Pedro Caiano',firstName:'Pedro',lastName:'Caiano'};
 const POLICY_BLOCK_RE=/(paid submission|requires? payment|payment required|credit card required|requires? (?:a )?reciprocal (?:link|badge)|must (?:add|place|install) (?:our )?(?:badge|backlink)|automated submissions? (?:are )?(?:not allowed|prohibited|forbidden)|bots? (?:are )?(?:not allowed|prohibited|forbidden))/i;
 const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|accept (?:the )?terms|agree to (?:the )?terms|explicit (?:user|owner) approval|user confirmation required|confirm before submission)/i;
 const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
@@ -144,6 +147,10 @@ function safeFormPayload(html){
     else if(['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(name))payload[name]='https://trytoolscout.org/';
     else if(['description','short_description','summary','overview'].includes(name))payload[name]='ToolScout is an independent software discovery and recommendation platform.';
     else if(name==='tagline')payload[name]='Find the right software for the job without the noise.';
+    else if(['email','email_address','contact_email','business_email','work_email','submitter_email'].includes(name))payload[name]=FORM_CONTACT.email;
+    else if(['contact_name','submitter_name'].includes(name))payload[name]=FORM_CONTACT.name;
+    else if(name==='first_name')payload[name]=FORM_CONTACT.firstName;
+    else if(name==='last_name')payload[name]=FORM_CONTACT.lastName;
     else if(['category','categories','industry','type'].includes(name))payload[name]='Software';
     else if(name==='slug')payload[name]='toolscout';
     else if(name==='domain')payload[name]='trytoolscout.org';
@@ -392,6 +399,13 @@ async function qualifyOne(env,row){
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=90,acceptance_probability=65,next_action='Verified same-host no-auth form adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
     await mark(env,effectiveRow,'ready_to_submit',`verified_safe_form_adapter:${formAdapter.endpoint}`);
     return 'ready_to_submit';
+  }
+  if(AUTH_RE.test(h.body)||/<input[^>]+type=["']password["']/i.test(h.body)){
+    const reason='Canonical qualifier found an authenticated submission route after exhausting public machine-safe adapters. Authentication is isolated to the non-blocking Auth Plane.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,automation_potential=85,acceptance_probability=70,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+    await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason});
+    await mark(env,{...effectiveRow,action_url:h.url},'auth_required','current_route_auth_required');
+    return 'auth_required';
   }
   if(HUMAN_BLOCK_RE.test(h.body)||(relatedPolicy&&HUMAN_BLOCK_RE.test(relatedPolicy))){
     const reason='Autonomous research exhausted safe machine routes and detected a genuine human-only gate such as CAPTCHA, explicit confirmation or material terms acceptance.';
