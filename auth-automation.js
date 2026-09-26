@@ -114,10 +114,10 @@ export async function reconcileAuthAutomationClasses(env,{limit=400}={}){
       automationClass='human_bootstrap_then_automatic';credentialState='missing';bootstrap=1;evidence='Machine-safe authenticated route is proven, but a reusable token/API key is still required.';
     }else if(sessionActive){
       automationClass='session_automatic';credentialState='session_active';evidence='Reusable authenticated session is active; post-login route work remains machine-owned.';
-    }else if(reusableSession){
-      automationClass='session_bootstrap_sidecar';credentialState='session_missing';bootstrap=1;evidence='A reusable authenticated session may unlock automation. Human bootstrap is isolated from autonomous throughput.';
     }else if(humanChallenge){
       automationClass='human_challenge_sidecar';credentialState='human_challenge';bootstrap=1;evidence='CAPTCHA or interactive verification is a non-blocking human sidecar, not a stalled distribution failure.';
+    }else if(reusableSession){
+      automationClass='session_bootstrap_sidecar';credentialState='session_missing';bootstrap=1;evidence='A reusable authenticated session may unlock automation. Human bootstrap is isolated from autonomous throughput.';
     }else if(row.auth_mode||row.status==='auth_required'||row.status==='human_action_required'||row.automation_state==='account_bootstrap_complete'){
       automationClass='human_manual_sidecar';credentialState='human_required';bootstrap=1;evidence='No reusable machine route is proven. Complete this surface manually without consuming autonomous executor capacity.';
     }else continue;
