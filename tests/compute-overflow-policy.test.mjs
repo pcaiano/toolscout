@@ -19,6 +19,9 @@ assert.match(router,/d1ReadModel:'single_row_metrics_plus_two_budget_rows_plus_c
 assert.match(router,/qualifyDistributionSurfaces/);
 assert.match(router,/continueDistributionExecutionHandoff/);
 assert.match(router,/distributionHandoffSlugs/);
+assert.match(router,/validatedOverflowMachineCandidate/);
+assert.match(router,/machineCandidatesFoundToday/);
+assert.match(router,/overflow_queue_refilled/);
 assert.match(router,/reconcileMetricAnomaly/);
 assert.match(router,/await metricDelta\(env,\{queued:metricQueued,leased:metricLeased,completed:metricCompleted,failed:metricFailed,activeBatches:-1,completedBatches:1,lastCompleted:true\}\)/);
 assert.match(router,/if\(!env\.OVERFLOW_COMPUTE_URL\)return\{ok:true,status:'awaiting_external_runtime'\}/);
@@ -34,6 +37,10 @@ assert.match(core,/sameHost/);
 assert.match(core,/PAYMENT_RE/);
 assert.match(core,/RECIPROCAL_RE/);
 assert.match(core,/AUTOMATION_BLOCK_RE/);
+assert.match(core,/machineFormCandidate/);
+assert.match(core,/SAFE_FORM_FIELDS/);
+assert.match(core,/machineCandidate/);
+assert.doesNotMatch(core,/const AUTH_RE=\/\(login\|log in\|sign in\|create account\|register\|password\)\/i/);
 
 const server=read('overflow-compute/server.mjs');
 assert.match(server,/MAX_CONCURRENCY/);
