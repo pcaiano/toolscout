@@ -64,6 +64,11 @@ async function ensureSchema(env){
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_batches_status ON compute_overflow_batches(status,dispatched_at)`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_locks(
+      lock_name TEXT PRIMARY KEY,
+      lease_until TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_events(
       event_id TEXT PRIMARY KEY,
       event_type TEXT NOT NULL,
@@ -435,6 +440,9 @@ async function health(env){
     contactSupplyHealth(env),
     env.DB.prepare(`SELECT
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued') canonical_queued,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now')) runnable_queued,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now')) deferred_queued,
+      (SELECT MIN(available_at) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now')) next_available_at,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='leased') canonical_leased,
       (SELECT COUNT(*) FROM compute_overflow_batches WHERE status IN ('dispatched','running')) canonical_active_batches,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) research_completed_today,
@@ -474,7 +482,8 @@ async function health(env){
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
-    queued:num(funnel?.canonical_queued),leased:num(funnel?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
+    queued:num(funnel?.canonical_queued),runnableQueued:num(funnel?.runnable_queued),deferredQueued:num(funnel?.deferred_queued),nextAvailableAt:funnel?.next_available_at||null,
+    leased:num(funnel?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(funnel?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,
     d1ReadModel:'canonical_queue_counts_plus_metrics_plus_distribution_funnel',
@@ -714,7 +723,7 @@ async function triggerBatch(env,batch){
     await event(env,'overflow_batch_dispatched','completed',`Dispatched ${batch.count} external compute job(s).`,{batchId:batch.batchId});
     return{ok:true,httpStatus:response.status};
   }catch(error){
-    const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now','+5 minutes'),last_error=?,updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(safe(error?.message||error,300),batch.batchId).run();
+    const w=await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,available_at=datetime('now','+1 minute'),last_error=?,updated_at=datetime('now') WHERE batch_id=? AND status='leased'`).bind(safe(error?.message||error,300),batch.batchId).run();
     const restored=Number(w?.meta?.changes||w?.changes||0);
     await env.DB.prepare(`UPDATE compute_overflow_batches SET status='trigger_failed',last_error=?,updated_at=datetime('now') WHERE batch_id=?`).bind(safe(error?.message||error,300),batch.batchId).run();
     if(restored>0)await metricDelta(env,{queued:restored,leased:-restored,activeBatches:-1});
@@ -729,16 +738,49 @@ async function isolatedOverflowStage(env,name,fn,fallback){
     return {...fallback,ok:false,error:message};
   }
 }
+async function acquireDispatchLock(env){
+  await ensureSchema(env);
+  const w=await env.DB.prepare(`INSERT INTO compute_overflow_locks(lock_name,lease_until,updated_at)
+    VALUES('dispatch',datetime('now','+20 seconds'),datetime('now'))
+    ON CONFLICT(lock_name) DO UPDATE SET lease_until=excluded.lease_until,updated_at=datetime('now')
+    WHERE compute_overflow_locks.lease_until<=datetime('now')`).run().catch(()=>null);
+  return Number(w?.meta?.changes||w?.changes||0)>0;
+}
+async function releaseDispatchLock(env){
+  await env.DB.prepare(`UPDATE compute_overflow_locks SET lease_until=datetime('now','-1 second'),updated_at=datetime('now') WHERE lock_name='dispatch'`).run().catch(()=>{});
+}
+async function recoverTransientDispatchDeferrals(env){
+  const w=await env.DB.prepare(`UPDATE compute_overflow_jobs
+    SET available_at=datetime('now'),updated_at=datetime('now')
+    WHERE status='queued'
+      AND available_at>datetime('now')
+      AND updated_at<=datetime('now','-30 seconds')
+      AND (
+        last_error LIKE 'trigger_http_%'
+        OR last_error LIKE '%timeout%'
+        OR last_error LIKE '%timed out%'
+        OR last_error LIKE '%worker_busy%'
+        OR last_error LIKE '%rate_limited%'
+      )`).run().catch(()=>null);
+  return Number(w?.meta?.changes||w?.changes||0);
+}
 async function dispatchAvailableBatches(env){
+  const locked=await acquireDispatchLock(env);
+  if(!locked)return[];
   const runs=[];
-  for(let slot=0;slot<MAX_ACTIVE_BATCHES;slot++){
-    const batch=await isolatedOverflowStage(env,'batch_create',()=>createBatch(env),null);
-    if(!batch||batch.ok===false||!batch.count)break;
-    const dispatch=await isolatedOverflowStage(env,'batch_trigger',()=>triggerBatch(env,batch),{ok:false});
-    runs.push({batch:{batchId:batch.batchId,count:batch.count},dispatch});
-    if(dispatch?.reason==='overflow_runtime_not_configured')break;
+  try{
+    await recoverTransientDispatchDeferrals(env);
+    for(let slot=0;slot<MAX_ACTIVE_BATCHES;slot++){
+      const batch=await isolatedOverflowStage(env,'batch_create',()=>createBatch(env),null);
+      if(!batch||batch.ok===false||!batch.count)break;
+      const dispatch=await isolatedOverflowStage(env,'batch_trigger',()=>triggerBatch(env,batch),{ok:false});
+      runs.push({batch:{batchId:batch.batchId,count:batch.count},dispatch});
+      if(dispatch?.reason==='overflow_runtime_not_configured')break;
+    }
+    return runs;
+  }finally{
+    await releaseDispatchLock(env);
   }
-  return runs;
 }
 
 async function continueDistributionExecutionHandoff(env,surfaceSlugs=[]){
@@ -1195,7 +1237,7 @@ export default{
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
       const snapshot=await health(env);
-      if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.queued)>0&&num(snapshot.activeBatches)===0){
+      if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.runnableQueued)>0&&num(snapshot.activeBatches)===0){
         // Health is polled by the Command Center and operational probes. Use it only
         // as a lightweight executor watchdog: lease and trigger queued work now,
         // without waiting for research/qualification stages.
