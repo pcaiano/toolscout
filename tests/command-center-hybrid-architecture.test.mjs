@@ -12,6 +12,9 @@ assert.match(cc,/Machine-safe actions - today/);
 assert.match(cc,/Research jobs - today/);
 assert.match(cc,/Distribution execution funnel/);
 assert.match(cc,/Submission routes found/);
+assert.match(cc,/Machine-safe form candidates/);
+assert.match(cc,/Placements verified today/);
+assert.match(cc,/Open architecture incident detail/);
 assert.match(cc,/Actions completed/);
 assert.match(cc,/Open secure login session/);
 assert.match(cc,/data-auth-handoff/);
@@ -31,5 +34,7 @@ assert.match(truth,/cloudflare_authorize_make_send_cloudflare_confirm/);
 assert.match(truth,/cloudflare_vault_render_browser_human_challenge_resume/);
 assert.match(truth,/business-truth-v10-hybrid-execution/);
 assert.match(truth,/Growth Execution Plane/);
+assert.match(truth,/FROM growth_architecture_incidents/);
+assert.match(truth,/items:\(architecture\.items\|\|\[\]\)/);
 
 console.log('Command Center reflects the hybrid Growth Brain architecture without treating capacity as business success.');
