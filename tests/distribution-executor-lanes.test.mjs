@@ -19,6 +19,7 @@ assert.match(autonomous,/const QUALIFY_LIMIT=24;/);
 assert.match(autonomous,/const EXECUTION_LIMIT=12;/);
 assert.match(autonomous,/export async function qualifyDistributionSurfaces/);
 assert.match(autonomous,/research_result_targeted_handoff/);
+assert.doesNotMatch(autonomous,/const AUTH_RE=\/\(account required\|sign in\|login required/);
 assert.match(autonomous,/\['submitted','queued_external','pending_review','verified'\]/);
 assert.doesNotMatch(autonomous,/\['submitted','ready'\]/);
 
@@ -31,6 +32,9 @@ assert.match(router,/j\.job_type='distribution_route_research'/);
 assert.match(router,/queued\.status IN \('queued_external','submitted','pending_review','verified'\)/);
 assert.match(router,/continueDistributionExecutionHandoff/);
 assert.match(router,/distribution_research_execution_handoff/);
+assert.match(router,/validatedOverflowMachineCandidate/);
+assert.match(router,/status='ready_to_submit'/);
+assert.match(router,/overflow_queue_refilled/);
 
 const dashboard=read('distribution-engine-worker.js');
 assert.match(dashboard,/executionLanes/);
