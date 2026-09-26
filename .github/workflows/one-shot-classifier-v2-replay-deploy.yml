@@ -1,4 +1,4 @@
-name: One Shot Serialized Dispatch Deploy
+name: One Shot Canonical Adapter Deploy
 
 on:
   push:
@@ -20,10 +20,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate serialized dispatch
+      - name: Validate canonical adapter path
         run: |
           set -euo pipefail
+          node --check distribution-autonomous-worker.js
           node --check compute-router-worker.js
+          node --check command-center-simplified-view.js
           node tests/compute-overflow-policy.test.mjs
           node tests/distribution-executor-lanes.test.mjs
           node tests/command-center-hybrid-architecture.test.mjs
@@ -31,26 +33,15 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Verify runnable backlog behavior
+      - name: Verify canonical queue fields live
         run: |
           set -euo pipefail
-          curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?serialized=before" -o /tmp/before.json
-          cat /tmp/before.json
-          jq -e '(.runnableQueued|type=="number") and (.deferredQueued|type=="number")' /tmp/before.json >/dev/null
-          before_run=$(jq -r '.runnableQueued // 0' /tmp/before.json)
-          before_d=$(jq -r '.completedToday // 0' /tmp/before.json)
-          before_last=$(jq -r '.lastDispatchedAt // ""' /tmp/before.json)
-          if [ "$before_run" -eq 0 ]; then exit 0; fi
-          for i in $(seq 1 12); do
-            sleep 5
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?serialized=$i" -o /tmp/after.json
-            cat /tmp/after.json
-            run=$(jq -r '.runnableQueued // 0' /tmp/after.json)
-            d=$(jq -r '.completedToday // 0' /tmp/after.json)
-            a=$(jq -r '.activeBatches // 0' /tmp/after.json)
-            last=$(jq -r '.lastDispatchedAt // ""' /tmp/after.json)
-            if [ "$a" -gt 0 ] || [ "$run" -lt "$before_run" ] || [ "$d" -gt "$before_d" ] || [ "$last" != "$before_last" ]; then
+          for i in 1 2 3 4 5 6; do
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?adapter_deploy=$i" -o /tmp/health.json
+            cat /tmp/health.json
+            if jq -e '(.runnableQueued|type=="number") and (.deferredQueued|type=="number") and .status=="configured"' /tmp/health.json >/dev/null; then
               exit 0
             fi
+            sleep 5
           done
           exit 1
