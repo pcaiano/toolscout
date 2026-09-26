@@ -4,7 +4,7 @@ const source=fs.readFileSync(new URL('../distribution-autonomous-worker.js',impo
 
 assert.match(source,/refreshPersistentActionUrls\(env,\{statuses:\['auth_required','research_required'\],limit:3\}\)/);
 assert.match(source,/refreshPersistentActionUrls\(env,\{statuses:\['human_action_required','approval_required'\],limit:3\}\)/);
-assert.match(source,/human_gate_execution_policy:'non_blocking_sidecar_v1'/);
+assert.match(source,/human_gate_execution_policy:'non_blocking_sidecar_v2'/);
 assert.match(source,/non_blocking:true/);
 
 const machineRefresh=source.indexOf("const routeRefresh=await refreshPersistentActionUrls(env,{statuses:['auth_required','research_required'],limit:3})");
