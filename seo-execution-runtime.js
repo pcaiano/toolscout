@@ -68,7 +68,7 @@ async function canonicalState(env,pathname){
     if(!type.includes('text/html'))return {verified:false,httpStatus:response.status,expected,proofSource,reason:'public_asset_not_html'};
     const html=await response.text();
     const canonical=(html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)||[])[1]||null;
-    const normalize=value=>{try{const u=new URL(value,expected);let p=u.pathname||'/';if(p.length>1)p=p.replace(/\/$/,'');return u.origin+p}catch{return null}};
+    const normalize=value=>{try{const u=new URL(value,expected);let p=u.pathname||'/';if(p==='/index.html')p='/';else if(/\.html$/i.test(p))p=p.replace(/\.html$/i,'');if(p.length>1)p=p.replace(/\/$/,'');return u.origin+p}catch{return null}};
     const verified=normalize(canonical)===normalize(expected);
     return {verified,httpStatus:response.status,expected,canonical,proofSource,reason:verified?'self_canonical_verified':'canonical_not_self'};
   }catch(error){return {verified:false,expected,reason:'canonical_probe_failed',error:String(error?.message||error).slice(0,300)}}
