@@ -2,7 +2,7 @@ const UA='ToolScout Overflow Research/1.0 (+https://trytoolscout.org/)';
 const MAX_HTML=500000;
 const ACTION_RE=/(submit|submission|add[-_ /]?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
-const AUTH_RE=/(login|log in|sign in|create account|register|password)/i;
+const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
 const CAPTCHA_RE=/(captcha|g-recaptcha|h-captcha|cf-turnstile|turnstile)/i;
 const PAYMENT_RE=/(paid listing|payment required|sponsored listing|buy a listing|purchase a listing|listing fee|pay to submit)/i;
 const RECIPROCAL_RE=/(reciprocal link|link back|backlink required|add (?:our|this) badge|badge required)/i;
@@ -77,6 +77,52 @@ function extractMailto(html){
   const out=[];const re=/<a\b[^>]*href=["'](mailto:[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;let m;
   while((m=re.exec(html))&&out.length<20)out.push({url:decodeEntities(m[1]),text:stripTags(m[2]).slice(0,180),kind:'email'});
   return out;
+}
+const SAFE_FORM_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
+function tagAttr(tag,name){
+  const m=String(tag||'').match(new RegExp('\\b'+name+'\\s*=\\s*["\\\']([^"\\\']*)["\\\']','i'));
+  return m?decodeEntities(m[1]):null;
+}
+function safeFormPayload(html){
+  const payload={};let useful=0;
+  const fields=[...String(html||'').matchAll(/<(input|textarea|select)\b[^>]*>/gi)].map(m=>m[0]);
+  for(const tag of fields){
+    const name=String(tagAttr(tag,'name')||'').trim();if(!name)continue;
+    const type=String(tagAttr(tag,'type')||'text').toLowerCase();
+    const required=/\brequired\b/i.test(tag);
+    if(/password|file|checkbox|radio|submit|button/i.test(type)){if(required)return null;continue}
+    if(/csrf|token|captcha|terms|agree|consent|password|auth|payment|card/i.test(name))return null;
+    if(type==='hidden'){
+      const value=tagAttr(tag,'value');
+      if(value==null||String(value).length>300)return null;
+      payload[name]=String(value);continue;
+    }
+    if(!SAFE_FORM_FIELDS.has(name)){if(required)return null;continue}
+    if(name==='name'||name==='title')payload[name]='ToolScout';
+    else if(['url','website','website_url','homepage','product_url','tool_url'].includes(name))payload[name]='https://trytoolscout.org/';
+    else if(name==='description')payload[name]='ToolScout is an independent software discovery and recommendation platform.';
+    else if(name==='tagline')payload[name]='Find the right software for the job without the noise.';
+    else if(name==='category'||name==='categories')payload[name]='Software';
+    else if(name==='slug')payload[name]='toolscout';
+    else if(name==='domain')payload[name]='trytoolscout.org';
+    useful++;
+  }
+  return useful>=2?payload:null;
+}
+function machineFormCandidate(page){
+  const signals=page?.signals||pageSignals(page||{html:'',url:''});
+  if(!page?.ok||signals.auth||signals.captcha||signals.payment||signals.reciprocal||signals.automationBlocked)return null;
+  for(const match of String(page.html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
+    const open=match[1]||'',body=match[2]||'';
+    const method=String(tagAttr(open,'method')||'GET').toUpperCase();
+    if(method!=='POST'||CAPTCHA_RE.test(body)||AUTH_RE.test(stripTags(body))||/<input[^>]+type=["']password["']/i.test(body)||PAYMENT_RE.test(stripTags(body))||RECIPROCAL_RE.test(stripTags(body))||AUTOMATION_BLOCK_RE.test(stripTags(body)))continue;
+    const action=tagAttr(open,'action')||page.url;
+    const endpoint=absolute(action,page.url);
+    if(!endpoint||!sameHost(page.url,endpoint)||!endpoint.startsWith('https://'))continue;
+    const payload=safeFormPayload(body);if(!payload)continue;
+    return {kind:'html_form',endpoint,method:'POST',contentType:'application/x-www-form-urlencoded',payload,confidence:96};
+  }
+  return null;
 }
 function pageSignals(page){
   const text=stripTags(page.html).slice(0,120000);
@@ -197,11 +243,13 @@ async function researchDistribution(job){
     if(!x?.page?.ok)continue;
     const signals=x.signals||{};
     if(ACTION_RE.test(x.link.text+' '+x.link.url)||signals.hasForm||signals.auth||signals.captcha){
-      routes.push({url:x.page.url||x.link.url,kind:signals.captcha?'captcha':signals.auth?'auth':ACTION_RE.test(x.link.text+' '+x.link.url)?'submission':'contact',label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),auth:Boolean(signals.auth),captcha:Boolean(signals.captcha)});
+      const machineCandidate=machineFormCandidate({...x.page,signals});
+      routes.push({url:x.page.url||x.link.url,kind:signals.captcha?'captcha':signals.auth?'auth':ACTION_RE.test(x.link.text+' '+x.link.url)||machineCandidate?'submission':'contact',label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),auth:Boolean(signals.auth),captcha:Boolean(signals.captcha),machineCandidate});
     }
   }
   if(!routes.length&&(ACTION_RE.test(home.url)||home.signals.hasForm||home.signals.auth||home.signals.captcha)){
-    routes.push({url:home.url,kind:home.signals.captcha?'captcha':home.signals.auth?'auth':ACTION_RE.test(home.url)?'submission':'contact',label:'source route',hasForm:Boolean(home.signals.hasForm),auth:Boolean(home.signals.auth),captcha:Boolean(home.signals.captcha)});
+    const machineCandidate=machineFormCandidate(home);
+    routes.push({url:home.url,kind:home.signals.captcha?'captcha':home.signals.auth?'auth':ACTION_RE.test(home.url)||machineCandidate?'submission':'contact',label:'source route',hasForm:Boolean(home.signals.hasForm),auth:Boolean(home.signals.auth),captcha:Boolean(home.signals.captcha),machineCandidate});
   }
   const mailto=extractMailto(home.html);
   const contactRoutes=[
