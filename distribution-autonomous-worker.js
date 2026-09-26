@@ -513,6 +513,13 @@ export async function qualifyDistributionSurfaces(env,surfaceSlugs=[]){
       AND o.action_url IS NOT NULL
       AND o.surface_slug<>'indexnow'
       AND o.status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')
+      AND (
+        o.status<>'ready_to_submit'
+        OR NOT EXISTS (
+          SELECT 1 FROM distribution_auto_adapters a
+          WHERE a.surface_slug=o.surface_slug AND a.policy_state='verified' AND a.confidence>=95
+        )
+      )
     ORDER BY o.distribution_score DESC`).bind(...slugs).all();
   const outcomes=await Promise.all((q.results||[]).map(row=>qualifyOne(env,row)));
   let checked=outcomes.length,ready=0,auth=0,blocked=0,human=0,research=0,skipped=0;
