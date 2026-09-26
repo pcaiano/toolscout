@@ -6,7 +6,12 @@ import {ensureHumanGateSchema,humanGateKey,upsertHumanGate,dueHumanGateVerificat
 import {reconcileAuthAutomationClasses,machineAuthHeaders,invalidateMachineCredential} from './auth-automation.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-const SAFE_FIELDS=new Set(['name','title','url','website','website_url','description','tagline','category','categories','slug','domain','homepage','product_url','tool_url']);
+const SAFE_FIELDS=new Set([
+  'name','title','product_name','tool_name','startup_name','company','company_name',
+  'url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website',
+  'description','short_description','summary','overview','tagline',
+  'category','categories','industry','type','slug','domain'
+]);
 const POLICY_BLOCK_RE=/(paid submission|requires? payment|payment required|credit card required|requires? (?:a )?reciprocal (?:link|badge)|must (?:add|place|install) (?:our )?(?:badge|backlink)|automated submissions? (?:are )?(?:not allowed|prohibited|forbidden)|bots? (?:are )?(?:not allowed|prohibited|forbidden))/i;
 const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|accept (?:the )?terms|agree to (?:the )?terms|explicit (?:user|owner) approval|user confirmation required|confirm before submission)/i;
 const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
@@ -135,12 +140,11 @@ function safeFormPayload(html){
       if(required)return null;
       continue;
     }
-    if(name==='name'||name==='title')payload[name]='ToolScout';
-    else if(['url','website','website_url','homepage','product_url','tool_url'].includes(name))payload[name]='https://trytoolscout.org/';
-    else if(name==='description')payload[name]='ToolScout is an independent software discovery and recommendation platform.';
+    if(['name','title','product_name','tool_name','startup_name','company','company_name'].includes(name))payload[name]='ToolScout';
+    else if(['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(name))payload[name]='https://trytoolscout.org/';
+    else if(['description','short_description','summary','overview'].includes(name))payload[name]='ToolScout is an independent software discovery and recommendation platform.';
     else if(name==='tagline')payload[name]='Find the right software for the job without the noise.';
-    else if(name==='category')payload[name]='Software';
-    else if(name==='categories')payload[name]='Software';
+    else if(['category','categories','industry','type'].includes(name))payload[name]='Software';
     else if(name==='slug')payload[name]='toolscout';
     else if(name==='domain')payload[name]='trytoolscout.org';
     useful++;
@@ -148,7 +152,6 @@ function safeFormPayload(html){
   return useful>=2?payload:null;
 }
 function htmlFormAdapter(homepage,html){
-  if(POLICY_BLOCK_RE.test(html)||HUMAN_BLOCK_RE.test(html)||AUTH_RE.test(html))return null;
   for(const match of String(html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
     const open=match[1]||'',body=match[2]||'';
     const method=String(tagAttr(open,'method')||'GET').toUpperCase();
