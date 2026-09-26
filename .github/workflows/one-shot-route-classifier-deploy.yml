@@ -1,0 +1,48 @@
+name: One Shot Route Classifier Deploy
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-route-classifier-deploy.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate route classifier changes
+        run: |
+          set -euo pipefail
+          node --check overflow-compute/research-core.mjs
+          node --check compute-router-worker.js
+          node --check command-center-simplified-view.js
+          node tests/compute-overflow-policy.test.mjs
+          node tests/distribution-executor-lanes.test.mjs
+          node tests/command-center-hybrid-architecture.test.mjs
+
+      - name: Deploy Cloudflare Worker
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Verify live classifier surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://trytoolscout.org"
+          curl -fsS --max-time 20 "$BASE/api/compute/health" -o /tmp/compute.json
+          jq -e '.status=="configured" and (.distributionFunnel.formRoutesSeenToday|type=="number") and (.distributionFunnel.authRoutesSeenToday|type=="number") and (.distributionFunnel.captchaRoutesSeenToday|type=="number")' /tmp/compute.json >/dev/null
+          curl -fsSL --max-time 20 "$BASE/analytics" -o /tmp/analytics.html
+          grep -q "Route blockers observed" /tmp/analytics.html
