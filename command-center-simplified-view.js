@@ -213,7 +213,7 @@ function throughput(){
  const t=data.truth||{},g=t.growth||{},c=data.compute||{},a=data.auth||{};
  const researchUsed=Number(c.researchUsedToday||0),researchMax=Number(c.dailyJobBudget||g.researchExternalJobMax24h||1500);
  const execUsed=Number(c.executionUsedToday||0),execMax=Number(c.executionDailyJobBudget||g.machineSafeExternalActionMax24h||800);
- const funnel=c.distributionFunnel||{},researchCompleted=Number(funnel.researchCompletedToday||0),routesFound=Number(funnel.submissionRoutesFoundToday||0),adaptersReady=Number(funnel.adaptersReady||0),actionsAuthorized=Number(funnel.actionsAuthorizedToday??execUsed),actionsCompleted=Number(funnel.actionsCompletedToday||0),submissionsAccepted=Number(funnel.submissionsAcceptedToday||0),placementsVerified=Number(funnel.placementsVerifiedToday||0);
+ const funnel=c.distributionFunnel||{},researchCompleted=Number(funnel.researchCompletedToday||0),routesFound=Number(funnel.submissionRoutesFoundToday||0),machineCandidates=Number(funnel.machineCandidatesFoundToday||0),adaptersReady=Number(funnel.adaptersReady||0),actionsAuthorized=Number(funnel.actionsAuthorizedToday??execUsed),actionsCompleted=Number(funnel.actionsCompletedToday||0),submissionsAccepted=Number(funnel.submissionsAcceptedToday||0),placementsVerified=Number(funnel.placementsVerifiedToday||0);
  const emailSent=Number(g.emailSent24h||0),emailTarget=Number(g.emailTarget24h||50),emailMax=Number(g.emailMax24h||60);
  const supply=c.contactSupply||{},readyContacts=Number(supply.readyEmail??g.contactSupplyReadyEmail??g.emailReadyContacts??0),supplyTarget=Number(supply.targetReady??g.contactSupplyTarget??200),supplyMin=Number(supply.minReady??g.contactSupplyMin??150),readyRoutes=Number(supply.readyRoute??g.contactSupplyReadyRoute??0),cooldown=Number(supply.cooldown??g.contactSupplyCooldown??0),researching=Number(supply.researching??g.contactSupplyResearching??0),unresolved=Number(supply.unresolved??g.contactSupplyUnresolved??0),apolloEligible=Number(supply.apolloEligible??g.contactSupplyApolloEligible??0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
  const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
@@ -239,12 +239,13 @@ function throughput(){
    '</div>'+
    '<div class="section"><div class="sectionTitle">Distribution execution funnel</div>'+
      row('Research completed',n(researchCompleted),'External route research completed today')+
-     row('Submission routes found',n(routesFound),'Research found a same-host submission route')+
-     row('Verified adapters ready',n(adaptersReady),'Canonical qualification passed and is ready for machine execution')+
+     row('Submission routes found',n(routesFound),'All same-host submission routes found, including manual/auth routes')+
+     row('Machine-safe form candidates',n(machineCandidates),'Render found a no-auth, no-CAPTCHA, no-payment POST form that passed structural safety checks')+
+     row('Verified adapters ready',n(adaptersReady),'Canonical policy accepted a machine-safe adapter and it is ready for execution')+
      row('Actions authorized',n(actionsAuthorized),'Cloudflare authorized machine-safe execution today')+
      row('Actions completed',n(actionsCompleted),'Render completed authorized submission jobs today')+
      row('Submissions accepted',n(submissionsAccepted),'External service accepted the ToolScout submission today')+
-     row('Placements verified',n(placementsVerified),'Canonical public verification completed today')+
+     row('Placements verified today',n(placementsVerified),'Verification events completed today; these can belong to submissions from an earlier cohort')+
    '</div>'+
    '<div class="section"><div class="sectionTitle">Execution architecture</div>'+
      row('Control plane','Cloudflare','Priorities, policy, leases, canonical D1 state and final verification')+
@@ -299,7 +300,10 @@ function health(){
  const ec=t.executionContract||{},arch=t.architecture||{},g=t.search||{},growth=t.growth||{};
  if(Number(ec.missingExecutors||0)>0)issues.push({level:'bad',title:'Missing execution contracts',detail:n(ec.missingExecutors)+' executor mappings are missing.'});
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
- if(Number(arch.openIncidents||0)>0)issues.push({level:'bad',title:'Architecture incidents',detail:n(arch.openIncidents)+' open architecture incidents.'});
+ if(Number(arch.openIncidents||0)>0){
+   const top=Array.isArray(arch.items)&&arch.items.length?arch.items[0]:null;
+   issues.push({level:'bad',title:'Architecture incidents',detail:top?(n(arch.openIncidents)+' open · '+human(top.severity||'')+' · '+human(top.title||'Architecture incident')):(n(arch.openIncidents)+' open architecture incidents.')});
+ }
  if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
  const authorityFailureStates=new Set(['execution_required','external_handoff_timeout','handoff_reconciliation_required','failed']);
  if(a.status&&authorityFailureStates.has(String(a.status))){
@@ -324,7 +328,10 @@ function health(){
   ['Execution contract',n(ec.verified)+' verified',n(ec.ready)+' ready - '+n(ec.inFlight)+' in flight - '+n(ec.deferred)+' deferred'],
   ['Affiliate programmes',n(t.affiliate?.productionRoutes)+' active','Canonical production registry']
  ];
- document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div><div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
+ const architectureDetail=Array.isArray(arch.items)&&arch.items.length
+   ?'<div class="section"><div class="sectionTitle">Open architecture incident detail</div>'+arch.items.slice(0,3).map(x=>row(human((x.severity||'')+' · '+(x.title||x.id||'Incident')),human(x.engine||'growth')+(x.executor?' · '+human(x.executor):''),human(x.summary||'')+' · detected '+dt(x.lastDetectedAt))).join('')+'</div>'
+   :'';
+ document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div>'+architectureDetail+'<div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
 function render(){business();trafficProgress();authorityProgress();gscProgress();brain();throughput();queue();results();health()}
 async function reviewReputation(button){
