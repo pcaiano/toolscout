@@ -46,6 +46,7 @@ async function ensureSchema(env){
     )`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_status_priority ON compute_overflow_jobs(status,priority_score DESC,available_at)`),
     env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_batch ON compute_overflow_jobs(batch_id,status)`),
+    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_subject_type_created ON compute_overflow_jobs(subject_key,job_type,created_at)`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_batches(
       batch_id TEXT PRIMARY KEY,
       completion_token_hash TEXT NOT NULL,
@@ -475,6 +476,12 @@ async function enqueueDistributionResearch(env){
         status IN ('candidate','discovered')
         OR (status='research_required' AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')))
       )
+      AND NOT EXISTS (
+        SELECT 1 FROM compute_overflow_jobs j
+        WHERE j.subject_key=distribution_opportunities.surface_slug
+          AND j.job_type='distribution_route_research'
+          AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
+      )
     ORDER BY distribution_score DESC,updated_at ASC LIMIT ?`).bind(limit).all().catch(()=>({results:[]}));
   for(const row of rows(q)){
     if(remaining<=0||!isHttp(row.action_url))break;
@@ -555,6 +562,13 @@ async function enqueueAuthorizedExecution(env){
       AND COALESCE(ac.automation_class,'public_automatic')<>'token_automatic'
       AND COALESCE(c.cost_amount,0)=0
       AND COALESCE(l.operating_decision,'explore') IN ('explore','measure','scale')
+      AND NOT EXISTS (
+        SELECT 1 FROM distribution_submissions queued
+        WHERE queued.surface_slug=a.surface_slug
+          AND queued.asset_url='https://trytoolscout.org/'
+          AND queued.submission_type='auto_discovered_json'
+          AND queued.status IN ('queued_external','submitted','pending_review','verified')
+      )
     ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
     LIMIT ?`).bind(submitLimit).all().catch(()=>({results:[]}));
 
