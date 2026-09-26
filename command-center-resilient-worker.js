@@ -162,16 +162,75 @@ function editorialAction(row){
 }
 async function lightweightQueue(request,env,ctx){
   try{
-    const [rawResponse,editorialRows]=await Promise.all([
-      base.fetch(new Request(new URL('/analytics/api/human-actions',request.url).toString(),{method:'GET',headers:request.headers}),env,ctx),
+    // This read path must stay cheap. Never call the full /analytics/api/human-actions
+    // snapshot here: that route performs reconciliation and schema work and can stall
+    // both the Chairman Queue and /analytics/api/stats.
+    const [affiliateRows,gateRows,legacyRows,editorialRows]=await Promise.all([
+      safeAll(env,`SELECT tool_slug,status,program_name,application_url,program_url,blocker,notes,updated_at
+        FROM affiliate_workflow
+        WHERE status IN ('ready_to_apply','human_action_required','approved_needs_link')
+          AND COALESCE(application_url,program_url) IS NOT NULL
+        ORDER BY updated_at DESC LIMIT 20`),
+      safeAll(env,`SELECT g.gate_key,g.subject_key,g.gate_type,g.title,g.reason,g.instructions,g.action_url,g.payload_json,g.updated_at,
+          o.surface_name,o.distribution_score
+        FROM human_gate_contract g
+        LEFT JOIN distribution_opportunities o ON o.surface_slug=g.subject_key
+        WHERE g.engine='distribution' AND g.status='open' AND g.action_url IS NOT NULL
+        ORDER BY g.updated_at DESC LIMIT 40`),
+      safeAll(env,`SELECT surface_slug,surface_name,status,action_url,next_action,distribution_score,updated_at
+        FROM distribution_opportunities
+        WHERE action_url IS NOT NULL
+          AND (human_required=1 OR status IN ('approval_required','auth_required','human_action_required'))
+          AND status NOT IN ('policy_blocked','rejected','skipped','submitted','pending_review','scheduled','live','verified','stale')
+        ORDER BY distribution_score DESC,updated_at DESC LIMIT 40`),
       editorialQueueRows(env)
     ]);
-    const raw=rawResponse.ok?await rawResponse.json():{affiliate:[],distribution:[]};
-    const nonEditorial=[...(raw.affiliate||[]),...(raw.distribution||[])].filter(x=>!x.editorial_queue_id&&!String(x.id||'').startsWith('editorial:'));
+    const affiliate=(affiliateRows||[]).map(row=>({
+      engine:'affiliate',
+      id:String(row.tool_slug||''),
+      title:row.program_name||row.tool_slug||'Affiliate programme',
+      status:row.status||'human_action_required',
+      reason:row.blocker||row.notes||'Affiliate action requires owner input.',
+      action_url:row.application_url||row.program_url,
+      metric:0,
+      metric_label:'affiliate priority',
+      source_of_truth:'affiliate_workflow'
+    })).filter(x=>x.id&&x.action_url);
+    const gateSubjects=new Set((gateRows||[]).map(x=>String(x.subject_key||'')));
+    const gates=(gateRows||[]).map(row=>{
+      let payload={};try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
+      return {
+        engine:'distribution',
+        id:String(row.subject_key||''),
+        gate_key:row.gate_key||null,
+        gate_type:row.gate_type||'human_gate',
+        title:row.title||row.surface_name||row.subject_key||'Distribution action',
+        status:row.gate_type||'human_gate',
+        reason:row.reason||'Human-only distribution step required.',
+        action_url:row.action_url,
+        metric:n(row.distribution_score)||50,
+        metric_label:'distribution priority',
+        source_of_truth:'human_gate_contract',
+        gate_evidence:payload.gate_evidence||null,
+        instructions:row.instructions||'Complete only the human-required step, then mark it done.'
+      };
+    }).filter(x=>x.id&&x.action_url);
+    const legacy=(legacyRows||[]).filter(row=>!gateSubjects.has(String(row.surface_slug||''))).map(row=>({
+      engine:'distribution',
+      id:String(row.surface_slug||''),
+      title:row.surface_name||row.surface_slug||'Distribution action',
+      status:row.status||'human_action_required',
+      reason:row.next_action||'Human-only distribution step required.',
+      action_url:row.action_url,
+      metric:n(row.distribution_score)||40,
+      metric_label:'distribution priority',
+      source_of_truth:'distribution_opportunities',
+      instructions:row.next_action||''
+    })).filter(x=>x.id&&x.action_url);
     const editorial=editorialRows.map(editorialAction);
-    const quality=partitionChairmanTasks([...nonEditorial,...editorial].map(queueItem));
+    const quality=partitionChairmanTasks([...affiliate,...gates,...legacy,...editorial].map(queueItem));
     const items=quality.items.sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,12);
-    return {status:rawResponse.ok?'connected':'partial',quality_holds:[...(raw.quality_holds||[]),...quality.quality_holds],quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-editorial-v3',rule:'Current canonical engine states plus prepared editorial actions read directly from D1. Editorial tasks include publication type, exact instructions, title and prepared content.'};
+    return {status:'connected',quality_holds:quality.quality_holds,quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-direct-d1-v4',rule:'Direct canonical D1 read path only. Heavy reconciliation is excluded from dashboard requests so human actions can never block the Command Center.'};
   }catch(error){return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:String(error?.message||error)}}
 }
 async function resilientSnapshot(request,env,ctx){
