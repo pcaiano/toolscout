@@ -17,7 +17,7 @@ assert.match(router,/BATCH_TIMEOUT_MINUTES=3/);
 assert.match(router,/githubActionsRole:'disabled_until_october'/);
 assert.match(router,/d1ReadModel:'single_row_metrics_plus_two_budget_rows_plus_contact_supply_single_row'/);
 assert.match(router,/reconcileMetricAnomaly/);
-assert.match(router,/await metricDelta\(env,\{leased:-1,completed:1,lastCompleted:true\}\)/);
+assert.match(router,/await metricDelta\(env,\{queued:metricQueued,leased:metricLeased,completed:metricCompleted,failed:metricFailed,activeBatches:-1,completedBatches:1,lastCompleted:true\}\)/);
 assert.match(router,/if\(!env\.OVERFLOW_COMPUTE_URL\)return\{ok:true,status:'awaiting_external_runtime'\}/);
 assert.match(router,/capability-secured|completion_token_hash|invalid_completion_capability/);
 assert.match(router,/distribution_route_research/);
