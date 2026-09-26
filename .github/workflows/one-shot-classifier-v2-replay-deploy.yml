@@ -1,4 +1,4 @@
-name: One Shot Backlog First Deploy
+name: One Shot Canonical Queue Deploy
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate backlog-first dispatch
+      - name: Validate canonical queue truth
         run: |
           set -euo pipefail
           node --check compute-router-worker.js
@@ -31,17 +31,19 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Verify idle backlog immediately drains
+      - name: Verify canonical queue and watchdog
         run: |
           set -euo pipefail
-          curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?backlog_first=before" -o /tmp/before.json
+          curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?canonical_queue=before" -o /tmp/before.json
           cat /tmp/before.json
+          jq -e '.d1ReadModel=="canonical_queue_counts_plus_metrics_plus_distribution_funnel"' /tmp/before.json >/dev/null
           before_q=$(jq -r '.queued // 0' /tmp/before.json)
           before_d=$(jq -r '.completedToday // 0' /tmp/before.json)
           before_last=$(jq -r '.lastDispatchedAt // ""' /tmp/before.json)
+          if [ "$before_q" -eq 0 ]; then exit 0; fi
           for i in $(seq 1 12); do
             sleep 5
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?backlog_first=$i" -o /tmp/after.json
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?canonical_queue=$i" -o /tmp/after.json
             cat /tmp/after.json
             q=$(jq -r '.queued // 0' /tmp/after.json)
             d=$(jq -r '.completedToday // 0' /tmp/after.json)
