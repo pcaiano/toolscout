@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-25T09:55:00Z",
+  "updatedAt": "2026-09-26T09:58:00Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "chatgpt-images-2-5",
+      "publishedAt": "2026-09-26",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Official product update",
+      "title": "ChatGPT Images 2.5 sharpens editing and speeds up generation",
+      "summary": "ChatGPT Images 2.5 improves detail, editing precision and generation speed while adding templates, sketch-based creation and prompt sharing.",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-chatgpt-images-2-5/",
+      "articleUrl": "/news/chatgpt-images-2-5.html",
+      "profileUrl": "/news/chatgpt-images-2-5.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "github-proof-of-presence-enterprise",
       "publishedAt": "2026-09-25",
