@@ -224,6 +224,7 @@ async function buildCommandCenterBusinessTruth(request,env){
   const seRankingDomainAuthority=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.domainAuthority??seRankingBacklinkTruth?.metrics?.domainInlinkRank):0;
   const internalVerifiedBacklinks=truthNum(backlink.verified_backlinks);
   const observedBacklinks=Math.max(internalVerifiedBacklinks,seRankingBacklinks);
+  const backlinkReconciliationGap=seRankingFresh?Math.max(0,seRankingBacklinks-internalVerifiedBacklinks):0;
   const authorityVerifiedDomains=Math.max(truthNum(backlink.verified_referring_domains),internalAuthorityVerifiedDomains,seRankingReferringDomains);
   const authorityRequired=true;
   const authorityThroughputGap=authorityRequired&&authorityAttempts24<AUTHORITY_POLICY_MIN_24H;
@@ -408,6 +409,9 @@ async function buildCommandCenterBusinessTruth(request,env){
       verifiedBacklinks:internalVerifiedBacklinks,
       observedBacklinks,
       internalVerifiedBacklinks,
+      internalVerifiedBacklinkSurfaces:internalVerifiedBacklinks,
+      backlinkReconciliationGap,
+      backlinkCountSource:seRankingFresh?'SE Ranking observed link URLs':'internal verified backlink-bearing placements',
       referringDomains:authorityVerifiedDomains,
       verifiedReferringDomains:authorityVerifiedDomains,
       internalVerifiedReferringDomains:internalAuthorityVerifiedDomains,
