@@ -131,6 +131,7 @@ function business(){
    metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d')+
    metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d')+
    metric('Referring domains',n(b.referringDomains??b.verifiedReferringDomains),(b.seRankingReferringDomains!=null?n(b.seRankingReferringDomains)+' SE Ranking · ':'')+n(b.internalVerifiedReferringDomains??b.verifiedReferringDomains)+' internally verified')+
+   metric('Domain authority',b.domainAuthority==null?'Unavailable':n(b.domainAuthority),b.domainAuthoritySource||'External authority source')+
    metric('Active affiliates',n(aff.productionRoutes),'Live ToolScout affiliate routes')+
    metric('Confirmed revenue',data.stats==null?'Source unavailable':(r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency)),data.stats==null?'Stats source did not respond':(r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected'))+
    metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
@@ -163,15 +164,15 @@ function authorityProgress(){
  const handoff=live.senderFreshClaim&&Number(live.senderClaimed||0)>0;
  document.getElementById('authorityProgressMeta').textContent=b.latestPlacementVerifiedAt?'Latest placement '+dt(b.latestPlacementVerifiedAt):(b.lastVerifiedAt?'Last backlink '+dt(b.lastVerifiedAt):'Verified authority history');
  document.getElementById('authorityProgressBody').innerHTML=
-  '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Verified backlinks</small><b>'+n(b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(queue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(attempts24)+' / '+n(min24)+'</b></div></div>'+donut(b.referringDomains??b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
+  '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Observed backlinks</small><b>'+n(b.observedBacklinks??b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Domain authority</small><b>'+(b.domainAuthority==null?'Unavailable':n(b.domainAuthority))+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(queue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(attempts24)+' / '+n(min24)+'</b></div></div>'+donut(b.referringDomains??b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'placements',label:'Verified placements',cls:'primary'},{key:'backlinks',label:'Verified backlinks',cls:'good'},{key:'referringDomains',label:'Referring domains',cls:'warn'}])+'</div>'+
   '<div class="section">'+
     row('Latest authority placement',b.latestPlacementVerifiedAt?dt(b.latestPlacementVerifiedAt):'Unavailable','Any verified public authority placement')+
     row('Last backlink verified',b.lastVerifiedAt?dt(b.lastVerifiedAt):'Unavailable','Backlink-specific evidence')+
-    (b.seRankingReferringDomains!=null?row('SE Ranking referring domains',n(b.seRankingReferringDomains),n(b.internalVerifiedReferringDomains??0)+' internally verified · snapshot '+dt(b.seRankingObservedAt)):'')+
+    (b.seRankingReferringDomains!=null?row('SE Ranking authority profile',n(b.seRankingBacklinks)+' backlinks · '+n(b.seRankingReferringDomains)+' referring domains',(b.seRankingDofollowBacklinks==null?'':n(b.seRankingDofollowBacklinks)+' dofollow links · ')+(b.seRankingDofollowReferringDomains==null?'':n(b.seRankingDofollowReferringDomains)+' dofollow domains · ')+(b.domainAuthority==null?'':'authority '+n(b.domainAuthority)+' · ')+'snapshot '+dt(b.seRankingObservedAt)):'')+
     (handoff?row('Authority handoff','In progress',n(live.senderClaimed)+' sender task claimed at '+dt(live.senderNewestClaimedAt)):'')+
   '</div>'+
-  '<div class="sourceLine">Referring-domain headline is reconciled against fresh SE Ranking evidence while the internal ledger remains visible separately. Placement/backlink dates and the live queue remain ToolScout-verified operational evidence.</div>';
+  '<div class="sourceLine">Authority truth separates external observation from ToolScout internal verification. Fresh SE Ranking evidence drives the observed backlink profile and authority score; the internal ledger remains visible separately. The bootstrap floor is a milestone, not a stop condition.</div>';
 }
 function gscProgress(){
  const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{};
