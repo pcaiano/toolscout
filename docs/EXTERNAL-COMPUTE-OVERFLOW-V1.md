@@ -26,7 +26,7 @@ The external worker performs network-heavy research and strictly pre-authorized 
 - HTTP submission through adapters that Cloudflare has already revalidated as verified, free and confidence >=95;
 - public publication verification.
 
-It never decides which action should happen, never edits ToolScout business state directly and never sends email. Reputation-sensitive email remains Cloudflare-authorized and is delivered by the existing external Make sender. CAPTCHA, login, paid, reciprocal and manual-only routes remain Human Actions.
+It never decides which action should happen, never edits ToolScout business state directly and never sends email. Reputation-sensitive email remains Cloudflare-authorized and is delivered by the existing external Make sender. Payment, reciprocal-link requirements and material terms acceptance remain policy-blocked. Login/account bootstrap and CAPTCHA are routed to non-blocking human-assisted sidecars; when a reusable machine credential or authenticated route becomes available, autonomous execution resumes without consuming the human queue as executor capacity.
 
 ## Capacity
 
