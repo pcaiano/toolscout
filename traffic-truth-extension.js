@@ -6,9 +6,10 @@ function hoursOld(value){const t=Date.parse(String(value||''));return Number.isF
 function dateEnd(value){const t=Date.parse(`${String(value||'')}T23:59:59Z`);return Number.isFinite(t)?t:0}
 
 export async function augmentTrafficTruthStats(data,request,env){
-  const [legacy,external]=await Promise.all([
+  const [legacy,external,gscReality]=await Promise.all([
     assetJson(request,env,'/data/traffic-truth.json',{status:'unavailable'}),
-    assetJson(request,env,'/data/external-analytics-truth.json',{status:'unavailable'})
+    assetJson(request,env,'/data/external-analytics-truth.json',{status:'unavailable'}),
+    assetJson(request,env,'/data/gsc-search-reality.json',{status:'unavailable'})
   ]);
   const tracking=data?.tracking||{},traffic=data?.traffic||{},funnel=data?.funnel||{},commercial=data?.commercial||{};
   const d1={
@@ -22,23 +23,38 @@ export async function augmentTrafficTruthStats(data,request,env){
     humanOutbound:n(funnel.outboundClicks||commercial?.totals?.outbound),
     monetizedOutbound:n(commercial?.totals?.monetizedOutbound||commercial?.monetizedOutbound)
   };
-  const ga4=external?.ga4||{status:'unavailable'},gsc=external?.gsc||legacy?.googleSearchConsole||{status:'unavailable'};
-  const externalAge=hoursOld(external?.generatedAt);
+  const ga4=external?.ga4||{status:'unavailable'};
+  const gscWindow=gscReality?.searchPerformance?.window28d||{};
+  const gscHasCanonical=Number.isFinite(Number(gscWindow?.impressions))||Number.isFinite(Number(gscWindow?.clicks));
+  const gsc=gscHasCanonical?{
+    status:'observed',
+    source:gscReality?.source||'Google Search Console first-party APIs',
+    generatedAt:gscReality?.generatedAt||null,
+    startDate:gscWindow?.startDate||null,
+    endDate:gscWindow?.endDate||null,
+    clicks:n(gscWindow?.clicks),
+    impressions:n(gscWindow?.impressions),
+    ctr:Number(gscWindow?.ctr||0),
+    position:Number(gscWindow?.position||0),
+    pageCount:n(gscReality?.searchPerformance?.observedPages)
+  }:(external?.gsc||legacy?.googleSearchConsole||{status:'unavailable'});
+  const externalAge=hoursOld(external?.generatedAt),gscAge=hoursOld(gsc?.generatedAt);
   const launchAt=Date.parse(String(ga4?.installedAt||''));
   const settledEnd=dateEnd(ga4?.settled28d?.endDate);
   const hasSettledPostLaunch=Number.isFinite(launchAt)&&launchAt>0&&settledEnd>=launchAt;
   const checks=[];
   let status='healthy',note='First-party operations, consent analytics and search visibility are available as separate truth layers.';
-  if(!external?.generatedAt||externalAge===null){status='unavailable';note='External analytics snapshot is unavailable.';}
-  else if(externalAge>36){status='stale';note='GA4 and GSC snapshot is older than 36 hours. D1 remains live, but external validation is stale.';}
+  if(!external?.generatedAt||externalAge===null){status='unavailable';note='GA4 external analytics snapshot is unavailable. D1 and GSC remain independent truth layers.';}
+  else if(externalAge>36){status='stale';note='GA4 external snapshot is older than 36 hours. D1 remains live and GSC uses its own canonical first-party snapshot.';}
   else if(ga4.status==='warming_up'||!hasSettledPostLaunch){status='warming_up';note='GA4 launched after the current settled reporting window. D1 is live; GA4 validation is collecting its first comparable data.';}
+  if(gscAge===null||gscAge>72){checks.push({id:'gsc-freshness',state:gscAge===null?'unavailable':'stale',label:'GSC freshness',detail:gscAge===null?'Canonical GSC snapshot timestamp unavailable.':`Canonical GSC snapshot is ${gscAge.toFixed(1)} hours old.`});}
   const gscClicks=n(gsc?.clicks),googleSessions=n(ga4?.settled28d?.googleOrganicSessions);
   if(status==='healthy'&&gscClicks>=3&&googleSessions===0){status='warning';note='GSC reports Google Search clicks but GA4 reports no Google organic sessions in the comparable settled window.';}
   checks.push({id:'d1-primary',state:'healthy',label:'D1 operational truth',detail:'Browser-confirmed likely-human sessions and outbound monetization remain primary.'});
   checks.push({id:'ga4-readiness',state:ga4.status==='warming_up'||!hasSettledPostLaunch?'warming_up':ga4.status||'unavailable',label:'GA4 consent audit',detail:ga4.note||'Consent-based acquisition and engagement validation.'});
   checks.push({id:'gsc-search',state:gsc.status==='observed'?'healthy':gsc.status||'unavailable',label:'GSC search truth',detail:`${gscClicks} clicks and ${n(gsc?.impressions)} impressions in the settled window.`});
   checks.push({id:'gsc-ga4-organic',state:!hasSettledPostLaunch?'warming_up':(gscClicks>=3&&googleSessions===0?'warning':'healthy'),label:'Google click to session bridge',detail:!hasSettledPostLaunch?'Waiting for a settled GA4 window after launch.':`${gscClicks} GSC clicks versus ${googleSessions} GA4 Google organic sessions.`});
-  const reconciliation={status,note,generatedAt:new Date().toISOString(),externalGeneratedAt:external?.generatedAt||null,externalAgeHours:externalAge,hasSettledPostLaunchData:hasSettledPostLaunch,checks};
+  const reconciliation={status,note,generatedAt:new Date().toISOString(),externalGeneratedAt:external?.generatedAt||null,externalAgeHours:externalAge,gscGeneratedAt:gsc?.generatedAt||null,gscAgeHours:gscAge,hasSettledPostLaunchData:hasSettledPostLaunch,checks};
   const truth={...legacy,version:2,generatedAt:new Date().toISOString(),primaryMetric:'D1 browser-confirmed likely-human sessions',d1,ga4,googleSearchConsole:gsc,reconciliation,status:'observed'};
   return {...data,trafficTruth:truth,trafficIntegrity:{...(data?.trafficIntegrity||{}),crossSourceStatus:status,d1Status:'live',ga4Status:ga4.status||'unavailable',googleSearchConsoleStatus:gsc.status||'unavailable',externalSnapshotAgeHours:externalAge,truthGeneratedAt:truth.generatedAt}};
 }
