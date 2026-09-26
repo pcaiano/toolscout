@@ -1,0 +1,30 @@
+name: One Shot Command Center Stall Diagnostic
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-command-center-stall-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe Command Center and canonical endpoints
+        shell: bash
+        run: |
+          set -u
+          BASE="https://trytoolscout.org"
+          JAR="/tmp/ts-cookies.txt"
+          echo "=== establish session ==="
+          curl -sS -L --max-time 20 -c "$JAR" -b "$JAR" -o /tmp/analytics.html -w "analytics status=%{http_code} time=%{time_total}s size=%{size_download}\n" "$BASE/analytics" || true
+          for p in             "/analytics/api/stats"             "/analytics/api/chairman-queue"             "/api/command-center-business-truth"             "/api/runtime/executors"             "/api/distribution/authority/closed-loop-health"             "/api/compute/health"             "/api/auth-plane/health"
+          do
+            safe=$(echo "$p" | tr '/?' '__')
+            echo "=== $p ==="
+            curl -sS --max-time 20 -c "$JAR" -b "$JAR" -o "/tmp/$safe.out" -w "status=%{http_code} time=%{time_total}s size=%{size_download}\n" "$BASE$p" || true
+            head -c 800 "/tmp/$safe.out" 2>/dev/null || true
+            echo
+          done
