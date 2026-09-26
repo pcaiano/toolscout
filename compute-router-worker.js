@@ -435,6 +435,7 @@ async function health(env){
     contactSupplyHealth(env),
     env.DB.prepare(`SELECT
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) research_completed_today,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"routeSummary":%') classified_research_jobs_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"kind":"submission"%') submission_routes_found_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"machineCandidate":{"kind":"html_form"%') machine_candidates_found_today,
       (SELECT COALESCE(SUM(CAST(json_extract(result_json,'$.routeSummary.formRoutes') AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) form_routes_seen_today,
@@ -450,6 +451,7 @@ async function health(env){
   const usage=Object.fromEntries(rows(budgets).map(x=>[String(x.kind),num(x.used_today)]));
   const distributionFunnel={
     researchCompletedToday:num(funnel?.research_completed_today),
+    classifiedResearchJobsToday:num(funnel?.classified_research_jobs_today),
     submissionRoutesFoundToday:num(funnel?.submission_routes_found_today),
     machineCandidatesFoundToday:num(funnel?.machine_candidates_found_today),
     formRoutesSeenToday:num(funnel?.form_routes_seen_today),
