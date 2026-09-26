@@ -3,15 +3,15 @@
   "source": "SE Ranking Data API",
   "target": "trytoolscout.org",
   "mode": "domain",
-  "observedAt": "2026-09-26T07:39:46.482Z",
+  "observedAt": "2026-09-26T09:58:00Z",
   "freshnessHours": 168,
   "metrics": {
-    "backlinks": 20,
-    "referringDomains": 13,
-    "subnets": 13,
-    "ips": 13,
+    "backlinks": 74,
+    "referringDomains": 15,
+    "subnets": 15,
+    "ips": 15,
     "dofollowBacklinks": 7,
-    "nofollowBacklinks": 13,
+    "nofollowBacklinks": 67,
     "dofollowReferringDomains": 6,
     "eduBacklinks": 0,
     "govBacklinks": 0,
@@ -21,6 +21,20 @@
   },
   "referringDomains": [
     {
+      "domain": "hypestar.org",
+      "backlinks": 52,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 5,
+      "firstSeen": "2026-09-26"
+    },
+    {
+      "domain": "verifymcp.io",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 13,
+      "firstSeen": "2026-09-26"
+    },
+    {
       "domain": "techtwitter.io",
       "backlinks": 1,
       "dofollowBacklinks": 1,
@@ -28,17 +42,17 @@
       "firstSeen": "2026-09-25"
     },
     {
-      "domain": "allagents.app",
-      "backlinks": 2,
-      "dofollowBacklinks": 0,
-      "domainInlinkRank": 0,
-      "firstSeen": "2026-09-25"
-    },
-    {
       "domain": "agentlair.dev",
       "backlinks": 1,
       "dofollowBacklinks": 1,
       "domainInlinkRank": 15,
+      "firstSeen": "2026-09-25"
+    },
+    {
+      "domain": "allagents.app",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
       "firstSeen": "2026-09-25"
     },
     {
@@ -54,13 +68,6 @@
       "dofollowBacklinks": 2,
       "domainInlinkRank": 37,
       "firstSeen": "2026-09-24"
-    },
-    {
-      "domain": "odel.app",
-      "backlinks": 2,
-      "dofollowBacklinks": 0,
-      "domainInlinkRank": 10,
-      "firstSeen": "2026-09-23"
     },
     {
       "domain": "finderlaunch.com",
@@ -84,11 +91,11 @@
       "firstSeen": "2026-09-23"
     },
     {
-      "domain": "epicsaas.com",
-      "backlinks": 1,
+      "domain": "odel.app",
+      "backlinks": 2,
       "dofollowBacklinks": 0,
-      "domainInlinkRank": 20,
-      "firstSeen": "2026-09-22"
+      "domainInlinkRank": 10,
+      "firstSeen": "2026-09-23"
     },
     {
       "domain": "uicomet.com",
@@ -98,17 +105,24 @@
       "firstSeen": "2026-09-22"
     },
     {
+      "domain": "epicsaas.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 20,
+      "firstSeen": "2026-09-22"
+    },
+    {
       "domain": "wellknown.network",
       "backlinks": 4,
       "dofollowBacklinks": 0,
-      "domainInlinkRank": 0,
+      "domainInlinkRank": 1,
       "firstSeen": "2026-09-11"
     },
     {
       "domain": "mcpindex.ai",
       "backlinks": 1,
       "dofollowBacklinks": 0,
-      "domainInlinkRank": 10,
+      "domainInlinkRank": 13,
       "firstSeen": "2026-09-10"
     }
   ],
