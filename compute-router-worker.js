@@ -770,10 +770,19 @@ async function runOverflowTick(env){
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
   const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
   const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
+
+  // Drain already-queued work first. Slow discovery/qualification must never starve
+  // the external executor when there is an existing backlog.
+  const preRuns=await dispatchAvailableBatches(env);
+
   const qualification=await isolatedOverflowStage(env,'canonical_qualification_sweep',()=>qualifyResearchReadySweep(env),{ok:false,requested:0,checked:0,ready:0});
   const execution=await isolatedOverflowStage(env,'authorized_execution_enqueue',()=>enqueueAuthorizedExecution(env),{enqueued:0,submissionJobs:0,verificationJobs:0,remaining:0});
   const research=await isolatedOverflowStage(env,'research_enqueue',()=>enqueueDistributionResearch(env),{enqueued:0,remaining:0,contactSupply:{enqueued:0}});
-  const runs=await dispatchAvailableBatches(env);
+
+  // A second pass fills slots only if the first pass had nothing to lease or a
+  // very fast executor completed while the canonical stages were running.
+  const postRuns=await dispatchAvailableBatches(env);
+  const runs=[...preRuns,...postRuns];
   const first=runs[0]||null;
   const dispatched=runs.filter(x=>x.dispatch?.ok).length;
   const failedStages=[contactSupply,qualification,execution,research].filter(x=>x&&x.ok===false).length;
@@ -1184,7 +1193,10 @@ export default{
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
       const snapshot=await health(env);
       if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.queued)>0&&num(snapshot.activeBatches)===0){
-        ctx.waitUntil(runOverflowTick(env).catch(async error=>{await event(env,'health_watchdog_pump_failed','failed',safe(error?.message||error,600)).catch(()=>{});return null;}));
+        // Health is polled by the Command Center and operational probes. Use it only
+        // as a lightweight executor watchdog: lease and trigger queued work now,
+        // without waiting for research/qualification stages.
+        ctx.waitUntil(dispatchAvailableBatches(env).catch(async error=>{await event(env,'health_watchdog_pump_failed','failed',safe(error?.message||error,600)).catch(()=>{});return null;}));
       }
       return Response.json(snapshot,{headers:JSON_H});
     }
