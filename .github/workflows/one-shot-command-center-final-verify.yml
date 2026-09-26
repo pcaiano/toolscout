@@ -1,0 +1,30 @@
+name: One Shot Command Center Final Verify
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-command-center-final-verify.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live Command Center
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://trytoolscout.org"
+          JAR="/tmp/cc.txt"
+          curl -fsSL --max-time 12 -c "$JAR" -b "$JAR" -o /tmp/analytics "$BASE/analytics"
+          curl -fsS --max-time 12 -c "$JAR" -b "$JAR" -o /tmp/stats "$BASE/analytics/api/stats"
+          curl -fsS --max-time 12 -c "$JAR" -b "$JAR" -o /tmp/queue "$BASE/analytics/api/chairman-queue"
+          curl -fsS --max-time 12 -c "$JAR" -b "$JAR" -o /tmp/truth "$BASE/api/command-center-business-truth"
+          echo "stats:"
+          jq -c '{ga4:.acquisition.status,ga4_sessions:.acquisition.sessions,gsc:.trafficTruth.googleSearchConsole,queue:.growthOps.chairmanQueue.total}' /tmp/stats
+          echo "queue:"
+          jq -c '{status,total,payload_version,quality_holds:(.quality_holds|length)}' /tmp/queue
+          echo "truth:"
+          jq -c '{gsc:{impressions:.search.impressions,clicks:.search.clicks,observedPages:.search.observedPages},authority:{observedBacklinks:.authority.observedBacklinks,referringDomains:.authority.referringDomains,domainAuthority:.authority.domainAuthority}}' /tmp/truth
