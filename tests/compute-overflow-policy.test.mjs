@@ -9,6 +9,8 @@ assert.match(wrangler,/crons\s*=\s*\["\*\/5 \* \* \* \*"/);
 
 const router=read('compute-router-worker.js');
 assert.match(router,/DAILY_JOB_BUDGET=1500/);
+assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=800/);
+assert.match(router,/const submitLimit=Math\.min\(300,remaining\);/);
 assert.match(router,/BATCH_SIZE=25/);
 assert.match(router,/MAX_ACTIVE_BATCHES=2/);
 assert.match(router,/BATCH_TIMEOUT_MINUTES=3/);
