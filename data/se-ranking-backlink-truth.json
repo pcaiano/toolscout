@@ -1,39 +1,129 @@
 {
-  "version": 1,
+  "version": 2,
   "source": "SE Ranking Data API",
   "target": "trytoolscout.org",
   "mode": "domain",
-  "observedAt": "2026-09-26T07:31:00Z",
+  "observedAt": "2026-09-26T07:39:46.482Z",
   "freshnessHours": 168,
   "metrics": {
     "backlinks": 20,
     "referringDomains": 13,
-    "subnets": 10,
-    "ips": 10,
+    "subnets": 13,
+    "ips": 13,
     "dofollowBacklinks": 7,
     "nofollowBacklinks": 13,
+    "dofollowReferringDomains": 6,
     "eduBacklinks": 0,
-    "govBacklinks": 0
+    "govBacklinks": 0,
+    "pageInlinkRank": 1,
+    "domainInlinkRank": 2,
+    "domainAuthority": 2
   },
   "referringDomains": [
-    {"domain":"techtwitter.io","backlinks":1,"dofollowBacklinks":1,"domainInlinkRank":7,"firstSeen":"2026-09-25"},
-    {"domain":"agentlair.dev","backlinks":1,"dofollowBacklinks":1,"domainInlinkRank":15,"firstSeen":"2026-09-25"},
-    {"domain":"allagents.app","backlinks":2,"dofollowBacklinks":0,"domainInlinkRank":0,"firstSeen":"2026-09-25"},
-    {"domain":"mcpcensus.com","backlinks":2,"dofollowBacklinks":0,"domainInlinkRank":8,"firstSeen":"2026-09-24"},
-    {"domain":"www.claudemcp.org","backlinks":2,"dofollowBacklinks":2,"domainInlinkRank":37,"firstSeen":"2026-09-24"},
-    {"domain":"finderlaunch.com","backlinks":1,"dofollowBacklinks":1,"domainInlinkRank":6,"firstSeen":"2026-09-23"},
-    {"domain":"connectors.fun","backlinks":1,"dofollowBacklinks":1,"domainInlinkRank":1,"firstSeen":"2026-09-23"},
-    {"domain":"viralrank.lol","backlinks":1,"dofollowBacklinks":0,"domainInlinkRank":0,"firstSeen":"2026-09-23"},
-    {"domain":"odel.app","backlinks":2,"dofollowBacklinks":0,"domainInlinkRank":10,"firstSeen":"2026-09-23"},
-    {"domain":"launches.uicomet.com","backlinks":1,"dofollowBacklinks":1,"domainInlinkRank":20,"firstSeen":"2026-09-22"},
-    {"domain":"epicsaas.com","backlinks":1,"dofollowBacklinks":0,"domainInlinkRank":20,"firstSeen":"2026-09-22"},
-    {"domain":"wellknown.network","backlinks":4,"dofollowBacklinks":0,"domainInlinkRank":1,"firstSeen":"2026-09-11"},
-    {"domain":"mcpindex.ai","backlinks":1,"dofollowBacklinks":0,"domainInlinkRank":13,"firstSeen":"2026-09-10"}
+    {
+      "domain": "techtwitter.io",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 7,
+      "firstSeen": "2026-09-25"
+    },
+    {
+      "domain": "allagents.app",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-09-25"
+    },
+    {
+      "domain": "agentlair.dev",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 15,
+      "firstSeen": "2026-09-25"
+    },
+    {
+      "domain": "mcpcensus.com",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 8,
+      "firstSeen": "2026-09-24"
+    },
+    {
+      "domain": "claudemcp.org",
+      "backlinks": 2,
+      "dofollowBacklinks": 2,
+      "domainInlinkRank": 37,
+      "firstSeen": "2026-09-24"
+    },
+    {
+      "domain": "odel.app",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 10,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "finderlaunch.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 6,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "connectors.fun",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 1,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "viralrank.lol",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "epicsaas.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 20,
+      "firstSeen": "2026-09-22"
+    },
+    {
+      "domain": "uicomet.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 20,
+      "firstSeen": "2026-09-22"
+    },
+    {
+      "domain": "wellknown.network",
+      "backlinks": 4,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-09-11"
+    },
+    {
+      "domain": "mcpindex.ai",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 10,
+      "firstSeen": "2026-09-10"
+    }
   ],
   "reconciliationPolicy": {
-    "primaryDisplay": "max(fresh SE Ranking referring domains, internal verified referring domains)",
+    "primaryDisplay": "fresh SE Ranking observed backlink and referring-domain profile, with the internal verified ledger retained separately",
     "internalLedgerRetained": true,
     "externalSnapshotExpiresAfterHours": 168,
-    "backlinkCountRemainsInternalInCommandCenter": true
+    "bootstrapFloorIsMilestoneNotStopCondition": true,
+    "authorityAcquisitionAlwaysOn": true
+  },
+  "authorityHistorySummary": {
+    "windowStart": "2026-09-01",
+    "windowEnd": "2026-09-26",
+    "startDomainAuthority": 1,
+    "currentDomainAuthority": 2,
+    "firstObservedAtCurrentValue": "2026-09-22"
   }
 }
