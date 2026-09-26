@@ -12,12 +12,13 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe compute health and watchdog
+      - name: Wait for deferred jobs and probe
         run: |
           set -euo pipefail
-          for i in 1 2 3; do
+          sleep 15
+          for i in 1 2 3 4; do
             echo "PROBE $i"
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?manual_probe=$i" || true
+            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?deferred_probe=$i"
             echo
-            sleep 5
+            sleep 8
           done
