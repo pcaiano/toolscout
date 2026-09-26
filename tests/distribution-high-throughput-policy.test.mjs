@@ -19,6 +19,7 @@ assert.match(throughput,/const RESEARCH_BUDGET=24;/);
 assert.match(throughput,/const INDEXNOW_BATCH_LIMIT=25;/);
 assert.match(throughput,/const VERIFY_LIMIT=80;/);
 const supervisor=read('growth-supervisor.js');
+assert.match(supervisor,/const MACHINE_SAFE_EXTERNAL_EXECUTIONS_MAX_24H=800;/);
 assert.match(supervisor,/suppress_repetitive_routes_and_rotate_to_competitive_gap/);
 assert.match(supervisor,/rank_by_human_referral_potential:true/);
 const adapters=JSON.parse(read('data/distribution-submission-adapters.json'));
