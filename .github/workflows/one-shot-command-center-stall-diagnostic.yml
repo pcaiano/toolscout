@@ -1,4 +1,5 @@
 name: One Shot Command Center Stall Diagnostic
+# post-fix verification
 
 on:
   push:
@@ -27,4 +28,12 @@ jobs:
             curl -sS --max-time 20 -c "$JAR" -b "$JAR" -o "/tmp/$safe.out" -w "status=%{http_code} time=%{time_total}s size=%{size_download}\n" "$BASE$p" || true
             head -c 800 "/tmp/$safe.out" 2>/dev/null || true
             echo
+            if [ "$p" = "/analytics/api/stats" ] && [ -s "/tmp/$safe.out" ]; then
+              echo "--- stats truth extract ---"
+              jq -c '{ga4_status:.acquisition.status,ga4_sessions:.acquisition.sessions,gsc_status:.trafficTruth.googleSearchConsole.status,gsc_clicks:.trafficTruth.googleSearchConsole.clicks,gsc_impressions:.trafficTruth.googleSearchConsole.impressions,queue_total:.growthOps.chairmanQueue.total}' "/tmp/$safe.out" 2>/dev/null || true
+            fi
+            if [ "$p" = "/api/command-center-business-truth" ] && [ -s "/tmp/$safe.out" ]; then
+              echo "--- business truth extract ---"
+              jq -c '{search:.search,authority:.authority,growth:{status:.growth.status,strictHumans24h:.growth.strictHumans24h}}' "/tmp/$safe.out" 2>/dev/null || true
+            fi
           done
