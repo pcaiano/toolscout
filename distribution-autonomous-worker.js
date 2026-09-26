@@ -12,8 +12,8 @@ const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|acc
 const AUTH_RE=/(account required|sign in|login required|api key|bearer token|oauth)/i;
 const ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add)/i;
 const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|registry|submit)/i;
-const QUALIFY_LIMIT=12;
-const EXECUTION_LIMIT=4;
+const QUALIFY_LIMIT=24;
+const EXECUTION_LIMIT=12;
 const RESEARCH_COOLDOWN_HOURS=6;
 const AUTHORITY_ATTEMPT_MIN_24H=4;
 const AUTHORITY_ATTEMPT_TARGET_24H=50;
@@ -651,7 +651,7 @@ async function executeCredentialedAdapters(env){
   let sent=0,failed=0,deduped=0,authRejected=0;
   for(const a of q.results||[]){
     const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first().catch(()=>null);
-    if(prior&&['submitted','ready','queued_external','pending_review','verified'].includes(String(prior.status||''))){deduped++;continue}
+    if(prior&&['submitted','queued_external','pending_review','verified'].includes(String(prior.status||''))){deduped++;continue}
     if(prior&&Number(prior.attempts||0)>=3){deduped++;continue}
     const headers=await machineAuthHeaders(env,a.surface_slug);
     if(!headers){await invalidateMachineCredential(env,a.surface_slug,'credential_unavailable_or_decrypt_failed');authRejected++;continue}
@@ -698,8 +698,9 @@ async function packageAndExecute(env){
     ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
     LIMIT ${EXECUTION_LIMIT}`).all();
   const outcomes=await Promise.all((q.results||[]).map(async a=>{
-    const prior=await env.DB.prepare(`SELECT submission_id,status FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
-    if(prior&&['submitted','ready'].includes(prior.status))return 'deduped';
+    const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
+    if(prior&&['submitted','queued_external','pending_review','verified'].includes(String(prior.status||'')))return 'deduped';
+    if(prior&&Number(prior.attempts||0)>=3)return 'deduped';
     const id=prior?.submission_id||`sub_${crypto.randomUUID()}`;
     if(!prior)await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(id,a.surface_slug,'https://trytoolscout.org/','auto_discovered_json','ready',a.payload_template_json,a.endpoint,0).run();
     try{
@@ -936,7 +937,7 @@ export async function runAutonomousDistributionCycle(env){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v1'};
+  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {

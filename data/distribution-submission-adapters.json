@@ -184,11 +184,9 @@
     "automatic_content_types": [
       "application/json"
     ],
-    "max_automatic_per_run": 6,
+    "max_automatic_per_run": 12,
     "max_attempts": 3,
     "never_automatic": [
-      "captcha",
-      "account_creation",
       "payment",
       "community_post",
       "editorial_pitch",
@@ -196,7 +194,21 @@
       "explicit_third_party_approval"
     ],
     "zero_cost_only": true,
-    "execution_strategy": "outcome_weighted_bounded",
-    "scale_only_after_verified_human_or_commercial_evidence": true
+    "execution_strategy": "lane_routed_outcome_weighted",
+    "scale_only_after_verified_human_or_commercial_evidence": true,
+    "human_assisted_only": [
+      "captcha",
+      "interactive_human_verification",
+      "mfa",
+      "manual_account_creation"
+    ],
+    "bootstrap_once_then_resume": [
+      "account_creation",
+      "login",
+      "oauth",
+      "api_token_provisioning"
+    ],
+    "human_gate_execution_policy": "non_blocking_sidecar_v2",
+    "eligible_surface_policy": "execute_all_qualified_zero_cost_surfaces"
   }
 }

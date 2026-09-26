@@ -85,7 +85,7 @@ export async function reconcileAuthAutomationClasses(env,{limit=400}={}){
   const staticMap=await staticAdapters(env);
   const q=await env.DB.prepare(`SELECT o.surface_slug,o.status,o.action_url,o.next_action,o.human_required,o.distribution_score,
       a.policy_state auto_policy_state,a.confidence auto_confidence,a.auth_type auto_auth_type,a.auth_detail auto_auth_detail,
-      c.auth_mode,c.challenge_type,c.automation_state
+      c.auth_mode,c.challenge_type,c.automation_state,c.session_reusable
     FROM distribution_opportunities o
     LEFT JOIN distribution_auto_adapters a ON a.surface_slug=o.surface_slug
     LEFT JOIN auth_surface_capability c ON c.surface_slug=o.surface_slug
@@ -102,6 +102,9 @@ export async function reconcileAuthAutomationClasses(env,{limit=400}={}){
     const envCredential=Boolean(st?.auth_env&&env[st.auth_env]);
     const autoVerified=(row.auto_policy_state==='verified'&&Number(row.auto_confidence||0)>=95)||Boolean(st?.enabled&&st?.allow_automatic);
     const machineRouteProven=Boolean(row.auto_policy_state==='auth_required'||row.auth_mode==='api_credential'||(spec.required&&spec.supported));
+    const reusableSession=Boolean(Number(row.session_reusable||0))||['human_bootstrap_session','reusable_session_candidate'].includes(String(row.auth_mode||''));
+    const sessionActive=reusableSession&&['authenticated','route_validated'].includes(String(row.automation_state||''));
+    const humanChallenge=String(row.challenge_type||'')==='captcha_or_human_verification'||String(row.auth_mode||'')==='human_challenge';
     let automationClass=null,credentialState='not_required',bootstrap=0,evidence='';
     if(autoVerified&&!spec.required){
       automationClass='public_automatic';evidence='Verified free machine adapter requires no authentication.';
@@ -109,8 +112,14 @@ export async function reconcileAuthAutomationClasses(env,{limit=400}={}){
       automationClass='token_automatic';credentialState='active';evidence='Verified machine authentication is available for autonomous execution.';
     }else if(machineRouteProven&&spec.required&&spec.supported){
       automationClass='human_bootstrap_then_automatic';credentialState='missing';bootstrap=1;evidence='Machine-safe authenticated route is proven, but a reusable token/API key is still required.';
+    }else if(sessionActive){
+      automationClass='session_automatic';credentialState='session_active';evidence='Reusable authenticated session is active; post-login route work remains machine-owned.';
+    }else if(humanChallenge){
+      automationClass='human_challenge_sidecar';credentialState='human_challenge';bootstrap=1;evidence='CAPTCHA or interactive verification is a non-blocking human sidecar, not a stalled distribution failure.';
+    }else if(reusableSession){
+      automationClass='session_bootstrap_sidecar';credentialState='session_missing';bootstrap=1;evidence='A reusable authenticated session may unlock automation. Human bootstrap is isolated from autonomous throughput.';
     }else if(row.auth_mode||row.status==='auth_required'||row.status==='human_action_required'||row.automation_state==='account_bootstrap_complete'){
-      automationClass='human_only';credentialState='unsupported';bootstrap=row.status==='auth_required'?1:0;evidence='No reusable machine credential route is proven. Human browser action remains required for authenticated steps.';
+      automationClass='human_manual_sidecar';credentialState='human_required';bootstrap=1;evidence='No reusable machine route is proven. Complete this surface manually without consuming autonomous executor capacity.';
     }else continue;
     const w=await env.DB.prepare(`INSERT INTO auth_automation_capability(surface_slug,automation_class,credential_kind,credential_header,credential_prefix,credential_state,human_bootstrap_required,evidence,last_verified_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now'))
