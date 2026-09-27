@@ -137,3 +137,6 @@ When the operating architecture changes, update this file and the JSON contract 
 
 27. Autonomous mission-cycle identity is `15m@04`, aligned to the dedicated `:04/:19/:34/:49` heartbeat. Hourly recovery calls share that cycle identity and therefore deduplicate against the scheduled owner instead of creating a second run.
 28. Stale mission-cycle takeover is bounded by the mission cadence. For the 15-minute autonomous cycle, takeover occurs after 12 minutes so one dead claim cannot suppress multiple heartbeats.
+
+29. GA4 is the canonical acquisition source for traffic volume and acquisition trends. Strict verified human sessions are first-party diagnostic and attribution-quality evidence; they may differ from GA4 because the populations, windows and instrumentation differ, and they must never silently override GA4 in owner-facing business truth.
+30. Command Center funnel counters must be live or explicitly unavailable. Never hardcode zero for a metric that has a canonical D1 source; a synthetic zero is an observability defect.
