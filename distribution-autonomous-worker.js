@@ -1016,6 +1016,7 @@ export async function runAutonomousDistributionCycle(env){
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
   const duplicateGates=await reconcileDuplicateSubmissionGates(env);
+  const duplicateHumanGates=await reconcileDuplicateOpenHumanGates(env);
   const machineGateRecovery=await recoverMachineResolvableAuthGates(env);
 
   // Machine-owned work stays on the critical path. Human-only gates are processed
@@ -1045,7 +1046,7 @@ export async function runAutonomousDistributionCycle(env){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
+  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
