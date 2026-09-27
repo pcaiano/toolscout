@@ -154,3 +154,5 @@ When the operating architecture changes, update this file and the JSON contract 
 
 40. Content and marketing URLs such as /best-of/, /blog/, /news/, /category/, /guides/, /advertise/ and /pricing/ cannot become submission routes merely because their page text mentions submit/launch or contains a site-wide form/CAPTCHA. They require explicit submission intent in the URL or a separate exact submission route.
 41. Research-derived Human Gates carry the classifier version that admitted them. When the classifier contract tightens, older open research-derived Human Gates are invalidated and returned to autonomous research before the owner is asked to act.
+
+42. Single-flight run observability follows lease ownership. A run recorded as single-flight cannot remain visible as running after its lease is absent or expired; the next ownership reconciliation marks it failed with single_flight_lease_expired before a successor is admitted.
