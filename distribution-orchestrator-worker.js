@@ -397,7 +397,14 @@ async function coordinateGrowthOpportunities(env){
         return p||'/';
       }catch{return String(value||'').replace(/\.html$/i,'')||'/'}
     };
-    const canonicalEquivalent=(a,b)=>Boolean(a&&b)&&canonicalTechnicalPath(a)===canonicalTechnicalPath(b);
+    const canonicalTechnicalIdentity=value=>{
+      try{
+        const u=new URL(String(value||''),'https://trytoolscout.org');
+        const host=String(u.hostname||'').toLowerCase().replace(/^www\./,'');
+        return host+'|'+canonicalTechnicalPath(u.toString());
+      }catch{return 'trytoolscout.org|'+canonicalTechnicalPath(value)}
+    };
+    const canonicalEquivalent=(a,b)=>Boolean(a&&b)&&canonicalTechnicalIdentity(a)===canonicalTechnicalIdentity(b);
     for(const row of gscReality.opportunities){
       const kind=String(row?.kind||'');if(!precedence[kind])continue;
       const rawPage=String(row?.page||row?.url||'');if(!rawPage)continue;
@@ -405,8 +412,8 @@ async function coordinateGrowthOpportunities(env){
       const publicPath=canonicalTechnicalPath(row?.url||rawPage);
       const legacyHtmlAlias=/\.html$/i.test(rawPage)&&page===publicPath;
       const reportedCanonicalsAligned=(!row?.googleCanonical||!row?.userCanonical||canonicalEquivalent(row.googleCanonical,row.userCanonical))
-        &&(!row?.googleCanonical||canonicalTechnicalPath(row.googleCanonical)===publicPath)
-        &&(!row?.userCanonical||canonicalTechnicalPath(row.userCanonical)===publicPath);
+        &&(!row?.googleCanonical||canonicalEquivalent(row.googleCanonical,row?.url||rawPage))
+        &&(!row?.userCanonical||canonicalEquivalent(row.userCanonical,row?.url||rawPage));
       // Search Reality may retain a Google observation for an old .html alias after
       // ToolScout has already moved the public surface to the extensionless URL.
       // That is migration evidence, not a repair task. Likewise, .html versus
