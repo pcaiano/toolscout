@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T12:17:27.321Z",
+  "generatedAt": "2026-09-27T21:32:22.837Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-09-27",
   "siteTotals": {
     "clicks": 5,
-    "impressions": 4600,
-    "ctr": 0.1087
+    "impressions": 4659,
+    "ctr": 0.1073
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 42,
       "clicks": 0,
-      "impressions": 2490
+      "impressions": 2528
     },
     "home": {
       "pages": 1,
@@ -35,12 +35,12 @@
     "other": {
       "pages": 10,
       "clicks": 2,
-      "impressions": 117
+      "impressions": 118
     },
     "tool-profile": {
       "pages": 75,
       "clicks": 1,
-      "impressions": 1738
+      "impressions": 1758
     }
   },
   "pageCount": 139,
@@ -52,9 +52,9 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 878,
+      "impressions": 906,
       "ctr": 0,
-      "position": 75.8223,
+      "position": 76.1534,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -125,39 +125,39 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 391,
+      "impressions": 403,
       "ctr": 0,
-      "position": 74.399,
+      "position": 74.4144,
       "topQueries": [
         {
           "query": "airtable",
           "clicks": 0,
-          "impressions": 85,
-          "position": 63.8118
+          "impressions": 87,
+          "position": 63.6092
         },
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 58,
-          "position": 86.6552
+          "impressions": 62,
+          "position": 86.7097
         },
         {
           "query": "what is airtable used for",
           "clicks": 0,
-          "impressions": 44,
-          "position": 90.5227
+          "impressions": 46,
+          "position": 90.413
         },
         {
           "query": "airtable software",
           "clicks": 0,
-          "impressions": 36,
-          "position": 66.8889
+          "impressions": 38,
+          "position": 67
         },
         {
           "query": "airtabel",
           "clicks": 0,
-          "impressions": 28,
-          "position": 67.6786
+          "impressions": 29,
+          "position": 67.5172
         },
         {
           "query": "what is airtable and how it works",
@@ -168,8 +168,8 @@
         {
           "query": "airtbale",
           "clicks": 0,
-          "impressions": 22,
-          "position": 65.8636
+          "impressions": 23,
+          "position": 65.6957
         },
         {
           "query": "airtable ticketing system",
@@ -198,15 +198,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 341,
+      "impressions": 342,
       "ctr": 0,
-      "position": 55.5367,
+      "position": 55.538,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 145,
-          "position": 56.7793
+          "impressions": 146,
+          "position": 56.774
         },
         {
           "query": "semrush software",
@@ -551,9 +551,9 @@
       "type": "guide",
       "intent": "best-social-media-management-tools",
       "clicks": 0,
-      "impressions": 167,
+      "impressions": 172,
       "ctr": 0,
-      "position": 62.7964,
+      "position": 63.0523,
       "topQueries": [
         {
           "query": "social media management tools",
@@ -564,8 +564,8 @@
         {
           "query": "social media management tool",
           "clicks": 0,
-          "impressions": 34,
-          "position": 66.8235
+          "impressions": 37,
+          "position": 67.6757
         },
         {
           "query": "best social media management tools",
@@ -582,8 +582,8 @@
         {
           "query": "social media manager tool",
           "clicks": 0,
-          "impressions": 7,
-          "position": 76
+          "impressions": 8,
+          "position": 75.25
         },
         {
           "query": "social media manager tools",
@@ -697,9 +697,9 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 134,
+      "impressions": 135,
       "ctr": 0,
-      "position": 39.791,
+      "position": 39.8444,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -880,9 +880,9 @@
       "type": "guide",
       "intent": "best-free-crm",
       "clicks": 0,
-      "impressions": 85,
+      "impressions": 88,
       "ctr": 0,
-      "position": 73.9529,
+      "position": 73.8295,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -915,6 +915,12 @@
           "position": 74.8
         },
         {
+          "query": "free crm tools",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 77.5
+        },
+        {
           "query": "crm tools free",
           "clicks": 0,
           "impressions": 4,
@@ -927,22 +933,16 @@
           "position": 83
         },
         {
-          "query": "free crm tools",
+          "query": "free crm guide",
           "clicks": 0,
-          "impressions": 3,
-          "position": 79
+          "impressions": 2,
+          "position": 65
         },
         {
           "query": "crm tool freeware",
           "clicks": 0,
           "impressions": 2,
           "position": 70.5
-        },
-        {
-          "query": "best free crm tool",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 41
         }
       ]
     },
@@ -1057,27 +1057,27 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 79,
+      "impressions": 81,
       "ctr": 0,
-      "position": 72.5316,
+      "position": 72.5432,
       "topQueries": [
         {
           "query": "screaming frog",
           "clicks": 0,
-          "impressions": 46,
-          "position": 73.6522
+          "impressions": 47,
+          "position": 73.7872
+        },
+        {
+          "query": "screaming frog software",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 66.5
         },
         {
           "query": "screamingfrog",
           "clicks": 0,
           "impressions": 4,
           "position": 81.25
-        },
-        {
-          "query": "screaming frog software",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 66.6667
         },
         {
           "query": "frog seo",
@@ -1203,15 +1203,15 @@
       "type": "guide",
       "intent": "best-crm-for-sales-teams",
       "clicks": 0,
-      "impressions": 56,
+      "impressions": 57,
       "ctr": 0,
-      "position": 74.7321,
+      "position": 74.5965,
       "topQueries": [
         {
           "query": "crm for sales teams",
           "clicks": 0,
-          "impressions": 20,
-          "position": 72.95
+          "impressions": 21,
+          "position": 72.6667
         },
         {
           "query": "crm for sales team",
@@ -1368,15 +1368,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 32,
+      "impressions": 33,
       "ctr": 0,
-      "position": 46.1563,
+      "position": 46.5455,
       "topQueries": [
         {
           "query": "miro tool",
           "clicks": 0,
-          "impressions": 17,
-          "position": 52.0588
+          "impressions": 18,
+          "position": 52.4444
         },
         {
           "query": "miro features list",
@@ -1850,6 +1850,31 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/surfer",
+      "pathname": "/tools/surfer",
+      "key": "surfer",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 15,
+      "ctr": 0,
+      "position": 57.1333,
+      "topQueries": [
+        {
+          "query": "surfer tool",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 70.3
+        },
+        {
+          "query": "surfer tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 92
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/zoho-crm",
       "pathname": "/tools/zoho-crm",
       "key": "zoho-crm",
@@ -1905,31 +1930,6 @@
       "topQueries": []
     },
     {
-      "page": "https://trytoolscout.org/tools/surfer",
-      "pathname": "/tools/surfer",
-      "key": "surfer",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 14,
-      "ctr": 0,
-      "position": 55.9286,
-      "topQueries": [
-        {
-          "query": "surfer tool",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 69.8889
-        },
-        {
-          "query": "surfer tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 92
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/tool",
       "pathname": "/tool",
       "key": "tool",
@@ -1963,6 +1963,25 @@
           "clicks": 0,
           "impressions": 1,
           "position": 69
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/news/notion-mail-shuts-down",
+      "pathname": "/news/notion-mail-shuts-down",
+      "key": "notion-mail-shuts-down",
+      "type": "other",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 12,
+      "ctr": 0,
+      "position": 3.6667,
+      "topQueries": [
+        {
+          "query": "notion mail shutdown september 2026",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 1
         }
       ]
     },
@@ -2053,21 +2072,27 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/news/notion-mail-shuts-down",
-      "pathname": "/news/notion-mail-shuts-down",
-      "key": "notion-mail-shuts-down",
-      "type": "other",
+      "page": "https://trytoolscout.org/tools/n8n",
+      "pathname": "/tools/n8n",
+      "key": "n8n",
+      "type": "tool-profile",
       "intent": null,
       "clicks": 0,
       "impressions": 11,
       "ctr": 0,
-      "position": 3.8182,
+      "position": 58.9091,
       "topQueries": [
         {
-          "query": "notion mail shutdown september 2026",
+          "query": "n8n tool",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 73.2857
+        },
+        {
+          "query": "n8n tools",
           "clicks": 0,
           "impressions": 1,
-          "position": 1
+          "position": 74
         }
       ]
     },
@@ -2099,31 +2124,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 50
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/n8n",
-      "pathname": "/tools/n8n",
-      "key": "n8n",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 10,
-      "ctr": 0,
-      "position": 57.2,
-      "topQueries": [
-        {
-          "query": "n8n tool",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 72.8333
-        },
-        {
-          "query": "n8n tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 74
         }
       ]
     },
@@ -2376,6 +2376,18 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/apollo",
+      "pathname": "/tools/apollo",
+      "key": "apollo",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 7,
+      "ctr": 0,
+      "position": 15.8571,
+      "topQueries": []
+    },
+    {
       "page": "https://trytoolscout.org/tools/asana",
       "pathname": "/tools/asana",
       "key": "asana",
@@ -2605,18 +2617,6 @@
           "position": 71
         }
       ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/apollo",
-      "pathname": "/tools/apollo",
-      "key": "apollo",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 5,
-      "ctr": 0,
-      "position": 20.4,
-      "topQueries": []
     },
     {
       "page": "https://trytoolscout.org/tools/buffer",
@@ -3701,9 +3701,9 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 878,
+      "impressions": 906,
       "ctr": 0,
-      "position": 75.8223,
+      "position": 76.1534,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -3981,9 +3981,9 @@
       "intent": "best-social-media-management-tools",
       "page": "https://trytoolscout.org/best-social-media-management-tools",
       "clicks": 0,
-      "impressions": 167,
+      "impressions": 172,
       "ctr": 0,
-      "position": 62.7964,
+      "position": 63.0523,
       "topQueries": [
         {
           "query": "social media management tools",
@@ -3994,8 +3994,8 @@
         {
           "query": "social media management tool",
           "clicks": 0,
-          "impressions": 34,
-          "position": 66.8235
+          "impressions": 37,
+          "position": 67.6757
         },
         {
           "query": "best social media management tools",
@@ -4012,8 +4012,8 @@
         {
           "query": "social media manager tool",
           "clicks": 0,
-          "impressions": 7,
-          "position": 76
+          "impressions": 8,
+          "position": 75.25
         },
         {
           "query": "social media manager tools",
@@ -4051,9 +4051,9 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools",
       "clicks": 0,
-      "impressions": 134,
+      "impressions": 135,
       "ctr": 0,
-      "position": 39.791,
+      "position": 39.8444,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -4191,9 +4191,9 @@
       "intent": "best-free-crm",
       "page": "https://trytoolscout.org/best-free-crm",
       "clicks": 0,
-      "impressions": 85,
+      "impressions": 88,
       "ctr": 0,
-      "position": 73.9529,
+      "position": 73.8295,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -4226,6 +4226,12 @@
           "position": 74.8
         },
         {
+          "query": "free crm tools",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 77.5
+        },
+        {
           "query": "crm tools free",
           "clicks": 0,
           "impressions": 4,
@@ -4238,22 +4244,16 @@
           "position": 83
         },
         {
-          "query": "free crm tools",
+          "query": "free crm guide",
           "clicks": 0,
-          "impressions": 3,
-          "position": 79
+          "impressions": 2,
+          "position": 65
         },
         {
           "query": "crm tool freeware",
           "clicks": 0,
           "impressions": 2,
           "position": 70.5
-        },
-        {
-          "query": "best free crm tool",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 41
         }
       ]
     },
@@ -4295,15 +4295,15 @@
       "intent": "best-crm-for-sales-teams",
       "page": "https://trytoolscout.org/best-crm-for-sales-teams",
       "clicks": 0,
-      "impressions": 56,
+      "impressions": 57,
       "ctr": 0,
-      "position": 74.7321,
+      "position": 74.5965,
       "topQueries": [
         {
           "query": "crm for sales teams",
           "clicks": 0,
-          "impressions": 20,
-          "position": 72.95
+          "impressions": 21,
+          "position": 72.6667
         },
         {
           "query": "crm for sales team",
