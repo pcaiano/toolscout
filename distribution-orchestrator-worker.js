@@ -4,7 +4,7 @@ import {runWithLedger,missionCycleContext,missionCycleContextFromRequest,mission
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
 import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
 import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,recordExecutionProof,deferExecutionTask,runExecutionIntegritySelfTest,executionContractSnapshot} from './growth-execution-contract.js';
-import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
+import {runAutonomousDistributionCycle,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
 import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates,executeCatalogGrowthTask,auditCatalogQualityBatch,catalogQualitySnapshot} from './catalog-autonomy-worker.js';
@@ -1464,6 +1464,7 @@ if(u.pathname==='/api/growth/engine-health/public-reconcile'&&request.method==='
   await run('operatingPriorities','distribution','operating_priorities',20,()=>rebalanceDistributionPriorities(env));
   await run('networkCycle','distribution','network_cycle',20,()=>runDistributionNetworkCycle(env),{cycleContext:missionCycleContext('distribution','network_cycle',Date.now()),cycleOwner:'make_engine_health_recovery'});
   await run('autonomousDistribution','distribution','autonomous_cycle',12,()=>runAutonomousDistributionCycle(env),{cycleContext:missionCycleContext('distribution','autonomous_cycle',Date.now()),cycleOwner:'make_engine_health_recovery'});
+  await run('humanGateResearchReconcile','distribution','human_gate_reconcile',8,()=>reconcileFreshResearchHumanGates(env));
   await run('affiliateCoverage','affiliate','coverage_cycle',20,()=>runAffiliateCoverageCycle(env));
   await run('catalogRuntimeQuality','catalog','runtime_quality',20,()=>contractVerifyCatalogBatch(env));
   await run('contentSocialIntelligence','content','social_intelligence',15,()=>runContentSocialIntelligenceCycle(env));
