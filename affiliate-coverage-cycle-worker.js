@@ -269,7 +269,7 @@ export async function runAffiliateCoverageCycle(env){
     if(prior&&recentlyChecked(prior.last_checked)&&current==='watchlist')continue;
     watchlist_checked++;
     const result=await discoverWatchlistProgram(config);
-    if(result){watchlist_promoted++;await persistWatchlist(env,slug,config,result);states.set(slug,{...(states.get(slug)||{}),status:result.status,network:result.network,program_url:result.official_program_url,application_url:result.application_url,blocker:result.blocker});}
+    if(result){watchlist_promoted++;await persistWatchlist(env,slug,config,result);if(HUMAN_DISCOVERY_STATES.has(normalizeAffiliateState(result.status)))await prepareApplicationPack(env,{tool_slug:slug,slug,name:slug,network:result.network,program_url:result.official_program_url,application_url:result.application_url,blocker:result.blocker});states.set(slug,{...(states.get(slug)||{}),status:result.status,network:result.network,program_url:result.official_program_url,application_url:result.application_url,blocker:result.blocker});}
     else{await persistWatchlist(env,slug,config);states.set(slug,{...(states.get(slug)||{}),status:'watchlist',network:'Direct',program_url:null,application_url:null,blocker:config.reason});}
   }
   let human_revalidated=0,human_downgraded=0;
@@ -297,7 +297,7 @@ export async function runAffiliateCoverageCycle(env){
     researched++;
     const result=await discoverOfficialProgram(tool);
     if(!result){await env.DB.prepare(`INSERT INTO affiliate_program_discovery(tool_slug,status,evidence_json,automation_mode,confidence,last_checked,updated_at) VALUES(?,'research_required','[]','research',0,datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET status='research_required',official_program_url=NULL,application_url=NULL,automation_mode='research',confidence=0,last_checked=datetime('now'),updated_at=datetime('now')`).bind(tool.slug).run();continue}
-    found++;if(result.automation_mode==='human')human++;await persistDiscovery(env,tool.slug,result);
+    found++;if(result.automation_mode==='human')human++;await persistDiscovery(env,tool.slug,result);if(HUMAN_DISCOVERY_STATES.has(normalizeAffiliateState(result.status)))await prepareApplicationPack(env,{...tool,tool_slug:tool.slug,network:result.network,program_url:result.official_program_url,application_url:result.application_url,blocker:result.blocker});
   }
   const route_activation=await activateAcquiredLinks(env);
   return {ok:true,production_reconciliation,coverage:{human_outbound:snapshot.human_outbound_clicks,monetized:snapshot.monetized_human_outbound_clicks,unmonetized:snapshot.unmonetized_human_outbound_clicks,weighted:snapshot.weighted_coverage,traffic_truth:snapshot.traffic_truth},queue_size:snapshot.recoverable_queue.length,application_packs_prepared,route_activation,watchlist:{checked:watchlist_checked,promoted:watchlist_promoted},qualification_guardrail:{revalidated:human_revalidated,downgraded:human_downgraded,per_cycle_limit:MAX_HUMAN_REVALIDATIONS_PER_CYCLE},research:{processed:researched,programs_found:found,human_actions:human,cooldown_skipped,per_cycle_limit:MAX_TOOLS_PER_CYCLE,cooldown_hours:RESEARCH_COOLDOWN_HOURS},guardrail:'The production affiliate registry is canonical for active monetized routes. Any enabled route with an affiliate URL is reconciled into D1 before coverage is calculated. Human Action is limited to authentication, CAPTCHA, legal/terms acceptance, identity/tax/payment data or final third-party submission when required.'};
