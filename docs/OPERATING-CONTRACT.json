@@ -60,7 +60,7 @@
     "autonomous_control_cycle_minutes": 15,
     "autonomous_control_cycle_anchor_minute": 4,
     "autonomous_stale_takeover_minutes": 12,
-    "distribution_classifier_version": 5,
+    "distribution_classifier_version": 6,
     "human_gate_exact_submission_intent_required": true,
     "captcha_routes_open_human_gate_same_cycle": true,
     "human_gate_queue_limit": 24,
@@ -68,7 +68,9 @@
     "duplicate_human_gate_key": "normalized_exact_action_url",
     "command_center_human_gate_backlog_visible": true,
     "human_required_requires_active_gate": true,
-    "human_state_write_order": "gate_first_status_second"
+    "human_state_write_order": "gate_first_status_second",
+    "content_pages_cannot_be_submission_routes_without_explicit_url_intent": true,
+    "obsolete_classifier_human_gates_are_invalidated": true
   },
   "truth_order": [
     "live_provider_and_production_observation",
@@ -96,7 +98,9 @@
     "command_center_exposes_open_human_gate_backlog",
     "human_required_status_requires_open_or_verification_pending_gate",
     "human_gate_creation_precedes_human_required_status",
-    "terminal_human_gate_cannot_leave_owner_required_status_orphaned"
+    "terminal_human_gate_cannot_leave_owner_required_status_orphaned",
+    "content_or_marketing_page_captcha_never_counts_as_submission_intent_without_explicit_url_intent",
+    "classifier_upgrade_invalidates_older_research_derived_human_gates_before_owner_action"
   ],
   "mission": {
     "starts_on": "2026-09-28",
