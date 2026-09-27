@@ -5,11 +5,13 @@
 Before planning or executing ToolScout work, every agent, Codex session, Work session, automation, or repository operator must read:
 
 1. `AGENTS.md`
-2. `docs/PRODUCTION-BASELINE.md`
-3. `docs/COMMAND-CENTER.md`
-4. Any mission-specific or subsystem-specific documentation referenced by those files
+2. `docs/OPERATING-MEMORY.md`
+3. `docs/OPERATING-CONTRACT.json`
+4. `docs/PRODUCTION-BASELINE.md` for historical and subsystem context
+5. `docs/COMMAND-CENTER.md`
+6. Any mission-specific or subsystem-specific documentation referenced by those files
 
-`docs/COMMAND-CENTER.md` is the canonical operational memory across ChatGPT chats, Work, Codex, GitHub sessions, and human actions. Do not rely on conversational memory or stale checkpoints when repository state can be inspected. After substantial execution, reconcile meaningful operational changes back into the Command Center and relevant source-of-truth files.
+`docs/OPERATING-MEMORY.md` is the canonical startup and anti-regression memory across ChatGPT chats, Work, Codex, GitHub sessions, and human actions. `docs/COMMAND-CENTER.md` is the operational journal. Before runtime or architecture work, run `node scripts/validate-operating-contract.mjs` when a filesystem is available. Do not rely on conversational memory or stale checkpoints when repository or live runtime state can be inspected. If the operating contract conflicts with current repository configuration or live provider state, treat that as drift and reconcile it before unrelated architecture changes. After substantial execution, reconcile meaningful operational changes back into the Operating Memory, Command Center, and relevant source-of-truth files.
 
 ## Development MCP and verification policy
 

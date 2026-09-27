@@ -1,5 +1,7 @@
 # ToolScout Production Baseline
 
+> Runtime status warning - 2026-09-27: this file began as an August production snapshot and contains historical implementation detail that is no longer the current entrypoint. The current source configuration in root wrangler.toml uses compute-router-worker.js. For startup and anti-regression truth, read docs/OPERATING-MEMORY.md and docs/OPERATING-CONTRACT.json first. When this historical snapshot conflicts with current main configuration or verified live provider state, do not use the older value as current runtime truth.
+
 ## Snapshot
 
 - Verified on: 2026-08-31 (Europe/Lisbon)

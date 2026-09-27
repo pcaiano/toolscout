@@ -32,12 +32,12 @@ It never decides which action should happen, never edits ToolScout business stat
 
 Current design budget:
 - 1,500 external research jobs per UTC day.
-- 300 machine-safe execution/verification jobs per UTC day.
+- 800 machine-safe execution/verification jobs per UTC day.
 - reputation-sensitive external actions keep their separate 12/day ceiling.
 - 25 jobs per batch to keep Cloudflare/D1 completion commits bounded.
 - at most 2 active batches.
 - external worker concurrency: 24 requests.
-- Cloudflare dispatch cadence: every 5 minutes.
+- Cloudflare dispatch cadence: every 15 minutes.
 - authorized execution jobs outrank research jobs in the external queue.
 
 These are maximum processing limits, not a requirement to invent work. Priority and quality gates remain canonical.
@@ -46,7 +46,7 @@ These are maximum processing limits, not a requirement to invent work. Priority 
 
 D1 Workers Free has a hard daily row-read ceiling, so overflow observability must not scan the job table.
 
-The router uses one `compute_overflow_metrics` row for Command Center/runtime health. Metrics are updated as state changes occur. The five-minute overflow cron exits without querying D1 while no external runtime URL is configured.
+The router uses one `compute_overflow_metrics` row for Command Center/runtime health. Metrics are updated as state changes occur. The fifteen-minute overflow cron exits without querying D1 while no external runtime URL is configured.
 
 External results only cause canonical D1 changes when they produce useful route/contact evidence. Cloudflare then performs the final validation through the existing Distribution Engine.
 

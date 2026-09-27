@@ -232,6 +232,6 @@ Examples that are bugs or engine-health events:
 
 ## Current implementation
 
-Development branch: `growth-engines-v2-command-center`.
+Historical development branch: `growth-engines-v2-command-center`.
 
-The V2 implementation deliberately reuses the existing canonical Affiliate and Distribution state machines and D1 evidence. It does not create a second task store or a parallel interpretation of operational truth.
+Production truth now follows current `main`, verified provider state, canonical D1 state, and docs/OPERATING-CONTRACT.json. The V2 implementation deliberately reuses the existing canonical Affiliate and Distribution state machines and D1 evidence. It does not create a second task store or a parallel interpretation of operational truth.

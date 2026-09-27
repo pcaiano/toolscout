@@ -20,7 +20,7 @@ Uneed remains measurement-only: six legacy browser-confirmed sessions, zero reco
 
 ## Purpose
 
-This file is the canonical operational memory for ToolScout. It exists to keep project state coherent across ChatGPT chats, Work, Codex, GitHub sessions, and human actions.
+This file is the operational journal for ToolScout. The canonical startup and anti-regression memory is docs/OPERATING-MEMORY.md, backed by docs/OPERATING-CONTRACT.json. This journal keeps current operational events and decisions coherent across ChatGPT chats, Work, Codex, GitHub sessions, and human actions.
 
 It is not a replacement for technical source-of-truth files such as `AGENTS.md` or `docs/PRODUCTION-BASELINE.md`. Instead, it is the current operational layer: what is live, what is monetized, what needs human action, what belongs in growth work, and what is worth spending Work/Codex credits on.
 
@@ -36,7 +36,7 @@ The Command Center must expose only current, resolvable human exceptions through
 
 The Command Center 2.0 is user-configurable: every operational block is clickable for drill-down, draggable/reorderable and resizable, with the owner's layout persisted between sessions.
 
-The current implementation branch is `growth-engines-v2-command-center`. It reuses the canonical engine state machines and evidence stores rather than introducing a parallel task database.
+The historical implementation branch was `growth-engines-v2-command-center`. Production truth now follows current `main`, current provider state, canonical D1 state, and the operating contract. Do not use the historical branch name as evidence of what is live.
 
 
 ## Mandatory startup sequence
@@ -44,9 +44,11 @@ The current implementation branch is `growth-engines-v2-command-center`. It reus
 Before planning or executing ToolScout work, read in this order:
 
 1. `AGENTS.md`
-2. `docs/PRODUCTION-BASELINE.md`
-3. `docs/COMMAND-CENTER.md`
-4. Any mission-specific or subsystem-specific documentation referenced by those files
+2. `docs/OPERATING-MEMORY.md`
+3. `docs/OPERATING-CONTRACT.json`
+4. `docs/PRODUCTION-BASELINE.md`
+5. `docs/COMMAND-CENTER.md`
+6. Any mission-specific or subsystem-specific documentation referenced by those files
 
 Do not rely on memory from previous chats, Work sessions, Codex runs, or stale checkpoints when repository state can be inspected.
 
