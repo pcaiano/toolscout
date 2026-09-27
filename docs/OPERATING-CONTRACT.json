@@ -21,6 +21,9 @@
       "7,22,37,52 * * * *",
       "15 * * * *",
       "35 3 * * *"
+    ],
+    "auxiliary_worker_names": [
+      "toolscout-social-image"
     ]
   },
   "render": {
@@ -31,7 +34,8 @@
       "region": "frankfurt",
       "start_command": "node overflow-compute/server.mjs",
       "max_concurrency": 24,
-      "must_not_own_canonical_business_state": true
+      "must_not_own_canonical_business_state": true,
+      "health_check_path": "/health"
     },
     "auth_broker": {
       "service_name": "toolscout-auth-broker",
@@ -102,12 +106,26 @@
     "terminal_human_gate_cannot_leave_owner_required_status_orphaned",
     "content_or_marketing_page_captcha_never_counts_as_submission_intent_without_explicit_url_intent",
     "classifier_upgrade_invalidates_older_research_derived_human_gates_before_owner_action",
-    "single_flight_run_without_active_lease_cannot_remain_running"
+    "single_flight_run_without_active_lease_cannot_remain_running",
+    "make_scenario_success_without_external_outcome_evidence_is_not_business_success",
+    "content_distribution_filters_use_verified_dynamic_targets_not_hardcoded_origin",
+    "gsc_truth_snapshots_commit_as_one_atomic_set",
+    "repository_provider_settings_do_not_override_live_provider_truth"
   ],
   "mission": {
     "starts_on": "2026-09-28",
     "expires_on": "2026-10-05",
     "objective": "Reliable and consistent Growth Brain and engine operation with aggressive autonomous traffic generation once reliability gates pass."
   },
-  "reconciled_from_base_commit": "6e355088af9062177b15afc2dbd1a47a97579e6a"
+  "reconciled_from_base_commit": "6e355088af9062177b15afc2dbd1a47a97579e6a",
+  "observability": {
+    "gsc_truth_files": [
+      "reports/gsc-signals.json",
+      "reports/gsc-search-reality.json",
+      "data/gsc-search-reality.json"
+    ],
+    "content_external_success_source": "engine_evidence_after_external_publication",
+    "make_scenario_success_is_transport_only": true,
+    "content_target_validation": "verified_dynamic_brief_target"
+  }
 }
