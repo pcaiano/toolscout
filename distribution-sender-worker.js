@@ -1,6 +1,7 @@
 import base from './distribution-contact-worker.js';
 import {recordExecutionProof,deferExecutionTask} from './growth-execution-contract.js';
 import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION} from './distribution-outreach-policy.js';
+import {vendorAssetCoherence} from './distribution-vendor-integrity.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const EMAIL_TARGET_24H=50;
@@ -98,7 +99,7 @@ async function ensureReputationSchema(env){
   ]).catch(error=>{reputationSchemaReady=null;throw error});
   return reputationSchemaReady;
 }
-const HARD_REPUTATION_ISSUES=new Set(['internal_api_url','internal_handoff_header','internal_runtime_identifier','raw_json_payload','unresolved_template_or_object','non_public_runtime_url']);
+const HARD_REPUTATION_ISSUES=new Set(['internal_api_url','internal_handoff_header','internal_runtime_identifier','raw_json_payload','unresolved_template_or_object','non_public_runtime_url','vendor_asset_tool_mismatch']);
 async function reputationContentHash(subject,body){return sha256(`${String(subject||'').trim()}\n---BODY---\n${String(body||'').trim()}`)}
 async function reputationPayloadHash(to,subject,body){return sha256(`${String(to||'').trim().toLowerCase()}\n---SUBJECT---\n${String(subject||'').trim()}\n---BODY---\n${String(body||'').trim()}`)}
 async function applyLearnedReputationExceptions(env,review,{subject,body,template_id}){
@@ -236,6 +237,9 @@ function evaluateOutboundReputation({to,subject,body,mode='manual_authorized',te
       if(!/featured on ToolScout/i.test(subj))issues.push('vendor_subject_contract');
       if(!/Your ToolScout profile:/i.test(raw))issues.push('vendor_profile_context_missing');
       if(!/distribution\/publisher-kit/i.test(raw))issues.push('public_publisher_resource_missing');
+      const featuredProfile=raw.match(/Featured page:[\\s\\S]{0,1000}?https:\\/\\/trytoolscout\\.org\\/tools\\/([a-z0-9-]+)/i)?.[1]?.toLowerCase();
+      const ownProfile=raw.match(/Your ToolScout profile:[\\s\\S]{0,1000}?https:\\/\\/trytoolscout\\.org\\/tools\\/([a-z0-9-]+)/i)?.[1]?.toLowerCase();
+      if(featuredProfile&&ownProfile&&featuredProfile!==ownProfile)issues.push('vendor_asset_tool_mismatch');
     }else if(template_id==='publisher_resources_v22'){
       if(!/ToolScout publisher resources/i.test(subj))issues.push('publisher_subject_contract');
       if(!/distribution\/publisher-kit/i.test(raw))issues.push('publisher_kit_missing');
@@ -383,6 +387,18 @@ async function publicCandidates(env,limit=8){
       if(!row){
         await deferExecutionTask(env,task.task_id,'make_sender_no_ready_vendor_candidate');
         deferredTasks.push({task_id:task.task_id,reason:'no_ready_vendor_candidate'});
+        continue;
+      }
+      const assetCoherence=vendorAssetCoherence(row.asset_url,row.tool_slug);
+      if(!assetCoherence.ok){
+        await env.DB.prepare(`UPDATE distribution_vendor_amplification
+          SET status='suppressed_asset_mismatch',outreach_error='vendor_asset_tool_mismatch',public_dispatch_token=NULL,public_dispatch_leased_at=NULL,updated_at=datetime('now')
+          WHERE tool_slug=? AND asset_url=? AND status<>'sent'`).bind(row.tool_slug,row.asset_url).run().catch(()=>{});
+        await env.DB.prepare(`UPDATE growth_execution_contract
+          SET status='blocked',completed_at=datetime('now'),last_result='vendor_asset_tool_mismatch',updated_at=datetime('now')
+          WHERE task_id=? AND executor='make_sender' AND status IN ('pending','claimed','attempted','deferred','stalled')`).bind(task.task_id).run().catch(()=>{});
+        await recordReputationBlock(env,{to:row.contact_email,issues:['vendor_asset_tool_mismatch'],source:'vendor_amplification'});
+        deferredTasks.push({task_id:task.task_id,reason:'vendor_asset_tool_mismatch',asset_url:row.asset_url,tool_slug:row.tool_slug});
         continue;
       }
       if(freshDispatchLease(row.public_dispatch_leased_at)){
