@@ -416,8 +416,21 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
     :isCaptcha
       ?`Open ${actionUrl}. Complete the CAPTCHA yourself, fill the ToolScout submission fields with the prepared details below, and submit once. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion, add a reciprocal badge or invent claims. Return here and mark the task done.`
       :`Open ${actionUrl}. Complete the ToolScout submission manually with the prepared details below and submit once. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion, add a reciprocal badge or invent claims. Return here and mark the task done.`;
-  const previous=await env.DB.prepare('SELECT status FROM human_gate_contract WHERE gate_key=?').bind(humanGateKey('distribution','surface',row.surface_slug)).first().catch(()=>null);
-  if(previous&&previous.status!=='open')return {opened:false,reason:'gate_already_terminal',status:previous.status};
+  const gateKeyValue=humanGateKey('distribution','surface',row.surface_slug);
+  const previous=await env.DB.prepare('SELECT status,payload_json,verification_detail FROM human_gate_contract WHERE gate_key=?').bind(gateKeyValue).first().catch(()=>null);
+  if(previous?.status==='resolved')return {opened:false,reason:'gate_already_resolved',status:previous.status};
+  if(previous?.status==='verification_pending')return {opened:false,reason:'gate_verification_pending',status:previous.status};
+  if(previous?.status==='cancelled'){
+    let oldPayload={};try{oldPayload=JSON.parse(previous.payload_json||'{}')||{}}catch{}
+    const oldVersion=Number(oldPayload.research_classifier_version||0);
+    const newVersion=Number(result?.classifierVersion||RESEARCH_CLASSIFIER_VERSION);
+    const classifierUpgrade=oldVersion>0&&newVersion>oldVersion&&/classifier upgrade/i.test(String(previous.verification_detail||''));
+    if(!classifierUpgrade)return {opened:false,reason:'cancelled_gate_not_reopenable',status:previous.status,oldVersion,newVersion};
+    await env.DB.prepare(`UPDATE human_gate_contract
+      SET status='open',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,next_verification_at=NULL,
+          verification_detail='reopened_from_fresher_classifier_evidence',updated_at=datetime('now')
+      WHERE gate_key=? AND status='cancelled'`).bind(gateKeyValue).run().catch(()=>{});
+  }
   const gateKey=await upsertHumanGate(env,{
     engine:'distribution',subjectType:'surface',subjectKey:row.surface_slug,gateType,
     title:`${target}: human step required`,reason,instructions,actionUrl,
@@ -431,6 +444,42 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
     env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,row.surface_slug,actionUrl,status,evidenceDetail)
   ]).catch(()=>{});
   return {opened:true,gateKey,gateType,status,actionUrl};
+}
+
+async function reconcileFreshResearchHumanGates(env){
+  await ensureHumanGateSchema(env);
+  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,o.status,
+      j.result_json,j.payload_json,j.completed_at
+    FROM distribution_opportunities o
+    JOIN compute_overflow_jobs j ON j.subject_key=o.surface_slug
+    WHERE o.status='research_required' AND o.human_required=0
+      AND j.job_type='distribution_route_research' AND j.status='completed'
+      AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=?
+      AND j.completed_at>=datetime('now','-7 days')
+      AND j.completed_at=(
+        SELECT MAX(j2.completed_at) FROM compute_overflow_jobs j2
+        WHERE j2.subject_key=o.surface_slug AND j2.job_type='distribution_route_research' AND j2.status='completed'
+          AND CAST(COALESCE(json_extract(j2.payload_json,'$.classifierVersion'),0) AS INTEGER)>=?
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM human_gate_contract g
+        WHERE g.engine='distribution' AND g.subject_type='surface' AND g.subject_key=o.surface_slug
+          AND g.status IN ('open','verification_pending')
+      )
+    ORDER BY o.distribution_score DESC,j.completed_at DESC LIMIT 50`)
+    .bind(RESEARCH_CLASSIFIER_VERSION,RESEARCH_CLASSIFIER_VERSION).all().catch(()=>({results:[]}));
+  let opened=0,checked=0;
+  for(const row of q.results||[]){
+    checked++;
+    let result={},payload={};try{result=JSON.parse(row.result_json||'{}')||{}}catch{}try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
+    const routes=(Array.isArray(result.routes)?result.routes:[])
+      .filter(route=>route?.submissionIntent===true&&!route?.machineCandidate&&!(route?.policyBlockers||[]).length&&(route?.auth||route?.captcha||['auth','captcha'].includes(String(route?.kind||''))));
+    const route=routes[0]||null;
+    if(!route)continue;
+    const gate=await openDistributionHumanGateFromResearchEvidence(env,row,{route,result:{...result,targetUrl:result?.targetUrl||payload?.url||row.action_url,classifierVersion:Number(payload?.classifierVersion||RESEARCH_CLASSIFIER_VERSION)}}).catch(()=>null);
+    if(gate?.opened)opened++;
+  }
+  return {checked,opened,classifierVersion:RESEARCH_CLASSIFIER_VERSION};
 }
 
 async function reconcileLegacyGenericHumanGates(env){
@@ -483,10 +532,12 @@ async function qualifyOne(env,row){
     if(adapter.auth_required){
       await storeAutoAdapter(env,effectiveRow,h,adapter,'auth_required');
       const reason='Verified submission API discovered automatically, but the external service requires owner authentication before ToolScout can be submitted.';
-      await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,automation_potential=85,acceptance_probability=70,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
-      await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason,verificationUrl:adapter.verification_endpoint||adapter.public_url||null});
-      await mark(env,{...effectiveRow,action_url:h.url},'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
-      return 'auth_required';
+      const gateKey=await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'authentication',actionUrl:h.url,reason,verificationUrl:adapter.verification_endpoint||adapter.public_url||null});
+      if(gateKey){
+        await env.DB.prepare(`UPDATE distribution_opportunities SET status='auth_required',human_required=1,automation_potential=85,acceptance_probability=70,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
+        await mark(env,{...effectiveRow,action_url:h.url},'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
+        return 'auth_required';
+      }
     }
     await storeAutoAdapter(env,effectiveRow,h,adapter,'verified');
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth JSON submission adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
@@ -510,7 +561,7 @@ async function qualifyOne(env,row){
     }
   }
   if(currentSubmissionIntent&&(HUMAN_BLOCK_RE.test(h.body)||(relatedPolicy&&HUMAN_BLOCK_RE.test(relatedPolicy)))){
-    const reason='Autonomous research exhausted safe machine routes and detected a genuine human-only gate such as CAPTCHA, explicit confirmation or material terms acceptance.';
+    const reason='Autonomous research exhausted safe machine routes and the exact submission route now requires an interactive CAPTCHA, explicit confirmation or material terms acceptance.';
     const gateKey=await openDistributionHumanGate(env,{...effectiveRow,action_url:h.url},{gateType:'human_confirmation',actionUrl:h.url,reason});
     if(gateKey){
       await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(h.url,reason,effectiveRow.surface_slug).run();
@@ -552,7 +603,7 @@ async function qualifyOne(env,row){
   }
   if(linkedHuman){
     const actionUrl=linkedHumanUrl||effectiveRow.action_url;
-    const reason='Autonomous route discovery found the exact submission path, but it contains a genuine human-only gate such as CAPTCHA or explicit confirmation.';
+    const reason='Autonomous route discovery found the exact submission path, but that route requires an interactive CAPTCHA or explicit confirmation before ToolScout can be submitted.';
     const gateKey=await openDistributionHumanGate(env,{...effectiveRow,action_url:actionUrl},{gateType:'human_confirmation',actionUrl,reason});
     if(gateKey){
       await env.DB.prepare(`UPDATE distribution_opportunities SET status='human_action_required',human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(actionUrl,reason,effectiveRow.surface_slug).run();
@@ -1153,6 +1204,7 @@ export async function runAutonomousDistributionCycle(env){
   const normalized=await normalizeLegacyHumanEscalations(env);
   const legacyGenericHumanGates=await reconcileLegacyGenericHumanGates(env);
   const obsoleteClassifierHumanGates=await reconcileObsoleteClassifierHumanGates(env);
+  const freshResearchHumanGates=await reconcileFreshResearchHumanGates(env);
   const openHumanGateStates=await reconcileOpenHumanGateStates(env);
   const orphanHumanStates=await reconcileOrphanHumanStates(env);
   const duplicateGates=await reconcileDuplicateSubmissionGates(env);
@@ -1186,7 +1238,7 @@ export async function runAutonomousDistributionCycle(env){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,obsoleteClassifierHumanGates,openHumanGateStates,orphanHumanStates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
+  return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,obsoleteClassifierHumanGates,freshResearchHumanGates,openHumanGateStates,orphanHumanStates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
