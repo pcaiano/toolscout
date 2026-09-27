@@ -3,7 +3,7 @@ import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedRes
 import {qualifyDistributionSurfaces} from './distribution-autonomous-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-const OVERFLOW_CRON='*/5 * * * *';
+const OVERFLOW_CRON='*/15 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
