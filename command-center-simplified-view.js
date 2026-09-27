@@ -241,7 +241,7 @@ function throughput(){
    '</div>'+
    '<div class="section"><div class="sectionTitle">Distribution execution funnel</div>'+
      row('Research completed',n(researchCompleted),'External route research completed today')+
-     row('Classifier v2 results seen',n(classifiedResearch),'Confirms the Render research service is emitting the new route classification payload')+
+     row('Classifier v'+n(c.distributionClassifierVersion||2)+' results seen',n(classifiedResearch),'Confirms the Render research service is emitting the current route classification payload')+
      row('Submission routes found',n(routesFound),'All same-host submission routes found, including manual/auth routes')+
      row('Machine-safe form candidates',n(machineCandidates),'Render found a no-auth, no-CAPTCHA, no-payment POST form that passed structural safety checks')+
      row('Route blockers observed',n(formRoutes)+' forms · '+n(authRoutes)+' auth · '+n(captchaRoutes)+' CAPTCHA',n(policyBlockers)+' policy blocker signals in newly classified research results')+
