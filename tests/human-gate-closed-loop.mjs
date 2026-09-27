@@ -1,0 +1,26 @@
+import fs from 'node:fs';
+const compute=fs.readFileSync('compute-router-worker.js','utf8');
+const research=fs.readFileSync('overflow-compute/research-core.mjs','utf8');
+const autonomous=fs.readFileSync('distribution-autonomous-worker.js','utf8');
+const human=fs.readFileSync('human-action-entry-worker.js','utf8');
+const chairman=fs.readFileSync('chairman-task-quality.js','utf8');
+const command=fs.readFileSync('growth-command-center-v2-worker.js','utf8');
+const simplified=fs.readFileSync('command-center-simplified-view.js','utf8');
+const failures=[];
+const check=(ok,msg)=>{if(!ok)failures.push(msg)};
+check(compute.includes('const DISTRIBUTION_CLASSIFIER_VERSION=5;'),'classifier v5 active');
+check(research.includes('submissionIntent'),'Render distinguishes submission intent from page-level forms');
+check(research.includes('humanGateCandidates'),'Render exposes exact human-gate candidates');
+check(compute.includes('openDistributionHumanGateFromResearchEvidence'),'Render completion can open canonical human gate');
+check(autonomous.includes('route?.submissionIntent!==true')||autonomous.includes('route.submissionIntent!==true'),'research-evidence gate requires exact submission intent');
+check(autonomous.includes('currentSubmissionIntent&&(HUMAN_BLOCK_RE.test'),'generic page CAPTCHA cannot create owner work');
+check(autonomous.includes('reconcileLegacyGenericHumanGates'),'legacy generic CAPTCHA gates are reclassified');
+check(chairman.includes('reconcileDuplicateOpenHumanGates'),'exact duplicate human gates reconcile canonically');
+check(human.includes("limit:100"),'human action reader loads enough canonical gates before quality');
+check(human.includes('dedupeChairmanTasksByActionUrl'),'human action reader deduplicates before presentation');
+check(command.includes('const HUMAN_ACTION_LIMIT=24;'),'Chairman Queue has adequate owner-action capacity');
+check(command.includes('const HUMAN_GATE_RESERVED_SLOTS=12;'),'canonical Human Gates reserve queue capacity');
+check(simplified.includes("row('Human gates open'"),'Command Center exposes human-gate backlog');
+check(simplified.includes('engine-held'),'Command Center exposes quality-held tasks');
+if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
+console.log('PASS human-gate closed loop, queue visibility and anti-regression guards');
