@@ -17,6 +17,9 @@ const MAX_ACTIVE_BATCHES=2;
 const BATCH_TIMEOUT_MINUTES=3;
 let schemaReady=null;
 let hotIndexesReady=null;
+let healthCacheAt=0;
+let healthCacheValue=null;
+const HEALTH_CACHE_MS=120000;
 
 function safe(v,n=4000){return String(v??'').slice(0,n)}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
@@ -434,6 +437,7 @@ async function budgetConsume(env,kind,count){
   await env.DB.prepare(`UPDATE compute_overflow_budget SET used_today=used_today+?,updated_at=datetime('now') WHERE kind=?`).bind(n,kind).run().catch(()=>{});
 }
 async function health(env){
+  if(healthCacheValue&&(Date.now()-healthCacheAt)<HEALTH_CACHE_MS)return healthCacheValue;
   const [m,budgets,contactSupply,funnel,qualificationSamples]=await Promise.all([
     metricRow(env),
     env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]})),
@@ -520,7 +524,7 @@ async function health(env){
     submissionsAcceptedToday:num(funnel?.submissions_accepted_today),
     placementsVerifiedToday:num(funnel?.placements_verified_today)
   };
-  return {
+  const snapshot={
     status:env.OVERFLOW_COMPUTE_URL?'configured':'awaiting_external_runtime',
     providerUrl:env.OVERFLOW_COMPUTE_URL?(()=>{try{return new URL(env.OVERFLOW_COMPUTE_URL).origin}catch{return null}})():null,
     dailyJobBudget:DAILY_JOB_BUDGET,researchUsedToday:num(usage.research),
@@ -534,8 +538,12 @@ async function health(env){
     qualificationSamples:(qualificationSamples||[]).map(x=>({surfaceSlug:x.surface_slug,detail:x.detail,actionUrl:x.action_url,createdAt:x.created_at})),
     d1ReadModel:'canonical_queue_counts_plus_metrics_plus_distribution_funnel',
     githubActionsRole:'disabled_until_october',
-    writeAmplificationGuard:'d1-write-guard-v1'
+    writeAmplificationGuard:'d1-write-guard-v1',
+    healthReadModel:'cached_120s_read_only'
   };
+  healthCacheValue=snapshot;
+  healthCacheAt=Date.now();
+  return snapshot;
 }
 async function enqueueJob(env,{jobKey,jobType,subjectType,subjectKey,priority,payload}){
   const jobId=`coj_${await shortHash(jobKey)}`;
@@ -820,7 +828,7 @@ async function dispatchAvailableBatches(env){
   try{
     await recoverTransientDispatchDeferrals(env);
     for(let slot=0;slot<MAX_ACTIVE_BATCHES;slot++){
-      // Reserve the first available slot for classifier v2 route research when
+      // Reserve the first available slot for current classifier route research when
       // such work exists. The second slot remains a general throughput lane so
       // contact discovery and authorized execution cannot be starved.
       const preferredJobType=slot===0?'distribution_route_research':null;
@@ -839,7 +847,9 @@ async function dispatchAvailableBatches(env){
 async function continueDistributionExecutionHandoff(env,surfaceSlugs=[]){
   const slugs=[...new Set((Array.isArray(surfaceSlugs)?surfaceSlugs:[]).map(x=>safe(x,120)).filter(Boolean))].slice(0,BATCH_SIZE);
   if(!slugs.length)return{ok:true,status:'no_distribution_handoff',qualified:0,executionEnqueued:0,dispatchSlotsUsed:0};
-  const qualification=await isolatedOverflowStage(env,'research_handoff_qualification',()=>qualifyDistributionSurfaces(env,slugs),{ok:false,checked:0,ready:0});
+  // Render already performed external route inspection. Re-fetching the same
+  // surfaces from Cloudflare wastes D1/subrequest budget and duplicates work.
+  const qualification={ok:true,skipped:true,checked:0,ready:0,reason:'render_result_applied_directly'};
   const execution=await isolatedOverflowStage(env,'research_handoff_execution_enqueue',()=>enqueueAuthorizedExecution(env),{ok:false,enqueued:0,submissionJobs:0,verificationJobs:0});
   const runs=await dispatchAvailableBatches(env);
   await event(env,'distribution_research_execution_handoff',qualification?.ok===false?'partial':'completed',
@@ -892,7 +902,9 @@ async function runOverflowTick(env){
   // the external executor when there is an existing backlog.
   const preRuns=await dispatchAvailableBatches(env);
 
-  const qualification=await isolatedOverflowStage(env,'canonical_qualification_sweep',()=>qualifyResearchReadySweep(env),{ok:false,requested:0,checked:0,ready:0});
+  // External route research and classification run on Render. Keep the
+  // Cloudflare control-plane tick focused on queue state, authorization and D1.
+  const qualification={ok:true,skipped:true,requested:0,checked:0,ready:0,reason:'render_classification_primary'};
   const execution=await isolatedOverflowStage(env,'authorized_execution_enqueue',()=>enqueueAuthorizedExecution(env),{enqueued:0,submissionJobs:0,verificationJobs:0,remaining:0});
   const research=await isolatedOverflowStage(env,'research_enqueue',()=>enqueueDistributionResearch(env),{enqueued:0,remaining:0,contactSupply:{enqueued:0}});
 
@@ -1308,18 +1320,9 @@ export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
-      const snapshot=await health(env);
-      if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.runnableQueued)>0&&num(snapshot.activeBatches)===0){
-        // Health is polled by the Command Center and operational probes. Use it only
-        // as a lightweight executor watchdog: lease and trigger queued work now.
-        ctx.waitUntil(dispatchAvailableBatches(env).catch(async error=>{await event(env,'health_watchdog_pump_failed','failed',safe(error?.message||error,600)).catch(()=>{});return null;}));
-      }
-      if(ctx?.waitUntil&&snapshot.status==='configured'&&num(snapshot.distributionFunnel?.submissionRoutesFoundToday)>0){
-        // Five-minute cooldown keeps this bounded while giving the canonical qualifier
-        // a fallback path even if a scheduled cycle is delayed.
-        ctx.waitUntil(runQualificationWatchdog(env).catch(async error=>{await event(env,'qualification_watchdog_failed','failed',safe(error?.message||error,600)).catch(()=>{});return null;}));
-      }
-      return Response.json(snapshot,{headers:JSON_H});
+      // Observability must be read-only. Command Center polling must never execute
+      // distribution work or amplify D1 reads/writes.
+      return Response.json(await health(env),{headers:JSON_H});
     }
     if(request.method==='GET'&&u.pathname==='/api/contact-supply/health')return Response.json(await contactSupplyHealth(env),{headers:JSON_H});
     if(request.method==='POST'&&u.pathname==='/api/contact-supply/refresh'){
