@@ -95,6 +95,8 @@ This week's minimum acceptance conditions:
 15. Failed engine runs must not leave cycle claims in `running` or expired single-flight leases behind. Reaping a run must reconcile ownership state in the same control path.
 16. The autonomous distribution control-plane cycle must stay bounded. Heavy recursive discovery runs in its scheduled sidecar and external overflow, not synchronously inside every autonomous execution/recovery pass.
 17. Recursive discovery writes are material-change only. Rediscovering an already-known source must not rewrite the same D1 row merely to refresh a timestamp.
+18. Execution-contract draining runs every 15 minutes through the existing overflow cadence. Heavy supervisor self-audit remains hourly. This separates throughput from expensive observability and avoids hourly-only executor starvation.
+19. The hourly `15 * * * *` event must not duplicate the 15-minute execution-contract drain. At minute 15 it owns audit/recovery duties while `*/15` owns executor draining.
 
 ## Preflight before ToolScout changes
 
