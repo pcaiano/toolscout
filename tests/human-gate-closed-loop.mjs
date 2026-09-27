@@ -6,6 +6,9 @@ const human=fs.readFileSync('human-action-entry-worker.js','utf8');
 const chairman=fs.readFileSync('chairman-task-quality.js','utf8');
 const command=fs.readFileSync('growth-command-center-v2-worker.js','utf8');
 const simplified=fs.readFileSync('command-center-simplified-view.js','utf8');
+const affiliate=fs.readFileSync('affiliate-coverage-cycle-worker.js','utf8');
+const resilient=fs.readFileSync('command-center-resilient-worker.js','utf8');
+const orchestrator=fs.readFileSync('distribution-orchestrator-worker.js','utf8');
 const failures=[];
 const check=(ok,msg)=>{if(!ok)failures.push(msg)};
 check(compute.includes('const DISTRIBUTION_CLASSIFIER_VERSION=6;'),'classifier v6 active');
@@ -29,5 +32,13 @@ check(autonomous.includes("previous?.status==='resolved'&&!canonicalAuthProof"),
 check(research.includes('CONTENT_ROUTE_RE'),'classifier rejects content and marketing routes');
 check(research.includes("CONTENT_ROUTE_RE.test(path)&&!SUBMISSION_ACCOUNT_RE.test(rawUrl)"),'content CAPTCHA needs explicit URL submission intent');
 check(autonomous.includes('reconcileObsoleteClassifierHumanGates'),'stale research-derived Human Gates are invalidated on classifier upgrade');
+check(affiliate.includes("if(HUMAN_DISCOVERY_STATES.has(normalizeAffiliateState(result.status)))await prepareApplicationPack"),'affiliate human discovery prepares application pack in the same cycle');
+check(resilient.includes("LEFT JOIN affiliate_application_packs"),'Chairman Queue joins canonical affiliate application packs');
+check(resilient.includes("source_of_truth:'affiliate_workflow+affiliate_application_packs'"),'affiliate queue source of truth includes prepared packs');
+check(autonomous.includes('export async function reconcileFreshResearchHumanGates'),'fresh classifier evidence can reconcile to Human Gates without research replay');
+check(autonomous.includes("previous?.status==='resolved'"),'resolved research-derived Human Gates never reopen silently');
+check(autonomous.includes('classifierUpgrade=oldVersion>0&&newVersion>oldVersion'),'cancelled gates reopen only from newer classifier proof');
+check(orchestrator.includes("'humanGateResearchReconcile'"),'Engine Health Recovery repairs research-to-Human-Gate drift');
+check(orchestrator.includes("'affiliateCoverage'"),'Engine Health Recovery exercises Affiliate Coverage');
 if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
 console.log('PASS human-gate closed loop, queue visibility and anti-regression guards');
