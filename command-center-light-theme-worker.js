@@ -176,7 +176,7 @@ function render(d){
   var root=document.getElementById('trafficTruthBody');if(!root)return;
   var forecast=root.querySelector('.tsTruthForecast');if(!forecast)return;
   var v=latest.visitors||{},t=latest.traffic||{},commercial=latest.canonicalCommercialTruth||{},countries=latest.trafficCountries||{};
-  var html='<div class="tsTrafficDetail" data-repair="1"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>Strict Verified Human Sessions is the canonical business traffic metric. Browser-validated sessions are diagnostic only and never enter this KPI.</span></div><div class="tsDetailGrid">'+
+  var html='<div class="tsTrafficDetail" data-repair="1"><div class="tsTrafficDetailHead"><strong>Traffic detail</strong><span>GA4 sessions remain the canonical acquisition metric. Strict verified human sessions are first-party diagnostic and attribution proof, useful for filtering traffic quality but they do not override GA4.</span></div><div class="tsDetailGrid">'+
     card('Strict human visitors, last 24h',fmt(v.last24),windowMeta(v,'last24'))+
     card('Strict human visitors today',fmt(v.today),windowMeta(v,'today'))+
     card('Strict human visitors this month',fmt(v.monthToDate),windowMeta(v,'month'))+
