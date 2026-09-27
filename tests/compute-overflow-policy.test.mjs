@@ -5,7 +5,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 const wrangler=read('wrangler.toml');
 assert.match(wrangler,/main\s*=\s*"compute-router-worker\.js"/);
-assert.match(wrangler,/crons\s*=\s*\["\*\/5 \* \* \* \*"/);
+assert.match(wrangler,/crons\s*=\s*\["\*\/15 \* \* \* \*"/);
 
 const router=read('compute-router-worker.js');
 assert.match(router,/DAILY_JOB_BUDGET=1500/);
@@ -19,7 +19,7 @@ assert.match(router,/job_type=\?/);
 assert.match(router,/preferredJobType=slot===0\?'distribution_route_research':null/);
 assert.match(router,/BATCH_TIMEOUT_MINUTES=3/);
 assert.match(router,/githubActionsRole:'disabled_until_october'/);
-assert.match(router,/d1ReadModel:'canonical_queue_counts_plus_metrics_plus_distribution_funnel'/);
+assert.match(router,/d1ReadModel:'incremental_funnel_plus_indexed_queue_v2'/);
 assert.match(router,/SELECT COUNT\(\*\) n FROM compute_overflow_batches WHERE status IN \('dispatched','running'\)/);
 assert.match(router,/canonical_queued/);
 assert.match(router,/runnable_queued/);
@@ -93,7 +93,14 @@ assert.match(render,/node overflow-compute\/server\.mjs/);
 console.log('External compute overflow v1 policy is intact.');
 
 assert.match(router,/HEALTH_CACHE_MS=120000/);
-assert.match(router,/healthReadModel:'cached_120s_read_only'/);
+assert.match(router,/healthReadModel:'incremental_cached_120s_read_only'/);
 assert.match(router,/render_classification_primary/);
 assert.match(router,/render_result_applied_directly/);
 assert.doesNotMatch(router,/health_watchdog_pump_failed/);
+
+assert.match(router,/compute_overflow_funnel_metrics/);
+assert.match(router,/funnelMetricDelta/);
+assert.match(router,/hiddenSafetyFields/);
+assert.match(core,/machineFormAssessment/);
+assert.match(core,/canonicalFieldName/);
+assert.match(core,/formRejections/);
