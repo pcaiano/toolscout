@@ -75,7 +75,13 @@
     "human_state_write_order": "gate_first_status_second",
     "content_pages_cannot_be_submission_routes_without_explicit_url_intent": true,
     "obsolete_classifier_human_gates_are_invalidated": true,
-    "single_flight_observability_follows_active_lease": true
+    "single_flight_observability_follows_active_lease": true,
+    "affiliate_human_action_pack_same_cycle": true,
+    "chairman_affiliate_pack_source": "affiliate_application_packs",
+    "engine_health_recovers_affiliate_coverage": true,
+    "engine_health_reconciles_fresh_research_human_gates": true,
+    "cancelled_classifier_gate_reopens_only_from_fresher_classifier_proof": true,
+    "source_unreachable_backoff_is_deferred_not_runnable": true
   },
   "truth_order": [
     "live_provider_and_production_observation",
@@ -110,7 +116,13 @@
     "make_scenario_success_without_external_outcome_evidence_is_not_business_success",
     "content_distribution_filters_use_verified_dynamic_targets_not_hardcoded_origin",
     "gsc_truth_snapshots_commit_as_one_atomic_set",
-    "repository_provider_settings_do_not_override_live_provider_truth"
+    "repository_provider_settings_do_not_override_live_provider_truth",
+    "affiliate_human_action_never_reaches_owner_queue_without_prepared_application_pack",
+    "affiliate_discovery_prepares_owner_pack_in_same_cycle",
+    "fresh_classifier_evidence_reconciles_to_human_gate_without_research_replay",
+    "cancelled_classifier_gate_reopens_only_from_newer_exact_route_evidence",
+    "resolved_human_gate_never_reopens_silently",
+    "source_unreachable_backoff_is_not_counted_as_runnable_or_stalled_work"
   ],
   "mission": {
     "starts_on": "2026-09-28",
