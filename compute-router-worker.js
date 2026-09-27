@@ -462,6 +462,22 @@ async function health(env){
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='human_action_required' AND created_at>=datetime('now','-15 minutes')) qualification_human_15m,
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='auth_required' AND created_at>=datetime('now','-15 minutes')) qualification_auth_15m,
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='policy_blocked' AND created_at>=datetime('now','-15 minutes')) qualification_policy_15m,
+      (SELECT COUNT(*) FROM distribution_opportunities o
+        WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
+          AND o.status IN ('candidate','discovered','research_required')) route_research_candidates,
+      (SELECT COUNT(*) FROM distribution_opportunities o
+        WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
+          AND o.status IN ('candidate','discovered','research_required')
+          AND NOT EXISTS (
+            SELECT 1 FROM compute_overflow_jobs j
+            WHERE j.subject_key=o.surface_slug
+              AND j.job_type='distribution_route_research'
+              AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
+              AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+          )) route_research_eligible,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued') route_research_queued,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued' AND available_at<=datetime('now')) route_research_runnable,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='leased') route_research_leased,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND created_at>=datetime('now','start of day')) actions_authorized_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status='completed' AND completed_at>=datetime('now','start of day')) actions_completed_today,
       (SELECT COUNT(*) FROM distribution_submissions WHERE submission_type='auto_discovered_json' AND status IN ('submitted','pending_review','verified') AND COALESCE(submitted_at,last_attempt_at,created_at)>=datetime('now','start of day')) submissions_accepted_today,
@@ -494,6 +510,11 @@ async function health(env){
     qualificationHuman15m:num(funnel?.qualification_human_15m),
     qualificationAuth15m:num(funnel?.qualification_auth_15m),
     qualificationPolicy15m:num(funnel?.qualification_policy_15m),
+    routeResearchCandidates:num(funnel?.route_research_candidates),
+    routeResearchEligible:num(funnel?.route_research_eligible),
+    routeResearchQueued:num(funnel?.route_research_queued),
+    routeResearchRunnable:num(funnel?.route_research_runnable),
+    routeResearchLeased:num(funnel?.route_research_leased),
     actionsAuthorizedToday:num(funnel?.actions_authorized_today),
     actionsCompletedToday:num(funnel?.actions_completed_today),
     submissionsAcceptedToday:num(funnel?.submissions_accepted_today),
@@ -540,7 +561,7 @@ async function enqueueDistributionResearch(env){
   const limit=Math.min(500,remaining);
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action
     FROM distribution_opportunities
-    WHERE human_required=0 AND action_url IS NOT NULL
+    WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
       AND status IN ('candidate','discovered','research_required')
       AND NOT EXISTS (
         SELECT 1 FROM compute_overflow_jobs j
