@@ -287,10 +287,10 @@ function queue(){
   document.getElementById('queueBody').innerHTML='<div class="issue warn"><b>Chairman Queue could not refresh.</b>This is a source/session error, not an empty queue. The Command Center will retry automatically.</div>';
   return;
  }
- const safeQ=q||{items:[],total:0,estimated_minutes:0};
- const items=Array.isArray(safeQ.items)?safeQ.items:[];
- document.getElementById('queueMeta').textContent=items.length?n(safeQ.total)+' current':(sourceErrors.queue?'Last known state':'Clear');
- document.getElementById('queueBody').innerHTML=items.length?items.map(taskHtml).join(''):'<div class="empty"><b>No owner action is ready.</b><br><br>Incomplete or machine-resolvable tasks stay out of this queue.</div>';
+ const safeQ=q||{items:[],total:0,estimated_minutes:0,quality_holds:[]};
+ const items=Array.isArray(safeQ.items)?safeQ.items:[],holds=Array.isArray(safeQ.quality_holds)?safeQ.quality_holds:[];
+ document.getElementById('queueMeta').textContent=(items.length?n(safeQ.total)+' current':(sourceErrors.queue?'Last known state':'Clear'))+(holds.length?' · '+n(holds.length)+' engine-held':'');
+ document.getElementById('queueBody').innerHTML=(items.length?items.map(taskHtml).join(''):'<div class="empty"><b>No owner action is ready.</b><br><br>Incomplete or machine-resolvable tasks stay out of this queue.</div>')+(holds.length?'<div class="issue warn"><b>'+n(holds.length)+' task(s) held inside the engines.</b>They are not asking for your time yet because route evidence, prepared content or exact instructions are incomplete. The engines must repair them before promotion to Needs You.</div>':'');
  if(sourceErrors.queue&&items.length)document.getElementById('queueBody').insertAdjacentHTML('afterbegin','<div class="issue warn"><b>Queue refresh delayed.</b>Showing the last successful queue state while the source retries.</div>');
 }
 function results(){
@@ -330,6 +330,7 @@ function health(){
   ['External compute',compute.status||'Unavailable',n(compute.completedToday)+' completed today · '+n(compute.queued)+' queued'],
   ['Email plane',growth.emailDeliveryMode||'Unavailable',n(growth.emailSent24h)+' sent / 24h · '+n(growth.emailReadyContacts)+' ready contacts'],
   ['Auth Plane',auth.status||'Unavailable',n(auth.activeSessions)+' active sessions · '+n(auth.bootstrapRequired)+' bootstrap required'],
+  ['Human gates',n(compute.distributionFunnel?.humanGatesOpen)+' open',n(compute.distributionFunnel?.captchaHumanGatesOpen)+' CAPTCHA · '+n(compute.distributionFunnel?.authHumanGatesOpen)+' auth · '+n(compute.distributionFunnel?.humanGatesVerificationPending)+' verification pending'],
   ['GitHub Actions',rt.githubActions?.role||'Unavailable',rt.githubActions?.scheduledPrimary===false?'Disabled/fallback only':'Check scheduling role'],
   ['GSC evidence',g.runtimeStatus||'Unavailable',g.runtimeGeneratedAt?dt(g.runtimeGeneratedAt):'No runtime timestamp'],
   ['Authority',a.status||'Unavailable',n(a.attempts24)+' attempts / 24h'],
