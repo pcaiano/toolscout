@@ -424,12 +424,12 @@ document.getElementById('refresh').addEventListener('click',()=>loadAll(true));
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden)return;
  const now=Date.now();
- if(now-lastFast>=60000)loadFast();
- if(now-lastHeavy>=180000)loadHeavy();
+ if(now-lastFast>=180000)loadFast();
+ if(now-lastHeavy>=600000)loadHeavy();
 });
 loadAll(false);
-setInterval(loadFast,60000);
-setInterval(loadHeavy,180000);
+setInterval(loadFast,180000);
+setInterval(loadHeavy,600000);
 </script>
 </body>
 </html>`;
