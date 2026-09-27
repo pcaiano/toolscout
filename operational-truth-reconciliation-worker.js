@@ -228,9 +228,18 @@ async function buildCommandCenterBusinessTruth(request,env){
   const seRankingDofollowReferringDomains=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.dofollowReferringDomains):0;
   const seRankingDomainAuthority=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.domainAuthority??seRankingBacklinkTruth?.metrics?.domainInlinkRank):0;
   const internalVerifiedBacklinks=truthNum(backlink.verified_backlinks);
-  const observedBacklinks=Math.max(internalVerifiedBacklinks,seRankingBacklinks);
+  const observedBacklinks=seRankingFresh?seRankingBacklinks:internalVerifiedBacklinks;
   const backlinkReconciliationGap=seRankingFresh?Math.max(0,seRankingBacklinks-internalVerifiedBacklinks):0;
-  const authorityVerifiedDomains=Math.max(truthNum(backlink.verified_referring_domains),internalAuthorityVerifiedDomains,seRankingReferringDomains);
+  const authorityVerifiedDomains=seRankingFresh?seRankingReferringDomains:internalAuthorityVerifiedDomains;
+  const seRankingReferringDomainItems=seRankingFresh&&Array.isArray(seRankingBacklinkTruth?.referringDomains)
+    ?seRankingBacklinkTruth.referringDomains.map(x=>({
+      domain:String(x?.domain||'').toLowerCase().replace(/^www\./,''),
+      backlinks:truthNum(x?.backlinks),
+      dofollowBacklinks:truthNum(x?.dofollowBacklinks),
+      domainAuthority:truthNum(x?.domainInlinkRank),
+      firstSeen:x?.firstSeen||null
+    })).filter(x=>x.domain)
+    :[];
   const authorityRequired=true;
   const authorityThroughputGap=authorityRequired&&authorityAttempts24<AUTHORITY_POLICY_MIN_24H;
   const architecture={
@@ -415,23 +424,29 @@ async function buildCommandCenterBusinessTruth(request,env){
     traffic:{strictDaily},
     authority:{
       required:authorityRequired,
-      verifiedBacklinks:internalVerifiedBacklinks,
+      verifiedBacklinks:observedBacklinks,
       observedBacklinks,
       internalVerifiedBacklinks,
       internalVerifiedBacklinkSurfaces:internalVerifiedBacklinks,
       backlinkReconciliationGap,
-      backlinkCountSource:seRankingFresh?'SE Ranking observed link URLs':'internal verified backlink-bearing placements',
+      backlinkCountSource:seRankingFresh?'SE Ranking Data API':'internal verified backlink-bearing placements',
+      authorityTruthSource:seRankingFresh?'SE Ranking Data API':'internal verified placement ledger',
+      internalLedgerRole:'diagnostic_only',
       referringDomains:authorityVerifiedDomains,
       verifiedReferringDomains:authorityVerifiedDomains,
       internalVerifiedReferringDomains:internalAuthorityVerifiedDomains,
       seRankingReferringDomains,
+      referringDomainItems:seRankingReferringDomainItems,
       seRankingBacklinks:seRankingFresh?seRankingBacklinks:null,
       seRankingDofollowBacklinks:seRankingFresh?seRankingDofollowBacklinks:null,
       seRankingDofollowReferringDomains:seRankingFresh?seRankingDofollowReferringDomains:null,
       domainAuthority:seRankingFresh?seRankingDomainAuthority:null,
       domainAuthoritySource:seRankingFresh?'SE Ranking':null,
       seRankingObservedAt:seRankingFresh?seRankingObservedAt:null,
-      referringDomainSource:seRankingFresh?'SE Ranking + internal verified ledger':'internal verified ledger',
+      referringDomainSource:seRankingFresh?'SE Ranking':'internal verified ledger',
+      diversificationObjective:'grow_unique_independent_referring_domains',
+      newReferringDomainPriority:'primary',
+      repeatDomainAuthorityPriority:'secondary_unless_verified_human_or_commercial_signal',
       reconciliationGap:Math.max(0,authorityVerifiedDomains-internalAuthorityVerifiedDomains),
       bootstrapFloor:truthNum(backlink.bootstrap_referring_domain_floor)||10,
       attempts24h:authorityAttempts24,
