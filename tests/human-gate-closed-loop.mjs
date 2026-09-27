@@ -8,7 +8,7 @@ const command=fs.readFileSync('growth-command-center-v2-worker.js','utf8');
 const simplified=fs.readFileSync('command-center-simplified-view.js','utf8');
 const failures=[];
 const check=(ok,msg)=>{if(!ok)failures.push(msg)};
-check(compute.includes('const DISTRIBUTION_CLASSIFIER_VERSION=5;'),'classifier v5 active');
+check(compute.includes('const DISTRIBUTION_CLASSIFIER_VERSION=6;'),'classifier v6 active');
 check(research.includes('submissionIntent'),'Render distinguishes submission intent from page-level forms');
 check(research.includes('humanGateCandidates'),'Render exposes exact human-gate candidates');
 check(compute.includes('openDistributionHumanGateFromResearchEvidence'),'Render completion can open canonical human gate');
@@ -26,5 +26,8 @@ check(autonomous.includes('reconcileOrphanHumanStates'),'orphan owner-required s
 check(autonomous.includes("status IN ('open','verification_pending')"),'open or verification-pending gate is the only valid owner-required backing state');
 check(autonomous.includes("const gateKey=await openDistributionHumanGate"),'qualifier creates gate before committing owner-required status');
 check(autonomous.includes("previous?.status==='resolved'&&!canonicalAuthProof"),'resolved owner steps are not silently reopened');
+check(research.includes('CONTENT_ROUTE_RE'),'classifier rejects content and marketing routes');
+check(research.includes("CONTENT_ROUTE_RE.test(path)&&!SUBMISSION_ACCOUNT_RE.test(rawUrl)"),'content CAPTCHA needs explicit URL submission intent');
+check(autonomous.includes('reconcileObsoleteClassifierHumanGates'),'stale research-derived Human Gates are invalidated on classifier upgrade');
 if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
 console.log('PASS human-gate closed loop, queue visibility and anti-regression guards');
