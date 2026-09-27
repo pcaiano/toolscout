@@ -3,6 +3,7 @@ const MAX_HTML=500000;
 const ACTION_RE=/(submit|submission|add[-_ /]?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
 const SUBMISSION_INTENT_RE=/(submit(?:\s+now|\s+(?:your|a))?|submission|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product))/i;
 const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|return_to=[^&]*(?:product|tool|startup)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
+const CONTENT_ROUTE_RE=/(?:^|\/)(?:best-of|blog|blogs|article|articles|news|funding-news|category|categories|tag|tags|guides?|resources?|advertise|pricing)(?:\/|$)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
 const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
 const CAPTCHA_RE=/(captcha|g-recaptcha|h-captcha|cf-turnstile|turnstile)/i;
@@ -63,8 +64,13 @@ function sameHost(a,b){
   }catch{return false}
 }
 function hasSubmissionIntent(label,url){
-  const signal=String(label||'')+' '+String(url||'');
-  return SUBMISSION_INTENT_RE.test(signal)||SUBMISSION_ACCOUNT_RE.test(signal);
+  const rawUrl=String(url||''),signal=String(label||'')+' '+rawUrl;
+  let path='';try{path=new URL(rawUrl).pathname}catch{}
+  // Content/marketing pages often contain site-wide forms and CAPTCHA widgets.
+  // They are never submission routes unless the URL itself carries an explicit
+  // account/submission intent such as intent=submit or return_to=.../new.
+  if(CONTENT_ROUTE_RE.test(path)&&!SUBMISSION_ACCOUNT_RE.test(rawUrl))return false;
+  return SUBMISSION_ACCOUNT_RE.test(rawUrl)||SUBMISSION_INTENT_RE.test(signal);
 }
 function absolute(href,base){
   try{const u=new URL(href,base);u.hash='';return validPublicHttp(u.toString())?u.toString():null}catch{return null}
