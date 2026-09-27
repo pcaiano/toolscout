@@ -38,6 +38,7 @@ requireCheck(router.includes('const DAILY_JOB_BUDGET='+contract.execution.extern
 requireCheck(router.includes('const EXECUTION_DAILY_JOB_BUDGET='+contract.execution.external_execution_jobs_per_utc_day+';'),'router execution budget matches contract');
 requireCheck(router.includes('const BATCH_SIZE='+contract.execution.batch_size+';'),'router batch size matches contract');
 requireCheck(router.includes('const MAX_ACTIVE_BATCHES='+contract.execution.max_active_batches+';'),'router active batch limit matches contract');
+requireCheck(router.includes('const DISTRIBUTION_CLASSIFIER_VERSION='+contract.execution.distribution_classifier_version+';'),'distribution classifier version matches contract');
 requireCheck(router.includes("const OVERFLOW_CRON='"+contract.execution.dispatch_cron+"';"),'router overflow cron matches contract');
 requireCheck(router.includes("const RENDER_KEEPALIVE_CRON='"+contract.execution.render_keepalive_cron+"';"),'render keepalive cron matches contract');
 requireCheck(wrangler.includes('"'+contract.execution.autonomous_control_cron+'"'),'wrangler autonomous control cron matches contract');
