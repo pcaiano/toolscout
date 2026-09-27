@@ -56,7 +56,10 @@
     "autonomous_control_single_flight_minutes": 12,
     "hourly_audit_cron": "15 * * * *",
     "primary_growth_cron": "*/15 * * * *",
-    "overlapping_core_work_forbidden": true
+    "overlapping_core_work_forbidden": true,
+    "autonomous_control_cycle_minutes": 15,
+    "autonomous_control_cycle_anchor_minute": 4,
+    "autonomous_stale_takeover_minutes": 12
   },
   "truth_order": [
     "live_provider_and_production_observation",

@@ -1,7 +1,7 @@
 let schemaReady=null;
 
 const CYCLE_OWNED_MISSIONS=new Map([
-  ['distribution:autonomous_cycle',{minutes:60,anchorMinute:15}],
+  ['distribution:autonomous_cycle',{minutes:15,anchorMinute:4}],
   ['distribution:network_cycle',{minutes:120,anchorMinute:15}],
   ['growth:execution_contract',{minutes:60,anchorMinute:15}],
   ['growth:opportunity_coordination',{minutes:60,anchorMinute:15}]
@@ -116,11 +116,12 @@ async function acquireMissionCycleClaim(env,{runId,engine,mission,triggerName=nu
     FROM engine_cycle_claims WHERE engine=? AND mission=? AND cycle_key=?`).bind(e,m,cycle.key).first();
 
   if(existing?.status==='failed'||(existing?.status==='running'&&existing?.acquired_at)){
+    const staleTakeoverMinutes=Math.max(5,Math.min(CYCLE_STALE_TAKEOVER_MINUTES,Math.max(5,Number(cycle.minutes||60)-3)));
     const takeover=await env.DB.prepare(`UPDATE engine_cycle_claims
       SET owner=?,run_id=?,status='running',attempts=attempts+1,acquired_at=datetime('now'),completed_at=NULL,updated_at=datetime('now')
       WHERE engine=? AND mission=? AND cycle_key=?
         AND (status='failed' OR (status='running' AND acquired_at<=datetime('now', ?)))`)
-      .bind(owner,runId,e,m,cycle.key,`-${CYCLE_STALE_TAKEOVER_MINUTES} minutes`).run();
+      .bind(owner,runId,e,m,cycle.key,`-${staleTakeoverMinutes} minutes`).run();
     if(Number(takeover?.meta?.changes||takeover?.changes||0)>0){
       return{owned:true,recovered:true,cycle,owner,runId,status:'running',previousOwner:existing?.owner||null,previousRunId:existing?.run_id||null};
     }

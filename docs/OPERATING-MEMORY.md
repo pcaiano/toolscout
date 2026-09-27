@@ -134,3 +134,6 @@ Keep this file concise. Record durable architecture, ownership, invariants, curr
 Do not turn it into an append-only event log. Detailed events belong in docs/COMMAND-CENTER.md or subsystem-specific records.
 
 When the operating architecture changes, update this file and the JSON contract together. If only runtime state changes, prefer live provider and D1 truth rather than hardcoding transient counters here.
+
+27. Autonomous mission-cycle identity is `15m@04`, aligned to the dedicated `:04/:19/:34/:49` heartbeat. Hourly recovery calls share that cycle identity and therefore deduplicate against the scheduled owner instead of creating a second run.
+28. Stale mission-cycle takeover is bounded by the mission cadence. For the 15-minute autonomous cycle, takeover occurs after 12 minutes so one dead claim cannot suppress multiple heartbeats.
