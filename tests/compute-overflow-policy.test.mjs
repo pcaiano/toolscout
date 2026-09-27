@@ -69,7 +69,7 @@ assert.match(core,/SAFE_FORM_FIELDS/);
 assert.match(core,/machineCandidate/);
 assert.match(core,/routeSummary/);
 assert.match(core,/sourceFallbackAttempted/);
-assert.match(core,/origin\+'\\/submit-tool'/);
+assert.match(core,/origin\+'\/submit-tool'/);
 assert.match(core,/classification:'source_unreachable'/);
 assert.match(core,/product_name/);
 assert.match(core,/short_description/);
