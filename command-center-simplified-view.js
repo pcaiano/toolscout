@@ -168,10 +168,7 @@ function authorityProgress(){
  document.getElementById('authorityProgressMeta').textContent=b.seRankingObservedAt?'SE Ranking snapshot '+dt(b.seRankingObservedAt):(b.latestPlacementVerifiedAt?'Latest placement '+dt(b.latestPlacementVerifiedAt):'Authority history');
  document.getElementById('authorityProgressBody').innerHTML=
   '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Observed backlinks</small><b>'+n(b.observedBacklinks??b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Domain authority</small><b>'+(b.domainAuthority==null?'Unavailable':n(b.domainAuthority))+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(queue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(attempts24)+' / '+n(min24)+'</b></div></div>'+donut(b.referringDomains??b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
-  '<div class="chartBox">'+seriesChart(rows,[{key:'placements',label:'Verified placements',cls:'primary'},{key:'backlinks',label:'Observed backlinks',cls:'good'},{key:'referringDomains',label:'Referring domains',cls:'warn'}])+'</div>'+
   '<div class="section">'+
-    row('Latest authority placement',b.latestPlacementVerifiedAt?dt(b.latestPlacementVerifiedAt):'Unavailable','Any verified public authority placement')+
-    row('Last backlink verified',b.lastVerifiedAt?dt(b.lastVerifiedAt):'Unavailable','Backlink-specific evidence')+
     (b.seRankingReferringDomains!=null?row('SE Ranking authority profile',n(b.seRankingBacklinks)+' backlinks · '+n(b.seRankingReferringDomains)+' referring domains',(b.seRankingDofollowBacklinks==null?'':n(b.seRankingDofollowBacklinks)+' dofollow links · ')+(b.seRankingDofollowReferringDomains==null?'':n(b.seRankingDofollowReferringDomains)+' dofollow domains · ')+(b.domainAuthority==null?'':'authority '+n(b.domainAuthority)+' · ')+'snapshot '+dt(b.seRankingObservedAt)):'')+
     (handoff?row('Authority handoff','In progress',n(live.senderClaimed)+' sender task claimed at '+dt(live.senderNewestClaimedAt)):'')+
   '</div>'+
