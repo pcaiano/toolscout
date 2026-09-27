@@ -32,6 +32,19 @@ export function partitionChairmanTasks(items,now=Date.now()){
   }
   return {items:accepted,quality_holds:held,quality_version:CHAIRMAN_QUALITY_VERSION};
 }
+export function dedupeChairmanTasksByActionUrl(items){
+  const out=[],seen=new Set();
+  for(const item of items||[]){
+    let key=null;
+    if(item?.engine==='distribution'&&item?.gate_key){
+      try{const u=new URL(String(item.action_url||''));u.hash='';key='distribution:'+u.toString().replace(/\/$/,'')}catch{}
+    }
+    if(key&&seen.has(key))continue;
+    if(key)seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
 export const SUBMITTED_STATES=['submitted','pending_review','scheduled','live','verified'];
 export async function existingParentSubmission(env,subjectKey){
   return env.DB.prepare(`SELECT p.surface_slug,p.status,p.action_url,p.live_url
@@ -56,4 +69,29 @@ export async function reconcileDuplicateSubmissionGates(env){
     ]);
   }
   return {reconciled:(rows.results||[]).length};
+}
+
+export async function reconcileDuplicateOpenHumanGates(env){
+  const rows=await env.DB.prepare(`SELECT g.gate_key,g.subject_key,g.action_url,g.gate_type,g.created_at,
+      COALESCE(o.distribution_score,0) distribution_score
+    FROM human_gate_contract g
+    LEFT JOIN distribution_opportunities o ON o.surface_slug=g.subject_key
+    WHERE g.engine='distribution' AND g.status='open' AND g.action_url IS NOT NULL
+    ORDER BY CASE WHEN g.subject_key LIKE 'route-%' THEN 1 ELSE 0 END,
+      COALESCE(o.distribution_score,0) DESC,g.created_at ASC`).all().catch(()=>({results:[]}));
+  const keep=new Map(),duplicates=[];
+  for(const row of rows.results||[]){
+    let key;try{const u=new URL(String(row.action_url||''));u.hash='';key=u.toString().replace(/\/$/,'')}catch{continue}
+    if(!keep.has(key)){keep.set(key,row);continue}
+    duplicates.push({...row,canonical:keep.get(key)});
+  }
+  for(const row of duplicates){
+    const detail=`Duplicate human gate collapsed into ${row.canonical.gate_key}; exact external action URL is identical. One owner action is sufficient.`;
+    await env.DB.batch([
+      env.DB.prepare(`UPDATE human_gate_contract SET status='cancelled',resolved_at=datetime('now'),next_verification_at=NULL,verification_detail=?,updated_at=datetime('now') WHERE gate_key=? AND status='open'`).bind(detail,row.gate_key),
+      env.DB.prepare(`UPDATE distribution_opportunities SET status=CASE WHEN status IN ('human_action_required','auth_required','approval_required') THEN 'skipped' ELSE status END,human_required=0,next_action=?,updated_at=datetime('now') WHERE surface_slug=?`).bind(detail,row.subject_key),
+      env.DB.prepare(`UPDATE distribution_contact_route_actions SET status=CASE WHEN status IN ('human_action_required','auth_required','queued','retry_due','researching') THEN 'exhausted' ELSE status END,last_result='duplicate_exact_human_gate',next_action=?,updated_at=datetime('now') WHERE opportunity_slug=?`).bind(detail,row.subject_key)
+    ]).catch(()=>{});
+  }
+  return {reconciled:duplicates.length,openCanonical:keep.size};
 }
