@@ -1,4 +1,4 @@
-import {actionUrl as validHumanActionUrl,existingParentSubmission,reconcileDuplicateSubmissionGates} from './chairman-task-quality.js';
+import {actionUrl as validHumanActionUrl,existingParentSubmission,reconcileDuplicateSubmissionGates,reconcileDuplicateOpenHumanGates} from './chairman-task-quality.js';
 import base from './distribution-submission-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
@@ -46,7 +46,9 @@ function sameHostFamily(a,b){const x=host(a),y=host(b);return x===y||x.endsWith(
 async function text(url,timeout=4000){try{const r=await fetch(url,{headers:{'User-Agent':'ToolScout-Distribution-Qualifier/1.0','Accept':'text/html,application/json;q=0.9,*/*;q=0.8'},redirect:'follow',signal:AbortSignal.timeout(timeout)});if(!r.ok)return null;return {url:r.url,contentType:r.headers.get('content-type')||'',body:(await r.text()).slice(0,800000)}}catch{return null}}
 function links(html,base){const out=new Set();for(const m of String(html||'').matchAll(/href=["']([^"']+)["']/gi)){try{const u=new URL(m[1],base);if(u.protocol==='https:')out.add(u.href)}catch{}}return [...out]}
 const ACTION_ROUTE_RE=/(submit|submission|add(?:-|_|\/)?(?:tool|startup|product)|new(?:-|_|\/)?(?:tool|startup|product)|register|sign(?:-|_|\/)?up|list(?:-|_|\/)?your)/i;
-const MANUAL_ACTION_RE=/(submit (?:your |a )?(?:tool|startup|product)|add (?:your |a )?(?:tool|startup|product)|list your (?:tool|startup|product))/i;
+const MANUAL_ACTION_RE=/(submit(?: now| (?:your |a )?(?:tool|startup|product|software))|add (?:your |a )?(?:tool|startup|product)|list your (?:tool|startup|product)|launch (?:a |your )?(?:tool|startup|product))/i;
+const STRONG_SUBMISSION_ROUTE_RE=/(?:^|[\/_-])(?:submit|submission|add-(?:tool|startup|product)|list-your-(?:tool|startup|product)|new-(?:tool|startup|product))(?:[\/?#_-]|$)|(?:intent=submit|return_to=[^&]*(?:product|tool|startup)[^&]*(?:new|add|submit))/i;
+function hasExactSubmissionIntent(url,body=''){return STRONG_SUBMISSION_ROUTE_RE.test(String(url||''))||MANUAL_ACTION_RE.test(String(body||''))}
 async function externalRouteFailureCount(env,surfaceSlug){
   try{
     const row=await env.DB.prepare(`SELECT COUNT(*) AS count FROM distribution_qualification_events WHERE surface_slug=? AND result='external_verification_failed' AND created_at>=datetime('now','-72 hours')`).bind(surfaceSlug).first();
@@ -356,6 +358,52 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
     WHERE surface_slug=?`).bind(finalActionUrl,instructions,row.surface_slug).run().catch(()=>{});
   return gateKey;
 }
+export async function openDistributionHumanGateFromResearchEvidence(env,row,{route=null,result=null}={}){
+  await ensureHumanGateSchema(env);
+  if(!row?.surface_slug||!route||route.machineCandidate||route.submissionIntent!==true)return {opened:false,reason:'not_exact_human_submission_route'};
+  const actionUrl=validHumanActionUrl(route.url);
+  if(!actionUrl)return {opened:false,reason:'invalid_action_url'};
+  const sourceUrl=String(result?.targetUrl||row.action_url||'');
+  if(sourceUrl&&!sameHostFamily(sourceUrl,actionUrl))return {opened:false,reason:'cross_host_route'};
+  const blockers=Array.isArray(route.policyBlockers)?route.policyBlockers.filter(Boolean):[];
+  if(blockers.length)return {opened:false,reason:'policy_blocked',blockers};
+  const isAuth=Boolean(route.auth||route.kind==='auth');
+  const isCaptcha=Boolean(route.captcha||route.kind==='captcha');
+  const score=Number(row.distribution_score||0);
+  if(!isAuth&&!isCaptcha&&score<PRIORITY_HUMAN_GATE_THRESHOLD)return {opened:false,reason:'manual_route_below_human_priority_threshold'};
+  if(await existingParentSubmission(env,row.surface_slug)){await reconcileDuplicateSubmissionGates(env);return {opened:false,reason:'existing_parent_submission'};}
+  const gateType=isAuth?'authentication':isCaptcha?'human_confirmation':'manual_submission';
+  const target=row.surface_name||row.surface_slug;
+  const evidenceDetail=isAuth&&isCaptcha
+    ?'Render classifier found an exact same-host ToolScout submission route that requires authentication and an interactive CAPTCHA.'
+    :isAuth
+      ?'Render classifier found an exact same-host ToolScout submission route that requires authentication.'
+      :isCaptcha
+        ?'Render classifier found an exact same-host ToolScout submission route with an interactive CAPTCHA.'
+        :'Render classifier found an exact same-host ToolScout submission route, but no safe automatic adapter was available.';
+  const reason=`${target}: ${evidenceDetail} Cloudflare validated the structured same-host route evidence and requires owner action before execution can continue.`;
+  const instructions=isAuth
+    ?`Open ${actionUrl}. Sign in or create only the minimum free account needed to submit ToolScout. Complete CAPTCHA or MFA yourself if shown. Submit ToolScout once using the prepared details below. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion or add a reciprocal badge. Return here and mark the task done.`
+    :isCaptcha
+      ?`Open ${actionUrl}. Complete the CAPTCHA yourself, fill the ToolScout submission fields with the prepared details below, and submit once. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion, add a reciprocal badge or invent claims. Return here and mark the task done.`
+      :`Open ${actionUrl}. Complete the ToolScout submission manually with the prepared details below and submit once. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion, add a reciprocal badge or invent claims. Return here and mark the task done.`;
+  const previous=await env.DB.prepare('SELECT status FROM human_gate_contract WHERE gate_key=?').bind(humanGateKey('distribution','surface',row.surface_slug)).first().catch(()=>null);
+  if(previous&&previous.status!=='open')return {opened:false,reason:'gate_already_terminal',status:previous.status};
+  const gateKey=await upsertHumanGate(env,{
+    engine:'distribution',subjectType:'surface',subjectKey:row.surface_slug,gateType,
+    title:`${target}: human step required`,reason,instructions,actionUrl,
+    resolutionMode:'verify_publication',
+    payload:{...humanGatePayload(),gate_evidence:{url:actionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail},research_classifier_version:Number(result?.classifierVersion||5)},
+    verificationUrl:null
+  });
+  const status=isAuth?'auth_required':'human_action_required';
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE distribution_opportunities SET status=?,human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(status,actionUrl,instructions,row.surface_slug),
+    env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,row.surface_slug,actionUrl,status,evidenceDetail)
+  ]).catch(()=>{});
+  return {opened:true,gateKey,gateType,status,actionUrl};
+}
+
 async function qualifyOne(env,row){
   let effectiveRow=row;
   if(isTechnicalSurface(row.action_url)){
