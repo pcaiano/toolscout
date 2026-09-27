@@ -127,13 +127,14 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/data/gsc-search-reality.json' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1`).first().catch(()=>null),
+    ccAssetJson(request,env,'/data/gsc-daily-trend.json',{daily:[]}),
     ccAssetJson(request,env,'/data/affiliate.json',{}),
     ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
     env.DB.prepare(`SELECT tool_slug,status,updated_at FROM affiliate_workflow ORDER BY tool_slug`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -282,7 +283,9 @@ async function buildCommandCenterBusinessTruth(request,env){
   const w=reality?.searchPerformance?.window28d||gsc?.siteTotals||{};
   const idx=reality?.indexHealth||{};
   const sitemap=reality?.sitemaps||{};
-  const rawDaily28=Array.isArray(reality?.searchPerformance?.daily28)?reality.searchPerformance.daily28:[];
+  const realityDaily28=Array.isArray(reality?.searchPerformance?.daily28)?reality.searchPerformance.daily28:[];
+  const assetDaily28=Array.isArray(gscDailyTrend?.daily)?gscDailyTrend.daily:[];
+  const rawDaily28=assetDaily28.length>=2?assetDaily28:realityDaily28;
   const lisbonDate=(()=>{try{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const map=Object.fromEntries(parts.map(p=>[p.type,p.value]));return map.year+'-'+map.month+'-'+map.day}catch{return new Date().toISOString().slice(0,10)}})();
   const completedDaily=rawDaily28.filter(row=>String(row?.date||'')<lisbonDate);
   let lastEvidenceIndex=completedDaily.length-1;
@@ -295,10 +298,11 @@ async function buildCommandCenterBusinessTruth(request,env){
   };
   const recentRows=daily28.slice(-7),previousRows=daily28.slice(-14,-7),recent7=aggregateDays(recentRows),previous7=aggregateDays(previousRows);
   const pct=(cur,prev)=>prev?((cur-prev)/prev*100):(cur?100:0);
+  const hasComparison=recentRows.length===7&&previousRows.length===7;
   const change7d={
-    clicksPct:pct(recent7.clicks,previous7.clicks),
-    impressionsPct:pct(recent7.impressions,previous7.impressions),
-    positionDelta:recent7.position==null||previous7.position==null?null:recent7.position-previous7.position
+    clicksPct:hasComparison?pct(recent7.clicks,previous7.clicks):null,
+    impressionsPct:hasComparison?pct(recent7.impressions,previous7.impressions):null,
+    positionDelta:hasComparison&&recent7.position!=null&&previous7.position!=null?recent7.position-previous7.position:null
   };
   const verifiedThroughDate=daily28.at(-1)?.date||null;
   const strictDaily=Array.isArray(strictDailyRows)?strictDailyRows.map(x=>({date:x.day,humans:truthNum(x.humans)})):[];
@@ -491,6 +495,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       indexRecoveryCandidates:truthMaybeNum(idx.recoveryCandidates??idx.indexRecoveryCandidates),
       sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps),
       daily28,
+      dailyGeneratedAt:gscDailyTrend?.generatedAt||reality?.searchPerformance?.trendGeneratedAt||null,
+      dailySource:assetDaily28.length>=2?'gsc-daily-trend-asset':'gsc-search-reality-cache',
       verifiedThroughDate,
       recent7,
       previous7,
