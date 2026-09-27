@@ -541,10 +541,7 @@ async function enqueueDistributionResearch(env){
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action
     FROM distribution_opportunities
     WHERE human_required=0 AND action_url IS NOT NULL
-      AND (
-        status IN ('candidate','discovered')
-        OR (status='research_required' AND (last_checked_at IS NULL OR last_checked_at<=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')))
-      )
+      AND status IN ('candidate','discovered','research_required')
       AND NOT EXISTS (
         SELECT 1 FROM compute_overflow_jobs j
         WHERE j.subject_key=distribution_opportunities.surface_slug
