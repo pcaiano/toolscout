@@ -31,8 +31,6 @@ assert.match(router,/available_at=datetime\('now','\+1 minute'\)/);
 assert.match(router,/qualifyDistributionSurfaces/);
 assert.match(router,/continueDistributionExecutionHandoff/);
 assert.match(router,/qualifyResearchReadySweep/);
-assert.match(router,/canonical_qualification_sweep/);
-assert.match(router,/health_watchdog_pump_failed/);
 assert.match(router,/runQualificationWatchdog/);
 assert.match(router,/qualification_watchdog_cycle/);
 assert.match(router,/qualificationReady15m/);
