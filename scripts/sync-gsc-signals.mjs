@@ -282,8 +282,12 @@ function canonicalPublicUrl(value) {
     return u.toString();
   } catch { return null; }
 }
+function canonicalEquivalent(a,b) {
+  const left=canonicalPublicUrl(a),right=canonicalPublicUrl(b);
+  return Boolean(left&&right&&left===right);
+}
 const sitemapXml = fs.existsSync('sitemap.xml') ? fs.readFileSync('sitemap.xml','utf8') : '';
-const sitemapUrls = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>normalizeUrl(String(m[1]).replaceAll('&amp;','&'))).filter(Boolean);
+const sitemapUrls = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>canonicalPublicUrl(String(m[1]).replaceAll('&amp;','&'))).filter(Boolean);
 const inspectionLimit = Math.max(20, Math.min(500, Number(process.env.GSC_INSPECTION_LIMIT || 250)));
 const inspectionCandidates = [];
 const seenInspection = new Set();
@@ -300,9 +304,9 @@ for (let i=0;i<inspectionTargets.length;i+=10) {
 }
 const successfulInspections = inspections.filter(x=>x.ok);
 const inspectionErrors = inspections.filter(x=>!x.ok);
-const canonicalUniverse = new Set(sitemapUrls.map(normalizeUrl).filter(Boolean));
-const canonicalInspections = successfulInspections.filter(x=>canonicalUniverse.has(normalizeUrl(x.url)));
-const legacyObservedInspections = successfulInspections.filter(x=>!canonicalUniverse.has(normalizeUrl(x.url)));
+const canonicalUniverse = new Set(sitemapUrls.map(canonicalPublicUrl).filter(Boolean));
+const canonicalInspections = successfulInspections.filter(x=>canonicalUniverse.has(canonicalPublicUrl(x.url)));
+const legacyObservedInspections = successfulInspections.filter(x=>!canonicalUniverse.has(canonicalPublicUrl(x.url)));
 const indexedInspections = canonicalInspections.filter(x=>x.verdict==='PASS');
 const excludedInspections = canonicalInspections.filter(x=>x.verdict==='NEUTRAL');
 const failedInspections = canonicalInspections.filter(x=>x.verdict==='FAIL');
@@ -313,8 +317,8 @@ const discoveredNotIndexedInspections = canonicalInspections.filter(x=>x.coverag
 const crawledNotIndexedInspections = canonicalInspections.filter(x=>x.coverageState==='Crawled - currently not indexed');
 const indexRecoveryCandidates = canonicalInspections.filter(x=>x.verdict==='FAIL'||['URL is unknown to Google','Discovered - currently not indexed','Crawled - currently not indexed'].includes(String(x.coverageState||'')));
 const otherExcludedInspections = excludedInspections.filter(x=>!['Page with redirect','URL is unknown to Google','Discovered - currently not indexed','Crawled - currently not indexed'].includes(String(x.coverageState||'')));
-const canonicalMismatches = canonicalInspections.filter(x=>x.googleCanonical&&x.userCanonical&&normalizeUrl(x.googleCanonical)!==normalizeUrl(x.userCanonical));
-const canonicalDisagreementsAll = successfulInspections.filter(x=>x.googleCanonical&&x.userCanonical&&normalizeUrl(x.googleCanonical)!==normalizeUrl(x.userCanonical));
+const canonicalMismatches = canonicalInspections.filter(x=>x.googleCanonical&&x.userCanonical&&!canonicalEquivalent(x.googleCanonical,x.userCanonical));
+const canonicalDisagreementsAll = successfulInspections.filter(x=>x.googleCanonical&&x.userCanonical&&!canonicalEquivalent(x.googleCanonical,x.userCanonical));
 const robotsBlocked = canonicalInspections.filter(x=>x.robotsTxtState==='DISALLOWED');
 const noindexBlocked = canonicalInspections.filter(x=>['BLOCKED_BY_META_TAG','BLOCKED_BY_HTTP_HEADER'].includes(String(x.indexingState||'')));
 const fetchIssues = canonicalInspections.filter(x=>x.pageFetchState&&!['SUCCESSFUL','PAGE_FETCH_STATE_UNSPECIFIED'].includes(x.pageFetchState));
