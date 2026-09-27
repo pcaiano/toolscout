@@ -96,6 +96,25 @@ async function ensureSchema(env){
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`),
     env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_metrics(id,metric_day) VALUES('global',date('now'))`),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_funnel_metrics(
+      id TEXT PRIMARY KEY,
+      metric_day TEXT NOT NULL DEFAULT (date('now')),
+      bootstrapped INTEGER NOT NULL DEFAULT 0,
+      research_completed_today INTEGER NOT NULL DEFAULT 0,
+      classified_research_jobs_today INTEGER NOT NULL DEFAULT 0,
+      submission_routes_found_today INTEGER NOT NULL DEFAULT 0,
+      machine_candidates_found_today INTEGER NOT NULL DEFAULT 0,
+      form_routes_seen_today INTEGER NOT NULL DEFAULT 0,
+      auth_routes_seen_today INTEGER NOT NULL DEFAULT 0,
+      captcha_routes_seen_today INTEGER NOT NULL DEFAULT 0,
+      policy_blockers_seen_today INTEGER NOT NULL DEFAULT 0,
+      actions_authorized_today INTEGER NOT NULL DEFAULT 0,
+      actions_completed_today INTEGER NOT NULL DEFAULT 0,
+      submissions_accepted_today INTEGER NOT NULL DEFAULT 0,
+      placements_verified_today INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`),
+    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_funnel_metrics(id,metric_day) VALUES('global',date('now'))`),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_budget(
       kind TEXT PRIMARY KEY,
       metric_day TEXT NOT NULL DEFAULT (date('now')),
@@ -426,6 +445,73 @@ async function metricDelta(env,{queued=0,leased=0,completed=0,failed=0,created=0
       updated_at=datetime('now')
     WHERE id='global'`).bind(queued,leased,completed,failed,created,activeBatches,completedBatches,lastDispatched?1:0,lastCompleted?1:0).run().catch(()=>{});
 }
+async function resetFunnelMetricsDay(env){
+  await ensureSchema(env);
+  await env.DB.prepare(`UPDATE compute_overflow_funnel_metrics SET
+      metric_day=date('now'),bootstrapped=0,
+      research_completed_today=0,classified_research_jobs_today=0,submission_routes_found_today=0,machine_candidates_found_today=0,
+      form_routes_seen_today=0,auth_routes_seen_today=0,captcha_routes_seen_today=0,policy_blockers_seen_today=0,
+      actions_authorized_today=0,actions_completed_today=0,submissions_accepted_today=0,placements_verified_today=0,
+      updated_at=datetime('now')
+    WHERE id='global' AND metric_day<>date('now')`).run().catch(()=>{});
+}
+async function bootstrapFunnelMetrics(env){
+  await resetFunnelMetricsDay(env);
+  const row=await env.DB.prepare(`SELECT bootstrapped FROM compute_overflow_funnel_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+  if(num(row?.bootstrapped)>0)return;
+  const b=await env.DB.prepare(`SELECT
+    (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) research_completed_today,
+    (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"routeSummary":%') classified_research_jobs_today,
+    (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND CAST(COALESCE(json_extract(result_json,'$.routeSummary.submissionRoutes'),0) AS INTEGER)>0) submission_routes_found_today,
+    (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND CAST(COALESCE(json_extract(result_json,'$.routeSummary.machineCandidates'),0) AS INTEGER)>0) machine_candidates_found_today,
+    (SELECT COALESCE(SUM(CAST(COALESCE(json_extract(result_json,'$.routeSummary.formRoutes'),0) AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) form_routes_seen_today,
+    (SELECT COALESCE(SUM(CAST(COALESCE(json_extract(result_json,'$.routeSummary.authRoutes'),0) AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) auth_routes_seen_today,
+    (SELECT COALESCE(SUM(CAST(COALESCE(json_extract(result_json,'$.routeSummary.captchaRoutes'),0) AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) captcha_routes_seen_today,
+    (SELECT COALESCE(SUM(CAST(COALESCE(json_extract(result_json,'$.routeSummary.policyBlockers'),0) AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) policy_blockers_seen_today,
+    (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND created_at>=datetime('now','start of day')) actions_authorized_today,
+    (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status='completed' AND completed_at>=datetime('now','start of day')) actions_completed_today,
+    (SELECT COUNT(*) FROM distribution_submissions WHERE submission_type='auto_discovered_json' AND status IN ('submitted','pending_review','verified') AND COALESCE(submitted_at,last_attempt_at,created_at)>=datetime('now','start of day')) submissions_accepted_today,
+    (SELECT COUNT(*) FROM distribution_opportunities WHERE status IN ('verified','live') AND updated_at>=datetime('now','start of day')) placements_verified_today`).first().catch(()=>null);
+  if(!b)return;
+  await env.DB.prepare(`UPDATE compute_overflow_funnel_metrics SET
+      bootstrapped=1,
+      research_completed_today=?,classified_research_jobs_today=?,submission_routes_found_today=?,machine_candidates_found_today=?,
+      form_routes_seen_today=?,auth_routes_seen_today=?,captcha_routes_seen_today=?,policy_blockers_seen_today=?,
+      actions_authorized_today=?,actions_completed_today=?,submissions_accepted_today=?,placements_verified_today=?,
+      updated_at=datetime('now')
+    WHERE id='global'`).bind(
+      num(b.research_completed_today),num(b.classified_research_jobs_today),num(b.submission_routes_found_today),num(b.machine_candidates_found_today),
+      num(b.form_routes_seen_today),num(b.auth_routes_seen_today),num(b.captcha_routes_seen_today),num(b.policy_blockers_seen_today),
+      num(b.actions_authorized_today),num(b.actions_completed_today),num(b.submissions_accepted_today),num(b.placements_verified_today)
+    ).run().catch(()=>{});
+}
+async function funnelMetricRow(env){
+  await bootstrapFunnelMetrics(env);
+  return env.DB.prepare(`SELECT * FROM compute_overflow_funnel_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+}
+async function funnelMetricDelta(env,d={}){
+  await bootstrapFunnelMetrics(env);
+  await env.DB.prepare(`UPDATE compute_overflow_funnel_metrics SET
+      research_completed_today=MAX(0,research_completed_today+?),
+      classified_research_jobs_today=MAX(0,classified_research_jobs_today+?),
+      submission_routes_found_today=MAX(0,submission_routes_found_today+?),
+      machine_candidates_found_today=MAX(0,machine_candidates_found_today+?),
+      form_routes_seen_today=MAX(0,form_routes_seen_today+?),
+      auth_routes_seen_today=MAX(0,auth_routes_seen_today+?),
+      captcha_routes_seen_today=MAX(0,captcha_routes_seen_today+?),
+      policy_blockers_seen_today=MAX(0,policy_blockers_seen_today+?),
+      actions_authorized_today=MAX(0,actions_authorized_today+?),
+      actions_completed_today=MAX(0,actions_completed_today+?),
+      submissions_accepted_today=MAX(0,submissions_accepted_today+?),
+      placements_verified_today=MAX(0,placements_verified_today+?),
+      updated_at=datetime('now')
+    WHERE id='global'`).bind(
+      num(d.researchCompleted),num(d.classifiedResearchJobs),num(d.submissionRoutesFound),num(d.machineCandidatesFound),
+      num(d.formRoutesSeen),num(d.authRoutesSeen),num(d.captchaRoutesSeen),num(d.policyBlockersSeen),
+      num(d.actionsAuthorized),num(d.actionsCompleted),num(d.submissionsAccepted),num(d.placementsVerified)
+    ).run().catch(()=>{});
+  healthCacheValue=null;healthCacheAt=0;
+}
 async function budgetRemaining(env,kind,limit){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE compute_overflow_budget SET metric_day=date('now'),used_today=0,updated_at=datetime('now') WHERE kind=? AND metric_day<>date('now')`).bind(kind).run().catch(()=>{});
@@ -438,10 +524,11 @@ async function budgetConsume(env,kind,count){
 }
 async function health(env){
   if(healthCacheValue&&(Date.now()-healthCacheAt)<HEALTH_CACHE_MS)return healthCacheValue;
-  const [m,budgets,contactSupply,funnel,qualificationSamples]=await Promise.all([
+  const [m,budgets,contactSupply,fm,live]=await Promise.all([
     metricRow(env),
     env.DB.prepare(`SELECT kind,used_today FROM compute_overflow_budget WHERE kind IN ('research','execution')`).all().catch(()=>({results:[]})),
     contactSupplyHealth(env),
+    funnelMetricRow(env),
     env.DB.prepare(`SELECT
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued') canonical_queued,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now')) runnable_queued,
@@ -449,80 +536,39 @@ async function health(env){
       (SELECT MIN(available_at) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now')) next_available_at,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='leased') canonical_leased,
       (SELECT COUNT(*) FROM compute_overflow_batches WHERE status IN ('dispatched','running')) canonical_active_batches,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) research_completed_today,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"routeSummary":%') classified_research_jobs_today,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"kind":"submission"%') submission_routes_found_today,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day') AND result_json LIKE '%"machineCandidate":{"kind":"html_form"%') machine_candidates_found_today,
-      (SELECT COALESCE(SUM(CAST(json_extract(result_json,'$.routeSummary.formRoutes') AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) form_routes_seen_today,
-      (SELECT COALESCE(SUM(CAST(json_extract(result_json,'$.routeSummary.authRoutes') AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) auth_routes_seen_today,
-      (SELECT COALESCE(SUM(CAST(json_extract(result_json,'$.routeSummary.captchaRoutes') AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) captcha_routes_seen_today,
-      (SELECT COALESCE(SUM(CAST(json_extract(result_json,'$.routeSummary.policyBlockers') AS INTEGER)),0) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND completed_at>=datetime('now','start of day')) policy_blockers_seen_today,
       (SELECT COUNT(*) FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit') adapters_ready,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='ready_to_submit' AND created_at>=datetime('now','-15 minutes')) qualification_ready_15m,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='research_required' AND created_at>=datetime('now','-15 minutes')) qualification_research_15m,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='research_required' AND detail='safe_form_adapter_not_yet_resolved' AND created_at>=datetime('now','-15 minutes')) qualification_safe_form_unresolved_15m,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='research_required' AND detail='no_verified_submission_protocol' AND created_at>=datetime('now','-15 minutes')) qualification_no_protocol_15m,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='research_required' AND detail='homepage_unreachable' AND created_at>=datetime('now','-15 minutes')) qualification_unreachable_15m,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='human_action_required' AND created_at>=datetime('now','-15 minutes')) qualification_human_15m,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='auth_required' AND created_at>=datetime('now','-15 minutes')) qualification_auth_15m,
-      (SELECT COUNT(*) FROM distribution_qualification_events WHERE result='policy_blocked' AND created_at>=datetime('now','-15 minutes')) qualification_policy_15m,
-      (SELECT COUNT(*) FROM distribution_opportunities o
-        WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
-          AND o.status IN ('candidate','discovered','research_required')) route_research_candidates,
-      (SELECT COUNT(*) FROM distribution_opportunities o
-        WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
-          AND o.status IN ('candidate','discovered','research_required')
-          AND NOT EXISTS (
-            SELECT 1 FROM compute_overflow_jobs j
-            WHERE j.subject_key=o.surface_slug
-              AND j.job_type='distribution_route_research'
-              AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
-              AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
-          )) route_research_eligible,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued') route_research_queued,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued' AND available_at<=datetime('now')) route_research_runnable,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='leased') route_research_leased,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND created_at>=datetime('now','start of day')) actions_authorized_today,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status='completed' AND completed_at>=datetime('now','start of day')) actions_completed_today,
-      (SELECT COUNT(*) FROM distribution_submissions WHERE submission_type='auto_discovered_json' AND status IN ('submitted','pending_review','verified') AND COALESCE(submitted_at,last_attempt_at,created_at)>=datetime('now','start of day')) submissions_accepted_today,
-      (SELECT COUNT(*) FROM distribution_opportunities WHERE status IN ('verified','live') AND updated_at>=datetime('now','start of day')) placements_verified_today`).first().catch(()=>null),
-    env.DB.prepare(`SELECT q.surface_slug,q.detail,q.created_at,o.action_url
-      FROM distribution_qualification_events q
-      LEFT JOIN distribution_opportunities o ON o.surface_slug=q.surface_slug
-      WHERE q.created_at>=datetime('now','-30 minutes')
-        AND q.result='research_required'
-        AND q.detail IN ('safe_form_adapter_not_yet_resolved','homepage_unreachable','no_verified_submission_protocol')
-      ORDER BY q.created_at DESC
-      LIMIT 12`).all().then(r=>r.results||[]).catch(()=>[])
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='leased') route_research_leased`).first().catch(()=>null)
   ]);
   const usage=Object.fromEntries(rows(budgets).map(x=>[String(x.kind),num(x.used_today)]));
   const distributionFunnel={
-    researchCompletedToday:num(funnel?.research_completed_today),
-    classifiedResearchJobsToday:num(funnel?.classified_research_jobs_today),
-    submissionRoutesFoundToday:num(funnel?.submission_routes_found_today),
-    machineCandidatesFoundToday:num(funnel?.machine_candidates_found_today),
-    formRoutesSeenToday:num(funnel?.form_routes_seen_today),
-    authRoutesSeenToday:num(funnel?.auth_routes_seen_today),
-    captchaRoutesSeenToday:num(funnel?.captcha_routes_seen_today),
-    policyBlockersSeenToday:num(funnel?.policy_blockers_seen_today),
-    adaptersReady:num(funnel?.adapters_ready),
-    qualificationReady15m:num(funnel?.qualification_ready_15m),
-    qualificationResearch15m:num(funnel?.qualification_research_15m),
-    qualificationSafeFormUnresolved15m:num(funnel?.qualification_safe_form_unresolved_15m),
-    qualificationNoProtocol15m:num(funnel?.qualification_no_protocol_15m),
-    qualificationUnreachable15m:num(funnel?.qualification_unreachable_15m),
-    qualificationHuman15m:num(funnel?.qualification_human_15m),
-    qualificationAuth15m:num(funnel?.qualification_auth_15m),
-    qualificationPolicy15m:num(funnel?.qualification_policy_15m),
-    routeResearchCandidates:num(funnel?.route_research_candidates),
-    routeResearchEligible:num(funnel?.route_research_eligible),
-    routeResearchQueued:num(funnel?.route_research_queued),
-    routeResearchRunnable:num(funnel?.route_research_runnable),
-    routeResearchLeased:num(funnel?.route_research_leased),
-    actionsAuthorizedToday:num(funnel?.actions_authorized_today),
-    actionsCompletedToday:num(funnel?.actions_completed_today),
-    submissionsAcceptedToday:num(funnel?.submissions_accepted_today),
-    placementsVerifiedToday:num(funnel?.placements_verified_today)
+    researchCompletedToday:num(fm?.research_completed_today),
+    classifiedResearchJobsToday:num(fm?.classified_research_jobs_today),
+    submissionRoutesFoundToday:num(fm?.submission_routes_found_today),
+    machineCandidatesFoundToday:num(fm?.machine_candidates_found_today),
+    formRoutesSeenToday:num(fm?.form_routes_seen_today),
+    authRoutesSeenToday:num(fm?.auth_routes_seen_today),
+    captchaRoutesSeenToday:num(fm?.captcha_routes_seen_today),
+    policyBlockersSeenToday:num(fm?.policy_blockers_seen_today),
+    adaptersReady:num(live?.adapters_ready),
+    qualificationReady15m:0,
+    qualificationResearch15m:0,
+    qualificationSafeFormUnresolved15m:0,
+    qualificationNoProtocol15m:0,
+    qualificationUnreachable15m:0,
+    qualificationHuman15m:0,
+    qualificationAuth15m:0,
+    qualificationPolicy15m:0,
+    routeResearchCandidates:null,
+    routeResearchEligible:null,
+    routeResearchQueued:num(live?.route_research_queued),
+    routeResearchRunnable:num(live?.route_research_runnable),
+    routeResearchLeased:num(live?.route_research_leased),
+    actionsAuthorizedToday:num(fm?.actions_authorized_today),
+    actionsCompletedToday:num(fm?.actions_completed_today),
+    submissionsAcceptedToday:num(fm?.submissions_accepted_today),
+    placementsVerifiedToday:num(fm?.placements_verified_today)
   };
   const snapshot={
     status:env.OVERFLOW_COMPUTE_URL?'configured':'awaiting_external_runtime',
@@ -531,19 +577,17 @@ async function health(env){
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
-    queued:num(funnel?.canonical_queued),runnableQueued:num(funnel?.runnable_queued),deferredQueued:num(funnel?.deferred_queued),nextAvailableAt:funnel?.next_available_at||null,
-    leased:num(funnel?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
-    activeBatches:num(funnel?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
-    contactSupply,distributionFunnel,
-    qualificationSamples:(qualificationSamples||[]).map(x=>({surfaceSlug:x.surface_slug,detail:x.detail,actionUrl:x.action_url,createdAt:x.created_at})),
-    d1ReadModel:'canonical_queue_counts_plus_metrics_plus_distribution_funnel',
+    queued:num(live?.canonical_queued),runnableQueued:num(live?.runnable_queued),deferredQueued:num(live?.deferred_queued),nextAvailableAt:live?.next_available_at||null,
+    leased:num(live?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
+    activeBatches:num(live?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
+    contactSupply,distributionFunnel,qualificationSamples:[],
+    d1ReadModel:'incremental_funnel_plus_indexed_queue_v2',
     githubActionsRole:'disabled_until_october',
-    writeAmplificationGuard:'d1-write-guard-v1',
-    healthReadModel:'cached_120s_read_only'
+    writeAmplificationGuard:'d1-write-guard-v2',
+    healthReadModel:'incremental_cached_120s_read_only',
+    qualificationMode:'render_primary_no_cloudflare_sweep'
   };
-  healthCacheValue=snapshot;
-  healthCacheAt=Date.now();
-  return snapshot;
+  healthCacheValue=snapshot;healthCacheAt=Date.now();return snapshot;
 }
 async function enqueueJob(env,{jobKey,jobType,subjectType,subjectKey,priority,payload}){
   const jobId=`coj_${await shortHash(jobKey)}`;
@@ -729,7 +773,11 @@ async function enqueueAuthorizedExecution(env){
     }
   }
 
-  if(enqueued>0){await metricDelta(env,{queued:enqueued,created:enqueued});await budgetConsume(env,'execution',enqueued);}
+  if(enqueued>0){
+    await metricDelta(env,{queued:enqueued,created:enqueued});
+    await budgetConsume(env,'execution',enqueued);
+    if(submissionJobs>0)await funnelMetricDelta(env,{actionsAuthorized:submissionJobs});
+  }
   return{enqueued,submissionJobs,verificationJobs,remaining};
 }
 async function requeueStaleBatches(env){
@@ -948,14 +996,16 @@ const OVERFLOW_SAFE_FORM_FIELDS=new Set([
 function validatedOverflowMachineCandidate(sourceUrl,route,result){
   const c=route?.machineCandidate;
   if(!c||String(route?.kind||'')!=='submission'||route?.auth||route?.captcha)return null;
-  if(Array.isArray(result?.blockers)&&result.blockers.length)return null;
+  if(Array.isArray(route?.policyBlockers)&&route.policyBlockers.length)return null;
   if(String(c.kind||'')!=='html_form'||String(c.method||'').toUpperCase()!=='POST'||String(c.contentType||'').toLowerCase()!=='application/x-www-form-urlencoded')return null;
   if(!isHttp(c.endpoint)||!sameHostRoute(sourceUrl,c.endpoint)||!sameHostRoute(route.url,c.endpoint))return null;
   const payload=c.payload&&typeof c.payload==='object'&&!Array.isArray(c.payload)?c.payload:null;
   if(!payload)return null;
+  const hiddenSafety=new Set(Array.isArray(c.hiddenSafetyFields)?c.hiddenSafetyFields.map(String):[]);
   const keys=Object.keys(payload);
-  if(keys.some(k=>/csrf|token|captcha|terms|agree|consent|password|auth|payment|card/i.test(k)))return null;
-  if(keys.some(k=>typeof payload[k]!=='string'||String(payload[k]).length>500))return null;
+  if(keys.some(k=>/captcha|terms|agree|consent|password|auth|payment|card/i.test(k)))return null;
+  if(keys.some(k=>/csrf|token|nonce|form[_-]?key|verification/i.test(k)&&!hiddenSafety.has(k)))return null;
+  if(keys.some(k=>typeof payload[k]!=='string'||String(payload[k]).length>(hiddenSafety.has(k)?2000:500)))return null;
   const useful=keys.filter(k=>OVERFLOW_SAFE_FORM_FIELDS.has(k)).length;
   if(useful<2)return null;
   return{endpoint:c.endpoint,method:'POST',contentType:'application/x-www-form-urlencoded',payload,confidence:Math.max(95,Math.min(98,num(c.confidence)||96))};
@@ -1229,18 +1279,35 @@ async function completeBatch(request,env,ctx,batchId){
   let completed=0,failed=0,retried=0,applied=0,contactSupplyTouched=false;
   const distributionHandoffSlugs=[];
   let metricQueued=0,metricLeased=0,metricCompleted=0,metricFailed=0;
+  const funnelDelta={researchCompleted:0,classifiedResearchJobs:0,submissionRoutesFound:0,machineCandidatesFound:0,formRoutesSeen:0,authRoutesSeen:0,captchaRoutesSeen:0,policyBlockersSeen:0,actionsAuthorized:0,actionsCompleted:0,submissionsAccepted:0,placementsVerified:0};
   for(const result of results){
     const jobId=safe(result?.jobId,120);if(!jobId)continue;
     const job=await env.DB.prepare(`SELECT job_id,job_type,subject_key,payload_json,attempts FROM compute_overflow_jobs WHERE job_id=? AND batch_id=? AND status='leased' LIMIT 1`).bind(jobId,batchId).first();
     if(!job)continue;
     const ok=result?.ok!==false;
-    if(job.job_type==='authorized_http_action'){const a=await applyAuthorizedActionResult(env,job,result);applied+=a.applied?1:0}
-    else if(job.job_type==='authorized_verification'){const a=await applyAuthorizedVerificationResult(env,job,result);applied+=a.applied?1:0}
+    if(job.job_type==='authorized_http_action'){
+      const a=await applyAuthorizedActionResult(env,job,result);applied+=a.applied?1:0;
+      if(ok)funnelDelta.actionsCompleted++;
+      if(a.accepted)funnelDelta.submissionsAccepted++;
+    }
+    else if(job.job_type==='authorized_verification'){
+      const a=await applyAuthorizedVerificationResult(env,job,result);applied+=a.applied?1:0;
+      if(a.verified)funnelDelta.placementsVerified++;
+    }
     else if(job.job_type==='contact_supply_public_research'){
       contactSupplyTouched=true;
       const a=ok?await applyContactSupplyResult(env,job,result):await applyContactSupplyFailure(env,job,result);applied+=a.applied?1:0;
     }else if(ok){
       if(job.job_type==='distribution_route_research'){
+        const rs=result?.routeSummary||{};
+        funnelDelta.researchCompleted++;
+        if(result?.routeSummary)funnelDelta.classifiedResearchJobs++;
+        if(num(rs.submissionRoutes)>0)funnelDelta.submissionRoutesFound++;
+        if(num(rs.machineCandidates)>0)funnelDelta.machineCandidatesFound++;
+        funnelDelta.formRoutesSeen+=num(rs.formRoutes);
+        funnelDelta.authRoutesSeen+=num(rs.authRoutes);
+        funnelDelta.captchaRoutesSeen+=num(rs.captchaRoutes);
+        funnelDelta.policyBlockersSeen+=num(rs.policyBlockers);
         const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0;
         if(a.applied&&a.slug)distributionHandoffSlugs.push(a.slug);
       }
@@ -1273,6 +1340,7 @@ async function completeBatch(request,env,ctx,batchId){
   const missing=num(unresolved?.n);
   metricLeased-=missing;metricQueued+=missing;
   await metricDelta(env,{queued:metricQueued,leased:metricLeased,completed:metricCompleted,failed:metricFailed,activeBatches:-1,completedBatches:1,lastCompleted:true});
+  await funnelMetricDelta(env,funnelDelta);
   if(contactSupplyTouched)await refreshContactSupplyMetrics(env);
   await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} completed, ${retried} externally-unreachable retry, and ${failed} operationally failed job(s); ${applied} canonical records were advanced.`,{batchId});
   const handoffSlugs=[...new Set(distributionHandoffSlugs)].slice(0,BATCH_SIZE);
