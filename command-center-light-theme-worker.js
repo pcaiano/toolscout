@@ -1,6 +1,5 @@
 import base from './command-center-final-integrity-worker.js';
 import resilientFallback from './command-center-resilient-worker.js';
-import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger,reapStaleEngineRuns,missionCycleContext} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
@@ -720,7 +719,7 @@ export default {
     const catalogDemandLed=catalogSupervisor?.config?.mode==='demand_led_quality';
 
     if(hourly){
-      const autonomousCycle=missionCycleContext('distribution','autonomous_cycle',Number(event?.scheduledTime)||Date.now());ctx.waitUntil(runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger,cycleContext:autonomousCycle,cycleOwner:'command_center_scheduler'},()=>runAutonomousDistributionCycle(env)).catch(()=>{}));
+      // Autonomous Distribution has a dedicated staggered heartbeat in the Distribution Orchestrator.
       const prioritiesRecovery=await missionNeedsRecovery(env,'distribution','operating_priorities',150);
       const contentRecovery=await missionNeedsRecovery(env,'content','social_intelligence',7*60);
       if(twoHourly){
