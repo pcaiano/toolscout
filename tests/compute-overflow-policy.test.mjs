@@ -55,6 +55,9 @@ assert.match(router,/if\(!env\.OVERFLOW_COMPUTE_URL\)return\{ok:true,status:'awa
 assert.match(router,/capability-secured|completion_token_hash|invalid_completion_capability/);
 assert.match(router,/distribution_route_research/);
 assert.match(router,/status IN \('candidate','discovered','research_required'\)/);
+assert.match(router,/COALESCE\(human_required,0\)=0 AND action_url IS NOT NULL/);
+assert.match(router,/route_research_eligible/);
+assert.match(router,/routeResearchEligible/);
 assert.doesNotMatch(router,/status='research_required' AND \(last_checked_at IS NULL OR last_checked_at<=datetime\('now','-\$\{DISTRIBUTION_RESEARCH_BUCKET_HOURS\} hours'\)\)/);
 assert.match(router,/contact_route_research/);
 assert.doesNotMatch(router,/GITHUB_ACTIONS|workflow_dispatch/);
