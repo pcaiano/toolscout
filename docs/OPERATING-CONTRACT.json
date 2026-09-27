@@ -70,7 +70,8 @@
     "human_required_requires_active_gate": true,
     "human_state_write_order": "gate_first_status_second",
     "content_pages_cannot_be_submission_routes_without_explicit_url_intent": true,
-    "obsolete_classifier_human_gates_are_invalidated": true
+    "obsolete_classifier_human_gates_are_invalidated": true,
+    "single_flight_observability_follows_active_lease": true
   },
   "truth_order": [
     "live_provider_and_production_observation",
@@ -100,7 +101,8 @@
     "human_gate_creation_precedes_human_required_status",
     "terminal_human_gate_cannot_leave_owner_required_status_orphaned",
     "content_or_marketing_page_captcha_never_counts_as_submission_intent_without_explicit_url_intent",
-    "classifier_upgrade_invalidates_older_research_derived_human_gates_before_owner_action"
+    "classifier_upgrade_invalidates_older_research_derived_human_gates_before_owner_action",
+    "single_flight_run_without_active_lease_cannot_remain_running"
   ],
   "mission": {
     "starts_on": "2026-09-28",
