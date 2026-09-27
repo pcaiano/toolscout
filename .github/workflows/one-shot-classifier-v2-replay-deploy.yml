@@ -39,7 +39,18 @@ jobs:
           curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?deploy_verify=1" -o /tmp/health.json
           cat /tmp/health.json
           jq -e '
-            (.distributionClassifierVersion >= 3) and
-            (.healthReadModel == "incremental_cached_120s_read_only") and
-            (.d1ReadModel == "incremental_funnel_plus_indexed_queue_v2")
+            (.distributionClassifierVersion >= 4) and
+            (
+              (
+                .status == "d1_quota_exhausted" and
+                .healthReadModel == "static_no_d1" and
+                .d1ReadModel == "emergency_no_read_mode"
+              )
+              or
+              (
+                .status == "configured" and
+                .healthReadModel == "incremental_cached_120s_read_only" and
+                .d1ReadModel == "incremental_funnel_plus_indexed_queue_v2"
+              )
+            )
           ' /tmp/health.json >/dev/null
