@@ -393,7 +393,7 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
     engine:'distribution',subjectType:'surface',subjectKey:row.surface_slug,gateType,
     title:`${target}: human step required`,reason,instructions,actionUrl,
     resolutionMode:'verify_publication',
-    payload:{...humanGatePayload(),gate_evidence:{url:actionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail},research_classifier_version:Number(result?.classifierVersion||5)},
+    payload:{...humanGatePayload(),gate_evidence:{url:actionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail},research_classifier_version:Number(result?.classifierVersion||5),submission_intent:true,research_route_label:safe(route.label||'',240)},
     verificationUrl:null
   });
   const status=isAuth?'auth_required':'human_action_required';
@@ -402,6 +402,27 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
     env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,row.surface_slug,actionUrl,status,evidenceDetail)
   ]).catch(()=>{});
   return {opened:true,gateKey,gateType,status,actionUrl};
+}
+
+async function reconcileLegacyGenericHumanGates(env){
+  await ensureHumanGateSchema(env);
+  const q=await env.DB.prepare(`SELECT g.gate_key,g.subject_key,g.action_url,g.payload_json
+    FROM human_gate_contract g
+    WHERE g.engine='distribution' AND g.status='open' AND g.gate_type='human_confirmation'
+    ORDER BY g.updated_at ASC LIMIT 100`).all().catch(()=>({results:[]}));
+  let reconciled=0;
+  for(const row of q.results||[]){
+    let payload={};try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
+    if(payload.submission_intent===true||hasExactSubmissionIntent(row.action_url,''))continue;
+    const detail='Legacy human gate removed because the page-level CAPTCHA/confirmation was not tied to an exact ToolScout submission route. Surface returned to classifier-v5 research.';
+    await env.DB.batch([
+      env.DB.prepare(`DELETE FROM human_gate_contract WHERE gate_key=? AND status='open'`).bind(row.gate_key),
+      env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,last_checked_at=NULL,updated_at=datetime('now') WHERE surface_slug=? AND status IN ('human_action_required','approval_required','research_required')`).bind(detail,row.subject_key),
+      env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,destination_url,detail,observed_at,created_at) VALUES(?,?,'legacy_generic_human_gate_reconciled','research_required',?,?,datetime('now'),datetime('now'))`).bind(`gateclean_${crypto.randomUUID()}`,row.subject_key,row.action_url,detail)
+    ]).catch(()=>{});
+    reconciled++;
+  }
+  return {reconciled};
 }
 
 async function qualifyOne(env,row){
@@ -1015,6 +1036,7 @@ export async function runAutonomousDistributionCycle(env){
   await ensureHumanGateSchema(env);
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
+  const legacyGenericHumanGates=await reconcileLegacyGenericHumanGates(env);
   const duplicateGates=await reconcileDuplicateSubmissionGates(env);
   const duplicateHumanGates=await reconcileDuplicateOpenHumanGates(env);
   const machineGateRecovery=await recoverMachineResolvableAuthGates(env);
@@ -1046,7 +1068,7 @@ export async function runAutonomousDistributionCycle(env){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
+  return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
