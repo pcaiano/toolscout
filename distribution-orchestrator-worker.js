@@ -393,9 +393,9 @@ async function coordinateGrowthOpportunities(env){
         const u=new URL(String(value||''),'https://trytoolscout.org');
         let p=u.pathname||'/';
         if(p==='/index.html')p='/';
-        else if(/\\.html$/i.test(p))p=p.replace(/\\.html$/i,'');
+        else if(/\.html$/i.test(p))p=p.replace(/\.html$/i,'');
         return p||'/';
-      }catch{return String(value||'').replace(/\\.html$/i,'')||'/'}
+      }catch{return String(value||'').replace(/\.html$/i,'')||'/'}
     };
     const canonicalEquivalent=(a,b)=>Boolean(a&&b)&&canonicalTechnicalPath(a)===canonicalTechnicalPath(b);
     for(const row of gscReality.opportunities){
@@ -403,7 +403,7 @@ async function coordinateGrowthOpportunities(env){
       const rawPage=String(row?.page||row?.url||'');if(!rawPage)continue;
       const page=canonicalTechnicalPath(rawPage);
       const publicPath=canonicalTechnicalPath(row?.url||rawPage);
-      const legacyHtmlAlias=/\\.html$/i.test(rawPage)&&page===publicPath;
+      const legacyHtmlAlias=/\.html$/i.test(rawPage)&&page===publicPath;
       const reportedCanonicalsAligned=(!row?.googleCanonical||!row?.userCanonical||canonicalEquivalent(row.googleCanonical,row.userCanonical))
         &&(!row?.googleCanonical||canonicalTechnicalPath(row.googleCanonical)===publicPath)
         &&(!row?.userCanonical||canonicalTechnicalPath(row.userCanonical)===publicPath);
