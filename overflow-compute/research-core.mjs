@@ -91,51 +91,114 @@ function tagAttr(tag,name){
   const m=String(tag||'').match(new RegExp('\\b'+name+'\\s*=\\s*["\\\']([^"\\\']*)["\\\']','i'));
   return m?decodeEntities(m[1]):null;
 }
+function canonicalFieldName(raw){
+  const original=String(raw||'').trim().toLowerCase();
+  if(!original)return null;
+  if(SAFE_FORM_FIELDS.has(original))return original;
+  const parts=original.replace(/\]/g,'').split(/[\[\].:]+/).filter(Boolean);
+  const leaf=parts[parts.length-1]||original;
+  const compact=leaf.replace(/[-\s]+/g,'_');
+  if(SAFE_FORM_FIELDS.has(compact))return compact;
+  if(/^(?:product|tool|startup|company)?_?name$/.test(compact))return'product_name';
+  if(/^(?:product|tool|startup|company)?_?(?:url|website|homepage|site)$/.test(compact)||/^(?:website|homepage|site)$/.test(compact))return'website_url';
+  if(/^(?:product|tool|startup)?_?(?:description|summary|overview)$/.test(compact))return'description';
+  if(/^(?:business|work|contact|submitter)?_?email(?:_address)?$/.test(compact))return'contact_email';
+  if(/^(?:contact|submitter)?_?name$/.test(compact))return'contact_name';
+  if(/^(?:first|given)_?name$/.test(compact))return'first_name';
+  if(/^(?:last|family|surname)_?name$/.test(compact))return'last_name';
+  if(/^(?:category|categories|industry|type)$/.test(compact))return compact;
+  if(compact==='tag_line')return'tagline';
+  return null;
+}
+function optionValue(selectBody){
+  const options=[...String(selectBody||'').matchAll(/<option\b([^>]*)>([\s\S]*?)<\/option>/gi)].map(m=>({
+    value:tagAttr(m[1]||'','value'),
+    text:stripTags(m[2]||'')
+  })).filter(x=>String(x.value??x.text).trim());
+  if(!options.length)return null;
+  const preferred=options.find(x=>/(software|saas|tool|technology|general|other)/i.test(String(x.text||'')+' '+String(x.value||'')))||options[0];
+  return String(preferred.value??preferred.text).slice(0,300);
+}
+function valueForField(key){
+  if(['name','title','product_name','tool_name','startup_name','company','company_name'].includes(key))return'ToolScout';
+  if(['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(key))return'https://trytoolscout.org/';
+  if(['description','short_description','summary','overview'].includes(key))return'ToolScout is an independent software discovery and recommendation platform.';
+  if(key==='tagline')return'Find the right software for the job without the noise.';
+  if(['email','email_address','contact_email','business_email','work_email','submitter_email'].includes(key))return FORM_CONTACT.email;
+  if(['contact_name','submitter_name'].includes(key))return FORM_CONTACT.name;
+  if(key==='first_name')return FORM_CONTACT.firstName;
+  if(key==='last_name')return FORM_CONTACT.lastName;
+  if(key==='slug')return'toolscout';
+  if(key==='domain')return'trytoolscout.org';
+  if(['category','categories','industry','type'].includes(key))return'Software';
+  return null;
+}
 function safeFormPayload(html){
-  const payload={};let useful=0;
-  const fields=[...String(html||'').matchAll(/<(input|textarea|select)\b[^>]*>/gi)].map(m=>m[0]);
+  const payload={},hiddenSafetyFields=[];let useful=0;
+  const selectRanges=[];
+  for(const match of String(html||'').matchAll(/<select\b([^>]*)>([\s\S]*?)<\/select>/gi)){
+    selectRanges.push(match.index);
+    const open=match[1]||'',body=match[2]||'',name=String(tagAttr(open,'name')||'').trim();
+    const required=/\brequired\b/i.test(open);
+    if(!name){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_unnamed_select'};continue}
+    const key=canonicalFieldName(name);
+    if(!key){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'unsupported_required_select'};continue}
+    const selected=optionValue(body);
+    if(!selected){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_select_without_option'};continue}
+    payload[name]=selected;useful++;
+  }
+  const fields=[...String(html||'').matchAll(/<(input|textarea)\b[^>]*>/gi)].map(m=>m[0]);
   for(const tag of fields){
     const name=String(tagAttr(tag,'name')||'').trim();if(!name)continue;
     const type=String(tagAttr(tag,'type')||'text').toLowerCase();
     const required=/\brequired\b/i.test(tag);
-    if(/password|file|checkbox|radio|submit|button/i.test(type)){if(required)return null;continue}
-    if(/csrf|token|captcha|terms|agree|consent|password|auth|payment|card/i.test(name))return null;
+    if(/password|file/i.test(type))return{payload:null,hiddenSafetyFields,rejectionReason:'interactive_sensitive_field'};
+    if(/checkbox|radio/i.test(type)){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_interactive_choice'};continue}
+    if(/submit|button|reset|image/i.test(type))continue;
+    if(/captcha|payment|card|password|auth|terms|agree|consent/i.test(name))return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name'};
     if(type==='hidden'){
       const value=tagAttr(tag,'value');
-      if(value==null||String(value).length>300)return null;
-      payload[name]=String(value);continue;
+      if(value==null||String(value).length>2000)return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_hidden_value'};
+      payload[name]=String(value);
+      if(/csrf|token|nonce|form[_-]?key|verification/i.test(name))hiddenSafetyFields.push(name);
+      continue;
     }
-    if(!SAFE_FORM_FIELDS.has(name)){if(required)return null;continue}
-    if(['name','title','product_name','tool_name','startup_name','company','company_name'].includes(name))payload[name]='ToolScout';
-    else if(['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(name))payload[name]='https://trytoolscout.org/';
-    else if(['description','short_description','summary','overview'].includes(name))payload[name]='ToolScout is an independent software discovery and recommendation platform.';
-    else if(name==='tagline')payload[name]='Find the right software for the job without the noise.';
-    else if(['email','email_address','contact_email','business_email','work_email','submitter_email'].includes(name))payload[name]=FORM_CONTACT.email;
-    else if(['contact_name','submitter_name'].includes(name))payload[name]=FORM_CONTACT.name;
-    else if(name==='first_name')payload[name]=FORM_CONTACT.firstName;
-    else if(name==='last_name')payload[name]=FORM_CONTACT.lastName;
-    else if(['category','categories','industry','type'].includes(name))payload[name]='Software';
-    else if(name==='slug')payload[name]='toolscout';
-    else if(name==='domain')payload[name]='trytoolscout.org';
-    useful++;
+    const key=canonicalFieldName(name);
+    if(!key){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'unsupported_required_field'};continue}
+    const value=valueForField(key);
+    if(value==null){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_field_without_safe_value'};continue}
+    payload[name]=value;useful++;
   }
-  return useful>=2?payload:null;
+  return useful>=2
+    ?{payload,hiddenSafetyFields,rejectionReason:null}
+    :{payload:null,hiddenSafetyFields,rejectionReason:'insufficient_safe_fields'};
 }
-function machineFormCandidate(page){
-  const signals=page?.signals||pageSignals(page||{html:'',url:''});
-  if(!page?.ok||signals.captcha)return null;
+function machineFormAssessment(page){
+  if(!page?.ok)return{candidate:null,reasons:['page_unavailable'],formsSeen:0};
+  const reasons=[];let formsSeen=0;
   for(const match of String(page.html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
+    formsSeen++;
     const open=match[1]||'',body=match[2]||'',formText=stripTags(body);
     const method=String(tagAttr(open,'method')||'GET').toUpperCase();
-    if(method!=='POST'||CAPTCHA_RE.test(body)||AUTH_RE.test(formText)||/<input[^>]+type=["']password["']/i.test(body)||PAYMENT_RE.test(formText)||RECIPROCAL_RE.test(formText)||AUTOMATION_BLOCK_RE.test(formText))continue;
+    if(method!=='POST'){reasons.push('method_not_post');continue}
+    if(CAPTCHA_RE.test(body)){reasons.push('captcha_in_form');continue}
+    if(AUTH_RE.test(formText)||/<input[^>]+type=["']password["']/i.test(body)){reasons.push('auth_in_form');continue}
+    if(PAYMENT_RE.test(formText)){reasons.push('payment_in_form');continue}
+    if(RECIPROCAL_RE.test(formText)){reasons.push('reciprocal_in_form');continue}
+    if(AUTOMATION_BLOCK_RE.test(formText)){reasons.push('automation_block_in_form');continue}
     const action=tagAttr(open,'action')||page.url;
     const endpoint=absolute(action,page.url);
-    if(!endpoint||!sameHost(page.url,endpoint)||!endpoint.startsWith('https://'))continue;
-    const payload=safeFormPayload(body);if(!payload)continue;
-    return {kind:'html_form',endpoint,method:'POST',contentType:'application/x-www-form-urlencoded',payload,confidence:96};
+    if(!endpoint||!sameHost(page.url,endpoint)||!endpoint.startsWith('https://')){reasons.push('unsafe_endpoint');continue}
+    const assessed=safeFormPayload(body);
+    if(!assessed.payload){reasons.push(assessed.rejectionReason||'payload_unresolved');continue}
+    return{
+      candidate:{kind:'html_form',endpoint,method:'POST',contentType:'application/x-www-form-urlencoded',payload:assessed.payload,hiddenSafetyFields:assessed.hiddenSafetyFields,confidence:96},
+      reasons,formsSeen
+    };
   }
-  return null;
+  return{candidate:null,reasons:[...new Set(reasons)].slice(0,8),formsSeen};
 }
+function machineFormCandidate(page){return machineFormAssessment(page).candidate}
 function pageSignals(page){
   const text=stripTags(page.html).slice(0,120000);
   const lower=text.toLowerCase();
@@ -271,13 +334,37 @@ async function researchDistribution(job){
     if(!x?.page?.ok)continue;
     const signals=x.signals||{};
     if(ACTION_RE.test(x.link.text+' '+x.link.url)||signals.hasForm||signals.auth||signals.captcha){
-      const machineCandidate=machineFormCandidate({...x.page,signals});
-      routes.push({url:x.page.url||x.link.url,kind:signals.captcha?'captcha':signals.auth?'auth':ACTION_RE.test(x.link.text+' '+x.link.url)||machineCandidate?'submission':'contact',label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),auth:Boolean(signals.auth),captcha:Boolean(signals.captcha),machineCandidate});
+      const assessment=machineFormAssessment({...x.page,signals}),machineCandidate=assessment.candidate;
+      const policyBlockers=[
+        signals.payment?'payment':null,
+        signals.reciprocal?'reciprocal':null,
+        signals.automationBlocked?'automation_blocked':null
+      ].filter(Boolean);
+      routes.push({
+        url:x.page.url||x.link.url,
+        kind:machineCandidate?'submission':signals.captcha?'captcha':signals.auth?'auth':ACTION_RE.test(x.link.text+' '+x.link.url)?'submission':'contact',
+        label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),
+        auth:Boolean(signals.auth&&!machineCandidate),captcha:Boolean(signals.captcha&&!machineCandidate),
+        policyBlockers,machineCandidate,
+        formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons}
+      });
     }
   }
   if(!routes.length&&(ACTION_RE.test(home.url)||home.signals.hasForm||home.signals.auth||home.signals.captcha)){
-    const machineCandidate=machineFormCandidate(home);
-    routes.push({url:home.url,kind:home.signals.captcha?'captcha':home.signals.auth?'auth':ACTION_RE.test(home.url)||machineCandidate?'submission':'contact',label:'source route',hasForm:Boolean(home.signals.hasForm),auth:Boolean(home.signals.auth),captcha:Boolean(home.signals.captcha),machineCandidate});
+    const assessment=machineFormAssessment(home),machineCandidate=assessment.candidate;
+    const policyBlockers=[
+      home.signals.payment?'payment':null,
+      home.signals.reciprocal?'reciprocal':null,
+      home.signals.automationBlocked?'automation_blocked':null
+    ].filter(Boolean);
+    routes.push({
+      url:home.url,
+      kind:machineCandidate?'submission':home.signals.captcha?'captcha':home.signals.auth?'auth':ACTION_RE.test(home.url)?'submission':'contact',
+      label:'source route',hasForm:Boolean(home.signals.hasForm),
+      auth:Boolean(home.signals.auth&&!machineCandidate),captcha:Boolean(home.signals.captcha&&!machineCandidate),
+      policyBlockers,machineCandidate,
+      formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons}
+    });
   }
   const mailto=extractMailto(home.html);
   const contactRoutes=[
@@ -303,7 +390,8 @@ async function researchDistribution(job){
       authRoutes:selectedRoutes.filter(x=>x.kind==='auth'||x.auth).length,
       captchaRoutes:selectedRoutes.filter(x=>x.kind==='captcha'||x.captcha).length,
       machineCandidates:selectedRoutes.filter(x=>Boolean(x.machineCandidate)).length,
-      policyBlockers:blockers.length
+      policyBlockers:blockers.length,
+      formRejections:selectedRoutes.flatMap(x=>x.formAssessment?.rejections||[]).reduce((acc,key)=>{acc[key]=(acc[key]||0)+1;return acc},{})
     },
     evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length,sourceFallbackUsed:home.url!==source,attemptedUrls:attempted.slice(0,8)}
   };
