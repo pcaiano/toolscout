@@ -5,6 +5,9 @@ const contract=JSON.parse(read('docs/OPERATING-CONTRACT.json'));
 const wrangler=read('wrangler.toml');
 const render=read('render.yaml');
 const router=read('compute-router-worker.js');
+const overflowServer=read('overflow-compute/server.mjs');
+const gscWorkflow=read('.github/workflows/gsc-growth-bridge.yml');
+const gscSync=read('scripts/sync-gsc-signals.mjs');
 const agents=read('AGENTS.md');
 
 const failures=[];
@@ -33,6 +36,8 @@ requireCheck(render.includes('name: '+contract.render.overflow.service_name),'Re
 requireCheck(render.includes('region: '+contract.render.overflow.region),'Render overflow region matches contract');
 requireCheck(render.includes('startCommand: "'+contract.render.overflow.start_command+'"'),'Render overflow start command matches contract');
 requireCheck(render.includes('value: "'+String(contract.render.overflow.max_concurrency)+'"'),'Render MAX_CONCURRENCY matches contract');
+requireCheck(render.includes('healthCheckPath: '+contract.render.overflow.health_check_path),'Render overflow health-check path matches contract');
+requireCheck(overflowServer.includes("url.pathname==='/health'"),'Render overflow server exposes /health');
 
 requireCheck(router.includes('const DAILY_JOB_BUDGET='+contract.execution.external_research_jobs_per_utc_day+';'),'router research budget matches contract');
 requireCheck(router.includes('const EXECUTION_DAILY_JOB_BUDGET='+contract.execution.external_execution_jobs_per_utc_day+';'),'router execution budget matches contract');
@@ -46,6 +51,12 @@ requireCheck(router.includes("const RENDER_TRIGGER_TIMEOUT_MS="+contract.executi
 requireCheck(router.includes("async scheduled(scheduledEvent,env,ctx)"),'overflow scheduler does not shadow event logger');
 requireCheck(router.includes("base.scheduled(scheduledEvent,env,ctx)"),'overflow cron delegates to inherited scheduler');
 requireCheck(router.includes("'inherited_scheduler_failed'"),'inherited scheduler failures are observable');
+
+for(const truthFile of contract.observability.gsc_truth_files){
+  requireCheck(gscSync.includes(truthFile),'GSC sync writes truth file '+truthFile);
+  requireCheck(gscWorkflow.includes(truthFile),'GSC workflow stages truth file '+truthFile);
+}
+requireCheck(gscWorkflow.includes('git add $GSC_FILES'),'GSC truth files are committed as one atomic set');
 
 requireCheck(agents.includes('docs/OPERATING-MEMORY.md'),'AGENTS startup reads operating memory');
 requireCheck(agents.includes('docs/OPERATING-CONTRACT.json'),'AGENTS startup reads operating contract');
