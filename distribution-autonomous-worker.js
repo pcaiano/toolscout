@@ -957,7 +957,7 @@ async function authorityLoopState(env){
 }
 export async function runAutonomousDistributionCycle(env){
   await ensureAutonomySchema(env);
-  const discovery=await runDiscoveryRefresh(env);
+  const discovery={ok:true,delegated:true,synchronous:false,mode:'scheduled_discovery_sidecar_and_render_overflow'};
   await env.DB.prepare(`UPDATE distribution_opportunities
     SET status='ready_to_submit',human_required=0,next_action='Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements.',updated_at=datetime('now')
     WHERE surface_slug='indexnow' AND status='skipped' AND next_action='Technical infrastructure host excluded from distribution discovery.'`).run().catch(()=>{});
@@ -980,9 +980,8 @@ export async function runAutonomousDistributionCycle(env){
   const authority=await authorityLoopState(env);
   let authorityRecovery=null;
   if(authority.recoveryDue){
-    authorityRecovery=await runDiscoveryRefresh(env);
-    const status=authorityRecovery?.ok===false?'partial':'completed';
-    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authority_${crypto.randomUUID()}`,'authority_pipeline_replenishment',status,'backlink_acquisition',`Authority loop replenishment triggered automatically. Referring domains ${authority.verifiedReferringDomains}/${authority.bootstrapFloor}; qualified attempts ${authority.attempts24}/${authority.attemptMin24h} in 24h; queue ${authority.authorityQueue}; throughput gap ${authority.throughputGap}; stagnating ${authority.stagnating}. Discovery result: ${JSON.stringify(authorityRecovery).slice(0,900)}`).run().catch(()=>{});
+    authorityRecovery={ok:true,delegated:true,synchronous:false,mode:'scheduled_discovery_sidecar_and_render_overflow'};
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authority_${crypto.randomUUID()}`,'authority_pipeline_replenishment','delegated','backlink_acquisition',`Authority replenishment remains required. Referring domains ${authority.verifiedReferringDomains}/${authority.bootstrapFloor}; qualified attempts ${authority.attempts24}/${authority.attemptMin24h} in 24h; queue ${authority.authorityQueue}. Heavy discovery is delegated to the scheduled discovery sidecar and Render overflow rather than duplicated inside the autonomous control-plane cycle.`).run().catch(()=>{});
   }
   let humanSidecar={ok:true,non_blocking:true,humanGateSync:0,humanGateVerification:{ok:true,checked:0,resolved:0,deferred:0,reopened:0},routeRefresh:{checked:0,recovered:0,externalFailures:0,statuses:['human_action_required','approval_required'],limit:3}};
   try{

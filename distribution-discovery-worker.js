@@ -57,16 +57,28 @@ async function familySignals(env){
   }catch{return new Map();}
 }
 async function dynamicSources(env,limit){try{const q=await env.DB.prepare(`SELECT s.source_slug AS slug,s.source_url AS url,'recursive' AS type,1 AS enabled,COALESCE(e.economic_boost,0) parent_economic_boost FROM distribution_discovery_sources s LEFT JOIN distribution_opportunities o ON o.surface_slug=s.parent_surface_slug LEFT JOIN distribution_economic_learning e ON e.surface_slug=o.surface_slug WHERE s.status='active' AND s.confidence>=60 ORDER BY COALESCE(e.economic_boost,0) DESC,COALESCE(s.last_scanned_at,'') ASC,s.confidence DESC LIMIT ?`).bind(limit).all();return q.results||[];}catch{return[]}}
-async function rememberSource(env,s,parent){try{await env.DB.prepare(`INSERT INTO distribution_discovery_sources(source_slug,source_url,source_host,source_type,parent_surface_slug,confidence,status,created_at,updated_at) VALUES(?,?,?,?,?,60,'active',datetime('now'),datetime('now')) ON CONFLICT(source_url) DO UPDATE SET confidence=MAX(distribution_discovery_sources.confidence,60),updated_at=datetime('now')`).bind(s.slug,s.url,s.host,'recursive',parent||null).run();return true;}catch{return false}}
+async function rememberSource(env,s,parent){try{const r=await env.DB.prepare(`INSERT OR IGNORE INTO distribution_discovery_sources(source_slug,source_url,source_host,source_type,parent_surface_slug,confidence,status,created_at,updated_at) VALUES(?,?,?,?,?,60,'active',datetime('now'),datetime('now'))`).bind(s.slug,s.url,s.host,'recursive',parent||null).run();return Number(r?.meta?.changes||r?.changes||0)>0;}catch{return false}}
 async function markScanned(env,slug,total,relevant){try{await env.DB.prepare(`UPDATE distribution_discovery_sources SET last_scanned_at=datetime('now'),links_seen=?,relevant_links_seen=?,confidence=MIN(95,confidence+CASE WHEN ?>=5 THEN 5 WHEN ?=0 THEN -10 ELSE 0 END),status=CASE WHEN confidence<=20 THEN 'deprioritized' ELSE status END,updated_at=datetime('now') WHERE source_slug=?`).bind(total,relevant,relevant,relevant,slug).run();}catch{}}
 async function discover(request,env){
   const technicalSuppressed=await suppressTechnicalNoise(env);
   const [c,families]=await Promise.all([config(request,env),familySignals(env)]),maxFetch=Math.max(1,Math.min(24,Number(c.guardrails?.max_fetches_per_run||16))),staticSources=(c.sources||[]).filter(x=>x.enabled),dynamic=await dynamicSources(env,Math.max(0,maxFetch-staticSources.length)),sources=[...staticSources,...dynamic].slice(0,maxFetch);
   const existing=await env.DB.prepare('SELECT surface_slug FROM distribution_opportunities').all(),known=new Set((existing.results||[]).map(x=>String(x.surface_slug)));
   let scanned=0,found=0,inserted=0,recursiveAdded=0,familyBoosted=0;
-  for(const s of sources){
-    const sourceUrl=publicHttps(s.url);if(!sourceUrl)continue;scanned++;let r;try{r=await fetch(sourceUrl.toString(),{headers:{'User-Agent':'ToolScout-Distribution-Radar/1.2','Accept':'text/html,text/plain,application/json;q=0.9'},redirect:'follow',signal:AbortSignal.timeout(8000)});}catch{continue}if(!r.ok)continue;
-    const type=(r.headers.get('content-type')||'').toLowerCase();if(!/(text|json|xml|markdown)/.test(type))continue;const text=(await r.text()).slice(0,1000000),allLinks=links(text,sourceUrl.toString()).slice(0,Math.max(50,Number(c.guardrails?.max_candidates_per_source||50)*2));let relevantOnSource=0;
+  const fetched=await Promise.all(sources.map(async s=>{
+    const sourceUrl=publicHttps(s.url);if(!sourceUrl)return null;
+    try{
+      const r=await fetch(sourceUrl.toString(),{headers:{'User-Agent':'ToolScout-Distribution-Radar/1.2','Accept':'text/html,text/plain,application/json;q=0.9'},redirect:'follow',signal:AbortSignal.timeout(8000)});
+      if(!r.ok)return {s,sourceUrl,attempted:true,usable:false};
+      const type=(r.headers.get('content-type')||'').toLowerCase();
+      if(!/(text|json|xml|markdown)/.test(type))return {s,sourceUrl,attempted:true,usable:false};
+      const body=(await r.text()).slice(0,1000000);
+      return {s,sourceUrl,attempted:true,usable:true,allLinks:links(body,sourceUrl.toString()).slice(0,Math.max(50,Number(c.guardrails?.max_candidates_per_source||50)*2))};
+    }catch{return {s,sourceUrl,attempted:true,usable:false}}
+  }));
+  scanned=fetched.filter(x=>x?.attempted).length;
+  for(const item of fetched){
+    if(!item?.usable)continue;
+    const {s,sourceUrl,allLinks}=item;let relevantOnSource=0;
     for(const raw of allLinks.slice(0,c.guardrails?.max_candidates_per_source||50)){
       const rs=recursiveSource(raw,s.slug);if(rs&&await rememberSource(env,rs,s.slug))recursiveAdded++;
       let x;try{x=candidate(raw,s.slug,c.guardrails||{})}catch{continue}if(!x)continue;let sourceHost=sourceUrl.hostname.toLowerCase().replace(/^www\./,'');if(c.guardrails?.exclude_source_hosts&&sourceHost&&x.host===sourceHost)continue;if((c.guardrails?.exclude_hosts||[]).some(h=>x.host===String(h).toLowerCase().replace(/^www\./,'')))continue;found++;relevantOnSource++;if(known.has(x.slug))continue;

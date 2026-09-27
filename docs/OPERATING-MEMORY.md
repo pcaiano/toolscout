@@ -92,6 +92,9 @@ This week's minimum acceptance conditions:
 12. If current repository configuration contradicts an older production baseline, current configuration wins for intended source state and the stale document must be marked or reconciled immediately.
 13. Overflow scheduling is a sidecar, never the owner of the scheduler chain. The `*/15` external-compute cron must always delegate the same scheduled event to the inherited Growth Brain/engine chain.
 14. Scheduler error logging must not be shadowed by event parameters. A scheduler failure must create observable failure evidence rather than disappear inside `Promise.allSettled`.
+15. Failed engine runs must not leave cycle claims in `running` or expired single-flight leases behind. Reaping a run must reconcile ownership state in the same control path.
+16. The autonomous distribution control-plane cycle must stay bounded. Heavy recursive discovery runs in its scheduled sidecar and external overflow, not synchronously inside every autonomous execution/recovery pass.
+17. Recursive discovery writes are material-change only. Rediscovering an already-known source must not rewrite the same D1 row merely to refresh a timestamp.
 
 ## Preflight before ToolScout changes
 

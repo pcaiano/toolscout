@@ -160,6 +160,27 @@ export async function recordEngineRun(env,{runId,engine,mission,triggerName=null
   return id;
 }
 
+async function reconcileStaleRunOwnership(env){
+  try{
+    const results=await env.DB.batch([
+      env.DB.prepare(`UPDATE engine_cycle_claims
+        SET status='failed',completed_at=COALESCE(completed_at,datetime('now')),updated_at=datetime('now')
+        WHERE status='running'
+          AND EXISTS (
+            SELECT 1 FROM engine_runs r
+            WHERE r.run_id=engine_cycle_claims.run_id
+              AND r.status='failed'
+              AND r.completed_at IS NOT NULL
+          )`),
+      env.DB.prepare(`DELETE FROM engine_run_leases WHERE expires_at<=datetime('now')`)
+    ]);
+    return{
+      failedClaims:Number(results?.[0]?.meta?.changes||results?.[0]?.changes||0),
+      expiredLeases:Number(results?.[1]?.meta?.changes||results?.[1]?.changes||0)
+    };
+  }catch{return{failedClaims:0,expiredLeases:0}}
+}
+
 export async function reapStaleEngineRuns(env,minutes=120){
   await ensureEngineRunSchema(env);
   try{
@@ -167,6 +188,7 @@ export async function reapStaleEngineRuns(env,minutes=120){
       SET status='failed',completed_at=datetime('now'),detail='stale_run_abandoned',evidence_json='{"reason":"stale_run_abandoned"}',updated_at=datetime('now')
       WHERE status='running' AND started_at<datetime('now', ?)`)
       .bind(`-${Math.max(30,Number(minutes)||120)} minutes`).run();
+    await reconcileStaleRunOwnership(env);
     return Number(r?.meta?.changes||r?.changes||0);
   }catch{return 0}
 }
@@ -189,6 +211,7 @@ export async function runWithLedger(env,{engine,mission,triggerName=null,singleF
           evidence_json='{"reason":"single_flight_lease_expired"}',updated_at=datetime('now')
       WHERE engine=? AND mission=? AND status='running' AND started_at<datetime('now', ?)`)
       .bind(e,m,`-${staleMinutes} minutes`).run().catch(()=>{});
+    await reconcileStaleRunOwnership(env);
 
     await env.DB.prepare(`DELETE FROM engine_run_leases WHERE engine=? AND mission=? AND expires_at<=datetime('now')`).bind(e,m).run().catch(()=>{});
     const expiresAt=new Date(Date.now()+singleFlight*60000).toISOString().replace('T',' ').slice(0,19);
