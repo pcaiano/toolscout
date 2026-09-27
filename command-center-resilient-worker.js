@@ -194,7 +194,7 @@ async function lightweightQueue(request,env,ctx){
       const instructions=row.status==='approved_needs_link'
         ?`Open ${actionUrl}. Sign in if required, copy the approved affiliate/referral link for ToolScout, then return here and record the link. Do not change programme settings or create a duplicate application.`
         :row.status==='human_action_required'
-          ?`Open ${actionUrl}. Complete only the required human step such as sign-in, CAPTCHA, terms acceptance or owner details. Then complete the affiliate application once using the prepared ToolScout answers below. Do not invent traffic, revenue or company-size claims. Return here and mark the application submitted.`
+          ?`Open ${actionUrl}. The verified blocker is: ${row.blocker||'a human-only application step'}. Complete the blocker shown on that page, then complete the affiliate application once using the prepared ToolScout answers below. Do not invent traffic, revenue or company-size claims. Return here and mark the application submitted.`
           :`Open ${actionUrl}. Complete the affiliate application once using the prepared ToolScout answers below. If authentication or CAPTCHA appears, complete it yourself. Do not invent traffic, revenue or company-size claims. Return here and mark the application submitted.`;
       return {
         engine:'affiliate',
