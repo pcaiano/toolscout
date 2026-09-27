@@ -59,7 +59,14 @@
     "overlapping_core_work_forbidden": true,
     "autonomous_control_cycle_minutes": 15,
     "autonomous_control_cycle_anchor_minute": 4,
-    "autonomous_stale_takeover_minutes": 12
+    "autonomous_stale_takeover_minutes": 12,
+    "distribution_classifier_version": 5,
+    "human_gate_exact_submission_intent_required": true,
+    "captcha_routes_open_human_gate_same_cycle": true,
+    "human_gate_queue_limit": 24,
+    "human_gate_reserved_slots": 12,
+    "duplicate_human_gate_key": "normalized_exact_action_url",
+    "command_center_human_gate_backlog_visible": true
   },
   "truth_order": [
     "live_provider_and_production_observation",
@@ -79,7 +86,12 @@
     "command_center_dependency_failures_are_bounded_and_explicit",
     "cloudflare_and_d1_observability_must_be_quota_bounded",
     "deployment_is_not_fixed_until_live_verification_passes",
-    "architecture_changes_update_operating_memory_and_contract_together"
+    "architecture_changes_update_operating_memory_and_contract_together",
+    "captcha_or_auth_on_exact_submission_route_opens_non_blocking_human_gate_same_cycle",
+    "generic_page_captcha_does_not_open_human_gate",
+    "chairman_queue_validates_and_deduplicates_before_limiting",
+    "canonical_human_gates_reserve_queue_capacity",
+    "command_center_exposes_open_human_gate_backlog"
   ],
   "mission": {
     "starts_on": "2026-09-28",
