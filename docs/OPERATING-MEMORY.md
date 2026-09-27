@@ -147,3 +147,7 @@ When the operating architecture changes, update this file and the JSON contract 
 34. Exact duplicate distribution Human Gates for the same normalized external action URL collapse to one canonical owner task. Duplicates are cancelled and must not reappear unless a materially different external action route is proven.
 35. Command Center execution truth exposes the open Human Gate backlog, including CAPTCHA, authentication, manual and verification-pending counts. Detected blockers and owner-visible actions must reconcile rather than drift silently.
 36. Render route classification must distinguish submission intent from page-level form/CAPTCHA presence. Machine execution and Human Gates both require exact submission intent; generic contact, article, advertising and unrelated account pages are not submission routes.
+
+37. A distribution opportunity may not remain in human_action_required, auth_required or approval_required unless a matching Human Gate is open or verification_pending. Terminal, missing or rejected gates force the opportunity back to autonomous research.
+38. Human-required state is transactional: prove and create/reopen the Human Gate first, then set the opportunity to human/auth required. If gate admission fails, owner-required state must not be written.
+39. A previously resolved owner step, such as account bootstrap already completed, must not be silently re-requested by rediscovery. The engine resumes research/automation unless fresh evidence proves a materially different owner-only action.
