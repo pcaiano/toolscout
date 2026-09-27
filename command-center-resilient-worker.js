@@ -190,16 +190,23 @@ async function lightweightQueue(request,env,ctx){
     const affiliate=(affiliateRows||[]).map(row=>{
       let pack={};try{pack=JSON.parse(row.pack_json||'{}')||{}}catch{}
       const preparedBody=Object.entries(pack).filter(([,v])=>v!=null&&String(v)!=='').map(([k,v])=>`${k}: ${Array.isArray(v)?v.join(', '):String(v)}`).join('\n');
+      const actionUrl=row.application_url||row.program_url;
+      const instructions=row.status==='approved_needs_link'
+        ?`Open ${actionUrl}. Sign in if required, copy the approved affiliate/referral link for ToolScout, then return here and record the link. Do not change programme settings or create a duplicate application.`
+        :row.status==='human_action_required'
+          ?`Open ${actionUrl}. Complete only the required human step such as sign-in, CAPTCHA, terms acceptance or owner details. Then complete the affiliate application once using the prepared ToolScout answers below. Do not invent traffic, revenue or company-size claims. Return here and mark the application submitted.`
+          :`Open ${actionUrl}. Complete the affiliate application once using the prepared ToolScout answers below. If authentication or CAPTCHA appears, complete it yourself. Do not invent traffic, revenue or company-size claims. Return here and mark the application submitted.`;
       return {
         engine:'affiliate',
         id:String(row.tool_slug||''),
         title:row.program_name||row.tool_slug||'Affiliate programme',
         status:row.status||'human_action_required',
         reason:row.blocker||row.notes||'Affiliate action requires owner input.',
-        action_url:row.application_url||row.program_url,
+        action_url:actionUrl,
         metric:0,
         metric_label:'affiliate priority',
         source_of_truth:'affiliate_workflow+affiliate_application_packs',
+        instructions,
         prepared_body:preparedBody,
         application_pack:pack,
         pack_status:row.pack_status||null,
