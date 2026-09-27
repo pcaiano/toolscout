@@ -388,9 +388,31 @@ async function coordinateGrowthOpportunities(env){
     if(!postHygieneSearchReality)return[];
     if(!inputFreshness.gscReality.fresh||!Array.isArray(gscReality?.opportunities))return[];
     const precedence={sitemap_redirect:3,canonical_mismatch:2,index_issue:1},byPage=new Map();
+    const canonicalTechnicalPath=value=>{
+      try{
+        const u=new URL(String(value||''),'https://trytoolscout.org');
+        let p=u.pathname||'/';
+        if(p==='/index.html')p='/';
+        else if(/\\.html$/i.test(p))p=p.replace(/\\.html$/i,'');
+        return p||'/';
+      }catch{return String(value||'').replace(/\\.html$/i,'')||'/'}
+    };
+    const canonicalEquivalent=(a,b)=>Boolean(a&&b)&&canonicalTechnicalPath(a)===canonicalTechnicalPath(b);
     for(const row of gscReality.opportunities){
       const kind=String(row?.kind||'');if(!precedence[kind])continue;
-      const page=String(row?.page||row?.url||'');if(!page)continue;
+      const rawPage=String(row?.page||row?.url||'');if(!rawPage)continue;
+      const page=canonicalTechnicalPath(rawPage);
+      const publicPath=canonicalTechnicalPath(row?.url||rawPage);
+      const legacyHtmlAlias=/\\.html$/i.test(rawPage)&&page===publicPath;
+      const reportedCanonicalsAligned=(!row?.googleCanonical||!row?.userCanonical||canonicalEquivalent(row.googleCanonical,row.userCanonical))
+        &&(!row?.googleCanonical||canonicalTechnicalPath(row.googleCanonical)===publicPath)
+        &&(!row?.userCanonical||canonicalTechnicalPath(row.userCanonical)===publicPath);
+      // Search Reality may retain a Google observation for an old .html alias after
+      // ToolScout has already moved the public surface to the extensionless URL.
+      // That is migration evidence, not a repair task. Likewise, .html versus
+      // extensionless canonical strings are equivalent under the public URL policy.
+      if(kind==='sitemap_redirect'&&legacyHtmlAlias&&reportedCanonicalsAligned)continue;
+      if(kind==='canonical_mismatch'&&row?.googleCanonical&&row?.userCanonical&&canonicalEquivalent(row.googleCanonical,row.userCanonical))continue;
       const prior=byPage.get(page);
       if(!prior||precedence[kind]>precedence[String(prior?.kind||'')]||(precedence[kind]===precedence[String(prior?.kind||'')]&&Number(row?.score||0)>Number(prior?.score||0)))byPage.set(page,row);
     }
