@@ -156,3 +156,10 @@ When the operating architecture changes, update this file and the JSON contract 
 41. Research-derived Human Gates carry the classifier version that admitted them. When the classifier contract tightens, older open research-derived Human Gates are invalidated and returned to autonomous research before the owner is asked to act.
 
 42. Single-flight run observability follows lease ownership. A run recorded as single-flight cannot remain visible as running after its lease is absent or expired; the next ownership reconciliation marks it failed with single_flight_lease_expired before a successor is admitted.
+
+
+43. A Make scenario reaching `success` is transport/control-flow completion only. For outward-facing content, outreach or distribution, business success requires canonical external outcome evidence from the actual publication/send/placement step.
+44. Content Engine destination validation follows the verified brief dynamically. Do not hardcode `trytoolscout.org` as the only acceptable target because approved direct-vendor affiliate campaigns are valid distribution paths.
+45. The GSC bridge owns three generated truth snapshots - `reports/gsc-signals.json`, `reports/gsc-search-reality.json`, and `data/gsc-search-reality.json` - and must stage/commit them atomically before rebasing.
+46. `toolscout-social-image` is a verified separate ToolScout Cloudflare Worker resource. The account-level workers.dev subdomain is not resource identity; project ownership is determined by the exact Worker/script name and live provider evidence.
+47. Repository configuration is not proof of live provider configuration. Provider drift, including health-check settings, remains an operational defect until the provider state itself matches and is verified.
