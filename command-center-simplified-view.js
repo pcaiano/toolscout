@@ -62,20 +62,26 @@ const row=(name,value,meta)=>'<div class="row"><div><div class="rowName">'+esc(n
 const compactDate=v=>{const s=String(v||'');if(/^\d{8}$/.test(s))return s.slice(6,8)+'/'+s.slice(4,6);if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(8,10)+'/'+s.slice(5,7);return s};
 const deltaClass=v=>Number(v)>0?'deltaUp':Number(v)<0?'deltaDown':'deltaFlat';
 const signedPct=v=>v==null?'Unavailable':(Number(v)>0?'+':'')+Number(v).toFixed(1)+'%';
-function seriesChart(rows,lines){
+function seriesChart(rows,lines,options={}){
  if(!Array.isArray(rows)||rows.length<2)return '<div class="empty">Not enough historical observations yet.</div>';
  const W=620,H=205,L=34,R=10,T=12,B=27,plotW=W-L-R,plotH=H-T-B;
- const values=[];for(const line of lines)for(const row of rows){const x=Number(row[line.key]);if(Number.isFinite(x))values.push(x)}
- const max=Math.max(1,...values),min=0,range=Math.max(1,max-min);
+ const numeric=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
+ const values=[];for(const line of lines)for(const row of rows){const x=numeric(row[line.key]);if(x!==null)values.push(x)}
+ if(!values.length)return '<div class="empty">Not enough historical observations yet.</div>';
+ const zeroBaseline=options.zeroBaseline!==false,invert=options.invert===true,axisDecimals=Number.isInteger(options.axisDecimals)?options.axisDecimals:0;
+ let min=zeroBaseline?0:Math.min(...values),max=Math.max(...values);
+ if(max===min){const pad=Math.max(1,Math.abs(max)*0.05);if(!zeroBaseline)min-=pad;max+=pad}
+ const range=Math.max(0.000001,max-min);
  const x=i=>L+(rows.length===1?0:i/(rows.length-1))*plotW;
- const y=v=>T+plotH-(Math.max(min,Number(v)||0)-min)/range*plotH;
+ const y=v=>{const ratio=(Number(v)-min)/range;return invert?T+ratio*plotH:T+plotH-ratio*plotH};
+ const axis=v=>axisDecimals?Number(v).toFixed(axisDecimals):Math.round(v);
  let svg='<svg class="chartSvg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">';
- for(let g=0;g<=3;g++){const yy=T+plotH*g/3;const val=Math.round(max*(1-g/3));svg+='<line class="chartGrid" x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'"></line><text class="chartAxis" x="2" y="'+(yy+3)+'">'+val+'</text>'}
+ for(let g=0;g<=3;g++){const yy=T+plotH*g/3;const val=invert?min+range*g/3:max-range*g/3;svg+='<line class="chartGrid" x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'"></line><text class="chartAxis" x="2" y="'+(yy+3)+'">'+axis(val)+'</text>'}
  const ticks=[0,Math.floor((rows.length-1)/2),rows.length-1];for(const i of ticks)svg+='<text class="chartAxis" text-anchor="'+(i===0?'start':i===rows.length-1?'end':'middle')+'" x="'+x(i)+'" y="'+(H-5)+'">'+esc(compactDate(rows[i]?.date))+'</text>';
  for(const line of lines){
-   const points=rows.map((r,i)=>Number.isFinite(Number(r[line.key]))?x(i)+','+y(r[line.key]):null).filter(Boolean);
+   const points=rows.map((r,i)=>{const v=numeric(r[line.key]);return v===null?null:x(i)+','+y(v)}).filter(Boolean);
    if(points.length>1)svg+='<polyline class="chartLine '+line.cls+'" points="'+points.join(' ')+'"></polyline>';
-   if(line.dots)for(let i=0;i<rows.length;i++){const v=Number(rows[i]?.[line.key]);if(Number.isFinite(v)&&v>0)svg+='<circle class="chartDot '+line.cls+'" cx="'+x(i)+'" cy="'+y(v)+'" r="3"></circle>'}
+   if(line.dots)for(let i=0;i<rows.length;i++){const v=numeric(rows[i]?.[line.key]);if(v!==null&&v>0)svg+='<circle class="chartDot '+line.cls+'" cx="'+x(i)+'" cy="'+y(v)+'" r="3"></circle>'}
  }
  svg+='</svg><div class="chartLegend">'+lines.map(line=>'<span class="legendKey"><i class="'+line.cls+'"></i>'+esc(line.label)+'</span>').join('')+'</div>';
  return svg;
@@ -178,11 +184,12 @@ function authorityProgress(){
 }
 function gscProgress(){
  const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{};
- document.getElementById('gscProgressMeta').textContent=(g.verifiedThroughDate?'Verified through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.runtimeGeneratedAt||g.generatedAt);
+ document.getElementById('gscProgressMeta').textContent=(g.verifiedThroughDate?'Verified through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
  document.getElementById('gscProgressBody').innerHTML=
   '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Completed 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>Avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
-  '<div class="chartBox">'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
-  '<div class="sourceLine">The trend stops at the latest completed GSC day. The current partial day is excluded from the chart and from the 7-day comparison so it cannot create an artificial drop to zero.</div>';
+  '<div class="chartBox"><div class="sectionTitle">Google impressions</div>'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
+  '<div class="chartBox"><div class="sectionTitle">Average position - lower is better</div>'+seriesChart(rows,[{key:'position',label:'Average position',cls:'warn'}],{zeroBaseline:false,invert:true,axisDecimals:1})+'</div>'+
+  '<div class="sourceLine">The trend stops at the latest completed GSC day. The current partial day is excluded from both charts and from the 7-day comparison so it cannot create an artificial drop to zero. Average position is inverted so ranking improvement moves upward.</div>';
 }
 
 function brain(){
