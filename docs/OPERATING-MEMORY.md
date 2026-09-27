@@ -97,6 +97,10 @@ This week's minimum acceptance conditions:
 17. Recursive discovery writes are material-change only. Rediscovering an already-known source must not rewrite the same D1 row merely to refresh a timestamp.
 18. Execution-contract draining runs every 15 minutes through the existing overflow cadence. Heavy supervisor self-audit remains hourly. This separates throughput from expensive observability and avoids hourly-only executor starvation.
 19. The hourly `15 * * * *` event must not duplicate the 15-minute execution-contract drain. At minute 15 it owns audit/recovery duties while `*/15` owns executor draining.
+20. Render free-runtime availability is protected by a D1-free keepalive between full overflow ticks. A cold external executor must not turn a healthy Cloudflare control plane into a failed batch.
+21. Overflow batches are intentionally small and parallel: 8 jobs per batch, up to 3 active batches, matching Render's 24-request concurrency while bounding Cloudflare completion-callback subrequests.
+22. Overflow completion callbacks are terminal. They apply evidence and close state only. They never recursively refill or dispatch another batch; the next scheduled control-plane tick owns follow-up work.
+23. Non-Render repository changes must use the commit marker `[skip render]` so control-plane, documentation, SEO or site commits cannot restart external executors. When Render code actually changes, deploy only the affected Render service and verify its health before resuming dispatch.
 
 ## Preflight before ToolScout changes
 

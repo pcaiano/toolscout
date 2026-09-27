@@ -76,7 +76,7 @@ GA4_PROPERTY_ID = "554080029"
 OVERFLOW_COMPUTE_URL = "https://toolscout-overflow.onrender.com"
 
 [triggers]
-crons = ["*/15 * * * *", "15 * * * *", "35 3 * * *"]
+crons = ["*/15 * * * *", "7,22,37,52 * * * *", "15 * * * *", "35 3 * * *"]
 
 [[d1_databases]]
 binding = "DB"

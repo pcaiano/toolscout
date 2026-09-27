@@ -39,6 +39,8 @@ requireCheck(router.includes('const EXECUTION_DAILY_JOB_BUDGET='+contract.execut
 requireCheck(router.includes('const BATCH_SIZE='+contract.execution.batch_size+';'),'router batch size matches contract');
 requireCheck(router.includes('const MAX_ACTIVE_BATCHES='+contract.execution.max_active_batches+';'),'router active batch limit matches contract');
 requireCheck(router.includes("const OVERFLOW_CRON='"+contract.execution.dispatch_cron+"';"),'router overflow cron matches contract');
+requireCheck(router.includes("const RENDER_KEEPALIVE_CRON='"+contract.execution.render_keepalive_cron+"';"),'render keepalive cron matches contract');
+requireCheck(router.includes("const RENDER_TRIGGER_TIMEOUT_MS="+contract.execution.render_trigger_timeout_ms+";"),'Render trigger timeout matches contract');
 requireCheck(router.includes("async scheduled(scheduledEvent,env,ctx)"),'overflow scheduler does not shadow event logger');
 requireCheck(router.includes("base.scheduled(scheduledEvent,env,ctx)"),'overflow cron delegates to inherited scheduler');
 requireCheck(router.includes("'inherited_scheduler_failed'"),'inherited scheduler failures are observable');

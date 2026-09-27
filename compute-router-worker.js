@@ -4,6 +4,7 @@ import {qualifyDistributionSurfaces} from './distribution-autonomous-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/15 * * * *';
+const RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
@@ -12,9 +13,10 @@ const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
 const CONTACT_SUPPLY_RESEARCH_BATCH=40;
-const BATCH_SIZE=25;
-const MAX_ACTIVE_BATCHES=2;
+const BATCH_SIZE=8;
+const MAX_ACTIVE_BATCHES=3;
 const BATCH_TIMEOUT_MINUTES=3;
+const RENDER_TRIGGER_TIMEOUT_MS=25000;
 let schemaReady=null;
 let hotIndexesReady=null;
 let healthCacheAt=0;
@@ -822,7 +824,7 @@ async function triggerBatch(env,batch){
   if(!env.OVERFLOW_COMPUTE_URL||!batch)return{ok:false,reason:'overflow_runtime_not_configured'};
   const endpoint=new URL(`/tick/${encodeURIComponent(batch.batchId)}`,env.OVERFLOW_COMPUTE_URL).toString();
   try{
-    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','User-Agent':'ToolScout-Compute-Router/1.0'},body:JSON.stringify({batchId:batch.batchId,completionToken:batch.completionToken,toolscoutBaseUrl:'https://trytoolscout.org'}),signal:AbortSignal.timeout(10000)});
+    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','User-Agent':'ToolScout-Compute-Router/1.0'},body:JSON.stringify({batchId:batch.batchId,completionToken:batch.completionToken,toolscoutBaseUrl:'https://trytoolscout.org'}),signal:AbortSignal.timeout(RENDER_TRIGGER_TIMEOUT_MS)});
     await env.DB.prepare(`UPDATE compute_overflow_batches SET trigger_http_status=?,last_error=?,updated_at=datetime('now') WHERE batch_id=?`).bind(response.status,response.ok?null:`trigger_http_${response.status}`,batch.batchId).run();
     if(!response.ok)throw new Error(`trigger_http_${response.status}`);
     await event(env,'overflow_batch_dispatched','completed',`Dispatched ${batch.count} external compute job(s).`,{batchId:batch.batchId});
@@ -846,7 +848,7 @@ async function isolatedOverflowStage(env,name,fn,fallback){
 async function acquireDispatchLock(env){
   await ensureSchema(env);
   const w=await env.DB.prepare(`INSERT INTO compute_overflow_locks(lock_name,lease_until,updated_at)
-    VALUES('dispatch',datetime('now','+20 seconds'),datetime('now'))
+    VALUES('dispatch',datetime('now','+40 seconds'),datetime('now'))
     ON CONFLICT(lock_name) DO UPDATE SET lease_until=excluded.lease_until,updated_at=datetime('now')
     WHERE compute_overflow_locks.lease_until<=datetime('now')`).run().catch(()=>null);
   return Number(w?.meta?.changes||w?.changes||0)>0;
@@ -872,21 +874,22 @@ async function recoverTransientDispatchDeferrals(env){
 async function dispatchAvailableBatches(env){
   const locked=await acquireDispatchLock(env);
   if(!locked)return[];
-  const runs=[];
   try{
     await recoverTransientDispatchDeferrals(env);
+    const batches=[];
     for(let slot=0;slot<MAX_ACTIVE_BATCHES;slot++){
-      // Reserve the first available slot for current classifier route research when
-      // such work exists. The second slot remains a general throughput lane so
-      // contact discovery and authorized execution cannot be starved.
+      // One lane favors current route research; the remaining lanes preserve
+      // mixed execution/contact throughput. Small batches keep completion callbacks
+      // comfortably below Cloudflare subrequest limits.
       const preferredJobType=slot===0?'distribution_route_research':null;
       const batch=await isolatedOverflowStage(env,'batch_create',()=>createBatch(env,{preferredJobType}),null);
       if(!batch||batch.ok===false||!batch.count)break;
-      const dispatch=await isolatedOverflowStage(env,'batch_trigger',()=>triggerBatch(env,batch),{ok:false});
-      runs.push({batch:{batchId:batch.batchId,count:batch.count},dispatch});
-      if(dispatch?.reason==='overflow_runtime_not_configured')break;
+      batches.push(batch);
     }
-    return runs;
+    const dispatches=await Promise.all(batches.map(batch=>
+      isolatedOverflowStage(env,'batch_trigger',()=>triggerBatch(env,batch),{ok:false})
+    ));
+    return batches.map((batch,index)=>({batch:{batchId:batch.batchId,count:batch.count},dispatch:dispatches[index]}));
   }finally{
     await releaseDispatchLock(env);
   }
@@ -1344,28 +1347,16 @@ async function completeBatch(request,env,ctx,batchId){
   if(contactSupplyTouched)await refreshContactSupplyMetrics(env);
   await event(env,'overflow_batch_completed',failed?'partial':'completed',`External compute returned ${completed} completed, ${retried} externally-unreachable retry, and ${failed} operationally failed job(s); ${applied} canonical records were advanced.`,{batchId});
   const handoffSlugs=[...new Set(distributionHandoffSlugs)].slice(0,BATCH_SIZE);
-  let handoffWork=null;
+  // Completion callbacks are deliberately terminal: apply canonical evidence,
+  // close the batch and return. Follow-up authorization, qualification and refill
+  // are owned by the next 15-minute control-plane tick. Chaining more execution
+  // from this callback previously exhausted Cloudflare subrequest budgets.
   if(handoffSlugs.length){
-    handoffWork=continueDistributionExecutionHandoff(env,handoffSlugs).catch(async error=>{
-      await event(env,'distribution_research_execution_handoff','failed',safe(error?.message||error,600),{batchId}).catch(()=>{});
-      return null;
-    });
+    await event(env,'distribution_research_execution_handoff','deferred',
+      `Research produced ${handoffSlugs.length} machine-relevant surface(s). Follow-up execution is delegated to the next scheduled control-plane cycle.`,
+      {batchId}).catch(()=>{});
   }
-  const refillWork=(async()=>{
-    if(handoffWork)await handoffWork;
-    const refilled=await dispatchAvailableBatches(env);
-    if(refilled.length)await event(env,'overflow_queue_refilled','completed',`Completion callback immediately refilled ${refilled.length} external batch slot(s) from queued work.`,{batchId}).catch(()=>{});
-    return refilled;
-  })().catch(async error=>{
-    await event(env,'overflow_queue_refill_failed','failed',safe(error?.message||error,600),{batchId}).catch(()=>{});
-    return [];
-  });
-  if(ctx?.waitUntil)ctx.waitUntil(refillWork);else await refillWork;
-  if(ctx&&env.ADMIN_TOKEN&&applied>0){
-    const headers={Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'};
-    ctx.waitUntil(base.fetch(new Request('https://trytoolscout.org/api/distribution/network/refresh',{method:'POST',headers}),env,ctx).catch(()=>null));
-  }
-  return Response.json({ok:true,batchId,completed,failed,retried,applied,missing,distributionHandoff:handoffSlugs.length},{headers:JSON_H});
+  return Response.json({ok:true,batchId,completed,failed,retried,applied,missing,distributionHandoff:handoffSlugs.length,followup:'next_scheduled_control_plane_cycle'},{headers:JSON_H});
 }
 async function serveBatch(env,batchId){
   const out=await batchPayload(env,batchId);
@@ -1429,6 +1420,20 @@ export default{
   },
   async scheduled(scheduledEvent,env,ctx){
     const trigger=scheduledEvent?.cron||'scheduled';
+    if(trigger===RENDER_KEEPALIVE_CRON){
+      if(!env.OVERFLOW_COMPUTE_URL)return;
+      const keepalive=(async()=>{
+        try{
+          const endpoint=new URL('/health',env.OVERFLOW_COMPUTE_URL).toString();
+          const response=await fetch(endpoint,{method:'GET',headers:{'User-Agent':'ToolScout-Render-Keepalive/1.0'},signal:AbortSignal.timeout(RENDER_TRIGGER_TIMEOUT_MS)});
+          if(!response.ok)await event(env,'render_keepalive_failed','failed',`HTTP ${response.status}`).catch(()=>{});
+        }catch(error){
+          await event(env,'render_keepalive_failed','failed',safe(error?.message||error,500)).catch(()=>{});
+        }
+      })();
+      if(ctx?.waitUntil){ctx.waitUntil(keepalive);return;}
+      await keepalive;return;
+    }
     if(trigger===OVERFLOW_CRON){
       const minute=new Date(Number(scheduledEvent?.scheduledTime)||Date.now()).getUTCMinutes();
       const overflowWork=Promise.allSettled([

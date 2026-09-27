@@ -34,10 +34,11 @@ Current design budget:
 - 1,500 external research jobs per UTC day.
 - 800 machine-safe execution/verification jobs per UTC day.
 - reputation-sensitive external actions keep their separate 12/day ceiling.
-- 25 jobs per batch to keep Cloudflare/D1 completion commits bounded.
-- at most 2 active batches.
+- 8 jobs per batch to keep Cloudflare completion callbacks safely bounded.
+- at most 3 active batches, matching 24 jobs against the external worker's 24-request concurrency.
 - external worker concurrency: 24 requests.
 - Cloudflare dispatch cadence: every 15 minutes.
+- lightweight Render keepalive: minutes 7, 22, 37 and 52 of every hour, with no normal D1 work on successful probes.
 - authorized execution jobs outrank research jobs in the external queue.
 
 These are maximum processing limits, not a requirement to invent work. Priority and quality gates remain canonical.
@@ -77,6 +78,7 @@ If external compute is absent or unavailable:
 - Cloudflare continues normal Growth Brain operation.
 - Overflow cron does not consume D1 work when no runtime is configured.
 - failed batch dispatches are requeued.
+- completion callbacks do not recursively dispatch more work; follow-up waits for the next scheduled control-plane tick to avoid Cloudflare subrequest exhaustion.
 - stale external batches are requeued after 3 minutes.
 - no external research result is trusted as an automatic submission decision.
 

@@ -69,6 +69,7 @@ GitHub Actions conservation mode is not a development or production deployment f
 4. GitHub Actions conservation affects workflows that specifically depend on Actions compute, such as scheduled SEO/catalog jobs or CI tasks. It does not by itself block Cloudflare deployment of repository changes.
 5. The Make Cloudflare Deploy Version scenario is a fallback for promoting an already-uploaded Cloudflare Worker version. It does not replace the source build/upload step unless a separate Cloudflare build trigger is invoked.
 6. Before assuming deployment is blocked, inspect the current Cloudflare Workers Build/deployment state. Treat Cloudflare as the deployment source of truth during conservation.
+7. Render services are independent execution planes. For repository changes that do not modify `overflow-compute/**` or `auth-broker/**`, include `[skip render]` in the commit message so an unrelated ToolScout commit cannot restart Render. For a Render-code change, prefer a targeted deploy of only the affected Render service and verify its health before declaring the change complete.
 
 ## Traffic and commercial measurement source-of-truth contract
 

@@ -17,6 +17,7 @@
     "overflow_compute_url": "https://toolscout-overflow.onrender.com",
     "crons": [
       "*/15 * * * *",
+      "7,22,37,52 * * * *",
       "15 * * * *",
       "35 3 * * *"
     ]
@@ -41,12 +42,15 @@
   "execution": {
     "external_research_jobs_per_utc_day": 1500,
     "external_execution_jobs_per_utc_day": 800,
-    "batch_size": 25,
-    "max_active_batches": 2,
+    "batch_size": 8,
+    "max_active_batches": 3,
     "dispatch_cron": "*/15 * * * *",
     "cloudflare_is_control_plane": true,
     "render_is_execution_plane": true,
-    "make_is_reputation_sensitive_email_plane": true
+    "make_is_reputation_sensitive_email_plane": true,
+    "render_keepalive_cron": "7,22,37,52 * * * *",
+    "render_trigger_timeout_ms": 25000,
+    "completion_callbacks_dispatch_followup": false
   },
   "truth_order": [
     "live_provider_and_production_observation",
