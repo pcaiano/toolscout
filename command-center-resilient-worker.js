@@ -166,11 +166,13 @@ async function lightweightQueue(request,env,ctx){
     // snapshot here: that route performs reconciliation and schema work and can stall
     // both the Chairman Queue and /analytics/api/stats.
     const [affiliateRows,gateRows,legacyRows,editorialRows]=await Promise.all([
-      safeAll(env,`SELECT tool_slug,status,program_name,application_url,program_url,blocker,notes,updated_at
-        FROM affiliate_workflow
-        WHERE status IN ('ready_to_apply','human_action_required','approved_needs_link')
-          AND COALESCE(application_url,program_url) IS NOT NULL
-        ORDER BY updated_at DESC LIMIT 20`),
+      safeAll(env,`SELECT w.tool_slug,w.status,w.program_name,w.application_url,w.program_url,w.blocker,w.notes,w.updated_at,
+          p.pack_json,p.status pack_status,p.prepared_at
+        FROM affiliate_workflow w
+        LEFT JOIN affiliate_application_packs p ON p.tool_slug=w.tool_slug AND p.status='prepared'
+        WHERE w.status IN ('ready_to_apply','human_action_required','approved_needs_link')
+          AND COALESCE(w.application_url,w.program_url) IS NOT NULL
+        ORDER BY w.updated_at DESC LIMIT 20`),
       safeAll(env,`SELECT g.gate_key,g.subject_key,g.gate_type,g.title,g.reason,g.instructions,g.action_url,g.payload_json,g.updated_at,
           o.surface_name,o.distribution_score
         FROM human_gate_contract g
@@ -185,17 +187,25 @@ async function lightweightQueue(request,env,ctx){
         ORDER BY distribution_score DESC,updated_at DESC LIMIT 40`),
       editorialQueueRows(env)
     ]);
-    const affiliate=(affiliateRows||[]).map(row=>({
-      engine:'affiliate',
-      id:String(row.tool_slug||''),
-      title:row.program_name||row.tool_slug||'Affiliate programme',
-      status:row.status||'human_action_required',
-      reason:row.blocker||row.notes||'Affiliate action requires owner input.',
-      action_url:row.application_url||row.program_url,
-      metric:0,
-      metric_label:'affiliate priority',
-      source_of_truth:'affiliate_workflow'
-    })).filter(x=>x.id&&x.action_url);
+    const affiliate=(affiliateRows||[]).map(row=>{
+      let pack={};try{pack=JSON.parse(row.pack_json||'{}')||{}}catch{}
+      const preparedBody=Object.entries(pack).filter(([,v])=>v!=null&&String(v)!=='').map(([k,v])=>`${k}: ${Array.isArray(v)?v.join(', '):String(v)}`).join('\n');
+      return {
+        engine:'affiliate',
+        id:String(row.tool_slug||''),
+        title:row.program_name||row.tool_slug||'Affiliate programme',
+        status:row.status||'human_action_required',
+        reason:row.blocker||row.notes||'Affiliate action requires owner input.',
+        action_url:row.application_url||row.program_url,
+        metric:0,
+        metric_label:'affiliate priority',
+        source_of_truth:'affiliate_workflow+affiliate_application_packs',
+        prepared_body:preparedBody,
+        application_pack:pack,
+        pack_status:row.pack_status||null,
+        pack_prepared_at:row.prepared_at||null
+      };
+    }).filter(x=>x.id&&x.action_url);
     const gateSubjects=new Set((gateRows||[]).map(x=>String(x.subject_key||'')));
     const gates=(gateRows||[]).map(row=>{
       let payload={};try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
@@ -235,7 +245,7 @@ async function lightweightQueue(request,env,ctx){
     const editorial=editorialRows.map(editorialAction);
     const quality=partitionChairmanTasks([...affiliate,...gates,...legacy,...editorial].map(queueItem));
     const items=quality.items.sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,12);
-    return {status:'connected',quality_holds:quality.quality_holds,quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-direct-d1-v5',rule:'Direct canonical D1 read path only. Heavy reconciliation is excluded from dashboard requests so human actions can never block the Command Center.'};
+    return {status:'connected',quality_holds:quality.quality_holds,quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-direct-d1-v6',rule:'Direct canonical D1 read path only. Heavy reconciliation is excluded from dashboard requests so human actions can never block the Command Center.'};
   }catch(error){return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:String(error?.message||error)}}
 }
 async function resilientSnapshot(request,env,ctx){
