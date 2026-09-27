@@ -1427,20 +1427,31 @@ export default{
     if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await base.fetch(request,env,ctx),env);
     return base.fetch(request,env,ctx);
   },
-  async scheduled(event,env,ctx){
-    const trigger=event?.cron||'scheduled';
+  async scheduled(scheduledEvent,env,ctx){
+    const trigger=scheduledEvent?.cron||'scheduled';
     if(trigger===OVERFLOW_CRON){
-      const minute=new Date(Number(event?.scheduledTime)||Date.now()).getUTCMinutes();
-      const work=Promise.allSettled([
+      const minute=new Date(Number(scheduledEvent?.scheduledTime)||Date.now()).getUTCMinutes();
+      const overflowWork=Promise.allSettled([
         runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null}),
         minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
-        minute===0&&new Date(Number(event?.scheduledTime)||Date.now()).getUTCHours()%6===0?seedContactSupply(env):Promise.resolve(null),
+        minute===0&&new Date(Number(scheduledEvent?.scheduledTime)||Date.now()).getUTCHours()%6===0?seedContactSupply(env):Promise.resolve(null),
         Promise.resolve(null),
         Promise.resolve(null)
       ]);
-      if(ctx?.waitUntil)ctx.waitUntil(work);
+      // Overflow is an execution sidecar, never the owner of the scheduler chain.
+      // Always delegate the same cron event so Growth Brain, engine recovery,
+      // execution contracts and observability continue to run 24/7.
+      const inherited=typeof base.scheduled==='function'
+        ?Promise.resolve(base.scheduled(scheduledEvent,env,ctx)).catch(async error=>{
+          await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800));
+          return null;
+        })
+        :Promise.resolve(null);
+      const combined=Promise.allSettled([overflowWork,inherited]);
+      if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
+      await combined;
       return;
     }
-    return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
+    return typeof base.scheduled==='function'?base.scheduled(scheduledEvent,env,ctx):undefined;
   }
 };

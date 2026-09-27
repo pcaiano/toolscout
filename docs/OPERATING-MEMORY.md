@@ -90,6 +90,8 @@ This week's minimum acceptance conditions:
 10. Never declare a deployment, repair, or architecture migration complete from repository state alone. Verify the affected live provider and public path.
 11. Any architecture change that changes ownership, entry points, schedules, provider roles, canonical state, or execution limits must update this file and docs/OPERATING-CONTRACT.json in the same change.
 12. If current repository configuration contradicts an older production baseline, current configuration wins for intended source state and the stale document must be marked or reconciled immediately.
+13. Overflow scheduling is a sidecar, never the owner of the scheduler chain. The `*/15` external-compute cron must always delegate the same scheduled event to the inherited Growth Brain/engine chain.
+14. Scheduler error logging must not be shadowed by event parameters. A scheduler failure must create observable failure evidence rather than disappear inside `Promise.allSettled`.
 
 ## Preflight before ToolScout changes
 
