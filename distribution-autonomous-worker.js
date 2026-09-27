@@ -701,6 +701,34 @@ async function recoverMachineResolvableAuthGates(env){
   }
   return {checked,recovered};
 }
+async function reconcileOpenHumanGateStates(env){
+  await ensureHumanGateSchema(env);
+  const q=await env.DB.prepare(`SELECT g.gate_key,g.subject_key,g.gate_type,g.action_url,g.instructions,o.status,o.human_required
+    FROM human_gate_contract g
+    JOIN distribution_opportunities o ON o.surface_slug=g.subject_key
+    WHERE g.engine='distribution' AND g.status='open'
+      AND o.status NOT IN ('verified','live','submitted','pending_review','scheduled','policy_blocked','rejected','skipped','unavailable_free')
+    LIMIT 100`).all().catch(()=>({results:[]}));
+  let reconciled=0;
+  for(const row of q.results||[]){
+    const expected=row.gate_type==='authentication'?'auth_required':row.gate_type==='owner_approval'?'approval_required':'human_action_required';
+    if(row.status===expected&&Number(row.human_required||0)===1)continue;
+    const detail=String(row.instructions||'Complete the canonical Human Gate action, then return for autonomous verification.');
+    const w=await env.DB.prepare(`UPDATE distribution_opportunities
+      SET status=?,human_required=1,action_url=COALESCE(?,action_url),next_action=?,updated_at=datetime('now')
+      WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','scheduled','policy_blocked','rejected','skipped','unavailable_free')`)
+      .bind(expected,row.action_url||null,detail,row.subject_key).run().catch(()=>null);
+    const changed=Number(w?.meta?.changes||w?.changes||0);
+    if(changed){
+      reconciled+=changed;
+      await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,destination_url,detail,observed_at,created_at)
+        VALUES(?,?,'open_human_gate_state_reconciled',?,?,?,datetime('now'),datetime('now'))`)
+        .bind(`gatestate_${crypto.randomUUID()}`,row.subject_key,expected,row.action_url||null,'Canonical open Human Gate restored its owner-required opportunity state.').run().catch(()=>{});
+    }
+  }
+  return {reconciled};
+}
+
 async function reconcileOrphanHumanStates(env){
   await ensureHumanGateSchema(env);
   const q=await env.DB.prepare(`SELECT o.surface_slug,o.status,o.action_url
@@ -1101,6 +1129,7 @@ export async function runAutonomousDistributionCycle(env){
   const technicalSuppressed=await normalizeTechnicalOpportunities(env);
   const normalized=await normalizeLegacyHumanEscalations(env);
   const legacyGenericHumanGates=await reconcileLegacyGenericHumanGates(env);
+  const openHumanGateStates=await reconcileOpenHumanGateStates(env);
   const orphanHumanStates=await reconcileOrphanHumanStates(env);
   const duplicateGates=await reconcileDuplicateSubmissionGates(env);
   const duplicateHumanGates=await reconcileDuplicateOpenHumanGates(env);
@@ -1133,7 +1162,7 @@ export async function runAutonomousDistributionCycle(env){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,orphanHumanStates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
+  return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,openHumanGateStates,orphanHumanStates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 export default {
