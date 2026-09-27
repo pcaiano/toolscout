@@ -721,11 +721,17 @@ async function requeueStaleBatches(env){
   }
   return requeued;
 }
-async function createBatch(env){
+async function createBatch(env,{preferredJobType=null}={}){
   await ensureSchema(env);
   const active=await env.DB.prepare(`SELECT COUNT(*) n FROM compute_overflow_batches WHERE status IN ('dispatched','running')`).first().catch(()=>null);
   if(num(active?.n)>=MAX_ACTIVE_BATCHES)return null;
-  const q=await env.DB.prepare(`SELECT job_id FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(BATCH_SIZE).all().catch(()=>({results:[]}));
+  let q=null;
+  if(preferredJobType){
+    q=await env.DB.prepare(`SELECT job_id FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now') AND job_type=? ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(preferredJobType,BATCH_SIZE).all().catch(()=>({results:[]}));
+  }
+  if(!rows(q).length){
+    q=await env.DB.prepare(`SELECT job_id FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now') ORDER BY priority_score DESC,created_at ASC LIMIT ?`).bind(BATCH_SIZE).all().catch(()=>({results:[]}));
+  }
   const ids=rows(q).map(x=>x.job_id).filter(Boolean);
   if(!ids.length)return null;
   const batchId=`cob_${crypto.randomUUID()}`;
@@ -796,7 +802,11 @@ async function dispatchAvailableBatches(env){
   try{
     await recoverTransientDispatchDeferrals(env);
     for(let slot=0;slot<MAX_ACTIVE_BATCHES;slot++){
-      const batch=await isolatedOverflowStage(env,'batch_create',()=>createBatch(env),null);
+      // Reserve the first available slot for classifier v2 route research when
+      // such work exists. The second slot remains a general throughput lane so
+      // contact discovery and authorized execution cannot be starved.
+      const preferredJobType=slot===0?'distribution_route_research':null;
+      const batch=await isolatedOverflowStage(env,'batch_create',()=>createBatch(env,{preferredJobType}),null);
       if(!batch||batch.ok===false||!batch.count)break;
       const dispatch=await isolatedOverflowStage(env,'batch_trigger',()=>triggerBatch(env,batch),{ok:false});
       runs.push({batch:{batchId:batch.batchId,count:batch.count},dispatch});
