@@ -17,6 +17,7 @@
     "overflow_compute_url": "https://toolscout-overflow.onrender.com",
     "crons": [
       "*/15 * * * *",
+      "4,19,34,49 * * * *",
       "7,22,37,52 * * * *",
       "15 * * * *",
       "35 3 * * *"
@@ -50,7 +51,12 @@
     "make_is_reputation_sensitive_email_plane": true,
     "render_keepalive_cron": "7,22,37,52 * * * *",
     "render_trigger_timeout_ms": 25000,
-    "completion_callbacks_dispatch_followup": false
+    "completion_callbacks_dispatch_followup": false,
+    "autonomous_control_cron": "4,19,34,49 * * * *",
+    "autonomous_control_single_flight_minutes": 12,
+    "hourly_audit_cron": "15 * * * *",
+    "primary_growth_cron": "*/15 * * * *",
+    "overlapping_core_work_forbidden": true
   },
   "truth_order": [
     "live_provider_and_production_observation",

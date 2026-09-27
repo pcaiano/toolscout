@@ -101,6 +101,9 @@ This week's minimum acceptance conditions:
 21. Overflow batches are intentionally small and parallel: 8 jobs per batch, up to 3 active batches, matching Render's 24-request concurrency while bounding Cloudflare completion-callback subrequests.
 22. Overflow completion callbacks are terminal. They apply evidence and close state only. They never recursively refill or dispatch another batch; the next scheduled control-plane tick owns follow-up work.
 23. Non-Render repository changes must use the commit marker `[skip render]` so control-plane, documentation, SEO or site commits cannot restart external executors. When Render code actually changes, deploy only the affected Render service and verify its health before resuming dispatch.
+24. Autonomous Distribution has its own heartbeat at minutes 04, 19, 34 and 49 UTC. It is a system service and must not depend on opportunity-task admission to prove that the engine itself is alive.
+25. The primary 15-minute Growth cycle, the staggered Autonomous Distribution cycle, Render keepalive and hourly supervisor audit have separate cron ownership. Do not make unrelated cron events execute the same core mission merely because acquisition mode is active.
+26. Engine-health recovery must exercise Autonomous Distribution as well as Network, economic learning, content and catalog so a red autonomous heartbeat can be proved healthy without waiting for organic queue selection.
 
 ## Preflight before ToolScout changes
 
