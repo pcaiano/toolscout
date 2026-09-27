@@ -1,6 +1,6 @@
 import base from './operational-truth-reconciliation-worker.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
-import {qualifyDistributionSurfaces} from './distribution-autonomous-worker.js';
+import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence} from './distribution-autonomous-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/15 * * * *';
@@ -8,7 +8,7 @@ const RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
-const DISTRIBUTION_CLASSIFIER_VERSION=4;
+const DISTRIBUTION_CLASSIFIER_VERSION=5;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
@@ -1006,7 +1006,7 @@ const OVERFLOW_SAFE_FORM_FIELDS=new Set([
 ]);
 function validatedOverflowMachineCandidate(sourceUrl,route,result){
   const c=route?.machineCandidate;
-  if(!c||String(route?.kind||'')!=='submission'||route?.auth||route?.captcha)return null;
+  if(!c||route?.submissionIntent!==true||String(route?.kind||'')!=='submission'||route?.auth||route?.captcha)return null;
   if(Array.isArray(route?.policyBlockers)&&route.policyBlockers.length)return null;
   if(String(c.kind||'')!=='html_form'||String(c.method||'').toUpperCase()!=='POST'||String(c.contentType||'').toLowerCase()!=='application/x-www-form-urlencoded')return null;
   if(!isHttp(c.endpoint)||!sameHostRoute(sourceUrl,c.endpoint)||!sameHostRoute(route.url,c.endpoint))return null;
@@ -1026,51 +1026,64 @@ async function applyDistributionResult(env,job,result){
   const slug=job.subject_key||payload.surfaceSlug;
   if(!slug)return{applied:false};
   const routes=(Array.isArray(result?.routes)?result.routes:[]).filter(r=>r?.url&&sameHostRoute(payload.url,r.url)&&['submission','auth','captcha'].includes(String(r.kind||'')));
-  const best=routes.find(r=>String(r.kind||'')==='submission'&&r.machineCandidate)
-    ||routes.find(r=>String(r.kind||'')==='submission')
-    ||routes.find(r=>String(r.kind||'')==='auth')
-    ||routes.find(r=>String(r.kind||'')==='captcha')
-    ||null;
-  const machineCandidate=best?validatedOverflowMachineCandidate(payload.url,best,result):null;
+  const exactRoutes=routes.filter(r=>r.submissionIntent===true);
+  const machineRoute=exactRoutes.find(r=>String(r.kind||'')==='submission'&&r.machineCandidate)||null;
+  const machineCandidate=machineRoute?validatedOverflowMachineCandidate(payload.url,machineRoute,result):null;
+  const humanRoute=exactRoutes.find(r=>!r.machineCandidate&&!(r.policyBlockers||[]).length&&(r.auth||r.captcha||['auth','captcha'].includes(String(r.kind||''))))||null;
+  const manualRoute=exactRoutes.find(r=>String(r.kind||'')==='submission'&&!r.machineCandidate&&!r.auth&&!r.captcha&&!(r.policyBlockers||[]).length)||null;
+  const policyRoute=exactRoutes.find(r=>Array.isArray(r.policyBlockers)&&r.policyBlockers.length)||null;
+  const best=machineRoute||humanRoute||manualRoute||policyRoute||null;
   const detail=machineCandidate
-    ?'External overflow research discovered and structurally validated a same-host machine-safe POST form. Canonical Cloudflare policy accepted the adapter and execution can proceed immediately.'
-    :best
-      ?`External overflow research discovered a ${best.kind} route. Canonical Cloudflare validation is queued before any execution.`
-      :`External overflow research completed without a verified submission route. Canonical engines may continue alternate-route research.`;
+    ?'External overflow research discovered an exact submission route and structurally validated a same-host machine-safe POST form. Canonical Cloudflare policy accepted the adapter.'
+    :humanRoute
+      ?'External overflow research found an exact same-host submission route that requires a human-only CAPTCHA or authentication step. A canonical Human Gate is opened immediately.'
+      :manualRoute
+        ?'External overflow research found an exact manual submission route without a safe automatic adapter.'
+        :policyRoute
+          ?'External overflow research found an exact submission route with a policy blocker. It is not eligible for automatic or human execution.'
+          :'External overflow research completed without an exact executable ToolScout submission route. Alternate-route research remains autonomous.';
   const actionUrl=best?.url||null;
-  let w=null;
+  let w=null,gate=null;
   if(machineCandidate){
     await env.DB.prepare(`INSERT INTO distribution_auto_adapters(surface_slug,source_url,endpoint,method,content_type,payload_template_json,confidence,policy_state,verification_source,verification_endpoint,public_url,verification_method,auth_type,auth_detail,last_checked_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,?,'verified',?,NULL,NULL,'GET',NULL,NULL,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(surface_slug) DO UPDATE SET source_url=excluded.source_url,endpoint=excluded.endpoint,method=excluded.method,content_type=excluded.content_type,payload_template_json=excluded.payload_template_json,confidence=excluded.confidence,policy_state='verified',verification_source=excluded.verification_source,verification_endpoint=NULL,public_url=NULL,verification_method='GET',auth_type=NULL,auth_detail=NULL,last_checked_at=datetime('now'),updated_at=datetime('now')`)
       .bind(slug,actionUrl,machineCandidate.endpoint,machineCandidate.method,machineCandidate.contentType,JSON.stringify(machineCandidate.payload),machineCandidate.confidence,actionUrl).run();
     w=await env.DB.prepare(`UPDATE distribution_opportunities SET
-        action_url=COALESCE(?,action_url),
-        status='ready_to_submit',
-        human_required=0,
-        automation_potential=95,
-        acceptance_probability=70,
-        next_action=?,
-        last_checked_at=datetime('now'),
-        updated_at=datetime('now')
+        action_url=COALESCE(?,action_url),status='ready_to_submit',human_required=0,
+        automation_potential=95,acceptance_probability=70,next_action=?,
+        last_checked_at=datetime('now'),updated_at=datetime('now')
       WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
       .bind(actionUrl,safe(detail,1000),slug).run().catch(()=>null);
     await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at)
       VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,slug,actionUrl,'ready_to_submit',`overflow_verified_safe_form_adapter:${machineCandidate.endpoint}`).run().catch(()=>{});
+  }else if(humanRoute||(manualRoute&&num(payload.score)>=70)){
+    const route=humanRoute||manualRoute;
+    gate=await openDistributionHumanGateFromResearchEvidence(env,{
+      surface_slug:slug,surface_name:payload.surfaceName||slug,action_url:payload.url,distribution_score:num(payload.score),status:payload.currentStatus||'research_required'
+    },{route,result:{...result,classifierVersion:num(payload.classifierVersion||DISTRIBUTION_CLASSIFIER_VERSION)}}).catch(error=>({opened:false,reason:safe(error?.message||error,300)}));
+    w={meta:{changes:gate?.opened?1:0}};
+    if(!gate?.opened){
+      await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=COALESCE(?,action_url),status=CASE WHEN status IN ('candidate','discovered') THEN 'research_required' ELSE status END,next_action=?,last_checked_at=NULL,updated_at=datetime('now') WHERE surface_slug=? AND human_required=0 AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
+        .bind(actionUrl,safe(detail+' Human gate was not admitted: '+String(gate?.reason||'unknown'),1000),slug).run().catch(()=>{});
+    }
+  }else if(policyRoute){
+    w=await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=COALESCE(?,action_url),status='policy_blocked',human_required=0,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','rejected','skipped','unavailable_free')`)
+      .bind(actionUrl,safe(detail+' Blockers: '+(policyRoute.policyBlockers||[]).join(', '),1000),slug).run().catch(()=>null);
+    await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`)
+      .bind(`qual_${crypto.randomUUID()}`,slug,actionUrl,'policy_blocked',safe((policyRoute.policyBlockers||[]).join(','),1200)).run().catch(()=>{});
   }else{
     w=await env.DB.prepare(`UPDATE distribution_opportunities SET
         action_url=COALESCE(?,action_url),
         status=CASE WHEN status IN ('candidate','discovered') THEN 'research_required' ELSE status END,
-        next_action=?,
-        last_checked_at=NULL,
-        updated_at=datetime('now')
+        next_action=?,last_checked_at=NULL,updated_at=datetime('now')
       WHERE surface_slug=? AND human_required=0 AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
       .bind(actionUrl,safe(detail,1000),slug).run().catch(()=>null);
   }
   try{await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at)
     VALUES(?,?, 'overflow_compute_research','completed',?,?,?,datetime('now'),datetime('now'))`)
-    .bind(`overflow_${crypto.randomUUID()}`,slug,payload.url||null,actionUrl||payload.url||null,safe(JSON.stringify({classification:result?.classification||null,route:best||null,machineCandidate:Boolean(machineCandidate),blockers:result?.blockers||[]}),1600)).run()}catch{}
-  return{applied:Number(w?.meta?.changes||w?.changes||0)>0,slug,route:best,machineCandidate:Boolean(machineCandidate)};
+    .bind(`overflow_${crypto.randomUUID()}`,slug,payload.url||null,actionUrl||payload.url||null,safe(JSON.stringify({classifierVersion:payload.classifierVersion||null,classification:result?.classification||null,route:best||null,machineCandidate:Boolean(machineCandidate),humanGate:gate||null,blockers:result?.blockers||[]}),1800)).run()}catch{}
+  return{applied:Number(w?.meta?.changes||w?.changes||0)>0,slug,route:best,machineCandidate:Boolean(machineCandidate),humanGate:gate||null};
 }
 async function applyContactResult(env,job,result){
   let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
