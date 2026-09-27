@@ -242,8 +242,24 @@ async function researchRoleEmail(job){
 async function researchDistribution(job){
   const source=job?.payload?.url;
   if(!validPublicHttp(source))return{ok:false,error:'invalid_or_private_url'};
-  const home=await fetchPage(source);
-  if(!home?.ok)return{ok:false,error:'source_unreachable',httpStatus:home?.status||0,targetUrl:source,finalUrl:home?.url||source};
+  let home=await fetchPage(source);
+  const attempted=[source];
+  if(!home?.ok){
+    let origin=null;try{origin=new URL(source).origin}catch{}
+    const fallbacks=origin?[origin+'/',origin+'/submit',origin+'/submit-tool',origin+'/add-tool',origin+'/add',origin+'/contact',origin+'/contact-us']:[];
+    for(const candidate of [...new Set(fallbacks)]){
+      if(candidate===source||!validPublicHttp(candidate))continue;
+      attempted.push(candidate);
+      const page=await fetchPage(candidate);
+      if(page?.ok){home=page;break}
+    }
+  }
+  if(!home?.ok)return{
+    ok:false,error:'source_unreachable',httpStatus:home?.status||0,targetUrl:source,finalUrl:home?.url||source,
+    classification:'source_unreachable',routes:[],contactRoutes:[],blockers:[],
+    routeSummary:{submissionRoutes:0,formRoutes:0,authRoutes:0,captchaRoutes:0,machineCandidates:0,policyBlockers:0},
+    evidence:{pagesFetched:0,cacheHits:0,sourceFallbackAttempted:attempted.length>1,attemptedUrls:attempted.slice(0,8)}
+  };
   home.signals=pageSignals(home);
   const links=extractLinks(home.html,home.url);
   const actionCandidates=links.filter(x=>ACTION_RE.test(x.text+' '+x.url)).slice(0,5);
@@ -289,7 +305,7 @@ async function researchDistribution(job){
       machineCandidates:selectedRoutes.filter(x=>Boolean(x.machineCandidate)).length,
       policyBlockers:blockers.length
     },
-    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length}
+    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length,sourceFallbackUsed:home.url!==source,attemptedUrls:attempted.slice(0,8)}
   };
 }
 
