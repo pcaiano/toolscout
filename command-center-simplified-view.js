@@ -132,7 +132,8 @@ function business(){
    metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · quality proof')+
    metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d')+
    metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d')+
-   metric('Referring domains (unique)',n(b.referringDomains??b.verifiedReferringDomains),(b.seRankingReferringDomains!=null?n(b.seRankingReferringDomains)+' SE Ranking · ':'')+n(b.internalVerifiedReferringDomains??b.verifiedReferringDomains)+' internally verified')+
+   metric('Backlinks',n(b.seRankingBacklinks??b.observedBacklinks??b.verifiedBacklinks),b.seRankingObservedAt?'SE Ranking · snapshot '+dt(b.seRankingObservedAt):human(b.backlinkCountSource||'External backlink truth'))+
+   metric('Referring domains (unique)',n(b.seRankingReferringDomains??b.referringDomains??b.verifiedReferringDomains),(b.seRankingDofollowReferringDomains!=null?n(b.seRankingDofollowReferringDomains)+' dofollow · ':'')+human(b.referringDomainSource||'External authority source'))+
    metric('Domain authority',b.domainAuthority==null?'Unavailable':n(b.domainAuthority),b.domainAuthoritySource||'External authority source')+
    metric('Active affiliates',n(aff.productionRoutes),'Live ToolScout affiliate routes')+
    metric('Confirmed revenue',data.stats==null?'Source unavailable':(r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency)),data.stats==null?'Stats source did not respond':(r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected'))+
@@ -164,7 +165,7 @@ function authorityProgress(){
  const b=data?.truth?.authority||{},live=data?.authority||{},rows=Array.isArray(b.history30)?b.history30:[];
  const queue=live.queue!=null?live.queue:b.authorityQueue,attempts24=live.attempts24!=null?live.attempts24:b.attempts24,min24=live.attemptMin24h!=null?live.attemptMin24h:b.attemptMin24h;
  const handoff=live.senderFreshClaim&&Number(live.senderClaimed||0)>0;
- document.getElementById('authorityProgressMeta').textContent=b.latestPlacementVerifiedAt?'Latest placement '+dt(b.latestPlacementVerifiedAt):(b.lastVerifiedAt?'Last backlink '+dt(b.lastVerifiedAt):'Verified authority history');
+ document.getElementById('authorityProgressMeta').textContent=b.seRankingObservedAt?'SE Ranking snapshot '+dt(b.seRankingObservedAt):(b.latestPlacementVerifiedAt?'Latest placement '+dt(b.latestPlacementVerifiedAt):'Authority history');
  document.getElementById('authorityProgressBody').innerHTML=
   '<div class="progressTop"><div class="progressStats"><div class="progressStat"><small>Observed backlinks</small><b>'+n(b.observedBacklinks??b.verifiedBacklinks)+'</b></div><div class="progressStat"><small>Domain authority</small><b>'+(b.domainAuthority==null?'Unavailable':n(b.domainAuthority))+'</b></div><div class="progressStat"><small>Attempts 7d</small><b>'+n(b.attempts7d)+'</b></div><div class="progressStat"><small>Authority queue</small><b>'+n(queue)+'</b></div><div class="progressStat"><small>24h floor</small><b>'+n(attempts24)+' / '+n(min24)+'</b></div></div>'+donut(b.referringDomains??b.verifiedReferringDomains,b.bootstrapFloor)+'</div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'placements',label:'Verified placements',cls:'primary'},{key:'backlinks',label:'Observed backlinks',cls:'good'},{key:'referringDomains',label:'Referring domains',cls:'warn'}])+'</div>'+
@@ -172,10 +173,10 @@ function authorityProgress(){
     row('Latest authority placement',b.latestPlacementVerifiedAt?dt(b.latestPlacementVerifiedAt):'Unavailable','Any verified public authority placement')+
     row('Last backlink verified',b.lastVerifiedAt?dt(b.lastVerifiedAt):'Unavailable','Backlink-specific evidence')+
     (b.seRankingReferringDomains!=null?row('SE Ranking authority profile',n(b.seRankingBacklinks)+' backlinks · '+n(b.seRankingReferringDomains)+' referring domains',(b.seRankingDofollowBacklinks==null?'':n(b.seRankingDofollowBacklinks)+' dofollow links · ')+(b.seRankingDofollowReferringDomains==null?'':n(b.seRankingDofollowReferringDomains)+' dofollow domains · ')+(b.domainAuthority==null?'':'authority '+n(b.domainAuthority)+' · ')+'snapshot '+dt(b.seRankingObservedAt)):'')+
-    row('Internal verification ledger',n(b.internalVerifiedBacklinkSurfaces??b.internalVerifiedBacklinks)+' backlink-bearing placements',(b.backlinkReconciliationGap>0?n(b.backlinkReconciliationGap)+' additional individual backlink URLs are observed by SE Ranking; they are not collapsed into the placement ledger.':'External backlink observation and the internal placement ledger currently have no positive count gap.'))+
     (handoff?row('Authority handoff','In progress',n(live.senderClaimed)+' sender task claimed at '+dt(live.senderNewestClaimedAt)):'')+
   '</div>'+
-  '<div class="sourceLine">Backlinks are individual link URLs; referring domains are unique source domains. '+(b.seRankingBacklinks!=null?'SE Ranking currently observes '+n(b.seRankingBacklinks)+' backlink URLs across '+n(b.seRankingReferringDomains)+' referring domains. ':'')+'The internal ledger counts ToolScout-verified backlink-bearing placements separately and is not forced to equal the external link-row total. The bootstrap floor is a milestone, not a stop condition.</div>';
+  (Array.isArray(b.referringDomainItems)&&b.referringDomainItems.length?'<div class="section"><div class="sectionTitle">Referring domains observed by SE Ranking · '+n(b.referringDomainItems.length)+'</div>'+b.referringDomainItems.map(x=>row(x.domain,n(x.backlinks)+' backlink'+(n(x.backlinks)===1?'':'s'),n(x.dofollowBacklinks)+' dofollow · authority '+n(x.domainAuthority)+(x.firstSeen?' · first seen '+esc(x.firstSeen):''))).join('')+'</div>':'')+
+  '<div class="sourceLine">SE Ranking is the canonical external backlink truth while its snapshot is fresh. Backlinks are individual link URLs and referring domains are unique source domains. Internal placement verification remains an operational diagnostic and is not presented as the backlink total.</div>';
 }
 function gscProgress(){
  const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{};
