@@ -446,7 +446,7 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
   return {opened:true,gateKey,gateType,status,actionUrl};
 }
 
-async function reconcileFreshResearchHumanGates(env){
+export async function reconcileFreshResearchHumanGates(env){
   await ensureHumanGateSchema(env);
   const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,o.status,
       j.result_json,j.payload_json,j.completed_at
