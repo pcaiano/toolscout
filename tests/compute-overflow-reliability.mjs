@@ -11,5 +11,9 @@ check(s.includes("RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *'"),'Render keepalive
 check(w.includes('"7,22,37,52 * * * *"'),'Wrangler registers Render keepalive cron');
 check(s.includes("followup:'next_scheduled_control_plane_cycle'"),'completion follow-up is scheduler-owned');
 check(!s.includes("Completion callback immediately refilled"),'completion callback no longer recursively dispatches');
+check(s.includes("qualificationReady15m:num(live?.qualification_ready_15m)"),'qualification ready metric is live, not hardcoded');
+check(s.includes("qualificationResearch15m:num(live?.qualification_research_15m)"),'qualification research metric is live, not hardcoded');
+check(s.includes("qualificationVerificationFailed15m:num(live?.qualification_verification_failed_15m)"),'qualification verification failures are visible');
+check(s.includes("idx_distribution_qualification_created_result"),'qualification health query is indexed');
 if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
 console.log('PASS overflow reliability geometry and callback bounds');
