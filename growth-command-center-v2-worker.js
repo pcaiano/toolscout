@@ -8,7 +8,9 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const SESSION_COOKIE='toolscout_cc';
 const SESSION_TTL_SECONDS=86400;
 const OWNER_EMAIL='pcaiano@gmail.com';
-const HUMAN_ACTION_LIMIT=12;
+const HUMAN_ACTION_LIMIT=24;
+const HUMAN_GATE_RESERVED_SLOTS=12;
+const REPUTATION_RESERVED_MAX=6;
 const BACKLINK_BOOTSTRAP_FLOOR=10;
 const BACKLINK_ATTEMPT_MIN_24H=4;
 const BACKLINK_STAGNATION_HOURS=24;
@@ -400,10 +402,17 @@ async function chairmanQueue(request,env,ctx,{verifyLinks=true}={}){
   }));
   const quality=partitionChairmanTasks(rows);
   const standardActionable=quality.items.filter(x=>x.link_verification?.ok).sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes)));
-  const actionable=[...reputation,...standardActionable].slice(0,HUMAN_ACTION_LIMIT);
+  const humanGates=standardActionable.filter(x=>x.gate_key);
+  const otherActions=standardActionable.filter(x=>!x.gate_key);
+  const priorityHumanGates=humanGates.slice(0,HUMAN_GATE_RESERVED_SLOTS);
+  const reputationSlots=reputation.slice(0,REPUTATION_RESERVED_MAX);
+  const selectedKeys=new Set(priorityHumanGates.map(x=>x.gate_key||x.id));
+  const remainder=[...humanGates.slice(HUMAN_GATE_RESERVED_SLOTS),...otherActions]
+    .filter(x=>!selectedKeys.has(x.gate_key||x.id));
+  const actionable=[...priorityHumanGates,...reputationSlots,...remainder].slice(0,HUMAN_ACTION_LIMIT);
   const brokenLinks=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='internal');
   const externalVerificationIssues=rows.filter(x=>!x.link_verification?.ok&&x.link_verification?.failure_scope==='external');
-  return {status:'connected',quality_holds:[...(raw.quality_holds||[]),...quality.quality_holds],quality_version:quality.quality_version,total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,reputation_quarantine:reputation.length,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Reputation quarantine is reviewed directly in the Chairman Queue. Other human tasks require current engine state and a reachable HTTPS action URL. Reputation review never sends the email automatically.'};
+  return {status:'connected',quality_holds:[...(raw.quality_holds||[]),...quality.quality_holds],quality_version:quality.quality_version,total:actionable.length,estimated_minutes:actionable.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items:actionable,reputation_quarantine:reputation.length,broken_links:brokenLinks,external_verification_issues:externalVerificationIssues,rule:'Canonical Human Gates reserve queue capacity and cannot be crowded out by reputation/editorial work. Exact duplicate external action URLs are collapsed before presentation. Other human tasks require current engine state and a reachable HTTPS action URL. Reputation review never sends the email automatically.'};
 }
 async function growthOpsSnapshot(request,env,ctx,stats){
   const [affiliateLatest,affiliateWeekOld,affiliateStatuses,affiliateDiscovery,affiliatePacks,affiliateRoutes,distributionStatuses,distribution24,distribution7,deliveryStates,distEvents,affiliateHistory,gsc,gscReality,sitemap,contentIntel,organicGrowth,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogRuntimeState,catalogRuntimeCandidates,catalogInventory,catalogRuntimeGaps,catalogRecentAdmissions,latestAudienceEvent,latestContentPublish,distributionNetworkStates,distributionPlacements]=await Promise.all([
