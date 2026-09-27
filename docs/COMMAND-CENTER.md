@@ -439,3 +439,28 @@ The Command Center is business-first. The first row is GA4 sessions, strict attr
 The execution contract now fast-drains pending or stalled internal SEO and catalog work from the existing five-minute Cloudflare scheduler instead of waiting only for the hourly minute-15 pass. SEO canonical repair verifies the public Worker-rendered page first, because Google sees the runtime canonical normalization rather than the raw Static Assets source. Catalog `catalog_impact_review` work on software-news opportunities now has task-specific proof, including a valid no-catalog-profile conclusion, so reviews do not loop indefinitely waiting for unrelated catalog runtime evidence.
 
 Backlink truth keeps two populations explicit. The fresh SE Ranking domain snapshot is the canonical external observation for individual backlink URLs and unique referring domains. At 2026-09-26 19:27 UTC it reported 74 backlink rows across 15 referring domains, including 7 dofollow backlinks and 6 dofollow referring domains, with Domain InLink Rank 2. The internal D1 ledger remains a separate count of ToolScout-verified backlink-bearing placement records. The Command Center labels the external series as observed backlinks and does not present the unique-domain count as if it were a backlink count.
+
+## End-to-end reliability audit - 2026-09-27
+
+Scope: ToolScout production Worker/D1, Growth Brain scheduling and ledgers, autonomous Distribution, Render overflow/auth sidecars, Make send/content/audience paths, Chairman Queue, GSC bridge and owner-facing observability.
+
+Verified live during the audit:
+- Current Worker health and SEO runtime-health returned HTTP 200 with current data.
+- Canonical D1 showed current primary Growth, execution-contract, opportunity-coordination, self-audit and Distribution autonomous missions completing; no active run lease or running cycle claim was stranded.
+- Newest Render overflow batches completed after dispatch with HTTP 202 handoff and no last_error. Render overflow /health and auth-broker /health returned OK.
+- Chairman Queue returned two real canonical human actions with exact URLs, instructions and prepared content; rejected affiliate quality holds stayed engine-owned and did not consume owner queue capacity.
+- Push and fallback email senders, Architecture Approval Alerts, Audience ingestion/engagement and recent content schedules have no current incomplete Make executions.
+- Cloudflare D1 reads were functioning during the audit after the earlier daily-limit incident.
+
+Repairs applied:
+- Cloudflare Read Ops now normalizes /v4, /client/v4 and full api.cloudflare.com/client/v4 paths; the previously failing /client/v4/accounts request was retested successfully with HTTP 200.
+- GSC bridge now stages all three generated truth snapshots atomically before rebase/push, removing the exact unstaged-change failure that followed an otherwise successful GSC collection.
+- Monday, Wednesday and Friday Content Engine filters no longer hardcode trytoolscout.org as the only valid publication target. They require an issued verified brief and use the brief's approved dynamic LinkedIn/X targets. This fixes the Friday 2026-09-25 false-green run that generated copy but stopped before every publication module because the approved beehiiv direct affiliate target did not contain trytoolscout.org.
+- Operating contract and validator now encode live /health expectations, atomic GSC truth ownership, dynamic content targets and the rule that Make scenario completion is not business success without external outcome evidence.
+
+Open verification / provider drift:
+- Live Render service metadata currently reports an empty healthCheckPath even though render.yaml requires /health. The current connector can inspect and deploy Render but cannot mutate that provider field, so the repo/provider mismatch remains explicit rather than being marked fixed.
+- The GSC workflow root-cause fix is committed but must be considered runtime-unverified until a subsequent scheduled GSC run exercises the updated workflow.
+- Engine Health Reconcile has shown intermittent Make HTTP timeouts while canonical engine state and later calls remain healthy. Treat that helper as bounded diagnostic evidence, never as sole proof an engine is unhealthy.
+- The Content Engine filter repair was structurally validated without forcing an off-schedule public social post. Future scheduled content success must be judged from /api/engine-evidence publication proof, not Make scenario status.
+
