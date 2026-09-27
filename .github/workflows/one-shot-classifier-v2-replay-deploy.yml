@@ -33,18 +33,13 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      - name: Observe post-fix qualification
+      - name: Verify D1-safe production health once
         run: |
           set -euo pipefail
-          for i in $(seq 1 18); do
-            curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?contact_recovery=$i" -o /tmp/health.json
-            cat /tmp/health.json
-            jq -e '(.distributionFunnel.qualificationReady15m|type=="number") and
-                   (.distributionFunnel.qualificationAuth15m|type=="number")' /tmp/health.json >/dev/null
-            ready=$(jq -r '.distributionFunnel.qualificationReady15m // 0' /tmp/health.json)
-            adapters=$(jq -r '.distributionFunnel.adaptersReady // 0' /tmp/health.json)
-            auth=$(jq -r '.distributionFunnel.qualificationAuth15m // 0' /tmp/health.json)
-            if [ "$ready" -gt 0 ] || [ "$adapters" -gt 0 ] || [ "$auth" -gt 3 ]; then exit 0; fi
-            sleep 10
-          done
-          exit 1
+          curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?deploy_verify=1" -o /tmp/health.json
+          cat /tmp/health.json
+          jq -e '
+            (.distributionClassifierVersion >= 3) and
+            (.healthReadModel == "incremental_cached_120s_read_only") and
+            (.d1ReadModel == "incremental_funnel_plus_indexed_queue_v2")
+          ' /tmp/health.json >/dev/null
