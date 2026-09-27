@@ -237,8 +237,8 @@ function evaluateOutboundReputation({to,subject,body,mode='manual_authorized',te
       if(!/featured on ToolScout/i.test(subj))issues.push('vendor_subject_contract');
       if(!/Your ToolScout profile:/i.test(raw))issues.push('vendor_profile_context_missing');
       if(!/distribution\/publisher-kit/i.test(raw))issues.push('public_publisher_resource_missing');
-      const featuredProfile=raw.match(/Featured page:[\\s\\S]{0,1000}?https:\\/\\/trytoolscout\\.org\\/tools\\/([a-z0-9-]+)/i)?.[1]?.toLowerCase();
-      const ownProfile=raw.match(/Your ToolScout profile:[\\s\\S]{0,1000}?https:\\/\\/trytoolscout\\.org\\/tools\\/([a-z0-9-]+)/i)?.[1]?.toLowerCase();
+      const featuredProfile=raw.match(/Featured page:[\s\S]{0,1000}?https:\/\/trytoolscout\.org\/tools\/([a-z0-9-]+)/i)?.[1]?.toLowerCase();
+      const ownProfile=raw.match(/Your ToolScout profile:[\s\S]{0,1000}?https:\/\/trytoolscout\.org\/tools\/([a-z0-9-]+)/i)?.[1]?.toLowerCase();
       if(featuredProfile&&ownProfile&&featuredProfile!==ownProfile)issues.push('vendor_asset_tool_mismatch');
     }else if(template_id==='publisher_resources_v22'){
       if(!/ToolScout publisher resources/i.test(subj))issues.push('publisher_subject_contract');
