@@ -246,7 +246,7 @@ function throughput(){
      row('Classifier v'+n(c.distributionClassifierVersion||2)+' results seen',n(classifiedResearch),'Confirms the Render research service is emitting the current route classification payload')+
      row('Submission routes found',n(routesFound),'All same-host submission routes found, including manual/auth routes')+
      row('Machine-safe form candidates',n(machineCandidates),'Render found a no-auth, no-CAPTCHA, no-payment POST form that passed structural safety checks')+
-     row('Route blockers observed',n(formRoutes)+' forms · '+n(authRoutes)+' auth · '+n(captchaRoutes)+' CAPTCHA',n(policyBlockers)+' policy blocker signals in newly classified research results')+
+     row('Raw route signals observed',n(formRoutes)+' forms · '+n(authRoutes)+' auth · '+n(captchaRoutes)+' CAPTCHA',n(policyBlockers)+' policy blockers · page-level signals only; exact submission intent is required before execution or Human Gate promotion')+
      row('Canonical qualification - 15m',n(qualReady)+' ready · '+n(qualResearch)+' research',n(qualVerifyFailed)+' verification failed · '+n(qualHuman)+' human · '+n(qualAuth)+' auth · '+n(qualPolicy)+' policy blocked')+
      row('Human gates open',n(humanGates),n(captchaGates)+' CAPTCHA · '+n(authGates)+' auth · '+n(manualGates)+' manual · '+n(gateVerification)+' awaiting verification')+
      row('Verified adapters ready',n(adaptersReady),'Canonical policy accepted a machine-safe adapter and it is ready for execution')+
