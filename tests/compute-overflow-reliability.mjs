@@ -15,5 +15,9 @@ check(s.includes("qualificationReady15m:num(live?.qualification_ready_15m)"),'qu
 check(s.includes("qualificationResearch15m:num(live?.qualification_research_15m)"),'qualification research metric is live, not hardcoded');
 check(s.includes("qualificationVerificationFailed15m:num(live?.qualification_verification_failed_15m)"),'qualification verification failures are visible');
 check(s.includes("idx_distribution_qualification_created_result"),'qualification health query is indexed');
+check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=5;"),'classifier v5 is active');
+check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
+check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
+check(s.includes("humanGatesOpen:num(live?.open_human_gates)"),'human-gate backlog is visible in compute truth');
 if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
 console.log('PASS overflow reliability geometry and callback bounds');
