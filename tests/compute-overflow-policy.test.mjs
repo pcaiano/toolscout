@@ -93,3 +93,9 @@ assert.match(render,/region: frankfurt/);
 assert.match(render,/node overflow-compute\/server\.mjs/);
 
 console.log('External compute overflow v1 policy is intact.');
+
+assert.match(router,/HEALTH_CACHE_MS=120000/);
+assert.match(router,/healthReadModel:'cached_120s_read_only'/);
+assert.match(router,/render_classification_primary/);
+assert.match(router,/render_result_applied_directly/);
+assert.doesNotMatch(router,/health_watchdog_pump_failed/);
