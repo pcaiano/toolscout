@@ -40,6 +40,26 @@ async function runDiscoveryRefresh(env){
 function safe(v,n=4000){return String(v??'').slice(0,n)}
 async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 function host(v){try{return new URL(v).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
+async function knownReferringDomains(env){
+  const snapshot=await assetJson(env,'/data/se-ranking-backlink-truth.json',{observedAt:null,referringDomains:[]});
+  const observed=Date.parse(String(snapshot?.observedAt||''));
+  if(!Number.isFinite(observed)||Date.now()-observed>168*3600000)return new Set();
+  return new Set((Array.isArray(snapshot?.referringDomains)?snapshot.referringDomains:[])
+    .map(x=>String(x?.domain||'').toLowerCase().replace(/^www\./,'')).filter(Boolean));
+}
+function alreadyReferring(hostname,known){
+  const h=String(hostname||'').toLowerCase().replace(/^www\./,'');if(!h)return false;
+  for(const d of known){if(h===d||h.endsWith('.'+d))return true}
+  return false;
+}
+function prioritizeIndependentDomains(rows,known,limit,urlField='action_url'){
+  return [...rows].sort((a,b)=>{
+    const ak=alreadyReferring(host(a?.[urlField]||a?.endpoint||a?.public_url||''),known)?1:0;
+    const bk=alreadyReferring(host(b?.[urlField]||b?.endpoint||b?.public_url||''),known)?1:0;
+    if(ak!==bk)return ak-bk;
+    return Number(b?.distribution_score||0)-Number(a?.distribution_score||0);
+  }).slice(0,limit);
+}
 const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets|asset|img|images|media|js|css|fonts|edge|storage)\./i;
 function isTechnicalSurface(value){const h=host(value);return TECHNICAL_HOST_RE.test(h)||/(?:githubassets\.com|githubusercontent\.com)$/i.test(h)}
 function sameHostFamily(a,b){const x=host(a),y=host(b);return x===y||x.endsWith('.'+y)||y.endsWith('.'+x)}
@@ -592,8 +612,10 @@ async function qualify(env){
         ))
       )
     ORDER BY CASE WHEN o.status='ready_to_submit' THEN 0 ELSE 1 END,o.distribution_score DESC,CASE WHEN o.status IN ('discovered','candidate') THEN 0 ELSE 1 END,o.last_checked_at ASC
-    LIMIT ${QUALIFY_LIMIT}`).all();
-  const outcomes=await Promise.all((q.results||[]).map(row=>qualifyOne(env,row)));
+    LIMIT ${Math.min(QUALIFY_LIMIT*4,100)}`).all();
+  const known=await knownReferringDomains(env);
+  const candidates=prioritizeIndependentDomains(q.results||[],known,QUALIFY_LIMIT);
+  const outcomes=await Promise.all(candidates.map(row=>qualifyOne(env,row)));
   let checked=outcomes.length,ready=0,auth=0,blocked=0,human=0,research=0,skipped=0;
   for(const r of outcomes){
     if(r==='ready_to_submit')ready++;
@@ -606,7 +628,7 @@ async function qualify(env){
   if(checked>0){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,'autonomous_distribution_qualification','completed','distribution_engine',`Autonomous qualification checked ${checked} due surface(s): ${ready} verified no-auth adapter(s), ${auth} authenticated adapter(s) awaiting one-time credentials, ${blocked} policy blocked, ${human} human-only, ${research} still research-required, ${skipped} technical hosts skipped. Empty no-change cycles are not persisted.`).run();
   }
-  return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT,write_policy:'material_or_due_only'};
+  return {ok:true,checked,ready,authRequired:auth,blocked,human,research,skipped,cooldown_hours:RESEARCH_COOLDOWN_HOURS,per_cycle_limit:QUALIFY_LIMIT,referring_domain_strategy:'new_independent_domains_first',known_referring_domains:known.size,write_policy:'material_or_due_only'};
 }
 
 export async function qualifyDistributionSurfaces(env,surfaceSlugs=[]){
