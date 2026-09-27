@@ -1,0 +1,29 @@
+name: One Shot D1 Truth
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-d1-truth.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Inspect canonical D1 state read-only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "=== core counts ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT 'jobs' AS metric, COUNT(*) AS value FROM compute_overflow_jobs UNION ALL SELECT 'queued_jobs', COUNT(*) FROM compute_overflow_jobs WHERE status='queued' UNION ALL SELECT 'opportunities', COUNT(*) FROM distribution_opportunities UNION ALL SELECT 'contact_domains', COUNT(*) FROM contact_supply_domain UNION ALL SELECT 'adapters', COUNT(*) FROM distribution_auto_adapters;"
+          echo "=== metrics rows ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT * FROM compute_overflow_metrics WHERE id='global'; SELECT * FROM compute_overflow_funnel_metrics WHERE id='global'; SELECT * FROM contact_supply_metrics WHERE id='global'; SELECT * FROM compute_overflow_budget ORDER BY kind;"
+          echo "=== latest jobs ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT job_type,status,COUNT(*) AS n,MIN(available_at) AS min_available,MAX(updated_at) AS max_updated FROM compute_overflow_jobs GROUP BY job_type,status ORDER BY job_type,status;"
