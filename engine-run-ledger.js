@@ -161,8 +161,28 @@ export async function recordEngineRun(env,{runId,engine,mission,triggerName=null
   return id;
 }
 
+async function reconcileExpiredSingleFlightRuns(env,{engine=null,mission=null}={}){
+  try{
+    const where=engine&&mission?'AND r.engine=? AND r.mission=?':'';
+    const stmt=env.DB.prepare(`UPDATE engine_runs AS r
+      SET status='failed',completed_at=datetime('now'),detail='single_flight_lease_expired',
+          evidence_json='{"reason":"single_flight_lease_expired","ownership":"no_active_lease"}',updated_at=datetime('now')
+      WHERE r.status='running'
+        AND r.evidence_json LIKE '%"single_flight":true%'
+        ${where}
+        AND NOT EXISTS (
+          SELECT 1 FROM engine_run_leases l
+          WHERE l.engine=r.engine AND l.mission=r.mission AND l.run_id=r.run_id
+            AND l.expires_at>datetime('now')
+        )`);
+    const out=engine&&mission?await stmt.bind(engine,mission).run():await stmt.run();
+    return Number(out?.meta?.changes||out?.changes||0);
+  }catch{return 0}
+}
+
 async function reconcileStaleRunOwnership(env){
   try{
+    const expiredSingleFlightRuns=await reconcileExpiredSingleFlightRuns(env);
     const results=await env.DB.batch([
       env.DB.prepare(`UPDATE engine_cycle_claims
         SET status='failed',completed_at=COALESCE(completed_at,datetime('now')),updated_at=datetime('now')
@@ -177,7 +197,8 @@ async function reconcileStaleRunOwnership(env){
     ]);
     return{
       failedClaims:Number(results?.[0]?.meta?.changes||results?.[0]?.changes||0),
-      expiredLeases:Number(results?.[1]?.meta?.changes||results?.[1]?.changes||0)
+      expiredLeases:Number(results?.[1]?.meta?.changes||results?.[1]?.changes||0),
+      expiredSingleFlightRuns
     };
   }catch{return{failedClaims:0,expiredLeases:0}}
 }
@@ -203,6 +224,9 @@ export async function runWithLedger(env,{engine,mission,triggerName=null,singleF
   let leased=false,cycleClaim=null;
 
   if(singleFlight>0){
+    // Ownership truth is lease-based. If a single-flight run no longer owns an
+    // unexpired lease, close the stale ledger row before admitting a successor.
+    await reconcileExpiredSingleFlightRuns(env,{engine:e,mission:m});
     // A prior run older than its lease plus a small grace period cannot still
     // legitimately own the mission. Close it before acquiring the next lease
     // so observability never leaves orphaned "running" rows for hours.
