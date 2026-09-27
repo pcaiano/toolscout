@@ -45,9 +45,6 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </div>
 <script>
 const endpoints={stats:'/analytics/api/stats',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
-const D1_EMERGENCY_UNTIL=Date.parse('2026-09-28T00:05:00Z');
-const D1_RESET_AT='2026-09-28T00:00:00Z';
-const d1Emergency=()=>Date.now()<D1_EMERGENCY_UNTIL;
 let data={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
 const sourceErrors={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
 let sessionRefreshPromise=null;
@@ -214,18 +211,7 @@ function brain(){
 }
 function throughput(){
  const t=data.truth||{},g=t.growth||{},c=data.compute||{},a=data.auth||{};
- if(c.status==='d1_quota_exhausted'||d1Emergency()){
-   document.getElementById('throughputMeta').textContent='Emergency protection active';
-   document.getElementById('throughputBody').innerHTML=
-     '<div class="headline"><b>Cloudflare D1 daily row-read limit exhausted</b><span>Autonomous D1-dependent execution is paused to prevent error storms. Stored data is intact. Automatic resume is scheduled after '+esc(dt(D1_RESET_AT))+'. Render remains deployed and ready.</span></div>'+
-     '<div class="section"><div class="sectionTitle">Protection state</div>'+
-       row('D1 reads','Paused','Free-tier daily cap reached')+
-       row('Cloudflare control plane','Protected','Scheduled D1 work suppressed until reset')+
-       row('Render research runtime','Ready','Classifier v4 is deployed; new control-plane work resumes after D1 reset')+
-       row('Command Center polling','Paused','No repeated D1 reads while the quota is exhausted')+
-     '</div>';
-   return;
- }
+
  const researchUsed=Number(c.researchUsedToday||0),researchMax=Number(c.dailyJobBudget||g.researchExternalJobMax24h||1500);
  const execUsed=Number(c.executionUsedToday||0),execMax=Number(c.executionDailyJobBudget||g.machineSafeExternalActionMax24h||800);
  const funnel=c.distributionFunnel||{},researchCompleted=Number(funnel.researchCompletedToday||0),classifiedResearch=Number(funnel.classifiedResearchJobsToday||0),routesFound=Number(funnel.submissionRoutesFoundToday||0),machineCandidates=Number(funnel.machineCandidatesFoundToday||0),formRoutes=Number(funnel.formRoutesSeenToday||0),authRoutes=Number(funnel.authRoutesSeenToday||0),captchaRoutes=Number(funnel.captchaRoutesSeenToday||0),policyBlockers=Number(funnel.policyBlockersSeenToday||0),adaptersReady=Number(funnel.adaptersReady||0),qualReady=Number(funnel.qualificationReady15m||0),qualResearch=Number(funnel.qualificationResearch15m||0),qualHuman=Number(funnel.qualificationHuman15m||0),qualAuth=Number(funnel.qualificationAuth15m||0),qualPolicy=Number(funnel.qualificationPolicy15m||0),actionsAuthorized=Number(funnel.actionsAuthorizedToday??execUsed),actionsCompleted=Number(funnel.actionsCompletedToday||0),submissionsAccepted=Number(funnel.submissionsAcceptedToday||0),placementsVerified=Number(funnel.placementsVerifiedToday||0);
@@ -420,23 +406,15 @@ async function fetchKeys(keys,{fresh=false,announce=false}={}){
  return failures;
 }
 async function loadFast(){
- if(d1Emergency())return;
  if(document.hidden||fastBusy)return;
  fastBusy=true;try{await fetchKeys(FAST_KEYS);lastFast=Date.now()}finally{fastBusy=false}
 }
 async function loadHeavy(){
- if(d1Emergency())return;
  if(document.hidden||heavyBusy)return;
  heavyBusy=true;try{await fetchKeys(HEAVY_KEYS);lastHeavy=Date.now()}finally{heavyBusy=false}
 }
 async function loadAll(fresh=false){
- if(d1Emergency()){
-   data.compute={status:'d1_quota_exhausted',resetAt:D1_RESET_AT};
-   document.getElementById('status').innerHTML='<strong>D1 emergency protection active</strong> - daily row-read cap exhausted; automatic resume after reset.';
-   document.getElementById('sourceStatus').textContent='Polling paused to protect Cloudflare';
-   render();
-   return;
- }
+
  if(fastBusy||heavyBusy)return;
  fastBusy=heavyBusy=true;
  try{
