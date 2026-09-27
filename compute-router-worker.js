@@ -1326,8 +1326,8 @@ async function completeBatch(request,env,ctx,batchId){
         const rs=result?.routeSummary||{};
         funnelDelta.researchCompleted++;
         if(result?.routeSummary)funnelDelta.classifiedResearchJobs++;
-        if(num(rs.submissionRoutes)>0)funnelDelta.submissionRoutesFound++;
-        if(num(rs.machineCandidates)>0)funnelDelta.machineCandidatesFound++;
+        funnelDelta.submissionRoutesFound+=num(rs.submissionRoutes);
+        funnelDelta.machineCandidatesFound+=num(rs.machineCandidates);
         funnelDelta.formRoutesSeen+=num(rs.formRoutes);
         funnelDelta.authRoutesSeen+=num(rs.authRoutes);
         funnelDelta.captchaRoutesSeen+=num(rs.captchaRoutes);
