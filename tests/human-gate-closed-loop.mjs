@@ -22,5 +22,9 @@ check(command.includes('const HUMAN_ACTION_LIMIT=24;'),'Chairman Queue has adequ
 check(command.includes('const HUMAN_GATE_RESERVED_SLOTS=12;'),'canonical Human Gates reserve queue capacity');
 check(simplified.includes("row('Human gates open'"),'Command Center exposes human-gate backlog');
 check(simplified.includes('engine-held'),'Command Center exposes quality-held tasks');
+check(autonomous.includes('reconcileOrphanHumanStates'),'orphan owner-required states reconcile automatically');
+check(autonomous.includes("status IN ('open','verification_pending')"),'open or verification-pending gate is the only valid owner-required backing state');
+check(autonomous.includes("const gateKey=await openDistributionHumanGate"),'qualifier creates gate before committing owner-required status');
+check(autonomous.includes("previous?.status==='resolved'&&!canonicalAuthProof"),'resolved owner steps are not silently reopened');
 if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
 console.log('PASS human-gate closed loop, queue visibility and anti-regression guards');
