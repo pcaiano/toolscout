@@ -14,7 +14,8 @@ const consolidations=fs.existsSync(consolidationsPath)?JSON.parse(fs.readFileSyn
 const intentSlugs=new Set([...baseIntents,...longtail].map(x=>x?.slug).filter(slug=>slug&&!consolidations[slug]));
 const isIndexable=file=>{if(!fs.existsSync(file))return false;const html=fs.readFileSync(file,'utf8');return !/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)&&!/<meta[^>]+content=["'][^"']*noindex[^"']*["'][^>]+name=["']robots["']/i.test(html);};
 const cleanFile=file=>String(file||'').replace(/\.html$/i,'');
-const canonicalUrl=file=>{try{const html=fs.readFileSync(file,'utf8');const m=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i);return m?.[1]?.startsWith(BASE+'/')?m[1]:null}catch{return null}};
+const canonicalPublicUrl=value=>{try{const u=new URL(String(value));if(u.origin!==BASE)return null;u.hash='';u.search='';if(u.pathname==='/index.html')u.pathname='/';else if(/\.html$/i.test(u.pathname))u.pathname=u.pathname.replace(/\.html$/i,'');return u.toString()}catch{return null}};
+const canonicalUrl=file=>{try{const html=fs.readFileSync(file,'utf8');const m=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i);return canonicalPublicUrl(m?.[1])}catch{return null}};
 const publicUrl=file=>canonicalUrl(path.join(ROOT,file))||`${BASE}/${cleanFile(file)}`;
 const urls=[BASE+'/',`${BASE}/guides`,...CORE_PAGES.filter(file=>fs.existsSync(path.join(ROOT,file))&&isIndexable(path.join(ROOT,file))).map(publicUrl)];
 const blogIndex=path.join(ROOT,'blog','index.html');
