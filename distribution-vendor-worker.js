@@ -1,4 +1,5 @@
 import base from './distribution-radar-worker.js';
+import {vendorAssetCoherence} from './distribution-vendor-integrity.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 async function assetJson(request,env,path,fallback){try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback;}catch{return fallback;}}
@@ -15,14 +16,17 @@ async function candidateAssets(request,env){
 
 async function pageMentionsTool(request,env,assetUrl,slug){
   try{
+    const coherence=vendorAssetCoherence(assetUrl,slug);
+    if(!coherence.ok)return false;
     const u=new URL(assetUrl);
     const clean=cleanPath(u.pathname);
+    const s=String(slug||'').toLowerCase();
+    if(/^\/tools\//i.test(clean))return clean===`/tools/${s}`;
     const reqPath=clean==='/'?'/index.html':`${clean}.html`;
     const r=await env.ASSETS.fetch(new Request(new URL(reqPath,request.url)));
     if(!r.ok)return false;
     const html=(await r.text()).toLowerCase();
-    const s=String(slug||'').toLowerCase();
-    return html.includes(`/tools/${s}`)||html.includes(`/go/${s}`)||clean===`/tools/${s}`||clean.includes(`${s}-vs-`)||clean.includes(`-vs-${s}`);
+    return html.includes(`/tools/${s}`)||html.includes(`/go/${s}`)||clean.includes(`${s}-vs-`)||clean.includes(`-vs-${s}`);
   }catch{return false;}
 }
 
@@ -36,6 +40,22 @@ async function refreshVendorAmplification(request,env){
   const routeByPath=new Map((routing.priorities||[]).filter(x=>x?.pathname).map(x=>[cleanPath(x.pathname),x]));
   const priorityAssets=[...(routing.priorities||[])].filter(x=>x?.pathname&&['guide','comparison','tool-profile'].includes(x.type)).sort((a,b)=>Number(b.priorityScore||0)-Number(a.priorityScore||0)).map(x=>`https://trytoolscout.org${cleanPath(x.pathname)}`);
   const ordered=[...new Set([...priorityAssets,...assets.map(u=>`https://trytoolscout.org${cleanPath(u)}`)])];
+
+  // Reconcile any stale cross-tool profile rows created by older matching logic before
+  // contact discovery or sender leasing can see them.
+  const activeProfiles=await env.DB.prepare(`SELECT tool_slug,asset_url FROM distribution_vendor_amplification
+    WHERE status IN ('queued','contact_found','sending','needs_contact_fallback','send_failed','reputation_quarantine')
+      AND asset_url LIKE '%/tools/%'`).all().catch(()=>({results:[]}));
+  let suppressedAssetMismatches=0;
+  for(const row of activeProfiles.results||[]){
+    const coherence=vendorAssetCoherence(row.asset_url,row.tool_slug);
+    if(coherence.ok)continue;
+    await env.DB.prepare(`UPDATE distribution_vendor_amplification
+      SET status='suppressed_asset_mismatch',outreach_error='vendor_asset_tool_mismatch',public_dispatch_token=NULL,public_dispatch_leased_at=NULL,updated_at=datetime('now')
+      WHERE tool_slug=? AND asset_url=? AND status<>'sent'`).bind(row.tool_slug,row.asset_url).run().catch(()=>{});
+    suppressedAssetMismatches++;
+  }
+
   let queued=0,searchPrioritized=0;
   for(const tool of tools){
     const slug=String(tool.slug||'');if(!slug)continue;
@@ -61,7 +81,7 @@ async function refreshVendorAmplification(request,env){
     }
   }
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vendor_${crypto.randomUUID()}`,'vendor_amplification_refresh','completed','vendor_amplification',`Vendor amplification queue refreshed: ${queued} opportunities prepared, ${searchPrioritized} prioritized from Search Console demand.`).run();
-  return {ok:true,queued,searchPrioritized};
+  return {ok:true,queued,searchPrioritized,suppressedAssetMismatches};
 }
 
 async function vendorQueue(env){
