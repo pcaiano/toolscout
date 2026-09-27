@@ -7,11 +7,11 @@ const OVERFLOW_CRON='*/15 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
-const DISTRIBUTION_CLASSIFIER_VERSION=3;
+const DISTRIBUTION_CLASSIFIER_VERSION=4;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
-const CONTACT_SUPPLY_RESEARCH_BATCH=120;
+const CONTACT_SUPPLY_RESEARCH_BATCH=40;
 const BATCH_SIZE=25;
 const MAX_ACTIVE_BATCHES=2;
 const BATCH_TIMEOUT_MINUTES=3;
@@ -610,7 +610,7 @@ async function enqueueDistributionResearch(env){
   }
   const routeBucket=Math.floor(Date.now()/(DISTRIBUTION_RESEARCH_BUCKET_HOURS*3600000));
   const roleEmailBucket=Math.floor(Date.now()/(ROLE_EMAIL_RESEARCH_BUCKET_HOURS*3600000));
-  const limit=Math.min(500,remaining);
+  const limit=Math.min(80,remaining);
   const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action
     FROM distribution_opportunities
     WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
