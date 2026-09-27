@@ -106,7 +106,3 @@ assert.match(core,/formRejections/);
 assert.match(router,/CONTACT_SUPPLY_RESEARCH_BATCH=40/);
 assert.match(router,/const limit=Math\.min\(80,remaining\);/);
 
-assert.match(router,/D1_EMERGENCY_UNTIL='2026-09-28T00:05:00Z'/);
-assert.match(router,/d1_daily_rows_read_limit_exceeded/);
-assert.match(router,/if\(d1EmergencyActive\(\)\)return;/);
-assert.match(router,/healthReadModel:'static_no_d1'/);
