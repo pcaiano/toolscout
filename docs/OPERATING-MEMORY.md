@@ -140,3 +140,10 @@ When the operating architecture changes, update this file and the JSON contract 
 
 29. GA4 is the canonical acquisition source for traffic volume and acquisition trends. Strict verified human sessions are first-party diagnostic and attribution-quality evidence; they may differ from GA4 because the populations, windows and instrumentation differ, and they must never silently override GA4 in owner-facing business truth.
 30. Command Center funnel counters must be live or explicitly unavailable. Never hardcode zero for a metric that has a canonical D1 source; a synthetic zero is an observability defect.
+
+31. CAPTCHA or authentication is actionable only when tied to an exact, same-host ToolScout submission route. A generic page that merely contains a CAPTCHA, login widget, contact form or terms text must remain research evidence and must not create owner work.
+32. When Render classifier evidence proves an exact same-host submission route and the only remaining blocker is CAPTCHA or authentication, Cloudflare must open the canonical non-blocking Human Gate in the same completion cycle. It must not wait for a later rediscovery pass.
+33. Chairman Queue quality runs before presentation limits. Qualified canonical Human Gates reserve queue capacity and cannot be crowded out by duplicates, reputation reviews, affiliate applications or editorial work.
+34. Exact duplicate distribution Human Gates for the same normalized external action URL collapse to one canonical owner task. Duplicates are cancelled and must not reappear unless a materially different external action route is proven.
+35. Command Center execution truth exposes the open Human Gate backlog, including CAPTCHA, authentication, manual and verification-pending counts. Detected blockers and owner-visible actions must reconcile rather than drift silently.
+36. Render route classification must distinguish submission intent from page-level form/CAPTCHA presence. Machine execution and Human Gates both require exact submission intent; generic contact, article, advertising and unrelated account pages are not submission routes.
