@@ -66,7 +66,9 @@
     "human_gate_queue_limit": 24,
     "human_gate_reserved_slots": 12,
     "duplicate_human_gate_key": "normalized_exact_action_url",
-    "command_center_human_gate_backlog_visible": true
+    "command_center_human_gate_backlog_visible": true,
+    "human_required_requires_active_gate": true,
+    "human_state_write_order": "gate_first_status_second"
   },
   "truth_order": [
     "live_provider_and_production_observation",
@@ -91,7 +93,10 @@
     "generic_page_captcha_does_not_open_human_gate",
     "chairman_queue_validates_and_deduplicates_before_limiting",
     "canonical_human_gates_reserve_queue_capacity",
-    "command_center_exposes_open_human_gate_backlog"
+    "command_center_exposes_open_human_gate_backlog",
+    "human_required_status_requires_open_or_verification_pending_gate",
+    "human_gate_creation_precedes_human_required_status",
+    "terminal_human_gate_cannot_leave_owner_required_status_orphaned"
   ],
   "mission": {
     "starts_on": "2026-09-28",
