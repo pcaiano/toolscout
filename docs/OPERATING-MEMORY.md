@@ -151,3 +151,6 @@ When the operating architecture changes, update this file and the JSON contract 
 37. A distribution opportunity may not remain in human_action_required, auth_required or approval_required unless a matching Human Gate is open or verification_pending. Terminal, missing or rejected gates force the opportunity back to autonomous research.
 38. Human-required state is transactional: prove and create/reopen the Human Gate first, then set the opportunity to human/auth required. If gate admission fails, owner-required state must not be written.
 39. A previously resolved owner step, such as account bootstrap already completed, must not be silently re-requested by rediscovery. The engine resumes research/automation unless fresh evidence proves a materially different owner-only action.
+
+40. Content and marketing URLs such as /best-of/, /blog/, /news/, /category/, /guides/, /advertise/ and /pricing/ cannot become submission routes merely because their page text mentions submit/launch or contains a site-wide form/CAPTCHA. They require explicit submission intent in the URL or a separate exact submission route.
+41. Research-derived Human Gates carry the classifier version that admitted them. When the classifier contract tightens, older open research-derived Human Gates are invalidated and returned to autonomous research before the owner is asked to act.
