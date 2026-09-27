@@ -15,25 +15,6 @@ const CONTACT_SUPPLY_RESEARCH_BATCH=40;
 const BATCH_SIZE=25;
 const MAX_ACTIVE_BATCHES=2;
 const BATCH_TIMEOUT_MINUTES=3;
-const D1_EMERGENCY_UNTIL='2026-09-28T00:05:00Z';
-function d1EmergencyActive(){return Date.now()<Date.parse(D1_EMERGENCY_UNTIL)}
-function d1EmergencySnapshot(){
-  return{
-    status:'d1_quota_exhausted',
-    error:'d1_daily_rows_read_limit_exceeded',
-    resetAt:'2026-09-28T00:00:00Z',
-    resumesAutomaticallyAfter:D1_EMERGENCY_UNTIL,
-    dailyLimitRowsRead:5000000,
-    providerUrl:'https://toolscout-overflow.onrender.com',
-    distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,
-    d1ReadModel:'emergency_no_read_mode',
-    healthReadModel:'static_no_d1',
-    qualificationMode:'paused_until_d1_reset',
-    distributionFunnel:{actionsAuthorizedToday:0,actionsCompletedToday:0,machineCandidatesFoundToday:0,adaptersReady:0},
-    contactSupply:{status:'paused_d1_quota',targetReady:CONTACT_SUPPLY_TARGET,minReady:CONTACT_SUPPLY_MIN},
-    queued:null,runnableQueued:null,deferredQueued:null,leased:null,activeBatches:null
-  };
-}
 let schemaReady=null;
 let hotIndexesReady=null;
 let healthCacheAt=0;
@@ -542,7 +523,6 @@ async function budgetConsume(env,kind,count){
   await env.DB.prepare(`UPDATE compute_overflow_budget SET used_today=used_today+?,updated_at=datetime('now') WHERE kind=?`).bind(n,kind).run().catch(()=>{});
 }
 async function health(env){
-  if(d1EmergencyActive())return d1EmergencySnapshot();
   if(healthCacheValue&&(Date.now()-healthCacheAt)<HEALTH_CACHE_MS)return healthCacheValue;
   const [m,budgets,contactSupply,fm,live]=await Promise.all([
     metricRow(env),
@@ -1407,13 +1387,6 @@ async function augmentRuntime(response,env){
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(d1EmergencyActive()){
-      if(request.method==='GET'&&u.pathname==='/api/compute/health')return Response.json(d1EmergencySnapshot(),{headers:JSON_H});
-      if(request.method==='GET'&&u.pathname==='/api/contact-supply/health')return Response.json({status:'paused_d1_quota',resetAt:'2026-09-28T00:00:00Z'},{status:503,headers:JSON_H});
-      if(request.method==='GET'&&u.pathname==='/api/auth-plane/health')return Response.json({status:'paused_d1_quota',resetAt:'2026-09-28T00:00:00Z'},{status:503,headers:JSON_H});
-      if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return Response.json({status:'paused_d1_quota',resetAt:'2026-09-28T00:00:00Z',computeOverflow:d1EmergencySnapshot()},{status:503,headers:JSON_H});
-      if(request.method==='POST'&&u.pathname.startsWith('/api/compute/'))return Response.json({error:'d1_quota_exhausted',resetAt:'2026-09-28T00:00:00Z'},{status:503,headers:JSON_H});
-    }
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
       // Observability must be read-only. Command Center polling must never execute
       // distribution work or amplify D1 reads/writes.
@@ -1455,7 +1428,6 @@ export default{
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    if(d1EmergencyActive())return;
     const trigger=event?.cron||'scheduled';
     if(trigger===OVERFLOW_CRON){
       const minute=new Date(Number(event?.scheduledTime)||Date.now()).getUTCMinutes();
