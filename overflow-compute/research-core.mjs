@@ -1,6 +1,8 @@
 const UA='ToolScout Overflow Research/1.0 (+https://trytoolscout.org/)';
 const MAX_HTML=500000;
 const ACTION_RE=/(submit|submission|add[-_ /]?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
+const SUBMISSION_INTENT_RE=/(submit(?:\s+now|\s+(?:your|a))?|submission|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product))/i;
+const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|return_to=[^&]*(?:product|tool|startup)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
 const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
 const CAPTCHA_RE=/(captcha|g-recaptcha|h-captcha|cf-turnstile|turnstile)/i;
@@ -59,6 +61,10 @@ function sameHost(a,b){
     const xh=x.hostname.replace(/^www\./,''),yh=y.hostname.replace(/^www\./,'');
     return xh===yh||xh.endsWith('.'+yh)||yh.endsWith('.'+xh);
   }catch{return false}
+}
+function hasSubmissionIntent(label,url){
+  const signal=String(label||'')+' '+String(url||'');
+  return SUBMISSION_INTENT_RE.test(signal)||SUBMISSION_ACCOUNT_RE.test(signal);
 }
 function absolute(href,base){
   try{const u=new URL(href,base);u.hash='';return validPublicHttp(u.toString())?u.toString():null}catch{return null}
@@ -334,16 +340,17 @@ async function researchDistribution(job){
     if(!x?.page?.ok)continue;
     const signals=x.signals||{};
     if(ACTION_RE.test(x.link.text+' '+x.link.url)||signals.hasForm||signals.auth||signals.captcha){
-      const assessment=machineFormAssessment({...x.page,signals}),machineCandidate=assessment.candidate;
+      const routeUrl=x.page.url||x.link.url,submissionIntent=hasSubmissionIntent(x.link.text,routeUrl);
+      const assessment=machineFormAssessment({...x.page,signals}),machineCandidate=submissionIntent?assessment.candidate:null;
       const policyBlockers=[
         signals.payment?'payment':null,
         signals.reciprocal?'reciprocal':null,
         signals.automationBlocked?'automation_blocked':null
       ].filter(Boolean);
       routes.push({
-        url:x.page.url||x.link.url,
-        kind:machineCandidate?'submission':signals.captcha?'captcha':signals.auth?'auth':ACTION_RE.test(x.link.text+' '+x.link.url)?'submission':'contact',
-        label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),
+        url:routeUrl,
+        kind:machineCandidate?'submission':signals.captcha?'captcha':signals.auth?'auth':submissionIntent?'submission':'contact',
+        label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),submissionIntent,
         auth:Boolean(signals.auth&&!machineCandidate),captcha:Boolean(signals.captcha&&!machineCandidate),
         policyBlockers,machineCandidate,
         formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons}
@@ -351,7 +358,8 @@ async function researchDistribution(job){
     }
   }
   if(!routes.length&&(ACTION_RE.test(home.url)||home.signals.hasForm||home.signals.auth||home.signals.captcha)){
-    const assessment=machineFormAssessment(home),machineCandidate=assessment.candidate;
+    const submissionIntent=hasSubmissionIntent('source route',home.url);
+    const assessment=machineFormAssessment(home),machineCandidate=submissionIntent?assessment.candidate:null;
     const policyBlockers=[
       home.signals.payment?'payment':null,
       home.signals.reciprocal?'reciprocal':null,
@@ -359,8 +367,8 @@ async function researchDistribution(job){
     ].filter(Boolean);
     routes.push({
       url:home.url,
-      kind:machineCandidate?'submission':home.signals.captcha?'captcha':home.signals.auth?'auth':ACTION_RE.test(home.url)?'submission':'contact',
-      label:'source route',hasForm:Boolean(home.signals.hasForm),
+      kind:machineCandidate?'submission':home.signals.captcha?'captcha':home.signals.auth?'auth':submissionIntent?'submission':'contact',
+      label:'source route',hasForm:Boolean(home.signals.hasForm),submissionIntent,
       auth:Boolean(home.signals.auth&&!machineCandidate),captcha:Boolean(home.signals.captcha&&!machineCandidate),
       policyBlockers,machineCandidate,
       formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons}
@@ -385,11 +393,13 @@ async function researchDistribution(job){
     classification:blockers.length?'policy_signal':routes.length?'route_found':contactRoutes.length?'contact_found':'no_route_found',
     routes:selectedRoutes,contactRoutes:contactRoutes.slice(0,12),blockers,
     routeSummary:{
-      submissionRoutes:selectedRoutes.filter(x=>x.kind==='submission').length,
+      submissionRoutes:selectedRoutes.filter(x=>x.submissionIntent===true).length,
       formRoutes:selectedRoutes.filter(x=>x.hasForm).length,
       authRoutes:selectedRoutes.filter(x=>x.kind==='auth'||x.auth).length,
       captchaRoutes:selectedRoutes.filter(x=>x.kind==='captcha'||x.captcha).length,
       machineCandidates:selectedRoutes.filter(x=>Boolean(x.machineCandidate)).length,
+      humanGateCandidates:selectedRoutes.filter(x=>x.submissionIntent===true&&!x.machineCandidate&&(x.auth||x.captcha)).length,
+      manualRoutes:selectedRoutes.filter(x=>x.submissionIntent===true&&!x.machineCandidate&&!x.auth&&!x.captcha&&!(x.policyBlockers||[]).length).length,
       policyBlockers:blockers.length,
       formRejections:selectedRoutes.flatMap(x=>x.formAssessment?.rejections||[]).reduce((acc,key)=>{acc[key]=(acc[key]||0)+1;return acc},{})
     },
