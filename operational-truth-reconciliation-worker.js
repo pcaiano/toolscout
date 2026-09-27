@@ -227,8 +227,8 @@ async function buildCommandCenterBusinessTruth(request,env){
   const seRankingDofollowBacklinks=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.dofollowBacklinks):0;
   const seRankingDofollowReferringDomains=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.dofollowReferringDomains):0;
   const seRankingDomainAuthority=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.domainAuthority??seRankingBacklinkTruth?.metrics?.domainInlinkRank):0;
-  const internalVerifiedBacklinks=truthNum(backlink.verified_backlinks);
-  const observedBacklinks=seRankingFresh?seRankingBacklinks:internalVerifiedBacklinks;
+  const internalVerifiedBacklinks=truthNum(backlink.internal_verified_backlinks??backlink.verified_backlinks);
+  const observedBacklinks=seRankingFresh?seRankingBacklinks:truthNum(backlink.verified_backlinks??internalVerifiedBacklinks);
   const backlinkReconciliationGap=seRankingFresh?Math.max(0,seRankingBacklinks-internalVerifiedBacklinks):0;
   const authorityVerifiedDomains=seRankingFresh?seRankingReferringDomains:internalAuthorityVerifiedDomains;
   const seRankingReferringDomainItems=seRankingFresh&&Array.isArray(seRankingBacklinkTruth?.referringDomains)
