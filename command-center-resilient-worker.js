@@ -199,6 +199,9 @@ async function lightweightQueue(request,env,ctx){
     const gateSubjects=new Set((gateRows||[]).map(x=>String(x.subject_key||'')));
     const gates=(gateRows||[]).map(row=>{
       let payload={};try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
+      const preparedBody=Object.entries(payload)
+        .filter(([k,v])=>!['gate_evidence','research_classifier_version','submission_intent','research_route_label'].includes(k)&&v!=null&&String(v)!=='')
+        .map(([k,v])=>`${k}: ${Array.isArray(v)?v.join(', '):String(v)}`).join('\n');
       return {
         engine:'distribution',
         id:String(row.subject_key||''),
@@ -212,7 +215,9 @@ async function lightweightQueue(request,env,ctx){
         metric_label:'distribution priority',
         source_of_truth:'human_gate_contract',
         gate_evidence:payload.gate_evidence||null,
-        instructions:row.instructions||'Complete only the human-required step, then mark it done.'
+        instructions:row.instructions||'Complete only the human-required step, then mark it done.',
+        prepared_body:preparedBody,
+        application_pack:payload
       };
     }).filter(x=>x.id&&x.action_url);
     const legacy=(legacyRows||[]).filter(row=>!gateSubjects.has(String(row.surface_slug||''))).map(row=>({
@@ -230,7 +235,7 @@ async function lightweightQueue(request,env,ctx){
     const editorial=editorialRows.map(editorialAction);
     const quality=partitionChairmanTasks([...affiliate,...gates,...legacy,...editorial].map(queueItem));
     const items=quality.items.sort((a,b)=>(b.expected_impact_score/Math.max(1,b.estimated_minutes))-(a.expected_impact_score/Math.max(1,a.estimated_minutes))).slice(0,12);
-    return {status:'connected',quality_holds:quality.quality_holds,quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-direct-d1-v4',rule:'Direct canonical D1 read path only. Heavy reconciliation is excluded from dashboard requests so human actions can never block the Command Center.'};
+    return {status:'connected',quality_holds:quality.quality_holds,quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-direct-d1-v5',rule:'Direct canonical D1 read path only. Heavy reconciliation is excluded from dashboard requests so human actions can never block the Command Center.'};
   }catch(error){return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:String(error?.message||error)}}
 }
 async function resilientSnapshot(request,env,ctx){
