@@ -305,8 +305,8 @@ for (let i=0;i<inspectionTargets.length;i+=10) {
 const successfulInspections = inspections.filter(x=>x.ok);
 const inspectionErrors = inspections.filter(x=>!x.ok);
 const canonicalUniverse = new Set(sitemapUrls.map(canonicalPublicUrl).filter(Boolean));
-const canonicalInspections = successfulInspections.filter(x=>canonicalUniverse.has(canonicalPublicUrl(x.url)));
-const legacyObservedInspections = successfulInspections.filter(x=>!canonicalUniverse.has(canonicalPublicUrl(x.url)));
+const canonicalInspections = successfulInspections.filter(x=>canonicalUniverse.has(normalizeUrl(x.url)));
+const legacyObservedInspections = successfulInspections.filter(x=>!canonicalUniverse.has(normalizeUrl(x.url)));
 const indexedInspections = canonicalInspections.filter(x=>x.verdict==='PASS');
 const excludedInspections = canonicalInspections.filter(x=>x.verdict==='NEUTRAL');
 const failedInspections = canonicalInspections.filter(x=>x.verdict==='FAIL');
