@@ -1,4 +1,4 @@
-# replay: external 401/403 adapter recovery 2026-09-28
+# replay: external 401/403 adapter recovery validation 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
