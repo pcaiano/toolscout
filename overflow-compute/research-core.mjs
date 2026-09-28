@@ -1,8 +1,8 @@
 const UA='ToolScout Overflow Research/1.0 (+https://trytoolscout.org/)';
 const MAX_HTML=500000;
-const ACTION_RE=/(\bsubmit\b|\bsubmission\b|add[-_ /]?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
-const SUBMISSION_INTENT_RE=/(\bsubmit\b(?:\s+now|\s+(?:your|a))?|\bsubmission\b|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product))/i;
-const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|return_to=[^&]*(?:product|tool|startup)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
+const ACTION_RE=/(\bsubmit\b|\bsubmission\b|add[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
+const SUBMISSION_INTENT_RE=/(\bsubmit\b(?:\s+now|\s+(?:your|a))?|\bsubmission\b|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product|app|software|project))/i;
+const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|return_to=[^&]*(?:product|tool|startup|listing|app|software|project|company|business)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?|listings?|apps?|software|projects?|companies|businesses)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
 const CONTENT_ROUTE_RE=/(?:^|\/)(?:best-of|blog|blogs|article|articles|news|funding-news|category|categories|tag|tags|guides?|resources?|advertise|pricing)(?:\/|$)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
 const DOC_RE=/(openapi|swagger|api[-_/ ]?docs|developer|developers|for-llms|agent|mcp|registry)/i;
@@ -133,6 +133,17 @@ function optionValue(selectBody){
   const preferred=options.find(x=>/(software|saas|tool|technology|general|other)/i.test(String(x.text||'')+' '+String(x.value||'')))||options[0];
   return String(preferred.value??preferred.text).slice(0,300);
 }
+function explicitSubmissionFormIntent(html){
+  const raw=String(html||'');
+  const text=stripTags(raw);
+  if(SUBMISSION_INTENT_RE.test(text))return true;
+  const names=[...raw.matchAll(/<(?:input|textarea|select)\b[^>]*\bname=["']([^"']+)["'][^>]*>/gi)].map(m=>String(m[1]||'').toLowerCase());
+  const specificName=names.some(name=>/(?:^|[\[_.:-])(product|tool|startup|app|software|project)(?:[_\].:-]|$)/i.test(name));
+  const canonical=new Set(names.map(canonicalFieldName).filter(Boolean));
+  const hasUrl=[...canonical].some(key=>['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(key));
+  const hasDetails=[...canonical].some(key=>['description','short_description','summary','overview','tagline','category','categories','industry','type'].includes(key));
+  return specificName&&hasUrl&&hasDetails;
+}
 function valueForField(key){
   if(['name','title','product_name','tool_name','startup_name','company','company_name'].includes(key))return'ToolScout';
   if(['url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website'].includes(key))return'https://trytoolscout.org/';
@@ -188,11 +199,11 @@ function safeFormPayload(html){
     :{payload:null,hiddenSafetyFields,rejectionReason:'insufficient_safe_fields'};
 }
 function machineFormAssessment(page){
-  if(!page?.ok)return{candidate:null,reasons:['page_unavailable'],formsSeen:0};
+  if(!page?.ok)return{candidate:null,reasons:['page_unavailable'],formsSeen:0,submissionIntentEvidence:false};
   const reasons=[];let formsSeen=0;
   for(const match of String(page.html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
     formsSeen++;
-    const open=match[1]||'',body=match[2]||'',formText=stripTags(body);
+    const open=match[1]||'',body=match[2]||'',formText=stripTags(body),submissionIntentEvidence=explicitSubmissionFormIntent(body);
     const method=String(tagAttr(open,'method')||'GET').toUpperCase();
     if(method!=='POST'){reasons.push('method_not_post');continue}
     if(CAPTCHA_RE.test(body)){reasons.push('captcha_in_form');continue}
@@ -207,10 +218,10 @@ function machineFormAssessment(page){
     if(!assessed.payload){reasons.push(assessed.rejectionReason||'payload_unresolved');continue}
     return{
       candidate:{kind:'html_form',endpoint,method:'POST',contentType:'application/x-www-form-urlencoded',payload:assessed.payload,hiddenSafetyFields:assessed.hiddenSafetyFields,confidence:96},
-      reasons,formsSeen
+      reasons,formsSeen,submissionIntentEvidence
     };
   }
-  return{candidate:null,reasons:[...new Set(reasons)].slice(0,8),formsSeen};
+  return{candidate:null,reasons:[...new Set(reasons)].slice(0,8),formsSeen,submissionIntentEvidence:false};
 }
 function resolveSchemaRef(spec,schema){
   if(!schema)return null;
@@ -443,17 +454,19 @@ async function researchDistribution(job){
   };
   home.signals=pageSignals(home);
   const links=extractLinks(home.html,home.url);
-  const actionCandidates=links.filter(x=>ACTION_RE.test(x.text+' '+x.url)).slice(0,5);
+  const exactActionCandidates=links.filter(x=>hasSubmissionIntent(x.text,x.url));
+  const genericActionCandidates=links.filter(x=>ACTION_RE.test(x.text+' '+x.url));
+  const actionCandidates=[...new Map([...exactActionCandidates,...genericActionCandidates].map(x=>[x.url,x])).values()].slice(0,8);
   const contactCandidates=links.filter(x=>CONTACT_RE.test(x.text+' '+x.url)).slice(0,8);
-  const unique=[...new Map([...actionCandidates,...contactCandidates].map(x=>[x.url,x])).values()].slice(0,8);
+  const unique=[...new Map([...actionCandidates,...contactCandidates].map(x=>[x.url,x])).values()].slice(0,10);
   const pages=await mapLimit(unique,4,async link=>{const p=await fetchPage(link.url);if(!p?.ok)return{link,page:p,signals:null};return{link,page:p,signals:pageSignals(p)}});
   const routes=[];
   for(const x of pages){
     if(!x?.page?.ok)continue;
     const signals=x.signals||{};
     if(ACTION_RE.test(x.link.text+' '+x.link.url)||signals.hasForm||signals.auth||signals.captcha){
-      const routeUrl=x.page.url||x.link.url,submissionIntent=hasSubmissionIntent(x.link.text,routeUrl);
-      const assessment=machineFormAssessment({...x.page,signals}),machineCandidate=submissionIntent?assessment.candidate:null;
+      const routeUrl=x.page.url||x.link.url;
+      const assessment=machineFormAssessment({...x.page,signals}),submissionIntent=hasSubmissionIntent(x.link.text,routeUrl)||assessment.submissionIntentEvidence===true,machineCandidate=submissionIntent?assessment.candidate:null;
       const policyBlockers=[
         signals.payment?'payment':null,
         signals.reciprocal?'reciprocal':null,
@@ -469,9 +482,8 @@ async function researchDistribution(job){
       });
     }
   }
-  if(!routes.length&&(ACTION_RE.test(home.url)||home.signals.hasForm||home.signals.auth||home.signals.captcha)){
-    const submissionIntent=hasSubmissionIntent('source route',home.url);
-    const assessment=machineFormAssessment(home),machineCandidate=submissionIntent?assessment.candidate:null;
+  if(!routes.some(x=>x.url===home.url)&&(ACTION_RE.test(home.url)||home.signals.hasForm||home.signals.auth||home.signals.captcha)){
+    const assessment=machineFormAssessment(home),submissionIntent=hasSubmissionIntent('source route',home.url)||assessment.submissionIntentEvidence===true,machineCandidate=submissionIntent?assessment.candidate:null;
     const policyBlockers=[
       home.signals.payment?'payment':null,
       home.signals.reciprocal?'reciprocal':null,
