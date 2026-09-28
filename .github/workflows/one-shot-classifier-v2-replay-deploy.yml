@@ -106,6 +106,16 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
+      - name: Diagnose classifier v8 zero-yield
+        run: |
+          set -euo pipefail
+          echo "Classifier v8 recent route outcomes"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT subject_key,completed_at,json_extract(result_json,'$.classification') classification,json_extract(result_json,'$.routeSummary.submissionRoutes') submission_routes,json_extract(result_json,'$.routeSummary.formRoutes') form_routes,json_extract(result_json,'$.routeSummary.authRoutes') auth_routes,json_extract(result_json,'$.routeSummary.captchaRoutes') captcha_routes,json_extract(result_json,'$.routeSummary.machineCandidates') machine_candidates,json_extract(result_json,'$.routes') routes FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND CAST(COALESCE(json_extract(payload_json,'$.classifierVersion'),0) AS INTEGER)>=8 ORDER BY completed_at DESC LIMIT 80;" | tee /tmp/classifier-v8.json
+          echo "Classifier v8 aggregate rejection evidence"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "WITH recent AS (SELECT result_json FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='completed' AND CAST(COALESCE(json_extract(payload_json,'$.classifierVersion'),0) AS INTEGER)>=8 ORDER BY completed_at DESC LIMIT 120), routes AS (SELECT value route FROM recent,json_each(recent.result_json,'$.routes')) SELECT json_extract(route,'$.submissionIntent') submission_intent,json_extract(route,'$.kind') kind,json_extract(route,'$.auth') auth,json_extract(route,'$.captcha') captcha,json_extract(route,'$.hasForm') has_form,json_extract(route,'$.formAssessment.rejections') rejections,COUNT(*) n FROM routes GROUP BY submission_intent,kind,auth,captcha,has_form,rejections ORDER BY n DESC LIMIT 60;" | tee /tmp/classifier-v8-rejections.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
       - name: Verify D1-safe production health once
         run: |
           set -euo pipefail
