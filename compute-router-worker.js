@@ -1049,7 +1049,7 @@ async function reconcileDuplicateRouteSurfaces(env){
       AND d.status IN ('candidate','discovered','research_required')
       AND NOT EXISTS (
         SELECT 1 FROM human_gate_contract h
-        WHERE h.engine='distribution' AND h.surface_slug=d.surface_slug
+        WHERE h.engine='distribution' AND h.subject_type='surface' AND h.subject_key=d.surface_slug
           AND h.status IN ('open','verification_pending')
       )
       AND NOT EXISTS (
