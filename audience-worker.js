@@ -5,7 +5,7 @@ import {SOCIAL_PLATFORM_CAPABILITIES,socialPlatformCapabilityHealth} from './soc
 const TOOLSCOUT_BLUESKY_DID='did:plc:hjawfnxtifnuqcgidlvmas76';
 const BLUESKY_MAX_GRAPHEMES=300;
 const BLUESKY_MAX_BYTES=3000;
-const BLUESKY_REPLY_TARGET_GRAPHEMES=280;
+const BLUESKY_REPLY_TARGET_GRAPHEMES=300;
 const AUDIENCE_INGEST_TOKEN_SHA256='6e19bfed6e6a9c3387a7a3cbe9d13cd88cb7567513829c7881d4cddc5a5d6daa';
 const jsonHeaders={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const safeText=(v,n=1000)=>String(v??'').slice(0,n);
@@ -30,33 +30,50 @@ function withinBlueskyLimits(text,maxGraphemes=BLUESKY_MAX_GRAPHEMES){
 function takeGraphemes(text,max){
   return graphemeSegments(text).slice(0,Math.max(0,max)).join('');
 }
+const BLUESKY_DANGLING_TERMINAL=/\b(?:at|to|for|with|from|via|and|or|but|because|if|when|while|about|of|in|on|by)\s*[.!?)]*$/i;
+function hasDanglingBlueskyTerminal(value){
+  return BLUESKY_DANGLING_TERMINAL.test(String(value||'').trim());
+}
+function completeSentencePrefixWithinBlueskyLimit(value,target){
+  const text=normalizeBlueskyCopy(value);
+  let best='';
+  for(const match of text.matchAll(/[.!?](?=\s|$)/g)){
+    const candidate=text.slice(0,Number(match.index)+1).trim();
+    if(!withinBlueskyLimits(candidate,target))break;
+    if(!hasDanglingBlueskyTerminal(candidate))best=candidate;
+  }
+  return best;
+}
 function completeBlueskyReply(value,{target=BLUESKY_REPLY_TARGET_GRAPHEMES}={}){
   const original=normalizeBlueskyCopy(value);
-  if(!original)return {text:'',changed:false,reason:'empty',originalGraphemes:0,graphemes:0,bytes:0};
+  if(!original)return {text:'',changed:false,reason:'empty',originalGraphemes:0,graphemes:0,bytes:0,blocked:true};
   const originalGraphemes=graphemeLength(original);
-  if(withinBlueskyLimits(original,target))return {text:original,changed:false,reason:'within_target',originalGraphemes,graphemes:originalGraphemes,bytes:utf8Bytes(original)};
-
-  const hard=takeGraphemes(original,target).trim();
-  const sentenceMatches=[...hard.matchAll(/(?:^|.*?)(?:[.!?](?=\s|$))/g)].map(m=>m[0].trim()).filter(Boolean);
-  let text=sentenceMatches.length?sentenceMatches.at(-1):'';
-
-  if(graphemeLength(text)<Math.min(80,Math.floor(target*0.35))){
-    const words=hard.split(/\s+/).filter(Boolean);
-    if(words.length){
-      words.pop();
-      text=words.join(' ').trim();
-      text=text.replace(/[,:;\-]+$/,'').trim();
-      if(text&&!/[.!?]$/.test(text))text+='.';
-    }
+  if(withinBlueskyLimits(original,target)&&!hasDanglingBlueskyTerminal(original)){
+    return {text:original,changed:false,reason:'within_target',originalGraphemes,graphemes:originalGraphemes,bytes:utf8Bytes(original),blocked:false};
   }
-  if(!text)text=hard.replace(/[,:;\-]+$/,'').trim();
-  while(text&&!withinBlueskyLimits(text,target)){
-    const parts=text.replace(/[.!?]$/,'').trim().split(/\s+/);
-    parts.pop();
-    text=parts.join(' ').trim();
-    if(text)text+='.';
+
+  const text=completeSentencePrefixWithinBlueskyLimit(original,target);
+  if(text){
+    return {
+      text,
+      changed:text!==original,
+      reason:withinBlueskyLimits(original,target)?'removed_dangling_sentence':'dropped_trailing_sentence_to_limit',
+      originalGraphemes,
+      graphemes:graphemeLength(text),
+      bytes:utf8Bytes(text),
+      blocked:false
+    };
   }
-  return {text,changed:text!==original,reason:'rewritten_to_complete_limit',originalGraphemes,graphemes:graphemeLength(text),bytes:utf8Bytes(text)};
+
+  return {
+    text:'',
+    changed:true,
+    reason:'requires_regeneration',
+    originalGraphemes,
+    graphemes:0,
+    bytes:0,
+    blocked:true
+  };
 }
 async function digestHex(value){const bytes=new TextEncoder().encode(String(value||''));const digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function validAudienceIngest(request){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(token&&(await digestHex(token))===AUDIENCE_INGEST_TOKEN_SHA256)}
@@ -166,10 +183,10 @@ async function prepareBlueskyReply(request,env){
   if(!(await validAudienceIngest(request)))return Response.json({ok:false,error:'unauthorized'},{status:401,headers:jsonHeaders});
   let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:jsonHeaders})}
   const result=completeBlueskyReply(body.text,{target:Math.min(BLUESKY_REPLY_TARGET_GRAPHEMES,Math.max(120,Number(body.target_graphemes)||BLUESKY_REPLY_TARGET_GRAPHEMES))});
-  if(!result.text)return Response.json({ok:false,error:'empty_reply'},{status:422,headers:jsonHeaders});
+  if(!result.text)return Response.json({ok:false,error:result.reason==='requires_regeneration'?'reply_requires_regeneration':'empty_reply',...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,policy:'complete-or-block-no-synthetic-truncation-v2'},{status:422,headers:jsonHeaders});
   const valid=withinBlueskyLimits(result.text,BLUESKY_MAX_GRAPHEMES);
   if(!valid)return Response.json({ok:false,error:'reply_still_over_limit',...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES},{status:422,headers:jsonHeaders});
-  return Response.json({ok:true,...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,policy:'complete-sentence-no-hard-cut-v1'},{headers:jsonHeaders});
+  return Response.json({ok:true,...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,policy:'complete-or-block-no-synthetic-truncation-v2'},{headers:jsonHeaders});
 }
 
 async function ingestAudienceEvent(request,env){
