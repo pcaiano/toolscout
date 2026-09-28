@@ -1,4 +1,4 @@
-# replay: force one-shot SEO queue proof after IndexNow fix 2026-09-28
+# replay: bypass one-shot cycle claim for SEO queue proof 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -80,7 +80,12 @@ jobs:
           new="engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:0,cycleContext:executionCycle"
           if old not in s:
               raise SystemExit('scheduled execution single-flight patch point not found')
-          p.write_text(s.replace(old,new,1))
+          s=s.replace(old,new,1)
+          cycle_old="const executionCycle=missionCycleContext('growth','execution_contract',Number(event?.scheduledTime)||Date.now());"
+          if cycle_old not in s:
+              raise SystemExit('scheduled execution cycle-claim patch point not found')
+          s=s.replace(cycle_old,"const executionCycle=null;",1)
+          p.write_text(s)
           PY
           npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
           DEV_PID=$!
