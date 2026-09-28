@@ -113,3 +113,21 @@ Traffic Quality can continue to flag bots, synthetic traffic, browser confirmati
 ## Closed-loop attribution exception
 
 Distribution and Growth Engine experiments may continue to use stricter D1 browser-confirmed sessions when the question is exact action attribution, such as proving that a specific tracked distribution action produced a browser-confirmed visit. Those metrics must be labelled attributed or browser-confirmed and must not be presented as ToolScout's total acquisition traffic.
+
+
+## Health and freshness contract
+
+Effective: 2026-09-28
+
+GA4 health is runtime evidence, not a repository freshness signal. The canonical health check is a successful direct Google Analytics 4 Data API read performed by the production Command Center runtime. Its `fetchedAt` value is the observation timestamp.
+
+`reports/ga4-health.json` is a legacy diagnostic artifact only. Its file age must never mark GA4 unavailable, stale or unhealthy, and no Growth Brain, Software News, Command Center or monitoring process may use its `generatedAt` value as GA4 connection freshness.
+
+The canonical states are:
+
+- `connected`: the direct GA4 Data API request succeeds for the configured ToolScout property.
+- `unavailable`: the direct request fails, OAuth is disconnected, credentials are unavailable or the property cannot be queried.
+
+A stale repository artifact is not a GA4 incident. A failed live API read is.
+
+Google Search Console follows its own first-party Search Console API freshness contract and is not inferred from GA4 health.
