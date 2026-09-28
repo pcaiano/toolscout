@@ -2,7 +2,7 @@ const UA='ToolScout Overflow Research/1.0 (+https://trytoolscout.org/)';
 const MAX_HTML=500000;
 const ACTION_RE=/(\bsubmit\b|\bsubmission\b|add[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
 const SUBMISSION_INTENT_RE=/(\bsubmit\b(?:\s+now|\s+(?:your|a))?|\bsubmission\b|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product|app|software|project))/i;
-const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|return_to=[^&]*(?:product|tool|startup|listing|app|software|project|company|business)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?|listings?|apps?|software|projects?|companies|businesses)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
+const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|(?:return_to|next|redirect|redirect_to|continue)=[^&]*(?:product|tool|startup|listing|app|software|project|company|business)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?|listings?|apps?|software|projects?|companies|businesses)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
 const CONTENT_ROUTE_RE=/(?:^|\/)(?:best-of|blog|blogs|article|articles|news|funding-news|category|categories|tag|tags|guides?|resources?|advertise|pricing)(?:\/|$)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
 const DOC_RE=/(openapi|swagger|api[-_/ ]?docs|developer|developers|for-llms|agent|mcp|registry)/i;
@@ -66,7 +66,9 @@ function sameHost(a,b){
   }catch{return false}
 }
 function hasSubmissionIntent(label,url){
-  const rawUrl=String(url||''),signal=String(label||'')+' '+rawUrl;
+  const rawUrl=String(url||'');
+  let decodedUrl=rawUrl;try{decodedUrl=decodeURIComponent(rawUrl)}catch{}
+  const signal=String(label||'')+' '+rawUrl+' '+decodedUrl;
   let path='';try{path=new URL(rawUrl).pathname}catch{}
   // Content/marketing pages often contain site-wide forms and CAPTCHA widgets.
   // They are never submission routes unless the URL itself carries an explicit
@@ -453,12 +455,31 @@ async function researchDistribution(job){
     evidence:{pagesFetched:0,cacheHits:0,sourceFallbackAttempted:attempted.length>1,attemptedUrls:attempted.slice(0,8)}
   };
   home.signals=pageSignals(home);
-  const links=extractLinks(home.html,home.url);
+  const discoveryPages=[home];
+  const sourceHasExactIntent=hasSubmissionIntent('source route',home.url);
+  if(!sourceHasExactIntent){
+    let rootUrl=null;try{rootUrl=new URL(home.url).origin+'/'}catch{}
+    if(rootUrl&&rootUrl!==home.url){
+      const root=await fetchPage(rootUrl);
+      if(root?.ok){root.signals=pageSignals(root);discoveryPages.push(root)}
+    }
+  }
+  const links=[...new Map(discoveryPages.flatMap(page=>extractLinks(page.html,page.url)).map(x=>[x.url,x])).values()];
   const exactActionCandidates=links.filter(x=>hasSubmissionIntent(x.text,x.url));
+  let guessedSubmissionLinks=[];
+  if(!exactActionCandidates.length){
+    let origin=null;try{origin=new URL(home.url).origin}catch{}
+    if(origin){
+      guessedSubmissionLinks=['/submit','/submit-tool','/add-tool','/add-product','/list-your-tool','/products/new','/tools/new','/startups/new','/listings/new']
+        .map(path=>({url:absolute(path,origin+'/'),text:'guessed submission route'}))
+        .filter(x=>x.url&&x.url!==home.url)
+        .slice(0,6);
+    }
+  }
   const genericActionCandidates=links.filter(x=>ACTION_RE.test(x.text+' '+x.url));
-  const actionCandidates=[...new Map([...exactActionCandidates,...genericActionCandidates].map(x=>[x.url,x])).values()].slice(0,8);
+  const actionCandidates=[...new Map([...exactActionCandidates,...guessedSubmissionLinks,...genericActionCandidates].map(x=>[x.url,x])).values()].slice(0,10);
   const contactCandidates=links.filter(x=>CONTACT_RE.test(x.text+' '+x.url)).slice(0,8);
-  const unique=[...new Map([...actionCandidates,...contactCandidates].map(x=>[x.url,x])).values()].slice(0,10);
+  const unique=[...new Map([...actionCandidates,...contactCandidates].map(x=>[x.url,x])).values()].slice(0,12);
   const pages=await mapLimit(unique,4,async link=>{const p=await fetchPage(link.url);if(!p?.ok)return{link,page:p,signals:null};return{link,page:p,signals:pageSignals(p)}});
   const routes=[];
   for(const x of pages){
@@ -501,7 +522,7 @@ async function researchDistribution(job){
   let openApi={candidate:null,probes:0,source:null};
   const hasExactSubmissionRoute=routes.some(x=>x.submissionIntent===true);
   if(hasExactSubmissionRoute&&!routes.some(x=>Boolean(x.machineCandidate))){
-    openApi=await findOpenApiMachineCandidate(home.url,[home,...pages.map(x=>x?.page).filter(p=>p?.ok)]);
+    openApi=await findOpenApiMachineCandidate(home.url,[...discoveryPages,...pages.map(x=>x?.page).filter(p=>p?.ok)]);
     if(openApi.candidate){
       const c=openApi.candidate;
       routes.unshift({
@@ -540,7 +561,7 @@ async function researchDistribution(job){
       policyBlockers:blockers.length,
       formRejections:selectedRoutes.flatMap(x=>x.formAssessment?.rejections||[]).reduce((acc,key)=>{acc[key]=(acc[key]||0)+1;return acc},{})
     },
-    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length,openApiProbes:Number(openApi.probes||0),openApiSource:openApi.source||null,sourceFallbackUsed:home.url!==source,attemptedUrls:attempted.slice(0,8)}
+    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:discoveryPages.length+pages.filter(x=>x?.page?.ok).length,cacheHits:discoveryPages.filter(x=>x?.cacheHit).length+pages.filter(x=>x?.page?.cacheHit).length,openApiProbes:Number(openApi.probes||0),openApiSource:openApi.source||null,sourceFallbackUsed:home.url!==source,rootDiscoveryUsed:discoveryPages.length>1,guessedSubmissionRoutes:guessedSubmissionLinks.length,attemptedUrls:attempted.slice(0,8)}
   };
 }
 
