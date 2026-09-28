@@ -464,3 +464,10 @@ Open verification / provider drift:
 - Engine Health Reconcile has shown intermittent Make HTTP timeouts while canonical engine state and later calls remain healthy. Treat that helper as bounded diagnostic evidence, never as sole proof an engine is unhealthy.
 - The Content Engine filter repair was structurally validated without forcing an off-schedule public social post. Future scheduled content success must be judged from /api/engine-evidence publication proof, not Make scenario status.
 
+
+
+## External submission 401/403 recovery - 2026-09-28
+
+Launching Next exposed a replay-loop failure class in the external execution plane. An authorized POST returned HTTP 403, but the same route could later be rediscovered and promoted back to `verified/ready_to_submit` even after three failed attempts. Production D1 readback confirmed that exact drift for `launchingnext-com`.
+
+The recovery contract now separates transport completion from external acceptance, invalidates HTTP 401/403 adapters, reconciles existing rejected rows into fresh route research, and suppresses automatic re-promotion when fresh research reproduces the same endpoint, method and content type. The adapter remains `transport_rejected` unless materially different machine evidence appears; CAPTCHA, authentication or manual work creates a Human Gate only from fresh exact same-host evidence. A direct production reconciliation moved `launchingnext-com` from `ready_to_submit / verified` to `research_required / revalidation_required` with `human_required=0`.

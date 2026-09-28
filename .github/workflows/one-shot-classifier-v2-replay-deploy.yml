@@ -1,4 +1,4 @@
-# replay: external 401/403 adapter recovery validation 2026-09-28
+# replay: external 401/403 replay suppression 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -46,7 +46,7 @@ jobs:
           jq -e '
             (.distributionClassifierVersion >= 7) and
             (.qualificationMode == "render_primary_with_bounded_cloudflare_fallback") and
-            (.externalSubmissionRecoveryPolicy == "revalidate_401_403_then_fresh_route_research_v1") and
+            (.externalSubmissionRecoveryPolicy == "revalidate_401_403_reject_same_route_v2") and
             (
               (
                 .status == "d1_quota_exhausted" and
