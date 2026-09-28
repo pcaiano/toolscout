@@ -1,8 +1,24 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-26T09:58:00Z",
+  "updatedAt": "2026-09-28T09:55:08Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "github-copilot-sandboxing-observability",
+      "publishedAt": "2026-09-28",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub Copilot adds local sandboxing and agent observability",
+      "summary": "GitHub Copilot adds local sandboxing, OpenTelemetry agent monitoring and expanded model choice for software teams.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-25-github-copilot-weekly-releases-september-21/",
+      "articleUrl": "/news/github-copilot-sandboxing-observability.html",
+      "profileUrl": "/news/github-copilot-sandboxing-observability.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "chatgpt-images-2-5",
       "publishedAt": "2026-09-26",
