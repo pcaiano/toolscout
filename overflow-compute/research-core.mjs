@@ -47,7 +47,7 @@ async function acquireHost(url){
 
 
 function safe(v,n=2000){return String(v??'').slice(0,n)}
-function stripTags(v){return safe(v,8000).replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
+function stripTags(v,n=8000){return safe(v,n).replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
 function validPublicHttp(value){
   try{
     const u=new URL(value);
@@ -418,7 +418,7 @@ function exactUnreachableHumanRoute(source,httpStatus){
 }
 function machineFormCandidate(page){return machineFormAssessment(page).candidate}
 function pageSignals(page){
-  const text=stripTags(page.html).slice(0,120000);
+  const text=stripTags(page.html,120000);
   const lower=text.toLowerCase();
   return{
     auth:AUTH_RE.test(lower)||/<input[^>]+type=["']password["']/i.test(page.html),
