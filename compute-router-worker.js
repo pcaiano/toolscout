@@ -9,7 +9,7 @@ const RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
-const DISTRIBUTION_CLASSIFIER_VERSION=7;
+const DISTRIBUTION_CLASSIFIER_VERSION=8;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
@@ -541,7 +541,16 @@ async function health(env){
       (SELECT MIN(available_at) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now')) next_available_at,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='leased') canonical_leased,
       (SELECT COUNT(*) FROM compute_overflow_batches WHERE status IN ('dispatched','running')) canonical_active_batches,
-      (SELECT COUNT(*) FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit') adapters_ready,
+      (SELECT COUNT(*) FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
+        AND NOT EXISTS (
+          SELECT 1 FROM distribution_submissions rejected
+          WHERE rejected.surface_slug=a.surface_slug
+            AND rejected.asset_url='https://trytoolscout.org/'
+            AND rejected.submission_type='auto_discovered_json'
+            AND rejected.status='failed'
+            AND rejected.action_url=a.endpoint
+            AND (rejected.error LIKE 'external_http_401:%' OR rejected.error LIKE 'external_http_403:%')
+        )) adapters_ready,
       (SELECT COUNT(*) FROM human_gate_contract WHERE engine='distribution' AND status='open') open_human_gates,
       (SELECT COUNT(*) FROM human_gate_contract WHERE engine='distribution' AND status='open' AND (lower(reason) LIKE '%captcha%' OR lower(instructions) LIKE '%captcha%')) captcha_human_gates,
       (SELECT COUNT(*) FROM human_gate_contract WHERE engine='distribution' AND status='open' AND gate_type='authentication') auth_human_gates,
@@ -736,6 +745,15 @@ async function enqueueAuthorizedExecution(env){
     LEFT JOIN distribution_surface_costs c ON c.surface_slug=a.surface_slug
     LEFT JOIN auth_automation_capability ac ON ac.surface_slug=a.surface_slug
     WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
+      AND NOT EXISTS (
+        SELECT 1 FROM distribution_submissions rejected
+        WHERE rejected.surface_slug=a.surface_slug
+          AND rejected.asset_url='https://trytoolscout.org/'
+          AND rejected.submission_type='auto_discovered_json'
+          AND rejected.status='failed'
+          AND rejected.action_url=a.endpoint
+          AND (rejected.error LIKE 'external_http_401:%' OR rejected.error LIKE 'external_http_403:%')
+      )
       AND COALESCE(ac.automation_class,'public_automatic')<>'token_automatic'
       AND COALESCE(c.cost_amount,0)=0
       AND COALESCE(l.operating_decision,'explore') IN ('explore','measure','scale')
