@@ -22,6 +22,8 @@ check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render resear
 check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
 check(s.includes("QUALIFICATION_FALLBACK_LIMIT=6"),'fallback qualification is bounded');
 check(s.includes("runQualificationWatchdog(env).catch"),'scheduled control plane actually invokes qualification watchdog');
+check(s.includes("reconcileDuplicateRouteSurfaces"),'duplicate route surfaces are consolidated before research enqueue');
+check(s.includes("h.subject_type='surface' AND h.subject_key=d.surface_slug"),'duplicate consolidation preserves open human gates');
 check(s.includes("kind==='json_api'"),'canonical validator accepts safe JSON API candidates');
 check(s.includes("render_primary_with_bounded_cloudflare_fallback"),'health exposes the real two-stage qualification architecture');
 check(s.includes("humanGatesOpen:num(live?.open_human_gates)"),'human-gate backlog is visible in compute truth');
