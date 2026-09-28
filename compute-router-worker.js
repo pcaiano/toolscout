@@ -607,7 +607,7 @@ async function health(env){
     writeAmplificationGuard:'d1-write-guard-v2',
     healthReadModel:'incremental_cached_120s_read_only',
     qualificationMode:'render_primary_with_bounded_cloudflare_fallback',
-    externalSubmissionRecoveryPolicy:'revalidate_401_403_then_fresh_route_research_v1'
+    externalSubmissionRecoveryPolicy:'revalidate_401_403_reject_same_route_v2'
   };
   healthCacheValue=snapshot;healthCacheAt=Date.now();return snapshot;
 }
