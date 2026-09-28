@@ -81,6 +81,7 @@ If external compute is absent or unavailable:
 - completion callbacks do not recursively dispatch more work; follow-up waits for the next scheduled control-plane tick to avoid Cloudflare subrequest exhaustion.
 - stale external batches are requeued after 3 minutes.
 - no external research result is trusted as an automatic submission decision.
+- an HTTP 401 or 403 returned by an authorized submission is recorded as an external rejection outcome, invalidates the adapter for revalidation, and returns the surface to fresh route research; it does not itself create a Human Gate.
 
 GitHub Actions remain fallback-disabled until the October quota reset.
 
