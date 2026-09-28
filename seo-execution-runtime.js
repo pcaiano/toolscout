@@ -107,13 +107,28 @@ async function verifyDepthIntervention(pathname){
 async function queueIndexNow(env,pathname){
   const a=await adapter(env);if(!a)return {queued:false,reason:'indexnow_adapter_unavailable'};
   const assetUrl='https://trytoolscout.org'+pathname;
-  const recent=await env.DB.prepare(`SELECT 1 ok FROM distribution_submissions WHERE surface_slug='indexnow' AND asset_url=? AND created_at>=datetime('now','-7 days') LIMIT 1`).bind(assetUrl).first().catch(()=>null);
-  if(recent?.ok)return {queued:false,reason:'recent_indexnow_exists'};
+  const existing=await env.DB.prepare(`SELECT submission_id,status,created_at,updated_at,last_attempt_at,submitted_at
+    FROM distribution_submissions
+    WHERE surface_slug='indexnow' AND asset_url=? AND submission_type='http_json'
+    LIMIT 1`).bind(assetUrl).first().catch(()=>null);
   const payload={host:'trytoolscout.org',key:String(a.key||''),keyLocation:String(a.key_location||''),urlList:[assetUrl]};
-  await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at)
+  const endpoint=a.endpoint||'https://api.indexnow.org/indexnow';
+  if(existing?.submission_id){
+    const recent=await env.DB.prepare(`SELECT 1 ok FROM distribution_submissions
+      WHERE submission_id=?
+        AND COALESCE(last_attempt_at,submitted_at,updated_at,created_at)>=datetime('now','-7 days')
+      LIMIT 1`).bind(existing.submission_id).first().catch(()=>null);
+    if(recent?.ok)return {queued:false,reason:'recent_indexnow_exists',submissionId:existing.submission_id};
+    await env.DB.prepare(`UPDATE distribution_submissions
+      SET status='ready',payload_json=?,action_url=?,human_required=0,error=NULL,updated_at=datetime('now')
+      WHERE submission_id=?`).bind(JSON.stringify(payload),endpoint,existing.submission_id).run();
+    return {queued:true,reused:true,submissionId:existing.submission_id};
+  }
+  const inserted=await env.DB.prepare(`INSERT OR IGNORE INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at)
     VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
-    .bind('sub_'+crypto.randomUUID(),'indexnow',assetUrl,'http_json','ready',JSON.stringify(payload),a.endpoint||'https://api.indexnow.org/indexnow',0).run();
-  return {queued:true};
+    .bind('sub_'+crypto.randomUUID(),'indexnow',assetUrl,'http_json','ready',JSON.stringify(payload),endpoint,0).run();
+  const changes=Number(inserted?.meta?.changes||inserted?.changes||0);
+  return changes>0?{queued:true}:{queued:false,reason:'indexnow_already_exists'};
 }
 export async function executeCloudflareSeoTask(env,task){
   if(!task||!SEO_ACTIONS.has(String(task.action||'')))return {verified:false,reason:'unsupported_seo_action'};
