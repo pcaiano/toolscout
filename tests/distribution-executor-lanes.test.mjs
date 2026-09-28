@@ -37,7 +37,9 @@ assert.match(router,/continueDistributionExecutionHandoff/);
 assert.match(router,/distribution_research_execution_handoff/);
 assert.match(router,/validatedOverflowMachineCandidate/);
 assert.match(router,/status='ready_to_submit'/);
-assert.match(router,/overflow_queue_refilled/);
+assert.match(router,/runQualificationWatchdog/);
+assert.match(router,/render_primary_with_bounded_cloudflare_fallback/);
+assert.match(router,/kind==='json_api'/);
 
 const dashboard=read('distribution-engine-worker.js');
 assert.match(dashboard,/executionLanes/);
