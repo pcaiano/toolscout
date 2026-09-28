@@ -84,8 +84,9 @@ async function publicHtml(pathname){
   }catch(error){return {ok:false,status:0,html:'',error:String(error?.message||error).slice(0,300)}}
 }
 function hrefPresent(html,pathname){
-  const escaped=String(pathname).replace(/[.*+?^${}()|[\]\\]/g,'\\async function queueIndexNow(env,pathname){');
-  return new RegExp('href=["\\\']'+escaped+'(?:["\\\'?#])','i').test(String(html||''));
+  const body=String(html||'');
+  const path=String(pathname||'');
+  return body.includes('href="'+path+'"')||body.includes("href='"+path+"'");
 }
 async function verifyInternalLinkIntervention(pathname){
   const hubs=['/guides','/tools','/compare'];
