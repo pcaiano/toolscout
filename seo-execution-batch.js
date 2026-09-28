@@ -16,15 +16,22 @@ async function boundedExecution(promise,ms,label='execution'){
 
 async function executeBatch(env,limit=8){
   const cap=Math.max(1,Math.min(8,Number(limit)||8));
+  await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+        claimed_at=NULL,attempted_at=NULL,last_result='seo_execution_batch_orphan_recovered_v2',updated_at=datetime('now')
+    WHERE executor='seo_cloudflare'
+      AND status='claimed'
+      AND last_result IN ('seo_execution_batch_claimed_v1','seo_execution_batch_claimed_v2')
+      AND claimed_at<datetime('now','-90 seconds')`).run().catch(()=>null);
   const claim=await claimExecutorTasks(env,'seo_cloudflare',{
     limit:cap,
     maxInFlight:cap,
-    result:'seo_execution_batch_claimed_v1'
+    result:'seo_execution_batch_claimed_v2'
   });
   if(!claim.claimed)return {ok:true,claimed:0,verified:0,deferred:0,items:[]};
 
   const items=[];
-  for(const task of claim.tasks||[]){
+  await Promise.all((claim.tasks||[]).map(async task=>{
     try{
       if(task?.source_kind==='supervisor'){
         const proof=await recordExecutionProof(env,{
@@ -40,7 +47,7 @@ async function executeBatch(env,limit=8){
           }
         });
         items.push({task_id:task.task_id,status:'verified',supervisor:true,action:task.action,proof:proof?.ok===true});
-        continue;
+        return;
       }
 
       const out=await boundedExecution(executeCloudflareSeoTask(env,task),12000,'seo_cloudflare_task');
@@ -71,7 +78,7 @@ async function executeBatch(env,limit=8){
       await deferExecutionTask(env,task.task_id,'cloudflare_seo_batch_error:'+message).catch(()=>null);
       items.push({task_id:task.task_id,status:'deferred',error:message});
     }
-  }
+  }));
 
   return {
     ok:true,
@@ -87,9 +94,9 @@ export async function runSeoExecutionBatch(env,limit=8,triggerName='seo_executio
     env,
     {
       engine:'seo_geo_aio',
-      mission:'execution_batch',
+      mission:'execution_batch_v2',
       triggerName:String(triggerName||'seo_execution_batch').slice(0,120),
-      singleFlightMinutes:10
+      singleFlightMinutes:2
     },
     ()=>executeBatch(env,limit)
   );
