@@ -1037,11 +1037,47 @@ async function reconcileRejectedExternalAdapters(env,{limit=20}={}){
   return{checked:rows(q).length,recovered};
 }
 
+async function reconcileDuplicateRouteSurfaces(env){
+  const w=await env.DB.prepare(`UPDATE distribution_opportunities AS d
+    SET status='skipped',
+        human_required=0,
+        next_action='Duplicate discovered route consolidated into the canonical same-URL opportunity.',
+        last_checked_at=datetime('now'),
+        updated_at=datetime('now')
+    WHERE d.surface_slug LIKE 'route-%'
+      AND d.action_url IS NOT NULL
+      AND d.status IN ('candidate','discovered','research_required')
+      AND NOT EXISTS (
+        SELECT 1 FROM human_gate_contract h
+        WHERE h.engine='distribution' AND h.surface_slug=d.surface_slug
+          AND h.status IN ('open','verification_pending')
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM distribution_submissions s
+        WHERE s.surface_slug=d.surface_slug
+          AND s.status IN ('submitted','pending_review','verified')
+      )
+      AND EXISTS (
+        SELECT 1 FROM distribution_opportunities c
+        WHERE c.surface_slug<>d.surface_slug
+          AND lower(c.action_url)=lower(d.action_url)
+          AND c.status NOT IN ('rejected','skipped','unavailable_free','policy_blocked')
+          AND (
+            c.surface_slug NOT LIKE 'route-%'
+            OR c.surface_slug<d.surface_slug
+          )
+      )`).run().catch(()=>null);
+  const consolidated=Number(w?.meta?.changes||w?.changes||0);
+  if(consolidated>0)await event(env,'duplicate_route_surfaces_consolidated','completed',`Consolidated ${consolidated} duplicate route surface(s) by exact action URL before Render research enqueue.`).catch(()=>{});
+  return consolidated;
+}
+
 async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
   await ensureHotIndexes(env);
   const rejectedAdapterRecovery=await isolatedOverflowStage(env,'external_submission_recovery',()=>reconcileRejectedExternalAdapters(env),{checked:0,recovered:0});
+  const duplicateRouteConsolidation=await isolatedOverflowStage(env,'duplicate_route_consolidation',()=>reconcileDuplicateRouteSurfaces(env),0);
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
   const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
   const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
@@ -1066,7 +1102,7 @@ async function runOverflowTick(env){
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,
+    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,
     batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
