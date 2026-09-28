@@ -6,6 +6,9 @@
   "propertyLinked": true,
   "dimensionProbe": "channel",
   "rowCount": 1,
-  "role": "secondary_sanity_check_only",
-  "note": "Health marker only. GA4 metrics are intentionally not published in this asset."
+  "role": "legacy_diagnostic_only",
+  "note": "Legacy diagnostic artifact. GA4 health is determined by direct runtime GA4 Data API reads.",
+  "canonicalHealthSource": "production Command Center direct GA4 Data API runtime",
+  "freshnessPolicy": "Do not use generatedAt to determine GA4 health or staleness. Use live runtime status and fetchedAt.",
+  "deprecatedForFreshness": true
 }
