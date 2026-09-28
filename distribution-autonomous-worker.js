@@ -780,16 +780,18 @@ async function recoverMachineResolvableAuthGates(env){
 }
 async function reconcileObsoleteClassifierHumanGates(env){
   await ensureHumanGateSchema(env);
-  const q=await env.DB.prepare(`SELECT gate_key,subject_key,action_url,payload_json
+  const q=await env.DB.prepare(`SELECT gate_key,subject_key,action_url,payload_json,gate_type
     FROM human_gate_contract
-    WHERE engine='distribution' AND status='open' AND gate_type='human_confirmation'
+    WHERE engine='distribution' AND status='open'
+      AND gate_type IN ('human_confirmation','manual_submission','authentication')
+      AND CAST(COALESCE(json_extract(payload_json,'$.research_classifier_version'),0) AS INTEGER)>0
     ORDER BY updated_at ASC LIMIT 100`).all().catch(()=>({results:[]}));
   let reconciled=0;
   for(const row of q.results||[]){
     let payload={};try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
     const version=Number(payload.research_classifier_version||0);
     if(!version||version>=RESEARCH_CLASSIFIER_VERSION)continue;
-    const detail=`Human Gate invalidated by classifier upgrade v${version}->v${RESEARCH_CLASSIFIER_VERSION}. Re-run external research before asking the owner to act.`;
+    const detail=`Research-derived Human Gate invalidated by classifier upgrade v${version}->v${RESEARCH_CLASSIFIER_VERSION}. Re-run external research before asking the owner to act.`;
     await env.DB.batch([
       env.DB.prepare(`UPDATE human_gate_contract SET status='cancelled',resolved_at=datetime('now'),next_verification_at=NULL,verification_detail=?,updated_at=datetime('now') WHERE gate_key=? AND status='open'`).bind(detail,row.gate_key),
       env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,last_checked_at=NULL,updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','scheduled','policy_blocked','rejected','skipped','unavailable_free')`).bind(detail,row.subject_key),
