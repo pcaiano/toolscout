@@ -1,0 +1,30 @@
+name: One Shot Rejected Adapter Replay Validation
+
+on:
+  push:
+    branches:
+      - "fix/rejected-adapter-replay-loop"
+    paths:
+      - ".github/workflows/one-shot-rejected-adapter-loop-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate rejected adapter replay guard
+        run: |
+          set -euo pipefail
+          node --check compute-router-worker.js
+          node tests/external-submission-recovery.test.mjs
+          node tests/compute-overflow-policy.test.mjs
+          node tests/compute-overflow-reliability.mjs
+          node tests/external-action-plane.test.mjs
