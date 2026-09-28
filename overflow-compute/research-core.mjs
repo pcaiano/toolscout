@@ -275,6 +275,8 @@ function openApiMachineCandidate(spec,source,homepage){
   for(const [path,methods] of Object.entries(spec.paths)){
     const op=methods?.post;
     if(!op||!API_ROUTE_RE.test(path+' '+safe(op.summary,300)+' '+safe(op.operationId,200)))continue;
+    if(/\{[^}]+\}/.test(path))continue;
+    if(Array.isArray(op.parameters)&&op.parameters.some(p=>p?.required))continue;
     if(securityRequiresAuth(operationSecurity(spec,op)))continue;
     const schema=resolveSchemaRef(spec,op?.requestBody?.content?.['application/json']?.schema);
     const payload=apiPayloadFromSchema(spec,schema);
