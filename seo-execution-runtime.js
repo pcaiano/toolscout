@@ -73,6 +73,36 @@ async function canonicalState(env,pathname){
     return {verified,httpStatus:response.status,expected,canonical,proofSource,reason:verified?'self_canonical_verified':'canonical_not_self'};
   }catch(error){return {verified:false,expected,reason:'canonical_probe_failed',error:String(error?.message||error).slice(0,300)}}
 }
+async function publicHtml(pathname){
+  const url='https://trytoolscout.org'+pathname;
+  try{
+    const r=await fetch(url,{headers:{'Cache-Control':'no-cache','User-Agent':'ToolScout-SEO-Execution-Probe/1.0'},signal:AbortSignal.timeout(8000)});
+    if(!r.ok)return {ok:false,status:r.status,html:''};
+    const type=String(r.headers.get('content-type')||'').toLowerCase();
+    if(!type.includes('text/html'))return {ok:false,status:r.status,html:''};
+    return {ok:true,status:r.status,html:await r.text()};
+  }catch(error){return {ok:false,status:0,html:'',error:String(error?.message||error).slice(0,300)}}
+}
+function hrefPresent(html,pathname){
+  const escaped=String(pathname).replace(/[.*+?^${}()|[\]\\]/g,'\\async function queueIndexNow(env,pathname){');
+  return new RegExp('href=["\\\']'+escaped+'(?:["\\\'?#])','i').test(String(html||''));
+}
+async function verifyInternalLinkIntervention(pathname){
+  const hubs=['/guides','/tools','/compare'];
+  const evidence=[];
+  for(const hub of hubs){
+    const page=await publicHtml(hub);
+    evidence.push({hub,ok:page.ok,linked:page.ok&&page.html.includes('data-toolscout-index-recovery-links="1"')&&hrefPresent(page.html,pathname),status:page.status});
+  }
+  const linked=evidence.filter(x=>x.linked).length;
+  return {verified:linked>=2,linkedHubs:linked,hubs:evidence};
+}
+async function verifyDepthIntervention(pathname){
+  const page=await publicHtml(pathname);
+  const marker=page.ok&&(page.html.includes('organic-growth:runtime-start')||page.html.includes('organic-growth:start'));
+  return {verified:Boolean(marker),status:page.status,marker:Boolean(marker)};
+}
+
 async function queueIndexNow(env,pathname){
   const a=await adapter(env);if(!a)return {queued:false,reason:'indexnow_adapter_unavailable'};
   const assetUrl='https://trytoolscout.org'+pathname;
@@ -111,14 +141,24 @@ export async function executeCloudflareSeoTask(env,task){
     indexNow=await queueIndexNow(env,pathname);
     if(indexNow.queued)await env.DB.prepare(`UPDATE seo_runtime_state SET indexnow_queued_at=datetime('now'),updated_at=datetime('now') WHERE pathname=?`).bind(pathname).run().catch(()=>{});
   }
+  let mutationProof=null;
+  if(action==='strengthen_internal_links'){
+    mutationProof=await verifyInternalLinkIntervention(pathname);
+    if(!mutationProof.verified)return {verified:false,reason:'internal_links_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
+  }
+  if(action==='deepen_existing_search_asset'){
+    mutationProof=await verifyDepthIntervention(pathname);
+    if(!mutationProof.verified)return {verified:false,reason:'search_asset_depth_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
+  }
   return {
     verified:true,
     executor:'seo_cloudflare',
     pathname,
     action,
-    proof_kind:action==='repair_canonical_alignment'?'canonical_current_state_verified':(mutationActions.has(action)?'cloudflare_runtime_state':'cloudflare_search_measurement'),
+    proof_kind:action==='repair_canonical_alignment'?'canonical_current_state_verified':action==='strengthen_internal_links'?'public_internal_links_verified':action==='deepen_existing_search_asset'?'public_search_asset_depth_verified':(mutationActions.has(action)?'cloudflare_runtime_state':'cloudflare_search_measurement'),
     evidence,
     canonicalProof,
-    indexNow
+    indexNow,
+    mutationProof
   };
 }
