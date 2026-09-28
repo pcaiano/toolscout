@@ -231,7 +231,7 @@ function throughput(){
  let bottleneckMeta='Business outcomes remain the constraint to scale decisions.';
  if(runnableQueued>batchSize*4){bottleneck='Runnable external compute backlog';bottleneckMeta=n(runnableQueued)+' runnable · '+n(deferredQueued)+' deferred retry · '+n(c.activeBatches)+' active batches.'}
  else if(deferredQueued>0&&runnableQueued===0){bottleneck='No runnable compute backlog';bottleneckMeta=n(deferredQueued)+' jobs are intentionally deferred for retry; next eligible '+(c.nextAvailableAt?dt(c.nextAvailableAt):'later')+'.'}
- else if(researchCompleted>0&&classifiedResearch>0&&machineCandidates===0){bottleneck='Zero machine-safe yield from classified research';bottleneckMeta=n(classifiedResearch)+' classified jobs · '+n(routesFound)+' route-bearing results · '+n(formRoutes)+' forms, but no structurally safe automatic POST candidate yet.'}
+ else if(researchCompleted>0&&classifiedResearch>0&&machineCandidates===0&&adaptersReady===0){bottleneck='Zero machine-safe yield from classified research';bottleneckMeta=n(classifiedResearch)+' classified jobs · '+n(routesFound)+' route-bearing results · '+n(formRoutes)+' forms, but neither Render nor the bounded fallback has produced a verified automatic adapter yet.'}
  else if(machineSupplyUnderfed){bottleneck='Machine-safe action supply';bottleneckMeta=n(execUsed)+' / '+n(execMax)+' actions used today versus '+n(Math.round(expectedExecPace))+' at linear daily pace. Discovery and qualification must keep Render fed.'}
  else if(readyContacts<supplyMin){bottleneck='Qualified email contact supply';bottleneckMeta=n(readyContacts)+' / '+n(supplyTarget)+' unique-domain email buffer · minimum '+n(supplyMin)+'.'}
  else if(authBootstrap>0&&authActive===0){bottleneck='Authentication bootstrap';bottleneckMeta=n(authBootstrap)+' reusable session(s) need one-time owner login/challenge.'}
@@ -251,11 +251,11 @@ function throughput(){
      row('Research completed',n(researchCompleted),'External route research completed today')+
      row('Classifier v'+n(c.distributionClassifierVersion||2)+' results seen',n(classifiedResearch),'Confirms the Render research service is emitting the current route classification payload')+
      row('Submission routes found',n(routesFound),'All same-host submission routes found, including manual/auth routes')+
-     row('Machine-safe form candidates',n(machineCandidates),'Render found a no-auth, no-CAPTCHA, no-payment POST form that passed structural safety checks')+
+     row('Machine-safe candidates - Render',n(machineCandidates),'Render found a no-auth, no-CAPTCHA, no-payment JSON API or POST form that passed structural safety checks')+
      row('Raw route signals observed',n(formRoutes)+' forms · '+n(authRoutes)+' auth · '+n(captchaRoutes)+' CAPTCHA',n(policyBlockers)+' policy blockers · page-level signals only; exact submission intent is required before execution or Human Gate promotion')+
-     row('Canonical qualification - 15m',n(qualReady)+' ready · '+n(qualResearch)+' research',n(qualVerifyFailed)+' verification failed · '+n(qualHuman)+' human · '+n(qualAuth)+' auth · '+n(qualPolicy)+' policy blocked')+
+     row('Fallback qualification - 15m',n(qualReady)+' ready · '+n(qualResearch)+' research',n(qualVerifyFailed)+' verification failed · '+n(qualHuman)+' human · '+n(qualAuth)+' auth · '+n(qualPolicy)+' policy blocked · bounded Cloudflare fallback after Render, not a sequential funnel stage')+
      row('Human gates open',n(humanGates),n(captchaGates)+' CAPTCHA · '+n(authGates)+' auth · '+n(manualGates)+' manual · '+n(gateVerification)+' awaiting verification')+
-     row('Verified adapters ready',n(adaptersReady),'Canonical policy accepted a machine-safe adapter and it is ready for execution')+
+     row('Verified adapters ready',n(adaptersReady),'Canonical policy accepted a machine-safe adapter from Render or fallback qualification and it is ready for execution')+
      row('Actions authorized',n(actionsAuthorized),'Cloudflare authorized machine-safe execution today')+
      row('Actions completed',n(actionsCompleted),'Render completed authorized submission jobs today')+
      row('Submissions accepted',n(submissionsAccepted),'External service accepted the ToolScout submission today')+
