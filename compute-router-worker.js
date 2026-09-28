@@ -765,6 +765,16 @@ function encodedAdapterBody(contentType,payload){
 async function enqueueAuthorizedExecution(env){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE distribution_submissions
+    SET response_url=NULL,updated_at=datetime('now')
+    WHERE submission_type='auto_discovered_json' AND status='submitted'
+      AND response_url=action_url
+      AND EXISTS (
+        SELECT 1 FROM distribution_auto_adapters a
+        WHERE a.surface_slug=distribution_submissions.surface_slug
+          AND a.content_type='application/x-www-form-urlencoded'
+          AND a.verification_endpoint IS NULL AND a.public_url IS NULL
+      )`).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE distribution_submissions
     SET status='failed',error=COALESCE(error,'orphan_queued_external_recovered'),updated_at=datetime('now')
     WHERE submission_type='auto_discovered_json' AND status='queued_external'
       AND NOT EXISTS (
@@ -1392,9 +1402,12 @@ async function applyAuthorizedActionResult(env,job,result){
   const httpStatus=num(result?.httpStatus);
   const accepted=result?.ok===true&&httpStatus>=200&&httpStatus<300;
   if(accepted){
-    const evidence=safeSameHostEvidence(payload.endpoint,result?.evidenceUrl)||safeSameHostEvidence(payload.endpoint,result?.finalUrl)||payload.verificationEndpoint||payload.publicUrl||payload.endpoint;
+    const finalEvidence=safeSameHostEvidence(payload.endpoint,result?.finalUrl);
+    const finalIsEndpoint=String(finalEvidence||'')===String(payload.endpoint||'');
+    const evidence=safeSameHostEvidence(payload.endpoint,result?.evidenceUrl)||(!finalIsEndpoint?finalEvidence:null)||payload.verificationEndpoint||payload.publicUrl||null;
     await env.DB.prepare(`UPDATE distribution_submissions SET status='submitted',attempts=attempts+1,last_attempt_at=datetime('now'),submitted_at=COALESCE(submitted_at,datetime('now')),response_url=?,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(evidence,submissionId).run();
-    await env.DB.prepare(`UPDATE distribution_opportunities SET status='submitted',next_action='External execution plane completed an authorized machine-safe submission. Verification remains canonical before placement is counted.',updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live')`).bind(slug).run();
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='submitted',next_action=?,updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live')`)
+      .bind(evidence?'External execution plane completed an authorized machine-safe submission. Verify the returned public evidence before placement is counted.':'External execution plane completed an authorized machine-safe submission. No public placement URL was returned, so independent verification is still required before this counts as a placement.',slug).run();
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,destination_url,detail,observed_at,created_at)
       VALUES(?,?, 'external_authorized_submission','completed',?,?,?,datetime('now'),datetime('now'))`)
       .bind(`extsub_${crypto.randomUUID()}`,slug,payload.endpoint,evidence,`Render executed a Cloudflare-authorized verified free adapter. HTTP ${httpStatus}. Cloudflare retained decision and verification authority.`).run().catch(()=>{});
