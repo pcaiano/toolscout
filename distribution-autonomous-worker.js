@@ -29,7 +29,7 @@ const AUTHORITY_STAGNATION_HOURS=24;
 const AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D=12;
 const AUTHORITY_RECOVERY_COOLDOWN_HOURS=6;
 const PRIORITY_HUMAN_GATE_THRESHOLD=70;
-const RESEARCH_CLASSIFIER_VERSION=14;
+const RESEARCH_CLASSIFIER_VERSION=15;
 async function runDiscoveryRefresh(env){
   if(!env.ADMIN_TOKEN)return {ok:false,reason:'admin_token_unavailable'};
   try{
