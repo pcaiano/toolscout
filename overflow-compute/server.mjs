@@ -37,6 +37,7 @@ async function runBatch(batchId,completionToken){
         candidateConfidence:Number(route?.machineCandidate?.confidence||0),
         provenance:route?.provenance||null,
         explicitFormIntent:route?.formAssessment?.submissionIntentEvidence===true,
+        transportHints:Array.isArray(route?.transportHints)?route.transportHints.slice(0,4):[],
         rejections:Array.isArray(route?.formAssessment?.rejections)?route.formAssessment.rejections.slice(0,8):[]
       })):[];
       console.log(JSON.stringify({
