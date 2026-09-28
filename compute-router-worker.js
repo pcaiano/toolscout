@@ -17,6 +17,7 @@ const CONTACT_SUPPLY_RESEARCH_BATCH=40;
 const BATCH_SIZE=8;
 const MAX_ACTIVE_BATCHES=3;
 const BATCH_TIMEOUT_MINUTES=3;
+const SOURCE_UNREACHABLE_BACKOFF_HOURS=6;
 const RENDER_TRIGGER_TIMEOUT_MS=25000;
 const QUALIFICATION_FALLBACK_LIMIT=6;
 let schemaReady=null;
@@ -539,6 +540,7 @@ async function health(env){
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued' AND available_at<=datetime('now')) runnable_queued,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now')) deferred_queued,
       (SELECT MIN(available_at) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now')) next_available_at,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now') AND last_error='source_unreachable_backoff') source_unreachable_deferred,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='leased') canonical_leased,
       (SELECT COUNT(*) FROM compute_overflow_batches WHERE status IN ('dispatched','running')) canonical_active_batches,
       (SELECT COUNT(*) FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
@@ -608,7 +610,7 @@ async function health(env){
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
-    queued:num(live?.canonical_queued),runnableQueued:num(live?.runnable_queued),deferredQueued:num(live?.deferred_queued),nextAvailableAt:live?.next_available_at||null,
+    queued:num(live?.canonical_queued),runnableQueued:num(live?.runnable_queued),deferredQueued:num(live?.deferred_queued),sourceUnreachableDeferred:num(live?.source_unreachable_deferred),nextAvailableAt:live?.next_available_at||null,
     leased:num(live?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(live?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,qualificationSamples:[],
@@ -921,6 +923,10 @@ async function recoverTransientDispatchDeferrals(env){
         OR last_error LIKE '%timed out%'
         OR last_error LIKE '%worker_busy%'
         OR last_error LIKE '%rate_limited%'
+        OR (
+          last_error='source_unreachable_backoff'
+          AND updated_at<=datetime('now','-${SOURCE_UNREACHABLE_BACKOFF_HOURS} hours')
+        )
       )`).run().catch(()=>null);
   return Number(w?.meta?.changes||w?.changes||0);
 }
@@ -1507,7 +1513,7 @@ async function completeBatch(request,env,ctx,batchId){
     const externalUnreachable=!ok&&String(result?.error||'')==='source_unreachable'&&['distribution_route_research','contact_route_research','publisher_role_email_research','vendor_role_email_research','contact_supply_public_research'].includes(String(job.job_type||''));
     const maxExternalAttempts=job.job_type==='contact_supply_public_research'?2:3;
     if(externalUnreachable&&num(job.attempts)<maxExternalAttempts){
-      await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,completed_at=NULL,available_at=datetime('now','+24 hours'),result_json=?,last_error='source_unreachable_backoff',updated_at=datetime('now') WHERE job_id=?`)
+      await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,completed_at=NULL,available_at=datetime('now','+${SOURCE_UNREACHABLE_BACKOFF_HOURS} hours'),result_json=?,last_error='source_unreachable_backoff',updated_at=datetime('now') WHERE job_id=?`)
         .bind(JSON.stringify(result).slice(0,24000),jobId).run();
       retried++;metricLeased-=1;metricQueued+=1;
     }else if(externalUnreachable){
