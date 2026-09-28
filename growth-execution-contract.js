@@ -87,7 +87,7 @@ const READY_CAPS=Object.freeze({
   make_sender:12,
   content_issue:1,
   audience_make:1,
-  seo_cloudflare:4,
+  seo_cloudflare:8,
   affiliate_cycle:1,
   catalog_cycle:1,
   growth_supervisor:1
