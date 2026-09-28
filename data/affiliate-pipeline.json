@@ -323,7 +323,7 @@
     {
       "slug": "zendesk",
       "provider": "Zendesk",
-      "status": "submitted",
+      "status": "rejected",
       "commission_note": "15% rate for first year of sales; top affiliates may earn more",
       "source": "https://www.zendesk.com/programs/affiliate-program/",
       "application_url": "https://www.zendesk.com/programs/affiliate-program/",
@@ -334,10 +334,10 @@
         "Application runs through PartnerStack"
       ],
       "form_guidance": "ToolScout matches the software publisher/content creator profile. Describe independent customer-support software comparisons and contextual Zendesk recommendations for high-intent buyers.",
-      "last_verified": "2026-09-11",
-      "next_action": "Application submitted via PartnerStack and awaiting Zendesk review. Do not duplicate the application and do not enable affiliate routing unless approval provides a verified personal affiliate URL.",
+      "last_verified": "2026-09-28",
+      "next_action": "Do not enable affiliate routing. PartnerStack confirmed Zendesk rejected ToolScout on 2026-09-28. Reassess or reapply only after materially stronger verified audience/traffic evidence or an explicit invitation from Zendesk.",
       "network": "PartnerStack",
-      "evidence": "PartnerStack application-received email dated 2026-09-10 confirms the application was submitted for Zendesk review."
+      "evidence": "PartnerStack rejection email received 2026-09-28 confirming Zendesk declined ToolScout's affiliate application."
     },
     {
       "slug": "surfer",
