@@ -3,7 +3,7 @@
   "source": "SE Ranking Data API",
   "target": "trytoolscout.org",
   "mode": "domain",
-  "observedAt": "2026-09-27T12:58:00Z",
+  "observedAt": "2026-09-28T10:02:19Z",
   "freshnessHours": 168,
   "metrics": {
     "backlinks": 74,
@@ -135,7 +135,7 @@
     "backlinkDefinition": "SE Ranking backlink count is the number of individual source link URLs observed for the domain.",
     "referringDomainDefinition": "Referring-domain count is the number of unique external domains and must not be compared as if it were a backlink count.",
     "internalLedgerDefinition": "The internal verified ledger counts ToolScout-verified backlink-bearing placement records; it remains separate from SE Ranking link-row totals.",
-    "lastFullLinkRowReconciliation": "2026-09-27T12:58:00Z",
+    "lastFullLinkRowReconciliation": "2026-09-28T10:02:19Z",
     "fullLinkRowsObserved": 74,
     "canonicalExternalTruth": "SE Ranking Data API",
     "commandCenterBacklinkTotal": "SE Ranking backlinks when fresh",
@@ -147,7 +147,7 @@
   },
   "authorityHistorySummary": {
     "windowStart": "2026-09-01",
-    "windowEnd": "2026-09-27",
+    "windowEnd": "2026-09-28",
     "startDomainAuthority": 1,
     "currentDomainAuthority": 2,
     "firstObservedAtCurrentValue": "2026-09-22"
