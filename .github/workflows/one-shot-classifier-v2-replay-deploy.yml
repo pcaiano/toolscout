@@ -1,4 +1,4 @@
-name: One Shot Contact Form Recovery Deploy
+name: One Shot Distribution Execution Recovery Deploy
 
 on:
   push:
@@ -20,11 +20,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate contact form recovery
+      - name: Validate distribution execution recovery
         run: |
           set -euo pipefail
           node --check distribution-autonomous-worker.js
           node --check compute-router-worker.js
+          node --check overflow-compute/research-core.mjs
           node --check command-center-simplified-view.js
           node tests/compute-overflow-policy.test.mjs
           node tests/distribution-executor-lanes.test.mjs
@@ -39,7 +40,8 @@ jobs:
           curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?deploy_verify=1" -o /tmp/health.json
           cat /tmp/health.json
           jq -e '
-            (.distributionClassifierVersion >= 4) and
+            (.distributionClassifierVersion >= 6) and
+            (.qualificationMode == "render_primary_with_bounded_cloudflare_fallback") and
             (
               (
                 .status == "d1_quota_exhausted" and
