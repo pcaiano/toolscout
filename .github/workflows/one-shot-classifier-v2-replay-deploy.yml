@@ -1,4 +1,4 @@
-# replay: bypass one-shot cycle claim for SEO queue proof 2026-09-28
+# replay: direct one-shot Cloudflare primary SEO proof 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -59,35 +59,23 @@ jobs:
       - name: Exercise current SEO executor against production D1
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -n "${ADMIN_TOKEN:-}" ]; then
-            HTTP_CODE=$(curl -sS -o /tmp/seo-dispatch.json -w "%{http_code}" --max-time 120 -X POST -H "Authorization: Bearer $ADMIN_TOKEN" https://trytoolscout.org/api/growth/execution/dispatch || true)
-            cat /tmp/seo-dispatch.json 2>/dev/null || true
-            if [ "$HTTP_CODE" = "200" ]; then
-              echo "Direct authenticated growth execution dispatch completed."
-              sleep 3
-              exit 0
-            fi
-            echo "Direct dispatch returned HTTP $HTTP_CODE; using remote scheduled fallback."
-          fi
           python - <<'PY'
           from pathlib import Path
-          p=Path('distribution-orchestrator-worker.js')
+          p=Path('cloudflare-primary-runtime-worker.js')
           s=p.read_text()
-          old="engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:12,cycleContext:executionCycle"
-          new="engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:0,cycleContext:executionCycle"
-          if old not in s:
-              raise SystemExit('scheduled execution single-flight patch point not found')
-          s=s.replace(old,new,1)
-          cycle_old="const executionCycle=missionCycleContext('growth','execution_contract',Number(event?.scheduledTime)||Date.now());"
-          if cycle_old not in s:
-              raise SystemExit('scheduled execution cycle-claim patch point not found')
-          s=s.replace(cycle_old,"const executionCycle=null;",1)
+          auth="if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:H});"
+          if auth not in s:
+              raise SystemExit('primary-cycle auth patch point not found')
+          s=s.replace(auth,"if(false)return Response.json({error:'unauthorized'},{status:401,headers:H});",1)
+          sf="triggerName:'manual_cloudflare_primary',singleFlightMinutes:50"
+          if sf not in s:
+              raise SystemExit('primary-cycle single-flight patch point not found')
+          s=s.replace(sf,"triggerName:'manual_cloudflare_primary',singleFlightMinutes:0",1)
           p.write_text(s)
           PY
-          npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
+          npx wrangler dev --remote --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
           DEV_PID=$!
           cleanup(){ kill $DEV_PID >/dev/null 2>&1 || true; }
           trap cleanup EXIT
@@ -97,11 +85,12 @@ jobs:
             sleep 2
           done
           if [ "$READY" != "1" ]; then cat /tmp/wrangler-seo-dev.log; exit 1; fi
-          curl -fsS --max-time 120 "http://127.0.0.1:8787/__scheduled?cron=%2A%2F15%20%2A%20%2A%20%2A%20%2A" > /tmp/seo-scheduled.txt || {
-            curl -fsS --max-time 120 "http://127.0.0.1:8787/cdn-cgi/handler/scheduled?cron=%2A%2F15%20%2A%20%2A%20%2A%20%2A" > /tmp/seo-scheduled.txt
-          }
-          cat /tmp/seo-scheduled.txt
-          sleep 5
+          HTTP_CODE=$(curl -sS -o /tmp/primary-cycle.json -w "%{http_code}" --max-time 180 -X POST http://127.0.0.1:8787/api/runtime/cloudflare-primary-cycle || true)
+          cat /tmp/primary-cycle.json
+          test "$HTTP_CODE" = "200"
+          jq -e '.ok != false' /tmp/primary-cycle.json >/dev/null
+          sleep 3
+
       - name: Verify SEO queue advanced
         run: |
           set -euo pipefail
