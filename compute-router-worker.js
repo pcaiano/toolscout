@@ -1,6 +1,7 @@
 import base from './operational-truth-reconciliation-worker.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
 import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence} from './distribution-autonomous-worker.js';
+import {runSeoExecutionBatch} from './seo-execution-batch.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/15 * * * *';
@@ -1610,6 +1611,10 @@ export default{
           const qualificationFallback=await runQualificationWatchdog(env).catch(async error=>{await event(env,'qualification_watchdog_failed','failed',safe(error?.message||error,800));return null});
           return{tick,qualificationFallback};
         })(),
+        runSeoExecutionBatch(env,8,'compute_router_overflow_cron').catch(async error=>{
+          await event(env,'seo_execution_batch_failed','failed',safe(error?.message||error,800));
+          return null;
+        }),
         minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
         minute===0&&new Date(Number(scheduledEvent?.scheduledTime)||Date.now()).getUTCHours()%6===0?seedContactSupply(env):Promise.resolve(null),
         Promise.resolve(null),
