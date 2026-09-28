@@ -18,8 +18,8 @@ assert.match(cc,/Fallback qualification - 15m/);
 assert.match(cc,/Placements verified today/);
 assert.match(cc,/Open architecture incident detail/);
 assert.match(cc,/Actions completed/);
-assert.match(cc,/Open secure login session/);
-assert.match(cc,/data-auth-handoff/);
+assert.doesNotMatch(cc,/Open secure login session/);
+assert.doesNotMatch(cc,/data-auth-handoff/);
 assert.match(cc,/const FAST_KEYS=\['queue','runtime','authority','compute','auth'\]/);
 assert.doesNotMatch(cc,/External actions - 24h[\s\S]{0,120}Target/);
 
