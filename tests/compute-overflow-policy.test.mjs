@@ -9,11 +9,11 @@ assert.match(wrangler,/crons\s*=\s*\["\*\/15 \* \* \* \*"/);
 
 const router=read('compute-router-worker.js');
 assert.match(router,/DAILY_JOB_BUDGET=1500/);
-assert.match(router,/DISTRIBUTION_CLASSIFIER_VERSION=4/);
+assert.match(router,/DISTRIBUTION_CLASSIFIER_VERSION=6/);
 assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=800/);
 assert.match(router,/const submitLimit=Math\.min\(300,remaining\);/);
-assert.match(router,/BATCH_SIZE=25/);
-assert.match(router,/MAX_ACTIVE_BATCHES=2/);
+assert.match(router,/BATCH_SIZE=8/);
+assert.match(router,/MAX_ACTIVE_BATCHES=3/);
 assert.match(router,/async function createBatch\(env,\{preferredJobType=null\}=\{\}\)/);
 assert.match(router,/job_type=\?/);
 assert.match(router,/preferredJobType=slot===0\?'distribution_route_research':null/);
@@ -93,7 +93,9 @@ console.log('External compute overflow v1 policy is intact.');
 assert.match(router,/HEALTH_CACHE_MS=120000/);
 assert.match(router,/healthReadModel:'incremental_cached_120s_read_only'/);
 assert.match(router,/render_classification_primary/);
-assert.match(router,/render_result_applied_directly/);
+assert.match(router,/render_primary_with_bounded_cloudflare_fallback/);
+assert.match(router,/runQualificationWatchdog\(env\)\.catch/);
+assert.match(router,/QUALIFICATION_FALLBACK_LIMIT=6/);
 assert.doesNotMatch(router,/health_watchdog_pump_failed/);
 
 assert.match(router,/compute_overflow_funnel_metrics/);
@@ -102,6 +104,11 @@ assert.match(router,/hiddenSafetyFields/);
 assert.match(core,/machineFormAssessment/);
 assert.match(core,/canonicalFieldName/);
 assert.match(core,/formRejections/);
+assert.match(core,/openApiMachineCandidate/);
+assert.match(core,/findOpenApiMachineCandidate/);
+assert.match(core,/kind:'json_api'/);
+assert.match(router,/safeOverflowJsonPayload/);
+assert.match(router,/kind==='json_api'/);
 
 assert.match(router,/CONTACT_SUPPLY_RESEARCH_BATCH=40/);
 assert.match(router,/const limit=Math\.min\(80,remaining\);/);
