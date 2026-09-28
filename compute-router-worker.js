@@ -635,8 +635,33 @@ async function enqueueJob(env,{jobKey,jobType,subjectType,subjectKey,priority,pa
     .bind(jobId,jobKey,jobType,subjectType||null,subjectKey||null,Number(priority||0),JSON.stringify(payload||{}).slice(0,12000)).run();
   return Number(w?.meta?.changes||w?.changes||0);
 }
+async function reconcileStaleResearchHumanGates(env){
+  const stale=await env.DB.prepare(`SELECT g.gate_key,g.subject_key,CAST(COALESCE(json_extract(g.payload_json,'$.research_classifier_version'),0) AS INTEGER) classifier_version
+    FROM human_gate_contract g
+    WHERE g.engine='distribution' AND g.status='open'
+      AND g.gate_type IN ('human_confirmation','manual_submission','authentication')
+      AND CAST(COALESCE(json_extract(g.payload_json,'$.research_classifier_version'),0) AS INTEGER)>0
+      AND CAST(COALESCE(json_extract(g.payload_json,'$.research_classifier_version'),0) AS INTEGER)<?
+    ORDER BY g.updated_at ASC LIMIT 100`).bind(DISTRIBUTION_CLASSIFIER_VERSION).all().catch(()=>({results:[]}));
+  const items=rows(stale);
+  if(!items.length)return{reconciled:0};
+  let reconciled=0;
+  for(const gate of items){
+    const detail=`Research-derived Human Gate invalidated by classifier upgrade v${num(gate.classifier_version)}->v${DISTRIBUTION_CLASSIFIER_VERSION}. Fresh Render research owns the next decision.`;
+    const opp=await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,last_checked_at=NULL,updated_at=datetime('now')
+      WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','scheduled','policy_blocked','rejected','skipped','unavailable_free')`)
+      .bind(detail,gate.subject_key).run().catch(()=>null);
+    await env.DB.prepare(`UPDATE human_gate_contract SET status='cancelled',resolved_at=datetime('now'),next_verification_at=NULL,verification_detail=?,updated_at=datetime('now')
+      WHERE gate_key=? AND status='open'`).bind(detail,gate.gate_key).run().catch(()=>{});
+    if(num(opp?.meta?.changes||opp?.changes)>0)reconciled++;
+  }
+  if(reconciled)await event(env,'stale_research_human_gates_reconciled','completed',`Released ${reconciled} stale research-derived Human Gate(s) for classifier v${DISTRIBUTION_CLASSIFIER_VERSION} re-evaluation.`,{reconciled}).catch(()=>{});
+  return{reconciled};
+}
+
 async function enqueueDistributionResearch(env){
   await ensureSchema(env);
+  await reconcileStaleResearchHumanGates(env).catch(()=>({reconciled:0}));
   let remaining=await budgetRemaining(env,'research',DAILY_JOB_BUDGET);
   if(!remaining)return{enqueued:0,remaining:0,contactSupply:{enqueued:0,remaining:0}};
   let enqueued=0;
