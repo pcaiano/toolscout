@@ -17,13 +17,13 @@ check(s.includes("qualificationReady15m:num(live?.qualification_ready_15m)"),'qu
 check(s.includes("qualificationResearch15m:num(live?.qualification_research_15m)"),'qualification research metric is live, not hardcoded');
 check(s.includes("qualificationVerificationFailed15m:num(live?.qualification_verification_failed_15m)"),'qualification verification failures are visible');
 check(s.includes("idx_distribution_qualification_created_result"),'qualification health query is indexed');
-check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=13;"),'classifier v13 is active');
+check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=14;"),'classifier v14 is active');
 check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
 check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
 check(s.includes("QUALIFICATION_FALLBACK_LIMIT=6"),'fallback qualification is bounded');
 check(s.includes("runQualificationWatchdog(env).catch"),'scheduled control plane actually invokes qualification watchdog');
 check(s.includes("reconcileDuplicateRouteSurfaces"),'duplicate route surfaces are consolidated before research enqueue');
-check(s.includes("DISTRIBUTION_CLASSIFIER_VERSION=13"),'current classifier version is pinned in the control plane');
+check(s.includes("DISTRIBUTION_CLASSIFIER_VERSION=14"),'current classifier version is pinned in the control plane');
 check(s.includes("h.subject_type='surface' AND h.subject_key=d.surface_slug"),'duplicate consolidation preserves open human gates');
 check(s.includes("kind==='json_api'"),'canonical validator accepts safe JSON API candidates');
 check(s.includes("render_primary_with_bounded_cloudflare_fallback"),'health exposes the real two-stage qualification architecture');
