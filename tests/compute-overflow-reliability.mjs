@@ -18,6 +18,10 @@ check(s.includes("idx_distribution_qualification_created_result"),'qualification
 check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=6;"),'classifier v6 is active');
 check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
 check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
+check(s.includes("QUALIFICATION_FALLBACK_LIMIT=6"),'fallback qualification is bounded');
+check(s.includes("runQualificationWatchdog(env).catch"),'scheduled control plane actually invokes qualification watchdog');
+check(s.includes("kind==='json_api'"),'canonical validator accepts safe JSON API candidates');
+check(s.includes("render_primary_with_bounded_cloudflare_fallback"),'health exposes the real two-stage qualification architecture');
 check(s.includes("humanGatesOpen:num(live?.open_human_gates)"),'human-gate backlog is visible in compute truth');
 if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
 console.log('PASS overflow reliability geometry and callback bounds');
