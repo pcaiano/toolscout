@@ -340,6 +340,24 @@ async function findOpenApiMachineCandidate(homepage,pages=[]){
   }
   return{candidate:null,probes:urls.length,source:null};
 }
+function staticPostEndpointSignals(page){
+  if(!page?.ok||!page?.url)return[];
+  const html=String(page.html||''),hits=[];
+  const add=(raw,transport)=>{
+    const endpoint=absolute(raw,page.url);
+    if(!endpoint||!endpoint.startsWith('https://')||!sameHost(page.url,endpoint))return;
+    let path='';try{path=new URL(endpoint).pathname}catch{return}
+    if(!API_ROUTE_RE.test(path))return;
+    if(/(?:login|sign-in|signin|sign-up|signup|logout|session|oauth|auth|captcha|payment|billing|checkout)(?:[\\/?#]|$)/i.test(path))return;
+    hits.push({endpoint,transport});
+  };
+  for(const m of html.matchAll(/axios\s*\.\s*post\s*\(\s*['"`]([^'"`]{1,1000})['"`]/gi))add(m[1],'axios.post');
+  for(const m of html.matchAll(/(?:\$|jQuery)\s*\.\s*post\s*\(\s*['"`]([^'"`]{1,1000})['"`]/gi))add(m[1],'jquery.post');
+  for(const m of html.matchAll(/fetch\s*\(\s*['"`]([^'"`]{1,1000})['"`]\s*,\s*\{([\s\S]{0,1600}?)\}\s*\)/gi)){
+    if(/\bmethod\s*:\s*['"]POST['"]/i.test(m[2]))add(m[1],'fetch.post');
+  }
+  return [...new Map(hits.map(x=>[x.endpoint,x])).values()].slice(0,8);
+}
 function machineFormCandidate(page){return machineFormAssessment(page).candidate}
 function pageSignals(page){
   const text=stripTags(page.html).slice(0,120000);
@@ -503,6 +521,7 @@ async function researchDistribution(job){
       const guessConfirmed=!guessed||assessment.submissionIntentEvidence===true||SUBMISSION_INTENT_RE.test(String(signals.title||''));
       const submissionIntent=guessConfirmed&&(hasSubmissionIntent(x.link.text,routeUrl)||assessment.submissionIntentEvidence===true);
       const machineCandidate=submissionIntent?assessment.candidate:null;
+      const transportHints=submissionIntent&&!machineCandidate?staticPostEndpointSignals(x.page):[];
       const policyBlockers=[
         signals.payment?'payment':null,
         signals.reciprocal?'reciprocal':null,
@@ -513,13 +532,14 @@ async function researchDistribution(job){
         kind:machineCandidate?'submission':signals.captcha?'captcha':signals.auth?'auth':submissionIntent?'submission':'contact',
         label:safe(x.link.text,160),provenance:x.link.guessed?'guess':'link',hasForm:Boolean(signals.hasForm),submissionIntent,
         auth:Boolean(signals.auth&&!machineCandidate),captcha:Boolean(signals.captcha&&!machineCandidate),
-        policyBlockers,machineCandidate,
+        policyBlockers,machineCandidate,transportHints,
         formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons,submissionIntentEvidence:assessment.submissionIntentEvidence===true}
       });
     }
   }
   if(!routes.some(x=>x.url===home.url)&&(ACTION_RE.test(home.url)||home.signals.hasForm||home.signals.auth||home.signals.captcha)){
     const assessment=machineFormAssessment(home),submissionIntent=hasSubmissionIntent('source route',home.url)||assessment.submissionIntentEvidence===true,machineCandidate=submissionIntent?assessment.candidate:null;
+    const transportHints=submissionIntent&&!machineCandidate?staticPostEndpointSignals(home):[];
     const policyBlockers=[
       home.signals.payment?'payment':null,
       home.signals.reciprocal?'reciprocal':null,
@@ -530,7 +550,7 @@ async function researchDistribution(job){
       kind:machineCandidate?'submission':home.signals.captcha?'captcha':home.signals.auth?'auth':submissionIntent?'submission':'contact',
       label:'source route',provenance:'source',hasForm:Boolean(home.signals.hasForm),submissionIntent,
       auth:Boolean(home.signals.auth&&!machineCandidate),captcha:Boolean(home.signals.captcha&&!machineCandidate),
-      policyBlockers,machineCandidate,
+      policyBlockers,machineCandidate,transportHints,
       formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons,submissionIntentEvidence:assessment.submissionIntentEvidence===true}
     });
   }
@@ -573,6 +593,7 @@ async function researchDistribution(job){
       machineCandidates:selectedRoutes.filter(x=>Boolean(x.machineCandidate)).length,
       humanGateCandidates:selectedRoutes.filter(x=>x.submissionIntent===true&&!x.machineCandidate&&(x.auth||x.captcha)).length,
       manualRoutes:selectedRoutes.filter(x=>x.submissionIntent===true&&!x.machineCandidate&&!x.auth&&!x.captcha&&!(x.policyBlockers||[]).length).length,
+      staticPostEndpointSignals:selectedRoutes.reduce((n,x)=>n+(Array.isArray(x.transportHints)?x.transportHints.length:0),0),
       policyBlockers:blockers.length,
       formRejections:selectedRoutes.flatMap(x=>x.formAssessment?.rejections||[]).reduce((acc,key)=>{acc[key]=(acc[key]||0)+1;return acc},{})
     },
