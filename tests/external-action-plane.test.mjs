@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 const router=read('compute-router-worker.js');
-assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=300/);
+assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=800/);
 assert.match(router,/enqueueAuthorizedExecution/);
 assert.match(router,/authorized_http_action/);
 assert.match(router,/authorized_verification/);
@@ -34,12 +34,12 @@ assert.doesNotMatch(core,/Authorization['"]/);
 assert.doesNotMatch(core,/gmail|smtp|sendgrid|resend/i);
 
 const supervisor=read('growth-supervisor.js');
-assert.match(supervisor,/MACHINE_SAFE_EXTERNAL_EXECUTIONS_MAX_24H=300/);
+assert.match(supervisor,/MACHINE_SAFE_EXTERNAL_EXECUTIONS_MAX_24H=800/);
 assert.match(supervisor,/reputation_sensitive_external_execution_max_24h/);
 assert.match(supervisor,/machine_safe_external_execution_max_24h/);
 
 const truth=read('operational-truth-reconciliation-worker.js');
-assert.match(truth,/MACHINE_SAFE_EXTERNAL_MAX_24H=300/);
+assert.match(truth,/MACHINE_SAFE_EXTERNAL_MAX_24H=800/);
 assert.match(truth,/reputationSensitiveActionMax24h/);
 assert.match(truth,/machineSafeExternalActionMax24h/);
 assert.match(truth,/cloudflare_authorize_external_execute_cloudflare_verify/);

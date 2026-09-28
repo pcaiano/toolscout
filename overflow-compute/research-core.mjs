@@ -586,7 +586,7 @@ async function executeAuthorizedHttpAction(job){
     try{text=(await response.text()).slice(0,12000)}catch{}
     if(!evidenceUrl)evidenceUrl=responseEvidenceFromText(text,endpoint);
     return{
-      ok:accepted,httpStatus,targetUrl:endpoint,finalUrl,evidenceUrl,
+      ok:true,accepted,httpStatus,targetUrl:endpoint,finalUrl,evidenceUrl,
       responseType:safe(response.headers.get('content-type')||'',160),
       authorizationClass:p.authorizationClass
     };
@@ -604,7 +604,7 @@ async function executeAuthorizedVerification(job){
 export function runtimeStats(){
   let hostQueued=0,hostActive=0;
   for(const state of hostState.values()){hostActive+=Number(state.active||0);hostQueued+=Array.isArray(state.queue)?state.queue.length:0}
-  return{pageCacheEntries:pageCache.size,pageInflight:pageInflight.size,activeHosts:hostState.size,hostActive,hostQueued,perHostConcurrency:PER_HOST_CONCURRENCY,pageCacheMax:PAGE_CACHE_MAX,pageCacheTtlMinutes:PAGE_CACHE_TTL_MS/60000};
+  return{pageCacheEntries:pageCache.size,pageInflight:pageInflight.size,activeHosts:hostState.size,hostActive,hostQueued,perHostConcurrency:PER_HOST_CONCURRENCY,pageCacheMax:PAGE_CACHE_MAX,pageCacheTtlMinutes:PAGE_CACHE_TTL_MS/60000,httpActionOutcomeSemantics:'transport_completed_external_acceptance_separate_v1'};
 }
 export async function researchJob(job){
   const started=Date.now();

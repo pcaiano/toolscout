@@ -1,4 +1,4 @@
-# replay: classifier v7 adapter recovery 2026-09-28
+# replay: external 401/403 adapter recovery validation 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout current main
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref_name }}
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -29,6 +29,9 @@ jobs:
           node --check overflow-compute/research-core.mjs
           node --check command-center-simplified-view.js
           node tests/compute-overflow-policy.test.mjs
+          node tests/compute-overflow-reliability.mjs
+          node tests/external-action-plane.test.mjs
+          node tests/external-submission-recovery.test.mjs
           node tests/distribution-executor-lanes.test.mjs
           node tests/command-center-hybrid-architecture.test.mjs
       - name: Deploy Cloudflare Worker
@@ -43,6 +46,7 @@ jobs:
           jq -e '
             (.distributionClassifierVersion >= 7) and
             (.qualificationMode == "render_primary_with_bounded_cloudflare_fallback") and
+            (.externalSubmissionRecoveryPolicy == "revalidate_401_403_then_fresh_route_research_v1") and
             (
               (
                 .status == "d1_quota_exhausted" and
