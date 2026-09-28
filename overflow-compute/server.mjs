@@ -25,6 +25,22 @@ async function runBatch(batchId,completionToken){
     const results=await runResearchBatch(jobs,{concurrency:MAX_CONCURRENCY});
     for(let i=0;i<results.length;i++){
       const job=jobs[i],result=results[i];
+      if(job?.type==='authorized_http_action'){
+        console.log(JSON.stringify({
+          event:'authorized_http_action_result',
+          batchId,
+          jobId:result?.jobId||job?.jobId||null,
+          subjectKey:job?.subjectKey||null,
+          endpoint:job?.payload?.endpoint||null,
+          method:job?.payload?.method||null,
+          ok:result?.ok===true,
+          accepted:result?.accepted===true,
+          httpStatus:Number(result?.httpStatus||0),
+          resultError:result?.error||null,
+          responseBody:String(result?.responseBody||'').slice(0,1200)
+        }));
+        continue;
+      }
       if(job?.type!=='distribution_route_research')continue;
       const routes=Array.isArray(result?.routes)?result.routes.slice(0,8).map(route=>({
         url:route?.url||null,
