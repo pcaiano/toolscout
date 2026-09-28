@@ -15,9 +15,9 @@ const SAFE_FIELDS=new Set([
   'category','categories','industry','type','slug','domain'
 ]);
 const FORM_CONTACT={email:'pedro@trytoolscout.org',name:'Pedro Caiano',firstName:'Pedro',lastName:'Caiano'};
-const POLICY_BLOCK_RE=/(paid submission|requires? payment|payment required|credit card required|requires? (?:a )?reciprocal (?:link|badge)|must (?:add|place|install) (?:our )?(?:badge|backlink)|automated submissions? (?:are )?(?:not allowed|prohibited|forbidden)|bots? (?:are )?(?:not allowed|prohibited|forbidden))/i;
+const POLICY_BLOCK_RE=/(paid submission|requires? payment|payment required|credit card required|requires? (?:a )?reciprocal (?:link|badge)|backlink(?:\s+\w+){0,5}\s+required|required(?:\s+\w+){0,5}\s+backlink|must (?:add|place|install) (?:our )?(?:badge|backlink)|automated submissions? (?:are )?(?:not allowed|prohibited|forbidden)|bots? (?:are )?(?:not allowed|prohibited|forbidden))/i;
 const HUMAN_BLOCK_RE=/(captcha|turnstile|hcaptcha|recaptcha|terms acceptance|accept (?:the )?terms|agree to (?:the )?terms|explicit (?:user|owner) approval|user confirmation required|confirm before submission)/i;
-const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
+const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|please\s+(?:log|sign)\s+in\s+to|(?:log|sign)\s+in\s+to\s+(?:submit|add|list|continue)|create (?:an? )?account\s+to\s+(?:submit|add|list|continue)|authentication required|api key|bearer token|oauth|password required)/i;
 const ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add)/i;
 const DOC_RE=/(openapi|swagger|api-docs|api\/docs|developer|for-llms|agent|mcp|registry|submit)/i;
 const QUALIFY_LIMIT=24;
@@ -29,7 +29,7 @@ const AUTHORITY_STAGNATION_HOURS=24;
 const AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D=12;
 const AUTHORITY_RECOVERY_COOLDOWN_HOURS=6;
 const PRIORITY_HUMAN_GATE_THRESHOLD=70;
-const RESEARCH_CLASSIFIER_VERSION=6;
+const RESEARCH_CLASSIFIER_VERSION=8;
 async function runDiscoveryRefresh(env){
   if(!env.ADMIN_TOKEN)return {ok:false,reason:'admin_token_unavailable'};
   try{
@@ -267,6 +267,24 @@ async function mark(env,row,result,detail){try{await env.DB.prepare(`INSERT INTO
 async function storeAutoAdapter(env,row,h,adapter,policyState){
   await env.DB.prepare(`INSERT INTO distribution_auto_adapters(surface_slug,source_url,endpoint,method,content_type,payload_template_json,confidence,policy_state,verification_source,verification_endpoint,public_url,verification_method,auth_type,auth_detail,last_checked_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'),datetime('now')) ON CONFLICT(surface_slug) DO UPDATE SET source_url=excluded.source_url,endpoint=excluded.endpoint,method=excluded.method,content_type=excluded.content_type,payload_template_json=excluded.payload_template_json,confidence=excluded.confidence,policy_state=excluded.policy_state,verification_source=excluded.verification_source,verification_endpoint=excluded.verification_endpoint,public_url=excluded.public_url,verification_method=excluded.verification_method,auth_type=excluded.auth_type,auth_detail=excluded.auth_detail,last_checked_at=datetime('now'),updated_at=datetime('now')`)
     .bind(row.surface_slug,h.url,adapter.endpoint,adapter.method||'POST',adapter.content_type||'application/json',JSON.stringify(adapter.payload),adapter.confidence,policyState,adapter.verification_source,adapter.verification_endpoint||null,adapter.public_url||null,adapter.verification_method||'GET',adapter.auth_required?'openapi_security':null,adapter.auth_detail?JSON.stringify(adapter.auth_detail):null).run();
+}
+async function rejectedAdapterReplay(env,row,adapter){
+  const prior=await env.DB.prepare(`SELECT endpoint,method,content_type,policy_state FROM distribution_auto_adapters WHERE surface_slug=? LIMIT 1`).bind(row.surface_slug).first().catch(()=>null);
+  if(!prior||!['revalidation_required','transport_rejected'].includes(String(prior.policy_state||'')))return false;
+  const same=String(prior.endpoint||'')===String(adapter.endpoint||'')
+    &&String(prior.method||'POST').toUpperCase()===String(adapter.method||'POST').toUpperCase()
+    &&String(prior.content_type||'application/json').toLowerCase()===String(adapter.content_type||'application/json').toLowerCase();
+  if(!same){
+    await env.DB.prepare(`UPDATE distribution_submissions
+      SET attempts=0,error='adapter_changed_after_revalidation',updated_at=datetime('now')
+      WHERE surface_slug=? AND submission_type='auto_discovered_json' AND status='failed'`).bind(row.surface_slug).run().catch(()=>{});
+    return false;
+  }
+  const detail='Fallback qualification reproduced the same transport route that already returned HTTP 401/403. Automatic replay is suppressed until a materially different adapter or an exact human-only blocker is proven.';
+  await env.DB.prepare(`UPDATE distribution_auto_adapters SET policy_state='transport_rejected',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(row.surface_slug).run().catch(()=>{});
+  await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,last_checked_at=datetime('now'),next_action=?,updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`).bind(detail,row.surface_slug).run().catch(()=>{});
+  await mark(env,row,'research_required',`rejected_adapter_replay_suppressed:${adapter.endpoint||''}`);
+  return true;
 }
 function humanGatePayload(){
   return {
@@ -538,7 +556,11 @@ async function qualifyOne(env,row){
         await mark(env,{...effectiveRow,action_url:h.url},'auth_required',`verified_authenticated_adapter:${adapter.endpoint}`);
         return 'auth_required';
       }
+      await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action='Authenticated submission API found, but no verified owner-only authentication gate was admitted. Keep automatic submission disabled and continue route research.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run().catch(()=>{});
+      await mark(env,effectiveRow,'research_required',`authenticated_adapter_gate_not_admitted:${adapter.endpoint}`);
+      return 'research_required';
     }
+    if(await rejectedAdapterReplay(env,effectiveRow,adapter))return 'research_required';
     await storeAutoAdapter(env,effectiveRow,h,adapter,'verified');
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth JSON submission adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
     await mark(env,effectiveRow,'ready_to_submit',`verified_auto_adapter:${adapter.endpoint}`);
@@ -546,6 +568,7 @@ async function qualifyOne(env,row){
   }
   const formAdapter=currentSubmissionIntent?htmlFormAdapter(h.url,h.body):null;
   if(formAdapter){
+    if(await rejectedAdapterReplay(env,effectiveRow,formAdapter))return 'research_required';
     await storeAutoAdapter(env,effectiveRow,h,formAdapter,'verified');
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='ready_to_submit',human_required=0,automation_potential=90,acceptance_probability=65,next_action='Verified same-host no-auth form adapter discovered automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
     await mark(env,effectiveRow,'ready_to_submit',`verified_safe_form_adapter:${formAdapter.endpoint}`);
@@ -585,6 +608,7 @@ async function qualifyOne(env,row){
       const linkedApi=await findOpenApi(page.url,page.body);
       if(linkedApi){
         if(linkedApi.auth_required){linkedAuth=true;linkedAuthUrl=page.url;continue}
+        if(await rejectedAdapterReplay(env,effectiveRow,linkedApi))return 'research_required';
         await storeAutoAdapter(env,effectiveRow,page,linkedApi,'verified');
         await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,status='ready_to_submit',human_required=0,automation_potential=95,acceptance_probability=70,next_action='Verified no-auth submission API discovered by following a same-host action route automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(page.url,effectiveRow.surface_slug).run();
         await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_auto_adapter:${linkedApi.endpoint}`);
@@ -592,6 +616,7 @@ async function qualifyOne(env,row){
       }
       const linkedForm=exactIntent?htmlFormAdapter(page.url,page.body):null;
       if(linkedForm){
+        if(await rejectedAdapterReplay(env,effectiveRow,linkedForm))return 'research_required';
         await storeAutoAdapter(env,effectiveRow,page,linkedForm,'verified');
         await env.DB.prepare(`UPDATE distribution_opportunities SET action_url=?,status='ready_to_submit',human_required=0,automation_potential=90,acceptance_probability=65,next_action='Verified no-auth same-host submission form discovered by following a Submit/Add/List route automatically.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(page.url,effectiveRow.surface_slug).run();
         await mark(env,{...effectiveRow,action_url:page.url},'ready_to_submit',`verified_linked_safe_form_adapter:${linkedForm.endpoint}`);
