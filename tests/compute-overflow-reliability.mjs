@@ -22,6 +22,8 @@ check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render resear
 check(s.includes("reconcileStaleResearchHumanGates"),'classifier upgrades release stale research-derived human gates before re-enqueue');
 check(s.includes("canonicalOverflowFormField"),'canonical policy accepts the same safe field aliases as Render research');
 check(s.includes("session_refresh_retry_armed_v1"),'legacy HTTP 419 form failures get one bounded session-aware retry');
+check(s.includes("AUTHORIZED_EXECUTION_VERSION=2"),'authorized action keys version executor semantics so recovered actions can be re-issued safely');
+check(s.includes("orphan_queued_external_recovered"),'queued external submissions cannot stall without an active execution job');
 check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
 check(s.includes("QUALIFICATION_FALLBACK_LIMIT=6"),'fallback qualification is bounded');
 check(s.includes("runQualificationWatchdog(env).catch"),'scheduled control plane actually invokes qualification watchdog');
