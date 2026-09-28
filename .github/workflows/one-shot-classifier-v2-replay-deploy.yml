@@ -1,4 +1,4 @@
-# retry: all recovery tests reconciled 2026-09-28
+# replay: classifier v7 adapter recovery 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -41,7 +41,7 @@ jobs:
           curl -fsS --max-time 20 "https://trytoolscout.org/api/compute/health?deploy_verify=1" -o /tmp/health.json
           cat /tmp/health.json
           jq -e '
-            (.distributionClassifierVersion >= 6) and
+            (.distributionClassifierVersion >= 7) and
             (.qualificationMode == "render_primary_with_bounded_cloudflare_fallback") and
             (
               (
