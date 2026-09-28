@@ -127,8 +127,11 @@ async function transformPage(request,response,env){
     html=shortenTitle(html,pathname);
     html=ensureCanonical(html,pathname,cfg);
     const state=await activeState(env,pathname);
-    if(state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)]&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
-      const block=decisionBlock(pathname.slice(1),criteriaFor(cfg,pathname.slice(1)));
+    const taskSpecificDepth=state&&String(state.reason||'')==='execution_contract:deepen_existing_search_asset';
+    const bestPageDepth=state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
+    if((taskSpecificDepth||bestPageDepth)&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
+      const depthSlug=pathname.replace(/^\/tools\//,'').replace(/^\//,'');
+      const block=decisionBlock(depthSlug,criteriaFor(cfg,depthSlug));
       const marker='<section class="section"><h2>How ToolScout chooses</h2>';
       html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
     }
@@ -149,12 +152,27 @@ async function queueIndexNow(request,env,pathname,cfg){
   const adapter=cfg.adapters.find(x=>x?.surface_slug==='indexnow'&&x?.enabled&&x?.allow_automatic);
   if(!adapter)return false;
   const assetUrl=`https://trytoolscout.org${pathname}`;
-  const recent=await env.DB.prepare(`SELECT 1 ok FROM distribution_submissions WHERE surface_slug='indexnow' AND asset_url=? AND created_at>=datetime('now','-7 days') LIMIT 1`).bind(assetUrl).first().catch(()=>null);
-  if(recent?.ok)return false;
+  const existing=await env.DB.prepare(`SELECT submission_id,created_at,updated_at,last_attempt_at,submitted_at
+    FROM distribution_submissions
+    WHERE surface_slug='indexnow' AND asset_url=? AND submission_type='http_json'
+    LIMIT 1`).bind(assetUrl).first().catch(()=>null);
   const payload={host:'trytoolscout.org',key:String(adapter.key||''),keyLocation:String(adapter.key_location||''),urlList:[assetUrl]};
-  await env.DB.prepare(`INSERT INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
-    .bind(`sub_${crypto.randomUUID()}`,'indexnow',assetUrl,'http_json','ready',JSON.stringify(payload),adapter.endpoint||'https://api.indexnow.org/indexnow',0).run();
-  return true;
+  const endpoint=adapter.endpoint||'https://api.indexnow.org/indexnow';
+  if(existing?.submission_id){
+    const recent=await env.DB.prepare(`SELECT 1 ok FROM distribution_submissions
+      WHERE submission_id=?
+        AND COALESCE(last_attempt_at,submitted_at,updated_at,created_at)>=datetime('now','-7 days')
+      LIMIT 1`).bind(existing.submission_id).first().catch(()=>null);
+    if(recent?.ok)return false;
+    await env.DB.prepare(`UPDATE distribution_submissions
+      SET status='ready',payload_json=?,action_url=?,human_required=0,error=NULL,updated_at=datetime('now')
+      WHERE submission_id=?`).bind(JSON.stringify(payload),endpoint,existing.submission_id).run();
+    return true;
+  }
+  const inserted=await env.DB.prepare(`INSERT OR IGNORE INTO distribution_submissions(submission_id,surface_slug,asset_url,submission_type,status,payload_json,action_url,human_required,created_at,updated_at)
+    VALUES(?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
+    .bind(`sub_${crypto.randomUUID()}`,'indexnow',assetUrl,'http_json','ready',JSON.stringify(payload),endpoint,0).run();
+  return Number(inserted?.meta?.changes||inserted?.changes||0)>0;
 }
 async function refreshState(request,env){
   await ensureSchema(env);
