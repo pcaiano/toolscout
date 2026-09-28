@@ -708,8 +708,60 @@ async function safeSameHostGet(start,headers,maxHops=3){
   }
   return{ok:false,status:0,url:current,error:'redirect_limit'};
 }
+function normalizedHttpUrl(value){
+  try{const u=new URL(String(value||''));u.hash='';return u.toString()}catch{return null}
+}
+function freshAuthorizedFormPayload(html,sourceUrl,endpoint){
+  const expected=normalizedHttpUrl(endpoint);
+  if(!expected)return null;
+  for(const match of String(html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
+    const open=match[1]||'',body=match[2]||'',method=String(tagAttr(open,'method')||'GET').toUpperCase();
+    if(method!=='POST')continue;
+    const action=absolute(tagAttr(open,'action')||sourceUrl,sourceUrl);
+    if(normalizedHttpUrl(action)!==expected)continue;
+    const formText=stripTags(body,120000);
+    if(CAPTCHA_RE.test(body)||AUTH_RE.test(formText)||/<input[^>]+type=["']password["']/i.test(body)||PAYMENT_RE.test(formText)||RECIPROCAL_RE.test(formText)||AUTOMATION_BLOCK_RE.test(formText))continue;
+    const assessed=safeFormPayload(body);
+    if(!assessed.payload)continue;
+    return{payload:assessed.payload,hiddenSafetyFields:assessed.hiddenSafetyFields||[]};
+  }
+  return null;
+}
+function cookieHeaderFromResponse(response){
+  let values=[];
+  try{if(typeof response?.headers?.getSetCookie==='function')values=response.headers.getSetCookie()||[]}catch{}
+  if(!values.length){
+    const one=response?.headers?.get?.('set-cookie');
+    if(one)values=[one];
+  }
+  return values.map(v=>String(v||'').split(';')[0].trim()).filter(Boolean).join('; ');
+}
+async function refreshPublicFormSession(sourceUrl,endpoint){
+  if(!validPublicHttp(sourceUrl)||!sameHost(sourceUrl,endpoint))return null;
+  try{
+    const response=await fetch(sourceUrl,{
+      method:'GET',
+      headers:{'Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5','User-Agent':'ToolScout External Execution/1.0 (+https://trytoolscout.org/)'},
+      redirect:'follow',
+      signal:AbortSignal.timeout(12000)
+    });
+    const finalUrl=response.url||sourceUrl;
+    const type=String(response.headers.get('content-type')||'').toLowerCase();
+    if(!response.ok||!sameHost(sourceUrl,finalUrl)||!type.includes('text/html'))return null;
+    const html=(await response.text()).slice(0,MAX_HTML);
+    const fresh=freshAuthorizedFormPayload(html,finalUrl,endpoint);
+    if(!fresh)return null;
+    return{
+      body:new URLSearchParams(Object.entries(fresh.payload).map(([k,v])=>[k,Array.isArray(v)?v.join(','):String(v??'')])).toString(),
+      cookie:cookieHeaderFromResponse(response),
+      referer:finalUrl,
+      hiddenSafetyFields:fresh.hiddenSafetyFields
+    };
+  }catch{return null}
+}
 async function executeAuthorizedHttpAction(job){
-  const p=job?.payload||{},endpoint=String(p.endpoint||''),method=String(p.method||'POST').toUpperCase(),contentType=String(p.contentType||'application/json').toLowerCase(),body=String(p.body||'');
+  const p=job?.payload||{},endpoint=String(p.endpoint||''),method=String(p.method||'POST').toUpperCase(),contentType=String(p.contentType||'application/json').toLowerCase();
+  let body=String(p.body||'');
   if(p.authorizationClass!=='verified_free_auto_adapter_v1')return{ok:false,error:'authorization_class_rejected'};
   if(!validPublicHttp(endpoint))return{ok:false,error:'invalid_or_private_endpoint'};
   if(!['POST','PUT','PATCH'].includes(method))return{ok:false,error:'method_not_authorized'};
@@ -717,6 +769,16 @@ async function executeAuthorizedHttpAction(job){
   if(body.length>50000)return{ok:false,error:'body_too_large'};
   try{
     const headers={'Content-Type':contentType,'Accept':'application/json,text/html;q=0.9,*/*;q=0.8','User-Agent':'ToolScout External Execution/1.0 (+https://trytoolscout.org/)'};
+    let sessionPreflightUsed=false,sessionCookieCount=0;
+    if(contentType==='application/x-www-form-urlencoded'&&validPublicHttp(p.sourceUrl)&&sameHost(p.sourceUrl,endpoint)){
+      const refreshed=await refreshPublicFormSession(String(p.sourceUrl),endpoint);
+      if(refreshed){
+        body=refreshed.body;
+        if(refreshed.cookie){headers.Cookie=refreshed.cookie;sessionCookieCount=refreshed.cookie.split('; ').filter(Boolean).length}
+        if(refreshed.referer){headers.Referer=refreshed.referer;try{headers.Origin=new URL(refreshed.referer).origin}catch{}}
+        sessionPreflightUsed=true;
+      }
+    }
     const response=await fetch(endpoint,{method,headers,body,redirect:'manual',signal:AbortSignal.timeout(15000)});
     const location=response.headers.get('location');
     let evidenceUrl=null,finalUrl=endpoint,httpStatus=response.status,accepted=response.ok;
@@ -734,6 +796,7 @@ async function executeAuthorizedHttpAction(job){
     return{
       ok:true,accepted,httpStatus,targetUrl:endpoint,finalUrl,evidenceUrl,
       responseType:safe(response.headers.get('content-type')||'',160),
+      sessionPreflightUsed,sessionCookieCount,
       authorizationClass:p.authorizationClass
     };
   }catch(error){return{ok:false,httpStatus:0,targetUrl:endpoint,error:safe(error?.message||error,500),authorizationClass:p.authorizationClass}}
