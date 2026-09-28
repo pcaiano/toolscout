@@ -586,7 +586,7 @@ async function executeAuthorizedHttpAction(job){
     try{text=(await response.text()).slice(0,12000)}catch{}
     if(!evidenceUrl)evidenceUrl=responseEvidenceFromText(text,endpoint);
     return{
-      ok:accepted,httpStatus,targetUrl:endpoint,finalUrl,evidenceUrl,
+      ok:true,accepted,httpStatus,targetUrl:endpoint,finalUrl,evidenceUrl,
       responseType:safe(response.headers.get('content-type')||'',160),
       authorizationClass:p.authorizationClass
     };
