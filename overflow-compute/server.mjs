@@ -39,7 +39,8 @@ async function runBatch(batchId,completionToken){
         explicitFormIntent:route?.formAssessment?.submissionIntentEvidence===true,
         spaScriptProbes:Number(route?.spaScriptProbes||0),
         transportHints:Array.isArray(route?.transportHints)?route.transportHints.slice(0,4):[],
-        rejections:Array.isArray(route?.formAssessment?.rejections)?route.formAssessment.rejections.slice(0,8):[]
+        rejections:Array.isArray(route?.formAssessment?.rejections)?route.formAssessment.rejections.slice(0,8):[],
+        rejectionDetails:Array.isArray(route?.formAssessment?.rejectionDetails)?route.formAssessment.rejectionDetails.slice(0,8):[]
       })):[];
       console.log(JSON.stringify({
         event:'distribution_classifier_result',
