@@ -21,6 +21,7 @@ check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=16;"),'classifier v16 is
 check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
 check(s.includes("reconcileStaleResearchHumanGates"),'classifier upgrades release stale research-derived human gates before re-enqueue');
 check(s.includes("canonicalOverflowFormField"),'canonical policy accepts the same safe field aliases as Render research');
+check(s.includes("session_refresh_retry_armed_v1"),'legacy HTTP 419 form failures get one bounded session-aware retry');
 check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
 check(s.includes("QUALIFICATION_FALLBACK_LIMIT=6"),'fallback qualification is bounded');
 check(s.includes("runQualificationWatchdog(env).catch"),'scheduled control plane actually invokes qualification watchdog');
