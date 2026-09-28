@@ -8,6 +8,7 @@ const OVERFLOW_CRON='*/15 * * * *';
 const RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
+const AUTHORIZED_EXECUTION_VERSION=2;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
 const DISTRIBUTION_CLASSIFIER_VERSION=16;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
@@ -763,6 +764,15 @@ function encodedAdapterBody(contentType,payload){
 }
 async function enqueueAuthorizedExecution(env){
   await ensureSchema(env);
+  await env.DB.prepare(`UPDATE distribution_submissions
+    SET status='failed',error=COALESCE(error,'orphan_queued_external_recovered'),updated_at=datetime('now')
+    WHERE submission_type='auto_discovered_json' AND status='queued_external'
+      AND NOT EXISTS (
+        SELECT 1 FROM compute_overflow_jobs j
+        WHERE j.job_type='authorized_http_action'
+          AND j.subject_key=distribution_submissions.surface_slug
+          AND j.status IN ('queued','leased')
+      )`).run().catch(()=>{});
   let remaining=await budgetRemaining(env,'execution',EXECUTION_DAILY_JOB_BUDGET);
   if(!remaining)return{enqueued:0,submissionJobs:0,verificationJobs:0,remaining:0};
   let enqueued=0,submissionJobs=0,verificationJobs=0;
@@ -823,7 +833,7 @@ async function enqueueAuthorizedExecution(env){
     }
     const keyHash=await shortHash(`${a.endpoint}|${method}|${contentType}|${a.payload_template_json}`);
     const added=await enqueueJob(env,{
-      jobKey:`execute:${a.surface_slug}:${submissionId}:attempt:${num(prior?.attempts)+1}:${keyHash}`,
+      jobKey:`execute:v${AUTHORIZED_EXECUTION_VERSION}:${a.surface_slug}:${submissionId}:attempt:${num(prior?.attempts)+1}:${keyHash}`,
       jobType:'authorized_http_action',
       subjectType:'surface',subjectKey:a.surface_slug,
       priority:1200+num(a.distribution_score),
