@@ -9,7 +9,7 @@ const RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *';
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
-const DISTRIBUTION_CLASSIFIER_VERSION=15;
+const DISTRIBUTION_CLASSIFIER_VERSION=16;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
@@ -1156,8 +1156,30 @@ const OVERFLOW_SAFE_FORM_FIELDS=new Set([
   'name','title','product_name','tool_name','startup_name','company','company_name',
   'url','website','website_url','homepage','homepage_url','product_url','tool_url','site','site_url','product_website',
   'description','short_description','summary','overview','tagline',
+  'email','email_address','contact_email','business_email','work_email','submitter_email',
+  'contact_name','submitter_name','first_name','last_name',
   'category','categories','industry','type','slug','domain'
 ]);
+function canonicalOverflowFormField(raw){
+  const source=String(raw||'').trim();
+  const original=source.replace(/([a-z0-9])([A-Z])/g,'$1_$2').toLowerCase();
+  if(!original)return null;
+  if(OVERFLOW_SAFE_FORM_FIELDS.has(original))return original;
+  const parts=original.replace(/\]/g,'').split(/[\[\].:]+/).filter(Boolean);
+  const leaf=parts[parts.length-1]||original;
+  const compact=leaf.replace(/[-\s]+/g,'_');
+  if(OVERFLOW_SAFE_FORM_FIELDS.has(compact))return compact;
+  if(/^(?:listing|product|tool|startup|company|app|software|project)?_?(?:name|title)$/.test(compact))return'product_name';
+  if(/^(?:listing|product|tool|startup|company|app|software|project)?_?(?:url|website|homepage|site)$/.test(compact)||/^(?:website|homepage|site)$/.test(compact))return'website_url';
+  if(/^(?:listing|product|tool|startup|app|software|project)?_?(?:description|summary|overview|content|details)$/.test(compact)||compact==='content')return'description';
+  if(/^(?:business|work|contact|submitter|user|owner)?_?email(?:_address)?$/.test(compact))return'contact_email';
+  if(/^(?:contact|submitter|user|owner)?_?name$/.test(compact))return'contact_name';
+  if(/^(?:first|given)_?name$/.test(compact))return'first_name';
+  if(/^(?:last|family|surname)_?name$/.test(compact))return'last_name';
+  if(/^(?:category|categories|industry|type)$/.test(compact))return compact;
+  if(compact==='tag_line')return'tagline';
+  return null;
+}
 const OVERFLOW_JSON_ROOT_FIELDS=new Set([...OVERFLOW_SAFE_FORM_FIELDS,'listing','attribution','is_stealth','type_data']);
 const OVERFLOW_ATTRIBUTION_FIELDS=new Set(['agent_name','represented_organization']);
 function safeOverflowJsonPayload(payload){
@@ -1203,10 +1225,11 @@ function validatedOverflowMachineCandidate(sourceUrl,route,result){
   if(kind!=='html_form'||contentType!=='application/x-www-form-urlencoded')return null;
   const hiddenSafety=new Set(Array.isArray(c.hiddenSafetyFields)?c.hiddenSafetyFields.map(String):[]);
   const keys=Object.keys(payload);
-  if(keys.some(k=>/captcha|terms|agree|consent|password|auth|payment|card/i.test(k)))return null;
+  if(keys.some(k=>/captcha|terms|agree|consent|password|payment|card/i.test(k)))return null;
+  if(keys.some(k=>/auth/i.test(k)&&!hiddenSafety.has(k)))return null;
   if(keys.some(k=>/csrf|token|nonce|form[_-]?key|verification/i.test(k)&&!hiddenSafety.has(k)))return null;
   if(keys.some(k=>typeof payload[k]!=='string'||String(payload[k]).length>(hiddenSafety.has(k)?2000:500)))return null;
-  const useful=keys.filter(k=>OVERFLOW_SAFE_FORM_FIELDS.has(k)).length;
+  const useful=keys.filter(k=>OVERFLOW_SAFE_FORM_FIELDS.has(canonicalOverflowFormField(k))).length;
   if(useful<2)return null;
   return{endpoint:c.endpoint,method:'POST',contentType:'application/x-www-form-urlencoded',payload,confidence:Math.max(95,Math.min(98,num(c.confidence)||96))};
 }
@@ -1272,7 +1295,7 @@ async function applyDistributionResult(env,job,result){
     }
     await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at)
       VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,slug,actionUrl,'ready_to_submit',`overflow_verified_safe_form_adapter:${machineCandidate.endpoint}`).run().catch(()=>{});
-  }else if(humanRoute||(manualRoute&&num(payload.score)>=70)){
+  }else if(humanRoute||manualRoute){
     const route=humanRoute||manualRoute;
     gate=await openDistributionHumanGateFromResearchEvidence(env,{
       surface_slug:slug,surface_name:payload.surfaceName||slug,action_url:payload.url,distribution_score:num(payload.score),status:payload.currentStatus||'research_required'
