@@ -179,7 +179,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       FROM growth_action_events
       WHERE created_at>=datetime('now','-12 hours')
       ORDER BY updated_at DESC,created_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
-    env.DB.prepare(`SELECT task_id,opportunity_key,subject_type,subject_key,action,executor,engine,status,claimed_at,attempted_at,updated_at
+    env.DB.prepare(`SELECT task_id,opportunity_key,subject_type,subject_key,action,executor,engine,status,created_at,claimed_at,attempted_at,updated_at
       FROM growth_execution_contract
       WHERE updated_at>=datetime('now','-12 hours') AND status IN ('pending','claimed','attempted','verified','human_required')
       ORDER BY updated_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -333,8 +333,11 @@ async function buildCommandCenterBusinessTruth(request,env){
   const growthActions=[
     ...(executionActionRows||[]).map(x=>({
       id:x.task_id,
-      at:x.updated_at||x.attempted_at||x.claimed_at,
-      createdAt:x.claimed_at||x.updated_at,
+      at:x.updated_at||x.attempted_at||x.claimed_at||x.created_at,
+      createdAt:x.created_at||null,
+      updatedAt:x.updated_at||null,
+      claimedAt:x.claimed_at||null,
+      attemptedAt:x.attempted_at||null,
       engine:x.engine||x.executor||'growth',
       channel:x.action||x.executor||'execution',
       status:x.status,
