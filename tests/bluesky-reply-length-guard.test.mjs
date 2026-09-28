@@ -13,5 +13,5 @@ assert.match(src,/BLUESKY_DANGLING_TERMINAL/);
 assert.match(src,/\/api\/audience\/bluesky-reply\/prepare/);
 assert.match(src,/bluesky_reply_possible_hard_cut/);
 assert.match(wrangler,/"\/api\/audience\/\*"/,'Bluesky reply preparation endpoint must route through the Worker');
-assert.match(src,/replace\(\[\\u2013\\u2014\]\/g,'-'\)/,'ToolScout social copy must normalize em/en dashes');
+assert.match(src,/replace\(\/\[\\u2013\\u2014\]\/g,'-'\)/,'ToolScout social copy must normalize em/en dashes');
 console.log('Bluesky reply guard keeps replies complete and inside platform limits.');
