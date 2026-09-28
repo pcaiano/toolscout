@@ -566,7 +566,9 @@ async function health(env){
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE created_at>=datetime('now','-15 minutes') AND result='policy_blocked') qualification_policy_15m,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued') route_research_queued,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued' AND available_at<=datetime('now')) route_research_runnable,
-      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='leased') route_research_leased`).first().catch(()=>null)
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='leased') route_research_leased,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status IN ('completed','failed') AND completed_at>=datetime('now','start of day')) actions_attempted_today,
+      (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='authorized_http_action' AND status='failed' AND completed_at>=datetime('now','start of day')) actions_failed_today`).first().catch(()=>null)
   ]);
   const usage=Object.fromEntries(rows(budgets).map(x=>[String(x.kind),num(x.used_today)]));
   const distributionFunnel={
@@ -599,7 +601,9 @@ async function health(env){
     routeResearchRunnable:num(live?.route_research_runnable),
     routeResearchLeased:num(live?.route_research_leased),
     actionsAuthorizedToday:num(fm?.actions_authorized_today),
+    actionsAttemptedToday:num(live?.actions_attempted_today),
     actionsCompletedToday:num(fm?.actions_completed_today),
+    actionsFailedToday:num(live?.actions_failed_today),
     submissionsAcceptedToday:num(fm?.submissions_accepted_today),
     placementsVerifiedToday:num(fm?.placements_verified_today)
   };
