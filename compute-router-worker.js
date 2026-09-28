@@ -768,7 +768,7 @@ async function enqueueAuthorizedExecution(env){
   let enqueued=0,submissionJobs=0,verificationJobs=0;
 
   const submitLimit=Math.min(300,remaining);
-  const candidates=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url,
+  const candidates=await env.DB.prepare(`SELECT a.surface_slug,a.source_url,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url,
       o.distribution_score,COALESCE(l.operating_decision,'explore') operating_decision
     FROM distribution_auto_adapters a
     JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
@@ -805,7 +805,11 @@ async function enqueueAuthorizedExecution(env){
     let payload={};try{payload=JSON.parse(a.payload_template_json||'{}')}catch{continue}
     const contentType=String(a.content_type||'application/json').toLowerCase();
     if(!['application/json','application/x-www-form-urlencoded'].includes(contentType))continue;
-    const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first().catch(()=>null);
+    let prior=await env.DB.prepare(`SELECT submission_id,status,attempts,error FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first().catch(()=>null);
+    if(prior&&num(prior.attempts)>=3&&contentType==='application/x-www-form-urlencoded'&&isHttp(a.source_url)&&String(prior.error||'').startsWith('external_http_419:')&&!String(prior.error||'').includes('session_refresh_failed')){
+      await env.DB.prepare(`UPDATE distribution_submissions SET attempts=0,error='session_refresh_retry_armed_v1',status='queued_external',updated_at=datetime('now') WHERE submission_id=?`).bind(prior.submission_id).run().catch(()=>{});
+      prior={...prior,attempts:0,status:'queued_external',error:'session_refresh_retry_armed_v1'};
+    }
     if(prior&&['submitted','pending_review','verified'].includes(String(prior.status||'')))continue;
     if(prior&&num(prior.attempts)>=3)continue;
     const submissionId=prior?.submission_id||`sub_${crypto.randomUUID()}`;
@@ -824,7 +828,7 @@ async function enqueueAuthorizedExecution(env){
       subjectType:'surface',subjectKey:a.surface_slug,
       priority:1200+num(a.distribution_score),
       payload:{
-        surfaceSlug:a.surface_slug,submissionId,endpoint:a.endpoint,method,contentType,
+        surfaceSlug:a.surface_slug,submissionId,sourceUrl:isHttp(a.source_url)?a.source_url:null,endpoint:a.endpoint,method,contentType,
         body:encodedAdapterBody(contentType,payload),
         verificationEndpoint:a.verification_endpoint||null,publicUrl:a.public_url||null,
         authorizationClass:'verified_free_auto_adapter_v1'
@@ -1386,14 +1390,15 @@ async function applyAuthorizedActionResult(env,job,result){
       .bind(`extsub_${crypto.randomUUID()}`,slug,payload.endpoint,evidence,`Render executed a Cloudflare-authorized verified free adapter. HTTP ${httpStatus}. Cloudflare retained decision and verification authority.`).run().catch(()=>{});
     return{applied:true,accepted:true,evidence};
   }
-  const routeRejected=httpStatus===401||httpStatus===403;
+  const sessionRefreshFailed=httpStatus===419&&payload.contentType==='application/x-www-form-urlencoded'&&result?.sessionPreflightUsed===true;
+  const routeRejected=httpStatus===401||httpStatus===403||sessionRefreshFailed;
   if(routeRejected){
     await env.DB.batch([
       env.DB.prepare(`UPDATE distribution_submissions
         SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),
             error=?,updated_at=datetime('now')
         WHERE submission_id=?`)
-        .bind(`external_http_${httpStatus}:route_revalidation_required`,submissionId),
+        .bind(sessionRefreshFailed?`external_http_419:session_refresh_failed_v1`:`external_http_${httpStatus}:route_revalidation_required`,submissionId),
       env.DB.prepare(`UPDATE distribution_auto_adapters
         SET policy_state='revalidation_required',last_checked_at=datetime('now'),updated_at=datetime('now')
         WHERE surface_slug=?`).bind(slug),
@@ -1401,11 +1406,11 @@ async function applyAuthorizedActionResult(env,job,result){
         SET status='research_required',human_required=0,last_checked_at=NULL,
             next_action=?,updated_at=datetime('now')
         WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
-        .bind(`External submission returned HTTP ${httpStatus}. The machine adapter was invalidated and queued for fresh route research. Open a non-blocking Human Gate only if fresh same-host evidence proves login, CAPTCHA or a manual-only submission step.`,slug)
+        .bind(sessionRefreshFailed?'Session-aware form submission still returned HTTP 419. The machine adapter was invalidated; fresh research must fall back to a non-blocking manual route rather than replaying stale CSRF state.':`External submission returned HTTP ${httpStatus}. The machine adapter was invalidated and queued for fresh route research. Open a non-blocking Human Gate only if fresh same-host evidence proves login, CAPTCHA or a manual-only submission step.`,slug)
     ]).catch(()=>{});
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,detail,observed_at,created_at)
       VALUES(?,?, 'external_authorized_submission','recovery_queued',?,?,datetime('now'),datetime('now'))`)
-      .bind(`extsubrecover_${crypto.randomUUID()}`,slug,payload.endpoint,`Authorized external submission returned HTTP ${httpStatus}. Adapter moved to revalidation_required; next control-plane tick will prioritize fresh route research before any retry or Human Gate.`).run().catch(()=>{});
+      .bind(`extsubrecover_${crypto.randomUUID()}`,slug,payload.endpoint,sessionRefreshFailed?'Session-aware authorized form submission still returned HTTP 419. Adapter moved to revalidation_required and automatic replay is suppressed.':`Authorized external submission returned HTTP ${httpStatus}. Adapter moved to revalidation_required; next control-plane tick will prioritize fresh route research before any retry or Human Gate.`).run().catch(()=>{});
     return{applied:true,accepted:false,revalidationRequired:true,httpStatus};
   }
   await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`)
