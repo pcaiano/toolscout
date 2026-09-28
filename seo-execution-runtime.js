@@ -73,38 +73,29 @@ async function canonicalState(env,pathname){
     return {verified,httpStatus:response.status,expected,canonical,proofSource,reason:verified?'self_canonical_verified':'canonical_not_self'};
   }catch(error){return {verified:false,expected,reason:'canonical_probe_failed',error:String(error?.message||error).slice(0,300)}}
 }
-async function publicHtml(pathname){
-  const probeUrl=new URL('https://trytoolscout.org'+pathname);
-  probeUrl.searchParams.set('__ts_seo_probe',String(Date.now()));
+async function externalSeoProof(env,pathname,action){
+  const base=String(env.OVERFLOW_COMPUTE_URL||'').replace(/\/$/,'');
+  if(!base)return {verified:false,reason:'external_proof_observer_unavailable',observer:'render-overflow'};
+  const u=new URL(base+'/seo-proof');
+  u.searchParams.set('path',pathname);
+  u.searchParams.set('action',action);
   try{
-    const r=await fetch(probeUrl.toString(),{headers:{'Cache-Control':'no-cache, no-store','Pragma':'no-cache','User-Agent':'ToolScout-SEO-Execution-Probe/1.0'},signal:AbortSignal.timeout(8000)});
-    if(!r.ok)return {ok:false,status:r.status,html:''};
-    const type=String(r.headers.get('content-type')||'').toLowerCase();
-    if(!type.includes('text/html'))return {ok:false,status:r.status,html:''};
-    return {ok:true,status:r.status,html:await r.text()};
-  }catch(error){return {ok:false,status:0,html:'',error:String(error?.message||error).slice(0,300)}}
+    const r=await fetch(u.toString(),{
+      headers:{'Accept':'application/json','User-Agent':'ToolScout-SEO-Execution/1.0'},
+      signal:AbortSignal.timeout(15000)
+    });
+    const body=await r.json().catch(()=>null);
+    if(!r.ok||!body)return {verified:false,reason:'external_proof_http_'+r.status,observer:'render-overflow'};
+    return {...body,verified:body.verified===true,observer:'render-overflow'};
+  }catch(error){
+    return {verified:false,reason:'external_proof_failed',error:String(error?.message||error).slice(0,300),observer:'render-overflow'};
+  }
 }
-function hrefPresent(html,pathname){
-  const body=String(html||'');
-  const path=String(pathname||'');
-  return body.includes('href="'+path+'"')||body.includes("href='"+path+"'");
+async function verifyInternalLinkIntervention(env,pathname){
+  return externalSeoProof(env,pathname,'strengthen_internal_links');
 }
-async function verifyInternalLinkIntervention(pathname){
-  const hubs=['/guides','/tools','/compare'];
-  const pages=await Promise.all(hubs.map(hub=>publicHtml(hub)));
-  const evidence=pages.map((page,index)=>({
-    hub:hubs[index],
-    ok:page.ok,
-    linked:page.ok&&page.html.includes('data-toolscout-index-recovery-links="1"')&&hrefPresent(page.html,pathname),
-    status:page.status
-  }));
-  const linked=evidence.filter(x=>x.linked).length;
-  return {verified:linked>=2,linkedHubs:linked,hubs:evidence};
-}
-async function verifyDepthIntervention(pathname){
-  const page=await publicHtml(pathname);
-  const marker=page.ok&&(page.html.includes('organic-growth:runtime-start')||page.html.includes('organic-growth:start'));
-  return {verified:Boolean(marker),status:page.status,marker:Boolean(marker)};
+async function verifyDepthIntervention(env,pathname){
+  return externalSeoProof(env,pathname,'deepen_existing_search_asset');
 }
 
 async function queueIndexNow(env,pathname){
@@ -162,11 +153,11 @@ export async function executeCloudflareSeoTask(env,task){
   }
   let mutationProof=null;
   if(action==='strengthen_internal_links'){
-    mutationProof=await verifyInternalLinkIntervention(pathname);
+    mutationProof=await verifyInternalLinkIntervention(env,pathname);
     if(!mutationProof.verified)return {verified:false,reason:'internal_links_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
   }
   if(action==='deepen_existing_search_asset'){
-    mutationProof=await verifyDepthIntervention(pathname);
+    mutationProof=await verifyDepthIntervention(env,pathname);
     if(!mutationProof.verified)return {verified:false,reason:'search_asset_depth_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
   }
   return {
