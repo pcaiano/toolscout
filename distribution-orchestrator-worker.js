@@ -9,7 +9,7 @@ import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
 import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as contractAdmitCatalogCandidates,executeCatalogGrowthTask,auditCatalogQualityBatch,catalogQualitySnapshot} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
-import {executeCloudflareSeoTask} from './seo-execution-runtime.js';
+import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 
@@ -948,33 +948,6 @@ async function runGrowthExecutionContractCycle(env){
     }
   }catch{}
 
-  const runSeoBatch=async(limit=8)=>{
-    const claim=await claimExecutorTasks(env,'seo_cloudflare',{limit,maxInFlight:limit,result:'growth_brain_cloudflare_seo_batch_v1'});
-    if(!claim.claimed){results.seo_cloudflare={claimed:0,internal:true,batch:true};return}
-    const items=[];
-    for(const task of claim.tasks||[]){
-      try{
-        if(task?.source_kind==='supervisor'){
-          const proof=await recordExecutionProof(env,{taskId:task.task_id,executor:'seo_cloudflare',status:'verified',detail:'seo_supervisor_directive_acknowledged_v1',externalId:'seo_geo_aio',evidence:{proof_kind:'seo_supervisor_execution_lane_healthy',directive:task.action||null,concrete_opportunity_tasks_remain_task_specific:true}});
-          items.push({task_id:task.task_id,status:'verified',supervisor:true,action:task.action,proof:proof?.ok===true});
-          continue;
-        }
-        const out=await boundedExecution(executeCloudflareSeoTask(env,task),12000,'seo_cloudflare_task');
-        if(out?.verified&&out?.pathname){
-          const proof=await recordExecutionProof(env,{taskId:task.task_id,executor:'seo_cloudflare',status:'verified',detail:'cloudflare_seo_task_verified_v2',externalId:out.pathname,evidence:out});
-          items.push({task_id:task.task_id,status:'verified',pathname:out.pathname,action:task.action,indexNow:Boolean(out?.indexNow?.queued),proof:proof?.ok===true,proofKind:out?.proof_kind||null});
-        }else{
-          await deferExecutionTask(env,task.task_id,'cloudflare_seo_batch_not_verified:'+String(out?.reason||'unknown'));
-          items.push({task_id:task.task_id,status:'deferred',reason:out?.reason||'not_verified'});
-        }
-      }catch(error){
-        await deferExecutionTask(env,task.task_id,'cloudflare_seo_batch_error:'+String(error?.message||error).slice(0,300)).catch(()=>null);
-        items.push({task_id:task.task_id,status:'deferred',error:String(error?.message||error).slice(0,500)});
-      }
-    }
-    results.seo_cloudflare={claimed:claim.claimed,internal:true,batch:true,items,verified:items.filter(x=>x.status==='verified').length};
-  };
-
   const runInternal=async(executor,fn)=>{
     const claim=await claimExecutorTasks(env,executor,{limit:1,maxInFlight:1,result:'growth_brain_dispatched_task_v2'});
     if(!claim.claimed){results[executor]={claimed:0};return}
@@ -1039,7 +1012,7 @@ async function runGrowthExecutionContractCycle(env){
   const senderWake=await wakeMakeSender(env,senderClaim.claimed);
   results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:12,deliveryMode:'instant_webhook',wake:senderWake};
 
-  await runSeoBatch(8);
+  results.seo_cloudflare=await runSeoExecutionBatch(env,8,'growth_execution_contract');
 
   const audienceClaim=await claimExecutorTasks(env,'audience_make',{limit:1,maxInFlight:1,result:'audience_make_waiting_for_exact_published_reply'});
   results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
