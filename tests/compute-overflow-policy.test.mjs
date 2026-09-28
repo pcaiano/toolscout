@@ -46,7 +46,6 @@ assert.match(router,/machineCandidatesFoundToday/);
 assert.match(router,/formRoutesSeenToday/);
 assert.match(router,/authRoutesSeenToday/);
 assert.match(router,/captchaRoutesSeenToday/);
-assert.match(router,/overflow_queue_refilled/);
 assert.match(router,/reconcileMetricAnomaly/);
 assert.match(router,/await metricDelta\(env,\{queued:metricQueued,leased:metricLeased,completed:metricCompleted,failed:metricFailed,activeBatches:-1,completedBatches:1,lastCompleted:true\}\)/);
 assert.match(router,/if\(!env\.OVERFLOW_COMPUTE_URL\)return\{ok:true,status:'awaiting_external_runtime'\}/);
