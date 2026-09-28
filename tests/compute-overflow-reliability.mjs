@@ -7,6 +7,8 @@ check(s.includes("const BATCH_SIZE=8;"),'batch size is callback-safe');
 check(s.includes("const MAX_ACTIVE_BATCHES=3;"),'three batches match 24 external concurrency');
 check(s.includes("Promise.all(batches.map(batch=>"),'batch triggers run concurrently');
 check(s.includes("RENDER_TRIGGER_TIMEOUT_MS=25000"),'cold-start trigger timeout is tolerant');
+check(s.includes("SOURCE_UNREACHABLE_BACKOFF_HOURS=6"),'source-unreachable retries use a bounded 6h backoff');
+check(s.includes("last_error='source_unreachable_backoff'"),'mature unreachable backoffs are eligible for self-healing');
 check(s.includes("RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *'"),'Render keepalive cadence exists');
 check(w.includes('"7,22,37,52 * * * *"'),'Wrangler registers Render keepalive cron');
 check(s.includes("followup:'next_scheduled_control_plane_cycle'"),'completion follow-up is scheduler-owned');
