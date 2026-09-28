@@ -1,4 +1,4 @@
-# replay: IndexNow idempotency and SEO queue drain 2026-09-28
+# replay: force one-shot SEO queue proof after IndexNow fix 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -72,6 +72,16 @@ jobs:
             fi
             echo "Direct dispatch returned HTTP $HTTP_CODE; using remote scheduled fallback."
           fi
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('distribution-orchestrator-worker.js')
+          s=p.read_text()
+          old="engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:12,cycleContext:executionCycle"
+          new="engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:0,cycleContext:executionCycle"
+          if old not in s:
+              raise SystemExit('scheduled execution single-flight patch point not found')
+          p.write_text(s.replace(old,new,1))
+          PY
           npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
           DEV_PID=$!
           cleanup(){ kill $DEV_PID >/dev/null 2>&1 || true; }
