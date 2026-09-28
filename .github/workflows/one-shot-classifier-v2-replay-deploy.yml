@@ -1,4 +1,4 @@
-# replay: external 401/403 replay suppression 2026-09-28
+# replay: SEO execution recovery and truthful task age 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -28,6 +28,11 @@ jobs:
           node --check compute-router-worker.js
           node --check overflow-compute/research-core.mjs
           node --check command-center-simplified-view.js
+          node --check operational-truth-reconciliation-worker.js
+          node --check distribution-orchestrator-worker.js
+          node --check growth-execution-contract.js
+          node --check seo-execution-runtime.js
+          node --check seo-cloudflare-runtime-worker.js
           node tests/compute-overflow-policy.test.mjs
           node tests/compute-overflow-reliability.mjs
           node tests/external-action-plane.test.mjs
@@ -38,6 +43,51 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Inspect and release stale SEO execution slots
+        run: |
+          set -euo pipefail
+          echo "SEO queue before stale-slot recovery"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT status,COUNT(*) n,MIN(created_at) oldest_created,MIN(COALESCE(attempted_at,claimed_at,updated_at)) oldest_activity FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status<>'cancelled' GROUP BY status ORDER BY status;" | tee /tmp/seo-before.json
+          echo "Oldest active SEO tasks"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT task_id,source_kind,subject_key,action,status,created_at,claimed_at,attempted_at,updated_at,last_result FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status IN ('pending','claimed','attempted','stalled','deferred') ORDER BY created_at ASC LIMIT 20;" | tee /tmp/seo-oldest-before.json
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "UPDATE growth_execution_contract SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,claimed_at=NULL,attempted_at=NULL,last_result='one_shot_stale_seo_slot_release_20260928',updated_at=datetime('now') WHERE executor='seo_cloudflare' AND status IN ('claimed','attempted') AND COALESCE(attempted_at,claimed_at,updated_at)<datetime('now','-20 minutes');" | tee /tmp/seo-release.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Exercise current SEO executor against production D1
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
+          DEV_PID=$!
+          cleanup(){ kill $DEV_PID >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          READY=0
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 2 http://127.0.0.1:8787/api/autonomous-growth-health >/dev/null 2>&1; then READY=1; break; fi
+            sleep 2
+          done
+          if [ "$READY" != "1" ]; then cat /tmp/wrangler-seo-dev.log; exit 1; fi
+          curl -fsS --max-time 120 "http://127.0.0.1:8787/__scheduled?cron=%2A%2F15%20%2A%20%2A%20%2A%20%2A" > /tmp/seo-scheduled.txt || {
+            curl -fsS --max-time 120 "http://127.0.0.1:8787/cdn-cgi/handler/scheduled?cron=%2A%2F15%20%2A%20%2A%20%2A%20%2A" > /tmp/seo-scheduled.txt
+          }
+          cat /tmp/seo-scheduled.txt
+          sleep 5
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Verify SEO queue advanced
+        run: |
+          set -euo pipefail
+          echo "SEO queue after execution"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT status,COUNT(*) n,MIN(created_at) oldest_created,MAX(updated_at) newest_update FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status<>'cancelled' GROUP BY status ORDER BY status;" | tee /tmp/seo-after.json
+          echo "Recent SEO tasks"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT task_id,source_kind,subject_key,action,status,created_at,claimed_at,attempted_at,verified_at,updated_at,last_result FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status<>'cancelled' ORDER BY updated_at DESC LIMIT 24;" | tee /tmp/seo-recent-after.json
+          echo "Stale active slots after recovery"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) stale_active FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status IN ('claimed','attempted') AND COALESCE(attempted_at,claimed_at,updated_at)<datetime('now','-20 minutes');" | tee /tmp/seo-stale-after.json
+          jq -e '.[0].results[0].stale_active == 0' /tmp/seo-stale-after.json >/dev/null
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
       - name: Verify D1-safe production health once
         run: |
           set -euo pipefail
