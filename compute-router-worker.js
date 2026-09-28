@@ -17,6 +17,7 @@ const BATCH_SIZE=8;
 const MAX_ACTIVE_BATCHES=3;
 const BATCH_TIMEOUT_MINUTES=3;
 const RENDER_TRIGGER_TIMEOUT_MS=25000;
+const QUALIFICATION_FALLBACK_LIMIT=6;
 let schemaReady=null;
 let hotIndexesReady=null;
 let healthCacheAt=0;
@@ -605,7 +606,7 @@ async function health(env){
     githubActionsRole:'disabled_until_october',
     writeAmplificationGuard:'d1-write-guard-v2',
     healthReadModel:'incremental_cached_120s_read_only',
-    qualificationMode:'render_primary_no_cloudflare_sweep'
+    qualificationMode:'render_primary_with_bounded_cloudflare_fallback'
   };
   healthCacheValue=snapshot;healthCacheAt=Date.now();return snapshot;
 }
@@ -934,7 +935,7 @@ async function qualifyResearchReadySweep(env){
       AND status IN ('candidate','discovered','research_required')
       AND surface_slug<>'indexnow'
     ORDER BY COALESCE(last_checked_at,'1970-01-01') ASC,distribution_score DESC
-    LIMIT 25`).all().catch(()=>({results:[]}));
+    LIMIT ${QUALIFICATION_FALLBACK_LIMIT}`).all().catch(()=>({results:[]}));
   const slugs=rows(q).map(x=>safe(x.surface_slug,120)).filter(Boolean);
   if(!slugs.length)return{ok:true,requested:0,checked:0,ready:0};
   return qualifyDistributionSurfaces(env,slugs);
@@ -1014,14 +1015,49 @@ const OVERFLOW_SAFE_FORM_FIELDS=new Set([
   'description','short_description','summary','overview','tagline',
   'category','categories','industry','type','slug','domain'
 ]);
+const OVERFLOW_JSON_ROOT_FIELDS=new Set([...OVERFLOW_SAFE_FORM_FIELDS,'listing','attribution','is_stealth','type_data']);
+const OVERFLOW_ATTRIBUTION_FIELDS=new Set(['agent_name','represented_organization']);
+function safeOverflowJsonPayload(payload){
+  if(!payload||typeof payload!=='object'||Array.isArray(payload))return false;
+  let useful=0;
+  const walk=(value,scope='root',depth=0)=>{
+    if(depth>3)return false;
+    if(value===null)return true;
+    if(typeof value==='string')return value.length<=2000;
+    if(typeof value==='boolean'||typeof value==='number')return Number.isFinite(Number(value));
+    if(Array.isArray(value))return value.length<=10&&value.every(v=>typeof v==='string'&&v.length<=300);
+    if(typeof value!=='object')return false;
+    const entries=Object.entries(value);
+    if(scope==='type_data'&&entries.length===0)return true;
+    for(const [key,v] of entries){
+      if(/captcha|terms|agree|consent|password|auth|payment|card|csrf|token|nonce|secret|api[_-]?key/i.test(key))return false;
+      if(scope==='attribution'){
+        if(!OVERFLOW_ATTRIBUTION_FIELDS.has(key)||typeof v!=='string'||v.length>300)return false;
+        continue;
+      }
+      if(!OVERFLOW_JSON_ROOT_FIELDS.has(key))return false;
+      if(OVERFLOW_SAFE_FORM_FIELDS.has(key))useful++;
+      const nextScope=key==='attribution'?'attribution':key==='type_data'?'type_data':key==='listing'?'listing':scope;
+      if(!walk(v,nextScope,depth+1))return false;
+    }
+    return true;
+  };
+  return walk(payload)&&useful>=2;
+}
 function validatedOverflowMachineCandidate(sourceUrl,route,result){
   const c=route?.machineCandidate;
   if(!c||route?.submissionIntent!==true||String(route?.kind||'')!=='submission'||route?.auth||route?.captcha)return null;
   if(Array.isArray(route?.policyBlockers)&&route.policyBlockers.length)return null;
-  if(String(c.kind||'')!=='html_form'||String(c.method||'').toUpperCase()!=='POST'||String(c.contentType||'').toLowerCase()!=='application/x-www-form-urlencoded')return null;
+  if(String(c.method||'').toUpperCase()!=='POST')return null;
   if(!isHttp(c.endpoint)||!sameHostRoute(sourceUrl,c.endpoint)||!sameHostRoute(route.url,c.endpoint))return null;
   const payload=c.payload&&typeof c.payload==='object'&&!Array.isArray(c.payload)?c.payload:null;
   if(!payload)return null;
+  const kind=String(c.kind||''),contentType=String(c.contentType||'').toLowerCase();
+  if(kind==='json_api'){
+    if(contentType!=='application/json'||!safeOverflowJsonPayload(payload))return null;
+    return{endpoint:c.endpoint,method:'POST',contentType:'application/json',payload,confidence:Math.max(95,Math.min(99,num(c.confidence)||98))};
+  }
+  if(kind!=='html_form'||contentType!=='application/x-www-form-urlencoded')return null;
   const hiddenSafety=new Set(Array.isArray(c.hiddenSafetyFields)?c.hiddenSafetyFields.map(String):[]);
   const keys=Object.keys(payload);
   if(keys.some(k=>/captcha|terms|agree|consent|password|auth|payment|card/i.test(k)))return null;
@@ -1468,7 +1504,11 @@ export default{
     if(trigger===OVERFLOW_CRON){
       const minute=new Date(Number(scheduledEvent?.scheduledTime)||Date.now()).getUTCMinutes();
       const overflowWork=Promise.allSettled([
-        runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null}),
+        (async()=>{
+          const tick=await runOverflowTick(env).catch(async error=>{await event(env,'overflow_tick_failed','failed',safe(error?.message||error,800));return null});
+          const qualificationFallback=await runQualificationWatchdog(env).catch(async error=>{await event(env,'qualification_watchdog_failed','failed',safe(error?.message||error,800));return null});
+          return{tick,qualificationFallback};
+        })(),
         minute%30===0?classifyAuthBacklog(env,{limit:200}):Promise.resolve(null),
         minute===0&&new Date(Number(scheduledEvent?.scheduledTime)||Date.now()).getUTCHours()%6===0?seedContactSupply(env):Promise.resolve(null),
         Promise.resolve(null),
