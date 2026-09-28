@@ -51,6 +51,25 @@ async function gscSignals(env){
 async function activeState(env,pathname){
   try{return await env.DB.prepare(`SELECT pathname,reason,impressions,clicks,position,active,source_generated_at,first_activated_at,last_evaluated_at,indexnow_queued_at,updated_at FROM seo_runtime_state WHERE pathname=? AND active=1 LIMIT 1`).bind(pathname).first()}catch{return null}
 }
+async function recoveryTargets(env,limit=8){
+  try{
+    const rows=(await env.DB.prepare(`SELECT pathname,reason,impressions,position,updated_at
+      FROM seo_runtime_state
+      WHERE active=1 AND reason LIKE 'execution_contract:%'
+      ORDER BY updated_at DESC, impressions DESC
+      LIMIT ?`).bind(Math.max(1,Math.min(12,Number(limit)||8))).all()).results||[];
+    return rows.filter(x=>String(x?.pathname||'').startsWith('/')&&!String(x.pathname).startsWith('/analytics'));
+  }catch{return[]}
+}
+function recoveryLinksBlock(targets){
+  if(!targets.length)return'';
+  const links=targets.map(row=>{
+    const pathname=String(row.pathname||'/');
+    const label=pathname.replace(/^\//,'').replace(/\.html$/i,'').replace(/-/g,' ').replace(/\b\w/g,ch=>ch.toUpperCase());
+    return `<a href="${esc(pathname)}" data-toolscout-index-recovery-link="1">${esc(label||'ToolScout guide')}</a>`;
+  }).join(' · ');
+  return `<!-- toolscout-index-recovery-links:start --><section class="section" data-toolscout-index-recovery-links="1"><h2>Recently strengthened ToolScout guides</h2><p class="small">Related decision pages currently being reinforced for discovery and indexing.</p><p>${links}</p></section><!-- toolscout-index-recovery-links:end -->`;
+}
 function criteriaFor(cfg,slug){
   const intent=cfg.intents.find(x=>x?.slug===slug);
   const keys=Object.keys(intent?.weights||{}).filter(x=>x!=='category').slice(0,5);
@@ -113,6 +132,11 @@ async function transformPage(request,response,env){
       const marker='<section class="section"><h2>How ToolScout chooses</h2>';
       html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
     }
+    if(['/guides','/tools','/compare'].includes(pathname)&&!html.includes('data-toolscout-index-recovery-links="1"')){
+      const targets=await recoveryTargets(env,8);
+      const block=recoveryLinksBlock(targets);
+      if(block)html=html.replace(/<\/body>/i,block+'</body>');
+    }
     if(html===original)return response;
     const gate=validate(html,pathname,cfg);
     if(!gate.ok)return response;
@@ -152,8 +176,15 @@ async function refreshState(request,env){
       await env.DB.prepare(`UPDATE seo_runtime_state SET indexnow_queued_at=datetime('now'),updated_at=datetime('now') WHERE pathname=?`).bind(pathname).run();queued.push(pathname);
     }
   }
-  const rows=(await env.DB.prepare(`SELECT pathname FROM seo_runtime_state WHERE active=1`).all()).results||[];
-  for(const row of rows)if(!seen.has(row.pathname))await env.DB.prepare(`UPDATE seo_runtime_state SET active=0,last_evaluated_at=datetime('now'),updated_at=datetime('now') WHERE pathname=?`).bind(row.pathname).run();
+  const rows=(await env.DB.prepare(`SELECT pathname,reason FROM seo_runtime_state WHERE active=1`).all()).results||[];
+  for(const row of rows){
+    // Search-demand rows follow the live GSC demand set. Execution-contract rows
+    // are durable recovery interventions and must not be erased by a performance
+    // refresh merely because the page has no impressions yet.
+    if(String(row.reason||'')==='observed_search_demand'&&!seen.has(row.pathname)){
+      await env.DB.prepare(`UPDATE seo_runtime_state SET active=0,last_evaluated_at=datetime('now'),updated_at=datetime('now') WHERE pathname=? AND reason='observed_search_demand'`).bind(row.pathname).run();
+    }
+  }
   return {ok:true,executor:'cloudflare',gscGeneratedAt:generatedAt||data?.generatedAt||null,observedPages:pages.length,active:seen.size,activated,queuedIndexNow:queued};
 }
 async function health(env){
