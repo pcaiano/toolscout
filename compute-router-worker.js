@@ -632,23 +632,35 @@ async function enqueueDistributionResearch(env){
   const routeBucket=Math.floor(Date.now()/(DISTRIBUTION_RESEARCH_BUCKET_HOURS*3600000));
   const roleEmailBucket=Math.floor(Date.now()/(ROLE_EMAIL_RESEARCH_BUCKET_HOURS*3600000));
   const limit=Math.min(80,remaining);
-  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action
+  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action,
+      COALESCE((SELECT a.policy_state FROM distribution_auto_adapters a WHERE a.surface_slug=distribution_opportunities.surface_slug LIMIT 1),'') adapter_policy_state
     FROM distribution_opportunities
     WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
       AND status IN ('candidate','discovered','research_required')
-      AND NOT EXISTS (
-        SELECT 1 FROM compute_overflow_jobs j
-        WHERE j.subject_key=distribution_opportunities.surface_slug
-          AND j.job_type='distribution_route_research'
-          AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
-          AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+      AND (
+        EXISTS (
+          SELECT 1 FROM distribution_auto_adapters recovery
+          WHERE recovery.surface_slug=distribution_opportunities.surface_slug
+            AND recovery.policy_state='revalidation_required'
+        )
+        OR NOT EXISTS (
+          SELECT 1 FROM compute_overflow_jobs j
+          WHERE j.subject_key=distribution_opportunities.surface_slug
+            AND j.job_type='distribution_route_research'
+            AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
+            AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+        )
       )
-    ORDER BY distribution_score DESC,updated_at ASC LIMIT ?`).bind(limit).all().catch(()=>({results:[]}));
+    ORDER BY CASE WHEN adapter_policy_state='revalidation_required' THEN 0 ELSE 1 END,distribution_score DESC,updated_at ASC LIMIT ?`).bind(limit).all().catch(()=>({results:[]}));
   for(const row of rows(q)){
     if(remaining<=0||!isHttp(row.action_url))break;
     const urlHash=await shortHash(row.action_url);
-    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION};
-    const routeAdded=await enqueueJob(env,{jobKey:`route:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:num(row.distribution_score),payload});
+    const recovering=String(row.adapter_policy_state||'')==='revalidation_required';
+    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,...(recovering?{recoveryReason:'external_submission_rejected'}:{})};
+    const routeJobKey=recovering
+      ?`route-recovery:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`
+      :`route:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`;
+    const routeAdded=await enqueueJob(env,{jobKey:routeJobKey,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:(recovering?2000:0)+num(row.distribution_score),payload});
     enqueued+=routeAdded;remaining=Math.max(0,remaining-routeAdded);
     if(remaining<=0)break;
     if(num(row.distribution_score)>=55){
@@ -1193,6 +1205,28 @@ async function applyAuthorizedActionResult(env,job,result){
       VALUES(?,?, 'external_authorized_submission','completed',?,?,?,datetime('now'),datetime('now'))`)
       .bind(`extsub_${crypto.randomUUID()}`,slug,payload.endpoint,evidence,`Render executed a Cloudflare-authorized verified free adapter. HTTP ${httpStatus}. Cloudflare retained decision and verification authority.`).run().catch(()=>{});
     return{applied:true,accepted:true,evidence};
+  }
+  const routeRejected=httpStatus===401||httpStatus===403;
+  if(routeRejected){
+    await env.DB.batch([
+      env.DB.prepare(`UPDATE distribution_submissions
+        SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),
+            error=?,updated_at=datetime('now')
+        WHERE submission_id=?`)
+        .bind(`external_http_${httpStatus}:route_revalidation_required`,submissionId),
+      env.DB.prepare(`UPDATE distribution_auto_adapters
+        SET policy_state='revalidation_required',last_checked_at=datetime('now'),updated_at=datetime('now')
+        WHERE surface_slug=?`).bind(slug),
+      env.DB.prepare(`UPDATE distribution_opportunities
+        SET status='research_required',human_required=0,last_checked_at=NULL,
+            next_action=?,updated_at=datetime('now')
+        WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
+        .bind(`External submission returned HTTP ${httpStatus}. The machine adapter was invalidated and queued for fresh route research. Open a non-blocking Human Gate only if fresh same-host evidence proves login, CAPTCHA or a manual-only submission step.`,slug)
+    ]).catch(()=>{});
+    await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,source_url,detail,observed_at,created_at)
+      VALUES(?,?, 'external_authorized_submission','recovery_queued',?,?,datetime('now'),datetime('now'))`)
+      .bind(`extsubrecover_${crypto.randomUUID()}`,slug,payload.endpoint,`Authorized external submission returned HTTP ${httpStatus}. Adapter moved to revalidation_required; next control-plane tick will prioritize fresh route research before any retry or Human Gate.`).run().catch(()=>{});
+    return{applied:true,accepted:false,revalidationRequired:true,httpStatus};
   }
   await env.DB.prepare(`UPDATE distribution_submissions SET status='failed',attempts=attempts+1,last_attempt_at=datetime('now'),error=?,updated_at=datetime('now') WHERE submission_id=?`)
     .bind(`external_http_${httpStatus||0}:${safe(result?.error||'submission_failed',300)}`,submissionId).run().catch(()=>{});
