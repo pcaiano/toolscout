@@ -37,6 +37,7 @@ async function runBatch(batchId,completionToken){
         candidateConfidence:Number(route?.machineCandidate?.confidence||0),
         provenance:route?.provenance||null,
         explicitFormIntent:route?.formAssessment?.submissionIntentEvidence===true,
+        spaScriptProbes:Number(route?.spaScriptProbes||0),
         transportHints:Array.isArray(route?.transportHints)?route.transportHints.slice(0,4):[],
         rejections:Array.isArray(route?.formAssessment?.rejections)?route.formAssessment.rejections.slice(0,8):[]
       })):[];
@@ -47,6 +48,9 @@ async function runBatch(batchId,completionToken){
         subjectKey:job?.subjectKey||null,
         sourceUrl:job?.payload?.url||null,
         classification:result?.classification||null,
+        httpStatus:Number(result?.httpStatus||0),
+        resultError:result?.error||null,
+        evidence:result?.evidence||null,
         routeSummary:result?.routeSummary||null,
         routes
       }));
