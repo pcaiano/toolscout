@@ -606,7 +606,8 @@ async function health(env){
     githubActionsRole:'disabled_until_october',
     writeAmplificationGuard:'d1-write-guard-v2',
     healthReadModel:'incremental_cached_120s_read_only',
-    qualificationMode:'render_primary_with_bounded_cloudflare_fallback'
+    qualificationMode:'render_primary_with_bounded_cloudflare_fallback',
+    externalSubmissionRecoveryPolicy:'revalidate_401_403_then_fresh_route_research_v1'
   };
   healthCacheValue=snapshot;healthCacheAt=Date.now();return snapshot;
 }
@@ -972,10 +973,48 @@ async function runQualificationWatchdog(env){
   return{ok:qualification?.ok!==false,qualification,execution,dispatches:dispatches.length};
 }
 
+async function reconcileRejectedExternalAdapters(env,{limit=20}={}){
+  const q=await env.DB.prepare(`SELECT ds.submission_id,ds.surface_slug,ds.error
+    FROM distribution_submissions ds
+    JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug
+    LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug
+    WHERE ds.submission_type='auto_discovered_json'
+      AND ds.status='failed'
+      AND (ds.error LIKE 'external_http_401:%' OR ds.error LIKE 'external_http_403:%')
+      AND a.policy_state='verified'
+      AND COALESCE(o.status,'') NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')
+    ORDER BY ds.updated_at DESC LIMIT ?`).bind(Math.max(1,Math.min(50,num(limit)||20))).all().catch(()=>({results:[]}));
+  let recovered=0;
+  for(const row of rows(q)){
+    const httpStatus=String(row.error||'').includes('external_http_401:')?401:403;
+    try{
+      await env.DB.batch([
+        env.DB.prepare(`UPDATE distribution_auto_adapters
+          SET policy_state='revalidation_required',last_checked_at=datetime('now'),updated_at=datetime('now')
+          WHERE surface_slug=? AND policy_state='verified'`).bind(row.surface_slug),
+        env.DB.prepare(`UPDATE distribution_opportunities
+          SET status='research_required',human_required=0,last_checked_at=NULL,
+              next_action=?,updated_at=datetime('now')
+          WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
+          .bind(`Existing external submission failure HTTP ${httpStatus} was reconciled into adapter revalidation. Fresh same-host route research must determine whether automation can resume or a non-blocking Human Gate is genuinely required.`,row.surface_slug),
+        env.DB.prepare(`UPDATE distribution_submissions
+          SET error=?,updated_at=datetime('now')
+          WHERE submission_id=?`).bind(`external_http_${httpStatus}:route_revalidation_required`,row.submission_id)
+      ]);
+      await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,detail,observed_at,created_at)
+        VALUES(?,?, 'external_submission_recovery','recovery_queued',?,datetime('now'),datetime('now'))`)
+        .bind(`extrecover_${crypto.randomUUID()}`,row.surface_slug,`Reconciled an existing HTTP ${httpStatus} external submission failure into prioritized adapter revalidation. Human work remains disabled unless fresh exact-route evidence proves an owner-only blocker.`).run().catch(()=>{});
+      recovered++;
+    }catch{}
+  }
+  return{checked:rows(q).length,recovered};
+}
+
 async function runOverflowTick(env){
   if(!env.OVERFLOW_COMPUTE_URL)return{ok:true,status:'awaiting_external_runtime'};
   await ensureSchema(env);
   await ensureHotIndexes(env);
+  const rejectedAdapterRecovery=await isolatedOverflowStage(env,'external_submission_recovery',()=>reconcileRejectedExternalAdapters(env),{checked:0,recovered:0});
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
   const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
   const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
@@ -1000,7 +1039,7 @@ async function runOverflowTick(env){
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,qualification,execution,research,requeued,
+    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,
     batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
