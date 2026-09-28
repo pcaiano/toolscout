@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 const router=read('compute-router-worker.js');
-assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=300/);
+assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=800/);
 assert.match(router,/enqueueAuthorizedExecution/);
 assert.match(router,/authorized_http_action/);
 assert.match(router,/authorized_verification/);
