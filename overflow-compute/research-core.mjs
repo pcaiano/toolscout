@@ -5,6 +5,8 @@ const SUBMISSION_INTENT_RE=/(submit(?:\s+now|\s+(?:your|a))?|submission|add[-_ /
 const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|return_to=[^&]*(?:product|tool|startup)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
 const CONTENT_ROUTE_RE=/(?:^|\/)(?:best-of|blog|blogs|article|articles|news|funding-news|category|categories|tag|tags|guides?|resources?|advertise|pricing)(?:\/|$)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
+const DOC_RE=/(openapi|swagger|api[-_/ ]?docs|developer|developers|for-llms|agent|mcp|registry)/i;
+const API_ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add|create)/i;
 const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|authentication required|api key|bearer token|oauth|password required)/i;
 const CAPTCHA_RE=/(captcha|g-recaptcha|h-captcha|cf-turnstile|turnstile)/i;
 const PAYMENT_RE=/(paid listing|payment required|sponsored listing|buy a listing|purchase a listing|listing fee|pay to submit)/i;
@@ -210,6 +212,108 @@ function machineFormAssessment(page){
   }
   return{candidate:null,reasons:[...new Set(reasons)].slice(0,8),formsSeen};
 }
+function resolveSchemaRef(spec,schema){
+  if(!schema)return null;
+  if(!schema.$ref)return schema;
+  const path=String(schema.$ref).replace(/^#\//,'').split('/');
+  let cur=spec;
+  for(const p of path)cur=cur?.[p];
+  return cur||null;
+}
+function apiValueForProperty(rawKey,property){
+  const key=canonicalFieldName(rawKey);
+  if(rawKey==='listing_type')return'company';
+  if(rawKey==='is_stealth')return false;
+  if(rawKey==='type_data')return{};
+  if(!key)return undefined;
+  let value=valueForField(key);
+  if(value==null)return undefined;
+  const schema=property||{};
+  if(schema.type==='array')return [String(value)];
+  if(schema.type==='boolean')return Boolean(value);
+  return value;
+}
+function apiPayloadFromSchema(spec,schema,depth=0){
+  const resolved=resolveSchemaRef(spec,schema);
+  if(!resolved||resolved.type!=='object'||depth>2)return null;
+  const props=resolved.properties||{},required=Array.isArray(resolved.required)?resolved.required:[],payload={};
+  for(const [rawKey,rawProperty] of Object.entries(props)){
+    const property=resolveSchemaRef(spec,rawProperty)||rawProperty||{};
+    if(rawKey==='listing'){
+      const listing=apiPayloadFromSchema(spec,property,depth+1);
+      if(listing)payload[rawKey]=listing;
+      else if(required.includes(rawKey))return null;
+      continue;
+    }
+    if(rawKey==='attribution'){
+      payload[rawKey]={agent_name:'ToolScout Distribution Engine',represented_organization:'ToolScout'};
+      continue;
+    }
+    if(/captcha|terms|agree|consent|password|auth|payment|card|csrf|token|nonce|secret|api[_-]?key/i.test(rawKey)){
+      if(required.includes(rawKey))return null;
+      continue;
+    }
+    const value=apiValueForProperty(rawKey,property);
+    if(value!==undefined)payload[rawKey]=value;
+    else if(required.includes(rawKey))return null;
+  }
+  for(const key of required)if(payload[key]===undefined)return null;
+  const useful=Object.keys(payload).filter(k=>canonicalFieldName(k)||k==='listing').length;
+  return useful>=2||payload.listing?payload:null;
+}
+function operationSecurity(spec,op){return op?.security!==undefined?op.security:(Array.isArray(spec?.security)?spec.security:null)}
+function securityRequiresAuth(security){
+  if(!Array.isArray(security)||security.length===0)return false;
+  return !security.some(req=>req&&typeof req==='object'&&Object.keys(req).length===0);
+}
+function serverBase(spec,source){
+  try{const s=spec?.servers?.[0]?.url;if(s)return new URL(s,source).toString()}catch{}
+  return new URL(source).origin+'/';
+}
+function openApiMachineCandidate(spec,source,homepage){
+  if(!spec||typeof spec!=='object'||!spec.paths)return null;
+  for(const [path,methods] of Object.entries(spec.paths)){
+    const op=methods?.post;
+    if(!op||!API_ROUTE_RE.test(path+' '+safe(op.summary,300)+' '+safe(op.operationId,200)))continue;
+    if(securityRequiresAuth(operationSecurity(spec,op)))continue;
+    const schema=resolveSchemaRef(spec,op?.requestBody?.content?.['application/json']?.schema);
+    const payload=apiPayloadFromSchema(spec,schema);
+    if(!payload)continue;
+    const blob=JSON.stringify({summary:op.summary,description:op.description,schema}).slice(0,12000);
+    if(PAYMENT_RE.test(blob)||RECIPROCAL_RE.test(blob)||AUTOMATION_BLOCK_RE.test(blob)||CAPTCHA_RE.test(blob))continue;
+    let endpoint;try{endpoint=new URL(path,serverBase(spec,source)).toString()}catch{continue}
+    if(!endpoint.startsWith('https://')||!sameHost(homepage,endpoint))continue;
+    return{kind:'json_api',endpoint,method:'POST',contentType:'application/json',payload,hiddenSafetyFields:[],confidence:98,openApiSource:source};
+  }
+  return null;
+}
+async function fetchJsonDocument(url,homepage){
+  if(!validPublicHttp(url)||!sameHost(url,homepage))return null;
+  const release=await acquireHost(url);
+  try{
+    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/json,application/*+json;q=0.9,*/*;q=0.2'},redirect:'follow',signal:AbortSignal.timeout(10000)});
+    if(!r.ok||!sameHost(homepage,r.url||url))return null;
+    const text=(await r.text()).slice(0,MAX_HTML);
+    const data=JSON.parse(text);
+    return{url:r.url||url,data};
+  }catch{return null}finally{release()}
+}
+async function findOpenApiMachineCandidate(homepage,pages=[]){
+  const guesses=[];
+  for(const page of pages){
+    if(!page?.html||!page?.url)continue;
+    for(const link of extractLinks(page.html,page.url))if(DOC_RE.test(link.text+' '+link.url))guesses.push(link.url);
+  }
+  for(const path of ['/openapi.json','/swagger.json','/api/openapi.json','/api/swagger.json'])guesses.push(absolute(path,homepage));
+  const urls=[...new Set(guesses.filter(Boolean))].filter(u=>sameHost(homepage,u)).slice(0,6);
+  const docs=await mapLimit(urls,3,u=>fetchJsonDocument(u,homepage));
+  for(const doc of docs){
+    if(!doc?.data||!(doc.data.openapi||doc.data.swagger))continue;
+    const candidate=openApiMachineCandidate(doc.data,doc.url,homepage);
+    if(candidate)return{candidate,probes:urls.length,source:doc.url};
+  }
+  return{candidate:null,probes:urls.length,source:null};
+}
 function machineFormCandidate(page){return machineFormAssessment(page).candidate}
 function pageSignals(page){
   const text=stripTags(page.html).slice(0,120000);
@@ -380,6 +484,19 @@ async function researchDistribution(job){
       formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons}
     });
   }
+  let openApi={candidate:null,probes:0,source:null};
+  const hasExactSubmissionRoute=routes.some(x=>x.submissionIntent===true);
+  if(hasExactSubmissionRoute&&!routes.some(x=>Boolean(x.machineCandidate))){
+    openApi=await findOpenApiMachineCandidate(home.url,[home,...pages.map(x=>x?.page).filter(p=>p?.ok)]);
+    if(openApi.candidate){
+      const c=openApi.candidate;
+      routes.unshift({
+        url:c.endpoint,kind:'submission',label:'OpenAPI submission endpoint',hasForm:false,submissionIntent:true,
+        auth:false,captcha:false,policyBlockers:[],machineCandidate:c,
+        formAssessment:{formsSeen:0,rejections:[]}
+      });
+    }
+  }
   const mailto=extractMailto(home.html);
   const contactRoutes=[
     ...mailto,
@@ -409,7 +526,7 @@ async function researchDistribution(job){
       policyBlockers:blockers.length,
       formRejections:selectedRoutes.flatMap(x=>x.formAssessment?.rejections||[]).reduce((acc,key)=>{acc[key]=(acc[key]||0)+1;return acc},{})
     },
-    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length,sourceFallbackUsed:home.url!==source,attemptedUrls:attempted.slice(0,8)}
+    evidence:{title:home.signals.title,canonical:home.signals.canonical,actionLinksScanned:actionCandidates.length,contactLinksScanned:contactCandidates.length,pagesFetched:1+pages.filter(x=>x?.page?.ok).length,cacheHits:Number(Boolean(home.cacheHit))+pages.filter(x=>x?.page?.cacheHit).length,openApiProbes:Number(openApi.probes||0),openApiSource:openApi.source||null,sourceFallbackUsed:home.url!==source,attemptedUrls:attempted.slice(0,8)}
   };
 }
 
