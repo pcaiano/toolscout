@@ -74,9 +74,10 @@ async function canonicalState(env,pathname){
   }catch(error){return {verified:false,expected,reason:'canonical_probe_failed',error:String(error?.message||error).slice(0,300)}}
 }
 async function publicHtml(pathname){
-  const url='https://trytoolscout.org'+pathname;
+  const probeUrl=new URL('https://trytoolscout.org'+pathname);
+  probeUrl.searchParams.set('__ts_seo_probe',String(Date.now()));
   try{
-    const r=await fetch(url,{headers:{'Cache-Control':'no-cache','User-Agent':'ToolScout-SEO-Execution-Probe/1.0'},signal:AbortSignal.timeout(8000)});
+    const r=await fetch(probeUrl.toString(),{headers:{'Cache-Control':'no-cache, no-store','Pragma':'no-cache','User-Agent':'ToolScout-SEO-Execution-Probe/1.0'},signal:AbortSignal.timeout(8000)});
     if(!r.ok)return {ok:false,status:r.status,html:''};
     const type=String(r.headers.get('content-type')||'').toLowerCase();
     if(!type.includes('text/html'))return {ok:false,status:r.status,html:''};
@@ -90,11 +91,13 @@ function hrefPresent(html,pathname){
 }
 async function verifyInternalLinkIntervention(pathname){
   const hubs=['/guides','/tools','/compare'];
-  const evidence=[];
-  for(const hub of hubs){
-    const page=await publicHtml(hub);
-    evidence.push({hub,ok:page.ok,linked:page.ok&&page.html.includes('data-toolscout-index-recovery-links="1"')&&hrefPresent(page.html,pathname),status:page.status});
-  }
+  const pages=await Promise.all(hubs.map(hub=>publicHtml(hub)));
+  const evidence=pages.map((page,index)=>({
+    hub:hubs[index],
+    ok:page.ok,
+    linked:page.ok&&page.html.includes('data-toolscout-index-recovery-links="1"')&&hrefPresent(page.html,pathname),
+    status:page.status
+  }));
   const linked=evidence.filter(x=>x.linked).length;
   return {verified:linked>=2,linkedHubs:linked,hubs:evidence};
 }
