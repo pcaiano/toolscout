@@ -19,6 +19,7 @@ check(s.includes("qualificationVerificationFailed15m:num(live?.qualification_ver
 check(s.includes("idx_distribution_qualification_created_result"),'qualification health query is indexed');
 check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=15;"),'classifier v15 is active');
 check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
+check(s.includes("reconcileStaleResearchHumanGates"),'classifier upgrades release stale research-derived human gates before re-enqueue');
 check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
 check(s.includes("QUALIFICATION_FALLBACK_LIMIT=6"),'fallback qualification is bounded');
 check(s.includes("runQualificationWatchdog(env).catch"),'scheduled control plane actually invokes qualification watchdog');
