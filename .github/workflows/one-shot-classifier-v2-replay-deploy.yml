@@ -1,3 +1,4 @@
+# retry: policy test reconciled 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
