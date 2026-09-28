@@ -191,7 +191,8 @@ function safeFormPayload(html){
     const name=String(tagAttr(tag,'name')||'').trim();if(!name)continue;
     const type=String(tagAttr(tag,'type')||'text').toLowerCase();
     const required=/\brequired\b/i.test(tag);
-    if(/password|file/i.test(type))return{payload:null,hiddenSafetyFields,rejectionReason:'interactive_sensitive_field',rejectionField:name};
+    if(type==='password')return{payload:null,hiddenSafetyFields,rejectionReason:'interactive_sensitive_field',rejectionField:name};
+    if(type==='file'){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_file_upload',rejectionField:name};continue}
     if(/checkbox|radio/i.test(type)){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_interactive_choice',rejectionField:name};continue}
     if(/submit|button|reset|image/i.test(type))continue;
     if(/captcha|payment|card|password|auth|terms|agree|consent/i.test(name))return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name',rejectionField:name};
