@@ -318,7 +318,7 @@ async function fetchJsonDocument(url,homepage){
   if(!validPublicHttp(url)||!sameHost(url,homepage))return null;
   const release=await acquireHost(url);
   try{
-    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/json,application/*+json;q=0.9,*/*;q=0.2'},redirect:'follow',signal:AbortSignal.timeout(5000)});
+    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/json,application/*+json;q=0.9,*/*;q=0.2'},redirect:'follow',signal:AbortSignal.timeout(10000)});
     if(!r.ok||!sameHost(homepage,r.url||url))return null;
     const text=(await r.text()).slice(0,MAX_HTML);
     const data=JSON.parse(text);
@@ -381,7 +381,7 @@ async function fetchScriptAsset(url,homepage){
   const cached=cacheGet(cacheKey);if(cached)return cached;
   const release=await acquireHost(url);
   try{
-    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/javascript,text/javascript;q=0.9,text/plain;q=0.7,*/*;q=0.2'},redirect:'follow',signal:AbortSignal.timeout(10000)});
+    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/javascript,text/javascript;q=0.9,text/plain;q=0.7,*/*;q=0.2'},redirect:'follow',signal:AbortSignal.timeout(5000)});
     const type=String(r.headers.get('content-type')||'').toLowerCase();
     if(!r.ok||!sameHost(homepage,r.url||url))return null;
     if(type&&!/(javascript|ecmascript|text\/plain|application\/octet-stream)/i.test(type))return null;
