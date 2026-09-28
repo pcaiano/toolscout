@@ -656,8 +656,10 @@ async function enqueueDistributionResearch(env){
   for(const row of rows(q)){
     if(remaining<=0||!isHttp(row.action_url))break;
     const urlHash=await shortHash(row.action_url);
-    const recovering=String(row.adapter_policy_state||'')==='revalidation_required';
-    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,...(recovering?{recoveryReason:'external_submission_rejected'}:{})};
+    const adapterPolicyState=String(row.adapter_policy_state||'');
+    const recovering=adapterPolicyState==='revalidation_required';
+    const previouslyRejected=recovering||adapterPolicyState==='transport_rejected';
+    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,...(previouslyRejected?{recoveryReason:'external_submission_rejected'}:{})};
     const routeJobKey=recovering
       ?`route-recovery:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`
       :`route:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`;
@@ -1125,23 +1127,45 @@ async function applyDistributionResult(env,job,result){
   const routes=(Array.isArray(result?.routes)?result.routes:[]).filter(r=>r?.url&&sameHostRoute(payload.url,r.url)&&['submission','auth','captcha'].includes(String(r.kind||'')));
   const exactRoutes=routes.filter(r=>r.submissionIntent===true);
   const machineRoute=exactRoutes.find(r=>String(r.kind||'')==='submission'&&r.machineCandidate)||null;
-  const machineCandidate=machineRoute?validatedOverflowMachineCandidate(payload.url,machineRoute,result):null;
+  let machineCandidate=machineRoute?validatedOverflowMachineCandidate(payload.url,machineRoute,result):null;
   const humanRoute=exactRoutes.find(r=>!r.machineCandidate&&!(r.policyBlockers||[]).length&&(r.auth||r.captcha||['auth','captcha'].includes(String(r.kind||''))))||null;
   const manualRoute=exactRoutes.find(r=>String(r.kind||'')==='submission'&&!r.machineCandidate&&!r.auth&&!r.captcha&&!(r.policyBlockers||[]).length)||null;
   const policyRoute=exactRoutes.find(r=>Array.isArray(r.policyBlockers)&&r.policyBlockers.length)||null;
-  const best=machineRoute||humanRoute||manualRoute||policyRoute||null;
-  const detail=machineCandidate
-    ?'External overflow research discovered an exact submission route and structurally validated a same-host machine-safe POST form. Canonical Cloudflare policy accepted the adapter.'
-    :humanRoute
-      ?'External overflow research found an exact same-host submission route that requires a human-only CAPTCHA or authentication step. A canonical Human Gate is opened immediately.'
-      :manualRoute
-        ?'External overflow research found an exact manual submission route without a safe automatic adapter.'
-        :policyRoute
-          ?'External overflow research found an exact submission route with a policy blocker. It is not eligible for automatic or human execution.'
-          :'External overflow research completed without an exact executable ToolScout submission route. Alternate-route research remains autonomous.';
+  let rejectedReplay=false,recoveryAdapterChanged=false;
+  if(machineCandidate&&payload.recoveryReason==='external_submission_rejected'){
+    const prior=await env.DB.prepare(`SELECT endpoint,method,content_type,policy_state FROM distribution_auto_adapters WHERE surface_slug=? LIMIT 1`).bind(slug).first().catch(()=>null);
+    if(prior&&['revalidation_required','transport_rejected'].includes(String(prior.policy_state||''))){
+      const sameTransportRoute=String(prior.endpoint||'')===String(machineCandidate.endpoint||'')
+        &&String(prior.method||'POST').toUpperCase()===String(machineCandidate.method||'POST').toUpperCase()
+        &&String(prior.content_type||'application/json').toLowerCase()===String(machineCandidate.contentType||'application/json').toLowerCase();
+      if(sameTransportRoute){rejectedReplay=true;machineCandidate=null}
+      else recoveryAdapterChanged=true;
+    }
+  }
+  const best=(machineCandidate?machineRoute:null)||humanRoute||manualRoute||policyRoute||machineRoute||null;
+  const detail=rejectedReplay
+    ?'Fresh route research reproduced the same transport route that already returned HTTP 401/403. Automatic replay is suppressed until a materially different adapter or an exact human-only blocker is proven.'
+    :machineCandidate
+      ?'External overflow research discovered an exact submission route and structurally validated a same-host machine-safe POST form. Canonical Cloudflare policy accepted the adapter.'
+      :humanRoute
+        ?'External overflow research found an exact same-host submission route that requires a human-only CAPTCHA or authentication step. A canonical Human Gate is opened immediately.'
+        :manualRoute
+          ?'External overflow research found an exact manual submission route without a safe automatic adapter.'
+          :policyRoute
+            ?'External overflow research found an exact submission route with a policy blocker. It is not eligible for automatic or human execution.'
+            :'External overflow research completed without an exact executable ToolScout submission route. Alternate-route research remains autonomous.';
   const actionUrl=best?.url||null;
   let w=null,gate=null;
-  if(machineCandidate){
+  if(rejectedReplay){
+    await env.DB.prepare(`UPDATE distribution_auto_adapters SET policy_state='transport_rejected',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(slug).run().catch(()=>{});
+    w=await env.DB.prepare(`UPDATE distribution_opportunities SET
+        action_url=COALESCE(?,action_url),status='research_required',human_required=0,
+        next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now')
+      WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
+      .bind(actionUrl,safe(detail,1000),slug).run().catch(()=>null);
+    await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at)
+      VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,slug,actionUrl,'transport_rejected',`rejected_adapter_replay_suppressed:${machineRoute?.machineCandidate?.endpoint||actionUrl||''}`).run().catch(()=>{});
+  }else if(machineCandidate){
     await env.DB.prepare(`INSERT INTO distribution_auto_adapters(surface_slug,source_url,endpoint,method,content_type,payload_template_json,confidence,policy_state,verification_source,verification_endpoint,public_url,verification_method,auth_type,auth_detail,last_checked_at,created_at,updated_at)
       VALUES(?,?,?,?,?,?,?,'verified',?,NULL,NULL,'GET',NULL,NULL,datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(surface_slug) DO UPDATE SET source_url=excluded.source_url,endpoint=excluded.endpoint,method=excluded.method,content_type=excluded.content_type,payload_template_json=excluded.payload_template_json,confidence=excluded.confidence,policy_state='verified',verification_source=excluded.verification_source,verification_endpoint=NULL,public_url=NULL,verification_method='GET',auth_type=NULL,auth_detail=NULL,last_checked_at=datetime('now'),updated_at=datetime('now')`)
@@ -1152,6 +1176,10 @@ async function applyDistributionResult(env,job,result){
         last_checked_at=datetime('now'),updated_at=datetime('now')
       WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`)
       .bind(actionUrl,safe(detail,1000),slug).run().catch(()=>null);
+    if(recoveryAdapterChanged){
+      await env.DB.prepare(`UPDATE distribution_submissions SET attempts=0,error='adapter_changed_after_revalidation',updated_at=datetime('now')
+        WHERE surface_slug=? AND submission_type='auto_discovered_json' AND status='failed'`).bind(slug).run().catch(()=>{});
+    }
     await env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at)
       VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,slug,actionUrl,'ready_to_submit',`overflow_verified_safe_form_adapter:${machineCandidate.endpoint}`).run().catch(()=>{});
   }else if(humanRoute||(manualRoute&&num(payload.score)>=70)){
