@@ -274,7 +274,7 @@ function throughput(){
    '<div class="sourceLine">Outcome hierarchy remains GA4 sessions → strict humans → verified outbound → monetized outbound → confirmed revenue. Capacity metrics only explain how fast the Growth Brain can work.</div>';
 }
 function taskHtml(x){
- const url=safeUrl(x.action_url),isReputation=x.engine==='reputation',isAuth=x.engine==='distribution'&&(x.gate_type==='authentication'||x.status==='auth_required'),canConfirm=!isReputation&&!isAuth&&(x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status)));
+ const url=safeUrl(x.action_url),isReputation=x.engine==='reputation',isAuth=x.engine==='distribution'&&(x.gate_type==='authentication'||x.status==='auth_required'),canConfirm=!isReputation&&(x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status)));
  const label=x.gate_key?'Mark done':x.editorial_queue_id?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
  const copy=(label,value)=>value?'<button class="btn" data-copy="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
  let payload='';
@@ -283,7 +283,7 @@ function taskHtml(x){
  return '<div class="task"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id)+'</div><div class="taskMeta">'+esc(x.engine||'human gate')+' - '+esc(x.status||'ready')+' - about '+esc(x.estimated_minutes||0)+' min</div></div>'+pill(isReputation?'reputation review':(x.expected_impact_score?'impact '+Math.round(x.expected_impact_score):'human gate'),isReputation?'bad':'warn')+'</div>'+
   '<div class="taskText"><b>Do:</b> '+esc(x.instructions||x.reason||'Complete the linked external step.')+'</div>'+
   (x.expected_impact?'<div class="taskText"><b>Expected result:</b> '+esc(x.expected_impact)+'</div>':'')+payload+
-  '<div class="taskActions">'+reputationActions+(isAuth?'<button class="btn primary" data-auth-handoff="'+esc(x.id)+'">Open secure login session</button>':(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':''))+copy('Copy steps',x.instructions||x.reason||'')+
+  '<div class="taskActions">'+reputationActions+(url?'<a class="btn primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open action</a>':'')+copy('Copy steps',x.instructions||x.reason||'')+
   (canConfirm?'<button class="btn" data-resolve="submitted" data-engine="'+esc(x.engine)+'" data-id="'+esc(x.id)+'" data-status="'+esc(x.status||'')+'" data-gate="'+esc(x.gate_key||'')+'">'+esc(label)+'</button>':'')+
   (!isReputation&&x.engine==='distribution'?'<button class="btn danger" data-resolve="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+'</div></div>';
 }
