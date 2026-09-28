@@ -40,9 +40,70 @@ async function readJson(req,maxBytes=16384){
   if(!data)return{};return JSON.parse(data);
 }
 
+
+function safeToolScoutPath(value){
+  const path=String(value||'').trim();
+  if(!path.startsWith('/')||path.startsWith('//')||path.includes('\\')||path.length>500)return null;
+  try{
+    const u=new URL(path,TOOLSCOUT_BASE_URL);
+    if(u.origin!==new URL(TOOLSCOUT_BASE_URL).origin)return null;
+    return u.pathname;
+  }catch{return null}
+}
+async function fetchPublicHtml(pathname){
+  const u=new URL(pathname,TOOLSCOUT_BASE_URL);
+  u.searchParams.set('__ts_seo_external_probe',String(Date.now()));
+  try{
+    const r=await fetch(u,{
+      headers:{
+        'User-Agent':'ToolScout-SEO-External-Proof/1.0',
+        'Cache-Control':'no-cache, no-store',
+        'Pragma':'no-cache',
+        'Accept':'text/html'
+      },
+      redirect:'follow',
+      signal:AbortSignal.timeout(12000)
+    });
+    const type=String(r.headers.get('content-type')||'').toLowerCase();
+    if(!r.ok||!type.includes('text/html'))return {ok:false,status:r.status,html:''};
+    return {ok:true,status:r.status,html:await r.text()};
+  }catch(error){
+    return {ok:false,status:0,html:'',error:String(error?.message||error).slice(0,300)};
+  }
+}
+async function seoProof(pathname,action){
+  if(action==='strengthen_internal_links'){
+    const hubs=['/guides','/tools','/compare'];
+    const pages=await Promise.all(hubs.map(fetchPublicHtml));
+    const evidence=pages.map((page,index)=>{
+      const path=String(pathname);
+      const linked=page.ok&&page.html.includes('data-toolscout-index-recovery-links="1"')&&(
+        page.html.includes('href="'+path+'"')||page.html.includes("href='"+path+"'")
+      );
+      return {hub:hubs[index],ok:page.ok,status:page.status,linked,error:page.error||null};
+    });
+    const linkedHubs=evidence.filter(x=>x.linked).length;
+    return {verified:linkedHubs>=2,action,pathname,linkedHubs,hubs:evidence,observer:'render-overflow'};
+  }
+  if(action==='deepen_existing_search_asset'){
+    const page=await fetchPublicHtml(pathname);
+    const marker=page.ok&&(page.html.includes('organic-growth:runtime-start')||page.html.includes('organic-growth:start'));
+    return {verified:Boolean(marker),action,pathname,status:page.status,marker:Boolean(marker),error:page.error||null,observer:'render-overflow'};
+  }
+  return {verified:false,action,pathname,error:'unsupported_action',observer:'render-overflow'};
+}
+
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
   if(req.method==='GET'&&url.pathname==='/health')return json(res,200,{ok:true,service:'toolscout-overflow',runtime:'node',activeBatches:active.size,maxConcurrency:MAX_CONCURRENCY,...runtimeStats()});
+  if(req.method==='GET'&&url.pathname==='/seo-proof'){
+    const pathname=safeToolScoutPath(url.searchParams.get('path'));
+    const action=String(url.searchParams.get('action')||'');
+    if(!pathname)return json(res,400,{ok:false,verified:false,error:'invalid_path'});
+    if(!['strengthen_internal_links','deepen_existing_search_asset'].includes(action))return json(res,400,{ok:false,verified:false,error:'unsupported_action'});
+    const proof=await seoProof(pathname,action);
+    return json(res,200,{ok:true,...proof});
+  }
   const m=url.pathname.match(/^\/tick\/(cob_[0-9a-f-]{36})$/i);
   if(req.method==='POST'&&m){
     if(!rateAllowed())return json(res,429,{ok:false,error:'rate_limited'});
