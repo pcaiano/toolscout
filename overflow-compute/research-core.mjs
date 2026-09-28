@@ -1,13 +1,13 @@
 const UA='ToolScout Overflow Research/1.0 (+https://trytoolscout.org/)';
 const MAX_HTML=500000;
 const ACTION_RE=/(\bsubmit\b|\bsubmission\b|add[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
-const SUBMISSION_INTENT_RE=/(\bsubmit\b(?:\s+now|\s+(?:your|a))?|\bsubmission\b|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product|app|software|project))/i;
-const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|(?:return_to|next|redirect|redirect_to|continue)=[^&]*(?:product|tool|startup|listing|app|software|project|company|business)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?|listings?|apps?|software|projects?|companies|businesses)\/(?:new|add|submit)|\/(?:vendors?)\/(?:sign[-_]?up|signup|register|new|add|submit))(?:[&#/?_-]|$)/i;
+const SUBMISSION_INTENT_RE=/(\bsubmit\b(?:\s+now|\s+(?:your|a))?|\bsubmission\b|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product|app|software|project))/i;
+const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|(?:return_to|next|redirect|redirect_to|continue)=[^&]*(?:product|tool|startup|listing|app|software|project|company|business)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?|listings?|apps?|software|projects?|companies|businesses)\/(?:new|create|add|submit)|\/(?:vendors?)\/(?:sign[-_]?up|signup|register|new|add|submit))(?:[&#/?_-]|$)/i;
 const CONTENT_ROUTE_RE=/(?:^|\/)(?:best-of|blog|blogs|article|articles|news|funding-news|category|categories|tag|tags|guides?|resources?|help|support|docs?|documentation|knowledge-base|advertise|pricing)(?:\/|$)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
 const DOC_RE=/(openapi|swagger|api[-_/ ]?docs|developer|developers|for-llms|agent|mcp|registry)/i;
 const API_ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add|create)/i;
-const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|please\s+(?:log|sign)\s+in\s+to|(?:log|sign)\s+in\s+to\s+(?:submit|add|list|continue)|create (?:an? )?account\s+to\s+(?:submit|add|list|continue)|authentication required|api key|bearer token|oauth|password required)/i;
+const AUTH_RE=/(account required|login required|sign in required|must (?:be )?(?:logged|signed) in|need to (?:log|sign) in|please\s+(?:log|sign)\s+in\s+to|(?:log|sign)\s+in\s+to\s+(?:submit|add|list|continue)|create (?:an? )?account\s+to\s+(?:submit|add|list|continue)|(?:log|sign)\s+in\b.{0,100}\b(?:submit|add|list)\b|\b(?:submit|add|list)\b.{0,100}\b(?:log|sign)\s+in\b|create (?:an? )?account\b.{0,100}\b(?:submit|add|list)\b|authentication required|api key|bearer token|oauth|password required)/i;
 const CAPTCHA_RE=/(captcha|g-recaptcha|h-captcha|cf-turnstile|turnstile)/i;
 const PAYMENT_RE=/(paid listing|payment required|sponsored listing|buy a listing|purchase a listing|listing fee|pay to submit)/i;
 const RECIPROCAL_RE=/(reciprocal link|link back|backlink(?:\s+\w+){0,5}\s+required|required(?:\s+\w+){0,5}\s+backlink|add (?:our|this) badge|badge required)/i;
@@ -119,18 +119,19 @@ function tagAttr(tag,name){
   return m?decodeEntities(m[1]):null;
 }
 function canonicalFieldName(raw){
-  const original=String(raw||'').trim().toLowerCase();
+  const source=String(raw||'').trim();
+  const original=source.replace(/([a-z0-9])([A-Z])/g,'$1_$2').toLowerCase();
   if(!original)return null;
   if(SAFE_FORM_FIELDS.has(original))return original;
   const parts=original.replace(/\]/g,'').split(/[\[\].:]+/).filter(Boolean);
   const leaf=parts[parts.length-1]||original;
   const compact=leaf.replace(/[-\s]+/g,'_');
   if(SAFE_FORM_FIELDS.has(compact))return compact;
-  if(/^(?:product|tool|startup|company)?_?name$/.test(compact))return'product_name';
-  if(/^(?:product|tool|startup|company)?_?(?:url|website|homepage|site)$/.test(compact)||/^(?:website|homepage|site)$/.test(compact))return'website_url';
-  if(/^(?:product|tool|startup)?_?(?:description|summary|overview)$/.test(compact))return'description';
-  if(/^(?:business|work|contact|submitter)?_?email(?:_address)?$/.test(compact))return'contact_email';
-  if(/^(?:contact|submitter)?_?name$/.test(compact))return'contact_name';
+  if(/^(?:listing|product|tool|startup|company|app|software|project)?_?(?:name|title)$/.test(compact))return'product_name';
+  if(/^(?:listing|product|tool|startup|company|app|software|project)?_?(?:url|website|homepage|site)$/.test(compact)||/^(?:website|homepage|site)$/.test(compact))return'website_url';
+  if(/^(?:listing|product|tool|startup|app|software|project)?_?(?:description|summary|overview|content|details)$/.test(compact)||compact==='content')return'description';
+  if(/^(?:business|work|contact|submitter|user|owner)?_?email(?:_address)?$/.test(compact))return'contact_email';
+  if(/^(?:contact|submitter|user|owner)?_?name$/.test(compact))return'contact_name';
   if(/^(?:first|given)_?name$/.test(compact))return'first_name';
   if(/^(?:last|family|surname)_?name$/.test(compact))return'last_name';
   if(/^(?:category|categories|industry|type)$/.test(compact))return compact;
@@ -178,11 +179,11 @@ function safeFormPayload(html){
     selectRanges.push(match.index);
     const open=match[1]||'',body=match[2]||'',name=String(tagAttr(open,'name')||'').trim();
     const required=/\brequired\b/i.test(open);
-    if(!name){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_unnamed_select'};continue}
+    if(!name){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_unnamed_select',rejectionField:null};continue}
     const key=canonicalFieldName(name);
-    if(!key){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'unsupported_required_select'};continue}
+    if(!key){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'unsupported_required_select',rejectionField:name};continue}
     const selected=optionValue(body);
-    if(!selected){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_select_without_option'};continue}
+    if(!selected){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_select_without_option',rejectionField:name};continue}
     payload[name]=selected;useful++;
   }
   const fields=[...String(html||'').matchAll(/<(input|textarea)\b[^>]*>/gi)].map(m=>m[0]);
@@ -190,51 +191,51 @@ function safeFormPayload(html){
     const name=String(tagAttr(tag,'name')||'').trim();if(!name)continue;
     const type=String(tagAttr(tag,'type')||'text').toLowerCase();
     const required=/\brequired\b/i.test(tag);
-    if(/password|file/i.test(type))return{payload:null,hiddenSafetyFields,rejectionReason:'interactive_sensitive_field'};
-    if(/checkbox|radio/i.test(type)){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_interactive_choice'};continue}
+    if(/password|file/i.test(type))return{payload:null,hiddenSafetyFields,rejectionReason:'interactive_sensitive_field',rejectionField:name};
+    if(/checkbox|radio/i.test(type)){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_interactive_choice',rejectionField:name};continue}
     if(/submit|button|reset|image/i.test(type))continue;
-    if(/captcha|payment|card|password|auth|terms|agree|consent/i.test(name))return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name'};
+    if(/captcha|payment|card|password|auth|terms|agree|consent/i.test(name))return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name',rejectionField:name};
     if(type==='hidden'){
       const value=tagAttr(tag,'value');
-      if(value==null||String(value).length>2000)return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_hidden_value'};
+      if(value==null||String(value).length>2000)return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_hidden_value',rejectionField:name};
       payload[name]=String(value);
       if(/csrf|token|nonce|form[_-]?key|verification/i.test(name))hiddenSafetyFields.push(name);
       continue;
     }
     const key=canonicalFieldName(name);
-    if(!key){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'unsupported_required_field'};continue}
+    if(!key){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'unsupported_required_field',rejectionField:name};continue}
     const value=valueForField(key);
-    if(value==null){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_field_without_safe_value'};continue}
+    if(value==null){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_field_without_safe_value',rejectionField:name};continue}
     payload[name]=value;useful++;
   }
   return useful>=2
-    ?{payload,hiddenSafetyFields,rejectionReason:null}
-    :{payload:null,hiddenSafetyFields,rejectionReason:'insufficient_safe_fields'};
+    ?{payload,hiddenSafetyFields,rejectionReason:null,rejectionField:null}
+    :{payload:null,hiddenSafetyFields,rejectionReason:'insufficient_safe_fields',rejectionField:null};
 }
 function machineFormAssessment(page){
   if(!page?.ok)return{candidate:null,reasons:['page_unavailable'],formsSeen:0,submissionIntentEvidence:false};
-  const reasons=[];let formsSeen=0;
+  const reasons=[],rejectionDetails=[];let formsSeen=0;
   for(const match of String(page.html||'').matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)){
     formsSeen++;
     const open=match[1]||'',body=match[2]||'',formText=stripTags(body),submissionIntentEvidence=explicitSubmissionFormIntent(body);
     const method=String(tagAttr(open,'method')||'GET').toUpperCase();
-    if(method!=='POST'){reasons.push('method_not_post');continue}
-    if(CAPTCHA_RE.test(body)){reasons.push('captcha_in_form');continue}
-    if(AUTH_RE.test(formText)||/<input[^>]+type=["']password["']/i.test(body)){reasons.push('auth_in_form');continue}
-    if(PAYMENT_RE.test(formText)){reasons.push('payment_in_form');continue}
-    if(RECIPROCAL_RE.test(formText)){reasons.push('reciprocal_in_form');continue}
-    if(AUTOMATION_BLOCK_RE.test(formText)){reasons.push('automation_block_in_form');continue}
+    if(method!=='POST'){reasons.push('method_not_post');rejectionDetails.push({reason:'method_not_post',field:null});continue}
+    if(CAPTCHA_RE.test(body)){reasons.push('captcha_in_form');rejectionDetails.push({reason:'captcha_in_form',field:null});continue}
+    if(AUTH_RE.test(formText)||/<input[^>]+type=["']password["']/i.test(body)){reasons.push('auth_in_form');rejectionDetails.push({reason:'auth_in_form',field:null});continue}
+    if(PAYMENT_RE.test(formText)){reasons.push('payment_in_form');rejectionDetails.push({reason:'payment_in_form',field:null});continue}
+    if(RECIPROCAL_RE.test(formText)){reasons.push('reciprocal_in_form');rejectionDetails.push({reason:'reciprocal_in_form',field:null});continue}
+    if(AUTOMATION_BLOCK_RE.test(formText)){reasons.push('automation_block_in_form');rejectionDetails.push({reason:'automation_block_in_form',field:null});continue}
     const action=tagAttr(open,'action')||page.url;
     const endpoint=absolute(action,page.url);
-    if(!endpoint||!sameHost(page.url,endpoint)||!endpoint.startsWith('https://')){reasons.push('unsafe_endpoint');continue}
+    if(!endpoint||!sameHost(page.url,endpoint)||!endpoint.startsWith('https://')){reasons.push('unsafe_endpoint');rejectionDetails.push({reason:'unsafe_endpoint',field:null});continue}
     const assessed=safeFormPayload(body);
-    if(!assessed.payload){reasons.push(assessed.rejectionReason||'payload_unresolved');continue}
+    if(!assessed.payload){const reason=assessed.rejectionReason||'payload_unresolved';reasons.push(reason);rejectionDetails.push({reason,field:assessed.rejectionField||null});continue}
     return{
       candidate:{kind:'html_form',endpoint,method:'POST',contentType:'application/x-www-form-urlencoded',payload:assessed.payload,hiddenSafetyFields:assessed.hiddenSafetyFields,confidence:96},
-      reasons,formsSeen,submissionIntentEvidence
+      reasons,formsSeen,submissionIntentEvidence,rejectionDetails:rejectionDetails.slice(0,8)
     };
   }
-  return{candidate:null,reasons:[...new Set(reasons)].slice(0,8),formsSeen,submissionIntentEvidence:false};
+  return{candidate:null,reasons:[...new Set(reasons)].slice(0,8),formsSeen,submissionIntentEvidence:false,rejectionDetails:rejectionDetails.slice(0,8)};
 }
 function resolveSchemaRef(spec,schema){
   if(!schema)return null;
@@ -317,7 +318,7 @@ async function fetchJsonDocument(url,homepage){
   if(!validPublicHttp(url)||!sameHost(url,homepage))return null;
   const release=await acquireHost(url);
   try{
-    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/json,application/*+json;q=0.9,*/*;q=0.2'},redirect:'follow',signal:AbortSignal.timeout(10000)});
+    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept':'application/json,application/*+json;q=0.9,*/*;q=0.2'},redirect:'follow',signal:AbortSignal.timeout(5000)});
     if(!r.ok||!sameHost(homepage,r.url||url))return null;
     const text=(await r.text()).slice(0,MAX_HTML);
     const data=JSON.parse(text);
@@ -576,7 +577,7 @@ async function researchDistribution(job){
   const unique=[...new Map([...actionCandidates,...contactCandidates].map(x=>[x.url,x])).values()].slice(0,12);
   const pages=await mapLimit(unique,4,async link=>{const p=await fetchPage(link.url);if(!p?.ok)return{link,page:p,signals:null};return{link,page:p,signals:pageSignals(p)}});
   const routes=[];
-  let spaProbeBudget=4;
+  let spaProbeBudget=2;
   for(const x of pages){
     if(!x?.page?.ok)continue;
     const signals=x.signals||{};
@@ -589,7 +590,7 @@ async function researchDistribution(job){
       const machineCandidate=submissionIntent?assessment.candidate:null;
       let transportHints=[],spaScriptProbes=0;
       if(submissionIntent&&!machineCandidate){
-        const probe=spaProbeBudget>0?await findSpaTransportHints(x.page,{maxScripts:2}):{hints:staticPostEndpointSignals(x.page),scriptProbes:0};
+        const probe=spaProbeBudget>0?await findSpaTransportHints(x.page,{maxScripts:1}):{hints:staticPostEndpointSignals(x.page),scriptProbes:0};
         transportHints=probe.hints;spaScriptProbes=probe.scriptProbes;if(spaProbeBudget>0)spaProbeBudget--;
       }
       const policyBlockers=[
@@ -603,7 +604,7 @@ async function researchDistribution(job){
         label:safe(x.link.text,160),provenance:x.link.guessed?'guess':'link',hasForm:Boolean(signals.hasForm),submissionIntent,
         auth:Boolean(signals.auth&&!machineCandidate),captcha:Boolean(signals.captcha&&!machineCandidate),
         policyBlockers,machineCandidate,transportHints,spaScriptProbes,
-        formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons,submissionIntentEvidence:assessment.submissionIntentEvidence===true}
+        formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons,rejectionDetails:assessment.rejectionDetails||[],submissionIntentEvidence:assessment.submissionIntentEvidence===true}
       });
     }
   }
@@ -611,7 +612,7 @@ async function researchDistribution(job){
     const assessment=machineFormAssessment(home),submissionIntent=hasSubmissionIntent('source route',home.url)||assessment.submissionIntentEvidence===true,machineCandidate=submissionIntent?assessment.candidate:null;
     let transportHints=[],spaScriptProbes=0;
     if(submissionIntent&&!machineCandidate){
-      const probe=spaProbeBudget>0?await findSpaTransportHints(home,{maxScripts:2}):{hints:staticPostEndpointSignals(home),scriptProbes:0};
+      const probe=spaProbeBudget>0?await findSpaTransportHints(home,{maxScripts:1}):{hints:staticPostEndpointSignals(home),scriptProbes:0};
       transportHints=probe.hints;spaScriptProbes=probe.scriptProbes;if(spaProbeBudget>0)spaProbeBudget--;
     }
     const policyBlockers=[
