@@ -3,7 +3,7 @@ const MAX_HTML=500000;
 const ACTION_RE=/(\bsubmit\b|\bsubmission\b|add[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|register|sign[-_ /]?up|contribute|partner|advertise)/i;
 const SUBMISSION_INTENT_RE=/(\bsubmit\b(?:\s+now|\s+(?:your|a))?|\bsubmission\b|add[-_ /]?(?:your[-_ /]?)?(?:tool|startup|product|listing|app|software|site|project|company|business)|list[-_ /]?(?:your|a)?[-_ /]?(?:tool|startup|product|listing|app|software|site|project|company|business)|launch[-_ /]?(?:a[-_ /]?)?(?:tool|startup|product|app|software|project))/i;
 const SUBMISSION_ACCOUNT_RE=/(?:intent=submit|(?:return_to|next|redirect|redirect_to|continue)=[^&]*(?:product|tool|startup|listing|app|software|project|company|business)[^&]*(?:new|add|submit)|\/(?:products?|tools?|startups?|listings?|apps?|software|projects?|companies|businesses)\/(?:new|add|submit))(?:[&#/?_-]|$)/i;
-const CONTENT_ROUTE_RE=/(?:^|\/)(?:best-of|blog|blogs|article|articles|news|funding-news|category|categories|tag|tags|guides?|resources?|advertise|pricing)(?:\/|$)/i;
+const CONTENT_ROUTE_RE=/(?:^|\/)(?:best-of|blog|blogs|article|articles|news|funding-news|category|categories|tag|tags|guides?|resources?|help|support|docs?|documentation|knowledge-base|advertise|pricing)(?:\/|$)/i;
 const CONTACT_RE=/(contact|about|editorial|press|partnership|partner|advertise|submit|contribute)/i;
 const DOC_RE=/(openapi|swagger|api[-_/ ]?docs|developer|developers|for-llms|agent|mcp|registry)/i;
 const API_ROUTE_RE=/(submit|submission|listing|listings|tool|tools|startup|startups|directory|register|add|create)/i;
@@ -69,12 +69,23 @@ function hasSubmissionIntent(label,url){
   const rawUrl=String(url||'');
   let decodedUrl=rawUrl;try{decodedUrl=decodeURIComponent(rawUrl)}catch{}
   const signal=String(label||'')+' '+rawUrl+' '+decodedUrl;
-  let path='';try{path=new URL(rawUrl).pathname}catch{}
+  let path='',parsed=null;try{parsed=new URL(rawUrl);path=parsed.pathname}catch{}
+  // Auth entry points only count as exact submission routes when their redirect
+  // target itself points to a submission/create flow. This prevents labels like
+  // "Submit" from turning /login?next=/pricing into a false manual route.
+  if(parsed&&/(?:^|\/)(?:login|sign-in|signin|sign-up|signup|register)(?:\/|$)/i.test(path)){
+    const redirectKey=['return_to','next','redirect','redirect_to','continue'].find(key=>parsed.searchParams.has(key));
+    if(redirectKey){
+      let target=String(parsed.searchParams.get(redirectKey)||'');try{target=decodeURIComponent(target)}catch{}
+      const targetIntent=SUBMISSION_INTENT_RE.test(target)||SUBMISSION_ACCOUNT_RE.test(target);
+      if(!targetIntent&&!/\bintent=submit\b/i.test(decodedUrl))return false;
+    }
+  }
   // Content/marketing pages often contain site-wide forms and CAPTCHA widgets.
   // They are never submission routes unless the URL itself carries an explicit
   // account/submission intent such as intent=submit or return_to=.../new.
-  if(CONTENT_ROUTE_RE.test(path)&&!SUBMISSION_ACCOUNT_RE.test(rawUrl))return false;
-  return SUBMISSION_ACCOUNT_RE.test(rawUrl)||SUBMISSION_INTENT_RE.test(signal);
+  if(CONTENT_ROUTE_RE.test(path)&&!SUBMISSION_ACCOUNT_RE.test(rawUrl)&&!SUBMISSION_ACCOUNT_RE.test(decodedUrl))return false;
+  return SUBMISSION_ACCOUNT_RE.test(rawUrl)||SUBMISSION_ACCOUNT_RE.test(decodedUrl)||SUBMISSION_INTENT_RE.test(signal);
 }
 function absolute(href,base){
   try{const u=new URL(href,base);u.hash='';return validPublicHttp(u.toString())?u.toString():null}catch{return null}
@@ -471,7 +482,7 @@ async function researchDistribution(job){
     let origin=null;try{origin=new URL(home.url).origin}catch{}
     if(origin){
       guessedSubmissionLinks=['/submit','/submit-tool','/add-tool','/add-product','/list-your-tool','/products/new','/tools/new','/startups/new','/listings/new']
-        .map(path=>({url:absolute(path,origin+'/'),text:'guessed submission route'}))
+        .map(path=>({url:absolute(path,origin+'/'),text:'guessed submission route',guessed:true}))
         .filter(x=>x.url&&x.url!==home.url)
         .slice(0,6);
     }
@@ -487,7 +498,11 @@ async function researchDistribution(job){
     const signals=x.signals||{};
     if(ACTION_RE.test(x.link.text+' '+x.link.url)||signals.hasForm||signals.auth||signals.captcha){
       const routeUrl=x.page.url||x.link.url;
-      const assessment=machineFormAssessment({...x.page,signals}),submissionIntent=hasSubmissionIntent(x.link.text,routeUrl)||assessment.submissionIntentEvidence===true,machineCandidate=submissionIntent?assessment.candidate:null;
+      const assessment=machineFormAssessment({...x.page,signals});
+      const guessed=Boolean(x.link.guessed);
+      const guessConfirmed=!guessed||assessment.submissionIntentEvidence===true||SUBMISSION_INTENT_RE.test(String(signals.title||''));
+      const submissionIntent=guessConfirmed&&(hasSubmissionIntent(x.link.text,routeUrl)||assessment.submissionIntentEvidence===true);
+      const machineCandidate=submissionIntent?assessment.candidate:null;
       const policyBlockers=[
         signals.payment?'payment':null,
         signals.reciprocal?'reciprocal':null,
@@ -496,10 +511,10 @@ async function researchDistribution(job){
       routes.push({
         url:routeUrl,
         kind:machineCandidate?'submission':signals.captcha?'captcha':signals.auth?'auth':submissionIntent?'submission':'contact',
-        label:safe(x.link.text,160),hasForm:Boolean(signals.hasForm),submissionIntent,
+        label:safe(x.link.text,160),provenance:x.link.guessed?'guess':'link',hasForm:Boolean(signals.hasForm),submissionIntent,
         auth:Boolean(signals.auth&&!machineCandidate),captcha:Boolean(signals.captcha&&!machineCandidate),
         policyBlockers,machineCandidate,
-        formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons}
+        formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons,submissionIntentEvidence:assessment.submissionIntentEvidence===true}
       });
     }
   }
@@ -513,10 +528,10 @@ async function researchDistribution(job){
     routes.push({
       url:home.url,
       kind:machineCandidate?'submission':home.signals.captcha?'captcha':home.signals.auth?'auth':submissionIntent?'submission':'contact',
-      label:'source route',hasForm:Boolean(home.signals.hasForm),submissionIntent,
+      label:'source route',provenance:'source',hasForm:Boolean(home.signals.hasForm),submissionIntent,
       auth:Boolean(home.signals.auth&&!machineCandidate),captcha:Boolean(home.signals.captcha&&!machineCandidate),
       policyBlockers,machineCandidate,
-      formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons}
+      formAssessment:{formsSeen:assessment.formsSeen,rejections:assessment.reasons,submissionIntentEvidence:assessment.submissionIntentEvidence===true}
     });
   }
   let openApi={candidate:null,probes:0,source:null};
@@ -527,8 +542,8 @@ async function researchDistribution(job){
       const c=openApi.candidate;
       routes.unshift({
         url:c.endpoint,kind:'submission',label:'OpenAPI submission endpoint',hasForm:false,submissionIntent:true,
-        auth:false,captcha:false,policyBlockers:[],machineCandidate:c,
-        formAssessment:{formsSeen:0,rejections:[]}
+        auth:false,captcha:false,policyBlockers:[],machineCandidate:c,provenance:'openapi',
+        formAssessment:{formsSeen:0,rejections:[],submissionIntentEvidence:true}
       });
     }
   }
