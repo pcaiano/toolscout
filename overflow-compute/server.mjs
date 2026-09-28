@@ -35,6 +35,8 @@ async function runBatch(batchId,completionToken){
         captcha:Boolean(route?.captcha),
         candidateKind:route?.machineCandidate?.kind||null,
         candidateConfidence:Number(route?.machineCandidate?.confidence||0),
+        provenance:route?.provenance||null,
+        explicitFormIntent:route?.formAssessment?.submissionIntentEvidence===true,
         rejections:Array.isArray(route?.formAssessment?.rejections)?route.formAssessment.rejections.slice(0,8):[]
       })):[];
       console.log(JSON.stringify({
