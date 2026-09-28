@@ -12,6 +12,11 @@ assert.match(router,/route-recovery:v\$\{DISTRIBUTION_CLASSIFIER_VERSION\}/);
 assert.match(router,/revalidate_401_403_then_fresh_route_research_v1/);
 assert.match(router,/Human Gate is genuinely required/);
 assert.match(router,/Human work remains disabled unless fresh exact-route evidence/);
+assert.match(router,/policy_state='transport_rejected'/);
+assert.match(router,/rejected_adapter_replay_suppressed/);
+assert.match(router,/same transport route that already returned HTTP 401\/403/);
+assert.match(router,/adapter_changed_after_revalidation/);
+assert.match(router,/previouslyRejected=recovering\|\|adapterPolicyState==='transport_rejected'/);
 assert.match(core,/ok:true,accepted,httpStatus,targetUrl:endpoint/);
 assert.match(core,/transport_completed_external_acceptance_separate_v1/);
 
