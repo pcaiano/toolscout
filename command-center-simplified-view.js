@@ -274,7 +274,8 @@ function throughput(){
    '<div class="sourceLine">Outcome hierarchy remains GA4 sessions → strict humans → verified outbound → monetized outbound → confirmed revenue. Capacity metrics only explain how fast the Growth Brain can work.</div>';
 }
 function taskHtml(x){
- const url=safeUrl(x.action_url),isReputation=x.engine==='reputation',isAuth=x.engine==='distribution'&&(x.gate_type==='authentication'||x.status==='auth_required'),canConfirm=!isReputation&&(x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status)));
+ // Chairman Queue human gates always open the exact external action in the owner's normal browser. Remote Auth Plane handoffs must never be required to unblock queue work.
+ const url=safeUrl(x.action_url),isReputation=x.engine==='reputation',canConfirm=!isReputation&&(x.engine==='distribution'||(x.engine==='affiliate'&&['ready_to_apply','human_action_required'].includes(x.status)));
  const label=x.gate_key?'Mark done':x.editorial_queue_id?'I published it':(x.engine==='affiliate'&&x.status==='human_action_required'?'I completed it':'I submitted it');
  const copy=(label,value)=>value?'<button class="btn" data-copy="'+encodeURIComponent(String(value))+'">'+esc(label)+'</button>':'';
  let payload='';
@@ -361,16 +362,6 @@ async function reviewReputation(button){
   data.queue=await get(endpoints.queue);queue();health();
  }catch(e){button.textContent='Save failed';setTimeout(()=>{button.disabled=false;button.textContent=old},1500)}
 }
-async function startAuthHandoff(button){
- const slug=button.dataset.authHandoff||'';if(!slug)return;
- const old=button.textContent;button.disabled=true;button.textContent='Starting secure session...';
- try{
-  const r=await ccFetch('/analytics/api/human-actions/auth-handoff',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({surface_slug:slug})});
-  const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.error||'auth_handoff_failed');
-  button.disabled=false;button.textContent=old;if(j.handoff_url)window.open(j.handoff_url,'_blank','noopener,noreferrer');
-  data.queue=await get(endpoints.queue);queue();health();
- }catch(e){button.textContent='Try secure login again';setTimeout(()=>{button.disabled=false;button.textContent=old},1800)}
-}
 async function resolveTask(button){
  const engine=button.dataset.engine,id=button.dataset.id,action=button.dataset.resolve,status=button.dataset.status||'',gate=button.dataset.gate||'';
  if(!engine||!id||!action)return;const old=button.textContent;button.disabled=true;button.textContent='Saving';
@@ -387,7 +378,6 @@ async function resolveTask(button){
 document.addEventListener('click',e=>{
  const c=e.target.closest('[data-copy]');if(c){e.preventDefault();const old=c.textContent,value=decodeURIComponent(c.dataset.copy||'');navigator.clipboard.writeText(value).then(()=>{c.textContent='Copied';setTimeout(()=>c.textContent=old,1200)}).catch(()=>{c.textContent='Copy failed';setTimeout(()=>c.textContent=old,1500)});return}
  const rep=e.target.closest('[data-reputation]');if(rep){e.preventDefault();reviewReputation(rep);return}
- const auth=e.target.closest('[data-auth-handoff]');if(auth){e.preventDefault();startAuthHandoff(auth);return}
  const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
 });
 const FAST_KEYS=['queue','runtime','authority','compute','auth'];
