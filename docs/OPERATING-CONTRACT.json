@@ -64,7 +64,7 @@
     "autonomous_control_cycle_minutes": 15,
     "autonomous_control_cycle_anchor_minute": 4,
     "autonomous_stale_takeover_minutes": 12,
-    "distribution_classifier_version": 6,
+    "distribution_classifier_version": 7,
     "human_gate_exact_submission_intent_required": true,
     "captcha_routes_open_human_gate_same_cycle": true,
     "human_gate_queue_limit": 24,
