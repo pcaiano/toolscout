@@ -1,4 +1,4 @@
-# replay: SEO execution recovery and truthful task age 2026-09-28
+# replay: IndexNow idempotency and SEO queue drain 2026-09-28
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -33,6 +33,8 @@ jobs:
           node --check growth-execution-contract.js
           node --check seo-execution-runtime.js
           node --check seo-cloudflare-runtime-worker.js
+          grep -q "INSERT OR IGNORE INTO distribution_submissions" seo-execution-runtime.js
+          grep -q "COALESCE(last_attempt_at,submitted_at,updated_at,created_at)" seo-execution-runtime.js
           node tests/compute-overflow-policy.test.mjs
           node tests/compute-overflow-reliability.mjs
           node tests/external-action-plane.test.mjs
@@ -55,8 +57,21 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Exercise current SEO executor against production D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
           set -euo pipefail
+          if [ -n "${ADMIN_TOKEN:-}" ]; then
+            HTTP_CODE=$(curl -sS -o /tmp/seo-dispatch.json -w "%{http_code}" --max-time 120 -X POST -H "Authorization: Bearer $ADMIN_TOKEN" https://trytoolscout.org/api/growth/execution/dispatch || true)
+            cat /tmp/seo-dispatch.json 2>/dev/null || true
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Direct authenticated growth execution dispatch completed."
+              sleep 3
+              exit 0
+            fi
+            echo "Direct dispatch returned HTTP $HTTP_CODE; using remote scheduled fallback."
+          fi
           npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
           DEV_PID=$!
           cleanup(){ kill $DEV_PID >/dev/null 2>&1 || true; }
@@ -72,9 +87,6 @@ jobs:
           }
           cat /tmp/seo-scheduled.txt
           sleep 5
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
       - name: Verify SEO queue advanced
         run: |
           set -euo pipefail
@@ -85,6 +97,8 @@ jobs:
           echo "Stale active slots after recovery"
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) stale_active FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status IN ('claimed','attempted') AND COALESCE(attempted_at,claimed_at,updated_at)<datetime('now','-20 minutes');" | tee /tmp/seo-stale-after.json
           jq -e '.[0].results[0].stale_active == 0' /tmp/seo-stale-after.json >/dev/null
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "SELECT COUNT(*) remaining FROM growth_execution_contract WHERE task_id IN ('opportunity|gsc-reality:index_issue:/best-affordable-crm|strengthen_internal_links','opportunity|gsc-reality:index_issue:/best-affordable-crm|deepen_existing_search_asset','opportunity|gsc-reality:index_issue:/best-workflow-automation-tools|strengthen_internal_links','opportunity|gsc-reality:index_issue:/brevo-vs-mailchimp|strengthen_internal_links','opportunity|gsc-reality:index_issue:/n8n-vs-make|strengthen_internal_links','opportunity|gsc-reality:index_issue:/semrush-vs-ahrefs|strengthen_internal_links') AND status='pending';" | tee /tmp/seo-target-pending.json
+          jq -e '.[0].results[0].remaining == 0' /tmp/seo-target-pending.json >/dev/null
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
