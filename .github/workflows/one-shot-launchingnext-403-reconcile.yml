@@ -1,0 +1,65 @@
+name: One Shot LaunchingNext 403 Reconcile
+
+on:
+  push:
+    branches:
+      - "ops/launchingnext-403-reconcile"
+    paths:
+      - ".github/workflows/one-shot-launchingnext-403-reconcile.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ToolScout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate production resource identity
+        run: |
+          set -euo pipefail
+          grep -q '^name = "toolscout"$' wrangler.toml
+          grep -q '^database_name = "toolscout"$' wrangler.toml
+          grep -q '^database_id = "cac6bc3c-d838-4edd-ba29-597030afb397"$' wrangler.toml
+      - name: Reconcile Launching Next rejected adapter
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          READ_SQL="SELECT o.surface_slug,o.status opportunity_status,o.human_required,a.policy_state adapter_policy_state,ds.status submission_status,ds.error,ds.attempts,ds.updated_at FROM distribution_opportunities o LEFT JOIN distribution_auto_adapters a ON a.surface_slug=o.surface_slug LEFT JOIN distribution_submissions ds ON ds.surface_slug=o.surface_slug AND ds.submission_type='auto_discovered_json' WHERE o.surface_slug='launchingnext-com' ORDER BY ds.updated_at DESC LIMIT 3;"
+          npx --yes wrangler@4 d1 execute toolscout --remote --json --command "$READ_SQL" > /tmp/before.json
+          echo "BEFORE"
+          cat /tmp/before.json
+          jq -e '.[0].results | length > 0' /tmp/before.json >/dev/null
+
+          if jq -e '.[0].results | any(.adapter_policy_state == "verified" and (.error // "" | startswith("external_http_403:")))' /tmp/before.json >/dev/null; then
+            npx --yes wrangler@4 d1 execute toolscout --remote --command "
+              UPDATE distribution_auto_adapters
+                SET policy_state='revalidation_required',last_checked_at=datetime('now'),updated_at=datetime('now')
+                WHERE surface_slug='launchingnext-com' AND policy_state='verified';
+              UPDATE distribution_opportunities
+                SET status='research_required',human_required=0,last_checked_at=NULL,
+                    next_action='Launching Next returned HTTP 403. Adapter invalidated for fresh same-host route research; open a Human Gate only if fresh evidence proves auth, CAPTCHA or a manual-only submission step.',
+                    updated_at=datetime('now')
+                WHERE surface_slug='launchingnext-com'
+                  AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free');
+              UPDATE distribution_submissions
+                SET error='external_http_403:route_revalidation_required',updated_at=datetime('now')
+                WHERE surface_slug='launchingnext-com'
+                  AND submission_type='auto_discovered_json'
+                  AND status='failed'
+                  AND error LIKE 'external_http_403:%';
+            "
+          fi
+
+          npx --yes wrangler@4 d1 execute toolscout --remote --json --command "$READ_SQL" > /tmp/after.json
+          echo "AFTER"
+          cat /tmp/after.json
+          jq -e '.[0].results | all((.adapter_policy_state != "verified") or ((.error // "") | startswith("external_http_403:") | not))' /tmp/after.json >/dev/null
