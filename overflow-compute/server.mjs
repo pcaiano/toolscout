@@ -23,6 +23,31 @@ async function runBatch(batchId,completionToken){
     const payload=await payloadResponse.json();
     const jobs=Array.isArray(payload.jobs)?payload.jobs:[];
     const results=await runResearchBatch(jobs,{concurrency:MAX_CONCURRENCY});
+    for(let i=0;i<results.length;i++){
+      const job=jobs[i],result=results[i];
+      if(job?.type!=='distribution_route_research')continue;
+      const routes=Array.isArray(result?.routes)?result.routes.slice(0,8).map(route=>({
+        url:route?.url||null,
+        kind:route?.kind||null,
+        submissionIntent:route?.submissionIntent===true,
+        hasForm:Boolean(route?.hasForm),
+        auth:Boolean(route?.auth),
+        captcha:Boolean(route?.captcha),
+        candidateKind:route?.machineCandidate?.kind||null,
+        candidateConfidence:Number(route?.machineCandidate?.confidence||0),
+        rejections:Array.isArray(route?.formAssessment?.rejections)?route.formAssessment.rejections.slice(0,8):[]
+      })):[];
+      console.log(JSON.stringify({
+        event:'distribution_classifier_result',
+        batchId,
+        jobId:result?.jobId||job?.jobId||null,
+        subjectKey:job?.subjectKey||null,
+        sourceUrl:job?.payload?.url||null,
+        classification:result?.classification||null,
+        routeSummary:result?.routeSummary||null,
+        routes
+      }));
+    }
     const complete=await fetch(`${TOOLSCOUT_BASE_URL}/api/compute/batches/${encodeURIComponent(batchId)}/complete`,{
       method:'POST',
       headers:{'Authorization':`Bearer ${completionToken}`,'Content-Type':'application/json','User-Agent':'ToolScout-Overflow-Render/1.0'},
