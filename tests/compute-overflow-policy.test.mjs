@@ -112,3 +112,5 @@ assert.match(router,/kind==='json_api'/);
 assert.match(router,/CONTACT_SUPPLY_RESEARCH_BATCH=40/);
 assert.match(router,/const limit=Math\.min\(80,remaining\);/);
 
+
+assert.match(router,/sourceUrl:isHttp\(a\.source_url\)\?a\.source_url:null/);
