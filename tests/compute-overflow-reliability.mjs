@@ -28,7 +28,7 @@ check(s.includes("qualificationReady15m:num(live?.qualification_ready_15m)"),'qu
 check(s.includes("qualificationResearch15m:num(live?.qualification_research_15m)"),'qualification research metric is live, not hardcoded');
 check(s.includes("qualificationVerificationFailed15m:num(live?.qualification_verification_failed_15m)"),'qualification verification failures are visible');
 check(s.includes("idx_distribution_qualification_created_result"),'qualification health query is indexed');
-check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=16;"),'classifier v16 is active');
+check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=17;"),'classifier v17 is active');
 check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
 check(d.includes("currentResearchProof"),'generic Chairman validation preserves exact current-classifier human-gate evidence');
 check(d.includes("current_classifier_exact_route_recovery"),'fresh current-classifier evidence can recover only transiently re-cancelled exact gates');
@@ -36,6 +36,8 @@ check(d.includes("terminal_opportunity_state"),'fresh research cannot resurrect 
 check(s.includes("fresh_research_human_gate_reconciliation"),'every overflow tick reconciles fresh exact human routes, including post-auth follow-up steps');
 check(s.includes("reconcileStaleResearchHumanGates"),'classifier upgrades release stale research-derived human gates before re-enqueue');
 check(s.includes("canonicalOverflowFormField"),'canonical policy accepts the same safe field aliases as Render research');
+const core=fs.readFileSync('overflow-compute/research-core.mjs','utf8');
+check(core.includes("authenticity_token"),'public Rails authenticity tokens are treated as refreshable hidden CSRF state, not credentials');
 check(s.includes("session_refresh_retry_armed_v1"),'legacy HTTP 419 form failures get one bounded session-aware retry');
 check(s.includes("AUTHORIZED_EXECUTION_VERSION=2"),'authorized action keys version executor semantics so recovered actions can be re-issued safely');
 check(s.includes("orphan_queued_external_recovered"),'queued external submissions cannot stall without an active execution job');
@@ -49,7 +51,7 @@ check(s.includes("non_submission_research_noise_pruned"),'research-noise pruning
 check(s.includes("reconcileDuplicateRouteSurfaces"),'duplicate route surfaces are consolidated before research enqueue');
 check(s.includes("reconcileGenericDomainDuplicates"),'generic root/login surfaces collapse behind a specific active same-domain submission surface');
 check(s.includes("generic_domain_route_duplicates_consolidated"),'same-domain route consolidation is observable');
-check(s.includes("DISTRIBUTION_CLASSIFIER_VERSION=16"),'current classifier version is pinned in the control plane');
+check(s.includes("DISTRIBUTION_CLASSIFIER_VERSION=17"),'current classifier version is pinned in the control plane');
 check(s.includes("h.subject_type='surface' AND h.subject_key=d.surface_slug"),'duplicate consolidation preserves open human gates');
 check(s.includes("kind==='json_api'"),'canonical validator accepts safe JSON API candidates');
 check(s.includes("render_primary_with_bounded_cloudflare_fallback"),'health exposes the real two-stage qualification architecture');
