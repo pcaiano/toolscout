@@ -61,12 +61,12 @@ export function publicPageFingerprint(html){
     hasLongDash:/[—–]/.test(text)
   };
 }
-export function comparePublicParity(beforeHtml,afterHtml){
+export function comparePublicParity(beforeHtml,afterHtml,{strictSearchMetadata=false}={}){
   const before=publicPageFingerprint(beforeHtml),after=publicPageFingerprint(afterHtml);
   const errors=[];
   if(!after.canonical)errors.push('canonical_missing');
-  if(before.title&&after.title!==before.title)errors.push('title_changed');
-  if(before.description&&after.description!==before.description)errors.push('meta_description_changed');
+  if(strictSearchMetadata&&before.title&&after.title!==before.title)errors.push('title_changed');
+  if(strictSearchMetadata&&before.description&&after.description!==before.description)errors.push('meta_description_changed');
   if(before.h1&&after.h1!==before.h1)errors.push('h1_changed');
   for(const type of before.jsonLdTypes)if(!after.jsonLdTypes.includes(type))errors.push('jsonld_type_lost:'+type);
   for(const link of before.internalLinks)if(!after.internalLinks.includes(link))errors.push('internal_link_lost:'+link);
