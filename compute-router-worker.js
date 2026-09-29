@@ -8,6 +8,8 @@ import {routeContract,routeOwner} from './runtime-route-contract.js';
 import {handleDistributionPriorityRoute} from './distribution-priority-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
+import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
+import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
@@ -1845,6 +1847,8 @@ async function earlyOwnedRoute(request,env,ctx){
   let response=null;
   if(ownership.owner==='distribution_priority')response=await handleDistributionPriorityRoute(request,env);
   else if(ownership.owner==='distribution_orchestrator')response=await handleDistributionOrchestratorRoute(request,env,ctx);
+  else if(ownership.owner==='seo_runtime')response=await handleSeoRuntimeRoute(request,env);
+  else if(ownership.owner==='authority_acquisition')response=await handleAuthorityAcquisitionRoute(request,env);
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
   if(!response)return null;
   const headers=new Headers(response.headers);
