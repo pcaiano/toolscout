@@ -1,4 +1,5 @@
 import {partitionChairmanTasks} from './chairman-task-quality.js';
+import {affiliateChairmanAdmissionState,filterChairmanQueueAffiliates} from './affiliate-chairman-filter.js';
 import base from './command-center-autoload-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
@@ -34,28 +35,18 @@ async function safeAll(env,sql,bindings=[]){
 async function assetJson(request,env,path,fallback={}){
   try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback}catch{return fallback}
 }
+let strictTruthSchemaReady=null;
 async function ensureStrictTruthSchema(env){
-  await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_human_evidence (
-      session_id TEXT PRIMARY KEY,
-      visitor_id TEXT,
-      evidence_type TEXT NOT NULL,
-      evidence_strength INTEGER NOT NULL DEFAULT 1,
-      interaction_count INTEGER NOT NULL DEFAULT 0,
-      first_path TEXT,
-      last_path TEXT,
-      source TEXT,
-      referrer_host TEXT,
-      country TEXT,
-      asn INTEGER,
-      first_evidence_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_evidence_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_created ON traffic_human_evidence(first_evidence_at)`),
-    env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('strict_human_tracking_started_at',datetime('now'))`)
-  ]);
+  if(strictTruthSchemaReady)return strictTruthSchemaReady;
+  strictTruthSchemaReady=(async()=>{
+    const required=['traffic_integrity_meta','traffic_human_evidence'];
+    const row=await env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (?,?)").bind(...required).first();
+    if(Number(row?.n||0)!==required.length)throw new Error(`strict_human_analytics_schema_not_migrated:${Number(row?.n||0)}/${required.length}`);
+    return{ok:true,source:'d1_migrations'};
+  })().catch(error=>{strictTruthSchemaReady=null;throw error});
+  return strictTruthSchemaReady;
 }
+
 async function assetText(request,env,path,fallback=''){
   try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.text():fallback}catch{return fallback}
 }
@@ -255,6 +246,20 @@ async function lightweightQueue(request,env,ctx){
     return {status:'connected',quality_holds:quality.quality_holds,quality_version:quality.quality_version,total:items.length,estimated_minutes:items.reduce((sum,x)=>sum+n(x.estimated_minutes),0),items,broken_links:[],external_verification_issues:[],payload_version:'chairman-direct-d1-v6',rule:'Direct canonical D1 read path only. Heavy reconciliation is excluded from dashboard requests so human actions can never block the Command Center.'};
   }catch(error){return {status:'partial',total:0,estimated_minutes:0,items:[],broken_links:[],external_verification_issues:[],reason:String(error?.message||error)}}
 }
+
+export async function handleChairmanQueueReadRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/analytics/api/chairman-queue')return null;
+  if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
+  const [queue,state]=await Promise.all([
+    lightweightQueue(request,env,ctx),
+    affiliateChairmanAdmissionState(env)
+  ]);
+  return Response.json(filterChairmanQueueAffiliates(queue,state),{
+    headers:{...JSON_H,'X-ToolScout-Read-Mode':'read-only','X-ToolScout-Route-Contract':'v2'}
+  });
+}
+
 async function resilientSnapshot(request,env,ctx){
   await ensureStrictTruthSchema(env);
   const now=new Date(),todayKey=zonedDayKey(now),monthKey=todayKey.slice(0,7),todayStart=zonedMidnight(todayKey),monthStart=zonedMidnight(monthKey+'-01'),last24Start=new Date(now.getTime()-86400000),window30Start=new Date(now.getTime()-30*86400000);
@@ -405,9 +410,10 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:6,statsMode:'direct-d1-resilient',trafficTruth:'strict-human-v1',externalLinkVerificationInStats:false,affiliateCanonicalTruth:'verified-outbound-v1',autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-quality-v1',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
-    if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/analytics/api/chairman-queue')){
+    const chairman=await handleChairmanQueueReadRoute(request,env,ctx);
+    if(chairman)return chairman;
+    if(request.method==='GET'&&url.pathname==='/analytics/api/stats'){
       if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
-      if(url.pathname==='/analytics/api/chairman-queue')return Response.json(await lightweightQueue(request,env,ctx),{headers:JSON_H});
       try{return Response.json(await resilientSnapshot(request,env,ctx),{headers:JSON_H})}
       catch(error){return Response.json({error:'resilient_snapshot_failed',message:String(error?.message||error)},{status:500,headers:JSON_H})}
     }

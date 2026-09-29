@@ -45,7 +45,8 @@ const directOwnerFiles={
   public_editorial_site:'public-editorial-runtime.js',
   command_center_direct:'command-center-direct-runtime.js',
   agent_protocol_core:'agent-protocol-core-worker.js',
-  machine_discovery_catalog:'machine-discovery-catalog-runtime.js'
+  machine_discovery_catalog:'machine-discovery-catalog-runtime.js',
+  analytics_chairman:'analytics-chairman-runtime.js'
 };
 const directOwnerDdlFiles=[...new Set(EARLY_DISPATCH_OWNERS.map(owner=>directOwnerFiles[owner]).filter(Boolean).filter(file=>runtimeDdlFiles.includes(file)))];
 const directGroups=ROUTE_GROUPS.filter(group=>group.owner==='compute_router'||EARLY_DISPATCH_OWNERS.includes(group.owner));
