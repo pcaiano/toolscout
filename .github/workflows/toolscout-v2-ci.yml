@@ -44,6 +44,7 @@ on:
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/audit-runtime-architecture.mjs'
       - 'scripts/audit-public-decision-parity.mjs'
+      - 'scripts/verify-public-decision-shadow.mjs'
       - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/generate-seo-pages.mjs'
@@ -115,6 +116,7 @@ jobs:
           node --check scripts/audit-runtime-architecture.mjs
           node --check scripts/validate-v2-preservation.mjs
           node --check scripts/verify-v2-live-smoke.mjs
+          node --check scripts/verify-public-decision-shadow.mjs
           node --check scripts/generate-tool-pages.mjs
           node --check scripts/generate-seo-pages.mjs
           node --check scripts/generate-comparisons.mjs
@@ -125,6 +127,8 @@ jobs:
         run: node scripts/audit-runtime-architecture.mjs
       - name: Audit full public decision parity
         run: node scripts/audit-public-decision-parity.mjs
+      - name: Shadow verify priority public pages against live production
+        run: node scripts/verify-public-decision-shadow.mjs
 
       - name: Enforce ToolScout 2.0 preservation invariants
         env:
