@@ -227,10 +227,13 @@ function throughput(){
  const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
  const batchSize=Number(c.batchSize||25),queued=Number(c.queued||0),runnableQueued=Number(c.runnableQueued??queued),deferredQueued=Number(c.deferredQueued||0),sourceUnreachableDeferred=Number(c.sourceUnreachableDeferred||0),sourceUnreachableSuppressed=Number(c.sourceUnreachableSuppressedToday||0),foldedContactResearch=Number(c.foldedContactResearchToday||0),routeResearchCandidates=Number(funnel.routeResearchCandidates||0),routeResearchEligible=Number(funnel.routeResearchEligible||0),routeResearchQueued=Number(funnel.routeResearchQueued||0),routeResearchRunnable=Number(funnel.routeResearchRunnable||0);
  const now=new Date(),utcHours=now.getUTCHours()+now.getUTCMinutes()/60,expectedExecPace=execMax*(utcHours/24);
+ const schedulerTick=c.lastSchedulerTickAt?new Date(String(c.lastSchedulerTickAt).replace(' ','T')+'Z'):null,schedulerAgeMin=schedulerTick&&Number.isFinite(schedulerTick.getTime())?Math.max(0,(now-schedulerTick)/60000):null,unmaterializedRouteResearch=Math.max(0,routeResearchEligible-routeResearchQueued),schedulerStale=schedulerAgeMin!=null&&schedulerAgeMin>35;
  const machineSupplyUnderfed=String(c.status||'')==='configured'&&execMax>0&&expectedExecPace>=4&&execUsed<Math.max(2,expectedExecPace*0.25)&&runnableQueued<=batchSize*2;
  let bottleneck='No capacity bottleneck proven.';
  let bottleneckMeta='Business outcomes remain the constraint to scale decisions.';
- if(runnableQueued>batchSize*4){bottleneck='Runnable external compute backlog';bottleneckMeta=n(runnableQueued)+' runnable · '+n(deferredQueued)+' deferred retry · '+n(c.activeBatches)+' active batches.'}
+ if(schedulerStale&&unmaterializedRouteResearch>0){bottleneck='Distribution scheduler stale';bottleneckMeta=n(unmaterializedRouteResearch)+' eligible route surface(s) are not materialized into queue work · last scheduler cycle '+(c.lastSchedulerTickAt?dt(c.lastSchedulerTickAt):'unknown')+'.'}
+ else if(unmaterializedRouteResearch>0&&runnableQueued===0){bottleneck='Eligible route research awaiting enqueue';bottleneckMeta=n(unmaterializedRouteResearch)+' eligible surface(s) are not yet represented by queued route research · scheduler last seen '+(c.lastSchedulerTickAt?dt(c.lastSchedulerTickAt):'unknown')+'.'}
+ else if(runnableQueued>batchSize*4){bottleneck='Runnable external compute backlog';bottleneckMeta=n(runnableQueued)+' runnable · '+n(deferredQueued)+' deferred retry · '+n(c.activeBatches)+' active batches.'}
  else if(deferredQueued>0&&runnableQueued===0){bottleneck='No runnable compute backlog';bottleneckMeta=n(deferredQueued)+' jobs are intentionally deferred for retry; next eligible '+(c.nextAvailableAt?dt(c.nextAvailableAt):'later')+'.'}
  else if(researchCompleted>0&&classifiedResearch>0&&machineCandidates===0&&adaptersReady===0){bottleneck='Zero machine-safe yield from classified research';bottleneckMeta=n(classifiedResearch)+' classified jobs · '+n(routesFound)+' route-bearing results · '+n(formRoutes)+' forms, but neither Render nor the bounded fallback has produced a verified automatic adapter yet.'}
  else if(machineSupplyUnderfed){bottleneck='Machine-safe action supply';bottleneckMeta=n(execUsed)+' / '+n(execMax)+' actions used today versus '+n(Math.round(expectedExecPace))+' at linear daily pace. Discovery and qualification must keep Render fed.'}
@@ -266,7 +269,7 @@ function throughput(){
      row('Placements verified today',n(placementsVerified),'Verification events completed today; these can belong to submissions from an earlier cohort')+
    '</div>'+
    '<div class="section"><div class="sectionTitle">Execution architecture</div>'+
-     row('Control plane','Cloudflare','Priorities, policy, leases, canonical D1 state and final verification')+
+     row('Control plane','Cloudflare','Priorities, policy, leases and final verification · scheduler '+(c.lastSchedulerTickAt?'last '+dt(c.lastSchedulerTickAt):'heartbeat unavailable'))+
      row('Research + machine execution',human(c.status||'Unavailable'),(c.providerUrl||'Render overflow')+' · batch '+n(c.batchSize)+' · max '+n(c.maxActiveBatches)+' active')+
      row('Research retry cadence',n(c.distributionResearchBucketHours||6)+'h routes · adaptive unreachable cooldowns · '+n(c.roleEmailResearchBucketHours||24)+'h contacts','404/410 routes cool down 72h, blocked routes 24h, transport/edge failures 12h; contact-route discovery is folded into the primary route crawl')+
      row('Email sender',human(g.emailDeliveryMode||'Unavailable'),'Target '+n(emailTarget)+' · max '+n(emailMax)+' / rolling 24h · reputation boundary retained')+
