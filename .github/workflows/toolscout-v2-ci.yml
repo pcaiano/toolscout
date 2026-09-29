@@ -9,6 +9,7 @@ on:
       - 'seo-cloudflare-runtime-worker.js'
       - 'migrations/0087_seo_runtime_schema.sql'
       - 'command-center-light-theme-worker.js'
+      - 'command-center-direct-runtime.js'
       - 'command-center-simplified-view.js'
       - 'operational-truth-reconciliation-worker.js'
       - 'growth-runtime-integrity-worker.js'
@@ -70,6 +71,7 @@ jobs:
           node --check growth-runtime-closed-loop-worker.js
           node --check growth-runtime-integrity-worker.js
           node --check command-center-light-theme-worker.js
+          node --check command-center-direct-runtime.js
           node --check operational-truth-reconciliation-worker.js
           node --check command-center-simplified-view.js
           node --check scripts/editorial-authority-model.mjs
