@@ -1,13 +1,15 @@
 {
-  "generatedAt": "2026-09-28T14:16:26.393Z",
+  "generatedAt": "2026-09-29T12:01:49.893Z",
   "source": "Google Search Console Search Analytics API - daily trend",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
-  "dataState": "all",
+  "dataState": "final",
+  "finalizedThroughDate": "2026-09-26",
   "range": {
-    "startDate": "2026-09-01",
-    "endDate": "2026-09-28",
-    "days": 28
+    "startDate": "2026-09-02",
+    "endDate": "2026-09-26",
+    "requestedEndDate": "2026-09-29",
+    "days": 25
   },
   "metrics": [
     "impressions",
@@ -17,14 +19,6 @@
     "searchVisiblePages"
   ],
   "daily": [
-    {
-      "date": "2026-09-01",
-      "clicks": 1,
-      "impressions": 5,
-      "ctr": 20,
-      "position": 8.2,
-      "searchVisiblePages": 2
-    },
     {
       "date": "2026-09-02",
       "clicks": 0,
@@ -224,27 +218,12 @@
       "ctr": 1.1905,
       "position": 61.5476,
       "searchVisiblePages": 34
-    },
-    {
-      "date": "2026-09-27",
-      "clicks": 0,
-      "impressions": 109,
-      "ctr": 0,
-      "position": 74.1743,
-      "searchVisiblePages": 26
-    },
-    {
-      "date": "2026-09-28",
-      "clicks": 0,
-      "impressions": 34,
-      "ctr": 0,
-      "position": 82.6765,
-      "searchVisiblePages": 7
     }
   ],
   "limitations": [
     "Search Analytics is the source of truth for Google search visibility, but it does not guarantee every row.",
     "Search-visible pages are pages returned by Search Analytics for a date, not a count of all URLs in the Google index.",
-    "Average position is a Search Console aggregate. Lower values indicate stronger average ranking."
+    "Average position is a Search Console aggregate. Lower values indicate stronger average ranking.",
+    "Preliminary fresh-data days are intentionally excluded until Google marks them final so incomplete ingestion cannot look like a traffic or ranking collapse."
   ]
 }

@@ -1,59 +1,59 @@
 {
-  "generatedAt": "2026-09-28T14:16:26.012Z",
+  "generatedAt": "2026-09-29T12:01:49.563Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
   "searchPerformance": {
     "window28d": {
-      "startDate": "2026-09-01",
-      "endDate": "2026-09-28",
-      "clicks": 5,
-      "impressions": 4750,
-      "ctr": 0.1053,
-      "position": 63.3021
+      "startDate": "2026-09-02",
+      "endDate": "2026-09-29",
+      "clicks": 4,
+      "impressions": 4896,
+      "ctr": 0.0817,
+      "position": 63.3478
     },
     "recent7": {
-      "startDate": "2026-09-22",
-      "endDate": "2026-09-28",
+      "startDate": "2026-09-23",
+      "endDate": "2026-09-29",
       "clicks": 4,
-      "impressions": 807,
-      "ctr": 0.4957,
-      "position": 62.4164
+      "impressions": 787,
+      "ctr": 0.5083,
+      "position": 63.5578
     },
     "previous7": {
-      "startDate": "2026-09-15",
-      "endDate": "2026-09-21",
+      "startDate": "2026-09-16",
+      "endDate": "2026-09-22",
       "clicks": 0,
-      "impressions": 1021,
+      "impressions": 1011,
       "ctr": 0,
-      "position": 64.1205
+      "position": 63.2591
     },
     "change7d": {
       "clicksPct": null,
-      "impressionsPct": -20.96,
-      "positionDelta": -1.7041
+      "impressionsPct": -22.16,
+      "positionDelta": 0.2987
     },
     "countries": [
       {
         "country": "usa",
         "clicks": 0,
-        "impressions": 2766,
+        "impressions": 2845,
         "ctr": 0,
-        "position": 67.256
+        "position": 67.2935
       },
       {
         "country": "gbr",
         "clicks": 0,
-        "impressions": 415,
+        "impressions": 433,
         "ctr": 0,
-        "position": 70.0554
+        "position": 69.7182
       },
       {
         "country": "aus",
         "clicks": 0,
-        "impressions": 206,
+        "impressions": 217,
         "ctr": 0,
-        "position": 72.2184
+        "position": 72.4654
       },
       {
         "country": "fra",
@@ -72,23 +72,23 @@
       {
         "country": "ind",
         "clicks": 1,
-        "impressions": 115,
-        "ctr": 0.8696,
-        "position": 55.8348
+        "impressions": 120,
+        "ctr": 0.8333,
+        "position": 56.425
       },
       {
         "country": "can",
         "clicks": 0,
-        "impressions": 57,
+        "impressions": 63,
         "ctr": 0,
-        "position": 61
+        "position": 61.127
       },
       {
         "country": "bra",
         "clicks": 0,
-        "impressions": 47,
+        "impressions": 48,
         "ctr": 0,
-        "position": 55.7021
+        "position": 56.1875
       },
       {
         "country": "deu",
@@ -100,9 +100,16 @@
       {
         "country": "nzl",
         "clicks": 0,
-        "impressions": 37,
+        "impressions": 38,
         "ctr": 0,
-        "position": 56.2703
+        "position": 56.8947
+      },
+      {
+        "country": "ukr",
+        "clicks": 0,
+        "impressions": 28,
+        "ctr": 0,
+        "position": 58.7857
       },
       {
         "country": "lux",
@@ -112,13 +119,6 @@
         "position": 67.9259
       },
       {
-        "country": "ukr",
-        "clicks": 0,
-        "impressions": 27,
-        "ctr": 0,
-        "position": 57.4815
-      },
-      {
         "country": "bel",
         "clicks": 0,
         "impressions": 23,
@@ -126,34 +126,34 @@
         "position": 58.3478
       },
       {
+        "country": "idn",
+        "clicks": 0,
+        "impressions": 21,
+        "ctr": 0,
+        "position": 51.0476
+      },
+      {
         "country": "rus",
         "clicks": 0,
         "impressions": 21,
         "ctr": 0,
         "position": 66.2381
-      },
-      {
-        "country": "idn",
-        "clicks": 0,
-        "impressions": 20,
-        "ctr": 0,
-        "position": 49.1
       }
     ],
     "devices": [
       {
         "device": "DESKTOP",
         "clicks": 3,
-        "impressions": 3471,
-        "ctr": 0.0864,
-        "position": 64.5255
+        "impressions": 3578,
+        "ctr": 0.0838,
+        "position": 64.5738
       },
       {
         "device": "MOBILE",
-        "clicks": 2,
-        "impressions": 914,
-        "ctr": 0.2188,
-        "position": 69.9508
+        "clicks": 1,
+        "impressions": 944,
+        "ctr": 0.1059,
+        "position": 70.2013
       },
       {
         "device": "TABLET",
@@ -163,26 +163,26 @@
         "position": 79.375
       }
     ],
-    "observedPages": 139
+    "observedPages": 141
   },
   "indexHealth": {
     "inspectionUniverseUrls": 176,
     "inspectionLimit": 250,
     "inspected": 176,
-    "indexed": 144,
-    "excluded": 32,
+    "indexed": 145,
+    "excluded": 31,
     "failed": 0,
     "unknownVerdict": 0,
     "redirected": 0,
-    "unknownToGoogle": 3,
-    "discoveredNotIndexed": 16,
+    "unknownToGoogle": 12,
+    "discoveredNotIndexed": 7,
     "crawledNotIndexed": 0,
-    "otherExcluded": 13,
+    "otherExcluded": 12,
     "indexRecoveryCandidates": 19,
     "errors": 0,
     "legacyObservedVariantsInspected": 11,
     "inspectionCoveragePct": 100,
-    "indexedPct": 81.8,
+    "indexedPct": 82.4,
     "canonicalMismatches": 0,
     "canonicalDisagreementsAll": 2,
     "robotsBlocked": 0,
@@ -230,8 +230,8 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "strengthen_internal_links_and_index_worthiness",
-          "coverageState": "Discovered - currently not indexed"
+          "action": "improve_discovery_and_internal_links",
+          "coverageState": "URL is unknown to Google"
         },
         {
           "page": "/categories",
@@ -240,8 +240,8 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "strengthen_internal_links_and_index_worthiness",
-          "coverageState": "Discovered - currently not indexed"
+          "action": "improve_discovery_and_internal_links",
+          "coverageState": "URL is unknown to Google"
         },
         {
           "page": "/crm-tools",
@@ -250,8 +250,8 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "improve_discovery_and_internal_links",
-          "coverageState": "URL is unknown to Google"
+          "action": "strengthen_internal_links_and_index_worthiness",
+          "coverageState": "Discovered - currently not indexed"
         },
         {
           "page": "/seo-tools",
@@ -270,8 +270,8 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "strengthen_internal_links_and_index_worthiness",
-          "coverageState": "Discovered - currently not indexed"
+          "action": "improve_discovery_and_internal_links",
+          "coverageState": "URL is unknown to Google"
         },
         {
           "page": "/best-affordable-crm",
@@ -290,8 +290,8 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "strengthen_internal_links_and_index_worthiness",
-          "coverageState": "Discovered - currently not indexed"
+          "action": "improve_discovery_and_internal_links",
+          "coverageState": "URL is unknown to Google"
         },
         {
           "page": "/brevo-vs-mailchimp",
@@ -300,8 +300,8 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "strengthen_internal_links_and_index_worthiness",
-          "coverageState": "Discovered - currently not indexed"
+          "action": "improve_discovery_and_internal_links",
+          "coverageState": "URL is unknown to Google"
         },
         {
           "page": "/n8n-vs-make",
@@ -310,8 +310,8 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "strengthen_internal_links_and_index_worthiness",
-          "coverageState": "Discovered - currently not indexed"
+          "action": "improve_discovery_and_internal_links",
+          "coverageState": "URL is unknown to Google"
         },
         {
           "page": "/semrush-vs-ahrefs",
@@ -320,30 +320,30 @@
           "score": 78,
           "impressions": 0,
           "position": 0,
-          "action": "strengthen_internal_links_and_index_worthiness",
-          "coverageState": "Discovered - currently not indexed"
+          "action": "improve_discovery_and_internal_links",
+          "coverageState": "URL is unknown to Google"
         }
       ]
     },
     "ranking_opportunities": {
-      "count": 19,
+      "count": 20,
       "top": [
         {
           "page": "/tools",
           "url": "https://trytoolscout.org/tools",
           "kind": "striking_distance",
-          "score": 93.6,
-          "impressions": 38,
-          "position": 11.0526,
+          "score": 93.8,
+          "impressions": 39,
+          "position": 10.8462,
           "action": "authority_and_content_amplification"
         },
         {
           "page": "/best-seo-tools-for-agencies",
           "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
           "kind": "high_impression_low_rank",
-          "score": 89.8,
-          "impressions": 964,
-          "position": 76.8102,
+          "score": 90,
+          "impressions": 1001,
+          "position": 76.97,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -351,17 +351,17 @@
           "url": "https://trytoolscout.org/best-project-management-tools",
           "kind": "striking_distance",
           "score": 85.7,
-          "impressions": 135,
-          "position": 39.8444,
+          "impressions": 137,
+          "position": 39.9197,
           "action": "authority_and_content_amplification"
         },
         {
           "page": "/tools/airtable",
           "url": "https://trytoolscout.org/tools/airtable",
           "kind": "high_impression_low_rank",
-          "score": 84.6,
-          "impressions": 409,
-          "position": 74.4401,
+          "score": 84.7,
+          "impressions": 419,
+          "position": 74.568,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -369,8 +369,8 @@
           "url": "https://trytoolscout.org/tools/semrush",
           "kind": "high_impression_low_rank",
           "score": 83.5,
-          "impressions": 342,
-          "position": 55.538,
+          "impressions": 345,
+          "position": 55.5333,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -401,6 +401,15 @@
           "action": "authority_depth_and_query_alignment"
         },
         {
+          "page": "/",
+          "url": "https://trytoolscout.org/",
+          "kind": "ctr_opportunity",
+          "score": 81,
+          "impressions": 126,
+          "position": 7.3175,
+          "action": "improve_search_snippet_and_click_capture"
+        },
+        {
           "page": "/tools/klaviyo",
           "url": "https://trytoolscout.org/tools/klaviyo",
           "kind": "high_impression_low_rank",
@@ -408,28 +417,19 @@
           "impressions": 212,
           "position": 61.3113,
           "action": "authority_depth_and_query_alignment"
-        },
-        {
-          "page": "/best-funnel-builder",
-          "url": "https://trytoolscout.org/best-funnel-builder",
-          "kind": "high_impression_low_rank",
-          "score": 80.4,
-          "impressions": 206,
-          "position": 76.0291,
-          "action": "authority_depth_and_query_alignment"
         }
       ]
     },
     "protect": {
-      "count": 4,
+      "count": 3,
       "top": [
         {
-          "page": "/",
-          "url": "https://trytoolscout.org/",
+          "page": "/news/notion-mail-shuts-down",
+          "url": "https://trytoolscout.org/news/notion-mail-shuts-down",
           "kind": "protect",
-          "score": 81.8,
-          "impressions": 130,
-          "position": 7.3923,
+          "score": 76.8,
+          "impressions": 17,
+          "position": 3.7647,
           "action": "protect_current_ranking"
         },
         {
@@ -439,15 +439,6 @@
           "score": 76.1,
           "impressions": 27,
           "position": 6.4074,
-          "action": "protect_current_ranking"
-        },
-        {
-          "page": "/news/notion-mail-shuts-down",
-          "url": "https://trytoolscout.org/news/notion-mail-shuts-down",
-          "kind": "protect",
-          "score": 75.5,
-          "impressions": 12,
-          "position": 3.6667,
           "action": "protect_current_ranking"
         },
         {
@@ -468,11 +459,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/tools",
       "page": "/tools",
-      "score": 93.6,
-      "impressions": 38,
+      "score": 93.8,
+      "impressions": 39,
       "clicks": 0,
       "ctr": 0,
-      "position": 11.0526,
+      "position": 10.8462,
       "action": "authority_and_content_amplification"
     },
     {
@@ -480,11 +471,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "page": "/best-seo-tools-for-agencies",
-      "score": 89.8,
-      "impressions": 964,
+      "score": 90,
+      "impressions": 1001,
       "clicks": 0,
       "ctr": 0,
-      "position": 76.8102,
+      "position": 76.97,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -493,10 +484,10 @@
       "url": "https://trytoolscout.org/best-project-management-tools",
       "page": "/best-project-management-tools",
       "score": 85.7,
-      "impressions": 135,
+      "impressions": 137,
       "clicks": 0,
       "ctr": 0,
-      "position": 39.8444,
+      "position": 39.9197,
       "action": "authority_and_content_amplification"
     },
     {
@@ -504,11 +495,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/tools/airtable",
       "page": "/tools/airtable",
-      "score": 84.6,
-      "impressions": 409,
+      "score": 84.7,
+      "impressions": 419,
       "clicks": 0,
       "ctr": 0,
-      "position": 74.4401,
+      "position": 74.568,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -517,10 +508,10 @@
       "url": "https://trytoolscout.org/tools/semrush",
       "page": "/tools/semrush",
       "score": 83.5,
-      "impressions": 342,
+      "impressions": 345,
       "clicks": 0,
       "ctr": 0,
-      "position": 55.538,
+      "position": 55.5333,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -560,16 +551,16 @@
       "action": "authority_depth_and_query_alignment"
     },
     {
-      "kind": "protect",
-      "queue": "protect",
+      "kind": "ctr_opportunity",
+      "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/",
       "page": "/",
-      "score": 81.8,
-      "impressions": 130,
-      "clicks": 2,
-      "ctr": 1.5385,
-      "position": 7.3923,
-      "action": "protect_current_ranking"
+      "score": 81,
+      "impressions": 126,
+      "clicks": 1,
+      "ctr": 0.7937,
+      "position": 7.3175,
+      "action": "improve_search_snippet_and_click_capture"
     },
     {
       "kind": "high_impression_low_rank",
@@ -588,11 +579,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-funnel-builder",
       "page": "/best-funnel-builder",
-      "score": 80.4,
-      "impressions": 206,
+      "score": 80.5,
+      "impressions": 207,
       "clicks": 0,
       "ctr": 0,
-      "position": 76.0291,
+      "position": 75.9614,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -629,8 +620,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -643,8 +634,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -657,8 +648,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "improve_discovery_and_internal_links",
-      "coverageState": "URL is unknown to Google",
+      "action": "strengthen_internal_links_and_index_worthiness",
+      "coverageState": "Discovered - currently not indexed",
       "verdict": "NEUTRAL"
     },
     {
@@ -685,8 +676,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -713,8 +704,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -727,8 +718,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -741,8 +732,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -755,8 +746,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -769,8 +760,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -783,8 +774,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -797,8 +788,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -839,8 +830,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "strengthen_internal_links_and_index_worthiness",
-      "coverageState": "Discovered - currently not indexed",
+      "action": "improve_discovery_and_internal_links",
+      "coverageState": "URL is unknown to Google",
       "verdict": "NEUTRAL"
     },
     {
@@ -867,8 +858,8 @@
       "clicks": 0,
       "ctr": 0,
       "position": 0,
-      "action": "improve_discovery_and_internal_links",
-      "coverageState": "URL is unknown to Google",
+      "action": "strengthen_internal_links_and_index_worthiness",
+      "coverageState": "Discovered - currently not indexed",
       "verdict": "NEUTRAL"
     },
     {
@@ -888,6 +879,18 @@
     {
       "kind": "protect",
       "queue": "protect",
+      "url": "https://trytoolscout.org/news/notion-mail-shuts-down",
+      "page": "/news/notion-mail-shuts-down",
+      "score": 76.8,
+      "impressions": 17,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 3.7647,
+      "action": "protect_current_ranking"
+    },
+    {
+      "kind": "protect",
+      "queue": "protect",
       "url": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
       "page": "/news/zapier-next-gen-zaps-mcp",
       "score": 76.1,
@@ -896,6 +899,18 @@
       "ctr": 7.4074,
       "position": 6.4074,
       "action": "protect_current_ranking"
+    },
+    {
+      "kind": "high_impression_low_rank",
+      "queue": "ranking_opportunities",
+      "url": "https://trytoolscout.org/best-free-crm",
+      "page": "/best-free-crm",
+      "score": 75.8,
+      "impressions": 96,
+      "clicks": 0,
+      "ctr": 0,
+      "position": 74.6354,
+      "action": "authority_depth_and_query_alignment"
     },
     {
       "kind": "high_impression_low_rank",
@@ -910,40 +925,16 @@
       "action": "authority_depth_and_query_alignment"
     },
     {
-      "kind": "protect",
-      "queue": "protect",
-      "url": "https://trytoolscout.org/news/notion-mail-shuts-down",
-      "page": "/news/notion-mail-shuts-down",
-      "score": 75.5,
-      "impressions": 12,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 3.6667,
-      "action": "protect_current_ranking"
-    },
-    {
       "kind": "high_impression_low_rank",
       "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/best-free-crm",
-      "page": "/best-free-crm",
-      "score": 75.3,
-      "impressions": 88,
-      "clicks": 0,
-      "ctr": 0,
-      "position": 73.8295,
-      "action": "authority_depth_and_query_alignment"
-    },
-    {
-      "kind": "striking_distance",
-      "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/miro",
-      "page": "/tools/miro",
+      "url": "https://trytoolscout.org/tools/screaming-frog",
+      "page": "/tools/screaming-frog",
       "score": 75.1,
-      "impressions": 33,
+      "impressions": 85,
       "clicks": 0,
       "ctr": 0,
-      "position": 46.5455,
-      "action": "authority_and_content_amplification"
+      "position": 72.5059,
+      "action": "authority_depth_and_query_alignment"
     },
     {
       "kind": "high_impression_low_rank",
@@ -958,16 +949,16 @@
       "action": "authority_depth_and_query_alignment"
     },
     {
-      "kind": "high_impression_low_rank",
+      "kind": "striking_distance",
       "queue": "ranking_opportunities",
-      "url": "https://trytoolscout.org/tools/screaming-frog",
-      "page": "/tools/screaming-frog",
-      "score": 75,
-      "impressions": 84,
+      "url": "https://trytoolscout.org/tools/miro",
+      "page": "/tools/miro",
+      "score": 74.7,
+      "impressions": 35,
       "clicks": 0,
       "ctr": 0,
-      "position": 72.4286,
-      "action": "authority_depth_and_query_alignment"
+      "position": 48.0286,
+      "action": "authority_and_content_amplification"
     },
     {
       "kind": "protect",
@@ -986,11 +977,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/tools/netlify",
       "page": "/tools/netlify",
-      "score": 73.7,
-      "impressions": 67,
+      "score": 74,
+      "impressions": 71,
       "clicks": 0,
       "ctr": 0,
-      "position": 61.806,
+      "position": 62.1549,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -998,24 +989,44 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-crm-for-sales-teams",
       "page": "/best-crm-for-sales-teams",
-      "score": 72.8,
-      "impressions": 58,
+      "score": 73.3,
+      "impressions": 63,
       "clicks": 0,
       "ctr": 0,
-      "position": 74.5,
+      "position": 72.0635,
       "action": "authority_depth_and_query_alignment"
     }
   ],
   "inspections": [
     {
-      "url": "https://trytoolscout.org/",
+      "url": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=zeA2UTr_ScXkGOncKajF3w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=hpCdIMDp-TQZu0zpISgbcQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-28T13:35:54Z",
+      "lastCrawlTime": "2026-09-21T18:17:26Z",
+      "pageFetchState": "SUCCESSFUL",
+      "googleCanonical": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
+      "userCanonical": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
+      "crawledAs": "MOBILE",
+      "sitemaps": [],
+      "referringUrls": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
+      "richResultsVerdict": null,
+      "richResultTypes": []
+    },
+    {
+      "url": "https://trytoolscout.org/",
+      "ok": true,
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=8mGK8ax57xOMaMy6eN6RQQ&utm_medium=link&utm_source=api",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "robotsTxtState": "ALLOWED",
+      "indexingState": "INDEXING_ALLOWED",
+      "lastCrawlTime": "2026-09-28T20:28:04Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/",
       "userCanonical": "https://trytoolscout.org/",
@@ -1030,43 +1041,19 @@
       "richResultTypes": []
     },
     {
-      "url": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
-      "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=5Pc8KpZ6DIddLDAASfFoLw&utm_medium=link&utm_source=api",
-      "verdict": "PASS",
-      "coverageState": "Submitted and indexed",
-      "robotsTxtState": "ALLOWED",
-      "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T18:17:26Z",
-      "pageFetchState": "SUCCESSFUL",
-      "googleCanonical": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
-      "userCanonical": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
-      "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "richResultsVerdict": null,
-      "richResultTypes": []
-    },
-    {
       "url": "https://trytoolscout.org/tools/replit",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=L6nR6OGFxVFk4QQQz-1reQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=luuSXnaHFwe1wGPZ9txGjQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T23:46:39Z",
+      "lastCrawlTime": "2026-09-28T17:00:37Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/replit",
       "userCanonical": "https://trytoolscout.org/tools/replit",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools"
       ],
@@ -1078,7 +1065,7 @@
     {
       "url": "https://trytoolscout.org/best-sales-prospecting-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=6aoQs2C_xesXnlnx_ekCjg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=yVzDYFBsTyswYOVuzYEYpg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1100,12 +1087,12 @@
     {
       "url": "https://trytoolscout.org/compare",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=5e1MNbXq27S6d5_PpXpwcA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=brsNkMptakVVQYrenXHYJQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-26T01:31:18Z",
+      "lastCrawlTime": "2026-09-28T19:45:01Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/compare",
       "userCanonical": "https://trytoolscout.org/compare",
@@ -1123,7 +1110,7 @@
     {
       "url": "https://trytoolscout.org/tool",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=1K48o5HZ0jzydKNEM-P0bw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=aRD_TPH6DhjVFsKAi3cUyQ&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -1141,7 +1128,7 @@
     {
       "url": "https://trytoolscout.org/tools/shopify",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=tIrP2G2au6yPpj-mNfRZew&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=QXIhdzlJNGkN5sQM2VHGGQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1163,7 +1150,7 @@
     {
       "url": "https://trytoolscout.org/activecampaign-vs-mailchimp",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ghVIRJBCSQMvdSfWPLEI4Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ULFTrhwWqx6H-b7vH_WbCQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1183,7 +1170,7 @@
     {
       "url": "https://trytoolscout.org/affiliate-disclosure",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Hu5-s7naanGrApqbFtKDOA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=_yewo-1Tp-7BqGkoSt2-3Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1203,7 +1190,7 @@
     {
       "url": "https://trytoolscout.org/airtable-vs-notion",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=zN1tyWnRTvEvhVlKa56aaw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Sycpca01uzKZiW-m_eIPkQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1225,7 +1212,7 @@
     {
       "url": "https://trytoolscout.org/apollo-vs-lemlist",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=jCUzuXQw3qIIp5ThaznA5Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=x4A1fKwc-jBo94DyaDGisg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1249,7 +1236,7 @@
     {
       "url": "https://trytoolscout.org/asana-vs-clickup",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=BEctttuql87GxHHyi4RAUQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=UWcUmCMSjO7E2NCuIdAXpA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1259,7 +1246,9 @@
       "googleCanonical": "https://trytoolscout.org/asana-vs-clickup",
       "userCanonical": "https://trytoolscout.org/asana-vs-clickup",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1267,7 +1256,7 @@
     {
       "url": "https://trytoolscout.org/beehiiv-vs-kit",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=bn4ky6dTul4EuR9RDsQSGw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=L-gbfXiTxiDacSkwSJ2N0w&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -1277,7 +1266,9 @@
       "googleCanonical": "https://trytoolscout.org/beehiiv-vs-kit.html",
       "userCanonical": "https://trytoolscout.org/beehiiv-vs-kit.html",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1285,7 +1276,7 @@
     {
       "url": "https://trytoolscout.org/best-ai-ad-creative-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=yIBcL3ONFbXaxqUUE-o-1A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=sv5vdPDJyeno_BgUxSzWLA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Not found (404)",
       "robotsTxtState": "ALLOWED",
@@ -1303,7 +1294,7 @@
     {
       "url": "https://trytoolscout.org/best-ai-assistants",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=2Xi8M1AiPAMu1MyKa0eM2g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=XtLhG2inX2dLdbLMilf_zA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1325,7 +1316,7 @@
     {
       "url": "https://trytoolscout.org/best-ai-coding-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=piQ9mj_H-vI-YSuA4l9IgA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=XB2fnKMrWCMgrCU2nT-Ajg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1345,7 +1336,7 @@
     {
       "url": "https://trytoolscout.org/best-ai-research-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=NOdspGBxmDqpNwyFjDvE9w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=6A509frMeTvX1w-v53-RuA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1355,9 +1346,7 @@
       "googleCanonical": "https://trytoolscout.org/best-ai-research-tools",
       "userCanonical": "https://trytoolscout.org/best-ai-research-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1365,12 +1354,12 @@
     {
       "url": "https://trytoolscout.org/best-all-in-one-business-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=XCWfyewHdW4IDuKEkfV-Ug&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=5qqM3NdcIkszODN9EE7MIg&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Not found (404)",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
-      "lastCrawlTime": "2026-09-27T17:45:35Z",
+      "lastCrawlTime": "2026-09-28T17:43:37Z",
       "pageFetchState": "NOT_FOUND",
       "googleCanonical": null,
       "userCanonical": null,
@@ -1383,7 +1372,7 @@
     {
       "url": "https://trytoolscout.org/best-cold-email-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=55kM9Z8RZrsp0b4-NIxm5g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=qUNHVIZZzIjyiBIKXZSNTg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1393,9 +1382,7 @@
       "googleCanonical": "https://trytoolscout.org/best-cold-email-tools",
       "userCanonical": "https://trytoolscout.org/best-cold-email-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1403,7 +1390,7 @@
     {
       "url": "https://trytoolscout.org/best-competitor-seo-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Pm4QbL3jhcPHfdxkS1n9Kw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=PUCPO037aootf_A5WOEaLQ&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -1413,9 +1400,7 @@
       "googleCanonical": "https://trytoolscout.org/best-competitor-seo-tools.html",
       "userCanonical": "https://trytoolscout.org/best-competitor-seo-tools.html",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1423,7 +1408,7 @@
     {
       "url": "https://trytoolscout.org/best-crm-for-agencies",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=SGow06dFLwzTO1LP1wsm6g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=BFRAuDNOwP2naykbzBHacA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Not found (404)",
       "robotsTxtState": "ALLOWED",
@@ -1441,7 +1426,7 @@
     {
       "url": "https://trytoolscout.org/best-crm-for-consultants",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=93hT1NwdMJo-nRajk5mL1Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=yZOKKlXaXPao2fQmXEtRwg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1451,7 +1436,9 @@
       "googleCanonical": "https://trytoolscout.org/best-crm-for-consultants",
       "userCanonical": "https://trytoolscout.org/best-crm-for-consultants",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1459,7 +1446,7 @@
     {
       "url": "https://trytoolscout.org/best-crm-for-real-estate",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gIafp_0JCTnqusnDemWcKA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=e8JFMcXWcw2wb47N0vbI8Q&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -1479,7 +1466,7 @@
     {
       "url": "https://trytoolscout.org/best-crm-for-sales-teams",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=hK2jNzJxoNT_Axjr2eFtSA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=rnKE-7h_w_QsHWm4c12pVw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1499,7 +1486,7 @@
     {
       "url": "https://trytoolscout.org/best-crm-for-small-business",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=yjm3CUm-Ef40LJX8tq2Ang&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=FkKHmhTLJ9rBqEy6KdICVg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1519,7 +1506,7 @@
     {
       "url": "https://trytoolscout.org/best-crm-for-solopreneurs",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=EXWp7HugZQMvQ_IsdviMhw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=CIfla4CbhH6bxmIHTO_P-A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1539,7 +1526,7 @@
     {
       "url": "https://trytoolscout.org/best-crm-with-automation",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=AgfqLqhAOlzCc2IMIARV8g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=nJh9HDIJtMuYcx6Po68XIw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1561,7 +1548,7 @@
     {
       "url": "https://trytoolscout.org/best-customer-support-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=es9O19tvTzZ3423jrn0_Xw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uaC_A2w-oPUD_xo-QE_oNQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1571,9 +1558,7 @@
       "googleCanonical": "https://trytoolscout.org/best-customer-support-tools",
       "userCanonical": "https://trytoolscout.org/best-customer-support-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools/zendesk"
       ],
@@ -1583,7 +1568,7 @@
     {
       "url": "https://trytoolscout.org/best-design-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=9k7HifECIiTJyGcJDjY7qQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=qrdP9OYN0wmmpJRFk4_-Ig&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1605,7 +1590,7 @@
     {
       "url": "https://trytoolscout.org/best-developer-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Jg-FULqgpRR1GyFfksX9jA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=PFNRaB4fVIK1Ev4HOoLBOA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1625,7 +1610,7 @@
     {
       "url": "https://trytoolscout.org/best-ecommerce-platforms",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=QL18k7qwyFSSqvVZ4KkZjg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=bAXKdVuHa0TUh2mxjNPyXg&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -1635,9 +1620,7 @@
       "googleCanonical": "https://trytoolscout.org/best-ecommerce-platforms.html",
       "userCanonical": "https://trytoolscout.org/best-ecommerce-platforms.html",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1645,7 +1628,7 @@
     {
       "url": "https://trytoolscout.org/best-email-marketing-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=-Zk_VbgLbBYFOZHz977mYg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Y3hhMrncIUhFw5a2taZUJA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1655,9 +1638,7 @@
       "googleCanonical": "https://trytoolscout.org/best-email-marketing-tools",
       "userCanonical": "https://trytoolscout.org/best-email-marketing-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1665,7 +1646,7 @@
     {
       "url": "https://trytoolscout.org/best-forms-for-small-business",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=RE1YwRyQj_6Ho8sKTmNb7g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=2fc6cWD1N2CC1lcRda5hPg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1685,7 +1666,7 @@
     {
       "url": "https://trytoolscout.org/best-free-crm",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=DfM--azEVjQ9Au809oMcvQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=dtNiDIouMvPmhdUEao4mLA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1707,12 +1688,12 @@
     {
       "url": "https://trytoolscout.org/best-free-funnel-builder",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Ns0-qDbje84pHdKbS42sSA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=wWB7Ofq7V5Nsh8d0bLMgxA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Not found (404)",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
-      "lastCrawlTime": "2026-09-28T11:38:12Z",
+      "lastCrawlTime": "2026-09-29T11:54:53Z",
       "pageFetchState": "NOT_FOUND",
       "googleCanonical": null,
       "userCanonical": null,
@@ -1725,7 +1706,7 @@
     {
       "url": "https://trytoolscout.org/best-free-project-management-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=9kW5IXNY1tqYYYtNuN3KZw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=B7s3ypYSeOW-4-FeVUCFEw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1743,12 +1724,12 @@
     {
       "url": "https://trytoolscout.org/best-free-sales-funnel-software",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=1PCDNMDHPEmWh91LLBo5Yg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=OAuybOxPzY2jpfRmxrJ15A&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Not found (404)",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
-      "lastCrawlTime": "2026-09-27T14:53:37Z",
+      "lastCrawlTime": "2026-09-28T15:12:00Z",
       "pageFetchState": "NOT_FOUND",
       "googleCanonical": null,
       "userCanonical": null,
@@ -1761,7 +1742,7 @@
     {
       "url": "https://trytoolscout.org/best-funnel-builder",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=v8dDSCdFDS7v91asO50Hag&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=u21_d7eb0zkre08g8qsAXw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1781,7 +1762,7 @@
     {
       "url": "https://trytoolscout.org/best-funnel-builder-for-beginners",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=-YQnSSA3RqTi91oW25H9Fg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=UngemHasOfKpsN8XUfEpCw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1799,7 +1780,7 @@
     {
       "url": "https://trytoolscout.org/best-keyword-research-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=YbqayYlOrMaKy3Xs9rCjxg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=eefJ_499BWPuCuQa9q5t4Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1809,7 +1790,9 @@
       "googleCanonical": "https://trytoolscout.org/best-keyword-research-tools",
       "userCanonical": "https://trytoolscout.org/best-keyword-research-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -1819,7 +1802,7 @@
     {
       "url": "https://trytoolscout.org/best-lead-capture-forms",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=0POKEDDSAVJjWn84SJMBOA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=irzSvlTAV3yo8Ihvze7TPQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1829,7 +1812,9 @@
       "googleCanonical": "https://trytoolscout.org/best-lead-capture-forms",
       "userCanonical": "https://trytoolscout.org/best-lead-capture-forms",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1837,7 +1822,7 @@
     {
       "url": "https://trytoolscout.org/best-marketing-automation-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=A6o9JJjbIqRKfiqmJiSoEw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=G1mlYpI2jcd7Nrr8Bbeu-g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1857,7 +1842,7 @@
     {
       "url": "https://trytoolscout.org/best-no-code-automation-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Vwq7Rc_O0ai5xYt_VylL4w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=HeJxHW3uOsqrItXnAr6ecw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Not found (404)",
       "robotsTxtState": "ALLOWED",
@@ -1875,7 +1860,7 @@
     {
       "url": "https://trytoolscout.org/best-product-analytics-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=QRxA3fEw0LQEe-h7H8LyJw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=PCheoxEV7S8hKfHC6Tyj2w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1885,9 +1870,7 @@
       "googleCanonical": "https://trytoolscout.org/best-product-analytics-tools",
       "userCanonical": "https://trytoolscout.org/best-product-analytics-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/software-trends-index"
       ],
@@ -1897,7 +1880,7 @@
     {
       "url": "https://trytoolscout.org/best-productivity-tools-for-teams",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=pi0OcwvRsbWZb7bnVt_Qaw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=KONJtJnuTKlaDcMRgxa4IA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1917,7 +1900,7 @@
     {
       "url": "https://trytoolscout.org/best-project-management-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=MRRBmb_FhbDdj2tt7jAkKw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uKJx8s2RAZwDktyJ00kwzg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1927,7 +1910,9 @@
       "googleCanonical": "https://trytoolscout.org/best-project-management-tools",
       "userCanonical": "https://trytoolscout.org/best-project-management-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/best-workflow-automation-tools"
       ],
@@ -1937,7 +1922,7 @@
     {
       "url": "https://trytoolscout.org/best-seo-keyword-research-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=mJhTVzb0bF7Ktuv_cvTxhg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=59oM58dKlNgxJewMu4iiwQ&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Page with redirect",
       "robotsTxtState": "ALLOWED",
@@ -1955,17 +1940,19 @@
     {
       "url": "https://trytoolscout.org/best-seo-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Y_AKbYfMOpJv2JzHmBveKw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Z0m0FuTHosAFSd7XEt2DYg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-26T00:04:22Z",
+      "lastCrawlTime": "2026-09-28T19:40:26Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/best-seo-tools",
       "userCanonical": "https://trytoolscout.org/best-seo-tools",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -1973,7 +1960,7 @@
     {
       "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=SGSR-ClkTmjG3qOE6paUbg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=cFVxEB6adg2RJ8H5OewIXA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -1993,7 +1980,7 @@
     {
       "url": "https://trytoolscout.org/best-social-media-management-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=OMMLzx7GF7eBZOUIp68tbg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=GyM4TBPNDG50NRhyGDadNw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2013,7 +2000,7 @@
     {
       "url": "https://trytoolscout.org/best-team-collaboration-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=JYoiazfnu0Uva3lll580jw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=weSX4pRWqmdbOSBQQGuAAA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2033,7 +2020,7 @@
     {
       "url": "https://trytoolscout.org/best-tools-for-agencies",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gCYVH7LAIIK8a35PpGXdVw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=YhR3LkYYwB7nBvorlS2z1Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2051,7 +2038,7 @@
     {
       "url": "https://trytoolscout.org/best-video-content-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=fjzCtHCVlEeX2DEnDbcYnw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=6o0cg7zLA23v8XAZgq2Ozw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Not found (404)",
       "robotsTxtState": "ALLOWED",
@@ -2069,7 +2056,7 @@
     {
       "url": "https://trytoolscout.org/best-website-builders",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=LVGsywsffOztenh5Yoys3A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=2FZ_j0IEB6KxK9EAhiWYBA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2091,12 +2078,12 @@
     {
       "url": "https://trytoolscout.org/guides",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=vBas-tbB0-nDnnNJNEaXRg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=nd7BImw25sFrexP0VBkm6Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-25T21:31:17Z",
+      "lastCrawlTime": "2026-09-29T08:20:33Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/guides",
       "userCanonical": "https://trytoolscout.org/guides",
@@ -2107,9 +2094,33 @@
       "richResultTypes": []
     },
     {
+      "url": "https://trytoolscout.org/hubspot-vs-pipedrive",
+      "ok": true,
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uaRW9SsdYEWiBmHOedP4zw&utm_medium=link&utm_source=api",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "robotsTxtState": "ALLOWED",
+      "indexingState": "INDEXING_ALLOWED",
+      "lastCrawlTime": "2026-09-26T12:26:12Z",
+      "pageFetchState": "SUCCESSFUL",
+      "googleCanonical": "https://trytoolscout.org/hubspot-vs-pipedrive",
+      "userCanonical": "https://trytoolscout.org/hubspot-vs-pipedrive",
+      "crawledAs": "MOBILE",
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
+      "referringUrls": [
+        "https://trytoolscout.org/compare?a=screaming-frog&b=se-ranking&source=comparison-suggestions",
+        "https://trytoolscout.org/tools/pipedrive",
+        "https://trytoolscout.org/best-free-crm"
+      ],
+      "richResultsVerdict": null,
+      "richResultTypes": []
+    },
+    {
       "url": "https://trytoolscout.org/jotform-vs-typeform",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=l8EjHcIxqqmKqP8rcki-_Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=pbpNJafKMmV2G-tmRRQ7Dg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2131,7 +2142,7 @@
     {
       "url": "https://trytoolscout.org/make-vs-zapier",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=HxO-GDMuTm5XScpZW8afoA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=AAM7-GlAtxDkPBrhkLFWyg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2151,7 +2162,7 @@
     {
       "url": "https://trytoolscout.org/news/chatgpt-word-microsoft-office",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=t2lCnwVY-rcgUoKfIlYueQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=er6dHyjue9mOemnB0HmZdg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2171,7 +2182,7 @@
     {
       "url": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=nhsfG70wuSGzBnZqqJ299w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=xXwS75-N2MIXzcPxUQ04ig&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2189,9 +2200,31 @@
       "richResultTypes": []
     },
     {
+      "url": "https://trytoolscout.org/news/github-ssh-security-changes-2026",
+      "ok": true,
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=M25QbakLf7Zc6Tswy1Uoug&utm_medium=link&utm_source=api",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
+      "robotsTxtState": "ALLOWED",
+      "indexingState": "INDEXING_ALLOWED",
+      "lastCrawlTime": "2026-09-25T03:29:47Z",
+      "pageFetchState": "SUCCESSFUL",
+      "googleCanonical": "https://trytoolscout.org/news/github-ssh-security-changes-2026",
+      "userCanonical": "https://trytoolscout.org/news/github-ssh-security-changes-2026",
+      "crawledAs": "MOBILE",
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
+      "referringUrls": [
+        "https://trytoolscout.org/analytics-consent?choice=granted&return=%2Fnews%2Fgithub-ssh-security-changes-2026"
+      ],
+      "richResultsVerdict": null,
+      "richResultTypes": []
+    },
+    {
       "url": "https://trytoolscout.org/news/hubspot-mcp-server-updates",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=C1Rrz90GkdbQnJWVJRExOg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=dip1eTO9MkY5rWUV1M30Kg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2211,7 +2244,7 @@
     {
       "url": "https://trytoolscout.org/news/notion-3-7-agent-skills",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=PRD-XSPH8n50SxxJ7PPmcw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=HyR33yI_x0VnAhaFUwxCdA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2233,7 +2266,7 @@
     {
       "url": "https://trytoolscout.org/news/notion-mail-shuts-down",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=hTSsbf6wxxumw_Z_6sprjw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ai0dc4sKItI8EsuIZoEPzg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2243,9 +2276,7 @@
       "googleCanonical": "https://trytoolscout.org/news/notion-mail-shuts-down",
       "userCanonical": "https://trytoolscout.org/news/notion-mail-shuts-down",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -2253,7 +2284,7 @@
     {
       "url": "https://trytoolscout.org/notion-vs-clickup",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=AQOClrGpR_1NVjFBmA6blA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=4C8g6Ie4uQfvkk4uIQTN9g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2275,7 +2306,7 @@
     {
       "url": "https://trytoolscout.org/privacy",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=kSoFDY86yjWiCGL9A-uAvw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=b8wL44Fd8p11S7nF1D5_mA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2298,7 +2329,7 @@
     {
       "url": "https://trytoolscout.org/tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Y1OuJYyxjmmq-fauqKww-g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=DMAuhqIo4gp_uIDOQ2hRGA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2318,7 +2349,7 @@
     {
       "url": "https://trytoolscout.org/tools/activecampaign",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=UxeJpf4thrcUatsaIaj-mw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=iOYxA6UbV-gq2BJNPxEs3A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2342,7 +2373,7 @@
     {
       "url": "https://trytoolscout.org/tools/adobe-express",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=O9NFsOnu3_oxWxsBr7P97Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=BF1_JEBLcfT7SYmi5R7nSQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2366,7 +2397,7 @@
     {
       "url": "https://trytoolscout.org/tools/ahrefs",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=FefxZqL_nJFIqqtgLZduUQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=NPwmhc_mbs7G_LkzWbnWKw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2390,7 +2421,7 @@
     {
       "url": "https://trytoolscout.org/tools/airtable",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=TxpkcLPAs-vKgbMRY1yH7Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uLI6wNQ3WEZyWf9PrbSQRw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -2412,7 +2443,7 @@
     {
       "url": "https://trytoolscout.org/tools/amplitude",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=-zbVy8qLAoN8eXXSl6LRPA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gIh4gkDZoVcRTmbeUQesWQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2437,7 +2468,7 @@
     {
       "url": "https://trytoolscout.org/tools/apollo",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Xfs3Tp9oHtFCVvShgZfTgA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=P6wMowm9IaGI0uhD685O7w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2461,7 +2492,7 @@
     {
       "url": "https://trytoolscout.org/tools/asana",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=XSQytuStJpz2SRS1iC_K-g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=mv8v8NDu4NiCOXOg1F01XA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2471,7 +2502,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/asana",
       "userCanonical": "https://trytoolscout.org/tools/asana",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/software-trends-index",
         "https://trytoolscout.org/best-project-management-tools"
@@ -2484,7 +2517,7 @@
     {
       "url": "https://trytoolscout.org/tools/attio",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=SetAuN2bhyLCpIE18tamlQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=UginV-hH5zQ6G-qDlPcKjA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2509,7 +2542,7 @@
     {
       "url": "https://trytoolscout.org/tools/beehiiv",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=RK_5g2nX_Hm-KnpToAoFNw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=d7QE9R3LPZ68qTQ3yXiNDw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2519,9 +2552,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/beehiiv",
       "userCanonical": "https://trytoolscout.org/tools/beehiiv",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -2531,7 +2562,7 @@
     {
       "url": "https://trytoolscout.org/tools/bigcommerce",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Q1Viky8X_SApgGSA8GLNeA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=lD8tS2ylHTF1Di31jvSM1g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2553,12 +2584,12 @@
     {
       "url": "https://trytoolscout.org/tools/brevo",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=6IJKJmOmWieQxR-CFepjRA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=kL--HIzIdtuo8RgSTmTNLA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T21:34:55Z",
+      "lastCrawlTime": "2026-09-28T18:51:38Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/brevo",
       "userCanonical": "https://trytoolscout.org/tools/brevo",
@@ -2577,7 +2608,7 @@
     {
       "url": "https://trytoolscout.org/tools/buffer",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=2kE9IHTwqsn_DDOPvXLPmQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=kGcYSYdZDcuf1luD3ykqtA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2587,7 +2618,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/buffer",
       "userCanonical": "https://trytoolscout.org/tools/buffer",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/tools/socialbee"
       ],
@@ -2599,7 +2632,7 @@
     {
       "url": "https://trytoolscout.org/tools/canva",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=YDT0qqR1tF5CQ7Bk_mUOlA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=BTzeEqCjqiyjf5EHWkj33w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2609,7 +2642,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/canva",
       "userCanonical": "https://trytoolscout.org/tools/canva",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -2619,7 +2654,7 @@
     {
       "url": "https://trytoolscout.org/tools/character-ai",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=5dy9QyRY7HeL739bkPWMxg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=4n3odVDgFn0emLP7J3uV0w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2641,7 +2676,7 @@
     {
       "url": "https://trytoolscout.org/tools/chatgpt",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=B5IS-bCLwWu0eyHYywp9UQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=L3ayL2KU5KfGkluWnhzd9w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2663,7 +2698,7 @@
     {
       "url": "https://trytoolscout.org/tools/claude",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Q8eVoeXb59q29KiX3IDLYA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=iGYxK4gKIGsgm3aGcfBW4g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2687,7 +2722,7 @@
     {
       "url": "https://trytoolscout.org/tools/clickup",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=PC333Qd1wVqJs1vNOcqo8Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Ytm4QHMHgFAslhNGw6nGUQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2697,7 +2732,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/clickup",
       "userCanonical": "https://trytoolscout.org/tools/clickup",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/tools/basecamp"
       ],
@@ -2709,7 +2746,7 @@
     {
       "url": "https://trytoolscout.org/tools/close",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=NtM5s2vwIbWPqO9J5nZSLA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=TUg19FraSVEYUbUqD0JDpA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2734,7 +2771,7 @@
     {
       "url": "https://trytoolscout.org/tools/copper",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=7vmk_xPihvcnFYyuyE3SWA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=65cueVmD_WgmJYk3f_AR6w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2744,9 +2781,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/copper",
       "userCanonical": "https://trytoolscout.org/tools/copper",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -2758,7 +2793,7 @@
     {
       "url": "https://trytoolscout.org/tools/crisp",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=FN5qPV0iWzPoW_h67RqVTQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=OOVZA7b6FfyzD5rNlfztww&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2782,7 +2817,7 @@
     {
       "url": "https://trytoolscout.org/tools/cursor",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=g5kKzMmYkTvOZSDB9Wr86A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=vTUrcE4TegcJa7pg_nUoyw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2792,7 +2827,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/cursor",
       "userCanonical": "https://trytoolscout.org/tools/cursor",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/software-trends-index"
       ],
@@ -2804,7 +2841,7 @@
     {
       "url": "https://trytoolscout.org/tools/descript",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=xTI9N8e-BbP-GueO6RVzoQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=YyaIQ6U-CSDO99FdPamlpQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2827,7 +2864,7 @@
     {
       "url": "https://trytoolscout.org/tools/figma",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=NnIqo-QPPFrYwUoOIbJPAA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=KGGWB9rDBCf7TaHxJi9bFQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2851,17 +2888,19 @@
     {
       "url": "https://trytoolscout.org/tools/fillout",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=1WJVWiwYqqvoygwkjU_ZqQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=0qPvRQQ8c8MB322QtmwVPg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-22T00:22:44Z",
+      "lastCrawlTime": "2026-09-28T15:34:34Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/fillout",
       "userCanonical": "https://trytoolscout.org/tools/fillout",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/tools/paperform"
       ],
@@ -2873,7 +2912,7 @@
     {
       "url": "https://trytoolscout.org/tools/framer",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ptUV9Mhm4jmZDm1Jk-9ktA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=9uYeE3R2jaiQwNRqEfFIIw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2883,9 +2922,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/framer",
       "userCanonical": "https://trytoolscout.org/tools/framer",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/analytics-consent?choice=denied&return=%2Ftools%2Fsquarespace"
       ],
@@ -2897,7 +2934,7 @@
     {
       "url": "https://trytoolscout.org/tools/freshdesk",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=zGWMKAxgzqYB4Qu0VXbXEw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=IC8D1iNf0RQClCzz8QhC8A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2922,7 +2959,7 @@
     {
       "url": "https://trytoolscout.org/tools/freshsales",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=s7NRu2BhXQKc6PmcnVsndA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=8B9dtXzMBUpcOuJw-tAOzg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2947,7 +2984,7 @@
     {
       "url": "https://trytoolscout.org/tools/gemini",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=2BuRXAbbkHt1tPrM1NyLMA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Gb9owqZ6Zh0BJA5ZqrUsRg&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -2965,7 +3002,7 @@
     {
       "url": "https://trytoolscout.org/tools/getresponse",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=iddKQw7rb_mWOk6LxFR1tA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=7Oqo33KbG5nHYgFLeXF49A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2975,9 +3012,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/getresponse",
       "userCanonical": "https://trytoolscout.org/tools/getresponse",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/analytics-consent?choice=denied&return=%2Ftools%2Fbeehiiv"
       ],
@@ -2989,7 +3024,7 @@
     {
       "url": "https://trytoolscout.org/tools/google-ai-studio",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=oSeZYp3xNbELGx__xzLtSg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=HyYhrML_rcTKcoV1o6-zSw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -2999,7 +3034,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/google-ai-studio",
       "userCanonical": "https://trytoolscout.org/tools/google-ai-studio",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -3009,7 +3046,7 @@
     {
       "url": "https://trytoolscout.org/tools/gorgias",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=IamwfZ0ZG2dT2IFkrXCm7w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=oQrZUAkpEMs6MaHA7Ikn-Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3019,9 +3056,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/gorgias",
       "userCanonical": "https://trytoolscout.org/tools/gorgias",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -3031,7 +3066,7 @@
     {
       "url": "https://trytoolscout.org/tools/grammarly",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=oYISnPMFuc5Ja6IEu687HA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=tgnjcp7e3FKmuls8WFwvpw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3053,7 +3088,7 @@
     {
       "url": "https://trytoolscout.org/tools/hotjar",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=-2e-zclvKBKEzAwTkLd0uA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=704ZUuhB549uTFK0TGFDjw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3063,9 +3098,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/hotjar",
       "userCanonical": "https://trytoolscout.org/tools/hotjar",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -3075,7 +3108,7 @@
     {
       "url": "https://trytoolscout.org/tools/hubspot",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ODNKlPIvvtxVdn_UnIgwmA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=RQqO1wk-dM7Jg9eFKeZFyg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3097,7 +3130,7 @@
     {
       "url": "https://trytoolscout.org/tools/instantly",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Z6bShmpXhPFgslTHaD0Wjw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=S03EkC9_yutM57pT6JDHkg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3117,7 +3150,7 @@
     {
       "url": "https://trytoolscout.org/tools/integrately",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=O3zwjPxBlk-gb-B3HMTTBg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uxwOLNChVILsCK82cvVd6g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3139,12 +3172,12 @@
     {
       "url": "https://trytoolscout.org/tools/intercom",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=bBumTBpYsTvJH7LKkCGVUw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=qTfVvCWuFbQMvWf6CyU-Iw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T10:20:54Z",
+      "lastCrawlTime": "2026-09-29T09:03:00Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/intercom",
       "userCanonical": "https://trytoolscout.org/tools/intercom",
@@ -3161,7 +3194,7 @@
     {
       "url": "https://trytoolscout.org/tools/jasper",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=WJWuZ6rXaAet306ZnCxYmg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=-dPnikld5TBclWOYnAQtUQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3171,7 +3204,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/jasper",
       "userCanonical": "https://trytoolscout.org/tools/jasper",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/tools"
       ],
@@ -3183,7 +3218,7 @@
     {
       "url": "https://trytoolscout.org/tools/jotform",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ZoeAh13qhHkeg0SP-lMK7w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Q9Vbu9ySN1JYRJ5RngeZuQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3207,7 +3242,7 @@
     {
       "url": "https://trytoolscout.org/tools/kit",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=dvCC1oPpsaxPN480NA1_Tg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=W5qIGHRPtwJOAOk-eMe5jg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3217,7 +3252,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/kit",
       "userCanonical": "https://trytoolscout.org/tools/kit",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -3229,19 +3266,17 @@
     {
       "url": "https://trytoolscout.org/tools/klaviyo",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Pl0CbQN6C8oi1G_LSWqoBQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=V33ND7gUCGKSp_ydgMOiiw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T20:19:07Z",
+      "lastCrawlTime": "2026-09-28T16:17:36Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/klaviyo",
       "userCanonical": "https://trytoolscout.org/tools/klaviyo",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -3251,7 +3286,7 @@
     {
       "url": "https://trytoolscout.org/tools/lemlist",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=MGfbwaHjk-X3UqGFX1T7CA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=GMSRVOfl8VyMjX5UhoSt7A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3273,7 +3308,7 @@
     {
       "url": "https://trytoolscout.org/tools/loom",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gt9hujx2lSz2tHaQRx2nFw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=h9z9MMMffU5_6qnqEm3EMQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3297,7 +3332,7 @@
     {
       "url": "https://trytoolscout.org/tools/make",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=dMA0T4A8GIkmHqZYNkWifA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=iys4reXlY7iVkn18AgmzaQ&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -3307,7 +3342,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/make.html",
       "userCanonical": "https://trytoolscout.org/tools/make.html",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -3315,7 +3352,7 @@
     {
       "url": "https://trytoolscout.org/tools/mangools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=mtI_Dyl98LAvo0Kcu2V_8A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=FqT-LJ0e9u-Ludd-rHl7hA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3325,9 +3362,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/mangools",
       "userCanonical": "https://trytoolscout.org/tools/mangools",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools"
       ],
@@ -3339,12 +3374,12 @@
     {
       "url": "https://trytoolscout.org/tools/matomo",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=iM1fDbd-FmXFOCk1BjIxKQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=-q7LCf54ALYj9Yh5lRVzjA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-23T05:40:47Z",
+      "lastCrawlTime": "2026-09-28T19:11:30Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/matomo",
       "userCanonical": "https://trytoolscout.org/tools/matomo",
@@ -3363,7 +3398,7 @@
     {
       "url": "https://trytoolscout.org/tools/miro",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=woxTaqiwY71curKC-hnRBw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=96KCbJCX4zSCVVC9zPCYxg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3387,7 +3422,7 @@
     {
       "url": "https://trytoolscout.org/tools/mixpanel",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=UFpLKkx4imjPRvdbNQw7iw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gjJ9_HX_QfuVf0DM2Thv1g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3411,7 +3446,7 @@
     {
       "url": "https://trytoolscout.org/tools/monday-crm",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=4vVWyjuw8NVklB6dVL2NsQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=WRsCSxICBW3idABvy3p60Q&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -3431,12 +3466,12 @@
     {
       "url": "https://trytoolscout.org/tools/moz-pro",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=hocFa6jKlFSwjNeGY7gLfg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Ax97zSpgBKRPivQfNkzDsQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-22T03:23:50Z",
+      "lastCrawlTime": "2026-09-29T09:45:11Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/moz-pro",
       "userCanonical": "https://trytoolscout.org/tools/moz-pro",
@@ -3453,7 +3488,7 @@
     {
       "url": "https://trytoolscout.org/tools/n8n",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=lr25aTKkUha99aeE9wzRdA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=NQxWRQbUJWpvn1cBKlGBmg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3475,7 +3510,7 @@
     {
       "url": "https://trytoolscout.org/tools/netlify",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=R6LorNzmo9IR93Aa8_5QcQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=I-1d9ANUVIsQkN_UjNxquw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -3495,7 +3530,7 @@
     {
       "url": "https://trytoolscout.org/tools/notion",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gEMBBkf5UMIie24C_llyfw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=aGihU6AK-dEKtcYFqIUEXw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3505,9 +3540,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/notion",
       "userCanonical": "https://trytoolscout.org/tools/notion",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools/linear"
       ],
@@ -3519,12 +3552,12 @@
     {
       "url": "https://trytoolscout.org/tools/omnisend",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ukDeuhplKu-_XfS_pOPU0w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=0Mv0fy6HJ48x8AvVmeZtEQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-19T02:42:17Z",
+      "lastCrawlTime": "2026-09-28T21:06:24Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/omnisend",
       "userCanonical": "https://trytoolscout.org/tools/omnisend",
@@ -3543,7 +3576,7 @@
     {
       "url": "https://trytoolscout.org/tools/pabbly-connect",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=z9GXkCTJkdkhWDXrIYtujQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=63Y3H0du3NvCTYYAHrg8pg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3553,9 +3586,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/pabbly-connect",
       "userCanonical": "https://trytoolscout.org/tools/pabbly-connect",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools/integrately",
         "https://trytoolscout.org/sitemap.xml"
@@ -3568,7 +3599,7 @@
     {
       "url": "https://trytoolscout.org/tools/perplexity",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=rE18546b3Dk3RvuRbrW53Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=JO3txc8eM4gOkhhNY-Omcw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3578,9 +3609,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/perplexity",
       "userCanonical": "https://trytoolscout.org/tools/perplexity",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -3590,7 +3619,7 @@
     {
       "url": "https://trytoolscout.org/tools/pipedrive",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ocw063nDTFhERvAHX-aV8g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=dV0LgP28Z6mz8d9xw_Rc4A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3614,7 +3643,7 @@
     {
       "url": "https://trytoolscout.org/tools/plausible",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Hv4mHF3Z_hPG0XlJs2W7rQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=pxGy9jtyke1IS3ScKjDE9A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3624,9 +3653,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/plausible",
       "userCanonical": "https://trytoolscout.org/tools/plausible",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools"
       ],
@@ -3638,7 +3665,7 @@
     {
       "url": "https://trytoolscout.org/tools/posthog",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=pzLNGXXl-zhq5JsNo74-2Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=PQB71Tb_Kbsgyi4JioC5YA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3648,9 +3675,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/posthog",
       "userCanonical": "https://trytoolscout.org/tools/posthog",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools/matomo"
       ],
@@ -3662,7 +3687,7 @@
     {
       "url": "https://trytoolscout.org/tools/screaming-frog",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=kuJ0y4PU9dBnNMVaDKeB4A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=GI0YfZkpSP4KFUaXR5SYIw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3686,27 +3711,29 @@
     {
       "url": "https://trytoolscout.org/tools/semrush",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=wK9OBSz2Rq9PtXY5J8fS-w&utm_medium=link&utm_source=api",
-      "verdict": "NEUTRAL",
-      "coverageState": "Alternate page with proper canonical tag",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=n4OqfsWx3JOcc3clkp4fyw&utm_medium=link&utm_source=api",
+      "verdict": "PASS",
+      "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-02T03:38:40Z",
+      "lastCrawlTime": "2026-09-29T04:43:05Z",
       "pageFetchState": "SUCCESSFUL",
-      "googleCanonical": "https://trytoolscout.org/tools/semrush.html",
-      "userCanonical": "https://trytoolscout.org/tools/semrush.html",
+      "googleCanonical": "https://trytoolscout.org/tools/semrush",
+      "userCanonical": "https://trytoolscout.org/tools/semrush",
       "crawledAs": "MOBILE",
       "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/software-trends-index"
       ],
-      "richResultsVerdict": null,
-      "richResultTypes": []
+      "richResultsVerdict": "PASS",
+      "richResultTypes": [
+        "Breadcrumbs"
+      ]
     },
     {
       "url": "https://trytoolscout.org/tools/sentry",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=K4Re1o7gOBFZnKUhguYYXA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=mq6_0575KoGSzg2-_aZD5g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3730,12 +3757,12 @@
     {
       "url": "https://trytoolscout.org/tools/slack",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=o_cgpqfPIdWx5fmR2xGGaA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=izTwtWwIQYst0RbAQG71Nw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-22T00:53:51Z",
+      "lastCrawlTime": "2026-09-28T15:45:54Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/slack",
       "userCanonical": "https://trytoolscout.org/tools/slack",
@@ -3750,7 +3777,7 @@
     {
       "url": "https://trytoolscout.org/tools/sprout-social",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=VJzH5ZWRFlV9vFay2CHIjw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ABzDyAJMzQtp33o5wGprKg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3772,7 +3799,7 @@
     {
       "url": "https://trytoolscout.org/tools/squarespace",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=1t65mVokcsnRHGMRDeXc-Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=o2lN8-WHkW0Hu1XUkhDX_g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3782,9 +3809,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/squarespace",
       "userCanonical": "https://trytoolscout.org/tools/squarespace",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -3796,7 +3821,7 @@
     {
       "url": "https://trytoolscout.org/tools/surfer",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=lHm066-31pVZEFZ7-kH-CA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=AJvtXheHuoRIXMeU9DCiwA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3806,9 +3831,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/surfer",
       "userCanonical": "https://trytoolscout.org/tools/surfer",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -3818,7 +3841,7 @@
     {
       "url": "https://trytoolscout.org/tools/tally",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=6eDFACKZJvvz3oTGQyfnJQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=srmstB2sfIKTWmv9tH2a4Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3840,7 +3863,7 @@
     {
       "url": "https://trytoolscout.org/tools/trello",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=vqft7v9VO3PJbNJqIhukFA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=xHoJ_qJDrC5-My7xlH6KLw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3850,9 +3873,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/trello",
       "userCanonical": "https://trytoolscout.org/tools/trello",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools/notion"
       ],
@@ -3864,7 +3885,7 @@
     {
       "url": "https://trytoolscout.org/tools/ubersuggest",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Wiwt4YDQWd4cBEqIobzaVg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=iab1qYbzBi1CmDib7R-dYQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3886,7 +3907,7 @@
     {
       "url": "https://trytoolscout.org/tools/workato",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=MFCTbuZYirVOJbYkepXa9g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=YB9J7aBUrn2T0edu85aBpQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3910,7 +3931,7 @@
     {
       "url": "https://trytoolscout.org/tools/wrike",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=klX2_FGIQ9CA0DTbI7JnCw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=0em2Dtp7j1acM-HFBalBhw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3934,7 +3955,7 @@
     {
       "url": "https://trytoolscout.org/tools/zendesk",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=I7nNJbHnJ7OTUnbGaPMDJQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=7nCZdhvi6GcSUmH8eX7H_g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3958,7 +3979,7 @@
     {
       "url": "https://trytoolscout.org/tools/zoho-crm",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uNdoE6CWWJIJ7DwCZB8znw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=nOUvvFThfOTN4b4jH9mh8w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -3982,7 +4003,7 @@
     {
       "url": "https://trytoolscout.org/whats-new",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uEjNvGaT605CWA3tNwo7MQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=GaC2R9qNJFChURtI2wxd6A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4004,47 +4025,7 @@
     {
       "url": "https://trytoolscout.org/methodology",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=t-VRRe7ksdDQ8CW4id7QoA&utm_medium=link&utm_source=api",
-      "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
-      "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
-      "indexingState": "INDEXING_STATE_UNSPECIFIED",
-      "lastCrawlTime": null,
-      "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
-      "googleCanonical": null,
-      "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [],
-      "richResultsVerdict": null,
-      "richResultTypes": []
-    },
-    {
-      "url": "https://trytoolscout.org/categories",
-      "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Gw2H1gKeG8Uh5aRL3XV4-w&utm_medium=link&utm_source=api",
-      "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
-      "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
-      "indexingState": "INDEXING_STATE_UNSPECIFIED",
-      "lastCrawlTime": null,
-      "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
-      "googleCanonical": null,
-      "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [],
-      "richResultsVerdict": null,
-      "richResultTypes": []
-    },
-    {
-      "url": "https://trytoolscout.org/crm-tools",
-      "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=kDnWxOHLyDUdG_3_D130fQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=4_yqS279IoIXXT95J1WJog&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -4060,9 +4041,47 @@
       "richResultTypes": []
     },
     {
+      "url": "https://trytoolscout.org/categories",
+      "ok": true,
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ld-RuK7ae9SJO5dBH2Ps_A&utm_medium=link&utm_source=api",
+      "verdict": "NEUTRAL",
+      "coverageState": "URL is unknown to Google",
+      "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
+      "indexingState": "INDEXING_STATE_UNSPECIFIED",
+      "lastCrawlTime": null,
+      "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
+      "googleCanonical": null,
+      "userCanonical": null,
+      "crawledAs": null,
+      "sitemaps": [],
+      "referringUrls": [],
+      "richResultsVerdict": null,
+      "richResultTypes": []
+    },
+    {
+      "url": "https://trytoolscout.org/crm-tools",
+      "ok": true,
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=jRIIrd_lsLp0Y4naHY5Z7A&utm_medium=link&utm_source=api",
+      "verdict": "NEUTRAL",
+      "coverageState": "Discovered - currently not indexed",
+      "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
+      "indexingState": "INDEXING_STATE_UNSPECIFIED",
+      "lastCrawlTime": null,
+      "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
+      "googleCanonical": null,
+      "userCanonical": null,
+      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
+      "referringUrls": [],
+      "richResultsVerdict": null,
+      "richResultTypes": []
+    },
+    {
       "url": "https://trytoolscout.org/seo-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=CAs7P0BEJ5sdzbP48QnFQw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=RUXspj7aBvPJ41kr-fndbw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Discovered - currently not indexed",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -4084,29 +4103,25 @@
     {
       "url": "https://trytoolscout.org/software-trends-index",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=6tHwBmNWrniOULx9Y8eBkA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=X49sXRzUtv13yUeJhB73yQ&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
+      "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/best-affordable-crm",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=hNEOUbuMRNeuO0NRD43g6Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=x-k51qV9ZQXVYbBEurruHA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -4124,7 +4139,7 @@
     {
       "url": "https://trytoolscout.org/best-ai-marketing-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=7Gqd_aqj9P5_r5-TxUEMlA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=1hsnoeHIdKemLsIbzQOMzQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4144,117 +4159,79 @@
     {
       "url": "https://trytoolscout.org/best-workflow-automation-tools",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=jTQCrfwDrMRnY1Rg7GD4yA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gLIwzkefShPNJtDmfujX2A&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
+      "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/brevo-vs-mailchimp",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=RBhbAdetnKYF-LRIYxFeOg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=e1gr5Fb7f1rBpk7vYdqlng&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
       "referringUrls": [],
-      "richResultsVerdict": null,
-      "richResultTypes": []
-    },
-    {
-      "url": "https://trytoolscout.org/hubspot-vs-pipedrive",
-      "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=VR04kuGRtL-cz6jAg3VlMQ&utm_medium=link&utm_source=api",
-      "verdict": "PASS",
-      "coverageState": "Submitted and indexed",
-      "robotsTxtState": "ALLOWED",
-      "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-26T12:26:12Z",
-      "pageFetchState": "SUCCESSFUL",
-      "googleCanonical": "https://trytoolscout.org/hubspot-vs-pipedrive",
-      "userCanonical": "https://trytoolscout.org/hubspot-vs-pipedrive",
-      "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/compare?a=screaming-frog&b=se-ranking&source=comparison-suggestions",
-        "https://trytoolscout.org/tools/pipedrive",
-        "https://trytoolscout.org/best-free-crm"
-      ],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/n8n-vs-make",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=txU5vWuCP3OsqttLlaZA1A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gJmZMipcRFjKJ5hoEiJHSw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/analytics-consent?choice=denied&return=%2Ftools%2Fn8n"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
+      "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/semrush-vs-ahrefs",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ytrPIwLLXmWH_9-1lAtoTg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=U6VfUVBLnH0bCaQt7ALtyw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/compare?a=vercel&source=tool-profile"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
+      "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/shopify-vs-webflow",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=b6zPMJfex8xXUUMbD2dPWA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=vu068tFvXBip7jprUG5QaA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4275,19 +4252,17 @@
     {
       "url": "https://trytoolscout.org/tally-vs-typeform",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=BqjymWy1_WyQ3bIfNPzWPQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=WtKVEIHYCMixCymg5EiOTA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -4295,19 +4270,17 @@
     {
       "url": "https://trytoolscout.org/webflow-vs-framer",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=lRRlWa5rDp9qlonQDl5MzA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=sE-EKeXsMGZSCbRFXsVppw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -4315,7 +4288,7 @@
     {
       "url": "https://trytoolscout.org/news/github-ai-scan-codeql-setup",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=VxxjvPv_PpE7-rjcxlxjnA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=GpSzNG4UCAJt3KZqu5-_rA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4325,37 +4298,15 @@
       "googleCanonical": "https://trytoolscout.org/news/github-ai-scan-codeql-setup",
       "userCanonical": "https://trytoolscout.org/news/github-ai-scan-codeql-setup",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [],
-      "richResultsVerdict": null,
-      "richResultTypes": []
-    },
-    {
-      "url": "https://trytoolscout.org/news/github-ssh-security-changes-2026",
-      "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uTBXxrbWk-k_dqk0dS2t0Q&utm_medium=link&utm_source=api",
-      "verdict": "PASS",
-      "coverageState": "Submitted and indexed",
-      "robotsTxtState": "ALLOWED",
-      "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-25T03:29:47Z",
-      "pageFetchState": "SUCCESSFUL",
-      "googleCanonical": "https://trytoolscout.org/news/github-ssh-security-changes-2026",
-      "userCanonical": "https://trytoolscout.org/news/github-ssh-security-changes-2026",
-      "crawledAs": "MOBILE",
       "sitemaps": [],
-      "referringUrls": [
-        "https://trytoolscout.org/analytics-consent?choice=granted&return=%2Fnews%2Fgithub-ssh-security-changes-2026"
-      ],
+      "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/tools/adcreative-ai",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=_vuImLvDgB3AUbCTcchrOg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=GGqFBU79AtKGxTY_kTBPtQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4365,9 +4316,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/adcreative-ai",
       "userCanonical": "https://trytoolscout.org/tools/adcreative-ai",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -4379,29 +4328,25 @@
     {
       "url": "https://trytoolscout.org/tools/basecamp",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=vU9Xo0DK8NASXW44c5EbtQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=wYu4jC6nT-GoguIO-oQUkA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/best-project-management-tools"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
+      "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/tools/calendly",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=jOEW2iCOY5wmSI8DWL1FuQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=HADR-XDQp3Nxr2hPLXVvaw&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4411,9 +4356,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/calendly",
       "userCanonical": "https://trytoolscout.org/tools/calendly",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools/wrike"
       ],
@@ -4425,7 +4368,7 @@
     {
       "url": "https://trytoolscout.org/tools/constant-contact",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=HFLK7EcQ-6rM2yzoF8jhYA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=7BuVP_Zc4h6sXw6fe920Yw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Discovered - currently not indexed",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -4445,7 +4388,7 @@
     {
       "url": "https://trytoolscout.org/tools/copy-ai",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=tFjoWoT_hDpt54G-nvM16Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=2_GFHXLGX1sDFxp8ahS2dw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -4455,9 +4398,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/copy-ai.html",
       "userCanonical": "https://trytoolscout.org/tools/copy-ai.html",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -4465,7 +4406,7 @@
     {
       "url": "https://trytoolscout.org/tools/github",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Dcx92LFXCLYGrt9sJM3z6w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uMa61RPP5WWK-3oJeplkXA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4475,9 +4416,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/github",
       "userCanonical": "https://trytoolscout.org/tools/github",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools"
       ],
@@ -4489,7 +4428,7 @@
     {
       "url": "https://trytoolscout.org/tools/gitlab",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=kivR4qrfmAslNebT-ZC8oQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ijLmPFCGltPqp3Bosi3CQg&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -4509,7 +4448,7 @@
     {
       "url": "https://trytoolscout.org/tools/help-scout",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Lv6YrNe3k5_LjM9gBDJisw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=IiWLKqcG8RajwrCx03m-ig&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4533,7 +4472,7 @@
     {
       "url": "https://trytoolscout.org/tools/hootsuite",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=yU1tUHf53WhxHYVEtOjvTQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=PlkclrL_6InRbO5yPHm7-Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4543,7 +4482,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/hootsuite",
       "userCanonical": "https://trytoolscout.org/tools/hootsuite",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": "PASS",
       "richResultTypes": [
@@ -4553,7 +4494,7 @@
     {
       "url": "https://trytoolscout.org/tools/jira",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=bILSwYg18BzTjQShTr8QHg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=vDLFOczZdu1pUbglLL6kCQ&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Discovered - currently not indexed",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -4575,7 +4516,7 @@
     {
       "url": "https://trytoolscout.org/tools/kling-ai",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=XanvN1l1IGapupKVNwImCg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=eXLkYd593lRp1lCLlPYI4w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4585,9 +4526,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/kling-ai",
       "userCanonical": "https://trytoolscout.org/tools/kling-ai",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -4597,7 +4536,7 @@
     {
       "url": "https://trytoolscout.org/tools/later",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uuJstPNYWK5QvWeYI6nUEQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=uNcXwXxnpt80FoWczUyi7g&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4619,7 +4558,7 @@
     {
       "url": "https://trytoolscout.org/tools/linear",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=qWsmuXECFbTl5BrLP90kCw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=hSz8qDFWVoz9KhXIbdTaqQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4643,29 +4582,25 @@
     {
       "url": "https://trytoolscout.org/tools/mailchimp",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=890dO609fgpU4iMovbTATg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=2haJTzZCKLrOK7-g8NCdYw&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "Discovered - currently not indexed",
+      "coverageState": "URL is unknown to Google",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
-      "referringUrls": [
-        "https://trytoolscout.org/tools/getresponse"
-      ],
+      "crawledAs": null,
+      "sitemaps": [],
+      "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/tools/mailerlite",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ypq79r9O2jS9i_9ZXE6yEA&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=DUymBTZoKqLOwvoWgGc8MQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4689,12 +4624,12 @@
     {
       "url": "https://trytoolscout.org/tools/notebooklm",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=rOFl-v_Zg4Ewte5AI_gvdQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=k_Sc4P1Kis7eAilnT_lzwA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-22T01:03:59Z",
+      "lastCrawlTime": "2026-09-29T10:27:16Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/notebooklm",
       "userCanonical": "https://trytoolscout.org/tools/notebooklm",
@@ -4711,7 +4646,7 @@
     {
       "url": "https://trytoolscout.org/tools/otter-ai",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Fnmk0znopNAReikSgh_pyw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=NM1GHAl2j5XAl00WLItTig&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Discovered - currently not indexed",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -4733,12 +4668,12 @@
     {
       "url": "https://trytoolscout.org/tools/paperform",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=GOvFw_k0QhVfBJMglmt_ow&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=aQiCzfL-GZDPP2dNKAwvmA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T19:49:07Z",
+      "lastCrawlTime": "2026-09-28T18:06:16Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/paperform",
       "userCanonical": "https://trytoolscout.org/tools/paperform",
@@ -4757,7 +4692,7 @@
     {
       "url": "https://trytoolscout.org/tools/podia",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=-3I6nW1MXaBvCOf8Wx6nAg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=RJAPCm2CVLY_hSCr3mFzAA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Alternate page with proper canonical tag",
       "robotsTxtState": "ALLOWED",
@@ -4767,7 +4702,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/podia.html",
       "userCanonical": "https://trytoolscout.org/tools/podia.html",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [],
       "richResultsVerdict": null,
       "richResultTypes": []
@@ -4775,7 +4712,7 @@
     {
       "url": "https://trytoolscout.org/tools/salesforce",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=gpD5SHpyvAxNvNDXkgbhmg&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=0zsbICx-s4f10AyJ6ROW7A&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4799,12 +4736,12 @@
     {
       "url": "https://trytoolscout.org/tools/se-ranking",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=UxRwZ8a0sOG4n4Q-zmPm4A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Rm8uWxG9JpeKANA8HeZC8w&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T07:15:47Z",
+      "lastCrawlTime": "2026-09-28T16:28:52Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/se-ranking",
       "userCanonical": "https://trytoolscout.org/tools/se-ranking",
@@ -4819,19 +4756,17 @@
     {
       "url": "https://trytoolscout.org/tools/socialbee",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=S9CEKZrM_qhg0sh7guVBAw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=aDFfS3K3GuqNMJvE17IHIA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-21T19:14:26Z",
+      "lastCrawlTime": "2026-09-28T23:15:34Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/socialbee",
       "userCanonical": "https://trytoolscout.org/tools/socialbee",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/tools"
       ],
@@ -4843,7 +4778,7 @@
     {
       "url": "https://trytoolscout.org/tools/systeme-io",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=sRd63-VE768jJpSrrcSerQ&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=T_m9a1ZLkmFoF0MY3L4n8Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4853,9 +4788,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/systeme-io",
       "userCanonical": "https://trytoolscout.org/tools/systeme-io",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -4867,7 +4800,7 @@
     {
       "url": "https://trytoolscout.org/tools/typeform",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=5fDQ-R44AWTI4iFIAcacrw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=jSnIkEGa_aKjyOh2lmiH9Q&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4891,25 +4824,29 @@
     {
       "url": "https://trytoolscout.org/tools/unbounce",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=cT3phttitf3CI7poeg2k2g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=yigjrSiAsWa1IE0KO0RFOA&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
-      "coverageState": "URL is unknown to Google",
+      "coverageState": "Discovered - currently not indexed",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
       "indexingState": "INDEXING_STATE_UNSPECIFIED",
       "lastCrawlTime": null,
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "crawledAs": null,
-      "sitemaps": [],
-      "referringUrls": [],
+      "crawledAs": "CRAWLING_USER_AGENT_UNSPECIFIED",
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
+      "referringUrls": [
+        "https://trytoolscout.org/tools"
+      ],
       "richResultsVerdict": null,
       "richResultTypes": []
     },
     {
       "url": "https://trytoolscout.org/tools/vercel",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=J15xFSd8g-_Pq0SYO6PQ_A&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=1gkOR7Cm52dVYkammd01JQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4919,7 +4856,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/vercel",
       "userCanonical": "https://trytoolscout.org/tools/vercel",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -4931,7 +4870,7 @@
     {
       "url": "https://trytoolscout.org/tools/webflow",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Xgt5O43bHrHo9AmyQHY3_g&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=aqHdTsEOI7OlKDiWS3zoTg&utm_medium=link&utm_source=api",
       "verdict": "NEUTRAL",
       "coverageState": "Discovered - currently not indexed",
       "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
@@ -4953,7 +4892,7 @@
     {
       "url": "https://trytoolscout.org/tools/wix",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=Z7Cb1XWXtWebPltWOsMbtw&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=3AW0mh0i3scsf9mK_sbRzg&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -4977,12 +4916,12 @@
     {
       "url": "https://trytoolscout.org/tools/woocommerce",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=eHryO4o2Lm7FFfrezjSAog&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=j1jpx-5lW9zykVv5s7yvJQ&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
       "indexingState": "INDEXING_ALLOWED",
-      "lastCrawlTime": "2026-09-23T07:08:17Z",
+      "lastCrawlTime": "2026-09-28T14:51:14Z",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://trytoolscout.org/tools/woocommerce",
       "userCanonical": "https://trytoolscout.org/tools/woocommerce",
@@ -4999,7 +4938,7 @@
     {
       "url": "https://trytoolscout.org/tools/wordpress-com",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=rTEIA3cV4dc07GKsVCmO7Q&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=X4ExYtb3ffvmPFGb_xSiIA&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -5009,7 +4948,9 @@
       "googleCanonical": "https://trytoolscout.org/tools/wordpress-com",
       "userCanonical": "https://trytoolscout.org/tools/wordpress-com",
       "crawledAs": "MOBILE",
-      "sitemaps": [],
+      "sitemaps": [
+        "https://trytoolscout.org/sitemap.xml"
+      ],
       "referringUrls": [
         "https://trytoolscout.org/sitemap.xml"
       ],
@@ -5021,7 +4962,7 @@
     {
       "url": "https://trytoolscout.org/tools/zapier",
       "ok": true,
-      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=39ZNZZR2dK-MXB-YdFrK7w&utm_medium=link&utm_source=api",
+      "inspectionResultLink": "https://search.google.com/search-console/inspect?resource_id=sc-domain:trytoolscout.org&id=ct8FRImskazgi5km5x5Wew&utm_medium=link&utm_source=api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
       "robotsTxtState": "ALLOWED",
@@ -5031,9 +4972,7 @@
       "googleCanonical": "https://trytoolscout.org/tools/zapier",
       "userCanonical": "https://trytoolscout.org/tools/zapier",
       "crawledAs": "MOBILE",
-      "sitemaps": [
-        "https://trytoolscout.org/sitemap.xml"
-      ],
+      "sitemaps": [],
       "referringUrls": [
         "https://trytoolscout.org/best-workflow-automation-tools"
       ],
