@@ -41,7 +41,7 @@ function fakeEnv(){
 
 test('Chairman Queue has a direct Phase 3 owner',()=>{
   assert.equal(routeOwner('/analytics/api/chairman-queue',{method:'GET'}).owner,'analytics_chairman');
-  assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'command_center');
+  assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
 });
 
 test('Chairman Queue direct route preserves session protection',async()=>{
