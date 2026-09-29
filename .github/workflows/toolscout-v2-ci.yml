@@ -5,6 +5,8 @@ on:
     paths:
       - 'acquisition-value-model.js'
       - 'compute-router-worker.js'
+      - 'seo-cloudflare-runtime-worker.js'
+      - 'migrations/0087_seo_runtime_schema.sql'
       - 'command-center-light-theme-worker.js'
       - 'growth-runtime-integrity-worker.js'
       - 'growth-runtime-closed-loop-worker.js'
@@ -43,6 +45,7 @@ jobs:
           node --check acquisition-value-model.js
           node --check distribution-priority-worker.js
           node --check compute-router-worker.js
+          node --check seo-cloudflare-runtime-worker.js
           node --check runtime-schedule-contract.js
           node --check growth-scheduler.js
           node --check distribution-orchestrator-worker.js
