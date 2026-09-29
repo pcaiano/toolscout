@@ -106,7 +106,7 @@ const adminStatsUnauthorized=await fetchText('/api/stats');
 if(adminStatsUnauthorized.status!==401)errors.push({code:'admin_stats_auth_regressed',status:adminStatsUnauthorized.status});
 else{
   if(adminStatsUnauthorized.headers.get('x-toolscout-route-owner')!=='admin_stats')errors.push({code:'admin_stats_wrong_route_owner',owner:adminStatsUnauthorized.headers.get('x-toolscout-route-owner')});
-  if(adminStatsUnauthorized.headers.get('access-control-allow-origin')!=='*')errors.push({code:'admin_stats_cors_regressed'});
+  if(adminStatsUnauthorized.headers.get('x-toolscout-compatibility-composition')!=='legacy-stats-v1')errors.push({code:'admin_stats_compatibility_header_missing'});
   try{
     const data=JSON.parse(adminStatsUnauthorized.text);
     if(data?.error!=='unauthorized')errors.push({code:'admin_stats_unauthorized_payload_regressed'});
