@@ -406,7 +406,7 @@ async function buildCommandCenterBusinessTruth(request,env){
   const observedBacklinks=seRankingFresh?seRankingBacklinks:truthNum(backlink.verified_backlinks??internalVerifiedBacklinks);
   const backlinkReconciliationGap=seRankingFresh?Math.max(0,seRankingBacklinks-internalVerifiedBacklinks):0;
   const authorityVerifiedDomains=seRankingFresh?seRankingReferringDomains:internalAuthorityVerifiedDomains;
-  const seRankingReferringDomainItems=seRankingFresh&&Array.isArray(seRankingBacklinkTruth?.referringDomains)
+  const seRankingReferringDomainItems=seRankingSnapshotAvailable&&Array.isArray(seRankingBacklinkTruth?.referringDomains)
     ?seRankingBacklinkTruth.referringDomains.map(x=>({
       domain:String(x?.domain||'').toLowerCase().replace(/^www\./,''),
       backlinks:truthNum(x?.backlinks),
