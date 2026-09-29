@@ -12,9 +12,10 @@ import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './conte
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-const AUTONOMOUS_CONTROL_CRON='4,19,34,49 * * * *';
+const AUTONOMOUS_CONTROL_CRON=TOOLSCOUT_CRONS.autonomousDistribution;
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
   id:'human-acquisition-v4',
   startAt:'2026-09-24T00:00:00.000Z',
@@ -1514,17 +1515,17 @@ if(u.pathname==='/api/growth/supervisor'&&request.method==='GET'){if(!(await aut
     await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:trigger,singleFlightMinutes:12,cycleContext:autonomousCycle,cycleOwner:'distribution_autonomous_scheduler'},()=>runAutonomousDistributionCycle(env)).catch(()=>null);
     return;
   }
-  const growthCycleDue=trigger==='*/15 * * * *'||trigger==='35 3 * * *';
-  const auditDue=trigger==='15 * * * *'||trigger==='35 3 * * *';
+  const growthCycleDue=trigger===TOOLSCOUT_CRONS.primaryGrowth||trigger===TOOLSCOUT_CRONS.daily;
+  const auditDue=trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily;
   if(growthCycleDue){
     await normalizeEditorialQueue(env);
     await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:trigger,singleFlightMinutes:12},()=>learnEconomics(env)).catch(()=>null);
     const opportunityCycle=missionCycleContext('growth','opportunity_coordination',Number(event?.scheduledTime)||Date.now());
     await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:trigger,singleFlightMinutes:12,cycleContext:opportunityCycle,cycleOwner:'distribution_orchestrator_scheduler'},()=>coordinateGrowthOpportunities(env)).catch(()=>null);
-    if(trigger==='35 3 * * *')await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger},()=>runGrowthRndAudit(env)).catch(()=>null);
+    if(trigger===TOOLSCOUT_CRONS.daily)await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger},()=>runGrowthRndAudit(env)).catch(()=>null);
     const executionCycle=missionCycleContext('growth','execution_contract',Number(event?.scheduledTime)||Date.now());
     await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:12,cycleContext:executionCycle,cycleOwner:'distribution_orchestrator_scheduler'},()=>runGrowthExecutionContractCycle(env)).catch(()=>null);
-  }else if(trigger==='15 * * * *'&&await growthRndAuditDue(env,12)){
+  }else if(trigger===TOOLSCOUT_CRONS.hourly&&await growthRndAuditDue(env,12)){
     await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger+':cadence_recovery'},()=>runGrowthRndAudit(env)).catch(()=>null);
   }
   if(auditDue){
@@ -1532,5 +1533,5 @@ if(u.pathname==='/api/growth/supervisor'&&request.method==='GET'){if(!(await aut
     await auditArchitectureEscalations(env).catch(()=>null);
   }
   if(base.scheduled)await base.scheduled(event,env,ctx);
-  if(trigger==='35 3 * * *')await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:trigger},()=>scanNew(new Request('https://trytoolscout.org/'),env));
+  if(trigger===TOOLSCOUT_CRONS.daily)await runWithLedger(env,{engine:'distribution',mission:'asset_scan',triggerName:trigger},()=>scanNew(new Request('https://trytoolscout.org/'),env));
 }};
