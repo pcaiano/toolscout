@@ -114,3 +114,7 @@ assert.match(router,/const limit=Math\.min\(80,remaining\);/);
 
 
 assert.match(router,/sourceUrl:isHttp\(a\.source_url\)\?a\.source_url:null/);
+
+assert.match(core,/retryClass/);
+assert.match(router,/external_source_unreachable_exhausted/);
+assert.match(router,/folded_into_distribution_route_research_v1/);
