@@ -545,6 +545,7 @@ async function health(env){
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='queued' AND available_at>datetime('now') AND last_error='source_unreachable_backoff') source_unreachable_deferred,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE status='leased') canonical_leased,
       (SELECT COUNT(*) FROM compute_overflow_batches WHERE status IN ('dispatched','running')) canonical_active_batches,
+      (SELECT updated_at FROM compute_overflow_locks WHERE lock_name='dispatch' LIMIT 1) last_scheduler_tick_at,
       (SELECT COUNT(*) FROM distribution_auto_adapters a JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
         AND NOT EXISTS (
           SELECT 1 FROM distribution_submissions rejected
@@ -652,7 +653,7 @@ async function health(env){
     distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
     queued:num(live?.canonical_queued),runnableQueued:num(live?.runnable_queued),deferredQueued:num(live?.deferred_queued),sourceUnreachableDeferred:num(live?.source_unreachable_deferred),sourceUnreachableSuppressedToday:num(live?.source_unreachable_suppressed_today),foldedContactResearchToday:num(live?.folded_contact_research_today),nextAvailableAt:live?.next_available_at||null,
     leased:num(live?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
-    activeBatches:num(live?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
+    activeBatches:num(live?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastSchedulerTickAt:live?.last_scheduler_tick_at||null,lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,qualificationSamples:[],
     d1ReadModel:'incremental_funnel_plus_indexed_queue_v2',
     githubActionsRole:'disabled_until_october',
