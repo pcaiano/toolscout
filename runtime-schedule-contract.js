@@ -55,6 +55,7 @@ export function scheduleContract(){
   return{
     version:2,
     architecture:'toolscout-2.0',
+    dispatcher:'compute_router',
     crons:TOOLSCOUT_CRONS,
     missions:SCHEDULED_MISSIONS,
     invariant:'one_named_owner_per_scheduled_mission'
