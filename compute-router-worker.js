@@ -1,6 +1,6 @@
 import base from './operational-truth-reconciliation-worker.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
-import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence} from './distribution-autonomous-worker.js';
+import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
@@ -1302,6 +1302,7 @@ async function runOverflowTick(env){
   await ensureHotIndexes(env);
   const rejectedAdapterRecovery=await isolatedOverflowStage(env,'external_submission_recovery',()=>reconcileRejectedExternalAdapters(env),{checked:0,recovered:0});
   const duplicateRouteConsolidation=await isolatedOverflowStage(env,'duplicate_route_consolidation',()=>reconcileDuplicateRouteSurfaces(env),0);
+  const freshHumanGateReconciliation=await isolatedOverflowStage(env,'fresh_research_human_gate_reconciliation',()=>reconcileFreshResearchHumanGates(env),{checked:0,opened:0});
   const verificationTruthRecovery=await isolatedOverflowStage(env,'verification_truth_recovery',()=>reconcileFalseSubmissionRouteVerifications(env),{corrected:0,verifiedToday:0});
   const foldedContactResearch=await isolatedOverflowStage(env,'contact_route_fold',()=>reconcileRedundantContactRouteJobs(env),0);
   const unreachableCompaction=await isolatedOverflowStage(env,'source_unreachable_compaction',()=>reconcileSourceUnreachableBacklog(env),0);
@@ -1329,7 +1330,7 @@ async function runOverflowTick(env){
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,verificationTruthRecovery,
+    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
     batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
