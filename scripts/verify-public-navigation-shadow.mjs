@@ -71,6 +71,10 @@ function compareCapabilities(pathname,html){
       ['history_state_lost',/history\.replaceState/]
     ])if(!re.test(html))errors.push(code);
   }
+  if(pathname==='/blog/'){
+    if(!/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex[^"']*follow/i.test(html))errors.push('blog_noindex_lost');
+    if(!/Research before publication\./.test(html))errors.push('blog_editorial_control_copy_lost');
+  }
   if(pathname==='/tools'){
     for(const [code,re] of [
       ['tool_catalog_fetch_lost',/\/data\/tools\.json/],
