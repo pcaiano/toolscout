@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T12:41:37.951Z",
+  "generatedAt": "2026-09-29T13:11:19.090Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,14 +8,14 @@
   "endDate": "2026-09-29",
   "siteTotals": {
     "clicks": 4,
-    "impressions": 4896,
-    "ctr": 0.0817
+    "impressions": 4904,
+    "ctr": 0.0816
   },
   "pageTypeSummary": {
     "comparison": {
       "pages": 9,
       "clicks": 0,
-      "impressions": 74
+      "impressions": 75
     },
     "directory": {
       "pages": 3,
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 42,
       "clicks": 0,
-      "impressions": 2685
+      "impressions": 2689
     },
     "home": {
       "pages": 1,
@@ -35,12 +35,12 @@
     "other": {
       "pages": 11,
       "clicks": 2,
-      "impressions": 134
+      "impressions": 136
     },
     "tool-profile": {
       "pages": 75,
       "clicks": 1,
-      "impressions": 1820
+      "impressions": 1821
     }
   },
   "pageCount": 141,
@@ -52,9 +52,9 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 1001,
+      "impressions": 1003,
       "ctr": 0,
-      "position": 76.97,
+      "position": 76.99,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -1405,9 +1405,9 @@
       "type": "guide",
       "intent": "best-crm-for-small-business",
       "clicks": 0,
-      "impressions": 31,
+      "impressions": 33,
       "ctr": 0,
-      "position": 78.871,
+      "position": 78.3939,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -1418,20 +1418,20 @@
         {
           "query": "best crm tools for small business",
           "clicks": 0,
+          "impressions": 4,
+          "position": 79.5
+        },
+        {
+          "query": "sales crm for small business",
+          "clicks": 0,
           "impressions": 3,
-          "position": 79.3333
+          "position": 65.6667
         },
         {
           "query": "crm small business",
           "clicks": 0,
           "impressions": 3,
           "position": 91.6667
-        },
-        {
-          "query": "sales crm for small business",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 67.5
         },
         {
           "query": "good crm for small business",
@@ -1897,6 +1897,31 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/news/notion-mail-shuts-down",
+      "pathname": "/news/notion-mail-shuts-down",
+      "key": "notion-mail-shuts-down",
+      "type": "other",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 19,
+      "ctr": 0,
+      "position": 3.7368,
+      "topQueries": [
+        {
+          "query": "notion mail shutdown september 2026",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 1
+        },
+        {
+          "query": "notion mail shutdown september 22 2026 official",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 5
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/workato",
       "pathname": "/tools/workato",
       "key": "workato",
@@ -1922,21 +1947,63 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/news/notion-mail-shuts-down",
-      "pathname": "/news/notion-mail-shuts-down",
-      "key": "notion-mail-shuts-down",
-      "type": "other",
+      "page": "https://trytoolscout.org/tools/ahrefs",
+      "pathname": "/tools/ahrefs",
+      "key": "ahrefs",
+      "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 17,
+      "impressions": 15,
       "ctr": 0,
-      "position": 3.7647,
+      "position": 46.9333,
       "topQueries": [
         {
-          "query": "notion mail shutdown september 2026",
+          "query": "ahrefs tool",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 40.6667
+        },
+        {
+          "query": "ahrefs free tool",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 53
+        },
+        {
+          "query": "ahref tools",
           "clicks": 0,
           "impressions": 1,
-          "position": 1
+          "position": 36
+        },
+        {
+          "query": "ahref tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 38
+        },
+        {
+          "query": "ahrefs free seo tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 52
+        },
+        {
+          "query": "ahref free seo tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 55
+        },
+        {
+          "query": "ahrefs seo tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 75
+        },
+        {
+          "query": "ahrefs competitor research tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 80
         }
       ]
     },
@@ -2026,61 +2093,6 @@
       "ctr": 0,
       "position": 75.7857,
       "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/tools/ahrefs",
-      "pathname": "/tools/ahrefs",
-      "key": "ahrefs",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 14,
-      "ctr": 0,
-      "position": 44.9286,
-      "topQueries": [
-        {
-          "query": "ahrefs tool",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 40.6667
-        },
-        {
-          "query": "ahrefs free tool",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 53
-        },
-        {
-          "query": "ahref tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 36
-        },
-        {
-          "query": "ahref tool",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 38
-        },
-        {
-          "query": "ahrefs free seo tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 52
-        },
-        {
-          "query": "ahref free seo tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 55
-        },
-        {
-          "query": "ahrefs competitor research tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 80
-        }
-      ]
     },
     {
       "page": "https://trytoolscout.org/tools/mangools",
@@ -3261,6 +3273,25 @@
       "topQueries": []
     },
     {
+      "page": "https://trytoolscout.org/notion-vs-clickup",
+      "pathname": "/notion-vs-clickup",
+      "key": "notion-vs-clickup",
+      "type": "comparison",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0,
+      "position": 57,
+      "topQueries": [
+        {
+          "query": "clickup vs notion",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 74
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/canva",
       "pathname": "/tools/canva",
       "key": "canva",
@@ -3406,18 +3437,6 @@
       "impressions": 2,
       "ctr": 0,
       "position": 7.5,
-      "topQueries": []
-    },
-    {
-      "page": "https://trytoolscout.org/notion-vs-clickup",
-      "pathname": "/notion-vs-clickup",
-      "key": "notion-vs-clickup",
-      "type": "comparison",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 48.5,
       "topQueries": []
     },
     {
@@ -3905,9 +3924,9 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 1001,
+      "impressions": 1003,
       "ctr": 0,
-      "position": 76.97,
+      "position": 76.99,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -4627,9 +4646,9 @@
       "intent": "best-crm-for-small-business",
       "page": "https://trytoolscout.org/best-crm-for-small-business",
       "clicks": 0,
-      "impressions": 31,
+      "impressions": 33,
       "ctr": 0,
-      "position": 78.871,
+      "position": 78.3939,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -4640,20 +4659,20 @@
         {
           "query": "best crm tools for small business",
           "clicks": 0,
+          "impressions": 4,
+          "position": 79.5
+        },
+        {
+          "query": "sales crm for small business",
+          "clicks": 0,
           "impressions": 3,
-          "position": 79.3333
+          "position": 65.6667
         },
         {
           "query": "crm small business",
           "clicks": 0,
           "impressions": 3,
           "position": 91.6667
-        },
-        {
-          "query": "sales crm for small business",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 67.5
         },
         {
           "query": "good crm for small business",
