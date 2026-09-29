@@ -41,6 +41,10 @@ jobs:
           GSC_PROPERTY: sc-domain:trytoolscout.org
           GSC_LOOKBACK_DAYS: '28'
         run: node scripts/sync-gsc-signals.mjs
+      - name: Build ToolScout 2.0 editorial authority portfolio
+        run: node scripts/build-editorial-authority-portfolio.mjs
+      - name: Validate ToolScout 2.0 editorial authority model
+        run: node --test tests/toolscout-v2-editorial-authority.test.mjs
       - name: Evaluate Google indexing gate
         run: node scripts/seo-indexing-gate.mjs
       - name: Audit observed GSC slugs
