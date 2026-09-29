@@ -170,16 +170,34 @@ function effectiveAffiliateStatus({active,pipelineRow,workflowRow}){
 }
 async function affiliateCoverageStatusSnapshot(request,env){
   try{
-    const [tools,pipeline,affiliate,workflowRows,clickRows]=await Promise.all([
+    const [tools,pipeline,affiliate,workflowRows,clickRows,socialRows,vendorRows]=await Promise.all([
       assetJson(request,env,'/data/tools.json',[]),
       assetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
       assetJson(request,env,'/data/affiliate.json',{}),
       safeAll(env,`SELECT tool_slug,status,updated_at FROM affiliate_workflow`),
-      safeAll(env,`SELECT tool_slug,COUNT(*) clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`)
+      safeAll(env,`SELECT tool_slug,COUNT(*) clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`),
+      safeAll(env,`SELECT tool_slug,COUNT(*) clicks FROM social_affiliate_redirects WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`),
+      safeAll(env,`SELECT e.tool_slug,e.provider,e.reported_clicks_total,e.observed_at
+        FROM affiliate_network_click_evidence e
+        JOIN (
+          SELECT tool_slug,provider,MAX(observed_at) observed_at
+          FROM affiliate_network_click_evidence
+          GROUP BY tool_slug,provider
+        ) latest
+          ON latest.tool_slug=e.tool_slug AND latest.provider=e.provider AND latest.observed_at=e.observed_at`)
     ]);
     const pipelineMap=new Map((pipeline?.verified_programs||[]).map(x=>[x.slug,x]));
     const workflowMap=new Map(workflowRows.map(x=>[x.tool_slug,x]));
     const clickMap=new Map(clickRows.map(x=>[x.tool_slug,{clicks:n(x.clicks),monetized:n(x.monetized)}]));
+    const socialMap=new Map(socialRows.map(x=>[x.tool_slug,n(x.clicks)]));
+    const vendorMap=new Map();
+    for(const row of vendorRows||[]){
+      const key=String(row.tool_slug||'');
+      const current=vendorMap.get(key)||{clicks:0,evidence:[]};
+      current.clicks+=n(row.reported_clicks_total);
+      current.evidence.push({provider:row.provider,reportedClicksTotal:n(row.reported_clicks_total),observedAt:row.observed_at});
+      vendorMap.set(key,current);
+    }
     const groups={active:[],pending:[],rejected:[]};
     for(const tool of tools||[]){
       const route=affiliate?.[tool.slug]||{};
@@ -190,11 +208,29 @@ async function affiliateCoverageStatusSnapshot(request,env){
       else if(PENDING_AFFILIATE_STATES.has(status))group='pending';
       else if(REJECTED_AFFILIATE_STATES.has(status))group='rejected';
       if(!group)continue;
-      const ct=clickMap.get(tool.slug)||{clicks:0,monetized:0};groups[group].push({slug:tool.slug,name:tool.name||tool.slug,status,clicks30d:ct.clicks,monetizedClicks30d:ct.monetized});
+      const ct=clickMap.get(tool.slug)||{clicks:0,monetized:0},social=n(socialMap.get(tool.slug)),vendor=vendorMap.get(tool.slug)||{clicks:0,evidence:[]};
+      groups[group].push({
+        slug:tool.slug,name:tool.name||tool.slug,status,
+        clicks30d:ct.clicks,monetizedClicks30d:ct.monetized,
+        socialAffiliateRedirects30d:social,
+        vendorReportedClicks:vendor.clicks,
+        vendorEvidence:vendor.evidence
+      });
     }
-    for(const items of Object.values(groups))items.sort((a,b)=>b.clicks30d-a.clicks30d||a.name.localeCompare(b.name));
-    const summarize=items=>({count:items.length,clicks30d:items.reduce((s,x)=>s+n(x.clicks30d),0),monetizedClicks30d:items.reduce((s,x)=>s+n(x.monetizedClicks30d),0),items});
-    return {status:'observed',windowDays:30,clickDefinition:'First-party verified /go/ outbound navigation only. Pre-integrity browser-confirmed clicks are diagnostic and excluded from canonical coverage.',active:summarize(groups.active),pending:summarize(groups.pending),rejected:summarize(groups.rejected)};
+    for(const items of Object.values(groups))items.sort((a,b)=>b.clicks30d-a.clicks30d||b.socialAffiliateRedirects30d-a.socialAffiliateRedirects30d||b.vendorReportedClicks-a.vendorReportedClicks||a.name.localeCompare(b.name));
+    const summarize=items=>({
+      count:items.length,
+      clicks30d:items.reduce((sum,x)=>sum+n(x.clicks30d),0),
+      monetizedClicks30d:items.reduce((sum,x)=>sum+n(x.monetizedClicks30d),0),
+      socialAffiliateRedirects30d:items.reduce((sum,x)=>sum+n(x.socialAffiliateRedirects30d),0),
+      vendorReportedClickFloor:items.reduce((sum,x)=>sum+n(x.vendorReportedClicks),0),
+      items
+    });
+    return {
+      status:'observed',windowDays:30,
+      clickDefinition:'Commercial click sources stay separate: strict first-party verified /go/ navigation, tracked social affiliate redirects, and cumulative affiliate-network counters. Cross-source counts can overlap and are never summed.',
+      active:summarize(groups.active),pending:summarize(groups.pending),rejected:summarize(groups.rejected)
+    };
   }catch(e){return {status:'unavailable',reason:String(e?.message||e)}}
 }
 function affiliateCoverageWidget(){return `<section class="widget" data-widget="affiliate-status" data-detail="1" style="--w:12;--h:6"><div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Verified outbound · 30d</div></div><div class="widgetBody" id="affiliateCoverageStatusBody"><div class="empty">Refresh to load affiliate status.</div></div><div class="resizeHandle"></div></section>`}
@@ -303,7 +339,9 @@ executionLog(x.external_execution_items,x.external_executions_7d)+
 '<div class="row"><div><div class="rowName">Alternate distribution routes</div><div class="rowMeta">Public contact or amplification routes discovered across '+n(x.contact_route_surfaces)+' external surfaces. '+n(x.route_actions_in_progress)+' in progress · '+n(x.route_actions_verified_placement)+' verified placement · '+n(x.route_actions_verified_human)+' strict-human impact · '+n(x.route_actions_stalled)+' stalled. Placement is not counted as human impact.</div></div><div class="value">'+n(x.contact_routes)+'</div></div>'+
 rndDetails(x.rnd_items,x.rnd_experiments)+frontierDetails(x.rnd_frontier_items,x.rnd_frontier_count)+deploymentDetails(x.rnd_deployment_items)+'<div class="row"><div><div class="rowName">Chairman Queue</div><div class="rowMeta">Human intervention should trend down as machine-resolvable routes are learned.</div></div><div class="value">'+n(x.chairman_queue)+'</div></div>'+
 '<div class="meta" style="margin-top:8px">'+esc(x.attribution_rule||'')+'</div>'}const original=window.render;if(typeof original==='function')window.render=function(d){original(d);renderAutonomousGrowth(d)}})();</script>`}
-function affiliateCoverageScript(){return `<style>.affiliateStatusTable{width:100%;border-collapse:collapse;font-size:12px}.affiliateStatusTable th,.affiliateStatusTable td{padding:9px 8px;border-top:1px solid var(--line);text-align:left}.affiliateStatusTable thead th{border-top:0;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.affiliateStatusTable th:last-child,.affiliateStatusTable td:last-child{text-align:right}.affiliateStatusSummary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}</style><script>(function(){const e=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m])),nn=v=>Number(v||0).toLocaleString(),sl=v=>String(v||'').replaceAll('_',' ');function rg(g,label){return(Array.isArray(g?.items)?g.items:[]).map(x=>({name:x.name,status:x.status||label,clicks:x.clicks30d||0,group:label}))}function renderAffiliateCoverageStatus(d){const root=document.getElementById('affiliateCoverageStatusBody');if(!root)return;const s=d?.affiliateCoverageStatus||{};if(s.status!=='observed'){root.innerHTML='<div class="empty">Affiliate coverage status is temporarily unavailable.</div>';return}const order={active:0,pending:1,rejected:2};const rows=[...rg(s.active,'active'),...rg(s.pending,'pending'),...rg(s.rejected,'rejected')].sort((a,b)=>order[a.group]-order[b.group]||b.clicks-a.clicks||a.name.localeCompare(b.name));const summary='<div class="affiliateStatusSummary"><span class="pill good">Active '+nn(s.active?.count)+' · '+nn(s.active?.clicks30d)+' clicks</span><span class="pill info">Pending '+nn(s.pending?.count)+' · '+nn(s.pending?.clicks30d)+' clicks</span><span class="pill bad">Rejected '+nn(s.rejected?.count)+' · '+nn(s.rejected?.clicks30d)+' clicks</span></div>';const table=rows.length?'<table class="affiliateStatusTable"><thead><tr><th>Affiliate</th><th>Status</th><th>Clicks</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+e(x.name)+'</td><td>'+e(sl(x.status))+'</td><td>'+nn(x.clicks)+'</td></tr>').join('')+'</tbody></table>':'<div class="empty">No active, pending or rejected affiliate programmes found.</div>';root.innerHTML=summary+table}const original=window.render;if(typeof original==='function')window.render=function(d){original(d);renderAffiliateCoverageStatus(d)}})();</script>`}
+function affiliateCoverageScript(){return `<style>
+.affiliateStatusTable{width:100%;border-collapse:collapse;font-size:12px}.affiliateStatusTable th,.affiliateStatusTable td{padding:9px 8px;border-top:1px solid var(--line);text-align:left}.affiliateStatusTable thead th{border-top:0;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.affiliateStatusTable th:nth-child(n+3),.affiliateStatusTable td:nth-child(n+3){text-align:right}.affiliateStatusSummary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+</style><script>(function(){const e=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m])),nn=v=>Number(v||0).toLocaleString(),sl=v=>String(v||'').replaceAll('_',' ');function rg(g,label){return(Array.isArray(g?.items)?g.items:[]).map(x=>({name:x.name||x.slug||'',status:x.status||label,clicks:Number(x.clicks30d||0),social:Number(x.socialAffiliateRedirects30d||0),vendor:Number(x.vendorReportedClicks||0),group:label}))}function renderAffiliateCoverageStatus(d){const root=document.getElementById('affiliateCoverageStatusBody');if(!root)return;const s=d?.affiliateCoverageStatus||{};if(s.status!=='observed'){root.innerHTML='<div class="empty">Affiliate coverage status is temporarily unavailable.</div>';return}const order={active:0,pending:1,rejected:2};const rows=[...rg(s.active,'active'),...rg(s.pending,'pending'),...rg(s.rejected,'rejected')].sort((a,b)=>order[a.group]-order[b.group]||b.clicks-a.clicks||b.social-a.social||b.vendor-a.vendor||a.name.localeCompare(b.name));const social=(s.active?.socialAffiliateRedirects30d||0)+(s.pending?.socialAffiliateRedirects30d||0)+(s.rejected?.socialAffiliateRedirects30d||0),vendor=(s.active?.vendorReportedClickFloor||0)+(s.pending?.vendorReportedClickFloor||0)+(s.rejected?.vendorReportedClickFloor||0);const summary='<div class="affiliateStatusSummary"><span class="pill good">Strict verified '+nn((s.active?.clicks30d||0)+(s.pending?.clicks30d||0)+(s.rejected?.clicks30d||0))+'</span><span class="pill info">Tracked social '+nn(social)+'</span><span class="pill info">Vendor floor '+nn(vendor)+'</span></div>';const table=rows.length?'<table class="affiliateStatusTable"><thead><tr><th>Affiliate</th><th>Status</th><th>Strict 30d</th><th>Social 30d</th><th>Vendor floor</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+e(x.name)+'</td><td>'+e(sl(x.status))+'</td><td>'+nn(x.clicks)+'</td><td>'+nn(x.social)+'</td><td>'+nn(x.vendor)+'</td></tr>').join('')+'</tbody></table>':'<div class="empty">No active, pending or rejected affiliate programmes found.</div>';root.innerHTML=summary+table}const original=window.render;if(typeof original==='function')window.render=function(d){original(d);renderAffiliateCoverageStatus(d)}})();</script>`}
 async function verifyActionUrl(url){
   const safe=safeUrl(url);
   const checkedAt=new Date().toISOString();
