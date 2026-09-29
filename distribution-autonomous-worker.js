@@ -502,18 +502,20 @@ export async function reconcileFreshResearchHumanGates(env){
       )
     ORDER BY o.distribution_score DESC,j.completed_at DESC LIMIT 50`)
     .bind(RESEARCH_CLASSIFIER_VERSION,RESEARCH_CLASSIFIER_VERSION).all().catch(()=>({results:[]}));
-  let opened=0,checked=0;
+  let opened=0,checked=0;const reasons={};
   for(const row of q.results||[]){
     checked++;
     let result={},payload={};try{result=JSON.parse(row.result_json||'{}')||{}}catch{}try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
     const routes=(Array.isArray(result.routes)?result.routes:[])
       .filter(route=>route?.submissionIntent===true&&!route?.machineCandidate&&!(route?.policyBlockers||[]).length&&(route?.auth||route?.captcha||['auth','captcha'].includes(String(route?.kind||''))));
     const route=routes[0]||null;
-    if(!route)continue;
-    const gate=await openDistributionHumanGateFromResearchEvidence(env,row,{route,result:{...result,targetUrl:result?.targetUrl||payload?.url||row.action_url,classifierVersion:Number(payload?.classifierVersion||RESEARCH_CLASSIFIER_VERSION)}}).catch(()=>null);
+    if(!route){reasons.no_exact_human_route=(reasons.no_exact_human_route||0)+1;continue}
+    const gate=await openDistributionHumanGateFromResearchEvidence(env,row,{route,result:{...result,targetUrl:result?.targetUrl||payload?.url||row.action_url,classifierVersion:Number(payload?.classifierVersion||RESEARCH_CLASSIFIER_VERSION)}})
+      .catch(error=>({opened:false,reason:'exception:'+safe(error?.message||error,240)}));
     if(gate?.opened)opened++;
+    else{const reason=String(gate?.reason||'unknown');reasons[reason]=(reasons[reason]||0)+1}
   }
-  return {checked,opened,classifierVersion:RESEARCH_CLASSIFIER_VERSION};
+  return {checked,opened,reasons,classifierVersion:RESEARCH_CLASSIFIER_VERSION};
 }
 
 async function reconcileLegacyGenericHumanGates(env){
