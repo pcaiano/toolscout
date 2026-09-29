@@ -1,4 +1,4 @@
-# production proof: deploy current main, exercise distribution router, verify canonical health
+# production proof: deploy finalized GSC truth, weekly recovery links, and current runtime
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
@@ -29,6 +29,8 @@ jobs:
           node --check overflow-compute/research-core.mjs
           node --check overflow-compute/server.mjs
           node --check command-center-simplified-view.js
+          node --check operational-truth-reconciliation-worker.js
+          node --check seo-cloudflare-runtime-worker.js
           node tests/compute-overflow-policy.test.mjs
           node tests/compute-overflow-reliability.mjs
           node tests/external-action-plane.test.mjs
