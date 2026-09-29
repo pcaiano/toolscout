@@ -1,5 +1,6 @@
 import base from './seo-cloudflare-runtime-worker.js';
 import {missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const ROUTES=[
@@ -229,11 +230,11 @@ export default{
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
-    if(trigger==='15 * * * *'){
+    if(trigger===TOOLSCOUT_CRONS.hourly){
       await Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
     }
     const inherited=typeof base.scheduled==='function'?await base.scheduled(event,env,ctx):undefined;
-    if(trigger==='15 * * * *'){
+    if(trigger===TOOLSCOUT_CRONS.hourly){
       const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/',{headers:missionCycleHeaders(event,'authority_acquisition_scheduler')}),env,ctx).catch(()=>null);
       if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }
