@@ -33,6 +33,46 @@ function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
 function rows(r){return r?.results||[]}
 function isHttp(url){try{const u=new URL(url);return ['http:','https:'].includes(u.protocol)}catch{return false}}
 function isTechnicalResearchUrl(url){try{const h=new URL(url).hostname.toLowerCase();return /(?:^|\.)(?:supabase\.co|r2\.dev|githubusercontent\.com|storage\.googleapis\.com|amazonaws\.com)$/.test(h)}catch{return false}}
+function nonSubmissionResearchNoise(url){
+  try{
+    const u=new URL(String(url||'')),host=u.hostname.toLowerCase(),path=decodeURIComponent(u.pathname||'').toLowerCase();
+    const full=(path+'?'+u.searchParams.toString()).toLowerCase();
+    const strong=/(?:^|[\/_-])(?:submit|submission|add-(?:tool|startup|product|software|app)|list-your-(?:tool|startup|product)|new-(?:tool|startup|product)|vendors?\/(?:new|submit)|products?\/(?:new|submit)|projects?\/(?:new|submit))(?:[\/?#_-]|$)|(?:intent=submit|(?:return_to|next|redirect|redirect_to|continue)=[^&]*(?:submit|submission|add(?:-|%2f|\/)?(?:tool|startup|product)|products?%2fnew|projects?%2fsubmit))/i;
+    if(strong.test(full))return false;
+    if(/(?:^|\.)linkedin\.com$/.test(host)&&(host.startsWith('about.')||host.startsWith('press.')||u.searchParams.has('trk')))return true;
+    const authPath=/(?:^|\/)(?:login|sign-in|signin|sign-up|signup|register)(?:\/|$)/i.test(path);
+    if(authPath){
+      const redirect=['next','redirect','return_to','redirect_to','continue'].map(k=>u.searchParams.get(k)).find(Boolean);
+      if(redirect){
+        let decoded=String(redirect||'');try{decoded=decodeURIComponent(decoded)}catch{}
+        if(/(?:pricing|billing|checkout|plans?|subscription|account|profile|settings|dashboard)(?:[\/?#_-]|$)/i.test(decoded)&&!strong.test(decoded))return true;
+      }
+    }
+    return false;
+  }catch{return false}
+}
+async function reconcileNonSubmissionResearchNoise(env){
+  const q=await env.DB.prepare(`SELECT surface_slug,action_url FROM distribution_opportunities
+    WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+      AND status IN ('candidate','discovered','research_required')
+    ORDER BY updated_at ASC LIMIT 200`).all().catch(()=>({results:[]}));
+  let skipped=0;
+  for(const row of rows(q)){
+    const url=String(row.action_url||'');
+    const nonHttp=!isHttp(url);
+    const noise=isHttp(url)&&nonSubmissionResearchNoise(url);
+    if(!nonHttp&&!noise)continue;
+    const detail=nonHttp
+      ?'Non-HTTP contact/navigation route excluded from machine submission research; contact discovery owns email routes.'
+      :'Navigation/authentication URL has no submission intent and was excluded from distribution route research.';
+    const w=await env.DB.prepare(`UPDATE distribution_opportunities
+      SET status='skipped',human_required=0,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now')
+      WHERE surface_slug=? AND status IN ('candidate','discovered','research_required')`).bind(detail,row.surface_slug).run().catch(()=>null);
+    skipped+=num(w?.meta?.changes||w?.changes);
+  }
+  if(skipped)await event(env,'non_submission_research_noise_pruned','completed',`Pruned ${skipped} non-submission route(s) before external research.`,{skipped}).catch(()=>{});
+  return skipped;
+}
 async function sha256(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function shortHash(value){return (await sha256(value)).slice(0,20)}
 async function ensureSchema(env){
@@ -1303,6 +1343,7 @@ async function runOverflowTick(env){
   await ensureHotIndexes(env);
   const rejectedAdapterRecovery=await isolatedOverflowStage(env,'external_submission_recovery',()=>reconcileRejectedExternalAdapters(env),{checked:0,recovered:0});
   const duplicateRouteConsolidation=await isolatedOverflowStage(env,'duplicate_route_consolidation',()=>reconcileDuplicateRouteSurfaces(env),0);
+  const nonSubmissionNoisePruned=await isolatedOverflowStage(env,'non_submission_research_noise',()=>reconcileNonSubmissionResearchNoise(env),0);
   const freshHumanGateReconciliation=await isolatedOverflowStage(env,'fresh_research_human_gate_reconciliation',()=>reconcileFreshResearchHumanGates(env),{checked:0,opened:0});
   const verificationTruthRecovery=await isolatedOverflowStage(env,'verification_truth_recovery',()=>reconcileFalseSubmissionRouteVerifications(env),{corrected:0,verifiedToday:0});
   const foldedContactResearch=await isolatedOverflowStage(env,'contact_route_fold',()=>reconcileRedundantContactRouteJobs(env),0);
@@ -1332,7 +1373,7 @@ async function runOverflowTick(env){
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
     ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
-    batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
+    nonSubmissionNoisePruned,batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
   };
