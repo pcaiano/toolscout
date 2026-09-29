@@ -74,25 +74,55 @@ test('admin stats GET has a direct owner while POST remains legacy',()=>{
   assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'command_center');
 });
 
-test('admin stats direct route preserves bearer auth and CORS',async()=>{
+test('admin stats public host preserves Cloudflare Access boundary',async()=>{
+  const state=fakeEnv();
+  const noAuth=await handleAdminStatsRoute(
+    new Request('https://trytoolscout.org/api/stats'),
+    state.env,
+    {}
+  );
+  assert.equal(noAuth.status,401);
+
+  const bearerOnly=await handleAdminStatsRoute(
+    new Request('https://trytoolscout.org/api/stats',{headers:{Authorization:'Bearer secret'}}),
+    state.env,
+    {}
+  );
+  assert.equal(bearerOnly.status,401);
+
+  const access=await handleAdminStatsRoute(
+    new Request('https://trytoolscout.org/api/stats',{
+      headers:{'Cf-Access-Authenticated-User-Email':'pcaiano@gmail.com'}
+    }),
+    state.env,
+    {}
+  );
+  assert.equal(access.status,200);
+  assert.equal(access.headers.get('X-ToolScout-Read-Mode'),'read-only');
+  assert.equal(state.writes,0);
+});
+
+test('admin stats internal host preserves legacy Bearer access',async()=>{
   const state=fakeEnv();
   const response=await handleAdminStatsRoute(
-    new Request('https://trytoolscout.org/api/stats'),
-    state.env
+    new Request('https://toolscout-command-center.internal/api/stats',{
+      headers:{Authorization:'Bearer secret'}
+    }),
+    state.env,
+    {}
   );
-  assert.equal(response.status,401);
-  assert.equal(response.headers.get('Access-Control-Allow-Origin'),'*');
-  assert.deepEqual(await response.json(),{error:'unauthorized'});
+  assert.equal(response.status,200);
+  assert.equal(response.headers.get('X-ToolScout-Read-Mode'),'read-only');
   assert.equal(state.writes,0);
 });
 
 test('admin stats direct route matches legacy semantic shape without writes',async()=>{
   const a=fakeEnv(),b=fakeEnv();
   const request=new Request('https://trytoolscout.org/api/stats',{
-    headers:{Authorization:'Bearer secret'}
+    headers:{'Cf-Access-Authenticated-User-Email':'pcaiano@gmail.com'}
   });
   const [directResponse,legacyResponse]=await Promise.all([
-    handleAdminStatsRoute(request.clone(),a.env),
+    handleAdminStatsRoute(request.clone(),a.env,{}),
     legacy.fetch(request.clone(),b.env,{waitUntil(){}})
   ]);
 
