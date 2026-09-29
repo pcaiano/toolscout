@@ -6,6 +6,7 @@ import {routeOwner} from '../runtime-route-contract.js';
 
 function fakeEnv(){
   let writes=0;
+  const writeSql=[];
   const db={
     prepare(sql){
       const text=String(sql);
@@ -29,10 +30,10 @@ function fakeEnv(){
           }
           return{results:[]};
         },
-        async run(){writes++;throw new Error('traffic_integrity_health_attempted_write')}
+        async run(){writes++;writeSql.push(text);throw new Error('traffic_integrity_health_attempted_write')}
       };
     },
-    async batch(){writes++;throw new Error('traffic_integrity_health_attempted_batch_write')}
+    async batch(statements){writes++;writeSql.push('BATCH:'+(Array.isArray(statements)?statements.length:'unknown'));throw new Error('traffic_integrity_health_attempted_batch_write')}
   };
   const assets={
     async fetch(request){
@@ -41,7 +42,7 @@ function fakeEnv(){
       return new Response('not found',{status:404});
     }
   };
-  return{env:{DB:db,ASSETS:assets},get writes(){return writes}};
+  return{env:{DB:db,ASSETS:assets},get writes(){return writes},get writeSql(){return writeSql}};
 }
 
 function stableShape(value,prefix=''){
@@ -86,7 +87,7 @@ test('direct traffic integrity health matches legacy semantic shape without writ
   assert.equal(direct.visitorIntegrity?.canonicalPopulation,legacyBody.visitorIntegrity?.canonicalPopulation);
   assert.equal(direct.operationalTruthReconciliation?.version,legacyBody.operationalTruthReconciliation?.version);
   assert.equal(a.writes,0);
-  assert.equal(b.writes,0);
+  assert.equal(b.writes,0,JSON.stringify(b.writeSql));
 });
 
 test('direct traffic integrity health ignores unrelated routes and methods',async()=>{
