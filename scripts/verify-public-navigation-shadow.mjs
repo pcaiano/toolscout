@@ -12,7 +12,8 @@ const CASES=[
   {pathname:'/compare',query:'?a=airtable&b=semrush&source=phase12-shadow'},
   {pathname:'/categories'},
   {pathname:'/crm-tools'},
-  {pathname:'/seo-tools'}
+  {pathname:'/seo-tools'},
+  {pathname:'/blog/'}
 ];
 
 function contentType(file){
