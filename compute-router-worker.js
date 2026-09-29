@@ -11,6 +11,7 @@ const EXECUTION_DAILY_JOB_BUDGET=800;
 const AUTHORIZED_EXECUTION_VERSION=2;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
 const DISTRIBUTION_CLASSIFIER_VERSION=17;
+const HUMAN_GATE_EVIDENCE_VERSION=16;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
 const CONTACT_SUPPLY_TARGET=200;
 const CONTACT_SUPPLY_MIN=150;
@@ -735,12 +736,12 @@ async function reconcileStaleResearchHumanGates(env){
       AND g.gate_type IN ('human_confirmation','manual_submission','authentication')
       AND CAST(COALESCE(json_extract(g.payload_json,'$.research_classifier_version'),0) AS INTEGER)>0
       AND CAST(COALESCE(json_extract(g.payload_json,'$.research_classifier_version'),0) AS INTEGER)<?
-    ORDER BY g.updated_at ASC LIMIT 100`).bind(DISTRIBUTION_CLASSIFIER_VERSION).all().catch(()=>({results:[]}));
+    ORDER BY g.updated_at ASC LIMIT 100`).bind(HUMAN_GATE_EVIDENCE_VERSION).all().catch(()=>({results:[]}));
   const items=rows(stale);
   if(!items.length)return{reconciled:0};
   let reconciled=0;
   for(const gate of items){
-    const detail=`Research-derived Human Gate invalidated by classifier upgrade v${num(gate.classifier_version)}->v${DISTRIBUTION_CLASSIFIER_VERSION}. Fresh Render research owns the next decision.`;
+    const detail=`Research-derived Human Gate invalidated by human-evidence policy upgrade v${num(gate.classifier_version)}->v${HUMAN_GATE_EVIDENCE_VERSION}. Fresh Render research owns the next decision.`;
     const opp=await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,last_checked_at=NULL,updated_at=datetime('now')
       WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','scheduled','policy_blocked','rejected','skipped','unavailable_free')`)
       .bind(detail,gate.subject_key).run().catch(()=>null);
