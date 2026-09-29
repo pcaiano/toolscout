@@ -1,4 +1,5 @@
 name: One Shot Commercial Metrics Test
+# rerun-marker: 2026-09-29T10:26Z
 
 on:
   push:
