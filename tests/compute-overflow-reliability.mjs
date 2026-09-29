@@ -13,6 +13,8 @@ check(s.includes("reconcileSourceUnreachableBacklog"),'definitive unreachable jo
 check(s.includes("reconcileRedundantContactRouteJobs"),'duplicate contact-route crawls are folded into the primary research pass');
 check(s.includes("const contact=await applyContactResult(env,job,result)"),'primary distribution research persists contact routes in the same pass');
 check(!s.includes("jobKey:`contact:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`"),'new route cycles do not enqueue duplicate contact crawls');
+check(s.includes("if(!isHttp(row.action_url))continue"),'non-HTTP route cannot abort the remaining research candidate batch');
+check(s.includes("action_url LIKE 'https://%' OR action_url LIKE 'http://%'"),'route research candidate universe excludes mailto and non-HTTP actions');
 check(s.includes("last_error='source_unreachable_backoff'"),'mature unreachable backoffs are eligible for self-healing');
 check(s.includes("RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *'"),'Render keepalive cadence exists');
 check(w.includes('"7,22,37,52 * * * *"'),'Wrangler registers Render keepalive cron');
