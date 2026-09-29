@@ -192,12 +192,18 @@ function authorityProgress(){
   '<div class="sourceLine">'+(status==='fresh'?'SE Ranking Data API is the current external backlink truth.':'The last SE Ranking snapshot is retained for reference but is not treated as current external truth while stale or unavailable.')+' Backlinks are individual source link URLs and referring domains are unique source domains. Internal placement verification remains a separate operational diagnostic.</div>';
 }
 function gscProgress(){
- const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{};
+ const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{},pc=g.periodComparison||{};
+ const losses=Array.isArray(pc?.pages?.losses)?pc.pages.losses.slice(0,3):[],gains=Array.isArray(pc?.pages?.gains)?pc.pages.gains.slice(0,3):[];
+ const moverRows=(losses.length||gains.length)?'<div class="section"><div class="sectionTitle">Largest finalized weekly movers</div>'+
+   losses.map(x=>row(x.page,(Number(x.impressionsDelta)>0?'+':'')+n(x.impressionsDelta)+' impressions','Now '+n(x.impressions)+' vs '+n(x.previousImpressions)+' prior week · position '+(x.position==null?'Unavailable':Number(x.position).toFixed(1)))).join('')+
+   gains.map(x=>row(x.page,'+'+n(x.impressionsDelta)+' impressions','Now '+n(x.impressions)+' vs '+n(x.previousImpressions)+' prior week · position '+(x.position==null?'Unavailable':Number(x.position).toFixed(1)))).join('')+
+   '</div>':'';
  document.getElementById('gscProgressMeta').textContent=(g.verifiedThroughDate?'Finalized through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
  document.getElementById('gscProgressBody').innerHTML=
   '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Final 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>7d avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
   '<div class="chartBox"><div class="sectionTitle">Google impressions</div>'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
   '<div class="chartBox"><div class="sectionTitle">Average position - lower is better</div>'+seriesChart(rows,[{key:'position',label:'Average position',cls:'warn'}],{zeroBaseline:false,invert:true,axisDecimals:1})+'</div>'+
+  moverRows+
   '<div class="sourceLine">Only Search Console days marked final by Google are plotted and used for the 28-day totals and 7-day comparison. Preliminary fresh-data days are withheld until finalized so incomplete ingestion cannot look like a traffic or ranking collapse. Average position is inverted so ranking improvement moves upward.</div>';
 }
 
