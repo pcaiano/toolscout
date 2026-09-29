@@ -27,16 +27,10 @@ while(current){
 const edges=Math.max(0,chain.length-1);
 const terminus=chain.at(-1)||null;
 const directSource=fs.readFileSync(path.join(ROOT,ENTRY),'utf8');
-const directOwners=EARLY_DISPATCH_OWNERS.filter(owner=>{
-  const quoted=owner.replace(/[.*+?^$\{\}()|[\]\\]/g,'\\const directOwners=[
-  ['distribution_priority',/ownership\.owner==='distribution_priority'/],
-  ['distribution_orchestrator',/ownership\.owner==='distribution_orchestrator'/],
-  ['seo_runtime',/ownership\.owner==='seo_runtime'/],
-  ['authority_acquisition',/ownership\.owner==='authority_acquisition'/],
-  ['mission_integrity',/ownership\.owner==='mission_integrity'/]
-].filter(([,pattern])=>pattern.test(directSource)).map(([owner])=>owner);');
-  return new RegExp(`ownership\\.owner===['"]${quoted}['"]`).test(directSource);
-});
+const directOwners=EARLY_DISPATCH_OWNERS.filter(owner=>
+  directSource.includes(`ownership.owner==='${owner}'`)||
+  directSource.includes(`ownership.owner==="${owner}"`)
+);
 
 const rootJs=fs.readdirSync(ROOT).filter(file=>file.endsWith('.js')&&fs.statSync(path.join(ROOT,file)).isFile());
 const runtimeDdlFiles=rootJs.filter(file=>/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i.test(fs.readFileSync(path.join(ROOT,file),'utf8')));
