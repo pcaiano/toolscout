@@ -4,6 +4,9 @@ import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidenc
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
 import {TOOLSCOUT_CRONS,scheduleContract} from './runtime-schedule-contract.js';
+import {routeContract,routeOwner} from './runtime-route-contract.js';
+import {handleDistributionPriorityRoute} from './distribution-priority-worker.js';
+import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
@@ -1836,8 +1839,22 @@ async function augmentRuntime(response,env){
   return Response.json(data,{status:response.status,headers:JSON_H});
 }
 
+async function earlyOwnedRoute(request,env){
+  const ownership=routeOwner(request.url,{method:request.method});
+  let response=null;
+  if(ownership.owner==='distribution_priority')response=await handleDistributionPriorityRoute(request,env);
+  else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
+  if(!response)return null;
+  const headers=new Headers(response.headers);
+  headers.set('X-ToolScout-Route-Owner',ownership.owner);
+  headers.set('X-ToolScout-Route-Contract','v2');
+  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+}
+
 export default{
   async fetch(request,env,ctx){
+    const early=await earlyOwnedRoute(request,env);
+    if(early)return early;
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
       // Observability must be read-only. Command Center polling must never execute
@@ -1877,6 +1894,8 @@ export default{
     const completeMatch=u.pathname.match(/^\/api\/compute\/batches\/(cob_[A-Za-z0-9-]+)\/complete$/);
     if(request.method==='POST'&&completeMatch)return completeBatch(request,env,ctx,completeMatch[1]);
     if(request.method==='GET'&&u.pathname==='/api/runtime/schedule-contract')return Response.json(scheduleContract(),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/route-contract')return Response.json(routeContract(),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/route-owner')return Response.json(routeOwner(u.searchParams.get('path')||'/',{method:u.searchParams.get('method')||'GET'}),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await base.fetch(request,env,ctx),env);
     return base.fetch(request,env,ctx);
   },
