@@ -935,3 +935,5 @@ export default{
     return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
   }
 };
+
+export {reconcile as reconcileOperationalTruth};

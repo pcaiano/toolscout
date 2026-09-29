@@ -375,3 +375,5 @@ export default {
     await env.DB.prepare(`DELETE FROM traffic_guard_events WHERE created_at<datetime('now','-7 days')`).run();
   }
 };
+
+export {augmentHealth as augmentTrafficGuardHealth};

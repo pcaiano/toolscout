@@ -79,43 +79,33 @@ function sqliteUtc(date){return date.toISOString().replace('T',' ').slice(0,19)}
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
   schemaReady=(async()=>{
-    await env.DB.batch([
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS verified_outbound_events (
-        proof_key TEXT PRIMARY KEY,
-        click_id INTEGER,
-        click_ref TEXT,
-        session_id TEXT NOT NULL,
-        tool_slug TEXT NOT NULL,
-        source TEXT NOT NULL,
-        affiliate_active_at_click INTEGER,
-        proof_type TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_created ON verified_outbound_events(created_at)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_session ON verified_outbound_events(session_id,created_at)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_created_affiliate ON verified_outbound_events(created_at,affiliate_active_at_click)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_verified_outbound_tool_created ON verified_outbound_events(tool_slug,created_at)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_human_evidence (
-        session_id TEXT PRIMARY KEY,
-        visitor_id TEXT,
-        evidence_type TEXT NOT NULL,
-        evidence_strength INTEGER NOT NULL DEFAULT 1,
-        interaction_count INTEGER NOT NULL DEFAULT 0,
-        first_path TEXT,
-        last_path TEXT,
-        source TEXT,
-        referrer_host TEXT,
-        country TEXT,
-        asn INTEGER,
-        first_evidence_at TEXT NOT NULL DEFAULT (datetime('now')),
-        last_evidence_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_created ON traffic_human_evidence(first_evidence_at)`),
-      env.DB.prepare(`INSERT OR IGNORE INTO outbound_integrity_meta(key,value) VALUES('tracking_started_at',datetime('now'))`),
-      env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('strict_human_tracking_started_at',datetime('now'))`)
+    const requiredTables=[
+      'verified_outbound_events',
+      'outbound_integrity_meta',
+      'traffic_integrity_meta',
+      'traffic_human_evidence'
+    ];
+    const requiredIndexes=[
+      'idx_verified_outbound_created',
+      'idx_verified_outbound_session',
+      'idx_verified_outbound_created_affiliate',
+      'idx_verified_outbound_tool_created',
+      'idx_traffic_human_evidence_created'
+    ];
+    const tableMarks=requiredTables.map(()=>'?').join(',');
+    const indexMarks=requiredIndexes.map(()=>'?').join(',');
+    const [tables,indexes,tracking,strict]=await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${tableMarks})`).bind(...requiredTables).first(),
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (${indexMarks})`).bind(...requiredIndexes).first(),
+      env.DB.prepare(`SELECT value FROM outbound_integrity_meta WHERE key='tracking_started_at' LIMIT 1`).first(),
+      env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='strict_human_tracking_started_at' LIMIT 1`).first()
     ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    const markersReady=Boolean(tracking?.value&&strict?.value);
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length||!markersReady){
+      throw new Error(`outbound_integrity_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}:markers_${markersReady?'ready':'missing'}`);
+    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount,markers:'ready'};
   })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
@@ -249,3 +239,5 @@ export default {
   },
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
+
+export {augmentHealth as augmentOutboundIntegrityHealth};

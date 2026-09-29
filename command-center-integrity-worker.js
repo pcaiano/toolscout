@@ -303,3 +303,5 @@ export default {
     try{await refreshDailyMetrics(env,event?.cron==='15 3 * * *'?8:2)}catch{}
   }
 };
+
+export {augmentHealth as augmentCommandCenterIntegrityHealth};
