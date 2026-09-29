@@ -39,9 +39,14 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/best-social-media-management-tools',{method:'GET'}).owner,'public_decision');
   assert.equal(routeOwner('/tools/typeform',{method:'GET'}).owner,'public_decision');
   assert.equal(routeOwner('/best-no-code-automation-tools',{method:'GET'}).owner,'public_decision');
-  assert.equal(routeOwner('/tools',{method:'GET'}).owner,'public_site');
-  assert.equal(routeOwner('/tools/',{method:'GET'}).owner,'public_site');
-  assert.equal(routeOwner('/compare',{method:'GET'}).owner,'public_site');
+  assert.equal(routeOwner('/tools',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/tools/',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/compare',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/guides',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/categories',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/crm-tools',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/seo-tools',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/blog/',{method:'GET'}).owner,'public_site');
   assert.equal(routeOwner('/go/airtable',{method:'GET'}).owner,'public_site');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
@@ -68,6 +73,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='analytics_stats'/);
   assert.match(src,/ownership\.owner==='analytics_human_actions'/);
   assert.match(src,/ownership\.owner==='public_decision'/);
+  assert.match(src,/ownership\.owner==='public_navigation'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
