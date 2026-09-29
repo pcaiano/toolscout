@@ -92,8 +92,10 @@ for(const row of CASES){
     continue;
   }
   const html=await candidate.text();
-  const parity=comparePublicParity(baseline.html,html,{strictSearchMetadata:true});
+  const parity=comparePublicParity(baseline.html,html,{strictSearchMetadata:true,strictInternalLinks:false});
   const capabilityErrors=compareCapabilities(row.pathname,html);
+  if(!/href=["']\/privacy["']/.test(html))capabilityErrors.push('privacy_link_missing');
+  if(!/href=["']\/analytics-consent\?choice=/.test(html))capabilityErrors.push('analytics_consent_link_missing');
   const errors=[...parity.errors,...capabilityErrors];
   if(errors.length)failed=true;
   const before=publicPageFingerprint(baseline.html),after=publicPageFingerprint(html);
