@@ -479,6 +479,7 @@ async function buildCommandCenterBusinessTruth(request,env){
     positionDelta:hasComparison&&recent7.position!=null&&previous7.position!=null?recent7.position-previous7.position:null
   };
   const verifiedThroughDate=daily28.at(-1)?.date||null;
+  const finalizedWindow=aggregateDays(daily28);
   const strictDaily=Array.isArray(strictDailyRows)?strictDailyRows.map(x=>({date:x.day,humans:truthNum(x.humans)})):[];
   const dayKeys=[];for(let i=29;i>=0;i--){const d=new Date(Date.now()-i*86400000);dayKeys.push(d.toISOString().slice(0,10))}
   const authorityHistory=dayKeys.map(day=>{
@@ -775,8 +776,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       runtimeGeneratedAt:gh?.generatedAt||gscHealth?.source_generated_at||null,
       runtimeOk:gh?.ok===true,
       runtimeStatus:gh?.status||null,
-      impressions:truthNum(w.impressions||gh?.impressions),
-      clicks:truthNum(w.clicks||gh?.clicks),
+      impressions:daily28.length?truthNum(finalizedWindow.impressions):truthNum(w.impressions||gh?.impressions),
+      clicks:daily28.length?truthNum(finalizedWindow.clicks):truthNum(w.clicks||gh?.clicks),
       observedPages:truthNum(gsc?.searchPerformance?.observedPages||gh?.observedPages),
       indexed:truthMaybeNum(idx.indexed),
       inspected:truthMaybeNum(idx.inspected),
@@ -785,6 +786,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       daily28,
       dailyGeneratedAt:gscDailyTrend?.generatedAt||reality?.searchPerformance?.trendGeneratedAt||null,
       dailySource:assetDaily28.length>=2?'gsc-daily-trend-asset':'gsc-search-reality-cache',
+      dailyDataState:gscDailyTrend?.dataState||null,
       verifiedThroughDate,
       recent7,
       previous7,
