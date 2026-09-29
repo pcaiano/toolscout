@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {canonicalPublicUrl} from '../public-canonical-contract.js';
 
 const BASE=(process.env.TOOLSCOUT_BASE_URL||'https://trytoolscout.org').replace(/\/$/,'');
 const errors=[],warnings=[];
@@ -43,9 +44,9 @@ for(const pathname of paths){
   if(!live.ok){errors.push({code:'critical_page_unavailable',pathname,status:live.status});continue;}
   const file=fileFor(pathname);
   if(!fs.existsSync(file))continue;
-  const expectedCanonical=canonical(fs.readFileSync(file,'utf8'));
   const liveCanonical=canonical(live.text);
-  if(expectedCanonical&&liveCanonical!==expectedCanonical){
+  const expectedCanonical=canonicalPublicUrl(new URL(live.url).pathname);
+  if(liveCanonical!==expectedCanonical){
     errors.push({code:'live_canonical_mismatch',pathname,expected:expectedCanonical,actual:liveCanonical});
   }
 }
