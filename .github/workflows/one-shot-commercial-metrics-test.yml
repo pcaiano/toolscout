@@ -1,0 +1,25 @@
+name: One Shot Commercial Metrics Test
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-commercial-metrics-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Validate commercial metrics implementation
+        run: |
+          set -euo pipefail
+          node --check outbound-integrity-worker.js
+          node --check operational-truth-reconciliation-worker.js
+          node --check command-center-simplified-view.js
+          node --check growth-command-center-v2-worker.js
+          node tests/commercial-click-reconciliation.test.mjs
