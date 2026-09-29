@@ -31,10 +31,17 @@ jobs:
       - name: Validate ToolScout 2.0 runtime
         run: |
           node scripts/audit-runtime-architecture.mjs
-          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs
+          node scripts/validate-v2-preservation.mjs
+          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs
+          node tests/growth-scheduler-ownership.mjs
 
       - name: Apply canonical public navigation
         run: node scripts/unify-public-nav.mjs
+
+      - name: Recheck preservation after navigation materialization
+        env:
+          TOOLSCOUT_V2_BASE_REF: HEAD
+        run: node scripts/validate-v2-preservation.mjs
 
       - name: Apply D1 migrations
         run: npx wrangler d1 migrations apply toolscout --remote --config wrangler.toml
