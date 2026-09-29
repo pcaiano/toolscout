@@ -33,12 +33,13 @@ async function assetJson(request,env,path,fallback){
 }
 async function config(request,env){
   if(configCache&&Date.now()-configCache.at<3600000)return configCache.value;
-  const [intents,consolidations,adapters]=await Promise.all([
+  const [intents,consolidations,adapters,gscTrend]=await Promise.all([
     assetJson(request,env,'/data/intents.json',[]),
     assetJson(request,env,'/data/seo-consolidations.json',{}),
-    assetJson(request,env,'/data/distribution-submission-adapters.json',{adapters:[]})
+    assetJson(request,env,'/data/distribution-submission-adapters.json',{adapters:[]}),
+    assetJson(request,env,'/data/gsc-daily-trend.json',{periodComparison:null})
   ]);
-  const value={intents:Array.isArray(intents)?intents:[],consolidations:consolidations||{},adapters:adapters?.adapters||[]};
+  const value={intents:Array.isArray(intents)?intents:[],consolidations:consolidations||{},adapters:adapters?.adapters||[],gscTrend:gscTrend||{}};
   configCache={at:Date.now(),value};return value;
 }
 async function gscSignals(env){
@@ -61,6 +62,19 @@ async function recoveryTargets(env,limit=8){
     return rows.filter(x=>String(x?.pathname||'').startsWith('/')&&!String(x.pathname).startsWith('/analytics'));
   }catch{return[]}
 }
+function weeklyLossTargets(cfg,route,limit=8){
+  const losses=cfg?.gscTrend?.periodComparison?.pages?.losses;
+  if(!Array.isArray(losses))return[];
+  const prefix=route==='/guides'?'/best-':route==='/tools'?'/tools/':null;
+  return losses.filter(row=>{
+    const pathname=String(row?.page||'');
+    if(prefix)return pathname.startsWith(prefix);
+    if(route==='/compare')return /-vs-|alternatives/.test(pathname);
+    return false;
+  }).filter(row=>Number(row?.impressionsDelta||0)<0&&Number(row?.impressions||0)>0)
+    .slice(0,Math.max(1,Math.min(12,Number(limit)||8)))
+    .map(row=>({pathname:String(row.page),reason:'weekly_search_loss',impressions:Number(row.impressions||0),position:Number(row.position||0),impressionsDelta:Number(row.impressionsDelta||0)}));
+}
 function recoveryLinksBlock(targets){
   if(!targets.length)return'';
   const links=targets.map(row=>{
@@ -68,7 +82,7 @@ function recoveryLinksBlock(targets){
     const label=pathname.replace(/^\//,'').replace(/\.html$/i,'').replace(/-/g,' ').replace(/\b\w/g,ch=>ch.toUpperCase());
     return `<a href="${esc(pathname)}" data-toolscout-index-recovery-link="1">${esc(label||'ToolScout guide')}</a>`;
   }).join(' · ');
-  return `<!-- toolscout-index-recovery-links:start --><section class="section" data-toolscout-index-recovery-links="1"><h2>Recently strengthened ToolScout guides</h2><p class="small">Related decision pages currently being reinforced for discovery and indexing.</p><p>${links}</p></section><!-- toolscout-index-recovery-links:end -->`;
+  return `<!-- toolscout-index-recovery-links:start --><section class="section" data-toolscout-index-recovery-links="1"><h2>Pages strengthened from live search demand</h2><p class="small">ToolScout reinforces useful pages when Search Console shows meaningful demand or a recent visibility loss.</p><p>${links}</p></section><!-- toolscout-index-recovery-links:end -->`;
 }
 function criteriaFor(cfg,slug){
   const intent=cfg.intents.find(x=>x?.slug===slug);
@@ -136,8 +150,16 @@ async function transformPage(request,response,env){
       html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
     }
     if(['/guides','/tools','/compare'].includes(pathname)&&!html.includes('data-toolscout-index-recovery-links="1"')){
-      const targets=await recoveryTargets(env,8);
-      const block=recoveryLinksBlock(targets);
+      const weekly=weeklyLossTargets(cfg,pathname,8);
+      const contract=await recoveryTargets(env,8);
+      const merged=[],seenLinks=new Set();
+      for(const row of [...weekly,...contract]){
+        const key=String(row?.pathname||'');
+        if(!key||seenLinks.has(key))continue;
+        seenLinks.add(key);merged.push(row);
+        if(merged.length>=8)break;
+      }
+      const block=recoveryLinksBlock(merged);
       if(block)html=html.replace(/<\/body>/i,block+'</body>');
     }
     if(html===original)return response;
