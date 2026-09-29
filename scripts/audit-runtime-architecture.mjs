@@ -6,7 +6,7 @@ const ROOT=process.cwd();
 const ENTRY='compute-router-worker.js';
 const MAX_LEGACY_EDGES=72;
 const MIN_DIRECT_ROUTE_COVERAGE_PCT=85;
-const ALLOWED_LEGACY_GROUPS=new Set(['analytics_control','public_blog','affiliate_redirect']);
+const ALLOWED_LEGACY_GROUPS=new Set(['analytics_control','affiliate_redirect']);
 
 function baseImport(file){
   const full=path.join(ROOT,file);
