@@ -31,8 +31,17 @@ function takeGraphemes(text,max){
   return graphemeSegments(text).slice(0,Math.max(0,max)).join('');
 }
 const BLUESKY_DANGLING_TERMINAL=/\b(?:at|to|for|with|from|via|and|or|but|because|if|when|while|about|of|in|on|by)\s*[.!?)]*$/i;
+const BLUESKY_INTERNAL_CONTROL_EXACT=/^(?:skip|pass|no reply|do not reply|don't reply|ignore|n\/a|none)$/i;
+const BLUESKY_MODEL_META_TEXT=/(?:^|\b)(?:(?:to be honest,?\s*)?i\s+(?:need|have)\s+to\s+(?:pause|stop)(?:\s+on\s+this(?:\s+one)?)?|i\s+(?:can't|cannot|won't|shouldn't|should not)\s+(?:answer|respond|reply|help|assist)|i(?:'m| am)\s+(?:going to|gonna)\s+(?:skip|pause|stop)|i\s+(?:must|need to)\s+decline|i\s+(?:can't|cannot)\s+continue|as an ai(?:\s+assistant)?\b)/i;
 function hasDanglingBlueskyTerminal(value){
   return BLUESKY_DANGLING_TERMINAL.test(String(value||'').trim());
+}
+function blueskyReplySemanticRisk(value){
+  const text=normalizeBlueskyCopy(value);
+  if(!text)return 'empty';
+  if(BLUESKY_INTERNAL_CONTROL_EXACT.test(text))return 'internal_control_text';
+  if(BLUESKY_MODEL_META_TEXT.test(text))return 'model_meta_text';
+  return null;
 }
 function completeSentencePrefixWithinBlueskyLimit(value,target){
   const text=normalizeBlueskyCopy(value);
@@ -184,6 +193,8 @@ async function prepareBlueskyReply(request,env){
   let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:jsonHeaders})}
   const result=completeBlueskyReply(body.text,{target:Math.min(BLUESKY_REPLY_TARGET_GRAPHEMES,Math.max(120,Number(body.target_graphemes)||BLUESKY_REPLY_TARGET_GRAPHEMES))});
   if(!result.text)return Response.json({ok:false,error:result.reason==='requires_regeneration'?'reply_requires_regeneration':'empty_reply',...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,policy:'complete-or-block-no-synthetic-truncation-v2'},{status:422,headers:jsonHeaders});
+  const semanticRisk=blueskyReplySemanticRisk(result.text);
+  if(semanticRisk)return Response.json({ok:false,error:'reply_blocked_internal_control_text',semanticRisk,...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,policy:'public-facing-semantic-guard-v3'},{status:422,headers:jsonHeaders});
   const valid=withinBlueskyLimits(result.text,BLUESKY_MAX_GRAPHEMES);
   if(!valid)return Response.json({ok:false,error:'reply_still_over_limit',...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES},{status:422,headers:jsonHeaders});
   return Response.json({ok:true,...result,maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,policy:'complete-or-block-no-synthetic-truncation-v2'},{headers:jsonHeaders});
@@ -339,7 +350,7 @@ export default {
     if(url.pathname==='/api/audience/platform-capabilities'&&request.method==='GET')return Response.json({ok:true,health:socialPlatformCapabilityHealth(),platforms:SOCIAL_PLATFORM_CAPABILITIES},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
     if(url.pathname==='/api/audience/dev-comments/candidates'&&request.method==='GET')return Response.json(await devCommentCandidates(env),{headers:{...jsonHeaders,'Cache-Control':'no-store'}});
     if(url.pathname==='/api/audience/dev-comment/observe'&&request.method==='POST')return observeDevComment(request,env);
-    if(url.pathname==='/api/audience/bluesky-reply/health'&&request.method==='GET')return Response.json({ok:true,version:'complete-sentence-no-hard-cut-v1',maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,requiresPrepareBeforePublish:true},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
+    if(url.pathname==='/api/audience/bluesky-reply/health'&&request.method==='GET')return Response.json({ok:true,version:'public-facing-semantic-guard-v3',maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,requiresPrepareBeforePublish:true,blocksInternalControlText:true},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
     if(url.pathname==='/api/audience/bluesky-reply/prepare'&&request.method==='POST')return prepareBlueskyReply(request,env);
     if(url.pathname==='/api/stats'&&request.method==='GET')return augmentStats(request,env,ctx);
     if(url.pathname==='/analytics.html'&&request.method==='GET'){
