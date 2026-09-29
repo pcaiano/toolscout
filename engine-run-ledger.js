@@ -60,46 +60,24 @@ export function copyMissionCycleHeaders(fromRequest,toHeaders){
 export async function ensureEngineRunSchema(env){
   if(schemaReady)return schemaReady;
   schemaReady=(async()=>{
-    await env.DB.batch([
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS engine_runs (
-        run_id TEXT PRIMARY KEY,
-        engine TEXT NOT NULL,
-        mission TEXT NOT NULL,
-        trigger_name TEXT,
-        status TEXT NOT NULL,
-        started_at TEXT NOT NULL DEFAULT (datetime('now')),
-        completed_at TEXT,
-        detail TEXT,
-        evidence_json TEXT,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_engine_started ON engine_runs(engine,started_at DESC)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_status_started ON engine_runs(status,started_at DESC)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_runs_started ON engine_runs(started_at DESC)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS engine_run_leases (
-        engine TEXT NOT NULL,
-        mission TEXT NOT NULL,
-        run_id TEXT NOT NULL,
-        acquired_at TEXT NOT NULL DEFAULT (datetime('now')),
-        expires_at TEXT NOT NULL,
-        PRIMARY KEY(engine,mission)
-      )`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS engine_cycle_claims (
-        engine TEXT NOT NULL,
-        mission TEXT NOT NULL,
-        cycle_key TEXT NOT NULL,
-        owner TEXT NOT NULL,
-        run_id TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'running',
-        attempts INTEGER NOT NULL DEFAULT 1,
-        acquired_at TEXT NOT NULL DEFAULT (datetime('now')),
-        completed_at TEXT,
-        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-        PRIMARY KEY(engine,mission,cycle_key)
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_engine_cycle_claims_updated ON engine_cycle_claims(updated_at DESC)`)
+    const requiredTables=['engine_runs','engine_run_leases','engine_cycle_claims'];
+    const requiredIndexes=[
+      'idx_engine_runs_engine_started',
+      'idx_engine_runs_status_started',
+      'idx_engine_runs_started',
+      'idx_engine_cycle_claims_updated'
+    ];
+    const tableMarks=requiredTables.map(()=>'?').join(',');
+    const indexMarks=requiredIndexes.map(()=>'?').join(',');
+    const [tables,indexes]=await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${tableMarks})`).bind(...requiredTables).first(),
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (${indexMarks})`).bind(...requiredIndexes).first()
     ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length){
+      throw new Error(`engine_run_ledger_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}`);
+    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount};
   })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
