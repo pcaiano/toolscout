@@ -172,7 +172,7 @@ function authorityProgress(){
  const externalAuthority=b.domainAuthority!=null?b.domainAuthority:b.seRankingLastDomainAuthority;
  const ageHours=Number.isFinite(Number(b.seRankingAgeHours))?Number(b.seRankingAgeHours):null;
  const statusLabel=status==='fresh'?'fresh':status==='stale'?'stale':'unavailable';
- const ageLabel=ageHours==null?'':(' · '+(ageHours<1?'<1h':Math.round(ageHours)+'h')+' old');
+ const ageLabel=ageHours==null?'':(' · '+(ageHours<1?'under 1h':Math.round(ageHours)+'h')+' old');
  document.getElementById('authorityProgressMeta').textContent=b.seRankingObservedAt?'SE Ranking Data API · '+statusLabel+' · refreshed '+dt(b.seRankingObservedAt):(b.latestPlacementVerifiedAt?'Latest placement '+dt(b.latestPlacementVerifiedAt):'Authority history');
  document.getElementById('authorityProgressBody').innerHTML=
   '<div class="progressTop"><div class="progressStats">'+
