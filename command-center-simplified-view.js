@@ -124,9 +124,10 @@ async function get(url,fresh=false){
  return r.json();
 }
 function business(){
- const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
+ const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},c=t.commercialActivity||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
  let headline='Execution is running, but business results are not yet proven.';
  let detail='Human Acquisition v4 is always on but resource-bounded: 60% existing search demand, 25% authority/vendor network, 10% AI/AEO discovery and 5% Growth R&D. GA4 is canonical traffic; strict-human evidence proves attribution quality. Activity itself is not success.';
+ if(Number(c?.vendorReported?.clickFloor)>0)headline='Affiliate networks confirm commercial click activity. First-party attribution is shown separately so it cannot disappear behind strict filters.';
  if(Number(g.strictHumans24h)>0)headline='Verified humans are arriving. Conversion is now the next proof point.';
  if(Number(g.verifiedOutbound24h)>0)headline='Verified humans are reaching vendors. Monetization is now the next proof point.';
  if(Number(g.monetizedOutbound24h)>0)headline='Monetized outbound is active. Scale only sources that preserve verified human quality.';
@@ -137,8 +138,10 @@ function business(){
   '<div class="metrics">'+
    metric('GA4 sessions - 24h',a.status==='connected'?n(ga.last24Hours):'Unavailable',a.status==='connected'?n(ga.monthToDate)+' MTD · canonical traffic':'GA4 source unavailable')+
    metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · quality proof')+
-   metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d')+
-   metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d')+
+   metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d · strict first-party')+
+   metric('Tracked social affiliate redirects - 24h',n(c?.socialAffiliateRedirects?.clicks24h),n(c?.socialAffiliateRedirects?.clicks7d)+' / 7d · first-party commercial tracking')+
+   metric('Affiliate-network click floor',n(c?.vendorReported?.clickFloor),(c?.vendorReported?.evidence?.length?n(c.vendorReported.evidence.length)+' external evidence source(s)':'No external click evidence'))+
+   metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d · strict first-party')+
    metric('Backlinks',n(b.seRankingBacklinks??b.observedBacklinks??b.verifiedBacklinks),b.seRankingObservedAt?'SE Ranking · snapshot '+dt(b.seRankingObservedAt):human(b.backlinkCountSource||'External backlink truth'))+
    metric('Referring domains (unique)',n(b.seRankingReferringDomains??b.referringDomains??b.verifiedReferringDomains),(b.seRankingDofollowReferringDomains!=null?n(b.seRankingDofollowReferringDomains)+' dofollow · ':'')+human(b.referringDomainSource||'External authority source'))+
    metric('Domain authority',b.domainAuthority==null?'Unavailable':n(b.domainAuthority),b.domainAuthoritySource||'External authority source')+
@@ -152,6 +155,7 @@ function business(){
    row('Research jobs - today',n(data?.compute?.distributionFunnel?.researchCompletedToday)+' distribution routes completed',n(data?.compute?.researchUsedToday)+' authorized · '+n(data?.compute?.dailyJobBudget||g.researchExternalJobMax24h||1500)+' / day capacity')+
    row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
    row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
+   row('Commercial click truth','Sources kept separate','Verified first-party, tracked social redirects and affiliate-network counters can overlap and are never summed.')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
 }
