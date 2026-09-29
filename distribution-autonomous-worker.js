@@ -419,7 +419,7 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
   const score=Number(row.distribution_score||0);
   if(!isAuth&&!isCaptcha&&score<PRIORITY_HUMAN_GATE_THRESHOLD)return {opened:false,reason:'manual_route_below_human_priority_threshold'};
   if(await existingParentSubmission(env,row.surface_slug)){await reconcileDuplicateSubmissionGates(env);return {opened:false,reason:'existing_parent_submission'};}
-  const gateType=isAuth?'authentication':isCaptcha?'human_confirmation':'manual_submission';
+  const gateType=postAuthFollowup?'manual_submission':isAuth?'authentication':isCaptcha?'human_confirmation':'manual_submission';
   const target=row.surface_name||row.surface_slug;
   const evidenceDetail=isAuth&&isCaptcha
     ?'Render classifier found an exact same-host ToolScout submission route that requires authentication and an interactive CAPTCHA.'
@@ -428,15 +428,31 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
       :isCaptcha
         ?'Render classifier found an exact same-host ToolScout submission route with an interactive CAPTCHA.'
         :'Render classifier found an exact same-host ToolScout submission route, but no safe automatic adapter was available.';
-  const reason=`${target}: ${evidenceDetail} Cloudflare validated the structured same-host route evidence and requires owner action before execution can continue.`;
-  const instructions=isAuth
-    ?`Open ${actionUrl}. Sign in or create only the minimum free account needed to submit ToolScout. Complete CAPTCHA or MFA yourself if shown. Submit ToolScout once using the prepared details below. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion or add a reciprocal badge. Return here and mark the task done.`
+  const reason=postAuthFollowup
+    ?`${target}: account creation/authentication was already completed. The exact submission route still requires an interactive signed-in browser step, so only the submission itself remains for the owner.`
+    :`${target}: ${evidenceDetail} Cloudflare validated the structured same-host route evidence and requires owner action before execution can continue.`;
+  const instructions=postAuthFollowup
+    ?`Open ${actionUrl} in your normal browser, sign in with the account you already created if needed, and submit ToolScout once using the prepared details below. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion or add a reciprocal badge. Return here and mark the task done.`
+    :isAuth
+      ?`Open ${actionUrl}. Sign in or create only the minimum free account needed to submit ToolScout. Complete CAPTCHA or MFA yourself if shown. Submit ToolScout once using the prepared details below. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion or add a reciprocal badge. Return here and mark the task done.`
     :isCaptcha
       ?`Open ${actionUrl}. Complete the CAPTCHA yourself, fill the ToolScout submission fields with the prepared details below, and submit once. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion, add a reciprocal badge or invent claims. Return here and mark the task done.`
       :`Open ${actionUrl}. Complete the ToolScout submission manually with the prepared details below and submit once. If ToolScout is already listed, copy the existing result URL instead. Do not buy promotion, add a reciprocal badge or invent claims. Return here and mark the task done.`;
   const gateKeyValue=humanGateKey('distribution','surface',row.surface_slug);
-  const previous=await env.DB.prepare('SELECT status,payload_json,verification_detail FROM human_gate_contract WHERE gate_key=?').bind(gateKeyValue).first().catch(()=>null);
-  if(previous?.status==='resolved')return {opened:false,reason:'gate_already_resolved',status:previous.status};
+  const previous=await env.DB.prepare('SELECT status,gate_type,payload_json,verification_detail FROM human_gate_contract WHERE gate_key=?').bind(gateKeyValue).first().catch(()=>null);
+  let postAuthFollowup=false;
+  if(previous?.status==='resolved'){
+    let oldPayload={};try{oldPayload=JSON.parse(previous.payload_json||'{}')||{}}catch{}
+    const authWasCompleted=previous.gate_type==='authentication'
+      && oldPayload.post_auth_submission!==true
+      && /account creation|authenticated|login|sign[- ]?in|session/i.test(String(previous.verification_detail||''));
+    if(!authWasCompleted)return {opened:false,reason:'gate_already_resolved',status:previous.status};
+    postAuthFollowup=true;
+    await env.DB.prepare(`UPDATE human_gate_contract
+      SET status='open',gate_type='manual_submission',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,
+          next_verification_at=NULL,verification_attempts=0,verification_detail='reopened_post_auth_submission_step',updated_at=datetime('now')
+      WHERE gate_key=? AND status='resolved'`).bind(gateKeyValue).run().catch(()=>{});
+  }
   if(previous?.status==='verification_pending')return {opened:false,reason:'gate_verification_pending',status:previous.status};
   if(previous?.status==='cancelled'){
     let oldPayload={};try{oldPayload=JSON.parse(previous.payload_json||'{}')||{}}catch{}
@@ -453,10 +469,10 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
     engine:'distribution',subjectType:'surface',subjectKey:row.surface_slug,gateType,
     title:`${target}: human step required`,reason,instructions,actionUrl,
     resolutionMode:'verify_publication',
-    payload:{...humanGatePayload(),gate_evidence:{url:actionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail},research_classifier_version:Number(result?.classifierVersion||RESEARCH_CLASSIFIER_VERSION),submission_intent:true,research_route_label:safe(route.label||'',240)},
+    payload:{...humanGatePayload(),gate_evidence:{url:actionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail},research_classifier_version:Number(result?.classifierVersion||RESEARCH_CLASSIFIER_VERSION),submission_intent:true,research_route_label:safe(route.label||'',240),post_auth_submission:postAuthFollowup},
     verificationUrl:null
   });
-  const status=isAuth?'auth_required':'human_action_required';
+  const status=postAuthFollowup?'human_action_required':isAuth?'auth_required':'human_action_required';
   await env.DB.batch([
     env.DB.prepare(`UPDATE distribution_opportunities SET status=?,human_required=1,action_url=?,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(status,actionUrl,instructions,row.surface_slug),
     env.DB.prepare(`INSERT INTO distribution_qualification_events(qualification_id,surface_slug,source_url,result,detail,created_at) VALUES(?,?,?,?,?,datetime('now'))`).bind(`qual_${crypto.randomUUID()}`,row.surface_slug,actionUrl,status,evidenceDetail)
