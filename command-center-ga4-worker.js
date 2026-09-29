@@ -196,6 +196,10 @@ export default {
       if(!ownerRouteAuthenticated(request))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
       const acquisition=await ga4Snapshot(env,request);return Response.json(acquisition,{status:acquisition.status==='connected'?200:503,headers:JSON_H});
     }
+    if(request.method==='GET'&&url.pathname==='/analytics/api/commerce'){
+      if(!ownerRouteAuthenticated(request))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+      const commerce=await serverCommerceSnapshot(env);return Response.json(commerce,{status:commerce.status==='connected'?200:503,headers:JSON_H});
+    }
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats'){
       const upstream=await base.fetch(request,env,ctx);if(!upstream.ok)return upstream;
       let data;try{data=await upstream.json()}catch{return new Response('Command Center stats unavailable',{status:502,headers:{'Cache-Control':'no-store'}})}
