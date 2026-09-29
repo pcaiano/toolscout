@@ -44,9 +44,9 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </main>
 </div>
 <script>
-const endpoints={acquisition:'/analytics/api/google/acquisition',commerce:'/analytics/api/commerce',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
-let data={acquisition:null,commerce:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
-const sourceErrors={acquisition:null,commerce:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+const endpoints={acquisition:'/analytics/api/google/acquisition',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
+let data={acquisition:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+const sourceErrors={acquisition:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
 let sessionRefreshPromise=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const n=v=>(v===null||v===undefined||v==='')?'Unavailable':(Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable');
@@ -124,26 +124,26 @@ async function get(url,fresh=false,timeoutMs=12000){
  return r.json();
 }
 function business(){
- const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},a=data.acquisition||{},commerce=data.commerce||{},q=data.queue||{};
- const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=t.search||{},out24=commerce?.last24Hours||{},outMtd=commerce?.monthToDate||{};
+ const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},a=data.acquisition||{},q=data.queue||{};
+ const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=t.search||{},out24=a?.outbound?.last24Hours||{},outMtd=a?.outbound?.monthToDate||{};
  const visitors=a.status==='connected'?(gaUsers.activeToday??gaUsers.today):null;
  const sessions24=a.status==='connected'?gaSessions.last24Hours:null;
  const googleClicks=gsc?.clicks??null;
- const outbound24=commerce.status==='connected'?out24.outbound:null;
- const monetized24=commerce.status==='connected'?out24.monetized:null;
+ const outbound24=a.status==='connected'?out24.outbound:null;
+ const monetized24=a.status==='connected'?out24.monetized:null;
  const kpiHealthy=[visitors,sessions24,googleClicks,outbound24,monetized24].filter(v=>v!==null&&v!==undefined).length;
  let headline='Core business metrics are available.';
- let detail='GA4 is canonical for visitors and sessions. Search Console is canonical for Google clicks. The server redirect ledger is canonical for outbound and monetized outbound.';
- if(kpiHealthy<5){headline='One or more core metrics are unavailable.';detail='Each KPI now has its own source. A failure in one source no longer removes the others.'}
- document.getElementById('businessMeta').textContent='GA4 + Google Search Console + server outbound';
+ let detail='GA4 is canonical for visitors, sessions and browser outbound clicks. Search Console is canonical for Google clicks. Server /go/ requests are diagnostic only.';
+ if(kpiHealthy<5){headline='One or more core metrics are unavailable.';detail='Each KPI keeps its own canonical source. Missing data stays unavailable rather than being replaced by server request counts.'}
+ document.getElementById('businessMeta').textContent='GA4 + Google Search Console';
  document.getElementById('businessBody').innerHTML=
   '<div class="headline"><b>'+esc(headline)+'</b><span>'+esc(detail)+'</span></div>'+
   '<div class="metrics">'+
    metric('Visitors - today',n(visitors),a.status==='connected'?'GA4 users · '+n(gaUsers.monthToDate)+' MTD':'GA4 unavailable')+
    metric('Sessions - 24h',n(sessions24),a.status==='connected'?n(gaSessions.monthToDate)+' MTD · GA4':'GA4 unavailable')+
    metric('Google clicks - 28d',n(googleClicks),'Google Search Console')+
-   metric('Outbound clicks - 24h',n(outbound24),commerce.status==='connected'?n(outMtd.outbound)+' MTD · server ledger':'Outbound source unavailable')+
-   metric('Monetized outbound - 24h',n(monetized24),commerce.status==='connected'?n(outMtd.monetized)+' MTD · affiliate active at click':'Outbound source unavailable')+
+   metric('Outbound clicks - 24h',n(outbound24),a.status==='connected'?n(outMtd.outbound)+' MTD · GA4 vendor_outbound':'GA4 outbound unavailable')+
+   metric('Monetized outbound - 24h',n(monetized24),a.status==='connected'?'GA4 monetized_outbound · tracking from 29 Sep':'GA4 outbound unavailable')+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
    row('Active affiliates',aff.productionRoutes==null?'Unavailable':n(aff.productionRoutes),'Production routes')+
@@ -382,7 +382,7 @@ document.addEventListener('click',e=>{
  const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
 });
 const FAST_KEYS=['queue','runtime','authority','compute','auth'];
-const HEAVY_KEYS=['acquisition','commerce','truth'];
+const HEAVY_KEYS=['acquisition','truth'];
 let fastBusy=false,heavyBusy=false,lastFast=0,lastHeavy=0;
 
 async function fetchKeys(keys,{fresh=false,announce=false}={}){
