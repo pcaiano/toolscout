@@ -37,7 +37,7 @@ async function readAffiliateMap(request,env){ try{const response=await env.ASSET
 async function consolidatedSeoRedirect(request,env,url){if(!/^\/best-[a-z0-9-]+(?:\.html)?$/i.test(url.pathname))return null;try{const response=await env.ASSETS.fetch(new Request(new URL('/data/seo-consolidations.json',request.url)));if(!response.ok)return null;const redirects=await response.json();const slug=url.pathname.slice(1).replace(/\.html$/i,'');const target=redirects[slug];if(!target)return null;return new Response(null,{status:301,headers:{Location:`${BASE}/${target}.html`,'Cache-Control':'public, max-age=3600'}});}catch{return null;}}
 async function readSeoConsolidations(request,env){try{const response=await env.ASSETS.fetch(new Request(new URL('/data/seo-consolidations.json',request.url)));return response.ok?await response.json():{};}catch{return {};}}
 function rowsOnly(result){return result?.results||[];}
-async function isAccessAuthenticated(request,ctx){
+export async function isAccessAuthenticated(request,ctx){
   const email=request.headers.get('Cf-Access-Authenticated-User-Email')||request.headers.get('cf-access-authenticated-user-email')||'';
   if(email.toLowerCase()==='pcaiano@gmail.com') return true;
   try{
