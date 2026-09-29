@@ -1,7 +1,9 @@
 import {trafficHealth} from './traffic-integrity-worker.js';
 import {augmentTrafficGuardHealth} from './traffic-integrity-guard-worker.js';
+import {augmentOutboundIntegrityHealth} from './outbound-integrity-worker.js';
 import {augmentVisitorIntegrityHealth} from './visitor-integrity-worker.js';
 import {augmentCommandCenterIntegrityHealth} from './command-center-integrity-worker.js';
+import {augmentMissionIntegrityHealth} from './mission-integrity-worker.js';
 import {reconcileOperationalTruth} from './operational-truth-reconciliation-worker.js';
 
 export async function handleTrafficIntegrityHealthRoute(request,env){
@@ -15,8 +17,10 @@ export async function handleTrafficIntegrityHealthRoute(request,env){
     }
   });
   response=await augmentTrafficGuardHealth(response,env);
+  response=await augmentOutboundIntegrityHealth(response,env);
   response=await augmentVisitorIntegrityHealth(response,env);
   response=await augmentCommandCenterIntegrityHealth(response,env);
+  response=await augmentMissionIntegrityHealth(response,env);
   response=await reconcileOperationalTruth(response,env);
 
   const headers=new Headers(response.headers);
