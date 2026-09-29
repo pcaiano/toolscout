@@ -67,7 +67,7 @@ const cases=[
   {pathname:'/tools/tally',file:'tools/tally.html'}
 ];
 
-test('Phase 6 candidate owns only tool profiles and best guides',()=>{
+test('verified decision owner serves only tool profiles and best guides',()=>{
   assert.equal(publicDecisionRoute('/tools/airtable')?.kind,'tool');
   assert.equal(publicDecisionRoute('/best-seo-tools-for-agencies')?.kind,'guide');
   assert.equal(publicDecisionRoute('/compare') ,null);
@@ -75,13 +75,13 @@ test('Phase 6 candidate owns only tool profiles and best guides',()=>{
 });
 
 for(const row of cases){
-  test(`public parity candidate preserves ${row.pathname}`,async()=>{
+  test(`verified public decision preserves ${row.pathname}`,async()=>{
     const before=fs.readFileSync(path.join(ROOT,row.file),'utf8');
     const response=await renderPublicDecisionCandidate(new Request('https://trytoolscout.org'+row.pathname),env());
     assert.ok(response instanceof Response);
     assert.equal(response.status,200);
     assert.equal(response.headers.get('X-ToolScout-Public-Plane'),'decision-v1');
-    assert.equal(response.headers.get('X-ToolScout-Public-Parity'),'candidate');
+    assert.equal(response.headers.get('X-ToolScout-Public-Parity'),'verified-v1');
     const after=await response.text();
     const parity=comparePublicParity(before,after);
     assert.equal(parity.ok,true,JSON.stringify(parity.errors));
@@ -90,14 +90,14 @@ for(const row of cases){
   });
 }
 
-test('candidate does not replace static guide with runtime ranking',async()=>{
+test('verified renderer does not replace static guide with runtime ranking',async()=>{
   const response=await renderPublicDecisionCandidate(new Request('https://trytoolscout.org/best-seo-tools-for-agencies'),env());
   const html=await response.text();
   assert.match(html,/Official source/i);
   assert.doesNotMatch(html,/New catalog tools compete under the same eligibility/i);
 });
 
-test('tool candidate preserves monetized outbound route and editorial evidence',async()=>{
+test('verified tool renderer preserves monetized outbound route and editorial evidence',async()=>{
   const response=await renderPublicDecisionCandidate(new Request('https://trytoolscout.org/tools/airtable'),env());
   const html=await response.text();
   const fp=publicPageFingerprint(html);
