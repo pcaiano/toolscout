@@ -224,13 +224,19 @@ async function health(env){
   return {status:'active',executor:'cloudflare',qualityGate:'runtime-safe-v1',state:{total:Number(summary?.total||0),active:Number(summary?.active||0),indexNowQueued24h:Number(summary?.indexnow_queued_24h||0),updatedAt:summary?.updated_at||null},items};
 }
 
+export async function handleSeoRuntimeRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/api/seo/runtime-health'){
+    await refreshState(request,env).catch(()=>{});
+    return Response.json(await health(env),{headers:H});
+  }
+  return null;
+}
+
 export default{
   async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/seo/runtime-health'){
-      await refreshState(request,env).catch(()=>{});
-      return Response.json(await health(env),{headers:H});
-    }
+    const owned=await handleSeoRuntimeRoute(request,env);
+    if(owned)return owned;
     const response=await base.fetch(request,env,ctx);
     return transformPage(request,response,env);
   },
