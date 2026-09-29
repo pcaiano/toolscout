@@ -20,6 +20,8 @@ assert.match(truth,/firstPartyRedirects/);
 assert.match(truth,/browserQualified/);
 assert.match(truth,/strictVerified/);
 assert.match(truth,/Unknown\/unverified traffic is never relabelled as bot/);
+assert.match(truth,/Source failures are reported as unavailable, never coerced to zero/);
+assert.match(truth,/window24hComplete/);
 assert.match(truth,/affiliate_network_accounts/);
 assert.match(truth,/affiliate_network_program_evidence/);
 assert.match(truth,/pedro@trytoolscout\.org/);
@@ -32,6 +34,8 @@ assert.match(commandCenter,/Browser-qualified outbound - 24h/);
 assert.match(commandCenter,/Strict \/ user-activated outbound - 24h/);
 assert.match(commandCenter,/PartnerStack network clicks/);
 assert.match(commandCenter,/Unknown stays unknown/);
+assert.match(commandCenter,/partial window since/);
+assert.match(commandCenter,/v===null\|\|v===undefined/);
 assert.match(commandCenter,/PartnerStack accounts/);
 assert.match(commandCenter,/PartnerStack current programmes/);
 
