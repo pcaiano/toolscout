@@ -89,7 +89,7 @@ for(const pathname of PATHS){
     continue;
   }
   const candidateHtml=await candidate.text();
-  const parity=comparePublicParity(baseline.html,candidateHtml);
+  const parity=comparePublicParity(baseline.html,candidateHtml,{strictSearchMetadata:true});
   const baselineFp=publicPageFingerprint(baseline.html);
   const candidateFp=publicPageFingerprint(candidateHtml);
   if(parity.errors.length)failed=true;
