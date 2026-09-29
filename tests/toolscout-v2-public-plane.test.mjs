@@ -30,3 +30,36 @@ test('non-news pages remain on staged legacy fallback',async()=>{
   const response=await handlePublicEditorialRoute(new Request('https://trytoolscout.org/best-seo-tools-for-agencies'),env);
   assert.equal(response,null);
 });
+
+
+test('Software Trends HTML is owned by the direct editorial plane',()=>{
+  assert.equal(ownsPublicEditorialPath('/software-trends-index'),true);
+  assert.equal(ownsPublicEditorialPath('/software-trends-index.html'),true);
+  assert.equal(ownsPublicEditorialPath('/software-trends-index.json'),true);
+});
+
+test('Software Trends legacy html URL preserves current extensionless redirect behavior',async()=>{
+  const response=await handlePublicEditorialRoute(
+    new Request('https://trytoolscout.org/software-trends-index.html?edition=2026-09'),
+    env
+  );
+  assert.equal(response.status,308);
+  assert.equal(response.headers.get('location'),'https://trytoolscout.org/software-trends-index?edition=2026-09');
+});
+
+test('Software Trends JSON dataset bypasses HTML transforms',async()=>{
+  const datasetEnv={ASSETS:{fetch:async request=>{
+    const p=new URL(request.url).pathname;
+    if(p==='/software-trends-index.json')return new Response(JSON.stringify({version:4,updates:[]}),{status:200,headers:{'Content-Type':'application/json'}});
+    return new Response('not found',{status:404});
+  }}};
+  const response=await handlePublicEditorialRoute(
+    new Request('https://trytoolscout.org/software-trends-index.json'),
+    datasetEnv
+  );
+  assert.equal(response.status,200);
+  assert.equal(response.headers.get('X-ToolScout-Public-Plane'),'editorial-v1');
+  assert.match(response.headers.get('content-type')||'',/application\/json/);
+  const body=await response.json();
+  assert.equal(body.version,4);
+});
