@@ -1,26 +1,3 @@
-const ADMIN_STATS_CORS={
-  'Access-Control-Allow-Origin':'*',
-  'Access-Control-Allow-Methods':'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers':'Content-Type,Authorization'
-};
-
-export async function handleAdminStatsBaseRoute(request,env){
-  const url=new URL(request.url);
-  if(url.pathname!=='/api/stats')return null;
-  const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
-  if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN){
-    return Response.json({error:'unauthorized'},{status:401,headers:ADMIN_STATS_CORS});
-  }
-  const [byTool,byIntent,total,searches,opportunities]=await Promise.all([
-    env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),
-    env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),
-    env.DB.prepare('SELECT COUNT(*) AS clicks,COUNT(DISTINCT session_id) AS sessions FROM click_events').first(),
-    env.DB.prepare('SELECT intent_slug,COUNT(DISTINCT session_id) AS searches FROM search_events GROUP BY intent_slug ORDER BY searches DESC LIMIT 20').all(),
-    env.DB.prepare('SELECT intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status FROM seo_opportunities ORDER BY opportunity_score DESC LIMIT 20').all()
-  ]);
-  return Response.json({total,byTool,byIntent,searches,opportunities},{headers:ADMIN_STATS_CORS});
-}
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -69,8 +46,11 @@ export default {
         return Response.json({ok:true,refreshed:opportunities.length,opportunities},{headers:cors});
       } catch(e) { return Response.json({error:'refresh_failed',message:String(e?.message||e)},{status:500,headers:cors}); }
     }
-    const adminStats=await handleAdminStatsBaseRoute(request,env);
-    if(adminStats)return adminStats;
+    if (url.pathname === '/api/stats') {
+      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,''); if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:cors});
+      const [byTool,byIntent,total,searches,opportunities]=await Promise.all([env.DB.prepare('SELECT tool_slug,COUNT(*) AS clicks FROM click_events GROUP BY tool_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,COUNT(*) AS clicks FROM click_events GROUP BY intent_slug ORDER BY clicks DESC LIMIT 20').all(),env.DB.prepare('SELECT COUNT(*) AS clicks,COUNT(DISTINCT session_id) AS sessions FROM click_events').first(),env.DB.prepare('SELECT intent_slug,COUNT(DISTINCT session_id) AS searches FROM search_events GROUP BY intent_slug ORDER BY searches DESC LIMIT 20').all(),env.DB.prepare('SELECT intent_slug,search_sessions,commercial_score,catalog_score,duplication_penalty,opportunity_score,status FROM seo_opportunities ORDER BY opportunity_score DESC LIMIT 20').all()]);
+      return Response.json({total,byTool,byIntent,searches,opportunities},{headers:cors});
+    }
     if (url.pathname === '/sitemap.xml' && request.method === 'GET') {
       try { const response=await env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url))); if(response.ok){const headers=new Headers(response.headers);headers.set('Content-Type','application/xml; charset=UTF-8');headers.set('Cache-Control','public, max-age=3600');headers.delete('Content-Encoding');return new Response(response.body,{status:response.status,headers});} } catch {}
       return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://trytoolscout.org/</loc></url></urlset>',{status:200,headers:{'Content-Type':'application/xml; charset=UTF-8','Cache-Control':'public, max-age=3600'}});
