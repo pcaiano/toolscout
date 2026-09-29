@@ -25,6 +25,9 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/.well-known/toolscout-distribution.json',{method:'GET'}).owner,'machine_discovery_catalog');
   assert.equal(routeOwner('/.well-known/api-catalog',{method:'GET'}).owner,'machine_discovery_catalog');
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
+  assert.equal(routeOwner('/analytics/api/chairman-queue',{method:'GET'}).owner,'analytics_chairman');
+  assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
+  assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'command_center');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
@@ -46,6 +49,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='public_editorial_site'/);
   assert.match(src,/ownership\.owner==='agent_protocol_core'/);
   assert.match(src,/ownership\.owner==='machine_discovery_catalog'/);
+  assert.match(src,/ownership\.owner==='analytics_chairman'/);
+  assert.match(src,/ownership\.owner==='analytics_stats'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
@@ -59,6 +64,7 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   const authority=read('authority-acquisition-worker.js');
   const evidence=read('mission-integrity-v2-worker.js');
   const closedLoop=read('growth-runtime-closed-loop-worker.js');
+  const analytics=read('command-center-resilient-worker.js');
   assert.match(priority,/export async function handleDistributionPriorityRoute/);
   assert.match(priority,/return null;/);
   assert.match(orchestrator,/export async function handleDistributionOrchestratorRoute/);
@@ -71,6 +77,8 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   assert.match(evidence,/return null;/);
   assert.match(closedLoop,/export async function handleGrowthClosedLoopRoute/);
   assert.match(closedLoop,/return null;/);
+  assert.match(analytics,/export async function handleAnalyticsStatsReadRoute/);
+  assert.match(analytics,/X-ToolScout-Read-Mode':'read-only/);
 });
 
 test('mission integrity runtime no longer creates schema',()=>{
@@ -84,4 +92,11 @@ test('Growth Planner runtime no longer creates schema',()=>{
   const planner=read('distribution-orchestrator-worker.js');
   assert.doesNotMatch(planner,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
   assert.match(planner,/growth_planner_schema_not_migrated/);
+});
+
+
+test('analytics read runtime uses migrated strict-human schema and no runtime DDL',()=>{
+  const analytics=read('command-center-resilient-worker.js');
+  assert.doesNotMatch(analytics,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+  assert.match(analytics,/strict_human_analytics_schema_not_migrated/);
 });
