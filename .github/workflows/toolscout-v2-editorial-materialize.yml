@@ -53,9 +53,46 @@ jobs:
           NODE
           echo "Selected portfolio:"
           cat /tmp/toolscout-v2-pages.txt
+
+          rm -rf /tmp/toolscout-v2-selected
+          mkdir -p /tmp/toolscout-v2-selected
           while IFS= read -r page; do
             [ -z "$page" ] && continue
             test -f "$page"
+            mkdir -p "/tmp/toolscout-v2-selected/$(dirname "$page")"
+            cp "$page" "/tmp/toolscout-v2-selected/$page"
+          done < /tmp/toolscout-v2-pages.txt
+
+          # Generators may refresh unrelated pages. Discard every non-selected
+          # working-tree mutation before reapplying the bounded portfolio.
+          git reset --hard HEAD
+          while IFS= read -r page; do
+            [ -z "$page" ] && continue
+            cp "/tmp/toolscout-v2-selected/$page" "$page"
+          done < /tmp/toolscout-v2-pages.txt
+
+          # Preservation is authoritative: keep each page's existing canonical
+          # exactly as it is on main, even when the current generator prefers a
+          # different URL normalization.
+          node <<'NODE'
+          const fs=require('fs'),cp=require('child_process');
+          const pages=fs.readFileSync('/tmp/toolscout-v2-pages.txt','utf8').split(/\r?\n/).filter(Boolean);
+          const canonical=html=>{
+            const a=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i);
+            const b=html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i);
+            return (a||b)?.[1]||null;
+          };
+          for(const page of pages){
+            const before=cp.execFileSync('git',['show',`origin/main:${page}`],{encoding:'utf8'});
+            let after=fs.readFileSync(page,'utf8');
+            const keep=canonical(before),next=canonical(after);
+            if(keep&&next&&keep!==next)after=after.replace(next,keep);
+            fs.writeFileSync(page,after);
+          }
+          NODE
+
+          while IFS= read -r page; do
+            [ -z "$page" ] && continue
             git add -- "$page"
           done < /tmp/toolscout-v2-pages.txt
 
