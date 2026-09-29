@@ -20,7 +20,8 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'command_center_truth',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/api/command-center-business-truth','/api/command-center-simplified-health']},
   {id:'analytics_control',owner:'command_center',plane:'signals',methods:['GET','POST'],prefixes:['/analytics','/api/stats','/api/traffic-integrity-health','/api/command-center-']},
   {id:'public_editorial_news',owner:'public_editorial_site',plane:'public_site',methods:['GET'],prefixes:['/news/']},
-  {id:'public_tools',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/tools','/guides','/compare','/best-','/blog/','/software-trends-index','/categories','/crm-tools','/seo-tools']},
+  {id:'public_editorial_trends',owner:'public_editorial_site',plane:'public_site',methods:['GET'],exact:['/software-trends-index','/software-trends-index/','/software-trends-index.html','/software-trends-index.json']},
+  {id:'public_tools',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/tools','/guides','/compare','/best-','/blog/','/categories','/crm-tools','/seo-tools']},
   {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
   {id:'agent_protocol',owner:'agent_protocol',plane:'public_site',methods:['GET','POST'],prefixes:['/mcp','/a2a','/.well-known/agent-card','/.well-known/toolscout-distribution','/.well-known/api-catalog']}
 ]);
