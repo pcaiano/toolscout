@@ -175,9 +175,9 @@ async function affiliateCoverageStatusSnapshot(request,env){
       assetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
       assetJson(request,env,'/data/affiliate.json',{}),
       safeAll(env,`SELECT tool_slug,status,updated_at FROM affiliate_workflow`),
-      safeAll(env,`WITH classified AS (SELECT v.*,CASE WHEN v.proof_type='user_activation_navigation' OR EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=v.session_id AND f.event_type='page_confirmed' AND COALESCE(f.source,'')<>'outbound-proof' AND f.created_at<=v.created_at) OR EXISTS(SELECT 1 FROM traffic_human_evidence h WHERE h.session_id=v.session_id AND h.evidence_type<>'verified_outbound_navigation' AND h.first_evidence_at<=v.created_at) THEN 1 ELSE 0 END strict_proof FROM verified_outbound_events v WHERE v.created_at>=datetime('now','-30 days')) SELECT tool_slug,COUNT(*) browser_clicks,SUM(CASE WHEN strict_proof=1 THEN 1 ELSE 0 END) strict_clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) browser_monetized,SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) strict_monetized FROM classified GROUP BY tool_slug`),
-      safeAll(env,`SELECT tool_slug,COUNT(*) clicks FROM social_affiliate_redirects WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`),
-      safeAll(env,`SELECT e.tool_slug,e.provider,e.account_email,e.reported_clicks_total,e.observed_at
+      env.DB.prepare(`WITH classified AS (SELECT v.*,CASE WHEN v.proof_type='user_activation_navigation' OR EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=v.session_id AND f.event_type='page_confirmed' AND COALESCE(f.source,'')<>'outbound-proof' AND f.created_at<=v.created_at) OR EXISTS(SELECT 1 FROM traffic_human_evidence h WHERE h.session_id=v.session_id AND h.evidence_type<>'verified_outbound_navigation' AND h.first_evidence_at<=v.created_at) THEN 1 ELSE 0 END strict_proof FROM verified_outbound_events v WHERE v.created_at>=datetime('now','-30 days')) SELECT tool_slug,COUNT(*) browser_clicks,SUM(CASE WHEN strict_proof=1 THEN 1 ELSE 0 END) strict_clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) browser_monetized,SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) strict_monetized FROM classified GROUP BY tool_slug`).all().then(r=>r.results||[]),
+      env.DB.prepare(`SELECT tool_slug,COUNT(*) clicks FROM social_affiliate_redirects WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`).all().then(r=>r.results||[]),
+      env.DB.prepare(`SELECT e.tool_slug,e.provider,e.account_email,e.reported_clicks_total,e.observed_at
         FROM affiliate_network_click_evidence e
         JOIN (
           SELECT tool_slug,provider,COALESCE(account_email,'') account_email,MAX(observed_at) observed_at
@@ -185,7 +185,7 @@ async function affiliateCoverageStatusSnapshot(request,env){
           GROUP BY tool_slug,provider,COALESCE(account_email,'')
         ) latest
           ON latest.tool_slug=e.tool_slug AND latest.provider=e.provider
-          AND latest.account_email=COALESCE(e.account_email,'') AND latest.observed_at=e.observed_at`)
+          AND latest.account_email=COALESCE(e.account_email,'') AND latest.observed_at=e.observed_at`).all().then(r=>r.results||[])
     ]);
     const pipelineMap=new Map((pipeline?.verified_programs||[]).map(x=>[x.slug,x]));
     const workflowMap=new Map(workflowRows.map(x=>[x.tool_slug,x]));
