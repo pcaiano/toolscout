@@ -24,3 +24,16 @@ test('Command Center puts editorial authority beside business outcomes',()=>{
   assert.match(ui,/metric\('Editorial portfolio'/);
   assert.match(ui,/gscProgress\(\);editorialAuthority\(\);brain\(\)/);
 });
+
+test('Command Center GET observability no longer mutates affiliate schema',()=>{
+  const truth=read('operational-truth-reconciliation-worker.js');
+  assert.match(truth,/affiliateNetworkEvidenceSchemaState/);
+  assert.match(truth,/read_only_schema_probe/);
+  assert.match(truth,/reconcile-affiliate-schema/);
+  assert.match(truth,/adminAuthorized/);
+  assert.doesNotMatch(truth,/buildCommandCenterBusinessTruth\(request,env\)\{\s*const affiliateEvidenceSchemaOk=await reconcileAffiliateNetworkEvidenceSchema/);
+  const buildStart=truth.indexOf('async function buildCommandCenterBusinessTruth');
+  const buildEnd=truth.indexOf('async function commandCenterBusinessTruth',buildStart);
+  const buildBody=truth.slice(buildStart,buildEnd);
+  assert.doesNotMatch(buildBody,/CREATE TABLE|CREATE INDEX|ALTER TABLE|reconcileAffiliateNetworkEvidenceSchema/);
+});
