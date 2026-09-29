@@ -566,6 +566,40 @@ async function health(env){
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE created_at>=datetime('now','-15 minutes') AND result='human_action_required') qualification_human_15m,
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE created_at>=datetime('now','-15 minutes') AND result='auth_required') qualification_auth_15m,
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE created_at>=datetime('now','-15 minutes') AND result='policy_blocked') qualification_policy_15m,
+      (SELECT COUNT(*) FROM distribution_opportunities
+        WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+          AND status IN ('candidate','discovered','research_required')) route_research_candidates,
+      (SELECT COUNT(*) FROM distribution_opportunities o
+        WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
+          AND o.status IN ('candidate','discovered','research_required')
+          AND NOT EXISTS (
+            SELECT 1 FROM compute_overflow_jobs exhausted
+            WHERE exhausted.subject_key=o.surface_slug
+              AND exhausted.job_type='distribution_route_research'
+              AND exhausted.status='completed'
+              AND json_extract(exhausted.result_json,'$.outcome')='external_source_unreachable_exhausted'
+              AND (
+                (json_extract(exhausted.result_json,'$.retryClass')='not_found' AND exhausted.completed_at>=datetime('now','-72 hours'))
+                OR (json_extract(exhausted.result_json,'$.retryClass')='access_blocked' AND exhausted.completed_at>=datetime('now','-24 hours'))
+                OR (json_extract(exhausted.result_json,'$.retryClass') IN ('transport_unreachable','edge_error') AND exhausted.completed_at>=datetime('now','-12 hours'))
+                OR (json_extract(exhausted.result_json,'$.retryClass')='transient' AND exhausted.completed_at>=datetime('now','-6 hours'))
+              )
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM compute_overflow_jobs recent
+            WHERE recent.subject_key=o.surface_slug
+              AND recent.job_type='distribution_route_research'
+              AND recent.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
+              AND CAST(COALESCE(json_extract(recent.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+          )) route_research_eligible,
+      (SELECT COUNT(*) FROM compute_overflow_jobs
+        WHERE status='completed'
+          AND json_extract(result_json,'$.outcome')='external_source_unreachable_exhausted'
+          AND completed_at>=datetime('now','start of day')) source_unreachable_suppressed_today,
+      (SELECT COUNT(*) FROM compute_overflow_jobs
+        WHERE status='completed'
+          AND json_extract(result_json,'$.outcome')='folded_into_distribution_route_research_v1'
+          AND completed_at>=datetime('now','start of day')) folded_contact_research_today,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued') route_research_queued,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='queued' AND available_at<=datetime('now')) route_research_runnable,
       (SELECT COUNT(*) FROM compute_overflow_jobs WHERE job_type='distribution_route_research' AND status='leased') route_research_leased,
@@ -597,8 +631,8 @@ async function health(env){
     qualificationHuman15m:num(live?.qualification_human_15m),
     qualificationAuth15m:num(live?.qualification_auth_15m),
     qualificationPolicy15m:num(live?.qualification_policy_15m),
-    routeResearchCandidates:null,
-    routeResearchEligible:null,
+    routeResearchCandidates:num(live?.route_research_candidates),
+    routeResearchEligible:num(live?.route_research_eligible),
     routeResearchQueued:num(live?.route_research_queued),
     routeResearchRunnable:num(live?.route_research_runnable),
     routeResearchLeased:num(live?.route_research_leased),
@@ -616,7 +650,7 @@ async function health(env){
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
     distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
-    queued:num(live?.canonical_queued),runnableQueued:num(live?.runnable_queued),deferredQueued:num(live?.deferred_queued),sourceUnreachableDeferred:num(live?.source_unreachable_deferred),nextAvailableAt:live?.next_available_at||null,
+    queued:num(live?.canonical_queued),runnableQueued:num(live?.runnable_queued),deferredQueued:num(live?.deferred_queued),sourceUnreachableDeferred:num(live?.source_unreachable_deferred),sourceUnreachableSuppressedToday:num(live?.source_unreachable_suppressed_today),foldedContactResearchToday:num(live?.folded_contact_research_today),nextAvailableAt:live?.next_available_at||null,
     leased:num(live?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(live?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,qualificationSamples:[],
