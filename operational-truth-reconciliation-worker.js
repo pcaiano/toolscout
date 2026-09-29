@@ -151,12 +151,28 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
         note TEXT,
         PRIMARY KEY(network,account_email)
       )`),
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_program_evidence (
+        network TEXT NOT NULL,
+        account_email TEXT NOT NULL,
+        tool_slug TEXT NOT NULL,
+        programme_status TEXT NOT NULL,
+        observed_at TEXT NOT NULL,
+        evidence_source TEXT NOT NULL,
+        note TEXT,
+        PRIMARY KEY(network,account_email,tool_slug)
+      )`),
       env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_accounts(network,account_email,status,marketplace_state,observed_at,evidence_source,note)
         VALUES('partnerstack','pedro@trytoolscout.org','active','active_programs','2026-09-29 09:37:26','owner_dashboard',
         'Owner supplied current PartnerStack dashboard with seven active programmes and current click totals.')`),
       env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_accounts(network,account_email,status,marketplace_state,observed_at,evidence_source,note)
         VALUES('partnerstack','pcaiano@gmail.com','active','restricted_new_program_access','2026-08-31 14:24:58','gmail',
-        'Gmail confirms a separate PartnerStack identity. Marketplace access to new programmes was limited; existing programme participation remains account-specific.')`)
+        'Gmail confirms a separate PartnerStack identity. Marketplace access to new programmes was limited; existing programme participation remains account-specific.')`),
+      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
+        VALUES('partnerstack','pcaiano@gmail.com','pipedrive','active','2026-08-31 22:46:07','gmail','PartnerStack approval email confirms Pipedrive approved this account.')`),
+      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
+        VALUES('partnerstack','pcaiano@gmail.com','adcreative-ai','active','2026-09-03 07:27:05','gmail','AdCreative.ai welcome email confirms active affiliate participation on this account.')`),
+      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
+        VALUES('partnerstack','pcaiano@gmail.com','n8n','rejected','2026-09-01 19:21:49','gmail','PartnerStack email confirms n8n rejected this account.')`)
     ]);
     // Backward-compatible upgrades for databases where the table existed before account-aware evidence.
     for(const sql of [
@@ -174,6 +190,9 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
       ['unbounce',6],['apollo',19],['gorgias',20],['brevo',0],['kit',23],['instantly',12],['lemlist',27]
     ];
     for(const [tool,clicks] of current){
+      await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
+        VALUES('partnerstack','pedro@trytoolscout.org',?,'active','2026-09-29 09:37:26','owner_dashboard','Current PartnerStack dashboard supplied by owner.')`).bind(tool).run();
+
       await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_click_evidence(
         evidence_key,tool_slug,provider,programme,account_email,programme_status,reported_clicks_total,reported_conversions_total,pending_commission_amount,currency,observed_at,evidence_source,note
       ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
@@ -196,7 +215,7 @@ async function ccAssetJson(request,env,path,fallback){
 }
 async function buildCommandCenterBusinessTruth(request,env){
   await ensureAffiliateNetworkEvidenceSchema(env);
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -305,7 +324,10 @@ async function buildCommandCenterBusinessTruth(request,env){
       ORDER BY e.observed_at DESC`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT network,account_email,status,marketplace_state,observed_at,evidence_source,note
       FROM affiliate_network_accounts
-      ORDER BY network,account_email`).all().then(r=>r.results||[]).catch(()=>[])
+      ORDER BY network,account_email`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT network,account_email,tool_slug,programme_status,observed_at,evidence_source,note
+      FROM affiliate_network_program_evidence
+      ORDER BY network,account_email,tool_slug`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -557,7 +579,13 @@ async function buildCommandCenterBusinessTruth(request,env){
           marketplaceState:row.marketplace_state,
           observedAt:row.observed_at,
           evidenceSource:row.evidence_source,
-          note:row.note
+          note:row.note,
+          programmes:(affiliateNetworkProgramEvidence||[]).filter(p=>p.network===row.network&&p.account_email===row.account_email).map(p=>({
+            toolSlug:p.tool_slug,
+            status:p.programme_status,
+            observedAt:p.observed_at,
+            evidenceSource:p.evidence_source
+          }))
         })),
         evidence:(affiliateNetworkEvidence||[]).map(row=>({
           toolSlug:row.tool_slug,
