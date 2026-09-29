@@ -61,7 +61,7 @@ export function publicPageFingerprint(html){
     hasLongDash:/[—–]/.test(text)
   };
 }
-export function comparePublicParity(beforeHtml,afterHtml,{strictSearchMetadata=false}={}){
+export function comparePublicParity(beforeHtml,afterHtml,{strictSearchMetadata=false,strictInternalLinks=true}={}){
   const before=publicPageFingerprint(beforeHtml),after=publicPageFingerprint(afterHtml);
   const errors=[];
   if(!after.canonical)errors.push('canonical_missing');
@@ -69,11 +69,11 @@ export function comparePublicParity(beforeHtml,afterHtml,{strictSearchMetadata=f
   if(strictSearchMetadata&&before.description&&after.description!==before.description)errors.push('meta_description_changed');
   if(before.h1&&after.h1!==before.h1)errors.push('h1_changed');
   for(const type of before.jsonLdTypes)if(!after.jsonLdTypes.includes(type))errors.push('jsonld_type_lost:'+type);
-  for(const link of before.internalLinks)if(!after.internalLinks.includes(link))errors.push('internal_link_lost:'+link);
+  if(strictInternalLinks)for(const link of before.internalLinks)if(!after.internalLinks.includes(link))errors.push('internal_link_lost:'+link);
   for(const link of before.monetizedLinks)if(!after.monetizedLinks.includes(link))errors.push('monetized_link_lost:'+link);
   if(before.hasEditorialEvidence&&!after.hasEditorialEvidence)errors.push('editorial_evidence_lost');
   if(before.hasAffiliateDisclosure&&!after.hasAffiliateDisclosure)errors.push('affiliate_disclosure_lost');
   if(before.hasIndexFollow&&!after.hasIndexFollow)errors.push('robots_index_follow_lost');
-  if(after.hasLongDash)errors.push('long_dash_introduced');
+  if(!before.hasLongDash&&after.hasLongDash)errors.push('long_dash_introduced');
   return{ok:errors.length===0,errors,before,after};
 }
