@@ -12,6 +12,7 @@ import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
 import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
+import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
@@ -1853,6 +1854,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='authority_acquisition')response=await handleAuthorityAcquisitionRoute(request,env);
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
   else if(ownership.owner==='growth_runtime_closed_loop')response=await handleGrowthClosedLoopRoute(request,env,ctx);
+  else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
   if(!response)return null;
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);
