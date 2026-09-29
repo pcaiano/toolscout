@@ -60,13 +60,12 @@ function authorityStatus(state){
   if(state.attempts24>=AUTHORITY_ATTEMPT_MIN_24H)return'executing_backlog';
   return'execution_required';
 }
-async function authorityHealthSnapshot(env,{fresh=false}={}){
+export async function authorityHealthSnapshot(env,{fresh=false}={}){
   const now=Date.now();
   if(!fresh&&authorityHealthCache.value&&now-authorityHealthCache.at<AUTHORITY_HEALTH_CACHE_MS)return authorityHealthCache.value;
   if(!fresh&&authorityHealthCache.promise)return authorityHealthCache.promise;
   const work=(async()=>{
     const state=await authoritySnapshot(env);
-    await normalizeFalseAsyncFailure(env,state);
     const value={status:authorityStatus(state),...state,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,attemptFloorIsMinimumNotCap:true,drainBacklogBeforeSlowdown:true,preparedDoesNotCountAsExecution:true,externalCallbackRequiredForEmailAttempt:true};
     authorityHealthCache={at:Date.now(),value,promise:null};
     return value;
