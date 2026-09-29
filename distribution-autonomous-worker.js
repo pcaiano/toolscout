@@ -30,6 +30,7 @@ const AUTHORITY_STAGNATION_MIN_ATTEMPTS_7D=12;
 const AUTHORITY_RECOVERY_COOLDOWN_HOURS=6;
 const PRIORITY_HUMAN_GATE_THRESHOLD=0;
 const RESEARCH_CLASSIFIER_VERSION=17;
+const HUMAN_GATE_EVIDENCE_VERSION=16;
 async function runDiscoveryRefresh(env){
   if(!env.ADMIN_TOKEN)return {ok:false,reason:'admin_token_unavailable'};
   try{
@@ -340,7 +341,7 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
   const previousEvidenceUrl=validHumanActionUrl(previousPayload?.gate_evidence?.url||previous?.action_url||'');
   const sameExactResearchRoute=Boolean(previousEvidenceUrl&&validHumanActionUrl(humanActionUrl)&&(()=>{try{const a=new URL(previousEvidenceUrl),b=new URL(humanActionUrl);a.hash='';b.hash='';return a.href===b.href}catch{return false}})());
   const currentResearchProof=Boolean(previousPayload?.submission_intent===true
-    &&Number(previousPayload?.research_classifier_version||0)>=RESEARCH_CLASSIFIER_VERSION
+    &&Number(previousPayload?.research_classifier_version||0)>=HUMAN_GATE_EVIDENCE_VERSION
     &&sameExactResearchRoute);
   if(previous?.status==='resolved'&&!canonicalAuthProof)return null;
   if(previous?.status==='verification_pending')return null;
@@ -837,8 +838,8 @@ async function reconcileObsoleteClassifierHumanGates(env){
   for(const row of q.results||[]){
     let payload={};try{payload=JSON.parse(row.payload_json||'{}')||{}}catch{}
     const version=Number(payload.research_classifier_version||0);
-    if(!version||version>=RESEARCH_CLASSIFIER_VERSION)continue;
-    const detail=`Research-derived Human Gate invalidated by classifier upgrade v${version}->v${RESEARCH_CLASSIFIER_VERSION}. Re-run external research before asking the owner to act.`;
+    if(!version||version>=HUMAN_GATE_EVIDENCE_VERSION)continue;
+    const detail=`Research-derived Human Gate invalidated by human-evidence policy upgrade v${version}->v${HUMAN_GATE_EVIDENCE_VERSION}. Re-run external research before asking the owner to act.`;
     await env.DB.batch([
       env.DB.prepare(`UPDATE human_gate_contract SET status='cancelled',resolved_at=datetime('now'),next_verification_at=NULL,verification_detail=?,updated_at=datetime('now') WHERE gate_key=? AND status='open'`).bind(detail,row.gate_key),
       env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,last_checked_at=NULL,updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','scheduled','policy_blocked','rejected','skipped','unavailable_free')`).bind(detail,row.subject_key),
@@ -846,7 +847,7 @@ async function reconcileObsoleteClassifierHumanGates(env){
     ]).catch(()=>{});
     reconciled++;
   }
-  return {reconciled,classifierVersion:RESEARCH_CLASSIFIER_VERSION};
+  return {reconciled,classifierVersion:RESEARCH_CLASSIFIER_VERSION,humanGateEvidenceVersion:HUMAN_GATE_EVIDENCE_VERSION};
 }
 
 async function reconcileOpenHumanGateStates(env){
