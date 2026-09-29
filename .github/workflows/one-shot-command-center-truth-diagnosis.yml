@@ -1,4 +1,5 @@
 name: One Shot Command Center Truth Diagnosis
+# rerun-marker: recovery-2026-09-29T10:40Z
 on:
   push:
     paths:
