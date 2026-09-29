@@ -215,7 +215,7 @@ async function ccAssetJson(request,env,path,fallback){
 }
 async function buildCommandCenterBusinessTruth(request,env){
   await ensureAffiliateNetworkEvidenceSchema(env);
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -299,14 +299,28 @@ async function buildCommandCenterBusinessTruth(request,env){
       ORDER BY CASE severity WHEN 'P1' THEN 0 ELSE 1 END,last_detected_at DESC
       LIMIT 10`).all().then(r=>r.results||[]).catch(()=>[]),
     ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]}),
-    env.DB.prepare(`SELECT
-      SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) verified24h,
-      SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) verified7d,
-      SUM(CASE WHEN created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) verified30d,
-      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) monetized24h,
-      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) monetized7d,
-      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) monetized30d
-      FROM verified_outbound_events`).first().catch(()=>null),
+    env.DB.prepare(`WITH classified AS (
+      SELECT v.*,
+        CASE WHEN v.proof_type='user_activation_navigation'
+          OR EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=v.session_id AND f.event_type='page_confirmed' AND COALESCE(f.source,'')<>'outbound-proof' AND f.created_at<=v.created_at)
+          OR EXISTS(SELECT 1 FROM traffic_human_evidence h WHERE h.session_id=v.session_id AND h.evidence_type<>'verified_outbound_navigation' AND h.first_evidence_at<=v.created_at)
+        THEN 1 ELSE 0 END strict_proof
+      FROM verified_outbound_events v
+    )
+    SELECT
+      SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) browser24h,
+      SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) browser7d,
+      SUM(CASE WHEN created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) browser30d,
+      SUM(CASE WHEN strict_proof=1 AND created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) strict24h,
+      SUM(CASE WHEN strict_proof=1 AND created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) strict7d,
+      SUM(CASE WHEN strict_proof=1 AND created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) strict30d,
+      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) browserMonetized24h,
+      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) browserMonetized7d,
+      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) browserMonetized30d,
+      SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 AND created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) strictMonetized24h,
+      SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 AND created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) strictMonetized7d,
+      SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 AND created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) strictMonetized30d
+      FROM classified`).first().catch(()=>null),
     env.DB.prepare(`SELECT
       SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,
       SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) clicks7d,
@@ -327,7 +341,16 @@ async function buildCommandCenterBusinessTruth(request,env){
       ORDER BY network,account_email`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT network,account_email,tool_slug,programme_status,observed_at,evidence_source,note
       FROM affiliate_network_program_evidence
-      ORDER BY network,account_email,tool_slug`).all().then(r=>r.results||[]).catch(()=>[])
+      ORDER BY network,account_email,tool_slug`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT
+      SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,
+      SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) clicks7d,
+      SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) clicks30d,
+      SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND s.classification='likely-human' THEN 1 ELSE 0 END) likelyHuman30d,
+      SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND s.classification='known-bot/crawler' THEN 1 ELSE 0 END) knownBot30d,
+      SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND s.classification='owner' THEN 1 ELSE 0 END) owner30d,
+      SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND (s.classification='unknown/legacy' OR s.session_id IS NULL) THEN 1 ELSE 0 END) unverified30d
+      FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id`).first().catch(()=>null)
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -337,10 +360,14 @@ async function buildCommandCenterBusinessTruth(request,env){
   const vendorReportedClickFloor=(affiliateNetworkEvidence||[]).reduce((sum,row)=>sum+truthNum(row.reported_clicks_total),0);
   const vendorReportedConversions=(affiliateNetworkEvidence||[]).reduce((sum,row)=>sum+truthNum(row.reported_conversions_total),0);
   const vendorPendingCommissionUsd=(affiliateNetworkEvidence||[]).filter(row=>String(row.currency||'USD')==='USD').reduce((sum,row)=>sum+truthNum(row.pending_commission_amount),0);
-  const liveVerifiedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.verified24h):truthNum(cfg.verified_outbound_24h);
-  const liveVerifiedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.verified7d):truthNum(cfg.verified_outbound_7d);
-  const liveMonetizedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.monetized24h):truthNum(cfg.monetized_outbound_24h);
-  const liveMonetizedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.monetized7d):truthNum(cfg.monetized_outbound_7d);
+  const liveBrowserQualifiedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browser24h):0;
+  const liveBrowserQualifiedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browser7d):0;
+  const liveStrictOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.strict24h):truthNum(cfg.verified_outbound_24h);
+  const liveStrictOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.strict7d):truthNum(cfg.verified_outbound_7d);
+  const liveBrowserMonetizedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browserMonetized24h):0;
+  const liveBrowserMonetizedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browserMonetized7d):0;
+  const liveStrictMonetizedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.strictMonetized24h):truthNum(cfg.monetized_outbound_24h);
+  const liveStrictMonetizedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.strictMonetized7d):truthNum(cfg.monetized_outbound_7d);
   const authorityAttempts24=truthNum(backlink.attempts_24h);
   const authorityQueueNow=truthNum(backlink.authority_queue);
   const internalAuthorityVerifiedDomains=truthNum(backlink.internal_verified_referring_domains??backlink.verified_referring_domains);
@@ -509,10 +536,16 @@ async function buildCommandCenterBusinessTruth(request,env){
       attributedHumans7d:truthNum(growth.attributed_humans_7d),
       externalExecutions24h:truthNum(growth.external_executions_24h),
       externalExecutions7d:truthNum(growth.external_executions_7d),
-      verifiedOutbound24h:liveVerifiedOutbound24h,
-      verifiedOutbound7d:liveVerifiedOutbound7d,
-      monetizedOutbound24h:liveMonetizedOutbound24h,
-      monetizedOutbound7d:liveMonetizedOutbound7d,
+      browserQualifiedOutbound24h:liveBrowserQualifiedOutbound24h,
+      browserQualifiedOutbound7d:liveBrowserQualifiedOutbound7d,
+      strictOutbound24h:liveStrictOutbound24h,
+      strictOutbound7d:liveStrictOutbound7d,
+      verifiedOutbound24h:liveStrictOutbound24h,
+      verifiedOutbound7d:liveStrictOutbound7d,
+      browserQualifiedMonetizedOutbound24h:liveBrowserMonetizedOutbound24h,
+      browserQualifiedMonetizedOutbound7d:liveBrowserMonetizedOutbound7d,
+      monetizedOutbound24h:liveStrictMonetizedOutbound24h,
+      monetizedOutbound7d:liveStrictMonetizedOutbound7d,
       corrections:truthNum(growth.correction_count),
       acquisitionPolicy:'outcome_weighted_bounded_always_on',
       acquisitionMin24h:ACQUISITION_SURGE_MIN_24H,
@@ -553,14 +586,43 @@ async function buildCommandCenterBusinessTruth(request,env){
       waitForTrafficThreshold:false
     },
     commercialActivity:{
-      definition:'Commercial click sources are reported separately because first-party verified navigation, tracked social affiliate redirects and affiliate-network counters can overlap and must not be summed.',
+      definition:'Commercial click truth is layered and non-destructive: PartnerStack network counters, all first-party affiliate redirects, browser-qualified navigations and strict/user-activated outbound are separate populations. Unknown/unverified traffic is never relabelled as bot, and overlapping layers are never summed.',
+      firstPartyRedirects:{
+        clicks24h:truthNum(firstPartyRedirectTruth?.clicks24h),
+        clicks7d:truthNum(firstPartyRedirectTruth?.clicks7d),
+        clicks30d:truthNum(firstPartyRedirectTruth?.clicks30d),
+        likelyHuman30d:truthNum(firstPartyRedirectTruth?.likelyHuman30d),
+        knownBot30d:truthNum(firstPartyRedirectTruth?.knownBot30d),
+        owner30d:truthNum(firstPartyRedirectTruth?.owner30d),
+        unverified30d:truthNum(firstPartyRedirectTruth?.unverified30d),
+        definition:'All first-party affiliate-active /go/ redirects. Classification is descriptive only; unverified is not treated as bot.'
+      },
+      browserQualified:{
+        clicks24h:liveBrowserQualifiedOutbound24h,
+        clicks7d:liveBrowserQualifiedOutbound7d,
+        clicks30d:truthNum(verifiedOutboundTruth?.browser30d),
+        monetized24h:liveBrowserMonetizedOutbound24h,
+        monetized7d:liveBrowserMonetizedOutbound7d,
+        monetized30d:truthNum(verifiedOutboundTruth?.browserMonetized30d),
+        definition:'Same-origin /go/ navigation from an established first-party session and plausible browser request.'
+      },
+      strictVerified:{
+        clicks24h:liveStrictOutbound24h,
+        clicks7d:liveStrictOutbound7d,
+        clicks30d:truthNum(verifiedOutboundTruth?.strict30d),
+        monetized24h:liveStrictMonetizedOutbound24h,
+        monetized7d:liveStrictMonetizedOutbound7d,
+        monetized30d:truthNum(verifiedOutboundTruth?.strictMonetized30d),
+        definition:'Positive pre-click human/browser evidence or explicit browser user-activation navigation. /go/ never manufactures page confirmation.'
+      },
       firstPartyVerified:{
-        clicks24h:liveVerifiedOutbound24h,
-        clicks7d:liveVerifiedOutbound7d,
-        clicks30d:truthNum(verifiedOutboundTruth?.verified30d),
-        monetized24h:liveMonetizedOutbound24h,
-        monetized7d:liveMonetizedOutbound7d,
-        monetized30d:truthNum(verifiedOutboundTruth?.monetized30d)
+        clicks24h:liveStrictOutbound24h,
+        clicks7d:liveStrictOutbound7d,
+        clicks30d:truthNum(verifiedOutboundTruth?.strict30d),
+        monetized24h:liveStrictMonetizedOutbound24h,
+        monetized7d:liveStrictMonetizedOutbound7d,
+        monetized30d:truthNum(verifiedOutboundTruth?.strictMonetized30d),
+        compatibilityAlias:'strictVerified'
       },
       socialAffiliateRedirects:{
         clicks24h:truthNum(socialAffiliateTruth?.clicks24h),
