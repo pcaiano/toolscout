@@ -1,14 +1,14 @@
-import {handleAdminStatsBaseRoute} from './worker.js';
+import {handleDynamicAdminStatsBaseRoute} from './dynamic-worker.js';
 import {augmentCommandCenterStats} from './command-center-integrity-worker.js';
 import {augmentMissionIntegrityHealth} from './mission-integrity-worker.js';
 import {normalizeAdminStatsResponse} from './command-center-final-integrity-worker.js';
 import {reconcileOperationalTruth} from './operational-truth-reconciliation-worker.js';
 
-export async function handleAdminStatsRoute(request,env){
+export async function handleAdminStatsRoute(request,env,ctx){
   const url=new URL(request.url);
   if(request.method!=='GET'||url.pathname!=='/api/stats')return null;
 
-  let response=await handleAdminStatsBaseRoute(request,env);
+  let response=await handleDynamicAdminStatsBaseRoute(request,env,ctx);
   if(!response)return null;
   if(response.ok){
     response=await augmentCommandCenterStats(response,env);
