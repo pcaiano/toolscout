@@ -26,6 +26,8 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/.well-known/api-catalog',{method:'GET'}).owner,'machine_discovery_catalog');
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeOwner('/api/command-center-resilient-health',{method:'GET'}).owner,'command_center_resilient_health');
+  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'GET'}).owner,'traffic_integrity_health');
+  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'command_center');
   assert.equal(routeOwner('/analytics/api/chairman-queue',{method:'GET'}).owner,'analytics_chairman');
   assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
   assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
@@ -73,6 +75,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='agent_protocol_core'/);
   assert.match(src,/ownership\.owner==='machine_discovery_catalog'/);
   assert.match(src,/ownership\.owner==='command_center_resilient_health'/);
+  assert.match(src,/ownership\.owner==='traffic_integrity_health'/);
   assert.match(src,/ownership\.owner==='analytics_chairman'/);
   assert.match(src,/ownership\.owner==='analytics_stats'/);
   assert.match(src,/ownership\.owner==='analytics_human_actions'/);
