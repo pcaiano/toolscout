@@ -102,3 +102,14 @@ test('analytics read runtime uses migrated strict-human schema and no runtime DD
   assert.doesNotMatch(analytics,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
   assert.match(analytics,/strict_human_analytics_schema_not_migrated/);
 });
+
+
+test('catalog runtime schema is migration-owned, not request-owned',()=>{
+  const catalog=read('catalog-autonomy-worker.js');
+  assert.doesNotMatch(catalog,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+  assert.match(catalog,/catalog_runtime_schema_not_migrated/);
+  const migration=read('migrations/0091_catalog_runtime_schema.sql');
+  assert.match(migration,/CREATE TABLE IF NOT EXISTS catalog_runtime_state/);
+  assert.match(migration,/CREATE TABLE IF NOT EXISTS catalog_runtime_candidates/);
+  assert.match(migration,/CREATE TABLE IF NOT EXISTS catalog_quality_audit/);
+});
