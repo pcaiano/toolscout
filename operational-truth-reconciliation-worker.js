@@ -215,7 +215,7 @@ async function ccAssetJson(request,env,path,fallback){
 }
 async function buildCommandCenterBusinessTruth(request,env){
   await ensureAffiliateNetworkEvidenceSchema(env);
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -350,7 +350,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND s.classification='known-bot/crawler' THEN 1 ELSE 0 END) knownBot30d,
       SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND s.classification='owner' THEN 1 ELSE 0 END) owner30d,
       SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND (s.classification='unknown/legacy' OR s.session_id IS NULL) THEN 1 ELSE 0 END) unverified30d
-      FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id`).first().catch(()=>null)
+      FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id`).first().catch(()=>null),
+    env.DB.prepare(`SELECT value FROM outbound_integrity_meta WHERE key='tracking_started_at' LIMIT 1`).first().catch(()=>null)
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -363,6 +364,11 @@ async function buildCommandCenterBusinessTruth(request,env){
   const outboundTruthAvailable=verifiedOutboundTruth!==null;
   const redirectTruthAvailable=firstPartyRedirectTruth!==null;
   const socialAffiliateTruthAvailable=socialAffiliateTruth!==null;
+  const outboundTrackingStartedAt=outboundTrackingMeta?.value||null;
+  const outboundTrackingStartedMs=Date.parse(String(outboundTrackingStartedAt||'').replace(' ','T')+(String(outboundTrackingStartedAt||'').includes('T')?'':'Z'));
+  const outbound24hComplete=Number.isFinite(outboundTrackingStartedMs)&&(Date.now()-outboundTrackingStartedMs)>=86400000;
+  const outbound7dComplete=Number.isFinite(outboundTrackingStartedMs)&&(Date.now()-outboundTrackingStartedMs)>=7*86400000;
+  const outbound30dComplete=Number.isFinite(outboundTrackingStartedMs)&&(Date.now()-outboundTrackingStartedMs)>=30*86400000;
   const liveBrowserQualifiedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browser24h):0;
   const liveBrowserQualifiedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browser7d):0;
   const liveStrictOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.strict24h):truthNum(cfg.verified_outbound_24h);
@@ -596,6 +602,12 @@ async function buildCommandCenterBusinessTruth(request,env){
         strictVerified:outboundTruthAvailable?'observed':'unavailable',
         socialAffiliateRedirects:socialAffiliateTruthAvailable?'observed':'unavailable',
         vendorReported:'observed'
+      },
+      tracking:{
+        outboundStartedAt:outboundTrackingStartedAt,
+        window24hComplete:outbound24hComplete,
+        window7dComplete:outbound7dComplete,
+        window30dComplete:outbound30dComplete
       },
       definition:'Commercial click truth is layered and non-destructive: PartnerStack network counters, all first-party affiliate redirects, browser-qualified navigations and strict/user-activated outbound are separate populations. Unknown/unverified traffic is never relabelled as bot, and overlapping layers are never summed. Source failures are reported as unavailable, never coerced to zero.',
       firstPartyRedirects:{
