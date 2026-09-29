@@ -1,0 +1,42 @@
+name: ToolScout 2.0 Migration CI
+
+on:
+  pull_request:
+    paths:
+      - 'acquisition-value-model.js'
+      - 'compute-router-worker.js'
+      - 'distribution-priority-worker.js'
+      - 'scripts/editorial-authority-model.mjs'
+      - 'scripts/build-editorial-authority-portfolio.mjs'
+      - 'scripts/build-growth-priority.mjs'
+      - 'data/organic-growth-engine.json'
+      - 'docs/OPERATING-CONTRACT.json'
+      - 'migrations/0085_toolscout_v2_external_value.sql'
+      - 'migrations/0086_compute_control_plane_schema.sql'
+      - 'tests/toolscout-v2-*.test.mjs'
+      - '.github/workflows/toolscout-v2-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check ToolScout 2.0 runtime
+        run: |
+          node --check acquisition-value-model.js
+          node --check distribution-priority-worker.js
+          node --check compute-router-worker.js
+          node --check scripts/editorial-authority-model.mjs
+          node --check scripts/build-editorial-authority-portfolio.mjs
+          node --check scripts/build-growth-priority.mjs
+      - name: Validate operating contract JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
+      - name: Run ToolScout 2.0 policy tests
+        run: node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs
