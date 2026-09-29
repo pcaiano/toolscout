@@ -128,7 +128,7 @@ test('admin stats direct route matches legacy semantic shape without writes',asy
 
   assert.equal(directResponse.status,200);
   assert.equal(legacyResponse.status,200);
-  assert.equal(directResponse.headers.get('Access-Control-Allow-Origin'),'*');
+  assert.equal(directResponse.headers.get('Access-Control-Allow-Origin'),legacyResponse.headers.get('Access-Control-Allow-Origin'));
   assert.equal(directResponse.headers.get('X-ToolScout-Read-Mode'),'read-only');
   assert.equal(directResponse.headers.get('X-ToolScout-Route-Contract'),'v2');
 
