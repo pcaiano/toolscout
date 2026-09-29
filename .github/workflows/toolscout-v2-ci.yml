@@ -10,6 +10,7 @@ on:
       - 'migrations/0091_catalog_runtime_schema.sql'
       - 'public-page-parity-contract.js'
       - 'public-decision-runtime.js'
+      - 'public-editorial-evidence.js'
       - 'seo-cloudflare-runtime-worker.js'
       - 'migrations/0087_seo_runtime_schema.sql'
       - 'command-center-light-theme-worker.js'
@@ -82,6 +83,7 @@ jobs:
           node --check public-editorial-runtime.js
           node --check public-canonical-contract.js
           node --check public-decision-runtime.js
+          node --check public-editorial-evidence.js
           node --check public-page-parity-contract.js
           node --check catalog-autonomy-worker.js
           node --check seo-cloudflare-runtime-worker.js
