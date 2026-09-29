@@ -1,0 +1,43 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {SCHEDULED_MISSIONS,missionOwner,scheduleContract} from '../runtime-schedule-contract.js';
+
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+
+test('every scheduled mission has one named owner',()=>{
+  const entries=Object.entries(SCHEDULED_MISSIONS);
+  assert.ok(entries.length>=10);
+  for(const [mission,def] of entries){
+    assert.ok(def.owner,mission+' must have an owner');
+    assert.equal(missionOwner(mission),def.owner);
+  }
+  assert.equal(scheduleContract().invariant,'one_named_owner_per_scheduled_mission');
+});
+
+test('Command Center theme no longer owns growth engine scheduling',()=>{
+  const cc=read('command-center-light-theme-worker.js');
+  assert.match(cc,/runGrowthScheduler/);
+  assert.doesNotMatch(cc,/runDistributionNetworkCycle/);
+  assert.doesNotMatch(cc,/runAuditedAffiliateCoverageCycle/);
+  assert.doesNotMatch(cc,/rebalanceDistributionPriorities/);
+  assert.doesNotMatch(cc,/runContentSocialIntelligenceCycle/);
+  assert.doesNotMatch(cc,/missionNeedsRecovery/);
+});
+
+test('growth scheduler owns the extracted operational cycles',()=>{
+  const scheduler=read('growth-scheduler.js');
+  assert.match(scheduler,/cycleOwner:'growth_scheduler'/);
+  assert.match(scheduler,/runDistributionNetworkCycle/);
+  assert.match(scheduler,/runAuditedAffiliateCoverageCycle/);
+  assert.match(scheduler,/rebalanceDistributionPriorities/);
+  assert.match(scheduler,/verifyCatalogBatch/);
+  assert.match(scheduler,/runContentSocialIntelligenceCycle/);
+  assert.match(scheduler,/verifyNewsSources/);
+});
+
+test('runtime schedule contract is observable from the entrypoint',()=>{
+  const compute=read('compute-router-worker.js');
+  assert.match(compute,/\/api\/runtime\/schedule-contract/);
+  assert.match(compute,/scheduleContract\(\)/);
+});
