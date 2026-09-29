@@ -109,17 +109,33 @@ async function ga4Snapshot(env,request=null){
     if(!propertyId)throw new Error('ga4_property_id_unavailable');
     const now=new Date(),local=zoneParts(now),today=ymd(local),monthStart=`${local.year}-${String(local.month).padStart(2,'0')}-01`,yesterdayDate=new Date(now.getTime()-36*3600000),yesterday=ymd(zoneParts(yesterdayDate)),cutoff=compactMinute(new Date(now.getTime()-24*3600000)),current=compactMinute(now);
     const historyStart=ymd(zoneParts(new Date(now.getTime()-29*86400000)));
-    const [todayReport,mtdReport,hourReport,sourcesReport,dailyReport]=await Promise.all([
+    const eventFilter={filter:{fieldName:'eventName',inListFilter:{values:['vendor_outbound','monetized_outbound']}}};
+    const [todayReport,mtdReport,hourReport,sourcesReport,dailyReport,outboundHourReport,outboundMtdReport]=await Promise.all([
       runReport(propertyId,token,{dateRanges:[{startDate:today,endDate:today}],metrics:[{name:'sessions'},{name:'totalUsers'},{name:'activeUsers'}]}),
       runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],metrics:[{name:'sessions'},{name:'totalUsers'}]}),
       runReport(propertyId,token,{dateRanges:[{startDate:yesterday,endDate:today}],dimensions:[{name:'dateHourMinute'}],metrics:[{name:'sessions'}],limit:'100000',orderBys:[{dimension:{dimensionName:'dateHourMinute'}}]}),
       runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'sessionSource'},{name:'sessionMedium'},{name:'sessionDefaultChannelGroup'},{name:'landingPagePlusQueryString'}],metrics:[{name:'sessions'}],limit:'100',orderBys:[{metric:{metricName:'sessions'},desc:true}]}),
-      runReport(propertyId,token,{dateRanges:[{startDate:historyStart,endDate:today}],dimensions:[{name:'date'}],metrics:[{name:'sessions'},{name:'totalUsers'}],limit:'100',orderBys:[{dimension:{dimensionName:'date'}}]})
+      runReport(propertyId,token,{dateRanges:[{startDate:historyStart,endDate:today}],dimensions:[{name:'date'}],metrics:[{name:'sessions'},{name:'totalUsers'}],limit:'100',orderBys:[{dimension:{dimensionName:'date'}}]}),
+      runReport(propertyId,token,{dateRanges:[{startDate:yesterday,endDate:today}],dimensions:[{name:'dateHourMinute'},{name:'eventName'}],metrics:[{name:'eventCount'}],dimensionFilter:eventFilter,limit:'100000',orderBys:[{dimension:{dimensionName:'dateHourMinute'}}]}).catch(()=>null),
+      runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'eventName'}],metrics:[{name:'eventCount'}],dimensionFilter:eventFilter,limit:'100'}).catch(()=>null)
     ]);
     let last24Hours=0;for(const row of hourReport.rows||[]){const key=String(row.dimensionValues?.[0]?.value||'');if(key>=cutoff&&key<=current)last24Hours+=n(row.metricValues?.[0]?.value)}
+    let outbound24=0,monetized24=0;
+    for(const row of outboundHourReport?.rows||[]){
+      const key=String(row.dimensionValues?.[0]?.value||''),eventName=String(row.dimensionValues?.[1]?.value||''),count=n(row.metricValues?.[0]?.value);
+      if(key<cutoff||key>current)continue;
+      if(eventName==='vendor_outbound')outbound24+=count;
+      else if(eventName==='monetized_outbound')monetized24+=count;
+    }
+    let outboundMtd=0,monetizedMtd=0;
+    for(const row of outboundMtdReport?.rows||[]){
+      const eventName=String(row.dimensionValues?.[0]?.value||''),count=n(row.metricValues?.[0]?.value);
+      if(eventName==='vendor_outbound')outboundMtd+=count;
+      else if(eventName==='monetized_outbound')monetizedMtd+=count;
+    }
     const sessionsToday=firstMetric(todayReport,0),mtd=firstMetric(mtdReport,0),elapsedDays=Math.max(1,local.day),dailyAverage=mtd/elapsedDays,projection=dailyAverage*daysInMonth(local.year,local.month),timeZone=todayReport?.metadata?.timeZone||mtdReport?.metadata?.timeZone||BUSINESS_TIME_ZONE,oauth=await googleAnalyticsOAuthStatus(env,request);
     const daily30=(dailyReport.rows||[]).map(row=>({date:String(row.dimensionValues?.[0]?.value||''),sessions:n(row.metricValues?.[0]?.value),users:n(row.metricValues?.[1]?.value)})).filter(x=>x.date);
-    return {status:'connected',canonical:true,source:'Google Analytics 4 Data API',propertyId,measurementId:cfg.measurementId,timeZone,authMode,connectedEmail,oauth,sessions:{today:sessionsToday,last24Hours,monthToDate:mtd,dailyAverageMTD:Number(dailyAverage.toFixed(2)),projectedMonth:Math.round(projection)},users:{today:firstMetric(todayReport,1),activeToday:firstMetric(todayReport,2),monthToDate:firstMetric(mtdReport,1)},daily30,sources:sourceRows(sourcesReport),fetchedAt:new Date().toISOString(),consentNote:'GA4 acquisition is consent dependent under the current ToolScout consent implementation. These figures reproduce the GA4 reporting population and are not expanded with ToolScout traffic classification estimates.'};
+    return {status:'connected',canonical:true,source:'Google Analytics 4 Data API',propertyId,measurementId:cfg.measurementId,timeZone,authMode,connectedEmail,oauth,sessions:{today:sessionsToday,last24Hours,monthToDate:mtd,dailyAverageMTD:Number(dailyAverage.toFixed(2)),projectedMonth:Math.round(projection)},users:{today:firstMetric(todayReport,1),activeToday:firstMetric(todayReport,2),monthToDate:firstMetric(mtdReport,1)},outbound:{source:'GA4 browser events',population:'GA4 consented reporting population',last24Hours:{outbound:outboundHourReport?outbound24:null,monetized:outboundHourReport?monetized24:null},monthToDate:{outbound:outboundMtdReport?outboundMtd:null,monetized:outboundMtdReport?monetizedMtd:null},monetizedTrackingStartedAt:'2026-09-29T11:02:00Z',definition:'Outbound is the browser-side vendor_outbound event. Monetized outbound is the browser-side monetized_outbound event emitted only for affiliate-active vendor links. Server /go/ requests are diagnostic only and are excluded from these KPIs.'},daily30,sources:sourceRows(sourcesReport),fetchedAt:new Date().toISOString(),consentNote:'GA4 acquisition and outbound are consent dependent under the current ToolScout consent implementation. These figures reproduce the GA4 reporting population and are not expanded with server request counts.'};
   }catch(error){return {status:'unavailable',canonical:true,source:'Google Analytics 4 Data API',reason:String(error?.message||error),measurementId:cfg.measurementId,authMode,connectedEmail,oauth:await googleAnalyticsOAuthStatus(env,request),fetchedAt:new Date().toISOString()}}
 }
 async function serverCommerceSnapshot(env){
