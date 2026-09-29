@@ -129,6 +129,7 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
         provider TEXT NOT NULL,
         programme TEXT,
         account_email TEXT,
+        programme_status TEXT,
         reported_clicks_total INTEGER NOT NULL,
         reported_conversions_total INTEGER,
         pending_commission_amount REAL,
@@ -160,6 +161,7 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
     // Backward-compatible upgrades for databases where the table existed before account-aware evidence.
     for(const sql of [
       `ALTER TABLE affiliate_network_click_evidence ADD COLUMN account_email TEXT`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN programme_status TEXT`,
       `ALTER TABLE affiliate_network_click_evidence ADD COLUMN reported_conversions_total INTEGER`,
       `ALTER TABLE affiliate_network_click_evidence ADD COLUMN pending_commission_amount REAL`,
       `ALTER TABLE affiliate_network_click_evidence ADD COLUMN currency TEXT`
@@ -173,10 +175,10 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
     ];
     for(const [tool,clicks] of current){
       await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_click_evidence(
-        evidence_key,tool_slug,provider,programme,account_email,reported_clicks_total,reported_conversions_total,pending_commission_amount,currency,observed_at,evidence_source,note
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
+        evidence_key,tool_slug,provider,programme,account_email,programme_status,reported_clicks_total,reported_conversions_total,pending_commission_amount,currency,observed_at,evidence_source,note
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
         `partnerstack:pedro@trytoolscout.org:${tool}:dashboard:2026-09-29T09:37:26Z`,
-        tool,'partnerstack',tool,'pedro@trytoolscout.org',clicks,0,0,'USD',
+        tool,'partnerstack',tool,'pedro@trytoolscout.org','active',clicks,0,0,'USD',
         '2026-09-29 09:37:26','owner_dashboard',
         'Current PartnerStack programme dashboard supplied by owner; status Active, zero conversions and zero pending commissions.'
       ).run();
@@ -291,7 +293,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) clicks7d,
       SUM(CASE WHEN created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) clicks30d
       FROM social_affiliate_redirects`).first().catch(()=>null),
-    env.DB.prepare(`SELECT e.tool_slug,e.provider,e.programme,e.account_email,e.reported_clicks_total,e.reported_conversions_total,e.pending_commission_amount,e.currency,e.observed_at,e.evidence_source
+    env.DB.prepare(`SELECT e.tool_slug,e.provider,e.programme,e.account_email,e.programme_status,e.reported_clicks_total,e.reported_conversions_total,e.pending_commission_amount,e.currency,e.observed_at,e.evidence_source
       FROM affiliate_network_click_evidence e
       JOIN (
         SELECT tool_slug,provider,COALESCE(account_email,'' ) account_email,MAX(observed_at) observed_at
@@ -562,6 +564,7 @@ async function buildCommandCenterBusinessTruth(request,env){
           provider:row.provider,
           programme:row.programme,
           accountEmail:row.account_email||null,
+          programmeStatus:row.programme_status||null,
           reportedClicksTotal:truthNum(row.reported_clicks_total),
           reportedConversionsTotal:truthNum(row.reported_conversions_total),
           pendingCommissionAmount:truthNum(row.pending_commission_amount),
