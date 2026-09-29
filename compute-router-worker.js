@@ -1302,6 +1302,54 @@ async function reconcileRejectedExternalAdapters(env,{limit=20}={}){
   return{checked:rows(q).length,recovered};
 }
 
+function routeHost(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
+function genericDiscoveryAction(value){
+  try{
+    const u=new URL(String(value||'')),path=(u.pathname||'/').replace(/\/+$/,'')||'/';
+    if(path==='/')return true;
+    if(!/^\/(?:login|sign-in|signin|sign-up|signup|register)$/i.test(path))return false;
+    const redirect=['next','redirect','redirect_to','return_to','continue'].map(k=>u.searchParams.get(k)).find(Boolean);
+    if(!redirect)return true;
+    let d=String(redirect);try{d=decodeURIComponent(d)}catch{}
+    return !/(?:submit|submission|products?\/new|projects?\/submit|add[-_/]?(?:tool|startup|product|software|app))/i.test(d);
+  }catch{return false}
+}
+async function reconcileGenericDomainDuplicates(env){
+  const q=await env.DB.prepare(`SELECT surface_slug,status,action_url,human_required,distribution_score
+    FROM distribution_opportunities
+    WHERE action_url IS NOT NULL
+      AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
+      AND status NOT IN ('rejected','unavailable_free','policy_blocked')
+    ORDER BY distribution_score DESC,updated_at DESC LIMIT 400`).all().catch(()=>({results:[]}));
+  const items=rows(q);
+  const activeByHost=new Map();
+  for(const row of items){
+    const host=routeHost(row.action_url);if(!host)continue;
+    const active=['ready_to_submit','auth_required','human_action_required','approval_required','submitted','pending_review','scheduled','live','verified'].includes(String(row.status||''));
+    if(!active||genericDiscoveryAction(row.action_url))continue;
+    if(!activeByHost.has(host))activeByHost.set(host,row);
+  }
+  let consolidated=0;
+  for(const row of items){
+    if(!['candidate','discovered','research_required'].includes(String(row.status||''))||Number(row.human_required||0)!==0||!genericDiscoveryAction(row.action_url))continue;
+    const host=routeHost(row.action_url),canonical=activeByHost.get(host);
+    if(!canonical||canonical.surface_slug===row.surface_slug)continue;
+    const protectedGate=await env.DB.prepare(`SELECT 1 ok FROM human_gate_contract
+      WHERE engine='distribution' AND subject_key=? AND status IN ('open','verification_pending') LIMIT 1`).bind(row.surface_slug).first().catch(()=>null);
+    if(protectedGate?.ok)continue;
+    const protectedSubmission=await env.DB.prepare(`SELECT 1 ok FROM distribution_submissions
+      WHERE surface_slug=? AND status IN ('submitted','pending_review','verified') LIMIT 1`).bind(row.surface_slug).first().catch(()=>null);
+    if(protectedSubmission?.ok)continue;
+    const detail=`Generic same-domain discovery surface consolidated into canonical submission surface ${canonical.surface_slug} (${canonical.status}); do not spend Render capacity researching the redundant root/login route.`;
+    const w=await env.DB.prepare(`UPDATE distribution_opportunities
+      SET status='skipped',human_required=0,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now')
+      WHERE surface_slug=? AND status IN ('candidate','discovered','research_required')`).bind(detail,row.surface_slug).run().catch(()=>null);
+    consolidated+=num(w?.meta?.changes||w?.changes);
+  }
+  if(consolidated)await event(env,'generic_domain_route_duplicates_consolidated','completed',`Consolidated ${consolidated} generic same-domain discovery route(s) behind canonical submission surfaces.`,{consolidated}).catch(()=>{});
+  return consolidated;
+}
+
 async function reconcileDuplicateRouteSurfaces(env){
   const w=await env.DB.prepare(`UPDATE distribution_opportunities AS d
     SET status='skipped',
@@ -1343,6 +1391,7 @@ async function runOverflowTick(env){
   await ensureHotIndexes(env);
   const rejectedAdapterRecovery=await isolatedOverflowStage(env,'external_submission_recovery',()=>reconcileRejectedExternalAdapters(env),{checked:0,recovered:0});
   const duplicateRouteConsolidation=await isolatedOverflowStage(env,'duplicate_route_consolidation',()=>reconcileDuplicateRouteSurfaces(env),0);
+  const genericDomainConsolidation=await isolatedOverflowStage(env,'generic_domain_route_consolidation',()=>reconcileGenericDomainDuplicates(env),0);
   const nonSubmissionNoisePruned=await isolatedOverflowStage(env,'non_submission_research_noise',()=>reconcileNonSubmissionResearchNoise(env),0);
   const freshHumanGateReconciliation=await isolatedOverflowStage(env,'fresh_research_human_gate_reconciliation',()=>reconcileFreshResearchHumanGates(env),{checked:0,opened:0});
   const verificationTruthRecovery=await isolatedOverflowStage(env,'verification_truth_recovery',()=>reconcileFalseSubmissionRouteVerifications(env),{corrected:0,verifiedToday:0});
@@ -1372,7 +1421,7 @@ async function runOverflowTick(env){
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
+    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,genericDomainConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
     nonSubmissionNoisePruned,batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
