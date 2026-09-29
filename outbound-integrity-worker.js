@@ -17,6 +17,51 @@ function sameOriginReferrer(request,url){
   if(!value)return null;
   try{const ref=new URL(value);return ref.hostname===url.hostname?ref:null}catch{return null}
 }
+function userActivatedNavigation(request){
+  return request.headers.get('Sec-Fetch-User')==='?1'&&String(request.headers.get('Sec-Fetch-Mode')||'').toLowerCase()==='navigate';
+}
+function sessionFromResponse(response){
+  const cookie=response.headers.get('Set-Cookie')||'';
+  const match=cookie.match(/(?:^|,?\s*)toolscout_session=([^;]+)/);
+  if(!match)return null;
+  try{const value=decodeURIComponent(match[1]);return UUID.test(value)?value:null}catch{return null}
+}
+async function affiliateEntry(request,env,tool){
+  try{
+    const r=await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url)));
+    if(!r.ok)return null;
+    const cfg=await r.json();
+    return cfg?.[tool]||null;
+  }catch{return null}
+}
+function withRedirectRobots(response){
+  if(response.status<300||response.status>=400)return response;
+  const h=new Headers(response.headers);
+  h.set('X-Robots-Tag','noindex, nofollow, noarchive');
+  h.set('Cache-Control','private, no-store, max-age=0');
+  return new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
+}
+async function bypassKnownAutomation(request,env,url,response){
+  const classification=classifySessionRequest(request);
+  if(![SESSION_CLASSIFICATIONS.KNOWN_BOT,SESSION_CLASSIFICATIONS.SYNTHETIC].includes(classification))return response;
+  if(response.status<300||response.status>=400||!response.headers.get('Location'))return response;
+  const tool=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if(!tool)return response;
+  const entry=await affiliateEntry(request,env,tool);
+  const destination=entry?.publicUrl||new URL('/tools/'+tool+'.html',request.url).toString();
+  const session=parseSession(request)||sessionFromResponse(response);
+  if(session){
+    await env.DB.prepare(`UPDATE click_events
+      SET affiliate_active_at_click=0,affiliate_route='known_automation_public_bypass'
+      WHERE id=(SELECT id FROM click_events WHERE session_id=? AND tool_slug=? ORDER BY id DESC LIMIT 1)`)
+      .bind(session,tool).run().catch(()=>{});
+  }
+  const h=new Headers(response.headers);
+  h.set('Location',destination);
+  h.set('X-Robots-Tag','noindex, nofollow, noarchive');
+  h.set('Cache-Control','private, no-store, max-age=0');
+  return new Response(null,{status:302,headers:h});
+}
 async function digestHex(value){
   const bytes=new TextEncoder().encode(String(value||''));
   const digest=await crypto.subtle.digest('SHA-256',bytes);
@@ -79,8 +124,8 @@ async function recordVerifiedOutbound(request,env,url,response){
   if(request.method!=='GET'||!url.pathname.startsWith('/go/')||response.status<300||response.status>=400||!response.headers.get('Location'))return;
   const session=parseSession(request),ref=sameOriginReferrer(request,url),classification=classifySessionRequest(request);
   if(!session||!ref||classification!==SESSION_CLASSIFICATIONS.LIKELY_HUMAN)return;
-  const denied=await env.DB.prepare(`SELECT decision FROM traffic_guard_events WHERE session_id=? ORDER BY id DESC LIMIT 1`).bind(session).first().catch(()=>null);
-  if(denied?.decision==='denied')return;
+  const guard=await env.DB.prepare(`SELECT decision FROM traffic_guard_events WHERE session_id=? ORDER BY id DESC LIMIT 1`).bind(session).first().catch(()=>null);
+  if(['blocked','denied'].includes(String(guard?.decision||'').toLowerCase()))return;
   const tool=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
   if(!tool)return;
   await ensureSchema(env);
@@ -88,53 +133,63 @@ async function recordVerifiedOutbound(request,env,url,response){
   if(!click)return;
   const created=parseUtc(click.created_at)||new Date();
   const proofKey=`${session}:${tool}:${Math.floor(created.getTime()/5000)}`;
+  const proofType=userActivatedNavigation(request)?'user_activation_navigation':'same_origin_established_session_navigation';
   await env.DB.prepare(`INSERT OR IGNORE INTO verified_outbound_events(proof_key,click_id,click_ref,session_id,tool_slug,source,affiliate_active_at_click,proof_type,created_at) VALUES(?,?,?,?,?,?,?,?,?)`)
-    .bind(proofKey,Number(click.id||0)||null,click.click_ref||null,session,tool,String(click.source||'public-redirect'),click.affiliate_active_at_click==null?null:Number(click.affiliate_active_at_click),'same_origin_established_session_navigation',String(click.created_at||sqliteUtc(created))).run();
-  await env.DB.prepare(`INSERT INTO traffic_human_evidence(
-      session_id,evidence_type,evidence_strength,interaction_count,first_path,last_path,source,referrer_host,country,asn,first_evidence_at,last_evidence_at
-    ) VALUES(?,'verified_outbound_navigation',4,0,?,?,?,?,?, ?,datetime('now'),datetime('now'))
-    ON CONFLICT(session_id) DO UPDATE SET
-      evidence_type='verified_outbound_navigation',
-      evidence_strength=MAX(traffic_human_evidence.evidence_strength,4),
-      last_path=excluded.last_path,
-      source=COALESCE(traffic_human_evidence.source,excluded.source),
-      referrer_host=COALESCE(traffic_human_evidence.referrer_host,excluded.referrer_host),
-      country=COALESCE(traffic_human_evidence.country,excluded.country),
-      asn=COALESCE(traffic_human_evidence.asn,excluded.asn),
-      last_evidence_at=datetime('now')`)
-    .bind(session,ref.pathname.slice(0,200)||'/',ref.pathname.slice(0,200)||'/',String(click.source||'public-redirect'),ref.hostname,String(request.cf?.country||'').slice(0,8)||null,Number(request.cf?.asn||0)||null).run();
-
-  const alreadyAllowed=await env.DB.prepare(`SELECT 1 ok FROM traffic_guard_events WHERE session_id=? AND decision='allowed' LIMIT 1`).bind(session).first().catch(()=>null);
-  if(!alreadyAllowed){
-    const ua=request.headers.get('User-Agent')||'',uaHash=await digestHex(ua),fingerprint=await digestHex(`${session}|${ref.pathname}|outbound`);
-    await env.DB.prepare(`INSERT INTO traffic_guard_events(fingerprint,ua_hash,session_id,path,country,asn,suspicious_direct,decision,reason,created_at) VALUES(?,?,?,?,?,?,0,'allowed','same_origin_outbound_navigation',datetime('now'))`)
-      .bind(fingerprint,uaHash,session,ref.pathname.slice(0,200)||'/',String(request.cf?.country||'').slice(0,8)||null,Number(request.cf?.asn||0)||null).run();
-  }
-
-  const existingPage=await env.DB.prepare(`SELECT 1 ok FROM funnel_events WHERE session_id=? AND event_type='page_confirmed' LIMIT 1`).bind(session).first().catch(()=>null);
-  if(!existingPage){
-    await env.DB.prepare(`INSERT INTO funnel_events(event_id,session_id,event_type,path,source,referrer_host,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
-      .bind(`evt_${crypto.randomUUID()}`,session,'page_confirmed',ref.pathname.slice(0,200)||'/','outbound-proof',url.hostname).run().catch(()=>{});
-  }
+    .bind(proofKey,Number(click.id||0)||null,click.click_ref||null,session,tool,String(click.source||'public-redirect'),click.affiliate_active_at_click==null?null:Number(click.affiliate_active_at_click),proofType,String(click.created_at||sqliteUtc(created))).run();
 }
 
 async function outboundSnapshot(env){
   await ensureSchema(env);
   const now=new Date(),todayStart=sqliteUtc(zonedMidnight(now)),last24=sqliteUtc(new Date(now.getTime()-86400000)),window30=sqliteUtc(new Date(now.getTime()-30*86400000));
-  const [meta,verified,legacy,guard]=await Promise.all([
+  const [meta,verified,guard]=await Promise.all([
     env.DB.prepare(`SELECT value FROM outbound_integrity_meta WHERE key='tracking_started_at' LIMIT 1`).first(),
-    env.DB.prepare(`SELECT COUNT(*) outbound30d,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized30d,SUM(CASE WHEN created_at>=? THEN 1 ELSE 0 END) outbound24h,SUM(CASE WHEN created_at>=? THEN 1 ELSE 0 END) outboundToday,SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=? THEN 1 ELSE 0 END) monetizedToday,COUNT(DISTINCT CASE WHEN created_at>=? THEN session_id END) outboundSessionsToday FROM verified_outbound_events WHERE created_at>=?`).bind(last24,todayStart,todayStart,todayStart,window30).first(),
-    env.DB.prepare(`WITH confirmed AS (SELECT DISTINCT session_id FROM funnel_events WHERE event_type='page_confirmed' AND created_at>=datetime('now','-31 days')) SELECT COUNT(*) outbound30d FROM click_events c JOIN confirmed x ON x.session_id=c.session_id LEFT JOIN sessions s ON s.session_id=c.session_id WHERE c.created_at>=? AND COALESCE(s.classification,'unknown/legacy') IN ('likely-human','human') AND c.source NOT IN ('internal-test','synthetic','health-check','ci')`).bind(window30).first().catch(()=>null),
-    env.DB.prepare(`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) sessions24h,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) sessionsToday,MAX(last_evidence_at) lastAllowedAt FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-36 hours')`).bind(last24,todayStart).first().catch(()=>null)
+    env.DB.prepare(`WITH classified AS (
+      SELECT v.*,
+        CASE WHEN v.proof_type='user_activation_navigation'
+          OR EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=v.session_id AND f.event_type='page_confirmed' AND COALESCE(f.source,'')<>'outbound-proof' AND f.created_at<=v.created_at)
+          OR EXISTS(SELECT 1 FROM traffic_human_evidence h WHERE h.session_id=v.session_id AND h.evidence_type<>'verified_outbound_navigation' AND h.first_evidence_at<=v.created_at)
+        THEN 1 ELSE 0 END strict_proof
+      FROM verified_outbound_events v
+      WHERE v.created_at>=?
+    )
+    SELECT
+      COUNT(*) browser30d,
+      SUM(CASE WHEN strict_proof=1 THEN 1 ELSE 0 END) strict30d,
+      SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) browserMonetized30d,
+      SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) strictMonetized30d,
+      SUM(CASE WHEN created_at>=? THEN 1 ELSE 0 END) browser24h,
+      SUM(CASE WHEN strict_proof=1 AND created_at>=? THEN 1 ELSE 0 END) strict24h,
+      SUM(CASE WHEN created_at>=? THEN 1 ELSE 0 END) browserToday,
+      SUM(CASE WHEN strict_proof=1 AND created_at>=? THEN 1 ELSE 0 END) strictToday,
+      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=? THEN 1 ELSE 0 END) browserMonetizedToday,
+      SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 AND created_at>=? THEN 1 ELSE 0 END) strictMonetizedToday
+    FROM classified`).bind(window30,last24,last24,todayStart,todayStart,todayStart,todayStart).first(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) sessions24h,COUNT(DISTINCT CASE WHEN first_evidence_at>=? THEN session_id END) sessionsToday,MAX(last_evidence_at) lastAllowedAt FROM traffic_human_evidence WHERE first_evidence_at>=datetime('now','-36 hours') AND evidence_type<>'verified_outbound_navigation'`).bind(last24,todayStart).first().catch(()=>null)
   ]);
   const trackingSince=parseUtc(meta?.value),windowComplete=Boolean(trackingSince&&trackingSince.getTime()<=now.getTime()-30*86400000);
-  const outbound30d=Number(verified?.outbound30d||0),monetized30d=Number(verified?.monetized30d||0);
+  const browser30d=Number(verified?.browser30d||0),strict30d=Number(verified?.strict30d||0);
+  const browserMonetized30d=Number(verified?.browserMonetized30d||0),strictMonetized30d=Number(verified?.strictMonetized30d||0);
   return {
-    status:'observed',source:'D1',proof:'same-origin established-session browser navigation',trackingSince:trackingSince?.toISOString()||null,windowDays:30,windowComplete,
-    humanOutbound:outbound30d,monetizedOutbound:monetized30d,unmonetizedOutbound:Math.max(0,outbound30d-monetized30d),weightedCoverage:outbound30d?monetized30d/outbound30d:null,
-    humanOutboundLast24:Number(verified?.outbound24h||0),humanOutboundToday:Number(verified?.outboundToday||0),monetizedOutboundToday:Number(verified?.monetizedToday||0),outboundSessionsToday:Number(verified?.outboundSessionsToday||0),
-    legacyStrictOutbound30d:Number(legacy?.outbound30d||0),strictHumanSessionsLast24:Number(guard?.sessions24h||0),strictHumanSessionsToday:Number(guard?.sessionsToday||0),lastStrictHumanEvidenceAt:guard?.lastAllowedAt||null,
-    definition:'Verified outbound counts only same-origin /go/ navigations from a browser-like request carrying an established first-party ToolScout session. Owner, bot, synthetic and direct redirect-only traffic are excluded. Repeated same-tool redirects within five seconds are deduplicated. History before trackingStartedAt is not backfilled.'
+    status:'observed',source:'D1',trackingSince:trackingSince?.toISOString()||null,windowDays:30,windowComplete,
+    browserQualifiedOutbound:browser30d,
+    browserQualifiedMonetizedOutbound:browserMonetized30d,
+    strictHumanOutbound:strict30d,
+    strictHumanMonetizedOutbound:strictMonetized30d,
+    browserQualifiedOutboundLast24:Number(verified?.browser24h||0),
+    strictHumanOutboundLast24:Number(verified?.strict24h||0),
+    browserQualifiedOutboundToday:Number(verified?.browserToday||0),
+    strictHumanOutboundToday:Number(verified?.strictToday||0),
+    browserQualifiedMonetizedToday:Number(verified?.browserMonetizedToday||0),
+    strictHumanMonetizedToday:Number(verified?.strictMonetizedToday||0),
+    strictHumanSessionsLast24:Number(guard?.sessions24h||0),
+    strictHumanSessionsToday:Number(guard?.sessionsToday||0),
+    lastStrictHumanEvidenceAt:guard?.lastAllowedAt||null,
+    humanOutbound:strict30d,
+    monetizedOutbound:strictMonetized30d,
+    humanOutboundLast24:Number(verified?.strict24h||0),
+    humanOutboundToday:Number(verified?.strictToday||0),
+    monetizedOutboundToday:Number(verified?.strictMonetizedToday||0),
+    definition:'Commercial outbound uses separate evidence levels. Browser-qualified means a same-origin /go/ navigation from an established first-party session with a plausible browser request. Strict human means prior positive browser/human evidence or an explicit browser user-activation navigation. Known bots, synthetic traffic and owner traffic are excluded. A /go/ request never creates page-confirmation evidence by itself.'
   };
 }
 
@@ -159,10 +214,10 @@ async function augmentHealth(response,env){
   if(!response.ok)return response;
   let data;try{data=await response.json()}catch{return response}
   const snap=await outboundSnapshot(env);
-  data.canonical='D1 strict-human-v1 + first-party verified outbound navigation';
+  data.canonical='D1 strict-human-v2 + layered outbound evidence';
   data.sessions24h=snap.strictHumanSessionsLast24;
   data.trafficState=snap.strictHumanSessionsLast24>0?'active':'quiet';
-  data.note='Human traffic requires positive evidence in traffic_human_evidence. Browser Guard is diagnostic only. Outbound uses first-party same-origin navigation proof.';
+  data.note='Human traffic requires positive evidence. Outbound evidence is layered: network-observed, first-party redirect, browser-qualified, and strict/user-activated. These populations are never silently collapsed.';
   data.legacyPageConfirmed={sessions24h:data.legacyPageConfirmed?.sessions24h??null,lastPageConfirmedAt:data.lastPageConfirmedAt||null};
   data.outboundIntegrity=snap;
   return Response.json(data,{headers:{'Cache-Control':'no-store'}});
@@ -171,7 +226,7 @@ async function augmentHealth(response,env){
 async function decorateAnalytics(response){
   if(!response.ok||(response.headers.get('content-type')||'').toLowerCase().includes('text/html')===false)return response;
   let html=await response.text();
-  html=html.replaceAll('Outbound clicks, 30d','Verified outbound clicks').replaceAll('Monetized outbound, 30d','Verified monetized outbound').replaceAll('Browser-confirmed human outbound clicks','First-party verified outbound clicks since exact tracking began').replaceAll('Browser-confirmed outbound with affiliate active at click time','Verified outbound with affiliate active at click time');
+  html=html.replaceAll('Outbound clicks, 30d','Strict human outbound').replaceAll('Monetized outbound, 30d','Strict human monetized outbound').replaceAll('Browser-confirmed human outbound clicks','Strict human outbound since layered tracking began').replaceAll('Browser-confirmed outbound with affiliate active at click time','Strict human outbound with affiliate active at click time');
   const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');headers.set('Cache-Control','private, no-store, max-age=0');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
@@ -179,8 +234,14 @@ async function decorateAnalytics(response){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    const response=await base.fetch(request,env,ctx);
-    if(url.pathname.startsWith('/go/')){try{await recordVerifiedOutbound(request,env,url,response)}catch{}}
+    let response=await base.fetch(request,env,ctx);
+    if(url.pathname.startsWith('/go/')){
+      try{
+        response=await bypassKnownAutomation(request,env,url,response);
+        await recordVerifiedOutbound(request,env,url,response);
+        response=withRedirectRobots(response);
+      }catch{}
+    }
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return augmentStats(response,env);
     if(request.method==='GET'&&url.pathname==='/api/traffic-integrity-health')return augmentHealth(response,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorateAnalytics(response);
