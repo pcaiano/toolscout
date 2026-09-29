@@ -883,7 +883,7 @@ async function reconcileFalseSubmissionRouteVerifications(env){
       env.DB.prepare(`UPDATE distribution_submissions SET response_url=NULL,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(item.submission_id),
       env.DB.prepare(`UPDATE distribution_auto_adapters SET public_url=CASE WHEN public_url IN (source_url,endpoint,?) THEN NULL ELSE public_url END,verification_endpoint=CASE WHEN verification_endpoint IN (source_url,endpoint,?) THEN NULL ELSE verification_endpoint END,updated_at=datetime('now') WHERE surface_slug=?`)
         .bind(item.response_url,item.response_url,item.surface_slug),
-      env.DB.prepare(`UPDATE distribution_events SET status='invalidated',detail=?,updated_at=COALESCE(updated_at,created_at) WHERE surface_slug=? AND event_type='external_publication_verification' AND status='verified' AND destination_url=?`)
+      env.DB.prepare(`UPDATE distribution_events SET status='invalidated',detail=? WHERE surface_slug=? AND event_type='external_publication_verification' AND status='verified' AND destination_url=?`)
         .bind(detail,item.surface_slug,item.response_url)
     ]).catch(()=>{});
     corrected++;verifiedToday+=num(item.verified_today);
