@@ -13,7 +13,8 @@ const CASES=[
   ['/compare','compare.html'],
   ['/categories','categories.html'],
   ['/crm-tools','crm-tools.html'],
-  ['/seo-tools','seo-tools.html']
+  ['/seo-tools','seo-tools.html'],
+  ['/blog/','blog/index.html']
 ];
 
 function contentType(file){
@@ -52,10 +53,12 @@ function env(){
 }
 
 test('navigation candidate recognizes only audited hubs',()=>{
-  for(const [pathname] of CASES)assert.equal(publicNavigationHub(pathname),pathname);
+  for(const [pathname] of CASES)assert.equal(publicNavigationHub(pathname),pathname==='/blog/'?'/blog':pathname);
   assert.equal(publicNavigationHub('/compare.html'),'/compare');
   assert.equal(publicNavigationHub('/tools/airtable'),null);
-  assert.equal(publicNavigationHub('/blog/'),null);
+  assert.equal(publicNavigationHub('/blog/'),'/blog');
+  assert.equal(publicNavigationHub('/blog'),'/blog');
+  assert.equal(publicNavigationHub('/blog/article'),null);
   assert.equal(publicNavigationHub('/go/airtable'),null);
 });
 
