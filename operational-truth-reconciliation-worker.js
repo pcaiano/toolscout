@@ -122,23 +122,34 @@ let affiliateNetworkEvidenceReady=null;
 async function ensureAffiliateNetworkEvidenceSchema(env){
   if(affiliateNetworkEvidenceReady)return affiliateNetworkEvidenceReady;
   affiliateNetworkEvidenceReady=(async()=>{
+    // Phase 1: make the legacy table structurally compatible before creating indexes
+    // or account-aware rows. This ordering matters on existing production D1 databases.
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_click_evidence (
+      evidence_key TEXT PRIMARY KEY,
+      tool_slug TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      programme TEXT,
+      account_email TEXT,
+      programme_status TEXT,
+      reported_clicks_total INTEGER NOT NULL,
+      reported_conversions_total INTEGER,
+      pending_commission_amount REAL,
+      currency TEXT,
+      observed_at TEXT NOT NULL,
+      evidence_source TEXT NOT NULL,
+      note TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`).run();
+    for(const sql of [
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN account_email TEXT`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN programme_status TEXT`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN reported_conversions_total INTEGER`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN pending_commission_amount REAL`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN currency TEXT`
+    ])await env.DB.prepare(sql).run().catch(()=>{});
+
+    // Phase 2: dependent indexes/tables are safe only after the columns exist.
     await env.DB.batch([
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_click_evidence (
-        evidence_key TEXT PRIMARY KEY,
-        tool_slug TEXT NOT NULL,
-        provider TEXT NOT NULL,
-        programme TEXT,
-        account_email TEXT,
-        programme_status TEXT,
-        reported_clicks_total INTEGER NOT NULL,
-        reported_conversions_total INTEGER,
-        pending_commission_amount REAL,
-        currency TEXT,
-        observed_at TEXT NOT NULL,
-        evidence_source TEXT NOT NULL,
-        note TEXT,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_affiliate_network_click_evidence_tool_observed ON affiliate_network_click_evidence(tool_slug,observed_at DESC)`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_affiliate_network_click_evidence_account_observed ON affiliate_network_click_evidence(account_email,observed_at DESC)`),
       env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_accounts (
@@ -160,7 +171,10 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
         evidence_source TEXT NOT NULL,
         note TEXT,
         PRIMARY KEY(network,account_email,tool_slug)
-      )`),
+      )`)
+    ]);
+
+    await env.DB.batch([
       env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_accounts(network,account_email,status,marketplace_state,observed_at,evidence_source,note)
         VALUES('partnerstack','pedro@trytoolscout.org','active','active_programs','2026-09-29 09:37:26','owner_dashboard',
         'Owner supplied current PartnerStack dashboard with seven active programmes and current click totals.')`),
@@ -174,14 +188,7 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
       env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
         VALUES('partnerstack','pcaiano@gmail.com','n8n','rejected','2026-09-01 19:21:49','gmail','PartnerStack email confirms n8n rejected this account.')`)
     ]);
-    // Backward-compatible upgrades for databases where the table existed before account-aware evidence.
-    for(const sql of [
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN account_email TEXT`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN programme_status TEXT`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN reported_conversions_total INTEGER`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN pending_commission_amount REAL`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN currency TEXT`
-    ])await env.DB.prepare(sql).run().catch(()=>{});
+
     await env.DB.prepare(`UPDATE affiliate_network_click_evidence
       SET account_email=COALESCE(account_email,'pedro@trytoolscout.org')
       WHERE evidence_key='partnerstack:apollo:first-10:2026-09-25T17:12:28Z'`).run().catch(()=>{});
@@ -192,7 +199,6 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
     for(const [tool,clicks] of current){
       await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
         VALUES('partnerstack','pedro@trytoolscout.org',?,'active','2026-09-29 09:37:26','owner_dashboard','Current PartnerStack dashboard supplied by owner.')`).bind(tool).run();
-
       await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_click_evidence(
         evidence_key,tool_slug,provider,programme,account_email,programme_status,reported_clicks_total,reported_conversions_total,pending_commission_amount,currency,observed_at,evidence_source,note
       ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
@@ -214,7 +220,7 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  await ensureAffiliateNetworkEvidenceSchema(env);
+  const affiliateEvidenceSchemaOk=await ensureAffiliateNetworkEvidenceSchema(env).then(()=>true).catch(()=>false);
   const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -532,7 +538,8 @@ async function buildCommandCenterBusinessTruth(request,env){
   else if(truthNum(growth.attributed_humans_7d)>0){currentGrowthStatus='working';currentGrowthDirective='scale_proven_human_sources_and_existing_search_demand'}
   return {
     ok:true,
-    version:'command-center-business-truth-v4-hybrid-execution',
+    version:'command-center-business-truth-v5-simple-kpis',
+    degradedSources:affiliateEvidenceSchemaOk?[]:['affiliate_network_evidence'],
     generatedAt:new Date().toISOString(),
     growth:{
       status:currentGrowthStatus,
