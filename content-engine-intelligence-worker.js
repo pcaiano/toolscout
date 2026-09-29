@@ -385,8 +385,13 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
   const preferredMention=(effectiveSprintTarget?.signals?.tool_slug||selected||comparison)?(mentions[0]||null):null;
   const routeCandidate=(routeCandidates.results||[])[0]||null;
   const mode=selected?'affiliate_social_verified':'editorial';
-  const targetMode=selected?'direct_vendor':'editorial';
-  let t=selected?{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url}:(effectiveSprintTarget?editorialTargets(family,effectiveSprintTarget.subject_key,humanAcquisitionSprintActive()?'human_acquisition_sprint':'growth_supervisor_search_demand'):editorialTargets(family));
+  const affiliateTargets=selected
+    ?(Number(selected.redirect_allowed||0)===1
+      ?targets(selected.tool_slug)
+      :{linkedin:selected.affiliate_url,x:selected.affiliate_url,bluesky:selected.affiliate_url})
+    :null;
+  const targetMode=selected?(Number(selected.redirect_allowed||0)===1?'toolscout_redirect':'direct_vendor'):'editorial';
+  let t=selected?affiliateTargets:(effectiveSprintTarget?editorialTargets(family,effectiveSprintTarget.subject_key,humanAcquisitionSprintActive()?'human_acquisition_sprint':'growth_supervisor_search_demand'):editorialTargets(family));
   const ownedPinterestBase=effectiveSprintTarget?.subject_key
     ?`https://trytoolscout.org${String(effectiveSprintTarget.subject_key).startsWith('/')?'':'/'}${effectiveSprintTarget.subject_key}`
     :(selected?.tool_slug?`https://trytoolscout.org/tools/${selected.tool_slug}`:'https://trytoolscout.org/');
