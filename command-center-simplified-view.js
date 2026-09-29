@@ -29,11 +29,11 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div><div class="eyebrow">ToolScout - business control</div><h1>Command Center</h1><p class="sub">Business truth first. The page shows verified acquisition, conversion, authority, execution and human exceptions. Internal engine activity only appears when it explains an outcome or a problem.</p></div><button class="btn primary" id="refresh">Refresh</button></header>
+<header class="top"><div><div class="eyebrow">ToolScout - business control</div><h1>Command Center</h1><p class="sub">Four business KPIs first: visitors, sessions, Google clicks and outbound clicks. Operational detail appears only when it explains a result or a problem.</p></div><button class="btn primary" id="refresh">Refresh</button></header>
 <div class="statusbar"><div id="status"><strong>Loading current state...</strong></div><span id="sourceStatus">Live sources</span></div>
 <main class="grid">
 <section class="card span12"><div class="head"><div><div class="kicker">Business</div><div class="title">Business State</div></div><div class="meta" id="businessMeta">Current verified evidence</div></div><div class="body" id="businessBody"><div class="empty">Loading...</div></div></section>
-<section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Traffic Progress</div></div><div class="meta" id="trafficProgressMeta">GA4 + strict human proof</div></div><div class="body" id="trafficProgressBody"><div class="empty">Loading...</div></div></section>
+<section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Traffic Progress</div></div><div class="meta" id="trafficProgressMeta">Google Analytics 4</div></div><div class="body" id="trafficProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Authority Progress</div></div><div class="meta" id="authorityProgressMeta">Backlinks + referring domains</div></div><div class="body" id="authorityProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span4"><div class="head"><div><div class="kicker">28 day trend</div><div class="title">Google Search Progress</div></div><div class="meta" id="gscProgressMeta">Search Console</div></div><div class="body" id="gscProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Autonomous execution + R&D</div><div class="title">Growth Brain</div></div><div class="meta" id="brainMeta">What it is doing now and what it is exploring next</div></div><div class="body" id="brainBody"><div class="empty">Loading...</div></div></section>
@@ -124,60 +124,44 @@ async function get(url,fresh=false){
  return r.json();
 }
 function business(){
- const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},c=t.commercialActivity||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
- const outboundCoverage=c?.tracking?.window24hComplete?'complete 24h window':(c?.tracking?.outboundStartedAt?'partial window since '+dt(c.tracking.outboundStartedAt):'tracking window unavailable');
- let headline='Execution is running, but business results are not yet proven.';
- let detail='Human Acquisition v4 is always on but resource-bounded: 60% existing search demand, 25% authority/vendor network, 10% AI/AEO discovery and 5% Growth R&D. GA4 is canonical traffic; strict-human evidence proves attribution quality. Activity itself is not success.';
- if(Number(c?.vendorReported?.clickFloor)>0)headline='Affiliate networks confirm commercial click activity. First-party attribution is shown separately so it cannot disappear behind strict filters.';
- if(Number(g.strictHumans24h)>0)headline='Verified humans are arriving. Conversion is now the next proof point.';
- if(Number(g.strictOutbound24h??g.verifiedOutbound24h)>0)headline='Strict or user-activated outbound is reaching vendors. Monetization is now the next proof point.';
- if(Number(g.monetizedOutbound24h)>0)headline='Monetized outbound is active. Scale only sources that preserve verified human quality.';
- if(Number(r.confirmedRevenue||0)>0)headline='Confirmed revenue is now present. Focus on repeatable acquisition and monetized conversion.';
- document.getElementById('businessMeta').textContent='Business truth '+dt(t.generatedAt);
+ const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},st=data.stats||{},a=st.acquisition||{},commerce=st.commerceTruth||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{};
+ const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=st?.growthOps?.googleSearchReality?.searchPerformance?.window28d||t.search||{},out24=commerce?.last24Hours||{};
+ const visitors=a.status==='connected'?gaUsers.activeToday??gaUsers.today:null;
+ const sessions24=a.status==='connected'?gaSessions.last24Hours:null;
+ const googleClicks=gsc?.clicks??null;
+ const outbound24=commerce.status==='connected'?out24.outbound:null;
+ const monetized24=commerce.status==='connected'?out24.monetized:null;
+ const kpiHealthy=[visitors,sessions24,googleClicks,outbound24].filter(v=>v!==null&&v!==undefined).length;
+ let headline='Core business metrics are available.';
+ let detail='GA4 is canonical for visitors and sessions. Search Console is canonical for Google clicks. The ToolScout server redirect ledger is canonical for outbound clicks.';
+ if(kpiHealthy<4){headline='One or more core metrics are unavailable.';detail='Missing sources remain unavailable rather than being converted to zero. The other KPIs continue to render independently.'}
+ document.getElementById('businessMeta').textContent='GA4 + Google Search Console + server outbound';
  document.getElementById('businessBody').innerHTML=
   '<div class="headline"><b>'+esc(headline)+'</b><span>'+esc(detail)+'</span></div>'+
   '<div class="metrics">'+
-   metric('GA4 sessions - 24h',a.status==='connected'?n(ga.last24Hours):'Unavailable',a.status==='connected'?n(ga.monthToDate)+' MTD · canonical traffic':'GA4 source unavailable')+
-   metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · positive human evidence')+
-   metric('Affiliate redirects - 24h',n(c?.firstPartyRedirects?.clicks24h),n(c?.firstPartyRedirects?.clicks7d)+' / 7d · all first-party affiliate /go/ traffic')+
-   metric('Browser-qualified outbound - 24h',n(c?.browserQualified?.clicks24h),outboundCoverage+' · '+n(c?.browserQualified?.clicks7d)+' / 7d')+
-   metric('Strict / user-activated outbound - 24h',n(c?.strictVerified?.clicks24h),outboundCoverage+' · '+n(c?.strictVerified?.clicks7d)+' / 7d · strongest first-party proof')+
-   metric('PartnerStack network clicks',n(c?.vendorReported?.clickFloor),(c?.vendorReported?.accounts?.length?n(c.vendorReported.accounts.length)+' account(s) · cumulative external counter':'No external click evidence'))+
-   metric('Strict monetized outbound - 24h',n(c?.strictVerified?.monetized24h),n(c?.strictVerified?.monetized7d)+' / 7d · subset of strict outbound')+
-   metric('Backlinks',n(b.seRankingBacklinks??b.observedBacklinks??b.verifiedBacklinks),b.seRankingObservedAt?'SE Ranking · snapshot '+dt(b.seRankingObservedAt):human(b.backlinkCountSource||'External backlink truth'))+
-   metric('Referring domains (unique)',n(b.seRankingReferringDomains??b.referringDomains??b.verifiedReferringDomains),(b.seRankingDofollowReferringDomains!=null?n(b.seRankingDofollowReferringDomains)+' dofollow · ':'')+human(b.referringDomainSource||'External authority source'))+
-   metric('Domain authority',b.domainAuthority==null?'Unavailable':n(b.domainAuthority),b.domainAuthoritySource||'External authority source')+
-   metric('Active affiliates',n(aff.productionRoutes),'Live ToolScout affiliate routes')+
-   metric('Confirmed revenue',data.stats==null?'Source unavailable':(r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency)),data.stats==null?'Stats source did not respond':(r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected'))+
-   metric('Needs you',q.total==null?'Unavailable':n(q.total),(q.estimated_minutes==null?'Source unavailable':n(q.estimated_minutes)+' min estimated'))+
+   metric('Visitors - today',n(visitors),a.status==='connected'?'GA4 active users · '+n(gaUsers.monthToDate)+' users MTD':'GA4 unavailable')+
+   metric('Sessions - 24h',n(sessions24),a.status==='connected'?n(gaSessions.monthToDate)+' sessions MTD · GA4':'GA4 unavailable')+
+   metric('Google clicks - 28d',n(googleClicks),'Google Search Console')+
+   metric('Outbound clicks - 24h',n(outbound24),commerce.status==='connected'?n(monetized24)+' monetized · server redirect ledger':'Outbound source unavailable')+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
-   row('Emails - 24h',n(g.emailSent24h)+' sent','Target '+n(g.emailTarget24h||50)+' · hard max '+n(g.emailMax24h||60)+' · '+n(g.contactSupplyReadyEmail??g.emailReadyContacts)+' unique domains ready')+
-   row('Machine-safe actions - today',n(data?.compute?.distributionFunnel?.actionsCompletedToday)+' completed',n(data?.compute?.distributionFunnel?.actionsAuthorizedToday??data?.compute?.executionUsedToday)+' authorized · '+n(data?.compute?.executionDailyJobBudget||g.machineSafeExternalActionMax24h||800)+' / day capacity')+
-   row('Research jobs - today',n(data?.compute?.distributionFunnel?.researchCompletedToday)+' distribution routes completed',n(data?.compute?.researchUsedToday)+' authorized · '+n(data?.compute?.dailyJobBudget||g.researchExternalJobMax24h||1500)+' / day capacity')+
-   row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
-   row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
-   row('PartnerStack accounts',n(c?.vendorReported?.accounts?.length)+' reconciled',(c?.vendorReported?.accounts||[]).map(x=>x.accountEmail+' · '+human(x.marketplaceState||x.status)).join(' | ')||'No account evidence')+
-   row('PartnerStack current programmes',n((c?.vendorReported?.evidence||[]).filter(x=>String(x.programmeStatus||'').toLowerCase()==='active').length)+' active',(c?.vendorReported?.evidence||[]).map(x=>x.toolSlug+' '+n(x.reportedClicksTotal)+' clicks · '+(x.accountEmail||'account unknown')).join(' | ')||'No current programme evidence')+
-   row('Affiliate redirect classification · 30d',n(c?.firstPartyRedirects?.clicks30d)+' total',n(c?.firstPartyRedirects?.likelyHuman30d)+' likely-browser · '+n(c?.firstPartyRedirects?.knownBot30d)+' known bot · '+n(c?.firstPartyRedirects?.owner30d)+' owner · '+n(c?.firstPartyRedirects?.unverified30d)+' unverified')+
-   row('Metric rule','Unknown stays unknown','Unverified traffic is never converted into bot traffic. Network clicks, redirect requests, browser-qualified navigation and strict evidence are separate layers and are never summed.')+
-   row('Commercial click truth','Layered evidence','PartnerStack is external network evidence. First-party layers explain attribution quality without overwriting the network count.')+
-   row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
+   row('Revenue',r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected')+
+   row('Active affiliates',aff.productionRoutes==null?'Unavailable':n(aff.productionRoutes),'Production routes')+
+   row('Authority',b.seRankingBacklinks==null&&b.observedBacklinks==null?'Unavailable':n(b.seRankingBacklinks??b.observedBacklinks),(b.seRankingReferringDomains==null&&b.referringDomains==null?'':n(b.seRankingReferringDomains??b.referringDomains)+' referring domains'))+
+   row('Needs you',q.total==null?'Unavailable':n(q.total),q.estimated_minutes==null?'':n(q.estimated_minutes)+' min estimated')+
   '</div>';
 }
 
 function trafficProgress(){
- const a=data?.stats?.acquisition||{},rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),humans:0})):[];
- const strict=Array.isArray(data?.truth?.traffic?.strictDaily)?data.truth.traffic.strictDaily:[];
- const map=new Map(rows.map((x,i)=>[String(x.date),i]));
- for(const h of strict){const key=String(h.date||'').replaceAll('-','');let idx=map.get(key);if(idx==null)idx=map.get(String(h.date||''));if(idx!=null)rows[idx].humans=Number(h.humans||0)}
- const last7=rows.slice(-7),prev7=rows.slice(-14,-7),sum=x=>x.reduce((a,b)=>a+Number(b.sessions||0),0),cur=sum(last7),prev=sum(prev7),chg=prev?((cur-prev)/prev*100):null;
- document.getElementById('trafficProgressMeta').textContent=a.fetchedAt?'GA4 refreshed '+dt(a.fetchedAt):'GA4 history';
+ const a=data?.stats?.acquisition||{},rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),users:Number(x.users||0)})):[];
+ const last7=rows.slice(-7),prev7=rows.slice(-14,-7),sum=(xs,key)=>xs.reduce((acc,row)=>acc+Number(row[key]||0),0),cur=sum(last7,'sessions'),prev=sum(prev7,'sessions'),chg=prev?((cur-prev)/prev*100):null;
+ document.getElementById('trafficProgressMeta').textContent=a.fetchedAt?'GA4 refreshed '+dt(a.fetchedAt):'GA4';
  document.getElementById('trafficProgressBody').innerHTML=
-  '<div class="progressStats"><div class="progressStat"><small>Sessions last 7d</small><b>'+n(cur)+'</b></div><div class="progressStat"><small>7d vs prior 7d</small><b class="'+deltaClass(chg)+'">'+signedPct(chg)+'</b></div><div class="progressStat"><small>Strict humans 7d</small><b>'+n(data?.truth?.growth?.strictHumans7d)+'</b></div><div class="progressStat"><small>Sessions MTD</small><b>'+n(a?.sessions?.monthToDate)+'</b></div></div>'+
-  '<div class="chartBox">'+seriesChart(rows,[{key:'sessions',label:'GA4 sessions',cls:'primary'},{key:'humans',label:'Strict verified humans',cls:'good',dots:true}])+'</div>'+
-  '<div class="sourceLine">Traffic line is GA4 canonical acquisition. Green proof points are strict human diagnostics and do not override or erase GA4 sessions.</div>';
+  '<div class="progressStats"><div class="progressStat"><small>Sessions last 7d</small><b>'+n(cur)+'</b></div><div class="progressStat"><small>Visitors last 7d</small><b>'+n(sum(last7,'users'))+'</b></div><div class="progressStat"><small>7d vs prior 7d</small><b class="'+deltaClass(chg)+'">'+signedPct(chg)+'</b></div><div class="progressStat"><small>Sessions MTD</small><b>'+n(a?.sessions?.monthToDate)+'</b></div></div>'+
+  '<div class="chartBox">'+seriesChart(rows,[{key:'sessions',label:'GA4 sessions',cls:'primary'},{key:'users',label:'GA4 users',cls:'good'}])+'</div>'+
+  '<div class="sourceLine">GA4 is the only traffic source used in this chart. ToolScout bot classification is diagnostic and does not alter these totals.</div>';
 }
+
 function authorityProgress(){
  const b=data?.truth?.authority||{},live=data?.authority||{},rows=Array.isArray(b.history30)?b.history30:[];
  const queue=live.queue!=null?live.queue:b.authorityQueue,attempts24=live.attempts24!=null?live.attempts24:b.attempts24,min24=live.attemptMin24h!=null?live.attemptMin24h:b.attemptMin24h;
@@ -288,7 +272,7 @@ function throughput(){
      row('Auth Plane',human(a.status||'Unavailable'),a.brokerRuntime?.ok?'Chromium broker healthy · CAPTCHA/MFA human-only':'Broker health '+human(a.brokerRuntime?.error||'unavailable'))+
      row('GitHub Actions','Disabled until October','Not counted as current execution capacity')+
    '</div>'+
-   '<div class="sourceLine">Outcome hierarchy remains GA4 sessions → strict humans → verified outbound → monetized outbound → confirmed revenue. Capacity metrics only explain how fast the Growth Brain can work.</div>';
+   '<div class="sourceLine">Business KPIs remain visitors → sessions → Google clicks → outbound clicks → confirmed revenue. Capacity metrics only explain how fast the Growth Brain can work.</div>';
 }
 function taskHtml(x){
  // Chairman Queue human gates always open the exact external action in the owner's normal browser. Remote Auth Plane handoffs must never be required to unblock queue work.
