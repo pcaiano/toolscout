@@ -42,6 +42,7 @@ const directOwnerFiles={
   authority_acquisition:'authority-acquisition-worker.js',
   mission_integrity:'mission-integrity-v2-worker.js',
   growth_runtime_closed_loop:'growth-runtime-closed-loop-worker.js',
+  authority_health:'authority-health-runtime.js',
   public_editorial_site:'public-editorial-runtime.js',
   command_center_direct:'command-center-direct-runtime.js'
 };
