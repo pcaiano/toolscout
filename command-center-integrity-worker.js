@@ -305,3 +305,5 @@ export default {
 };
 
 export {augmentHealth as augmentCommandCenterIntegrityHealth};
+
+export {augmentStats as augmentCommandCenterStats};
