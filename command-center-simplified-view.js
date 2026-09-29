@@ -140,7 +140,7 @@ function business(){
    metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · quality proof')+
    metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d · strict first-party')+
    metric('Tracked social affiliate redirects - 24h',n(c?.socialAffiliateRedirects?.clicks24h),n(c?.socialAffiliateRedirects?.clicks7d)+' / 7d · first-party commercial tracking')+
-   metric('Affiliate-network click floor',n(c?.vendorReported?.clickFloor),(c?.vendorReported?.evidence?.length?n(c.vendorReported.evidence.length)+' external evidence source(s)':'No external click evidence'))+
+   metric('Affiliate-network click floor',n(c?.vendorReported?.clickFloor),(c?.vendorReported?.accounts?.length?n(c.vendorReported.accounts.length)+' PartnerStack account(s) tracked':'No external click evidence'))+
    metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d · strict first-party')+
    metric('Backlinks',n(b.seRankingBacklinks??b.observedBacklinks??b.verifiedBacklinks),b.seRankingObservedAt?'SE Ranking · snapshot '+dt(b.seRankingObservedAt):human(b.backlinkCountSource||'External backlink truth'))+
    metric('Referring domains (unique)',n(b.seRankingReferringDomains??b.referringDomains??b.verifiedReferringDomains),(b.seRankingDofollowReferringDomains!=null?n(b.seRankingDofollowReferringDomains)+' dofollow · ':'')+human(b.referringDomainSource||'External authority source'))+
@@ -155,6 +155,7 @@ function business(){
    row('Research jobs - today',n(data?.compute?.distributionFunnel?.researchCompletedToday)+' distribution routes completed',n(data?.compute?.researchUsedToday)+' authorized · '+n(data?.compute?.dailyJobBudget||g.researchExternalJobMax24h||1500)+' / day capacity')+
    row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
    row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
+   row('PartnerStack accounts',n(c?.vendorReported?.accounts?.length)+' reconciled',(c?.vendorReported?.accounts||[]).map(x=>x.accountEmail+' · '+human(x.marketplaceState||x.status)).join(' | ')||'No account evidence')+
    row('Commercial click truth','Sources kept separate','Verified first-party, tracked social redirects and affiliate-network counters can overlap and are never summed.')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
