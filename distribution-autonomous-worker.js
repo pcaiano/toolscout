@@ -421,6 +421,9 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
 export async function openDistributionHumanGateFromResearchEvidence(env,row,{route=null,result=null}={}){
   await ensureHumanGateSchema(env);
   if(!row?.surface_slug||!route||route.machineCandidate||route.submissionIntent!==true)return {opened:false,reason:'not_exact_human_submission_route'};
+  if(['skipped','verified','live','submitted','pending_review','scheduled','policy_blocked','rejected','unavailable_free'].includes(String(row.status||''))){
+    return {opened:false,reason:'terminal_opportunity_state',status:String(row.status||'')};
+  }
   const actionUrl=validHumanActionUrl(route.url);
   if(!actionUrl)return {opened:false,reason:'invalid_action_url'};
   const sourceUrl=String(result?.targetUrl||row.action_url||'');
