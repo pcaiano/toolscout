@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','public_decision','public_navigation']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','public_decision','public_navigation']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -18,6 +18,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'engine_evidence',owner:'mission_integrity',plane:'signals',methods:['POST'],exact:['/api/engine-evidence']},
   {id:'command_center_page',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html','/command-center','/command-center/']},
   {id:'command_center_truth',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/api/command-center-business-truth','/api/command-center-simplified-health']},
+  {id:'command_center_resilient_health',owner:'command_center_resilient_health',plane:'signals',methods:['GET'],exact:['/api/command-center-resilient-health']},
   {id:'analytics_chairman_queue',owner:'analytics_chairman',plane:'signals',methods:['GET'],exact:['/analytics/api/chairman-queue']},
   {id:'analytics_stats',owner:'analytics_stats',plane:'signals',methods:['GET'],exact:['/analytics/api/stats']},
   {id:'analytics_human_actions',owner:'analytics_human_actions',plane:'signals',methods:['GET'],exact:['/analytics/api/human-actions']},
