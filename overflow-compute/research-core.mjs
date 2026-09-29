@@ -525,29 +525,57 @@ async function researchDistribution(job){
   if(!validPublicHttp(source))return{ok:false,error:'invalid_or_private_url'};
   let home=await fetchPage(source);
   const attempted=[source];
+  const attempts=[{url:source,status:Number(home?.status||0),error:safe(home?.error||'',180)}];
   if(!home?.ok){
+    const sourceStatus=Number(home?.status||0);
+    const exactHumanRoute=exactUnreachableHumanRoute(source,sourceStatus);
+    if(exactHumanRoute)return{
+      ok:true,httpStatus:sourceStatus,targetUrl:source,finalUrl:home?.url||source,
+      classification:'exact_route_blocked_to_automation',routes:[exactHumanRoute],contactRoutes:[],blockers:[],
+      routeSummary:{submissionRoutes:1,formRoutes:0,authRoutes:exactHumanRoute.auth?1:0,captchaRoutes:0,machineCandidates:0,humanGateCandidates:exactHumanRoute.auth?1:0,manualRoutes:exactHumanRoute.auth?0:1,staticPostEndpointSignals:0,policyBlockers:0,formRejections:{source_unreachable:1}},
+      evidence:{pagesFetched:0,cacheHits:0,sourceFallbackAttempted:false,attemptedUrls:attempted.slice(0,8),attempts:attempts.slice(0,8),blockedHttpStatus:sourceStatus,exactUrlHumanFallback:true}
+    };
     let origin=null;try{origin=new URL(source).origin}catch{}
-    const fallbacks=origin?[origin+'/',origin+'/submit',origin+'/submit-tool',origin+'/add-tool',origin+'/add',origin+'/contact',origin+'/contact-us']:[];
-    for(const candidate of [...new Set(fallbacks)]){
+    const root=origin?origin+'/':null;
+    let fallbacks=[];
+    if(sourceStatus===0){
+      // A transport/DNS/TLS failure is host-wide most of the time. Probe the
+      // origin once when it differs, but never burn the whole job deadline on
+      // seven same-host paths that will fail identically.
+      fallbacks=root&&root!==source?[root]:[];
+    }else if([401,403,406,429,503,520].includes(sourceStatus)){
+      // Generic blocked roots are not improved by hammering guessed paths.
+      fallbacks=root&&root!==source?[root]:[];
+    }else{
+      fallbacks=origin?[root,origin+'/submit',origin+'/submit-tool',origin+'/add-tool',origin+'/contact']:[];
+    }
+    for(const candidate of [...new Set(fallbacks)].filter(Boolean)){
       if(candidate===source||!validPublicHttp(candidate))continue;
       attempted.push(candidate);
       const page=await fetchPage(candidate);
+      attempts.push({url:candidate,status:Number(page?.status||0),error:safe(page?.error||'',180)});
       if(page?.ok){home=page;break}
+      if(sourceStatus===0&&Number(page?.status||0)===0)break;
+      if([401,403,406,429,503,520].includes(sourceStatus)&&Number(page?.status||0)===sourceStatus)break;
     }
   }
   if(!home?.ok){
-    const exactHumanRoute=exactUnreachableHumanRoute(source,home?.status||0);
-    if(exactHumanRoute)return{
-      ok:true,httpStatus:home?.status||0,targetUrl:source,finalUrl:home?.url||source,
-      classification:'exact_route_blocked_to_automation',routes:[exactHumanRoute],contactRoutes:[],blockers:[],
-      routeSummary:{submissionRoutes:1,formRoutes:0,authRoutes:exactHumanRoute.auth?1:0,captchaRoutes:0,machineCandidates:0,humanGateCandidates:exactHumanRoute.auth?1:0,manualRoutes:exactHumanRoute.auth?0:1,staticPostEndpointSignals:0,policyBlockers:0,formRejections:{source_unreachable:1}},
-      evidence:{pagesFetched:0,cacheHits:0,sourceFallbackAttempted:attempted.length>1,attemptedUrls:attempted.slice(0,8),blockedHttpStatus:home?.status||0,exactUrlHumanFallback:true}
-    };
+    const statuses=attempts.map(x=>Number(x.status||0));
+    const positive=statuses.filter(x=>x>0);
+    const retryClass=positive.length&&positive.every(x=>x===404||x===410)
+      ?'not_found'
+      :statuses.length&&statuses.every(x=>x===0)
+        ?'transport_unreachable'
+        :positive.length&&positive.every(x=>[401,403,406,429,503].includes(x))
+          ?'access_blocked'
+          :positive.some(x=>x===520||x>=500)
+            ?'edge_error'
+            :'transient';
     return{
-      ok:false,error:'source_unreachable',httpStatus:home?.status||0,targetUrl:source,finalUrl:home?.url||source,
+      ok:false,error:'source_unreachable',retryClass,httpStatus:home?.status||0,targetUrl:source,finalUrl:home?.url||source,
       classification:'source_unreachable',routes:[],contactRoutes:[],blockers:[],
       routeSummary:{submissionRoutes:0,formRoutes:0,authRoutes:0,captchaRoutes:0,machineCandidates:0,policyBlockers:0},
-      evidence:{pagesFetched:0,cacheHits:0,sourceFallbackAttempted:attempted.length>1,attemptedUrls:attempted.slice(0,8)}
+      evidence:{pagesFetched:0,cacheHits:0,sourceFallbackAttempted:attempted.length>1,attemptedUrls:attempted.slice(0,8),attempts:attempts.slice(0,8)}
     };
   }
   home.signals=pageSignals(home);
