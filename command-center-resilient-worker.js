@@ -260,7 +260,7 @@ export async function handleChairmanQueueReadRoute(request,env,ctx){
   });
 }
 
-async function resilientSnapshot(request,env,ctx){
+export async function resilientSnapshot(request,env,ctx){
   await ensureStrictTruthSchema(env);
   const now=new Date(),todayKey=zonedDayKey(now),monthKey=todayKey.slice(0,7),todayStart=zonedMidnight(todayKey),monthStart=zonedMidnight(monthKey+'-01'),last24Start=new Date(now.getTime()-86400000),window30Start=new Date(now.getTime()-30*86400000);
   const todaySql=sqliteUtc(todayStart),monthSql=sqliteUtc(monthStart),last24Sql=sqliteUtc(last24Start),window30Sql=sqliteUtc(window30Start);
@@ -406,17 +406,27 @@ async function resilientSnapshot(request,env,ctx){
   };
 }
 
+export async function handleAnalyticsStatsReadRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/analytics/api/stats')return null;
+  if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
+  try{
+    return Response.json(await resilientSnapshot(request,env,ctx),{
+      headers:{...JSON_H,'X-ToolScout-Read-Mode':'read-only','X-ToolScout-Route-Contract':'v2'}
+    });
+  }catch(error){
+    return Response.json({error:'resilient_snapshot_failed',message:String(error?.message||error)},{status:500,headers:JSON_H});
+  }
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:6,statsMode:'direct-d1-resilient',trafficTruth:'strict-human-v1',externalLinkVerificationInStats:false,affiliateCanonicalTruth:'verified-outbound-v1',autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-quality-v1',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
     const chairman=await handleChairmanQueueReadRoute(request,env,ctx);
     if(chairman)return chairman;
-    if(request.method==='GET'&&url.pathname==='/analytics/api/stats'){
-      if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});
-      try{return Response.json(await resilientSnapshot(request,env,ctx),{headers:JSON_H})}
-      catch(error){return Response.json({error:'resilient_snapshot_failed',message:String(error?.message||error)},{status:500,headers:JSON_H})}
-    }
+    const stats=await handleAnalyticsStatsReadRoute(request,env,ctx);
+    if(stats)return stats;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}

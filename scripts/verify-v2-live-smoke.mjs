@@ -126,6 +126,8 @@ if(routeContractLive.ok){
     const owner=id=>groups.find(group=>group.id===id)?.owner||null;
     if(owner('agent_recommendation_protocol')!=='agent_protocol_core')errors.push({code:'agent_protocol_direct_owner_not_live'});
     if(owner('agent_discovery_catalog')!=='machine_discovery_catalog')errors.push({code:'machine_discovery_catalog_not_live'});
+    if(owner('analytics_chairman_queue')!=='analytics_chairman')errors.push({code:'analytics_chairman_direct_owner_not_live'});
+    if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
   }catch{}
 }
 
