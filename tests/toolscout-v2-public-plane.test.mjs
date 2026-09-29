@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {handlePublicEditorialRoute,ownsPublicEditorialPath} from '../public-editorial-runtime.js';
 
-const article='<!doctype html><html><head><title>Zapier update | ToolScout</title><link rel="canonical" href="https://trytoolscout.org/news/zapier-update"><link rel="icon" href="/favicon.svg"></head><body><main><h1>Zapier update</h1><p>ToolScout analysis: what this means for buyers.</p><a href="https://zapier.com/">Official source</a></main></body></html>';
+const article='<!doctype html><html><head><title>Zapier update | ToolScout</title><link rel="canonical" href="https://trytoolscout.org/news/zapier-update.html"><link rel="icon" href="/favicon.svg"></head><body><main><h1>Zapier update</h1><p>ToolScout analysis: what this means for buyers.</p><a href="https://zapier.com/">Official source</a></main></body></html>';
 const env={ASSETS:{fetch:async()=>new Response(article,{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}})}};
 
 test('news path is owned by the direct editorial public plane',()=>{
@@ -16,6 +16,7 @@ test('direct news response preserves editorial evidence and adds standard public
   assert.equal(response.headers.get('X-ToolScout-Public-Plane'),'editorial-v1');
   const html=await response.text();
   assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/news\/zapier-update"/);
+  assert.doesNotMatch(html,/trytoolscout\.org\/news\/zapier-update\.html/);
   assert.match(html,/https:\/\/zapier\.com\//);
   assert.match(html,/data-toolscout-social-footer="1"/);
 });
