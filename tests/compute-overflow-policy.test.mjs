@@ -9,7 +9,7 @@ assert.match(wrangler,/crons\s*=\s*\["\*\/15 \* \* \* \*"/);
 
 const router=read('compute-router-worker.js');
 assert.match(router,/DAILY_JOB_BUDGET=1500/);
-assert.match(router,/DISTRIBUTION_CLASSIFIER_VERSION=16/);
+assert.match(router,/DISTRIBUTION_CLASSIFIER_VERSION=17/);
 assert.match(router,/EXECUTION_DAILY_JOB_BUDGET=800/);
 assert.match(router,/const submitLimit=Math\.min\(300,remaining\);/);
 assert.match(router,/BATCH_SIZE=8/);
@@ -121,3 +121,5 @@ assert.match(router,/folded_into_distribution_route_research_v1/);
 
 assert.match(router,/verification_target_is_submission_route/);
 assert.match(router,/endpoint_success\.action_url=a\.endpoint/);
+
+assert.match(core,/authenticity_token/);
