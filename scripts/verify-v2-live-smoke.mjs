@@ -102,6 +102,20 @@ const analyticsPage=await fetchText('/analytics');
 if(!analyticsPage.ok)errors.push({code:'command_center_page_unavailable',status:analyticsPage.status});
 else if(!/Editorial Authority/.test(analyticsPage.text))errors.push({code:'command_center_editorial_authority_missing'});
 
+const trafficHealth=await fetchText('/api/traffic-integrity-health');
+if(!trafficHealth.ok)errors.push({code:'traffic_integrity_health_unavailable',status:trafficHealth.status});
+else{
+  if(trafficHealth.headers.get('x-toolscout-read-mode')!=='read-only')errors.push({code:'traffic_integrity_health_wrong_read_mode'});
+  if(trafficHealth.headers.get('x-toolscout-route-owner')!=='traffic_integrity_health')errors.push({code:'traffic_integrity_health_wrong_route_owner',owner:trafficHealth.headers.get('x-toolscout-route-owner')});
+  try{
+    const data=JSON.parse(trafficHealth.text);
+    if(!data||!data.browserGuard||!data.strictHumanTruth||!data.visitorIntegrity||!data.commandCenterIntegrity||!data.operationalTruthReconciliation){
+      errors.push({code:'traffic_integrity_health_payload_regressed'});
+    }
+    if(data.strictHumanTruth?.version!=='strict-human-v1')errors.push({code:'traffic_integrity_truth_version_regressed'});
+  }catch{errors.push({code:'traffic_integrity_health_invalid_json'});}
+}
+
 const resilientHealth=await fetchText('/api/command-center-resilient-health');
 if(!resilientHealth.ok)errors.push({code:'command_center_resilient_health_unavailable',status:resilientHealth.status});
 else{
@@ -138,6 +152,7 @@ if(routeContractLive.ok){
     if(owner('agent_recommendation_protocol')!=='agent_protocol_core')errors.push({code:'agent_protocol_direct_owner_not_live'});
     if(owner('agent_discovery_catalog')!=='machine_discovery_catalog')errors.push({code:'machine_discovery_catalog_not_live'});
     if(owner('command_center_resilient_health')!=='command_center_resilient_health')errors.push({code:'command_center_resilient_health_not_live'});
+    if(owner('traffic_integrity_health')!=='traffic_integrity_health')errors.push({code:'traffic_integrity_health_direct_owner_not_live'});
     if(owner('analytics_chairman_queue')!=='analytics_chairman')errors.push({code:'analytics_chairman_direct_owner_not_live'});
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
