@@ -17,7 +17,7 @@ assert.doesNotMatch(business,/Browser-qualified outbound/);
 assert.ok(!business.includes('Strict / user-activated outbound'));
 assert.doesNotMatch(business,/Strict attributed humans/);
 assert.doesNotMatch(business,/PartnerStack network clicks/);
-assert.ok(business.includes('data.commerce'));
+assert.ok(business.includes('a?.outbound'));
 assert.match(business,/Google Search Console/);
 assert.match(business,/GA4/);
 
@@ -30,10 +30,13 @@ assert.doesNotMatch(traffic,/strictHuman|Strict verified humans/);
 
 assert.ok(!business.includes('data.stats'));
 assert.ok(html.includes("acquisition:'/analytics/api/google/acquisition'"));
-assert.ok(html.includes("commerce:'/analytics/api/commerce'"));
 assert.ok(!html.includes("stats:'/analytics/api/stats'"));
 const ga4Worker=fs.readFileSync(new URL('../command-center-ga4-worker.js',import.meta.url),'utf8');
-assert.ok(ga4Worker.includes("url.pathname==='/analytics/api/commerce'"));
-const budgetWorker=fs.readFileSync(new URL('../d1-read-budget-worker.js',import.meta.url),'utf8');
-assert.ok(budgetWorker.includes("url.pathname === '/analytics/api/commerce'"));
-console.log('Command Center core KPI contract: five simple metrics with independent canonical sources.');
+assert.match(ga4Worker,/vendor_outbound/);
+assert.match(ga4Worker,/monetized_outbound/);
+assert.match(ga4Worker,/Server \/go\/ requests are diagnostic only/);
+const consent=fs.readFileSync(new URL('../analytics-consent.js',import.meta.url),'utf8');
+assert.match(consent,/send\('vendor_outbound'/);
+assert.match(consent,/send\('monetized_outbound'/);
+assert.match(consent,/activeAffiliates/);
+console.log('Command Center core KPI contract: five simple metrics with GA4 browser outbound events.');
