@@ -42,6 +42,7 @@ on:
       - 'scripts/build-editorial-authority-portfolio.mjs'
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/audit-runtime-architecture.mjs'
+      - 'scripts/audit-public-decision-parity.mjs'
       - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/generate-seo-pages.mjs'
@@ -120,6 +121,9 @@ jobs:
           node --check catalog-autonomy-worker.js
       - name: Audit ToolScout 2.0 runtime architecture
         run: node scripts/audit-runtime-architecture.mjs
+      - name: Audit full public decision parity
+        run: node scripts/audit-public-decision-parity.mjs
+
       - name: Enforce ToolScout 2.0 preservation invariants
         env:
           TOOLSCOUT_V2_BASE_REF: origin/main
