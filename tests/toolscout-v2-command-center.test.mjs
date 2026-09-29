@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {routeOwner} from '../runtime-route-contract.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
@@ -36,4 +37,22 @@ test('Command Center GET observability no longer mutates affiliate schema',()=>{
   const buildEnd=truth.indexOf('async function commandCenterBusinessTruth',buildStart);
   const buildBody=truth.slice(buildStart,buildEnd);
   assert.doesNotMatch(buildBody,/CREATE TABLE|CREATE INDEX|ALTER TABLE|reconcileAffiliateNetworkEvidenceSchema/);
+});
+
+
+test('Command Center read paths bypass the legacy wrapper chain',()=>{
+  assert.equal(routeOwner('/analytics',{method:'GET'}).owner,'command_center_direct');
+  assert.equal(routeOwner('/analytics-v2',{method:'GET'}).owner,'command_center_direct');
+  assert.equal(routeOwner('/api/command-center-business-truth',{method:'GET'}).owner,'command_center_direct');
+  assert.equal(routeOwner('/api/command-center-simplified-health',{method:'GET'}).owner,'command_center_direct');
+  // Schema reconciliation stays on the staged legacy/admin path until its
+  // compatibility migration can be made safely idempotent.
+  assert.equal(routeOwner('/api/command-center-business-truth/reconcile-affiliate-schema',{method:'POST'}).owner,'command_center');
+
+  const entry=read('compute-router-worker.js');
+  const truth=read('operational-truth-reconciliation-worker.js');
+  assert.match(entry,/ownership\.owner==='command_center_direct'/);
+  assert.match(truth,/export async function handleCommandCenterDirectRoute/);
+  assert.match(truth,/COMMAND_CENTER_SESSION_COOKIE/);
+  assert.match(truth,/Response\.redirect\(target\.toString\(\),308\)/);
 });
