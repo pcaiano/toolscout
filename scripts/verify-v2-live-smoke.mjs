@@ -135,7 +135,7 @@ if(routeContractLive.ok){
 
 
 
-for(const pathname of ['/best-seo-tools-for-agencies','/tools/airtable','/tools/semrush']){
+for(const pathname of ['/best-seo-tools-for-agencies','/best-social-media-management-tools','/best-project-management-tools','/tools/airtable','/tools/semrush','/tools/klaviyo','/tools/moz-pro','/tools/tally']){
   const live=await fetchText(pathname+'?toolscout_v2_canary='+Date.now(),{headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
   if(!live.ok)errors.push({code:'public_decision_canary_unavailable',pathname,status:live.status});
   else{
