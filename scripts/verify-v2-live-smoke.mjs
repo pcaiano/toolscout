@@ -129,13 +129,14 @@ if(routeContractLive.ok){
     if(owner('analytics_chairman_queue')!=='analytics_chairman')errors.push({code:'analytics_chairman_direct_owner_not_live'});
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
+    if(owner('public_decision_canary')!=='public_decision_canary')errors.push({code:'public_decision_canary_owner_not_live'});
   }catch{}
 }
 
 
 
 for(const pathname of ['/best-seo-tools-for-agencies','/tools/airtable','/tools/semrush']){
-  const live=await fetchText(pathname);
+  const live=await fetchText(pathname+'?toolscout_v2_canary='+Date.now(),{headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
   if(!live.ok)errors.push({code:'public_decision_canary_unavailable',pathname,status:live.status});
   else{
     if(live.headers.get('x-toolscout-public-plane')!=='decision-v1')errors.push({code:'public_decision_canary_not_live',pathname});
