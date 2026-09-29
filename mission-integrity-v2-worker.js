@@ -9,10 +9,11 @@ async function digestHex(value){const bytes=new TextEncoder().encode(String(valu
 async function authorized(request){const proof=String(request.headers.get('X-ToolScout-Proof')||'');return Boolean(proof)&&await digestHex(proof)===PROOF_SHA256}
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=(async()=>{await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS external_engine_evidence (evidence_id TEXT PRIMARY KEY,engine TEXT NOT NULL,mission_id TEXT NOT NULL,stage TEXT NOT NULL,status TEXT NOT NULL,external_id TEXT,detail TEXT,observed_at TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now')))`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_external_engine_evidence_engine_mission ON external_engine_evidence(engine,mission_id,created_at DESC)`)
-  ])})().catch(error=>{schemaReady=null;throw error});
+  schemaReady=(async()=>{
+    const row=await env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='external_engine_evidence'").first();
+    if(Number(row?.n||0)!==1)throw new Error('mission_integrity_schema_not_migrated');
+    return{ok:true,source:'d1_migrations'};
+  })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
 function safe(value,n=2000){return String(value??'').slice(0,n)}
@@ -34,8 +35,14 @@ async function ingestEvidence(request,env){
   return Response.json({ok:true,verified:effectiveStatus==='completed',evidence_id:evidenceId,mission_id:missionId,stage,status:effectiveStatus,external_id:externalId},{headers:JSON_H});
 }
 
+export async function handleMissionIntegrityRoute(request,env){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/engine-evidence'&&request.method==='POST')return ingestEvidence(request,env);
+  return null;
+}
+
 export default {
-  async fetch(request,env,ctx){const url=new URL(request.url);if(url.pathname==='/api/engine-evidence'&&request.method==='POST')return ingestEvidence(request,env);return base.fetch(request,env,ctx)},
+  async fetch(request,env,ctx){const owned=await handleMissionIntegrityRoute(request,env);if(owned)return owned;return base.fetch(request,env,ctx)},
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
 
