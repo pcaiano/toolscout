@@ -168,17 +168,23 @@ async function decisionSnapshot(env){
   }catch(error){return{status:'unavailable',items:[],error:String(error?.message||error).slice(0,500)};}
 }
 
+export async function handleDistributionPriorityRoute(request,env){
+  const u=new URL(request.url);
+  if(u.pathname==='/api/distribution/operating-decisions'&&request.method==='GET'){
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+    return Response.json(await decisionSnapshot(env),{headers:H});
+  }
+  if(u.pathname==='/api/distribution/operating-decisions/rebalance'&&request.method==='POST'){
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+    return Response.json(await rebalanceDistributionPriorities(env),{headers:H});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    if(u.pathname==='/api/distribution/operating-decisions'&&request.method==='GET'){
-      if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      return Response.json(await decisionSnapshot(env),{headers:H});
-    }
-    if(u.pathname==='/api/distribution/operating-decisions/rebalance'&&request.method==='POST'){
-      if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      return Response.json(await rebalanceDistributionPriorities(env),{headers:H});
-    }
+    const owned=await handleDistributionPriorityRoute(request,env);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
