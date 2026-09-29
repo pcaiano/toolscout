@@ -9,7 +9,7 @@ test('MCP, A2A and agent card have a direct protocol owner',()=>{
   for(const path of ['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']){
     assert.equal(routeOwner(path,{method:path.includes('well-known')?'GET':'POST'}).owner,'agent_protocol_core');
   }
-  assert.equal(routeOwner('/.well-known/toolscout-distribution.json',{method:'GET'}).owner,'agent_protocol');
+  assert.equal(routeOwner('/.well-known/toolscout-distribution.json',{method:'GET'}).owner,'machine_discovery_catalog');
 });
 
 test('agent card is served without legacy fallback',async()=>{
