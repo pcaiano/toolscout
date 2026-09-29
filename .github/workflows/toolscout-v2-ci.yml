@@ -14,6 +14,9 @@ on:
       - 'distribution-orchestrator-worker.js'
       - 'growth-scheduler.js'
       - 'runtime-schedule-contract.js'
+      - 'migrations/0088_mission_integrity_schema.sql'
+      - 'mission-integrity-v2-worker.js'
+      - 'runtime-route-contract.js'
       - 'distribution-priority-worker.js'
       - 'scripts/editorial-authority-model.mjs'
       - 'scripts/build-editorial-authority-portfolio.mjs'
@@ -47,6 +50,8 @@ jobs:
           node --check compute-router-worker.js
           node --check seo-cloudflare-runtime-worker.js
           node --check runtime-schedule-contract.js
+          node --check runtime-route-contract.js
+          node --check mission-integrity-v2-worker.js
           node --check growth-scheduler.js
           node --check distribution-orchestrator-worker.js
           node --check authority-acquisition-worker.js
@@ -62,4 +67,4 @@ jobs:
       - name: Validate operating contract JSON
         run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
       - name: Run ToolScout 2.0 policy tests
-        run: node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs
+        run: node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs
