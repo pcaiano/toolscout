@@ -193,12 +193,12 @@ function authorityProgress(){
 }
 function gscProgress(){
  const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{};
- document.getElementById('gscProgressMeta').textContent=(g.verifiedThroughDate?'Verified through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
+ document.getElementById('gscProgressMeta').textContent=(g.verifiedThroughDate?'Finalized through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
  document.getElementById('gscProgressBody').innerHTML=
-  '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Completed 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>Avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
+  '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Final 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>7d avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
   '<div class="chartBox"><div class="sectionTitle">Google impressions</div>'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
   '<div class="chartBox"><div class="sectionTitle">Average position - lower is better</div>'+seriesChart(rows,[{key:'position',label:'Average position',cls:'warn'}],{zeroBaseline:false,invert:true,axisDecimals:1})+'</div>'+
-  '<div class="sourceLine">The trend stops at the latest completed GSC day. The current partial day is excluded from both charts and from the 7-day comparison so it cannot create an artificial drop to zero. Average position is inverted so ranking improvement moves upward.</div>';
+  '<div class="sourceLine">Only Search Console days marked final by Google are plotted and used for the 28-day totals and 7-day comparison. Preliminary fresh-data days are withheld until finalized so incomplete ingestion cannot look like a traffic or ranking collapse. Average position is inverted so ranking improvement moves upward.</div>';
 }
 
 function brain(){
