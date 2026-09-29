@@ -129,22 +129,54 @@ if(routeContractLive.ok){
     if(owner('analytics_chairman_queue')!=='analytics_chairman')errors.push({code:'analytics_chairman_direct_owner_not_live'});
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
-    if(owner('public_decision_canary')!=='public_decision_canary')errors.push({code:'public_decision_canary_owner_not_live'});
+    if(owner('public_decision_pages')!=='public_decision')errors.push({code:'public_decision_owner_not_live'});
+    if(owner('public_navigation_misc')!=='public_site')errors.push({code:'public_navigation_legacy_owner_changed'});
   }catch{}
 }
 
 
 
-for(const pathname of ['/best-seo-tools-for-agencies','/best-social-media-management-tools','/best-project-management-tools','/tools/airtable','/tools/semrush','/tools/klaviyo','/tools/moz-pro','/tools/tally']){
-  const live=await fetchText(pathname+'?toolscout_v2_canary='+Date.now(),{headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
-  if(!live.ok)errors.push({code:'public_decision_canary_unavailable',pathname,status:live.status});
-  else{
-    if(live.headers.get('x-toolscout-public-plane')!=='decision-v1')errors.push({code:'public_decision_canary_not_live',pathname});
-    if(live.headers.get('x-toolscout-public-parity')!=='candidate')errors.push({code:'public_decision_parity_header_missing',pathname});
+const decisionPaths=[
+  ...fs.readdirSync('tools')
+    .filter(name=>name.endsWith('.html')&&name!=='index.html')
+    .sort()
+    .map(name=>'/tools/'+name.replace(/\.html$/,'')),
+  ...fs.readdirSync('.')
+    .filter(name=>/^best-[a-z0-9-]+\.html$/i.test(name))
+    .sort()
+    .map(name=>'/'+name.replace(/\.html$/,''))
+];
+
+for(let i=0;i<decisionPaths.length;i+=12){
+  const batch=decisionPaths.slice(i,i+12);
+  const results=await Promise.all(batch.map(async pathname=>[
+    pathname,
+    await fetchText(pathname+'?toolscout_v2_decision_smoke='+Date.now(),{
+      headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}
+    })
+  ]));
+  for(const [pathname,live] of results){
+    if(!live.ok){
+      errors.push({code:'public_decision_page_unavailable',pathname,status:live.status});
+      continue;
+    }
+    if(live.headers.get('x-toolscout-route-owner')!=='public_decision'){
+      errors.push({code:'public_decision_wrong_route_owner',pathname,owner:live.headers.get('x-toolscout-route-owner')});
+    }
+    if(live.headers.get('x-toolscout-public-plane')!=='decision-v1'){
+      errors.push({code:'public_decision_plane_not_live',pathname});
+    }
+    if(live.headers.get('x-toolscout-public-parity')!=='verified-v1'){
+      errors.push({code:'public_decision_verified_parity_missing',pathname,parity:live.headers.get('x-toolscout-public-parity')});
+    }
     const expected=canonicalPublicUrl(pathname);
     const actual=canonical(live.text);
-    if(actual!==expected)errors.push({code:'public_decision_canary_canonical_mismatch',pathname,expected,actual});
-    if(!/Official (?:product )?source|Editorial evidence:|Primary sources:/i.test(live.text))errors.push({code:'public_decision_editorial_evidence_missing',pathname});
+    if(actual!==expected){
+      errors.push({code:'public_decision_canonical_mismatch',pathname,expected,actual});
+    }
+    if(!/Official (?:product )?source|Editorial evidence:|Primary sources:/i.test(live.text)){
+      errors.push({code:'public_decision_editorial_evidence_missing',pathname});
+    }
   }
 }
 
@@ -173,6 +205,6 @@ else{
   }
 }
 
-const result={ok:errors.length===0,checkedAt:new Date().toISOString(),baseUrl:BASE,sitemapUrls:expectedSitemap.size,criticalPages:paths.length,errors,warnings};
+const result={ok:errors.length===0,checkedAt:new Date().toISOString(),baseUrl:BASE,sitemapUrls:expectedSitemap.size,criticalPages:paths.length,decisionPages:decisionPaths.length,errors,warnings};
 console.log(JSON.stringify(result,null,2));
 if(errors.length)process.exitCode=1;
