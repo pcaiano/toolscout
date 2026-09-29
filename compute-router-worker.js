@@ -32,6 +32,7 @@ function safe(v,n=4000){return String(v??'').slice(0,n)}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
 function rows(r){return r?.results||[]}
 function isHttp(url){try{const u=new URL(url);return ['http:','https:'].includes(u.protocol)}catch{return false}}
+function isTechnicalResearchUrl(url){try{const h=new URL(url).hostname.toLowerCase();return /(?:^|\.)(?:supabase\.co|r2\.dev|githubusercontent\.com|storage\.googleapis\.com|amazonaws\.com)$/.test(h)}catch{return false}}
 async function sha256(value){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function shortHash(value){return (await sha256(value)).slice(0,20)}
 async function ensureSchema(env){
@@ -569,10 +570,12 @@ async function health(env){
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE created_at>=datetime('now','-15 minutes') AND result='policy_blocked') qualification_policy_15m,
       (SELECT COUNT(*) FROM distribution_opportunities
         WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+          AND COALESCE(surface_type,'')<>'publisher_contact_route'
           AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
           AND status IN ('candidate','discovered','research_required')) route_research_candidates,
       (SELECT COUNT(*) FROM distribution_opportunities o
         WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
+          AND COALESCE(o.surface_type,'')<>'publisher_contact_route'
           AND (o.action_url LIKE 'https://%' OR o.action_url LIKE 'http://%')
           AND o.status IN ('candidate','discovered','research_required')
           AND NOT EXISTS (
@@ -594,6 +597,16 @@ async function health(env){
               AND recent.job_type='distribution_route_research'
               AND recent.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
               AND CAST(COALESCE(json_extract(recent.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM compute_overflow_jobs noyield
+            WHERE noyield.subject_key=o.surface_slug
+              AND noyield.job_type='distribution_route_research'
+              AND noyield.status='completed'
+              AND noyield.completed_at>=datetime('now','-24 hours')
+              AND CAST(COALESCE(json_extract(noyield.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+              AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.submissionRoutes'),0)=0
+              AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
           )) route_research_eligible,
       (SELECT COUNT(*) FROM compute_overflow_jobs
         WHERE status='completed'
@@ -763,6 +776,7 @@ async function enqueueDistributionResearch(env){
       COALESCE((SELECT a.policy_state FROM distribution_auto_adapters a WHERE a.surface_slug=distribution_opportunities.surface_slug LIMIT 1),'') adapter_policy_state
     FROM distribution_opportunities
     WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+      AND COALESCE(surface_type,'')<>'publisher_contact_route'
       AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
       AND status IN ('candidate','discovered','research_required')
       AND NOT EXISTS (
@@ -784,18 +798,34 @@ async function enqueueDistributionResearch(env){
           WHERE recovery.surface_slug=distribution_opportunities.surface_slug
             AND recovery.policy_state='revalidation_required'
         )
-        OR NOT EXISTS (
-          SELECT 1 FROM compute_overflow_jobs j
-          WHERE j.subject_key=distribution_opportunities.surface_slug
-            AND j.job_type='distribution_route_research'
-            AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
-            AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+        OR (
+          NOT EXISTS (
+            SELECT 1 FROM compute_overflow_jobs j
+            WHERE j.subject_key=distribution_opportunities.surface_slug
+              AND j.job_type='distribution_route_research'
+              AND j.created_at>=datetime('now','-${DISTRIBUTION_RESEARCH_BUCKET_HOURS} hours')
+              AND CAST(COALESCE(json_extract(j.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM compute_overflow_jobs noyield
+            WHERE noyield.subject_key=distribution_opportunities.surface_slug
+              AND noyield.job_type='distribution_route_research'
+              AND noyield.status='completed'
+              AND noyield.completed_at>=datetime('now','-24 hours')
+              AND CAST(COALESCE(json_extract(noyield.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
+              AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.submissionRoutes'),0)=0
+              AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
+          )
         )
       )
     ORDER BY CASE WHEN adapter_policy_state='revalidation_required' THEN 0 ELSE 1 END,distribution_score DESC,updated_at ASC LIMIT ?`).bind(limit).all().catch(()=>({results:[]}));
   for(const row of rows(q)){
     if(remaining<=0)break;
     if(!isHttp(row.action_url))continue;
+    if(isTechnicalResearchUrl(row.action_url)){
+      await env.DB.prepare(`UPDATE distribution_opportunities SET status='skipped',human_required=0,next_action='Technical infrastructure endpoint excluded from distribution route research.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live','submitted','pending_review','policy_blocked','rejected','skipped','unavailable_free')`).bind(row.surface_slug).run().catch(()=>{});
+      continue;
+    }
     const urlHash=await shortHash(row.action_url);
     const adapterPolicyState=String(row.adapter_policy_state||'');
     const recovering=adapterPolicyState==='revalidation_required';
