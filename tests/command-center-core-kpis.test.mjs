@@ -32,4 +32,8 @@ assert.ok(!business.includes('data.stats'));
 assert.ok(html.includes("acquisition:'/analytics/api/google/acquisition'"));
 assert.ok(html.includes("commerce:'/analytics/api/commerce'"));
 assert.ok(!html.includes("stats:'/analytics/api/stats'"));
+const ga4Worker=fs.readFileSync(new URL('../command-center-ga4-worker.js',import.meta.url),'utf8');
+assert.ok(ga4Worker.includes("url.pathname==='/analytics/api/commerce'"));
+const budgetWorker=fs.readFileSync(new URL('../d1-read-budget-worker.js',import.meta.url),'utf8');
+assert.ok(budgetWorker.includes("url.pathname === '/analytics/api/commerce'"));
 console.log('Command Center core KPI contract: five simple metrics with independent canonical sources.');
