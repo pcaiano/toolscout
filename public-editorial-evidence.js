@@ -37,7 +37,7 @@ function hasEvidence(html){
 function profileBlock(tool){
   if(!tool?.sourceUrl)return'';
   const checked=tool.lastVerified?' Source checked '+esc(tool.lastVerified)+'.':'';
-  return '<section class="section" data-toolscout-editorial-evidence="1"><h2>Editorial evidence</h2><p>ToolScout verifies product facts against the vendor\\'s official product source before using them in this profile.'+checked+'</p><p><a href="'+esc(tool.sourceUrl)+'" target="_blank" rel="noopener">Official product source for '+esc(tool.name||tool.slug)+'</a></p></section>';
+  return '<section class="section" data-toolscout-editorial-evidence="1"><h2>Editorial evidence</h2><p>ToolScout verifies product facts against the vendor&#39;s official product source before using them in this profile.'+checked+'</p><p><a href="'+esc(tool.sourceUrl)+'" target="_blank" rel="noopener">Official product source for '+esc(tool.name||tool.slug)+'</a></p></section>';
 }
 
 function guideBlock(rows){
