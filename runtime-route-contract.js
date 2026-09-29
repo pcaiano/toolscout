@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','public_decision']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','public_decision','public_navigation']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -25,7 +25,8 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'public_editorial_news',owner:'public_editorial_site',plane:'public_site',methods:['GET'],prefixes:['/news/']},
   {id:'public_editorial_trends',owner:'public_editorial_site',plane:'public_site',methods:['GET'],exact:['/software-trends-index','/software-trends-index/','/software-trends-index.html','/software-trends-index.json']},
   {id:'public_decision_pages',owner:'public_decision',plane:'public_site',methods:['GET'],matcher:'public_decision_page'},
-  {id:'public_navigation_misc',owner:'public_site',plane:'public_site',methods:['GET'],exact:['/tools','/tools/'],prefixes:['/guides','/compare','/blog/','/categories','/crm-tools','/seo-tools']},
+  {id:'public_navigation_hubs',owner:'public_navigation',plane:'public_site',methods:['GET'],exact:['/tools','/tools/','/tools.html','/guides','/guides/','/guides.html','/compare','/compare/','/compare.html','/categories','/categories/','/categories.html','/crm-tools','/crm-tools/','/crm-tools.html','/seo-tools','/seo-tools/','/seo-tools.html']},
+  {id:'public_blog',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/blog/']},
   {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
   {id:'agent_recommendation_protocol',owner:'agent_protocol_core',plane:'public_site',methods:['GET','POST','OPTIONS'],exact:['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']},
   {id:'agent_discovery_catalog',owner:'machine_discovery_catalog',plane:'public_site',methods:['GET','HEAD'],exact:['/.well-known/toolscout-distribution.json','/.well-known/api-catalog']}
