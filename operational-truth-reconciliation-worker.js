@@ -928,7 +928,6 @@ export default{
     }
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
-    if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname))return simplifiedPage(response,env);
     if(request.method==='GET')return injectToolScoutSocialFooter(response);
     return response;
   },
