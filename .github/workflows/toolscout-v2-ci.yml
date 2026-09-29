@@ -5,6 +5,7 @@ on:
     paths:
       - 'acquisition-value-model.js'
       - 'compute-router-worker.js'
+      - 'public-editorial-runtime.js'
       - 'seo-cloudflare-runtime-worker.js'
       - 'migrations/0087_seo_runtime_schema.sql'
       - 'command-center-light-theme-worker.js'
@@ -58,6 +59,7 @@ jobs:
           node --check acquisition-value-model.js
           node --check distribution-priority-worker.js
           node --check compute-router-worker.js
+          node --check public-editorial-runtime.js
           node --check seo-cloudflare-runtime-worker.js
           node --check runtime-schedule-contract.js
           node --check runtime-route-contract.js
@@ -89,5 +91,5 @@ jobs:
         run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
       - name: Run ToolScout 2.0 policy tests
         run: |
-          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs
+          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs
           node tests/growth-scheduler-ownership.mjs
