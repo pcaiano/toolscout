@@ -125,6 +125,7 @@ async function get(url,fresh=false){
 }
 function business(){
  const t=data.truth||{},g=t.growth||{},b=t.authority||{},aff=t.affiliate||{},c=t.commercialActivity||{},st=data.stats||{},a=st.acquisition||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{},ga=a.sessions||{};
+ const outboundCoverage=c?.tracking?.window24hComplete?'complete 24h window':(c?.tracking?.outboundStartedAt?'partial window since '+dt(c.tracking.outboundStartedAt):'tracking window unavailable');
  let headline='Execution is running, but business results are not yet proven.';
  let detail='Human Acquisition v4 is always on but resource-bounded: 60% existing search demand, 25% authority/vendor network, 10% AI/AEO discovery and 5% Growth R&D. GA4 is canonical traffic; strict-human evidence proves attribution quality. Activity itself is not success.';
  if(Number(c?.vendorReported?.clickFloor)>0)headline='Affiliate networks confirm commercial click activity. First-party attribution is shown separately so it cannot disappear behind strict filters.';
@@ -139,8 +140,8 @@ function business(){
    metric('GA4 sessions - 24h',a.status==='connected'?n(ga.last24Hours):'Unavailable',a.status==='connected'?n(ga.monthToDate)+' MTD · canonical traffic':'GA4 source unavailable')+
    metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · positive human evidence')+
    metric('Affiliate redirects - 24h',n(c?.firstPartyRedirects?.clicks24h),n(c?.firstPartyRedirects?.clicks7d)+' / 7d · all first-party affiliate /go/ traffic')+
-   metric('Browser-qualified outbound - 24h',n(c?.browserQualified?.clicks24h),n(c?.browserQualified?.clicks7d)+' / 7d · established session + same-origin browser navigation')+
-   metric('Strict / user-activated outbound - 24h',n(c?.strictVerified?.clicks24h),n(c?.strictVerified?.clicks7d)+' / 7d · strongest first-party outbound proof')+
+   metric('Browser-qualified outbound - 24h',n(c?.browserQualified?.clicks24h),outboundCoverage+' · '+n(c?.browserQualified?.clicks7d)+' / 7d')+
+   metric('Strict / user-activated outbound - 24h',n(c?.strictVerified?.clicks24h),outboundCoverage+' · '+n(c?.strictVerified?.clicks7d)+' / 7d · strongest first-party proof')+
    metric('PartnerStack network clicks',n(c?.vendorReported?.clickFloor),(c?.vendorReported?.accounts?.length?n(c.vendorReported.accounts.length)+' account(s) · cumulative external counter':'No external click evidence'))+
    metric('Strict monetized outbound - 24h',n(c?.strictVerified?.monetized24h),n(c?.strictVerified?.monetized7d)+' / 7d · subset of strict outbound')+
    metric('Backlinks',n(b.seRankingBacklinks??b.observedBacklinks??b.verifiedBacklinks),b.seRankingObservedAt?'SE Ranking · snapshot '+dt(b.seRankingObservedAt):human(b.backlinkCountSource||'External backlink truth'))+
