@@ -8,6 +8,11 @@ check(s.includes("const MAX_ACTIVE_BATCHES=3;"),'three batches match 24 external
 check(s.includes("Promise.all(batches.map(batch=>"),'batch triggers run concurrently');
 check(s.includes("RENDER_TRIGGER_TIMEOUT_MS=25000"),'cold-start trigger timeout is tolerant');
 check(s.includes("SOURCE_UNREACHABLE_BACKOFF_HOURS=6"),'source-unreachable retries use a bounded 6h backoff');
+check(s.includes("SOURCE_UNREACHABLE_POLICY_VERSION=2"),'unreachable retry policy is versioned');
+check(s.includes("reconcileSourceUnreachableBacklog"),'definitive unreachable jobs are compacted instead of endlessly recycled');
+check(s.includes("reconcileRedundantContactRouteJobs"),'duplicate contact-route crawls are folded into the primary research pass');
+check(s.includes("const contact=await applyContactResult(env,job,result)"),'primary distribution research persists contact routes in the same pass');
+check(!s.includes("jobKey:`contact:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`"),'new route cycles do not enqueue duplicate contact crawls');
 check(s.includes("last_error='source_unreachable_backoff'"),'mature unreachable backoffs are eligible for self-healing');
 check(s.includes("RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *'"),'Render keepalive cadence exists');
 check(w.includes('"7,22,37,52 * * * *"'),'Wrangler registers Render keepalive cron');
