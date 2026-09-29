@@ -63,6 +63,10 @@ ON CONFLICT(key) DO UPDATE SET value=excluded.value;
 -- valid visitor link, and country links must match that canonical identity.
 DELETE FROM confirmed_visitor_countries
 WHERE NOT EXISTS (
+  SELECT 1 FROM traffic_integrity_meta
+  WHERE key='session_identity_cleanup_v1'
+)
+AND NOT EXISTS (
   SELECT 1
   FROM confirmed_visitor_events e
   WHERE e.session_id=confirmed_visitor_countries.session_id
@@ -75,7 +79,11 @@ WHERE NOT EXISTS (
 );
 
 DELETE FROM confirmed_visitor_events
-WHERE id NOT IN (
+WHERE NOT EXISTS (
+  SELECT 1 FROM traffic_integrity_meta
+  WHERE key='session_identity_cleanup_v1'
+)
+AND id NOT IN (
   SELECT MIN(id)
   FROM confirmed_visitor_events
   GROUP BY session_id
@@ -87,13 +95,17 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_confirmed_visitor_events_session_id
 CREATE UNIQUE INDEX IF NOT EXISTS uq_confirmed_visitor_countries_session_id
   ON confirmed_visitor_countries(session_id);
 
-INSERT OR REPLACE INTO traffic_integrity_meta(key,value)
+INSERT OR IGNORE INTO traffic_integrity_meta(key,value)
 VALUES('session_identity_cleanup_v1',datetime('now'));
 
 INSERT OR IGNORE INTO confirmed_visitor_registry(visitor_id,first_seen_at,last_seen_at)
 SELECT visitor_id,MIN(created_at),MAX(created_at)
 FROM confirmed_visitor_events
+WHERE NOT EXISTS (
+  SELECT 1 FROM traffic_integrity_meta
+  WHERE key='visitor_registry_backfilled_at'
+)
 GROUP BY visitor_id;
 
-INSERT OR REPLACE INTO traffic_integrity_meta(key,value)
+INSERT OR IGNORE INTO traffic_integrity_meta(key,value)
 VALUES('visitor_registry_backfilled_at',datetime('now'));
