@@ -3,6 +3,7 @@ import base from './command-center-ga4-worker.js';
 
 const READ_TTLS = new Map([
   ['/analytics/api/stats', 300],
+  ['/analytics/api/commerce', 60],
   ['/api/stats', 300],
   ['/api/autonomous-growth-health', 300],
   ['/api/distribution/discovery-health', 600],
@@ -193,7 +194,7 @@ export default {
       return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
     }
     if (
-      (request.method === 'GET' && (url.pathname === '/analytics/api/google/connect' || url.pathname === '/analytics/api/google/acquisition')) ||
+      (request.method === 'GET' && (url.pathname === '/analytics/api/google/connect' || url.pathname === '/analytics/api/google/acquisition' || url.pathname === '/analytics/api/commerce')) ||
       (request.method === 'POST' && url.pathname === '/analytics/api/google/disconnect')
     ) {
       const forwarded = await validCommandCenterSession(request, env) ? withOwnerAccessHeader(request) : request;
