@@ -234,3 +234,5 @@ export default {
     if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);
   }
 };
+
+export {trafficHealth};
