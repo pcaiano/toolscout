@@ -1871,7 +1871,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='traffic_integrity_health')response=await handleTrafficIntegrityHealthRoute(request,env);
-  else if(ownership.owner==='admin_stats')response=await handleAdminStatsRoute(request,env);
+  else if(ownership.owner==='admin_stats')response=await handleAdminStatsRoute(request,env,ctx);
   else if(ownership.owner==='agent_protocol_core')response=await handleAgentProtocolRoute(request,env,ctx);
   else if(ownership.owner==='machine_discovery_catalog')response=await handleMachineDiscoveryCatalogRoute(request,env);
   else if(ownership.owner==='analytics_chairman')response=await handleAnalyticsChairmanRoute(request,env,ctx);
