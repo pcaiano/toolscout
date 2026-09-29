@@ -872,39 +872,60 @@ async function commandCenterBusinessTruth(request,env,{fresh=false}={}){
   businessTruthCache.promise=work;
   return work;
 }
+export async function handleCommandCenterDirectRoute(request,env){
+  const u=new URL(request.url);
+
+  if(request.method==='GET'&&(u.pathname==='/analytics.html'||u.pathname==='/analytics-v2.html')){
+    const target=new URL(u.toString());
+    target.pathname=u.pathname.replace(/\.html$/i,'');
+    return Response.redirect(target.toString(),308);
+  }
+
+  if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname)){
+    return simplifiedPage(null,env);
+  }
+
+  if(request.method==='POST'&&u.pathname==='/api/command-center-business-truth/reconcile-affiliate-schema'){
+    if(!adminAuthorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:{'Cache-Control':'no-store'}});
+    await reconcileAffiliateNetworkEvidenceSchema(env);
+    const state=await affiliateNetworkEvidenceSchemaState(env);
+    businessTruthCache={at:0,value:null,promise:null};
+    return Response.json({ok:state.ok,reconciled:true,state},{status:state.ok?200:503,headers:{'Cache-Control':'no-store'}});
+  }
+
+  if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
+    const fresh=u.searchParams.get('fresh')==='1';
+    return Response.json(await commandCenterBusinessTruth(request,env,{fresh}),{headers:{'Cache-Control':'private, no-store, max-age=0','X-ToolScout-Read-Mode':fresh?'fresh':'observability-cache'}});
+  }
+
+  if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
+    ok:true,
+    version:'business-truth-v11-editorial-readonly-observability',
+    canonicalView:'command-center-simplified-view',
+    cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Editorial Authority','Growth Brain','Needs You','Growth Execution Plane','Recent Results','System Truth'],
+    suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],
+    canonicalSources:['Growth Supervisor','GA4','ToolScout redirect ledger','Google Search Console','verified backlink ledger','Chairman Queue','Cloudflare control plane','Render overflow compute','Make push sender','Auth Broker'],
+    refreshSeconds:60,
+    heavyRefreshSeconds:180,
+    hiddenTabPolling:false,
+    d1ReadConservation:'observability_gets_are_read_only_no_schema_mutation',
+    growthRndFrontier:'net_new_acquisition_v1',
+    unavailableIsNeverZero:true,
+    generatedAt:new Date().toISOString()
+  },{headers:{'Cache-Control':'no-store'}});
+
+  return null;
+}
+
 export default{
   async fetch(request,env,ctx){
     const u=new URL(request.url);
+    const direct=await handleCommandCenterDirectRoute(request,env);
+    if(direct)return direct;
     if(request.method==='GET'&&u.pathname.startsWith('/tools/')){
       const m=u.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)(?:\.html)?\/?$/i);
       if(m){const runtime=await publicRuntimeToolResponse(env,m[1]).catch(()=>null);if(runtime)return injectToolScoutSocialFooter(runtime);}
     }
-    if(request.method==='POST'&&u.pathname==='/api/command-center-business-truth/reconcile-affiliate-schema'){
-      if(!adminAuthorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:{'Cache-Control':'no-store'}});
-      await reconcileAffiliateNetworkEvidenceSchema(env);
-      const state=await affiliateNetworkEvidenceSchemaState(env);
-      businessTruthCache={at:0,value:null,promise:null};
-      return Response.json({ok:state.ok,reconciled:true,state},{status:state.ok?200:503,headers:{'Cache-Control':'no-store'}});
-    }
-    if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
-      const fresh=u.searchParams.get('fresh')==='1';
-      return Response.json(await commandCenterBusinessTruth(request,env,{fresh}),{headers:{'Cache-Control':'private, no-store, max-age=0','X-ToolScout-Read-Mode':fresh?'fresh':'observability-cache'}});
-    }
-    if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
-      ok:true,
-      version:'business-truth-v11-editorial-readonly-observability',
-      canonicalView:'command-center-simplified-view',
-      cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Editorial Authority','Growth Brain','Needs You','Growth Execution Plane','Recent Results','System Truth'],
-      suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],
-      canonicalSources:['Growth Supervisor','GA4','ToolScout redirect ledger','Google Search Console','verified backlink ledger','Chairman Queue','Cloudflare control plane','Render overflow compute','Make push sender','Auth Broker'],
-      refreshSeconds:60,
-      heavyRefreshSeconds:180,
-      hiddenTabPolling:false,
-      d1ReadConservation:'observability_gets_are_read_only_no_schema_mutation',
-      growthRndFrontier:'net_new_acquisition_v1',
-      unavailableIsNeverZero:true,
-      generatedAt:new Date().toISOString()
-    },{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
     if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname))return simplifiedPage(response,env);
