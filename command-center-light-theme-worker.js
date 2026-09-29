@@ -7,6 +7,7 @@ import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSourc
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 import {growthSupervisorDirective} from './growth-supervisor.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const STATS_CACHE_TTL_SECONDS = 30;
 
@@ -705,8 +706,8 @@ export default {
   },
   async scheduled(event, env, ctx) {
     const trigger=event?.cron||'scheduled';
-    const hourly=trigger==='15 * * * *';
-    const daily=trigger==='35 3 * * *';
+    const hourly=trigger===TOOLSCOUT_CRONS.hourly;
+    const daily=trigger===TOOLSCOUT_CRONS.daily;
     const scheduledHour=new Date(Number(event?.scheduledTime)||Date.now()).getUTCHours();
     const twoHourly=hourly&&scheduledHour%2===0;
     const sixHourly=hourly&&scheduledHour%6===0;
