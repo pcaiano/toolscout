@@ -179,3 +179,5 @@ export default {
   async fetch(request,env,ctx){const url=new URL(request.url);const response=await base.fetch(request,env,ctx);if(request.method==='GET'&&statsPath(url.pathname))return normalizeJsonResponse(response);if(request.method==='GET'&&analyticsPath(url.pathname))return injectUi(response);return response},
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
+
+export {normalizeJsonResponse as normalizeAdminStatsResponse};
