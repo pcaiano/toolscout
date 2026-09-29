@@ -118,6 +118,34 @@ const truthNum=v=>Number.isFinite(Number(v))?Number(v):0;
 const truthMaybeNum=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
 const BUSINESS_TRUTH_CACHE_MS=120000;
 let businessTruthCache={at:0,value:null,promise:null};
+let affiliateNetworkEvidenceReady=null;
+async function ensureAffiliateNetworkEvidenceSchema(env){
+  if(affiliateNetworkEvidenceReady)return affiliateNetworkEvidenceReady;
+  affiliateNetworkEvidenceReady=(async()=>{
+    await env.DB.batch([
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_click_evidence (
+        evidence_key TEXT PRIMARY KEY,
+        tool_slug TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        programme TEXT,
+        reported_clicks_total INTEGER NOT NULL,
+        observed_at TEXT NOT NULL,
+        evidence_source TEXT NOT NULL,
+        note TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`),
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_affiliate_network_click_evidence_tool_observed ON affiliate_network_click_evidence(tool_slug,observed_at DESC)`),
+      env.DB.prepare(`INSERT OR IGNORE INTO affiliate_network_click_evidence(
+        evidence_key,tool_slug,provider,programme,reported_clicks_total,observed_at,evidence_source,note
+      ) VALUES(
+        'partnerstack:apollo:first-10:2026-09-25T17:12:28Z','apollo','partnerstack','apollo',10,
+        '2026-09-25 17:12:28','partnerstack_email_milestone',
+        'PartnerStack/Apollo milestone email confirmed the affiliate link had reached its first 10 clicks.'
+      )`)
+    ]);
+  })().catch(error=>{affiliateNetworkEvidenceReady=null;throw error});
+  return affiliateNetworkEvidenceReady;
+}
 async function ccAssetJson(request,env,path,fallback){
   try{
     const url=new URL(path,request.url);
@@ -127,7 +155,8 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth]=await Promise.all([
+  await ensureAffiliateNetworkEvidenceSchema(env);
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -210,13 +239,40 @@ async function buildCommandCenterBusinessTruth(request,env){
       WHERE status='open'
       ORDER BY CASE severity WHEN 'P1' THEN 0 ELSE 1 END,last_detected_at DESC
       LIMIT 10`).all().then(r=>r.results||[]).catch(()=>[]),
-    ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]})
+    ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]}),
+    env.DB.prepare(`SELECT
+      SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) verified24h,
+      SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) verified7d,
+      SUM(CASE WHEN created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) verified30d,
+      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) monetized24h,
+      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) monetized7d,
+      SUM(CASE WHEN affiliate_active_at_click=1 AND created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) monetized30d
+      FROM verified_outbound_events`).first().catch(()=>null),
+    env.DB.prepare(`SELECT
+      SUM(CASE WHEN created_at>=datetime('now','-24 hours') THEN 1 ELSE 0 END) clicks24h,
+      SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) clicks7d,
+      SUM(CASE WHEN created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) clicks30d
+      FROM social_affiliate_redirects`).first().catch(()=>null),
+    env.DB.prepare(`SELECT e.tool_slug,e.provider,e.programme,e.reported_clicks_total,e.observed_at,e.evidence_source
+      FROM affiliate_network_click_evidence e
+      JOIN (
+        SELECT tool_slug,provider,MAX(observed_at) observed_at
+        FROM affiliate_network_click_evidence
+        GROUP BY tool_slug,provider
+      ) latest
+        ON latest.tool_slug=e.tool_slug AND latest.provider=e.provider AND latest.observed_at=e.observed_at
+      ORDER BY e.observed_at DESC`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
   const growth=byEngine.get('growth_brain')||{};
   const cfg=parse(growth.directive_json,{});
   const backlink=cfg.backlink_acquisition||{};
+  const vendorReportedClickFloor=(affiliateNetworkEvidence||[]).reduce((sum,row)=>sum+truthNum(row.reported_clicks_total),0);
+  const liveVerifiedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.verified24h):truthNum(cfg.verified_outbound_24h);
+  const liveVerifiedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.verified7d):truthNum(cfg.verified_outbound_7d);
+  const liveMonetizedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.monetized24h):truthNum(cfg.monetized_outbound_24h);
+  const liveMonetizedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.monetized7d):truthNum(cfg.monetized_outbound_7d);
   const authorityAttempts24=truthNum(backlink.attempts_24h);
   const authorityQueueNow=truthNum(backlink.authority_queue);
   const internalAuthorityVerifiedDomains=truthNum(backlink.internal_verified_referring_domains??backlink.verified_referring_domains);
@@ -385,10 +441,10 @@ async function buildCommandCenterBusinessTruth(request,env){
       attributedHumans7d:truthNum(growth.attributed_humans_7d),
       externalExecutions24h:truthNum(growth.external_executions_24h),
       externalExecutions7d:truthNum(growth.external_executions_7d),
-      verifiedOutbound24h:truthNum(cfg.verified_outbound_24h),
-      verifiedOutbound7d:truthNum(cfg.verified_outbound_7d),
-      monetizedOutbound24h:truthNum(cfg.monetized_outbound_24h),
-      monetizedOutbound7d:truthNum(cfg.monetized_outbound_7d),
+      verifiedOutbound24h:liveVerifiedOutbound24h,
+      verifiedOutbound7d:liveVerifiedOutbound7d,
+      monetizedOutbound24h:liveMonetizedOutbound24h,
+      monetizedOutbound7d:liveMonetizedOutbound7d,
       corrections:truthNum(growth.correction_count),
       acquisitionPolicy:'outcome_weighted_bounded_always_on',
       acquisitionMin24h:ACQUISITION_SURGE_MIN_24H,
@@ -427,6 +483,37 @@ async function buildCommandCenterBusinessTruth(request,env){
       canonicalAcquisitionSource:'ga4',
       strictHumanRole:'action_attribution_quality',
       waitForTrafficThreshold:false
+    },
+    commercialActivity:{
+      definition:'Commercial click sources are reported separately because first-party verified navigation, tracked social affiliate redirects and affiliate-network counters can overlap and must not be summed.',
+      firstPartyVerified:{
+        clicks24h:liveVerifiedOutbound24h,
+        clicks7d:liveVerifiedOutbound7d,
+        clicks30d:truthNum(verifiedOutboundTruth?.verified30d),
+        monetized24h:liveMonetizedOutbound24h,
+        monetized7d:liveMonetizedOutbound7d,
+        monetized30d:truthNum(verifiedOutboundTruth?.monetized30d)
+      },
+      socialAffiliateRedirects:{
+        clicks24h:truthNum(socialAffiliateTruth?.clicks24h),
+        clicks7d:truthNum(socialAffiliateTruth?.clicks7d),
+        clicks30d:truthNum(socialAffiliateTruth?.clicks30d),
+        source:'ToolScout /go/ redirects carrying ts_affiliate=1'
+      },
+      vendorReported:{
+        clickFloor:vendorReportedClickFloor,
+        evidence:(affiliateNetworkEvidence||[]).map(row=>({
+          toolSlug:row.tool_slug,
+          provider:row.provider,
+          programme:row.programme,
+          reportedClicksTotal:truthNum(row.reported_clicks_total),
+          observedAt:row.observed_at,
+          evidenceSource:row.evidence_source
+        })),
+        source:'affiliate-network evidence',
+        cumulative:true
+      },
+      overlapPolicy:'never_sum_cross_source_click_counts'
     },
     traffic:{strictDaily},
     authority:{
