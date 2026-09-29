@@ -12,6 +12,7 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/compute/health',{method:'GET'}).owner,'compute_router');
   assert.equal(routeOwner('/api/seo/runtime-health',{method:'GET'}).owner,'seo_runtime');
   assert.equal(routeOwner('/api/growth/supervisor/public',{method:'GET'}).owner,'distribution_orchestrator');
+  assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
@@ -25,6 +26,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   const src=read('compute-router-worker.js');
   assert.match(src,/earlyOwnedRoute/);
   assert.match(src,/ownership\.owner==='distribution_priority'/);
+  assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='mission_integrity'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
@@ -34,9 +36,12 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
 
 test('migrated route owners expose null-returning direct handlers',()=>{
   const priority=read('distribution-priority-worker.js');
+  const orchestrator=read('distribution-orchestrator-worker.js');
   const evidence=read('mission-integrity-v2-worker.js');
   assert.match(priority,/export async function handleDistributionPriorityRoute/);
   assert.match(priority,/return null;/);
+  assert.match(orchestrator,/export async function handleDistributionOrchestratorRoute/);
+  assert.match(orchestrator,/return null;/);
   assert.match(evidence,/export async function handleMissionIntegrityRoute/);
   assert.match(evidence,/return null;/);
 });
