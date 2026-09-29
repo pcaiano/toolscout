@@ -112,3 +112,11 @@ test('navigation candidate is read-only',async()=>{
   await renderPublicNavigationCandidate(new Request('https://trytoolscout.org/guides'),e);
   assert.equal(writes,0);
 });
+
+
+test('blog hub remains noindex follow',async()=>{
+  const response=await renderPublicNavigationCandidate(new Request('https://trytoolscout.org/blog/'),env());
+  const html=await response.text();
+  assert.match(html,/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex[^"']*follow/i);
+  assert.match(html,/Research before publication\./);
+});
