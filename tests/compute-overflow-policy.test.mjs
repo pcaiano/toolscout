@@ -118,3 +118,6 @@ assert.match(router,/sourceUrl:isHttp\(a\.source_url\)\?a\.source_url:null/);
 assert.match(core,/retryClass/);
 assert.match(router,/external_source_unreachable_exhausted/);
 assert.match(router,/folded_into_distribution_route_research_v1/);
+
+assert.match(router,/verification_target_is_submission_route/);
+assert.match(router,/endpoint_success\.action_url=a\.endpoint/);
