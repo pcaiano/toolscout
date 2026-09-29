@@ -1,5 +1,6 @@
 import {transformSeoPublicPage} from './seo-cloudflare-runtime-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
+import {canonicalizePublicHtmlResponse} from './public-canonical-contract.js';
 
 function editorialRoute(pathname){
   const p=String(pathname||'');
@@ -47,7 +48,8 @@ export async function handlePublicEditorialRoute(request,env){
   // Preserve the two useful public transformations while bypassing the legacy
   // control/observability decorator chain.
   const seo=await transformSeoPublicPage(request,asset,env);
-  const finalResponse=await injectToolScoutSocialFooter(seo);
+  const social=await injectToolScoutSocialFooter(seo);
+  const finalResponse=await canonicalizePublicHtmlResponse(social,url.pathname);
   const headers=new Headers(finalResponse.headers);
   headers.set('X-ToolScout-Public-Plane','editorial-v1');
   headers.set('X-ToolScout-Editorial-Surface',route.surface);
