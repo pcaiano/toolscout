@@ -12,7 +12,7 @@ const businessEnd=html.indexOf('function trafficProgress(){',businessStart);
 assert.ok(businessStart>=0&&businessEnd>businessStart);
 const business=html.slice(businessStart,businessEnd);
 
-assert.equal((business.match(/metric\\('/g)||[]).length,4,'Business State must expose exactly four primary KPIs');
+assert.equal(business.split("metric('").length-1,4,'Business State must expose exactly four primary KPIs');
 assert.doesNotMatch(business,/Browser-qualified outbound/);
 assert.doesNotMatch(business,/Strict \\/ user-activated outbound/);
 assert.doesNotMatch(business,/Strict attributed humans/);
