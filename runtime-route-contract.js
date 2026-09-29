@@ -24,45 +24,20 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'analytics_control',owner:'command_center',plane:'signals',methods:['GET','POST'],prefixes:['/analytics','/api/stats','/api/traffic-integrity-health','/api/command-center-']},
   {id:'public_editorial_news',owner:'public_editorial_site',plane:'public_site',methods:['GET'],prefixes:['/news/']},
   {id:'public_editorial_trends',owner:'public_editorial_site',plane:'public_site',methods:['GET'],exact:['/software-trends-index','/software-trends-index/','/software-trends-index.html','/software-trends-index.json']},
-  {id:'public_decision_pages',owner:'public_decision',plane:'public_site',methods:['GET'],patterns:['^/tools/[a-z0-9][a-z0-9-]*(?:\\.html)?/?
+  {id:'public_decision_pages',owner:'public_decision',plane:'public_site',methods:['GET'],matcher:'public_decision_page'},
   {id:'public_navigation_misc',owner:'public_site',plane:'public_site',methods:['GET'],exact:['/tools','/tools/'],prefixes:['/guides','/compare','/blog/','/categories','/crm-tools','/seo-tools']},
   {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
   {id:'agent_recommendation_protocol',owner:'agent_protocol_core',plane:'public_site',methods:['GET','POST','OPTIONS'],exact:['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']},
   {id:'agent_discovery_catalog',owner:'machine_discovery_catalog',plane:'public_site',methods:['GET','HEAD'],exact:['/.well-known/toolscout-distribution.json','/.well-known/api-catalog']}
 ]);
 
-function normalizedPath(value){
-  try{return new URL(String(value),'https://trytoolscout.org').pathname||'/';}
-  catch{return String(value||'/').split('?')[0]||'/';}
-}
-
-export function routeOwner(input,{method='GET'}={}){
-  const pathname=normalizedPath(input),verb=String(method||'GET').toUpperCase();
-  for(const group of ROUTE_GROUPS){
-    if(group.methods&&!group.methods.includes(verb))continue;
-    if(group.exact?.includes(pathname))return{...group,pathname,method:verb};
-    if(group.patterns?.some(pattern=>new RegExp(pattern,'i').test(pathname)))return{...group,pathname,method:verb};
-    if(group.prefixes?.some(prefix=>pathname===prefix||pathname.startsWith(prefix)))return{...group,pathname,method:verb};
+function namedMatcher(name,pathname){
+  if(name==='public_decision_page'){
+    return /^\/tools\/[a-z0-9][a-z0-9-]*(?:\.html)?\/?$/i.test(pathname)
+      || /^\/best-[a-z0-9-]+(?:\.html)?\/?$/i.test(pathname);
   }
-  return{id:'legacy_fallback',owner:'legacy_chain',plane:'legacy',pathname,method:verb};
+  return false;
 }
-
-export function routeContract(){
-  return{
-    version:2,
-    architecture:'toolscout-2.0',
-    groups:ROUTE_GROUPS,
-    earlyDispatchOwners:EARLY_DISPATCH_OWNERS,
-    fallback:'legacy_chain',
-    invariant:'one_declared_owner_per_route_group'
-  };
-}
-,'^/best-[a-z0-9-]+(?:\\.html)?/?
-  {id:'public_tools',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/tools','/guides','/compare','/best-','/blog/','/categories','/crm-tools','/seo-tools']},
-  {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
-  {id:'agent_recommendation_protocol',owner:'agent_protocol_core',plane:'public_site',methods:['GET','POST','OPTIONS'],exact:['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']},
-  {id:'agent_discovery_catalog',owner:'machine_discovery_catalog',plane:'public_site',methods:['GET','HEAD'],exact:['/.well-known/toolscout-distribution.json','/.well-known/api-catalog']}
-]);
 
 function normalizedPath(value){
   try{return new URL(String(value),'https://trytoolscout.org').pathname||'/';}
@@ -74,38 +49,7 @@ export function routeOwner(input,{method='GET'}={}){
   for(const group of ROUTE_GROUPS){
     if(group.methods&&!group.methods.includes(verb))continue;
     if(group.exact?.includes(pathname))return{...group,pathname,method:verb};
-    if(group.prefixes?.some(prefix=>pathname===prefix||pathname.startsWith(prefix)))return{...group,pathname,method:verb};
-  }
-  return{id:'legacy_fallback',owner:'legacy_chain',plane:'legacy',pathname,method:verb};
-}
-
-export function routeContract(){
-  return{
-    version:2,
-    architecture:'toolscout-2.0',
-    groups:ROUTE_GROUPS,
-    earlyDispatchOwners:EARLY_DISPATCH_OWNERS,
-    fallback:'legacy_chain',
-    invariant:'one_declared_owner_per_route_group'
-  };
-}
-]},
-  {id:'public_tools',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/tools','/guides','/compare','/best-','/blog/','/categories','/crm-tools','/seo-tools']},
-  {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
-  {id:'agent_recommendation_protocol',owner:'agent_protocol_core',plane:'public_site',methods:['GET','POST','OPTIONS'],exact:['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']},
-  {id:'agent_discovery_catalog',owner:'machine_discovery_catalog',plane:'public_site',methods:['GET','HEAD'],exact:['/.well-known/toolscout-distribution.json','/.well-known/api-catalog']}
-]);
-
-function normalizedPath(value){
-  try{return new URL(String(value),'https://trytoolscout.org').pathname||'/';}
-  catch{return String(value||'/').split('?')[0]||'/';}
-}
-
-export function routeOwner(input,{method='GET'}={}){
-  const pathname=normalizedPath(input),verb=String(method||'GET').toUpperCase();
-  for(const group of ROUTE_GROUPS){
-    if(group.methods&&!group.methods.includes(verb))continue;
-    if(group.exact?.includes(pathname))return{...group,pathname,method:verb};
+    if(group.matcher&&namedMatcher(group.matcher,pathname))return{...group,pathname,method:verb};
     if(group.prefixes?.some(prefix=>pathname===prefix||pathname.startsWith(prefix)))return{...group,pathname,method:verb};
   }
   return{id:'legacy_fallback',owner:'legacy_chain',plane:'legacy',pathname,method:verb};
