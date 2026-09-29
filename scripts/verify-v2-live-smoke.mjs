@@ -102,15 +102,22 @@ const analyticsPage=await fetchText('/analytics');
 if(!analyticsPage.ok)errors.push({code:'command_center_page_unavailable',status:analyticsPage.status});
 else if(!/Editorial Authority/.test(analyticsPage.text))errors.push({code:'command_center_editorial_authority_missing'});
 
-const adminStatsUnauthorized=await fetchText('/api/stats');
-if(adminStatsUnauthorized.status!==401)errors.push({code:'admin_stats_auth_regressed',status:adminStatsUnauthorized.status});
-else{
+const adminStatsUnauthorized=await fetchText('/api/stats',{redirect:'manual'});
+const adminStatsAccessRedirect=[301,302,303,307,308].includes(adminStatsUnauthorized.status);
+if(adminStatsUnauthorized.status===401){
   if(adminStatsUnauthorized.headers.get('x-toolscout-route-owner')!=='admin_stats')errors.push({code:'admin_stats_wrong_route_owner',owner:adminStatsUnauthorized.headers.get('x-toolscout-route-owner')});
   if(adminStatsUnauthorized.headers.get('x-toolscout-compatibility-composition')!=='legacy-stats-v1')errors.push({code:'admin_stats_compatibility_header_missing'});
   try{
     const data=JSON.parse(adminStatsUnauthorized.text);
     if(data?.error!=='unauthorized')errors.push({code:'admin_stats_unauthorized_payload_regressed'});
   }catch{errors.push({code:'admin_stats_unauthorized_invalid_json'});}
+}else if(adminStatsAccessRedirect){
+  const location=String(adminStatsUnauthorized.headers.get('location')||'');
+  if(!/cloudflareaccess\.com|\/cdn-cgi\/access\/login/i.test(location)){
+    errors.push({code:'admin_stats_unexpected_auth_redirect',status:adminStatsUnauthorized.status,location});
+  }
+}else{
+  errors.push({code:'admin_stats_auth_regressed',status:adminStatsUnauthorized.status});
 }
 
 const trafficHealth=await fetchText('/api/traffic-integrity-health');
