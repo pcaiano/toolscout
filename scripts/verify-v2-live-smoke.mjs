@@ -112,6 +112,23 @@ else{
   }catch{errors.push({code:'authority_health_invalid_json'});}
 }
 
+
+
+for(const pathname of ['/.well-known/agent-card.json','/.well-known/toolscout-distribution.json','/.well-known/api-catalog']){
+  const live=await fetchText(pathname);
+  if(!live.ok)errors.push({code:'machine_discovery_endpoint_unavailable',pathname,status:live.status});
+}
+const routeContractLive=await fetchText('/api/runtime/route-contract');
+if(routeContractLive.ok){
+  try{
+    const data=JSON.parse(routeContractLive.text);
+    const groups=Array.isArray(data.groups)?data.groups:[];
+    const owner=id=>groups.find(group=>group.id===id)?.owner||null;
+    if(owner('agent_recommendation_protocol')!=='agent_protocol_core')errors.push({code:'agent_protocol_direct_owner_not_live'});
+    if(owner('agent_discovery_catalog')!=='machine_discovery_catalog')errors.push({code:'machine_discovery_catalog_not_live'});
+  }catch{}
+}
+
 // Protect the commercial redirect plane without generating a real click.
 // The health-check header is explicitly synthetic in trackedRedirect.
 const affiliate=readJson('data/affiliate.json',{});
