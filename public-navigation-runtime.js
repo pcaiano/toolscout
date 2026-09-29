@@ -1,6 +1,8 @@
 import {transformSeoPublicPage} from './seo-cloudflare-runtime-worker.js';
 import {canonicalizePublicHtmlResponse} from './public-canonical-contract.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
+import {injectSeoDiscoveryLinks} from './public-discovery-links.js';
+import {decoratePublicAnalytics} from './analytics-consent.js';
 
 const HUBS=Object.freeze({
   '/tools':'/tools.html',
@@ -34,9 +36,15 @@ async function asset(env,request,hub){
 async function finish(request,response,env){
   if(!response)return null;
   const hub=normalizedHubPath(new URL(request.url).pathname);
-  const canonicalized=await canonicalizePublicHtmlResponse(response,hub||new URL(request.url).pathname);
+  const sourceHtml=decoratePublicAnalytics(request,await response.text());
+  const sourceHeaders=new Headers(response.headers);sourceHeaders.delete('content-length');
+  const analytics=new Response(sourceHtml,{status:response.status,statusText:response.statusText,headers:sourceHeaders});
+  const canonicalized=await canonicalizePublicHtmlResponse(analytics,hub||new URL(request.url).pathname);
   const seo=await transformSeoPublicPage(request,canonicalized,env);
-  const social=await injectToolScoutSocialFooter(seo);
+  const discoveryHtml=injectSeoDiscoveryLinks(await seo.text(),hub||new URL(request.url).pathname);
+  const discoveryHeaders=new Headers(seo.headers);discoveryHeaders.delete('content-length');
+  const discovery=new Response(discoveryHtml,{status:seo.status,statusText:seo.statusText,headers:discoveryHeaders});
+  const social=await injectToolScoutSocialFooter(discovery);
   const headers=new Headers(social.headers);
   headers.set('X-ToolScout-Public-Plane','navigation-v1');
   headers.set('X-ToolScout-Route-Contract','v2');
