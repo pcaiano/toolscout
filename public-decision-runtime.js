@@ -2,6 +2,7 @@ import {publicRuntimeToolResponse,publicQualityEnhancedToolResponse,publicRuntim
 import {transformSeoPublicPage} from './seo-cloudflare-runtime-worker.js';
 import {canonicalizePublicHtmlResponse} from './public-canonical-contract.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
+import {addPublicEditorialEvidence} from './public-editorial-evidence.js';
 
 function route(pathname){
   const p=String(pathname||'');
@@ -27,7 +28,8 @@ async function assetHtml(env,request,canonical){
 
 async function finish(request,response,env){
   if(!response)return null;
-  const canonical=await canonicalizePublicHtmlResponse(response,new URL(request.url).pathname);
+  const evidenced=await addPublicEditorialEvidence(request,response,env);
+  const canonical=await canonicalizePublicHtmlResponse(evidenced,new URL(request.url).pathname);
   const seo=await transformSeoPublicPage(request,canonical,env);
   const social=await injectToolScoutSocialFooter(seo);
   const headers=new Headers(social.headers);
