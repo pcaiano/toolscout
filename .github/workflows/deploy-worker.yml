@@ -3,6 +3,11 @@ name: ToolScout Worker Recovery Fallback
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/toolscout-v2-rollout.marker'
 
 permissions:
   contents: read
@@ -31,7 +36,7 @@ jobs:
 
       - name: Validate ToolScout 2.0 runtime
         env:
-          TOOLSCOUT_V2_BASE_REF: 8660a9154f5716841eea37ef180cc6d365e7fdfb
+          TOOLSCOUT_V2_BASE_REF: 3600e1f32a3337a4c29ddc809ad8e667522d47a9
         run: |
           node scripts/audit-runtime-architecture.mjs
           node scripts/validate-v2-preservation.mjs
@@ -40,7 +45,7 @@ jobs:
 
       - name: Final preservation gate before production mutation
         env:
-          TOOLSCOUT_V2_BASE_REF: 8660a9154f5716841eea37ef180cc6d365e7fdfb
+          TOOLSCOUT_V2_BASE_REF: 3600e1f32a3337a4c29ddc809ad8e667522d47a9
         run: node scripts/validate-v2-preservation.mjs
 
       - name: Apply D1 migrations
