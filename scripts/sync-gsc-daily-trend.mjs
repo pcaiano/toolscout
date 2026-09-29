@@ -18,7 +18,9 @@ const property = process.env.GSC_PROPERTY || 'sc-domain:trytoolscout.org';
 const lookbackDays = Math.max(7, Math.min(90, Number(process.env.GSC_LOOKBACK_DAYS || 28)));
 const end = new Date();
 const start = new Date(end);
-start.setUTCDate(start.getUTCDate() - lookbackDays + 1);
+// Ask for a small buffer before the requested window so the final 28-day
+// range can end on Google's latest finalized day rather than on today's date.
+start.setUTCDate(start.getUTCDate() - lookbackDays - 6);
 const isoDate = d => d.toISOString().slice(0, 10);
 const startDate = isoDate(start);
 const endDate = isoDate(end);
@@ -115,13 +117,11 @@ for (const row of pageDateJson.rows || []) {
 const rawByDate = new Map((dateJson.rows || []).map(row => [String(row.keys?.[0] || ''), row]));
 const returnedDates = [...rawByDate.keys()].filter(Boolean).sort();
 const finalizedThroughDate = returnedDates.at(-1) || null;
+const finalizedStartDate = finalizedThroughDate ? addDays(finalizedThroughDate, -lookbackDays + 1) : null;
 const daily = [];
-if (finalizedThroughDate) {
-  const finalizedDays = Math.max(0, Math.floor(
-    (Date.parse(finalizedThroughDate + 'T12:00:00Z') - Date.parse(startDate + 'T12:00:00Z')) / 86400000
-  ) + 1);
-  for (let index = 0; index < finalizedDays; index += 1) {
-    const date = addDays(startDate, index);
+if (finalizedThroughDate && finalizedStartDate) {
+  for (let index = 0; index < lookbackDays; index += 1) {
+    const date = addDays(finalizedStartDate, index);
     const row = rawByDate.get(date);
     const clicks = Number(row?.clicks || 0);
     const impressions = Number(row?.impressions || 0);
@@ -224,7 +224,7 @@ const report = {
   authorizationScope: 'https://www.googleapis.com/auth/webmasters.readonly',
   dataState: 'final',
   finalizedThroughDate,
-  range: { startDate, endDate: finalizedThroughDate, requestedEndDate: endDate, days: daily.length },
+  range: { startDate: finalizedStartDate, endDate: finalizedThroughDate, requestedStartDate: startDate, requestedEndDate: endDate, days: daily.length },
   metrics: ['impressions', 'clicks', 'position', 'ctr', 'searchVisiblePages'],
   daily,
   periodComparison,
@@ -244,7 +244,8 @@ fs.writeFileSync('data/gsc-daily-trend.json', JSON.stringify(report, null, 2) + 
 console.log(JSON.stringify({
   generatedAt: report.generatedAt,
   property,
-  startDate,
+  startDate: finalizedStartDate,
+  requestedStartDate: startDate,
   endDate: finalizedThroughDate,
   requestedEndDate: endDate,
   days: daily.length,
