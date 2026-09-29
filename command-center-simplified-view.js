@@ -44,9 +44,9 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </main>
 </div>
 <script>
-const endpoints={stats:'/analytics/api/stats',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
-let data={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
-const sourceErrors={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+const endpoints={acquisition:'/analytics/api/google/acquisition',commerce:'/analytics/api/commerce',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
+let data={acquisition:null,commerce:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+const sourceErrors={acquisition:null,commerce:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
 let sessionRefreshPromise=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const n=v=>(v===null||v===undefined||v==='')?'Unavailable':(Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable');
@@ -114,9 +114,9 @@ async function ccFetch(url,options={},retrySession=true){
  }
  return r;
 }
-async function get(url,fresh=false){
+async function get(url,fresh=false,timeoutMs=12000){
  const target=fresh?url+(url.includes('?')?'&':'?')+'fresh=1':url;
- const r=await ccFetch(target);
+ const r=await ccFetch(target,{timeoutMs});
  if(!r.ok){
   let body={};try{body=await r.clone().json()}catch{}
   const err=new Error(body?.error||String(r.status));err.status=r.status;err.code=body?.error||null;throw err;
@@ -124,28 +124,28 @@ async function get(url,fresh=false){
  return r.json();
 }
 function business(){
- const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},st=data.stats||{},a=st.acquisition||{},commerce=st.commerceTruth||{},q=data.queue||st?.growthOps?.chairmanQueue||{},r=st.revenue||{};
- const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=st?.growthOps?.googleSearchReality?.searchPerformance?.window28d||t.search||{},out24=commerce?.last24Hours||{};
- const visitors=a.status==='connected'?gaUsers.activeToday??gaUsers.today:null;
+ const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},a=data.acquisition||{},commerce=data.commerce||{},q=data.queue||{};
+ const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=t.search||{},out24=commerce?.last24Hours||{},outMtd=commerce?.monthToDate||{};
+ const visitors=a.status==='connected'?(gaUsers.activeToday??gaUsers.today):null;
  const sessions24=a.status==='connected'?gaSessions.last24Hours:null;
  const googleClicks=gsc?.clicks??null;
  const outbound24=commerce.status==='connected'?out24.outbound:null;
  const monetized24=commerce.status==='connected'?out24.monetized:null;
- const kpiHealthy=[visitors,sessions24,googleClicks,outbound24].filter(v=>v!==null&&v!==undefined).length;
+ const kpiHealthy=[visitors,sessions24,googleClicks,outbound24,monetized24].filter(v=>v!==null&&v!==undefined).length;
  let headline='Core business metrics are available.';
- let detail='GA4 is canonical for visitors and sessions. Search Console is canonical for Google clicks. The ToolScout server redirect ledger is canonical for outbound clicks.';
- if(kpiHealthy<4){headline='One or more core metrics are unavailable.';detail='Missing sources remain unavailable rather than being converted to zero. The other KPIs continue to render independently.'}
+ let detail='GA4 is canonical for visitors and sessions. Search Console is canonical for Google clicks. The server redirect ledger is canonical for outbound and monetized outbound.';
+ if(kpiHealthy<5){headline='One or more core metrics are unavailable.';detail='Each KPI now has its own source. A failure in one source no longer removes the others.'}
  document.getElementById('businessMeta').textContent='GA4 + Google Search Console + server outbound';
  document.getElementById('businessBody').innerHTML=
   '<div class="headline"><b>'+esc(headline)+'</b><span>'+esc(detail)+'</span></div>'+
   '<div class="metrics">'+
-   metric('Visitors - today',n(visitors),a.status==='connected'?'GA4 active users · '+n(gaUsers.monthToDate)+' users MTD':'GA4 unavailable')+
-   metric('Sessions - 24h',n(sessions24),a.status==='connected'?n(gaSessions.monthToDate)+' sessions MTD · GA4':'GA4 unavailable')+
+   metric('Visitors - today',n(visitors),a.status==='connected'?'GA4 users · '+n(gaUsers.monthToDate)+' MTD':'GA4 unavailable')+
+   metric('Sessions - 24h',n(sessions24),a.status==='connected'?n(gaSessions.monthToDate)+' MTD · GA4':'GA4 unavailable')+
    metric('Google clicks - 28d',n(googleClicks),'Google Search Console')+
-   metric('Outbound clicks - 24h',n(outbound24),commerce.status==='connected'?n(monetized24)+' monetized · server redirect ledger':'Outbound source unavailable')+
+   metric('Outbound clicks - 24h',n(outbound24),commerce.status==='connected'?n(outMtd.outbound)+' MTD · server ledger':'Outbound source unavailable')+
+   metric('Monetized outbound - 24h',n(monetized24),commerce.status==='connected'?n(outMtd.monetized)+' MTD · affiliate active at click':'Outbound source unavailable')+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
-   row('Revenue',r.confirmedRevenue==null?'No confirmed evidence':money(r.confirmedRevenue,r.currency),r.reportingStatus==='connected'?'Vendor evidence connected':'Vendor reporting not connected')+
    row('Active affiliates',aff.productionRoutes==null?'Unavailable':n(aff.productionRoutes),'Production routes')+
    row('Authority',b.seRankingBacklinks==null&&b.observedBacklinks==null?'Unavailable':n(b.seRankingBacklinks??b.observedBacklinks),(b.seRankingReferringDomains==null&&b.referringDomains==null?'':n(b.seRankingReferringDomains??b.referringDomains)+' referring domains'))+
    row('Needs you',q.total==null?'Unavailable':n(q.total),q.estimated_minutes==null?'':n(q.estimated_minutes)+' min estimated')+
@@ -153,13 +153,13 @@ function business(){
 }
 
 function trafficProgress(){
- const a=data?.stats?.acquisition||{},rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),users:Number(x.users||0)})):[];
+ const a=data.acquisition||{},rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),users:Number(x.users||0)})):[];
  const last7=rows.slice(-7),prev7=rows.slice(-14,-7),sum=(xs,key)=>xs.reduce((acc,row)=>acc+Number(row[key]||0),0),cur=sum(last7,'sessions'),prev=sum(prev7,'sessions'),chg=prev?((cur-prev)/prev*100):null;
  document.getElementById('trafficProgressMeta').textContent=a.fetchedAt?'GA4 refreshed '+dt(a.fetchedAt):'GA4';
  document.getElementById('trafficProgressBody').innerHTML=
   '<div class="progressStats"><div class="progressStat"><small>Sessions last 7d</small><b>'+n(cur)+'</b></div><div class="progressStat"><small>Visitors last 7d</small><b>'+n(sum(last7,'users'))+'</b></div><div class="progressStat"><small>7d vs prior 7d</small><b class="'+deltaClass(chg)+'">'+signedPct(chg)+'</b></div><div class="progressStat"><small>Sessions MTD</small><b>'+n(a?.sessions?.monthToDate)+'</b></div></div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'sessions',label:'GA4 sessions',cls:'primary'},{key:'users',label:'GA4 users',cls:'good'}])+'</div>'+
-  '<div class="sourceLine">GA4 is the only traffic source used in this chart. ToolScout bot classification is diagnostic and does not alter these totals.</div>';
+  '<div class="sourceLine">GA4 is the traffic source for this chart. Internal bot diagnostics do not alter these totals.</div>';
 }
 
 function authorityProgress(){
@@ -203,7 +203,7 @@ function brain(){
  if(activity.length)body.push('<div class="section"><div class="sectionTitle">Latest engine activity</div>'+activity.map(x=>row(human((x.engine||'engine')+' - '+(x.mission||'cycle')),human(x.status||'unknown'),dt(x.at)+(x.detail?' - '+human(x.detail):''))).join('')+'</div>');
  const actions=Array.isArray(t.growthActions)?t.growthActions.slice(0,6):[];
  if(actions.length)body.push('<div class="section"><div class="sectionTitle">Latest action pipeline · 6 most recent</div>'+actions.map(x=>{const created=x.createdAt||x.at,updated=x.updatedAt||x.at,status=String(x.status||'unknown'),waiting=['pending','claimed','attempted','stalled'].includes(status)?' - waiting '+ageLabel(created):'';return row(human((x.engine||'growth')+' - '+(x.channel||'action')),human(status),'Created '+dt(created)+' - updated '+dt(updated)+waiting+' - '+human(x.opportunityKey||x.id||''))}).join('')+'<div class="sourceLine">Created time is the original task age. Updated time is the last state change. Waiting time is measured from creation so refreshes cannot make an old task look new.</div></div>');
- const frontier=Array.isArray(data?.stats?.growthOps?.autonomousGrowth?.rnd_frontier_items)?data.stats.growthOps.autonomousGrowth.rnd_frontier_items.slice(0,6):[];
+ const frontier=[];
  if(frontier.length)body.push('<div class="section"><div class="sectionTitle">Growth R&D - new acquisition ideas</div>'+
    frontier.map(x=>'<div class="task" style="margin-top:8px"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id||'Acquisition idea')+'</div><div class="taskMeta">'+esc(human(x.implementation_mode||'candidate'))+' - automation '+n(x.automation_score)+'/100 - semi-passive '+n(x.semi_passive_score)+'/100</div></div>'+pill(human(x.status||'candidate'),'warn')+'</div><div class="taskText"><b>Mechanism:</b> '+esc(x.mechanism||'')+'</div><div class="taskText"><b>Next:</b> '+esc(x.next_step||'Research and bind a safe executor.')+'</div><div class="taskText"><b>Signal:</b> '+esc(human(x.expected_signal||'traffic impact'))+'</div></div>').join('')+
  '</div>');
@@ -290,7 +290,7 @@ function taskHtml(x){
   (!isReputation&&x.engine==='distribution'?'<button class="btn danger" data-resolve="skipped" data-engine="distribution" data-id="'+esc(x.id)+'">Skip</button>':'')+'</div></div>';
 }
 function queue(){
- const q=data.queue||data?.stats?.growthOps?.chairmanQueue||null;
+ const q=data.queue||null;
  if(!q&&sourceErrors.queue){
   document.getElementById('queueMeta').textContent='Unavailable';
   document.getElementById('queueBody').innerHTML='<div class="issue warn"><b>Chairman Queue could not refresh.</b>This is a source/session error, not an empty queue. The Command Center will retry automatically.</div>';
@@ -382,7 +382,7 @@ document.addEventListener('click',e=>{
  const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
 });
 const FAST_KEYS=['queue','runtime','authority','compute','auth'];
-const HEAVY_KEYS=['stats','truth'];
+const HEAVY_KEYS=['acquisition','commerce','truth'];
 let fastBusy=false,heavyBusy=false,lastFast=0,lastHeavy=0;
 
 async function fetchKeys(keys,{fresh=false,announce=false}={}){
@@ -391,7 +391,7 @@ async function fetchKeys(keys,{fresh=false,announce=false}={}){
  // Never leave the whole page behind a loading barrier while one source is slow.
  render();
  await Promise.all(keys.map(async k=>{
-   try{data[k]=await get(endpoints[k],fresh);sourceErrors[k]=null}
+   try{const timeoutMs=k==='acquisition'?25000:k==='truth'?20000:12000;data[k]=await get(endpoints[k],fresh,timeoutMs);sourceErrors[k]=null}
    catch(e){sourceErrors[k]=String(e?.name==='TimeoutError'?'timeout':(e?.message||e));failures.push(k)}
    finally{
      completed++;render();
