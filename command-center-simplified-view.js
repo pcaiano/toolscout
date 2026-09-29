@@ -29,7 +29,7 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div><div class="eyebrow">ToolScout - business control</div><h1>Command Center</h1><p class="sub">Four business KPIs first: visitors, sessions, Google clicks and outbound clicks. Operational detail appears only when it explains a result or a problem.</p></div><button class="btn primary" id="refresh">Refresh</button></header>
+<header class="top"><div><div class="eyebrow">ToolScout - business control</div><h1>Command Center</h1><p class="sub">Five business KPIs first: visitors, sessions, Google clicks, outbound clicks and monetized outbound. Operational detail appears only when it explains a result or a problem.</p></div><button class="btn primary" id="refresh">Refresh</button></header>
 <div class="statusbar"><div id="status"><strong>Loading current state...</strong></div><span id="sourceStatus">Live sources</span></div>
 <main class="grid">
 <section class="card span12"><div class="head"><div><div class="kicker">Business</div><div class="title">Business State</div></div><div class="meta" id="businessMeta">Current verified evidence</div></div><div class="body" id="businessBody"><div class="empty">Loading...</div></div></section>
