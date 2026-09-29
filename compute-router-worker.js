@@ -569,9 +569,11 @@ async function health(env){
       (SELECT COUNT(*) FROM distribution_qualification_events WHERE created_at>=datetime('now','-15 minutes') AND result='policy_blocked') qualification_policy_15m,
       (SELECT COUNT(*) FROM distribution_opportunities
         WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+          AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
           AND status IN ('candidate','discovered','research_required')) route_research_candidates,
       (SELECT COUNT(*) FROM distribution_opportunities o
         WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
+          AND (o.action_url LIKE 'https://%' OR o.action_url LIKE 'http://%')
           AND o.status IN ('candidate','discovered','research_required')
           AND NOT EXISTS (
             SELECT 1 FROM compute_overflow_jobs exhausted
@@ -761,6 +763,7 @@ async function enqueueDistributionResearch(env){
       COALESCE((SELECT a.policy_state FROM distribution_auto_adapters a WHERE a.surface_slug=distribution_opportunities.surface_slug LIMIT 1),'') adapter_policy_state
     FROM distribution_opportunities
     WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+      AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
       AND status IN ('candidate','discovered','research_required')
       AND NOT EXISTS (
         SELECT 1 FROM compute_overflow_jobs exhausted
@@ -791,7 +794,8 @@ async function enqueueDistributionResearch(env){
       )
     ORDER BY CASE WHEN adapter_policy_state='revalidation_required' THEN 0 ELSE 1 END,distribution_score DESC,updated_at ASC LIMIT ?`).bind(limit).all().catch(()=>({results:[]}));
   for(const row of rows(q)){
-    if(remaining<=0||!isHttp(row.action_url))break;
+    if(remaining<=0)break;
+    if(!isHttp(row.action_url))continue;
     const urlHash=await shortHash(row.action_url);
     const adapterPolicyState=String(row.adapter_policy_state||'');
     const recovering=adapterPolicyState==='revalidation_required';
