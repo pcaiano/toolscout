@@ -10,6 +10,7 @@ import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
 import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
+import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
@@ -1851,6 +1852,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='seo_runtime')response=await handleSeoRuntimeRoute(request,env);
   else if(ownership.owner==='authority_acquisition')response=await handleAuthorityAcquisitionRoute(request,env);
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
+  else if(ownership.owner==='growth_runtime_closed_loop')response=await handleGrowthClosedLoopRoute(request,env,ctx);
   if(!response)return null;
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);
