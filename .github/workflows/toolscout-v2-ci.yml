@@ -16,6 +16,8 @@ on:
       - 'growth-runtime-integrity-worker.js'
       - 'growth-runtime-closed-loop-worker.js'
       - 'authority-health-runtime.js'
+      - 'agent-protocol-core-worker.js'
+      - 'agent-protocol-worker.js'
       - 'authority-acquisition-worker.js'
       - 'distribution-orchestrator-worker.js'
       - 'growth-scheduler.js'
@@ -76,6 +78,8 @@ jobs:
           node --check authority-acquisition-worker.js
           node --check growth-runtime-closed-loop-worker.js
           node --check authority-health-runtime.js
+          node --check agent-protocol-core-worker.js
+          node --check agent-protocol-worker.js
           node --check growth-runtime-integrity-worker.js
           node --check command-center-light-theme-worker.js
           node --check command-center-direct-runtime.js
@@ -103,5 +107,5 @@ jobs:
         run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
       - name: Run ToolScout 2.0 policy tests
         run: |
-          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs
+          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs
           node tests/growth-scheduler-ownership.mjs
