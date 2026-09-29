@@ -30,6 +30,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/earlyOwnedRoute/);
   assert.match(src,/ownership\.owner==='distribution_priority'/);
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
+  assert.match(src,/ownership\.owner==='seo_runtime'/);
+  assert.match(src,/ownership\.owner==='authority_acquisition'/);
   assert.match(src,/ownership\.owner==='mission_integrity'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
@@ -40,11 +42,17 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
 test('migrated route owners expose null-returning direct handlers',()=>{
   const priority=read('distribution-priority-worker.js');
   const orchestrator=read('distribution-orchestrator-worker.js');
+  const seo=read('seo-cloudflare-runtime-worker.js');
+  const authority=read('authority-acquisition-worker.js');
   const evidence=read('mission-integrity-v2-worker.js');
   assert.match(priority,/export async function handleDistributionPriorityRoute/);
   assert.match(priority,/return null;/);
   assert.match(orchestrator,/export async function handleDistributionOrchestratorRoute/);
   assert.match(orchestrator,/return null;/);
+  assert.match(seo,/export async function handleSeoRuntimeRoute/);
+  assert.match(seo,/return null;/);
+  assert.match(authority,/export async function handleAuthorityAcquisitionRoute/);
+  assert.match(authority,/return null;/);
   assert.match(evidence,/export async function handleMissionIntegrityRoute/);
   assert.match(evidence,/return null;/);
 });
