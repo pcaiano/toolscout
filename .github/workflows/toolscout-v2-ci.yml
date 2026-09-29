@@ -10,6 +10,7 @@ on:
       - 'migrations/0091_catalog_runtime_schema.sql'
       - 'public-page-parity-contract.js'
       - 'public-decision-runtime.js'
+      - 'public-editorial-evidence.js'
       - 'seo-cloudflare-runtime-worker.js'
       - 'migrations/0087_seo_runtime_schema.sql'
       - 'command-center-light-theme-worker.js'
@@ -42,6 +43,7 @@ on:
       - 'scripts/build-editorial-authority-portfolio.mjs'
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/audit-runtime-architecture.mjs'
+      - 'scripts/audit-public-decision-parity.mjs'
       - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/generate-seo-pages.mjs'
@@ -81,6 +83,7 @@ jobs:
           node --check public-editorial-runtime.js
           node --check public-canonical-contract.js
           node --check public-decision-runtime.js
+          node --check public-editorial-evidence.js
           node --check public-page-parity-contract.js
           node --check catalog-autonomy-worker.js
           node --check seo-cloudflare-runtime-worker.js
@@ -120,6 +123,9 @@ jobs:
           node --check catalog-autonomy-worker.js
       - name: Audit ToolScout 2.0 runtime architecture
         run: node scripts/audit-runtime-architecture.mjs
+      - name: Audit full public decision parity
+        run: node scripts/audit-public-decision-parity.mjs
+
       - name: Enforce ToolScout 2.0 preservation invariants
         env:
           TOOLSCOUT_V2_BASE_REF: origin/main
