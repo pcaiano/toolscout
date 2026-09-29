@@ -3,10 +3,11 @@ import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedRes
 import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
+import {TOOLSCOUT_CRONS,scheduleContract} from './runtime-schedule-contract.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-const OVERFLOW_CRON='*/15 * * * *';
-const RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *';
+const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
+const RENDER_KEEPALIVE_CRON=TOOLSCOUT_CRONS.renderKeepalive;
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const AUTHORIZED_EXECUTION_VERSION=2;
@@ -1875,6 +1876,7 @@ export default{
     if(request.method==='GET'&&getMatch)return serveBatch(env,getMatch[1]);
     const completeMatch=u.pathname.match(/^\/api\/compute\/batches\/(cob_[A-Za-z0-9-]+)\/complete$/);
     if(request.method==='POST'&&completeMatch)return completeBatch(request,env,ctx,completeMatch[1]);
+    if(request.method==='GET'&&u.pathname==='/api/runtime/schedule-contract')return Response.json(scheduleContract(),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await base.fetch(request,env,ctx),env);
     return base.fetch(request,env,ctx);
   },
