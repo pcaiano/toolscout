@@ -335,7 +335,13 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
   const authCapability=isAuth?await env.DB.prepare(`SELECT action_url,auth_mode,challenge_type,automation_state,confidence,evidence,last_verified_at
     FROM auth_surface_capability WHERE surface_slug=? AND confidence>=95 AND auth_mode='human_bootstrap_session' LIMIT 1`).bind(row.surface_slug).first().catch(()=>null):null;
   const canonicalAuthProof=Boolean(authCapability&&validHumanActionUrl(authCapability.action_url));
-  const previous=await env.DB.prepare('SELECT status,gate_type,action_url,verification_detail FROM human_gate_contract WHERE gate_key=?').bind(humanGateKey('distribution','surface',row.surface_slug)).first();
+  const previous=await env.DB.prepare('SELECT status,gate_type,action_url,verification_detail,payload_json FROM human_gate_contract WHERE gate_key=?').bind(humanGateKey('distribution','surface',row.surface_slug)).first();
+  let previousPayload={};try{previousPayload=JSON.parse(previous?.payload_json||'{}')||{}}catch{}
+  const previousEvidenceUrl=validHumanActionUrl(previousPayload?.gate_evidence?.url||previous?.action_url||'');
+  const sameExactResearchRoute=Boolean(previousEvidenceUrl&&validHumanActionUrl(humanActionUrl)&&(()=>{try{const a=new URL(previousEvidenceUrl),b=new URL(humanActionUrl);a.hash='';b.hash='';return a.href===b.href}catch{return false}})());
+  const currentResearchProof=Boolean(previousPayload?.submission_intent===true
+    &&Number(previousPayload?.research_classifier_version||0)>=RESEARCH_CLASSIFIER_VERSION
+    &&sameExactResearchRoute);
   if(previous?.status==='resolved'&&!canonicalAuthProof)return null;
   if(previous?.status==='verification_pending')return null;
   if(previous&&previous.status!=='open'&&canonicalAuthProof){
@@ -346,10 +352,10 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
   const page=validHumanActionUrl(authTarget)?await text(authTarget,4500):null;
   // A sign-in link in a navigation bar is not proof that submission requires login.
   // A high-confidence Auth Plane capability is canonical evidence even when the protected page returns 401 to anonymous fetches.
-  const authProof=canonicalAuthProof||Boolean(page&&(/<input[^>]+type=["']password["']/i.test(page.body)||/(?:must|need to|required to) (?:be logged|sign|log) in|login required|account required/i.test(page.body)));
-  const captchaProof=page&&/<(?:div|iframe|input)[^>]+(?:g-recaptcha|h-captcha|cf-turnstile|captcha)/i.test(page.body);
-  const humanProof=page&&(captchaProof||HUMAN_BLOCK_RE.test(page.body));
-  const manualProof=page&&(ACTION_ROUTE_RE.test(page.url)||MANUAL_ACTION_RE.test(page.body));
+  const authProof=canonicalAuthProof||(currentResearchProof&&previous?.gate_type==='authentication')||Boolean(page&&(/<input[^>]+type=["']password["']/i.test(page.body)||/(?:must|need to|required to) (?:be logged|sign|log) in|login required|account required/i.test(page.body)));
+  const captchaProof=(currentResearchProof&&previous?.gate_type==='human_confirmation')||Boolean(page&&/<(?:div|iframe|input)[^>]+(?:g-recaptcha|h-captcha|cf-turnstile|captcha)/i.test(page.body));
+  const humanProof=(currentResearchProof&&previous?.gate_type==='human_confirmation')||Boolean(page&&(captchaProof||HUMAN_BLOCK_RE.test(page.body)));
+  const manualProof=(currentResearchProof&&previous?.gate_type==='manual_submission')||Boolean(page&&(ACTION_ROUTE_RE.test(page.url)||MANUAL_ACTION_RE.test(page.body)));
   if((!page&&!canonicalAuthProof)||!(isAuth?authProof:(isManual||isOwnerApproval)?manualProof:humanProof)){
     const detail='Chairman quality hold: no verified, actionable owner-only step on the destination. Engine must research the route and prepare exact instructions.';
     await env.DB.batch([
@@ -359,7 +365,7 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
     ]);
     return null;
   }
-  const finalActionUrl=canonicalAuthProof?authCapability.action_url:page.url;
+  const finalActionUrl=canonicalAuthProof?authCapability.action_url:(page?.url||previousEvidenceUrl||humanActionUrl);
   if(previous?.status==='cancelled'){
     await env.DB.prepare(`UPDATE human_gate_contract
       SET status='open',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,next_verification_at=NULL,
@@ -394,7 +400,14 @@ async function openDistributionHumanGate(env,row,{gateType='human_confirmation',
     instructions,
     actionUrl:finalActionUrl,
     resolutionMode:isAuth&&canonicalAuthProof?'auth_session_saved':'verify_publication',
-    payload:{...humanGatePayload(),gate_evidence:{url:finalActionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail}},
+    payload:{...humanGatePayload(),
+      ...(currentResearchProof?{
+        research_classifier_version:Number(previousPayload.research_classifier_version||RESEARCH_CLASSIFIER_VERSION),
+        submission_intent:true,
+        research_route_label:safe(previousPayload.research_route_label||'',240),
+        post_auth_submission:previousPayload.post_auth_submission===true
+      }:{}),
+      gate_evidence:{url:finalActionUrl,checked_at:new Date().toISOString(),detail:evidenceDetail}},
     verificationUrl
   });
   await env.DB.prepare(`UPDATE distribution_opportunities
@@ -438,8 +451,12 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
     const oldVersion=Number(oldPayload.research_classifier_version||0);
     const newVersion=Number(result?.classifierVersion||RESEARCH_CLASSIFIER_VERSION);
     const classifierUpgrade=oldVersion>0&&newVersion>oldVersion&&/classifier upgrade/i.test(String(previous.verification_detail||''));
-    if(!classifierUpgrade)return {opened:false,reason:'cancelled_gate_not_reopenable',status:previous.status,oldVersion,newVersion};
-    reopenMode='classifier_upgrade';
+    const transientReopenCancellation=newVersion>=RESEARCH_CLASSIFIER_VERSION
+      &&oldVersion>=RESEARCH_CLASSIFIER_VERSION
+      &&oldPayload.submission_intent===true
+      &&/reopened_(?:from_fresher_classifier_evidence|post_auth_submission_step|after_fresh_exact_route_proof)/i.test(String(previous.verification_detail||''));
+    if(!classifierUpgrade&&!transientReopenCancellation)return {opened:false,reason:'cancelled_gate_not_reopenable',status:previous.status,oldVersion,newVersion};
+    reopenMode=classifierUpgrade?'classifier_upgrade':'current_classifier_exact_route_recovery';
   }
 
   const gateType=postAuthFollowup?'manual_submission':isAuth?'authentication':isCaptcha?'human_confirmation':'manual_submission';
@@ -467,11 +484,12 @@ export async function openDistributionHumanGateFromResearchEvidence(env,row,{rou
       SET status='open',gate_type='manual_submission',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,
           next_verification_at=NULL,verification_attempts=0,verification_detail='reopened_post_auth_submission_step',updated_at=datetime('now')
       WHERE gate_key=? AND status='resolved'`).bind(gateKeyValue).run().catch(()=>{});
-  }else if(reopenMode==='classifier_upgrade'){
+  }else if(reopenMode==='classifier_upgrade'||reopenMode==='current_classifier_exact_route_recovery'){
     await env.DB.prepare(`UPDATE human_gate_contract
       SET status='open',owner_completed_at=NULL,resolved_at=NULL,result_url=NULL,next_verification_at=NULL,
-          verification_detail='reopened_from_fresher_classifier_evidence',updated_at=datetime('now')
-      WHERE gate_key=? AND status='cancelled'`).bind(gateKeyValue).run().catch(()=>{});
+          verification_detail=?,updated_at=datetime('now')
+      WHERE gate_key=? AND status='cancelled'`)
+      .bind(reopenMode==='classifier_upgrade'?'reopened_from_fresher_classifier_evidence':'reopened_from_current_classifier_exact_route_evidence',gateKeyValue).run().catch(()=>{});
   }
 
   const gateKey=await upsertHumanGate(env,{
