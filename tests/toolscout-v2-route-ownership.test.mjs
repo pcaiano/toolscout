@@ -32,8 +32,13 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/best-seo-tools-for-agencies',{method:'GET'}).owner,'public_decision_canary');
   assert.equal(routeOwner('/tools/airtable',{method:'GET'}).owner,'public_decision_canary');
   assert.equal(routeOwner('/tools/semrush',{method:'GET'}).owner,'public_decision_canary');
-  assert.equal(routeOwner('/tools/klaviyo',{method:'GET'}).owner,'public_site');
-  assert.equal(routeOwner('/best-project-management-tools',{method:'GET'}).owner,'public_site');
+  assert.equal(routeOwner('/tools/klaviyo',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/tools/moz-pro',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/tools/tally',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/best-project-management-tools',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/best-social-media-management-tools',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/tools/typeform',{method:'GET'}).owner,'public_site');
+  assert.equal(routeOwner('/best-no-code-automation-tools',{method:'GET'}).owner,'public_site');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
