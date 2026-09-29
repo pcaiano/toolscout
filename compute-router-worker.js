@@ -17,6 +17,7 @@ import {handleAgentProtocolRoute} from './agent-protocol-core-worker.js';
 import {handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
 import {handleAnalyticsChairmanRoute} from './analytics-chairman-runtime.js';
 import {handleAnalyticsStatsReadRoute} from './command-center-resilient-worker.js';
+import {handleAnalyticsHumanActionsRoute} from './analytics-human-actions-runtime.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 
@@ -1867,6 +1868,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='machine_discovery_catalog')response=await handleMachineDiscoveryCatalogRoute(request,env);
   else if(ownership.owner==='analytics_chairman')response=await handleAnalyticsChairmanRoute(request,env,ctx);
   else if(ownership.owner==='analytics_stats')response=await handleAnalyticsStatsReadRoute(request,env,ctx);
+  else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   if(!response)return null;
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);
