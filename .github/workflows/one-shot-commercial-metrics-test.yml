@@ -1,5 +1,5 @@
 name: One Shot Commercial Metrics Test
-# rerun-marker: 2026-09-29T10:26Z
+# rerun-marker: 2026-09-29T10:44Z
 
 on:
   push:
@@ -24,3 +24,4 @@ jobs:
           node --check command-center-simplified-view.js
           node --check growth-command-center-v2-worker.js
           node tests/commercial-click-reconciliation.test.mjs
+          node tests/command-center-core-kpis.test.mjs
