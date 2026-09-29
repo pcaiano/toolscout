@@ -63,7 +63,8 @@ test('analytics stats direct route is read-only and preserves resilient payload'
     state.env,
     {}
   );
-  assert.equal(response.status,200);
+  const responseBody=await response.clone().text();
+  assert.equal(response.status,200,responseBody);
   assert.equal(response.headers.get('X-ToolScout-Read-Mode'),'read-only');
   assert.equal(response.headers.get('X-ToolScout-Route-Contract'),'v2');
   const body=await response.json();
