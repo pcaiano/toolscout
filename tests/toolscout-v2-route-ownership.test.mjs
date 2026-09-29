@@ -19,6 +19,9 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/news/zapier-next-gen-zaps-mcp',{method:'GET'}).owner,'public_editorial_site');
   assert.equal(routeOwner('/software-trends-index',{method:'GET'}).owner,'public_editorial_site');
   assert.equal(routeOwner('/software-trends-index.json',{method:'GET'}).owner,'public_editorial_site');
+  assert.equal(routeOwner('/mcp',{method:'POST'}).owner,'agent_protocol_core');
+  assert.equal(routeOwner('/a2a',{method:'POST'}).owner,'agent_protocol_core');
+  assert.equal(routeOwner('/.well-known/agent-card.json',{method:'GET'}).owner,'agent_protocol_core');
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
@@ -39,6 +42,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='mission_integrity'/);
   assert.match(src,/ownership\.owner==='growth_runtime_closed_loop'/);
   assert.match(src,/ownership\.owner==='public_editorial_site'/);
+  assert.match(src,/ownership\.owner==='agent_protocol_core'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
