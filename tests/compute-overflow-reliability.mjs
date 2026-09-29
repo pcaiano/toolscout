@@ -41,5 +41,9 @@ check(s.includes("h.subject_type='surface' AND h.subject_key=d.surface_slug"),'d
 check(s.includes("kind==='json_api'"),'canonical validator accepts safe JSON API candidates');
 check(s.includes("render_primary_with_bounded_cloudflare_fallback"),'health exposes the real two-stage qualification architecture');
 check(s.includes("humanGatesOpen:num(live?.open_human_gates)"),'human-gate backlog is visible in compute truth');
+check(s.includes("endpoint_success.action_url=a.endpoint"),'machine execution deduplicates successful exact endpoints across discovered surfaces');
+check(s.includes("verification_target_is_submission_route"),'verification cannot promote a submission form or POST endpoint to placement');
+check(s.includes("reconcileFalseSubmissionRouteVerifications"),'historical false submission-route verifications are reconciled');
+check(s.includes("isSubmissionFormEvidence"),'submission transport evidence excludes source form and endpoint URLs');
 if(failures.length){for(const f of failures)console.error('FAIL '+f);process.exit(1)}
 console.log('PASS overflow reliability geometry and callback bounds');
