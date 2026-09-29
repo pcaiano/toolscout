@@ -30,44 +30,34 @@ function minutesOld(value,now=Date.now()){
 async function ensureIntegritySchema(env){
   if(integritySchemaReady)return integritySchemaReady;
   integritySchemaReady=(async()=>{
-  await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      visitor_id TEXT NOT NULL,
-      session_id TEXT NOT NULL,
-      path TEXT,
-      source TEXT NOT NULL DEFAULT 'direct',
-      referrer_host TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(visitor_id,session_id)
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_at ON confirmed_visitor_events(created_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_visitor_id ON confirmed_visitor_events(visitor_id)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_session_id ON confirmed_visitor_events(session_id)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_visitor ON confirmed_visitor_events(created_at,visitor_id)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_funnel_event_type_created_session ON funnel_events(event_type,created_at,session_id)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_sessions_classification_session ON sessions(classification,session_id)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_countries (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      visitor_id TEXT NOT NULL,
-      session_id TEXT NOT NULL,
-      country TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(visitor_id,session_id)
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_created_at ON confirmed_visitor_countries(created_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_country ON confirmed_visitor_countries(country)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    )`),
-    env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta (key,value) VALUES ('confirmed_tracking_started_at',datetime('now'))`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_heartbeat (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_integrity_heartbeat_created_at ON traffic_integrity_heartbeat(created_at)`)
-  ]);
+    const requiredTables=[
+      'confirmed_visitor_events',
+      'confirmed_visitor_countries',
+      'traffic_integrity_meta',
+      'traffic_integrity_heartbeat'
+    ];
+    const requiredIndexes=[
+      'idx_confirmed_visitor_events_created_at',
+      'idx_confirmed_visitor_events_visitor_id',
+      'idx_confirmed_visitor_events_session_id',
+      'idx_confirmed_visitor_events_created_visitor',
+      'idx_funnel_event_type_created_session',
+      'idx_sessions_classification_session',
+      'idx_confirmed_visitor_countries_created_at',
+      'idx_confirmed_visitor_countries_country',
+      'idx_traffic_integrity_heartbeat_created_at'
+    ];
+    const tableMarks=requiredTables.map(()=>'?').join(',');
+    const indexMarks=requiredIndexes.map(()=>'?').join(',');
+    const [tables,indexes]=await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${tableMarks})`).bind(...requiredTables).first(),
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (${indexMarks})`).bind(...requiredIndexes).first()
+    ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length){
+      throw new Error(`traffic_integrity_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}`);
+    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount};
   })().catch(error=>{integritySchemaReady=null;throw error});
   return integritySchemaReady;
 }

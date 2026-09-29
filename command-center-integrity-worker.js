@@ -37,36 +37,19 @@ async function all(env,sql,bindings=[]){try{return{ok:true,value:(await env.DB.p
 async function ensureOptimizationSchema(env){
   if(optimizationReady)return optimizationReady;
   optimizationReady=(async()=>{
-    await env.DB.batch([
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS command_center_daily_metrics (
-        day TEXT PRIMARY KEY,
-        human_sessions INTEGER NOT NULL DEFAULT 0,
-        unique_visitors INTEGER NOT NULL DEFAULT 0,
-        outbound_clicks INTEGER NOT NULL DEFAULT 0,
-        monetized_outbound INTEGER NOT NULL DEFAULT 0,
-        unmonetized_outbound INTEGER NOT NULL DEFAULT 0,
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_command_center_daily_updated ON command_center_daily_metrics(updated_at)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_human_evidence (
-        session_id TEXT PRIMARY KEY,
-        visitor_id TEXT,
-        evidence_type TEXT NOT NULL,
-        evidence_strength INTEGER NOT NULL DEFAULT 1,
-        interaction_count INTEGER NOT NULL DEFAULT 0,
-        first_path TEXT,
-        last_path TEXT,
-        source TEXT,
-        referrer_host TEXT,
-        country TEXT,
-        asn INTEGER,
-        first_evidence_at TEXT NOT NULL DEFAULT (datetime('now')),
-        last_evidence_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_created ON traffic_human_evidence(first_evidence_at)`),
-      env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('strict_human_tracking_started_at',datetime('now'))`)
+    const requiredTables=['command_center_daily_metrics','traffic_integrity_meta','traffic_human_evidence'];
+    const requiredIndexes=['idx_command_center_daily_updated','idx_traffic_human_evidence_created'];
+    const tableMarks=requiredTables.map(()=>'?').join(',');
+    const indexMarks=requiredIndexes.map(()=>'?').join(',');
+    const [tables,indexes]=await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${tableMarks})`).bind(...requiredTables).first(),
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (${indexMarks})`).bind(...requiredIndexes).first()
     ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length){
+      throw new Error(`command_center_optimization_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}`);
+    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount};
   })().catch(error=>{optimizationReady=null;throw error});
   return optimizationReady;
 }
