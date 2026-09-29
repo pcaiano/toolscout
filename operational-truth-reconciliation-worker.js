@@ -787,6 +787,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       dailyGeneratedAt:gscDailyTrend?.generatedAt||reality?.searchPerformance?.trendGeneratedAt||null,
       dailySource:assetDaily28.length>=2?'gsc-daily-trend-asset':'gsc-search-reality-cache',
       dailyDataState:gscDailyTrend?.dataState||null,
+      periodComparison:gscDailyTrend?.periodComparison||null,
       verifiedThroughDate,
       recent7,
       previous7,
