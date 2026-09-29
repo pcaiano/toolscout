@@ -131,7 +131,6 @@ if(routeContractLive.ok){
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
     if(owner('public_decision_pages')!=='public_decision')errors.push({code:'public_decision_owner_not_live'});
     if(owner('public_navigation_hubs')!=='public_navigation')errors.push({code:'public_navigation_owner_not_live'});
-    if(owner('public_blog')!=='public_site')errors.push({code:'public_blog_legacy_owner_changed'});
   }catch{}
 }
 
@@ -187,7 +186,8 @@ const navigationHubs=[
   {pathname:'/compare',query:'?a=airtable&b=semrush&source=phase13-smoke'},
   {pathname:'/categories'},
   {pathname:'/crm-tools'},
-  {pathname:'/seo-tools'}
+  {pathname:'/seo-tools'},
+  {pathname:'/blog/'}
 ];
 
 for(const hub of navigationHubs){
@@ -218,6 +218,14 @@ for(const hub of navigationHubs){
   }
   if(!/href=["']\/analytics-consent\?choice=/.test(live.text)){
     errors.push({code:'public_navigation_consent_link_missing',pathname:hub.pathname});
+  }
+  if(hub.pathname==='/blog/'){
+    if(!/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex[^"']*follow/i.test(live.text)){
+      errors.push({code:'public_blog_noindex_missing',pathname:hub.pathname});
+    }
+    if(!/Research before publication\./.test(live.text)){
+      errors.push({code:'public_blog_editorial_control_copy_missing',pathname:hub.pathname});
+    }
   }
   if(hub.pathname==='/compare'){
     for(const [code,re] of [
