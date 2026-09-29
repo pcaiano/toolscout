@@ -150,8 +150,8 @@ async function transformPage(request,response,env){
       html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
     }
     if(['/guides','/tools','/compare'].includes(pathname)&&!html.includes('data-toolscout-index-recovery-links="1"')){
-      const weekly=weeklyLossTargets(cfg,pathname,8);
-      const contract=await recoveryTargets(env,8);
+      const weekly=weeklyLossTargets(cfg,pathname,4);
+      const contract=await recoveryTargets(env,4);
       const merged=[],seenLinks=new Set();
       for(const row of [...weekly,...contract]){
         const key=String(row?.pathname||'');
