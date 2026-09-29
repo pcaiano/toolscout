@@ -21,4 +21,10 @@ assert.match(commandCenter,/Tracked social affiliate redirects - 24h/);
 assert.match(commandCenter,/Affiliate-network click floor/);
 assert.match(commandCenter,/Sources kept separate/);
 
+const growthCommandCenter=read('growth-command-center-v2-worker.js');
+assert.match(growthCommandCenter,/socialAffiliateRedirects30d/);
+assert.match(growthCommandCenter,/vendorReportedClickFloor/);
+assert.match(growthCommandCenter,/Strict 30d/);
+assert.match(growthCommandCenter,/Vendor floor/);
+
 console.log('Commercial click reconciliation preserves strict truth while exposing social and affiliate-network evidence.');
