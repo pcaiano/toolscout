@@ -62,7 +62,7 @@ function prioritizeIndependentDomains(rows,known,limit,urlField='action_url'){
   }).slice(0,limit);
 }
 const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets|asset|img|images|media|js|css|fonts|edge|storage)\./i;
-function isTechnicalSurface(value){const h=host(value);return TECHNICAL_HOST_RE.test(h)||/(?:githubassets\.com|githubusercontent\.com)$/i.test(h)}
+function isTechnicalSurface(value){const h=host(value);return TECHNICAL_HOST_RE.test(h)||/(?:githubassets\.com|githubusercontent\.com|supabase\.co|r2\.dev)$/i.test(h)}
 function sameHostFamily(a,b){const x=host(a),y=host(b);return x===y||x.endsWith('.'+y)||y.endsWith('.'+x)}
 async function text(url,timeout=4000){try{const r=await fetch(url,{headers:{'User-Agent':'ToolScout-Distribution-Qualifier/1.0','Accept':'text/html,application/json;q=0.9,*/*;q=0.8'},redirect:'follow',signal:AbortSignal.timeout(timeout)});if(!r.ok)return null;return {url:r.url,contentType:r.headers.get('content-type')||'',body:(await r.text()).slice(0,800000)}}catch{return null}}
 function links(html,base){const out=new Set();for(const m of String(html||'').matchAll(/href=["']([^"']+)["']/gi)){try{const u=new URL(m[1],base);if(u.protocol==='https:')out.add(u.href)}catch{}}return [...out]}
