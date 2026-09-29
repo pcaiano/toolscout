@@ -8,6 +8,8 @@ on:
       - 'seo-cloudflare-runtime-worker.js'
       - 'migrations/0087_seo_runtime_schema.sql'
       - 'command-center-light-theme-worker.js'
+      - 'command-center-simplified-view.js'
+      - 'operational-truth-reconciliation-worker.js'
       - 'growth-runtime-integrity-worker.js'
       - 'growth-runtime-closed-loop-worker.js'
       - 'authority-acquisition-worker.js'
@@ -58,6 +60,8 @@ jobs:
           node --check growth-runtime-closed-loop-worker.js
           node --check growth-runtime-integrity-worker.js
           node --check command-center-light-theme-worker.js
+          node --check operational-truth-reconciliation-worker.js
+          node --check command-center-simplified-view.js
           node --check scripts/editorial-authority-model.mjs
           node --check scripts/build-editorial-authority-portfolio.mjs
           node --check scripts/build-growth-priority.mjs
@@ -67,4 +71,4 @@ jobs:
       - name: Validate operating contract JSON
         run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
       - name: Run ToolScout 2.0 policy tests
-        run: node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs
+        run: node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs
