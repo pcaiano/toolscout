@@ -35,13 +35,13 @@ async function finish(request,response,env){
   const headers=new Headers(social.headers);
   headers.set('X-ToolScout-Public-Plane','decision-v1');
   headers.set('X-ToolScout-Route-Contract','v2');
-  headers.set('X-ToolScout-Public-Parity','candidate');
+  headers.set('X-ToolScout-Public-Parity','verified-v1');
   return new Response(social.body,{status:social.status,statusText:social.statusText,headers});
 }
 
 export function publicDecisionRoute(pathname){return route(pathname)}
 
-export async function renderPublicDecisionCandidate(request,env){
+export async function renderPublicDecisionPage(request,env){
   if(request.method!=='GET')return null;
   const r=route(new URL(request.url).pathname);
   if(!r)return null;
@@ -59,3 +59,5 @@ export async function renderPublicDecisionCandidate(request,env){
 
   return finish(request,response,env);
 }
+
+export const renderPublicDecisionCandidate=renderPublicDecisionPage;
