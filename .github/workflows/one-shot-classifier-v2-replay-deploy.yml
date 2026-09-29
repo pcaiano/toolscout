@@ -75,7 +75,7 @@ jobs:
           s=s.replace(sf,"triggerName:'manual_cloudflare_primary',singleFlightMinutes:0",1)
           p.write_text(s)
           PY
-          npx wrangler dev --remote --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
+          npx wrangler dev --remote --test-scheduled --config wrangler.toml --ip 127.0.0.1 --port 8787 --log-level error --show-interactive-dev-session=false > /tmp/wrangler-seo-dev.log 2>&1 &
           DEV_PID=$!
           cleanup(){ kill $DEV_PID >/dev/null 2>&1 || true; }
           trap cleanup EXIT
@@ -89,7 +89,11 @@ jobs:
           cat /tmp/primary-cycle.json
           test "$HTTP_CODE" = "200"
           jq -e '.ok != false' /tmp/primary-cycle.json >/dev/null
-          sleep 3
+          echo "Exercise the real 15-minute overflow scheduler against production D1"
+          OVERFLOW_HTTP=$(curl -sS -o /tmp/overflow-cycle.txt -w "%{http_code}" --max-time 180 "http://127.0.0.1:8787/__scheduled?cron=%2A%2F15%20%2A%20%2A%20%2A%20%2A" || true)
+          cat /tmp/overflow-cycle.txt || true
+          test "$OVERFLOW_HTTP" = "200"
+          sleep 5
 
       - name: Verify SEO queue advanced
         run: |
