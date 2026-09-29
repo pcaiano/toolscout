@@ -41,8 +41,16 @@ export function publicPageFingerprint(html){
   const internal=[...new Set(hrefs(text).map(canonicalInternal).filter(Boolean))].sort();
   const monetized=[...new Set(internal.filter(x=>x.startsWith('/go/')))].sort();
   const h1=strip(text.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
+  const title=strip(text.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'');
+  const description=decode(
+    text.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)?.[1]||
+    text.match(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i)?.[1]||
+    ''
+  ).trim();
   return{
     canonical:canonicalHref(text).replace(/\.html$/i,''),
+    title,
+    description,
     h1,
     jsonLdTypes:jsonLdTypes(text),
     internalLinks:internal,
@@ -57,6 +65,8 @@ export function comparePublicParity(beforeHtml,afterHtml){
   const before=publicPageFingerprint(beforeHtml),after=publicPageFingerprint(afterHtml);
   const errors=[];
   if(!after.canonical)errors.push('canonical_missing');
+  if(before.title&&after.title!==before.title)errors.push('title_changed');
+  if(before.description&&after.description!==before.description)errors.push('meta_description_changed');
   if(before.h1&&after.h1!==before.h1)errors.push('h1_changed');
   for(const type of before.jsonLdTypes)if(!after.jsonLdTypes.includes(type))errors.push('jsonld_type_lost:'+type);
   for(const link of before.internalLinks)if(!after.internalLinks.includes(link))errors.push('internal_link_lost:'+link);
