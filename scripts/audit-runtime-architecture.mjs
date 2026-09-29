@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {ROUTE_GROUPS,EARLY_DISPATCH_OWNERS} from '../runtime-route-contract.js';
 
 const ROOT=process.cwd();
 const ENTRY='compute-router-worker.js';
@@ -32,23 +33,56 @@ const directOwners=[
   ['mission_integrity',/ownership\.owner==='mission_integrity'/]
 ].filter(([,pattern])=>pattern.test(directSource)).map(([owner])=>owner);
 
+const rootJs=fs.readdirSync(ROOT).filter(file=>file.endsWith('.js')&&fs.statSync(path.join(ROOT,file)).isFile());
+const runtimeDdlFiles=rootJs.filter(file=>/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i.test(fs.readFileSync(path.join(ROOT,file),'utf8')));
+const directOwnerFiles={
+  distribution_priority:'distribution-priority-worker.js',
+  distribution_orchestrator:'distribution-orchestrator-worker.js',
+  seo_runtime:'seo-cloudflare-runtime-worker.js',
+  authority_acquisition:'authority-acquisition-worker.js',
+  mission_integrity:'mission-integrity-v2-worker.js',
+  growth_runtime_closed_loop:'growth-runtime-closed-loop-worker.js'
+};
+const directOwnerDdlFiles=[...new Set(EARLY_DISPATCH_OWNERS.map(owner=>directOwnerFiles[owner]).filter(Boolean).filter(file=>runtimeDdlFiles.includes(file)))];
+const directGroups=ROUTE_GROUPS.filter(group=>group.owner==='compute_router'||EARLY_DISPATCH_OWNERS.includes(group.owner));
+const legacyDeclaredGroups=ROUTE_GROUPS.filter(group=>!directGroups.includes(group));
+const routeCoveragePct=ROUTE_GROUPS.length?Number((directGroups.length/ROUTE_GROUPS.length*100).toFixed(1)):0;
+
 const report={
   generatedAt:new Date().toISOString(),
   architecture:'toolscout-2.0',
   entrypoint:ENTRY,
   legacyChain:{edges,files:chain.length,terminus,chain},
   earlyDispatchOwners:directOwners,
-  policy:{maxLegacyEdges:MAX_LEGACY_EDGES,mustNotIncrease:true,target:'progressively replace decorator traversal with explicit owner dispatch'}
+  routeOwnership:{
+    declaredGroups:ROUTE_GROUPS.length,
+    directGroups:directGroups.length,
+    legacyDeclaredGroups:legacyDeclaredGroups.length,
+    directCoveragePct:routeCoveragePct,
+    directGroupIds:directGroups.map(x=>x.id),
+    legacyGroupIds:legacyDeclaredGroups.map(x=>x.id)
+  },
+  runtimeDdl:{
+    files:runtimeDdlFiles,
+    count:runtimeDdlFiles.length,
+    directOwnerFiles:directOwnerDdlFiles
+  },
+  policy:{maxLegacyEdges:MAX_LEGACY_EDGES,mustNotIncrease:true,target:'progressively replace decorator traversal with explicit owner dispatch',directOwnersMustBeMigrationOnly:true}
 };
 
 fs.mkdirSync(path.join(ROOT,'reports'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'reports','runtime-architecture-audit.json'),JSON.stringify(report,null,2)+'\n');
-console.log(JSON.stringify({ok:edges<=MAX_LEGACY_EDGES,edges,files:chain.length,terminus,directOwners},null,2));
+console.log(JSON.stringify({ok:edges<=MAX_LEGACY_EDGES&&directOwnerDdlFiles.length===0,edges,files:chain.length,terminus,directOwners,routeCoveragePct,directGroups:directGroups.length,declaredGroups:ROUTE_GROUPS.length,runtimeDdlFiles:runtimeDdlFiles.length,directOwnerDdlFiles},null,2));
 if(edges>MAX_LEGACY_EDGES){
   console.error('Legacy wrapper depth increased. New runtime behavior must use explicit ownership rather than adding another decorator.');
   process.exitCode=1;
 }
 if(terminus!=='worker.js'){
   console.error('Unexpected runtime chain terminus: '+terminus);
+  process.exitCode=1;
+}
+
+if(directOwnerDdlFiles.length){
+  console.error('Direct ToolScout 2.0 route owners must not create or alter schema at runtime: '+directOwnerDdlFiles.join(', '));
   process.exitCode=1;
 }
