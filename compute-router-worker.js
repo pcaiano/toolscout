@@ -2,6 +2,7 @@ import base from './operational-truth-reconciliation-worker.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
 import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
+import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON='*/15 * * * *';
@@ -350,8 +351,11 @@ async function seedContactSupply(env){
       WHERE domain IS NOT NULL AND status NOT IN ('suppressed_technical') ORDER BY priority_score DESC LIMIT 300`).all().catch(()=>({results:[]})),
     env.DB.prepare(`SELECT tool_slug,vendor_domain,asset_url,MAX(priority_score) priority_score FROM distribution_vendor_amplification
       WHERE vendor_domain IS NOT NULL GROUP BY lower(vendor_domain) ORDER BY priority_score DESC LIMIT 300`).all().catch(()=>({results:[]})),
-    env.DB.prepare(`SELECT surface_slug,surface_name,action_url,distribution_score FROM distribution_opportunities
-      WHERE action_url IS NOT NULL AND status NOT IN ('policy_blocked','rejected','skipped','unavailable_free') ORDER BY distribution_score DESC LIMIT 500`).all().catch(()=>({results:[]}))
+    env.DB.prepare(`SELECT surface_slug,surface_name,action_url,distribution_score,external_value_score FROM distribution_opportunities
+      WHERE action_url IS NOT NULL
+        AND status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')
+        AND (COALESCE(external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH} OR status IN ('live','verified','submitted','pending_review','scheduled'))
+      ORDER BY COALESCE(external_value_score,0) DESC,distribution_score DESC LIMIT 500`).all().catch(()=>({results:[]}))
   ]);
   for(const row of rows(network))seeded+=await upsertContactSupplyDomain(env,{domain:row.domain,sourceType:'publisher_network',sourceKey:row.surface_slug,sourceName:row.surface_name,sourceUrl:row.source_url,priority:820+num(row.priority_score)});
   for(const row of rows(vendors))seeded+=await upsertContactSupplyDomain(env,{domain:row.vendor_domain,sourceType:'vendor_amplification',sourceKey:row.tool_slug,sourceUrl:row.asset_url,priority:900+num(row.priority_score)});
@@ -615,11 +619,18 @@ async function health(env){
           AND COALESCE(surface_type,'')<>'publisher_contact_route'
           AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
           AND status IN ('candidate','discovered','research_required')) route_research_candidates,
+      (SELECT COUNT(*) FROM distribution_opportunities
+        WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+          AND COALESCE(surface_type,'')<>'publisher_contact_route'
+          AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
+          AND status IN ('candidate','discovered','research_required')
+          AND COALESCE(external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH}) route_research_value_eligible,
       (SELECT COUNT(*) FROM distribution_opportunities o
         WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
           AND COALESCE(o.surface_type,'')<>'publisher_contact_route'
           AND (o.action_url LIKE 'https://%' OR o.action_url LIKE 'http://%')
           AND o.status IN ('candidate','discovered','research_required')
+          AND COALESCE(o.external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH}
           AND NOT EXISTS (
             SELECT 1 FROM compute_overflow_jobs exhausted
             WHERE exhausted.subject_key=o.surface_slug
@@ -690,6 +701,7 @@ async function health(env){
     qualificationAuth15m:num(live?.qualification_auth_15m),
     qualificationPolicy15m:num(live?.qualification_policy_15m),
     routeResearchCandidates:num(live?.route_research_candidates),
+    routeResearchValueEligible:num(live?.route_research_value_eligible),
     routeResearchEligible:num(live?.route_research_eligible),
     routeResearchQueued:num(live?.route_research_queued),
     routeResearchRunnable:num(live?.route_research_runnable),
@@ -814,13 +826,14 @@ async function enqueueDistributionResearch(env){
   const routeBucket=Math.floor(Date.now()/(DISTRIBUTION_RESEARCH_BUCKET_HOURS*3600000));
   const roleEmailBucket=Math.floor(Date.now()/(ROLE_EMAIL_RESEARCH_BUCKET_HOURS*3600000));
   const limit=Math.min(80,remaining);
-  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action,
+  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,external_value_score,external_value_tier,status,next_action,
       COALESCE((SELECT a.policy_state FROM distribution_auto_adapters a WHERE a.surface_slug=distribution_opportunities.surface_slug LIMIT 1),'') adapter_policy_state
     FROM distribution_opportunities
     WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
       AND COALESCE(surface_type,'')<>'publisher_contact_route'
       AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
       AND status IN ('candidate','discovered','research_required')
+      AND COALESCE(external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH}
       AND NOT EXISTS (
         SELECT 1 FROM compute_overflow_jobs exhausted
         WHERE exhausted.subject_key=distribution_opportunities.surface_slug
@@ -872,7 +885,7 @@ async function enqueueDistributionResearch(env){
     const adapterPolicyState=String(row.adapter_policy_state||'');
     const recovering=adapterPolicyState==='revalidation_required';
     const previouslyRejected=recovering||adapterPolicyState==='transport_rejected';
-    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,...(previouslyRejected?{recoveryReason:'external_submission_rejected'}:{})};
+    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),externalValueScore:num(row.external_value_score),externalValueTier:String(row.external_value_tier||''),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,...(previouslyRejected?{recoveryReason:'external_submission_rejected'}:{})};
     const routeJobKey=recovering
       ?`route-recovery:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`
       :`route:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`;
