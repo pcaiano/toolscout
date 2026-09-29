@@ -388,12 +388,20 @@ async function buildCommandCenterBusinessTruth(request,env){
   const internalAuthorityVerifiedDomains=truthNum(backlink.internal_verified_referring_domains??backlink.verified_referring_domains);
   const seRankingObservedAt=seRankingBacklinkTruth?.observedAt||null;
   const seRankingObservedMs=Date.parse(String(seRankingObservedAt||''));
-  const seRankingFresh=Number.isFinite(seRankingObservedMs)&&(Date.now()-seRankingObservedMs)<=168*3600000;
-  const seRankingReferringDomains=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.referringDomains):0;
-  const seRankingBacklinks=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.backlinks):0;
-  const seRankingDofollowBacklinks=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.dofollowBacklinks):0;
-  const seRankingDofollowReferringDomains=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.dofollowReferringDomains):0;
-  const seRankingDomainAuthority=seRankingFresh?truthNum(seRankingBacklinkTruth?.metrics?.domainAuthority??seRankingBacklinkTruth?.metrics?.domainInlinkRank):0;
+  const seRankingFreshnessHours=Math.max(1,truthNum(seRankingBacklinkTruth?.freshnessHours)||48);
+  const seRankingAgeHours=Number.isFinite(seRankingObservedMs)?Math.max(0,(Date.now()-seRankingObservedMs)/3600000):null;
+  const seRankingSnapshotAvailable=Number.isFinite(seRankingObservedMs)&&seRankingBacklinkTruth?.metrics?.backlinks!=null&&seRankingBacklinkTruth?.metrics?.referringDomains!=null;
+  const seRankingFresh=seRankingSnapshotAvailable&&seRankingAgeHours<=seRankingFreshnessHours;
+  const seRankingLastReferringDomains=seRankingSnapshotAvailable?truthNum(seRankingBacklinkTruth?.metrics?.referringDomains):null;
+  const seRankingLastBacklinks=seRankingSnapshotAvailable?truthNum(seRankingBacklinkTruth?.metrics?.backlinks):null;
+  const seRankingLastDofollowBacklinks=seRankingSnapshotAvailable?truthNum(seRankingBacklinkTruth?.metrics?.dofollowBacklinks):null;
+  const seRankingLastDofollowReferringDomains=seRankingSnapshotAvailable?truthNum(seRankingBacklinkTruth?.metrics?.dofollowReferringDomains):null;
+  const seRankingLastDomainAuthority=seRankingSnapshotAvailable?truthNum(seRankingBacklinkTruth?.metrics?.domainAuthority??seRankingBacklinkTruth?.metrics?.domainInlinkRank):null;
+  const seRankingReferringDomains=seRankingFresh?seRankingLastReferringDomains:0;
+  const seRankingBacklinks=seRankingFresh?seRankingLastBacklinks:0;
+  const seRankingDofollowBacklinks=seRankingFresh?seRankingLastDofollowBacklinks:0;
+  const seRankingDofollowReferringDomains=seRankingFresh?seRankingLastDofollowReferringDomains:0;
+  const seRankingDomainAuthority=seRankingFresh?seRankingLastDomainAuthority:0;
   const internalVerifiedBacklinks=truthNum(backlink.internal_verified_backlinks??backlink.verified_backlinks);
   const observedBacklinks=seRankingFresh?seRankingBacklinks:truthNum(backlink.verified_backlinks??internalVerifiedBacklinks);
   const backlinkReconciliationGap=seRankingFresh?Math.max(0,seRankingBacklinks-internalVerifiedBacklinks):0;
@@ -718,7 +726,15 @@ async function buildCommandCenterBusinessTruth(request,env){
       seRankingDofollowReferringDomains:seRankingFresh?seRankingDofollowReferringDomains:null,
       domainAuthority:seRankingFresh?seRankingDomainAuthority:null,
       domainAuthoritySource:seRankingFresh?'SE Ranking':null,
-      seRankingObservedAt:seRankingFresh?seRankingObservedAt:null,
+      seRankingStatus:seRankingSnapshotAvailable?(seRankingFresh?'fresh':'stale'):'unavailable',
+      seRankingAgeHours,
+      seRankingFreshnessHours,
+      seRankingObservedAt:seRankingSnapshotAvailable?seRankingObservedAt:null,
+      seRankingLastBacklinks,
+      seRankingLastReferringDomains,
+      seRankingLastDofollowBacklinks,
+      seRankingLastDofollowReferringDomains,
+      seRankingLastDomainAuthority,
       referringDomainSource:seRankingFresh?'SE Ranking':'internal verified ledger',
       diversificationObjective:'grow_unique_independent_referring_domains',
       newReferringDomainPriority:'primary',
