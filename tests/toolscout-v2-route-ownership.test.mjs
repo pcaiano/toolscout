@@ -12,9 +12,18 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/compute/health',{method:'GET'}).owner,'compute_router');
   assert.equal(routeOwner('/api/seo/runtime-health',{method:'GET'}).owner,'seo_runtime');
   assert.equal(routeOwner('/api/distribution/authority/vetted-health',{method:'GET'}).owner,'authority_acquisition');
-  assert.equal(routeOwner('/api/distribution/authority/closed-loop-health',{method:'GET'}).owner,'growth_runtime_authority_drain');
+  assert.equal(routeOwner('/api/distribution/authority/closed-loop-health',{method:'GET'}).owner,'authority_health');
   assert.equal(routeOwner('/api/distribution/authority/close-loop',{method:'POST'}).owner,'growth_runtime_closed_loop');
+  assert.ok(routeContract().earlyDispatchOwners.includes('growth_runtime_closed_loop'));
   assert.equal(routeOwner('/api/growth/supervisor/public',{method:'GET'}).owner,'distribution_orchestrator');
+  assert.equal(routeOwner('/news/zapier-next-gen-zaps-mcp',{method:'GET'}).owner,'public_editorial_site');
+  assert.equal(routeOwner('/software-trends-index',{method:'GET'}).owner,'public_editorial_site');
+  assert.equal(routeOwner('/software-trends-index.json',{method:'GET'}).owner,'public_editorial_site');
+  assert.equal(routeOwner('/mcp',{method:'POST'}).owner,'agent_protocol_core');
+  assert.equal(routeOwner('/a2a',{method:'POST'}).owner,'agent_protocol_core');
+  assert.equal(routeOwner('/.well-known/agent-card.json',{method:'GET'}).owner,'agent_protocol_core');
+  assert.equal(routeOwner('/.well-known/toolscout-distribution.json',{method:'GET'}).owner,'machine_discovery_catalog');
+  assert.equal(routeOwner('/.well-known/api-catalog',{method:'GET'}).owner,'machine_discovery_catalog');
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
@@ -33,6 +42,10 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
   assert.match(src,/ownership\.owner==='mission_integrity'/);
+  assert.match(src,/ownership\.owner==='growth_runtime_closed_loop'/);
+  assert.match(src,/ownership\.owner==='public_editorial_site'/);
+  assert.match(src,/ownership\.owner==='agent_protocol_core'/);
+  assert.match(src,/ownership\.owner==='machine_discovery_catalog'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
@@ -45,6 +58,7 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   const seo=read('seo-cloudflare-runtime-worker.js');
   const authority=read('authority-acquisition-worker.js');
   const evidence=read('mission-integrity-v2-worker.js');
+  const closedLoop=read('growth-runtime-closed-loop-worker.js');
   assert.match(priority,/export async function handleDistributionPriorityRoute/);
   assert.match(priority,/return null;/);
   assert.match(orchestrator,/export async function handleDistributionOrchestratorRoute/);
@@ -55,10 +69,19 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   assert.match(authority,/return null;/);
   assert.match(evidence,/export async function handleMissionIntegrityRoute/);
   assert.match(evidence,/return null;/);
+  assert.match(closedLoop,/export async function handleGrowthClosedLoopRoute/);
+  assert.match(closedLoop,/return null;/);
 });
 
 test('mission integrity runtime no longer creates schema',()=>{
   const evidence=read('mission-integrity-v2-worker.js');
   assert.doesNotMatch(evidence,/CREATE TABLE|CREATE INDEX/);
   assert.match(evidence,/mission_integrity_schema_not_migrated/);
+});
+
+
+test('Growth Planner runtime no longer creates schema',()=>{
+  const planner=read('distribution-orchestrator-worker.js');
+  assert.doesNotMatch(planner,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+  assert.match(planner,/growth_planner_schema_not_migrated/);
 });

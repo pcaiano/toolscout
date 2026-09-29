@@ -1,49 +1,354 @@
 {
-  "version": 2,
+  "version": 4,
   "edition": "2026-09",
   "editionLabel": "September 2026",
-  "publishedAt": "2026-09-16T08:52:00.000Z",
-  "scope": "Buyer focused summary of public software product changes and recurring themes from vendor announcements.",
-  "editorialPolicy": "Updates are selected for product relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
+  "publishedAt": "2026-09-28T09:55:08.000Z",
+  "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
+  "updatedThrough": "2026-09-28",
+  "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout classifies buyer impact independently of affiliate status.",
+  "primarySourceCount": 11,
+  "searchVisibility": {
+    "source": "Google Search Console",
+    "impressions": 2215,
+    "clicks": 1,
+    "ctr": 0.0451,
+    "position": 0
+  },
+  "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "themes": [
     {
       "id": "agent-workflows",
       "title": "AI agents are becoming reusable team workflows",
-      "summary": "Recent releases point toward reusable skills, shared AI behaviour and workflows that teams can invoke repeatedly instead of starting from a blank chat.",
+      "summary": "Recent product releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
       "evidence": [
-        "notion-3-7-agent-skills",
-        "hubspot-mcp-server-update"
+        "github-copilot-sandboxing-observability",
+        "notion-mail-shuts-down",
+        "zapier-next-gen-zaps-mcp",
+        "notion-3-7-agent-skills"
       ]
     },
     {
       "id": "connected-software",
       "title": "Business software is opening up to agent connections",
-      "summary": "MCP, integrations and related connection layers are making software easier for AI tools and external systems to work with directly.",
+      "summary": "MCP and related integration layers are making software easier for AI tools to read from and act on with explicit permissions.",
       "evidence": [
+        "notion-mail-shuts-down",
         "hubspot-mcp-server-update"
       ]
     },
     {
       "id": "workflow-convergence",
-      "title": "Work apps are absorbing more automation",
-      "summary": "Product updates increasingly combine core work, automation and AI in the same product experience, reducing the distance between planning and execution.",
+      "title": "Analysis and execution are moving closer together",
+      "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
-        "notion-3-7-agent-skills"
+        "github-proof-of-presence-enterprise",
+        "notion-mail-shuts-down",
+        "zapier-next-gen-zaps-mcp",
+        "github-actions-workflow-execution-protections-ga",
+        "hubspot-mcp-server-update"
       ]
     }
   ],
   "updates": [
+    {
+      "id": "github-copilot-sandboxing-observability",
+      "publishedAt": "2026-09-28",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub Copilot adds local sandboxing and agent observability",
+      "summary": "GitHub Copilot adds local sandboxing, OpenTelemetry agent monitoring and expanded model choice for software teams.",
+      "changeType": "ai_automation",
+      "buyerImpact": "GitHub buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-copilot-sandboxing-observability.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-25-github-copilot-weekly-releases-september-21/"
+    },
+    {
+      "id": "chatgpt-images-2-5",
+      "publishedAt": "2026-09-26",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Official product update",
+      "title": "ChatGPT Images 2.5 sharpens editing and speeds up generation",
+      "summary": "ChatGPT Images 2.5 improves detail, editing precision and generation speed while adding templates, sketch-based creation and prompt sharing.",
+      "changeType": "product_capability",
+      "buyerImpact": "ChatGPT buyers should compare the new capability against the requirements that originally put the product on their shortlist.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-assistants",
+          "label": "Best AI Assistants"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-images-2-5.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-chatgpt-images-2-5/"
+    },
+    {
+      "id": "github-proof-of-presence-enterprise",
+      "publishedAt": "2026-09-25",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "GitHub adds fresh authentication for high-impact enterprise actions",
+      "summary": "GitHub Enterprise Cloud can now require fresh re-authentication or MFA before managed users perform sensitive actions such as creating tokens or editing webhooks.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-proof-of-presence-enterprise.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-24-require-proof-of-presence-for-high-impact-actions/"
+    },
+    {
+      "id": "github-ssh-security-changes-2026",
+      "publishedAt": "2026-09-23",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "GitHub sets new SSH security requirements for keys and clients",
+      "summary": "GitHub is phasing out older SSH cryptography, raising the minimum size for newly uploaded RSA keys and adding a post-quantum key exchange option.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-ssh-security-changes-2026.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-22-security-improvements-for-ssh/"
+    },
+    {
+      "id": "notion-mail-shuts-down",
+      "publishedAt": "2026-09-22",
+      "toolSlug": "notion",
+      "toolName": "Notion",
+      "label": "Product retirement",
+      "title": "Notion Mail shuts down as Notion shifts email workflows to AI",
+      "summary": "Notion Mail shuts down across all plans on 22 September while Gmail-connected AI features and agent email tools remain available.",
+      "changeType": "product_retirement",
+      "buyerImpact": "Notion buyers should review migration, continuity and replacement requirements before relying on the affected workflow.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/notion",
+          "label": "Notion profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/notion-vs-clickup",
+          "label": "notion vs clickup"
+        },
+        {
+          "type": "comparison",
+          "url": "/airtable-vs-notion",
+          "label": "airtable vs notion"
+        }
+      ],
+      "articleUrl": "/news/notion-mail-shuts-down.html",
+      "sourceName": "Notion Help Center",
+      "sourceUrl": "https://www.notion.com/help/notion-mail-inbox-is-going-away-what-to-do-next"
+    },
+    {
+      "id": "chatgpt-word-microsoft-office",
+      "publishedAt": "2026-09-21",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Official product update",
+      "title": "ChatGPT arrives in Microsoft Word across all plans",
+      "summary": "OpenAI has added ChatGPT to Microsoft Word, bringing drafting, summarization, revision and document formatting into the Word sidebar across all ChatGPT plans.",
+      "changeType": "pricing_packaging",
+      "buyerImpact": "ChatGPT buyers should re-check total cost and plan eligibility because packaging changes can alter the economics of an existing shortlist.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-assistants",
+          "label": "Best AI Assistants"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-word-microsoft-office.html",
+      "sourceName": "OpenAI ChatGPT release notes",
+      "sourceUrl": "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+    },
+    {
+      "id": "zapier-next-gen-zaps-mcp",
+      "publishedAt": "2026-09-20",
+      "toolSlug": "zapier",
+      "toolName": "Zapier",
+      "label": "Official product update",
+      "title": "Zapier expands Next Gen Zaps with branching, recovery and agentic management",
+      "summary": "Next Gen Zaps adds richer branching, nested loops, resilient error handling, human pauses and agent managed diagnosis and repair to Zapier's new automation model.",
+      "changeType": "ai_automation",
+      "buyerImpact": "Zapier buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/zapier",
+          "label": "Zapier profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/make-vs-zapier",
+          "label": "make vs zapier"
+        },
+        {
+          "type": "guide",
+          "url": "/best-workflow-automation-tools",
+          "label": "Best Workflow Automation Tools"
+        }
+      ],
+      "articleUrl": "/news/zapier-next-gen-zaps-mcp.html",
+      "sourceName": "Zapier Product Updates",
+      "sourceUrl": "https://community.zapier.com/product-updates/the-next-generation-of-zaps-is-here-53832"
+    },
+    {
+      "id": "github-actions-workflow-execution-protections-ga",
+      "publishedAt": "2026-09-17",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub Actions adds stronger controls over who can run workflows",
+      "summary": "GitHub Actions workflow execution protections are now generally available, adding workflow-specific targeting, policy insights, REST APIs and safer defaults for public repositories.",
+      "changeType": "ai_automation",
+      "buyerImpact": "GitHub buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-actions-workflow-execution-protections-ga.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-17-workflow-execution-protections-in-github-actions-generally-available/"
+    },
+    {
+      "id": "github-ai-scan-codeql-setup",
+      "publishedAt": "2026-09-16",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub removes a setup barrier for AI Scan in pull requests",
+      "summary": "GitHub AI Scan can now check pull requests without requiring CodeQL default setup first, reducing configuration friction for eligible GitHub Advanced Security customers.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-ai-scan-codeql-setup.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-16-code-scanning-ai-scan-no-longer-requires-codeql-default-setup/"
+    },
     {
       "id": "notion-3-7-agent-skills",
       "publishedAt": "2026-09-15",
       "toolSlug": "notion",
       "toolName": "Notion",
       "label": "Official release",
-      "title": "Notion 3.7 adds shared Agent skills",
-      "summary": "Notion now lets teams create reusable AI skills, keep them in a shared library and run them from Agent conversations.",
+      "title": "Notion 3.7 turns team prompts into reusable Agent skills",
+      "summary": "Notion 3.7 adds reusable team skills, a shared skills library and portability to external AI coding agents.",
+      "changeType": "ai_automation",
+      "buyerImpact": "Notion buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/notion",
+          "label": "Notion profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/notion-vs-clickup",
+          "label": "notion vs clickup"
+        },
+        {
+          "type": "comparison",
+          "url": "/airtable-vs-notion",
+          "label": "airtable vs notion"
+        }
+      ],
+      "articleUrl": "/news/notion-3-7-agent-skills.html",
       "sourceName": "Notion release notes",
-      "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15",
-      "profileUrl": "/tools/notion.html"
+      "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15"
     },
     {
       "id": "hubspot-mcp-server-update",
@@ -51,11 +356,40 @@
       "toolSlug": "hubspot",
       "toolName": "HubSpot",
       "label": "Official product update",
-      "title": "HubSpot publishes new MCP server updates",
-      "summary": "HubSpot has published an update covering its MCP server and related AI integration tooling.",
+      "title": "HubSpot expands its MCP server from insight to action",
+      "summary": "HubSpot is broadening what teams can do with CRM data and actions from AI conversations through its MCP server and Claude connector.",
+      "changeType": "integrations_connectivity",
+      "buyerImpact": "HubSpot buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/hubspot",
+          "label": "HubSpot profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/hubspot-vs-pipedrive",
+          "label": "hubspot vs pipedrive"
+        },
+        {
+          "type": "guide",
+          "url": "/best-free-crm",
+          "label": "Best Free CRM Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-crm-for-real-estate",
+          "label": "Best CRM for Real Estate"
+        },
+        {
+          "type": "guide",
+          "url": "/best-affordable-crm",
+          "label": "Best Affordable CRM"
+        }
+      ],
+      "articleUrl": "/news/hubspot-mcp-server-updates.html",
       "sourceName": "HubSpot Releases and Updates",
-      "sourceUrl": "https://community.hubspot.com/c/resources/releases-and-updates/134",
-      "profileUrl": "/tools/hubspot.html"
+      "sourceUrl": "https://community.hubspot.com/t/spotlight-feature-hubspot-mcp-server-updates/156456"
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",

@@ -1,4 +1,5 @@
 import base from './operational-truth-reconciliation-worker.js';
+import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
 import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
@@ -10,7 +11,12 @@ import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
 import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
+import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
+import {handleAuthorityHealthRoute} from './authority-health-runtime.js';
+import {handleAgentProtocolRoute} from './agent-protocol-core-worker.js';
+import {handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
+import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
@@ -1851,6 +1857,12 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='seo_runtime')response=await handleSeoRuntimeRoute(request,env);
   else if(ownership.owner==='authority_acquisition')response=await handleAuthorityAcquisitionRoute(request,env);
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
+  else if(ownership.owner==='growth_runtime_closed_loop')response=await handleGrowthClosedLoopRoute(request,env,ctx);
+  else if(ownership.owner==='authority_health')response=await handleAuthorityHealthRoute(request,env);
+  else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
+  else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
+  else if(ownership.owner==='agent_protocol_core')response=await handleAgentProtocolRoute(request,env,ctx);
+  else if(ownership.owner==='machine_discovery_catalog')response=await handleMachineDiscoveryCatalogRoute(request,env);
   if(!response)return null;
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);

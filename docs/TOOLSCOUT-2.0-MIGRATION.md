@@ -120,3 +120,44 @@ Branch: architecture/toolscout-2.0
 Pull request: #168
 
 The PR remains draft until targeted CI passes and the migration/deployment order is safe.
+
+
+## Phase 2 - Runtime consolidation continuation
+
+Status: active on branch architecture/toolscout-2.0-phase-2.
+
+Implemented in this phase:
+- migration 0089 moves Growth Planner state tables/indexes out of runtime;
+- authority closed-loop POST action is an explicit early-dispatch route;
+- runtime architecture audit measures declared direct-route coverage and rejects runtime DDL in direct 2.0 owners;
+- software news (/news/*) has a dedicated public editorial plane that preserves SEO transformation, canonical handling and ToolScout social footer while bypassing the legacy control chain;
+- Command Center page, Business Truth GET and Simplified Health GET are explicit read-only route owners and bypass the legacy chain;
+- schema reconciliation remains on the legacy/admin path until a compatibility-safe idempotent migration is available;
+- priority editorial pages are materialized in a bounded GSC-observed portfolio rather than regenerating the entire public surface.
+
+Deliberately not migrated yet:
+- /go/* affiliate redirects and commercial tracking;
+- authority closed-loop health enrichment;
+- remaining analytics/statistics augmentation routes;
+- dynamic tool/ranking public pages;
+- agent protocol routes.
+
+These remain on legacy fallback until parity can be demonstrated.
+
+
+### Phase 2 additions after route consolidation
+
+- Canonical ownership is now explicit in `public-canonical-contract.js`. The production contract remains extensionless even where older static source files still contain `.html` canonicals.
+- Software news and the Software Trends Index are served through the direct editorial public plane with the same extensionless canonical behaviour as the legacy runtime.
+- Existing static `best-*` guides are sovereign. Runtime rankings may create a genuinely new guide surface, but may not replace an existing indexed guide at request time.
+- Runtime-admitted tool profiles and runtime-created rankings expose primary vendor evidence.
+- Authority closed-loop health is a direct read-only owner. GET observability no longer normalizes failed engine runs as a side effect.
+- MCP, A2A and `/.well-known/agent-card.json` are direct route owners. The remaining machine discovery catalog endpoints stay on legacy fallback.
+- AgentReady verification moved from an unreachable `15 3 * * *` wrapper condition to the central hourly scheduler with a daily 03:15 UTC subcadence.
+- Production recovery deploy now rechecks preservation before migrations/deploy and performs a post-deploy smoke for canonicals, editorial plane, Command Center, authority health and a synthetic non-recording affiliate redirect.
+
+Still deliberately legacy:
+- analytics/statistics augmentation beyond the direct Command Center reads;
+- `/go/*` commercial redirect implementation;
+- dynamic/static tool profile composition;
+- remaining machine discovery catalog endpoints.

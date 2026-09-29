@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
+import {routeOwner} from '../runtime-route-contract.js';
+import {missionOwner,cronMatches,TOOLSCOUT_CRONS} from '../runtime-schedule-contract.js';
+import fs from 'node:fs';
+
+test('MCP, A2A and agent card have a direct protocol owner',()=>{
+  for(const path of ['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']){
+    assert.equal(routeOwner(path,{method:path.includes('well-known')?'GET':'POST'}).owner,'agent_protocol_core');
+  }
+  assert.equal(routeOwner('/.well-known/toolscout-distribution.json',{method:'GET'}).owner,'machine_discovery_catalog');
+});
+
+test('agent card is served without legacy fallback',async()=>{
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/.well-known/agent-card.json'),
+    {},
+    {waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const body=await response.json();
+  assert.equal(body.name,'ToolScout Software Recommendation Agent');
+  assert.equal(body.supportedInterfaces[0].url,'https://trytoolscout.org/a2a');
+});
+
+test('MCP OPTIONS is handled directly with protocol CORS',async()=>{
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'OPTIONS'}),
+    {},
+    {waitUntil(){}}
+  );
+  assert.equal(response.status,204);
+  assert.match(response.headers.get('access-control-allow-methods')||'',/POST/);
+});
+
+test('AgentReady verification is owned by central hourly scheduler',()=>{
+  assert.equal(missionOwner('agentready_verification'),'growth_scheduler');
+  assert.equal(cronMatches('agentready_verification',TOOLSCOUT_CRONS.hourly),true);
+  const wrapper=fs.readFileSync(new URL('../agent-protocol-worker.js',import.meta.url),'utf8');
+  const scheduler=fs.readFileSync(new URL('../growth-scheduler.js',import.meta.url),'utf8');
+  assert.doesNotMatch(wrapper,/AGENTREADY_CRON|syncAgentReadyVerified/);
+  assert.match(scheduler,/agentReadyDaily=hourly&&scheduledHour===3/);
+  assert.match(scheduler,/mission:'agentready_verification'/);
+  assert.match(scheduler,/syncAgentReadyVerified/);
+});

@@ -5,6 +5,7 @@ import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSourc
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 import {growthSupervisorDirective} from './growth-supervisor.js';
+import {syncAgentReadyVerified} from './machine-discovery-extension.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 async function missionNeedsRecovery(env,engine,mission,maxAgeMinutes=0){
@@ -56,6 +57,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
   const twoHourly=hourly&&scheduledHour%2===0;
   const sixHourly=hourly&&scheduledHour%6===0;
   const twelveHourly=hourly&&scheduledHour%12===0;
+  const agentReadyDaily=hourly&&scheduledHour===3;
 
   const [affiliateSupervisor,catalogSupervisor]=await Promise.all([
     growthSupervisorDirective(env,'affiliate').catch(()=>null),
@@ -83,6 +85,9 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     }
     if(sixHourly||contentRecovery){
       scheduleTask(ctx,runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:contentRecovery?trigger+':recovery':trigger,singleFlightMinutes:15},()=>runContentSocialIntelligenceCycle(env)));
+    }
+    if(agentReadyDaily){
+      scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'agentready_verification',triggerName:trigger,singleFlightMinutes:30},()=>syncAgentReadyVerified(env)));
     }
   }
 

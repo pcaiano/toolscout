@@ -1,6 +1,6 @@
 import base from './command-center-affiliate-table-worker.js';
 import { withPrivateAssets } from './private-assets.js';
-import { augmentMachineDiscoveryStats, decorateMachineDiscoveryPage, syncAgentReadyVerified } from './machine-discovery-extension.js';
+import { augmentMachineDiscoveryStats, decorateMachineDiscoveryPage } from './machine-discovery-extension.js';
 import { augmentTrafficTruthStats, decorateTrafficTruthPage } from './traffic-truth-extension.js';
 import { analyticsConsentResponse, decoratePublicAnalytics } from './analytics-consent.js';
 
@@ -8,7 +8,6 @@ const WATCHLIST_QUEUE_BLOCK=new Set(['airtable','klaviyo']);
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const HUMAN_DISCOVERY_STATES=new Set(['ready_to_apply','human_action_required']);
 const QUALIFIED_EVIDENCE=/(official_publisher_affiliate_program|official_affiliate_watchlist)/i;
-const AGENTREADY_CRON='15 3 * * *';
 const PUBLIC_BASE='https://trytoolscout.org';
 
 function slugOf(item){return String(item?.id||item?.tool_slug||'').trim().toLowerCase()}
@@ -115,9 +114,7 @@ const filteredBase={
     return upstream;
   },
   async scheduled(event,env,ctx){
-    const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
-    if(event?.cron===AGENTREADY_CRON)ctx.waitUntil(syncAgentReadyVerified(env));
-    return result;
+    return base.scheduled?base.scheduled(event,env,ctx):undefined;
   }
 };
 
