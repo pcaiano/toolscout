@@ -29,6 +29,8 @@ check(s.includes("qualificationResearch15m:num(live?.qualification_research_15m)
 check(s.includes("qualificationVerificationFailed15m:num(live?.qualification_verification_failed_15m)"),'qualification verification failures are visible');
 check(s.includes("idx_distribution_qualification_created_result"),'qualification health query is indexed');
 check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=17;"),'classifier v17 is active');
+check(s.includes("const HUMAN_GATE_EVIDENCE_VERSION=16;"),'machine-classifier upgrades do not invalidate still-current human gate evidence');
+check(d.includes("const HUMAN_GATE_EVIDENCE_VERSION=16;"),'human gate worker shares the independent evidence-policy version');
 check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
 check(d.includes("currentResearchProof"),'generic Chairman validation preserves exact current-classifier human-gate evidence');
 check(d.includes("current_classifier_exact_route_recovery"),'fresh current-classifier evidence can recover only transiently re-cancelled exact gates');
