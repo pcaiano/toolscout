@@ -109,10 +109,11 @@ test('admin stats internal host preserves legacy Bearer access',async()=>{
       headers:{Authorization:'Bearer secret'}
     }),
     state.env,
-    {}
+    {waitUntil(){}}
   );
   assert.equal(response.status,200);
   assert.equal(response.headers.get('X-ToolScout-Read-Mode'),'read-only');
+  assert.equal(response.headers.get('X-ToolScout-Compatibility-Composition'),'legacy-stats-v1');
   assert.equal(state.writes,0);
 });
 
@@ -131,6 +132,7 @@ test('admin stats direct route matches legacy semantic shape without writes',asy
   assert.equal(directResponse.headers.get('Access-Control-Allow-Origin'),legacyResponse.headers.get('Access-Control-Allow-Origin'));
   assert.equal(directResponse.headers.get('X-ToolScout-Read-Mode'),'read-only');
   assert.equal(directResponse.headers.get('X-ToolScout-Route-Contract'),'v2');
+  assert.equal(directResponse.headers.get('X-ToolScout-Compatibility-Composition'),'legacy-stats-v1');
 
   const direct=await directResponse.json();
   const legacyBody=await legacyResponse.json();
