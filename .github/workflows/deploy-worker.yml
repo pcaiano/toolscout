@@ -43,10 +43,7 @@ jobs:
           node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-machine-discovery-catalog.test.mjs
           node tests/growth-scheduler-ownership.mjs
 
-      - name: Apply canonical public navigation
-        run: node scripts/unify-public-nav.mjs
-
-      - name: Recheck preservation after navigation materialization
+      - name: Final preservation gate before production mutation
         env:
           TOOLSCOUT_V2_BASE_REF: 8660a9154f5716841eea37ef180cc6d365e7fdfb
         run: node scripts/validate-v2-preservation.mjs
