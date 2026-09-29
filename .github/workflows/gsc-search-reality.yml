@@ -1,4 +1,5 @@
 name: ToolScout Google Search Reality
+# Trend telemetry uses finalized Search Console data only.
 
 on:
   push:
