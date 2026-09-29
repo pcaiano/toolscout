@@ -1,15 +1,16 @@
 {
-  "generatedAt": "2026-09-29T12:06:54.815Z",
+  "generatedAt": "2026-09-29T12:15:41.979Z",
   "source": "Google Search Console Search Analytics API - daily trend",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
   "dataState": "final",
   "finalizedThroughDate": "2026-09-26",
   "range": {
-    "startDate": "2026-09-02",
+    "startDate": "2026-08-30",
     "endDate": "2026-09-26",
+    "requestedStartDate": "2026-08-26",
     "requestedEndDate": "2026-09-29",
-    "days": 25
+    "days": 28
   },
   "metrics": [
     "impressions",
@@ -19,6 +20,30 @@
     "searchVisiblePages"
   ],
   "daily": [
+    {
+      "date": "2026-08-30",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": null,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-08-31",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": null,
+      "searchVisiblePages": 0
+    },
+    {
+      "date": "2026-09-01",
+      "clicks": 1,
+      "impressions": 5,
+      "ctr": 20,
+      "position": 8.2,
+      "searchVisiblePages": 2
+    },
     {
       "date": "2026-09-02",
       "clicks": 0,
