@@ -39,6 +39,7 @@ check(s.includes("No public placement URL was returned"),'successful POST transp
 check(s.includes("route?.submissionIntent!==true"),'machine execution requires exact submission intent');
 check(s.includes("QUALIFICATION_FALLBACK_LIMIT=6"),'fallback qualification is bounded');
 check(s.includes("runQualificationWatchdog(env).catch"),'scheduled control plane actually invokes qualification watchdog');
+check(s.includes("overflow_scheduler_heartbeat"),'real scheduled overflow cycles persist an autonomous heartbeat');
 check(s.includes("reconcileDuplicateRouteSurfaces"),'duplicate route surfaces are consolidated before research enqueue');
 check(s.includes("DISTRIBUTION_CLASSIFIER_VERSION=16"),'current classifier version is pinned in the control plane');
 check(s.includes("h.subject_type='surface' AND h.subject_key=d.surface_slug"),'duplicate consolidation preserves open human gates');
