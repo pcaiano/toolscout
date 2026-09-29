@@ -7,6 +7,7 @@ import {TOOLSCOUT_CRONS,scheduleContract} from './runtime-schedule-contract.js';
 import {routeContract,routeOwner} from './runtime-route-contract.js';
 import {handleDistributionPriorityRoute} from './distribution-priority-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
+import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
@@ -1843,6 +1844,7 @@ async function earlyOwnedRoute(request,env){
   const ownership=routeOwner(request.url,{method:request.method});
   let response=null;
   if(ownership.owner==='distribution_priority')response=await handleDistributionPriorityRoute(request,env);
+  else if(ownership.owner==='distribution_orchestrator')response=await handleDistributionOrchestratorRoute(request,env,{});
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
   if(!response)return null;
   const headers=new Headers(response.headers);
