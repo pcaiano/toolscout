@@ -63,12 +63,15 @@ Status: started.
 
 Implemented:
 - migration 0086 owns compute overflow, contact-supply and auth-capability schema/index creation;
-- compute-router no longer executes CREATE TABLE or CREATE INDEX at runtime;
-- runtime now verifies that the migrated control-plane schema exists.
+- migration 0087 owns SEO runtime state schema/index creation;
+- compute-router and SEO runtime no longer execute CREATE TABLE or CREATE INDEX at runtime;
+- runtime now verifies that the migrated schemas exist;
+- scheduler ownership is explicit in runtime-schedule-contract.js and observable at /api/runtime/schedule-contract;
+- distribution, affiliate, catalog and content scheduling has been extracted from the Command Center theme layer into growth-scheduler.js.
 
 Still to do:
 - replace remaining implicit worker-decorator chains with explicit route ownership;
-- centralize scheduler ownership;
+- continue moving remaining scheduled ownership behind the central schedule contract;
 - identify and retire redundant Command Center truth/integrity wrappers after parity verification;
 - separate public serving dependencies from growth/control dependencies where the current chain still couples them.
 
