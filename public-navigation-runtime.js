@@ -48,15 +48,17 @@ async function finish(request,response,env){
   const headers=new Headers(social.headers);
   headers.set('X-ToolScout-Public-Plane','navigation-v1');
   headers.set('X-ToolScout-Route-Contract','v2');
-  headers.set('X-ToolScout-Public-Parity','candidate');
+  headers.set('X-ToolScout-Public-Parity','verified-v1');
   return new Response(social.body,{status:social.status,statusText:social.statusText,headers});
 }
 
 export function publicNavigationHub(pathname){return normalizedHubPath(pathname)}
 
-export async function renderPublicNavigationCandidate(request,env){
+export async function renderPublicNavigationPage(request,env){
   if(request.method!=='GET')return null;
   const hub=normalizedHubPath(new URL(request.url).pathname);
   if(!hub)return null;
   return finish(request,await asset(env,request,hub),env);
 }
+
+export const renderPublicNavigationCandidate=renderPublicNavigationPage;
