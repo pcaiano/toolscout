@@ -59,7 +59,7 @@ Production impact before generated pages are published: none.
 
 ## Phase 3 - Architecture consolidation
 
-Status: started.
+Status: active migration.
 
 Implemented:
 - migration 0086 owns compute overflow, contact-supply and auth-capability schema/index creation;
@@ -67,7 +67,11 @@ Implemented:
 - compute-router and SEO runtime no longer execute CREATE TABLE or CREATE INDEX at runtime;
 - runtime now verifies that the migrated schemas exist;
 - scheduler ownership is explicit in runtime-schedule-contract.js and observable at /api/runtime/schedule-contract;
-- distribution, affiliate, catalog and content scheduling has been extracted from the Command Center theme layer into growth-scheduler.js.
+- distribution, affiliate, catalog and content scheduling has been extracted from the Command Center theme layer into growth-scheduler.js;
+- route ownership is explicit in runtime-route-contract.js and observable at /api/runtime/route-contract;
+- distribution priority, Growth/Distribution control and mission evidence APIs now use early owner dispatch instead of traversing the full decorator chain;
+- the legacy decorator chain is currently 72 edges and CI prevents it from growing;
+- Command Center business-truth GETs are read-only: legacy affiliate schema reconciliation is an explicit admin mutation, not an observability side effect.
 
 Still to do:
 - replace remaining implicit worker-decorator chains with explicit route ownership;
@@ -77,7 +81,13 @@ Still to do:
 
 ## Phase 4 - Command Center simplification
 
-Status: not started in code.
+Status: started.
+
+Implemented so far:
+- Editorial Authority is now part of business truth and the Command Center;
+- observed-demand authority gaps are visible as a priority portfolio;
+- business truth v6 keeps unavailable data unavailable instead of manufacturing zeros;
+- technical execution remains visible but is secondary to business outcomes.
 
 Target headline view:
 - visitors;
