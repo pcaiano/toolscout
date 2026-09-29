@@ -16,6 +16,7 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/distribution/authority/close-loop',{method:'POST'}).owner,'growth_runtime_closed_loop');
   assert.ok(routeContract().earlyDispatchOwners.includes('growth_runtime_closed_loop'));
   assert.equal(routeOwner('/api/growth/supervisor/public',{method:'GET'}).owner,'distribution_orchestrator');
+  assert.equal(routeOwner('/news/zapier-next-gen-zaps-mcp',{method:'GET'}).owner,'public_editorial_site');
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
@@ -35,6 +36,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
   assert.match(src,/ownership\.owner==='mission_integrity'/);
   assert.match(src,/ownership\.owner==='growth_runtime_closed_loop'/);
+  assert.match(src,/ownership\.owner==='public_editorial_site'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
