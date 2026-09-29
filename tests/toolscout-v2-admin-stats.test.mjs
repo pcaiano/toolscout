@@ -4,6 +4,15 @@ import legacy from '../operational-truth-reconciliation-worker.js';
 import {handleAdminStatsRoute} from '../admin-stats-runtime.js';
 import {routeOwner} from '../runtime-route-contract.js';
 
+// Cloudflare Workers exposes the Cache API globally. Node's test runner does
+// not, so provide a no-hit/no-op cache for legacy parity only.
+globalThis.caches={
+  default:{
+    async match(){return undefined},
+    async put(){return undefined}
+  }
+};
+
 function fakeEnv(){
   let writes=0;
   const writeSql=[];
