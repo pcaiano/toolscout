@@ -120,3 +120,26 @@ Branch: architecture/toolscout-2.0
 Pull request: #168
 
 The PR remains draft until targeted CI passes and the migration/deployment order is safe.
+
+
+## Phase 2 - Runtime consolidation continuation
+
+Status: active on branch architecture/toolscout-2.0-phase-2.
+
+Implemented in this phase:
+- migration 0089 moves Growth Planner state tables/indexes out of runtime;
+- authority closed-loop POST action is an explicit early-dispatch route;
+- runtime architecture audit measures declared direct-route coverage and rejects runtime DDL in direct 2.0 owners;
+- software news (/news/*) has a dedicated public editorial plane that preserves SEO transformation, canonical handling and ToolScout social footer while bypassing the legacy control chain;
+- Command Center page, Business Truth GET and Simplified Health GET are explicit read-only route owners and bypass the legacy chain;
+- schema reconciliation remains on the legacy/admin path until a compatibility-safe idempotent migration is available;
+- priority editorial pages are materialized in a bounded GSC-observed portfolio rather than regenerating the entire public surface.
+
+Deliberately not migrated yet:
+- /go/* affiliate redirects and commercial tracking;
+- authority closed-loop health enrichment;
+- remaining analytics/statistics augmentation routes;
+- dynamic tool/ranking public pages;
+- agent protocol routes.
+
+These remain on legacy fallback until parity can be demonstrated.
