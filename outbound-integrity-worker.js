@@ -239,3 +239,5 @@ export default {
   },
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
+
+export {augmentHealth as augmentOutboundIntegrityHealth};
