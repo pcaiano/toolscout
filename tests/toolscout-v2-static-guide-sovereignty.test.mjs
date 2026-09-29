@@ -12,7 +12,7 @@ const intent={
   weights:{seo:1,research:0.8}
 };
 const tools=[
-  {slug:'alpha-seo',name:'Alpha SEO',category:'seo',description:'SEO and keyword research platform',features:['seo','keyword research'],bestFor:['agencies'],scores:{seo:9,research:8},sourceUrl:'https://alpha.example.com',lastVerified:'2026-09-29'},
+  {slug:'alpha-seo',name:'Alpha SEO',category:'seo',description:'SEO and keyword research platform',features:['seo','keyword research'],bestFor:['agencies'],scores:{seo:9,research:8},sourceUrl:'https://alpha.example.com',lastVerified:'2026-09-29',provenance:{mode:'runtime_trusted_catalog'}},
   {slug:'beta-seo',name:'Beta SEO',category:'seo',description:'SEO keyword research software',features:['seo','keyword research'],bestFor:['agencies'],scores:{seo:8,research:8},sourceUrl:'https://beta.example.com',lastVerified:'2026-09-29'}
 ];
 
