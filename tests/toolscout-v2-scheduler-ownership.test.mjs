@@ -17,7 +17,7 @@ test('every scheduled mission has one named owner',()=>{
 
 test('Command Center theme no longer owns growth engine scheduling',()=>{
   const cc=read('command-center-light-theme-worker.js');
-  assert.match(cc,/runGrowthScheduler/);
+  assert.doesNotMatch(cc,/runGrowthScheduler/);
   assert.doesNotMatch(cc,/runDistributionNetworkCycle/);
   assert.doesNotMatch(cc,/runAuditedAffiliateCoverageCycle/);
   assert.doesNotMatch(cc,/rebalanceDistributionPriorities/);
@@ -25,7 +25,12 @@ test('Command Center theme no longer owns growth engine scheduling',()=>{
   assert.doesNotMatch(cc,/missionNeedsRecovery/);
 });
 
-test('growth scheduler owns the extracted operational cycles',()=>{
+test('compute router dispatches growth scheduling while growth scheduler owns the extracted operational cycles',()=>{
+  const compute=read('compute-router-worker.js');
+  assert.match(compute,/runGrowthScheduler/);
+  assert.match(compute,/trigger===TOOLSCOUT_CRONS\.hourly\|\|trigger===TOOLSCOUT_CRONS\.daily/);
+  assert.equal(scheduleContract().dispatcher,'compute_router');
+
   const scheduler=read('growth-scheduler.js');
   assert.match(scheduler,/cycleOwner:'growth_scheduler'/);
   assert.match(scheduler,/runDistributionNetworkCycle/);
