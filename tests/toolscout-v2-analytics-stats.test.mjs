@@ -41,7 +41,7 @@ function fakeEnv(){
 
 test('analytics stats has a direct Phase 4 owner',()=>{
   assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
-  assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'command_center');
+  assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
 });
 
 test('analytics stats direct route preserves session protection',async()=>{
