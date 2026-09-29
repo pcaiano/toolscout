@@ -24,7 +24,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'analytics_control',owner:'command_center',plane:'signals',methods:['GET','POST'],prefixes:['/analytics','/api/stats','/api/traffic-integrity-health','/api/command-center-']},
   {id:'public_editorial_news',owner:'public_editorial_site',plane:'public_site',methods:['GET'],prefixes:['/news/']},
   {id:'public_editorial_trends',owner:'public_editorial_site',plane:'public_site',methods:['GET'],exact:['/software-trends-index','/software-trends-index/','/software-trends-index.html','/software-trends-index.json']},
-  {id:'public_decision_pages',owner:'public_decision',plane:'public_site',methods:['GET'],patterns:['^/tools/[a-z0-9][a-z0-9-]*(?:\\.html)?/?
+  {id:'public_decision_pages',owner:'public_decision',plane:'public_site',methods:['GET'],patterns:['^/tools/[a-z0-9][a-z0-9-]*(?:\\.html)?/?$','^/best-[a-z0-9-]+(?:\\.html)?/?$']},
   {id:'public_navigation_misc',owner:'public_site',plane:'public_site',methods:['GET'],exact:['/tools','/tools/'],prefixes:['/guides','/compare','/blog/','/categories','/crm-tools','/seo-tools']},
   {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
   {id:'agent_recommendation_protocol',owner:'agent_protocol_core',plane:'public_site',methods:['GET','POST','OPTIONS'],exact:['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']},
