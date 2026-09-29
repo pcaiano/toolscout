@@ -1,7 +1,6 @@
 import base from './command-center-final-integrity-worker.js';
 import resilientFallback from './command-center-resilient-worker.js';
 import {publicMergedTools,publicRuntimeToolResponse,publicQualityEnhancedToolResponse,publicMergedSitemap,publicRuntimeRankingResponse} from './catalog-autonomy-worker.js';
-import {runGrowthScheduler} from './growth-scheduler.js';
 
 const STATS_CACHE_TTL_SECONDS = 30;
 
@@ -665,10 +664,6 @@ export default {
     return finalResponse;
   },
   async scheduled(event, env, ctx) {
-    return runGrowthScheduler(event,env,ctx,{
-      delegate:(scheduledEvent,scheduledEnv,scheduledCtx)=>typeof base.scheduled==='function'
-        ?base.scheduled(scheduledEvent,scheduledEnv,scheduledCtx)
-        :undefined
-    });
+    return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
   }
 };
