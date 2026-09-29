@@ -32,16 +32,17 @@ jobs:
 
       - name: Validate ToolScout 2.0 runtime
         env:
-          TOOLSCOUT_V2_BASE_REF: 3464fb8424b5b990001c7a8b02e445e95de2efcf
+          TOOLSCOUT_V2_BASE_REF: e3c87181a5b31061ca76c91de86acb16ff8eafa0
         run: |
           node scripts/audit-runtime-architecture.mjs
           node scripts/validate-v2-preservation.mjs
-          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-machine-discovery-catalog.test.mjs tests/toolscout-v2-analytics-chairman.test.mjs tests/toolscout-v2-analytics-stats.test.mjs tests/toolscout-v2-analytics-human-actions.test.mjs tests/toolscout-v2-public-decision-parity.test.mjs
+          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-machine-discovery-catalog.test.mjs tests/toolscout-v2-analytics-chairman.test.mjs tests/toolscout-v2-analytics-stats.test.mjs tests/toolscout-v2-analytics-human-actions.test.mjs tests/toolscout-v2-public-decision-parity.test.mjs tests/toolscout-v2-public-navigation-parity.test.mjs
           node tests/growth-scheduler-ownership.mjs
+          node scripts/verify-public-navigation-shadow.mjs
 
       - name: Final preservation gate before production mutation
         env:
-          TOOLSCOUT_V2_BASE_REF: 3464fb8424b5b990001c7a8b02e445e95de2efcf
+          TOOLSCOUT_V2_BASE_REF: e3c87181a5b31061ca76c91de86acb16ff8eafa0
         run: node scripts/validate-v2-preservation.mjs
 
       - name: Apply D1 migrations

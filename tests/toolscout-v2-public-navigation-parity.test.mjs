@@ -60,13 +60,13 @@ test('navigation candidate recognizes only audited hubs',()=>{
 });
 
 for(const [pathname,file] of CASES){
-  test(`navigation candidate preserves ${pathname}`,async()=>{
+  test(`verified navigation preserves ${pathname}`,async()=>{
     const before=fs.readFileSync(path.join(ROOT,file),'utf8');
     const response=await renderPublicNavigationCandidate(new Request('https://trytoolscout.org'+pathname),env());
     assert.ok(response instanceof Response);
     assert.equal(response.status,200);
     assert.equal(response.headers.get('X-ToolScout-Public-Plane'),'navigation-v1');
-    assert.equal(response.headers.get('X-ToolScout-Public-Parity'),'candidate');
+    assert.equal(response.headers.get('X-ToolScout-Public-Parity'),'verified-v1');
     const after=await response.text();
     const parity=comparePublicParity(before,after);
     assert.equal(parity.ok,true,JSON.stringify(parity.errors));

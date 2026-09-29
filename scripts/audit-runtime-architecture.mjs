@@ -6,7 +6,7 @@ const ROOT=process.cwd();
 const ENTRY='compute-router-worker.js';
 const MAX_LEGACY_EDGES=72;
 const MIN_DIRECT_ROUTE_COVERAGE_PCT=85;
-const ALLOWED_LEGACY_GROUPS=new Set(['analytics_control','public_navigation_misc','affiliate_redirect']);
+const ALLOWED_LEGACY_GROUPS=new Set(['analytics_control','public_blog','affiliate_redirect']);
 
 function baseImport(file){
   const full=path.join(ROOT,file);
@@ -49,7 +49,8 @@ const directOwnerFiles={
   analytics_chairman:'analytics-chairman-runtime.js',
   analytics_stats:'command-center-resilient-worker.js',
   analytics_human_actions:'analytics-human-actions-runtime.js',
-  public_decision:'public-decision-runtime.js'
+  public_decision:'public-decision-runtime.js',
+  public_navigation:'public-navigation-runtime.js'
 };
 const directOwnerDdlFiles=[...new Set(EARLY_DISPATCH_OWNERS.map(owner=>directOwnerFiles[owner]).filter(Boolean).filter(file=>runtimeDdlFiles.includes(file)))];
 const directGroups=ROUTE_GROUPS.filter(group=>group.owner==='compute_router'||EARLY_DISPATCH_OWNERS.includes(group.owner));

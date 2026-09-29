@@ -130,7 +130,8 @@ if(routeContractLive.ok){
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
     if(owner('public_decision_pages')!=='public_decision')errors.push({code:'public_decision_owner_not_live'});
-    if(owner('public_navigation_misc')!=='public_site')errors.push({code:'public_navigation_legacy_owner_changed'});
+    if(owner('public_navigation_hubs')!=='public_navigation')errors.push({code:'public_navigation_owner_not_live'});
+    if(owner('public_blog')!=='public_site')errors.push({code:'public_blog_legacy_owner_changed'});
   }catch{}
 }
 
@@ -180,6 +181,63 @@ for(let i=0;i<decisionPaths.length;i+=12){
   }
 }
 
+const navigationHubs=[
+  {pathname:'/tools'},
+  {pathname:'/guides'},
+  {pathname:'/compare',query:'?a=airtable&b=semrush&source=phase13-smoke'},
+  {pathname:'/categories'},
+  {pathname:'/crm-tools'},
+  {pathname:'/seo-tools'}
+];
+
+for(const hub of navigationHubs){
+  const target=hub.pathname+(hub.query||'');
+  const live=await fetchText(target,{
+    headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}
+  });
+  if(!live.ok){
+    errors.push({code:'public_navigation_hub_unavailable',pathname:hub.pathname,status:live.status});
+    continue;
+  }
+  if(live.headers.get('x-toolscout-route-owner')!=='public_navigation'){
+    errors.push({code:'public_navigation_wrong_route_owner',pathname:hub.pathname,owner:live.headers.get('x-toolscout-route-owner')});
+  }
+  if(live.headers.get('x-toolscout-public-plane')!=='navigation-v1'){
+    errors.push({code:'public_navigation_plane_not_live',pathname:hub.pathname});
+  }
+  if(live.headers.get('x-toolscout-public-parity')!=='verified-v1'){
+    errors.push({code:'public_navigation_verified_parity_missing',pathname:hub.pathname,parity:live.headers.get('x-toolscout-public-parity')});
+  }
+  const expected=canonicalPublicUrl(hub.pathname);
+  const actual=canonical(live.text);
+  if(actual!==expected){
+    errors.push({code:'public_navigation_canonical_mismatch',pathname:hub.pathname,expected,actual});
+  }
+  if(!/href=["']\/privacy["']/.test(live.text)){
+    errors.push({code:'public_navigation_privacy_link_missing',pathname:hub.pathname});
+  }
+  if(!/href=["']\/analytics-consent\?choice=/.test(live.text)){
+    errors.push({code:'public_navigation_consent_link_missing',pathname:hub.pathname});
+  }
+  if(hub.pathname==='/compare'){
+    for(const [code,re] of [
+      ['compare_query_params_missing',/URLSearchParams\(location\.search\)/],
+      ['compare_events_missing',/\/api\/events/],
+      ['compare_catalog_missing',/data\/tools\.json/],
+      ['compare_assets_missing',/data\/tool-assets\.json/],
+      ['compare_commercial_cta_missing',/\/go\//],
+      ['compare_history_state_missing',/history\.replaceState/]
+    ])if(!re.test(live.text))errors.push({code,pathname:hub.pathname});
+  }
+  if(hub.pathname==='/tools'){
+    for(const [code,re] of [
+      ['tools_catalog_missing',/\/data\/tools\.json/],
+      ['tools_pending_affiliate_missing',/\/data\/pending-affiliate-tools\.json/],
+      ['tools_assets_missing',/\/data\/tool-assets\.json/]
+    ])if(!re.test(live.text))errors.push({code,pathname:hub.pathname});
+  }
+}
+
 // Protect the commercial redirect plane without generating a real click.
 // The health-check header is explicitly synthetic in trackedRedirect.
 const affiliate=readJson('data/affiliate.json',{});
@@ -205,6 +263,6 @@ else{
   }
 }
 
-const result={ok:errors.length===0,checkedAt:new Date().toISOString(),baseUrl:BASE,sitemapUrls:expectedSitemap.size,criticalPages:paths.length,decisionPages:decisionPaths.length,errors,warnings};
+const result={ok:errors.length===0,checkedAt:new Date().toISOString(),baseUrl:BASE,sitemapUrls:expectedSitemap.size,criticalPages:paths.length,decisionPages:decisionPaths.length,navigationHubs:navigationHubs.length,errors,warnings};
 console.log(JSON.stringify(result,null,2));
 if(errors.length)process.exitCode=1;
