@@ -46,6 +46,8 @@ check(s.includes("overflow_scheduler_heartbeat"),'real scheduled overflow cycles
 check(s.includes("nonSubmissionResearchNoise"),'obvious navigation and non-submission auth routes are pruned before Render research');
 check(s.includes("non_submission_research_noise_pruned"),'research-noise pruning is observable in the canonical event ledger');
 check(s.includes("reconcileDuplicateRouteSurfaces"),'duplicate route surfaces are consolidated before research enqueue');
+check(s.includes("reconcileGenericDomainDuplicates"),'generic root/login surfaces collapse behind a specific active same-domain submission surface');
+check(s.includes("generic_domain_route_duplicates_consolidated"),'same-domain route consolidation is observable');
 check(s.includes("DISTRIBUTION_CLASSIFIER_VERSION=16"),'current classifier version is pinned in the control plane');
 check(s.includes("h.subject_type='surface' AND h.subject_key=d.surface_slug"),'duplicate consolidation preserves open human gates');
 check(s.includes("kind==='json_api'"),'canonical validator accepts safe JSON API candidates');
