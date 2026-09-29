@@ -129,7 +129,7 @@ function business(){
  let detail='Human Acquisition v4 is always on but resource-bounded: 60% existing search demand, 25% authority/vendor network, 10% AI/AEO discovery and 5% Growth R&D. GA4 is canonical traffic; strict-human evidence proves attribution quality. Activity itself is not success.';
  if(Number(c?.vendorReported?.clickFloor)>0)headline='Affiliate networks confirm commercial click activity. First-party attribution is shown separately so it cannot disappear behind strict filters.';
  if(Number(g.strictHumans24h)>0)headline='Verified humans are arriving. Conversion is now the next proof point.';
- if(Number(g.verifiedOutbound24h)>0)headline='Verified humans are reaching vendors. Monetization is now the next proof point.';
+ if(Number(g.strictOutbound24h??g.verifiedOutbound24h)>0)headline='Strict or user-activated outbound is reaching vendors. Monetization is now the next proof point.';
  if(Number(g.monetizedOutbound24h)>0)headline='Monetized outbound is active. Scale only sources that preserve verified human quality.';
  if(Number(r.confirmedRevenue||0)>0)headline='Confirmed revenue is now present. Focus on repeatable acquisition and monetized conversion.';
  document.getElementById('businessMeta').textContent='Business truth '+dt(t.generatedAt);
@@ -137,11 +137,12 @@ function business(){
   '<div class="headline"><b>'+esc(headline)+'</b><span>'+esc(detail)+'</span></div>'+
   '<div class="metrics">'+
    metric('GA4 sessions - 24h',a.status==='connected'?n(ga.last24Hours):'Unavailable',a.status==='connected'?n(ga.monthToDate)+' MTD · canonical traffic':'GA4 source unavailable')+
-   metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · quality proof')+
-   metric('Verified outbound - 24h',n(g.verifiedOutbound24h),n(g.verifiedOutbound7d)+' / 7d · strict first-party')+
-   metric('Tracked social affiliate redirects - 24h',n(c?.socialAffiliateRedirects?.clicks24h),n(c?.socialAffiliateRedirects?.clicks7d)+' / 7d · first-party commercial tracking')+
-   metric('Affiliate-network click floor',n(c?.vendorReported?.clickFloor),(c?.vendorReported?.accounts?.length?n(c.vendorReported.accounts.length)+' PartnerStack account(s) tracked':'No external click evidence'))+
-   metric('Monetized outbound - 24h',n(g.monetizedOutbound24h),n(g.monetizedOutbound7d)+' / 7d · strict first-party')+
+   metric('Strict attributed humans - 24h',n(g.strictHumans24h),n(g.strictHumans7d)+' / 7d · positive human evidence')+
+   metric('Affiliate redirects - 24h',n(c?.firstPartyRedirects?.clicks24h),n(c?.firstPartyRedirects?.clicks7d)+' / 7d · all first-party affiliate /go/ traffic')+
+   metric('Browser-qualified outbound - 24h',n(c?.browserQualified?.clicks24h),n(c?.browserQualified?.clicks7d)+' / 7d · established session + same-origin browser navigation')+
+   metric('Strict / user-activated outbound - 24h',n(c?.strictVerified?.clicks24h),n(c?.strictVerified?.clicks7d)+' / 7d · strongest first-party outbound proof')+
+   metric('PartnerStack network clicks',n(c?.vendorReported?.clickFloor),(c?.vendorReported?.accounts?.length?n(c.vendorReported.accounts.length)+' account(s) · cumulative external counter':'No external click evidence'))+
+   metric('Strict monetized outbound - 24h',n(c?.strictVerified?.monetized24h),n(c?.strictVerified?.monetized7d)+' / 7d · subset of strict outbound')+
    metric('Backlinks',n(b.seRankingBacklinks??b.observedBacklinks??b.verifiedBacklinks),b.seRankingObservedAt?'SE Ranking · snapshot '+dt(b.seRankingObservedAt):human(b.backlinkCountSource||'External backlink truth'))+
    metric('Referring domains (unique)',n(b.seRankingReferringDomains??b.referringDomains??b.verifiedReferringDomains),(b.seRankingDofollowReferringDomains!=null?n(b.seRankingDofollowReferringDomains)+' dofollow · ':'')+human(b.referringDomainSource||'External authority source'))+
    metric('Domain authority',b.domainAuthority==null?'Unavailable':n(b.domainAuthority),b.domainAuthoritySource||'External authority source')+
@@ -157,7 +158,9 @@ function business(){
    row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
    row('PartnerStack accounts',n(c?.vendorReported?.accounts?.length)+' reconciled',(c?.vendorReported?.accounts||[]).map(x=>x.accountEmail+' · '+human(x.marketplaceState||x.status)).join(' | ')||'No account evidence')+
    row('PartnerStack current programmes',n((c?.vendorReported?.evidence||[]).filter(x=>String(x.programmeStatus||'').toLowerCase()==='active').length)+' active',(c?.vendorReported?.evidence||[]).map(x=>x.toolSlug+' '+n(x.reportedClicksTotal)+' clicks · '+(x.accountEmail||'account unknown')).join(' | ')||'No current programme evidence')+
-   row('Commercial click truth','Sources kept separate','Verified first-party, tracked social redirects and affiliate-network counters can overlap and are never summed.')+
+   row('Affiliate redirect classification · 30d',n(c?.firstPartyRedirects?.clicks30d)+' total',n(c?.firstPartyRedirects?.likelyHuman30d)+' likely-browser · '+n(c?.firstPartyRedirects?.knownBot30d)+' known bot · '+n(c?.firstPartyRedirects?.owner30d)+' owner · '+n(c?.firstPartyRedirects?.unverified30d)+' unverified')+
+   row('Metric rule','Unknown stays unknown','Unverified traffic is never converted into bot traffic. Network clicks, redirect requests, browser-qualified navigation and strict evidence are separate layers and are never summed.')+
+   row('Commercial click truth','Layered evidence','PartnerStack is external network evidence. First-party layers explain attribution quality without overwriting the network count.')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
 }
