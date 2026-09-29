@@ -12,6 +12,7 @@ import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-w
 import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
 import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
+import {handleAuthorityHealthRoute} from './authority-health-runtime.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 
@@ -1855,6 +1856,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='authority_acquisition')response=await handleAuthorityAcquisitionRoute(request,env);
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
   else if(ownership.owner==='growth_runtime_closed_loop')response=await handleGrowthClosedLoopRoute(request,env,ctx);
+  else if(ownership.owner==='authority_health')response=await handleAuthorityHealthRoute(request,env);
   else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   if(!response)return null;
