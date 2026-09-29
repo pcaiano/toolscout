@@ -59,7 +59,7 @@ async function accessToken() {
 const token = await accessToken();
 const endpoint = `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(property)}/searchAnalytics/query`;
 
-async function querySearchConsole(dimensions) {
+async function querySearchConsole(dimensions, dataState = 'final') {
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -71,7 +71,7 @@ async function querySearchConsole(dimensions) {
       endDate,
       dimensions,
       type: 'web',
-      dataState: 'all',
+      dataState,
       rowLimit: 25000
     })
   });
@@ -113,20 +113,27 @@ for (const row of pageDateJson.rows || []) {
 }
 
 const rawByDate = new Map((dateJson.rows || []).map(row => [String(row.keys?.[0] || ''), row]));
+const returnedDates = [...rawByDate.keys()].filter(Boolean).sort();
+const finalizedThroughDate = returnedDates.at(-1) || null;
 const daily = [];
-for (let index = 0; index < lookbackDays; index += 1) {
-  const date = addDays(startDate, index);
-  const row = rawByDate.get(date);
-  const clicks = Number(row?.clicks || 0);
-  const impressions = Number(row?.impressions || 0);
-  daily.push({
-    date,
-    clicks,
-    impressions,
-    ctr: impressions ? Number((clicks / impressions * 100).toFixed(4)) : 0,
-    position: impressions > 0 && row && Number.isFinite(Number(row.position)) ? Number(Number(row.position).toFixed(4)) : null,
-    searchVisiblePages: visiblePagesByDate.get(date)?.size || 0
-  });
+if (finalizedThroughDate) {
+  const finalizedDays = Math.max(0, Math.floor(
+    (Date.parse(finalizedThroughDate + 'T12:00:00Z') - Date.parse(startDate + 'T12:00:00Z')) / 86400000
+  ) + 1);
+  for (let index = 0; index < finalizedDays; index += 1) {
+    const date = addDays(startDate, index);
+    const row = rawByDate.get(date);
+    const clicks = Number(row?.clicks || 0);
+    const impressions = Number(row?.impressions || 0);
+    daily.push({
+      date,
+      clicks,
+      impressions,
+      ctr: impressions ? Number((clicks / impressions * 100).toFixed(4)) : 0,
+      position: impressions > 0 && row && Number.isFinite(Number(row.position)) ? Number(Number(row.position).toFixed(4)) : null,
+      searchVisiblePages: visiblePagesByDate.get(date)?.size || 0
+    });
+  }
 }
 
 const report = {
@@ -134,14 +141,16 @@ const report = {
   source: 'Google Search Console Search Analytics API - daily trend',
   property,
   authorizationScope: 'https://www.googleapis.com/auth/webmasters.readonly',
-  dataState: 'all',
-  range: { startDate, endDate, days: lookbackDays },
+  dataState: 'final',
+  finalizedThroughDate,
+  range: { startDate, endDate: finalizedThroughDate, requestedEndDate: endDate, days: daily.length },
   metrics: ['impressions', 'clicks', 'position', 'ctr', 'searchVisiblePages'],
   daily,
   limitations: [
     'Search Analytics is the source of truth for Google search visibility, but it does not guarantee every row.',
     'Search-visible pages are pages returned by Search Analytics for a date, not a count of all URLs in the Google index.',
-    'Average position is a Search Console aggregate. Lower values indicate stronger average ranking.'
+    'Average position is a Search Console aggregate. Lower values indicate stronger average ranking.',
+    'Preliminary fresh-data days are intentionally excluded until Google marks them final so incomplete ingestion cannot look like a traffic or ranking collapse.'
   ]
 };
 
@@ -154,7 +163,8 @@ console.log(JSON.stringify({
   generatedAt: report.generatedAt,
   property,
   startDate,
-  endDate,
+  endDate: finalizedThroughDate,
+  requestedEndDate: endDate,
   days: daily.length,
   impressions: daily.reduce((sum, row) => sum + row.impressions, 0),
   clicks: daily.reduce((sum, row) => sum + row.clicks, 0),
