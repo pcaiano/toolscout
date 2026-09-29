@@ -29,6 +29,11 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
   assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
   assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/best-seo-tools-for-agencies',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/tools/airtable',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/tools/semrush',{method:'GET'}).owner,'public_decision_canary');
+  assert.equal(routeOwner('/tools/klaviyo',{method:'GET'}).owner,'public_site');
+  assert.equal(routeOwner('/best-project-management-tools',{method:'GET'}).owner,'public_site');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
@@ -53,6 +58,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='analytics_chairman'/);
   assert.match(src,/ownership\.owner==='analytics_stats'/);
   assert.match(src,/ownership\.owner==='analytics_human_actions'/);
+  assert.match(src,/ownership\.owner==='public_decision_canary'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
