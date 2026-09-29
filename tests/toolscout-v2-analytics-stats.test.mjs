@@ -19,7 +19,7 @@ function fakeEnv(){
       return {
         bind(){return this},
         async first(){
-          if(text.includes("sqlite_master")&&text.includes("traffic_integrity_meta"))return {n:2};
+          if(text.includes("sqlite_master"))return {n:2};
           return null;
         },
         async all(){return {results:[]}},
