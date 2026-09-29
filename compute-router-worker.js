@@ -857,6 +857,44 @@ function encodedAdapterBody(contentType,payload){
   if(type==='application/x-www-form-urlencoded')return new URLSearchParams(Object.entries(payload||{}).map(([k,v])=>[k,Array.isArray(v)?v.join(','):String(v??'')])).toString();
   return JSON.stringify(payload||{});
 }
+async function reconcileFalseSubmissionRouteVerifications(env){
+  const rowsToFix=await env.DB.prepare(`SELECT DISTINCT o.surface_slug,ds.submission_id,ds.response_url,a.source_url,a.endpoint,
+      CASE WHEN EXISTS (
+        SELECT 1 FROM distribution_events e
+        WHERE e.surface_slug=o.surface_slug AND e.event_type='external_publication_verification' AND e.status='verified'
+          AND e.destination_url=ds.response_url AND e.observed_at>=datetime('now','start of day')
+      ) THEN 1 ELSE 0 END verified_today
+    FROM distribution_opportunities o
+    JOIN distribution_submissions ds ON ds.surface_slug=o.surface_slug
+    JOIN distribution_auto_adapters a ON a.surface_slug=o.surface_slug
+    WHERE o.status='verified'
+      AND ds.asset_url='https://trytoolscout.org/'
+      AND ds.submission_type='auto_discovered_json'
+      AND ds.response_url IS NOT NULL
+      AND (ds.response_url=a.source_url OR ds.response_url=a.endpoint OR ds.response_url=ds.action_url)
+    LIMIT 50`).all().catch(()=>({results:[]}));
+  const items=rows(rowsToFix);
+  let corrected=0,verifiedToday=0;
+  for(const item of items){
+    const detail='Verification truth corrected: the previous HTTP 200 target was the submission form/POST route, not independent public placement evidence.';
+    await env.DB.batch([
+      env.DB.prepare(`UPDATE distribution_opportunities SET status='submitted',live_url=CASE WHEN live_url IN (?,?,?) THEN NULL ELSE live_url END,next_action=?,updated_at=datetime('now') WHERE surface_slug=? AND status='verified'`)
+        .bind(item.response_url,item.source_url,item.endpoint,detail,item.surface_slug),
+      env.DB.prepare(`UPDATE distribution_submissions SET response_url=NULL,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(item.submission_id),
+      env.DB.prepare(`UPDATE distribution_auto_adapters SET public_url=CASE WHEN public_url IN (source_url,endpoint,?) THEN NULL ELSE public_url END,verification_endpoint=CASE WHEN verification_endpoint IN (source_url,endpoint,?) THEN NULL ELSE verification_endpoint END,updated_at=datetime('now') WHERE surface_slug=?`)
+        .bind(item.response_url,item.response_url,item.surface_slug),
+      env.DB.prepare(`UPDATE distribution_events SET status='invalidated',detail=?,updated_at=COALESCE(updated_at,created_at) WHERE surface_slug=? AND event_type='external_publication_verification' AND status='verified' AND destination_url=?`)
+        .bind(detail,item.surface_slug,item.response_url)
+    ]).catch(()=>{});
+    corrected++;verifiedToday+=num(item.verified_today);
+  }
+  if(verifiedToday>0){
+    await env.DB.prepare(`UPDATE compute_overflow_funnel_metrics SET placements_verified_today=MAX(0,placements_verified_today-?),updated_at=datetime('now') WHERE id='global' AND metric_day=date('now')`).bind(verifiedToday).run().catch(()=>{});
+  }
+  if(corrected)await event(env,'false_submission_route_verification_reconciled','completed',`Corrected ${corrected} false placement verification(s); ${verifiedToday} belonged to today's funnel metric.`,{corrected,verifiedToday}).catch(()=>{});
+  return{corrected,verifiedToday};
+}
+
 async function enqueueAuthorizedExecution(env){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE distribution_submissions
@@ -909,6 +947,14 @@ async function enqueueAuthorizedExecution(env){
           AND queued.asset_url='https://trytoolscout.org/'
           AND queued.submission_type='auto_discovered_json'
           AND queued.status IN ('queued_external','submitted','pending_review','verified')
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM distribution_submissions endpoint_success
+        WHERE endpoint_success.asset_url='https://trytoolscout.org/'
+          AND endpoint_success.submission_type='auto_discovered_json'
+          AND endpoint_success.action_url=a.endpoint
+          AND endpoint_success.status IN ('submitted','pending_review','verified')
+          AND endpoint_success.surface_slug<>a.surface_slug
       )
     ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
     LIMIT ?`).bind(submitLimit).all().catch(()=>({results:[]}));
@@ -1226,6 +1272,7 @@ async function runOverflowTick(env){
   await ensureHotIndexes(env);
   const rejectedAdapterRecovery=await isolatedOverflowStage(env,'external_submission_recovery',()=>reconcileRejectedExternalAdapters(env),{checked:0,recovered:0});
   const duplicateRouteConsolidation=await isolatedOverflowStage(env,'duplicate_route_consolidation',()=>reconcileDuplicateRouteSurfaces(env),0);
+  const verificationTruthRecovery=await isolatedOverflowStage(env,'verification_truth_recovery',()=>reconcileFalseSubmissionRouteVerifications(env),{corrected:0,verifiedToday:0});
   const foldedContactResearch=await isolatedOverflowStage(env,'contact_route_fold',()=>reconcileRedundantContactRouteJobs(env),0);
   const unreachableCompaction=await isolatedOverflowStage(env,'source_unreachable_compaction',()=>reconcileSourceUnreachableBacklog(env),0);
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
@@ -1252,7 +1299,7 @@ async function runOverflowTick(env){
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,
+    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,verificationTruthRecovery,
     batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
@@ -1265,6 +1312,18 @@ async function batchPayload(env,batchId){
   const jobs=await env.DB.prepare(`SELECT job_id,job_type,subject_type,subject_key,priority_score,payload_json FROM compute_overflow_jobs WHERE batch_id=? AND status='leased' ORDER BY priority_score DESC,created_at ASC`).bind(batchId).all();
   await env.DB.prepare(`UPDATE compute_overflow_batches SET status='running',fetched_at=COALESCE(fetched_at,datetime('now')),updated_at=datetime('now') WHERE batch_id=? AND status='dispatched'`).bind(batchId).run();
   return{batch,jobs:rows(jobs)};
+}
+function sameNormalizedUrl(a,b){
+  try{
+    const x=new URL(String(a||'')),y=new URL(String(b||''));
+    x.hash='';y.hash='';
+    return x.href===y.href;
+  }catch{return false}
+}
+function isSubmissionFormEvidence(value,payload){
+  if(!isHttp(value))return true;
+  if(sameNormalizedUrl(value,payload?.endpoint)||sameNormalizedUrl(value,payload?.sourceUrl))return true;
+  return false;
 }
 function sameHostRoute(source,target){
   try{
@@ -1499,9 +1558,10 @@ async function applyAuthorizedActionResult(env,job,result){
   const httpStatus=num(result?.httpStatus);
   const accepted=result?.ok===true&&httpStatus>=200&&httpStatus<300;
   if(accepted){
+    const responseEvidence=safeSameHostEvidence(payload.endpoint,result?.evidenceUrl);
     const finalEvidence=safeSameHostEvidence(payload.endpoint,result?.finalUrl);
-    const finalIsEndpoint=String(finalEvidence||'')===String(payload.endpoint||'');
-    const evidence=safeSameHostEvidence(payload.endpoint,result?.evidenceUrl)||(!finalIsEndpoint?finalEvidence:null)||payload.verificationEndpoint||payload.publicUrl||null;
+    const configuredEvidence=[payload.verificationEndpoint,payload.publicUrl].map(x=>safeSameHostEvidence(payload.endpoint,x)).find(x=>x&&!isSubmissionFormEvidence(x,payload))||null;
+    const evidence=[responseEvidence,finalEvidence].find(x=>x&&!isSubmissionFormEvidence(x,payload))||configuredEvidence||null;
     await env.DB.prepare(`UPDATE distribution_submissions SET status='submitted',attempts=attempts+1,last_attempt_at=datetime('now'),submitted_at=COALESCE(submitted_at,datetime('now')),response_url=?,error=NULL,updated_at=datetime('now') WHERE submission_id=?`).bind(evidence,submissionId).run();
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='submitted',next_action=?,updated_at=datetime('now') WHERE surface_slug=? AND status NOT IN ('verified','live')`)
       .bind(evidence?'External execution plane completed an authorized machine-safe submission. Verify the returned public evidence before placement is counted.':'External execution plane completed an authorized machine-safe submission. No public placement URL was returned, so independent verification is still required before this counts as a placement.',slug).run();
@@ -1544,12 +1604,13 @@ async function applyAuthorizedVerificationResult(env,job,result){
   let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
   const slug=job.subject_key||payload.surfaceSlug,submissionId=payload.submissionId,target=payload.targetUrl;
   if(!slug||!submissionId||!isHttp(target))return{applied:false,reason:'missing_verification_identity'};
-  const row=await env.DB.prepare(`SELECT ds.status,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url
+  const row=await env.DB.prepare(`SELECT ds.status,ds.response_url,ds.action_url,a.source_url,a.endpoint,a.verification_endpoint,a.public_url
     FROM distribution_submissions ds JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug
     WHERE ds.submission_id=? AND ds.surface_slug=? LIMIT 1`).bind(submissionId,slug).first().catch(()=>null);
   if(!row)return{applied:false,reason:'submission_missing'};
   const allowed=[row.response_url,row.verification_endpoint,row.public_url].filter(Boolean);
-  if(!allowed.some(x=>String(x)===String(target)))return{applied:false,reason:'verification_target_changed'};
+  if(!allowed.some(x=>sameNormalizedUrl(x,target)))return{applied:false,reason:'verification_target_changed'};
+  if(sameNormalizedUrl(target,row.source_url)||sameNormalizedUrl(target,row.endpoint)||sameNormalizedUrl(target,row.action_url))return{applied:false,reason:'verification_target_is_submission_route'};
   const httpStatus=num(result?.httpStatus);
   if(result?.ok===true&&httpStatus>=200&&httpStatus<300){
     const publicUrl=safeSameHostEvidence(target,result?.finalUrl)||target;
