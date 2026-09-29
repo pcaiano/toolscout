@@ -19,6 +19,7 @@ const BATCH_SIZE=8;
 const MAX_ACTIVE_BATCHES=3;
 const BATCH_TIMEOUT_MINUTES=3;
 const SOURCE_UNREACHABLE_BACKOFF_HOURS=6;
+const SOURCE_UNREACHABLE_POLICY_VERSION=2;
 const RENDER_TRIGGER_TIMEOUT_MS=25000;
 const QUALIFICATION_FALLBACK_LIMIT=6;
 let schemaReady=null;
@@ -660,6 +661,52 @@ async function reconcileStaleResearchHumanGates(env){
   return{reconciled};
 }
 
+async function reconcileRedundantContactRouteJobs(env){
+  const w=await env.DB.prepare(`UPDATE compute_overflow_jobs
+    SET status='completed',batch_id=NULL,leased_at=NULL,completed_at=datetime('now'),available_at=datetime('now'),
+        result_json=json_object('ok',1,'outcome','folded_into_distribution_route_research_v1'),
+        last_error=NULL,updated_at=datetime('now')
+    WHERE job_type='contact_route_research' AND status='queued'`).run().catch(()=>null);
+  const changed=Number(w?.meta?.changes||w?.changes||0);
+  if(changed>0){
+    await metricDelta(env,{queued:-changed,completed:changed});
+    await event(env,'redundant_contact_route_jobs_folded','completed',`Folded ${changed} queued contact-route research job(s) into the primary distribution research pass.`,{changed}).catch(()=>{});
+  }
+  return changed;
+}
+async function reconcileSourceUnreachableBacklog(env){
+  const w=await env.DB.prepare(`UPDATE compute_overflow_jobs
+    SET status='completed',batch_id=NULL,leased_at=NULL,completed_at=datetime('now'),available_at=datetime('now'),
+        result_json=json_set(
+          COALESCE(result_json,'{}'),
+          '$.outcome','external_source_unreachable_exhausted',
+          '$.retryPolicyVersion',${SOURCE_UNREACHABLE_POLICY_VERSION},
+          '$.retryClass',
+            CASE
+              WHEN CAST(COALESCE(json_extract(result_json,'$.httpStatus'),0) AS INTEGER) IN (404,410) THEN 'not_found'
+              WHEN CAST(COALESCE(json_extract(result_json,'$.httpStatus'),0) AS INTEGER)=0 THEN 'transport_unreachable'
+              WHEN CAST(COALESCE(json_extract(result_json,'$.httpStatus'),0) AS INTEGER) IN (401,403,406,429,503) THEN 'access_blocked'
+              WHEN CAST(COALESCE(json_extract(result_json,'$.httpStatus'),0) AS INTEGER)>=500 THEN 'edge_error'
+              ELSE 'transient'
+            END
+        ),
+        last_error=NULL,updated_at=datetime('now')
+    WHERE job_type='distribution_route_research'
+      AND status='queued' AND last_error='source_unreachable_backoff'
+      AND (
+        CAST(COALESCE(json_extract(result_json,'$.httpStatus'),0) AS INTEGER) IN (404,410)
+        OR (
+          attempts>=2 AND CAST(COALESCE(json_extract(result_json,'$.httpStatus'),0) AS INTEGER) IN (0,401,403,406,429,503,520)
+        )
+      )`).run().catch(()=>null);
+  const changed=Number(w?.meta?.changes||w?.changes||0);
+  if(changed>0){
+    await metricDelta(env,{queued:-changed,completed:changed});
+    await event(env,'source_unreachable_backlog_compacted','completed',`Closed ${changed} exhausted or definitive unreachable route-research job(s) instead of recycling them through Render.`,{changed,policyVersion:SOURCE_UNREACHABLE_POLICY_VERSION}).catch(()=>{});
+  }
+  return changed;
+}
+
 async function enqueueDistributionResearch(env){
   await ensureSchema(env);
   await reconcileStaleResearchHumanGates(env).catch(()=>({reconciled:0}));
@@ -680,6 +727,19 @@ async function enqueueDistributionResearch(env){
     FROM distribution_opportunities
     WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
       AND status IN ('candidate','discovered','research_required')
+      AND NOT EXISTS (
+        SELECT 1 FROM compute_overflow_jobs exhausted
+        WHERE exhausted.subject_key=distribution_opportunities.surface_slug
+          AND exhausted.job_type='distribution_route_research'
+          AND exhausted.status='completed'
+          AND json_extract(exhausted.result_json,'$.outcome')='external_source_unreachable_exhausted'
+          AND (
+            (json_extract(exhausted.result_json,'$.retryClass')='not_found' AND exhausted.completed_at>=datetime('now','-72 hours'))
+            OR (json_extract(exhausted.result_json,'$.retryClass')='access_blocked' AND exhausted.completed_at>=datetime('now','-24 hours'))
+            OR (json_extract(exhausted.result_json,'$.retryClass') IN ('transport_unreachable','edge_error') AND exhausted.completed_at>=datetime('now','-12 hours'))
+            OR (json_extract(exhausted.result_json,'$.retryClass')='transient' AND exhausted.completed_at>=datetime('now','-6 hours'))
+          )
+      )
       AND (
         EXISTS (
           SELECT 1 FROM distribution_auto_adapters recovery
@@ -708,10 +768,6 @@ async function enqueueDistributionResearch(env){
     const routeAdded=await enqueueJob(env,{jobKey:routeJobKey,jobType:'distribution_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:(recovering?2000:0)+num(row.distribution_score),payload});
     enqueued+=routeAdded;remaining=Math.max(0,remaining-routeAdded);
     if(remaining<=0)break;
-    if(num(row.distribution_score)>=55){
-      const contactAdded=await enqueueJob(env,{jobKey:`contact:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`,jobType:'contact_route_research',subjectType:'surface',subjectKey:row.surface_slug,priority:Math.max(0,num(row.distribution_score)-5),payload});
-      enqueued+=contactAdded;remaining=Math.max(0,remaining-contactAdded);
-    }
   }
   if(remaining>0){
     const network=await env.DB.prepare(`SELECT surface_slug,domain,source_url,contact_source_url,priority_score,status
@@ -1131,6 +1187,8 @@ async function runOverflowTick(env){
   await ensureHotIndexes(env);
   const rejectedAdapterRecovery=await isolatedOverflowStage(env,'external_submission_recovery',()=>reconcileRejectedExternalAdapters(env),{checked:0,recovered:0});
   const duplicateRouteConsolidation=await isolatedOverflowStage(env,'duplicate_route_consolidation',()=>reconcileDuplicateRouteSurfaces(env),0);
+  const foldedContactResearch=await isolatedOverflowStage(env,'contact_route_fold',()=>reconcileRedundantContactRouteJobs(env),0);
+  const unreachableCompaction=await isolatedOverflowStage(env,'source_unreachable_compaction',()=>reconcileSourceUnreachableBacklog(env),0);
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
   const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
   const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
@@ -1621,20 +1679,26 @@ async function completeBatch(request,env,ctx,batchId){
         funnelDelta.captchaRoutesSeen+=num(rs.captchaRoutes);
         funnelDelta.policyBlockersSeen+=num(rs.policyBlockers);
         const a=await applyDistributionResult(env,job,result);applied+=a.applied?1:0;
+        const contact=await applyContactResult(env,job,result);applied+=num(contact?.applied);
         if(a.applied&&a.slug)distributionHandoffSlugs.push(a.slug);
       }
       else if(job.job_type==='contact_route_research'){const a=await applyContactResult(env,job,result);applied+=num(a.applied)}
       else if(job.job_type==='publisher_role_email_research'||job.job_type==='vendor_role_email_research'){const a=await applyRoleEmailResult(env,job,result);applied+=a.applied?1:0}
     }
     const externalUnreachable=!ok&&String(result?.error||'')==='source_unreachable'&&['distribution_route_research','contact_route_research','publisher_role_email_research','vendor_role_email_research','contact_supply_public_research'].includes(String(job.job_type||''));
-    const maxExternalAttempts=job.job_type==='contact_supply_public_research'?2:3;
+    const retryClass=String(result?.retryClass||'transient');
+    const maxExternalAttempts=job.job_type==='contact_supply_public_research'
+      ?2
+      :job.job_type==='distribution_route_research'
+        ?(retryClass==='not_found'||retryClass==='access_blocked'?1:2)
+        :2;
     if(externalUnreachable&&num(job.attempts)<maxExternalAttempts){
       await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='queued',batch_id=NULL,leased_at=NULL,completed_at=NULL,available_at=datetime('now','+${SOURCE_UNREACHABLE_BACKOFF_HOURS} hours'),result_json=?,last_error='source_unreachable_backoff',updated_at=datetime('now') WHERE job_id=?`)
         .bind(JSON.stringify(result).slice(0,24000),jobId).run();
       retried++;metricLeased-=1;metricQueued+=1;
     }else if(externalUnreachable){
       await env.DB.prepare(`UPDATE compute_overflow_jobs SET status='completed',completed_at=datetime('now'),result_json=?,last_error=NULL,updated_at=datetime('now') WHERE job_id=?`)
-        .bind(JSON.stringify({...result,outcome:'external_source_unreachable_exhausted'}).slice(0,24000),jobId).run();
+        .bind(JSON.stringify({...result,retryClass,outcome:'external_source_unreachable_exhausted',retryPolicyVersion:SOURCE_UNREACHABLE_POLICY_VERSION}).slice(0,24000),jobId).run();
       completed++;metricLeased-=1;metricCompleted+=1;
     }else{
       await env.DB.prepare(`UPDATE compute_overflow_jobs SET status=?,completed_at=datetime('now'),result_json=?,last_error=?,updated_at=datetime('now') WHERE job_id=?`)
