@@ -47,6 +47,7 @@ check(s.includes("humanGatesOpen:num(live?.open_human_gates)"),'human-gate backl
 const a=fs.readFileSync('distribution-autonomous-worker.js','utf8');
 check(a.includes("reopened_post_auth_submission_step"),'resolved account-creation gates can advance once into the manual submission phase');
 check(a.includes("post_auth_submission:postAuthFollowup"),'post-auth submission phase is persisted to prevent gate loops');
+check(/supabase\\\.co\|r2\\\.dev/.test(a),'technical storage/database hosts are excluded by the canonical distribution qualifier');
 check(s.includes("endpoint_success.action_url=a.endpoint"),'machine execution deduplicates successful exact endpoints across discovered surfaces');
 check(s.includes("verification_target_is_submission_route"),'verification cannot promote a submission form or POST endpoint to placement');
 check(s.includes("reconcileFalseSubmissionRouteVerifications"),'historical false submission-route verifications are reconciled');
