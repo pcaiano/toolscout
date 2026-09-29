@@ -118,4 +118,4 @@ console.log(JSON.stringify({
   toolDisclosureGapCount:report.toolDisclosureGaps.length,
   migrationReadyCount:report.directMigrationReady.length
 },null,2));
-if(structuralFailures.length)process.exitCode=1;
+if(structuralFailures.length||editorialGaps.length||disclosureGaps.length)process.exitCode=1;
