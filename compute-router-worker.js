@@ -1,4 +1,4 @@
-import base from './operational-truth-reconciliation-worker.js';
+import base,{handleCommandCenterDirectRoute} from './operational-truth-reconciliation-worker.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
 import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
@@ -1855,6 +1855,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
   else if(ownership.owner==='growth_runtime_closed_loop')response=await handleGrowthClosedLoopRoute(request,env,ctx);
   else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
+  else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   if(!response)return null;
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);
