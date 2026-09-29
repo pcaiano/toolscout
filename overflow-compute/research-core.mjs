@@ -210,14 +210,17 @@ function safeFormPayload(html){
     if(type==='file'){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_file_upload',rejectionField:name};continue}
     if(/checkbox|radio/i.test(type)){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'required_interactive_choice',rejectionField:name};continue}
     if(/submit|button|reset|image/i.test(type))continue;
-    if(/captcha|payment|card|password|auth|terms|agree|consent/i.test(name))return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name',rejectionField:name};
     if(type==='hidden'){
       const value=tagAttr(tag,'value');
+      const transientSafetyField=/^(?:_?csrf(?:_token)?|csrfmiddlewaretoken|authenticity_token|_token|__requestverificationtoken|form[_-]?key|nonce)$/i.test(name);
+      if(/captcha|payment|card|password|terms|agree|consent/i.test(name))return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name',rejectionField:name};
+      if(/auth/i.test(name)&&!transientSafetyField)return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name',rejectionField:name};
       if(value==null||String(value).length>2000)return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_hidden_value',rejectionField:name};
       payload[name]=String(value);
-      if(/csrf|token|nonce|form[_-]?key|verification/i.test(name))hiddenSafetyFields.push(name);
+      if(transientSafetyField||/csrf|token|nonce|form[_-]?key|verification/i.test(name))hiddenSafetyFields.push(name);
       continue;
     }
+    if(/captcha|payment|card|password|auth|terms|agree|consent/i.test(name))return{payload:null,hiddenSafetyFields,rejectionReason:'unsafe_field_name',rejectionField:name};
     const key=canonicalFieldName(name);
     if(!key){if(required)return{payload:null,hiddenSafetyFields,rejectionReason:'unsupported_required_field',rejectionField:name};continue}
     const value=valueForField(key);
