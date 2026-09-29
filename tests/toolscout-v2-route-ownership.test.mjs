@@ -62,3 +62,10 @@ test('mission integrity runtime no longer creates schema',()=>{
   assert.doesNotMatch(evidence,/CREATE TABLE|CREATE INDEX/);
   assert.match(evidence,/mission_integrity_schema_not_migrated/);
 });
+
+
+test('Growth Planner runtime no longer creates schema',()=>{
+  const planner=read('distribution-orchestrator-worker.js');
+  assert.doesNotMatch(planner,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+  assert.match(planner,/growth_planner_schema_not_migrated/);
+});
