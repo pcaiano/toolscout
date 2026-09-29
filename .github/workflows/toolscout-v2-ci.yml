@@ -24,6 +24,7 @@ on:
       - 'command-center-resilient-health-runtime.js'
       - 'traffic-integrity-health-runtime.js'
       - 'admin-stats-runtime.js'
+      - 'dynamic-worker.js'
       - 'analytics-human-actions-runtime.js'
       - 'human-action-entry-worker.js'
       - 'command-center-direct-runtime.js'
@@ -120,6 +121,7 @@ jobs:
           node --check command-center-resilient-health-runtime.js
           node --check traffic-integrity-health-runtime.js
           node --check admin-stats-runtime.js
+          node --check dynamic-worker.js
           node --check worker.js
           node --check outbound-integrity-worker.js
           node --check engine-run-ledger.js
