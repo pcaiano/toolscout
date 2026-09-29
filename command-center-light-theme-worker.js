@@ -1,4 +1,5 @@
 import base from './command-center-final-integrity-worker.js';
+import {injectSeoDiscoveryLinks} from './public-discovery-links.js';
 import {canonicalSeoPath,canonicalizeOwnedMarkup} from './public-canonical-contract.js';
 import resilientFallback from './command-center-resilient-worker.js';
 import {publicMergedTools,publicRuntimeToolResponse,publicQualityEnhancedToolResponse,publicMergedSitemap,publicRuntimeRankingResponse} from './catalog-autonomy-worker.js';
@@ -568,24 +569,6 @@ async function resilientStatsResponse(request, env, ctx) {
   }
 }
 
-const SEO_DISCOVERY_LINKS={
-  '/guides':[
-    ['/methodology','Methodology'],['/categories','Software categories'],['/crm-tools','CRM tools'],['/seo-tools','SEO tools'],['/software-trends-index','Software trends index'],['/best-affordable-crm','Best affordable CRM'],['/best-workflow-automation-tools','Best workflow automation tools']
-  ],
-  '/compare':[
-    ['/apollo-vs-lemlist','Apollo vs Lemlist'],['/brevo-vs-mailchimp','Brevo vs Mailchimp'],['/hubspot-vs-pipedrive','HubSpot vs Pipedrive'],['/n8n-vs-make','n8n vs Make'],['/semrush-vs-ahrefs','Semrush vs Ahrefs'],['/tally-vs-typeform','Tally vs Typeform'],['/webflow-vs-framer','Webflow vs Framer']
-  ],
-  '/tools':[
-    ['/tools/adobe-express','Adobe Express'],['/tools/attio','Attio'],['/tools/basecamp','Basecamp'],['/tools/brevo','Brevo'],['/tools/constant-contact','Constant Contact'],['/tools/fillout','Fillout'],['/tools/github','GitHub'],['/tools/jira','Jira'],['/tools/mailchimp','Mailchimp'],['/tools/notebooklm','NotebookLM'],['/tools/replit','Replit'],['/tools/typeform','Typeform'],['/tools/webflow','Webflow']
-  ]
-};
-function injectSeoDiscoveryLinks(body,pathname){
-  const path=canonicalSeoPath(pathname),items=SEO_DISCOVERY_LINKS[path];
-  if(!items?.length||String(body).includes('data-ts-search-discovery="1"'))return body;
-  const links=items.map(([href,label])=>`<a href="${href}">${label}</a>`).join('');
-  const section=`<section data-ts-search-discovery="1" aria-label="Explore more ToolScout resources" style="max-width:1100px;margin:44px auto 24px;padding:20px 22px;border-top:1px solid #e4e7ec"><h2 style="font-size:16px;margin:0 0 12px">Explore more ToolScout resources</h2><div style="display:flex;flex-wrap:wrap;gap:9px 14px">${links}</div></section>`;
-  return String(body).replace(/<\/body>/i,section+'</body>');
-}
 async function canonicalizeHtmlResponse(response,pathname=''){
   if(!response||!response.ok)return response;
   const type=String(response.headers.get('content-type')||'').toLowerCase();
