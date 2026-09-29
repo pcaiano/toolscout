@@ -24,6 +24,7 @@ on:
       - 'scripts/build-editorial-authority-portfolio.mjs'
       - 'scripts/build-growth-priority.mjs'
       - 'scripts/audit-runtime-architecture.mjs'
+      - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/generate-seo-pages.mjs'
       - 'scripts/generate-comparisons.mjs'
@@ -43,6 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -67,11 +70,16 @@ jobs:
           node --check scripts/build-editorial-authority-portfolio.mjs
           node --check scripts/build-growth-priority.mjs
           node --check scripts/audit-runtime-architecture.mjs
+          node --check scripts/validate-v2-preservation.mjs
           node --check scripts/generate-tool-pages.mjs
           node --check scripts/generate-seo-pages.mjs
           node --check scripts/generate-comparisons.mjs
       - name: Audit ToolScout 2.0 runtime architecture
         run: node scripts/audit-runtime-architecture.mjs
+      - name: Enforce ToolScout 2.0 preservation invariants
+        env:
+          TOOLSCOUT_V2_BASE_REF: origin/main
+        run: node scripts/validate-v2-preservation.mjs
       - name: Validate operating contract JSON
         run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
       - name: Run ToolScout 2.0 policy tests
