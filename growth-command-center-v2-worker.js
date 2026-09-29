@@ -177,14 +177,15 @@ async function affiliateCoverageStatusSnapshot(request,env){
       safeAll(env,`SELECT tool_slug,status,updated_at FROM affiliate_workflow`),
       safeAll(env,`SELECT tool_slug,COUNT(*) clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`),
       safeAll(env,`SELECT tool_slug,COUNT(*) clicks FROM social_affiliate_redirects WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`),
-      safeAll(env,`SELECT e.tool_slug,e.provider,e.reported_clicks_total,e.observed_at
+      safeAll(env,`SELECT e.tool_slug,e.provider,e.account_email,e.reported_clicks_total,e.observed_at
         FROM affiliate_network_click_evidence e
         JOIN (
-          SELECT tool_slug,provider,MAX(observed_at) observed_at
+          SELECT tool_slug,provider,COALESCE(account_email,'') account_email,MAX(observed_at) observed_at
           FROM affiliate_network_click_evidence
-          GROUP BY tool_slug,provider
+          GROUP BY tool_slug,provider,COALESCE(account_email,'')
         ) latest
-          ON latest.tool_slug=e.tool_slug AND latest.provider=e.provider AND latest.observed_at=e.observed_at`)
+          ON latest.tool_slug=e.tool_slug AND latest.provider=e.provider
+          AND latest.account_email=COALESCE(e.account_email,'') AND latest.observed_at=e.observed_at`)
     ]);
     const pipelineMap=new Map((pipeline?.verified_programs||[]).map(x=>[x.slug,x]));
     const workflowMap=new Map(workflowRows.map(x=>[x.tool_slug,x]));
@@ -195,7 +196,7 @@ async function affiliateCoverageStatusSnapshot(request,env){
       const key=String(row.tool_slug||'');
       const current=vendorMap.get(key)||{clicks:0,evidence:[]};
       current.clicks+=n(row.reported_clicks_total);
-      current.evidence.push({provider:row.provider,reportedClicksTotal:n(row.reported_clicks_total),observedAt:row.observed_at});
+      current.evidence.push({provider:row.provider,accountEmail:row.account_email||null,reportedClicksTotal:n(row.reported_clicks_total),observedAt:row.observed_at});
       vendorMap.set(key,current);
     }
     const groups={active:[],pending:[],rejected:[]};
