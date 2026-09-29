@@ -26,66 +26,42 @@ function sqliteUtc(date){return date.toISOString().replace('T',' ').slice(0,19)}
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
   schemaReady=(async()=>{
-    await env.DB.batch([
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        visitor_id TEXT NOT NULL,
-        session_id TEXT NOT NULL,
-        path TEXT,
-        source TEXT NOT NULL DEFAULT 'direct',
-        referrer_host TEXT,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(visitor_id,session_id)
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_at ON confirmed_visitor_events(created_at)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_visitor_id ON confirmed_visitor_events(visitor_id)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_session_id ON confirmed_visitor_events(session_id)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_events_created_session_visitor ON confirmed_visitor_events(created_at,session_id,visitor_id)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_countries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        visitor_id TEXT NOT NULL,
-        session_id TEXT NOT NULL,
-        country TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(visitor_id,session_id)
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_created_at ON confirmed_visitor_countries(created_at)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_country ON confirmed_visitor_countries(country)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_countries_session_country ON confirmed_visitor_countries(session_id,country)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS confirmed_visitor_registry (
-        visitor_id TEXT PRIMARY KEY,
-        first_seen_at TEXT NOT NULL,
-        last_seen_at TEXT NOT NULL
-      )`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_confirmed_visitor_registry_last_seen ON confirmed_visitor_registry(last_seen_at)`),
-      env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('visitor_guard_linking_started_at',datetime('now'))`),
-      env.DB.prepare(`INSERT INTO traffic_integrity_meta(key,value) VALUES('session_identity_rule','one_session_one_visitor_first_valid_link_wins')
-        ON CONFLICT(key) DO UPDATE SET value=excluded.value`)
+    const requiredTables=[
+      'confirmed_visitor_events',
+      'confirmed_visitor_countries',
+      'traffic_integrity_meta',
+      'confirmed_visitor_registry'
+    ];
+    const requiredIndexes=[
+      'idx_confirmed_visitor_events_created_at',
+      'idx_confirmed_visitor_events_visitor_id',
+      'idx_confirmed_visitor_events_session_id',
+      'idx_confirmed_visitor_events_created_session_visitor',
+      'idx_confirmed_visitor_countries_created_at',
+      'idx_confirmed_visitor_countries_country',
+      'idx_confirmed_visitor_countries_session_country',
+      'idx_confirmed_visitor_registry_last_seen',
+      'uq_confirmed_visitor_events_session_id',
+      'uq_confirmed_visitor_countries_session_id'
+    ];
+    const tableMarks=requiredTables.map(()=>'?').join(',');
+    const indexMarks=requiredIndexes.map(()=>'?').join(',');
+    const [tables,indexes,markers]=await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${tableMarks})`).bind(...requiredTables).first(),
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (${indexMarks})`).bind(...requiredIndexes).first(),
+      env.DB.prepare(`SELECT key,value FROM traffic_integrity_meta WHERE key IN ('session_identity_cleanup_v1','visitor_registry_backfilled_at','session_identity_rule')`).all()
     ]);
-    const cleaned=await env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='session_identity_cleanup_v1' LIMIT 1`).first().catch(()=>null);
-    if(!cleaned?.value){
-      await env.DB.prepare(`DELETE FROM confirmed_visitor_countries
-        WHERE NOT EXISTS (
-          SELECT 1 FROM confirmed_visitor_events e
-          WHERE e.session_id=confirmed_visitor_countries.session_id
-            AND e.visitor_id=confirmed_visitor_countries.visitor_id
-            AND e.id=(SELECT MIN(e2.id) FROM confirmed_visitor_events e2 WHERE e2.session_id=e.session_id)
-        )`).run();
-      await env.DB.prepare(`DELETE FROM confirmed_visitor_events
-        WHERE id NOT IN (SELECT MIN(id) FROM confirmed_visitor_events GROUP BY session_id)`).run();
-      await env.DB.batch([
-        env.DB.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS uq_confirmed_visitor_events_session_id ON confirmed_visitor_events(session_id)`),
-        env.DB.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS uq_confirmed_visitor_countries_session_id ON confirmed_visitor_countries(session_id)`),
-        env.DB.prepare(`INSERT OR REPLACE INTO traffic_integrity_meta(key,value) VALUES('session_identity_cleanup_v1',datetime('now'))`)
-      ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    const markerMap=new Map((markers?.results||[]).map(row=>[String(row.key||''),String(row.value||'')]));
+    const markersReady=Boolean(
+      markerMap.get('session_identity_cleanup_v1')&&
+      markerMap.get('visitor_registry_backfilled_at')&&
+      markerMap.get('session_identity_rule')==='one_session_one_visitor_first_valid_link_wins'
+    );
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length||!markersReady){
+      throw new Error(`visitor_integrity_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}:markers_${markersReady?'ready':'missing'}`);
     }
-    const backfilled=await env.DB.prepare(`SELECT value FROM traffic_integrity_meta WHERE key='visitor_registry_backfilled_at' LIMIT 1`).first().catch(()=>null);
-    if(!backfilled?.value){
-      await env.DB.prepare(`INSERT OR IGNORE INTO confirmed_visitor_registry(visitor_id,first_seen_at,last_seen_at)
-        SELECT visitor_id,MIN(created_at),MAX(created_at) FROM confirmed_visitor_events GROUP BY visitor_id`).run();
-      await env.DB.prepare(`INSERT OR REPLACE INTO traffic_integrity_meta(key,value) VALUES('visitor_registry_backfilled_at',datetime('now'))`).run();
-    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount,markers:'ready'};
   })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
