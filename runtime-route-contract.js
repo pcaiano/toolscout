@@ -1,0 +1,43 @@
+// ToolScout 2.0 explicit route ownership contract.
+// The contract is descriptive first and becomes executable route-by-route.
+// Legacy fallback remains available until each route group has parity coverage.
+
+export const ROUTE_GROUPS=Object.freeze([
+  {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
+  {id:'runtime',owner:'compute_router',plane:'control',methods:['GET','POST'],prefixes:['/api/runtime/']},
+  {id:'distribution_priority',owner:'distribution_priority',plane:'growth_planner',methods:['GET','POST'],exact:['/api/distribution/operating-decisions','/api/distribution/operating-decisions/rebalance']},
+  {id:'distribution_control',owner:'distribution_orchestrator',plane:'growth_planner',methods:['GET','POST'],prefixes:['/api/distribution/orchestrate','/api/distribution/economic-learning','/api/distribution/editorial-queue']},
+  {id:'growth_control',owner:'distribution_orchestrator',plane:'growth_planner',methods:['GET','POST'],prefixes:['/api/growth/']},
+  {id:'authority',owner:'authority_acquisition',plane:'executor',methods:['GET','POST'],prefixes:['/api/distribution/authority/']},
+  {id:'seo_runtime',owner:'seo_runtime',plane:'signals',methods:['GET','POST'],prefixes:['/api/seo/']},
+  {id:'engine_evidence',owner:'mission_integrity',plane:'signals',methods:['POST'],exact:['/api/engine-evidence']},
+  {id:'analytics_control',owner:'command_center',plane:'signals',methods:['GET','POST'],prefixes:['/analytics','/api/stats','/api/traffic-integrity-health','/api/command-center-']},
+  {id:'public_tools',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/tools','/guides','/compare','/best-','/news/','/blog/','/software-trends-index','/categories','/crm-tools','/seo-tools']},
+  {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
+  {id:'agent_protocol',owner:'agent_protocol',plane:'public_site',methods:['GET','POST'],prefixes:['/mcp','/a2a','/.well-known/agent-card','/.well-known/toolscout-distribution','/.well-known/api-catalog']}
+]);
+
+function normalizedPath(value){
+  try{return new URL(String(value),'https://trytoolscout.org').pathname||'/';}
+  catch{return String(value||'/').split('?')[0]||'/';}
+}
+
+export function routeOwner(input,{method='GET'}={}){
+  const pathname=normalizedPath(input),verb=String(method||'GET').toUpperCase();
+  for(const group of ROUTE_GROUPS){
+    if(group.methods&&!group.methods.includes(verb))continue;
+    if(group.exact?.includes(pathname))return{...group,pathname,method:verb};
+    if(group.prefixes?.some(prefix=>pathname===prefix||pathname.startsWith(prefix)))return{...group,pathname,method:verb};
+  }
+  return{id:'legacy_fallback',owner:'legacy_chain',plane:'legacy',pathname,method:verb};
+}
+
+export function routeContract(){
+  return{
+    version:2,
+    architecture:'toolscout-2.0',
+    groups:ROUTE_GROUPS,
+    fallback:'legacy_chain',
+    invariant:'one_declared_owner_per_route_group'
+  };
+}
