@@ -10,6 +10,7 @@ import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
 import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
+import {runGrowthScheduler} from './growth-scheduler.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
@@ -1951,6 +1952,21 @@ export default{
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;
       return;
+    }
+    if(trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily){
+      const growth=Promise.resolve(runGrowthScheduler(scheduledEvent,env,ctx)).catch(async error=>{
+        await event(env,'growth_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+        return null;
+      });
+      const inherited=typeof base.scheduled==='function'
+        ?Promise.resolve(base.scheduled(scheduledEvent,env,ctx)).catch(async error=>{
+          await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+          return null;
+        })
+        :Promise.resolve(null);
+      const combined=Promise.allSettled([growth,inherited]);
+      if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
+      await combined;return;
     }
     return typeof base.scheduled==='function'?base.scheduled(scheduledEvent,env,ctx):undefined;
   }
