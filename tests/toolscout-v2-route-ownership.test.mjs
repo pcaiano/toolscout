@@ -11,6 +11,9 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/engine-evidence',{method:'POST'}).owner,'mission_integrity');
   assert.equal(routeOwner('/api/compute/health',{method:'GET'}).owner,'compute_router');
   assert.equal(routeOwner('/api/seo/runtime-health',{method:'GET'}).owner,'seo_runtime');
+  assert.equal(routeOwner('/api/distribution/authority/vetted-health',{method:'GET'}).owner,'authority_acquisition');
+  assert.equal(routeOwner('/api/distribution/authority/closed-loop-health',{method:'GET'}).owner,'growth_runtime_authority_drain');
+  assert.equal(routeOwner('/api/distribution/authority/close-loop',{method:'POST'}).owner,'growth_runtime_closed_loop');
   assert.equal(routeOwner('/api/growth/supervisor/public',{method:'GET'}).owner,'distribution_orchestrator');
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
