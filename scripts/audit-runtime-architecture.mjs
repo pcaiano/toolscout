@@ -42,7 +42,8 @@ const directOwnerFiles={
   authority_acquisition:'authority-acquisition-worker.js',
   mission_integrity:'mission-integrity-v2-worker.js',
   growth_runtime_closed_loop:'growth-runtime-closed-loop-worker.js',
-  public_editorial_site:'public-editorial-runtime.js'
+  public_editorial_site:'public-editorial-runtime.js',
+  command_center_direct:'command-center-direct-runtime.js'
 };
 const directOwnerDdlFiles=[...new Set(EARLY_DISPATCH_OWNERS.map(owner=>directOwnerFiles[owner]).filter(Boolean).filter(file=>runtimeDdlFiles.includes(file)))];
 const directGroups=ROUTE_GROUPS.filter(group=>group.owner==='compute_router'||EARLY_DISPATCH_OWNERS.includes(group.owner));
