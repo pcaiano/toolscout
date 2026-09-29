@@ -134,63 +134,16 @@ const GROWTH_EVIDENCE_RANK={none:0,directional:1,emerging:2,strong:3,revenue_con
 let growthSchemaReady=null;
 async function ensureGrowthSchema(env){
   if(growthSchemaReady)return growthSchemaReady;
-  growthSchemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_opportunity_state(
-      opportunity_key TEXT PRIMARY KEY,
-      subject_type TEXT NOT NULL,
-      subject_key TEXT NOT NULL,
-      priority_score REAL NOT NULL DEFAULT 0,
-      signal_json TEXT NOT NULL,
-      action_json TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'active',
-      first_seen_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_evaluated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_opportunity_priority ON growth_opportunity_state(status,priority_score DESC)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_opportunity_subject ON growth_opportunity_state(subject_type,subject_key)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_rnd_experiments(
-      experiment_key TEXT PRIMARY KEY,
-      experiment_type TEXT NOT NULL,
-      subject_key TEXT,
-      hypothesis TEXT NOT NULL,
-      action_json TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'proposed',
-      risk_class TEXT NOT NULL DEFAULT 'bounded',
-      expected_signal TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_evaluated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_rnd_status ON growth_rnd_experiments(status,updated_at DESC)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_rnd_frontier(
-      idea_key TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      mechanism TEXT NOT NULL,
-      hypothesis TEXT NOT NULL,
-      automation_score INTEGER NOT NULL DEFAULT 0,
-      semi_passive_score INTEGER NOT NULL DEFAULT 0,
-      implementation_mode TEXT NOT NULL DEFAULT 'one_time_build',
-      status TEXT NOT NULL DEFAULT 'candidate',
-      expected_signal TEXT,
-      next_step TEXT,
-      action_json TEXT NOT NULL DEFAULT '[]',
-      evidence_json TEXT NOT NULL DEFAULT '{}',
-      first_seen_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_evaluated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_rnd_frontier_status ON growth_rnd_frontier(status,automation_score DESC,updated_at DESC)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_asset_cache(
-      path TEXT PRIMARY KEY,
-      payload_json TEXT NOT NULL,
-      source_generated_at TEXT,
-      cached_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`)
-  ]).catch(error=>{growthSchemaReady=null;throw error});
+  growthSchemaReady=(async()=>{
+    const required=['growth_opportunity_state','growth_rnd_experiments','growth_rnd_frontier','growth_asset_cache'];
+    const placeholders=required.map(()=>'?').join(',');
+    const row=await env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${placeholders})`).bind(...required).first();
+    if(Number(row?.n||0)!==required.length)throw new Error(`growth_planner_schema_not_migrated:${Number(row?.n||0)}/${required.length}`);
+    return{ok:true,source:'d1_migrations',tables:Number(row?.n||0)};
+  })().catch(error=>{growthSchemaReady=null;throw error});
   return growthSchemaReady;
 }
+
 async function growthRows(env,sql){try{return (await env.DB.prepare(sql).all()).results||[]}catch{return[]}}
 async function flushGrowthWrites(env,writes,chunkSize=40){
   for(let i=0;i<writes.length;i+=chunkSize)await env.DB.batch(writes.slice(i,i+chunkSize));
