@@ -44,6 +44,9 @@ check(s.includes("h.subject_type='surface' AND h.subject_key=d.surface_slug"),'d
 check(s.includes("kind==='json_api'"),'canonical validator accepts safe JSON API candidates');
 check(s.includes("render_primary_with_bounded_cloudflare_fallback"),'health exposes the real two-stage qualification architecture');
 check(s.includes("humanGatesOpen:num(live?.open_human_gates)"),'human-gate backlog is visible in compute truth');
+const a=fs.readFileSync('distribution-autonomous-worker.js','utf8');
+check(a.includes("reopened_post_auth_submission_step"),'resolved account-creation gates can advance once into the manual submission phase');
+check(a.includes("post_auth_submission:postAuthFollowup"),'post-auth submission phase is persisted to prevent gate loops');
 check(s.includes("endpoint_success.action_url=a.endpoint"),'machine execution deduplicates successful exact endpoints across discovered surfaces');
 check(s.includes("verification_target_is_submission_route"),'verification cannot promote a submission form or POST endpoint to placement');
 check(s.includes("reconcileFalseSubmissionRouteVerifications"),'historical false submission-route verifications are reconciled');
