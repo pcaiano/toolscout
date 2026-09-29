@@ -156,6 +156,7 @@ function business(){
    row('Channel allocation','60 / 25 / 10 / 5','Search demand / authority+vendor / AI+AEO / R&D')+
    row('Affiliate programmes',n(aff.productionRoutes)+' active','Canonical production registry')+
    row('PartnerStack accounts',n(c?.vendorReported?.accounts?.length)+' reconciled',(c?.vendorReported?.accounts||[]).map(x=>x.accountEmail+' · '+human(x.marketplaceState||x.status)).join(' | ')||'No account evidence')+
+   row('PartnerStack current programmes',n((c?.vendorReported?.evidence||[]).filter(x=>String(x.programmeStatus||'').toLowerCase()==='active').length)+' active',(c?.vendorReported?.evidence||[]).map(x=>x.toolSlug+' '+n(x.reportedClicksTotal)+' clicks · '+(x.accountEmail||'account unknown')).join(' | ')||'No current programme evidence')+
    row('Commercial click truth','Sources kept separate','Verified first-party, tracked social redirects and affiliate-network counters can overlap and are never summed.')+
    row('Growth Brain',human(g.status||'unavailable'),human(g.directive||'No directive'))+
   '</div>';
