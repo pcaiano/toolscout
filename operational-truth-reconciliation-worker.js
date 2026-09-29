@@ -128,21 +128,59 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
         tool_slug TEXT NOT NULL,
         provider TEXT NOT NULL,
         programme TEXT,
+        account_email TEXT,
         reported_clicks_total INTEGER NOT NULL,
+        reported_conversions_total INTEGER,
+        pending_commission_amount REAL,
+        currency TEXT,
         observed_at TEXT NOT NULL,
         evidence_source TEXT NOT NULL,
         note TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )`),
       env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_affiliate_network_click_evidence_tool_observed ON affiliate_network_click_evidence(tool_slug,observed_at DESC)`),
-      env.DB.prepare(`INSERT OR IGNORE INTO affiliate_network_click_evidence(
-        evidence_key,tool_slug,provider,programme,reported_clicks_total,observed_at,evidence_source,note
-      ) VALUES(
-        'partnerstack:apollo:first-10:2026-09-25T17:12:28Z','apollo','partnerstack','apollo',10,
-        '2026-09-25 17:12:28','partnerstack_email_milestone',
-        'PartnerStack/Apollo milestone email confirmed the affiliate link had reached its first 10 clicks.'
-      )`)
+      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_affiliate_network_click_evidence_account_observed ON affiliate_network_click_evidence(account_email,observed_at DESC)`),
+      env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_accounts (
+        network TEXT NOT NULL,
+        account_email TEXT NOT NULL,
+        status TEXT NOT NULL,
+        marketplace_state TEXT,
+        observed_at TEXT NOT NULL,
+        evidence_source TEXT NOT NULL,
+        note TEXT,
+        PRIMARY KEY(network,account_email)
+      )`),
+      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_accounts(network,account_email,status,marketplace_state,observed_at,evidence_source,note)
+        VALUES('partnerstack','pedro@trytoolscout.org','active','active_programs','2026-09-29 09:37:26','owner_dashboard',
+        'Owner supplied current PartnerStack dashboard with seven active programmes and current click totals.')`),
+      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_accounts(network,account_email,status,marketplace_state,observed_at,evidence_source,note)
+        VALUES('partnerstack','pcaiano@gmail.com','active','restricted_new_program_access','2026-08-31 14:24:58','gmail',
+        'Gmail confirms a separate PartnerStack identity. Marketplace access to new programmes was limited; existing programme participation remains account-specific.')`)
     ]);
+    // Backward-compatible upgrades for databases where the table existed before account-aware evidence.
+    for(const sql of [
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN account_email TEXT`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN reported_conversions_total INTEGER`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN pending_commission_amount REAL`,
+      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN currency TEXT`
+    ])await env.DB.prepare(sql).run().catch(()=>{});
+    await env.DB.prepare(`UPDATE affiliate_network_click_evidence
+      SET account_email=COALESCE(account_email,'pedro@trytoolscout.org')
+      WHERE evidence_key='partnerstack:apollo:first-10:2026-09-25T17:12:28Z'`).run().catch(()=>{});
+
+    const current=[
+      ['unbounce',6],['apollo',19],['gorgias',20],['brevo',0],['kit',23],['instantly',12],['lemlist',27]
+    ];
+    for(const [tool,clicks] of current){
+      await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_click_evidence(
+        evidence_key,tool_slug,provider,programme,account_email,reported_clicks_total,reported_conversions_total,pending_commission_amount,currency,observed_at,evidence_source,note
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
+        `partnerstack:pedro@trytoolscout.org:${tool}:dashboard:2026-09-29T09:37:26Z`,
+        tool,'partnerstack',tool,'pedro@trytoolscout.org',clicks,0,0,'USD',
+        '2026-09-29 09:37:26','owner_dashboard',
+        'Current PartnerStack programme dashboard supplied by owner; status Active, zero conversions and zero pending commissions.'
+      ).run();
+    }
   })().catch(error=>{affiliateNetworkEvidenceReady=null;throw error});
   return affiliateNetworkEvidenceReady;
 }
@@ -156,7 +194,7 @@ async function ccAssetJson(request,env,path,fallback){
 }
 async function buildCommandCenterBusinessTruth(request,env){
   await ensureAffiliateNetworkEvidenceSchema(env);
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence]=await Promise.all([
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -253,15 +291,19 @@ async function buildCommandCenterBusinessTruth(request,env){
       SUM(CASE WHEN created_at>=datetime('now','-7 days') THEN 1 ELSE 0 END) clicks7d,
       SUM(CASE WHEN created_at>=datetime('now','-30 days') THEN 1 ELSE 0 END) clicks30d
       FROM social_affiliate_redirects`).first().catch(()=>null),
-    env.DB.prepare(`SELECT e.tool_slug,e.provider,e.programme,e.reported_clicks_total,e.observed_at,e.evidence_source
+    env.DB.prepare(`SELECT e.tool_slug,e.provider,e.programme,e.account_email,e.reported_clicks_total,e.reported_conversions_total,e.pending_commission_amount,e.currency,e.observed_at,e.evidence_source
       FROM affiliate_network_click_evidence e
       JOIN (
-        SELECT tool_slug,provider,MAX(observed_at) observed_at
+        SELECT tool_slug,provider,COALESCE(account_email,'' ) account_email,MAX(observed_at) observed_at
         FROM affiliate_network_click_evidence
-        GROUP BY tool_slug,provider
+        GROUP BY tool_slug,provider,COALESCE(account_email,'')
       ) latest
-        ON latest.tool_slug=e.tool_slug AND latest.provider=e.provider AND latest.observed_at=e.observed_at
-      ORDER BY e.observed_at DESC`).all().then(r=>r.results||[]).catch(()=>[])
+        ON latest.tool_slug=e.tool_slug AND latest.provider=e.provider
+        AND latest.account_email=COALESCE(e.account_email,'') AND latest.observed_at=e.observed_at
+      ORDER BY e.observed_at DESC`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT network,account_email,status,marketplace_state,observed_at,evidence_source,note
+      FROM affiliate_network_accounts
+      ORDER BY network,account_email`).all().then(r=>r.results||[]).catch(()=>[])
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -269,6 +311,8 @@ async function buildCommandCenterBusinessTruth(request,env){
   const cfg=parse(growth.directive_json,{});
   const backlink=cfg.backlink_acquisition||{};
   const vendorReportedClickFloor=(affiliateNetworkEvidence||[]).reduce((sum,row)=>sum+truthNum(row.reported_clicks_total),0);
+  const vendorReportedConversions=(affiliateNetworkEvidence||[]).reduce((sum,row)=>sum+truthNum(row.reported_conversions_total),0);
+  const vendorPendingCommissionUsd=(affiliateNetworkEvidence||[]).filter(row=>String(row.currency||'USD')==='USD').reduce((sum,row)=>sum+truthNum(row.pending_commission_amount),0);
   const liveVerifiedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.verified24h):truthNum(cfg.verified_outbound_24h);
   const liveVerifiedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.verified7d):truthNum(cfg.verified_outbound_7d);
   const liveMonetizedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.monetized24h):truthNum(cfg.monetized_outbound_24h);
@@ -502,11 +546,26 @@ async function buildCommandCenterBusinessTruth(request,env){
       },
       vendorReported:{
         clickFloor:vendorReportedClickFloor,
+        conversions:vendorReportedConversions,
+        pendingCommissionUsd:vendorPendingCommissionUsd,
+        accounts:(affiliateNetworkAccounts||[]).map(row=>({
+          network:row.network,
+          accountEmail:row.account_email,
+          status:row.status,
+          marketplaceState:row.marketplace_state,
+          observedAt:row.observed_at,
+          evidenceSource:row.evidence_source,
+          note:row.note
+        })),
         evidence:(affiliateNetworkEvidence||[]).map(row=>({
           toolSlug:row.tool_slug,
           provider:row.provider,
           programme:row.programme,
+          accountEmail:row.account_email||null,
           reportedClicksTotal:truthNum(row.reported_clicks_total),
+          reportedConversionsTotal:truthNum(row.reported_conversions_total),
+          pendingCommissionAmount:truthNum(row.pending_commission_amount),
+          currency:row.currency||null,
           observedAt:row.observed_at,
           evidenceSource:row.evidence_source
         })),
