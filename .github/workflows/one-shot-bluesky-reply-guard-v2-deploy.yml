@@ -1,5 +1,5 @@
 name: One Shot Bluesky Reply Guard v2 Deploy
-# retry after regression-test correction
+# deploy semantic guard v3 after bad-reply incident
 
 on:
   push:
