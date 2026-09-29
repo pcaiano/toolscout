@@ -12,7 +12,8 @@ const CASES=[
   {pathname:'/compare',query:'?a=airtable&b=semrush&source=phase12-shadow'},
   {pathname:'/categories'},
   {pathname:'/crm-tools'},
-  {pathname:'/seo-tools'}
+  {pathname:'/seo-tools'},
+  {pathname:'/blog/'}
 ];
 
 function contentType(file){
@@ -69,6 +70,10 @@ function compareCapabilities(pathname,html){
       ['commercial_cta_lost',/\/go\//],
       ['history_state_lost',/history\.replaceState/]
     ])if(!re.test(html))errors.push(code);
+  }
+  if(pathname==='/blog/'){
+    if(!/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex[^"']*follow/i.test(html))errors.push('blog_noindex_lost');
+    if(!/Research before publication\./.test(html))errors.push('blog_editorial_control_copy_lost');
   }
   if(pathname==='/tools'){
     for(const [code,re] of [

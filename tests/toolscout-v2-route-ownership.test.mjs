@@ -46,7 +46,9 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/categories',{method:'GET'}).owner,'public_navigation');
   assert.equal(routeOwner('/crm-tools',{method:'GET'}).owner,'public_navigation');
   assert.equal(routeOwner('/seo-tools',{method:'GET'}).owner,'public_navigation');
-  assert.equal(routeOwner('/blog/',{method:'GET'}).owner,'public_site');
+  assert.equal(routeOwner('/blog/',{method:'GET'}).owner,'public_navigation');
+  assert.equal(routeOwner('/blog',{method:'GET'}).owner,'legacy_chain');
+  assert.equal(routeOwner('/blog/article',{method:'GET'}).owner,'legacy_chain');
   assert.equal(routeOwner('/go/airtable',{method:'GET'}).owner,'public_site');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });

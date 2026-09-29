@@ -10,7 +10,8 @@ const HUBS=Object.freeze({
   '/compare':'/compare.html',
   '/categories':'/categories.html',
   '/crm-tools':'/crm-tools.html',
-  '/seo-tools':'/seo-tools.html'
+  '/seo-tools':'/seo-tools.html',
+  '/blog':'/blog/index.html'
 });
 
 function normalizedHubPath(pathname){
