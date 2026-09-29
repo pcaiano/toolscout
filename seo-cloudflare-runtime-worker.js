@@ -1,4 +1,5 @@
 import base from './cloudflare-primary-runtime-worker.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 let schemaReady=null,configCache=null;
@@ -10,22 +11,11 @@ function htmlResponse(response,html){const h=new Headers(response.headers);h.set
 
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS seo_runtime_state(
-      pathname TEXT PRIMARY KEY,
-      reason TEXT NOT NULL,
-      impressions INTEGER NOT NULL DEFAULT 0,
-      clicks INTEGER NOT NULL DEFAULT 0,
-      position REAL NOT NULL DEFAULT 0,
-      active INTEGER NOT NULL DEFAULT 1,
-      source_generated_at TEXT,
-      first_activated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_evaluated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      indexnow_queued_at TEXT,
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_seo_runtime_active ON seo_runtime_state(active,updated_at DESC)`)
-  ]).catch(error=>{schemaReady=null;throw error});
+  schemaReady=(async()=>{
+    const row=await env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='seo_runtime_state'").first();
+    if(Number(row?.n||0)!==1)throw new Error('seo_runtime_schema_not_migrated');
+    return{ok:true,source:'d1_migrations'};
+  })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
 async function assetJson(request,env,path,fallback){
@@ -234,20 +224,26 @@ async function health(env){
   return {status:'active',executor:'cloudflare',qualityGate:'runtime-safe-v1',state:{total:Number(summary?.total||0),active:Number(summary?.active||0),indexNowQueued24h:Number(summary?.indexnow_queued_24h||0),updatedAt:summary?.updated_at||null},items};
 }
 
+export async function handleSeoRuntimeRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/api/seo/runtime-health'){
+    await refreshState(request,env).catch(()=>{});
+    return Response.json(await health(env),{headers:H});
+  }
+  return null;
+}
+
 export default{
   async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/seo/runtime-health'){
-      await refreshState(request,env).catch(()=>{});
-      return Response.json(await health(env),{headers:H});
-    }
+    const owned=await handleSeoRuntimeRoute(request,env);
+    if(owned)return owned;
     const response=await base.fetch(request,env,ctx);
     return transformPage(request,response,env);
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
     if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
-    if(trigger==='15 * * * *'||trigger==='35 3 * * *'){
+    if(trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily){
       const task=refreshState(new Request('https://trytoolscout.org/'),env).catch(()=>{});
       if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }

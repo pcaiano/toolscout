@@ -1,5 +1,6 @@
 import base from './seo-cloudflare-runtime-worker.js';
 import {missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const ROUTES=[
@@ -217,23 +218,29 @@ function authorized(request,env){
   return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
 }
 
+export async function handleAuthorityAcquisitionRoute(request,env){
+  const u=new URL(request.url);
+  if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
+  if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+    return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
+  }
+  return null;
+}
+
 export default{
   async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    if(request.method==='GET'&&u.pathname==='/api/distribution/authority/vetted-health')return Response.json(await health(env),{headers:H});
-    if(request.method==='POST'&&u.pathname==='/api/distribution/authority/vetted-run'){
-      if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      return Response.json(await runVetted(env,{force:u.searchParams.get('force')==='1'}),{headers:H});
-    }
+    const owned=await handleAuthorityAcquisitionRoute(request,env);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
-    if(trigger==='15 * * * *'){
+    if(trigger===TOOLSCOUT_CRONS.hourly){
       await Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
     }
     const inherited=typeof base.scheduled==='function'?await base.scheduled(event,env,ctx):undefined;
-    if(trigger==='15 * * * *'){
+    if(trigger===TOOLSCOUT_CRONS.hourly){
       const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/',{headers:missionCycleHeaders(event,'authority_acquisition_scheduler')}),env,ctx).catch(()=>null);
       if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
     }

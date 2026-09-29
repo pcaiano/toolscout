@@ -2,6 +2,7 @@ import base from './command-center-light-theme-worker.js';
 import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger} from './engine-run-ledger.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const AUTHORITY_ATTEMPT_MIN_24H=6;
 const AUTHORITY_REFERRING_DOMAIN_FLOOR=10;
@@ -187,7 +188,7 @@ export default {
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
-    const hourly=trigger==='15 * * * *';
+    const hourly=trigger===TOOLSCOUT_CRONS.hourly;
     if(hourly){
       const task=(async()=>{
         const state=await authorityState(env);

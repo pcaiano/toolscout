@@ -29,13 +29,14 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div><div class="eyebrow">ToolScout - business control</div><h1>Command Center</h1><p class="sub">Five business KPIs first: visitors, sessions, Google clicks, outbound clicks and monetized outbound. Operational detail appears only when it explains a result or a problem.</p></div><button class="btn primary" id="refresh">Refresh</button></header>
+<header class="top"><div><div class="eyebrow">ToolScout - business control</div><h1>Command Center</h1><p class="sub">Business outcomes first: demand, traffic, authority, editorial depth and monetized outbound. Operational detail appears only when it explains a result or a problem.</p></div><button class="btn primary" id="refresh">Refresh</button></header>
 <div class="statusbar"><div id="status"><strong>Loading current state...</strong></div><span id="sourceStatus">Live sources</span></div>
 <main class="grid">
 <section class="card span12"><div class="head"><div><div class="kicker">Business</div><div class="title">Business State</div></div><div class="meta" id="businessMeta">Current verified evidence</div></div><div class="body" id="businessBody"><div class="empty">Loading...</div></div></section>
 <section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Traffic Progress</div></div><div class="meta" id="trafficProgressMeta">Google Analytics 4</div></div><div class="body" id="trafficProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span4"><div class="head"><div><div class="kicker">30 day trend</div><div class="title">Authority Progress</div></div><div class="meta" id="authorityProgressMeta">Backlinks + referring domains</div></div><div class="body" id="authorityProgressBody"><div class="empty">Loading...</div></div></section>
 <section class="card span4"><div class="head"><div><div class="kicker">28 day trend</div><div class="title">Google Search Progress</div></div><div class="meta" id="gscProgressMeta">Search Console</div></div><div class="body" id="gscProgressBody"><div class="empty">Loading...</div></div></section>
+<section class="card span12"><div class="head"><div><div class="kicker">Observed demand + information gain</div><div class="title">Editorial Authority</div></div><div class="meta" id="editorialMeta">ToolScout 2.0 priority portfolio</div></div><div class="body" id="editorialBody"><div class="empty">Loading...</div></div></section>
 <section class="card span7"><div class="head"><div><div class="kicker">Autonomous execution + R&D</div><div class="title">Growth Brain</div></div><div class="meta" id="brainMeta">What it is doing now and what it is exploring next</div></div><div class="body" id="brainBody"><div class="empty">Loading...</div></div></section>
 <section class="card span5"><div class="head"><div><div class="kicker">Human exceptions only</div><div class="title">Needs You</div></div><div class="meta" id="queueMeta">Chairman Queue</div></div><div class="body" id="queueBody"><div class="empty">Loading...</div></div></section>
 <section class="card span12"><div class="head"><div><div class="kicker">Capacity + throughput</div><div class="title">Growth Execution Plane</div></div><div class="meta" id="throughputMeta">Cloudflare control · Render compute · Make sender · Auth broker</div></div><div class="body" id="throughputBody"><div class="empty">Loading...</div></div></section>
@@ -124,7 +125,7 @@ async function get(url,fresh=false,timeoutMs=12000){
  return r.json();
 }
 function business(){
- const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},a=data.acquisition||{},q=data.queue||{};
+ const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},ed=t.editorial||{},a=data.acquisition||{},q=data.queue||{};
  const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=t.search||{},out24=a?.outbound?.last24Hours||{},outMtd=a?.outbound?.monthToDate||{};
  const visitors=a.status==='connected'?(gaUsers.activeToday??gaUsers.today):null;
  const sessions24=a.status==='connected'?gaSessions.last24Hours:null;
@@ -144,10 +145,13 @@ function business(){
    metric('Google clicks - 28d',n(googleClicks),'Google Search Console')+
    metric('Outbound clicks - 24h',n(outbound24),a.status==='connected'?n(outMtd.outbound)+' MTD · GA4 vendor_outbound':'GA4 outbound unavailable')+
    metric('Monetized outbound - 24h',n(monetized24),a.status==='connected'?'GA4 monetized_outbound · tracking from 29 Sep':'GA4 outbound unavailable')+
+   metric('Referring domains',b.seRankingReferringDomains==null&&b.referringDomains==null?'Unavailable':n(b.seRankingReferringDomains??b.referringDomains),'External authority truth')+
+   metric('Editorial portfolio',ed.averagePriorityScore==null?'Unavailable':dec(ed.averagePriorityScore,1)+' / '+n(ed.targetScore),n(ed.belowTarget)+' below target')+
   '</div>'+
   '<div class="section"><div class="sectionTitle">Business context</div>'+
    row('Active affiliates',aff.productionRoutes==null?'Unavailable':n(aff.productionRoutes),'Production routes')+
    row('Authority',b.seRankingBacklinks==null&&b.observedBacklinks==null?'Unavailable':n(b.seRankingBacklinks??b.observedBacklinks),(b.seRankingReferringDomains==null&&b.referringDomains==null?'':n(b.seRankingReferringDomains??b.referringDomains)+' referring domains'))+
+   row('Editorial authority',ed.averagePriorityScore==null?'Unavailable':dec(ed.averagePriorityScore,1)+' / '+n(ed.targetScore),n(ed.priorityCount)+' priority pages · '+n(ed.belowTarget)+' below target')+
    row('Needs you',q.total==null?'Unavailable':n(q.total),q.estimated_minutes==null?'':n(q.estimated_minutes)+' min estimated')+
   '</div>';
 }
@@ -205,6 +209,22 @@ function gscProgress(){
   '<div class="chartBox"><div class="sectionTitle">Average position - lower is better</div>'+seriesChart(rows,[{key:'position',label:'Average position',cls:'warn'}],{zeroBaseline:false,invert:true,axisDecimals:1})+'</div>'+
   moverRows+
   '<div class="sourceLine">Only Search Console days marked final by Google are plotted and used for the 28-day totals and 7-day comparison. Preliminary fresh-data days are withheld until finalized so incomplete ingestion cannot look like a traffic or ranking collapse. Average position is inverted so ranking improvement moves upward.</div>';
+}
+
+function editorialAuthority(){
+ const ed=data?.truth?.editorial||{},items=Array.isArray(ed.priority)?ed.priority:[];
+ const target=Number(ed.targetScore||70),below=Number(ed.belowTarget||0),evaluated=Number(ed.evaluated||0),avg=ed.averagePriorityScore;
+ document.getElementById('editorialMeta').textContent=ed.generatedAt?'Portfolio refreshed '+dt(ed.generatedAt):'ToolScout 2.0 priority portfolio';
+ const top=items.slice(0,8);
+ const status=below===0&&evaluated>0?'Priority portfolio meets the editorial target.':below>0?'Observed-demand pages need deeper evidence before surface expansion.':'Editorial portfolio unavailable.';
+ const metrics='<div class="progressStats">'+
+   '<div class="progressStat"><small>Target score</small><b>'+n(target)+'</b></div>'+
+   '<div class="progressStat"><small>Portfolio average</small><b>'+(avg==null?'Unavailable':dec(avg,1))+'</b></div>'+
+   '<div class="progressStat"><small>Below target</small><b>'+n(below)+'</b></div>'+
+   '<div class="progressStat"><small>Evaluated</small><b>'+n(evaluated)+'</b></div>'+
+  '</div>';
+ const rowsHtml=top.length?'<div class="section"><div class="sectionTitle">Highest-priority authority gaps</div>'+top.map(x=>row(x.page,dec(x.score,0)+' / '+n(x.target),n(x.impressions)+' impressions · '+(x.position==null?'position unavailable':'position '+dec(x.position,1))+' · '+human(x.action||'observe')+' · '+n(x.primarySourceLinks)+' primary-source links')).join('')+'</div>':'<div class="empty">No editorial priority rows available.</div>';
+ document.getElementById('editorialBody').innerHTML='<div class="headline"><b>'+esc(status)+'</b><span>ToolScout 2.0 deepens pages with observed demand, weak primary-source evidence or insufficient buyer analysis before creating more SEO surface.</span></div>'+metrics+rowsHtml+'<div class="sourceLine">Editorial Authority is a ToolScout internal quality model. It is not a Google ranking score. The portfolio is prioritized using observed Search Console demand plus evidence depth.</div>';
 }
 
 function brain(){
@@ -371,7 +391,7 @@ function health(){
    :'';
  document.getElementById('healthBody').innerHTML=issues.map(i=>'<div class="issue '+i.level+'"><b>'+esc(i.title)+'</b>'+esc(i.detail)+'</div>').join('')+'<div class="section">'+rows.map(x=>row(x[0],x[1],x[2])).join('')+'</div>'+architectureDetail+'<div class="sourceLine">Critical metrics are read from the canonical business truth endpoint. Missing data is not converted to zero.</div>';
 }
-function render(){business();trafficProgress();authorityProgress();gscProgress();brain();throughput();queue();results();health()}
+function render(){business();trafficProgress();authorityProgress();gscProgress();editorialAuthority();brain();throughput();queue();results();health()}
 async function reviewReputation(button){
  const kind=button.dataset.kind,key=button.dataset.key,verdict=button.dataset.reputation;
  if(!kind||!key||!verdict)return;

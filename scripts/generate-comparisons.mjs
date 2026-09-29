@@ -129,7 +129,7 @@ function render(a,b){
   html=html.replace('<body data-default-a="" data-default-b="">',`<body data-default-a="${esc(a.slug)}" data-default-b="${esc(b.slug)}">`);
   html=html.replace('<div id="pairNote"></div>',`<div id="pairNote"><div class="pairNote">Comparing <strong>${esc(a.name)}</strong> with <strong>${esc(b.name)}</strong>. Change either selector to explore another pair.</div></div>`);
   html=html.replace('<div id="table" class="table"></div>',`<div id="table" class="table">${initialTable(a,b)}</div>`);
-  html=html.replace('<section id="analysis" class="analysis" aria-live="polite"></section>',`<section id="analysis" class="analysis" aria-live="polite"><div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>${esc(editorialConclusion(a,b))}</p></section>`);
+  html=html.replace('<section id="analysis" class="analysis" aria-live="polite"></section>',`<section id="analysis" class="analysis" aria-live="polite"><div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>${esc(editorialConclusion(a,b))}</p><p class="source-note"><strong>Primary sources:</strong> <a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.name)} official source</a> · <a href="${esc(b.sourceUrl)}" target="_blank" rel="noopener">${esc(b.name)} official source</a>. Catalog evidence last checked ${esc(a.lastVerified||'not recorded')} and ${esc(b.lastVerified||'not recorded')} respectively.</p></section>`);
   html=html.replace('<section id="suggestions" class="suggestions" aria-live="polite"></section>',`<section id="suggestions" class="suggestions" aria-live="polite">${suggestionsHtml(a,b)}</section>`);
   return html;
 }

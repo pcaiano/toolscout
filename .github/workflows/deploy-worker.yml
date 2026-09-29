@@ -28,6 +28,11 @@ jobs:
       - name: Validate ToolScout copy guard
         run: node scripts/check-distribution-copy.mjs
 
+      - name: Validate ToolScout 2.0 runtime
+        run: |
+          node scripts/audit-runtime-architecture.mjs
+          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs
+
       - name: Apply canonical public navigation
         run: node scripts/unify-public-nav.mjs
 
@@ -40,3 +45,6 @@ jobs:
         run: npx wrangler deploy --config wrangler.toml --latest
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Verify ToolScout 2.0 live preservation
+        run: node scripts/verify-v2-live-smoke.mjs

@@ -119,7 +119,7 @@ const truthMaybeNum=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Num
 const BUSINESS_TRUTH_CACHE_MS=120000;
 let businessTruthCache={at:0,value:null,promise:null};
 let affiliateNetworkEvidenceReady=null;
-async function ensureAffiliateNetworkEvidenceSchema(env){
+async function reconcileAffiliateNetworkEvidenceSchema(env){
   if(affiliateNetworkEvidenceReady)return affiliateNetworkEvidenceReady;
   affiliateNetworkEvidenceReady=(async()=>{
     // Phase 1: make the legacy table structurally compatible before creating indexes
@@ -211,6 +211,28 @@ async function ensureAffiliateNetworkEvidenceSchema(env){
   })().catch(error=>{affiliateNetworkEvidenceReady=null;throw error});
   return affiliateNetworkEvidenceReady;
 }
+async function affiliateNetworkEvidenceSchemaState(env){
+  try{
+    const [tables,columns]=await Promise.all([
+      env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('affiliate_network_click_evidence','affiliate_network_accounts','affiliate_network_program_evidence')").all(),
+      env.DB.prepare("PRAGMA table_info(affiliate_network_click_evidence)").all()
+    ]);
+    const tableNames=new Set((tables?.results||[]).map(row=>String(row.name||'')));
+    const columnNames=new Set((columns?.results||[]).map(row=>String(row.name||'')));
+    const requiredTables=['affiliate_network_click_evidence','affiliate_network_accounts','affiliate_network_program_evidence'];
+    const requiredColumns=['account_email','programme_status','reported_conversions_total','pending_commission_amount','currency'];
+    const missingTables=requiredTables.filter(name=>!tableNames.has(name));
+    const missingColumns=requiredColumns.filter(name=>!columnNames.has(name));
+    return{ok:missingTables.length===0&&missingColumns.length===0,missingTables,missingColumns,mode:'read_only_schema_probe'};
+  }catch(error){
+    return{ok:false,missingTables:[],missingColumns:[],mode:'read_only_schema_probe',error:String(error?.message||error).slice(0,500)};
+  }
+}
+function adminAuthorized(request,env){
+  const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+  return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
+}
+
 async function ccAssetJson(request,env,path,fallback){
   try{
     const url=new URL(path,request.url);
@@ -220,8 +242,9 @@ async function ccAssetJson(request,env,path,fallback){
   }catch{return fallback}
 }
 async function buildCommandCenterBusinessTruth(request,env){
-  const affiliateEvidenceSchemaOk=await ensureAffiliateNetworkEvidenceSchema(env).then(()=>true).catch(()=>false);
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta]=await Promise.all([
+  const affiliateEvidenceSchema=await affiliateNetworkEvidenceSchemaState(env);
+  const affiliateEvidenceSchemaOk=affiliateEvidenceSchema.ok===true;
+  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta,editorialAuthorityPortfolio]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -357,7 +380,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND s.classification='owner' THEN 1 ELSE 0 END) owner30d,
       SUM(CASE WHEN c.affiliate_active_at_click=1 AND c.created_at>=datetime('now','-30 days') AND (s.classification='unknown/legacy' OR s.session_id IS NULL) THEN 1 ELSE 0 END) unverified30d
       FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id`).first().catch(()=>null),
-    env.DB.prepare(`SELECT value FROM outbound_integrity_meta WHERE key='tracking_started_at' LIMIT 1`).first().catch(()=>null)
+    env.DB.prepare(`SELECT value FROM outbound_integrity_meta WHERE key='tracking_started_at' LIMIT 1`).first().catch(()=>null),
+    ccAssetJson(request,env,'/reports/editorial-authority-portfolio.json',{summary:{},portfolio:[],all:[]})
   ]);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
@@ -545,10 +569,16 @@ async function buildCommandCenterBusinessTruth(request,env){
   if(truthNum(architecture.open_incidents)>0){currentGrowthStatus='critical';currentGrowthDirective='repair_architecture_and_continue_bounded_acquisition'}
   else if(contract.missingExecutors>0||contract.stalled>0){currentGrowthStatus='critical';currentGrowthDirective='repair_execution_contract_and_continue_bounded_acquisition'}
   else if(truthNum(growth.attributed_humans_7d)>0){currentGrowthStatus='working';currentGrowthDirective='scale_proven_human_sources_and_existing_search_demand'}
+  const editorialPortfolio=Array.isArray(editorialAuthorityPortfolio?.portfolio)?editorialAuthorityPortfolio.portfolio:[];
+  const editorialSummary=editorialAuthorityPortfolio?.summary||{};
+  const editorialTarget=truthNum(editorialAuthorityPortfolio?.targetScore)||70;
+  const editorialAverage=editorialPortfolio.length?Number((editorialPortfolio.reduce((sum,row)=>sum+truthNum(row.editorialAuthorityScore),0)/editorialPortfolio.length).toFixed(1)):null;
+  const editorialPriority=editorialPortfolio.slice(0,10).map(row=>({page:row.page,pageType:row.pageType,score:truthNum(row.editorialAuthorityScore),target:truthNum(row.targetScore)||editorialTarget,impressions:truthNum(row.impressions),clicks:truthNum(row.clicks),position:row.position==null?null:Number(row.position),action:row.action||'observe',primarySourceLinks:truthNum(row.primarySourceLinks),hasAnalysis:Boolean(row.hasAnalysis),hasTradeoffs:Boolean(row.hasTradeoffs),hasVerification:Boolean(row.hasVerification)}));
   return {
     ok:true,
-    version:'command-center-business-truth-v5-simple-kpis',
+    version:'command-center-business-truth-v6-editorial-authority',
     degradedSources:affiliateEvidenceSchemaOk?[]:['affiliate_network_evidence'],
+    affiliateEvidenceSchema,
     generatedAt:new Date().toISOString(),
     growth:{
       status:currentGrowthStatus,
@@ -793,6 +823,17 @@ async function buildCommandCenterBusinessTruth(request,env){
       previous7,
       change7d
     },
+    editorial:{
+      targetScore:editorialTarget,
+      averagePriorityScore:editorialAverage,
+      evaluated:truthNum(editorialSummary.evaluated),
+      belowTarget:truthNum(editorialSummary.belowTarget),
+      priorityCount:editorialPortfolio.length,
+      generatedAt:editorialAuthorityPortfolio?.generatedAt||null,
+      model:editorialAuthorityPortfolio?.model||'toolscout-editorial-authority-v1',
+      priority:editorialPriority,
+      source:'/reports/editorial-authority-portfolio.json'
+    },
     recentResults,
     growthActivity,
     growthActions,
@@ -838,21 +879,28 @@ export default{
       const m=u.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)(?:\.html)?\/?$/i);
       if(m){const runtime=await publicRuntimeToolResponse(env,m[1]).catch(()=>null);if(runtime)return injectToolScoutSocialFooter(runtime);}
     }
+    if(request.method==='POST'&&u.pathname==='/api/command-center-business-truth/reconcile-affiliate-schema'){
+      if(!adminAuthorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:{'Cache-Control':'no-store'}});
+      await reconcileAffiliateNetworkEvidenceSchema(env);
+      const state=await affiliateNetworkEvidenceSchemaState(env);
+      businessTruthCache={at:0,value:null,promise:null};
+      return Response.json({ok:state.ok,reconciled:true,state},{status:state.ok?200:503,headers:{'Cache-Control':'no-store'}});
+    }
     if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
       const fresh=u.searchParams.get('fresh')==='1';
       return Response.json(await commandCenterBusinessTruth(request,env,{fresh}),{headers:{'Cache-Control':'private, no-store, max-age=0','X-ToolScout-Read-Mode':fresh?'fresh':'observability-cache'}});
     }
     if(request.method==='GET'&&u.pathname==='/api/command-center-simplified-health')return Response.json({
       ok:true,
-      version:'business-truth-v10-hybrid-execution',
+      version:'business-truth-v11-editorial-readonly-observability',
       canonicalView:'command-center-simplified-view',
-      cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Growth Brain','Needs You','Growth Execution Plane','Recent Results','System Truth'],
+      cards:['Business State','Traffic Progress','Authority Progress','Google Search Progress','Editorial Authority','Growth Brain','Needs You','Growth Execution Plane','Recent Results','System Truth'],
       suppressed:['North Star duplicate','Distribution Engine detail card','Affiliate Coverage detail table','ToolScout Footprint','Growth Ledger duplicate','Revenue & Coverage duplicate','Autonomous Growth duplicate','legacy Google Search chart','legacy traffic charts','visitor country charts','product behavior card'],
       canonicalSources:['Growth Supervisor','GA4','ToolScout redirect ledger','Google Search Console','verified backlink ledger','Chairman Queue','Cloudflare control plane','Render overflow compute','Make push sender','Auth Broker'],
       refreshSeconds:60,
       heavyRefreshSeconds:180,
       hiddenTabPolling:false,
-      d1ReadConservation:'observability_only_hot_paths_indexed_compute_metrics_o1',
+      d1ReadConservation:'observability_gets_are_read_only_no_schema_mutation',
       growthRndFrontier:'net_new_acquisition_v1',
       unavailableIsNeverZero:true,
       generatedAt:new Date().toISOString()

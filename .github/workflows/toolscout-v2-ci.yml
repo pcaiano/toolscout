@@ -1,0 +1,89 @@
+name: ToolScout 2.0 Migration CI
+
+on:
+  pull_request:
+    paths:
+      - 'acquisition-value-model.js'
+      - 'compute-router-worker.js'
+      - 'seo-cloudflare-runtime-worker.js'
+      - 'migrations/0087_seo_runtime_schema.sql'
+      - 'command-center-light-theme-worker.js'
+      - 'command-center-simplified-view.js'
+      - 'operational-truth-reconciliation-worker.js'
+      - 'growth-runtime-integrity-worker.js'
+      - 'growth-runtime-closed-loop-worker.js'
+      - 'authority-acquisition-worker.js'
+      - 'distribution-orchestrator-worker.js'
+      - 'growth-scheduler.js'
+      - 'runtime-schedule-contract.js'
+      - 'migrations/0088_mission_integrity_schema.sql'
+      - 'mission-integrity-v2-worker.js'
+      - 'runtime-route-contract.js'
+      - 'distribution-priority-worker.js'
+      - 'scripts/editorial-authority-model.mjs'
+      - 'scripts/build-editorial-authority-portfolio.mjs'
+      - 'scripts/build-growth-priority.mjs'
+      - 'scripts/audit-runtime-architecture.mjs'
+      - 'scripts/validate-v2-preservation.mjs'
+      - 'scripts/generate-tool-pages.mjs'
+      - 'scripts/generate-seo-pages.mjs'
+      - 'scripts/generate-comparisons.mjs'
+      - 'data/organic-growth-engine.json'
+      - 'docs/OPERATING-CONTRACT.json'
+      - 'migrations/0085_toolscout_v2_external_value.sql'
+      - 'migrations/0086_compute_control_plane_schema.sql'
+      - 'tests/toolscout-v2-*.test.mjs'
+      - '.github/workflows/toolscout-v2-ci.yml'
+      - '.github/workflows/deploy-worker.yml'
+      - 'scripts/verify-v2-live-smoke.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check ToolScout 2.0 runtime
+        run: |
+          node --check acquisition-value-model.js
+          node --check distribution-priority-worker.js
+          node --check compute-router-worker.js
+          node --check seo-cloudflare-runtime-worker.js
+          node --check runtime-schedule-contract.js
+          node --check runtime-route-contract.js
+          node --check mission-integrity-v2-worker.js
+          node --check growth-scheduler.js
+          node --check distribution-orchestrator-worker.js
+          node --check authority-acquisition-worker.js
+          node --check growth-runtime-closed-loop-worker.js
+          node --check growth-runtime-integrity-worker.js
+          node --check command-center-light-theme-worker.js
+          node --check operational-truth-reconciliation-worker.js
+          node --check command-center-simplified-view.js
+          node --check scripts/editorial-authority-model.mjs
+          node --check scripts/build-editorial-authority-portfolio.mjs
+          node --check scripts/build-growth-priority.mjs
+          node --check scripts/audit-runtime-architecture.mjs
+          node --check scripts/validate-v2-preservation.mjs
+          node --check scripts/verify-v2-live-smoke.mjs
+          node --check scripts/generate-tool-pages.mjs
+          node --check scripts/generate-seo-pages.mjs
+          node --check scripts/generate-comparisons.mjs
+      - name: Audit ToolScout 2.0 runtime architecture
+        run: node scripts/audit-runtime-architecture.mjs
+      - name: Enforce ToolScout 2.0 preservation invariants
+        env:
+          TOOLSCOUT_V2_BASE_REF: origin/main
+        run: node scripts/validate-v2-preservation.mjs
+      - name: Validate operating contract JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
+      - name: Run ToolScout 2.0 policy tests
+        run: node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs

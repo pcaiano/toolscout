@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "principles": {
     "fullyAutonomous": true,
     "ownerContentInterventionRequired": false,
@@ -25,7 +25,10 @@
     "activityIsNotSuccess": true,
     "scaleOnlyOnHumanOrCommercialEvidence": true,
     "competitiveAcquisitionGapAlwaysOn": true,
-    "resourceBudgetedAlwaysOn": true
+    "resourceBudgetedAlwaysOn": true,
+    "editorialAuthorityBeforeSurfaceExpansion": true,
+    "informationGainRequiredForPriorityCommercialPages": true,
+    "freshSoftwareIntelligenceFeedsDecisionPages": true
   },
   "autonomy": {
     "mode": "closed-loop",
@@ -221,5 +224,26 @@
     "scaleOnlyAfterObservedDemandOrHumanEvidence": true,
     "maxNewSearchInterventionsPerCycle": 2,
     "maxNewCompetitiveContentIntentsPerCycle": 1
+  },
+  "editorialAuthority": {
+    "mode": "evidence-and-information-gain-first",
+    "priorityPortfolioSize": 15,
+    "targetScore": 70,
+    "minimumPrimarySourceLinks": 1,
+    "minimumObservedImpressionsForAuthorityIntervention": 20,
+    "authorityGapPriorityWeight": 0.15,
+    "protectTop10WhenAuthorityHealthy": true,
+    "preferredEvidence": [
+      "primary_vendor_documentation",
+      "pricing_and_plan_changes",
+      "changelog_and_release_notes",
+      "feature_constraints",
+      "integration_constraints",
+      "buyer_tradeoffs",
+      "dated_verification",
+      "toolscout_first_party_dataset"
+    ],
+    "softwareNewsRole": "authority_wedge_and_freshness_input",
+    "softwareTrendsRole": "citation_worthy_first_party_dataset"
   }
 }

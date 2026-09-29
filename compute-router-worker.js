@@ -2,10 +2,19 @@ import base from './operational-truth-reconciliation-worker.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
 import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
+import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
+import {TOOLSCOUT_CRONS,scheduleContract} from './runtime-schedule-contract.js';
+import {routeContract,routeOwner} from './runtime-route-contract.js';
+import {handleDistributionPriorityRoute} from './distribution-priority-worker.js';
+import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
+import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
+import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
+import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
+import {runGrowthScheduler} from './growth-scheduler.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-const OVERFLOW_CRON='*/15 * * * *';
-const RENDER_KEEPALIVE_CRON='7,22,37,52 * * * *';
+const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
+const RENDER_KEEPALIVE_CRON=TOOLSCOUT_CRONS.renderKeepalive;
 const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const AUTHORIZED_EXECUTION_VERSION=2;
@@ -78,171 +87,22 @@ async function sha256(value){const d=await crypto.subtle.digest('SHA-256',new Te
 async function shortHash(value){return (await sha256(value)).slice(0,20)}
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_jobs(
-      job_id TEXT PRIMARY KEY,
-      job_key TEXT NOT NULL UNIQUE,
-      job_type TEXT NOT NULL,
-      subject_type TEXT,
-      subject_key TEXT,
-      priority_score REAL NOT NULL DEFAULT 0,
-      payload_json TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'queued',
-      batch_id TEXT,
-      attempts INTEGER NOT NULL DEFAULT 0,
-      available_at TEXT NOT NULL DEFAULT (datetime('now')),
-      leased_at TEXT,
-      completed_at TEXT,
-      result_json TEXT,
-      last_error TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_status_priority ON compute_overflow_jobs(status,priority_score DESC,available_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_batch ON compute_overflow_jobs(batch_id,status)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_subject_type_created ON compute_overflow_jobs(subject_key,job_type,created_at)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_batches(
-      batch_id TEXT PRIMARY KEY,
-      completion_token_hash TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'dispatched',
-      job_count INTEGER NOT NULL DEFAULT 0,
-      trigger_http_status INTEGER,
-      fetched_at TEXT,
-      dispatched_at TEXT NOT NULL DEFAULT (datetime('now')),
-      completed_at TEXT,
-      result_summary_json TEXT,
-      last_error TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_batches_status ON compute_overflow_batches(status,dispatched_at)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_locks(
-      lock_name TEXT PRIMARY KEY,
-      lease_until TEXT NOT NULL,
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_events(
-      event_id TEXT PRIMARY KEY,
-      event_type TEXT NOT NULL,
-      status TEXT,
-      job_id TEXT,
-      batch_id TEXT,
-      detail TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_metrics(
-      id TEXT PRIMARY KEY,
-      metric_day TEXT NOT NULL DEFAULT (date('now')),
-      queued INTEGER NOT NULL DEFAULT 0,
-      leased INTEGER NOT NULL DEFAULT 0,
-      completed_today INTEGER NOT NULL DEFAULT 0,
-      failed_today INTEGER NOT NULL DEFAULT 0,
-      created_today INTEGER NOT NULL DEFAULT 0,
-      active_batches INTEGER NOT NULL DEFAULT 0,
-      completed_batches_today INTEGER NOT NULL DEFAULT 0,
-      last_dispatched_at TEXT,
-      last_completed_at TEXT,
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_metrics(id,metric_day) VALUES('global',date('now'))`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_funnel_metrics(
-      id TEXT PRIMARY KEY,
-      metric_day TEXT NOT NULL DEFAULT (date('now')),
-      bootstrapped INTEGER NOT NULL DEFAULT 0,
-      research_completed_today INTEGER NOT NULL DEFAULT 0,
-      classified_research_jobs_today INTEGER NOT NULL DEFAULT 0,
-      submission_routes_found_today INTEGER NOT NULL DEFAULT 0,
-      machine_candidates_found_today INTEGER NOT NULL DEFAULT 0,
-      form_routes_seen_today INTEGER NOT NULL DEFAULT 0,
-      auth_routes_seen_today INTEGER NOT NULL DEFAULT 0,
-      captcha_routes_seen_today INTEGER NOT NULL DEFAULT 0,
-      policy_blockers_seen_today INTEGER NOT NULL DEFAULT 0,
-      actions_authorized_today INTEGER NOT NULL DEFAULT 0,
-      actions_completed_today INTEGER NOT NULL DEFAULT 0,
-      submissions_accepted_today INTEGER NOT NULL DEFAULT 0,
-      placements_verified_today INTEGER NOT NULL DEFAULT 0,
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_funnel_metrics(id,metric_day) VALUES('global',date('now'))`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS compute_overflow_budget(
-      kind TEXT PRIMARY KEY,
-      metric_day TEXT NOT NULL DEFAULT (date('now')),
-      used_today INTEGER NOT NULL DEFAULT 0,
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('research',date('now'),0)`),
-    env.DB.prepare(`INSERT OR IGNORE INTO compute_overflow_budget(kind,metric_day,used_today) VALUES('execution',date('now'),0)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS contact_supply_domain(
-      domain TEXT PRIMARY KEY,
-      source_type TEXT NOT NULL,
-      source_key TEXT,
-      source_name TEXT,
-      source_url TEXT,
-      priority_score REAL NOT NULL DEFAULT 0,
-      status TEXT NOT NULL DEFAULT 'queued',
-      contact_email TEXT,
-      contact_name TEXT,
-      contact_title TEXT,
-      contact_source TEXT,
-      contact_source_url TEXT,
-      route_type TEXT,
-      route_url TEXT,
-      provider TEXT,
-      provider_person_id TEXT,
-      public_attempts INTEGER NOT NULL DEFAULT 0,
-      apollo_status TEXT NOT NULL DEFAULT 'plan_blocked',
-      next_research_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_researched_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_contact_supply_status_priority ON contact_supply_domain(status,priority_score DESC,next_research_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_contact_supply_email ON contact_supply_domain(contact_email,status)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS contact_supply_metrics(
-      id TEXT PRIMARY KEY,
-      target_ready INTEGER NOT NULL DEFAULT 200,
-      min_ready INTEGER NOT NULL DEFAULT 150,
-      catalog_domains INTEGER NOT NULL DEFAULT 0,
-      network_domains INTEGER NOT NULL DEFAULT 0,
-      vendor_domains INTEGER NOT NULL DEFAULT 0,
-      ready_email INTEGER NOT NULL DEFAULT 0,
-      ready_route INTEGER NOT NULL DEFAULT 0,
-      cooldown INTEGER NOT NULL DEFAULT 0,
-      researching INTEGER NOT NULL DEFAULT 0,
-      unresolved INTEGER NOT NULL DEFAULT 0,
-      apollo_eligible INTEGER NOT NULL DEFAULT 0,
-      apollo_status TEXT NOT NULL DEFAULT 'plan_blocked_people_api',
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`INSERT OR IGNORE INTO contact_supply_metrics(id,target_ready,min_ready) VALUES('global',200,150)`)
-  ]).catch(error=>{schemaReady=null;throw error});
+  schemaReady=(async()=>{
+    const required=[
+      'compute_overflow_jobs','compute_overflow_batches','compute_overflow_locks','compute_overflow_events',
+      'compute_overflow_metrics','compute_overflow_funnel_metrics','compute_overflow_budget',
+      'contact_supply_domain','contact_supply_metrics','auth_automation_capability'
+    ];
+    const placeholders=required.map(()=>'?').join(',');
+    const row=await env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${placeholders})`).bind(...required).first();
+    if(num(row?.n)!==required.length)throw new Error(`compute_control_plane_schema_not_migrated:${num(row?.n)}/${required.length}`);
+    return{ok:true,source:'d1_migrations',tables:num(row?.n)};
+  })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
 async function ensureHotIndexes(env){
   if(hotIndexesReady)return hotIndexesReady;
-  hotIndexesReady=Promise.allSettled([
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_opportunities_overflow ON distribution_opportunities(human_required,status,distribution_score DESC,updated_at)`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_lookup ON distribution_submissions(surface_slug,submission_type,asset_url,status)`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_submissions_verify ON distribution_submissions(submission_type,status,submitted_at)`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_auto_adapters_policy ON distribution_auto_adapters(policy_state,confidence,surface_slug)`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_compute_overflow_jobs_type_status_completed ON compute_overflow_jobs(job_type,status,completed_at)`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_qualification_created_result ON distribution_qualification_events(created_at,result)`).run(),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS auth_automation_capability(
-      surface_slug TEXT PRIMARY KEY,
-      automation_class TEXT NOT NULL,
-      credential_kind TEXT,
-      credential_header TEXT,
-      credential_prefix TEXT,
-      credential_state TEXT NOT NULL DEFAULT 'not_required',
-      human_bootstrap_required INTEGER NOT NULL DEFAULT 0,
-      evidence TEXT,
-      last_verified_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_vendor_amplification_domain_status ON distribution_vendor_amplification(vendor_domain,status)`).run(),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_network_outreach_domain_status ON distribution_network_outreach(domain,status)`).run()
-  ]).catch(error=>{hotIndexesReady=null;throw error});
+  hotIndexesReady=ensureSchema(env).then(()=>({ok:true,source:'d1_migrations'})).catch(error=>{hotIndexesReady=null;throw error});
   return hotIndexesReady;
 }
 function contactDomain(value){
@@ -350,8 +210,11 @@ async function seedContactSupply(env){
       WHERE domain IS NOT NULL AND status NOT IN ('suppressed_technical') ORDER BY priority_score DESC LIMIT 300`).all().catch(()=>({results:[]})),
     env.DB.prepare(`SELECT tool_slug,vendor_domain,asset_url,MAX(priority_score) priority_score FROM distribution_vendor_amplification
       WHERE vendor_domain IS NOT NULL GROUP BY lower(vendor_domain) ORDER BY priority_score DESC LIMIT 300`).all().catch(()=>({results:[]})),
-    env.DB.prepare(`SELECT surface_slug,surface_name,action_url,distribution_score FROM distribution_opportunities
-      WHERE action_url IS NOT NULL AND status NOT IN ('policy_blocked','rejected','skipped','unavailable_free') ORDER BY distribution_score DESC LIMIT 500`).all().catch(()=>({results:[]}))
+    env.DB.prepare(`SELECT surface_slug,surface_name,action_url,distribution_score,external_value_score FROM distribution_opportunities
+      WHERE action_url IS NOT NULL
+        AND status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')
+        AND (COALESCE(external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH} OR status IN ('live','verified','submitted','pending_review','scheduled'))
+      ORDER BY COALESCE(external_value_score,0) DESC,distribution_score DESC LIMIT 500`).all().catch(()=>({results:[]}))
   ]);
   for(const row of rows(network))seeded+=await upsertContactSupplyDomain(env,{domain:row.domain,sourceType:'publisher_network',sourceKey:row.surface_slug,sourceName:row.surface_name,sourceUrl:row.source_url,priority:820+num(row.priority_score)});
   for(const row of rows(vendors))seeded+=await upsertContactSupplyDomain(env,{domain:row.vendor_domain,sourceType:'vendor_amplification',sourceKey:row.tool_slug,sourceUrl:row.asset_url,priority:900+num(row.priority_score)});
@@ -615,11 +478,18 @@ async function health(env){
           AND COALESCE(surface_type,'')<>'publisher_contact_route'
           AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
           AND status IN ('candidate','discovered','research_required')) route_research_candidates,
+      (SELECT COUNT(*) FROM distribution_opportunities
+        WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
+          AND COALESCE(surface_type,'')<>'publisher_contact_route'
+          AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
+          AND status IN ('candidate','discovered','research_required')
+          AND COALESCE(external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH}) route_research_value_eligible,
       (SELECT COUNT(*) FROM distribution_opportunities o
         WHERE COALESCE(o.human_required,0)=0 AND o.action_url IS NOT NULL
           AND COALESCE(o.surface_type,'')<>'publisher_contact_route'
           AND (o.action_url LIKE 'https://%' OR o.action_url LIKE 'http://%')
           AND o.status IN ('candidate','discovered','research_required')
+          AND COALESCE(o.external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH}
           AND NOT EXISTS (
             SELECT 1 FROM compute_overflow_jobs exhausted
             WHERE exhausted.subject_key=o.surface_slug
@@ -690,6 +560,7 @@ async function health(env){
     qualificationAuth15m:num(live?.qualification_auth_15m),
     qualificationPolicy15m:num(live?.qualification_policy_15m),
     routeResearchCandidates:num(live?.route_research_candidates),
+    routeResearchValueEligible:num(live?.route_research_value_eligible),
     routeResearchEligible:num(live?.route_research_eligible),
     routeResearchQueued:num(live?.route_research_queued),
     routeResearchRunnable:num(live?.route_research_runnable),
@@ -814,13 +685,14 @@ async function enqueueDistributionResearch(env){
   const routeBucket=Math.floor(Date.now()/(DISTRIBUTION_RESEARCH_BUCKET_HOURS*3600000));
   const roleEmailBucket=Math.floor(Date.now()/(ROLE_EMAIL_RESEARCH_BUCKET_HOURS*3600000));
   const limit=Math.min(80,remaining);
-  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,status,next_action,
+  const q=await env.DB.prepare(`SELECT surface_slug,surface_name,surface_type,action_url,distribution_score,external_value_score,external_value_tier,status,next_action,
       COALESCE((SELECT a.policy_state FROM distribution_auto_adapters a WHERE a.surface_slug=distribution_opportunities.surface_slug LIMIT 1),'') adapter_policy_state
     FROM distribution_opportunities
     WHERE COALESCE(human_required,0)=0 AND action_url IS NOT NULL
       AND COALESCE(surface_type,'')<>'publisher_contact_route'
       AND (action_url LIKE 'https://%' OR action_url LIKE 'http://%')
       AND status IN ('candidate','discovered','research_required')
+      AND COALESCE(external_value_score,0)>=${MIN_EXTERNAL_VALUE_FOR_RESEARCH}
       AND NOT EXISTS (
         SELECT 1 FROM compute_overflow_jobs exhausted
         WHERE exhausted.subject_key=distribution_opportunities.surface_slug
@@ -872,7 +744,7 @@ async function enqueueDistributionResearch(env){
     const adapterPolicyState=String(row.adapter_policy_state||'');
     const recovering=adapterPolicyState==='revalidation_required';
     const previouslyRejected=recovering||adapterPolicyState==='transport_rejected';
-    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,...(previouslyRejected?{recoveryReason:'external_submission_rejected'}:{})};
+    const payload={url:row.action_url,surfaceSlug:row.surface_slug,surfaceName:row.surface_name,surfaceType:row.surface_type,currentStatus:row.status,score:num(row.distribution_score),externalValueScore:num(row.external_value_score),externalValueTier:String(row.external_value_tier||''),classifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,...(previouslyRejected?{recoveryReason:'external_submission_rejected'}:{})};
     const routeJobKey=recovering
       ?`route-recovery:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`
       :`route:v${DISTRIBUTION_CLASSIFIER_VERSION}:${row.surface_slug}:bucket:${routeBucket}:${urlHash}`;
@@ -1971,8 +1843,25 @@ async function augmentRuntime(response,env){
   return Response.json(data,{status:response.status,headers:JSON_H});
 }
 
+async function earlyOwnedRoute(request,env,ctx){
+  const ownership=routeOwner(request.url,{method:request.method});
+  let response=null;
+  if(ownership.owner==='distribution_priority')response=await handleDistributionPriorityRoute(request,env);
+  else if(ownership.owner==='distribution_orchestrator')response=await handleDistributionOrchestratorRoute(request,env,ctx);
+  else if(ownership.owner==='seo_runtime')response=await handleSeoRuntimeRoute(request,env);
+  else if(ownership.owner==='authority_acquisition')response=await handleAuthorityAcquisitionRoute(request,env);
+  else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
+  if(!response)return null;
+  const headers=new Headers(response.headers);
+  headers.set('X-ToolScout-Route-Owner',ownership.owner);
+  headers.set('X-ToolScout-Route-Contract','v2');
+  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+}
+
 export default{
   async fetch(request,env,ctx){
+    const early=await earlyOwnedRoute(request,env,ctx);
+    if(early)return early;
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
       // Observability must be read-only. Command Center polling must never execute
@@ -2011,6 +1900,9 @@ export default{
     if(request.method==='GET'&&getMatch)return serveBatch(env,getMatch[1]);
     const completeMatch=u.pathname.match(/^\/api\/compute\/batches\/(cob_[A-Za-z0-9-]+)\/complete$/);
     if(request.method==='POST'&&completeMatch)return completeBatch(request,env,ctx,completeMatch[1]);
+    if(request.method==='GET'&&u.pathname==='/api/runtime/schedule-contract')return Response.json(scheduleContract(),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/route-contract')return Response.json(routeContract(),{headers:JSON_H});
+    if(request.method==='GET'&&u.pathname==='/api/runtime/route-owner')return Response.json(routeOwner(u.searchParams.get('path')||'/',{method:u.searchParams.get('method')||'GET'}),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await base.fetch(request,env,ctx),env);
     return base.fetch(request,env,ctx);
   },
@@ -2060,6 +1952,21 @@ export default{
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;
       return;
+    }
+    if(trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily){
+      const growth=Promise.resolve(runGrowthScheduler(scheduledEvent,env,ctx)).catch(async error=>{
+        await event(env,'growth_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+        return null;
+      });
+      const inherited=typeof base.scheduled==='function'
+        ?Promise.resolve(base.scheduled(scheduledEvent,env,ctx)).catch(async error=>{
+          await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+          return null;
+        })
+        :Promise.resolve(null);
+      const combined=Promise.allSettled([growth,inherited]);
+      if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
+      await combined;return;
     }
     return typeof base.scheduled==='function'?base.scheduled(scheduledEvent,env,ctx):undefined;
   }
