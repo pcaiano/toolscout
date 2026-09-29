@@ -29,6 +29,8 @@ check(s.includes("qualificationVerificationFailed15m:num(live?.qualification_ver
 check(s.includes("idx_distribution_qualification_created_result"),'qualification health query is indexed');
 check(s.includes("const DISTRIBUTION_CLASSIFIER_VERSION=16;"),'classifier v16 is active');
 check(s.includes("openDistributionHumanGateFromResearchEvidence"),'Render research can hand exact human routes to canonical gates');
+check(s.includes("currentResearchProof"),'generic Chairman validation preserves exact current-classifier human-gate evidence');
+check(s.includes("current_classifier_exact_route_recovery"),'fresh current-classifier evidence can recover only transiently re-cancelled exact gates');
 check(s.includes("fresh_research_human_gate_reconciliation"),'every overflow tick reconciles fresh exact human routes, including post-auth follow-up steps');
 check(s.includes("reconcileStaleResearchHumanGates"),'classifier upgrades release stale research-derived human gates before re-enqueue');
 check(s.includes("canonicalOverflowFormField"),'canonical policy accepts the same safe field aliases as Render research');
