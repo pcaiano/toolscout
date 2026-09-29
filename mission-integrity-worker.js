@@ -9,24 +9,24 @@ async function digestHex(value){const bytes=new TextEncoder().encode(String(valu
 async function authorized(request){const token=String(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(token)&&await digestHex(token)===TOKEN_SHA256}
 async function ensureSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=(async()=>{await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS external_engine_evidence (
-      evidence_id TEXT PRIMARY KEY,
-      engine TEXT NOT NULL,
-      mission_id TEXT NOT NULL,
-      stage TEXT NOT NULL,
-      status TEXT NOT NULL,
-      external_id TEXT,
-      detail TEXT,
-      observed_at TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_external_engine_evidence_engine_mission ON external_engine_evidence(engine,mission_id,created_at DESC)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_external_engine_evidence_created ON external_engine_evidence(created_at DESC)`)
-  ])})().catch(error=>{schemaReady=null;throw error});
+  schemaReady=(async()=>{
+    const requiredIndexes=[
+      'idx_external_engine_evidence_engine_mission',
+      'idx_external_engine_evidence_created'
+    ];
+    const [table,indexes]=await Promise.all([
+      env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='external_engine_evidence'").first(),
+      env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (?,?)").bind(...requiredIndexes).first()
+    ]);
+    const tableCount=Number(table?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==1||indexCount!==requiredIndexes.length){
+      throw new Error(`mission_integrity_schema_not_migrated:table_${tableCount}/1:indexes_${indexCount}/${requiredIndexes.length}`);
+    }
+    return{ok:true,source:'d1_migrations',table:tableCount,indexes:indexCount};
+  })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
+
 function safe(value,n=2000){return String(value??'').slice(0,n)}
 function parseUtc(value){const text=String(value||'').trim();if(!text)return null;const d=new Date(text.includes('T')?text:(text.replace(' ','T')+'Z'));return Number.isFinite(d.getTime())?d:null}
 function ageMinutes(value){const d=parseUtc(value);return d?Math.max(0,(Date.now()-d.getTime())/60000):null}
