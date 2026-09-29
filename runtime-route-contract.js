@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','public_editorial_site']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','public_editorial_site','command_center_direct']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -16,6 +16,8 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'authority_closed_loop_action',owner:'growth_runtime_closed_loop',plane:'executor',methods:['POST'],exact:['/api/distribution/authority/close-loop']},
   {id:'seo_runtime',owner:'seo_runtime',plane:'signals',methods:['GET','POST'],prefixes:['/api/seo/']},
   {id:'engine_evidence',owner:'mission_integrity',plane:'signals',methods:['POST'],exact:['/api/engine-evidence']},
+  {id:'command_center_page',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html','/command-center','/command-center/']},
+  {id:'command_center_truth',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/api/command-center-business-truth','/api/command-center-simplified-health']},
   {id:'analytics_control',owner:'command_center',plane:'signals',methods:['GET','POST'],prefixes:['/analytics','/api/stats','/api/traffic-integrity-health','/api/command-center-']},
   {id:'public_editorial_news',owner:'public_editorial_site',plane:'public_site',methods:['GET'],prefixes:['/news/']},
   {id:'public_tools',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/tools','/guides','/compare','/best-','/blog/','/software-trends-index','/categories','/crm-tools','/seo-tools']},
