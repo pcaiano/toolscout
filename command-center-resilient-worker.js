@@ -1,6 +1,7 @@
 import {partitionChairmanTasks} from './chairman-task-quality.js';
 import {affiliateChairmanAdmissionState,filterChairmanQueueAffiliates} from './affiliate-chairman-filter.js';
 import base from './command-center-autoload-worker.js';
+import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const PUBLIC_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
@@ -422,7 +423,8 @@ export async function handleAnalyticsStatsReadRoute(request,env,ctx){
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-resilient-health'){const editorial=await editorialQueueRows(env);const stremit=editorial.find(x=>x.target_name==='Stremit')||null;return Response.json({ok:true,service:'toolscout-command-center-resilient',version:6,statsMode:'direct-d1-resilient',trafficTruth:'strict-human-v1',externalLinkVerificationInStats:false,affiliateCanonicalTruth:'verified-outbound-v1',autonomousGrowthIncluded:true,catalogGrowthIncluded:true,chairmanPayloadVersion:'chairman-quality-v1',preparedEditorialCount:editorial.length,stremitPayloadPresent:Boolean(stremit&&stremit.suggested_title&&stremit.suggested_body&&stremit.target_url)},{headers:PUBLIC_H})}
+    const resilientHealth=await handleCommandCenterResilientHealthRoute(request,env);
+    if(resilientHealth)return resilientHealth;
     const chairman=await handleChairmanQueueReadRoute(request,env,ctx);
     if(chairman)return chairman;
     const stats=await handleAnalyticsStatsReadRoute(request,env,ctx);

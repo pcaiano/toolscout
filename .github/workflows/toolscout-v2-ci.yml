@@ -17,6 +17,7 @@ on:
       - 'migrations/0087_seo_runtime_schema.sql'
       - 'command-center-light-theme-worker.js'
       - 'command-center-resilient-worker.js'
+      - 'command-center-resilient-health-runtime.js'
       - 'analytics-human-actions-runtime.js'
       - 'human-action-entry-worker.js'
       - 'command-center-direct-runtime.js'
@@ -110,6 +111,7 @@ jobs:
           node --check growth-runtime-integrity-worker.js
           node --check command-center-light-theme-worker.js
           node --check command-center-resilient-worker.js
+          node --check command-center-resilient-health-runtime.js
           node --check analytics-human-actions-runtime.js
           node --check human-action-entry-worker.js
           node --check command-center-direct-runtime.js
@@ -146,5 +148,5 @@ jobs:
         run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
       - name: Run ToolScout 2.0 policy tests
         run: |
-          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-machine-discovery-catalog.test.mjs tests/toolscout-v2-analytics-chairman.test.mjs tests/toolscout-v2-analytics-stats.test.mjs tests/toolscout-v2-analytics-human-actions.test.mjs tests/toolscout-v2-public-decision-parity.test.mjs tests/toolscout-v2-public-navigation-parity.test.mjs
+          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-command-center-resilient-health.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-machine-discovery-catalog.test.mjs tests/toolscout-v2-analytics-chairman.test.mjs tests/toolscout-v2-analytics-stats.test.mjs tests/toolscout-v2-analytics-human-actions.test.mjs tests/toolscout-v2-public-decision-parity.test.mjs tests/toolscout-v2-public-navigation-parity.test.mjs
           node tests/growth-scheduler-ownership.mjs

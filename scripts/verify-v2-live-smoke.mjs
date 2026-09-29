@@ -102,6 +102,17 @@ const analyticsPage=await fetchText('/analytics');
 if(!analyticsPage.ok)errors.push({code:'command_center_page_unavailable',status:analyticsPage.status});
 else if(!/Editorial Authority/.test(analyticsPage.text))errors.push({code:'command_center_editorial_authority_missing'});
 
+const resilientHealth=await fetchText('/api/command-center-resilient-health');
+if(!resilientHealth.ok)errors.push({code:'command_center_resilient_health_unavailable',status:resilientHealth.status});
+else{
+  if(resilientHealth.headers.get('x-toolscout-read-mode')!=='read-only')errors.push({code:'resilient_health_wrong_read_mode'});
+  if(resilientHealth.headers.get('x-toolscout-route-owner')!=='command_center_resilient_health')errors.push({code:'resilient_health_wrong_route_owner',owner:resilientHealth.headers.get('x-toolscout-route-owner')});
+  try{
+    const data=JSON.parse(resilientHealth.text);
+    if(data.service!=='toolscout-command-center-resilient'||Number(data.version)!==6)errors.push({code:'resilient_health_payload_regressed'});
+  }catch{errors.push({code:'resilient_health_invalid_json'});}
+}
+
 const authorityHealth=await fetchText('/api/distribution/authority/closed-loop-health?fresh=1');
 if(!authorityHealth.ok)errors.push({code:'authority_health_unavailable',status:authorityHealth.status});
 else{
@@ -126,6 +137,7 @@ if(routeContractLive.ok){
     const owner=id=>groups.find(group=>group.id===id)?.owner||null;
     if(owner('agent_recommendation_protocol')!=='agent_protocol_core')errors.push({code:'agent_protocol_direct_owner_not_live'});
     if(owner('agent_discovery_catalog')!=='machine_discovery_catalog')errors.push({code:'machine_discovery_catalog_not_live'});
+    if(owner('command_center_resilient_health')!=='command_center_resilient_health')errors.push({code:'command_center_resilient_health_not_live'});
     if(owner('analytics_chairman_queue')!=='analytics_chairman')errors.push({code:'analytics_chairman_direct_owner_not_live'});
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
