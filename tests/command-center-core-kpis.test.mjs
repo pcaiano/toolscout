@@ -17,7 +17,7 @@ assert.doesNotMatch(business,/Browser-qualified outbound/);
 assert.ok(!business.includes('Strict / user-activated outbound'));
 assert.doesNotMatch(business,/Strict attributed humans/);
 assert.doesNotMatch(business,/PartnerStack network clicks/);
-assert.match(business,/st\\.commerceTruth/);
+assert.ok(business.includes('st.commerceTruth'));
 assert.match(business,/Google Search Console/);
 assert.match(business,/GA4/);
 
