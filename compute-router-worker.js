@@ -13,6 +13,7 @@ import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
 import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {handleAuthorityHealthRoute} from './authority-health-runtime.js';
+import {handleAgentProtocolRoute} from './agent-protocol-core-worker.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 
@@ -1859,6 +1860,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='authority_health')response=await handleAuthorityHealthRoute(request,env);
   else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
+  else if(ownership.owner==='agent_protocol_core')response=await handleAgentProtocolRoute(request,env,ctx);
   if(!response)return null;
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);
