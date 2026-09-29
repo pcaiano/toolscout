@@ -2,6 +2,8 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','mission_integrity']);
+
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
   {id:'runtime',owner:'compute_router',plane:'control',methods:['GET','POST'],prefixes:['/api/runtime/']},
@@ -40,6 +42,7 @@ export function routeContract(){
     version:2,
     architecture:'toolscout-2.0',
     groups:ROUTE_GROUPS,
+    earlyDispatchOwners:EARLY_DISPATCH_OWNERS,
     fallback:'legacy_chain',
     invariant:'one_declared_owner_per_route_group'
   };
