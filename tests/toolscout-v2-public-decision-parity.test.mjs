@@ -58,8 +58,13 @@ function env(){
 
 const cases=[
   {pathname:'/best-seo-tools-for-agencies',file:'best-seo-tools-for-agencies.html'},
+  {pathname:'/best-social-media-management-tools',file:'best-social-media-management-tools.html'},
+  {pathname:'/best-project-management-tools',file:'best-project-management-tools.html'},
   {pathname:'/tools/airtable',file:'tools/airtable.html'},
-  {pathname:'/tools/semrush',file:'tools/semrush.html'}
+  {pathname:'/tools/semrush',file:'tools/semrush.html'},
+  {pathname:'/tools/klaviyo',file:'tools/klaviyo.html'},
+  {pathname:'/tools/moz-pro',file:'tools/moz-pro.html'},
+  {pathname:'/tools/tally',file:'tools/tally.html'}
 ];
 
 test('Phase 6 candidate owns only tool profiles and best guides',()=>{
