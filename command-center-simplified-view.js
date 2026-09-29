@@ -225,7 +225,7 @@ function throughput(){
  const emailSent=Number(g.emailSent24h||0),emailTarget=Number(g.emailTarget24h||50),emailMax=Number(g.emailMax24h||60);
  const supply=c.contactSupply||{},readyContacts=Number(supply.readyEmail??g.contactSupplyReadyEmail??g.emailReadyContacts??0),supplyTarget=Number(supply.targetReady??g.contactSupplyTarget??200),supplyMin=Number(supply.minReady??g.contactSupplyMin??150),readyRoutes=Number(supply.readyRoute??g.contactSupplyReadyRoute??0),cooldown=Number(supply.cooldown??g.contactSupplyCooldown??0),researching=Number(supply.researching??g.contactSupplyResearching??0),unresolved=Number(supply.unresolved??g.contactSupplyUnresolved??0),apolloEligible=Number(supply.apolloEligible??g.contactSupplyApolloEligible??0),leased=Number(g.emailLeasedRecent||0),quarantine=Number(g.emailReputationQuarantine||0);
  const authActive=Number(a.activeSessions||0),authBootstrap=Number(a.bootstrapRequired||0),authCaps=Number(a.capabilities||0);
- const batchSize=Number(c.batchSize||25),queued=Number(c.queued||0),runnableQueued=Number(c.runnableQueued??queued),deferredQueued=Number(c.deferredQueued||0),sourceUnreachableDeferred=Number(c.sourceUnreachableDeferred||0);
+ const batchSize=Number(c.batchSize||25),queued=Number(c.queued||0),runnableQueued=Number(c.runnableQueued??queued),deferredQueued=Number(c.deferredQueued||0),sourceUnreachableDeferred=Number(c.sourceUnreachableDeferred||0),sourceUnreachableSuppressed=Number(c.sourceUnreachableSuppressedToday||0),foldedContactResearch=Number(c.foldedContactResearchToday||0),routeResearchCandidates=Number(funnel.routeResearchCandidates||0),routeResearchEligible=Number(funnel.routeResearchEligible||0),routeResearchQueued=Number(funnel.routeResearchQueued||0),routeResearchRunnable=Number(funnel.routeResearchRunnable||0);
  const now=new Date(),utcHours=now.getUTCHours()+now.getUTCMinutes()/60,expectedExecPace=execMax*(utcHours/24);
  const machineSupplyUnderfed=String(c.status||'')==='configured'&&execMax>0&&expectedExecPace>=4&&execUsed<Math.max(2,expectedExecPace*0.25)&&runnableQueued<=batchSize*2;
  let bottleneck='No capacity bottleneck proven.';
@@ -241,7 +241,7 @@ function throughput(){
    '<div class="headline"><b>'+esc(bottleneck)+'</b><span>'+esc(bottleneckMeta)+'</span></div>'+
    '<div class="metrics">'+
      metric('Research jobs - today',n(researchCompleted)+' completed',n(researchUsed)+' authorized · '+n(researchMax)+' daily capacity')+
-     metric('Compute queue',n(runnableQueued)+' runnable',n(deferredQueued)+' deferred retry · '+n(sourceUnreachableDeferred)+' unreachable backoff · '+n(c.activeBatches)+' active batches')+
+     metric('Compute queue',n(runnableQueued)+' runnable',n(deferredQueued)+' deferred retry · '+n(sourceUnreachableDeferred)+' unreachable backoff · '+n(sourceUnreachableSuppressed)+' unreachable suppressed today · '+n(c.activeBatches)+' active batches')+
      metric('Machine-safe actions - today',n(actionsAttempted)+' attempted',n(actionsCompleted)+' succeeded · '+n(actionsFailed)+' failed · '+n(actionsAuthorized)+' authorized')+
      metric('Emails - rolling 24h',n(emailSent)+' / '+n(emailTarget),'hard max '+n(emailMax)+' · '+n(leased)+' currently leased')+
      metric('Recipient buffer',n(readyContacts)+' / '+n(supplyTarget),'minimum '+n(supplyMin)+' · '+n(cooldown)+' cooldown · '+n(readyRoutes)+' alternate routes')+
@@ -250,6 +250,7 @@ function throughput(){
    '</div>'+
    '<div class="section"><div class="sectionTitle">Distribution execution funnel</div>'+
      row('Research completed',n(researchCompleted),'External route research completed today')+
+     row('Route research supply',n(routeResearchCandidates)+' candidates · '+n(routeResearchEligible)+' eligible',n(routeResearchQueued)+' queued · '+n(routeResearchRunnable)+' runnable · '+n(foldedContactResearch)+' duplicate contact crawls folded today')+
      row('Classifier v'+n(c.distributionClassifierVersion||2)+' results seen',n(classifiedResearch),'Confirms the Render research service is emitting the current route classification payload')+
      row('Submission routes found',n(routesFound),'All same-host submission routes found, including manual/auth routes')+
      row('Machine-safe candidates - Render',n(machineCandidates),'Render found a no-auth, no-CAPTCHA, no-payment JSON API or POST form that passed structural safety checks')+
@@ -267,7 +268,7 @@ function throughput(){
    '<div class="section"><div class="sectionTitle">Execution architecture</div>'+
      row('Control plane','Cloudflare','Priorities, policy, leases, canonical D1 state and final verification')+
      row('Research + machine execution',human(c.status||'Unavailable'),(c.providerUrl||'Render overflow')+' · batch '+n(c.batchSize)+' · max '+n(c.maxActiveBatches)+' active')+
-     row('Research retry cadence',n(c.distributionResearchBucketHours||6)+'h routes · 6h unreachable retry · '+n(c.roleEmailResearchBucketHours||24)+'h contacts','Mature unreachable jobs are released automatically so Render cannot sit idle behind a long retry wall')+
+     row('Research retry cadence',n(c.distributionResearchBucketHours||6)+'h routes · adaptive unreachable cooldowns · '+n(c.roleEmailResearchBucketHours||24)+'h contacts','404/410 routes cool down 72h, blocked routes 24h, transport/edge failures 12h; contact-route discovery is folded into the primary route crawl')+
      row('Email sender',human(g.emailDeliveryMode||'Unavailable'),'Target '+n(emailTarget)+' · max '+n(emailMax)+' / rolling 24h · reputation boundary retained')+
      row('Contact Supply Engine',human(supply.status||'active'),n(readyContacts)+' ready emails · '+n(readyRoutes)+' contact routes · '+human(supply.apolloStatus||g.contactSupplyApolloStatus||'provider unavailable'))+
      row('Auth Plane',human(a.status||'Unavailable'),a.brokerRuntime?.ok?'Chromium broker healthy · CAPTCHA/MFA human-only':'Broker health '+human(a.brokerRuntime?.error||'unavailable'))+
