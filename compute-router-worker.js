@@ -1840,11 +1840,11 @@ async function augmentRuntime(response,env){
   return Response.json(data,{status:response.status,headers:JSON_H});
 }
 
-async function earlyOwnedRoute(request,env){
+async function earlyOwnedRoute(request,env,ctx){
   const ownership=routeOwner(request.url,{method:request.method});
   let response=null;
   if(ownership.owner==='distribution_priority')response=await handleDistributionPriorityRoute(request,env);
-  else if(ownership.owner==='distribution_orchestrator')response=await handleDistributionOrchestratorRoute(request,env,{});
+  else if(ownership.owner==='distribution_orchestrator')response=await handleDistributionOrchestratorRoute(request,env,ctx);
   else if(ownership.owner==='mission_integrity')response=await handleMissionIntegrityRoute(request,env);
   if(!response)return null;
   const headers=new Headers(response.headers);
@@ -1855,7 +1855,7 @@ async function earlyOwnedRoute(request,env){
 
 export default{
   async fetch(request,env,ctx){
-    const early=await earlyOwnedRoute(request,env);
+    const early=await earlyOwnedRoute(request,env,ctx);
     if(early)return early;
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
