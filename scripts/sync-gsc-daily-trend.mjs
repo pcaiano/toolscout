@@ -59,7 +59,7 @@ async function accessToken() {
 const token = await accessToken();
 const endpoint = `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(property)}/searchAnalytics/query`;
 
-async function querySearchConsole(dimensions, dataState = 'final') {
+async function querySearchConsole(dimensions, dataState = 'final', rangeStart = startDate, rangeEnd = endDate) {
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -67,8 +67,8 @@ async function querySearchConsole(dimensions, dataState = 'final') {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      startDate,
-      endDate,
+      startDate: rangeStart,
+      endDate: rangeEnd,
       dimensions,
       type: 'web',
       dataState,
@@ -136,6 +136,87 @@ if (finalizedThroughDate) {
   }
 }
 
+function canonicalPathname(value) {
+  try {
+    const url = new URL(String(value || ''));
+    if (!['trytoolscout.org', 'www.trytoolscout.org'].includes(url.hostname)) return null;
+    let pathname = url.pathname || '/';
+    if (pathname === '/index.html') pathname = '/';
+    else if (/\.html$/i.test(pathname)) pathname = pathname.replace(/\.html$/i, '');
+    return pathname;
+  } catch {
+    return null;
+  }
+}
+
+function aggregateDimension(json, dimension) {
+  const map = new Map();
+  for (const row of json.rows || []) {
+    const raw = String(row.keys?.[0] || '');
+    const key = dimension === 'page' ? canonicalPathname(raw) : raw.trim();
+    if (!key) continue;
+    const impressions = Number(row.impressions || 0);
+    const clicks = Number(row.clicks || 0);
+    const position = Number(row.position || 0);
+    const current = map.get(key) || { key, clicks: 0, impressions: 0, positionNumerator: 0 };
+    current.clicks += clicks;
+    current.impressions += impressions;
+    current.positionNumerator += position * impressions;
+    map.set(key, current);
+  }
+  return new Map([...map.entries()].map(([key, row]) => [key, {
+    key,
+    clicks: row.clicks,
+    impressions: row.impressions,
+    position: row.impressions ? Number((row.positionNumerator / row.impressions).toFixed(4)) : null
+  }]));
+}
+
+function compareDimension(currentJson, previousJson, dimension, limit = 20) {
+  const current = aggregateDimension(currentJson, dimension);
+  const previous = aggregateDimension(previousJson, dimension);
+  const keys = new Set([...current.keys(), ...previous.keys()]);
+  const rows = [...keys].map(key => {
+    const now = current.get(key) || { clicks: 0, impressions: 0, position: null };
+    const before = previous.get(key) || { clicks: 0, impressions: 0, position: null };
+    return {
+      [dimension]: key,
+      impressions: now.impressions,
+      previousImpressions: before.impressions,
+      impressionsDelta: now.impressions - before.impressions,
+      clicks: now.clicks,
+      previousClicks: before.clicks,
+      clicksDelta: now.clicks - before.clicks,
+      position: now.position,
+      previousPosition: before.position,
+      positionDelta: now.position == null || before.position == null ? null : Number((now.position - before.position).toFixed(4))
+    };
+  });
+  return {
+    losses: rows.filter(row => row.impressionsDelta < 0).sort((a, b) => a.impressionsDelta - b.impressionsDelta || b.previousImpressions - a.previousImpressions).slice(0, limit),
+    gains: rows.filter(row => row.impressionsDelta > 0).sort((a, b) => b.impressionsDelta - a.impressionsDelta || b.impressions - a.impressions).slice(0, limit)
+  };
+}
+
+let periodComparison = null;
+if (daily.length >= 14 && finalizedThroughDate) {
+  const recentStart = addDays(finalizedThroughDate, -6);
+  const previousEnd = addDays(recentStart, -1);
+  const previousStart = addDays(previousEnd, -6);
+  const [recentPages, previousPages, recentQueries, previousQueries] = await Promise.all([
+    querySearchConsole(['page'], 'final', recentStart, finalizedThroughDate),
+    querySearchConsole(['page'], 'final', previousStart, previousEnd),
+    querySearchConsole(['query'], 'final', recentStart, finalizedThroughDate),
+    querySearchConsole(['query'], 'final', previousStart, previousEnd)
+  ]);
+  periodComparison = {
+    recent7: { startDate: recentStart, endDate: finalizedThroughDate },
+    previous7: { startDate: previousStart, endDate: previousEnd },
+    pages: compareDimension(recentPages, previousPages, 'page'),
+    queries: compareDimension(recentQueries, previousQueries, 'query')
+  };
+}
+
 const report = {
   generatedAt: new Date().toISOString(),
   source: 'Google Search Console Search Analytics API - daily trend',
@@ -146,6 +227,7 @@ const report = {
   range: { startDate, endDate: finalizedThroughDate, requestedEndDate: endDate, days: daily.length },
   metrics: ['impressions', 'clicks', 'position', 'ctr', 'searchVisiblePages'],
   daily,
+  periodComparison,
   limitations: [
     'Search Analytics is the source of truth for Google search visibility, but it does not guarantee every row.',
     'Search-visible pages are pages returned by Search Analytics for a date, not a count of all URLs in the Google index.',
