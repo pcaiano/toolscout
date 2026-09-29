@@ -360,6 +360,9 @@ async function buildCommandCenterBusinessTruth(request,env){
   const vendorReportedClickFloor=(affiliateNetworkEvidence||[]).reduce((sum,row)=>sum+truthNum(row.reported_clicks_total),0);
   const vendorReportedConversions=(affiliateNetworkEvidence||[]).reduce((sum,row)=>sum+truthNum(row.reported_conversions_total),0);
   const vendorPendingCommissionUsd=(affiliateNetworkEvidence||[]).filter(row=>String(row.currency||'USD')==='USD').reduce((sum,row)=>sum+truthNum(row.pending_commission_amount),0);
+  const outboundTruthAvailable=verifiedOutboundTruth!==null;
+  const redirectTruthAvailable=firstPartyRedirectTruth!==null;
+  const socialAffiliateTruthAvailable=socialAffiliateTruth!==null;
   const liveBrowserQualifiedOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browser24h):0;
   const liveBrowserQualifiedOutbound7d=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.browser7d):0;
   const liveStrictOutbound24h=verifiedOutboundTruth?truthNum(verifiedOutboundTruth.strict24h):truthNum(cfg.verified_outbound_24h);
@@ -586,33 +589,41 @@ async function buildCommandCenterBusinessTruth(request,env){
       waitForTrafficThreshold:false
     },
     commercialActivity:{
-      definition:'Commercial click truth is layered and non-destructive: PartnerStack network counters, all first-party affiliate redirects, browser-qualified navigations and strict/user-activated outbound are separate populations. Unknown/unverified traffic is never relabelled as bot, and overlapping layers are never summed.',
+      status:(outboundTruthAvailable&&redirectTruthAvailable)?'observed':'degraded',
+      sourceHealth:{
+        firstPartyRedirects:redirectTruthAvailable?'observed':'unavailable',
+        browserQualified:outboundTruthAvailable?'observed':'unavailable',
+        strictVerified:outboundTruthAvailable?'observed':'unavailable',
+        socialAffiliateRedirects:socialAffiliateTruthAvailable?'observed':'unavailable',
+        vendorReported:'observed'
+      },
+      definition:'Commercial click truth is layered and non-destructive: PartnerStack network counters, all first-party affiliate redirects, browser-qualified navigations and strict/user-activated outbound are separate populations. Unknown/unverified traffic is never relabelled as bot, and overlapping layers are never summed. Source failures are reported as unavailable, never coerced to zero.',
       firstPartyRedirects:{
-        clicks24h:truthNum(firstPartyRedirectTruth?.clicks24h),
-        clicks7d:truthNum(firstPartyRedirectTruth?.clicks7d),
-        clicks30d:truthNum(firstPartyRedirectTruth?.clicks30d),
-        likelyHuman30d:truthNum(firstPartyRedirectTruth?.likelyHuman30d),
-        knownBot30d:truthNum(firstPartyRedirectTruth?.knownBot30d),
-        owner30d:truthNum(firstPartyRedirectTruth?.owner30d),
-        unverified30d:truthNum(firstPartyRedirectTruth?.unverified30d),
+        clicks24h:redirectTruthAvailable?truthNum(firstPartyRedirectTruth?.clicks24h):null,
+        clicks7d:redirectTruthAvailable?truthNum(firstPartyRedirectTruth?.clicks7d):null,
+        clicks30d:redirectTruthAvailable?truthNum(firstPartyRedirectTruth?.clicks30d):null,
+        likelyHuman30d:redirectTruthAvailable?truthNum(firstPartyRedirectTruth?.likelyHuman30d):null,
+        knownBot30d:redirectTruthAvailable?truthNum(firstPartyRedirectTruth?.knownBot30d):null,
+        owner30d:redirectTruthAvailable?truthNum(firstPartyRedirectTruth?.owner30d):null,
+        unverified30d:redirectTruthAvailable?truthNum(firstPartyRedirectTruth?.unverified30d):null,
         definition:'All first-party affiliate-active /go/ redirects. Classification is descriptive only; unverified is not treated as bot.'
       },
       browserQualified:{
-        clicks24h:liveBrowserQualifiedOutbound24h,
-        clicks7d:liveBrowserQualifiedOutbound7d,
-        clicks30d:truthNum(verifiedOutboundTruth?.browser30d),
-        monetized24h:liveBrowserMonetizedOutbound24h,
-        monetized7d:liveBrowserMonetizedOutbound7d,
-        monetized30d:truthNum(verifiedOutboundTruth?.browserMonetized30d),
+        clicks24h:outboundTruthAvailable?liveBrowserQualifiedOutbound24h:null,
+        clicks7d:outboundTruthAvailable?liveBrowserQualifiedOutbound7d:null,
+        clicks30d:outboundTruthAvailable?truthNum(verifiedOutboundTruth?.browser30d):null,
+        monetized24h:outboundTruthAvailable?liveBrowserMonetizedOutbound24h:null,
+        monetized7d:outboundTruthAvailable?liveBrowserMonetizedOutbound7d:null,
+        monetized30d:outboundTruthAvailable?truthNum(verifiedOutboundTruth?.browserMonetized30d):null,
         definition:'Same-origin /go/ navigation from an established first-party session and plausible browser request.'
       },
       strictVerified:{
-        clicks24h:liveStrictOutbound24h,
-        clicks7d:liveStrictOutbound7d,
-        clicks30d:truthNum(verifiedOutboundTruth?.strict30d),
-        monetized24h:liveStrictMonetizedOutbound24h,
-        monetized7d:liveStrictMonetizedOutbound7d,
-        monetized30d:truthNum(verifiedOutboundTruth?.strictMonetized30d),
+        clicks24h:outboundTruthAvailable?liveStrictOutbound24h:null,
+        clicks7d:outboundTruthAvailable?liveStrictOutbound7d:null,
+        clicks30d:outboundTruthAvailable?truthNum(verifiedOutboundTruth?.strict30d):null,
+        monetized24h:outboundTruthAvailable?liveStrictMonetizedOutbound24h:null,
+        monetized7d:outboundTruthAvailable?liveStrictMonetizedOutbound7d:null,
+        monetized30d:outboundTruthAvailable?truthNum(verifiedOutboundTruth?.strictMonetized30d):null,
         definition:'Positive pre-click human/browser evidence or explicit browser user-activation navigation. /go/ never manufactures page confirmation.'
       },
       firstPartyVerified:{
@@ -625,9 +636,9 @@ async function buildCommandCenterBusinessTruth(request,env){
         compatibilityAlias:'strictVerified'
       },
       socialAffiliateRedirects:{
-        clicks24h:truthNum(socialAffiliateTruth?.clicks24h),
-        clicks7d:truthNum(socialAffiliateTruth?.clicks7d),
-        clicks30d:truthNum(socialAffiliateTruth?.clicks30d),
+        clicks24h:socialAffiliateTruthAvailable?truthNum(socialAffiliateTruth?.clicks24h):null,
+        clicks7d:socialAffiliateTruthAvailable?truthNum(socialAffiliateTruth?.clicks7d):null,
+        clicks30d:socialAffiliateTruthAvailable?truthNum(socialAffiliateTruth?.clicks30d):null,
         source:'ToolScout /go/ redirects carrying ts_affiliate=1'
       },
       vendorReported:{
