@@ -49,8 +49,8 @@ let data={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:n
 const sourceErrors={stats:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
 let sessionRefreshPromise=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-const n=v=>Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable';
-const dec=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'Unavailable';
+const n=v=>(v===null||v===undefined||v==='')?'Unavailable':(Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable');
+const dec=(v,d=1)=>(v===null||v===undefined||v==='')?'Unavailable':(Number.isFinite(Number(v))?Number(v).toFixed(d):'Unavailable');
 const money=(v,c)=>{if(v===null||v===undefined||!Number.isFinite(Number(v)))return 'Unknown';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:c||'EUR',maximumFractionDigits:2}).format(Number(v))}catch{return String(v)}};
 const dt=v=>{if(!v)return 'Unavailable';try{let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';const d=new Date(s);return new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)}catch{return String(v)}};
 const ageHours=v=>{if(!v)return null;let s=String(v);if(!s.includes('T'))s=s.replace(' ','T')+'Z';const t=Date.parse(s);return Number.isFinite(t)?Math.max(0,(Date.now()-t)/3600000):null};
