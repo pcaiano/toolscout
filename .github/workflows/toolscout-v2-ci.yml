@@ -10,6 +10,7 @@ on:
       - 'migrations/0091_catalog_runtime_schema.sql'
       - 'public-page-parity-contract.js'
       - 'public-decision-runtime.js'
+      - 'public-navigation-runtime.js'
       - 'public-editorial-evidence.js'
       - 'seo-cloudflare-runtime-worker.js'
       - 'migrations/0087_seo_runtime_schema.sql'
@@ -45,6 +46,7 @@ on:
       - 'scripts/audit-runtime-architecture.mjs'
       - 'scripts/audit-public-decision-parity.mjs'
       - 'scripts/verify-public-decision-shadow.mjs'
+      - 'scripts/verify-public-navigation-shadow.mjs'
       - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/generate-seo-pages.mjs'
@@ -84,6 +86,7 @@ jobs:
           node --check public-editorial-runtime.js
           node --check public-canonical-contract.js
           node --check public-decision-runtime.js
+          node --check public-navigation-runtime.js
           node --check public-editorial-evidence.js
           node --check public-page-parity-contract.js
           node --check catalog-autonomy-worker.js
@@ -117,6 +120,7 @@ jobs:
           node --check scripts/validate-v2-preservation.mjs
           node --check scripts/verify-v2-live-smoke.mjs
           node --check scripts/verify-public-decision-shadow.mjs
+          node --check scripts/verify-public-navigation-shadow.mjs
           node --check scripts/generate-tool-pages.mjs
           node --check scripts/generate-seo-pages.mjs
           node --check scripts/generate-comparisons.mjs
@@ -129,6 +133,8 @@ jobs:
         run: node scripts/audit-public-decision-parity.mjs
       - name: Shadow verify priority public pages against live production
         run: node scripts/verify-public-decision-shadow.mjs
+      - name: Shadow verify public navigation hubs against live production
+        run: node scripts/verify-public-navigation-shadow.mjs
 
       - name: Enforce ToolScout 2.0 preservation invariants
         env:
@@ -138,5 +144,5 @@ jobs:
         run: node -e "JSON.parse(require('fs').readFileSync('docs/OPERATING-CONTRACT.json','utf8')); console.log('operating contract valid')"
       - name: Run ToolScout 2.0 policy tests
         run: |
-          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-machine-discovery-catalog.test.mjs tests/toolscout-v2-analytics-chairman.test.mjs tests/toolscout-v2-analytics-stats.test.mjs tests/toolscout-v2-analytics-human-actions.test.mjs tests/toolscout-v2-public-decision-parity.test.mjs
+          node --test tests/toolscout-v2-external-value.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-route-ownership.test.mjs tests/toolscout-v2-command-center.test.mjs tests/toolscout-v2-public-plane.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-static-guide-sovereignty.test.mjs tests/toolscout-v2-authority-health.test.mjs tests/toolscout-v2-canonical-contract.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-machine-discovery-catalog.test.mjs tests/toolscout-v2-analytics-chairman.test.mjs tests/toolscout-v2-analytics-stats.test.mjs tests/toolscout-v2-analytics-human-actions.test.mjs tests/toolscout-v2-public-decision-parity.test.mjs tests/toolscout-v2-public-navigation-parity.test.mjs
           node tests/growth-scheduler-ownership.mjs
