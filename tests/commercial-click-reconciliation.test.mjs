@@ -29,15 +29,12 @@ assert.match(truth,/pcaiano@gmail\.com/);
 assert.match(truth,/\['unbounce',6\],\['apollo',19\],\['gorgias',20\],\['brevo',0\],\['kit',23\],\['instantly',12\],\['lemlist',27\]/);
 
 const commandCenter=read('command-center-simplified-view.js');
-assert.match(commandCenter,/Affiliate redirects - 24h/);
-assert.match(commandCenter,/Browser-qualified outbound - 24h/);
-assert.match(commandCenter,/Strict \/ user-activated outbound - 24h/);
-assert.match(commandCenter,/PartnerStack network clicks/);
-assert.match(commandCenter,/Unknown stays unknown/);
-assert.match(commandCenter,/partial window since/);
+assert.match(commandCenter,/Visitors - today/);
+assert.match(commandCenter,/Sessions - 24h/);
+assert.match(commandCenter,/Google clicks - 28d/);
+assert.match(commandCenter,/Outbound clicks - 24h/);
+assert.doesNotMatch(commandCenter.slice(commandCenter.indexOf('function business(){'),commandCenter.indexOf('function trafficProgress(){')),/Browser-qualified outbound|Strict \/ user-activated outbound|PartnerStack network clicks|Strict attributed humans/);
 assert.match(commandCenter,/v===null\|\|v===undefined/);
-assert.match(commandCenter,/PartnerStack accounts/);
-assert.match(commandCenter,/PartnerStack current programmes/);
 
 const growthCommandCenter=read('growth-command-center-v2-worker.js');
 assert.match(growthCommandCenter,/socialAffiliateRedirects30d/);
@@ -56,4 +53,4 @@ assert.doesNotMatch(outbound,/evidence_type='verified_outbound_navigation'/);
 const robots=read('robots.txt');
 assert.match(robots,/Disallow: \/go\//);
 
-console.log('Commercial click truth is layered: network, redirect, browser-qualified and strict evidence remain separate.');
+console.log('Commercial click evidence remains available in backend truth while the main Command Center stays simple.');
