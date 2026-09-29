@@ -65,6 +65,21 @@ function sameHost(a,b){
     return xh===yh||xh.endsWith('.'+yh)||yh.endsWith('.'+xh);
   }catch{return false}
 }
+function alternateWwwUrl(value){
+  try{
+    const u=new URL(String(value||''));
+    if(!['http:','https:'].includes(u.protocol))return null;
+    const host=u.hostname.toLowerCase();
+    if(/^\d+(?:\.\d+){3}$/.test(host)||host==='localhost')return null;
+    if(host.startsWith('www.'))u.hostname=host.slice(4);
+    else{
+      const parts=host.split('.').filter(Boolean);
+      if(parts.length<2)return null;
+      u.hostname='www.'+host;
+    }
+    return validPublicHttp(u.href)?u.href:null;
+  }catch{return null}
+}
 function hasSubmissionIntent(label,url){
   const rawUrl=String(url||'');
   let decodedUrl=rawUrl;try{decodedUrl=decodeURIComponent(rawUrl)}catch{}
@@ -539,10 +554,11 @@ async function researchDistribution(job){
     const root=origin?origin+'/':null;
     let fallbacks=[];
     if(sourceStatus===0){
-      // A transport/DNS/TLS failure is host-wide most of the time. Probe the
-      // origin once when it differs, but never burn the whole job deadline on
-      // seven same-host paths that will fail identically.
-      fallbacks=root&&root!==source?[root]:[];
+      // A transport/DNS/TLS failure is often a bare-host vs www mismatch.
+      // Probe the equivalent www/bare URL once, then at most the origin root.
+      // This stays bounded and avoids the old seven-path deadline burn.
+      const alternate=alternateWwwUrl(source);
+      fallbacks=[alternate,root&&root!==source?root:null].filter(Boolean);
     }else if([401,403,406,429,503,520].includes(sourceStatus)){
       // Generic blocked roots are not improved by hammering guessed paths.
       fallbacks=root&&root!==source?[root]:[];
