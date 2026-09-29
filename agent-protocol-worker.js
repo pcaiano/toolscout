@@ -21,14 +21,6 @@ function filterHumanActionData(data,state){
   return {...data,affiliate,distribution,total:affiliate.length+distribution.length};
 }
 
-function filterChairmanQueueAffiliates(queue,state){
-  if(!queue||typeof queue!=='object')return queue;
-  const items=(Array.isArray(queue.items)?queue.items:[]).filter(item=>item.engine!=='affiliate'||affiliateChairmanAllowed(item,state));
-  const broken=(Array.isArray(queue.broken_links)?queue.broken_links:[]).filter(item=>item.engine!=='affiliate'||affiliateChairmanAllowed(item,state));
-  const external=(Array.isArray(queue.external_verification_issues)?queue.external_verification_issues:[]).filter(item=>item.engine!=='affiliate'||affiliateChairmanAllowed(item,state));
-  return {...queue,items,broken_links:broken,external_verification_issues:external,total:items.length,estimated_minutes:items.reduce((sum,item)=>sum+Number(item.estimated_minutes||0),0),rule:'Affiliate human actions require qualified publisher-affiliate evidence, high-confidence discovery and an exact validated application URL. Watchlist, no-program, rejected and paused states are excluded.'};
-}
-
 async function filteredHumanActions(request,env,ctx){
   const upstream=await base.fetch(request,env,ctx);
   if(!upstream.ok)return upstream;
