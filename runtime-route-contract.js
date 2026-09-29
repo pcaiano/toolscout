@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','agent_protocol_core']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','agent_protocol_core','machine_discovery_catalog']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -24,7 +24,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'public_tools',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/tools','/guides','/compare','/best-','/blog/','/categories','/crm-tools','/seo-tools']},
   {id:'affiliate_redirect',owner:'public_site',plane:'public_site',methods:['GET'],prefixes:['/go/']},
   {id:'agent_recommendation_protocol',owner:'agent_protocol_core',plane:'public_site',methods:['GET','POST','OPTIONS'],exact:['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']},
-  {id:'agent_discovery_catalog',owner:'agent_protocol',plane:'public_site',methods:['GET','POST'],prefixes:['/.well-known/toolscout-distribution','/.well-known/api-catalog']}
+  {id:'agent_discovery_catalog',owner:'machine_discovery_catalog',plane:'public_site',methods:['GET','HEAD'],exact:['/.well-known/toolscout-distribution.json','/.well-known/api-catalog']}
 ]);
 
 function normalizedPath(value){
