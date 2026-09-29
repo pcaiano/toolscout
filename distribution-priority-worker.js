@@ -1,4 +1,5 @@
 import base from './distribution-throughput-integrity-worker.js';
+import {expectedHumanValue,MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const TERMINAL=new Set(['policy_blocked','rejected','skipped','unavailable_free']);
@@ -16,6 +17,7 @@ const HUMAN_ACQUISITION_SPRINT=Object.freeze({
 });
 function humanSprintActive(){return true;}
 function strictHumanSessions(row){return Math.max(0,number(row?.browser_confirmed_sessions_30d,row?.human_sessions_30d));}
+function externalValue(row){return row?.externalValue||expectedHumanValue(row);}
 
 function authorized(request,env){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);}
 function number(v,fallback=0){const n=Number(v);return Number.isFinite(n)?n:fallback;}
@@ -29,7 +31,9 @@ export function operatingDecision(row){
   if(number(row?.cost_amount)>0&&String(row?.paid_policy_decision||'')==='experiment_measuring')return{s:'measure',reason:'Paid experiments remain measurement-only and never auto-scale.'};
   if(humans>=1)return{s:'measure',reason:`Human Acquisition v4: ${humans} strict verified human session(s) are directional evidence.`};
   if(ACTIVE_MEASUREMENT.has(String(row?.status||'')))return{s:'measure',reason:'Active surface remains under measurement. Placement alone is not a reason to scale.'};
-  return{s:'explore',reason:'No verified human acquisition evidence yet. Keep only bounded, high-signal exploration.'};
+  const value=externalValue(row);
+  if(!value.researchEligible)return{s:'suspend',reason:`ToolScout 2.0: external value ${value.score}/100 is below the ${MIN_EXTERNAL_VALUE_FOR_RESEARCH} research floor. Preserve the opportunity but do not spend autonomous acquisition capacity.`};
+  return{s:'explore',reason:`ToolScout 2.0: external value ${value.score}/100 qualifies for bounded acquisition exploration before route automation.`};
 }
 
 export function priorityWeight(row,decision,{explorationSlot=false}={}){
@@ -37,13 +41,16 @@ export function priorityWeight(row,decision,{explorationSlot=false}={}){
   const learned=Math.max(0,Math.min(100,number(row?.learned_score,row?.distribution_score)));
   const baseline=Math.max(0,Math.min(100,number(row?.baseline_score,row?.distribution_score)));
   const humans=strictHumanSessions(row);
+  const value=externalValue(row);
   const humanGate=number(row?.human_required)>0||['human_action_required','auth_required','approval_required'].includes(String(row?.status||''));
   let calculated;
-  if(explorationSlot)calculated=78;
-  else if(decision==='scale')calculated=Math.min(100,96+Math.min(4,humans));
-  else if(decision==='measure')calculated=Math.min(92,58+Math.min(24,humans*8)+learned*0.08);
-  else calculated=Math.min(72,24+learned*0.12);
-  if(humanGate)calculated=Math.max(calculated,baseline,learned,number(row?.distribution_score));
+  if(explorationSlot)calculated=Math.min(88,70+value.score*0.18);
+  else if(decision==='scale')calculated=Math.min(100,94+Math.min(6,humans));
+  else if(decision==='measure')calculated=Math.min(94,54+Math.min(24,humans*8)+value.score*0.14+learned*0.04);
+  else calculated=Math.min(78,18+value.score*0.62+learned*0.04);
+  // A human gate is not valuable merely because it is a human gate. Preserve
+  // priority only for already-proven or externally valuable opportunities.
+  if(humanGate&&(value.researchEligible||value.protected))calculated=Math.max(calculated,value.score,baseline*0.6,learned*0.6);
   return Number(Math.min(100,calculated).toFixed(2));
 }
 
@@ -60,7 +67,8 @@ function eligibleForExploration(row){
     number(row.cost_amount)===0&&
     row.surface_slug!=='indexnow'&&
     number(row.already_submitted)===0&&
-    number(row.submission_blocked)===0;
+    number(row.submission_blocked)===0&&
+    externalValue(row).researchEligible;
 }
 
 export async function rebalanceDistributionPriorities(env){
@@ -68,11 +76,11 @@ export async function rebalanceDistributionPriorities(env){
   try{const row=await env.DB.prepare(`SELECT status,directive,directive_json FROM growth_supervisor_state WHERE engine='distribution'`).first();if(row){let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}supervisor={status:row.status,directive:row.directive,config}}}catch{}
   let rows=[];
   try{
-    const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.human_required,o.distribution_score,o.last_checked_at,o.updated_at,l.baseline_score,l.learned_score,l.economic_boost,l.evidence_grade,l.paid_policy_decision,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,l.confirmed_revenue_30d,c.cost_amount,c.currency AS cost_currency,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status='submitted') AS already_submitted,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status IN ('auth_required','adapter_missing','policy_blocked','setup_required','human_required')) AS submission_blocked FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug LEFT JOIN distribution_surface_costs c ON c.surface_slug=o.surface_slug WHERE o.surface_slug IS NOT NULL`).all();
+    const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.human_required,o.distribution_score,o.live_url,o.last_checked_at,o.updated_at,o.audience_fit,o.authority,o.traffic_potential,o.backlink_value,o.acceptance_probability,o.automation_potential,o.effort_cost,o.external_value_score,o.external_value_tier,o.external_value_reason,o.value_model_version,l.baseline_score,l.learned_score,l.economic_boost,l.evidence_grade,l.paid_policy_decision,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,l.confirmed_revenue_30d,c.cost_amount,c.currency AS cost_currency,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status='submitted') AS already_submitted,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status IN ('auth_required','adapter_missing','policy_blocked','setup_required','human_required')) AS submission_blocked FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug LEFT JOIN distribution_surface_costs c ON c.surface_slug=o.surface_slug WHERE o.surface_slug IS NOT NULL`).all();
     rows=q.results||[];
   }catch(error){return{ok:false,updated:0,reason:'operating_decision_schema_unavailable',detail:String(error?.message||error).slice(0,500)};}
 
-  const staged=rows.map(row=>({...row,decision:operatingDecision(row)}));
+  const staged=rows.map(row=>{const value=expectedHumanValue(row);const enriched={...row,externalValue:value};return{...enriched,decision:operatingDecision(enriched)};});
   const supervisorSlots=Math.max(0,Math.min(3,number(supervisor?.config?.exploration_slots,0)));
   const explorationLimit=Math.max(1,Math.min(3,supervisorSlots||HUMAN_ACQUISITION_SPRINT.explorationSlots));
   const explorationCandidates=staged.filter(eligibleForExploration).sort(oldestFirst).slice(0,explorationLimit);
@@ -80,10 +88,12 @@ export async function rebalanceDistributionPriorities(env){
 
   let evaluated=0,updated=0,paidBlocked=0;
   const counts={scale:0,measure:0,explore:0,suspend:0};
+  const valueTiers={high:0,medium:0,low:0};
   const plans=[];
   for(const row of staged){
     evaluated++;
     const decision=row.decision.s;
+    valueTiers[row.externalValue.tier]=(valueTiers[row.externalValue.tier]||0)+1;
     const explorationSlot=explorationSlugs.has(row.surface_slug);
     const basePriority=priorityWeight(row,decision,{explorationSlot});
     const supervisorBoost=Math.max(0,Math.min(25,number(supervisor?.config?.priority_boost,0)));
@@ -109,8 +119,10 @@ export async function rebalanceDistributionPriorities(env){
          OR distribution_economic_learning.chairman_required IS NOT excluded.chairman_required`)
       .bind(row.surface_slug,baseline,learned,decision,priority,reason,chairmanRequired?1:0);
     const priorityStmt=env.DB.prepare(`UPDATE distribution_opportunities
-      SET distribution_score=?,updated_at=datetime('now')
-      WHERE surface_slug=? AND distribution_score IS NOT ?`).bind(priority,row.surface_slug,priority);
+      SET distribution_score=?,external_value_score=?,external_value_tier=?,external_value_reason=?,value_model_version=?,updated_at=datetime('now')
+      WHERE surface_slug=?
+        AND (distribution_score IS NOT ? OR external_value_score IS NOT ? OR external_value_tier IS NOT ? OR external_value_reason IS NOT ? OR value_model_version IS NOT ?)`)
+      .bind(priority,row.externalValue.score,row.externalValue.tier,row.externalValue.reason,row.externalValue.modelVersion,row.surface_slug,priority,row.externalValue.score,row.externalValue.tier,row.externalValue.reason,row.externalValue.modelVersion);
     const paidStmt=isPaid&&row.status===EXECUTABLE_STATUS
       ?env.DB.prepare(`UPDATE distribution_opportunities SET status='approval_required',human_required=1,next_action='Paid distribution is never executed automatically. Review measured evidence, expected value and cost before authorizing any spend.',updated_at=datetime('now') WHERE surface_slug=? AND status='ready_to_submit'`).bind(row.surface_slug)
       :null;
@@ -146,7 +158,7 @@ export async function rebalanceDistributionPriorities(env){
   try{
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`priority_${crypto.randomUUID()}`,'distribution_operating_priorities','completed','distribution_engine',`Operating priorities evaluated ${evaluated} surface(s) and materially changed ${updated}: scale ${counts.scale}, measure ${counts.measure}, explore ${counts.explore}, suspend ${counts.suspend}. ${explorationCandidates.length?`Reserved ${explorationCandidates.map(x=>x.surface_slug).join(', ')} as bounded acquisition exploration slot(s).`:'No eligible free acquisition exploration candidate was available.'} ${paidBlocked} paid ready-to-submit surface(s) were moved behind owner approval. Unchanged state is not rewritten.`).run();
   }catch{}
-  return{ok:true,evaluated,updated,decisions:counts,exploration_slot:explorationCandidates[0]?.surface_slug||null,exploration_slots:explorationCandidates.map(x=>x.surface_slug),paid_auto_execution_blocked:paidBlocked,write_policy:'material_change_only',write_mode:'d1_batch_v1',batch_size:batchSize,growth_supervisor:supervisor,human_acquisition_sprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
+  return{ok:true,evaluated,updated,decisions:counts,external_value_tiers:valueTiers,external_value_research_floor:MIN_EXTERNAL_VALUE_FOR_RESEARCH,exploration_slot:explorationCandidates[0]?.surface_slug||null,exploration_slots:explorationCandidates.map(x=>x.surface_slug),paid_auto_execution_blocked:paidBlocked,write_policy:'material_change_only',write_mode:'d1_batch_v1',batch_size:batchSize,growth_supervisor:supervisor,human_acquisition_sprint:{active:humanSprintActive(),...HUMAN_ACQUISITION_SPRINT}};
 }
 
 async function decisionSnapshot(env){
