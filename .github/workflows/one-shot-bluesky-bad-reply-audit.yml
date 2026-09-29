@@ -1,0 +1,52 @@
+name: One Shot Bluesky Bad Reply Audit
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-bluesky-bad-reply-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch ToolScout Bluesky feed and flag unacceptable replies
+        shell: bash
+        run: |
+          set -euo pipefail
+          DID='did:plc:hjawfnxtifnuqcgidlvmas76'
+          URL="https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${DID}&limit=100"
+          curl -fsSL "$URL" -o /tmp/feed.json
+          echo "=== matching ToolScout posts ==="
+          jq -r '
+            .feed[]
+            | .post as $p
+            | ($p.record.text // "") as $t
+            | select(
+                ($t | ascii_downcase) == "skip"
+                or ($t | ascii_downcase | contains("i need to pause on this one"))
+                or (($t | ascii_downcase | contains("to be honest")) and ($t | ascii_downcase | contains("pause")))
+              )
+            | [
+                $p.uri,
+                ($p.indexedAt // ""),
+                ($t | gsub("\n"; " ")),
+                (.reply.parent.uri // ""),
+                (.reply.root.uri // "")
+              ]
+            | @tsv
+          ' /tmp/feed.json
+          echo "=== recent ToolScout replies, newest first ==="
+          jq -r '
+            .feed[]
+            | select(.reply != null)
+            | [
+                .post.uri,
+                (.post.indexedAt // ""),
+                ((.post.record.text // "") | gsub("\n"; " ")),
+                (.reply.parent.uri // "")
+              ]
+            | @tsv
+          ' /tmp/feed.json | head -40
