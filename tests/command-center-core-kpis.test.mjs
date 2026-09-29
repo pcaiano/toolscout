@@ -14,7 +14,7 @@ const business=html.slice(businessStart,businessEnd);
 
 assert.equal(business.split("metric('").length-1,4,'Business State must expose exactly four primary KPIs');
 assert.doesNotMatch(business,/Browser-qualified outbound/);
-assert.doesNotMatch(business,/Strict \\/ user-activated outbound/);
+assert.ok(!business.includes('Strict / user-activated outbound'));
 assert.doesNotMatch(business,/Strict attributed humans/);
 assert.doesNotMatch(business,/PartnerStack network clicks/);
 assert.match(business,/st\\.commerceTruth/);
