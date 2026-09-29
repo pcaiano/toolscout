@@ -160,12 +160,19 @@ async function handleA2A(request,env,ctx){
   return Response.json({jsonrpc:'2.0',id:body.id,result:{message}},{headers:A2A_HEADERS});
 }
 
+export async function handleAgentProtocolRoute(request,env,ctx){
+  const u=new URL(request.url);
+  if(u.pathname==='/.well-known/agent-card.json'&&request.method==='GET')return Response.json(agentCard(),{headers:{...A2A_HEADERS,'Cache-Control':'public, max-age=3600'}});
+  if(u.pathname==='/a2a'||u.pathname==='/a2a/')return handleA2A(request,env,ctx);
+  if(u.pathname==='/mcp'||u.pathname==='/mcp/')return handleMcp(request,env,ctx);
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(u.pathname==='/.well-known/agent-card.json'&&request.method==='GET')return Response.json(agentCard(),{headers:{...A2A_HEADERS,'Cache-Control':'public, max-age=3600'}});
-    if(u.pathname==='/a2a'||u.pathname==='/a2a/')return handleA2A(request,env,ctx);
-    if(u.pathname==='/mcp'||u.pathname==='/mcp/')return handleMcp(request,env,ctx);
+    const owned=await handleAgentProtocolRoute(request,env,ctx);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined;}
