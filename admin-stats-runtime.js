@@ -1,4 +1,5 @@
 import legacy from './operational-truth-reconciliation-worker.js';
+import {isAccessAuthenticated} from './dynamic-worker.js';
 
 // ToolScout 2.0 owns /api/stats at the router boundary while preserving the
 // mature protected stats composition behind a read-only compatibility facade.
@@ -7,6 +8,22 @@ import legacy from './operational-truth-reconciliation-worker.js';
 export async function handleAdminStatsRoute(request,env,ctx){
   const url=new URL(request.url);
   if(request.method!=='GET'||url.pathname!=='/api/stats')return null;
+
+  const publicHost=url.hostname==='trytoolscout.org';
+  const token=String(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+  const authorized=publicHost
+    ?await isAccessAuthenticated(request,ctx)
+    :Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
+  if(!authorized){
+    const headers=new Headers({
+      'Content-Type':'application/json; charset=UTF-8',
+      'Cache-Control':'private, no-store',
+      'X-ToolScout-Read-Mode':'read-only',
+      'X-ToolScout-Route-Contract':'v2',
+      'X-ToolScout-Compatibility-Composition':'legacy-stats-v1'
+    });
+    return Response.json({error:'unauthorized'},{status:401,headers});
+  }
 
   const response=await legacy.fetch(request,env,ctx);
   const headers=new Headers(response.headers);
