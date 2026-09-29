@@ -132,6 +132,21 @@ if(routeContractLive.ok){
   }catch{}
 }
 
+
+
+for(const pathname of ['/best-seo-tools-for-agencies','/tools/airtable','/tools/semrush']){
+  const live=await fetchText(pathname);
+  if(!live.ok)errors.push({code:'public_decision_canary_unavailable',pathname,status:live.status});
+  else{
+    if(live.headers.get('x-toolscout-public-plane')!=='decision-v1')errors.push({code:'public_decision_canary_not_live',pathname});
+    if(live.headers.get('x-toolscout-public-parity')!=='candidate')errors.push({code:'public_decision_parity_header_missing',pathname});
+    const expected=canonicalPublicUrl(pathname);
+    const actual=canonical(live.text);
+    if(actual!==expected)errors.push({code:'public_decision_canary_canonical_mismatch',pathname,expected,actual});
+    if(!/Official (?:product )?source|Editorial evidence:|Primary sources:/i.test(live.text))errors.push({code:'public_decision_editorial_evidence_missing',pathname});
+  }
+}
+
 // Protect the commercial redirect plane without generating a real click.
 // The health-check header is explicitly synthetic in trackedRedirect.
 const affiliate=readJson('data/affiliate.json',{});
