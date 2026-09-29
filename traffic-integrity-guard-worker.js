@@ -20,59 +20,37 @@ async function digestHex(value){
 async function ensureGuardSchema(env){
   if(guardSchemaReady)return guardSchemaReady;
   guardSchemaReady=(async()=>{
-  await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_guard_events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      fingerprint TEXT NOT NULL,
-      ua_hash TEXT NOT NULL,
-      session_id TEXT NOT NULL,
-      path TEXT,
-      country TEXT,
-      asn INTEGER,
-      suspicious_direct INTEGER NOT NULL DEFAULT 0,
-      decision TEXT NOT NULL DEFAULT 'pending',
-      reason TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_created ON traffic_guard_events(created_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_fingerprint_created ON traffic_guard_events(fingerprint,created_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_decision_created ON traffic_guard_events(decision,created_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_decision_created_session ON traffic_guard_events(decision,created_at,session_id)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_session_decision_created ON traffic_guard_events(session_id,decision,created_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_guard_suspicious_created ON traffic_guard_events(suspicious_direct,created_at)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_quarantine_sessions (
-      session_id TEXT PRIMARY KEY,
-      reason TEXT NOT NULL,
-      original_classification TEXT,
-      first_confirmed_at TEXT,
-      quarantined_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_integrity_meta (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    )`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS traffic_human_evidence (
-      session_id TEXT PRIMARY KEY,
-      visitor_id TEXT,
-      evidence_type TEXT NOT NULL,
-      evidence_strength INTEGER NOT NULL DEFAULT 1,
-      interaction_count INTEGER NOT NULL DEFAULT 0,
-      first_path TEXT,
-      last_path TEXT,
-      source TEXT,
-      referrer_host TEXT,
-      country TEXT,
-      asn INTEGER,
-      first_evidence_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_evidence_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_created ON traffic_human_evidence(first_evidence_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_traffic_human_evidence_visitor ON traffic_human_evidence(visitor_id,first_evidence_at)`),
-    env.DB.prepare(`INSERT OR IGNORE INTO traffic_integrity_meta(key,value) VALUES('strict_human_tracking_started_at',datetime('now'))`)
-  ]);
+    const requiredTables=[
+      'traffic_guard_events',
+      'traffic_quarantine_sessions',
+      'traffic_integrity_meta',
+      'traffic_human_evidence'
+    ];
+    const requiredIndexes=[
+      'idx_traffic_guard_created',
+      'idx_traffic_guard_fingerprint_created',
+      'idx_traffic_guard_decision_created',
+      'idx_traffic_guard_decision_created_session',
+      'idx_traffic_guard_session_decision_created',
+      'idx_traffic_guard_suspicious_created',
+      'idx_traffic_human_evidence_created',
+      'idx_traffic_human_evidence_visitor'
+    ];
+    const tableMarks=requiredTables.map(()=>'?').join(',');
+    const indexMarks=requiredIndexes.map(()=>'?').join(',');
+    const [tables,indexes]=await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${tableMarks})`).bind(...requiredTables).first(),
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (${indexMarks})`).bind(...requiredIndexes).first()
+    ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length){
+      throw new Error(`traffic_guard_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}`);
+    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount};
   })().catch(error=>{guardSchemaReady=null;throw error});
   return guardSchemaReady;
 }
+
 function safePath(value){
   const text=String(value||'/').slice(0,200);
   return text.startsWith('/')?text:'/';
