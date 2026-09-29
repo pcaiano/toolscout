@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-29T12:47:00Z",
-  "source": "ToolScout 2.0 branch audit using current GSC opportunities",
+  "generatedAt": "2026-09-29T14:07:24.421Z",
+  "source": "ToolScout 2.0 branch audit using latest merged GSC opportunities",
   "model": "toolscout-editorial-authority-v1",
   "targetScore": 70,
   "preservationRule": "No URL, canonical, indexed page or existing backlink is removed by this portfolio.",
@@ -21,11 +21,11 @@
       "hasAnalysis": true,
       "hasTradeoffs": true,
       "hasVerification": false,
-      "impressions": 1001,
+      "impressions": 1003,
       "clicks": 0,
-      "position": 76.97,
+      "position": 76.99,
       "searchOpportunityKind": "high_impression_low_rank",
-      "priorityScore": 88.62,
+      "priorityScore": 88.63,
       "action": "deepen_editorial_evidence"
     },
     {
@@ -203,11 +203,11 @@
       "hasAnalysis": true,
       "hasTradeoffs": true,
       "hasVerification": false,
-      "impressions": 1001,
+      "impressions": 1003,
       "clicks": 0,
-      "position": 76.97,
+      "position": 76.99,
       "searchOpportunityKind": "high_impression_low_rank",
-      "priorityScore": 88.62,
+      "priorityScore": 88.63,
       "action": "deepen_editorial_evidence"
     },
     {
