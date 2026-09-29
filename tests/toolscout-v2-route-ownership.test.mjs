@@ -17,6 +17,8 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.ok(routeContract().earlyDispatchOwners.includes('growth_runtime_closed_loop'));
   assert.equal(routeOwner('/api/growth/supervisor/public',{method:'GET'}).owner,'distribution_orchestrator');
   assert.equal(routeOwner('/news/zapier-next-gen-zaps-mcp',{method:'GET'}).owner,'public_editorial_site');
+  assert.equal(routeOwner('/software-trends-index',{method:'GET'}).owner,'public_editorial_site');
+  assert.equal(routeOwner('/software-trends-index.json',{method:'GET'}).owner,'public_editorial_site');
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
