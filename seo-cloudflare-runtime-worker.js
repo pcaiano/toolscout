@@ -224,6 +224,8 @@ async function health(env){
   return {status:'active',executor:'cloudflare',qualityGate:'runtime-safe-v1',state:{total:Number(summary?.total||0),active:Number(summary?.active||0),indexNowQueued24h:Number(summary?.indexnow_queued_24h||0),updatedAt:summary?.updated_at||null},items};
 }
 
+export {transformPage as transformSeoPublicPage};
+
 export async function handleSeoRuntimeRoute(request,env){
   const url=new URL(request.url);
   if(request.method==='GET'&&url.pathname==='/api/seo/runtime-health'){
