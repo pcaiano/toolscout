@@ -102,6 +102,17 @@ const analyticsPage=await fetchText('/analytics');
 if(!analyticsPage.ok)errors.push({code:'command_center_page_unavailable',status:analyticsPage.status});
 else if(!/Editorial Authority/.test(analyticsPage.text))errors.push({code:'command_center_editorial_authority_missing'});
 
+const adminStatsUnauthorized=await fetchText('/api/stats');
+if(adminStatsUnauthorized.status!==401)errors.push({code:'admin_stats_auth_regressed',status:adminStatsUnauthorized.status});
+else{
+  if(adminStatsUnauthorized.headers.get('x-toolscout-route-owner')!=='admin_stats')errors.push({code:'admin_stats_wrong_route_owner',owner:adminStatsUnauthorized.headers.get('x-toolscout-route-owner')});
+  if(adminStatsUnauthorized.headers.get('access-control-allow-origin')!=='*')errors.push({code:'admin_stats_cors_regressed'});
+  try{
+    const data=JSON.parse(adminStatsUnauthorized.text);
+    if(data?.error!=='unauthorized')errors.push({code:'admin_stats_unauthorized_payload_regressed'});
+  }catch{errors.push({code:'admin_stats_unauthorized_invalid_json'});}
+}
+
 const trafficHealth=await fetchText('/api/traffic-integrity-health');
 if(!trafficHealth.ok)errors.push({code:'traffic_integrity_health_unavailable',status:trafficHealth.status});
 else{
@@ -153,6 +164,7 @@ if(routeContractLive.ok){
     if(owner('agent_discovery_catalog')!=='machine_discovery_catalog')errors.push({code:'machine_discovery_catalog_not_live'});
     if(owner('command_center_resilient_health')!=='command_center_resilient_health')errors.push({code:'command_center_resilient_health_not_live'});
     if(owner('traffic_integrity_health')!=='traffic_integrity_health')errors.push({code:'traffic_integrity_health_direct_owner_not_live'});
+    if(owner('admin_stats')!=='admin_stats')errors.push({code:'admin_stats_direct_owner_not_live'});
     if(owner('analytics_chairman_queue')!=='analytics_chairman')errors.push({code:'analytics_chairman_direct_owner_not_live'});
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
