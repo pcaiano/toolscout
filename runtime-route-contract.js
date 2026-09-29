@@ -6,7 +6,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
   {id:'runtime',owner:'compute_router',plane:'control',methods:['GET','POST'],prefixes:['/api/runtime/']},
   {id:'distribution_priority',owner:'distribution_priority',plane:'growth_planner',methods:['GET','POST'],exact:['/api/distribution/operating-decisions','/api/distribution/operating-decisions/rebalance']},
-  {id:'distribution_control',owner:'distribution_orchestrator',plane:'growth_planner',methods:['GET','POST'],prefixes:['/api/distribution/orchestrate','/api/distribution/economic-learning','/api/distribution/editorial-queue']},
+  {id:'distribution_control',owner:'distribution_orchestrator',plane:'growth_planner',methods:['GET','POST'],prefixes:['/api/distribution/orchestrate','/api/distribution/economic-learning','/api/distribution/editorial-queue','/api/distribution/priorities/']},
   {id:'growth_control',owner:'distribution_orchestrator',plane:'growth_planner',methods:['GET','POST'],prefixes:['/api/growth/']},
   {id:'authority',owner:'authority_acquisition',plane:'executor',methods:['GET','POST'],prefixes:['/api/distribution/authority/']},
   {id:'seo_runtime',owner:'seo_runtime',plane:'signals',methods:['GET','POST'],prefixes:['/api/seo/']},
