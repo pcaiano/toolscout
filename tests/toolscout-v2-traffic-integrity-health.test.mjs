@@ -13,6 +13,7 @@ function fakeEnv(){
       return{
         bind(...args){bindings=args;return this},
         async first(){
+          if(text.includes("sqlite_master")&&text.includes("name='external_engine_evidence'"))return{n:1};
           if(text.includes("sqlite_master"))return{n:bindings.length};
           if(text.includes("outbound_integrity_meta")&&text.includes("tracking_started_at"))return{value:'2026-09-01 00:00:00'};
           if(text.includes("traffic_integrity_meta")&&text.includes("strict_human_tracking_started_at"))return{value:'2026-09-01 00:00:00'};
