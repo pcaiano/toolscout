@@ -27,6 +27,8 @@ const directSource=fs.readFileSync(path.join(ROOT,ENTRY),'utf8');
 const directOwners=[
   ['distribution_priority',/ownership\.owner==='distribution_priority'/],
   ['distribution_orchestrator',/ownership\.owner==='distribution_orchestrator'/],
+  ['seo_runtime',/ownership\.owner==='seo_runtime'/],
+  ['authority_acquisition',/ownership\.owner==='authority_acquisition'/],
   ['mission_integrity',/ownership\.owner==='mission_integrity'/]
 ].filter(([,pattern])=>pattern.test(directSource)).map(([owner])=>owner);
 
