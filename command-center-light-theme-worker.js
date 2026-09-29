@@ -1,4 +1,5 @@
 import base from './command-center-final-integrity-worker.js';
+import {canonicalSeoPath,canonicalizeOwnedMarkup} from './public-canonical-contract.js';
 import resilientFallback from './command-center-resilient-worker.js';
 import {publicMergedTools,publicRuntimeToolResponse,publicQualityEnhancedToolResponse,publicMergedSitemap,publicRuntimeRankingResponse} from './catalog-autonomy-worker.js';
 
@@ -567,17 +568,6 @@ async function resilientStatsResponse(request, env, ctx) {
   }
 }
 
-function canonicalSeoPath(pathname){
-  const p=String(pathname||'/');
-  if(p==='/index.html')return'/';
-  return p.replace(/\.html$/i,'')||'/';
-}
-function canonicalizeOwnedMarkup(value){
-  return String(value||'')
-    .replace(/https:\/\/www\.trytoolscout\.org/gi,'https://trytoolscout.org')
-    .replace(/https:\/\/trytoolscout\.org(\/[^"'<>\\\s?#]*?)\.html(?=([?#"'<>\\\s]|$))/gi,'https://trytoolscout.org$1')
-    .replace(/(["'=])((?:\.\/|\/)[^"'<>\\\s?#]*?)\.html(?=([?#"'<>\\\s]|$))/gi,'$1$2');
-}
 const SEO_DISCOVERY_LINKS={
   '/guides':[
     ['/methodology','Methodology'],['/categories','Software categories'],['/crm-tools','CRM tools'],['/seo-tools','SEO tools'],['/software-trends-index','Software trends index'],['/best-affordable-crm','Best affordable CRM'],['/best-workflow-automation-tools','Best workflow automation tools']
