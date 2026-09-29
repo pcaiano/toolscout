@@ -128,7 +128,13 @@
     "low_value_surfaces_do_not_consume_render_route_research_capacity",
     "existing_live_verified_submitted_and_pending_distribution_outcomes_are_preserved_during_v2_migration",
     "existing_public_canonicals_indexed_pages_and_go_routes_are_preserved_during_v2_migration",
-    "editorial_authority_and_information_gain_are_primary_content_quality_goals"
+    "editorial_authority_and_information_gain_are_primary_content_quality_goals",
+    "direct_route_coverage_cannot_fall_below_phase_floor",
+    "new_legacy_route_groups_are_forbidden_without_contract_change",
+    "public_canonical_contract_is_extensionless",
+    "existing_static_guides_cannot_be_replaced_by_runtime_rankings",
+    "observability_get_routes_do_not_mutate_canonical_state",
+    "scheduled_missions_must_use_registered_runtime_crons"
   ],
   "mission": {
     "starts_on": "2026-09-29",
@@ -161,6 +167,16 @@
     "preserve_existing_canonicals": true,
     "preserve_existing_indexed_pages": true,
     "preserve_existing_verified_backlinks": true,
-    "preserve_existing_go_routes": true
+    "preserve_existing_go_routes": true,
+    "direct_route_coverage_floor_pct": 85,
+    "allowed_legacy_route_groups": [
+      "analytics_control",
+      "public_tools",
+      "affiliate_redirect"
+    ],
+    "public_canonical_contract": "extensionless-v1",
+    "static_guide_sovereignty": true,
+    "observability_gets_are_read_only": true,
+    "scheduled_missions_require_registered_cron": true
   }
 }
