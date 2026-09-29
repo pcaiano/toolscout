@@ -1,4 +1,4 @@
-# production proof: deploy finalized GSC truth, weekly recovery links, and current runtime
+# production proof: deploy finalized GSC truth and balanced weekly recovery 2026-09-29
 name: One Shot Distribution Execution Recovery Deploy
 
 on:
