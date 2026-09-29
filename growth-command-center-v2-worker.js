@@ -175,7 +175,7 @@ async function affiliateCoverageStatusSnapshot(request,env){
       assetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
       assetJson(request,env,'/data/affiliate.json',{}),
       safeAll(env,`SELECT tool_slug,status,updated_at FROM affiliate_workflow`),
-      safeAll(env,`SELECT tool_slug,COUNT(*) clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized FROM verified_outbound_events WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`),
+      safeAll(env,`WITH classified AS (SELECT v.*,CASE WHEN v.proof_type='user_activation_navigation' OR EXISTS(SELECT 1 FROM funnel_events f WHERE f.session_id=v.session_id AND f.event_type='page_confirmed' AND COALESCE(f.source,'')<>'outbound-proof' AND f.created_at<=v.created_at) OR EXISTS(SELECT 1 FROM traffic_human_evidence h WHERE h.session_id=v.session_id AND h.evidence_type<>'verified_outbound_navigation' AND h.first_evidence_at<=v.created_at) THEN 1 ELSE 0 END strict_proof FROM verified_outbound_events v WHERE v.created_at>=datetime('now','-30 days')) SELECT tool_slug,COUNT(*) browser_clicks,SUM(CASE WHEN strict_proof=1 THEN 1 ELSE 0 END) strict_clicks,SUM(CASE WHEN affiliate_active_at_click=1 THEN 1 ELSE 0 END) browser_monetized,SUM(CASE WHEN strict_proof=1 AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) strict_monetized FROM classified GROUP BY tool_slug`),
       safeAll(env,`SELECT tool_slug,COUNT(*) clicks FROM social_affiliate_redirects WHERE created_at>=datetime('now','-30 days') GROUP BY tool_slug`),
       safeAll(env,`SELECT e.tool_slug,e.provider,e.account_email,e.reported_clicks_total,e.observed_at
         FROM affiliate_network_click_evidence e
@@ -189,7 +189,7 @@ async function affiliateCoverageStatusSnapshot(request,env){
     ]);
     const pipelineMap=new Map((pipeline?.verified_programs||[]).map(x=>[x.slug,x]));
     const workflowMap=new Map(workflowRows.map(x=>[x.tool_slug,x]));
-    const clickMap=new Map(clickRows.map(x=>[x.tool_slug,{clicks:n(x.clicks),monetized:n(x.monetized)}]));
+    const clickMap=new Map(clickRows.map(x=>[x.tool_slug,{browserClicks:n(x.browser_clicks),strictClicks:n(x.strict_clicks),browserMonetized:n(x.browser_monetized),strictMonetized:n(x.strict_monetized)}]));
     const socialMap=new Map(socialRows.map(x=>[x.tool_slug,n(x.clicks)]));
     const vendorMap=new Map();
     for(const row of vendorRows||[]){
@@ -209,32 +209,34 @@ async function affiliateCoverageStatusSnapshot(request,env){
       else if(PENDING_AFFILIATE_STATES.has(status))group='pending';
       else if(REJECTED_AFFILIATE_STATES.has(status))group='rejected';
       if(!group)continue;
-      const ct=clickMap.get(tool.slug)||{clicks:0,monetized:0},social=n(socialMap.get(tool.slug)),vendor=vendorMap.get(tool.slug)||{clicks:0,evidence:[]};
+      const ct=clickMap.get(tool.slug)||{browserClicks:0,strictClicks:0,browserMonetized:0,strictMonetized:0},social=n(socialMap.get(tool.slug)),vendor=vendorMap.get(tool.slug)||{clicks:0,evidence:[]};
       groups[group].push({
         slug:tool.slug,name:tool.name||tool.slug,status,
-        clicks30d:ct.clicks,monetizedClicks30d:ct.monetized,
+        browserClicks30d:ct.browserClicks,strictClicks30d:ct.strictClicks,browserMonetizedClicks30d:ct.browserMonetized,strictMonetizedClicks30d:ct.strictMonetized,
         socialAffiliateRedirects30d:social,
         vendorReportedClicks:vendor.clicks,
         vendorEvidence:vendor.evidence
       });
     }
-    for(const items of Object.values(groups))items.sort((a,b)=>b.clicks30d-a.clicks30d||b.socialAffiliateRedirects30d-a.socialAffiliateRedirects30d||b.vendorReportedClicks-a.vendorReportedClicks||a.name.localeCompare(b.name));
+    for(const items of Object.values(groups))items.sort((a,b)=>b.strictClicks30d-a.strictClicks30d||b.browserClicks30d-a.browserClicks30d||b.socialAffiliateRedirects30d-a.socialAffiliateRedirects30d||b.vendorReportedClicks-a.vendorReportedClicks||a.name.localeCompare(b.name));
     const summarize=items=>({
       count:items.length,
-      clicks30d:items.reduce((sum,x)=>sum+n(x.clicks30d),0),
-      monetizedClicks30d:items.reduce((sum,x)=>sum+n(x.monetizedClicks30d),0),
+      browserClicks30d:items.reduce((sum,x)=>sum+n(x.browserClicks30d),0),
+      strictClicks30d:items.reduce((sum,x)=>sum+n(x.strictClicks30d),0),
+      browserMonetizedClicks30d:items.reduce((sum,x)=>sum+n(x.browserMonetizedClicks30d),0),
+      strictMonetizedClicks30d:items.reduce((sum,x)=>sum+n(x.strictMonetizedClicks30d),0),
       socialAffiliateRedirects30d:items.reduce((sum,x)=>sum+n(x.socialAffiliateRedirects30d),0),
       vendorReportedClickFloor:items.reduce((sum,x)=>sum+n(x.vendorReportedClicks),0),
       items
     });
     return {
       status:'observed',windowDays:30,
-      clickDefinition:'Commercial click sources stay separate: strict first-party verified /go/ navigation, tracked social affiliate redirects, and cumulative affiliate-network counters. Cross-source counts can overlap and are never summed.',
+      clickDefinition:'Commercial click evidence is layered: browser-qualified first-party navigation, strict/user-activated outbound, tracked social redirects, and cumulative affiliate-network counters. Unknown traffic is not labelled bot and cross-source counts are never summed.',
       active:summarize(groups.active),pending:summarize(groups.pending),rejected:summarize(groups.rejected)
     };
   }catch(e){return {status:'unavailable',reason:String(e?.message||e)}}
 }
-function affiliateCoverageWidget(){return `<section class="widget" data-widget="affiliate-status" data-detail="1" style="--w:12;--h:6"><div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Verified outbound · 30d</div></div><div class="widgetBody" id="affiliateCoverageStatusBody"><div class="empty">Refresh to load affiliate status.</div></div><div class="resizeHandle"></div></section>`}
+function affiliateCoverageWidget(){return `<section class="widget" data-widget="affiliate-status" data-detail="1" style="--w:12;--h:6"><div class="widgetHead"><div><div class="widgetKicker">Affiliate · status · clicks</div><div class="widgetTitle">Affiliate Coverage Status</div></div><div class="widgetMeta">Layered click evidence · 30d</div></div><div class="widgetBody" id="affiliateCoverageStatusBody"><div class="empty">Refresh to load affiliate status.</div></div><div class="resizeHandle"></div></section>`}
 function autonomousGrowthWidget(){return `<section class="widget" data-widget="autonomous-growth" data-detail="1" style="--w:12;--h:6"><div class="widgetHead"><div><div class="widgetKicker">Growth · autonomous loop</div><div class="widgetTitle">Autonomous Growth</div></div><div class="widgetMeta">Discovery → action → verified human impact</div></div><div class="widgetBody" id="autonomousGrowthBody"><div class="empty">Refresh to load autonomous growth.</div></div><div class="resizeHandle"></div></section>`}
 
 function businessPulseWidget(){return `<section class="widget" data-widget="business-pulse" style="--w:12;--h:7"><div class="widgetHead"><div><div class="widgetKicker">Human acquisition · conversion · revenue</div><div class="widgetTitle">Human Growth Machine</div></div><div class="widgetMeta" id="businessPulseMeta">Current evidence</div></div><div class="widgetBody" id="businessPulseBody"><div class="empty">Refresh to load the business state.</div></div><div class="resizeHandle"></div></section>`}
@@ -342,7 +344,7 @@ rndDetails(x.rnd_items,x.rnd_experiments)+frontierDetails(x.rnd_frontier_items,x
 '<div class="meta" style="margin-top:8px">'+esc(x.attribution_rule||'')+'</div>'}const original=window.render;if(typeof original==='function')window.render=function(d){original(d);renderAutonomousGrowth(d)}})();</script>`}
 function affiliateCoverageScript(){return `<style>
 .affiliateStatusTable{width:100%;border-collapse:collapse;font-size:12px}.affiliateStatusTable th,.affiliateStatusTable td{padding:9px 8px;border-top:1px solid var(--line);text-align:left}.affiliateStatusTable thead th{border-top:0;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.affiliateStatusTable th:nth-child(n+3),.affiliateStatusTable td:nth-child(n+3){text-align:right}.affiliateStatusSummary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-</style><script>(function(){const e=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m])),nn=v=>Number(v||0).toLocaleString(),sl=v=>String(v||'').replaceAll('_',' ');function rg(g,label){return(Array.isArray(g?.items)?g.items:[]).map(x=>({name:x.name||x.slug||'',status:x.status||label,clicks:Number(x.clicks30d||0),social:Number(x.socialAffiliateRedirects30d||0),vendor:Number(x.vendorReportedClicks||0),group:label}))}function renderAffiliateCoverageStatus(d){const root=document.getElementById('affiliateCoverageStatusBody');if(!root)return;const s=d?.affiliateCoverageStatus||{};if(s.status!=='observed'){root.innerHTML='<div class="empty">Affiliate coverage status is temporarily unavailable.</div>';return}const order={active:0,pending:1,rejected:2};const rows=[...rg(s.active,'active'),...rg(s.pending,'pending'),...rg(s.rejected,'rejected')].sort((a,b)=>order[a.group]-order[b.group]||b.clicks-a.clicks||b.social-a.social||b.vendor-a.vendor||a.name.localeCompare(b.name));const social=(s.active?.socialAffiliateRedirects30d||0)+(s.pending?.socialAffiliateRedirects30d||0)+(s.rejected?.socialAffiliateRedirects30d||0),vendor=(s.active?.vendorReportedClickFloor||0)+(s.pending?.vendorReportedClickFloor||0)+(s.rejected?.vendorReportedClickFloor||0);const summary='<div class="affiliateStatusSummary"><span class="pill good">Strict verified '+nn((s.active?.clicks30d||0)+(s.pending?.clicks30d||0)+(s.rejected?.clicks30d||0))+'</span><span class="pill info">Tracked social '+nn(social)+'</span><span class="pill info">Vendor floor '+nn(vendor)+'</span></div>';const table=rows.length?'<table class="affiliateStatusTable"><thead><tr><th>Affiliate</th><th>Status</th><th>Strict 30d</th><th>Social 30d</th><th>Vendor floor</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+e(x.name)+'</td><td>'+e(sl(x.status))+'</td><td>'+nn(x.clicks)+'</td><td>'+nn(x.social)+'</td><td>'+nn(x.vendor)+'</td></tr>').join('')+'</tbody></table>':'<div class="empty">No active, pending or rejected affiliate programmes found.</div>';root.innerHTML=summary+table}const original=window.render;if(typeof original==='function')window.render=function(d){original(d);renderAffiliateCoverageStatus(d)}})();</script>`}
+</style><script>(function(){const e=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m])),nn=v=>Number(v||0).toLocaleString(),sl=v=>String(v||'').replaceAll('_',' ');function rg(g,label){return(Array.isArray(g?.items)?g.items:[]).map(x=>({name:x.name||x.slug||'',status:x.status||label,browser:Number(x.browserClicks30d||0),strict:Number(x.strictClicks30d||0),social:Number(x.socialAffiliateRedirects30d||0),vendor:Number(x.vendorReportedClicks||0),group:label}))}function renderAffiliateCoverageStatus(d){const root=document.getElementById('affiliateCoverageStatusBody');if(!root)return;const s=d?.affiliateCoverageStatus||{};if(s.status!=='observed'){root.innerHTML='<div class="empty">Affiliate coverage status is temporarily unavailable.</div>';return}const order={active:0,pending:1,rejected:2};const rows=[...rg(s.active,'active'),...rg(s.pending,'pending'),...rg(s.rejected,'rejected')].sort((a,b)=>order[a.group]-order[b.group]||b.strict-a.strict||b.browser-a.browser||b.social-a.social||b.vendor-a.vendor||a.name.localeCompare(b.name));const browser=(s.active?.browserClicks30d||0)+(s.pending?.browserClicks30d||0)+(s.rejected?.browserClicks30d||0),strict=(s.active?.strictClicks30d||0)+(s.pending?.strictClicks30d||0)+(s.rejected?.strictClicks30d||0),social=(s.active?.socialAffiliateRedirects30d||0)+(s.pending?.socialAffiliateRedirects30d||0)+(s.rejected?.socialAffiliateRedirects30d||0),vendor=(s.active?.vendorReportedClickFloor||0)+(s.pending?.vendorReportedClickFloor||0)+(s.rejected?.vendorReportedClickFloor||0);const summary='<div class="affiliateStatusSummary"><span class="pill info">Browser-qualified '+nn(browser)+'</span><span class="pill good">Strict / user-activated '+nn(strict)+'</span><span class="pill info">Tracked social '+nn(social)+'</span><span class="pill info">Vendor network '+nn(vendor)+'</span></div>';const table=rows.length?'<table class="affiliateStatusTable"><thead><tr><th>Affiliate</th><th>Status</th><th>Browser 30d</th><th>Strict 30d</th><th>Social 30d</th><th>Vendor</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+e(x.name)+'</td><td>'+e(sl(x.status))+'</td><td>'+nn(x.browser)+'</td><td>'+nn(x.strict)+'</td><td>'+nn(x.social)+'</td><td>'+nn(x.vendor)+'</td></tr>').join('')+'</tbody></table>':'<div class="empty">No active, pending or rejected affiliate programmes found.</div>';root.innerHTML=summary+table}const original=window.render;if(typeof original==='function')window.render=function(d){original(d);renderAffiliateCoverageStatus(d)}})();</script>`}
 async function verifyActionUrl(url){
   const safe=safeUrl(url);
   const checkedAt=new Date().toISOString();
