@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "effective_date": "2026-09-27",
+  "version": 2,
+  "effective_date": "2026-09-29",
   "purpose": "Machine-checkable ToolScout operating contract and anti-drift invariants.",
   "project": {
     "repository": "pcaiano/toolscout",
@@ -122,12 +122,18 @@
     "fresh_classifier_evidence_reconciles_to_human_gate_without_research_replay",
     "cancelled_classifier_gate_reopens_only_from_newer_exact_route_evidence",
     "resolved_human_gate_never_reopens_silently",
-    "source_unreachable_backoff_is_not_counted_as_runnable_or_stalled_work"
+    "source_unreachable_backoff_is_not_counted_as_runnable_or_stalled_work",
+    "external_value_is_scored_before_new_distribution_research",
+    "automation_ease_never_increases_external_acquisition_value",
+    "low_value_surfaces_do_not_consume_render_route_research_capacity",
+    "existing_live_verified_submitted_and_pending_distribution_outcomes_are_preserved_during_v2_migration",
+    "existing_public_canonicals_indexed_pages_and_go_routes_are_preserved_during_v2_migration",
+    "editorial_authority_and_information_gain_are_primary_content_quality_goals"
   ],
   "mission": {
-    "starts_on": "2026-09-28",
-    "expires_on": "2026-10-05",
-    "objective": "Reliable and consistent Growth Brain and engine operation with aggressive autonomous traffic generation once reliability gates pass."
+    "starts_on": "2026-09-29",
+    "expires_on": null,
+    "objective": "Migrate ToolScout to the 2.0 external-value-first, editorial-authority architecture without regressing existing indexation, backlinks, canonicals, affiliate routes or verified acquisition outcomes."
   },
   "reconciled_from_base_commit": "6e355088af9062177b15afc2dbd1a47a97579e6a",
   "observability": {
@@ -139,5 +145,22 @@
     "content_external_success_source": "engine_evidence_after_external_publication",
     "make_scenario_success_is_transport_only": true,
     "content_target_validation": "verified_dynamic_brief_target"
+  },
+  "architecture_v2": {
+    "status": "migration_in_progress",
+    "objective_function": "expected_qualified_human_value",
+    "systems": [
+      "public_site",
+      "signals",
+      "growth_planner",
+      "executor"
+    ],
+    "external_value_research_floor": 45,
+    "editorial_authority_is_primary": true,
+    "automation_ease_is_not_value": true,
+    "preserve_existing_canonicals": true,
+    "preserve_existing_indexed_pages": true,
+    "preserve_existing_verified_backlinks": true,
+    "preserve_existing_go_routes": true
   }
 }
