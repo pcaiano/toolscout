@@ -1,5 +1,6 @@
 import base from './growth-runtime-integrity-worker.js';
 import {runWithLedger,missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const AUTHORITY_ATTEMPT_MIN_24H=4;
@@ -240,7 +241,7 @@ export default {
   },
   async scheduled(event,env,ctx){
     const trigger=event?.cron||'scheduled';
-    if(trigger==='15 * * * *'){
+    if(trigger===TOOLSCOUT_CRONS.hourly){
       const request=new Request('https://trytoolscout.org/api/distribution/authority/close-loop',{headers:missionCycleHeaders(event,'authority_closed_loop_scheduler')});
       try{await runWithLedger(env,{engine:'distribution',mission:'authority_execution_recovery',triggerName:'hourly_closed_loop',singleFlightMinutes:75},()=>closeAuthorityExecutionLoop(request,env,ctx));}
       catch(error){await recordEvent(env,'authority_closed_loop_runtime_error','failed',String(error?.message||error).slice(0,1200));}
