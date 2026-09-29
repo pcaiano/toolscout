@@ -27,7 +27,8 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeOwner('/analytics/api/chairman-queue',{method:'GET'}).owner,'analytics_chairman');
   assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
-  assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'command_center');
+  assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
+  assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'command_center');
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
@@ -51,6 +52,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='machine_discovery_catalog'/);
   assert.match(src,/ownership\.owner==='analytics_chairman'/);
   assert.match(src,/ownership\.owner==='analytics_stats'/);
+  assert.match(src,/ownership\.owner==='analytics_human_actions'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
