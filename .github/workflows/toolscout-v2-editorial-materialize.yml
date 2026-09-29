@@ -30,12 +30,13 @@ jobs:
         run: |
           node --check scripts/generate-seo-pages.mjs
           node --check scripts/generate-tool-pages.mjs
-          node --test tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-editorial-authority.test.mjs
+          node --test tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-editorial-authority.test.mjs tests/toolscout-v2-software-trends.test.mjs
 
       - name: Regenerate decision pages locally
         run: |
           node scripts/generate-seo-pages.mjs
           node scripts/generate-tool-pages.mjs
+          node scripts/generate-software-trends-index.mjs
 
       - name: Select observed-demand editorial portfolio only
         run: |
@@ -62,6 +63,11 @@ jobs:
             mkdir -p "/tmp/toolscout-v2-selected/$(dirname "$page")"
             cp "$page" "/tmp/toolscout-v2-selected/$page"
           done < /tmp/toolscout-v2-pages.txt
+          for artifact in software-trends-index.html software-trends-index.json reports/software-trends-index.json reports/linkable-assets.json; do
+            test -f "$artifact"
+            mkdir -p "/tmp/toolscout-v2-selected/$(dirname "$artifact")"
+            cp "$artifact" "/tmp/toolscout-v2-selected/$artifact"
+          done
 
           # Generators may refresh unrelated pages. Discard every non-selected
           # working-tree mutation before reapplying the bounded portfolio.
@@ -70,6 +76,9 @@ jobs:
             [ -z "$page" ] && continue
             cp "/tmp/toolscout-v2-selected/$page" "$page"
           done < /tmp/toolscout-v2-pages.txt
+          for artifact in software-trends-index.html software-trends-index.json reports/software-trends-index.json reports/linkable-assets.json; do
+            cp "/tmp/toolscout-v2-selected/$artifact" "$artifact"
+          done
 
           # Preservation is authoritative: keep each page's existing canonical
           # exactly as it is on main, even when the current generator prefers a
@@ -95,6 +104,7 @@ jobs:
             [ -z "$page" ] && continue
             git add -- "$page"
           done < /tmp/toolscout-v2-pages.txt
+          git add -- software-trends-index.html software-trends-index.json reports/software-trends-index.json reports/linkable-assets.json
 
       - name: Enforce preservation before commit
         env:
