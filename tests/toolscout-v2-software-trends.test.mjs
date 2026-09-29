@@ -21,6 +21,6 @@ test('Software Trends keeps affiliate status out of editorial selection',()=>{
 });
 
 test('Software Trends preserves the existing canonical URL contract',()=>{
-  assert.match(src,/const PAGE_URL=`${BASE}/software-trends-index.html`/);
-  assert.match(src,/const DATA_URL=`${BASE}/software-trends-index.json`/);
+  assert.ok(src.includes("const PAGE_URL=`${BASE}/software-trends-index.html`"));
+  assert.ok(src.includes("const DATA_URL=`${BASE}/software-trends-index.json`"));
 });
