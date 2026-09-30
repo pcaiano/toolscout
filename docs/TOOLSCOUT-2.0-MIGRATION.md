@@ -726,3 +726,19 @@ Implemented:
 
 Preservation rule:
 The base health payload remains version 1 with D1 first-party visitor IDs, last24 as the default reporting window and top chart placement. Only redundant generic UI decoration traversal is removed.
+
+
+## Phase 58 - Remove redundant resilient traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-58`.
+
+Implemented:
+- generic request fallback now connects directly to `command-center-autoload-worker.js`;
+- `command-center-resilient-worker.js` is removed from generic traversal;
+- resilient health remains owned directly by `command_center_resilient_health`;
+- Chairman Queue remains owned directly by `analytics_chairman`;
+- `/analytics/api/stats` remains owned directly by `analytics_stats`, using the existing resilient snapshot implementation;
+- the architecture edge budget ratchets from 42 to 41.
+
+Preservation rule:
+The resilient snapshot, Chairman Queue semantics, session validation and resilient health payload remain unchanged. Only redundant generic request interception is removed.
