@@ -1,9 +1,10 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './traffic-integrity-guard-worker.js';
+import base from './owner-exclusion-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
 import {handleTrafficIntegrityLiveRoute,gateTrafficIntegrityEvent,transformTrafficIntegrityLiveResponse} from './traffic-integrity-live-worker.js';
+import {handleTrafficIntegrityGuardRoute,processTrafficIntegrityGuardEvent,transformTrafficIntegrityGuardResponse,runTrafficIntegrityGuardScheduled} from './traffic-integrity-guard-worker.js';
 import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
@@ -52,7 +53,13 @@ async function legacyFallback(request,env,ctx){
   const trafficGate=await gateTrafficIntegrityEvent(request);
   if(trafficGate)return trafficGate;
   const visitorEvent=await prepareVisitorIntegrityEvent(request,url);
-  let response=await base.fetch(request,env,ctx);
+  let response;
+  if(url.pathname==='/api/events'){
+    response=await processTrafficIntegrityGuardEvent(request,env,ctx,(nextRequest)=>base.fetch(nextRequest,env,ctx));
+  }else{
+    response=await base.fetch(request,env,ctx);
+  }
+  response=await transformTrafficIntegrityGuardResponse(request,response);
   response=await transformTrafficIntegrityLiveResponse(request,response);
   response=await applyVisitorIntegrityLink(request,env,url,response,visitorEvent);
   response=await decorateVisitorIntegrityResponse(request,url,response);
@@ -1920,6 +1927,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='public_canonical_surface')response=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
   else if(ownership.owner==='visitor_integrity')response=await handleVisitorIntegrityRoute(request,env);
   else if(ownership.owner==='traffic_integrity_live')response=await handleTrafficIntegrityLiveRoute(request,env);
+  else if(ownership.owner==='traffic_integrity_guard')response=await handleTrafficIntegrityGuardRoute(request,env);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);
@@ -1982,6 +1990,8 @@ export default{
     return legacyFallback(request,env,ctx);
   },
   async scheduled(scheduledEvent,env,ctx){
+    const trafficGuardCleanup=Promise.resolve(runTrafficIntegrityGuardScheduled(env)).catch(async error=>{await event(env,'traffic_guard_cleanup_failed','failed',safe(error?.message||error,800)).catch(()=>{});return null;});
+    if(ctx?.waitUntil)ctx.waitUntil(trafficGuardCleanup);
     const trigger=scheduledEvent?.cron||'scheduled';
     if(trigger===RENDER_KEEPALIVE_CRON){
       if(!env.OVERFLOW_COMPUTE_URL)return;
