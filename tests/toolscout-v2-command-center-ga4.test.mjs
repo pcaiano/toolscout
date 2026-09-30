@@ -38,6 +38,7 @@ test('D1 budget composes owner-authenticated GA4 operations from explicit handle
 
 test('generic traversal bypasses Command Center GA4 wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/command-center-health-language-worker\.js'/);
+  assert.match(compute,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/command-center-health-language-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-ga4-worker\.js'/);
 });
