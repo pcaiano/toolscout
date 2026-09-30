@@ -115,19 +115,38 @@ async function decorate(response,isAnalytics,pathname){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleTrafficIntegrityLiveRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/api/distribution/feed.json')return prioritizedDistributionFeed(request,env,'json');
+  if(request.method==='GET'&&url.pathname==='/api/distribution/feed.xml')return prioritizedDistributionFeed(request,env,'xml');
+  return null;
+}
+
+export async function gateTrafficIntegrityEvent(request){
+  const url=new URL(request.url);
+  if(url.pathname!=='/api/events')return null;
+  return pageConfirmationGate(request);
+}
+
+export async function transformTrafficIntegrityLiveResponse(request,response){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response,true,url.pathname);
+  if(request.method==='GET'&&url.hostname==='trytoolscout.org'&&isHtml(response))return decorate(response,false,url.pathname);
+  return response;
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     const canonical=canonicalHtmlRedirect(request,url);
     if(canonical)return canonical;
-    if(request.method==='GET'&&url.pathname==='/api/distribution/feed.json')return prioritizedDistributionFeed(request,env,'json');
-    if(request.method==='GET'&&url.pathname==='/api/distribution/feed.xml')return prioritizedDistributionFeed(request,env,'xml');
-    if(url.pathname==='/api/events'){const gated=await pageConfirmationGate(request);if(gated)return gated}
+    const owned=await handleTrafficIntegrityLiveRoute(request,env);
+    if(owned)return owned;
+    const gated=await gateTrafficIntegrityEvent(request);
+    if(gated)return gated;
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentStats(response,env);
-    if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response,true,url.pathname);
-    if(request.method==='GET'&&url.hostname==='trytoolscout.org'&&isHtml(response))return decorate(response,false,url.pathname);
-    return response;
+    return transformTrafficIntegrityLiveResponse(request,response);
   },
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };
