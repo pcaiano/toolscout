@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-29T13:11:20.370Z",
+  "generatedAt": "2026-09-30T12:51:01.730Z",
   "source": "Google Search Console Search Analytics API - daily trend",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
   "dataState": "final",
-  "finalizedThroughDate": "2026-09-26",
+  "finalizedThroughDate": "2026-09-27",
   "range": {
-    "startDate": "2026-08-30",
-    "endDate": "2026-09-26",
-    "requestedStartDate": "2026-08-26",
-    "requestedEndDate": "2026-09-29",
+    "startDate": "2026-08-31",
+    "endDate": "2026-09-27",
+    "requestedStartDate": "2026-08-27",
+    "requestedEndDate": "2026-09-30",
     "days": 28
   },
   "metrics": [
@@ -20,14 +20,6 @@
     "searchVisiblePages"
   ],
   "daily": [
-    {
-      "date": "2026-08-30",
-      "clicks": 0,
-      "impressions": 0,
-      "ctr": 0,
-      "position": null,
-      "searchVisiblePages": 0
-    },
     {
       "date": "2026-08-31",
       "clicks": 0,
@@ -243,234 +235,230 @@
       "ctr": 1.1905,
       "position": 61.5476,
       "searchVisiblePages": 34
+    },
+    {
+      "date": "2026-09-27",
+      "clicks": 0,
+      "impressions": 110,
+      "ctr": 0,
+      "position": 73.5091,
+      "searchVisiblePages": 36
     }
   ],
   "periodComparison": {
     "recent7": {
-      "startDate": "2026-09-20",
-      "endDate": "2026-09-26"
+      "startDate": "2026-09-21",
+      "endDate": "2026-09-27"
     },
     "previous7": {
-      "startDate": "2026-09-13",
-      "endDate": "2026-09-19"
+      "startDate": "2026-09-14",
+      "endDate": "2026-09-20"
     },
     "pages": {
       "losses": [
         {
-          "page": "/best-seo-tools-for-agencies",
-          "impressions": 85,
-          "previousImpressions": 248,
-          "impressionsDelta": -163,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 75.4588,
-          "previousPosition": 73.4758,
-          "positionDelta": 1.983
-        },
-        {
           "page": "/best-seo-keyword-research-tools",
-          "impressions": 21,
-          "previousImpressions": 112,
-          "impressionsDelta": -91,
+          "impressions": 16,
+          "previousImpressions": 101,
+          "impressionsDelta": -85,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 75.0952,
-          "previousPosition": 77.5893,
-          "positionDelta": -2.4941
+          "position": 75.0625,
+          "previousPosition": 77.9307,
+          "positionDelta": -2.8682
         },
         {
-          "page": "/tools/semrush",
-          "impressions": 25,
-          "previousImpressions": 101,
+          "page": "/best-seo-tools-for-agencies",
+          "impressions": 134,
+          "previousImpressions": 210,
           "impressionsDelta": -76,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 55,
-          "previousPosition": 55.8416,
-          "positionDelta": -0.8416
+          "position": 80.4552,
+          "previousPosition": 73.6857,
+          "positionDelta": 6.7695
+        },
+        {
+          "page": "/tools/semrush",
+          "impressions": 23,
+          "previousImpressions": 78,
+          "impressionsDelta": -55,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 55.3913,
+          "previousPosition": 55.1923,
+          "positionDelta": 0.199
         },
         {
           "page": "/tools/moz-pro",
-          "impressions": 22,
-          "previousImpressions": 71,
-          "impressionsDelta": -49,
+          "impressions": 19,
+          "previousImpressions": 65,
+          "impressionsDelta": -46,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 62.5909,
-          "previousPosition": 70.1408,
-          "positionDelta": -7.5499
+          "position": 61.9474,
+          "previousPosition": 70.3692,
+          "positionDelta": -8.4218
         },
         {
           "page": "/",
-          "impressions": 5,
-          "previousImpressions": 50,
-          "impressionsDelta": -45,
+          "impressions": 6,
+          "previousImpressions": 47,
+          "impressionsDelta": -41,
           "clicks": 1,
           "previousClicks": 0,
           "clicksDelta": 1,
-          "position": 3.8,
-          "previousPosition": 8.34,
-          "positionDelta": -4.54
+          "position": 3.5,
+          "previousPosition": 8.2979,
+          "positionDelta": -4.7979
         },
         {
           "page": "/best-funnel-builder",
-          "impressions": 18,
-          "previousImpressions": 61,
-          "impressionsDelta": -43,
+          "impressions": 17,
+          "previousImpressions": 55,
+          "impressionsDelta": -38,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 76.2222,
-          "previousPosition": 73.7377,
-          "positionDelta": 2.4845
+          "position": 76.3529,
+          "previousPosition": 73.5273,
+          "positionDelta": 2.8256
         },
         {
           "page": "/tools/klaviyo",
-          "impressions": 24,
-          "previousImpressions": 61,
-          "impressionsDelta": -37,
+          "impressions": 21,
+          "previousImpressions": 52,
+          "impressionsDelta": -31,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 60.375,
-          "previousPosition": 63.9508,
-          "positionDelta": -3.5758
+          "position": 58.2381,
+          "previousPosition": 64.7885,
+          "positionDelta": -6.5504
         },
         {
           "page": "/best-project-management-tools",
-          "impressions": 16,
-          "previousImpressions": 51,
-          "impressionsDelta": -35,
+          "impressions": 15,
+          "previousImpressions": 43,
+          "impressionsDelta": -28,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 42.125,
-          "previousPosition": 38.7255,
-          "positionDelta": 3.3995
-        },
-        {
-          "page": "/best-keyword-research-tools",
-          "impressions": 11,
-          "previousImpressions": 31,
-          "impressionsDelta": -20,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 65.7273,
-          "previousPosition": 72.7419,
-          "positionDelta": -7.0146
-        },
-        {
-          "page": "/best-free-crm",
-          "impressions": 12,
-          "previousImpressions": 31,
-          "impressionsDelta": -19,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 69.25,
-          "previousPosition": 76.9355,
-          "positionDelta": -7.6855
+          "position": 43.3333,
+          "previousPosition": 40.1163,
+          "positionDelta": 3.217
         },
         {
           "page": "/best-no-code-automation-tools",
-          "impressions": 15,
-          "previousImpressions": 32,
-          "impressionsDelta": -17,
+          "impressions": 11,
+          "previousImpressions": 29,
+          "impressionsDelta": -18,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 73.7333,
-          "previousPosition": 76.9688,
-          "positionDelta": -3.2355
+          "position": 74.0909,
+          "previousPosition": 76.2759,
+          "positionDelta": -2.185
+        },
+        {
+          "page": "/best-keyword-research-tools",
+          "impressions": 9,
+          "previousImpressions": 27,
+          "impressionsDelta": -18,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 66.2222,
+          "previousPosition": 71.7778,
+          "positionDelta": -5.5556
+        },
+        {
+          "page": "/best-free-crm",
+          "impressions": 8,
+          "previousImpressions": 26,
+          "impressionsDelta": -18,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 71.5,
+          "previousPosition": 73.8846,
+          "positionDelta": -2.3846
         },
         {
           "page": "/best-free-project-management-tools",
-          "impressions": 14,
-          "previousImpressions": 30,
-          "impressionsDelta": -16,
+          "impressions": 11,
+          "previousImpressions": 26,
+          "impressionsDelta": -15,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 61.6429,
-          "previousPosition": 62.4,
-          "positionDelta": -0.7571
-        },
-        {
-          "page": "/tools/netlify",
-          "impressions": 21,
-          "previousImpressions": 33,
-          "impressionsDelta": -12,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 58.9048,
-          "previousPosition": 63.7879,
-          "positionDelta": -4.8831
+          "position": 63.4545,
+          "previousPosition": 60.3077,
+          "positionDelta": 3.1468
         },
         {
           "page": "/best-customer-support-tools",
-          "impressions": 13,
-          "previousImpressions": 23,
-          "impressionsDelta": -10,
+          "impressions": 11,
+          "previousImpressions": 25,
+          "impressionsDelta": -14,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 84.3077,
-          "previousPosition": 73.2174,
-          "positionDelta": 11.0903
-        },
-        {
-          "page": "/tools/tally",
-          "impressions": 24,
-          "previousImpressions": 32,
-          "impressionsDelta": -8,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 39.9583,
-          "previousPosition": 40.4688,
-          "positionDelta": -0.5105
-        },
-        {
-          "page": "/tools/mixpanel",
-          "impressions": 4,
-          "previousImpressions": 12,
-          "impressionsDelta": -8,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 67,
-          "previousPosition": 85.9167,
-          "positionDelta": -18.9167
+          "position": 82.6364,
+          "previousPosition": 74.84,
+          "positionDelta": 7.7964
         },
         {
           "page": "/asana-vs-clickup",
           "impressions": 2,
-          "previousImpressions": 10,
-          "impressionsDelta": -8,
+          "previousImpressions": 8,
+          "impressionsDelta": -6,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
           "position": 85,
-          "previousPosition": 82.9,
-          "positionDelta": 2.1
+          "previousPosition": 83.5,
+          "positionDelta": 1.5
         },
         {
-          "page": "/tools/monday-crm",
-          "impressions": 1,
-          "previousImpressions": 6,
+          "page": "/tools/netlify",
+          "impressions": 23,
+          "previousImpressions": 28,
           "impressionsDelta": -5,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 49,
-          "previousPosition": 63.3333,
-          "positionDelta": -14.3333
+          "position": 60.5217,
+          "previousPosition": 63.5,
+          "positionDelta": -2.9783
+        },
+        {
+          "page": "/tools/miro",
+          "impressions": 14,
+          "previousImpressions": 19,
+          "impressionsDelta": -5,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 43.9286,
+          "previousPosition": 48.4737,
+          "positionDelta": -4.5451
+        },
+        {
+          "page": "/tools/mixpanel",
+          "impressions": 5,
+          "previousImpressions": 10,
+          "impressionsDelta": -5,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 55,
+          "previousPosition": 88,
+          "positionDelta": -33
         },
         {
           "page": "/best-ai-ad-creative-tools",
@@ -485,42 +473,54 @@
           "positionDelta": null
         },
         {
-          "page": "/tools/gorgias",
-          "impressions": 9,
-          "previousImpressions": 13,
+          "page": "/tools/tally",
+          "impressions": 25,
+          "previousImpressions": 29,
           "impressionsDelta": -4,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 67.6667,
-          "previousPosition": 65.6154,
-          "positionDelta": 2.0513
+          "position": 41.84,
+          "previousPosition": 39.2414,
+          "positionDelta": 2.5986
+        },
+        {
+          "page": "/tools/monday-crm",
+          "impressions": 1,
+          "previousImpressions": 5,
+          "impressionsDelta": -4,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 49,
+          "previousPosition": 63.8,
+          "positionDelta": -14.8
         }
       ],
       "gains": [
         {
           "page": "/best-social-media-management-tools",
-          "impressions": 167,
-          "previousImpressions": 1,
-          "impressionsDelta": 166,
+          "impressions": 158,
+          "previousImpressions": 13,
+          "impressionsDelta": 145,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 62.9162,
-          "previousPosition": 65,
-          "positionDelta": -2.0838
+          "position": 63.6456,
+          "previousPosition": 56.3077,
+          "positionDelta": 7.3379
         },
         {
           "page": "/tools/screaming-frog",
-          "impressions": 78,
-          "previousImpressions": 1,
-          "impressionsDelta": 77,
+          "impressions": 75,
+          "previousImpressions": 9,
+          "impressionsDelta": 66,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 72.4872,
-          "previousPosition": 76,
-          "positionDelta": -3.5128
+          "position": 72.3467,
+          "previousPosition": 73.1111,
+          "positionDelta": -0.7644
         },
         {
           "page": "/news/zapier-next-gen-zaps-mcp",
@@ -559,28 +559,16 @@
           "positionDelta": null
         },
         {
-          "page": "/best-crm-with-automation",
-          "impressions": 16,
-          "previousImpressions": 0,
-          "impressionsDelta": 16,
+          "page": "/tools/zoho-crm",
+          "impressions": 18,
+          "previousImpressions": 1,
+          "impressionsDelta": 17,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 86.5,
-          "previousPosition": null,
-          "positionDelta": null
-        },
-        {
-          "page": "/airtable-vs-notion",
-          "impressions": 17,
-          "previousImpressions": 2,
-          "impressionsDelta": 15,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 59.2941,
+          "position": 59.6667,
           "previousPosition": 70,
-          "positionDelta": -10.7059
+          "positionDelta": -10.3333
         },
         {
           "page": "/tools/jasper",
@@ -593,30 +581,6 @@
           "position": 58.0667,
           "previousPosition": null,
           "positionDelta": null
-        },
-        {
-          "page": "/tools/zoho-crm",
-          "impressions": 15,
-          "previousImpressions": 0,
-          "impressionsDelta": 15,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 56.8667,
-          "previousPosition": null,
-          "positionDelta": null
-        },
-        {
-          "page": "/news/hubspot-mcp-server-updates",
-          "impressions": 16,
-          "previousImpressions": 2,
-          "impressionsDelta": 14,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 82.0625,
-          "previousPosition": 81,
-          "positionDelta": 1.0625
         },
         {
           "page": "/make-vs-zapier",
@@ -643,16 +607,28 @@
           "positionDelta": null
         },
         {
-          "page": "/news/notion-3-7-agent-skills",
-          "impressions": 16,
-          "previousImpressions": 3,
+          "page": "/best-crm-with-automation",
+          "impressions": 15,
+          "previousImpressions": 2,
           "impressionsDelta": 13,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 6.5625,
-          "previousPosition": 6.6667,
-          "positionDelta": -0.1042
+          "position": 85.6,
+          "previousPosition": 90.5,
+          "positionDelta": -4.9
+        },
+        {
+          "page": "/news/notion-mail-shuts-down",
+          "impressions": 12,
+          "previousImpressions": 0,
+          "impressionsDelta": 12,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 3.6667,
+          "previousPosition": null,
+          "positionDelta": null
         },
         {
           "page": "/whats-new",
@@ -667,40 +643,40 @@
           "positionDelta": null
         },
         {
-          "page": "/news/notion-mail-shuts-down",
-          "impressions": 11,
-          "previousImpressions": 0,
+          "page": "/airtable-vs-notion",
+          "impressions": 15,
+          "previousImpressions": 4,
           "impressionsDelta": 11,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 3.8182,
-          "previousPosition": null,
-          "positionDelta": null
+          "position": 57.9333,
+          "previousPosition": 69.75,
+          "positionDelta": -11.8167
         },
         {
-          "page": "/best-free-sales-funnel-software",
+          "page": "/news/notion-3-7-agent-skills",
+          "impressions": 14,
+          "previousImpressions": 5,
+          "impressionsDelta": 9,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 6.0714,
+          "previousPosition": 8,
+          "positionDelta": -1.9286
+        },
+        {
+          "page": "/tools/n8n",
           "impressions": 10,
           "previousImpressions": 1,
           "impressionsDelta": 9,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 52.8,
-          "previousPosition": 82,
-          "positionDelta": -29.2
-        },
-        {
-          "page": "/tools/n8n",
-          "impressions": 9,
-          "previousImpressions": 1,
-          "impressionsDelta": 8,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 55.7778,
+          "position": 57.8,
           "previousPosition": 70,
-          "positionDelta": -14.2222
+          "positionDelta": -12.2
         },
         {
           "page": "/tools/posthog",
@@ -715,16 +691,16 @@
           "positionDelta": null
         },
         {
-          "page": "/compare",
-          "impressions": 8,
-          "previousImpressions": 1,
+          "page": "/tools/apollo",
+          "impressions": 7,
+          "previousImpressions": 0,
           "impressionsDelta": 7,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 26.25,
-          "previousPosition": 10,
-          "positionDelta": 16.25
+          "position": 15.8571,
+          "previousPosition": null,
+          "positionDelta": null
         },
         {
           "page": "/tools/asana",
@@ -737,6 +713,30 @@
           "position": 31.7143,
           "previousPosition": null,
           "positionDelta": null
+        },
+        {
+          "page": "/tools/cursor",
+          "impressions": 7,
+          "previousImpressions": 0,
+          "impressionsDelta": 7,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 50.5714,
+          "previousPosition": null,
+          "positionDelta": null
+        },
+        {
+          "page": "/news/hubspot-mcp-server-updates",
+          "impressions": 12,
+          "previousImpressions": 6,
+          "impressionsDelta": 6,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 81,
+          "previousPosition": 83.8333,
+          "positionDelta": -2.8333
         }
       ]
     },
@@ -744,174 +744,174 @@
       "losses": [
         {
           "query": "best seo tools for agency",
-          "impressions": 20,
-          "previousImpressions": 71,
-          "impressionsDelta": -51,
+          "impressions": 18,
+          "previousImpressions": 57,
+          "impressionsDelta": -39,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 71.6,
-          "previousPosition": 69.2535,
-          "positionDelta": 2.3465
+          "position": 70.7778,
+          "previousPosition": 69.9474,
+          "positionDelta": 0.8304
         },
         {
           "query": "seo tools for agency",
-          "impressions": 11,
-          "previousImpressions": 59,
-          "impressionsDelta": -48,
+          "impressions": 12,
+          "previousImpressions": 51,
+          "impressionsDelta": -39,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 77.9091,
-          "previousPosition": 78.4576,
-          "positionDelta": -0.5485
+          "position": 80.8333,
+          "previousPosition": 78.3725,
+          "positionDelta": 2.4608
         },
         {
           "query": "website research tool",
-          "impressions": 1,
-          "previousImpressions": 42,
-          "impressionsDelta": -41,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 70,
-          "previousPosition": 68.9524,
-          "positionDelta": 1.0476
-        },
-        {
-          "query": "what is the best tool for seo agency",
-          "impressions": 2,
-          "previousImpressions": 37,
+          "impressions": 0,
+          "previousImpressions": 35,
           "impressionsDelta": -35,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 86,
-          "previousPosition": 76.4865,
-          "positionDelta": 9.5135
+          "position": null,
+          "previousPosition": 68.4571,
+          "positionDelta": null
         },
         {
           "query": "toolscout",
           "impressions": 1,
-          "previousImpressions": 34,
-          "impressionsDelta": -33,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 10,
-          "previousPosition": 8.6471,
-          "positionDelta": 1.3529
-        },
-        {
-          "query": "semrush software",
-          "impressions": 3,
-          "previousImpressions": 35,
-          "impressionsDelta": -32,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 61,
-          "previousPosition": 57.2,
-          "positionDelta": 3.8
-        },
-        {
-          "query": "best seo tool for agencies",
-          "impressions": 0,
-          "previousImpressions": 31,
+          "previousImpressions": 32,
           "impressionsDelta": -31,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
+          "position": 10,
+          "previousPosition": 8.6563,
+          "positionDelta": 1.3437
+        },
+        {
+          "query": "what is the best tool for seo agency",
+          "impressions": 2,
+          "previousImpressions": 28,
+          "impressionsDelta": -26,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 86,
+          "previousPosition": 76.6786,
+          "positionDelta": 9.3214
+        },
+        {
+          "query": "moz pro tools",
+          "impressions": 4,
+          "previousImpressions": 28,
+          "impressionsDelta": -24,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 57.25,
+          "previousPosition": 72.1786,
+          "positionDelta": -14.9286
+        },
+        {
+          "query": "semrush software",
+          "impressions": 3,
+          "previousImpressions": 24,
+          "impressionsDelta": -21,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 61,
+          "previousPosition": 56.7917,
+          "positionDelta": 4.2083
+        },
+        {
+          "query": "best seo tool for agencies",
+          "impressions": 0,
+          "previousImpressions": 21,
+          "impressionsDelta": -21,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
           "position": null,
-          "previousPosition": 68.1613,
+          "previousPosition": 68.381,
           "positionDelta": null
         },
         {
           "query": "semrush tool",
-          "impressions": 7,
-          "previousImpressions": 36,
-          "impressionsDelta": -29,
+          "impressions": 8,
+          "previousImpressions": 28,
+          "impressionsDelta": -20,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 55.8571,
-          "previousPosition": 56.9167,
-          "positionDelta": -1.0596
-        },
-        {
-          "query": "moz pro tools",
-          "impressions": 5,
-          "previousImpressions": 32,
-          "impressionsDelta": -27,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 59,
-          "previousPosition": 71.7813,
-          "positionDelta": -12.7813
+          "position": 55.875,
+          "previousPosition": 56.6429,
+          "positionDelta": -0.7679
         },
         {
           "query": "keyword discovery tool",
-          "impressions": 5,
-          "previousImpressions": 27,
-          "impressionsDelta": -22,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 70.4,
-          "previousPosition": 72.8148,
-          "positionDelta": -2.4148
-        },
-        {
-          "query": "klaviyo",
-          "impressions": 12,
-          "previousImpressions": 31,
+          "impressions": 4,
+          "previousImpressions": 23,
           "impressionsDelta": -19,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 60.75,
-          "previousPosition": 61.1613,
-          "positionDelta": -0.4113
+          "position": 73.75,
+          "previousPosition": 71.7826,
+          "positionDelta": 1.9674
         },
         {
-          "query": "best funnel builder",
-          "impressions": 0,
-          "previousImpressions": 17,
-          "impressionsDelta": -17,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": null,
-          "previousPosition": 69.4118,
-          "positionDelta": null
-        },
-        {
-          "query": "moz free trial",
-          "impressions": 4,
-          "previousImpressions": 18,
+          "query": "klaviyo",
+          "impressions": 11,
+          "previousImpressions": 25,
           "impressionsDelta": -14,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 68,
-          "previousPosition": 68.3333,
-          "positionDelta": -0.3333
+          "position": 60.3636,
+          "previousPosition": 60.92,
+          "positionDelta": -0.5564
         },
         {
-          "query": "funnel builder",
-          "impressions": 1,
-          "previousImpressions": 13,
-          "impressionsDelta": -12,
+          "query": "best funnel builder",
+          "impressions": 0,
+          "previousImpressions": 14,
+          "impressionsDelta": -14,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 74,
-          "previousPosition": 80,
-          "positionDelta": -6
+          "position": null,
+          "previousPosition": 69.7143,
+          "positionDelta": null
         },
         {
-          "query": "free online project manager tools",
+          "query": "moz free trial",
+          "impressions": 3,
+          "previousImpressions": 16,
+          "impressionsDelta": -13,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 67.6667,
+          "previousPosition": 69,
+          "positionDelta": -1.3333
+        },
+        {
+          "query": "funnel builder",
+          "impressions": 0,
+          "previousImpressions": 13,
+          "impressionsDelta": -13,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": null,
+          "previousPosition": 79.3846,
+          "positionDelta": null
+        },
+        {
+          "query": "best free crm tools",
           "impressions": 0,
           "previousImpressions": 12,
           "impressionsDelta": -12,
@@ -919,59 +919,35 @@
           "previousClicks": 0,
           "clicksDelta": 0,
           "position": null,
-          "previousPosition": 67.75,
+          "previousPosition": 67.1667,
           "positionDelta": null
+        },
+        {
+          "query": "what is airtable and how it works",
+          "impressions": 2,
+          "previousImpressions": 11,
+          "impressionsDelta": -9,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 93.5,
+          "previousPosition": 93.5455,
+          "positionDelta": -0.0455
         },
         {
           "query": "no-code automation tools",
           "impressions": 0,
-          "previousImpressions": 11,
-          "impressionsDelta": -11,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": null,
-          "previousPosition": 77.5455,
-          "positionDelta": null
-        },
-        {
-          "query": "tool semrush",
-          "impressions": 5,
-          "previousImpressions": 15,
-          "impressionsDelta": -10,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 44.8,
-          "previousPosition": 52.3333,
-          "positionDelta": -7.5333
-        },
-        {
-          "query": "marketing funnel builder",
-          "impressions": 0,
           "previousImpressions": 9,
           "impressionsDelta": -9,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
           "position": null,
-          "previousPosition": 82.5556,
+          "previousPosition": 77.3333,
           "positionDelta": null
         },
         {
-          "query": "project automation tools",
-          "impressions": 0,
-          "previousImpressions": 9,
-          "impressionsDelta": -9,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": null,
-          "previousPosition": 36.3333,
-          "positionDelta": null
-        },
-        {
-          "query": "competitor keyword research tools for seo",
+          "query": "free online project manager tools",
           "impressions": 0,
           "previousImpressions": 8,
           "impressionsDelta": -8,
@@ -979,46 +955,70 @@
           "previousClicks": 0,
           "clicksDelta": 0,
           "position": null,
-          "previousPosition": 85.375,
+          "previousPosition": 67.875,
           "positionDelta": null
+        },
+        {
+          "query": "marketing funnel builder",
+          "impressions": 0,
+          "previousImpressions": 8,
+          "impressionsDelta": -8,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": null,
+          "previousPosition": 82.125,
+          "positionDelta": null
+        },
+        {
+          "query": "semrush tools",
+          "impressions": 5,
+          "previousImpressions": 12,
+          "impressionsDelta": -7,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 51.8,
+          "previousPosition": 50.9167,
+          "positionDelta": 0.8833
         }
       ],
       "gains": [
         {
           "query": "social media management tools",
-          "impressions": 56,
-          "previousImpressions": 1,
-          "impressionsDelta": 55,
+          "impressions": 55,
+          "previousImpressions": 2,
+          "impressionsDelta": 53,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 65.0893,
-          "previousPosition": 65,
-          "positionDelta": 0.0893
+          "position": 65.0727,
+          "previousPosition": 65.5,
+          "positionDelta": -0.4273
         },
         {
           "query": "screaming frog",
-          "impressions": 45,
-          "previousImpressions": 1,
-          "impressionsDelta": 44,
+          "impressions": 42,
+          "previousImpressions": 8,
+          "impressionsDelta": 34,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 73.6,
-          "previousPosition": 76,
-          "positionDelta": -2.4
+          "position": 73.4524,
+          "previousPosition": 73.875,
+          "positionDelta": -0.4226
         },
         {
           "query": "social media management tool",
-          "impressions": 35,
-          "previousImpressions": 0,
-          "impressionsDelta": 35,
+          "impressions": 33,
+          "previousImpressions": 4,
+          "impressionsDelta": 29,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 66.9714,
-          "previousPosition": null,
-          "positionDelta": null
+          "position": 67.3939,
+          "previousPosition": 70,
+          "positionDelta": -2.6061
         },
         {
           "query": "best social media management tools",
@@ -1033,16 +1033,16 @@
           "positionDelta": null
         },
         {
-          "query": "hubspot mcp",
-          "impressions": 15,
-          "previousImpressions": 2,
+          "query": "crm software zoho",
+          "impressions": 14,
+          "previousImpressions": 1,
           "impressionsDelta": 13,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 87.1333,
-          "previousPosition": 81,
-          "positionDelta": 6.1333
+          "position": 70.7857,
+          "previousPosition": 70,
+          "positionDelta": 0.7857
         },
         {
           "query": "zapier next gen zaps",
@@ -1057,40 +1057,16 @@
           "positionDelta": null
         },
         {
-          "query": "crm software zoho",
-          "impressions": 11,
-          "previousImpressions": 0,
-          "impressionsDelta": 11,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 70,
-          "previousPosition": null,
-          "positionDelta": null
-        },
-        {
           "query": "what is airtable",
           "impressions": 21,
-          "previousImpressions": 12,
-          "impressionsDelta": 9,
+          "previousImpressions": 13,
+          "impressionsDelta": 8,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 86.9048,
-          "previousPosition": 88.8333,
-          "positionDelta": -1.9285
-        },
-        {
-          "query": "best social media management tool",
-          "impressions": 9,
-          "previousImpressions": 0,
-          "impressionsDelta": 9,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 36.1111,
-          "previousPosition": null,
-          "positionDelta": null
+          "position": 87.1905,
+          "previousPosition": 88.4615,
+          "positionDelta": -1.271
         },
         {
           "query": "social media manager tool",
@@ -1101,6 +1077,18 @@
           "previousClicks": 0,
           "clicksDelta": 0,
           "position": 75.25,
+          "previousPosition": null,
+          "positionDelta": null
+        },
+        {
+          "query": "adobe express pricing",
+          "impressions": 6,
+          "previousImpressions": 0,
+          "impressionsDelta": 6,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 26,
           "previousPosition": null,
           "positionDelta": null
         },
@@ -1117,100 +1105,76 @@
           "positionDelta": null
         },
         {
-          "query": "best tools for seo agency",
+          "query": "airtable",
+          "impressions": 27,
+          "previousImpressions": 22,
+          "impressionsDelta": 5,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 64.8519,
+          "previousPosition": 62.1364,
+          "positionDelta": 2.7155
+        },
+        {
+          "query": "agency seo tools",
           "impressions": 12,
           "previousImpressions": 7,
           "impressionsDelta": 5,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 69.3333,
-          "previousPosition": 69.5714,
-          "positionDelta": -0.2381
+          "position": 77.5833,
+          "previousPosition": 76.4286,
+          "positionDelta": 1.1547
         },
         {
-          "query": "best tools for social media managers",
-          "impressions": 5,
-          "previousImpressions": 0,
-          "impressionsDelta": 5,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 64,
-          "previousPosition": null,
-          "positionDelta": null
-        },
-        {
-          "query": "crm with workflow automation",
-          "impressions": 5,
-          "previousImpressions": 0,
-          "impressionsDelta": 5,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 91.8,
-          "previousPosition": null,
-          "positionDelta": null
-        },
-        {
-          "query": "notion airtable",
-          "impressions": 5,
-          "previousImpressions": 0,
-          "impressionsDelta": 5,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 67.8,
-          "previousPosition": null,
-          "positionDelta": null
-        },
-        {
-          "query": "social media tool",
-          "impressions": 5,
-          "previousImpressions": 0,
-          "impressionsDelta": 5,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 68.4,
-          "previousPosition": null,
-          "positionDelta": null
-        },
-        {
-          "query": "agency seo tools",
-          "impressions": 10,
+          "query": "hubspot mcp",
+          "impressions": 11,
           "previousImpressions": 6,
-          "impressionsDelta": 4,
+          "impressionsDelta": 5,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 75.3,
-          "previousPosition": 77.1667,
-          "positionDelta": -1.8667
+          "position": 87.8182,
+          "previousPosition": 83.8333,
+          "positionDelta": 3.9849
+        },
+        {
+          "query": "seo platform for agencies",
+          "impressions": 9,
+          "previousImpressions": 4,
+          "impressionsDelta": 5,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 89.7778,
+          "previousPosition": 81.5,
+          "positionDelta": 8.2778
         },
         {
           "query": "n8n tool",
+          "impressions": 6,
+          "previousImpressions": 1,
+          "impressionsDelta": 5,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 73.8333,
+          "previousPosition": 70,
+          "positionDelta": 3.8333
+        },
+        {
+          "query": "seo software for agencies",
           "impressions": 5,
           "previousImpressions": 1,
           "impressionsDelta": 4,
           "clicks": 0,
           "previousClicks": 0,
           "clicksDelta": 0,
-          "position": 73.4,
-          "previousPosition": 70,
-          "positionDelta": 3.4
-        },
-        {
-          "query": "adobe express pricing",
-          "impressions": 4,
-          "previousImpressions": 0,
-          "impressionsDelta": 4,
-          "clicks": 0,
-          "previousClicks": 0,
-          "clicksDelta": 0,
-          "position": 27.25,
-          "previousPosition": null,
-          "positionDelta": null
+          "position": 91.4,
+          "previousPosition": 79,
+          "positionDelta": 12.4
         },
         {
           "query": "cursor tool",
@@ -1221,6 +1185,42 @@
           "previousClicks": 0,
           "clicksDelta": 0,
           "position": 57,
+          "previousPosition": null,
+          "positionDelta": null
+        },
+        {
+          "query": "management tool",
+          "impressions": 4,
+          "previousImpressions": 0,
+          "impressionsDelta": 4,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 45.25,
+          "previousPosition": null,
+          "positionDelta": null
+        },
+        {
+          "query": "sales funnel software free",
+          "impressions": 4,
+          "previousImpressions": 0,
+          "impressionsDelta": 4,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 24.75,
+          "previousPosition": null,
+          "positionDelta": null
+        },
+        {
+          "query": "screamingfrog",
+          "impressions": 4,
+          "previousImpressions": 0,
+          "impressionsDelta": 4,
+          "clicks": 0,
+          "previousClicks": 0,
+          "clicksDelta": 0,
+          "position": 81.25,
           "previousPosition": null,
           "positionDelta": null
         }
