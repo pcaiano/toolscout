@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect','analytics_owner_exclusion','analytics_attribution_24h','d1_read_budget','google_analytics_callback','gsc_trend_surface','public_canonical_surface','visitor_integrity','traffic_integrity_live','traffic_integrity_guard']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect','analytics_owner_exclusion','analytics_attribution_24h','d1_read_budget','google_analytics_callback','gsc_trend_surface','public_canonical_surface','visitor_integrity','traffic_integrity_live','traffic_integrity_guard','owner_exclusion']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -19,6 +19,8 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'visitor_integrity_health',owner:'visitor_integrity',plane:'signals',methods:['GET'],exact:['/api/visitor-session-identity-health']},
   {id:'traffic_integrity_feed',owner:'traffic_integrity_live',plane:'public_site',methods:['GET'],exact:['/api/distribution/feed.json','/api/distribution/feed.xml']},
   {id:'traffic_integrity_forensics',owner:'traffic_integrity_guard',plane:'signals',methods:['GET'],exact:['/api/traffic-forensics-48h']},
+  {id:'owner_exclusion_status',owner:'owner_exclusion',plane:'signals',methods:['GET'],exact:['/analytics/api/owner-exclusion']},
+  {id:'owner_exclusion_audit',owner:'owner_exclusion',plane:'executor',methods:['POST'],exact:['/analytics/api/owner-retrospective-audit']},
   {id:'command_center_page',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html','/command-center','/command-center/']},
   {id:'command_center_truth',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/api/command-center-business-truth','/api/command-center-simplified-health']},
   {id:'command_center_resilient_health',owner:'command_center_resilient_health',plane:'signals',methods:['GET'],exact:['/api/command-center-resilient-health']},
