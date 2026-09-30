@@ -49,7 +49,8 @@ test('public response stage keeps traffic transforms before visitor and later ou
 
 test('generic traversal bypasses the live traffic wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/command-center-human-truth-final-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-human-truth-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/command-center-human-truth-final-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-human-truth-details-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-human-truth-chart-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
