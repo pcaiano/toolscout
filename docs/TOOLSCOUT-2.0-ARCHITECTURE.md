@@ -173,3 +173,8 @@ Further decomposition of the bounded commercial core is allowed only after parit
 The direct Command Center owner must not depend on the legacy operational worker chain. Its canonical Business Truth implementation lives in `command-center-business-truth-runtime.js` and may depend on the simplified view plus read-only data sources, but not on a generic `base.fetch` decorator path or request-time schema mutation.
 
 Compatibility workers may consume this canonical read model. They may not carry a divergent copy of it.
+
+
+### Legacy edge ratchet
+
+After explicit route ownership is proven, redundant decorator edges are removed one at a time. Each removal must preserve any still-useful fallback behavior explicitly at the front router and lower the architecture audit's maximum legacy-edge budget. The budget is a ratchet, not a target that may grow again.
