@@ -518,3 +518,18 @@ Implemented:
 
 Preservation rule:
 Stats normalization and Command Center integrity UI remain available where explicit compatibility compositions still consume them. Only redundant generic traversal is removed.
+
+
+## Phase 44 - Remove mission-integrity v2 wrapper traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-44`.
+
+Implemented:
+- generic compute fallback now connects directly to `mission-integrity-worker.js`;
+- `mission-integrity-v2-worker.js` remains the direct owner of `POST /api/engine-evidence` through `handleMissionIntegrityRoute()`;
+- the v2 wrapper is removed from generic traversal because it otherwise only delegates requests and schedules to its lower runtime;
+- no evidence ingestion, schema probe or route ownership changes in this phase;
+- the architecture edge budget ratchets from 55 to 54.
+
+Preservation rule:
+Engine evidence ingestion remains explicitly owned by the v2 handler. Only the redundant decorator hop is removed.
