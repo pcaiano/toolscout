@@ -550,3 +550,20 @@ Implemented:
 
 Preservation rule:
 Mission evidence ingestion, content-engine health augmentation and internal compatibility helpers remain available. Only the redundant generic wrapper edge is removed.
+
+
+## Phase 46 - Explicit Command Center integrity scheduling
+
+Status: implemented on `architecture/toolscout-2.0-phase-46`.
+
+Implemented:
+- generic request fallback now connects directly to `visitor-integrity-worker.js`;
+- `command-center-integrity-worker.js` exports `runCommandCenterIntegrityScheduled()`;
+- overflow and non-primary cron delegation in the compute router now calls that scheduler explicitly;
+- the exported scheduler preserves the prior ordering by awaiting the lower scheduled chain before running `refreshDailyMetrics()`;
+- hourly/daily primary coordination continues to receive the same integrity scheduling through the existing bounded compatibility chain, avoiding duplicate refresh writes;
+- direct traffic-integrity health continues to consume `augmentCommandCenterIntegrityHealth()` explicitly;
+- the architecture edge budget ratchets from 53 to 52.
+
+Preservation rule:
+Measurement audit generation, daily metric refresh cadence, traffic-integrity augmentation and lower scheduled delegation remain unchanged. Only generic request traversal is shortened.
