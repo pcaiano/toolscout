@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './command-center-final-integrity-worker.js';
+import base,{handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
@@ -17,7 +17,6 @@ import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
 import {TOOLSCOUT_CRONS,scheduleContract} from './runtime-schedule-contract.js';
 import {routeContract,routeOwner} from './runtime-route-contract.js';
 import {handleDistributionPriorityRoute} from './distribution-priority-worker.js';
-import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
 import {handleSeoRuntimeRoute,transformSeoPublicPage,runSeoRuntimeScheduled} from './seo-cloudflare-runtime-worker.js';
 import {handleCloudflarePrimaryRuntimeRoute,runCloudflarePrimaryScheduled} from './cloudflare-primary-runtime-worker.js';
