@@ -33,7 +33,8 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(compute,/runAuthorityDrainScheduled/);
   assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
   assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'15 * * * *');
-  assert.match(compute,/import base from '\.\/growth-runtime-observability-worker\.js'/);
+  assert.match(compute,/import base,\{handleGrowthClosedLoopRoute\} from '\.\/growth-runtime-closed-loop-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/growth-runtime-observability-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/growth-runtime-authority-drain-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/gsc-command-center-trend-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
