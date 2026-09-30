@@ -55,6 +55,9 @@ jobs:
           node tests/growth-scheduler-ownership.mjs
           node scripts/verify-public-navigation-shadow.mjs
 
+      - name: Wrangler dry-run build
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-wrangler-dry-run
+
       - name: Final preservation gate before production mutation
         env:
           TOOLSCOUT_V2_BASE_REF: a4bfbd36f0f6d049e3bf13dd6272f48276ada07e
