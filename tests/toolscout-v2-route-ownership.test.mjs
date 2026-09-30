@@ -109,7 +109,6 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.doesNotMatch(src,/import base from '\.\/command-center-final-integrity-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/mission-integrity-v2-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/mission-integrity-worker\.js'/);
-  assert.match(src,/import base from '\.\/mission-integrity-worker\.js'/);
   assert.match(src,/handleMissionIntegrityRoute.*mission-integrity-v2-worker/);
   assert.match(src,/handleMissionIntegrityRoute/);
   assert.match(src,/handleGrowthClosedLoopRoute/);
