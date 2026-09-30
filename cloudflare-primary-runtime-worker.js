@@ -211,47 +211,58 @@ async function runtimeMatrix(env,request=null){
   };
 }
 
+export async function handleCloudflarePrimaryRuntimeRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/api/runtime/executors'){
+    return Response.json(await runtimeMatrix(env,request),{headers:H});
+  }
+  if(request.method==='POST'&&url.pathname==='/api/runtime/cloudflare-primary-cycle'){
+    const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+    if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:H});
+    const result=await runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:'manual_cloudflare_primary',singleFlightMinutes:50},()=>runPrimaryCycle(env,ctx,'manual'));
+    return Response.json(result,{status:result?.ok===false?503:200,headers:H});
+  }
+  return null;
+}
+
+export async function runCloudflarePrimaryScheduled(event,env,ctx){
+  const trigger=event?.cron||'scheduled';
+  if(trigger!==HOURLY&&trigger!==DAILY)return null;
+
+  // Search evidence is refreshed outside the primary-cycle lease so a slow
+  // downstream engine can never make GSC evidence stale.
+  const req=new Request('https://trytoolscout.org/api/runtime/cloudflare-primary-cycle');
+  const gsc=await runtimeGscRefresh(env,req);
+
+  // Preserve the mature coordinator behavior: dispatch the lower scheduled
+  // chain once from inside the primary runtime ledger, without holding that
+  // ledger open until every component settles.
+  const primary=await runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:trigger,singleFlightMinutes:50},async()=>{
+    if(typeof base.scheduled==='function'){
+      const inherited=Promise.resolve(base.scheduled(event,env,ctx)).catch(()=>null);
+      if(ctx?.waitUntil)ctx.waitUntil(inherited);
+    }
+    return {
+      ok:true,
+      executor:'cloudflare',
+      trigger,
+      dispatch:'inherited_engine_chain',
+      gsc:{ok:Boolean(gsc?.ok),status:gsc?.status||null,reason:gsc?.reason||null},
+      proofModel:'component_engine_ledgers_are_canonical'
+    };
+  });
+  return {...(primary||{}),gsc:{ok:Boolean(gsc?.ok),status:gsc?.status||null,reason:gsc?.reason||null}};
+}
+
 export default{
   async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/runtime/executors'){
-      return Response.json(await runtimeMatrix(env,request),{headers:H});
-    }
-    if(request.method==='POST'&&url.pathname==='/api/runtime/cloudflare-primary-cycle'){
-      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
-      if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:H});
-      const result=await runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:'manual_cloudflare_primary',singleFlightMinutes:50},()=>runPrimaryCycle(env,ctx,'manual'));
-      return Response.json(result,{status:result?.ok===false?503:200,headers:H});
-    }
+    const owned=await handleCloudflarePrimaryRuntimeRoute(request,env,ctx);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    const trigger=event?.cron||'scheduled';
-    if(trigger===HOURLY||trigger===DAILY){
-      // Search evidence is refreshed outside the primary-cycle lease so a slow
-      // downstream engine can never make GSC evidence stale.
-      const req=new Request('https://trytoolscout.org/api/runtime/cloudflare-primary-cycle');
-      const gsc=await runtimeGscRefresh(env,req);
-
-      // The primary runtime is a coordinator. Component engines own their own
-      // ledgers and single-flight locks, so dispatch the inherited chain once
-      // without holding the outer runtime ledger open until every child settles.
-      const primary=await runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:trigger,singleFlightMinutes:50},async()=>{
-        if(typeof base.scheduled==='function'){
-          const inherited=Promise.resolve(base.scheduled(event,env,ctx)).catch(()=>null);
-          if(ctx?.waitUntil)ctx.waitUntil(inherited);
-        }
-        return {
-          ok:true,
-          executor:'cloudflare',
-          trigger,
-          dispatch:'inherited_engine_chain',
-          gsc:{ok:Boolean(gsc?.ok),status:gsc?.status||null,reason:gsc?.reason||null},
-          proofModel:'component_engine_ledgers_are_canonical'
-        };
-      });
-      return {...(primary||{}),gsc:{ok:Boolean(gsc?.ok),status:gsc?.status||null,reason:gsc?.reason||null}};
-    }
+    const owned=await runCloudflarePrimaryScheduled(event,env,ctx);
+    if(owned!==null)return owned;
     return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
   }
 };

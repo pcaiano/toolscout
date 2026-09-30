@@ -188,3 +188,8 @@ A worker that owns both direct routes and cron work does not need to remain in t
 ### Schema before dispatch extraction
 
 A wrapper that still owns request-time DDL is not eligible for direct-owner extraction. Move its schema into an additive D1 migration, replace runtime DDL with a read-only schema probe, then change routing or scheduling in a later phase. This keeps data-plane and dispatch risk independently reversible.
+
+
+### Coordinator extraction
+
+A coordinator wrapper may be removed from generic request traversal once its schema is migration-owned and its route/schedule responsibilities are exported explicitly. Preserve orchestration order: lower scheduled dispatch stays inside the coordinator contract where that ordering is part of the existing behavior, while unrelated explicit owners may continue in parallel at the front router.
