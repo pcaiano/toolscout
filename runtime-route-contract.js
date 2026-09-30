@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect','analytics_owner_exclusion','analytics_attribution_24h','d1_read_budget','google_analytics_callback']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect','analytics_owner_exclusion','analytics_attribution_24h','d1_read_budget','google_analytics_callback','gsc_trend_surface']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -28,6 +28,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'d1_read_budget_get',owner:'d1_read_budget',plane:'signals',methods:['GET'],exact:['/analytics/api/ga4-health','/analytics/api/google/connect','/analytics/api/google/acquisition','/analytics/api/commerce','/api/autonomous-growth-health','/api/distribution/discovery-health']},
   {id:'d1_read_budget_post',owner:'d1_read_budget',plane:'executor',methods:['POST'],exact:['/analytics/api/google/disconnect']},
   {id:'google_analytics_callback',owner:'google_analytics_callback',plane:'signals',methods:['GET'],exact:['/api/google-analytics/callback']},
+  {id:'gsc_trend_surface',owner:'gsc_trend_surface',plane:'signals',methods:['GET'],exact:['/api/gsc-trend.svg','/api/gsc-trend.css','/api/health']},
   {id:'analytics_human_actions',owner:'analytics_human_actions',plane:'signals',methods:['GET'],exact:['/analytics/api/human-actions']},
   {id:'analytics_human_action_mutations',owner:'analytics_human_actions_mutation',plane:'executor',methods:['POST'],exact:['/analytics/api/human-actions/credential','/analytics/api/human-actions/gate','/analytics/api/human-actions/editorial']},
   {id:'command_center_schema_reconcile',owner:'command_center_schema_control',plane:'control',methods:['POST'],exact:['/api/command-center-business-truth/reconcile-affiliate-schema']},
