@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect','analytics_owner_exclusion']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -23,6 +23,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'admin_stats',owner:'admin_stats',plane:'signals',methods:['GET'],exact:['/api/stats']},
   {id:'analytics_chairman_queue',owner:'analytics_chairman',plane:'signals',methods:['GET'],exact:['/analytics/api/chairman-queue']},
   {id:'analytics_stats',owner:'analytics_stats',plane:'signals',methods:['GET'],exact:['/analytics/api/stats']},
+  {id:'analytics_owner_exclusion',owner:'analytics_owner_exclusion',plane:'signals',methods:['GET'],exact:['/analytics/api/google/external-24h']},
   {id:'analytics_human_actions',owner:'analytics_human_actions',plane:'signals',methods:['GET'],exact:['/analytics/api/human-actions']},
   {id:'analytics_human_action_mutations',owner:'analytics_human_actions_mutation',plane:'executor',methods:['POST'],exact:['/analytics/api/human-actions/credential','/analytics/api/human-actions/gate','/analytics/api/human-actions/editorial']},
   {id:'command_center_schema_reconcile',owner:'command_center_schema_control',plane:'control',methods:['POST'],exact:['/api/command-center-business-truth/reconcile-affiliate-schema']},
