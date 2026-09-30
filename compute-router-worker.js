@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './seo-cloudflare-runtime-worker.js';
+import base from './cloudflare-primary-runtime-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
@@ -15,7 +15,7 @@ import {routeContract,routeOwner} from './runtime-route-contract.js';
 import {handleDistributionPriorityRoute} from './distribution-priority-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
-import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
+import {handleSeoRuntimeRoute,transformSeoPublicPage,runSeoRuntimeScheduled} from './seo-cloudflare-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute,runAuthorityAcquisitionScheduled} from './authority-acquisition-worker.js';
 import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {handleAuthorityHealthRoute} from './authority-health-runtime.js';
@@ -33,7 +33,8 @@ import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
 async function legacyFallback(request,env,ctx){
-  const response=await base.fetch(request,env,ctx);
+  let response=await base.fetch(request,env,ctx);
+  response=await transformSeoPublicPage(request,response,env);
   if(request.method==='GET')return injectToolScoutSocialFooter(response);
   return response;
 }
@@ -1999,17 +2000,25 @@ export default{
         await event(env,'growth_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const inherited=typeof base.scheduled==='function'
-        ?Promise.resolve(base.scheduled(scheduledEvent,env,ctx)).catch(async error=>{
-          await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
-          return null;
-        })
+      const inheritedRaw=typeof base.scheduled==='function'
+        ?Promise.resolve(base.scheduled(scheduledEvent,env,ctx))
         :Promise.resolve(null);
+      const inherited=inheritedRaw.catch(async error=>{
+        await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+        return null;
+      });
+      const seo=inheritedRaw.then(
+        ()=>runSeoRuntimeScheduled(scheduledEvent,env,ctx),
+        ()=>null
+      ).catch(async error=>{
+        await event(env,'seo_runtime_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+        return null;
+      });
       const authority=Promise.resolve(runAuthorityAcquisitionScheduled(scheduledEvent,env,ctx)).catch(async error=>{
         await event(env,'authority_acquisition_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const combined=Promise.allSettled([growth,authority,inherited]);
+      const combined=Promise.allSettled([growth,authority,inherited,seo]);
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;return;
     }
