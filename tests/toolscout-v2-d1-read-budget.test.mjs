@@ -33,7 +33,7 @@ test('D1 budget preserves credential forwarding and owner access bridge',()=>{
   assert.match(runtime,/Cf-Access-Authenticated-User-Email/);
   assert.match(runtime,/pcaiano@gmail\.com/);
   assert.match(runtime,/handleCommandCenterGa4Route\(forwarded,env,ctx\)/);
-  assert.match(runtime,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
+  assert.match(runtime,/import base from '\.\/command-center-health-language-worker\.js'/);
   assert.match(runtime,/handleCommandCenterGa4Route.*from '\.\/command-center-ga4-worker\.js'/);
 });
 
