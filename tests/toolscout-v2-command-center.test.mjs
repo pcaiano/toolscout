@@ -67,7 +67,7 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.match(owner,/toolscout_owner/);
   assert.match(owner,/toolscout_owner_since/);
   assert.match(owner,/campaign_source:'\$\{OWNER_SOURCE\}'/);
-  assert.match(entry,/import base from '\.\/ga4-attribution-24h-worker\.js'/);
+  assert.match(entry,/import base from '\.\/d1-read-budget-worker\.js'/);
   assert.match(entry,/injectToolScoutSocialFooter/);
   assert.match(entry,/async function legacyFallback/);
   assert.equal(fs.existsSync(new URL('../operational-truth-reconciliation-worker.js',import.meta.url)),false);
