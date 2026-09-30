@@ -60,7 +60,7 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.doesNotMatch(truth,/import base|base\.fetch|CREATE TABLE|CREATE INDEX|ALTER TABLE/);
   assert.doesNotMatch(facade,/operational-truth-reconciliation-worker/);
   assert.match(facade,/command-center-business-truth-runtime\.js/);
-  assert.match(entry,/import base from '\.\/authority-acquisition-worker\.js'/);
+  assert.match(entry,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
   assert.match(entry,/injectToolScoutSocialFooter/);
   assert.match(entry,/async function legacyFallback/);
   assert.equal(fs.existsSync(new URL('../operational-truth-reconciliation-worker.js',import.meta.url)),false);
