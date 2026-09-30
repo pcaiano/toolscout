@@ -27,6 +27,8 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/distribution/priorities/public-reconcile',{method:'POST'}).owner,'distribution_orchestrator');
   assert.equal(routeOwner('/api/command-center-resilient-health',{method:'GET'}).owner,'command_center_resilient_health');
   assert.equal(routeOwner('/api/traffic-integrity-health',{method:'GET'}).owner,'traffic_integrity_health');
+  assert.equal(routeOwner('/api/confirmed-visitor',{method:'POST'}).owner,'traffic_integrity_core');
+  assert.equal(routeOwner('/api/confirmed-visitor',{method:'OPTIONS'}).owner,'traffic_integrity_core');
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
   assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'legacy_chain');
   assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'legacy_chain');
@@ -91,12 +93,14 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/traffic-integrity-worker\.js'/);
+  assert.match(src,/import base from '\.\/command-center-human-truth-chart-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/owner-exclusion-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/traffic-integrity-guard-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/traffic-integrity-live-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/outbound-integrity-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/visitor-integrity-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/traffic-integrity-worker\.js'/);
+  assert.match(src,/transformTrafficIntegrityCoreResponse/);
   assert.doesNotMatch(src,/import base from '\.\/command-center-integrity-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/authority-acquisition-worker\.js'/);
@@ -135,6 +139,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='command_center_resilient_health'/);
   assert.match(src,/ownership\.owner==='command_center_schema_control'/);
   assert.match(src,/ownership\.owner==='traffic_integrity_health'/);
+  assert.match(src,/ownership\.owner==='traffic_integrity_core'/);
   assert.match(src,/ownership\.owner==='admin_stats'/);
   assert.match(src,/ownership\.owner==='analytics_chairman'/);
   assert.match(src,/ownership\.owner==='analytics_stats'/);
