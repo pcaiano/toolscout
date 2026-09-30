@@ -1016,3 +1016,20 @@ Implemented:
 
 Preservation rule:
 Firecrawl reconciliation, Gmail affiliate reply ingestion, affiliate approval/rejection classification, referral-link capture, manual coverage authorization, ledger semantics and scheduled affiliate coverage behavior remain unchanged.
+
+
+## Phase 76 - Remove distribution impact presentation traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-76`.
+
+Implemented:
+- generic compute fallback now connects directly to `agent-protocol-core-worker.js`;
+- `distribution-impact-entry-worker.js` leaves production's generic request traversal;
+- `GET /api/stats` remains owned by `admin_stats`;
+- `GET /analytics/api/stats` remains owned by `analytics_stats`;
+- Command Center pages remain owned by `command_center_direct`;
+- the obsolete distribution-impact page injection is not copied because canonical ToolScout 2.0 presentation already bypasses it;
+- the architecture edge budget ratchets from 27 to 26.
+
+Preservation rule:
+Canonical stats sources, Command Center page ownership, public URLs/canonicals and active observability behavior remain unchanged.
