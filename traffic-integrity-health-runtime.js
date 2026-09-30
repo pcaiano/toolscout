@@ -4,7 +4,7 @@ import {augmentOutboundIntegrityHealth} from './outbound-integrity-worker.js';
 import {augmentVisitorIntegrityHealth} from './visitor-integrity-worker.js';
 import {augmentCommandCenterIntegrityHealth} from './command-center-integrity-worker.js';
 import {augmentMissionIntegrityHealth} from './mission-integrity-worker.js';
-import {reconcileOperationalTruth} from './operational-truth-reconciliation-worker.js';
+import {reconcileOperationalTruth} from './operational-truth-reconciliation-runtime.js';
 
 export async function handleTrafficIntegrityHealthRoute(request,env){
   const url=new URL(request.url);
