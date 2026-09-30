@@ -201,3 +201,20 @@ Implemented:
 
 Preservation rule:
 This phase changes module ownership, not business semantics. Business Truth queries, cache behavior, Command Center session cookie, redirects, health contract, card inventory and unavailable-is-never-zero behavior remain unchanged.
+
+
+## Phase 25 - Retire operational truth wrapper
+
+Status: implemented on `architecture/toolscout-2.0-phase-25`.
+
+Implemented:
+- production remains rooted at `compute-router-worker.js`;
+- the compute router now connects its generic fallback directly to `authority-acquisition-worker.js`;
+- the remaining useful legacy behavior from the retired wrapper, ToolScout social-footer injection on fallback GET HTML, is applied explicitly by `legacyFallback()` in the compute router;
+- redundant Command Center, stats and dynamic tool-profile interceptions are removed because those route groups are already owned and dispatched before fallback;
+- `operational-truth-reconciliation-worker.js` is deleted;
+- CI no longer syntax-checks the retired wrapper;
+- the legacy decorator edge budget ratchets from 72 to 71 so the removed edge cannot silently return.
+
+Preservation rule:
+Declared owners retain priority. Unknown/undeclared requests still reach the same lower legacy runtime and GET HTML fallback still receives the ToolScout social footer.
