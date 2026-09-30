@@ -218,11 +218,18 @@ async function decorate(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleOwnerExclusionRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/analytics/api/owner-exclusion')return ownerStatus(request,env);
+  if(request.method==='POST'&&url.pathname==='/analytics/api/owner-retrospective-audit')return ownerRetrospectiveAudit(request,env);
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/analytics/api/owner-exclusion')return ownerStatus(request,env);
-    if(request.method==='POST'&&url.pathname==='/analytics/api/owner-retrospective-audit')return ownerRetrospectiveAudit(request,env);
+    const owned=await handleOwnerExclusionRoute(request,env);
+    if(owned)return owned;
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
