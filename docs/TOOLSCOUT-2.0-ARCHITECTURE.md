@@ -193,3 +193,8 @@ A wrapper that still owns request-time DDL is not eligible for direct-owner extr
 ### Coordinator extraction
 
 A coordinator wrapper may be removed from generic request traversal once its schema is migration-owned and its route/schedule responsibilities are exported explicitly. Preserve orchestration order: lower scheduled dispatch stays inside the coordinator contract where that ordering is part of the existing behavior, while unrelated explicit owners may continue in parallel at the front router.
+
+
+### Direct-owner side effects
+
+When a route moves ahead of a legacy decorator, preserve any intentional side effect that was coupled to that route even if the response HTML is replaced. Cookie marking, attribution context and security/session state are part of route semantics. Extract those effects into a shared primitive and invoke them from the direct owner rather than relying on a bypassed wrapper.

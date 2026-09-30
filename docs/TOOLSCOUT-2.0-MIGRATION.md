@@ -285,3 +285,22 @@ Implemented:
 
 Preservation rule:
 Runtime executor payloads, admin authentication, GSC refresh, primary-growth ledger semantics, lower scheduled dispatch, SEO ordering and generic fallback behavior remain unchanged.
+
+
+## Phase 30 - Restore direct GA4 owner marking
+
+Status: implemented on `architecture/toolscout-2.0-phase-30`.
+
+Implemented:
+- owner marker primitives are extracted to `ga4-owner-context.js`;
+- the direct Command Center page now sets the durable `toolscout_owner` cookie and initializes `toolscout_owner_since` when missing;
+- existing owner-since timestamps are preserved, so the 24h clean-window clock is never reset by reopening the Command Center;
+- the legacy GA4 owner wrapper consumes the same shared marker primitives instead of maintaining a divergent copy;
+- public owner analytics attribution remains unchanged: marked browsers continue to use `toolscout_owner / internal` on public pages that carry the GA tag;
+- no legacy widgets are reintroduced into the simplified Command Center.
+
+Why this matters:
+The direct Command Center route bypassed the old decorator that originally created the owner cookie. Without restoring that side effect at the direct owner, the operator's later public-page visits could be misclassified as external acquisition.
+
+Preservation rule:
+This phase changes owner identification only. Command Center HTML, business metrics, GA measurement ID, 24h warm-up semantics and public analytics campaign attribution remain unchanged.

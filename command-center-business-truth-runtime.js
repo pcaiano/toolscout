@@ -1,4 +1,5 @@
 import {commandCenterHtml} from './command-center-simplified-view.js';
+import {withOwnerMarker} from './ga4-owner-context.js';
 
 const AUTHORITY_POLICY_MIN_24H=4;
 const AUTHORITY_POLICY_TARGET_24H=50;
@@ -24,7 +25,7 @@ async function commandCenterDigestHex(value){
 }
 function commandCenterSessionBucket(now=Date.now()){return Math.floor(now/(COMMAND_CENTER_SESSION_TTL_SECONDS*1000))}
 async function commandCenterSessionValue(secret,bucket){return commandCenterDigestHex(`toolscout-command-center:${secret}:${bucket}`)}
-async function simplifiedPage(response,env){
+async function simplifiedPage(response,env,request){
   const headers=new Headers(response?.headers||undefined);
   headers.set('Content-Type','text/html; charset=UTF-8');
   headers.set('Cache-Control','private, no-store, max-age=0');
@@ -33,7 +34,7 @@ async function simplifiedPage(response,env){
     const value=await commandCenterSessionValue(env.ADMIN_TOKEN,commandCenterSessionBucket());
     headers.append('Set-Cookie',`${COMMAND_CENTER_SESSION_COOKIE}=${value}; Max-Age=${COMMAND_CENTER_SESSION_TTL_SECONDS}; Path=/; HttpOnly; Secure; SameSite=Lax`);
   }
-  return new Response(commandCenterHtml(),{status:200,headers});
+  return withOwnerMarker(new Response(commandCenterHtml(),{status:200,headers}),request);
 }
 
 
@@ -707,7 +708,7 @@ export async function handleCommandCenterDirectRoute(request,env){
   }
 
   if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname)){
-    return simplifiedPage(null,env);
+    return simplifiedPage(null,env,request);
   }
 
   if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){

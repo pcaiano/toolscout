@@ -52,6 +52,7 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   const entry=read('compute-router-worker.js');
   const truth=read('command-center-business-truth-runtime.js');
   const facade=read('command-center-direct-runtime.js');
+  const owner=read('ga4-owner-context.js');
   assert.match(entry,/ownership\.owner==='command_center_direct'/);
   assert.match(entry,/ownership\.owner==='command_center_schema_control'/);
   assert.match(truth,/export async function handleCommandCenterDirectRoute/);
@@ -60,6 +61,12 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.doesNotMatch(truth,/import base|base\.fetch|CREATE TABLE|CREATE INDEX|ALTER TABLE/);
   assert.doesNotMatch(facade,/operational-truth-reconciliation-worker/);
   assert.match(facade,/command-center-business-truth-runtime\.js/);
+  assert.match(truth,/import \{withOwnerMarker\} from '\.\/ga4-owner-context\.js'/);
+  assert.match(truth,/simplifiedPage\(null,env,request\)/);
+  assert.match(truth,/return withOwnerMarker\(new Response\(commandCenterHtml\(\)/);
+  assert.match(owner,/toolscout_owner/);
+  assert.match(owner,/toolscout_owner_since/);
+  assert.match(owner,/campaign_source:'\$\{OWNER_SOURCE\}'/);
   assert.match(entry,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
   assert.match(entry,/injectToolScoutSocialFooter/);
   assert.match(entry,/async function legacyFallback/);
