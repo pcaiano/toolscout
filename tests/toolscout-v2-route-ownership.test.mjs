@@ -34,6 +34,10 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
   assert.equal(routeOwner('/analytics/api/google/external-24h',{method:'GET'}).owner,'analytics_owner_exclusion');
   assert.equal(routeOwner('/analytics/api/google/acquisition-24h',{method:'GET'}).owner,'analytics_attribution_24h');
+  assert.equal(routeOwner('/api/autonomous-growth-health',{method:'GET'}).owner,'d1_read_budget');
+  assert.equal(routeOwner('/api/distribution/discovery-health',{method:'GET'}).owner,'d1_read_budget');
+  assert.equal(routeOwner('/analytics/api/google/connect',{method:'GET'}).owner,'d1_read_budget');
+  assert.equal(routeOwner('/analytics/api/google/disconnect',{method:'POST'}).owner,'d1_read_budget');
   assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
   assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'analytics_human_actions_mutation');
   assert.equal(routeOwner('/analytics/api/human-actions/gate',{method:'POST'}).owner,'analytics_human_actions_mutation');
@@ -78,11 +82,12 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/d1-read-budget-worker\.js'/);
+  assert.match(src,/import base from '\.\/command-center-ga4-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/authority-acquisition-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/ga4-attribution-24h-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/d1-read-budget-worker\.js'/);
   assert.match(src,/applyMarkedOwnerAnalytics/);
   assert.match(src,/transformSeoPublicPage/);
   assert.match(src,/response=await transformSeoPublicPage\(request,response,env\)/);
@@ -99,6 +104,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='analytics_stats'/);
   assert.match(src,/ownership\.owner==='analytics_owner_exclusion'/);
   assert.match(src,/ownership\.owner==='analytics_attribution_24h'/);
+  assert.match(src,/ownership\.owner==='d1_read_budget'/);
   assert.match(src,/ownership\.owner==='analytics_human_actions'/);
   assert.match(src,/ownership\.owner==='analytics_human_actions_mutation'/);
   assert.match(src,/ownership\.owner==='public_decision'/);
