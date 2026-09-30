@@ -400,3 +400,18 @@ Implemented:
 
 Preservation rule:
 Trend data source, SVG/CSS output, surface version, incomplete-day handling and health evidence remain unchanged.
+
+
+## Phase 37 - Remove redundant GSC trend traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-37`.
+
+Implemented:
+- generic compute fallback now connects directly to `growth-runtime-authority-drain-worker.js`;
+- `gsc-command-center-trend-worker.js` is removed from generic traversal because every response it mutates is already intercepted before fallback: `/api/health`, `/api/stats`, `/analytics/api/stats` and the Command Center HTML routes;
+- the trend wrapper remains intact for bounded direct compositions, including the explicit GSC health surface introduced in Phase 36;
+- no route owner, GSC data source, chart payload or stats enrichment is changed;
+- the architecture edge budget ratchets from 62 to 61.
+
+Preservation rule:
+GSC daily trend enrichment remains available in the explicit compositions that still consume it. Only redundant generic traversal is removed.
