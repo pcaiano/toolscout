@@ -51,6 +51,8 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
 
   const entry=read('compute-router-worker.js');
   const truth=read('command-center-business-truth-runtime.js');
+  const facade=read('command-center-direct-runtime.js');
+  const legacy=read('operational-truth-reconciliation-worker.js');
   assert.match(entry,/ownership\.owner==='command_center_direct'/);
   assert.match(entry,/ownership\.owner==='command_center_schema_control'/);
   assert.match(truth,/export async function handleCommandCenterDirectRoute/);
