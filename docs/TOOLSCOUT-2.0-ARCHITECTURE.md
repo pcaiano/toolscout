@@ -166,3 +166,10 @@ Further decomposition of the bounded commercial core is allowed only after parit
 - visitor linkage;
 - social affiliate attribution;
 - noindex/no-store redirect headers.
+
+
+### Command Center read-model boundary
+
+The direct Command Center owner must not depend on the legacy operational worker chain. Its canonical Business Truth implementation lives in `command-center-business-truth-runtime.js` and may depend on the simplified view plus read-only data sources, but not on a generic `base.fetch` decorator path or request-time schema mutation.
+
+Compatibility workers may consume this canonical read model. They may not carry a divergent copy of it.
