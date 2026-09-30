@@ -1,5 +1,6 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './operational-truth-reconciliation-worker.js';
+import base from './authority-acquisition-worker.js';
+import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
 import {handleCommandCenterSchemaControlRoute} from './command-center-schema-control-runtime.js';
@@ -30,6 +31,12 @@ import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
+
+async function legacyFallback(request,env,ctx){
+  const response=await base.fetch(request,env,ctx);
+  if(request.method==='GET')return injectToolScoutSocialFooter(response);
+  return response;
+}
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
 const RENDER_KEEPALIVE_CRON=TOOLSCOUT_CRONS.renderKeepalive;
 const DAILY_JOB_BUDGET=1500;
@@ -1937,8 +1944,8 @@ export default{
     if(request.method==='GET'&&u.pathname==='/api/runtime/schedule-contract')return Response.json(scheduleContract(),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/route-contract')return Response.json(routeContract(),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/route-owner')return Response.json(routeOwner(u.searchParams.get('path')||'/',{method:u.searchParams.get('method')||'GET'}),{headers:JSON_H});
-    if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await base.fetch(request,env,ctx),env);
-    return base.fetch(request,env,ctx);
+    if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await legacyFallback(request,env,ctx),env);
+    return legacyFallback(request,env,ctx);
   },
   async scheduled(scheduledEvent,env,ctx){
     const trigger=scheduledEvent?.cron||'scheduled';
