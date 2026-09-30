@@ -240,7 +240,7 @@ export async function runCloudflarePrimaryScheduled(event,env,ctx){
   const primary=await runWithLedger(env,{engine:'runtime',mission:'primary_growth_cycle',triggerName:trigger,singleFlightMinutes:50},async()=>{
     if(typeof base.scheduled==='function'){
       const inherited=Promise.resolve(base.scheduled(event,env,ctx)).catch(()=>null);
-      if(ctx?.waitUntil)ctx.waitUntil(inherited);else await inherited;
+      if(ctx?.waitUntil)ctx.waitUntil(inherited);
     }
     return {
       ok:true,
