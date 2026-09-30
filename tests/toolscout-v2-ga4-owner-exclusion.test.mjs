@@ -28,7 +28,8 @@ test('generic fallback preserves owner attribution before SEO and social footer'
   const seo=compute.indexOf('await transformSeoPublicPage(request,response,env)');
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   assert.ok(base>=0&&owner>base&&seo>owner&&footer>seo,'fallback order must remain base -> owner attribution -> SEO -> footer');
-  assert.match(compute,/import base from '\.\/command-center-human-truth-chart-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-human-truth-details-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/command-center-human-truth-chart-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/owner-exclusion-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-guard-worker\.js'/);
