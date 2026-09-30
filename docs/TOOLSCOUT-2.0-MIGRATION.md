@@ -680,3 +680,18 @@ Implemented:
 
 Preservation rule:
 Human truth chart health metadata, chart configuration and legacy analytics decoration remain unchanged. Only redundant generic traversal is removed.
+
+
+## Phase 55 - Direct human truth details health ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-55`.
+
+Implemented:
+- `GET /api/command-center-human-truth-details-health` gains explicit `human_truth_details_health` ownership;
+- the direct handler preserves the existing detail-health payload, canonical human-session semantics, unique-visitor support, visitor-country metadata and affiliate-coverage flags;
+- generic request fallback now connects directly to `command-center-human-truth-final-worker.js`;
+- legacy human-truth details augmentation and analytics decoration remain compatibility-only;
+- the architecture edge budget ratchets from 45 to 44.
+
+Preservation rule:
+Human-session truth semantics, visitor/country detail metadata, affiliate coverage detail and legacy Command Center decoration remain unchanged. Only redundant generic traversal is removed.

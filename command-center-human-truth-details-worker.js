@@ -148,10 +148,33 @@ async function decorate(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleHumanTruthDetailsRoute(request){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/api/command-center-human-truth-details-health')return null;
+  return Response.json({
+    ok:true,
+    service:'toolscout-command-center-human-truth-details',
+    version:8,
+    canonicalMetric:'human sessions',
+    supportingUniqueVisitorMetric:true,
+    visitorCountries:true,
+    visitorCountrySource:'Cloudflare request country on Browser Guard allowed sessions',
+    visitorProjectionRequiresComplete24h:true,
+    outboundMetrics:true,
+    affiliateCoverageStatus:true,
+    productBehaviourCard:false,
+    growthLedgerCard:false,
+    resilientNoticeVisible:false,
+    refreshNullGuard:true,
+    detailsPosition:'below human session forecast'
+  },{headers:{'Cache-Control':'no-store'}});
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleHumanTruthDetailsRoute(request);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-details-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-details',version:8,canonicalMetric:'human sessions',supportingUniqueVisitorMetric:true,visitorCountries:true,visitorCountrySource:'Cloudflare request country on Browser Guard allowed sessions',visitorProjectionRequiresComplete24h:true,outboundMetrics:true,affiliateCoverageStatus:true,productBehaviourCard:false,growthLedgerCard:false,resilientNoticeVisible:false,refreshNullGuard:true,detailsPosition:'below human session forecast'},{headers:{'Cache-Control':'no-store'}});
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentAffiliateStatus(response,request,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
