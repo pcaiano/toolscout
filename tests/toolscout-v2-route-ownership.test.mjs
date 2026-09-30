@@ -94,7 +94,9 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.doesNotMatch(src,/import base from '\.\/command-center-ga4-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/command-center-health-language-worker\.js'/);
   assert.match(healthLanguage,/async function improveStats/);
-  assert.match(healthLanguage,/\/analytics\/api\/stats\|\|url\.pathname==='\/api\/stats'/);
+  assert.match(healthLanguage,/url\.pathname==='\/analytics\/api\/stats'/);
+  assert.match(healthLanguage,/url\.pathname==='\/api\/stats'/);
+  assert.match(healthLanguage,/return improveStats\(response\)/);
   assert.match(adminStats,/legacyStatsBase\.fetch\(request,env,ctx\)/);
   assert.match(src,/applyMarkedOwnerAnalytics/);
   assert.match(src,/transformSeoPublicPage/);
