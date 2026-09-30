@@ -288,3 +288,8 @@ When a legacy wrapper decorates a page that is already owned earlier by a direct
 ### Schema-first tracking extraction
 
 Tracking wrappers that both write D1 and decorate public responses must become migration-owned before their request responsibilities are split. Replace runtime schema mutation with a cached readiness probe first, then extract the write route and public response stage in a later phase.
+
+
+### First-party tracker extraction
+
+A first-party tracking wrapper should be split into an explicit write-route owner and an ordered public response transform after its schema is migration-owned. Preserve tracker eligibility and transform order exactly; route extraction must not silently broaden the tracked population.
