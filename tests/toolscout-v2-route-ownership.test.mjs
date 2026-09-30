@@ -78,6 +78,8 @@ test('unknown routes remain on the legacy fallback during staged migration',()=>
 
 test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   const src=read('compute-router-worker.js');
+  const healthLanguage=read('command-center-health-language-worker.js');
+  const adminStats=read('admin-stats-runtime.js');
   assert.match(src,/earlyOwnedRoute/);
   assert.match(src,/ownership\.owner==='distribution_priority'/);
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
