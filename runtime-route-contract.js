@@ -2,7 +2,7 @@
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
 
-export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect','analytics_owner_exclusion','analytics_attribution_24h','d1_read_budget','google_analytics_callback','gsc_trend_surface']);
+export const EARLY_DISPATCH_OWNERS=Object.freeze(['distribution_priority','distribution_orchestrator','seo_runtime','authority_acquisition','mission_integrity','growth_runtime_closed_loop','authority_health','public_editorial_site','command_center_direct','command_center_resilient_health','command_center_schema_control','traffic_integrity_health','admin_stats','agent_protocol_core','machine_discovery_catalog','analytics_chairman','analytics_stats','analytics_human_actions','analytics_human_actions_mutation','public_decision','public_navigation','affiliate_redirect','analytics_owner_exclusion','analytics_attribution_24h','d1_read_budget','google_analytics_callback','gsc_trend_surface','public_canonical_surface']);
 
 export const ROUTE_GROUPS=Object.freeze([
   {id:'compute',owner:'compute_router',plane:'executor',methods:['GET','POST'],prefixes:['/api/compute/','/api/contact-supply/','/api/auth-plane/']},
@@ -36,6 +36,8 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'public_editorial_trends',owner:'public_editorial_site',plane:'public_site',methods:['GET'],exact:['/software-trends-index','/software-trends-index/','/software-trends-index.html','/software-trends-index.json']},
   {id:'public_decision_pages',owner:'public_decision',plane:'public_site',methods:['GET'],matcher:'public_decision_page'},
   {id:'public_navigation_hubs',owner:'public_navigation',plane:'public_site',methods:['GET'],exact:['/tools','/tools/','/tools.html','/guides','/guides/','/guides.html','/compare','/compare/','/compare.html','/categories','/categories/','/categories.html','/crm-tools','/crm-tools/','/crm-tools.html','/seo-tools','/seo-tools/','/seo-tools.html','/blog/']},
+  {id:'public_canonical_assets',owner:'public_canonical_surface',plane:'public_site',methods:['GET'],exact:['/sitemap.xml','/data/tools.json']},
+  {id:'public_legacy_html_redirect',owner:'public_canonical_surface',plane:'public_site',methods:['GET','HEAD'],matcher:'legacy_html_redirect'},
   {id:'affiliate_redirect',owner:'affiliate_redirect',plane:'public_site',methods:['GET'],prefixes:['/go/']},
   {id:'agent_recommendation_protocol',owner:'agent_protocol_core',plane:'public_site',methods:['GET','POST','OPTIONS'],exact:['/mcp','/mcp/','/a2a','/a2a/','/.well-known/agent-card.json']},
   {id:'agent_discovery_catalog',owner:'machine_discovery_catalog',plane:'public_site',methods:['GET','HEAD'],exact:['/.well-known/toolscout-distribution.json','/.well-known/api-catalog']}
@@ -46,6 +48,7 @@ function namedMatcher(name,pathname){
     return /^\/tools\/[a-z0-9][a-z0-9-]*(?:\.html)?\/?$/i.test(pathname)
       || /^\/best-[a-z0-9-]+(?:\.html)?\/?$/i.test(pathname);
   }
+  if(name==='legacy_html_redirect')return /\.html$/i.test(pathname);
   return false;
 }
 

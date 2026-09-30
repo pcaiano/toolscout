@@ -1,5 +1,6 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './command-center-light-theme-worker.js';
+import base from './command-center-final-integrity-worker.js';
+import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
 import {runAuthorityDrainScheduled} from './growth-runtime-authority-drain-worker.js';
@@ -42,7 +43,10 @@ import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
 async function legacyFallback(request,env,ctx){
+  const canonicalOwned=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
+  if(canonicalOwned)return canonicalOwned;
   let response=await base.fetch(request,env,ctx);
+  response=await transformPublicCanonicalResponse(request,response);
   response=await applyMarkedOwnerAnalytics(request,response);
   response=await transformSeoPublicPage(request,response,env);
   if(request.method==='GET')return injectToolScoutSocialFooter(response);
@@ -1903,6 +1907,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='d1_read_budget')response=await handleD1ReadBudgetRoute(request,env,ctx);
   else if(ownership.owner==='google_analytics_callback')response=await handleCommandCenterGa4Route(request,env,ctx);
   else if(ownership.owner==='gsc_trend_surface')response=await handleGscTrendSurfaceRoute(request,env,ctx);
+  else if(ownership.owner==='public_canonical_surface')response=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);

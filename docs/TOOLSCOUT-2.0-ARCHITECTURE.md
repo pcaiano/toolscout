@@ -228,3 +228,8 @@ A wrapper-owned scheduler mission is not considered preserved if a higher dispat
 ### Core-to-drain ordering
 
 Authority recovery sequencing is explicit: settle the independent hourly core missions, run the authority closed loop, then run the sender drain. This ordering keeps machine-first recovery ahead of external-handoff draining and prevents wrapper traversal from determining mission reachability.
+
+
+### Canonical response-stage ownership
+
+Canonical redirects and canonical public assets are explicit route owners. Generic HTML canonicalization is an explicit response stage that runs immediately after the lower runtime and before attribution, SEO runtime transforms and social-footer injection. This prevents SEO behavior from being coupled to Command Center presentation wrappers.

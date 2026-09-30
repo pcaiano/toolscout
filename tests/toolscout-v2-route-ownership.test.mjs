@@ -42,6 +42,9 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/gsc-trend.svg',{method:'GET'}).owner,'gsc_trend_surface');
   assert.equal(routeOwner('/api/gsc-trend.css',{method:'GET'}).owner,'gsc_trend_surface');
   assert.equal(routeOwner('/api/health',{method:'GET'}).owner,'gsc_trend_surface');
+  assert.equal(routeOwner('/sitemap.xml',{method:'GET'}).owner,'public_canonical_surface');
+  assert.equal(routeOwner('/data/tools.json',{method:'GET'}).owner,'public_canonical_surface');
+  assert.equal(routeOwner('/legacy-page.html',{method:'GET'}).owner,'public_canonical_surface');
   assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
   assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'analytics_human_actions_mutation');
   assert.equal(routeOwner('/analytics/api/human-actions/gate',{method:'POST'}).owner,'analytics_human_actions_mutation');
@@ -88,7 +91,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/command-center-light-theme-worker\.js'/);
+  assert.match(src,/import base from '\.\/command-center-final-integrity-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/authority-acquisition-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
@@ -102,6 +105,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.doesNotMatch(src,/import base from '\.\/growth-runtime-observability-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/growth-runtime-closed-loop-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/growth-runtime-integrity-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/command-center-light-theme-worker\.js'/);
   assert.match(src,/handleGrowthClosedLoopRoute/);
   assert.match(src,/runGrowthClosedLoopScheduled/);
   assert.match(healthLanguage,/async function improveStats/);
@@ -128,6 +132,9 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='d1_read_budget'/);
   assert.match(src,/ownership\.owner==='google_analytics_callback'/);
   assert.match(src,/ownership\.owner==='gsc_trend_surface'/);
+  assert.match(src,/ownership\.owner==='public_canonical_surface'/);
+  assert.match(src,/handlePublicCanonicalSurfaceRoute/);
+  assert.match(src,/transformPublicCanonicalResponse/);
   assert.match(src,/ownership\.owner==='analytics_human_actions'/);
   assert.match(src,/ownership\.owner==='analytics_human_actions_mutation'/);
   assert.match(src,/ownership\.owner==='public_decision'/);
