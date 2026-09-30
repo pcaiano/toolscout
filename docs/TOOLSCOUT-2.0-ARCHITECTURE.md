@@ -293,3 +293,8 @@ Tracking wrappers that both write D1 and decorate public responses must become m
 ### First-party tracker extraction
 
 A first-party tracking wrapper should be split into an explicit write-route owner and an ordered public response transform after its schema is migration-owned. Preserve tracker eligibility and transform order exactly; route extraction must not silently broaden the tracked population.
+
+
+### Request-only wrapper removal with scheduled preservation
+
+A wrapper can leave generic request traversal while remaining in a bounded scheduled compatibility chain. Prove that the front scheduler does not depend on the request base for that scheduled side effect, then preserve the scheduled ordering and remove only the request edge.
