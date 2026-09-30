@@ -27,7 +27,13 @@ test('Command Center theme no longer owns growth engine scheduling',()=>{
 
 test('compute router dispatches growth scheduling while growth scheduler owns the extracted operational cycles',()=>{
   const compute=read('compute-router-worker.js');
+  const authority=read('authority-acquisition-worker.js');
   assert.match(compute,/runGrowthScheduler/);
+  assert.match(compute,/runAuthorityAcquisitionScheduled/);
+  assert.match(compute,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
+  assert.match(authority,/export async function runAuthorityAcquisitionScheduled/);
+  assert.match(authority,/trigger!==TOOLSCOUT_CRONS\.hourly/);
+  assert.match(authority,/authority_acquisition_scheduler/);
   assert.match(compute,/trigger===TOOLSCOUT_CRONS\.hourly\|\|trigger===TOOLSCOUT_CRONS\.daily/);
   assert.equal(scheduleContract().dispatcher,'compute_router');
 
