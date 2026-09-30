@@ -1,42 +1,17 @@
 import base from './ga4-attribution-24h-worker.js';
+import {
+  OWNER_COOKIE,OWNER_SOURCE,OWNER_MEDIUM,markerState,cookieValue,withOwnerMarker,
+  markOwnerAnalyticsHtml,markPublicOwnerAnalytics
+} from './ga4-owner-context.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const COMMAND_CENTER_SESSION_COOKIE='toolscout_cc';
 const COMMAND_CENTER_SESSION_TTL_SECONDS=86400;
-const OWNER_COOKIE='toolscout_owner';
-const OWNER_SINCE_COOKIE='toolscout_owner_since';
-const OWNER_SOURCE='toolscout_owner';
-const OWNER_MEDIUM='internal';
-const OWNER_COOKIE_TTL_SECONDS=31536000;
-const CLEAN_WINDOW_HOURS=24;
-const GA_MEASUREMENT_ID='G-9VR80SYYH7';
 
 function n(value){const x=Number(value);return Number.isFinite(x)?x:0}
 async function digestHex(value){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('')}
 function sessionBucket(now=Date.now()){return Math.floor(now/(COMMAND_CENTER_SESSION_TTL_SECONDS*1000))}
 async function sessionValue(secret,bucket){return digestHex(`toolscout-command-center:${secret}:${bucket}`)}
-function cookieValue(request,name){const raw=String(request?.headers?.get('Cookie')||'');const match=raw.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));return match?decodeURIComponent(match[1]):''}
-async function validCommandCenterSession(request,env){
-  if(!env.ADMIN_TOKEN)return false;
-  const supplied=cookieValue(request,COMMAND_CENTER_SESSION_COOKIE);if(!supplied)return false;
-  const bucket=sessionBucket();
-  for(const candidate of [bucket,bucket-1])if(supplied===await sessionValue(env.ADMIN_TOKEN,candidate))return true;
-  return false;
-}
-function ownerSinceMs(request){const raw=Number(cookieValue(request,OWNER_SINCE_COOKIE));return Number.isFinite(raw)&&raw>0?raw:null}
-function markerState(request,now=Date.now()){
-  const marked=cookieValue(request,OWNER_COOKIE)==='1',since=ownerSinceMs(request);
-  const coverageHours=marked&&since?Math.max(0,Math.min(CLEAN_WINDOW_HOURS,(now-since)/3600000)):0;
-  const ready=marked&&Boolean(since)&&coverageHours>=CLEAN_WINDOW_HOURS;
-  return {marked,since,coverageHours:Number(coverageHours.toFixed(2)),ready,warmupRemainingHours:Number(Math.max(0,CLEAN_WINDOW_HOURS-coverageHours).toFixed(2)),scope:'this_browser'};
-}
-function withOwnerMarker(response,request){
-  const headers=new Headers(response.headers);
-  headers.append('Set-Cookie',`${OWNER_COOKIE}=1; Path=/; Max-Age=${OWNER_COOKIE_TTL_SECONDS}; SameSite=Lax; Secure`);
-  if(!ownerSinceMs(request))headers.append('Set-Cookie',`${OWNER_SINCE_COOKIE}=${Date.now()}; Path=/; Max-Age=${OWNER_COOKIE_TTL_SECONDS}; SameSite=Lax; Secure`);
-  headers.delete('Content-Length');
-  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
-}
 function analyticsPage(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/command-center'||path==='/command-center/'}
 
 async function ownerSafeAcquisition24h(request,env,ctx){
@@ -71,28 +46,7 @@ function sources(rows,title){if(!rows||!rows.length)return '';return '<div style
 async function load(){const root=document.getElementById('ga4ExternalBody'),meta=document.getElementById('ga4ExternalMeta');if(!root)return;try{const r=await fetch('/analytics/api/google/external-24h',{credentials:'same-origin',cache:'no-store'}),d=await r.json().catch(()=>null);if(!r.ok||!d||d.status!=='connected')throw new Error(d&&d.reason||'External GA4 acquisition unavailable');const ready=d.external&&d.external.status==='ready',marker=d.marker||{},ext=d.external||{},owner=d.owner||{},total=d.total||{};if(meta)meta.textContent=ready?'Clean 24h window · GA4 property '+d.propertyId:'Warm-up · '+Number(marker.warmupRemainingHours||0).toFixed(1)+'h remaining';root.innerHTML='<div class="metricGrid">'+metric('GA4 total · 24h',num(total.sessions),'Raw GA4 acquisition')+metric('Owner-marked · 24h',num(owner.sessions),'toolscout_owner / internal')+metric(ready?'GA4 external · 24h':'Non-owner-marked · 24h',num(ready?ext.sessions:ext.candidateSessions),ready?'Operational acquisition metric':'Candidate only during warm-up')+metric(ready?'External engagement rate':'Owner exclusion status',ready?pc(ext.engagementRate):'Warming up',ready?num(ext.engagedSessions)+' engaged':'Growth learning disabled · '+Number(marker.warmupRemainingHours||0).toFixed(1)+'h remaining')+'</div>'+sources(ext.sources,ready?'External sources':'Non-owner-marked sources · warm-up')+'<div class="note" style="margin-top:10px">'+esc(d.note||'')+'</div>';}catch(e){root.innerHTML='<div class="bug"><b>External GA4 acquisition is unavailable.</b><div style="margin-top:6px">'+esc(e&&e.message||e)+'</div></div>';}}
 setTimeout(load,1700);setInterval(load,300000);
 })();</script>`}
-function ownerGaConfig(){return `gtag('config','${GA_MEASUREMENT_ID}',{campaign_source:'${OWNER_SOURCE}',campaign_medium:'${OWNER_MEDIUM}',campaign_name:'owner_exclusion_v1'});`}
-function markOwnerAnalyticsHtml(html){
-  let value=String(html||'');
-  const plain=`gtag('config','${GA_MEASUREMENT_ID}');`,owner=ownerGaConfig();
-  if(value.includes(plain))value=value.replace(plain,owner);
-  return value;
-}
-async function decorate(response,forceOwnerAnalytics=false){
-  const type=String(response.headers.get('content-type')||'').toLowerCase();if(!response.ok||!type.includes('text/html'))return response;
-  let html=await response.text();
-  if(forceOwnerAnalytics)html=markOwnerAnalyticsHtml(html);
-  if(!html.includes('data-widget="ga4-external-truth"')){
-    if(html.includes('<section class="widget" data-widget="ga4-attribution-24h"'))html=html.replace('<section class="widget" data-widget="ga4-attribution-24h"',widget()+'\n    <section class="widget" data-widget="ga4-attribution-24h"');
-    else html=html.replace('<section class="widget" data-widget="chairman"',widget()+'\n    <section class="widget" data-widget="chairman"');
-  }
-  if(!html.includes('data-ga4-external-truth="v1"'))html=html.replace('</body>',script()+'</body>');
-  const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');return new Response(html,{status:response.status,statusText:response.statusText,headers});
-}
-async function markPublicOwnerAnalytics(response){
-  const type=String(response.headers.get('content-type')||'').toLowerCase();if(!response.ok||!type.includes('text/html'))return response;
-  const html=markOwnerAnalyticsHtml(await response.text());const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');return new Response(html,{status:response.status,statusText:response.statusText,headers});
-}
+
 
 export default {
   async fetch(request,env,ctx){
