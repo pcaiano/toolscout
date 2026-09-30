@@ -22,7 +22,7 @@ test('public canonical surface has explicit route ownership',()=>{
 test('legacy html redirects preserve extensionless canonical behavior',()=>{
   const runtime=read('command-center-light-theme-worker.js');
   assert.match(runtime,/request\.method==='GET'\|\|request\.method==='HEAD'/);
-  assert.match(runtime,/\/\.html\$\/i/);
+  assert.match(runtime,/\.html\$\/i/);
   assert.match(runtime,/canonicalSeoPath\(url\.pathname\)/);
   assert.match(runtime,/Response\.redirect\(target\.toString\(\),308\)/);
 });
