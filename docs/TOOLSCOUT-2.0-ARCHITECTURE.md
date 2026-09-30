@@ -203,3 +203,8 @@ When a route moves ahead of a legacy decorator, preserve any intentional side ef
 ### Attribution-stage extraction
 
 Analytics attribution that applies to generic public GET responses belongs in an explicit front-router response stage, not in a broad decorator. Preserve stage order relative to other response transforms and give protected analytics read endpoints their own route owner.
+
+
+### Budget-stage extraction
+
+A quota-protection wrapper should be narrowed to the routes that still reach it after direct ownership is introduced. Dead cache entries for already intercepted routes are not a reason to retain broad traversal. Preserve live cache, circuit-breaker and credential-scope semantics as an explicit route owner.

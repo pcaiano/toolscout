@@ -187,8 +187,30 @@ async function reduceDashboardPolling(request, env, ctx) {
   return new Response(html, { status: response.status, statusText: response.statusText, headers });
 }
 
+export async function handleD1ReadBudgetRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(url.pathname==='/analytics/api/ga4-health'){
+    return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+  }
+
+  if(
+    (request.method==='GET'&&(url.pathname==='/analytics/api/google/connect'||url.pathname==='/analytics/api/google/acquisition'||url.pathname==='/analytics/api/commerce'))||
+    (request.method==='POST'&&url.pathname==='/analytics/api/google/disconnect')
+  ){
+    const forwarded=await validCommandCenterSession(request,env)?withOwnerAccessHeader(request):request;
+    return base.fetch(forwarded,env,ctx);
+  }
+
+  if(request.method==='GET'&&(url.pathname==='/api/autonomous-growth-health'||url.pathname==='/api/distribution/discovery-health')){
+    return cachedRead(request,env,ctx,READ_TTLS.get(url.pathname),'public');
+  }
+  return null;
+}
+
 export default {
   async fetch(request, env, ctx) {
+    const owned = await handleD1ReadBudgetRoute(request, env, ctx);
+    if (owned) return owned;
     const url = new URL(request.url);
     if (url.pathname === '/analytics/api/ga4-health') {
       return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });

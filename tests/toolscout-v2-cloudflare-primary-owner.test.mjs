@@ -8,7 +8,8 @@ test('Cloudflare Primary runtime routes are explicitly dispatched by compute',()
   const compute=read('compute-router-worker.js');
   const primary=read('cloudflare-primary-runtime-worker.js');
 
-  assert.match(compute,/import base from '\.\/d1-read-budget-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-ga4-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/d1-read-budget-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/ga4-attribution-24h-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/cloudflare-primary-runtime-worker\.js'/);

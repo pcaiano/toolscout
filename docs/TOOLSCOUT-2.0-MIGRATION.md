@@ -336,3 +336,20 @@ Implemented:
 
 Preservation rule:
 The GA4 property/source, rolling 24h window, session and engagement metrics, source/medium, landing-page, country and direct-share semantics remain unchanged.
+
+
+## Phase 33 - Explicit D1 read budget ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-33`.
+
+Implemented:
+- the still-live D1 budget behavior is narrowed to seven explicit routes rather than wrapping every generic request;
+- protected Google connect/acquisition/commerce/disconnect requests preserve Command Center session bridging to the owner Access identity;
+- `/api/autonomous-growth-health` and `/api/distribution/discovery-health` preserve cache coalescing, quota circuit-breaker and D1 cache headers;
+- the intentional `/analytics/api/ga4-health` 404 remains explicit;
+- stale budget entries for routes already intercepted by ToolScout 2.0 owners no longer justify keeping the wrapper in generic traversal;
+- compute generic fallback now connects directly to `command-center-ga4-worker.js`;
+- the architecture edge budget ratchets from 66 to 65.
+
+Preservation rule:
+No active D1 quota protection is removed. Credential forwarding, owner identity bridging, public health-read TTLs, circuit-breaker behavior and cache evidence headers remain unchanged.
