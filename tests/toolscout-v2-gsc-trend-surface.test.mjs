@@ -40,7 +40,8 @@ test('api health enrichment still composes the lower runtime before adding trend
 
 test('generic request traversal bypasses the visible GSC decorator',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
+  assert.match(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-autoload-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-resilient-worker\.js'/);
