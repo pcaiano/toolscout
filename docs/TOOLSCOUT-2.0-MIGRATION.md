@@ -220,3 +220,19 @@ Implemented:
 
 Preservation rule:
 Declared owners retain priority. Unknown/undeclared requests still reach the same lower legacy runtime and GET HTML fallback still receives the ToolScout social footer.
+
+
+## Phase 26 - Explicit Authority Acquisition scheduling
+
+Status: implemented on `architecture/toolscout-2.0-phase-26`.
+
+Implemented:
+- `runAuthorityAcquisitionScheduled()` is an explicit exported scheduler owner for the hourly vetted-acquisition and authority-pipeline-recovery missions;
+- the compute router invokes that owner directly on the hourly schedule;
+- the compute router's generic base chain now connects directly to `seo-cloudflare-runtime-worker.js`, bypassing the Authority Acquisition decorator;
+- Authority Acquisition internal recovery calls continue to use the same lower SEO/runtime chain, preserving authenticated internal endpoint composition;
+- the default Authority Acquisition worker remains compatibility-capable for isolated use, but is no longer part of production's generic decorator traversal;
+- the architecture edge budget ratchets from 71 to 70.
+
+Preservation rule:
+The vetted acquisition route handlers, hourly cadence, public-placement reconciliation and pipeline recovery sequence remain unchanged. Only ownership and dispatch become explicit.
