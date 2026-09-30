@@ -223,3 +223,8 @@ Small UI-support endpoints such as SVG, CSS and health evidence should have expl
 ### Post-schedule ownership
 
 A wrapper-owned scheduler mission is not considered preserved if a higher dispatcher intercepts that cron and returns without delegating the wrapper chain. Post-schedule work must be exported as a named scheduler owner and explicitly sequenced after the core missions it depends on.
+
+
+### Core-to-drain ordering
+
+Authority recovery sequencing is explicit: settle the independent hourly core missions, run the authority closed loop, then run the sender drain. This ordering keeps machine-first recovery ahead of external-handoff draining and prevents wrapper traversal from determining mission reachability.
