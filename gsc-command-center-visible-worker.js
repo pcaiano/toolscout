@@ -45,21 +45,37 @@ async function decorate(response){
   const out=cleaned.includes('</head>')?cleaned.replace('</head>',tag+'</head>'):tag+cleaned;
   return withNoStore(response,out,'text/html; charset=UTF-8')
 }
+export async function handleGscTrendSurfaceRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(request.method!=='GET')return null;
+  if(url.pathname==='/api/gsc-trend.svg'){
+    const trend=await readTrend(request,env);
+    return new Response(svgFor(trend),{headers:{'content-type':'image/svg+xml; charset=UTF-8','cache-control':'no-store'}});
+  }
+  if(url.pathname==='/api/gsc-trend.css'){
+    const css=`#googleSearchRealityBody::before{content:"";display:block;width:100%;height:clamp(170px,24vw,240px);margin:0 0 10px;background:url("/api/gsc-trend.svg?v=${SURFACE_VERSION}") top left/contain no-repeat;border-bottom:1px solid var(--line)}@media(max-width:720px){#googleSearchRealityBody::before{height:190px;background-size:760px auto;background-position:0 0}}`;
+    return new Response(css,{headers:{'content-type':'text/css; charset=UTF-8','cache-control':'no-store'}});
+  }
+  if(url.pathname==='/api/health'){
+    const response=await base.fetch(request,env,ctx);
+    if(response.ok&&String(response.headers.get('content-type')||'').includes('application/json')){
+      try{
+        const d=await response.json();
+        d.gscTrendSurface={version:SURFACE_VERSION,status:'active',strategy:'compact-container-svg',trailingIncompleteDays:'excluded'};
+        return withNoStore(response,JSON.stringify(d),'application/json; charset=UTF-8');
+      }catch{return response}
+    }
+    return response;
+  }
+  return null;
+}
+
 export default{
   async fetch(request,env,ctx){
+    const owned=await handleGscTrendSurfaceRoute(request,env,ctx);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(url.pathname==='/api/gsc-trend.svg'){
-      const trend=await readTrend(request,env);
-      return new Response(svgFor(trend),{headers:{'content-type':'image/svg+xml; charset=UTF-8','cache-control':'no-store'}})
-    }
-    if(url.pathname==='/api/gsc-trend.css'){
-      const css=`#googleSearchRealityBody::before{content:"";display:block;width:100%;height:clamp(170px,24vw,240px);margin:0 0 10px;background:url("/api/gsc-trend.svg?v=${SURFACE_VERSION}") top left/contain no-repeat;border-bottom:1px solid var(--line)}@media(max-width:720px){#googleSearchRealityBody::before{height:190px;background-size:760px auto;background-position:0 0}}`;
-      return new Response(css,{headers:{'content-type':'text/css; charset=UTF-8','cache-control':'no-store'}})
-    }
     const response=await base.fetch(request,env,ctx);
-    if(url.pathname==='/api/health'&&response.ok&&String(response.headers.get('content-type')||'').includes('application/json')){
-      try{const d=await response.json();d.gscTrendSurface={version:SURFACE_VERSION,status:'active',strategy:'compact-container-svg',trailingIncompleteDays:'excluded'};return withNoStore(response,JSON.stringify(d),'application/json; charset=UTF-8')}catch{return response}
-    }
     if(ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
   },

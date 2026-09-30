@@ -213,3 +213,8 @@ A quota-protection wrapper should be narrowed to the routes that still reach it 
 ### Redundant decorator retirement
 
 If every route a decorator mutates is already intercepted by explicit owners, that decorator must not remain in generic traversal merely for historical symmetry. Keep it only inside the bounded compatibility composition that still needs its transform, and ratchet the generic edge budget downward.
+
+
+### Surface-owner extraction
+
+Small UI-support endpoints such as SVG, CSS and health evidence should have explicit ownership when their wrapper otherwise exists only to decorate already-owned HTML. Preserve lower-runtime composition for health enrichment and keep legacy page decoration available only as compatibility behavior.
