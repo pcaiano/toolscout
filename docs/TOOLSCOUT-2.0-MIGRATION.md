@@ -1,6 +1,6 @@
 # ToolScout 2.0 Migration Status
 
-Last updated: 2026-09-29
+Last updated: 2026-09-30
 
 This file is the handoff ledger for the ToolScout 2.0 migration. It exists to prevent architectural work from becoming an opaque sequence of patches.
 
@@ -115,11 +115,11 @@ Do not regress:
 
 ## Current branch / PR
 
-Branch: architecture/toolscout-2.0
+Base: main
 
-Pull request: #168
+Active migration branch: architecture/toolscout-2.0-phase-23
 
-The PR remains draft until targeted CI passes and the migration/deployment order is safe.
+PR #168 and phases through #195 are merged. Phase 23 is the current commercial-boundary migration and is not production-deployed merely because it exists in GitHub.
 
 
 ## Phase 2 - Runtime consolidation continuation
@@ -156,8 +156,31 @@ These remain on legacy fallback until parity can be demonstrated.
 - AgentReady verification moved from an unreachable `15 3 * * *` wrapper condition to the central hourly scheduler with a daily 03:15 UTC subcadence.
 - Production recovery deploy now rechecks preservation before migrations/deploy and performs a post-deploy smoke for canonicals, editorial plane, Command Center, authority health and a synthetic non-recording affiliate redirect.
 
-Still deliberately legacy:
-- analytics/statistics augmentation beyond the direct Command Center reads;
-- `/go/*` commercial redirect implementation;
-- dynamic/static tool profile composition;
-- remaining machine discovery catalog endpoints.
+Historical note: the items above were the remaining legacy groups at that earlier checkpoint. Subsequent phases moved analytics/statistics reads, public decision/navigation surfaces, machine discovery and control mutations behind explicit owners. The commercial redirect boundary is handled by Phase 23 below.
+
+
+## Phase 23 - Commercial redirect ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-23`; production rollout still requires preservation checks and live smoke verification.
+
+Implemented:
+- GET `/go/*` is assigned to the explicit `affiliate_redirect` route owner;
+- the direct owner uses a bounded compatibility core beginning at `distribution-embed-worker.js`, rather than rewriting the mature commercial implementation;
+- `/go/embed` tracking remains inside that core;
+- catalog public fallback remains inside the existing affiliate workflow layer;
+- the canonical tracked redirect continues to snapshot affiliate-active-at-click state, session/source context, click reference, affiliate sub-ID and funnel evidence before redirecting;
+- social affiliate redirect attribution is replayed explicitly after the commercial core;
+- known-automation bypass, strict outbound proof and redirect noindex/no-store behavior reuse the existing outbound-integrity implementation;
+- visitor-to-session linkage reuses the existing visitor-integrity implementation;
+- the response-stage order remains social attribution -> outbound integrity -> visitor linkage, matching the existing wrapper response order;
+- synthetic affiliate-route health checks remain non-recording;
+- the runtime architecture audit now requires 100% direct ownership across all declared route groups and permits no declared legacy group;
+- the production smoke verifies that a synthetic active affiliate redirect is still external and is served by the `affiliate_redirect` owner.
+
+Residual compatibility:
+- unknown and undeclared paths still retain the generic legacy fallback;
+- the direct affiliate owner intentionally retains a bounded lower commercial compatibility core until deeper decomposition can prove destination, attribution, monetization and measurement parity;
+- the 72-edge historical decorator chain is therefore no longer traversed for declared `/go/*` requests, but it is not deleted as part of this safety-sensitive phase.
+
+Preservation rule:
+No affiliate destination, public URL, canonical, sitemap URL, active programme relationship, click-time monetization semantics or verified outbound definition may change as a side effect of this migration.
