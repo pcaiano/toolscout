@@ -632,3 +632,19 @@ Implemented:
 
 Why this phase is separate:
 The owner-exclusion wrapper is the next generic decorator candidate. Schema ownership is removed first so the later route/response extraction does not combine dispatch risk with D1 mutation risk.
+
+
+## Phase 52 - Direct owner exclusion ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-52`.
+
+Implemented:
+- `GET /analytics/api/owner-exclusion` and `POST /analytics/api/owner-retrospective-audit` gain explicit `owner_exclusion` ownership;
+- Command Center session and owner-cookie protection remain inside the direct handler;
+- retrospective auditing continues to use the migration-owned `owner_retrospective_audits` table introduced in Phase 51;
+- generic fallback now connects directly to `traffic-integrity-worker.js`;
+- legacy owner-exclusion Command Center decoration remains compatibility-only and is no longer part of generic production traversal;
+- the architecture edge budget ratchets from 48 to 47.
+
+Preservation rule:
+Owner verification, persistent owner cookie semantics, canonical-human exclusion and retrospective audit matching remain unchanged.
