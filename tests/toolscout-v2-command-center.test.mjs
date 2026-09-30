@@ -67,7 +67,8 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.match(owner,/toolscout_owner/);
   assert.match(owner,/toolscout_owner_since/);
   assert.match(owner,/campaign_source:'\$\{OWNER_SOURCE\}'/);
-  assert.match(entry,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
+  assert.match(entry,/import base from '\.\/discovery-attribution-health-worker\.js'/);
+  assert.doesNotMatch(entry,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/command-center-autoload-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/command-center-resilient-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/command-center-human-truth-worker\.js'/);
