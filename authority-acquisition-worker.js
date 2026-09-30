@@ -228,6 +228,16 @@ export async function handleAuthorityAcquisitionRoute(request,env){
   return null;
 }
 
+export async function runAuthorityAcquisitionScheduled(event,env,ctx){
+  const trigger=event?.cron||'scheduled';
+  if(trigger!==TOOLSCOUT_CRONS.hourly)return null;
+  await Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
+  const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/',{headers:missionCycleHeaders(event,'authority_acquisition_scheduler')}),env,ctx).catch(()=>null);
+  if(ctx?.waitUntil){ctx.waitUntil(task);return {scheduled:true,deferred:true};}
+  await task;
+  return {scheduled:true,deferred:false};
+}
+
 export default{
   async fetch(request,env,ctx){
     const owned=await handleAuthorityAcquisitionRoute(request,env);
@@ -235,15 +245,9 @@ export default{
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    const trigger=event?.cron||'scheduled';
-    if(trigger===TOOLSCOUT_CRONS.hourly){
-      await Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
-    }
-    const inherited=typeof base.scheduled==='function'?await base.scheduled(event,env,ctx):undefined;
-    if(trigger===TOOLSCOUT_CRONS.hourly){
-      const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/',{headers:missionCycleHeaders(event,'authority_acquisition_scheduler')}),env,ctx).catch(()=>null);
-      if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
-    }
-    return inherited;
+    const authority=runAuthorityAcquisitionScheduled(event,env,ctx);
+    const inherited=typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
+    const settled=await Promise.allSettled([authority,inherited]);
+    return settled[1]?.status==='fulfilled'?settled[1].value:undefined;
   }
 };
