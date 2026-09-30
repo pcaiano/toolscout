@@ -44,6 +44,7 @@ on:
       - 'd1-read-budget-worker.js'
       - 'command-center-ga4-worker.js'
       - 'gsc-command-center-visible-worker.js'
+      - 'growth-runtime-authority-drain-worker.js'
       - 'operational-truth-reconciliation-runtime.js'
       - 'command-center-simplified-view.js'
       - 'growth-runtime-integrity-worker.js'
@@ -161,6 +162,7 @@ jobs:
           node --check d1-read-budget-worker.js
           node --check command-center-ga4-worker.js
           node --check gsc-command-center-visible-worker.js
+          node --check growth-runtime-authority-drain-worker.js
           node --check operational-truth-reconciliation-runtime.js
           node --check command-center-simplified-view.js
           node --check scripts/editorial-authority-model.mjs
