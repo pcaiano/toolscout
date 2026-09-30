@@ -97,10 +97,24 @@ async function decorate(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleHumanTruthBaseRoute(request){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/api/command-center-human-truth-health')return null;
+  return Response.json({
+    ok:true,
+    service:'toolscout-command-center-human-truth',
+    version:1,
+    canonicalVisitorSource:'D1 first-party visitor IDs',
+    defaultWindow:'last24',
+    chartPosition:'top'
+  },{headers:{'Cache-Control':'no-store'}});
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth',version:1,canonicalVisitorSource:'D1 first-party visitor IDs',defaultWindow:'last24',chartPosition:'top'},{headers:{'Cache-Control':'no-store'}});
+    const owned=await handleHumanTruthBaseRoute(request);
+    if(owned)return owned;
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;

@@ -253,3 +253,8 @@ When a wrapper performs state linkage around a lower request, preserve both side
 ### Human-confirmation stage extraction
 
 Browser-confirmed human evidence is a first-class response and signal stage. The confirmation client must be injected before downstream traffic transforms, while its ingestion endpoint and heartbeat schedule are explicitly owned. Schema remains migration-owned.
+
+
+### Presentation-only compatibility wrappers
+
+Once the current product surface is served by a direct owner, an older wrapper that only decorates legacy UI should not remain in generic request traversal. Keep its decorator available for bounded compatibility if needed, direct-own any remaining health endpoint, and let the front router bypass the presentation layer.

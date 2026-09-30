@@ -710,3 +710,19 @@ Implemented:
 
 Preservation rule:
 Strict-human evidence semantics, D1 canonical source, forecast metadata and legacy final-truth UI remain unchanged. Only redundant generic traversal is removed.
+
+
+## Phase 57 - Direct base human truth health ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-57`.
+
+Implemented:
+- `GET /api/command-center-human-truth-health` gains direct `human_truth_base_health` ownership;
+- `command-center-human-truth-worker.js` exports `handleHumanTruthBaseRoute()` while retaining its legacy presentation decorator for bounded compatibility;
+- generic request fallback now connects directly to `command-center-resilient-worker.js`;
+- the chart, details and final human-truth health owners remain unchanged;
+- no human visitor metric, first-party source definition or Command Center business-truth payload is changed;
+- the architecture edge budget ratchets from 43 to 42.
+
+Preservation rule:
+The base health payload remains version 1 with D1 first-party visitor IDs, last24 as the default reporting window and top chart placement. Only redundant generic UI decoration traversal is removed.
