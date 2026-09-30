@@ -384,3 +384,19 @@ Implemented:
 
 Preservation rule:
 Stats language reconciliation remains available where the direct Admin Stats compatibility composition still depends on it. Only redundant generic traversal is removed.
+
+
+## Phase 36 - Explicit GSC trend surface ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-36`.
+
+Implemented:
+- `GET /api/gsc-trend.svg`, `GET /api/gsc-trend.css` and `GET /api/health` are owned by the explicit `gsc_trend_surface` route;
+- the GSC SVG and CSS keep the existing versioned, no-store surface;
+- `/api/health` still composes the lower runtime first and then adds the existing `gscTrendSurface` evidence;
+- generic compute fallback now connects directly to `gsc-command-center-trend-worker.js`;
+- legacy Command Center HTML trend-link decoration remains compatibility-only and is no longer part of production generic traversal;
+- the architecture edge budget ratchets from 63 to 62.
+
+Preservation rule:
+Trend data source, SVG/CSS output, surface version, incomplete-day handling and health evidence remain unchanged.
