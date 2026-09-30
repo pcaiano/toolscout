@@ -872,15 +872,6 @@ async function reputationReview(request,env){
   const token=`repovr_${crypto.randomUUID()}`;
   const contentHash=await digestHex(`${subject}\n---BODY---\n${emailBody}`);
   const payloadHash=await digestHex(`${to.toLowerCase()}\n---SUBJECT---\n${subject}\n---BODY---\n${emailBody}`);
-  await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_overrides (
-      override_token TEXT PRIMARY KEY,kind TEXT NOT NULL,item_key TEXT NOT NULL,recipient TEXT NOT NULL,subject TEXT NOT NULL,body TEXT NOT NULL,
-      payload_hash TEXT NOT NULL,content_hash TEXT NOT NULL,issue_codes TEXT,template_id TEXT,status TEXT NOT NULL DEFAULT 'pending',
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),sent_at TEXT,gmail_message_id TEXT,error TEXT)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_learning (
-      rule_key TEXT PRIMARY KEY,template_id TEXT NOT NULL,issue_code TEXT NOT NULL,scope_type TEXT NOT NULL,content_hash TEXT,
-      enabled INTEGER NOT NULL DEFAULT 1,learned_at TEXT NOT NULL DEFAULT (datetime('now')),source_override_token TEXT)`)
-  ]);
   await env.DB.prepare(`INSERT INTO outbound_reputation_overrides
     (override_token,kind,item_key,recipient,subject,body,payload_hash,content_hash,issue_codes,template_id,status,created_at)
     VALUES(?,?,?,?,?,?,?,?,?,?, 'pending', datetime('now'))`)
