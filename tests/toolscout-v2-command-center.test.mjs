@@ -67,7 +67,8 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.match(owner,/toolscout_owner/);
   assert.match(owner,/toolscout_owner_since/);
   assert.match(owner,/campaign_source:'\$\{OWNER_SOURCE\}'/);
-  assert.match(entry,/import base from '\.\/growth-runtime-observability-worker\.js'/);
+  assert.match(entry,/import base,\{handleGrowthClosedLoopRoute\} from '\.\/growth-runtime-closed-loop-worker\.js'/);
+  assert.doesNotMatch(entry,/import base from '\.\/growth-runtime-observability-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/growth-runtime-authority-drain-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/gsc-command-center-trend-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
