@@ -45,7 +45,8 @@ test('traffic guard cleanup is explicit and generic traversal bypasses the wrapp
   assert.match(runtime,/export async function runTrafficIntegrityGuardScheduled/);
   assert.match(runtime,/DELETE FROM traffic_guard_events WHERE created_at<datetime\('now','-7 days'\)/);
   assert.match(compute,/runTrafficIntegrityGuardScheduled/);
-  assert.match(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
+  assert.match(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-autoload-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-resilient-worker\.js'/);
