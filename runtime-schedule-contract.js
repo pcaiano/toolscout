@@ -24,6 +24,7 @@ export const SCHEDULED_MISSIONS=Object.freeze({
 
   authority_vetted_acquisition:{owner:'authority_acquisition',cron:TOOLSCOUT_CRONS.hourly,plane:'executor'},
   authority_pipeline_recovery:{owner:'authority_acquisition',cron:TOOLSCOUT_CRONS.hourly,plane:'executor'},
+  authority_sender_drain:{owner:'authority_drain',cron:TOOLSCOUT_CRONS.hourly,plane:'executor'},
   authority_closed_loop:{owner:'growth_runtime_closed_loop',cron:TOOLSCOUT_CRONS.hourly,plane:'executor'},
   authority_gap_recovery:{owner:'growth_runtime_integrity',cron:TOOLSCOUT_CRONS.hourly,plane:'executor'},
 
