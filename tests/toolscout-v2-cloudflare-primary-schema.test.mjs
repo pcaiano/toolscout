@@ -11,6 +11,7 @@ test('Cloudflare primary growth asset cache schema is migration-owned',()=>{
   assert.doesNotMatch(runtime,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
   assert.match(runtime,/growth_asset_cache_schema_not_migrated/);
   assert.match(runtime,/source:'d1_migrations'/);
+  assert.match(runtime,/await ensureGscCache\(env\)/);
   assert.match(migration,/CREATE TABLE IF NOT EXISTS growth_asset_cache/);
   assert.match(migration,/path TEXT PRIMARY KEY/);
   assert.match(migration,/payload_json TEXT NOT NULL/);
