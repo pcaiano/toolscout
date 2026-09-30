@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './growth-runtime-observability-worker.js';
+import base from './growth-runtime-closed-loop-worker.js';
 import {runAuthorityDrainScheduled} from './growth-runtime-authority-drain-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
