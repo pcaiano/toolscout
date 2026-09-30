@@ -1,5 +1,6 @@
 // deploy-sync: 2026-09-22T14:05Z D1-independent GA4 acquisition
-import base from './command-center-ga4-worker.js';
+import base from './command-center-health-language-worker.js';
+import {handleCommandCenterGa4Route} from './command-center-ga4-worker.js';
 
 const READ_TTLS = new Map([
   ['/analytics/api/stats', 300],
@@ -198,7 +199,7 @@ export async function handleD1ReadBudgetRoute(request,env,ctx){
     (request.method==='POST'&&url.pathname==='/analytics/api/google/disconnect')
   ){
     const forwarded=await validCommandCenterSession(request,env)?withOwnerAccessHeader(request):request;
-    return base.fetch(forwarded,env,ctx);
+    return handleCommandCenterGa4Route(forwarded,env,ctx);
   }
 
   if(request.method==='GET'&&(url.pathname==='/api/autonomous-growth-health'||url.pathname==='/api/distribution/discovery-health')){
