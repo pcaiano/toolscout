@@ -8,9 +8,14 @@ const canonical=html=>String(html||'').match(/<link[^>]+rel=["']canonical["'][^>
 const sitemapUrls=xml=>new Set([...String(xml||'').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].trim()).filter(Boolean));
 const fileFor=pathname=>pathname==='/'?'index.html':pathname.replace(/^\//,'')+'.html';
 
-async function fetchText(pathname,{redirect='follow',headers={}}={}){
+async function fetchText(pathname,{redirect='follow',headers={},method='GET',body}={}){
   try{
-    const response=await fetch(BASE+pathname,{redirect,headers:{'User-Agent':'ToolScout-2.0-PostDeploy-Smoke/1.0',...headers}});
+    const response=await fetch(BASE+pathname,{
+      method,
+      body,
+      redirect,
+      headers:{'User-Agent':'ToolScout-2.0-PostDeploy-Smoke/1.0',...headers}
+    });
     const text=await response.text();
     return{ok:response.ok,status:response.status,text,url:response.url,headers:response.headers};
   }catch(error){
