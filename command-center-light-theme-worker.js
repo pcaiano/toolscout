@@ -590,13 +590,33 @@ async function canonicalizeSitemapResponse(response){
   return new Response(xml,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handlePublicCanonicalSurfaceRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if((request.method==='GET'||request.method==='HEAD')&&/\.html$/i.test(url.pathname)){
+    const target=new URL(url.toString());
+    target.pathname=canonicalSeoPath(url.pathname);
+    return Response.redirect(target.toString(),308);
+  }
+  if(request.method==='GET'&&url.pathname==='/data/tools.json'){
+    return Response.json(await publicMergedTools(env),{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  }
+  if(request.method==='GET'&&url.pathname==='/sitemap.xml'){
+    return canonicalizeSitemapResponse(await publicMergedSitemap(await base.fetch(request,env,ctx),env));
+  }
+  return null;
+}
+
+export async function transformPublicCanonicalResponse(request,response){
+  if(request?.method!=='GET')return response;
+  const url=new URL(request.url);
+  return canonicalizeHtmlResponse(response,url.pathname);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if((request.method==='GET'||request.method==='HEAD')&&/\.html$/i.test(url.pathname)){
-      const target=new URL(url.toString());target.pathname=canonicalSeoPath(url.pathname);
-      return Response.redirect(target.toString(),308);
-    }
+    const canonicalOwned=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
+    if(canonicalOwned)return canonicalOwned;
     if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health'){
       let assetStatus=null,assetLocation=null;
       try{
@@ -606,17 +626,11 @@ export default {
       const autonomousGrowthTruth=await canonicalAutonomousGrowthTruth(env).catch(()=>null);
       return Response.json({ok:true,brain:'shared-growth-v3',selfAudit:'strict-human-supervisor-v2',operatingMode:'always_on_acquisition',criticalStrictHumans24hMax:2,businessFunnel:['strict_verified_human_sessions','verified_outbound_clicks','monetized_verified_outbound_clicks'],selfCorrection:true,supervisedEngines:['distribution','content','audience','seo_geo_aio','affiliate','catalog'],affiliate:'2.1',catalog:'1.0',catalogRuntimeAutonomy:true,affiliateReplyReconciliation:true,affiliateReplyPayloadEncoding:'base64-v1',commandCenterComposition:'canonical-growth-v2',commandCenterAsset:{path:'/analytics-v2',status:assetStatus,location:assetLocation},seoExecutionBrainGated:true,whatsNewBrainIntegrated:true,growthRndAutonomy:'bounded-v1',affiliateCanonicalTruth:'verified-outbound-v1',trafficTruth:'strict-human-v1',browserValidatedIsDiagnosticOnly:true,d1WritePolicy:'material-change-only-v3',humanAcquisitionSprint:{id:'human-acquisition-sprint-2026-09',status:'active',northStar:'strict_verified_human_sessions',endAt:'2026-09-28T23:00:00.000Z',gscTargets:[{cluster:'project_management',path:'/best-project-management-tools'},{cluster:'seo_agencies',path:'/best-seo-tools-for-agencies'},{cluster:'no_code_automation',path:'/best-no-code-automation-tools'},{cluster:'semrush_airtable_profiles',paths:['/tools/semrush','/tools/airtable']},{cluster:'funnel_builders',path:'/best-funnel-builder'}]},autonomousGrowthTruth,buildContract:'2026-09-20.8'},{headers:{'Cache-Control':'no-store'}});
     }
-    if(request.method==='GET'&&url.pathname==='/data/tools.json'){
-      return Response.json(await publicMergedTools(env),{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60'}});
-    }
     if(request.method==='GET'&&/^\/tools\/[a-z0-9][a-z0-9-]*(?:\.html)?\/?$/i.test(url.pathname)){
       const slug=(url.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)/i)||[])[1]?.toLowerCase()||'';
       const runtimeResponse=await publicRuntimeToolResponse(env,slug);
       if(runtimeResponse)return canonicalizeHtmlResponse(runtimeResponse,url.pathname);
       return canonicalizeHtmlResponse(await publicQualityEnhancedToolResponse(await base.fetch(request,env,ctx),env,slug),url.pathname);
-    }
-    if(request.method==='GET'&&url.pathname==='/sitemap.xml'){
-      return canonicalizeSitemapResponse(await publicMergedSitemap(await base.fetch(request,env,ctx),env));
     }
     if(request.method==='GET'&&/^\/best-[a-z0-9-]+(?:\.html)?\/?$/i.test(url.pathname)){
       const rankingResponse=await publicRuntimeRankingResponse(env,url.pathname);
@@ -630,7 +644,7 @@ export default {
       return augmentEntrypointHealth(response);
     }
     let finalResponse=response;
-    if(request.method==='GET')finalResponse=await canonicalizeHtmlResponse(finalResponse,url.pathname);
+    if(request.method==='GET')finalResponse=await transformPublicCanonicalResponse(request,finalResponse);
     if (request.method === 'GET' && ANALYTICS_PATHS.has(url.pathname)) {
       return applyLightTheme(finalResponse);
     }
