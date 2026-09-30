@@ -273,3 +273,8 @@ A wrapper that only adds a read-only health endpoint can be removed from generic
 ### Redundant enrichment wrapper removal
 
 A legacy enrichment wrapper may leave generic traversal when the direct route owner already emits the same business truth. Keep the legacy decorator available only for bounded compatibility paths and protect the direct payload with policy tests before cutting the edge.
+
+
+### Public syndication stage extraction
+
+When a wrapper combines protected administration routes with public response decoration and a scheduled publish task, separate request ownership from response transformation without duplicating the scheduled path. Preserve the public transform's position relative to later integrity and SEO stages.
