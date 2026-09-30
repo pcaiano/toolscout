@@ -503,3 +503,18 @@ Implemented:
 
 Preservation rule:
 Canonical URLs, sitemap output, public tools data, SEO discovery links and residual HTML redirects remain unchanged.
+
+
+## Phase 43 - Remove redundant final-integrity traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-43`.
+
+Implemented:
+- generic compute fallback now connects directly to `mission-integrity-v2-worker.js`;
+- `command-center-final-integrity-worker.js` is removed from generic traversal because its response mutations target stats and Command Center HTML routes already intercepted by explicit owners;
+- the final-integrity wrapper remains available inside bounded compatibility compositions that still use its stats normalization/UI behavior;
+- the existing direct `mission_integrity` owner remains unchanged;
+- the architecture edge budget ratchets from 56 to 55.
+
+Preservation rule:
+Stats normalization and Command Center integrity UI remain available where explicit compatibility compositions still consume them. Only redundant generic traversal is removed.
