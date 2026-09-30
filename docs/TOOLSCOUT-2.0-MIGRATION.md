@@ -872,3 +872,19 @@ Implemented:
 
 Preservation rule:
 Visitor validation, CORS preflight, migration readiness, first-party tracker payload, source/referrer capture and public response ordering remain unchanged.
+
+
+## Phase 67 - Remove PostHog behavior request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-67`.
+
+Implemented:
+- generic request fallback now connects directly to `agent-protocol-worker.js`;
+- `posthog-behavior-worker.js` is removed from production's generic request traversal;
+- its scheduled behavior remains unchanged in the bounded compatibility chain: lower scheduling runs first, then `applyDistributionBehaviorPriorities()` is launched as a sidecar;
+- direct Command Center ownership keeps the old product-behavior widget outside the ToolScout 2.0 generic request path;
+- analytics stats ownership remains unchanged;
+- the architecture edge budget ratchets from 34 to 33.
+
+Preservation rule:
+PostHog audit behavior, D1-first behavior intelligence, distribution-priority learning and Command Center compatibility augmentation remain unchanged. Only redundant request traversal is removed.
