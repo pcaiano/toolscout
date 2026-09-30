@@ -805,3 +805,19 @@ Implemented:
 
 Preservation rule:
 Search, AI referral, distribution, social, dark-direct-deep, direct-home, tracked-campaign and other-referral attribution semantics remain unchanged in the direct stats truth.
+
+
+## Phase 63 - Explicit RSS distribution ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-63`.
+
+Implemented:
+- `GET /api/distribution/rss/status` and `POST /api/distribution/rss/publish` gain direct `rss_distribution` ownership;
+- `lemlist-profile-correction-worker.js` exports `handleRssDistributionRoute()` and `transformRssPublicResponse()`;
+- generic compute fallback now connects directly to `visitor-dashboard-metrics-worker.js`;
+- RSS feed headers, WebSub hub metadata, public RSS discovery links and the lemlist profile correction remain applied as an explicit response stage immediately after lower runtime;
+- the existing hourly WebSub publish remains in the bounded scheduled compatibility chain and is not duplicated in compute;
+- the architecture edge budget ratchets from 37 to 36.
+
+Preservation rule:
+RSS status/publish authorization, distribution RSS state, WebSub publish behavior, feed metadata, public RSS discovery and the lemlist profile correction remain unchanged.
