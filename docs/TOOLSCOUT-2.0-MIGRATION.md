@@ -304,3 +304,19 @@ The direct Command Center route bypassed the old decorator that originally creat
 
 Preservation rule:
 This phase changes owner identification only. Command Center HTML, business metrics, GA measurement ID, 24h warm-up semantics and public analytics campaign attribution remain unchanged.
+
+
+## Phase 31 - Direct GA4 owner exclusion
+
+Status: implemented on `architecture/toolscout-2.0-phase-31`.
+
+Implemented:
+- `GET /analytics/api/google/external-24h` is now a declared `analytics_owner_exclusion` route owned by `ga4-owner-exclusion-runtime.js`;
+- the direct runtime preserves Command Center session validation, rolling 24h owner subtraction, warm-up gating and the existing growth-signal contract;
+- generic fallback now connects directly to `ga4-attribution-24h-worker.js`;
+- marked-owner public analytics attribution is applied explicitly in the compute fallback before SEO transformation and social-footer injection;
+- the former `ga4-owner-exclusion-worker.js` remains compatibility-only and is no longer part of production's generic request traversal;
+- the architecture edge budget ratchets from 68 to 67.
+
+Preservation rule:
+The owner source/medium, GA measurement ID, 24h clean-window semantics, public attribution transformation, Command Center session boundary and external-acquisition payload remain unchanged.

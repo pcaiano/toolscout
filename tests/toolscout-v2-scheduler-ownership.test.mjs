@@ -30,7 +30,8 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   const authority=read('authority-acquisition-worker.js');
   assert.match(compute,/runGrowthScheduler/);
   assert.match(compute,/runAuthorityAcquisitionScheduled/);
-  assert.match(compute,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
+  assert.match(compute,/import base from '\.\/ga4-attribution-24h-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
   assert.match(compute,/runSeoRuntimeScheduled/);
   const seo=read('seo-cloudflare-runtime-worker.js');
   assert.match(seo,/export async function runSeoRuntimeScheduled/);
