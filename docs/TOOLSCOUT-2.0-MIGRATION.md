@@ -821,3 +821,19 @@ Implemented:
 
 Preservation rule:
 RSS status/publish authorization, distribution RSS state, WebSub publish behavior, feed metadata, public RSS discovery and the lemlist profile correction remain unchanged.
+
+
+## Phase 64 - Direct month metrics health ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-64`.
+
+Implemented:
+- `GET /api/month-metrics-health` gains direct `month_metrics_health` ownership;
+- `visitor-dashboard-metrics-worker.js` exposes `handleMonthMetricsHealthRoute()`;
+- generic request fallback now connects directly to `visitor-accuracy-worker.js`;
+- the legacy month-metrics Command Center decoration remains compatibility-only;
+- direct Command Center page ownership means the old decoration is not part of the ToolScout 2.0 public request path;
+- the architecture edge budget ratchets from 36 to 35.
+
+Preservation rule:
+The month-metrics health payload, cache policy and legacy compatibility script remain unchanged. Only redundant generic traversal is removed.

@@ -102,7 +102,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
+  assert.match(src,/import base from '\.\/visitor-accuracy-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/discovery-attribution-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/discovery-attribution-health-worker\.js'/);

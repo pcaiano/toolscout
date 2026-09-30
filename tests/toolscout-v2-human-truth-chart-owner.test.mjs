@@ -21,7 +21,8 @@ test('human truth chart health has a direct owner',()=>{
 
 test('generic traversal bypasses human truth chart decorator',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
+  assert.match(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);

@@ -278,3 +278,8 @@ A legacy enrichment wrapper may leave generic traversal when the direct route ow
 ### Public syndication stage extraction
 
 When a wrapper combines protected administration routes with public response decoration and a scheduled publish task, separate request ownership from response transformation without duplicating the scheduled path. Preserve the public transform's position relative to later integrity and SEO stages.
+
+
+### Compatibility-only UI decorators
+
+When a legacy wrapper decorates a page that is already owned earlier by a direct ToolScout 2.0 route, keep the decorator available for bounded compatibility paths but remove it from generic traversal. Any health or control endpoint still owned by that wrapper should be extracted explicitly first.
