@@ -42,7 +42,8 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.equal(missionOwner('authority_gap_recovery'),'growth_runtime_integrity');
   assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
   assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'15 * * * *');
-  assert.match(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
+  assert.match(compute,/import base from '\.\/agent-protocol-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
