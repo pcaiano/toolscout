@@ -24,7 +24,8 @@ test('generic fallback preserves confirmed visitor injection before guard and li
   const guard=compute.indexOf('await transformTrafficIntegrityGuardResponse(request,response)');
   const live=compute.indexOf('await transformTrafficIntegrityLiveResponse(request,response)');
   assert.ok(base>=0&&core>base&&guard>core&&live>guard,'response order must remain base -> traffic core -> guard -> live');
-  assert.match(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
+  assert.match(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);

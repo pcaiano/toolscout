@@ -36,6 +36,8 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/command-center-autoload-health',{method:'GET'}).owner,'command_center_autoload_health');
   assert.equal(routeOwner('/api/command-center-truth-health',{method:'GET'}).owner,'command_center_truth_health');
   assert.equal(routeOwner('/api/discovery-attribution-health',{method:'GET'}).owner,'discovery_attribution_health');
+  assert.equal(routeOwner('/api/distribution/rss/status',{method:'GET'}).owner,'rss_distribution');
+  assert.equal(routeOwner('/api/distribution/rss/publish',{method:'POST'}).owner,'rss_distribution');
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
   assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'legacy_chain');
   assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'legacy_chain');
@@ -100,7 +102,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
+  assert.match(src,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/discovery-attribution-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/discovery-attribution-health-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
@@ -163,6 +166,9 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='command_center_autoload_health'/);
   assert.match(src,/ownership\.owner==='command_center_truth_health'/);
   assert.match(src,/ownership\.owner==='discovery_attribution_health'/);
+  assert.match(src,/ownership\.owner==='rss_distribution'/);
+  assert.match(src,/handleRssDistributionRoute/);
+  assert.match(src,/transformRssPublicResponse/);
   assert.match(src,/handleDiscoveryAttributionHealthRoute/);
   assert.match(src,/handleCommandCenterTruthHealthRoute/);
   assert.match(src,/handleCommandCenterAutoloadHealthRoute/);

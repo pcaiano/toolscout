@@ -50,7 +50,8 @@ test('D1 budget preserves circuit breaker and cache semantics for the two live c
 
 test('generic request traversal bypasses the D1 budget wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
+  assert.match(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);

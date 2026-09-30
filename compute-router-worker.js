@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './lemlist-profile-correction-worker.js';
+import base from './visitor-dashboard-metrics-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -14,6 +14,7 @@ import {handleHumanTruthBaseRoute} from './command-center-human-truth-worker.js'
 import {handleCommandCenterAutoloadHealthRoute} from './command-center-autoload-worker.js';
 import {handleCommandCenterTruthHealthRoute} from './command-center-truth-consolidation-worker.js';
 import {handleDiscoveryAttributionHealthRoute} from './discovery-attribution-health-worker.js';
+import {handleRssDistributionRoute,transformRssPublicResponse} from './lemlist-profile-correction-worker.js';
 import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
@@ -68,6 +69,7 @@ async function legacyFallback(request,env,ctx){
   }else{
     response=await base.fetch(request,env,ctx);
   }
+  response=await transformRssPublicResponse(request,response);
   response=await transformTrafficIntegrityCoreResponse(request,response);
   response=await transformTrafficIntegrityGuardResponse(request,response);
   response=await transformTrafficIntegrityLiveResponse(request,response);
@@ -1947,6 +1949,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='command_center_autoload_health')response=await handleCommandCenterAutoloadHealthRoute(request);
   else if(ownership.owner==='command_center_truth_health')response=await handleCommandCenterTruthHealthRoute(request);
   else if(ownership.owner==='discovery_attribution_health')response=await handleDiscoveryAttributionHealthRoute(request);
+  else if(ownership.owner==='rss_distribution')response=await handleRssDistributionRoute(request,env);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);
