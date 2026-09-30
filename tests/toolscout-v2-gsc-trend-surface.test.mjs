@@ -1,0 +1,45 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+
+test('GSC trend surface has one explicit route owner',()=>{
+  const runtime=read('gsc-command-center-visible-worker.js');
+  const contract=read('runtime-route-contract.js');
+  const compute=read('compute-router-worker.js');
+
+  assert.match(runtime,/export async function handleGscTrendSurfaceRoute/);
+  assert.match(contract,/owner:'gsc_trend_surface'/);
+  assert.match(compute,/ownership\.owner==='gsc_trend_surface'/);
+  assert.match(compute,/handleGscTrendSurfaceRoute/);
+
+  for(const path of ['/api/gsc-trend.svg','/api/gsc-trend.css','/api/health']){
+    assert.ok(contract.includes(path),path+' must stay in the explicit GSC trend surface contract');
+  }
+});
+
+test('GSC trend SVG and CSS remain no-store and versioned',()=>{
+  const runtime=read('gsc-command-center-visible-worker.js');
+  assert.match(runtime,/SURFACE_VERSION=9/);
+  assert.match(runtime,/image\/svg\+xml; charset=UTF-8/);
+  assert.match(runtime,/text\/css; charset=UTF-8/);
+  assert.match(runtime,/cache-control':'no-store/);
+  assert.match(runtime,/gsc-trend\.svg\?v=\$\{SURFACE_VERSION\}/);
+  assert.match(runtime,/trailingIncompleteDays:'excluded'/);
+});
+
+test('api health enrichment still composes the lower runtime before adding trend evidence',()=>{
+  const runtime=read('gsc-command-center-visible-worker.js');
+  const health=runtime.indexOf("url.pathname==='/api/health'");
+  const lower=runtime.indexOf('await base.fetch(request,env,ctx)',health);
+  const evidence=runtime.indexOf('d.gscTrendSurface=',health);
+  assert.ok(health>=0&&lower>health&&evidence>lower,'health must remain lower-runtime -> GSC trend enrichment');
+  assert.match(runtime,/strategy:'compact-container-svg'/);
+});
+
+test('generic request traversal bypasses the visible GSC decorator',()=>{
+  const compute=read('compute-router-worker.js');
+  assert.match(compute,/import base from '\.\/gsc-command-center-trend-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
+});
