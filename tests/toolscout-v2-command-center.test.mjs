@@ -67,7 +67,9 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.match(owner,/toolscout_owner/);
   assert.match(owner,/toolscout_owner_since/);
   assert.match(owner,/campaign_source:'\$\{OWNER_SOURCE\}'/);
-  assert.match(entry,/import base,\{handleMissionIntegrityRoute\} from '\.\/mission-integrity-v2-worker\.js'/);
+  assert.match(entry,/import base from '\.\/mission-integrity-worker\.js'/);
+  assert.doesNotMatch(entry,/import base from '\.\/mission-integrity-v2-worker\.js'/);
+  assert.match(entry,/handleMissionIntegrityRoute.*from '\.\/mission-integrity-v2-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/command-center-final-integrity-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/command-center-light-theme-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/growth-runtime-integrity-worker\.js'/);
