@@ -121,7 +121,7 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   assert.match(analytics,/export async function handleAnalyticsStatsReadRoute/);
   assert.match(analytics,/X-ToolScout-Read-Mode':'read-only/);
   assert.match(affiliateRedirect,/export async function handleAffiliateRedirectRoute/);
-  assert.match(affiliateRedirect,/distribution-embed-worker\\.js/);
+  assert.ok(affiliateRedirect.includes('distribution-embed-worker.js'));
   assert.doesNotMatch(affiliateRedirect,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
 });
 
