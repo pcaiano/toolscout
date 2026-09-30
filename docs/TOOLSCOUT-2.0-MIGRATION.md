@@ -986,3 +986,18 @@ Implemented:
 
 Preservation rule:
 Human-action queue semantics, secure credential saving, non-blocking gate completion, editorial action resolution, public URLs/canonicals and active Command Center presentation remain unchanged.
+
+
+## Phase 74 - Migrate affiliate reply schema
+
+Status: implemented on `architecture/toolscout-2.0-phase-74`.
+
+Implemented:
+- migration `0102_affiliate_reply_schema.sql` formally owns `affiliate_reply_events`;
+- `affiliate-coverage-entry-worker.js` no longer executes `CREATE TABLE` during Gmail/affiliate reply ingestion;
+- the table shape, primary key, defaults, deduplication checks and reply reconciliation writes are unchanged;
+- deploy ordering remains migration-first through the existing D1 migration step;
+- the legacy edge budget remains 28 because this phase prepares the next direct-ownership extraction without changing dispatch.
+
+Preservation rule:
+Affiliate reply matching, approval/rejection classification, referral-link capture, workflow history and post-submit state reconciliation remain unchanged. Only lazy request-time schema creation is removed.
