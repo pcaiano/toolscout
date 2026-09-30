@@ -742,3 +742,19 @@ Implemented:
 
 Preservation rule:
 The resilient snapshot, Chairman Queue semantics, session validation and resilient health payload remain unchanged. Only redundant generic request interception is removed.
+
+
+## Phase 59 - Direct Command Center autoload health ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-59`.
+
+Implemented:
+- `GET /api/command-center-autoload-health` gains direct `command_center_autoload_health` ownership;
+- `command-center-autoload-worker.js` exports `handleCommandCenterAutoloadHealthRoute()`;
+- generic request fallback now connects directly to `command-center-truth-consolidation-worker.js`;
+- legacy autoload UI decoration remains available only for bounded compatibility;
+- analytics stats continue to use their existing direct owner, so no business-truth payload is moved;
+- the architecture edge budget ratchets from 41 to 40.
+
+Preservation rule:
+Autoload health remains version 5 with traffic-truth-first, Chairman second, three traffic trend series and dual-axis trend behavior. Only redundant generic UI traversal is removed.

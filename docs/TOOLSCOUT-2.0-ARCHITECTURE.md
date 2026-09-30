@@ -258,3 +258,8 @@ Browser-confirmed human evidence is a first-class response and signal stage. The
 ### Presentation-only compatibility wrappers
 
 Once the current product surface is served by a direct owner, an older wrapper that only decorates legacy UI should not remain in generic request traversal. Keep its decorator available for bounded compatibility if needed, direct-own any remaining health endpoint, and let the front router bypass the presentation layer.
+
+
+### Autoload presentation extraction
+
+Autoload scripts that hydrate a legacy dashboard from an already direct-owned API are presentation compatibility, not route ownership. Direct-own their health surface and remove the wrapper from generic traversal once the current Command Center no longer depends on that presentation layer.

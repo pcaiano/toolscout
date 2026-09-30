@@ -207,10 +207,28 @@ async function decorate(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleCommandCenterAutoloadHealthRoute(request){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/api/command-center-autoload-health')return null;
+  return Response.json({
+    ok:true,
+    service:'toolscout-command-center-autoload',
+    version:5,
+    autoload:true,
+    northStarCompatibilitySink:true,
+    trafficTruthFirst:true,
+    chairmanSecond:true,
+    trafficTrend:true,
+    trafficTrendSeries:3,
+    trafficTrendDualAxis:true
+  },{headers:{'Cache-Control':'no-store'}});
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-autoload-health')return Response.json({ok:true,service:'toolscout-command-center-autoload',version:5,autoload:true,northStarCompatibilitySink:true,trafficTruthFirst:true,chairmanSecond:true,trafficTrend:true,trafficTrendSeries:3,trafficTrendDualAxis:true},{headers:{'Cache-Control':'no-store'}});
+    const owned=await handleCommandCenterAutoloadHealthRoute(request);
+    if(owned)return owned;
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentStats(response,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
