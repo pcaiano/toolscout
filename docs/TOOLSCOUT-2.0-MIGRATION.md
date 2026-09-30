@@ -253,3 +253,18 @@ Implemented:
 
 Preservation rule:
 Canonical/redirect behavior, observed-search-demand activation, IndexNow queuing, public SEO transformation and hourly/daily refresh cadence remain unchanged.
+
+
+## Phase 28 - Cloudflare primary schema ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-28`.
+
+Implemented:
+- migration `0098_growth_asset_cache_schema.sql` formally owns `growth_asset_cache`;
+- `cloudflare-primary-runtime-worker.js` no longer creates schema at request or scheduled runtime;
+- the former runtime DDL is replaced by a cached migration-owned schema probe;
+- missing schema fails closed with `growth_asset_cache_schema_not_migrated`;
+- CI and production recovery validate that Cloudflare Primary contains no runtime DDL.
+
+Why this phase is separate:
+The Cloudflare Primary wrapper is the next decorator candidate, but it coordinates GSC refresh, the primary growth cycle and lower scheduled dispatch. Schema ownership is removed first so the later routing/scheduling extraction does not combine D1 migration risk with dispatch changes.
