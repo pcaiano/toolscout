@@ -65,18 +65,24 @@ async function augmentProtectedStats(request,env,ctx){const upstream=await base.
 function recorderScript(){return `<script>(function(){function addButtons(){document.querySelectorAll('[data-human-open^="affiliate:"]').forEach(function(open){if(open.parentElement.querySelector('[data-affiliate-record]'))return;var id=(open.getAttribute('data-human-open')||'').split(':').slice(1).join(':');if(!id)return;['contacted','submitted'].forEach(function(event){var b=document.createElement('button');b.className='btn';b.type='button';b.setAttribute('data-affiliate-record',event);b.setAttribute('data-tool-slug',id);b.textContent=event==='contacted'?'Record contacted':'Record submitted';open.parentElement.appendChild(b)})})}function refreshSoon(){setTimeout(addButtons,150);setTimeout(addButtons,900)}document.addEventListener('click',function(e){var b=e.target.closest('[data-affiliate-record]');if(!b)return;var event=b.getAttribute('data-affiliate-record'),slug=b.getAttribute('data-tool-slug');if(!event||!slug)return;b.disabled=true;var old=b.textContent;b.textContent='Saving…';fetch('/analytics/api/affiliate-human-action',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool_slug:slug,event:event,evidence:'Confirmed from Command Center human action queue'})}).then(function(r){return r.json().then(function(d){if(!r.ok||!d.ok)throw new Error(d.error||'save_failed');return d})}).then(function(){b.textContent='Recorded';setTimeout(function(){var rb=document.getElementById('refreshHumanActions');if(rb)rb.click()},150)}).catch(function(){b.disabled=false;b.textContent='Save failed';setTimeout(function(){b.textContent=old},1800)})});var observer=new MutationObserver(refreshSoon);var root=document.getElementById('humanActionSection')||document.body;observer.observe(root,{childList:true,subtree:true});refreshSoon()})();</script>`}
 function inject(html){if(html.includes('data-affiliate-record'))return html;return html.replace('</body>',recorderScript()+'</body>')}
 
+export async function handleAffiliateHumanActionRoute(request,env){
+  const u=new URL(request.url);
+  if(request.method==='GET'&&u.pathname==='/api/audience-health')return Response.json(await audienceHealth(env),{headers:PUBLIC_JSON_H});
+  if(request.method==='POST'&&u.pathname==='/analytics/api/audience-action')return recordAudienceHumanAction(request,env);
+  if(request.method==='POST'&&u.pathname==='/api/audience-suggestion')return ingestAudienceSuggestion(request,env);
+  if(request.method==='POST'&&u.pathname==='/analytics/api/affiliate-human-action'){
+    if(!(await validSession(request,env)))return Response.json({ok:false,error:'command_center_session_expired'},{status:401,headers:JSON_H});
+    let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_H})}
+    const result=await recordAffiliateHumanAction(env,body);return Response.json(result,{status:result.ok?200:400,headers:JSON_H});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(request.method==='GET'&&u.pathname==='/api/audience-health')return Response.json(await audienceHealth(env),{headers:PUBLIC_JSON_H});
     if(request.method==='GET'&&u.pathname==='/analytics/api/stats')return augmentProtectedStats(request,env,ctx);
-    if(request.method==='POST'&&u.pathname==='/analytics/api/audience-action')return recordAudienceHumanAction(request,env);
-    if(request.method==='POST'&&u.pathname==='/api/audience-suggestion')return ingestAudienceSuggestion(request,env);
-    if(request.method==='POST'&&u.pathname==='/analytics/api/affiliate-human-action'){
-      if(!(await validSession(request,env)))return Response.json({ok:false,error:'command_center_session_expired'},{status:401,headers:JSON_H});
-      let body={};try{body=await request.json()}catch{return Response.json({ok:false,error:'invalid_json'},{status:400,headers:JSON_H})}
-      const result=await recordAffiliateHumanAction(env,body);return Response.json(result,{status:result.ok?200:400,headers:JSON_H});
-    }
+    const owned=await handleAffiliateHumanActionRoute(request,env);if(owned)return owned;
     const r=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&analyticsPath(u.pathname)&&r.ok&&(r.headers.get('Content-Type')||'').includes('text/html')){const h=new Headers(r.headers);h.delete('Content-Length');h.set('Cache-Control','private, no-store');return new Response(inject(await r.text()),{status:r.status,headers:h})}
     return r;
