@@ -28,6 +28,7 @@ test('Command Center theme no longer owns growth engine scheduling',()=>{
 test('compute router dispatches growth scheduling while growth scheduler owns the extracted operational cycles',()=>{
   const compute=read('compute-router-worker.js');
   const authority=read('authority-acquisition-worker.js');
+  const traffic=read('traffic-integrity-worker.js');
   assert.match(compute,/runGrowthScheduler/);
   assert.match(compute,/runAuthorityAcquisitionScheduled/);
   assert.match(compute,/runAuthorityDrainScheduled/);
@@ -41,12 +42,16 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.equal(missionOwner('authority_gap_recovery'),'growth_runtime_integrity');
   assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
   assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'15 * * * *');
-  assert.match(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-human-truth-chart-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/owner-exclusion-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-guard-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-live-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/outbound-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-integrity-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
+  assert.match(compute,/runTrafficIntegrityCoreScheduled/);
+  assert.match(traffic,/export async function runTrafficIntegrityCoreScheduled/);
+  assert.match(traffic,/traffic_integrity_heartbeat/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/mission-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/mission-integrity-v2-worker\.js'/);
