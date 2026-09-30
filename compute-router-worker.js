@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './command-center-affiliate-table-worker.js';
+import base from './growth-command-center-v2-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -57,6 +57,7 @@ import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
 import {withPrivateAssets} from './private-assets.js';
 import {handlePublicAnalyticsRoute,transformPublicAnalyticsResponse} from './public-analytics-runtime.js';
+import {handleCommandCenterLocalLoginRoute} from './command-center-local-login-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -1940,6 +1941,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='authority_health')response=await handleAuthorityHealthRoute(request,env);
   else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
   else if(ownership.owner==='public_analytics_consent')response=await handlePublicAnalyticsRoute(request);
+  else if(ownership.owner==='command_center_local_login')response=await handleCommandCenterLocalLoginRoute(request,env);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
