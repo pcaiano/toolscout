@@ -1,11 +1,12 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './traffic-integrity-worker.js';
+import base from './command-center-human-truth-chart-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
 import {handleTrafficIntegrityLiveRoute,gateTrafficIntegrityEvent,transformTrafficIntegrityLiveResponse} from './traffic-integrity-live-worker.js';
 import {handleTrafficIntegrityGuardRoute,processTrafficIntegrityGuardEvent,transformTrafficIntegrityGuardResponse,runTrafficIntegrityGuardScheduled} from './traffic-integrity-guard-worker.js';
 import {handleOwnerExclusionRoute} from './owner-exclusion-worker.js';
+import {handleTrafficIntegrityCoreRoute,transformTrafficIntegrityCoreResponse,runTrafficIntegrityCoreScheduled} from './traffic-integrity-worker.js';
 import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
@@ -60,6 +61,7 @@ async function legacyFallback(request,env,ctx){
   }else{
     response=await base.fetch(request,env,ctx);
   }
+  response=await transformTrafficIntegrityCoreResponse(request,response);
   response=await transformTrafficIntegrityGuardResponse(request,response);
   response=await transformTrafficIntegrityLiveResponse(request,response);
   response=await applyVisitorIntegrityLink(request,env,url,response,visitorEvent);
@@ -1930,6 +1932,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='traffic_integrity_live')response=await handleTrafficIntegrityLiveRoute(request,env);
   else if(ownership.owner==='traffic_integrity_guard')response=await handleTrafficIntegrityGuardRoute(request,env);
   else if(ownership.owner==='owner_exclusion')response=await handleOwnerExclusionRoute(request,env);
+  else if(ownership.owner==='traffic_integrity_core')response=await handleTrafficIntegrityCoreRoute(request,env);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);
@@ -1992,6 +1995,11 @@ export default{
     return legacyFallback(request,env,ctx);
   },
   async scheduled(scheduledEvent,env,ctx){
+    const trigger=scheduledEvent?.cron||'scheduled';
+    const trafficIntegrityHeartbeat=trigger===TOOLSCOUT_CRONS.primaryGrowth
+      ?Promise.resolve(runTrafficIntegrityCoreScheduled(env)).catch(async error=>{await event(env,'traffic_integrity_heartbeat_failed','failed',safe(error?.message||error,800)).catch(()=>{});return null;})
+      :Promise.resolve(null);
+    if(ctx?.waitUntil)ctx.waitUntil(trafficIntegrityHeartbeat);
     const trafficGuardCleanup=Promise.resolve(runTrafficIntegrityGuardScheduled(env)).catch(async error=>{await event(env,'traffic_guard_cleanup_failed','failed',safe(error?.message||error,800)).catch(()=>{});return null;});
     if(ctx?.waitUntil)ctx.waitUntil(trafficGuardCleanup);
     const trigger=scheduledEvent?.cron||'scheduled';
