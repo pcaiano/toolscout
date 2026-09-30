@@ -44,7 +44,8 @@ test('generic fallback preserves canonical transform ordering before attribution
   const seo=compute.indexOf('await transformSeoPublicPage(request,response,env)');
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   assert.ok(lower>=0&&canonical>lower&&owner>canonical&&seo>owner&&footer>seo,'fallback order must remain lower -> canonical -> owner attribution -> SEO -> footer');
-  assert.match(compute,/import base from '\.\/traffic-integrity-guard-worker\.js'/);
+  assert.match(compute,/import base from '\.\/owner-exclusion-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-guard-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-live-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/outbound-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-integrity-worker\.js'/);

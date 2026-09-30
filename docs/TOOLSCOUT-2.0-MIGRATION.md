@@ -601,3 +601,19 @@ Implemented:
 
 Preservation rule:
 Distribution feed priority, page-confirmation eligibility, browser-proof enforcement, SEO uplift, commercial cluster overrides, late visitor retry injection and response-stage ordering remain unchanged.
+
+
+## Phase 50 - Explicit traffic guard ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-50`.
+
+Implemented:
+- `GET /api/traffic-forensics-48h` gains explicit `traffic_integrity_guard` ownership;
+- `/api/events` traffic-guard processing remains ahead of lower event persistence through an explicit continuation stage;
+- browser-guard HTML injection remains before the live-traffic transform and before Visitor Integrity/canonical/owner/SEO/footer stages;
+- traffic-guard retention cleanup is exported as an explicit scheduled mission and launched by the compute scheduler;
+- generic fallback moves from `traffic-integrity-guard-worker.js` to `owner-exclusion-worker.js`;
+- the architecture edge budget ratchets from 49 to 48.
+
+Preservation rule:
+Strict-human evidence rules, browser validation, quarantine logic, rate/burst detection, traffic forensics, browser-guard injection and seven-day guard-event retention remain unchanged.

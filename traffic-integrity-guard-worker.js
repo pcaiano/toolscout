@@ -110,12 +110,12 @@ async function handleHumanEvidence(request,env,ctx,body){
   await markStrictHuman(env,request,body,'trusted_interaction',3);
   return Response.json({ok:true,recorded:true,strict_human:true,evidence:'trusted_interaction'},{headers});
 }
-async function handlePageConfirmation(request,env,ctx,body){
+async function handlePageConfirmation(request,env,ctx,body,next){
   const headers=jsonHeaders();
   const classification=classifySessionRequest(request);
-  if(classification!==SESSION_CLASSIFICATIONS.LIKELY_HUMAN)return base.fetch(request,env,ctx);
+  if(classification!==SESSION_CLASSIFICATIONS.LIKELY_HUMAN)return next(request);
   const sessionId=String(body?.session_id||'');
-  if(!UUID.test(sessionId))return base.fetch(request,env,ctx);
+  if(!UUID.test(sessionId))return next(request);
   if(!proofIsValid(body)){
     return Response.json({ok:false,recorded:false,reason:'browser_proof_pending',minimumVisibleMs:MIN_VISIBLE_MS},{status:409,headers});
   }
@@ -177,17 +177,17 @@ async function handlePageConfirmation(request,env,ctx,body){
     return Response.json({ok:true,recorded:false,classification:SESSION_CLASSIFICATIONS.SYNTHETIC,guard:{decision:'blocked',reason:'parallel_multi_page_zero_interaction'}},{status:202,headers});
   }
   if(trustedInteractions>0)await markStrictHuman(env,request,body,'trusted_interaction',3);
-  return base.fetch(request,env,ctx);
+  return next(request);
 }
-async function handleEvents(request,env,ctx){
-  if(request.method!=='POST')return base.fetch(request,env,ctx);
+async function handleEvents(request,env,ctx,next){
+  if(request.method!=='POST')return next(request);
   const type=(request.headers.get('Content-Type')||'').toLowerCase();
-  if(!type.startsWith('application/json'))return base.fetch(request,env,ctx);
+  if(!type.startsWith('application/json'))return next(request);
   let body;
-  try{body=JSON.parse(await request.clone().text())}catch{return base.fetch(request,env,ctx)}
+  try{body=JSON.parse(await request.clone().text())}catch{return next(request)}
   if(body?.event_type==='human_evidence')return handleHumanEvidence(request,env,ctx,body);
-  if(body?.event_type!=='page_confirmed')return base.fetch(request,env,ctx);
-  return handlePageConfirmation(request,env,ctx,body);
+  if(body?.event_type!=='page_confirmed')return next(request);
+  return handlePageConfirmation(request,env,ctx,body,next);
 }
 function guardClientScript(){
   return `<script data-toolscout-browser-guard="2">(function(){try{
@@ -359,20 +359,42 @@ async function augmentHealth(response,env){
   const headers=new Headers(response.headers);headers.set('Content-Type','application/json; charset=UTF-8');headers.set('Cache-Control','no-store');headers.delete('Content-Length');
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }
+export async function handleTrafficIntegrityGuardRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/api/traffic-forensics-48h'){
+    return Response.json(await trafficForensics48h(env),{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}});
+  }
+  return null;
+}
+export async function processTrafficIntegrityGuardEvent(request,env,ctx,next){
+  const url=new URL(request.url);
+  if(url.pathname!=='/api/events')return null;
+  return handleEvents(request,env,ctx,next);
+}
+export async function transformTrafficIntegrityGuardResponse(request,response){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&isHtml(response)&&!ANALYTICS_PATHS.has(url.pathname))return decorate(response);
+  return response;
+}
+export async function runTrafficIntegrityGuardScheduled(env){
+  await ensureGuardSchema(env);
+  await env.DB.prepare(`DELETE FROM traffic_guard_events WHERE created_at<datetime('now','-7 days')`).run();
+  return {ok:true,mission:'traffic_guard_cleanup',retentionDays:7};
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(url.pathname==='/api/events')return handleEvents(request,env,ctx);
-    if(request.method==='GET'&&url.pathname==='/api/traffic-forensics-48h')return Response.json(await trafficForensics48h(env),{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'}});
+    if(url.pathname==='/api/events')return handleEvents(request,env,ctx,(nextRequest)=>base.fetch(nextRequest,env,ctx));
+    const owned=await handleTrafficIntegrityGuardRoute(request,env);if(owned)return owned;
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/api/traffic-integrity-health')response=await augmentHealth(response,env);
-    if(request.method==='GET'&&isHtml(response)&&!ANALYTICS_PATHS.has(url.pathname))response=await decorate(response);
+    response=await transformTrafficIntegrityGuardResponse(request,response);
     return response;
   },
   async scheduled(event,env,ctx){
     if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
-    await ensureGuardSchema(env);
-    await env.DB.prepare(`DELETE FROM traffic_guard_events WHERE created_at<datetime('now','-7 days')`).run();
+    await runTrafficIntegrityGuardScheduled(env);
   }
 };
 
