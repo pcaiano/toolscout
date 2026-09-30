@@ -6,7 +6,8 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('generic traversal bypasses discovery attribution decorator',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
+  assert.match(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
 });
