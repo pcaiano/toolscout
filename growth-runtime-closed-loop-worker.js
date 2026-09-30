@@ -229,6 +229,19 @@ export async function handleGrowthClosedLoopRoute(request,env,ctx){
   return null;
 }
 
+export async function runGrowthClosedLoopScheduled(event,env,ctx){
+  const trigger=event?.cron||'scheduled';
+  if(trigger!==TOOLSCOUT_CRONS.hourly)return {ok:true,status:'not_due'};
+  const request=new Request('https://trytoolscout.org/api/distribution/authority/close-loop',{headers:missionCycleHeaders(event,'authority_closed_loop_scheduler')});
+  try{
+    const result=await runWithLedger(env,{engine:'distribution',mission:'authority_execution_recovery',triggerName:'hourly_closed_loop',singleFlightMinutes:75},()=>closeAuthorityExecutionLoop(request,env,ctx));
+    return {ok:true,status:'completed',result};
+  }catch(error){
+    await recordEvent(env,'authority_closed_loop_runtime_error','failed',String(error?.message||error).slice(0,1200));
+    throw error;
+  }
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
@@ -246,12 +259,7 @@ export default {
     return response;
   },
   async scheduled(event,env,ctx){
-    const trigger=event?.cron||'scheduled';
-    if(trigger===TOOLSCOUT_CRONS.hourly){
-      const request=new Request('https://trytoolscout.org/api/distribution/authority/close-loop',{headers:missionCycleHeaders(event,'authority_closed_loop_scheduler')});
-      try{await runWithLedger(env,{engine:'distribution',mission:'authority_execution_recovery',triggerName:'hourly_closed_loop',singleFlightMinutes:75},()=>closeAuthorityExecutionLoop(request,env,ctx));}
-      catch(error){await recordEvent(env,'authority_closed_loop_runtime_error','failed',String(error?.message||error).slice(0,1200));}
-    }
+    await runGrowthClosedLoopScheduled(event,env,ctx);
     return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
   }
 };
