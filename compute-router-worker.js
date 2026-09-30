@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './ga4-attribution-24h-worker.js';
+import base from './d1-read-budget-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
@@ -25,6 +25,7 @@ import {handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-ru
 import {handleAnalyticsChairmanRoute} from './analytics-chairman-runtime.js';
 import {handleAnalyticsStatsReadRoute} from './command-center-resilient-worker.js';
 import {handleGa4OwnerExclusionRoute} from './ga4-owner-exclusion-runtime.js';
+import {handleGa4Attribution24hRoute} from './ga4-attribution-24h-worker.js';
 import {applyMarkedOwnerAnalytics} from './ga4-owner-context.js';
 import {handleAnalyticsHumanActionsRoute} from './analytics-human-actions-runtime.js';
 import {handleHumanActionsMutationRoute} from './human-action-entry-worker.js';
@@ -1893,6 +1894,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='analytics_chairman')response=await handleAnalyticsChairmanRoute(request,env,ctx);
   else if(ownership.owner==='analytics_stats')response=await handleAnalyticsStatsReadRoute(request,env,ctx);
   else if(ownership.owner==='analytics_owner_exclusion')response=await handleGa4OwnerExclusionRoute(request,env,ctx);
+  else if(ownership.owner==='analytics_attribution_24h')response=await handleGa4Attribution24hRoute(request,env);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);

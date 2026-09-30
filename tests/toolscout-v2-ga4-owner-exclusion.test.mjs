@@ -10,7 +10,7 @@ test('GA4 external acquisition has a direct ToolScout 2.0 owner',()=>{
   const compute=read('compute-router-worker.js');
 
   assert.match(runtime,/export async function handleGa4OwnerExclusionRoute/);
-  assert.match(runtime,/attributionCore from '\.\/ga4-attribution-24h-worker\.js'/);
+  assert.match(runtime,/handleGa4Attribution24hRoute.*from '\.\/ga4-attribution-24h-worker\.js'/);
   assert.match(runtime,/\/analytics\/api\/google\/external-24h/);
   assert.match(runtime,/validCommandCenterSession/);
   assert.match(runtime,/metric:'ga4_external_sessions_24h'/);
@@ -28,8 +28,9 @@ test('generic fallback preserves owner attribution before SEO and social footer'
   const seo=compute.indexOf('await transformSeoPublicPage(request,response,env)');
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   assert.ok(base>=0&&owner>base&&seo>owner&&footer>seo,'fallback order must remain base -> owner attribution -> SEO -> footer');
-  assert.match(compute,/import base from '\.\/ga4-attribution-24h-worker\.js'/);
+  assert.match(compute,/import base from '\.\/d1-read-budget-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/ga4-attribution-24h-worker\.js'/);
 });
 
 test('owner exclusion calculation preserves the established 24h clean-window semantics',()=>{

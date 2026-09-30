@@ -1,4 +1,4 @@
-import attributionCore from './ga4-attribution-24h-worker.js';
+import {handleGa4Attribution24hRoute} from './ga4-attribution-24h-worker.js';
 import {OWNER_SOURCE,OWNER_MEDIUM,markerState,cookieValue} from './ga4-owner-context.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
@@ -23,7 +23,7 @@ async function validCommandCenterSession(request,env){
 async function ownerSafeAcquisition24h(request,env,ctx){
   const target=new URL(request.url);target.pathname='/analytics/api/google/acquisition-24h';target.search='';
   const upstreamRequest=new Request(target.toString(),{method:'GET',headers:new Headers(request.headers)});
-  const upstream=await attributionCore.fetch(upstreamRequest,env,ctx);
+  const upstream=await handleGa4Attribution24hRoute(upstreamRequest,env);
   const raw=await upstream.json().catch(()=>null);
   if(!upstream.ok||!raw||raw.status!=='connected')return {
     status:'unavailable',
