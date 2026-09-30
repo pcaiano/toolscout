@@ -185,6 +185,9 @@ jobs:
           node --check scripts/generate-software-trends-index.mjs
           node --check catalog-runtime-ranking.js
           node --check catalog-autonomy-worker.js
+      - name: Wrangler dry-run build
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-wrangler-dry-run
+
       - name: Audit ToolScout 2.0 runtime architecture
         run: node scripts/audit-runtime-architecture.mjs
       - name: Audit full public decision parity
