@@ -283,3 +283,8 @@ When a wrapper combines protected administration routes with public response dec
 ### Compatibility-only UI decorators
 
 When a legacy wrapper decorates a page that is already owned earlier by a direct ToolScout 2.0 route, keep the decorator available for bounded compatibility paths but remove it from generic traversal. Any health or control endpoint still owned by that wrapper should be extracted explicitly first.
+
+
+### Schema-first tracking extraction
+
+Tracking wrappers that both write D1 and decorate public responses must become migration-owned before their request responsibilities are split. Replace runtime schema mutation with a cached readiness probe first, then extract the write route and public response stage in a later phase.

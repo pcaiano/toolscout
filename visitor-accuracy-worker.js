@@ -22,24 +22,22 @@ function parseSqliteUtc(value){
 }
 function isHtml(response){return (response.headers.get('content-type')||'').toLowerCase().includes('text/html')}
 
+let visitorAccuracySchemaReady=null;
 async function ensureVisitorSchema(env){
-  await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS visitor_events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      visitor_id TEXT NOT NULL,
-      path TEXT,
-      source TEXT NOT NULL DEFAULT 'direct',
-      referrer_host TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_visitor_events_created_at ON visitor_events(created_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_visitor_events_visitor_id ON visitor_events(visitor_id)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS visitor_tracking_meta (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    )`),
-    env.DB.prepare(`INSERT OR IGNORE INTO visitor_tracking_meta (key,value) VALUES ('tracking_started_at',datetime('now'))`)
-  ]);
+  if(visitorAccuracySchemaReady)return visitorAccuracySchemaReady;
+  visitorAccuracySchemaReady=(async()=>{
+    const [tables,indexes,marker]=await Promise.all([
+      env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN ('visitor_events','visitor_tracking_meta')").first(),
+      env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN ('idx_visitor_events_created_at','idx_visitor_events_visitor_id')").first(),
+      env.DB.prepare("SELECT value FROM visitor_tracking_meta WHERE key='tracking_started_at' LIMIT 1").first().catch(()=>null)
+    ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==2||indexCount!==2||!marker?.value){
+      throw new Error(`visitor_accuracy_schema_not_migrated:tables_${tableCount}/2:indexes_${indexCount}/2:marker_${marker?.value?'ready':'missing'}`);
+    }
+    return {ok:true,source:'d1_migrations'};
+  })().catch(error=>{visitorAccuracySchemaReady=null;throw error});
+  return visitorAccuracySchemaReady;
 }
 
 function visitorHeaders(){
@@ -194,7 +192,6 @@ export default {
     if(url.pathname==='/analytics/api/stats'&&request.method==='GET')return augmentStats(response,env);
     if(ANALYTICS_PATHS.has(url.pathname))return decorateCommandCenter(response);
     if(url.hostname===new URL(BASE).hostname&&request.method==='GET'&&isHtml(response)){
-      if(ctx?.waitUntil)ctx.waitUntil(ensureVisitorSchema(env));
       return decoratePublicPage(response);
     }
     return response;
