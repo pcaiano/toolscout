@@ -213,6 +213,8 @@ Implemented:
 - the remaining useful legacy behavior from the retired wrapper, ToolScout social-footer injection on fallback GET HTML, is applied explicitly by `legacyFallback()` in the compute router;
 - redundant Command Center, stats and dynamic tool-profile interceptions are removed because those route groups are already owned and dispatched before fallback;
 - `operational-truth-reconciliation-worker.js` is deleted;
+- its reusable JSON reconciliation is retained as the pure `operational-truth-reconciliation-runtime.js`, with no fetch-wrapper/base import;
+- direct admin stats now declares its mature lower-chain compatibility composition explicitly before applying that reconciliation;
 - CI no longer syntax-checks the retired wrapper;
 - the legacy decorator edge budget ratchets from 72 to 71 so the removed edge cannot silently return.
 
