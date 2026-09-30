@@ -12,34 +12,19 @@ function normalizeUrl(value){
 
 export async function ensureHumanGateSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS human_gate_contract(
-      gate_key TEXT PRIMARY KEY,
-      engine TEXT NOT NULL,
-      subject_type TEXT NOT NULL,
-      subject_key TEXT NOT NULL,
-      gate_type TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'open',
-      title TEXT,
-      reason TEXT,
-      instructions TEXT,
-      action_url TEXT,
-      resolution_mode TEXT NOT NULL DEFAULT 'verify_publication',
-      payload_json TEXT,
-      result_url TEXT,
-      verification_url TEXT,
-      verification_attempts INTEGER NOT NULL DEFAULT 0,
-      next_verification_at TEXT,
-      owner_completed_at TEXT,
-      resolved_at TEXT,
-      last_verification_at TEXT,
-      verification_detail TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_human_gate_status ON human_gate_contract(status,next_verification_at,updated_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_human_gate_subject ON human_gate_contract(engine,subject_type,subject_key)`)
-  ]);
+  schemaReady=(async()=>{
+    const requiredTables=['human_gate_contract'];
+    const requiredIndexes=['idx_human_gate_status','idx_human_gate_subject'];
+    const [tables,indexes]=await Promise.all([
+      env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='human_gate_contract'").first(),
+      env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (?,?)").bind(...requiredIndexes).first()
+    ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length){
+      throw new Error(`human_gate_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}`);
+    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount};
+  })().catch(error=>{schemaReady=null;throw error});
   await schemaReady;
   return true;
 }
