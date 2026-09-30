@@ -42,6 +42,7 @@ jobs:
           node --check d1-read-budget-worker.js
           node --check command-center-ga4-worker.js
           node --check gsc-command-center-visible-worker.js
+          node --check growth-runtime-authority-drain-worker.js
           node --check operational-truth-reconciliation-runtime.js
           node --check seo-cloudflare-runtime-worker.js
           node --check cloudflare-primary-runtime-worker.js
