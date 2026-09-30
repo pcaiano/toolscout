@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './agent-protocol-worker.js';
+import base from './command-center-affiliate-table-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -55,8 +55,22 @@ import {renderPublicDecisionPage} from './public-decision-runtime.js';
 import {renderPublicNavigationPage} from './public-navigation-runtime.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
+import {withPrivateAssets} from './private-assets.js';
+import {handlePublicAnalyticsRoute,transformPublicAnalyticsResponse} from './public-analytics-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
+
+const LEGACY_ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
+const protectedLegacyBase=withPrivateAssets({
+  async fetch(request,env,ctx){
+    let response=await protectedLegacyBase.fetch(request,env,ctx);
+    const url=new URL(request.url);
+    if(request.method==='GET'&&!LEGACY_ANALYTICS_PATHS.has(url.pathname)){
+      response=await transformPublicAnalyticsResponse(request,response);
+    }
+    return response;
+  }
+});
 
 async function legacyFallback(request,env,ctx){
   const canonicalOwned=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
@@ -67,7 +81,7 @@ async function legacyFallback(request,env,ctx){
   const visitorEvent=await prepareVisitorIntegrityEvent(request,url);
   let response;
   if(url.pathname==='/api/events'){
-    response=await processTrafficIntegrityGuardEvent(request,env,ctx,(nextRequest)=>base.fetch(nextRequest,env,ctx));
+    response=await processTrafficIntegrityGuardEvent(request,env,ctx,(nextRequest)=>protectedLegacyBase.fetch(nextRequest,env,ctx));
   }else{
     response=await base.fetch(request,env,ctx);
   }
@@ -1925,6 +1939,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='growth_runtime_closed_loop')response=await handleGrowthClosedLoopRoute(request,env,ctx);
   else if(ownership.owner==='authority_health')response=await handleAuthorityHealthRoute(request,env);
   else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
+  else if(ownership.owner==='public_analytics_consent')response=await handlePublicAnalyticsRoute(request);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
