@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './cloudflare-primary-runtime-worker.js';
+import base from './ga4-owner-exclusion-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
@@ -16,6 +16,7 @@ import {handleDistributionPriorityRoute} from './distribution-priority-worker.js
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
 import {handleSeoRuntimeRoute,transformSeoPublicPage,runSeoRuntimeScheduled} from './seo-cloudflare-runtime-worker.js';
+import {handleCloudflarePrimaryRuntimeRoute,runCloudflarePrimaryScheduled} from './cloudflare-primary-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute,runAuthorityAcquisitionScheduled} from './authority-acquisition-worker.js';
 import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {handleAuthorityHealthRoute} from './authority-health-runtime.js';
@@ -1945,7 +1946,8 @@ export default{
     if(request.method==='GET'&&u.pathname==='/api/runtime/schedule-contract')return Response.json(scheduleContract(),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/route-contract')return Response.json(routeContract(),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/route-owner')return Response.json(routeOwner(u.searchParams.get('path')||'/',{method:u.searchParams.get('method')||'GET'}),{headers:JSON_H});
-    if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await legacyFallback(request,env,ctx),env);
+    if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await handleCloudflarePrimaryRuntimeRoute(request,env,ctx),env);
+    if(request.method==='POST'&&u.pathname==='/api/runtime/cloudflare-primary-cycle')return handleCloudflarePrimaryRuntimeRoute(request,env,ctx);
     return legacyFallback(request,env,ctx);
   },
   async scheduled(scheduledEvent,env,ctx){
@@ -2000,14 +2002,12 @@ export default{
         await event(env,'growth_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const inheritedRaw=typeof base.scheduled==='function'
-        ?Promise.resolve(base.scheduled(scheduledEvent,env,ctx))
-        :Promise.resolve(null);
-      const inherited=inheritedRaw.catch(async error=>{
-        await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+      const primaryRaw=Promise.resolve(runCloudflarePrimaryScheduled(scheduledEvent,env,ctx));
+      const primary=primaryRaw.catch(async error=>{
+        await event(env,'cloudflare_primary_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const seo=inheritedRaw.then(
+      const seo=primaryRaw.then(
         ()=>runSeoRuntimeScheduled(scheduledEvent,env,ctx),
         ()=>null
       ).catch(async error=>{
@@ -2018,7 +2018,7 @@ export default{
         await event(env,'authority_acquisition_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const combined=Promise.allSettled([growth,authority,inherited,seo]);
+      const combined=Promise.allSettled([growth,authority,primary,seo]);
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;return;
     }
