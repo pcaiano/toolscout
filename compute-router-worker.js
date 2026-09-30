@@ -1,5 +1,6 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './growth-runtime-integrity-worker.js';
+import base from './command-center-light-theme-worker.js';
+import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
 import {runAuthorityDrainScheduled} from './growth-runtime-authority-drain-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
@@ -2035,6 +2036,10 @@ export default{
         await Promise.allSettled([growth,authority,primary,seo]);
         await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx).catch(async error=>{
           await event(env,'authority_closed_loop_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+          return null;
+        });
+        await runGrowthRuntimeIntegrityScheduled(scheduledEvent,env,ctx).catch(async error=>{
+          await event(env,'authority_integrity_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
           return null;
         });
         await runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{

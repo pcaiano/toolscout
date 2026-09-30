@@ -88,7 +88,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/growth-runtime-integrity-worker\.js'/);
+  assert.match(src,/import base from '\.\/command-center-light-theme-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/authority-acquisition-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
@@ -101,6 +101,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.doesNotMatch(src,/import base from '\.\/growth-runtime-authority-drain-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/growth-runtime-observability-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/growth-runtime-closed-loop-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/growth-runtime-integrity-worker\.js'/);
   assert.match(src,/handleGrowthClosedLoopRoute/);
   assert.match(src,/runGrowthClosedLoopScheduled/);
   assert.match(healthLanguage,/async function improveStats/);

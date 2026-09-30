@@ -467,3 +467,22 @@ The closed-loop hourly mission previously lived inside a wrapper `scheduled()`, 
 
 Preservation rule:
 Manual close-loop ownership, run ledger semantics, machine-first execution, sender handoff evidence and hourly mission identity remain unchanged. Scheduler reachability becomes explicit.
+
+
+## Phase 41 - Explicit authority integrity recovery scheduling
+
+Status: implemented on `architecture/toolscout-2.0-phase-41`.
+
+Implemented:
+- `runGrowthRuntimeIntegrityScheduled()` explicitly owns the hourly `authority_gap_recovery` mission already declared in the central schedule contract;
+- compute sequencing is now explicit: hourly core -> authority closed loop -> integrity recovery -> sender drain;
+- generic request fallback now connects directly to `command-center-light-theme-worker.js`;
+- integrity stats/health/UI corrections remain available inside bounded compatibility compositions;
+- production recovery syntax-checks both the closed-loop and integrity scheduler modules before any mutation;
+- the architecture edge budget ratchets from 58 to 57.
+
+Functional correction:
+The integrity recovery previously lived inside a wrapper `scheduled()` below the same hourly interception point. This phase makes the recovery reachable and independently observable.
+
+Preservation rule:
+Authority gap criteria, cooldown behavior, execution ledger semantics and recovery logic remain unchanged. Only ownership and reachability are made explicit.

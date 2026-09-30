@@ -43,6 +43,8 @@ jobs:
           node --check command-center-ga4-worker.js
           node --check gsc-command-center-visible-worker.js
           node --check growth-runtime-authority-drain-worker.js
+          node --check growth-runtime-closed-loop-worker.js
+          node --check growth-runtime-integrity-worker.js
           node --check operational-truth-reconciliation-runtime.js
           node --check seo-cloudflare-runtime-worker.js
           node --check cloudflare-primary-runtime-worker.js
