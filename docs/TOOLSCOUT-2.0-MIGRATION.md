@@ -856,3 +856,19 @@ Why this phase is separate:
 
 Preservation rule:
 The visitor-event table shape, tracking-start marker, visitor payload validation, acquisition script and visitor snapshot semantics remain unchanged.
+
+
+## Phase 66 - Explicit visitor accuracy ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-66`.
+
+Implemented:
+- `POST /api/visitor` and its `OPTIONS` preflight gain direct `visitor_accuracy` ownership;
+- `visitor-accuracy-worker.js` exports `handleVisitorAccuracyRoute()` and `transformVisitorAccuracyPublicResponse()`;
+- generic request fallback now connects directly to `posthog-behavior-worker.js`;
+- public visitor-tracker injection remains an explicit response stage immediately after the lower runtime and before RSS, traffic-integrity, visitor-integrity, canonical, owner-attribution, SEO and footer transforms;
+- analytics pages remain excluded from the public visitor-tracker stage;
+- the architecture edge budget ratchets from 35 to 34.
+
+Preservation rule:
+Visitor validation, CORS preflight, migration readiness, first-party tracker payload, source/referrer capture and public response ordering remain unchanged.
