@@ -57,7 +57,9 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/blog/',{method:'GET'}).owner,'public_navigation');
   assert.equal(routeOwner('/blog',{method:'GET'}).owner,'legacy_chain');
   assert.equal(routeOwner('/blog/article',{method:'GET'}).owner,'legacy_chain');
-  assert.equal(routeOwner('/go/airtable',{method:'GET'}).owner,'public_site');
+  assert.equal(routeOwner('/go/airtable',{method:'GET'}).owner,'affiliate_redirect');
+  assert.equal(routeOwner('/go/embed',{method:'GET'}).owner,'affiliate_redirect');
+  assert.ok(routeContract().earlyDispatchOwners.includes('affiliate_redirect'));
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
@@ -103,6 +105,7 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   const evidence=read('mission-integrity-v2-worker.js');
   const closedLoop=read('growth-runtime-closed-loop-worker.js');
   const analytics=read('command-center-resilient-worker.js');
+  const affiliateRedirect=read('affiliate-redirect-runtime.js');
   assert.match(priority,/export async function handleDistributionPriorityRoute/);
   assert.match(priority,/return null;/);
   assert.match(orchestrator,/export async function handleDistributionOrchestratorRoute/);
@@ -117,6 +120,9 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   assert.match(closedLoop,/return null;/);
   assert.match(analytics,/export async function handleAnalyticsStatsReadRoute/);
   assert.match(analytics,/X-ToolScout-Read-Mode':'read-only/);
+  assert.match(affiliateRedirect,/export async function handleAffiliateRedirectRoute/);
+  assert.match(affiliateRedirect,/distribution-embed-worker\\.js/);
+  assert.doesNotMatch(affiliateRedirect,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
 });
 
 test('mission integrity runtime no longer creates schema',()=>{
