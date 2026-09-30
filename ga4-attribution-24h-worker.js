@@ -88,13 +88,21 @@ async function decoratePage(response){
   const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleGa4Attribution24hRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/analytics/api/google/acquisition-24h')return null;
+  if(!(await validCommandCenterSession(request,env))){
+    return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+  }
+  const data=await acquisition24h(env,request);
+  return Response.json(data,{status:data.status==='connected'?200:503,headers:JSON_H});
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleGa4Attribution24hRoute(request,env);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/analytics/api/google/acquisition-24h'){
-      if(!(await validCommandCenterSession(request,env)))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
-      const data=await acquisition24h(env,request);return Response.json(data,{status:data.status==='connected'?200:503,headers:JSON_H});
-    }
     const response=await base.fetch(request,env,ctx);
     return request.method==='GET'&&analyticsPage(url.pathname)?decoratePage(response):response;
   },
