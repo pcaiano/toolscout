@@ -177,6 +177,23 @@ async function runAuthorityExecutionRecovery(env){
 
 function analyticsPath(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/analytics-v2'||path==='/analytics-v2/'||path==='/analytics-v2.html'}
 
+export async function runGrowthRuntimeIntegrityScheduled(event,env,ctx){
+  const trigger=event?.cron||'scheduled';
+  if(trigger!==TOOLSCOUT_CRONS.hourly)return {ok:true,status:'not_due'};
+  const task=(async()=>{
+    const state=await authorityState(env);
+    if(!state.required||!state.throughputGap||state.queue<=0)return {ok:true,status:'not_required',state};
+    if(await recoveryCoolingDown(env))return {ok:true,status:'cooldown',state};
+    const result=await runWithLedger(env,{engine:'distribution',mission:'authority_execution_recovery',triggerName:trigger,singleFlightMinutes:75},()=>runAuthorityExecutionRecovery(env));
+    return {ok:true,status:'completed',result};
+  })();
+  if(ctx?.waitUntil){
+    const tracked=task.catch(()=>null);
+    ctx.waitUntil(tracked);
+  }
+  return task;
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
@@ -187,17 +204,7 @@ export default {
     return response;
   },
   async scheduled(event,env,ctx){
-    const trigger=event?.cron||'scheduled';
-    const hourly=trigger===TOOLSCOUT_CRONS.hourly;
-    if(hourly){
-      const task=(async()=>{
-        const state=await authorityState(env);
-        if(!state.required||!state.throughputGap||state.queue<=0)return;
-        if(await recoveryCoolingDown(env))return;
-        await runWithLedger(env,{engine:'distribution',mission:'authority_execution_recovery',triggerName:trigger,singleFlightMinutes:75},()=>runAuthorityExecutionRecovery(env));
-      })().catch(()=>{});
-      if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
-    }
+    await runGrowthRuntimeIntegrityScheduled(event,env,ctx).catch(()=>null);
     if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);
   }
 };
