@@ -78,18 +78,26 @@ test('unknown routes remain on the legacy fallback during staged migration',()=>
 
 test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   const src=read('compute-router-worker.js');
+  const healthLanguage=read('command-center-health-language-worker.js');
+  const adminStats=read('admin-stats-runtime.js');
   assert.match(src,/earlyOwnedRoute/);
   assert.match(src,/ownership\.owner==='distribution_priority'/);
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/command-center-health-language-worker\.js'/);
+  assert.match(src,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/authority-acquisition-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/ga4-attribution-24h-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/d1-read-budget-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/command-center-ga4-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/command-center-health-language-worker\.js'/);
+  assert.match(healthLanguage,/async function improveStats/);
+  assert.match(healthLanguage,/url\.pathname==='\/analytics\/api\/stats'/);
+  assert.match(healthLanguage,/url\.pathname==='\/api\/stats'/);
+  assert.match(healthLanguage,/return improveStats\(response\)/);
+  assert.match(adminStats,/legacyStatsBase\.fetch\(request,env,ctx\)/);
   assert.match(src,/applyMarkedOwnerAnalytics/);
   assert.match(src,/transformSeoPublicPage/);
   assert.match(src,/response=await transformSeoPublicPage\(request,response,env\)/);
@@ -127,6 +135,8 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   const closedLoop=read('growth-runtime-closed-loop-worker.js');
   const analytics=read('command-center-resilient-worker.js');
   const affiliateRedirect=read('affiliate-redirect-runtime.js');
+  const healthLanguage=read('command-center-health-language-worker.js');
+  const adminStats=read('admin-stats-runtime.js');
   assert.match(priority,/export async function handleDistributionPriorityRoute/);
   assert.match(priority,/return null;/);
   assert.match(orchestrator,/export async function handleDistributionOrchestratorRoute/);

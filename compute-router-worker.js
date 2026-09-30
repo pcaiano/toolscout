@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './command-center-health-language-worker.js';
+import base from './gsc-command-center-visible-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';

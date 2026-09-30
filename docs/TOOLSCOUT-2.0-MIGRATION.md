@@ -369,3 +369,18 @@ Implemented:
 
 Preservation rule:
 OAuth connect/callback/disconnect behavior, GA4 acquisition and commerce payloads, owner-only access checks and existing D1 budget protection remain unchanged.
+
+
+## Phase 35 - Remove redundant stats-language traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-35`.
+
+Implemented:
+- generic compute fallback now connects directly to `gsc-command-center-visible-worker.js`;
+- `command-center-health-language-worker.js` is removed from generic traversal because its only response mutations target `/analytics/api/stats` and `/api/stats`, both already owned before fallback;
+- the health-language compatibility transform remains available inside the mature lower composition used by direct Admin Stats;
+- no endpoint ownership, payload shape or response mutation is moved in this phase;
+- the architecture edge budget ratchets from 64 to 63.
+
+Preservation rule:
+Stats language reconciliation remains available where the direct Admin Stats compatibility composition still depends on it. Only redundant generic traversal is removed.

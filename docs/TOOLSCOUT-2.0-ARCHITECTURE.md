@@ -208,3 +208,8 @@ Analytics attribution that applies to generic public GET responses belongs in an
 ### Budget-stage extraction
 
 A quota-protection wrapper should be narrowed to the routes that still reach it after direct ownership is introduced. Dead cache entries for already intercepted routes are not a reason to retain broad traversal. Preserve live cache, circuit-breaker and credential-scope semantics as an explicit route owner.
+
+
+### Redundant decorator retirement
+
+If every route a decorator mutates is already intercepted by explicit owners, that decorator must not remain in generic traversal merely for historical symmetry. Keep it only inside the bounded compatibility composition that still needs its transform, and ratchet the generic edge budget downward.
