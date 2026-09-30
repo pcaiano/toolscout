@@ -12,6 +12,13 @@ function n(value){const x=Number(value);return Number.isFinite(x)?x:0}
 async function digestHex(value){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('')}
 function sessionBucket(now=Date.now()){return Math.floor(now/(COMMAND_CENTER_SESSION_TTL_SECONDS*1000))}
 async function sessionValue(secret,bucket){return digestHex(`toolscout-command-center:${secret}:${bucket}`)}
+async function validCommandCenterSession(request,env){
+  if(!env.ADMIN_TOKEN)return false;
+  const supplied=cookieValue(request,COMMAND_CENTER_SESSION_COOKIE);if(!supplied)return false;
+  const bucket=sessionBucket();
+  for(const candidate of [bucket,bucket-1])if(supplied===await sessionValue(env.ADMIN_TOKEN,candidate))return true;
+  return false;
+}
 function analyticsPage(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/command-center'||path==='/command-center/'}
 
 async function ownerSafeAcquisition24h(request,env,ctx){
@@ -46,6 +53,18 @@ function sources(rows,title){if(!rows||!rows.length)return '';return '<div style
 async function load(){const root=document.getElementById('ga4ExternalBody'),meta=document.getElementById('ga4ExternalMeta');if(!root)return;try{const r=await fetch('/analytics/api/google/external-24h',{credentials:'same-origin',cache:'no-store'}),d=await r.json().catch(()=>null);if(!r.ok||!d||d.status!=='connected')throw new Error(d&&d.reason||'External GA4 acquisition unavailable');const ready=d.external&&d.external.status==='ready',marker=d.marker||{},ext=d.external||{},owner=d.owner||{},total=d.total||{};if(meta)meta.textContent=ready?'Clean 24h window · GA4 property '+d.propertyId:'Warm-up · '+Number(marker.warmupRemainingHours||0).toFixed(1)+'h remaining';root.innerHTML='<div class="metricGrid">'+metric('GA4 total · 24h',num(total.sessions),'Raw GA4 acquisition')+metric('Owner-marked · 24h',num(owner.sessions),'toolscout_owner / internal')+metric(ready?'GA4 external · 24h':'Non-owner-marked · 24h',num(ready?ext.sessions:ext.candidateSessions),ready?'Operational acquisition metric':'Candidate only during warm-up')+metric(ready?'External engagement rate':'Owner exclusion status',ready?pc(ext.engagementRate):'Warming up',ready?num(ext.engagedSessions)+' engaged':'Growth learning disabled · '+Number(marker.warmupRemainingHours||0).toFixed(1)+'h remaining')+'</div>'+sources(ext.sources,ready?'External sources':'Non-owner-marked sources · warm-up')+'<div class="note" style="margin-top:10px">'+esc(d.note||'')+'</div>';}catch(e){root.innerHTML='<div class="bug"><b>External GA4 acquisition is unavailable.</b><div style="margin-top:6px">'+esc(e&&e.message||e)+'</div></div>';}}
 setTimeout(load,1700);setInterval(load,300000);
 })();</script>`}
+async function decorate(response,forceOwnerAnalytics=false){
+  const type=String(response.headers.get('content-type')||'').toLowerCase();if(!response.ok||!type.includes('text/html'))return response;
+  let html=await response.text();
+  if(forceOwnerAnalytics)html=markOwnerAnalyticsHtml(html);
+  if(!html.includes('data-widget="ga4-external-truth"')){
+    if(html.includes('<section class="widget" data-widget="ga4-attribution-24h"'))html=html.replace('<section class="widget" data-widget="ga4-attribution-24h"',widget()+'\n    <section class="widget" data-widget="ga4-attribution-24h"');
+    else html=html.replace('<section class="widget" data-widget="chairman"',widget()+'\n    <section class="widget" data-widget="chairman"');
+  }
+  if(!html.includes('data-ga4-external-truth="v1"'))html=html.replace('</body>',script()+'</body>');
+  const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');return new Response(html,{status:response.status,statusText:response.statusText,headers});
+}
+
 
 
 export default {
