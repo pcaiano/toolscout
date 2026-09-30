@@ -80,14 +80,23 @@ async function correctStats(response,env){
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:JSON_H});
 }
 
+export async function runAuthorityDrainScheduled(event,env,ctx){
+  if((event?.cron||'scheduled')!=='15 * * * *')return {ok:true,status:'not_due'};
+  const req=new Request('https://trytoolscout.org/api/distribution/authority/post-schedule-drain',{headers:missionCycleHeaders(event,'authority_drain_scheduler')});
+  try{
+    const result=await drainSender(req,env,ctx);
+    return {ok:true,status:'completed',result};
+  }catch(error){
+    await record(env,'authority_sender_drain_error','failed',String(error?.message||error).slice(0,1000));
+    throw error;
+  }
+}
+
 export default{
   async fetch(request,env,ctx){const url=new URL(request.url),response=await base.fetch(request,env,ctx);if(request.method==='GET'&&url.pathname==='/api/distribution/authority/closed-loop-health')return correctAuthorityHealth(response,env);if(request.method==='GET'&&url.pathname==='/api/autonomous-growth-health')return correctAutonomous(response,env);if(request.method==='GET'&&(url.pathname==='/analytics/api/stats'||url.pathname==='/api/stats'))return correctStats(response,env);return response},
   async scheduled(event,env,ctx){
     const out=typeof base.scheduled==='function'?await base.scheduled(event,env,ctx):undefined;
-    if((event?.cron||'scheduled')==='15 * * * *'){
-      const req=new Request('https://trytoolscout.org/api/distribution/authority/post-schedule-drain',{headers:missionCycleHeaders(event,'authority_drain_scheduler')});
-      try{await drainSender(req,env,ctx)}catch(error){await record(env,'authority_sender_drain_error','failed',String(error?.message||error).slice(0,1000))}
-    }
+    await runAuthorityDrainScheduled(event,env,ctx);
     return out;
   }
 };
