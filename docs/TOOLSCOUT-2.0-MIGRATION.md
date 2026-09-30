@@ -789,3 +789,19 @@ Implemented:
 
 Preservation rule:
 Discovery attribution classification remains owned by `discovery-attribution-worker.js`. This phase only removes the redundant health wrapper from generic traversal.
+
+
+## Phase 62 - Remove redundant discovery attribution traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-62`.
+
+Implemented:
+- generic compute fallback now connects directly to `lemlist-profile-correction-worker.js`;
+- `discovery-attribution-worker.js` is removed from generic traversal;
+- direct `/analytics/api/stats` continues to emit `discoveryAttribution` from the ToolScout 2.0 resilient stats owner;
+- the legacy discovery-attribution widget and snapshot decorator remain compatibility-only;
+- no discovery classification definitions or category semantics are changed;
+- the architecture edge budget ratchets from 38 to 37.
+
+Preservation rule:
+Search, AI referral, distribution, social, dark-direct-deep, direct-home, tracked-campaign and other-referral attribution semantics remain unchanged in the direct stats truth.

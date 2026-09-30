@@ -268,3 +268,8 @@ Autoload scripts that hydrate a legacy dashboard from an already direct-owned AP
 ### Pure health endpoint extraction
 
 A wrapper that only adds a read-only health endpoint can be removed from generic traversal once that endpoint has an explicit route owner. Keep the underlying domain worker as the fallback base and preserve the health payload exactly.
+
+
+### Redundant enrichment wrapper removal
+
+A legacy enrichment wrapper may leave generic traversal when the direct route owner already emits the same business truth. Keep the legacy decorator available only for bounded compatibility paths and protect the direct payload with policy tests before cutting the edge.
