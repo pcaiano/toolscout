@@ -58,6 +58,7 @@ const directOwnerFiles={
   google_analytics_callback:'command-center-ga4-worker.js',
   gsc_trend_surface:'gsc-command-center-visible-worker.js',
   public_canonical_surface:'command-center-light-theme-worker.js',
+  visitor_integrity:'visitor-integrity-worker.js',
   analytics_human_actions:'analytics-human-actions-runtime.js',
   analytics_human_actions_mutation:'human-action-entry-worker.js',
   public_decision:'public-decision-runtime.js',
