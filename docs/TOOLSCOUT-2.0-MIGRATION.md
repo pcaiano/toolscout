@@ -320,3 +320,19 @@ Implemented:
 
 Preservation rule:
 The owner source/medium, GA measurement ID, 24h clean-window semantics, public attribution transformation, Command Center session boundary and external-acquisition payload remain unchanged.
+
+
+## Phase 32 - Direct GA4 rolling attribution
+
+Status: implemented on `architecture/toolscout-2.0-phase-32`.
+
+Implemented:
+- `GET /analytics/api/google/acquisition-24h` is now a declared `analytics_attribution_24h` route;
+- `handleGa4Attribution24hRoute()` preserves the existing Command Center session boundary and rolling 24h GA4 payload;
+- GA4 owner exclusion composes directly from that handler instead of calling the attribution wrapper as a generic fetch layer;
+- the compute router generic base moves from `ga4-attribution-24h-worker.js` to `d1-read-budget-worker.js`;
+- legacy Command Center widget decoration remains available only through the compatibility wrapper and is no longer part of production's generic traversal;
+- the architecture edge budget ratchets from 67 to 66.
+
+Preservation rule:
+The GA4 property/source, rolling 24h window, session and engagement metrics, source/medium, landing-page, country and direct-share semantics remain unchanged.
