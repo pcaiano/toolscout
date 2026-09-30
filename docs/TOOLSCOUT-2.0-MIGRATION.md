@@ -905,3 +905,19 @@ Implemented:
 
 Preservation rule:
 Canonical public URLs, legacy .html cleanup, analytics consent behavior, first-party page-entry tracking, private asset protection, Command Center ownership and MCP/A2A behavior remain unchanged. Only redundant generic request traversal is removed.
+
+
+## Phase 69 - Remove Command Center affiliate table request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-69`.
+
+Implemented:
+- generic compute fallback now connects directly to `growth-command-center-v2-worker.js`;
+- `command-center-affiliate-table-worker.js` leaves production's generic request traversal because canonical Command Center pages and read APIs already have direct ToolScout 2.0 ownership;
+- the legacy `GET /analytics/login` compatibility endpoint gains direct `command_center_local_login` ownership;
+- the fixed local-login token expired on 2026-09-09 and is retained only as a fail-closed compatibility contract: 503 when Command Center auth is unconfigured, otherwise 410 Gone;
+- public analytics compatibility and `withPrivateAssets()` remain scoped exactly as established in Phase 68;
+- the architecture edge budget ratchets from 32 to 31.
+
+Preservation rule:
+Canonical Command Center pages, business-truth APIs, public analytics consent, private asset protection, browser confirmation, visitor tracking and public URL/canonical behavior remain unchanged. No expired login credential is revived.
