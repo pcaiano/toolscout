@@ -178,3 +178,8 @@ Compatibility workers may consume this canonical read model. They may not carry 
 ### Legacy edge ratchet
 
 After explicit route ownership is proven, redundant decorator edges are removed one at a time. Each removal must preserve any still-useful fallback behavior explicitly at the front router and lower the architecture audit's maximum legacy-edge budget. The budget is a ratchet, not a target that may grow again.
+
+
+### Scheduled-owner extraction
+
+A worker that owns both direct routes and cron work does not need to remain in the generic request decorator chain. Its scheduled responsibility should be exported as a named function and invoked by the front scheduler according to `runtime-schedule-contract.js`. Internal calls may retain bounded lower-chain compatibility until their endpoint owners are extracted.

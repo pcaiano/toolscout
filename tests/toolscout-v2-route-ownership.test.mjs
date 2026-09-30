@@ -76,6 +76,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
+  assert.match(src,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/authority-acquisition-worker\.js'/);
   assert.match(src,/ownership\.owner==='mission_integrity'/);
   assert.match(src,/ownership\.owner==='growth_runtime_closed_loop'/);
   assert.match(src,/ownership\.owner==='public_editorial_site'/);
