@@ -60,22 +60,15 @@ async function ownerStatus(request,env){
   }),{status:200,headers});
 }
 
+let ownerAuditSchemaReady=null;
 async function ensureOwnerAuditSchema(env){
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS owner_retrospective_audits (
-    audit_key TEXT PRIMARY KEY,
-    visitor_hash TEXT NOT NULL,
-    window_start TEXT NOT NULL,
-    window_end TEXT NOT NULL,
-    total_confirmed_sessions INTEGER NOT NULL,
-    owner_visitor_events INTEGER NOT NULL,
-    high_confidence_matches INTEGER NOT NULL,
-    medium_confidence_matches INTEGER NOT NULL,
-    ambiguous_matches INTEGER NOT NULL,
-    definite_owner_sessions INTEGER NOT NULL,
-    unmatched_sessions INTEGER NOT NULL,
-    details_json TEXT NOT NULL,
-    audited_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )`).run();
+  if(ownerAuditSchemaReady)return ownerAuditSchemaReady;
+  ownerAuditSchemaReady=(async()=>{
+    const row=await env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='owner_retrospective_audits'").first();
+    if(Number(row?.n||0)!==1)throw new Error('owner_retrospective_audits_schema_not_migrated');
+    return {ok:true,source:'d1_migrations'};
+  })().catch(error=>{ownerAuditSchemaReady=null;throw error});
+  return ownerAuditSchemaReady;
 }
 
 async function ownerRetrospectiveAudit(request,env){
