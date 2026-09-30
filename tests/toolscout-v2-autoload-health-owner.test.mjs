@@ -32,6 +32,6 @@ test('legacy autoload UI remains compatibility-only',()=>{
   const runtime=read('command-center-autoload-worker.js');
   assert.match(runtime,/data-toolscout-command-autoload="5"/);
   assert.match(runtime,/\/analytics\/api\/stats/);
-  assert.match(runtime,/return decorate\(response\)/);
+  assert.match(runtime,/response=await decorate\(response\)/);
   assert.doesNotMatch(runtime,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
 });
