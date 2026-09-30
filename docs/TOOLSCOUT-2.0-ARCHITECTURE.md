@@ -303,3 +303,8 @@ A wrapper can leave generic request traversal while remaining in a bounded sched
 ### Compatibility wrapper extraction
 
 When a legacy wrapper mixes already direct-owned routes with a generic public response transform, migrate the routes first, then retain only the response behavior as an explicit bounded stage around the lower fallback. Security and tracking envelopes must remain scoped to the same fallback population; do not move them to the whole compute entrypoint merely to reduce an import edge.
+
+
+### Expired compatibility endpoints
+
+An expired internal compatibility endpoint should not keep an entire presentation wrapper in generic traversal. Give the endpoint a direct owner that preserves its current fail-closed response, and never revive an expired credential merely to preserve obsolete implementation structure.

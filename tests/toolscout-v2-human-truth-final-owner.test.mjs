@@ -22,7 +22,7 @@ test('human truth final health has a direct owner',()=>{
 
 test('generic traversal bypasses human truth final decorator',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/command-center-affiliate-table-worker\.js'/);
+  assert.match(compute,/import base from '\.\/growth-command-center-v2-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
