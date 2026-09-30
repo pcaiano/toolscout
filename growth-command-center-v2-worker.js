@@ -946,4 +946,11 @@ async function distributionHumanAction(request,env){
   return Response.json({ok:true,surface_slug:slug,status:next,resume:'verification_measurement'},{headers:JSON_H});
 }
 
-export default {async fetch(request,env,ctx){const url=new URL(request.url);if(request.method==='GET'&&analyticsPath(url.pathname))return servePage(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return protectedStats(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/chairman-queue'){if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});return Response.json(await chairmanQueue(request,env,ctx,{verifyLinks:true}),{headers:JSON_H})}if(request.method==='POST'&&url.pathname==='/analytics/api/reputation-review')return reputationReview(request,env);if(request.method==='POST'&&url.pathname==='/analytics/api/distribution-human-action')return distributionHumanAction(request,env);return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined}};
+export async function handleGrowthCommandCenterActionRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='POST'&&url.pathname==='/analytics/api/reputation-review')return reputationReview(request,env);
+  if(request.method==='POST'&&url.pathname==='/analytics/api/distribution-human-action')return distributionHumanAction(request,env);
+  return null;
+}
+
+export default {async fetch(request,env,ctx){const url=new URL(request.url);if(request.method==='GET'&&analyticsPath(url.pathname))return servePage(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return protectedStats(request,env,ctx);if(request.method==='GET'&&url.pathname==='/analytics/api/chairman-queue'){if(!(await validSession(request,env)))return Response.json({error:'command_center_session_expired'},{status:401,headers:JSON_H});return Response.json(await chairmanQueue(request,env,ctx,{verifyLinks:true}),{headers:JSON_H})}const owned=await handleGrowthCommandCenterActionRoute(request,env);if(owned)return owned;return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined}};

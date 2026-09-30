@@ -939,3 +939,19 @@ The remaining reputation-review action is a candidate for direct ownership, but 
 
 Preservation rule:
 Reputation quarantine review, override dispatch, Gmail proof, learning semantics and distribution state transitions remain unchanged. Only lazy request-time schema creation is removed.
+
+
+## Phase 71 - Remove Growth Command Center request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-71`.
+
+Implemented:
+- generic compute fallback now connects directly to `affiliate-human-action-entry-worker.js`;
+- `POST /analytics/api/reputation-review` and `POST /analytics/api/distribution-human-action` gain direct `command_center_growth_actions` ownership;
+- the direct owner calls the existing `reputationReview()` and `distributionHumanAction()` implementations through one exported handler rather than copying business logic;
+- Phase 70 guarantees the direct owner no longer performs runtime schema creation;
+- canonical Command Center pages, stats and chairman queue remain on their already direct read owners;
+- the architecture edge budget ratchets from 31 to 30.
+
+Preservation rule:
+Command Center session validation, reputation quarantine decisions, override dispatch and Gmail proof, learning rules, distribution human-gate resolution, public URLs/canonicals and analytics/tracking behavior remain unchanged.
