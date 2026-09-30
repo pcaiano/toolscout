@@ -567,3 +567,21 @@ Implemented:
 
 Preservation rule:
 Measurement audit generation, daily metric refresh cadence, traffic-integrity augmentation and lower scheduled delegation remain unchanged. Only generic request traversal is shortened.
+
+
+## Phase 47 - Explicit Visitor Integrity ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-47`.
+
+Implemented:
+- `GET /api/visitor-session-identity-health` gains direct `visitor_integrity` ownership;
+- generic request fallback now connects directly to `outbound-integrity-worker.js`;
+- `/api/events` visitor context is still prepared before lower runtime execution using a cloned request body;
+- visitor↔session linking is applied after the lower runtime confirms persistence;
+- public HTML visitor-cookie mirroring is applied explicitly before canonical, owner-attribution, SEO and social-footer response transforms;
+- affiliate redirects continue to use the existing explicit visitor-link helper;
+- direct traffic-integrity health continues to use the existing Visitor Integrity augmentation helper;
+- the architecture edge budget ratchets from 52 to 51.
+
+Preservation rule:
+First-valid visitor/session identity, confirmed-event persistence checks, outbound-proof linkage, country linkage, visitor cookie mirroring and visitor health semantics remain unchanged.

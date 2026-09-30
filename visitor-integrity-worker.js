@@ -198,16 +198,36 @@ async function augmentHealth(response,env){
   return Response.json(data,{headers:{'Cache-Control':'no-store'}});
 }
 
+export async function prepareVisitorIntegrityEvent(request,url){
+  return url.pathname==='/api/events'?eventContext(request):null;
+}
+
+export async function applyVisitorIntegrityLink(request,env,url,response,event){
+  try{await linkAfterRequest(request,env,url,response,event)}catch{}
+  return response;
+}
+
+export async function decorateVisitorIntegrityResponse(request,url,response){
+  if(request.method==='GET'&&url.hostname==='trytoolscout.org'&&isHtml(response)&&!ANALYTICS_PATHS.has(url.pathname))return decorate(response);
+  return response;
+}
+
+export async function handleVisitorIntegrityRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/api/visitor-session-identity-health')return sessionIdentityHealth(env);
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const url=new URL(request.url),event=url.pathname==='/api/events'?await eventContext(request):null;
-    if(request.method==='GET'&&url.pathname==='/api/visitor-session-identity-health')return sessionIdentityHealth(env);
+    const url=new URL(request.url),event=await prepareVisitorIntegrityEvent(request,url);
+    const owned=await handleVisitorIntegrityRoute(request,env);
+    if(owned)return owned;
     let response=await base.fetch(request,env,ctx);
-    try{await linkAfterRequest(request,env,url,response,event)}catch{}
+    response=await applyVisitorIntegrityLink(request,env,url,response,event);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await augmentStats(response,env);
     if(request.method==='GET'&&url.pathname==='/api/traffic-integrity-health')response=await augmentHealth(response,env);
-    if(request.method==='GET'&&url.hostname==='trytoolscout.org'&&isHtml(response)&&!ANALYTICS_PATHS.has(url.pathname))return decorate(response);
-    return response;
+    return decorateVisitorIntegrityResponse(request,url,response);
   },
   async scheduled(event,env,ctx){if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx)}
 };

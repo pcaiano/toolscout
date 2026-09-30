@@ -243,3 +243,8 @@ A wrapper may leave generic traversal while its exported helpers remain in use b
 ### Split request and scheduled ownership
 
 A legacy wrapper may leave generic request traversal before its scheduled responsibility is fully removed from compatibility chains. Export the scheduled responsibility explicitly and invoke it where the front scheduler previously delegated to that wrapper. Preserve ordering and avoid duplicate invocation when another bounded coordinator still traverses the compatibility chain.
+
+
+### Stateful response-stage extraction
+
+When a wrapper performs state linkage around a lower request, preserve both sides of the boundary: prepare any request context before lower execution, then apply persistence-dependent linkage only after the lower response exists. Response decoration may then be expressed as an ordered front-router stage without changing identity semantics.

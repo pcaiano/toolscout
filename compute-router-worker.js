@@ -1,7 +1,8 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './visitor-integrity-worker.js';
+import base from './outbound-integrity-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
+import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
 import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
@@ -46,7 +47,11 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 async function legacyFallback(request,env,ctx){
   const canonicalOwned=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
   if(canonicalOwned)return canonicalOwned;
+  const url=new URL(request.url);
+  const visitorEvent=await prepareVisitorIntegrityEvent(request,url);
   let response=await base.fetch(request,env,ctx);
+  response=await applyVisitorIntegrityLink(request,env,url,response,visitorEvent);
+  response=await decorateVisitorIntegrityResponse(request,url,response);
   response=await transformPublicCanonicalResponse(request,response);
   response=await applyMarkedOwnerAnalytics(request,response);
   response=await transformSeoPublicPage(request,response,env);
@@ -1909,6 +1914,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='google_analytics_callback')response=await handleCommandCenterGa4Route(request,env,ctx);
   else if(ownership.owner==='gsc_trend_surface')response=await handleGscTrendSurfaceRoute(request,env,ctx);
   else if(ownership.owner==='public_canonical_surface')response=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
+  else if(ownership.owner==='visitor_integrity')response=await handleVisitorIntegrityRoute(request,env);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);
