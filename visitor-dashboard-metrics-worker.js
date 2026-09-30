@@ -18,10 +18,17 @@ async function decorate(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleMonthMetricsHealthRoute(request){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/api/month-metrics-health')return null;
+  return Response.json({ok:true,service:'toolscout-month-metrics',version:1},{headers:{'Cache-Control':'no-store'}});
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleMonthMetricsHealthRoute(request);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(url.pathname==='/api/month-metrics-health')return Response.json({ok:true,service:'toolscout-month-metrics',version:1},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
