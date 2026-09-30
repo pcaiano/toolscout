@@ -585,3 +585,19 @@ Implemented:
 
 Preservation rule:
 First-valid visitor/session identity, confirmed-event persistence checks, outbound-proof linkage, country linkage, visitor cookie mirroring and visitor health semantics remain unchanged.
+
+
+## Phase 49 - Explicit live traffic ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-49`.
+
+Implemented:
+- distribution feeds `/api/distribution/feed.json` and `/api/distribution/feed.xml` gain explicit `traffic_integrity_live` ownership;
+- the `page_confirmed` browser-proof gate runs explicitly before lower-runtime event persistence;
+- public HTML traffic transforms run explicitly immediately after lower-runtime response, preserving their original position before Visitor Integrity, canonical, owner-attribution, SEO and footer stages;
+- generic fallback moves from `traffic-integrity-live-worker.js` to `traffic-integrity-guard-worker.js`;
+- the live wrapper remains compatibility-capable but is no longer part of production generic traversal;
+- the architecture edge budget ratchets from 50 to 49.
+
+Preservation rule:
+Distribution feed priority, page-confirmation eligibility, browser-proof enforcement, SEO uplift, commercial cluster overrides, late visitor retry injection and response-stage ordering remain unchanged.
