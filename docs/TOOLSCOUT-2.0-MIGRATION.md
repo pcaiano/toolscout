@@ -888,3 +888,20 @@ Implemented:
 
 Preservation rule:
 PostHog audit behavior, D1-first behavior intelligence, distribution-priority learning and Command Center compatibility augmentation remain unchanged. Only redundant request traversal is removed.
+
+
+## Phase 68 - Remove agent protocol compatibility request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-68`.
+
+Implemented:
+- generic compute fallback now connects directly to `command-center-affiliate-table-worker.js`;
+- `agent-protocol-worker.js` leaves production's generic request traversal because MCP/A2A routes already have direct `agent_protocol_core` ownership;
+- `GET /analytics-consent` gains direct `public_analytics_consent` ownership;
+- public HTML canonical markup cleanup plus consent decoration move to `public-analytics-runtime.js` as an explicit legacy public response stage;
+- `withPrivateAssets()` remains scoped to the legacy fallback around the lower runtime, preserving private asset denial, browser confirmation, first-party page-entry tracking and stats compatibility behavior;
+- direct Command Center, sitemap, human-actions, chairman, stats and agent-protocol routes remain outside the generic fallback;
+- the architecture edge budget ratchets from 33 to 32.
+
+Preservation rule:
+Canonical public URLs, legacy .html cleanup, analytics consent behavior, first-party page-entry tracking, private asset protection, Command Center ownership and MCP/A2A behavior remain unchanged. Only redundant generic request traversal is removed.

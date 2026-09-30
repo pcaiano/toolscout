@@ -24,7 +24,7 @@ test('event guard still runs before lower event persistence',()=>{
   assert.match(runtime,/parallel_multi_page_zero_interaction/);
   assert.match(runtime,/trusted_interaction_required/);
   const process=compute.indexOf('processTrafficIntegrityGuardEvent(request,env,ctx');
-  const lower=compute.indexOf('base.fetch(nextRequest,env,ctx)');
+  const lower=compute.indexOf('protectedLegacyBase.fetch(nextRequest,env,ctx)');
   assert.ok(process>=0&&lower>process,'guard must own the event path before lower persistence');
 });
 
@@ -45,7 +45,7 @@ test('traffic guard cleanup is explicit and generic traversal bypasses the wrapp
   assert.match(runtime,/export async function runTrafficIntegrityGuardScheduled/);
   assert.match(runtime,/DELETE FROM traffic_guard_events WHERE created_at<datetime\('now','-7 days'\)/);
   assert.match(compute,/runTrafficIntegrityGuardScheduled/);
-  assert.match(compute,/import base from '\.\/agent-protocol-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-affiliate-table-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);

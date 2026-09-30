@@ -298,3 +298,8 @@ A first-party tracking wrapper should be split into an explicit write-route owne
 ### Request-only wrapper removal with scheduled preservation
 
 A wrapper can leave generic request traversal while remaining in a bounded scheduled compatibility chain. Prove that the front scheduler does not depend on the request base for that scheduled side effect, then preserve the scheduled ordering and remove only the request edge.
+
+
+### Compatibility wrapper extraction
+
+When a legacy wrapper mixes already direct-owned routes with a generic public response transform, migrate the routes first, then retain only the response behavior as an explicit bounded stage around the lower fallback. Security and tracking envelopes must remain scoped to the same fallback population; do not move them to the whole compute entrypoint merely to reduce an import edge.
