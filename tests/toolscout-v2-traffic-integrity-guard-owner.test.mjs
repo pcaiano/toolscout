@@ -24,7 +24,7 @@ test('event guard still runs before lower event persistence',()=>{
   assert.match(runtime,/parallel_multi_page_zero_interaction/);
   assert.match(runtime,/trusted_interaction_required/);
   const process=compute.indexOf('processTrafficIntegrityGuardEvent(request,env,ctx');
-  const lower=compute.indexOf('base.fetch(nextRequest,env,ctx)');
+  const lower=compute.indexOf('protectedLegacyBase.fetch(nextRequest,env,ctx)');
   assert.ok(process>=0&&lower>process,'guard must own the event path before lower persistence');
 });
 
