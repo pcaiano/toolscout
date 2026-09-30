@@ -1,4 +1,3 @@
-  {id:'visitor_integrity_health',owner:'visitor_integrity',plane:'signals',methods:['GET'],exact:['/api/visitor-session-identity-health']},
 // ToolScout 2.0 explicit route ownership contract.
 // The contract is descriptive first and becomes executable route-by-route.
 // Legacy fallback remains available until each route group has parity coverage.
@@ -17,6 +16,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'authority_closed_loop_action',owner:'growth_runtime_closed_loop',plane:'executor',methods:['POST'],exact:['/api/distribution/authority/close-loop']},
   {id:'seo_runtime',owner:'seo_runtime',plane:'signals',methods:['GET','POST'],prefixes:['/api/seo/']},
   {id:'engine_evidence',owner:'mission_integrity',plane:'signals',methods:['POST'],exact:['/api/engine-evidence']},
+  {id:'visitor_integrity_health',owner:'visitor_integrity',plane:'signals',methods:['GET'],exact:['/api/visitor-session-identity-health']},
   {id:'command_center_page',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html','/command-center','/command-center/']},
   {id:'command_center_truth',owner:'command_center_direct',plane:'signals',methods:['GET'],exact:['/api/command-center-business-truth','/api/command-center-simplified-health']},
   {id:'command_center_resilient_health',owner:'command_center_resilient_health',plane:'signals',methods:['GET'],exact:['/api/command-center-resilient-health']},
