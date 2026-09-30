@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './growth-runtime-observability-worker.js';
+import base,{handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {runAuthorityDrainScheduled} from './growth-runtime-authority-drain-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
@@ -19,7 +19,6 @@ import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-w
 import {handleSeoRuntimeRoute,transformSeoPublicPage,runSeoRuntimeScheduled} from './seo-cloudflare-runtime-worker.js';
 import {handleCloudflarePrimaryRuntimeRoute,runCloudflarePrimaryScheduled} from './cloudflare-primary-runtime-worker.js';
 import {handleAuthorityAcquisitionRoute,runAuthorityAcquisitionScheduled} from './authority-acquisition-worker.js';
-import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {handleAuthorityHealthRoute} from './authority-health-runtime.js';
 import {handleAgentProtocolRoute} from './agent-protocol-core-worker.js';
 import {handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';

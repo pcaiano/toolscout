@@ -434,3 +434,18 @@ The old wrapper-owned `15 * * * *` drain could be unreachable because the comput
 
 Preservation rule:
 Authority sender handoff semantics, bounded drain passes, callback evidence requirements and error recording remain unchanged. Only ownership and scheduler reachability change.
+
+
+## Phase 39 - Remove redundant growth observability traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-39`.
+
+Implemented:
+- generic compute fallback now connects directly to `growth-runtime-closed-loop-worker.js`;
+- `growth-runtime-observability-worker.js` is removed from generic traversal because its response corrections target routes already intercepted by explicit owners: discovery health, autonomous growth health and the two stats reads;
+- the observability wrapper remains available inside bounded compatibility compositions such as the D1 budget path, where its corrections are still consumed;
+- no route owner, observability payload or scheduled mission changes in this phase;
+- the architecture edge budget ratchets from 60 to 59.
+
+Preservation rule:
+Existing observability corrections remain available where explicit compositions still depend on them. Only redundant generic traversal is removed.
