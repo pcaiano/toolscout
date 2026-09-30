@@ -1,3 +1,4 @@
+import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
 import base from './operational-truth-reconciliation-worker.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
@@ -1883,6 +1884,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);
   else if(ownership.owner==='public_navigation')response=await renderPublicNavigationPage(request,env);
+  else if(ownership.owner==='affiliate_redirect')response=await handleAffiliateRedirectRoute(request,env,ctx);
   if(!response)return null;
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);

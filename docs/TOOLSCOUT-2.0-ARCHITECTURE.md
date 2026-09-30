@@ -147,3 +147,22 @@ Do not create new SEO surface merely because generation is cheap.
 Do not spend external execution capacity on low-value surfaces unless explicitly selected as a bounded experiment.
 
 Do not change a proven URL, placement or affiliate route solely for architectural neatness.
+
+
+## Current route-ownership state
+
+As of Phase 23, every route group declared in `runtime-route-contract.js` has an explicit owner. Unknown or undeclared paths still retain the legacy fallback for compatibility.
+
+The commercial `/go/*` boundary is intentionally different from a clean-room rewrite. Its explicit owner calls a bounded compatibility core beginning at `distribution-embed-worker.js` and then applies the existing social-attribution, outbound-integrity and visitor-linkage stages explicitly. This preserves the mature redirect, affiliate-state, sub-ID, fallback and measurement semantics while removing declared commercial requests from the full decorator traversal.
+
+Further decomposition of the bounded commercial core is allowed only after parity can be demonstrated for:
+- affiliate and public destinations;
+- `/go/embed`;
+- click reference and affiliate sub-ID propagation;
+- click-time affiliate state;
+- session and funnel evidence;
+- known-bot/synthetic bypass;
+- strict outbound proof;
+- visitor linkage;
+- social affiliate attribution;
+- noindex/no-store redirect headers.
