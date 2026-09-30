@@ -30,7 +30,11 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   const authority=read('authority-acquisition-worker.js');
   assert.match(compute,/runGrowthScheduler/);
   assert.match(compute,/runAuthorityAcquisitionScheduled/);
-  assert.match(compute,/import base from '\.\/seo-cloudflare-runtime-worker\.js'/);
+  assert.match(compute,/import base from '\.\/cloudflare-primary-runtime-worker\.js'/);
+  assert.match(compute,/runSeoRuntimeScheduled/);
+  const seo=read('seo-cloudflare-runtime-worker.js');
+  assert.match(seo,/export async function runSeoRuntimeScheduled/);
+  assert.match(seo,/trigger!==TOOLSCOUT_CRONS\.hourly&&trigger!==TOOLSCOUT_CRONS\.daily/);
   assert.match(authority,/export async function runAuthorityAcquisitionScheduled/);
   assert.match(authority,/trigger!==TOOLSCOUT_CRONS\.hourly/);
   assert.match(authority,/authority_acquisition_scheduler/);

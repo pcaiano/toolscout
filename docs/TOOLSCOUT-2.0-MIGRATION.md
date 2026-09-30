@@ -236,3 +236,20 @@ Implemented:
 
 Preservation rule:
 The vetted acquisition route handlers, hourly cadence, public-placement reconciliation and pipeline recovery sequence remain unchanged. Only ownership and dispatch become explicit.
+
+
+## Phase 27 - Explicit SEO runtime ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-27`.
+
+Implemented:
+- `runSeoRuntimeScheduled()` explicitly owns the hourly/daily SEO runtime refresh;
+- the compute router invokes that scheduler only after the lower scheduled chain completes, preserving prior ordering;
+- generic request fallback now connects directly to `cloudflare-primary-runtime-worker.js`;
+- the compute fallback applies `transformSeoPublicPage()` explicitly before ToolScout social-footer injection, preserving the prior response transformation order;
+- direct `/api/seo/*` ownership remains unchanged;
+- the SEO wrapper remains available as a compatibility module but is no longer part of production's generic decorator traversal;
+- the architecture edge budget ratchets from 70 to 69.
+
+Preservation rule:
+Canonical/redirect behavior, observed-search-demand activation, IndexNow queuing, public SEO transformation and hourly/daily refresh cadence remain unchanged.
