@@ -202,29 +202,39 @@ async function decoratePage(response){
 }
 function analyticsPage(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/command-center'||path==='/command-center/'}
 
+export async function handleCommandCenterGa4Route(request,env,ctx){
+  const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/analytics/api/google/connect')return googleAnalyticsConnectResponse(request,env,ctx);
+  if(request.method==='GET'&&url.pathname==='/api/google-analytics/callback')return googleAnalyticsCallbackResponse(request,env);
+  if(request.method==='POST'&&url.pathname==='/analytics/api/google/disconnect')return googleAnalyticsDisconnectResponse(request,env,ctx);
+  if(request.method==='GET'&&url.pathname==='/analytics/api/google/acquisition'){
+    if(!ownerRouteAuthenticated(request))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+    const acquisition=await ga4Snapshot(env,request);
+    return Response.json(acquisition,{status:acquisition.status==='connected'?200:503,headers:JSON_H});
+  }
+  if(request.method==='GET'&&url.pathname==='/analytics/api/commerce'){
+    if(!ownerRouteAuthenticated(request))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+    const commerce=await serverCommerceSnapshot(env);
+    return Response.json(commerce,{status:commerce.status==='connected'?200:503,headers:JSON_H});
+  }
+  if(request.method==='GET'&&url.pathname==='/analytics/api/stats'){
+    const upstream=await base.fetch(request,env,ctx);if(!upstream.ok)return upstream;
+    let data;try{data=await upstream.json()}catch{return new Response('Command Center stats unavailable',{status:502,headers:{'Cache-Control':'no-store'}})}
+    const [acquisition,commerce]=await Promise.all([ga4Snapshot(env,request),serverCommerceSnapshot(env)]);
+    return Response.json(mergeTruth(data,acquisition,commerce),{headers:JSON_H});
+  }
+  if(request.method==='GET'&&url.pathname==='/analytics/api/ga4-health'){
+    const acquisition=await ga4Snapshot(env,request);
+    return Response.json({ok:acquisition.status==='connected',acquisition},{status:acquisition.status==='connected'?200:503,headers:JSON_H});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleCommandCenterGa4Route(request,env,ctx);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/analytics/api/google/connect')return googleAnalyticsConnectResponse(request,env,ctx);
-    if(request.method==='GET'&&url.pathname==='/api/google-analytics/callback')return googleAnalyticsCallbackResponse(request,env);
-    if(request.method==='POST'&&url.pathname==='/analytics/api/google/disconnect')return googleAnalyticsDisconnectResponse(request,env,ctx);
-    if(request.method==='GET'&&url.pathname==='/analytics/api/google/acquisition'){
-      if(!ownerRouteAuthenticated(request))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
-      const acquisition=await ga4Snapshot(env,request);return Response.json(acquisition,{status:acquisition.status==='connected'?200:503,headers:JSON_H});
-    }
-    if(request.method==='GET'&&url.pathname==='/analytics/api/commerce'){
-      if(!ownerRouteAuthenticated(request))return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
-      const commerce=await serverCommerceSnapshot(env);return Response.json(commerce,{status:commerce.status==='connected'?200:503,headers:JSON_H});
-    }
-    if(request.method==='GET'&&url.pathname==='/analytics/api/stats'){
-      const upstream=await base.fetch(request,env,ctx);if(!upstream.ok)return upstream;
-      let data;try{data=await upstream.json()}catch{return new Response('Command Center stats unavailable',{status:502,headers:{'Cache-Control':'no-store'}})}
-      const [acquisition,commerce]=await Promise.all([ga4Snapshot(env,request),serverCommerceSnapshot(env)]);
-      return Response.json(mergeTruth(data,acquisition,commerce),{headers:JSON_H});
-    }
-    if(request.method==='GET'&&url.pathname==='/analytics/api/ga4-health'){
-      const acquisition=await ga4Snapshot(env,request);return Response.json({ok:acquisition.status==='connected',acquisition},{status:acquisition.status==='connected'?200:503,headers:JSON_H});
-    }
     const response=await base.fetch(request,env,ctx);
     return request.method==='GET'&&analyticsPage(url.pathname)?decoratePage(response):response;
   },
