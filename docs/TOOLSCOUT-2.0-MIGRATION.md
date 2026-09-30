@@ -921,3 +921,21 @@ Implemented:
 
 Preservation rule:
 Canonical Command Center pages, business-truth APIs, public analytics consent, private asset protection, browser confirmation, visitor tracking and public URL/canonical behavior remain unchanged. No expired login credential is revived.
+
+
+## Phase 70 - Migrate outbound reputation schema
+
+Status: implemented on `architecture/toolscout-2.0-phase-70`.
+
+Implemented:
+- migration `0101_outbound_reputation_schema.sql` formally owns `outbound_reputation_overrides` and `outbound_reputation_learning`;
+- `growth-command-center-v2-worker.js` no longer performs reputation-related `CREATE TABLE` statements during the owner-review request path;
+- the table shapes, primary keys, defaults and existing reputation override/learning writes are unchanged;
+- deploy ordering remains migration-first through the existing D1 migration step;
+- the legacy edge budget remains 31 because this phase prepares the next ownership extraction without changing request dispatch.
+
+Why this phase is separate:
+The remaining reputation-review action is a candidate for direct ownership, but direct ToolScout 2.0 owners may not create or alter schema at request time. Schema ownership is removed first so the following request-traversal extraction is bounded and reversible.
+
+Preservation rule:
+Reputation quarantine review, override dispatch, Gmail proof, learning semantics and distribution state transitions remain unchanged. Only lazy request-time schema creation is removed.
