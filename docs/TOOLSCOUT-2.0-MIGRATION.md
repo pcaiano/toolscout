@@ -486,3 +486,20 @@ The integrity recovery previously lived inside a wrapper `scheduled()` below the
 
 Preservation rule:
 Authority gap criteria, cooldown behavior, execution ledger semantics and recovery logic remain unchanged. Only ownership and reachability are made explicit.
+
+
+## Phase 42 - Explicit public canonical surface ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-42`.
+
+Implemented:
+- `/sitemap.xml`, `/data/tools.json` and residual legacy `.html` redirects gain explicit `public_canonical_surface` ownership;
+- `handlePublicCanonicalSurfaceRoute()` preserves sitemap merge/deduplication, public tools JSON and extensionless 308 redirects;
+- `transformPublicCanonicalResponse()` preserves canonical markup and SEO discovery-link injection as an explicit response stage;
+- compute fallback ordering is explicit: lower runtime -> canonical response transform -> owner attribution -> SEO runtime -> social footer;
+- generic fallback now connects directly to `command-center-final-integrity-worker.js`;
+- the light-theme wrapper remains available inside bounded compatibility compositions for Command Center and owner-specific health paths;
+- the architecture edge budget ratchets from 57 to 56.
+
+Preservation rule:
+Canonical URLs, sitemap output, public tools data, SEO discovery links and residual HTML redirects remain unchanged.
