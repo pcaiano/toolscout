@@ -35,6 +35,7 @@ on:
       - 'migrations/0096_human_action_schema.sql'
       - 'human-action-entry-worker.js'
       - 'command-center-direct-runtime.js'
+      - 'command-center-business-truth-runtime.js'
       - 'command-center-simplified-view.js'
       - 'operational-truth-reconciliation-worker.js'
       - 'growth-runtime-integrity-worker.js'
@@ -144,6 +145,7 @@ jobs:
           node --check human-action-entry-worker.js
           node --check human-action-entry-worker.js
           node --check command-center-direct-runtime.js
+          node --check command-center-business-truth-runtime.js
           node --check operational-truth-reconciliation-worker.js
           node --check command-center-simplified-view.js
           node --check scripts/editorial-authority-model.mjs

@@ -6,7 +6,7 @@ import {routeOwner} from '../runtime-route-contract.js';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('business truth exposes the ToolScout 2.0 editorial portfolio',()=>{
-  const truth=read('operational-truth-reconciliation-worker.js');
+  const truth=read('command-center-business-truth-runtime.js');
   assert.match(truth,/editorialAuthorityPortfolio/);
   assert.match(truth,/command-center-business-truth-v6-editorial-authority/);
   assert.match(truth,/averagePriorityScore/);
@@ -27,7 +27,7 @@ test('Command Center puts editorial authority beside business outcomes',()=>{
 });
 
 test('Command Center GET observability no longer mutates affiliate schema',()=>{
-  const truth=read('operational-truth-reconciliation-worker.js');
+  const truth=read('command-center-business-truth-runtime.js');
   assert.match(truth,/affiliateNetworkEvidenceSchemaState/);
   assert.match(truth,/read_only_schema_probe/);
   const schemaControl=read('command-center-schema-control-runtime.js');
@@ -50,10 +50,17 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.equal(routeOwner('/api/command-center-business-truth/reconcile-affiliate-schema',{method:'POST'}).owner,'command_center_schema_control');
 
   const entry=read('compute-router-worker.js');
-  const truth=read('operational-truth-reconciliation-worker.js');
+  const truth=read('command-center-business-truth-runtime.js');
+  const facade=read('command-center-direct-runtime.js');
+  const legacy=read('operational-truth-reconciliation-worker.js');
   assert.match(entry,/ownership\.owner==='command_center_direct'/);
   assert.match(entry,/ownership\.owner==='command_center_schema_control'/);
   assert.match(truth,/export async function handleCommandCenterDirectRoute/);
   assert.match(truth,/COMMAND_CENTER_SESSION_COOKIE/);
   assert.match(truth,/Response\.redirect\(target\.toString\(\),308\)/);
+  assert.doesNotMatch(truth,/import base|base\.fetch|CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+  assert.doesNotMatch(facade,/operational-truth-reconciliation-worker/);
+  assert.match(facade,/command-center-business-truth-runtime\.js/);
+  assert.match(legacy,/command-center-business-truth-runtime\.js/);
+  assert.doesNotMatch(legacy,/async function buildCommandCenterBusinessTruth/);
 });
