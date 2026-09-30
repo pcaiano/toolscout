@@ -758,3 +758,19 @@ Implemented:
 
 Preservation rule:
 Autoload health remains version 5 with traffic-truth-first, Chairman second, three traffic trend series and dual-axis trend behavior. Only redundant generic UI traversal is removed.
+
+
+## Phase 60 - Direct Command Center truth health ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-60`.
+
+Implemented:
+- `GET /api/command-center-truth-health` gains direct `command_center_truth_health` ownership;
+- `command-center-truth-consolidation-worker.js` exports `handleCommandCenterTruthHealthRoute()`;
+- generic request fallback now connects directly to `discovery-attribution-health-worker.js`;
+- commercial-truth consolidation and legacy Command Center presentation remain compatibility-only;
+- analytics stats continue through their existing direct resilient owner;
+- the architecture edge budget ratchets from 40 to 39.
+
+Preservation rule:
+The health payload retains D1 browser-confirmed commercial truth, the redundant north-star state and consolidated traffic truth. No commercial ledger or affiliate metric is redefined.

@@ -164,10 +164,24 @@ async function decorateAnalytics(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleCommandCenterTruthHealthRoute(request){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/api/command-center-truth-health')return null;
+  return Response.json({
+    ok:true,
+    service:'toolscout-command-center-truth',
+    version:1,
+    canonicalCommercialTruth:'D1 browser-confirmed',
+    northStar:'removed_as_redundant',
+    trafficTruth:'consolidated'
+  },{headers:JSON_H});
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-truth-health')return Response.json({ok:true,service:'toolscout-command-center-truth',version:1,canonicalCommercialTruth:'D1 browser-confirmed',northStar:'removed_as_redundant',trafficTruth:'consolidated'},{headers:JSON_H});
+    const owned=await handleCommandCenterTruthHealthRoute(request);
+    if(owned)return owned;
     let response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')response=await consolidateStats(response,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))response=await decorateAnalytics(response);
