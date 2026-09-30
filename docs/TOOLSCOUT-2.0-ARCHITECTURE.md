@@ -198,3 +198,8 @@ A coordinator wrapper may be removed from generic request traversal once its sch
 ### Direct-owner side effects
 
 When a route moves ahead of a legacy decorator, preserve any intentional side effect that was coupled to that route even if the response HTML is replaced. Cookie marking, attribution context and security/session state are part of route semantics. Extract those effects into a shared primitive and invoke them from the direct owner rather than relying on a bypassed wrapper.
+
+
+### Attribution-stage extraction
+
+Analytics attribution that applies to generic public GET responses belongs in an explicit front-router response stage, not in a broad decorator. Preserve stage order relative to other response transforms and give protected analytics read endpoints their own route owner.
