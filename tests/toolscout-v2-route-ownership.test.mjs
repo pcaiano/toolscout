@@ -35,6 +35,7 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/command-center-human-truth-health',{method:'GET'}).owner,'human_truth_base_health');
   assert.equal(routeOwner('/api/command-center-autoload-health',{method:'GET'}).owner,'command_center_autoload_health');
   assert.equal(routeOwner('/api/command-center-truth-health',{method:'GET'}).owner,'command_center_truth_health');
+  assert.equal(routeOwner('/api/discovery-attribution-health',{method:'GET'}).owner,'discovery_attribution_health');
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
   assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'legacy_chain');
   assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'legacy_chain');
@@ -99,7 +100,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/discovery-attribution-health-worker\.js'/);
+  assert.match(src,/import base from '\.\/discovery-attribution-worker\.js'/);
+  assert.doesNotMatch(src,/import base from '\.\/discovery-attribution-health-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/command-center-autoload-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/command-center-resilient-worker\.js'/);
@@ -159,6 +161,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='human_truth_base_health'/);
   assert.match(src,/ownership\.owner==='command_center_autoload_health'/);
   assert.match(src,/ownership\.owner==='command_center_truth_health'/);
+  assert.match(src,/ownership\.owner==='discovery_attribution_health'/);
+  assert.match(src,/handleDiscoveryAttributionHealthRoute/);
   assert.match(src,/handleCommandCenterTruthHealthRoute/);
   assert.match(src,/handleCommandCenterAutoloadHealthRoute/);
   assert.match(src,/handleHumanTruthBaseRoute/);

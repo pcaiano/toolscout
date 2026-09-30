@@ -774,3 +774,18 @@ Implemented:
 
 Preservation rule:
 The health payload retains D1 browser-confirmed commercial truth, the redundant north-star state and consolidated traffic truth. No commercial ledger or affiliate metric is redefined.
+
+
+## Phase 61 - Direct discovery attribution health ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-61`.
+
+Implemented:
+- `GET /api/discovery-attribution-health` gains direct `discovery_attribution_health` ownership;
+- `discovery-attribution-health-worker.js` exports `handleDiscoveryAttributionHealthRoute()`;
+- generic compute fallback now connects directly to `discovery-attribution-worker.js`;
+- the health payload, category taxonomy and no-store cache behavior remain unchanged;
+- the architecture edge budget ratchets from 39 to 38.
+
+Preservation rule:
+Discovery attribution classification remains owned by `discovery-attribution-worker.js`. This phase only removes the redundant health wrapper from generic traversal.

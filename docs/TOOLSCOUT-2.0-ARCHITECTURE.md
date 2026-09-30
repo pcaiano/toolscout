@@ -263,3 +263,8 @@ Once the current product surface is served by a direct owner, an older wrapper t
 ### Autoload presentation extraction
 
 Autoload scripts that hydrate a legacy dashboard from an already direct-owned API are presentation compatibility, not route ownership. Direct-own their health surface and remove the wrapper from generic traversal once the current Command Center no longer depends on that presentation layer.
+
+
+### Pure health endpoint extraction
+
+A wrapper that only adds a read-only health endpoint can be removed from generic traversal once that endpoint has an explicit route owner. Keep the underlying domain worker as the fallback base and preserve the health payload exactly.
