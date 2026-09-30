@@ -1,0 +1,43 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+
+test('Command Center GA4 exposes one explicit request handler',()=>{
+  const runtime=read('command-center-ga4-worker.js');
+  assert.match(runtime,/export async function handleCommandCenterGa4Route/);
+  assert.match(runtime,/\/analytics\/api\/google\/connect/);
+  assert.match(runtime,/\/api\/google-analytics\/callback/);
+  assert.match(runtime,/\/analytics\/api\/google\/disconnect/);
+  assert.match(runtime,/\/analytics\/api\/google\/acquisition/);
+  assert.match(runtime,/\/analytics\/api\/commerce/);
+  assert.match(runtime,/googleAnalyticsConnectResponse/);
+  assert.match(runtime,/googleAnalyticsCallbackResponse/);
+  assert.match(runtime,/googleAnalyticsDisconnectResponse/);
+  assert.doesNotMatch(runtime,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+});
+
+test('Google Analytics callback is direct while owner-only operations stay behind D1 budget',()=>{
+  const contract=read('runtime-route-contract.js');
+  const compute=read('compute-router-worker.js');
+  assert.match(contract,/id:'google_analytics_callback'/);
+  assert.match(contract,/owner:'google_analytics_callback'/);
+  assert.match(compute,/ownership\.owner==='google_analytics_callback'/);
+  assert.match(compute,/handleCommandCenterGa4Route/);
+  assert.match(contract,/id:'d1_read_budget_get'/);
+  assert.match(contract,/id:'d1_read_budget_post'/);
+});
+
+test('D1 budget composes owner-authenticated GA4 operations from explicit handler',()=>{
+  const budget=read('d1-read-budget-worker.js');
+  assert.match(budget,/handleCommandCenterGa4Route/);
+  assert.match(budget,/validCommandCenterSession\(request,env\)\?withOwnerAccessHeader\(request\):request/);
+  assert.match(budget,/return handleCommandCenterGa4Route\(forwarded,env,ctx\)/);
+});
+
+test('generic traversal bypasses Command Center GA4 wrapper',()=>{
+  const compute=read('compute-router-worker.js');
+  assert.match(compute,/import base from '\.\/command-center-health-language-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/command-center-ga4-worker\.js'/);
+});
