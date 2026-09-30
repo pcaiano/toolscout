@@ -268,3 +268,20 @@ Implemented:
 
 Why this phase is separate:
 The Cloudflare Primary wrapper is the next decorator candidate, but it coordinates GSC refresh, the primary growth cycle and lower scheduled dispatch. Schema ownership is removed first so the later routing/scheduling extraction does not combine D1 migration risk with dispatch changes.
+
+
+## Phase 29 - Explicit Cloudflare Primary ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-29`; held for CI before merge because GitHub Actions quota is exhausted on 2026-09-30.
+
+Implemented:
+- `handleCloudflarePrimaryRuntimeRoute()` explicitly owns `GET /api/runtime/executors` and `POST /api/runtime/cloudflare-primary-cycle`;
+- `runCloudflarePrimaryScheduled()` explicitly owns the hourly/daily GSC refresh and primary growth coordinator cycle;
+- the compute router dispatches those responsibilities directly;
+- the generic request base moves from `cloudflare-primary-runtime-worker.js` to `ga4-owner-exclusion-worker.js`;
+- on hourly/daily schedules, SEO refresh remains chained after Cloudflare Primary, while Growth Scheduler and Authority Acquisition remain parallel sidecars;
+- Cloudflare Primary still dispatches its lower scheduled chain once from inside the primary runtime ledger, preserving the mature coordinator model;
+- the architecture edge budget ratchets from 69 to 68.
+
+Preservation rule:
+Runtime executor payloads, admin authentication, GSC refresh, primary-growth ledger semantics, lower scheduled dispatch, SEO ordering and generic fallback behavior remain unchanged.
