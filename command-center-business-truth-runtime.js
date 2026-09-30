@@ -708,7 +708,7 @@ export async function handleCommandCenterDirectRoute(request,env){
   }
 
   if(request.method==='GET'&&COMMAND_CENTER_PATHS.has(u.pathname)){
-    return simplifiedPage(null,env);
+    return simplifiedPage(null,env,request);
   }
 
   if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
