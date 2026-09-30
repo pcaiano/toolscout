@@ -837,3 +837,22 @@ Implemented:
 
 Preservation rule:
 The month-metrics health payload, cache policy and legacy compatibility script remain unchanged. Only redundant generic traversal is removed.
+
+
+## Phase 65 - Migrate visitor accuracy schema
+
+Status: implemented on `architecture/toolscout-2.0-phase-65`.
+
+Implemented:
+- migration `0100_visitor_accuracy_schema.sql` formally owns `visitor_events`, `visitor_tracking_meta` and visitor-event indexes;
+- `visitor-accuracy-worker.js` no longer performs `CREATE TABLE`, `CREATE INDEX` or tracking-marker writes during requests;
+- runtime readiness is now a cached, read-only schema probe;
+- missing schema fails closed with `visitor_accuracy_schema_not_migrated`;
+- the public-page request path no longer performs background schema auto-repair;
+- visitor writes and visitor snapshots require migrated schema before accessing D1.
+
+Why this phase is separate:
+`visitor-accuracy-worker.js` is the next generic-wrapper candidate, but it still owns `POST /api/visitor` and public visitor-tracking decoration. Schema ownership is removed first so the later route/response-stage extraction does not combine data-plane migration risk with dispatch changes.
+
+Preservation rule:
+The visitor-event table shape, tracking-start marker, visitor payload validation, acquisition script and visitor snapshot semantics remain unchanged.
