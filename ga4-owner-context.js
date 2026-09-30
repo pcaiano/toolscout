@@ -60,3 +60,9 @@ export async function markPublicOwnerAnalytics(response){
   headers.delete('Content-Encoding');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
+
+
+export async function applyMarkedOwnerAnalytics(request,response){
+  if(request?.method!=='GET'||cookieValue(request,OWNER_COOKIE)!=='1')return response;
+  return markPublicOwnerAnalytics(response);
+}
