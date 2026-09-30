@@ -45,7 +45,7 @@ test('Phase 21 gives Human Actions mutations direct ownership and isolates schem
   ]){
     assert.equal(routeOwner(pathname,{method:'POST'}).owner,'analytics_human_actions_mutation');
   }
-  assert.equal(routeOwner('/api/command-center-business-truth/reconcile-affiliate-schema',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/api/command-center-business-truth/reconcile-affiliate-schema',{method:'POST'}).owner,'command_center_schema_control');
   assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
   assert.equal(routeOwner('/api/traffic-integrity-health',{method:'GET'}).owner,'traffic_integrity_health');

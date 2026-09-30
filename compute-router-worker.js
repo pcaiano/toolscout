@@ -1,6 +1,7 @@
 import base from './operational-truth-reconciliation-worker.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
+import {handleCommandCenterSchemaControlRoute} from './command-center-schema-control-runtime.js';
 import {handleTrafficIntegrityHealthRoute} from './traffic-integrity-health-runtime.js';
 import {handleAdminStatsRoute} from './admin-stats-runtime.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
@@ -1871,6 +1872,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='public_editorial_site')response=await handlePublicEditorialRoute(request,env);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
+  else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
   else if(ownership.owner==='traffic_integrity_health')response=await handleTrafficIntegrityHealthRoute(request,env);
   else if(ownership.owner==='admin_stats')response=await handleAdminStatsRoute(request,env,ctx);
   else if(ownership.owner==='agent_protocol_core')response=await handleAgentProtocolRoute(request,env,ctx);

@@ -6,7 +6,7 @@ const ROOT=process.cwd();
 const ENTRY='compute-router-worker.js';
 const MAX_LEGACY_EDGES=72;
 const MIN_DIRECT_ROUTE_COVERAGE_PCT=85;
-const ALLOWED_LEGACY_GROUPS=new Set(['command_center_schema_reconcile','affiliate_redirect']);
+const ALLOWED_LEGACY_GROUPS=new Set(['affiliate_redirect']);
 
 function baseImport(file){
   const full=path.join(ROOT,file);
@@ -45,6 +45,7 @@ const directOwnerFiles={
   public_editorial_site:'public-editorial-runtime.js',
   command_center_direct:'command-center-direct-runtime.js',
   command_center_resilient_health:'command-center-resilient-health-runtime.js',
+  command_center_schema_control:'command-center-schema-control-runtime.js',
   traffic_integrity_health:'traffic-integrity-health-runtime.js',
   admin_stats:'admin-stats-runtime.js',
   agent_protocol_core:'agent-protocol-core-worker.js',

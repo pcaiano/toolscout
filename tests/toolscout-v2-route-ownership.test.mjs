@@ -36,7 +36,7 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'analytics_human_actions_mutation');
   assert.equal(routeOwner('/analytics/api/human-actions/gate',{method:'POST'}).owner,'analytics_human_actions_mutation');
   assert.equal(routeOwner('/analytics/api/human-actions/editorial',{method:'POST'}).owner,'analytics_human_actions_mutation');
-  assert.equal(routeOwner('/api/command-center-business-truth/reconcile-affiliate-schema',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/api/command-center-business-truth/reconcile-affiliate-schema',{method:'POST'}).owner,'command_center_schema_control');
   assert.equal(routeOwner('/best-seo-tools-for-agencies',{method:'GET'}).owner,'public_decision');
   assert.equal(routeOwner('/tools/airtable',{method:'GET'}).owner,'public_decision');
   assert.equal(routeOwner('/tools/semrush',{method:'GET'}).owner,'public_decision');
@@ -80,6 +80,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='agent_protocol_core'/);
   assert.match(src,/ownership\.owner==='machine_discovery_catalog'/);
   assert.match(src,/ownership\.owner==='command_center_resilient_health'/);
+  assert.match(src,/ownership\.owner==='command_center_schema_control'/);
   assert.match(src,/ownership\.owner==='traffic_integrity_health'/);
   assert.match(src,/ownership\.owner==='admin_stats'/);
   assert.match(src,/ownership\.owner==='analytics_chairman'/);
@@ -157,4 +158,16 @@ test('human action mutation schemas are migration-owned',()=>{
   assert.doesNotMatch(gate,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
   assert.match(auth,/auth_automation_schema_not_migrated/);
   assert.match(gate,/human_gate_schema_not_migrated/);
+});
+
+
+test('affiliate schema compatibility is migration-owned',()=>{
+  const operational=read('operational-truth-reconciliation-worker.js');
+  const owner=read('command-center-schema-control-runtime.js');
+  assert.doesNotMatch(operational,/reconcileAffiliateNetworkEvidenceSchema/);
+  assert.doesNotMatch(operational,/ALTER TABLE affiliate_network_click_evidence/);
+  assert.doesNotMatch(owner,/CREATE TABLE|CREATE INDEX|ALTER TABLE|\.run\(|\.batch\(/);
+  const migration=read('migrations/0097_affiliate_network_schema_completion.sql');
+  assert.match(migration,/CREATE TABLE IF NOT EXISTS affiliate_network_accounts/);
+  assert.match(migration,/CREATE TABLE IF NOT EXISTS affiliate_network_program_evidence/);
 });

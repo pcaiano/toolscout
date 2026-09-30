@@ -134,6 +134,15 @@ else{
   }catch{errors.push({code:'traffic_integrity_health_invalid_json'});}
 }
 
+const schemaControl=await fetchText('/api/command-center-business-truth/reconcile-affiliate-schema',{
+  method:'POST',
+  headers:{'Content-Type':'application/json'}
+});
+if(schemaControl.status!==401)errors.push({code:'schema_control_auth_boundary_missing',status:schemaControl.status});
+if(schemaControl.headers.get('x-toolscout-route-owner')!=='command_center_schema_control'){
+  errors.push({code:'schema_control_wrong_route_owner',owner:schemaControl.headers.get('x-toolscout-route-owner')});
+}
+
 const resilientHealth=await fetchText('/api/command-center-resilient-health');
 if(!resilientHealth.ok)errors.push({code:'command_center_resilient_health_unavailable',status:resilientHealth.status});
 else{
@@ -176,7 +185,7 @@ if(routeContractLive.ok){
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
     if(owner('analytics_human_action_mutations')!=='analytics_human_actions_mutation')errors.push({code:'analytics_human_action_mutations_not_live'});
-    if(owner('command_center_schema_reconcile')!=='command_center')errors.push({code:'command_center_schema_reconcile_owner_changed'});
+    if(owner('command_center_schema_reconcile')!=='command_center_schema_control')errors.push({code:'command_center_schema_control_not_live'});
     if(owner('public_decision_pages')!=='public_decision')errors.push({code:'public_decision_owner_not_live'});
     if(owner('public_navigation_hubs')!=='public_navigation')errors.push({code:'public_navigation_owner_not_live'});
   }catch{}
