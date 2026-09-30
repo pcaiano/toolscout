@@ -128,6 +128,15 @@ async function recordVerifiedOutbound(request,env,url,response){
     .bind(proofKey,Number(click.id||0)||null,click.click_ref||null,session,tool,String(click.source||'public-redirect'),click.affiliate_active_at_click==null?null:Number(click.affiliate_active_at_click),proofType,String(click.created_at||sqliteUtc(created))).run();
 }
 
+export async function applyAffiliateRedirectIntegrity(request,env,url,response){
+  try{
+    response=await bypassKnownAutomation(request,env,url,response);
+    await recordVerifiedOutbound(request,env,url,response);
+    response=withRedirectRobots(response);
+  }catch{}
+  return response;
+}
+
 async function outboundSnapshot(env){
   await ensureSchema(env);
   const now=new Date(),todayStart=sqliteUtc(zonedMidnight(now)),last24=sqliteUtc(new Date(now.getTime()-86400000)),window30=sqliteUtc(new Date(now.getTime()-30*86400000));
@@ -225,13 +234,7 @@ export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     let response=await base.fetch(request,env,ctx);
-    if(url.pathname.startsWith('/go/')){
-      try{
-        response=await bypassKnownAutomation(request,env,url,response);
-        await recordVerifiedOutbound(request,env,url,response);
-        response=withRedirectRobots(response);
-      }catch{}
-    }
+    if(url.pathname.startsWith('/go/'))response=await applyAffiliateRedirectIntegrity(request,env,url,response);
     if(request.method==='GET'&&url.pathname==='/analytics/api/stats')return augmentStats(response,env);
     if(request.method==='GET'&&url.pathname==='/api/traffic-integrity-health')return augmentHealth(response,env);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorateAnalytics(response);
