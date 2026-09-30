@@ -94,7 +94,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
-  assert.match(src,/return base\.fetch\(request,env,ctx\)/);
+  assert.match(src,/return legacyFallback\(request,env,ctx\)/);
 });
 
 test('migrated route owners expose null-returning direct handlers',()=>{
@@ -168,7 +168,7 @@ test('human action mutation schemas are migration-owned',()=>{
 
 
 test('affiliate schema compatibility is migration-owned',()=>{
-  const operational=read('operational-truth-reconciliation-worker.js');
+  const operational=read('command-center-business-truth-runtime.js');
   const owner=read('command-center-schema-control-runtime.js');
   assert.doesNotMatch(operational,/reconcileAffiliateNetworkEvidenceSchema/);
   assert.doesNotMatch(operational,/ALTER TABLE affiliate_network_click_evidence/);
