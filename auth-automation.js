@@ -26,39 +26,24 @@ async function decrypt(env,row){
 }
 export async function ensureAuthAutomationSchema(env){
   if(schemaReady)return schemaReady;
-  schemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS auth_automation_capability(
-      surface_slug TEXT PRIMARY KEY,
-      automation_class TEXT NOT NULL,
-      credential_kind TEXT,
-      credential_header TEXT,
-      credential_prefix TEXT,
-      credential_state TEXT NOT NULL DEFAULT 'not_required',
-      human_bootstrap_required INTEGER NOT NULL DEFAULT 0,
-      evidence TEXT,
-      last_verified_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_auth_automation_class ON auth_automation_capability(automation_class,credential_state,updated_at)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS auth_machine_credential(
-      surface_slug TEXT PRIMARY KEY,
-      credential_kind TEXT NOT NULL,
-      header_name TEXT NOT NULL,
-      prefix TEXT,
-      ciphertext TEXT NOT NULL,
-      iv TEXT NOT NULL,
-      secret_hash TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'active',
-      expires_at TEXT,
-      last_used_at TEXT,
-      last_verified_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`)
-  ]).catch(e=>{schemaReady=null;throw e});
+  schemaReady=(async()=>{
+    const requiredTables=['auth_automation_capability','auth_machine_credential'];
+    const requiredIndexes=['idx_auth_automation_class'];
+    const tableMarks=requiredTables.map(()=>'?').join(',');
+    const indexMarks=requiredIndexes.map(()=>'?').join(',');
+    const [tables,indexes]=await Promise.all([
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN (${tableMarks})`).bind(...requiredTables).first(),
+      env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master WHERE type='index' AND name IN (${indexMarks})`).bind(...requiredIndexes).first()
+    ]);
+    const tableCount=Number(tables?.n||0),indexCount=Number(indexes?.n||0);
+    if(tableCount!==requiredTables.length||indexCount!==requiredIndexes.length){
+      throw new Error(`auth_automation_schema_not_migrated:tables_${tableCount}/${requiredTables.length}:indexes_${indexCount}/${requiredIndexes.length}`);
+    }
+    return{ok:true,source:'d1_migrations',tables:tableCount,indexes:indexCount};
+  })().catch(error=>{schemaReady=null;throw error});
   return schemaReady;
 }
+
 function authSpec(authType,detail){
   const type=String(authType||'').toLowerCase();
   let parsed=[];try{parsed=Array.isArray(detail)?detail:JSON.parse(detail||'[]')}catch{}
