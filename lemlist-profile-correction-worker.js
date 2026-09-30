@@ -132,22 +132,33 @@ async function rssStatus(env){
   return {status:'connected',feed:RSS_FEED,hub:RSS_HUB,state:state||null,recent_events:events.results||[]};
 }
 
+export async function handleRssDistributionRoute(request,env){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/distribution/rss/status'&&request.method==='GET'){
+    if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+    return Response.json(await rssStatus(env),{headers:JSON_H});
+  }
+  if(url.pathname==='/api/distribution/rss/publish'&&request.method==='POST'){
+    if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+    return Response.json(await publishRssIfChanged(env,{force:true,reason:'manual'}),{headers:JSON_H});
+  }
+  return null;
+}
+
+export async function transformRssPublicResponse(request,response){
+  const url=new URL(request.url);
+  if((request.method==='GET'||request.method==='HEAD')&&url.pathname==='/feed.xml')return decorateFeed(response);
+  if(request.method==='GET'&&isHtml(response)&&shouldAdvertiseRss(url.pathname))return decorateHtml(response,url);
+  if(request.method==='GET'&&url.pathname===PROFILE_PATH)return decorateHtml(response,url);
+  return response;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(url.pathname==='/api/distribution/rss/status'&&request.method==='GET'){
-      if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await rssStatus(env),{headers:JSON_H});
-    }
-    if(url.pathname==='/api/distribution/rss/publish'&&request.method==='POST'){
-      if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await publishRssIfChanged(env,{force:true,reason:'manual'}),{headers:JSON_H});
-    }
+    const owned=await handleRssDistributionRoute(request,env);
+    if(owned)return owned;
     const response=await base.fetch(request,env,ctx);
-    if((request.method==='GET'||request.method==='HEAD')&&url.pathname==='/feed.xml')return decorateFeed(response);
-    if(request.method==='GET'&&isHtml(response)&&shouldAdvertiseRss(url.pathname))return decorateHtml(response,url);
-    if(request.method==='GET'&&url.pathname===PROFILE_PATH)return decorateHtml(response,url);
-    return response;
+    return transformRssPublicResponse(request,response);
   },
   async scheduled(event,env,ctx){
     if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
