@@ -215,22 +215,38 @@ async function decorateHtml(response,isAnalytics){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleTrafficIntegrityCoreRoute(request,env){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/confirmed-visitor'&&request.method==='OPTIONS')return new Response(null,{status:204,headers:jsonHeaders()});
+  if(url.pathname==='/api/confirmed-visitor'&&request.method==='POST')return recordConfirmedVisitor(request,env);
+  return null;
+}
+export async function transformTrafficIntegrityCoreResponse(request,response){
+  const url=new URL(request.url);
+  if(request.method!=='GET')return response;
+  if(ANALYTICS_PATHS.has(url.pathname))return decorateHtml(response,true);
+  if(url.hostname===new URL(BASE).hostname&&isHtml(response))return decorateHtml(response,false);
+  return response;
+}
+export async function runTrafficIntegrityCoreScheduled(env){
+  await ensureIntegritySchema(env);
+  await env.DB.prepare(`INSERT INTO traffic_integrity_heartbeat (created_at) VALUES (datetime('now'))`).run();
+  await env.DB.prepare(`DELETE FROM traffic_integrity_heartbeat WHERE created_at<datetime('now','-14 days')`).run();
+  return {ok:true,mission:'traffic_integrity_heartbeat',retentionDays:14};
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(url.pathname==='/api/confirmed-visitor'&&request.method==='OPTIONS')return new Response(null,{status:204,headers:jsonHeaders()});
-    if(url.pathname==='/api/confirmed-visitor'&&request.method==='POST')return recordConfirmedVisitor(request,env);
+    const owned=await handleTrafficIntegrityCoreRoute(request,env);
+    if(owned)return owned;
     if(url.pathname==='/api/traffic-integrity-health'&&request.method==='GET')return Response.json(await trafficHealth(env),{headers:{'Cache-Control':'no-store'}});
-    const response=await base.fetch(request,env,ctx);
+    let response=await base.fetch(request,env,ctx);
     if(url.pathname==='/analytics/api/stats'&&request.method==='GET')return augmentStats(response,env);
-    if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorateHtml(response,true);
-    if(request.method==='GET'&&url.hostname===new URL(BASE).hostname&&isHtml(response))return decorateHtml(response,false);
-    return response;
+    return transformTrafficIntegrityCoreResponse(request,response);
   },
   async scheduled(event,env,ctx){
-    await ensureIntegritySchema(env);
-    await env.DB.prepare(`INSERT INTO traffic_integrity_heartbeat (created_at) VALUES (datetime('now'))`).run();
-    await env.DB.prepare(`DELETE FROM traffic_integrity_heartbeat WHERE created_at<datetime('now','-14 days')`).run();
+    await runTrafficIntegrityCoreScheduled(env);
     if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);
   }
 };

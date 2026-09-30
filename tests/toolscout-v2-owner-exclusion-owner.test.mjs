@@ -35,6 +35,7 @@ test('retrospective audit remains migration-owned',()=>{
 
 test('generic traversal bypasses owner exclusion wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-human-truth-chart-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/owner-exclusion-worker\.js'/);
 });

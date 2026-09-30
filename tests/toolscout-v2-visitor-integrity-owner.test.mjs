@@ -35,7 +35,8 @@ test('generic response stages preserve visitor -> canonical -> owner -> SEO -> f
   const seo=compute.indexOf('transformSeoPublicPage(request,response,env)');
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   assert.ok(lower>=0&&link>lower&&visitor>link&&canonical>visitor&&owner>canonical&&seo>owner&&footer>seo);
-  assert.match(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-human-truth-chart-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/owner-exclusion-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-guard-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/traffic-integrity-live-worker\.js'/);

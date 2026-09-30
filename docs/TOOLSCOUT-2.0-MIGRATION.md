@@ -648,3 +648,20 @@ Implemented:
 
 Preservation rule:
 Owner verification, persistent owner cookie semantics, canonical-human exclusion and retrospective audit matching remain unchanged.
+
+
+## Phase 53 - Explicit traffic integrity core ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-53`.
+
+Implemented:
+- `POST/OPTIONS /api/confirmed-visitor` gains direct `traffic_integrity_core` ownership;
+- the browser-confirmed visitor HTML injection is applied explicitly immediately after lower-runtime response and before traffic guard/live transforms;
+- traffic-integrity heartbeat/retention is exported as an explicit scheduled mission owned by `traffic_integrity_core`;
+- the heartbeat continues to use migration-owned `traffic_integrity_heartbeat` schema from migration 0071;
+- generic request fallback now connects directly to `command-center-human-truth-chart-worker.js`;
+- `/api/traffic-integrity-health` remains on the existing direct health composition;
+- the architecture edge budget ratchets from 47 to 46.
+
+Preservation rule:
+Likely-human classification, page-confirmed prerequisite, visitor/session UUID validation, source/referrer validation, country evidence, confirmed-visitor insertion, public confirmation script and heartbeat retention remain unchanged.
