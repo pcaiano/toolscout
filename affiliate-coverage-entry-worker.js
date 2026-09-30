@@ -133,22 +133,28 @@ export function runAuditedAffiliateCoverageCycle(env,triggerName){
   return runWithLedger(env,{engine:'affiliate',mission:'coverage_cycle',triggerName},()=>runCycle(env));
 }
 
+export async function handleAffiliateCoverageRoute(request,env){
+  const u=new URL(request.url);
+  if(u.pathname==='/api/affiliate-workflow/firecrawl'){
+    if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
+    return ingestFirecrawl(request,env);
+  }
+  if(u.pathname==='/api/affiliate-replies/ingest'){
+    if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
+    return ingestAffiliateReply(request,env);
+  }
+  if(u.pathname==='/api/affiliate-coverage/run'){
+    if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+    return Response.json(await runAuditedAffiliateCoverageCycle(env,'manual_api'),{headers:JSON_H});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    if(u.pathname==='/api/affiliate-workflow/firecrawl'){
-      if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
-      return ingestFirecrawl(request,env);
-    }
-    if(u.pathname==='/api/affiliate-replies/ingest'){
-      if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
-      return ingestAffiliateReply(request,env);
-    }
-    if(u.pathname==='/api/affiliate-coverage/run'){
-      if(request.method!=='POST')return Response.json({error:'method_not_allowed'},{status:405,headers:JSON_H});
-      if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await runAuditedAffiliateCoverageCycle(env,'manual_api'),{headers:JSON_H});
-    }
+    const owned=await handleAffiliateCoverageRoute(request,env);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){

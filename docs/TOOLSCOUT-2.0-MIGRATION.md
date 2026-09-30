@@ -1001,3 +1001,18 @@ Implemented:
 
 Preservation rule:
 Affiliate reply matching, approval/rejection classification, referral-link capture, workflow history and post-submit state reconciliation remain unchanged. Only lazy request-time schema creation is removed.
+
+
+## Phase 75 - Remove affiliate coverage request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-75`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-impact-entry-worker.js`;
+- affiliate Firecrawl monitoring, affiliate reply ingestion and manual coverage-cycle execution gain direct `affiliate_coverage_runtime` ownership;
+- direct dispatch reuses the existing handlers and preserves 405 behavior for non-POST requests;
+- Phase 74 guarantees reply ingestion no longer performs runtime schema creation;
+- the architecture edge budget ratchets from 28 to 27.
+
+Preservation rule:
+Firecrawl reconciliation, Gmail affiliate reply ingestion, affiliate approval/rejection classification, referral-link capture, manual coverage authorization, ledger semantics and scheduled affiliate coverage behavior remain unchanged.
