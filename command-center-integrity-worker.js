@@ -290,6 +290,11 @@ async function augmentHealth(response,env){
   return Response.json(data,{headers:{'Cache-Control':'no-store'}});
 }
 
+export async function runCommandCenterIntegrityScheduled(event,env,ctx){
+  if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
+  try{await refreshDailyMetrics(env,event?.cron==='15 3 * * *'?8:2)}catch{}
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
@@ -299,8 +304,7 @@ export default {
     return response;
   },
   async scheduled(event,env,ctx){
-    if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
-    try{await refreshDailyMetrics(env,event?.cron==='15 3 * * *'?8:2)}catch{}
+    return runCommandCenterIntegrityScheduled(event,env,ctx);
   }
 };
 
