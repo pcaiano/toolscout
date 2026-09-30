@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('generic request traversal bypasses PostHog behavior wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/affiliate-human-action-entry-worker\.js'/);
+  assert.match(compute,/import base from '\.\/human-action-entry-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
 });
 

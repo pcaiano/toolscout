@@ -955,3 +955,18 @@ Implemented:
 
 Preservation rule:
 Command Center session validation, reputation quarantine decisions, override dispatch and Gmail proof, learning rules, distribution human-gate resolution, public URLs/canonicals and analytics/tracking behavior remain unchanged.
+
+
+## Phase 72 - Remove affiliate human-action request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-72`.
+
+Implemented:
+- generic compute fallback now connects directly to `human-action-entry-worker.js`;
+- `GET /api/audience-health` and the three audience/affiliate action POST endpoints gain direct `affiliate_human_actions` ownership;
+- direct dispatch reuses the existing audience health, suggestion ingestion, audience action and affiliate action implementations;
+- legacy Command Center stats augmentation and page-script injection are not copied into direct dispatch because those active surfaces already have canonical ToolScout 2.0 owners;
+- the architecture edge budget ratchets from 30 to 29.
+
+Preservation rule:
+Audience-health payload semantics, suggestion-ingest authentication, Command Center session gates, affiliate human-action recording, public URLs/canonicals, Command Center stats and active page composition remain unchanged.
