@@ -1,5 +1,6 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './growth-runtime-authority-drain-worker.js';
+import base from './growth-runtime-observability-worker.js';
+import {runAuthorityDrainScheduled} from './growth-runtime-authority-drain-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
@@ -2030,7 +2031,13 @@ export default{
         await event(env,'authority_acquisition_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const combined=Promise.allSettled([growth,authority,primary,seo]);
+      const combined=(async()=>{
+        await Promise.allSettled([growth,authority,primary,seo]);
+        await runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{
+          await event(env,'authority_drain_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+          return null;
+        });
+      })();
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;return;
     }

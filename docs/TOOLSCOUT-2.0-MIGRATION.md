@@ -415,3 +415,22 @@ Implemented:
 
 Preservation rule:
 GSC daily trend enrichment remains available in the explicit compositions that still consume it. Only redundant generic traversal is removed.
+
+
+## Phase 38 - Explicit authority sender drain scheduling
+
+Status: implemented on `architecture/toolscout-2.0-phase-38`.
+
+Implemented:
+- `runAuthorityDrainScheduled()` is an explicit scheduler owner for the hourly post-schedule authority sender drain;
+- `authority_sender_drain` is now declared in the central schedule contract with owner `authority_drain`;
+- the compute router executes the drain after the hourly growth, authority-acquisition, Cloudflare-primary and SEO scheduler work settles;
+- generic request fallback now connects directly to `growth-runtime-observability-worker.js`;
+- the legacy authority-drain wrapper remains available for bounded compatibility compositions that still use its response enrichments;
+- the architecture edge budget ratchets from 61 to 60.
+
+Functional correction:
+The old wrapper-owned `15 * * * *` drain could be unreachable because the compute router already intercepted the hourly cron and returned without delegating `base.scheduled()`. This phase makes the mission reachable and observable instead of preserving that hidden dependency.
+
+Preservation rule:
+Authority sender handoff semantics, bounded drain passes, callback evidence requirements and error recording remain unchanged. Only ownership and scheduler reachability change.

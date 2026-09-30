@@ -218,3 +218,8 @@ If every route a decorator mutates is already intercepted by explicit owners, th
 ### Surface-owner extraction
 
 Small UI-support endpoints such as SVG, CSS and health evidence should have explicit ownership when their wrapper otherwise exists only to decorate already-owned HTML. Preserve lower-runtime composition for health enrichment and keep legacy page decoration available only as compatibility behavior.
+
+
+### Post-schedule ownership
+
+A wrapper-owned scheduler mission is not considered preserved if a higher dispatcher intercepts that cron and returns without delegating the wrapper chain. Post-schedule work must be exported as a named scheduler owner and explicitly sequenced after the core missions it depends on.
