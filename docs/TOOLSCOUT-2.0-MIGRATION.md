@@ -617,3 +617,18 @@ Implemented:
 
 Preservation rule:
 Strict-human evidence rules, browser validation, quarantine logic, rate/burst detection, traffic forensics, browser-guard injection and seven-day guard-event retention remain unchanged.
+
+
+## Phase 51 - Owner retrospective schema ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-51`.
+
+Implemented:
+- migration `0099_owner_retrospective_audits_schema.sql` formally owns `owner_retrospective_audits`;
+- `owner-exclusion-worker.js` no longer creates the table during a request;
+- runtime now probes migration state once and fails closed with `owner_retrospective_audits_schema_not_migrated` if the migration is absent;
+- owner retrospective matching and audit writes are unchanged;
+- CI and production recovery enforce the no-runtime-DDL invariant.
+
+Why this phase is separate:
+The owner-exclusion wrapper is the next generic decorator candidate. Schema ownership is removed first so the later route/response extraction does not combine dispatch risk with D1 mutation risk.
