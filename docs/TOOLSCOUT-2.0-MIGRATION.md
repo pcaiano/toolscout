@@ -184,3 +184,20 @@ Residual compatibility:
 
 Preservation rule:
 No affiliate destination, public URL, canonical, sitemap URL, active programme relationship, click-time monetization semantics or verified outbound definition may change as a side effect of this migration.
+
+
+## Phase 24 - Command Center read-model isolation
+
+Status: implemented on `architecture/toolscout-2.0-phase-24`; production behavior intentionally unchanged.
+
+Implemented:
+- the canonical Command Center Business Truth read model is extracted to `command-center-business-truth-runtime.js`;
+- `command-center-direct-runtime.js` no longer imports `operational-truth-reconciliation-worker.js`;
+- the extracted read model has no `base.fetch`, runtime DDL or schema mutation;
+- the legacy operational reconciliation module consumes the same canonical direct handler instead of carrying a second copy of the Business Truth implementation;
+- the legacy reconciliation module is reduced from roughly 59 KB to roughly 7.5 KB and retains only its compatibility/reconciliation responsibilities;
+- architecture audit and CI now inspect the real direct read-model implementation;
+- production recovery syntax-checks the isolated read model before any D1 or Worker mutation.
+
+Preservation rule:
+This phase changes module ownership, not business semantics. Business Truth queries, cache behavior, Command Center session cookie, redirects, health contract, card inventory and unavailable-is-never-zero behavior remain unchanged.
