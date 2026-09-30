@@ -32,7 +32,9 @@ test('D1 budget preserves credential forwarding and owner access bridge',()=>{
   assert.match(runtime,/validCommandCenterSession\(request,env\)\?withOwnerAccessHeader\(request\):request/);
   assert.match(runtime,/Cf-Access-Authenticated-User-Email/);
   assert.match(runtime,/pcaiano@gmail\.com/);
-  assert.match(runtime,/return base\.fetch\(forwarded,env,ctx\)/);
+  assert.match(runtime,/handleCommandCenterGa4Route\(forwarded,env,ctx\)/);
+  assert.match(runtime,/import base from '\.\/command-center-health-language-worker\.js'/);
+  assert.match(runtime,/handleCommandCenterGa4Route.*from '\.\/command-center-ga4-worker\.js'/);
 });
 
 test('D1 budget preserves circuit breaker and cache semantics for the two live cached health reads',()=>{
@@ -48,6 +50,7 @@ test('D1 budget preserves circuit breaker and cache semantics for the two live c
 
 test('generic request traversal bypasses the D1 budget wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/command-center-ga4-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-health-language-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/command-center-ga4-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/d1-read-budget-worker\.js'/);
 });

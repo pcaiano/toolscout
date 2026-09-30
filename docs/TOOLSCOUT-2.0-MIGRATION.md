@@ -353,3 +353,19 @@ Implemented:
 
 Preservation rule:
 No active D1 quota protection is removed. Credential forwarding, owner identity bridging, public health-read TTLs, circuit-breaker behavior and cache evidence headers remain unchanged.
+
+
+## Phase 34 - Explicit Command Center GA4 handling
+
+Status: implemented on `architecture/toolscout-2.0-phase-34`.
+
+Implemented:
+- `command-center-ga4-worker.js` exposes `handleCommandCenterGa4Route()` for its GA4/OAuth request responsibilities;
+- the D1 budget owner composes Google connect, acquisition, commerce and disconnect through that explicit handler after applying the existing owner identity bridge;
+- `GET /api/google-analytics/callback` gains direct `google_analytics_callback` ownership;
+- generic request fallback now connects directly to `command-center-health-language-worker.js`;
+- legacy GA4 Command Center page decoration remains compatibility-only and is no longer part of production generic traversal;
+- the architecture edge budget ratchets from 65 to 64.
+
+Preservation rule:
+OAuth connect/callback/disconnect behavior, GA4 acquisition and commerce payloads, owner-only access checks and existing D1 budget protection remain unchanged.
