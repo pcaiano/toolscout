@@ -71,7 +71,7 @@ function stableShape(value,prefix=''){
 
 test('admin stats GET has a direct owner while POST remains legacy',()=>{
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
-  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'legacy_chain');
 });
 
 test('admin stats public host preserves Cloudflare Access boundary',async()=>{
