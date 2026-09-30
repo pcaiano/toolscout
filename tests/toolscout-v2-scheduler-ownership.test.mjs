@@ -31,9 +31,11 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(compute,/runGrowthScheduler/);
   assert.match(compute,/runAuthorityAcquisitionScheduled/);
   assert.match(compute,/runAuthorityDrainScheduled/);
+  assert.match(compute,/runGrowthClosedLoopScheduled/);
   assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
   assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'15 * * * *');
-  assert.match(compute,/import base,\{handleGrowthClosedLoopRoute\} from '\.\/growth-runtime-closed-loop-worker\.js'/);
+  assert.match(compute,/import base from '\.\/growth-runtime-integrity-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/growth-runtime-closed-loop-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/growth-runtime-observability-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/growth-runtime-authority-drain-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/gsc-command-center-trend-worker\.js'/);
@@ -50,12 +52,17 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(authority,/export async function runAuthorityAcquisitionScheduled/);
   assert.match(authority,/trigger!==TOOLSCOUT_CRONS\.hourly/);
   assert.match(authority,/authority_acquisition_scheduler/);
+  const closedLoop=read('growth-runtime-closed-loop-worker.js');
+  assert.match(closedLoop,/export async function runGrowthClosedLoopScheduled/);
+  assert.match(closedLoop,/authority_closed_loop_scheduler/);
   const drain=read('growth-runtime-authority-drain-worker.js');
   assert.match(drain,/export async function runAuthorityDrainScheduled/);
   assert.match(drain,/authority_drain_scheduler/);
   const hourlyCore=compute.indexOf('await Promise.allSettled([growth,authority,primary,seo])');
+  const closedLoopCall=compute.indexOf('await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx)');
   const drainCall=compute.indexOf('await runAuthorityDrainScheduled(scheduledEvent,env,ctx)');
-  assert.ok(hourlyCore>=0&&drainCall>hourlyCore,'authority drain must execute after hourly core scheduling settles');
+  assert.ok(hourlyCore>=0&&closedLoopCall>hourlyCore,'authority closed loop must execute after hourly core scheduling settles');
+  assert.ok(drainCall>closedLoopCall,'authority sender drain must execute after authority closed loop');
   assert.match(compute,/trigger===TOOLSCOUT_CRONS\.hourly\|\|trigger===TOOLSCOUT_CRONS\.daily/);
   assert.equal(scheduleContract().dispatcher,'compute_router');
 
