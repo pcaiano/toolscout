@@ -29,7 +29,7 @@ test('direct growth action handler preserves session gate before state mutation'
 test('generic request traversal bypasses the growth Command Center wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('growth-command-center-v2-worker.js');
-  assert.match(compute,/import base from '\.\/human-action-entry-worker\.js'/);
+  assert.match(compute,/import base from '\.\/affiliate-coverage-entry-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/growth-command-center-v2-worker\.js'/);
   assert.match(runtime,/export async function handleGrowthCommandCenterActionRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);

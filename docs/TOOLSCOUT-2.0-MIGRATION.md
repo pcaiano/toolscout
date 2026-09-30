@@ -970,3 +970,19 @@ Implemented:
 
 Preservation rule:
 Audience-health payload semantics, suggestion-ingest authentication, Command Center session gates, affiliate human-action recording, public URLs/canonicals, Command Center stats and active page composition remain unchanged.
+
+
+## Phase 73 - Remove human-action presentation traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-73`.
+
+Implemented:
+- generic compute fallback now connects directly to `affiliate-coverage-entry-worker.js`;
+- `human-action-entry-worker.js` leaves production's generic request traversal;
+- human-action reads remain on the canonical `analytics_human_actions` owner;
+- credential, gate and editorial mutations remain on the direct `analytics_human_actions_mutation` owner using the existing exported handler from `human-action-entry-worker.js`;
+- the legacy Command Center page injection is not copied because canonical Command Center page composition is already direct-owned;
+- the architecture edge budget ratchets from 29 to 28.
+
+Preservation rule:
+Human-action queue semantics, secure credential saving, non-blocking gate completion, editorial action resolution, public URLs/canonicals and active Command Center presentation remain unchanged.
