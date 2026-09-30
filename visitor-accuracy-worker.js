@@ -183,18 +183,29 @@ async function augmentStats(response,env){
   return new Response(JSON.stringify(data),{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleVisitorAccuracyRoute(request,env){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/visitor'&&request.method==='OPTIONS')return new Response(null,{status:204,headers:visitorHeaders()});
+  if(url.pathname==='/api/visitor'&&request.method==='POST')return recordVisitor(request,env);
+  return null;
+}
+
+export async function transformVisitorAccuracyPublicResponse(request,response){
+  const url=new URL(request.url);
+  if(ANALYTICS_PATHS.has(url.pathname))return response;
+  if(url.hostname===new URL(BASE).hostname&&request.method==='GET'&&isHtml(response))return decoratePublicPage(response);
+  return response;
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
-    if(url.pathname==='/api/visitor'&&request.method==='OPTIONS')return new Response(null,{status:204,headers:visitorHeaders()});
-    if(url.pathname==='/api/visitor'&&request.method==='POST')return recordVisitor(request,env);
+    const owned=await handleVisitorAccuracyRoute(request,env);
+    if(owned)return owned;
     const response=await base.fetch(request,env,ctx);
     if(url.pathname==='/analytics/api/stats'&&request.method==='GET')return augmentStats(response,env);
     if(ANALYTICS_PATHS.has(url.pathname))return decorateCommandCenter(response);
-    if(url.hostname===new URL(BASE).hostname&&request.method==='GET'&&isHtml(response)){
-      return decoratePublicPage(response);
-    }
-    return response;
+    return transformVisitorAccuracyPublicResponse(request,response);
   },
   async scheduled(event,env,ctx){
     if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);
