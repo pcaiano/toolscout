@@ -30,7 +30,11 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   const authority=read('authority-acquisition-worker.js');
   assert.match(compute,/runGrowthScheduler/);
   assert.match(compute,/runAuthorityAcquisitionScheduled/);
-  assert.match(compute,/import base from '\.\/growth-runtime-authority-drain-worker\.js'/);
+  assert.match(compute,/runAuthorityDrainScheduled/);
+  assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
+  assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'15 * * * *');
+  assert.match(compute,/import base from '\.\/growth-runtime-observability-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/growth-runtime-authority-drain-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/gsc-command-center-trend-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-health-language-worker\.js'/);
@@ -45,6 +49,12 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(authority,/export async function runAuthorityAcquisitionScheduled/);
   assert.match(authority,/trigger!==TOOLSCOUT_CRONS\.hourly/);
   assert.match(authority,/authority_acquisition_scheduler/);
+  const drain=read('growth-runtime-authority-drain-worker.js');
+  assert.match(drain,/export async function runAuthorityDrainScheduled/);
+  assert.match(drain,/authority_drain_scheduler/);
+  const hourlyCore=compute.indexOf('await Promise.allSettled([growth,authority,primary,seo])');
+  const drainCall=compute.indexOf('await runAuthorityDrainScheduled(scheduledEvent,env,ctx)');
+  assert.ok(hourlyCore>=0&&drainCall>hourlyCore,'authority drain must execute after hourly core scheduling settles');
   assert.match(compute,/trigger===TOOLSCOUT_CRONS\.hourly\|\|trigger===TOOLSCOUT_CRONS\.daily/);
   assert.equal(scheduleContract().dispatcher,'compute_router');
 
