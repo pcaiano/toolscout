@@ -37,7 +37,6 @@ on:
       - 'command-center-direct-runtime.js'
       - 'command-center-business-truth-runtime.js'
       - 'command-center-simplified-view.js'
-      - 'operational-truth-reconciliation-worker.js'
       - 'growth-runtime-integrity-worker.js'
       - 'growth-runtime-closed-loop-worker.js'
       - 'authority-health-runtime.js'
@@ -146,7 +145,6 @@ jobs:
           node --check human-action-entry-worker.js
           node --check command-center-direct-runtime.js
           node --check command-center-business-truth-runtime.js
-          node --check operational-truth-reconciliation-worker.js
           node --check command-center-simplified-view.js
           node --check scripts/editorial-authority-model.mjs
           node --check scripts/build-editorial-authority-portfolio.mjs
