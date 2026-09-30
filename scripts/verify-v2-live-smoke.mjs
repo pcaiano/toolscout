@@ -320,6 +320,7 @@ else{
     headers:{'X-ToolScout-Health-Check':'affiliate-route'}
   });
   const location=redirect.headers.get('location')||'';
+  if(redirect.headers.get('x-toolscout-route-owner')!=='affiliate_redirect')errors.push({code:'affiliate_redirect_wrong_route_owner',slug,owner:redirect.headers.get('x-toolscout-route-owner')});
   if(![301,302,303,307,308].includes(redirect.status)){
     errors.push({code:'affiliate_redirect_not_redirecting',slug,status:redirect.status});
   }else{
