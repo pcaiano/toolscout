@@ -22,7 +22,8 @@ test('GA4 rolling 24h acquisition has a direct route owner',()=>{
 
 test('generic fallback bypasses the GA4 attribution decorator',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
+  assert.match(compute,/import base from '\.\/lemlist-profile-correction-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/discovery-attribution-health-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-autoload-worker\.js'/);
