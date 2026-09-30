@@ -18,6 +18,8 @@ const ACQUISITION_SURGE_TARGET_24H=50;
 const ACQUISITION_SURGE_MAX_24H=60;
 const MACHINE_SAFE_EXTERNAL_MAX_24H=800;
 const RESEARCH_EXTERNAL_MAX_24H=1500;
+import {handleCommandCenterSchemaControlRoute} from './command-center-schema-control-runtime.js';
+
 const EMAIL_TARGET_24H=50;
 const EMAIL_MAX_24H=60;
 let factsCache={at:0,value:null,promise:null};
@@ -118,99 +120,6 @@ const truthNum=v=>Number.isFinite(Number(v))?Number(v):0;
 const truthMaybeNum=v=>v===null||v===undefined||v===''?null:(Number.isFinite(Number(v))?Number(v):null);
 const BUSINESS_TRUTH_CACHE_MS=120000;
 let businessTruthCache={at:0,value:null,promise:null};
-let affiliateNetworkEvidenceReady=null;
-async function reconcileAffiliateNetworkEvidenceSchema(env){
-  if(affiliateNetworkEvidenceReady)return affiliateNetworkEvidenceReady;
-  affiliateNetworkEvidenceReady=(async()=>{
-    // Phase 1: make the legacy table structurally compatible before creating indexes
-    // or account-aware rows. This ordering matters on existing production D1 databases.
-    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_click_evidence (
-      evidence_key TEXT PRIMARY KEY,
-      tool_slug TEXT NOT NULL,
-      provider TEXT NOT NULL,
-      programme TEXT,
-      account_email TEXT,
-      programme_status TEXT,
-      reported_clicks_total INTEGER NOT NULL,
-      reported_conversions_total INTEGER,
-      pending_commission_amount REAL,
-      currency TEXT,
-      observed_at TEXT NOT NULL,
-      evidence_source TEXT NOT NULL,
-      note TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`).run();
-    for(const sql of [
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN account_email TEXT`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN programme_status TEXT`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN reported_conversions_total INTEGER`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN pending_commission_amount REAL`,
-      `ALTER TABLE affiliate_network_click_evidence ADD COLUMN currency TEXT`
-    ])await env.DB.prepare(sql).run().catch(()=>{});
-
-    // Phase 2: dependent indexes/tables are safe only after the columns exist.
-    await env.DB.batch([
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_affiliate_network_click_evidence_tool_observed ON affiliate_network_click_evidence(tool_slug,observed_at DESC)`),
-      env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_affiliate_network_click_evidence_account_observed ON affiliate_network_click_evidence(account_email,observed_at DESC)`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_accounts (
-        network TEXT NOT NULL,
-        account_email TEXT NOT NULL,
-        status TEXT NOT NULL,
-        marketplace_state TEXT,
-        observed_at TEXT NOT NULL,
-        evidence_source TEXT NOT NULL,
-        note TEXT,
-        PRIMARY KEY(network,account_email)
-      )`),
-      env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_network_program_evidence (
-        network TEXT NOT NULL,
-        account_email TEXT NOT NULL,
-        tool_slug TEXT NOT NULL,
-        programme_status TEXT NOT NULL,
-        observed_at TEXT NOT NULL,
-        evidence_source TEXT NOT NULL,
-        note TEXT,
-        PRIMARY KEY(network,account_email,tool_slug)
-      )`)
-    ]);
-
-    await env.DB.batch([
-      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_accounts(network,account_email,status,marketplace_state,observed_at,evidence_source,note)
-        VALUES('partnerstack','pedro@trytoolscout.org','active','active_programs','2026-09-29 09:37:26','owner_dashboard',
-        'Owner supplied current PartnerStack dashboard with seven active programmes and current click totals.')`),
-      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_accounts(network,account_email,status,marketplace_state,observed_at,evidence_source,note)
-        VALUES('partnerstack','pcaiano@gmail.com','active','restricted_new_program_access','2026-08-31 14:24:58','gmail',
-        'Gmail confirms a separate PartnerStack identity. Marketplace access to new programmes was limited; existing programme participation remains account-specific.')`),
-      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
-        VALUES('partnerstack','pcaiano@gmail.com','pipedrive','active','2026-08-31 22:46:07','gmail','PartnerStack approval email confirms Pipedrive approved this account.')`),
-      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
-        VALUES('partnerstack','pcaiano@gmail.com','adcreative-ai','active','2026-09-03 07:27:05','gmail','AdCreative.ai welcome email confirms active affiliate participation on this account.')`),
-      env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
-        VALUES('partnerstack','pcaiano@gmail.com','n8n','rejected','2026-09-01 19:21:49','gmail','PartnerStack email confirms n8n rejected this account.')`)
-    ]);
-
-    await env.DB.prepare(`UPDATE affiliate_network_click_evidence
-      SET account_email=COALESCE(account_email,'pedro@trytoolscout.org')
-      WHERE evidence_key='partnerstack:apollo:first-10:2026-09-25T17:12:28Z'`).run().catch(()=>{});
-
-    const current=[
-      ['unbounce',6],['apollo',19],['gorgias',20],['brevo',0],['kit',23],['instantly',12],['lemlist',27]
-    ];
-    for(const [tool,clicks] of current){
-      await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_program_evidence(network,account_email,tool_slug,programme_status,observed_at,evidence_source,note)
-        VALUES('partnerstack','pedro@trytoolscout.org',?,'active','2026-09-29 09:37:26','owner_dashboard','Current PartnerStack dashboard supplied by owner.')`).bind(tool).run();
-      await env.DB.prepare(`INSERT OR REPLACE INTO affiliate_network_click_evidence(
-        evidence_key,tool_slug,provider,programme,account_email,programme_status,reported_clicks_total,reported_conversions_total,pending_commission_amount,currency,observed_at,evidence_source,note
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
-        `partnerstack:pedro@trytoolscout.org:${tool}:dashboard:2026-09-29T09:37:26Z`,
-        tool,'partnerstack',tool,'pedro@trytoolscout.org','active',clicks,0,0,'USD',
-        '2026-09-29 09:37:26','owner_dashboard',
-        'Current PartnerStack programme dashboard supplied by owner; status Active, zero conversions and zero pending commissions.'
-      ).run();
-    }
-  })().catch(error=>{affiliateNetworkEvidenceReady=null;throw error});
-  return affiliateNetworkEvidenceReady;
-}
 async function affiliateNetworkEvidenceSchemaState(env){
   try{
     const [tables,columns]=await Promise.all([
@@ -885,13 +794,8 @@ export async function handleCommandCenterDirectRoute(request,env){
     return simplifiedPage(null,env);
   }
 
-  if(request.method==='POST'&&u.pathname==='/api/command-center-business-truth/reconcile-affiliate-schema'){
-    if(!adminAuthorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:{'Cache-Control':'no-store'}});
-    await reconcileAffiliateNetworkEvidenceSchema(env);
-    const state=await affiliateNetworkEvidenceSchemaState(env);
-    businessTruthCache={at:0,value:null,promise:null};
-    return Response.json({ok:state.ok,reconciled:true,state},{status:state.ok?200:503,headers:{'Cache-Control':'no-store'}});
-  }
+  const schemaControl=await handleCommandCenterSchemaControlRoute(request,env);
+  if(schemaControl)return schemaControl;
 
   if(request.method==='GET'&&u.pathname==='/api/command-center-business-truth'){
     const fresh=u.searchParams.get('fresh')==='1';
