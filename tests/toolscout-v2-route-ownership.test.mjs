@@ -28,12 +28,15 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/command-center-resilient-health',{method:'GET'}).owner,'command_center_resilient_health');
   assert.equal(routeOwner('/api/traffic-integrity-health',{method:'GET'}).owner,'traffic_integrity_health');
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
-  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'command_center');
-  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'legacy_chain');
+  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'legacy_chain');
   assert.equal(routeOwner('/analytics/api/chairman-queue',{method:'GET'}).owner,'analytics_chairman');
   assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
   assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
-  assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'analytics_human_actions_mutation');
+  assert.equal(routeOwner('/analytics/api/human-actions/gate',{method:'POST'}).owner,'analytics_human_actions_mutation');
+  assert.equal(routeOwner('/analytics/api/human-actions/editorial',{method:'POST'}).owner,'analytics_human_actions_mutation');
+  assert.equal(routeOwner('/api/command-center-business-truth/reconcile-affiliate-schema',{method:'POST'}).owner,'command_center');
   assert.equal(routeOwner('/best-seo-tools-for-agencies',{method:'GET'}).owner,'public_decision');
   assert.equal(routeOwner('/tools/airtable',{method:'GET'}).owner,'public_decision');
   assert.equal(routeOwner('/tools/semrush',{method:'GET'}).owner,'public_decision');
@@ -82,6 +85,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='analytics_chairman'/);
   assert.match(src,/ownership\.owner==='analytics_stats'/);
   assert.match(src,/ownership\.owner==='analytics_human_actions'/);
+  assert.match(src,/ownership\.owner==='analytics_human_actions_mutation'/);
   assert.match(src,/ownership\.owner==='public_decision'/);
   assert.match(src,/ownership\.owner==='public_navigation'/);
   assert.match(src,/X-ToolScout-Route-Owner/);
@@ -143,4 +147,14 @@ test('catalog runtime schema is migration-owned, not request-owned',()=>{
   assert.match(migration,/CREATE TABLE IF NOT EXISTS catalog_runtime_state/);
   assert.match(migration,/CREATE TABLE IF NOT EXISTS catalog_runtime_candidates/);
   assert.match(migration,/CREATE TABLE IF NOT EXISTS catalog_quality_audit/);
+});
+
+
+test('human action mutation schemas are migration-owned',()=>{
+  const auth=read('auth-automation.js');
+  const gate=read('human-gate-contract.js');
+  assert.doesNotMatch(auth,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+  assert.doesNotMatch(gate,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+  assert.match(auth,/auth_automation_schema_not_migrated/);
+  assert.match(gate,/human_gate_schema_not_migrated/);
 });
