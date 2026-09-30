@@ -2002,7 +2002,6 @@ export default{
     if(ctx?.waitUntil)ctx.waitUntil(trafficIntegrityHeartbeat);
     const trafficGuardCleanup=Promise.resolve(runTrafficIntegrityGuardScheduled(env)).catch(async error=>{await event(env,'traffic_guard_cleanup_failed','failed',safe(error?.message||error,800)).catch(()=>{});return null;});
     if(ctx?.waitUntil)ctx.waitUntil(trafficGuardCleanup);
-    const trigger=scheduledEvent?.cron||'scheduled';
     if(trigger===RENDER_KEEPALIVE_CRON){
       if(!env.OVERFLOW_COMPUTE_URL)return;
       const keepalive=(async()=>{
