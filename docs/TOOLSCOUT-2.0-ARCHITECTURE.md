@@ -248,3 +248,8 @@ A legacy wrapper may leave generic request traversal before its scheduled respon
 ### Stateful response-stage extraction
 
 When a wrapper performs state linkage around a lower request, preserve both sides of the boundary: prepare any request context before lower execution, then apply persistence-dependent linkage only after the lower response exists. Response decoration may then be expressed as an ordered front-router stage without changing identity semantics.
+
+
+### Human-confirmation stage extraction
+
+Browser-confirmed human evidence is a first-class response and signal stage. The confirmation client must be injected before downstream traffic transforms, while its ingestion endpoint and heartbeat schedule are explicitly owned. Schema remains migration-owned.
