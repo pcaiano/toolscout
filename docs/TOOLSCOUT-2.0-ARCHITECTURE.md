@@ -238,3 +238,8 @@ Canonical redirects and canonical public assets are explicit route owners. Gener
 ### Helper-preserving wrapper removal
 
 A wrapper may leave generic traversal while its exported helpers remain in use by direct owners or bounded compatibility compositions. Removing a traversal edge does not require deleting the module. Preserve explicit helper imports and only retire request interception that is already owned elsewhere.
+
+
+### Split request and scheduled ownership
+
+A legacy wrapper may leave generic request traversal before its scheduled responsibility is fully removed from compatibility chains. Export the scheduled responsibility explicitly and invoke it where the front scheduler previously delegated to that wrapper. Preserve ordering and avoid duplicate invocation when another bounded coordinator still traverses the compatibility chain.
