@@ -30,7 +30,8 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   const authority=read('authority-acquisition-worker.js');
   assert.match(compute,/runGrowthScheduler/);
   assert.match(compute,/runAuthorityAcquisitionScheduled/);
-  assert.match(compute,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
+  assert.match(compute,/import base from '\.\/gsc-command-center-trend-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/gsc-command-center-visible-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-health-language-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-ga4-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/d1-read-budget-worker\.js'/);
