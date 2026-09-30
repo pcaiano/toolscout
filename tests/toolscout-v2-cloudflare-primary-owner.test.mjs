@@ -1,0 +1,44 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+
+test('Cloudflare Primary runtime routes are explicitly dispatched by compute',()=>{
+  const compute=read('compute-router-worker.js');
+  const primary=read('cloudflare-primary-runtime-worker.js');
+
+  assert.match(compute,/import base from '\.\/ga4-owner-exclusion-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/cloudflare-primary-runtime-worker\.js'/);
+  assert.match(compute,/handleCloudflarePrimaryRuntimeRoute/);
+  assert.match(compute,/runCloudflarePrimaryScheduled/);
+  assert.match(compute,/u\.pathname==='\/api\/runtime\/executors'/);
+  assert.match(compute,/u\.pathname==='\/api\/runtime\/cloudflare-primary-cycle'/);
+
+  assert.match(primary,/export async function handleCloudflarePrimaryRuntimeRoute/);
+  assert.match(primary,/export async function runCloudflarePrimaryScheduled/);
+  assert.match(primary,/return null;/);
+  assert.doesNotMatch(primary,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
+});
+
+test('Cloudflare Primary scheduled extraction preserves coordinator order',()=>{
+  const compute=read('compute-router-worker.js');
+  const primary=read('cloudflare-primary-runtime-worker.js');
+
+  assert.match(primary,/const gsc=await runtimeGscRefresh/);
+  assert.match(primary,/mission:'primary_growth_cycle'/);
+  assert.match(primary,/base\.scheduled\(event,env,ctx\)/);
+  assert.match(primary,/if\(ctx\?\.waitUntil\)ctx\.waitUntil\(inherited\)/);
+
+  const primaryIndex=compute.indexOf('runCloudflarePrimaryScheduled(scheduledEvent,env,ctx)');
+  const seoIndex=compute.indexOf('runSeoRuntimeScheduled(scheduledEvent,env,ctx)');
+  assert.ok(primaryIndex>=0&&seoIndex>primaryIndex,'SEO scheduled refresh must follow Cloudflare Primary scheduling');
+  assert.match(compute,/const seo=primaryRaw\.then/);
+});
+
+test('Cloudflare Primary schema prerequisite remains migration-owned',()=>{
+  const primary=read('cloudflare-primary-runtime-worker.js');
+  const migration=read('migrations/0098_growth_asset_cache_schema.sql');
+  assert.match(primary,/growth_asset_cache_schema_not_migrated/);
+  assert.match(migration,/CREATE TABLE IF NOT EXISTS growth_asset_cache/);
+});
