@@ -533,3 +533,20 @@ Implemented:
 
 Preservation rule:
 Engine evidence ingestion remains explicitly owned by the v2 handler. Only the redundant decorator hop is removed.
+
+
+## Phase 45 - Remove legacy mission-integrity traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-45`.
+
+Implemented:
+- generic compute fallback now connects directly to `command-center-integrity-worker.js`;
+- `mission-integrity-worker.js` is removed from production's generic request traversal;
+- `POST /api/engine-evidence` remains owned directly by the existing `mission_integrity` ToolScout 2.0 route;
+- traffic-integrity health continues to consume `augmentMissionIntegrityHealth()` explicitly;
+- direct Admin Stats retains the mature lower compatibility composition that still includes mission-integrity augmentation;
+- no route ownership, payload shape or mission evidence semantics are changed;
+- the architecture edge budget ratchets from 54 to 53.
+
+Preservation rule:
+Mission evidence ingestion, content-engine health augmentation and internal compatibility helpers remain available. Only the redundant generic wrapper edge is removed.
