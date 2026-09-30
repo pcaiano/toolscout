@@ -1,6 +1,7 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './command-center-integrity-worker.js';
+import base from './visitor-integrity-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
+import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
@@ -2005,12 +2006,10 @@ export default{
       // Overflow is an execution sidecar, never the owner of the scheduler chain.
       // Always delegate the same cron event so Growth Brain, engine recovery,
       // execution contracts and observability continue to run 24/7.
-      const inherited=typeof base.scheduled==='function'
-        ?Promise.resolve(base.scheduled(scheduledEvent,env,ctx)).catch(async error=>{
-          await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800));
-          return null;
-        })
-        :Promise.resolve(null);
+      const inherited=Promise.resolve(runCommandCenterIntegrityScheduled(scheduledEvent,env,ctx)).catch(async error=>{
+        await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800));
+        return null;
+      });
       const combined=Promise.allSettled([overflowWork,inherited]);
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;
@@ -2055,6 +2054,6 @@ export default{
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;return;
     }
-    return typeof base.scheduled==='function'?base.scheduled(scheduledEvent,env,ctx):undefined;
+    return runCommandCenterIntegrityScheduled(scheduledEvent,env,ctx);
   }
 };

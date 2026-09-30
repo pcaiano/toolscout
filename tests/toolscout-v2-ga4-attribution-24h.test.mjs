@@ -22,7 +22,8 @@ test('GA4 rolling 24h acquisition has a direct route owner',()=>{
 
 test('generic fallback bypasses the GA4 attribution decorator',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/command-center-integrity-worker\.js'/);
+  assert.match(compute,/import base from '\.\/visitor-integrity-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/command-center-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/mission-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/mission-integrity-v2-worker\.js'/);
   assert.match(compute,/handleMissionIntegrityRoute.*from '\.\/mission-integrity-v2-worker\.js'/);
