@@ -183,3 +183,8 @@ After explicit route ownership is proven, redundant decorator edges are removed 
 ### Scheduled-owner extraction
 
 A worker that owns both direct routes and cron work does not need to remain in the generic request decorator chain. Its scheduled responsibility should be exported as a named function and invoked by the front scheduler according to `runtime-schedule-contract.js`. Internal calls may retain bounded lower-chain compatibility until their endpoint owners are extracted.
+
+
+### Schema before dispatch extraction
+
+A wrapper that still owns request-time DDL is not eligible for direct-owner extraction. Move its schema into an additive D1 migration, replace runtime DDL with a read-only schema probe, then change routing or scheduling in a later phase. This keeps data-plane and dispatch risk independently reversible.

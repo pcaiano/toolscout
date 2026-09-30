@@ -45,11 +45,15 @@ function aggregateRows(rows=[]){
   for(const r of rows){const i=Number(r.impressions||0),c=Number(r.clicks||0);clicks+=c;impressions+=i;posN+=Number(r.position||0)*i}
   return {clicks,impressions,ctr:impressions?Number((clicks/impressions*100).toFixed(4)):0,position:impressions?Number((posN/impressions).toFixed(4)):0};
 }
+let growthAssetCacheSchemaReady=null;
 async function ensureGscCache(env){
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_asset_cache(
-    path TEXT PRIMARY KEY,payload_json TEXT NOT NULL,source_generated_at TEXT,
-    cached_at TEXT NOT NULL DEFAULT (datetime('now')),updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )`).run();
+  if(growthAssetCacheSchemaReady)return growthAssetCacheSchemaReady;
+  growthAssetCacheSchemaReady=(async()=>{
+    const row=await env.DB.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='growth_asset_cache'").first();
+    if(Number(row?.n||0)!==1)throw new Error('growth_asset_cache_schema_not_migrated');
+    return {ok:true,source:'d1_migrations'};
+  })().catch(error=>{growthAssetCacheSchemaReady=null;throw error});
+  return growthAssetCacheSchemaReady;
 }
 async function cacheAsset(env,path,payload){
   await ensureGscCache(env);
