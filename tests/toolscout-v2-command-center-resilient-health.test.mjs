@@ -34,7 +34,7 @@ function fakeEnv(){
 
 test('resilient health has a direct ToolScout 2.0 owner',()=>{
   assert.equal(routeOwner('/api/command-center-resilient-health',{method:'GET'}).owner,'command_center_resilient_health');
-  assert.equal(routeOwner('/api/command-center-resilient-health',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/api/command-center-resilient-health',{method:'POST'}).owner,'legacy_chain');
 });
 
 test('resilient health direct route is read-only and preserves payload',async()=>{

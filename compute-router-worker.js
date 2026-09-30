@@ -21,6 +21,7 @@ import {handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-ru
 import {handleAnalyticsChairmanRoute} from './analytics-chairman-runtime.js';
 import {handleAnalyticsStatsReadRoute} from './command-center-resilient-worker.js';
 import {handleAnalyticsHumanActionsRoute} from './analytics-human-actions-runtime.js';
+import {handleHumanActionsMutationRoute} from './human-action-entry-worker.js';
 import {renderPublicDecisionPage} from './public-decision-runtime.js';
 import {renderPublicNavigationPage} from './public-navigation-runtime.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
@@ -1877,6 +1878,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='analytics_chairman')response=await handleAnalyticsChairmanRoute(request,env,ctx);
   else if(ownership.owner==='analytics_stats')response=await handleAnalyticsStatsReadRoute(request,env,ctx);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
+  else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);
   else if(ownership.owner==='public_navigation')response=await renderPublicNavigationPage(request,env);
   if(!response)return null;

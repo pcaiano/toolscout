@@ -38,9 +38,9 @@ function fakeEnv(){
 
 test('Human Actions GET has a direct Phase 5 owner while mutations stay operational',()=>{
   assert.equal(routeOwner('/analytics/api/human-actions',{method:'GET'}).owner,'analytics_human_actions');
-  assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'command_center');
-  assert.equal(routeOwner('/analytics/api/human-actions/gate',{method:'POST'}).owner,'command_center');
-  assert.equal(routeOwner('/analytics/api/human-actions/editorial',{method:'POST'}).owner,'command_center');
+  assert.equal(routeOwner('/analytics/api/human-actions/credential',{method:'POST'}).owner,'analytics_human_actions_mutation');
+  assert.equal(routeOwner('/analytics/api/human-actions/gate',{method:'POST'}).owner,'analytics_human_actions_mutation');
+  assert.equal(routeOwner('/analytics/api/human-actions/editorial',{method:'POST'}).owner,'analytics_human_actions_mutation');
 });
 
 test('Human Actions GET preserves Command Center session protection',async()=>{
