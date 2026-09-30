@@ -70,10 +70,30 @@ async function decorate(response){
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+export async function handleHumanTruthFinalRoute(request){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.pathname!=='/api/command-center-human-truth-final-health')return null;
+  return Response.json({
+    ok:true,
+    service:'toolscout-command-center-human-truth-final',
+    version:4,
+    canonicalMetric:'strict verified human sessions',
+    canonicalSource:'D1 traffic_human_evidence',
+    trafficTruth:'strict-human-v1',
+    acceptedEvidence:['trusted_interaction','verified_outbound_navigation'],
+    browserValidatedDiagnosticOnly:true,
+    defaultWindow:'last24',
+    chartPosition:'top',
+    forecastMetric:'strict verified human sessions',
+    uniqueVisitorsRole:'secondary until exact visitor coverage matures'
+  },{headers:{'Cache-Control':'no-store'}});
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleHumanTruthFinalRoute(request);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname==='/api/command-center-human-truth-final-health')return Response.json({ok:true,service:'toolscout-command-center-human-truth-final',version:4,canonicalMetric:'strict verified human sessions',canonicalSource:'D1 traffic_human_evidence',trafficTruth:'strict-human-v1',acceptedEvidence:['trusted_interaction','verified_outbound_navigation'],browserValidatedDiagnosticOnly:true,defaultWindow:'last24',chartPosition:'top',forecastMetric:'strict verified human sessions',uniqueVisitorsRole:'secondary until exact visitor coverage matures'},{headers:{'Cache-Control':'no-store'}});
     const response=await base.fetch(request,env,ctx);
     if(request.method==='GET'&&ANALYTICS_PATHS.has(url.pathname))return decorate(response);
     return response;
