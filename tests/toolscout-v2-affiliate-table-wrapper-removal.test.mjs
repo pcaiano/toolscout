@@ -29,7 +29,7 @@ test('expired local login preserves fail-closed availability semantics',async()=
 
 test('generic request traversal bypasses the affiliate table compatibility wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-impact-entry-worker\.js'/);
+  assert.match(compute,/import base from '\.\/agent-protocol-core-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-affiliate-table-worker\.js'/);
   assert.match(compute,/const protectedLegacyBase=withPrivateAssets\(/);
 });
