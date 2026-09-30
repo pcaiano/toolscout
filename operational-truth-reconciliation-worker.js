@@ -137,11 +137,6 @@ async function affiliateNetworkEvidenceSchemaState(env){
     return{ok:false,missingTables:[],missingColumns:[],mode:'read_only_schema_probe',error:String(error?.message||error).slice(0,500)};
   }
 }
-function adminAuthorized(request,env){
-  const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
-  return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
-}
-
 async function ccAssetJson(request,env,path,fallback){
   try{
     const url=new URL(path,request.url);
