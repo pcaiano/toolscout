@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './authority-acquisition-worker.js';
+import base from './seo-cloudflare-runtime-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {handleCommandCenterDirectRoute} from './command-center-direct-runtime.js';
 import {handleCommandCenterResilientHealthRoute} from './command-center-resilient-health-runtime.js';
@@ -16,7 +16,7 @@ import {handleDistributionPriorityRoute} from './distribution-priority-worker.js
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {handleDistributionOrchestratorRoute} from './distribution-orchestrator-worker.js';
 import {handleSeoRuntimeRoute} from './seo-cloudflare-runtime-worker.js';
-import {handleAuthorityAcquisitionRoute} from './authority-acquisition-worker.js';
+import {handleAuthorityAcquisitionRoute,runAuthorityAcquisitionScheduled} from './authority-acquisition-worker.js';
 import {handleGrowthClosedLoopRoute} from './growth-runtime-closed-loop-worker.js';
 import {handleAuthorityHealthRoute} from './authority-health-runtime.js';
 import {handleAgentProtocolRoute} from './agent-protocol-core-worker.js';
@@ -2005,7 +2005,11 @@ export default{
           return null;
         })
         :Promise.resolve(null);
-      const combined=Promise.allSettled([growth,inherited]);
+      const authority=Promise.resolve(runAuthorityAcquisitionScheduled(scheduledEvent,env,ctx)).catch(async error=>{
+        await event(env,'authority_acquisition_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+        return null;
+      });
+      const combined=Promise.allSettled([growth,authority,inherited]);
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;return;
     }
