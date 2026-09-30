@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './command-center-human-truth-final-worker.js';
+import base from './command-center-human-truth-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -9,6 +9,7 @@ import {handleOwnerExclusionRoute} from './owner-exclusion-worker.js';
 import {handleTrafficIntegrityCoreRoute,transformTrafficIntegrityCoreResponse,runTrafficIntegrityCoreScheduled} from './traffic-integrity-worker.js';
 import {handleHumanTruthChartRoute} from './command-center-human-truth-chart-worker.js';
 import {handleHumanTruthDetailsRoute} from './command-center-human-truth-details-worker.js';
+import {handleHumanTruthFinalRoute} from './command-center-human-truth-final-worker.js';
 import {handlePublicCanonicalSurfaceRoute,transformPublicCanonicalResponse} from './command-center-light-theme-worker.js';
 import {runGrowthRuntimeIntegrityScheduled} from './growth-runtime-integrity-worker.js';
 import {handleGrowthClosedLoopRoute,runGrowthClosedLoopScheduled} from './growth-runtime-closed-loop-worker.js';
@@ -1937,6 +1938,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='traffic_integrity_core')response=await handleTrafficIntegrityCoreRoute(request,env);
   else if(ownership.owner==='human_truth_chart_health')response=await handleHumanTruthChartRoute(request);
   else if(ownership.owner==='human_truth_details_health')response=await handleHumanTruthDetailsRoute(request);
+  else if(ownership.owner==='human_truth_final_health')response=await handleHumanTruthFinalRoute(request);
   else if(ownership.owner==='analytics_human_actions')response=await handleAnalyticsHumanActionsRoute(request,env);
   else if(ownership.owner==='analytics_human_actions_mutation')response=await handleHumanActionsMutationRoute(request,env,ctx);
   else if(ownership.owner==='public_decision')response=await renderPublicDecisionPage(request,env);
