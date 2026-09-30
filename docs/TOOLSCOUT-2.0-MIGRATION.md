@@ -449,3 +449,21 @@ Implemented:
 
 Preservation rule:
 Existing observability corrections remain available where explicit compositions still depend on them. Only redundant generic traversal is removed.
+
+
+## Phase 40 - Explicit authority closed-loop scheduling
+
+Status: implemented on `architecture/toolscout-2.0-phase-40`.
+
+Implemented:
+- `runGrowthClosedLoopScheduled()` explicitly owns the hourly `authority_closed_loop` mission already declared in the central schedule contract;
+- the compute router executes the closed loop after the hourly core scheduler work settles and before the authority sender drain;
+- generic request fallback now connects directly to `growth-runtime-integrity-worker.js`;
+- the closed-loop wrapper remains available inside bounded compatibility compositions for health/stats/UI enrichment;
+- the architecture edge budget ratchets from 59 to 58.
+
+Functional correction:
+The closed-loop hourly mission previously lived inside a wrapper `scheduled()`, but the compute router intercepted the hourly cron and returned without delegating `base.scheduled()`. This phase makes that mission reachable and observable.
+
+Preservation rule:
+Manual close-loop ownership, run ledger semantics, machine-first execution, sender handoff evidence and hourly mission identity remain unchanged. Scheduler reachability becomes explicit.
