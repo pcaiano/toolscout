@@ -175,6 +175,8 @@ if(routeContractLive.ok){
     if(owner('analytics_chairman_queue')!=='analytics_chairman')errors.push({code:'analytics_chairman_direct_owner_not_live'});
     if(owner('analytics_stats')!=='analytics_stats')errors.push({code:'analytics_stats_direct_owner_not_live'});
     if(owner('analytics_human_actions')!=='analytics_human_actions')errors.push({code:'analytics_human_actions_direct_owner_not_live'});
+    if(owner('analytics_human_action_mutations')!=='analytics_human_actions_mutation')errors.push({code:'analytics_human_action_mutations_not_live'});
+    if(owner('command_center_schema_reconcile')!=='command_center')errors.push({code:'command_center_schema_reconcile_owner_changed'});
     if(owner('public_decision_pages')!=='public_decision')errors.push({code:'public_decision_owner_not_live'});
     if(owner('public_navigation_hubs')!=='public_navigation')errors.push({code:'public_navigation_owner_not_live'});
   }catch{}
