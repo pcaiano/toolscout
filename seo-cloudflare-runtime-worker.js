@@ -235,6 +235,15 @@ export async function handleSeoRuntimeRoute(request,env){
   return null;
 }
 
+export async function runSeoRuntimeScheduled(event,env,ctx){
+  const trigger=event?.cron||'scheduled';
+  if(trigger!==TOOLSCOUT_CRONS.hourly&&trigger!==TOOLSCOUT_CRONS.daily)return null;
+  const task=refreshState(new Request('https://trytoolscout.org/'),env).catch(()=>{});
+  if(ctx?.waitUntil){ctx.waitUntil(task);return {scheduled:true,deferred:true};}
+  await task;
+  return {scheduled:true,deferred:false};
+}
+
 export default{
   async fetch(request,env,ctx){
     const owned=await handleSeoRuntimeRoute(request,env);
@@ -243,11 +252,7 @@ export default{
     return transformPage(request,response,env);
   },
   async scheduled(event,env,ctx){
-    const trigger=event?.cron||'scheduled';
     if(typeof base.scheduled==='function')await base.scheduled(event,env,ctx);
-    if(trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily){
-      const task=refreshState(new Request('https://trytoolscout.org/'),env).catch(()=>{});
-      if(ctx?.waitUntil)ctx.waitUntil(task);else await task;
-    }
+    return runSeoRuntimeScheduled(event,env,ctx);
   }
 };
