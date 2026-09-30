@@ -233,3 +233,8 @@ Authority recovery sequencing is explicit: settle the independent hourly core mi
 ### Canonical response-stage ownership
 
 Canonical redirects and canonical public assets are explicit route owners. Generic HTML canonicalization is an explicit response stage that runs immediately after the lower runtime and before attribution, SEO runtime transforms and social-footer injection. This prevents SEO behavior from being coupled to Command Center presentation wrappers.
+
+
+### Helper-preserving wrapper removal
+
+A wrapper may leave generic traversal while its exported helpers remain in use by direct owners or bounded compatibility compositions. Removing a traversal edge does not require deleting the module. Preserve explicit helper imports and only retire request interception that is already owned elsewhere.
