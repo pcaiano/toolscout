@@ -1,8 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import legacy from '../operational-truth-reconciliation-worker.js';
+import legacyHealthBase from '../authority-acquisition-worker.js';
+import {reconcileOperationalTruth} from '../operational-truth-reconciliation-runtime.js';
 import {handleTrafficIntegrityHealthRoute} from '../traffic-integrity-health-runtime.js';
 import {routeOwner} from '../runtime-route-contract.js';
+
+async function legacyHealthFetch(request,env,ctx){
+  let response=await legacyHealthBase.fetch(request,env,ctx);
+  return reconcileOperationalTruth(response,env);
+}
 
 function fakeEnv(){
   let writes=0;
@@ -70,7 +76,7 @@ test('direct traffic integrity health matches legacy semantic shape without writ
   const request=new Request('https://trytoolscout.org/api/traffic-integrity-health');
   const [directResponse,legacyResponse]=await Promise.all([
     handleTrafficIntegrityHealthRoute(request.clone(),a.env),
-    legacy.fetch(request.clone(),b.env,{waitUntil(){}})
+    legacyHealthFetch(request.clone(),b.env,{waitUntil(){}})
   ]);
   assert.equal(directResponse.status,200);
   assert.equal(legacyResponse.status,200);

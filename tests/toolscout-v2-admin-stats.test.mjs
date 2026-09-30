@@ -1,8 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import legacy from '../operational-truth-reconciliation-worker.js';
+import legacyStatsBase from '../authority-acquisition-worker.js';
+import {reconcileOperationalTruth} from '../operational-truth-reconciliation-runtime.js';
 import {handleAdminStatsRoute} from '../admin-stats-runtime.js';
 import {routeOwner} from '../runtime-route-contract.js';
+
+async function legacyStatsFetch(request,env,ctx){
+  let response=await legacyStatsBase.fetch(request,env,ctx);
+  return reconcileOperationalTruth(response,env);
+}
 
 // Cloudflare Workers exposes the Cache API globally. Node's test runner does
 // not, so provide a no-hit/no-op cache for legacy parity only.
@@ -124,7 +130,7 @@ test('admin stats direct route matches legacy semantic shape without writes',asy
   });
   const [directResponse,legacyResponse]=await Promise.all([
     handleAdminStatsRoute(request.clone(),a.env,{}),
-    legacy.fetch(request.clone(),b.env,{waitUntil(){}})
+    legacyStatsFetch(request.clone(),b.env,{waitUntil(){}})
   ]);
 
   assert.equal(directResponse.status,200);

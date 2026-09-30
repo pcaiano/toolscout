@@ -1,7 +1,5 @@
-import base from './authority-acquisition-worker.js';
-import {injectToolScoutSocialFooter} from './social-profiles.js';
-import {publicRuntimeToolResponse} from './catalog-autonomy-worker.js';
-import {handleCommandCenterDirectRoute} from './command-center-business-truth-runtime.js';
+// ToolScout 2.0 compatibility reconciliation for mature observability payloads.
+// This module is deliberately not a fetch-wrapper and has no legacy base import.
 
 function jsonHeaders(response){
   const h=new Headers(response.headers);
@@ -84,24 +82,5 @@ async function reconcile(response,env){
   d.operationalTruthReconciliation={version:'live-runtime-v1',ga4Connected:f.ga4Connected,authorityAttempts24:f.authorityAttempts24,authorityThroughputHealthy:f.authorityAttempts24>=AUTHORITY_POLICY_MIN_24H,contentStatus:f.contentStatus,generatedAt:new Date().toISOString()};
   return new Response(JSON.stringify(d),{status:response.status,statusText:response.statusText,headers:jsonHeaders(response)});
 }
-
-export default{
-  async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    const direct=await handleCommandCenterDirectRoute(request,env);
-    if(direct)return direct;
-    if(request.method==='GET'&&u.pathname.startsWith('/tools/')){
-      const m=u.pathname.match(/^\/tools\/([a-z0-9][a-z0-9-]*)(?:\.html)?\/?$/i);
-      if(m){const runtime=await publicRuntimeToolResponse(env,m[1]).catch(()=>null);if(runtime)return injectToolScoutSocialFooter(runtime);}
-    }
-    const response=await base.fetch(request,env,ctx);
-    if(request.method==='GET'&&(u.pathname==='/api/traffic-integrity-health'||u.pathname==='/analytics/api/stats'||u.pathname==='/api/stats'))return reconcile(response,env);
-    if(request.method==='GET')return injectToolScoutSocialFooter(response);
-    return response;
-  },
-  async scheduled(event,env,ctx){
-    return typeof base.scheduled==='function'?base.scheduled(event,env,ctx):undefined;
-  }
-};
 
 export {reconcile as reconcileOperationalTruth};

@@ -1,4 +1,5 @@
-import legacy from './operational-truth-reconciliation-worker.js';
+import legacyStatsBase from './authority-acquisition-worker.js';
+import {reconcileOperationalTruth} from './operational-truth-reconciliation-runtime.js';
 import {isAccessAuthenticated} from './dynamic-worker.js';
 
 // ToolScout 2.0 owns /api/stats at the router boundary while preserving the
@@ -25,7 +26,8 @@ export async function handleAdminStatsRoute(request,env,ctx){
     return Response.json({error:'unauthorized'},{status:401,headers});
   }
 
-  const response=await legacy.fetch(request,env,ctx);
+  let response=await legacyStatsBase.fetch(request,env,ctx);
+  response=await reconcileOperationalTruth(response,env);
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Read-Mode','read-only');
   headers.set('X-ToolScout-Route-Contract','v2');
