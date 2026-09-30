@@ -23,7 +23,8 @@ test('resilient wrapper responsibilities remain direct-owned',()=>{
 
 test('generic traversal bypasses command-center-resilient wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/command-center-autoload-worker\.js'/);
+  assert.match(compute,/import base from '\.\/command-center-truth-consolidation-worker\.js'/);
+  assert.doesNotMatch(compute,/import base from '\.\/command-center-autoload-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-resilient-worker\.js'/);
 });
 
