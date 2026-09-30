@@ -1033,3 +1033,18 @@ Implemented:
 
 Preservation rule:
 Canonical stats sources, Command Center page ownership, public URLs/canonicals and active observability behavior remain unchanged.
+
+
+## Phase 77 - Remove agent protocol core request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-77`.
+
+Implemented:
+- generic compute fallback now connects directly to `content-engine-intelligence-worker.js`;
+- `agent-protocol-core-worker.js` leaves production's generic request traversal;
+- MCP, A2A and the agent card remain direct-owned by `agent_protocol_core`;
+- the protocol handler still uses its own lower `content-engine-intelligence-worker.js` dependency to resolve `/api/recommend`, preserving deterministic recommendation behavior;
+- the architecture edge budget ratchets from 26 to 25.
+
+Preservation rule:
+MCP/A2A envelopes, protocol validation, agent discovery, recommendation calls, ranking neutrality, public URLs/canonicals and agent-card semantics remain unchanged.
