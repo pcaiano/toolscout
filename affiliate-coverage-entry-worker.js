@@ -59,19 +59,6 @@ function extractReferralUrl(text){
   }
   return null;
 }
-async function ensureAffiliateReplySchema(env){
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_reply_events(
-    message_id TEXT PRIMARY KEY,
-    sender TEXT,
-    subject TEXT,
-    matched_tool_slug TEXT,
-    decision TEXT,
-    affiliate_url TEXT,
-    status TEXT NOT NULL,
-    received_at TEXT,
-    processed_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )`).run();
-}
 async function matchAffiliateTool(env,payload,text){
   const rows=await env.DB.prepare(`SELECT tool_slug,program_name,program_url,application_url,network,status FROM affiliate_workflow`).all();
   const hay=`${payload?.from||''} ${payload?.subject||''} ${text||''}`.toLowerCase(),senderHost=urlHost('https://'+String(payload?.from||'').split('@').pop()?.replace(/[>\s].*$/,''));
@@ -93,7 +80,6 @@ async function ingestAffiliateReply(request,env){
   const messageId=String(payload.message_id||payload.id||'').slice(0,300);if(!messageId)return Response.json({error:'message_id_required'},{status:422,headers:JSON_H});
   const receivedMs=Date.parse(String(payload.received_at||''));const cutoffMs=Date.parse(AFFILIATE_REPLY_ACCEPT_AFTER);
   if(!Number.isFinite(receivedMs)||receivedMs<cutoffMs)return Response.json({ok:true,ignored:true,reason:'historic_or_unparseable_message',cutoff:AFFILIATE_REPLY_ACCEPT_AFTER},{status:202,headers:JSON_H});
-  await ensureAffiliateReplySchema(env);
   const exists=await env.DB.prepare('SELECT message_id,status FROM affiliate_reply_events WHERE message_id=?').bind(messageId).first();
   if(exists)return Response.json({ok:true,duplicate:true,status:exists.status},{headers:JSON_H});
   const subject=String(payload.subject||'').slice(0,1000),sender=String(payload.from||payload.sender||'').slice(0,1000),body=cleanMail(payload.body||payload.text||payload.html||''),text=`${subject} ${body}`;
