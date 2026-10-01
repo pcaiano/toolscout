@@ -33,12 +33,15 @@ test('generic traversal bypasses discovery wrapper while autonomous and submissi
 
   assert.match(discovery,/export async function handleDistributionDiscoveryRoute/);
   assert.match(discovery,/export async function runDistributionDiscoveryScheduled/);
+  assert.match(discovery,/import base from '\.\/distribution-sender-worker\.js'/);
+  assert.match(discovery,/import \{runDistributionLearningScheduled\} from '\.\/distribution-learning-worker\.js'/);
+  assert.match(discovery,/await runDistributionLearningScheduled\(event,env,ctx\)/);
   assert.doesNotMatch(discovery,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 
   assert.match(autonomous,/import \{handleDistributionDiscoveryRoute\} from '\.\/distribution-discovery-worker\.js'/);
   assert.match(autonomous,/handleDistributionDiscoveryRoute\(new Request\('https:\/\/trytoolscout\.org\/api\/distribution\/discovery\/refresh'/);
 
-  assert.match(submission,/import base from '\.\/distribution-sender-worker\.js'/);
+  assert.match(submission,/import base from '\.\/distribution-learning-worker\.js'/);
   assert.match(submission,/import \{runDistributionDiscoveryScheduled\} from '\.\/distribution-discovery-worker\.js'/);
   assert.match(submission,/await runDistributionDiscoveryScheduled\(event,env,ctx\)/);
 });
