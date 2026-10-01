@@ -78,7 +78,6 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'distribution_contact_mutations',owner:'distribution_contact_runtime',plane:'executor',methods:['POST'],exact:['/api/distribution/vendor-amplification/contact-scan','/api/distribution/vendor-amplification/status']},
   {id:'distribution_vendor_queue',owner:'distribution_vendor_runtime',plane:'signals',methods:['GET'],exact:['/api/distribution/vendor-amplification']},
   {id:'distribution_vendor_refresh',owner:'distribution_vendor_runtime',plane:'executor',methods:['POST'],exact:['/api/distribution/vendor-amplification/refresh']},
-  {id:'distribution_radar_feeds',owner:'distribution_radar_runtime',plane:'public_site',methods:['GET'],exact:['/api/distribution/feed.json','/api/distribution/feed.xml']},
   {id:'distribution_radar_refresh',owner:'distribution_radar_runtime',plane:'executor',methods:['POST'],exact:['/api/distribution/radar/refresh']},
   {id:'public_decision_pages',owner:'public_decision',plane:'public_site',methods:['GET'],matcher:'public_decision_page'},
   {id:'public_navigation_hubs',owner:'public_navigation',plane:'public_site',methods:['GET'],exact:['/tools','/tools/','/tools.html','/guides','/guides/','/guides.html','/compare','/compare/','/compare.html','/categories','/categories/','/categories.html','/crm-tools','/crm-tools/','/crm-tools.html','/seo-tools','/seo-tools/','/seo-tools.html','/blog/']},
