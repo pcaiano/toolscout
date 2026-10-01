@@ -1237,3 +1237,19 @@ Why this phase is separate:
 
 Preservation rule:
 The `distribution_placements` schema, placement verification fields, backlink verification semantics and existing production rows remain unchanged.
+
+
+## Phase 90 - Explicit Autonomous Distribution ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-90`.
+
+Implemented:
+- `GET /api/distribution/autonomy/metrics` is declared under the explicit `distribution_autonomous_runtime` owner;
+- `POST /api/distribution/autonomous/refresh` intentionally remains owned by `distribution_throughput_runtime`, because throughput must preserve its due-research release and IndexNow timestamp-normalization stages around the autonomous cycle;
+- `distribution-throughput-worker.js` now composes `handleAutonomousDistributionRoute` directly for autonomous refresh instead of reaching it through decorator traversal;
+- generic request fallback now connects directly to `distribution-submission-worker.js`;
+- the compatibility default export remains available in the autonomous worker for isolated callers;
+- the architecture edge budget ratchets from 16 to 15.
+
+Preservation rule:
+No autonomous-cycle mission ledger semantics, qualification logic, Human Gate handling, placement verification, authority recovery, IndexNow pre/post processing or submission execution behavior changes in this phase. The change is routing and explicit composition only.
