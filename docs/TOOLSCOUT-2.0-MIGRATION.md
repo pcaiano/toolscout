@@ -1253,3 +1253,18 @@ Implemented:
 
 Preservation rule:
 No autonomous-cycle mission ledger semantics, qualification logic, Human Gate handling, placement verification, authority recovery, IndexNow pre/post processing or submission execution behavior changes in this phase. The change is routing and explicit composition only.
+
+
+## Phase 91 - Explicit Distribution Submission ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-91-resume`.
+
+Implemented:
+- `POST /api/distribution/submissions/package`, `POST /api/distribution/submissions/verify` and `GET /api/distribution/submissions` are declared under the explicit `distribution_submission_runtime` owner;
+- `POST /api/distribution/submissions/execute` deliberately remains under `distribution_throughput_runtime` so adaptive IndexNow delivery and timestamp normalization continue to wrap canonical submission execution;
+- `distribution-throughput-worker.js` composes `handleDistributionSubmissionRoute` directly for execute and package prework, and composes `runDistributionSubmissionScheduled` for compatibility cron behavior;
+- generic request fallback now connects directly to `distribution-discovery-worker.js`;
+- the architecture edge budget ratchets from 15 to 14.
+
+Preservation rule:
+No submission packaging, adapter policy, authentication, retry, verification, IndexNow, scheduling or response semantics change in this phase. Only ownership and explicit composition replace decorator traversal.
