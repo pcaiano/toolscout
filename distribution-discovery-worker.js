@@ -1,4 +1,5 @@
-import base from './distribution-learning-worker.js';
+import base from './distribution-sender-worker.js';
+import {runDistributionLearningScheduled} from './distribution-learning-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const hostSlug=h=>h.replace(/^www\./,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,110);
@@ -111,7 +112,7 @@ export async function handleDistributionDiscoveryRoute(request,env,ctx){
 }
 
 export async function runDistributionDiscoveryScheduled(event,env,ctx){
-  if(base.scheduled)await base.scheduled(event,env,ctx);
+  await runDistributionLearningScheduled(event,env,ctx);
   const work=discover(new Request('https://trytoolscout.org/'),env).catch(()=>{});
   if(ctx?.waitUntil){ctx.waitUntil(work);return;}
   await work;
