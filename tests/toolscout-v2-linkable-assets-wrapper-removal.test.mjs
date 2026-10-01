@@ -23,7 +23,7 @@ test('direct linkable assets owner preserves authorization',async()=>{
 test('generic traversal bypasses linkable assets wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-linkable-assets-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-sender-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-contact-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-linkable-assets-worker\.js'/);
   assert.match(runtime,/export async function handleLinkableAssetsRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
