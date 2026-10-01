@@ -1,4 +1,4 @@
-import base from './audience-worker.js';
+import base from './affiliate-workflow-worker.js';
 import {runDistributionContactScheduled} from './distribution-contact-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 
