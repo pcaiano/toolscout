@@ -1268,3 +1268,19 @@ Implemented:
 
 Preservation rule:
 No submission packaging, adapter policy, authentication, retry, verification, IndexNow, scheduling or response semantics change in this phase. Only ownership and explicit composition replace decorator traversal.
+
+
+## Phase 92 - Explicit Distribution Discovery ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-92`.
+
+Implemented:
+- `POST /api/distribution/discovery/refresh` is declared under the explicit `distribution_discovery_runtime` owner;
+- `distribution-discovery-worker.js` exports both the direct HTTP handler and its compatibility scheduler;
+- `distribution-autonomous-worker.js` calls the discovery handler directly when the autonomous cycle requests replenishment instead of reaching it through decorator traversal;
+- `distribution-submission-worker.js` composes the discovery scheduler directly before submission package/execute/verify work, preserving the previous scheduled ordering;
+- generic request fallback now connects directly to `distribution-learning-worker.js`;
+- the architecture edge budget ratchets from 14 to 13.
+
+Preservation rule:
+No discovery sources, recursive-source learning, surface scoring, technical-host suppression, family-learning boosts, authorization, autonomous replenishment or periodic discovery behavior changes in this phase. Only ownership and explicit composition replace decorator traversal.
