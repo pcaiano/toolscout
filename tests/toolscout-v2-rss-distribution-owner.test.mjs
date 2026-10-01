@@ -23,7 +23,7 @@ test('RSS public response transform remains explicit and ordered immediately aft
   const rss=compute.indexOf('transformRssPublicResponse(request,response)');
   const core=compute.indexOf('transformTrafficIntegrityCoreResponse(request,response)');
   assert.ok(lower>=0&&rss>lower&&core>rss,'RSS transform must remain after lower runtime and before later response transforms');
-  assert.match(compute,/import base from '\.\/distribution-command-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-orchestrator-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
