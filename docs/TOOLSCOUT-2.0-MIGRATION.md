@@ -1079,3 +1079,18 @@ Implemented:
 
 Preservation rule:
 Content intelligence refresh, brief generation, metrics, affiliate/social policy logic, agent recommendation lower dependencies, affiliate redirects, public URLs/canonicals and ranking semantics remain unchanged.
+
+
+## Phase 80 - Migrate Distribution Network route schema
+
+Status: implemented on `architecture/toolscout-2.0-phase-80`.
+
+Implemented:
+- migration `0104_distribution_network_route_schema.sql` formally owns `distribution_contact_routes` and the remaining route-action indexes;
+- `distribution_network_outreach` remains owned by migration `0078_distribution_network_engine.sql`;
+- `distribution_contact_route_actions` remains owned by migration `0103_content_social_intelligence_schema.sql`;
+- `distribution-network-worker.js` no longer executes `CREATE TABLE`, `CREATE INDEX` or `ALTER TABLE` during request or scheduled execution;
+- the legacy edge budget remains 24 because this phase prepares direct Distribution Network ownership without changing routing.
+
+Preservation rule:
+Publisher candidate discovery, competitor-outreach suppression, contact-route discovery, route-action materialization, strict-human attribution, adoption verification and network metrics remain unchanged.
