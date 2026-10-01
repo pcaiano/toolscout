@@ -1351,3 +1351,18 @@ Implemented:
 
 Preservation rule:
 No vendor contact scanning, public-role-email selection, fallback exhaustion, sender leasing, stats ownership, integration authentication or scheduled contact discovery semantics change in this phase.
+
+
+## Phase 97 - Explicit Distribution Vendor ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-97`.
+
+Implemented:
+- `GET /api/distribution/vendor-amplification` and `POST /api/distribution/vendor-amplification/refresh` are declared under the explicit `distribution_vendor_runtime` owner;
+- `GET /api/stats` remains owned by `admin_stats`; contact compatibility composition still enriches the upstream stats response with vendor amplification state without claiming the route;
+- contact scheduling composes `runDistributionVendorScheduled` before vendor contact discovery, preserving refresh-before-contact ordering;
+- generic and compatibility fallbacks now connect directly to `distribution-radar-worker.js`;
+- the architecture edge budget ratchets from 10 to 9.
+
+Preservation rule:
+No vendor opportunity generation, Search Console prioritization, asset/tool coherence suppression, queue contents, admin authentication, scheduled refresh ordering or stats enrichment semantics change in this phase.
