@@ -1397,3 +1397,20 @@ Implemented:
 
 Preservation rule:
 No distribution event ingestion, stats authentication, Command Center ownership, distribution KPI truth, analytics UI ownership, or scheduler semantics change in this phase.
+
+
+## Phase 100 - Explicit Audience Engine ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-100`.
+
+Implemented:
+- the six active Audience Engine API surfaces are declared under the explicit `audience_runtime` owner;
+- public capability and Bluesky health surfaces remain public;
+- Bluesky reply preparation preserves the existing audience-ingest token boundary;
+- DEV comment and Bluesky event surfaces retain their public-evidence verification logic before persistence;
+- `GET /api/stats` remains owned by `admin_stats`, and Command Center HTML remains owned by `command_center_direct`;
+- generic and compatibility fallbacks now connect directly to `affiliate-workflow-worker.js`;
+- the architecture edge budget ratchets from 7 to 6.
+
+Preservation rule:
+No social-platform capability policy, Bluesky reply semantic guard, DEV comment verification, audience event truth, stats ownership, Command Center ownership, or scheduler semantics change in this phase.
