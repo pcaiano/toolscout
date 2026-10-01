@@ -40,5 +40,7 @@ test('generic traversal bypasses submission wrapper while throughput composes ex
   assert.match(throughput,/runDistributionSubmissionScheduled\(event,env,ctx\)/);
   assert.match(runtime,/export async function handleDistributionSubmissionRoute/);
   assert.match(runtime,/export async function runDistributionSubmissionScheduled/);
+  assert.match(runtime,/import \{runDistributionDiscoveryScheduled\} from '\.\/distribution-discovery-worker\.js'/);
+  assert.match(runtime,/await runDistributionDiscoveryScheduled\(event,env,ctx\)/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 });
