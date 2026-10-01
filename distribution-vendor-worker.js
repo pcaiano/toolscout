@@ -1,4 +1,5 @@
-import base from './distribution-radar-worker.js';
+import base from './distribution-engine-worker.js';
+import {runDistributionRadarScheduled} from './distribution-radar-worker.js';
 import {vendorAssetCoherence} from './distribution-vendor-integrity.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
@@ -113,7 +114,7 @@ export async function handleDistributionVendorRoute(request,env,ctx){
 }
 
 export async function runDistributionVendorScheduled(event,env,ctx){
-  if(base.scheduled)await base.scheduled(event,env,ctx);
+  await runDistributionRadarScheduled(event,env,ctx);
   const work=refreshVendorAmplification(new Request('https://trytoolscout.org/'),env).catch(()=>{});
   if(ctx?.waitUntil){ctx.waitUntil(work);return;}
   await work;
