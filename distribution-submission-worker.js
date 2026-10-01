@@ -1,4 +1,5 @@
-import base from './distribution-discovery-worker.js';
+import base from './distribution-learning-worker.js';
+import {runDistributionDiscoveryScheduled} from './distribution-discovery-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const INDEXNOW_BATCH_LIMIT=1000;
@@ -207,7 +208,7 @@ export async function handleDistributionSubmissionRoute(request,env,ctx){
 export async function runDistributionSubmissionScheduled(event,env,ctx){
   const hourly=event?.cron==='15 * * * *';
   const daily=event?.cron==='35 3 * * *';
-  if(base.scheduled)await base.scheduled(event,env,ctx);
+  await runDistributionDiscoveryScheduled(event,env,ctx);
   if(hourly||daily){
     await packageQueue(new Request('https://trytoolscout.org/'),env);
     await execute(new Request('https://trytoolscout.org/'),env);
