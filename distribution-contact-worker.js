@@ -1,4 +1,5 @@
-import base from './distribution-vendor-worker.js';
+import base from './distribution-radar-worker.js';
+import {handleDistributionVendorRoute,runDistributionVendorScheduled} from './distribution-vendor-worker.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const ROLE_PRIORITY=['partnerships','partners','partner','marketing','growth','press','media','business','hello','contact'];
@@ -45,7 +46,7 @@ export async function handleDistributionContactRoute(request,env,ctx){
     return markStatus(request,env);
   }
   if(url.pathname==='/api/stats'&&request.method==='GET'){
-    const upstream=await base.fetch(request,env,ctx);
+    const upstream=(await handleDistributionVendorRoute(request,env,ctx))||await base.fetch(request,env,ctx);
     if(!upstream.ok)return upstream;
     const data=await upstream.json();
     let c={results:[]};
@@ -57,7 +58,7 @@ export async function handleDistributionContactRoute(request,env,ctx){
 }
 
 export async function runDistributionContactScheduled(event,env,ctx){
-  if(base.scheduled)await base.scheduled(event,env,ctx);
+  await runDistributionVendorScheduled(event,env,ctx);
   const work=discoverContacts(env).catch(()=>{});
   if(ctx?.waitUntil){ctx.waitUntil(work);return;}
   await work;

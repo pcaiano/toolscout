@@ -30,7 +30,7 @@ test('discovery attribution health payload is read-only and stable',async()=>{
 
 test('generic traversal bypasses discovery attribution health wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-vendor-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-radar-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);

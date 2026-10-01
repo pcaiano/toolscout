@@ -89,29 +89,43 @@ async function vendorQueue(env){
   return {status:'connected',items:r.results||[]};
 }
 
+export async function handleDistributionVendorRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/distribution/vendor-amplification'&&request.method==='GET'){
+    const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+    if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+    return Response.json(await vendorQueue(env),{headers:JSON_HEADERS});
+  }
+  if(url.pathname==='/api/distribution/vendor-amplification/refresh'&&request.method==='POST'){
+    const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+    if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+    try{return Response.json(await refreshVendorAmplification(request,env),{headers:JSON_HEADERS});}
+    catch(e){return Response.json({error:'vendor_refresh_failed',message:String(e?.message||e)},{status:500,headers:JSON_HEADERS});}
+  }
+  if(url.pathname==='/api/stats'&&request.method==='GET'){
+    const upstream=await base.fetch(request,env,ctx);
+    if(!upstream.ok)return upstream;
+    const data=await upstream.json();
+    let queue={status:'unavailable',items:[]};try{queue=await vendorQueue(env);}catch{}
+    return Response.json({...data,vendorAmplification:{status:queue.status,queued:queue.items.filter(x=>x.status==='queued').length,contactFound:queue.items.filter(x=>x.status==='contact_found').length,sent:queue.items.filter(x=>x.status==='sent').length,top:queue.items.slice(0,10)}},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
+  }
+  return null;
+}
+
+export async function runDistributionVendorScheduled(event,env,ctx){
+  if(base.scheduled)await base.scheduled(event,env,ctx);
+  const work=refreshVendorAmplification(new Request('https://trytoolscout.org/'),env).catch(()=>{});
+  if(ctx?.waitUntil){ctx.waitUntil(work);return;}
+  await work;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(url.pathname==='/api/distribution/vendor-amplification'&&request.method==='GET'){
-      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
-      if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
-      return Response.json(await vendorQueue(env),{headers:JSON_HEADERS});
-    }
-    if(url.pathname==='/api/distribution/vendor-amplification/refresh'&&request.method==='POST'){
-      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
-      if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
-      try{return Response.json(await refreshVendorAmplification(request,env),{headers:JSON_HEADERS});}catch(e){return Response.json({error:'vendor_refresh_failed',message:String(e?.message||e)},{status:500,headers:JSON_HEADERS});}
-    }
-    if(url.pathname==='/api/stats'&&request.method==='GET'){
-      const upstream=await base.fetch(request,env,ctx);if(!upstream.ok)return upstream;
-      const data=await upstream.json();
-      let queue={status:'unavailable',items:[]};try{queue=await vendorQueue(env);}catch{}
-      return Response.json({...data,vendorAmplification:{status:queue.status,queued:queue.items.filter(x=>x.status==='queued').length,contactFound:queue.items.filter(x=>x.status==='contact_found').length,sent:queue.items.filter(x=>x.status==='sent').length,top:queue.items.slice(0,10)}},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
-    }
+    const owned=await handleDistributionVendorRoute(request,env,ctx);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    if(base.scheduled)await base.scheduled(event,env,ctx);
-    ctx.waitUntil(refreshVendorAmplification(new Request('https://trytoolscout.org/'),env).catch(()=>{}));
+    return runDistributionVendorScheduled(event,env,ctx);
   }
 };
