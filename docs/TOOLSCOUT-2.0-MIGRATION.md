@@ -1158,3 +1158,18 @@ Implemented:
 
 Preservation rule:
 Growth opportunity coordination, execution contracts, supervisor state, autonomous distribution, affiliate/content cycles, scheduler ownership, authorization and public URLs remain unchanged.
+
+
+## Phase 85 - Remove distribution priority request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-85`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-throughput-integrity-worker.js`;
+- `distribution-priority-worker.js` leaves production's generic request traversal;
+- `GET /api/distribution/operating-decisions` and `POST /api/distribution/operating-decisions/rebalance` remain direct-owned by `distribution_priority`;
+- the existing `handleDistributionPriorityRoute()` implementation remains the canonical handler;
+- the architecture edge budget ratchets from 20 to 19.
+
+Preservation rule:
+Distribution economic learning, external-value scoring, bounded exploration slots, paid-execution approval gates, operating decisions, public URLs/canonicals and scheduled behavior remain unchanged.
