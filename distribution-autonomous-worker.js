@@ -1127,20 +1127,13 @@ async function verifyAutoSubmitted(env){
 let autonomySchemaReady=null;
 async function ensureAutonomySchema(env){
   if(autonomySchemaReady)return autonomySchemaReady;
-  autonomySchemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_placements (
-      surface_slug TEXT PRIMARY KEY,
-      public_url TEXT NOT NULL,
-      placement_verified INTEGER NOT NULL DEFAULT 0,
-      backlink_verified INTEGER NOT NULL DEFAULT 0,
-      link_rel TEXT,
-      first_verified_at TEXT,
-      last_checked_at TEXT NOT NULL DEFAULT (datetime('now')),
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_placements_backlink ON distribution_placements(backlink_verified,updated_at DESC)`)
-  ]).catch(error=>{autonomySchemaReady=null;throw error});
+  autonomySchemaReady=(async()=>{
+    const row=await env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master
+      WHERE (type='table' AND name='distribution_placements')
+         OR (type='index' AND name='idx_distribution_placements_backlink')`).first();
+    if(Number(row?.n||0)!==2)throw new Error('distribution_placements_schema_not_migrated');
+    return {ok:true,source:'d1_migrations'};
+  })().catch(error=>{autonomySchemaReady=null;throw error});
   return autonomySchemaReady;
 }
 async function normalizeTechnicalOpportunities(env){

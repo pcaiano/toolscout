@@ -1219,3 +1219,21 @@ Implemented:
 
 Preservation rule:
 No submission policy, Human Gate behavior, IndexNow retry semantics, delivery verification state, public placement state, authentication rule or distribution execution result changes in this phase. Only route ownership and generic traversal are changed.
+
+
+## Phase 89 - Autonomous distribution schema ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-89`.
+
+Implemented:
+- migration `0105_autonomous_distribution_placement_schema.sql` formally owns `distribution_placements` and `idx_distribution_placements_backlink`;
+- the migration adopts existing production objects idempotently with `CREATE ... IF NOT EXISTS`;
+- `distribution-autonomous-worker.js` no longer creates or alters schema at runtime;
+- the runtime now probes both the table and backlink-verification index and fails closed with `distribution_placements_schema_not_migrated` if migration ownership is incomplete;
+- CI and production recovery explicitly syntax-check the autonomous runtime and enforce migration ownership.
+
+Why this phase is separate:
+`distribution-autonomous-worker.js` is the next decorator candidate, but it owns a large distribution control surface. Schema mutation is removed first so the later routing extraction changes dispatch only, not D1 ownership and dispatch at the same time.
+
+Preservation rule:
+The `distribution_placements` schema, placement verification fields, backlink verification semantics and existing production rows remain unchanged.
