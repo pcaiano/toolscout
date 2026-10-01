@@ -6,9 +6,9 @@ import {handleDistributionRadarRoute} from '../distribution-radar-worker.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('distribution radar feeds and refresh have direct ToolScout 2.0 ownership',()=>{
-  assert.equal(routeOwner('/api/distribution/feed.json',{method:'GET'}).owner,'distribution_radar_runtime');
-  assert.equal(routeOwner('/api/distribution/feed.xml',{method:'GET'}).owner,'distribution_radar_runtime');
+test('distribution radar refresh has direct ToolScout 2.0 ownership while production feeds retain traffic-integrity ownership',()=>{
+  assert.equal(routeOwner('/api/distribution/feed.json',{method:'GET'}).owner,'traffic_integrity_live');
+  assert.equal(routeOwner('/api/distribution/feed.xml',{method:'GET'}).owner,'traffic_integrity_live');
   assert.equal(routeOwner('/api/distribution/radar/refresh',{method:'POST'}).owner,'distribution_radar_runtime');
 
   const compute=read('compute-router-worker.js');
