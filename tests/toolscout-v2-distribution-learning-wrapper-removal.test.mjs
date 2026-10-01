@@ -40,6 +40,8 @@ test('generic traversal bypasses learning wrapper while discovery composes its s
 
   assert.match(learning,/export async function handleDistributionLearningRoute/);
   assert.match(learning,/export async function runDistributionLearningScheduled/);
+  assert.match(learning,/import \{runDistributionContactScheduled\} from '\.\/distribution-contact-worker\.js'/);
+  assert.match(learning,/return runDistributionContactScheduled\(event,env,ctx\)/);
   assert.doesNotMatch(learning,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 
   assert.match(discovery,/import base from '\.\/distribution-vendor-worker\.js'/);
