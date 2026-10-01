@@ -28,7 +28,7 @@ test('direct throughput owner preserves authorization boundary',async()=>{
 test('generic traversal bypasses distribution throughput wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-throughput-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-learning-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-sender-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-throughput-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionThroughputRoute/);
   assert.match(runtime,/import \{handleAutonomousDistributionRoute\} from '\.\/distribution-autonomous-worker\.js'/);
