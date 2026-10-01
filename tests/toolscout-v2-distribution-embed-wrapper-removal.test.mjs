@@ -23,7 +23,7 @@ test('direct public embed owner preserves recommendation validation',async()=>{
 test('generic traversal bypasses distribution embed wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-embed-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-autonomous-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-submission-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-embed-worker\.js'/);
   assert.match(compute,/ownership\.owner==='distribution_public_embed'/);
   assert.match(runtime,/export async function handleDistributionEmbedRoute/);
