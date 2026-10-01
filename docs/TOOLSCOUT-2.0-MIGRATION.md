@@ -1126,3 +1126,20 @@ Implemented:
 
 Preservation rule:
 Recommendation ranking, publisher-kit canonicals, embed assets, distribution feed semantics, affiliate redirects and machine-discovery routes remain unchanged.
+
+
+## Phase 83 - Remove distribution command presentation traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-83`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-orchestrator-worker.js`;
+- `distribution-command-worker.js` leaves production's generic request traversal;
+- `GET /api/stats` remains owned by `admin_stats`;
+- `GET /analytics/api/stats` remains owned by `analytics_stats`;
+- Command Center pages remain owned by `command_center_direct`;
+- the obsolete Distribution Operations page injection is not copied into ToolScout 2.0 direct dispatch;
+- the architecture edge budget ratchets from 22 to 21.
+
+Preservation rule:
+Canonical stats sources, Command Center ownership, public URLs/canonicals and active distribution observability remain unchanged.
