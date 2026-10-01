@@ -1,5 +1,6 @@
 import {actionUrl as validHumanActionUrl,existingParentSubmission,reconcileDuplicateSubmissionGates,reconcileDuplicateOpenHumanGates} from './chairman-task-quality.js';
 import base from './distribution-submission-worker.js';
+import {handleDistributionDiscoveryRoute} from './distribution-discovery-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
 import {ensureHumanGateSchema,humanGateKey,upsertHumanGate,dueHumanGateVerifications,deferHumanGateVerification,resolveHumanGate,humanGateSnapshot} from './human-gate-contract.js';
@@ -34,7 +35,7 @@ const HUMAN_GATE_EVIDENCE_VERSION=16;
 async function runDiscoveryRefresh(env){
   if(!env.ADMIN_TOKEN)return {ok:false,reason:'admin_token_unavailable'};
   try{
-    const response=await base.fetch(new Request('https://trytoolscout.org/api/distribution/discovery/refresh',{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`}}),env);
+    const response=await handleDistributionDiscoveryRoute(new Request('https://trytoolscout.org/api/distribution/discovery/refresh',{method:'POST',headers:{Authorization:`Bearer ${env.ADMIN_TOKEN}`}}),env);
     if(!response?.ok)return {ok:false,status:Number(response?.status||0),reason:'discovery_refresh_failed'};
     return await response.json();
   }catch(e){return {ok:false,reason:String(e?.message||e).slice(0,300)}}
