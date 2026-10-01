@@ -61,6 +61,7 @@ import {handleCommandCenterLocalLoginRoute} from './command-center-local-login-r
 import {handleGrowthCommandCenterActionRoute} from './growth-command-center-v2-worker.js';
 import {handleAffiliateHumanActionRoute} from './affiliate-human-action-entry-worker.js';
 import {handleAffiliateCoverageRoute} from './affiliate-coverage-entry-worker.js';
+import {handleContentEngineIntelligenceRoute} from './content-engine-intelligence-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
