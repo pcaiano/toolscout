@@ -1,4 +1,4 @@
-import base from './audience-worker.js';
+import base from './affiliate-workflow-worker.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const safe=(v,n=2000)=>String(v??'').slice(0,n);
