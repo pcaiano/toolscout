@@ -31,7 +31,7 @@ test('direct human action owner preserves authentication boundaries',async()=>{
 test('generic request traversal bypasses affiliate human action wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('affiliate-human-action-entry-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-priority-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-throughput-integrity-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/affiliate-human-action-entry-worker\.js'/);
   assert.match(runtime,/export async function handleAffiliateHumanActionRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
