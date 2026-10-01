@@ -16,7 +16,7 @@ test('analytics consent has direct ToolScout 2.0 ownership',()=>{
 
 test('generic request traversal bypasses the agent protocol compatibility wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-engine-worker\.js'/);
+  assert.match(compute,/import base from '\.\/audience-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/agent-protocol-worker\.js'/);
   assert.match(compute,/const protectedLegacyBase=withPrivateAssets\(/);
   assert.match(compute,/transformPublicAnalyticsResponse\(request,response\)/);
