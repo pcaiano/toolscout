@@ -53,72 +53,7 @@ function routeNextAction(type){
   return 'Feed this verified public social route into the Content Engine as a borrowed-audience amplification candidate. Mention or engage only when directly relevant and non-spammy.';
 }
 
-async function ensureSchema(env){
-  if(schemaReady)return schemaReady;
-  schemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_network_outreach (
-      surface_slug TEXT PRIMARY KEY,
-      surface_name TEXT NOT NULL,
-      surface_type TEXT,
-      domain TEXT NOT NULL,
-      source_url TEXT NOT NULL,
-      priority_score REAL NOT NULL DEFAULT 0,
-      status TEXT NOT NULL DEFAULT 'queued',
-      contact_email TEXT,
-      contact_source_url TEXT,
-      contact_checked_at TEXT,
-      discovery_attempts INTEGER NOT NULL DEFAULT 0,
-      suggested_subject TEXT,
-      suggested_body TEXT,
-      public_dispatch_token TEXT UNIQUE,
-      public_dispatch_leased_at TEXT,
-      outreach_sent_at TEXT,
-      outreach_error TEXT,
-      attempts INTEGER NOT NULL DEFAULT 0,
-      adopted_at TEXT,
-      adoption_kind TEXT,
-      last_observed_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_contact_routes (
-      route_id TEXT PRIMARY KEY,
-      surface_slug TEXT NOT NULL,
-      domain TEXT NOT NULL,
-      route_type TEXT NOT NULL,
-      route_url TEXT NOT NULL,
-      source_url TEXT,
-      status TEXT NOT NULL DEFAULT 'discovered',
-      first_seen_at TEXT NOT NULL DEFAULT (datetime('now')),
-      last_seen_at TEXT NOT NULL DEFAULT (datetime('now')),
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_routes_surface ON distribution_contact_routes(surface_slug,status)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_routes_domain ON distribution_contact_routes(domain,route_type)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_contact_route_actions (
-      route_id TEXT PRIMARY KEY,
-      surface_slug TEXT NOT NULL,
-      route_type TEXT NOT NULL,
-      route_url TEXT NOT NULL,
-      execution_mode TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'queued',
-      opportunity_slug TEXT,
-      attempts INTEGER NOT NULL DEFAULT 0,
-      last_attempt_at TEXT,
-      last_result TEXT,
-      next_action TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_route_actions_status ON distribution_contact_route_actions(status,updated_at)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_contact_route_actions_surface ON distribution_contact_route_actions(surface_slug,status)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_network_status_priority ON distribution_network_outreach(status,priority_score DESC)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_network_domain ON distribution_network_outreach(domain)`)
-  ]).catch(error=>{schemaReady=null;throw error});
-  return schemaReady;
-}
-
+async function ensureSchema(_env){return true;}
 function outreachCopy(row){
   const name=safe(row.surface_name||row.domain,180);
   const subject=`ToolScout publisher resources for ${name}`;
