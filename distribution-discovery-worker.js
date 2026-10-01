@@ -103,4 +103,27 @@ async function discover(request,env){
   await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`discover_${crypto.randomUUID()}`,'external_discovery_refresh','completed','distribution_engine',`Self-expanding discovery scanned ${scanned} sources, found ${found} relevant links, added ${inserted} surfaces, learned ${recursiveAdded} recursive source candidates and family-boosted ${familyBoosted} new surfaces. Positive-only family signals: ${familySummary}.`).run();
   return {ok:true,scanned,found,inserted,technical_surfaces_suppressed:technicalSuppressed,recursive_sources_learned:recursiveAdded,family_boosted:familyBoosted,family_signals:Object.fromEntries(families)};
 }
-export default {async fetch(request,env,ctx){const u=new URL(request.url);if(u.pathname==='/api/distribution/discovery/refresh'&&request.method==='POST'){if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await discover(request,env),{headers:H});}return base.fetch(request,env,ctx);},async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);ctx.waitUntil(discover(new Request('https://trytoolscout.org/'),env).catch(()=>{}));}};
+export async function handleDistributionDiscoveryRoute(request,env,ctx){
+  const u=new URL(request.url);
+  if(u.pathname!=='/api/distribution/discovery/refresh'||request.method!=='POST')return null;
+  if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  return Response.json(await discover(request,env),{headers:H});
+}
+
+export async function runDistributionDiscoveryScheduled(event,env,ctx){
+  if(base.scheduled)await base.scheduled(event,env,ctx);
+  const work=discover(new Request('https://trytoolscout.org/'),env).catch(()=>{});
+  if(ctx?.waitUntil){ctx.waitUntil(work);return;}
+  await work;
+}
+
+export default {
+  async fetch(request,env,ctx){
+    const owned=await handleDistributionDiscoveryRoute(request,env,ctx);
+    if(owned)return owned;
+    return base.fetch(request,env,ctx);
+  },
+  async scheduled(event,env,ctx){
+    return runDistributionDiscoveryScheduled(event,env,ctx);
+  }
+};

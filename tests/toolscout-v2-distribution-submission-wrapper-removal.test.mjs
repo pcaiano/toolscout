@@ -33,12 +33,14 @@ test('generic traversal bypasses submission wrapper while throughput composes ex
   const compute=read('compute-router-worker.js');
   const throughput=read('distribution-throughput-worker.js');
   const runtime=read('distribution-submission-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-discovery-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-learning-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-submission-worker\.js'/);
   assert.match(throughput,/import base from '\.\/distribution-discovery-worker\.js'/);
   assert.match(throughput,/handleDistributionSubmissionRoute\(request,env,ctx\)/);
   assert.match(throughput,/runDistributionSubmissionScheduled\(event,env,ctx\)/);
   assert.match(runtime,/export async function handleDistributionSubmissionRoute/);
   assert.match(runtime,/export async function runDistributionSubmissionScheduled/);
+  assert.match(runtime,/import \{runDistributionDiscoveryScheduled\} from '\.\/distribution-discovery-worker\.js'/);
+  assert.match(runtime,/await runDistributionDiscoveryScheduled\(event,env,ctx\)/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 });
