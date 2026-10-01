@@ -102,7 +102,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/distribution-embed-worker\.js'/);
+  assert.match(src,/import base from '\.\/distribution-command-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
@@ -223,7 +223,7 @@ test('migrated route owners expose null-returning direct handlers',()=>{
   assert.match(analytics,/export async function handleAnalyticsStatsReadRoute/);
   assert.match(analytics,/X-ToolScout-Read-Mode':'read-only/);
   assert.match(affiliateRedirect,/export async function handleAffiliateRedirectRoute/);
-  assert.ok(affiliateRedirect.includes('distribution-embed-worker.js'));
+  assert.ok(affiliateRedirect.includes('distribution-command-worker.js'));
   assert.doesNotMatch(affiliateRedirect,/CREATE TABLE|CREATE INDEX|ALTER TABLE/);
 });
 
