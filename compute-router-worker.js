@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './distribution-contact-worker.js';
+import base from './distribution-vendor-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -70,6 +70,7 @@ import {handleDistributionSubmissionRoute} from './distribution-submission-worke
 import {handleDistributionDiscoveryRoute} from './distribution-discovery-worker.js';
 import {handleDistributionLearningRoute} from './distribution-learning-worker.js';
 import {handleDistributionSenderRoute} from './distribution-sender-worker.js';
+import {handleDistributionContactRoute} from './distribution-contact-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -1967,6 +1968,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='distribution_discovery_runtime')response=await handleDistributionDiscoveryRoute(request,env,ctx);
   else if(ownership.owner==='distribution_learning_runtime')response=await handleDistributionLearningRoute(request,env,ctx);
   else if(ownership.owner==='distribution_sender_runtime')response=await handleDistributionSenderRoute(request,env,ctx);
+  else if(ownership.owner==='distribution_contact_runtime')response=await handleDistributionContactRoute(request,env,ctx);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
