@@ -23,7 +23,7 @@ test('direct Content Engine refresh preserves proof authentication',async()=>{
 test('generic traversal bypasses Content Engine wrapper after schema migration',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('content-engine-intelligence-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-orchestrator-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-priority-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/content-engine-intelligence-worker\.js'/);
   assert.match(compute,/ownership\.owner==='content_engine_intelligence'/);
   assert.match(runtime,/export async function handleContentEngineIntelligenceRoute/);

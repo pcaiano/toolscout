@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './distribution-orchestrator-worker.js';
+import base from './distribution-priority-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
