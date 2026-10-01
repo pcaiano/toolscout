@@ -22,81 +22,26 @@ function displayToolName(row){
 let networkSchemaReady=null;
 async function ensureNetworkSchema(env){
   if(networkSchemaReady)return networkSchemaReady;
-  networkSchemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS distribution_network_outreach (
-      surface_slug TEXT PRIMARY KEY,
-      surface_name TEXT NOT NULL,
-      surface_type TEXT,
-      domain TEXT NOT NULL,
-      source_url TEXT NOT NULL,
-      priority_score REAL NOT NULL DEFAULT 0,
-      status TEXT NOT NULL DEFAULT 'queued',
-      contact_email TEXT,
-      contact_source_url TEXT,
-      contact_checked_at TEXT,
-      discovery_attempts INTEGER NOT NULL DEFAULT 0,
-      suggested_subject TEXT,
-      suggested_body TEXT,
-      public_dispatch_token TEXT UNIQUE,
-      public_dispatch_leased_at TEXT,
-      outreach_sent_at TEXT,
-      outreach_error TEXT,
-      attempts INTEGER NOT NULL DEFAULT 0,
-      adopted_at TEXT,
-      adoption_kind TEXT,
-      last_observed_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS growth_action_events(
-      action_id TEXT PRIMARY KEY,
-      opportunity_key TEXT,
-      engine TEXT NOT NULL,
-      channel TEXT,
-      target_url TEXT,
-      status TEXT NOT NULL DEFAULT 'prepared',
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_growth_action_events_opportunity ON growth_action_events(opportunity_key,status)`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_distribution_network_status_priority ON distribution_network_outreach(status,priority_score DESC)`)
-  ]).catch(error=>{networkSchemaReady=null;throw error});
+  networkSchemaReady=(async()=>{
+    const row=await env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master
+      WHERE (type='table' AND name IN ('distribution_network_outreach','growth_action_events'))
+         OR (type='index' AND name IN ('idx_growth_action_events_opportunity','idx_distribution_network_status_priority'))`).first();
+    if(Number(row?.n||0)!==4)throw new Error('distribution_sender_network_schema_not_migrated');
+    return {ok:true,source:'d1_migrations'};
+  })().catch(error=>{networkSchemaReady=null;throw error});
   return networkSchemaReady;
 }
 
 let reputationSchemaReady=null;
 async function ensureReputationSchema(env){
   if(reputationSchemaReady)return reputationSchemaReady;
-  reputationSchemaReady=env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_overrides (
-      override_token TEXT PRIMARY KEY,
-      kind TEXT NOT NULL,
-      item_key TEXT NOT NULL,
-      recipient TEXT NOT NULL,
-      subject TEXT NOT NULL,
-      body TEXT NOT NULL,
-      payload_hash TEXT NOT NULL,
-      content_hash TEXT NOT NULL,
-      issue_codes TEXT,
-      template_id TEXT,
-      status TEXT NOT NULL DEFAULT 'pending',
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      sent_at TEXT,
-      gmail_message_id TEXT,
-      error TEXT
-    )`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS outbound_reputation_learning (
-      rule_key TEXT PRIMARY KEY,
-      template_id TEXT NOT NULL,
-      issue_code TEXT NOT NULL,
-      scope_type TEXT NOT NULL,
-      content_hash TEXT,
-      enabled INTEGER NOT NULL DEFAULT 1,
-      learned_at TEXT NOT NULL DEFAULT (datetime('now')),
-      source_override_token TEXT
-    )`),
-    env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_reputation_learning_lookup ON outbound_reputation_learning(template_id,issue_code,scope_type,enabled)`)
-  ]).catch(error=>{reputationSchemaReady=null;throw error});
+  reputationSchemaReady=(async()=>{
+    const row=await env.DB.prepare(`SELECT COUNT(*) n FROM sqlite_master
+      WHERE (type='table' AND name IN ('outbound_reputation_overrides','outbound_reputation_learning'))
+         OR (type='index' AND name='idx_reputation_learning_lookup')`).first();
+    if(Number(row?.n||0)!==3)throw new Error('distribution_sender_reputation_schema_not_migrated');
+    return {ok:true,source:'d1_migrations'};
+  })().catch(error=>{reputationSchemaReady=null;throw error});
   return reputationSchemaReady;
 }
 const HARD_REPUTATION_ISSUES=new Set(['internal_api_url','internal_handoff_header','internal_runtime_identifier','raw_json_payload','unresolved_template_or_object','non_public_runtime_url','vendor_asset_tool_mismatch']);
