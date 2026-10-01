@@ -39,6 +39,8 @@ test('generic traversal bypasses vendor while contact composes vendor stats and 
   assert.match(runtime,/import base from '\.\/distribution-engine-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionVendorRoute/);
   assert.match(runtime,/export async function runDistributionVendorScheduled/);
+  assert.match(runtime,/import \{runDistributionRadarScheduled\} from '\.\/distribution-radar-worker\.js'/);
+  assert.match(runtime,/await runDistributionRadarScheduled\(event,env,ctx\)/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 
   assert.match(contact,/import \{handleDistributionVendorRoute,runDistributionVendorScheduled\} from '\.\/distribution-vendor-worker\.js'/);
