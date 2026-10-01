@@ -1048,3 +1048,18 @@ Implemented:
 
 Preservation rule:
 MCP/A2A envelopes, protocol validation, agent discovery, recommendation calls, ranking neutrality, public URLs/canonicals and agent-card semantics remain unchanged.
+
+
+## Phase 78 - Migrate Content Engine social intelligence schema
+
+Status: implemented on `architecture/toolscout-2.0-phase-78`.
+
+Implemented:
+- migration `0103_content_social_intelligence_schema.sql` formally owns Content Engine social-intelligence tables and indexes;
+- `content-engine-intelligence-worker.js` no longer performs `CREATE TABLE`, `CREATE INDEX` or `ALTER TABLE` in request or scheduled execution;
+- `affiliate_social_policy_queue` remains owned by migration `0080_affiliate_social_onboarding.sql`;
+- `ensureAffiliateSocialOnboardingSchema()` is retained as a compatibility no-op rather than mutating D1 at runtime;
+- the legacy edge budget remains 25 because this phase prepares direct Content Engine ownership without changing routing.
+
+Preservation rule:
+Social-profile discovery, affiliate social-policy classification, content brief generation, growth-action issuance, borrowed-audience route selection and social affiliate measurement semantics remain unchanged. Only lazy schema mutation is removed.
