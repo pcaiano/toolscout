@@ -30,16 +30,28 @@ async function legacyLearningSnapshot(env){
   };
 }
 
+export async function handleDistributionLearningRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/distribution/embed-event'&&(request.method==='POST'||request.method==='OPTIONS'))return embedEvent(request,env);
+  if(url.pathname==='/api/distribution/learning/refresh'&&request.method==='POST'){
+    const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+    if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+    return Response.json(await legacyLearningSnapshot(env),{headers:JSON_HEADERS});
+  }
+  return null;
+}
+
+export async function runDistributionLearningScheduled(event,env,ctx){
+  if(base.scheduled)return base.scheduled(event,env,ctx);
+}
+
 export default {
   async fetch(request,env,ctx){
-    const url=new URL(request.url);
-    if(url.pathname==='/api/distribution/embed-event'&&(request.method==='POST'||request.method==='OPTIONS'))return embedEvent(request,env);
-    if(url.pathname==='/api/distribution/learning/refresh'&&request.method==='POST'){
-      const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
-      if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
-      return Response.json(await legacyLearningSnapshot(env),{headers:JSON_HEADERS});
-    }
+    const owned=await handleDistributionLearningRoute(request,env,ctx);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
-  async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);}
+  async scheduled(event,env,ctx){
+    return runDistributionLearningScheduled(event,env,ctx);
+  }
 };
