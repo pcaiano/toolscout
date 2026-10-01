@@ -35,7 +35,7 @@ test('generic response stages preserve visitor -> canonical -> owner -> SEO -> f
   const seo=compute.indexOf('transformSeoPublicPage(request,response,env)');
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   assert.ok(lower>=0&&link>lower&&visitor>link&&canonical>visitor&&owner>canonical&&seo>owner&&footer>seo);
-  assert.match(compute,/import base from '\.\/distribution-network-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-embed-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
