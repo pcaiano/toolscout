@@ -1955,6 +1955,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='content_engine_intelligence')response=await handleContentEngineIntelligenceRoute(request,env);
   else if(ownership.owner==='distribution_network_runtime')response=await handleDistributionNetworkRoute(request,env);
   else if(ownership.owner==='distribution_public_embed')response=await handleDistributionEmbedRoute(request,env);
+  else if(ownership.owner==='distribution_linkable_assets')response=await handleLinkableAssetsRoute(request,env);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
