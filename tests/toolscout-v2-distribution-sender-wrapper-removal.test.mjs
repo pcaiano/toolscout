@@ -41,9 +41,9 @@ test('direct sender owner preserves integration and public handoff authorization
 test('generic traversal bypasses sender while public candidates preserve contact refresh composition',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-sender-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-radar-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-engine-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-sender-worker\.js'/);
-  assert.match(runtime,/import base from '\.\/distribution-radar-worker\.js'/);
+  assert.match(runtime,/import base from '\.\/distribution-engine-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionSenderRoute/);
   assert.match(runtime,/import \{handleDistributionContactRoute\} from '\.\/distribution-contact-worker\.js'/);
   assert.match(runtime,/handleDistributionContactRoute\(refreshRequest,env,ctx\)/);

@@ -1366,3 +1366,18 @@ Implemented:
 
 Preservation rule:
 No vendor opportunity generation, Search Console prioritization, asset/tool coherence suppression, queue contents, admin authentication, scheduled refresh ordering or stats enrichment semantics change in this phase.
+
+
+## Phase 98 - Explicit Distribution Radar ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-98`.
+
+Implemented:
+- `POST /api/distribution/radar/refresh` is declared under the explicit `distribution_radar_runtime` owner;
+- `GET /api/distribution/feed.json` and `GET /api/distribution/feed.xml` deliberately remain owned by `traffic_integrity_live`, preserving the prioritized production feed implementation and its public access boundary;
+- vendor scheduling composes `runDistributionRadarScheduled` before vendor amplification refresh, preserving radar-before-vendor ordering;
+- generic and compatibility fallbacks now connect directly to `distribution-engine-worker.js`;
+- the architecture edge budget ratchets from 9 to 8.
+
+Preservation rule:
+No syndication feed selection, Search Console priority ordering, opportunity scoring, configured status resolution, radar authentication, event recording or scheduled refresh ordering changes in this phase.
