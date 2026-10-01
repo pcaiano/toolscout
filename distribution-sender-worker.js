@@ -1,4 +1,4 @@
-import base from './distribution-radar-worker.js';
+import base from './distribution-engine-worker.js';
 import {handleDistributionContactRoute} from './distribution-contact-worker.js';
 import {recordExecutionProof,deferExecutionTask} from './growth-execution-contract.js';
 import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION} from './distribution-outreach-policy.js';
