@@ -13,4 +13,33 @@ function cleanPublicUrl(value){try{const u=new URL(String(value));u.protocol='ht
 async function syndicationPages(request,env){try{const [sitemap,routing]=await Promise.all([env.ASSETS.fetch(new Request(new URL('/sitemap.xml',request.url))),assetJson(request,env,'/data/search-commercial-routing.json',{priorities:[]})]);if(!sitemap.ok)return[];const xml=await sitemap.text();const sitemapUrls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>cleanPublicUrl(m[1].trim())).filter(Boolean).filter(u=>/(best-|\-vs-|alternatives|\/tools\/|compare)/i.test(u));const priorityUrls=(routing.priorities||[]).filter(x=>x?.page&&['guide','comparison','tool-profile'].includes(x.type)).sort((a,b)=>Number(b.priorityScore||0)-Number(a.priorityScore||0)).map(x=>cleanPublicUrl(x.page)).filter(Boolean);const urls=[...new Set([...priorityUrls,...sitemapUrls])].slice(0,100);const prioritySet=new Set(priorityUrls);return urls.map(u=>{const path=new URL(u).pathname.split('/').filter(Boolean).pop()||'toolscout';const slug=path.replace(/\.html$/i,'');const title=slug.replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());return {id:u,url:u,title,date_modified:new Date().toISOString(),toolscout_priority:prioritySet.has(u)?'gsc-observed':'catalog'};});}catch{return[];}}
 async function jsonFeed(request,env){const items=await syndicationPages(request,env);return Response.json({version:'https://jsonfeed.org/version/1.1',title:'ToolScout Decision Feed',home_page_url:'https://trytoolscout.org/',feed_url:'https://trytoolscout.org/api/distribution/feed.json',description:'Independent ToolScout comparisons, best-of pages and software decision resources for syndication. Pages with observed search demand are ordered first.',items},{headers:{...JSON_HEADERS,'Cache-Control':'public, max-age=900'}});}
 async function rssFeed(request,env){const items=await syndicationPages(request,env);const body=`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ToolScout Decision Feed</title><link>https://trytoolscout.org/</link><description>Independent software comparisons and decision resources from ToolScout. Pages with observed search demand are ordered first.</description>${items.map(i=>`<item><guid isPermaLink="true">${escXml(i.url)}</guid><title>${escXml(i.title)}</title><link>${escXml(i.url)}</link><pubDate>${new Date(i.date_modified).toUTCString()}</pubDate></item>`).join('')}</channel></rss>`;return new Response(body,{headers:XML_HEADERS});}
-export default {async fetch(request,env,ctx){const url=new URL(request.url);if(url.pathname==='/api/distribution/feed.json'&&request.method==='GET')return jsonFeed(request,env);if(url.pathname==='/api/distribution/feed.xml'&&request.method==='GET')return rssFeed(request,env);if(url.pathname==='/api/distribution/radar/refresh'&&request.method==='POST'){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});try{return Response.json(await refreshRadar(request,env),{headers:JSON_HEADERS});}catch(e){return Response.json({error:'radar_refresh_failed',message:String(e?.message||e)},{status:500,headers:JSON_HEADERS});}}return base.fetch(request,env,ctx);},async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);ctx.waitUntil(refreshRadar(new Request('https://trytoolscout.org/'),env).catch(()=>{}));}};
+export async function handleDistributionRadarRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/distribution/feed.json'&&request.method==='GET')return jsonFeed(request,env);
+  if(url.pathname==='/api/distribution/feed.xml'&&request.method==='GET')return rssFeed(request,env);
+  if(url.pathname==='/api/distribution/radar/refresh'&&request.method==='POST'){
+    const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+    if(!env.ADMIN_TOKEN||token!==env.ADMIN_TOKEN)return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+    try{return Response.json(await refreshRadar(request,env),{headers:JSON_HEADERS});}
+    catch(e){return Response.json({error:'radar_refresh_failed',message:String(e?.message||e)},{status:500,headers:JSON_HEADERS});}
+  }
+  return null;
+}
+
+export async function runDistributionRadarScheduled(event,env,ctx){
+  if(base.scheduled)await base.scheduled(event,env,ctx);
+  const work=refreshRadar(new Request('https://trytoolscout.org/'),env).catch(()=>{});
+  if(ctx?.waitUntil){ctx.waitUntil(work);return;}
+  await work;
+}
+
+export default {
+  async fetch(request,env,ctx){
+    const owned=await handleDistributionRadarRoute(request,env,ctx);
+    if(owned)return owned;
+    return base.fetch(request,env,ctx);
+  },
+  async scheduled(event,env,ctx){
+    return runDistributionRadarScheduled(event,env,ctx);
+  }
+};
