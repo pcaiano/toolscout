@@ -1173,3 +1173,19 @@ Implemented:
 
 Preservation rule:
 Distribution economic learning, external-value scoring, bounded exploration slots, paid-execution approval gates, operating decisions, public URLs/canonicals and scheduled behavior remain unchanged.
+
+
+## Phase 86 - Fold IndexNow throughput integrity into throughput runtime
+
+Status: implemented on `architecture/toolscout-2.0-phase-86`.
+
+Implemented:
+- `distribution-throughput-integrity-worker.js` leaves production's generic request traversal;
+- generic compute fallback now connects directly to `distribution-linkable-assets-worker.js`;
+- IndexNow retry timestamp normalization moves into `distribution-throughput-worker.js`;
+- normalization still runs after the two affected POST flows and after scheduled throughput execution;
+- `last_attempt_at` continues to reflect the real network attempt while `retry_after_at` remains the scheduling authority;
+- the architecture edge budget ratchets from 19 to 18.
+
+Preservation rule:
+IndexNow retry semantics, adaptive backoff, delivery-state timestamps, autonomous refresh, submission execution, scheduled verification and public URLs/canonicals remain unchanged.
