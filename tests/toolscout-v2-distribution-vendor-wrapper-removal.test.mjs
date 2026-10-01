@@ -34,9 +34,9 @@ test('generic traversal bypasses vendor while contact composes vendor stats and 
   const runtime=read('distribution-vendor-worker.js');
   const contact=read('distribution-contact-worker.js');
 
-  assert.match(compute,/import base from '\.\/audience-worker\.js'/);
+  assert.match(compute,/import base from '\.\/affiliate-workflow-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-vendor-worker\.js'/);
-  assert.match(runtime,/import base from '\.\/audience-worker\.js'/);
+  assert.match(runtime,/import base from '\.\/affiliate-workflow-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionVendorRoute/);
   assert.match(runtime,/export async function runDistributionVendorScheduled/);
   assert.match(runtime,/import \{runDistributionRadarScheduled\} from '\.\/distribution-radar-worker\.js'/);
