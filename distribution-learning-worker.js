@@ -1,4 +1,4 @@
-import base from './distribution-sender-worker.js';
+import base from './distribution-contact-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 
 // Attribution remains centralized in distribution-impact-worker.js and still enforces classification='likely-human' and confirmed revenue_ledger evidence.
