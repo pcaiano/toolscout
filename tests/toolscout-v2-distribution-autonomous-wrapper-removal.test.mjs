@@ -34,5 +34,7 @@ test('throughput explicitly composes autonomous refresh while generic traversal 
   assert.match(throughput,/import \{handleAutonomousDistributionRoute\} from '\.\/distribution-autonomous-worker\.js'/);
   assert.match(throughput,/handleAutonomousDistributionRoute\(request,env,ctx\)/);
   assert.match(runtime,/export async function handleAutonomousDistributionRoute/);
+  assert.match(runtime,/import \{handleDistributionDiscoveryRoute\} from '\.\/distribution-discovery-worker\.js'/);
+  assert.match(runtime,/await handleDistributionDiscoveryRoute\(new Request\('https:\/\/trytoolscout\.org\/api\/distribution\/discovery\/refresh'/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 });
