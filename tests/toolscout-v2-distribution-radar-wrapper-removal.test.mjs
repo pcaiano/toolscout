@@ -30,9 +30,9 @@ test('generic traversal bypasses radar while vendor composes radar scheduling ex
   const runtime=read('distribution-radar-worker.js');
   const vendor=read('distribution-vendor-worker.js');
 
-  assert.match(compute,/import base from '\.\/distribution-engine-worker\.js'/);
+  assert.match(compute,/import base from '\.\/audience-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-radar-worker\.js'/);
-  assert.match(runtime,/import base from '\.\/distribution-engine-worker\.js'/);
+  assert.match(runtime,/import base from '\.\/audience-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionRadarRoute/);
   assert.match(runtime,/export async function runDistributionRadarScheduled/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
