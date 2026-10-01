@@ -1,5 +1,4 @@
 import base from './distribution-network-worker.js';
-import {ensureAffiliateSocialOnboardingSchema} from './affiliate-social-onboarding.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'};
 const FETCH_TIMEOUT=6500;
