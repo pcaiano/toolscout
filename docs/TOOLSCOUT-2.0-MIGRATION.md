@@ -1300,3 +1300,21 @@ Implemented:
 
 Preservation rule:
 No embed attribution, likely-human classification, confirmed-revenue evidence, learning snapshot semantics, CORS behavior, authorization or scheduled ordering changes in this phase. Only ownership and explicit composition replace decorator traversal.
+
+
+## Phase 94 - Distribution Sender schema completion
+
+Status: implemented on `architecture/toolscout-2.0-phase-94`.
+
+Implemented:
+- runtime DDL is removed from `distribution-sender-worker.js`;
+- existing migration ownership is reused for `distribution_network_outreach` (0078), `growth_action_events` (0103), and outbound reputation tables (0101);
+- migration `0106_distribution_sender_schema_completion.sql` formally owns the remaining `idx_reputation_learning_lookup` index;
+- sender runtime now probes the required migrated tables and indexes and fails closed with explicit migration errors if ownership is incomplete;
+- CI and recovery syntax-check the sender runtime and enforce migration ownership.
+
+Why this phase is separate:
+`distribution-sender-worker.js` is the next legacy decorator, but it also owns outbound reputation and public handoff behavior. Runtime schema mutation is removed first so the later routing phase changes dispatch only.
+
+Preservation rule:
+No email throughput target, reputation filter, owner override learning, public handoff authentication, vendor/network leasing, execution proof or outreach state transition changes in this phase.
