@@ -1204,3 +1204,18 @@ Implemented:
 
 Preservation rule:
 Original-research asset discovery, IndexNow queueing, editorial/community packaging, deduplication, scheduled synchronization, public URLs/canonicals and distribution policy semantics remain unchanged.
+
+
+## Phase 88 - Explicit Distribution Throughput ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-88`.
+
+Implemented:
+- `POST /api/distribution/autonomous/refresh`, `POST /api/distribution/submissions/execute` and `GET /api/distribution/delivery/metrics` are declared under the explicit `distribution_throughput_runtime` owner;
+- the direct owner preserves the existing authorization boundary and the established ordering of due-research release, adaptive IndexNow delivery, lower distribution execution and IndexNow timestamp normalization;
+- generic request fallback now connects directly to `distribution-autonomous-worker.js`, bypassing the Distribution Throughput decorator;
+- the compatibility default export remains available for isolated callers, but production request traversal no longer depends on it;
+- the architecture edge budget ratchets from 17 to 16.
+
+Preservation rule:
+No submission policy, Human Gate behavior, IndexNow retry semantics, delivery verification state, public placement state, authentication rule or distribution execution result changes in this phase. Only route ownership and generic traversal are changed.
