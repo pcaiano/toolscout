@@ -1334,3 +1334,20 @@ Implemented:
 
 Preservation rule:
 No email throughput target, reputation filter, owner override learning, public handoff authentication, vendor/network leasing, contact refresh, execution proof or outreach state transition changes in this phase. Only route ownership and generic traversal change.
+
+
+## Phase 96 - Explicit Distribution Contact ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-96`.
+
+Implemented:
+- `POST /api/distribution/vendor-amplification/contact-scan` and `POST /api/distribution/vendor-amplification/status` are declared under the explicit `distribution_contact_runtime` owner;
+- `GET /api/distribution/vendor-amplification/ready` remains owned by `distribution_sender_runtime`, preserving the sender lease semantics that previously shadowed the lower contact route;
+- `GET /api/stats` remains owned by `admin_stats`, avoiding duplicate ownership;
+- sender public-candidates now composes `handleDistributionContactRoute` directly for contact refresh;
+- learning scheduling composes `runDistributionContactScheduled` directly so periodic vendor contact discovery is preserved;
+- generic and compatibility fallbacks now connect directly to `distribution-vendor-worker.js`;
+- the architecture edge budget ratchets from 11 to 10.
+
+Preservation rule:
+No vendor contact scanning, public-role-email selection, fallback exhaustion, sender leasing, stats ownership, integration authentication or scheduled contact discovery semantics change in this phase.
