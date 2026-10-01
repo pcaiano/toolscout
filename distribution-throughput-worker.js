@@ -44,7 +44,36 @@ if(rows.length)await event(env,'distribution_verification_lifecycle',errors||rej
 
 async function deliveryMetrics(env){const summary=await env.DB.prepare(`SELECT verification_state,COUNT(*) count FROM distribution_delivery_state GROUP BY verification_state ORDER BY count DESC`).all();const idx=await env.DB.prepare(`SELECT COUNT(*) backlog,MIN(created_at) oldest_created_at,SUM(CASE WHEN error LIKE 'retryable:indexnow_429%' OR error='retryable:indexnow_rate_limited' THEN 1 ELSE 0 END) rate_limited FROM distribution_submissions WHERE surface_slug='indexnow' AND (status='ready' OR (status='failed' AND error LIKE 'retryable:%'))`).first();const retry=await env.DB.prepare(`SELECT MAX(retry_after_at) retry_after_at FROM distribution_delivery_state WHERE surface_slug='indexnow' AND retry_after_at>datetime('now')`).first();return {ok:true,verification:summary.results||[],indexNow:{backlog:Number(idx?.backlog||0),rateLimited:Number(idx?.rate_limited||0),oldestCreatedAt:idx?.oldest_created_at||null,retryAfterAt:retry?.retry_after_at||null}};}
 
+export async function handleDistributionThroughputRoute(request,env,ctx){
+  const u=new URL(request.url);
+  const autonomousRefresh=u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST';
+  const submissionExecute=u.pathname==='/api/distribution/submissions/execute'&&request.method==='POST';
+  const deliveryMetricsRoute=u.pathname==='/api/distribution/delivery/metrics'&&request.method==='GET';
+  if(!autonomousRefresh&&!submissionExecute&&!deliveryMetricsRoute)return null;
+  if(deliveryMetricsRoute){
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401});
+    return Response.json(await deliveryMetrics(env));
+  }
+  if(autonomousRefresh&&authorized(request,env))await releaseDueResearch(env);
+  if(submissionExecute&&authorized(request,env))await adaptiveIndexNow(env);
+  const response=await base.fetch(request,env,ctx);
+  await normalizeIndexNowAttemptTimestamps(env);
+  return response;
+}
+
 export default {
-  async fetch(request,env,ctx){const u=new URL(request.url);const integrityTarget=request.method==='POST'&&(u.pathname==='/api/distribution/autonomous/refresh'||u.pathname==='/api/distribution/submissions/execute');if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'&&authorized(request,env))await releaseDueResearch(env);if(u.pathname==='/api/distribution/submissions/execute'&&request.method==='POST'&&authorized(request,env))await adaptiveIndexNow(env);if(u.pathname==='/api/distribution/delivery/metrics'&&request.method==='GET'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401});return Response.json(await deliveryMetrics(env));}const response=await base.fetch(request,env,ctx);if(integrityTarget)await normalizeIndexNowAttemptTimestamps(env);return response;},
-  async scheduled(event,env,ctx){await releaseDueResearch(env);const active=event?.cron==='15 * * * *'||event?.cron==='15 3 * * *';if(active){await prepackage(env,ctx);await adaptiveIndexNow(env);}const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;if(active)await enhancedVerification(env);await normalizeIndexNowAttemptTimestamps(env);return result;}
+  async fetch(request,env,ctx){
+    const owned=await handleDistributionThroughputRoute(request,env,ctx);
+    if(owned)return owned;
+    return base.fetch(request,env,ctx);
+  },
+  async scheduled(event,env,ctx){
+    await releaseDueResearch(env);
+    const active=event?.cron==='15 * * * *'||event?.cron==='15 3 * * *';
+    if(active){await prepackage(env,ctx);await adaptiveIndexNow(env);}
+    const result=base.scheduled?await base.scheduled(event,env,ctx):undefined;
+    if(active)await enhancedVerification(env);
+    await normalizeIndexNowAttemptTimestamps(env);
+    return result;
+  }
 };
