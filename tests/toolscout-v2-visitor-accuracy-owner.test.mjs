@@ -45,7 +45,7 @@ test('generic response ordering preserves visitor accuracy before later public t
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   const order=[lower,accuracy,rss,core,guard,live,visitorLink,visitorCookie,canonical,owner,seo,footer];
   assert.ok(order.every((v,i)=>v>=0&&(i===0||v>order[i-1])));
-  assert.match(compute,/import base from '\.\/distribution-embed-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-command-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
 });

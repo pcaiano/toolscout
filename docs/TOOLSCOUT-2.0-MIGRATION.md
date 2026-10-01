@@ -1110,3 +1110,19 @@ Implemented:
 
 Preservation rule:
 Publisher discovery, competitor-outreach suppression, contact-route discovery, autonomous route materialization, strict-human attribution, adoption verification, network metrics and public URLs/canonicals remain unchanged.
+
+
+## Phase 82 - Remove distribution embed request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-82`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-command-worker.js`;
+- publisher kit, recommendation API, ToolScout embed script, badge and the distribution RSS feed gain direct `distribution_public_embed` ownership;
+- `/api/distribution/feed.json` remains on the existing `traffic_integrity_live` owner;
+- machine discovery remains on `machine_discovery_catalog`;
+- `/go/` remains on `affiliate_redirect`;
+- the architecture edge budget ratchets from 23 to 22.
+
+Preservation rule:
+Recommendation ranking, publisher-kit canonicals, embed assets, distribution feed semantics, affiliate redirects and machine-discovery routes remain unchanged.

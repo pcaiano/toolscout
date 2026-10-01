@@ -22,7 +22,7 @@ test('month metrics health owner ignores unrelated routes and methods',async()=>
 test('generic traversal bypasses legacy month metrics decoration wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('visitor-dashboard-metrics-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-embed-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-command-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
