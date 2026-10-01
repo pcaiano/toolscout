@@ -61,13 +61,19 @@ export async function syncLinkableAssets(env){
   return {ok:true,assets:assets.length,indexNowQueued,editorialEligible,editorialQueued,deduped};
 }
 
+export async function handleLinkableAssetsRoute(request,env){
+  const u=new URL(request.url);
+  if(u.pathname==='/api/distribution/linkable-assets/sync'&&request.method==='POST'){
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+    return Response.json(await syncLinkableAssets(env),{headers:H});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    if(u.pathname==='/api/distribution/linkable-assets/sync'&&request.method==='POST'){
-      if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      return Response.json(await syncLinkableAssets(env),{headers:H});
-    }
+    const owned=await handleLinkableAssetsRoute(request,env);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){

@@ -1189,3 +1189,18 @@ Implemented:
 
 Preservation rule:
 IndexNow retry semantics, adaptive backoff, delivery-state timestamps, autonomous refresh, submission execution, scheduled verification and public URLs/canonicals remain unchanged.
+
+
+## Phase 87 - Remove linkable assets request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-87`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-throughput-worker.js`;
+- `POST /api/distribution/linkable-assets/sync` gains direct `distribution_linkable_assets` ownership;
+- the direct owner reuses the existing sync implementation and preserves admin authorization;
+- scheduled linkable-asset synchronization remains on the legacy scheduled chain until scheduler ownership is migrated separately;
+- the architecture edge budget ratchets from 18 to 17.
+
+Preservation rule:
+Original-research asset discovery, IndexNow queueing, editorial/community packaging, deduplication, scheduled synchronization, public URLs/canonicals and distribution policy semantics remain unchanged.
