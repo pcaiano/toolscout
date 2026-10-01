@@ -417,21 +417,28 @@ async function recordSocialAffiliateRedirect(request,env,u,response){
   const id=await sha256(`${tool}|${platform}|${hash}|${bucket}`);
   await env.DB.prepare(`INSERT OR IGNORE INTO social_affiliate_redirects(redirect_id,tool_slug,platform,utm_campaign,user_agent_hash,country,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`).bind(id,tool,platform,safe(u.searchParams.get('utm_campaign'),120)||null,hash,String(request.cf?.country||'').slice(0,8)||null).run();
 }
+export async function handleContentEngineIntelligenceRoute(request,env){
+  const u=new URL(request.url);
+  if(u.pathname==='/api/content-engine/intelligence/refresh'&&request.method==='POST'){
+    if(!(await proofAuthorized(request)))return Response.json({error:'unauthorized'},{status:401,headers:{...JSON_H,'Cache-Control':'no-store'}});
+    try{return Response.json(await runContentSocialIntelligenceCycle(env),{headers:{...JSON_H,'Cache-Control':'no-store'}})}catch(error){return Response.json({error:'content_intelligence_refresh_failed',message:safe(error?.message||error,500)},{status:500,headers:{...JSON_H,'Cache-Control':'no-store'}})}
+  }
+  if(u.pathname==='/api/content-engine/brief'&&request.method==='GET'){
+    const family=['monday_discovery','wednesday_comparison','friday_practical'].includes(u.searchParams.get('family'))?u.searchParams.get('family'):'monday_discovery';
+    const issue=u.searchParams.get('issue')==='1';
+    try{return Response.json(await buildBrief(env,family,{issue}),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
+  }
+  if(u.pathname==='/api/content-engine/intelligence/metrics'&&request.method==='GET'){
+    try{return Response.json(await metrics(env),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_metrics_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleContentEngineIntelligenceRoute(request,env);
+    if(owned)return owned;
     const u=new URL(request.url);
-    if(u.pathname==='/api/content-engine/intelligence/refresh'&&request.method==='POST'){
-      if(!(await proofAuthorized(request)))return Response.json({error:'unauthorized'},{status:401,headers:{...JSON_H,'Cache-Control':'no-store'}});
-      try{return Response.json(await runContentSocialIntelligenceCycle(env),{headers:{...JSON_H,'Cache-Control':'no-store'}})}catch(error){return Response.json({error:'content_intelligence_refresh_failed',message:safe(error?.message||error,500)},{status:500,headers:{...JSON_H,'Cache-Control':'no-store'}})}
-    }
-        if(u.pathname==='/api/content-engine/brief'&&request.method==='GET'){
-      const family=['monday_discovery','wednesday_comparison','friday_practical'].includes(u.searchParams.get('family'))?u.searchParams.get('family'):'monday_discovery';
-      const issue=u.searchParams.get('issue')==='1';
-      try{return Response.json(await buildBrief(env,family,{issue}),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
-    }
-    if(u.pathname==='/api/content-engine/intelligence/metrics'&&request.method==='GET'){
-      try{return Response.json(await metrics(env),{headers:JSON_H})}catch(error){return Response.json({error:'content_intelligence_metrics_unavailable',message:safe(error?.message||error,500)},{status:503,headers:{...JSON_H,'Cache-Control':'no-store'}})}
-    }
     const response=await base.fetch(request,env,ctx);
     if(u.pathname.startsWith('/go/')&&u.searchParams.get('ts_affiliate')==='1'){try{await recordSocialAffiliateRedirect(request,env,u,response)}catch{}}
     return response;

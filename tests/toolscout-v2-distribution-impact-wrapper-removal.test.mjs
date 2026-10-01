@@ -14,7 +14,7 @@ test('distribution impact legacy surfaces are already direct-owned',()=>{
 
 test('generic request traversal bypasses the distribution impact presentation wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/content-engine-intelligence-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-network-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-impact-entry-worker\.js'/);
 });
 
