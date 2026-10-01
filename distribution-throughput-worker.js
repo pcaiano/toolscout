@@ -1,4 +1,5 @@
-import base from './distribution-autonomous-worker.js';
+import base from './distribution-submission-worker.js';
+import {handleAutonomousDistributionRoute} from './distribution-autonomous-worker.js';
 
 const RESEARCH_SCAN_LIMIT=120;
 const RESEARCH_BUDGET=24;
@@ -56,7 +57,9 @@ export async function handleDistributionThroughputRoute(request,env,ctx){
   }
   if(autonomousRefresh&&authorized(request,env))await releaseDueResearch(env);
   if(submissionExecute&&authorized(request,env))await adaptiveIndexNow(env);
-  const response=await base.fetch(request,env,ctx);
+  const response=autonomousRefresh
+    ?(await handleAutonomousDistributionRoute(request,env,ctx))||await base.fetch(request,env,ctx)
+    :await base.fetch(request,env,ctx);
   await normalizeIndexNowAttemptTimestamps(env);
   return response;
 }
