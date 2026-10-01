@@ -1,4 +1,5 @@
-import base from './distribution-contact-worker.js';
+import base from './distribution-vendor-worker.js';
+import {runDistributionContactScheduled} from './distribution-contact-worker.js';
 import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 
 // Attribution remains centralized in distribution-impact-worker.js and still enforces classification='likely-human' and confirmed revenue_ledger evidence.
@@ -42,7 +43,7 @@ export async function handleDistributionLearningRoute(request,env,ctx){
 }
 
 export async function runDistributionLearningScheduled(event,env,ctx){
-  if(base.scheduled)return base.scheduled(event,env,ctx);
+  return runDistributionContactScheduled(event,env,ctx);
 }
 
 export default {

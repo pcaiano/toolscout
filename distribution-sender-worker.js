@@ -1,4 +1,5 @@
-import base from './distribution-contact-worker.js';
+import base from './distribution-vendor-worker.js';
+import {handleDistributionContactRoute} from './distribution-contact-worker.js';
 import {recordExecutionProof,deferExecutionTask} from './growth-execution-contract.js';
 import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION} from './distribution-outreach-policy.js';
 import {vendorAssetCoherence} from './distribution-vendor-integrity.js';
@@ -512,7 +513,7 @@ export async function handleDistributionSenderRoute(request,env,ctx){
         if(bearer)headers.Authorization=bearer;
         if(handoff)headers['X-ToolScout-Handoff']=handoff;
         const refreshRequest=new Request(new URL('/api/distribution/vendor-amplification/contact-scan',request.url),{method:'POST',headers});
-        const refreshed=await base.fetch(refreshRequest,env,ctx);
+        const refreshed=(await handleDistributionContactRoute(refreshRequest,env,ctx))||await base.fetch(refreshRequest,env,ctx);
         contactRefresh=refreshed.ok?await refreshed.json():{ok:false,http_status:refreshed.status};
       }catch(e){contactRefresh={ok:false,error:String(e?.message||e).slice(0,300)}}
       const result=await publicCandidates(env,url.searchParams.get('limit'));
