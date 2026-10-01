@@ -1143,3 +1143,18 @@ Implemented:
 
 Preservation rule:
 Canonical stats sources, Command Center ownership, public URLs/canonicals and active distribution observability remain unchanged.
+
+
+## Phase 84 - Remove distribution orchestrator request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-84`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-priority-worker.js`;
+- `distribution-orchestrator-worker.js` leaves production's generic request traversal;
+- all active `/api/distribution/orchestrate*`, economic-learning, editorial-queue, priorities and `/api/growth/*` surfaces remain on the direct `distribution_orchestrator` owner;
+- scheduled Growth Brain execution remains explicit in `compute-router-worker.js` and is not inherited from the legacy base chain;
+- the architecture edge budget ratchets from 21 to 20.
+
+Preservation rule:
+Growth opportunity coordination, execution contracts, supervisor state, autonomous distribution, affiliate/content cycles, scheduler ownership, authorization and public URLs remain unchanged.
