@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './distribution-autonomous-worker.js';
+import base from './distribution-submission-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -28,7 +28,7 @@ import {handleCommandCenterSchemaControlRoute} from './command-center-schema-con
 import {handleTrafficIntegrityHealthRoute} from './traffic-integrity-health-runtime.js';
 import {handleAdminStatsRoute} from './admin-stats-runtime.js';
 import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
-import {qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
+import {handleAutonomousDistributionRoute,qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
 import {TOOLSCOUT_CRONS,scheduleContract} from './runtime-schedule-contract.js';
@@ -1958,6 +1958,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='distribution_public_embed')response=await handleDistributionEmbedRoute(request,env);
   else if(ownership.owner==='distribution_linkable_assets')response=await handleLinkableAssetsRoute(request,env);
   else if(ownership.owner==='distribution_throughput_runtime')response=await handleDistributionThroughputRoute(request,env,ctx);
+  else if(ownership.owner==='distribution_autonomous_runtime')response=await handleAutonomousDistributionRoute(request,env,ctx);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
