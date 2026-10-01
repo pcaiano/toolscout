@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './distribution-throughput-worker.js';
+import base from './distribution-autonomous-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -65,6 +65,7 @@ import {handleContentEngineIntelligenceRoute} from './content-engine-intelligenc
 import {handleDistributionNetworkRoute} from './distribution-network-worker.js';
 import {handleDistributionEmbedRoute} from './distribution-embed-worker.js';
 import {handleLinkableAssetsRoute} from './distribution-linkable-assets-worker.js';
+import {handleDistributionThroughputRoute} from './distribution-throughput-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -1956,6 +1957,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='distribution_network_runtime')response=await handleDistributionNetworkRoute(request,env);
   else if(ownership.owner==='distribution_public_embed')response=await handleDistributionEmbedRoute(request,env);
   else if(ownership.owner==='distribution_linkable_assets')response=await handleLinkableAssetsRoute(request,env);
+  else if(ownership.owner==='distribution_throughput_runtime')response=await handleDistributionThroughputRoute(request,env,ctx);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
