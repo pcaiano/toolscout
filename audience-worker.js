@@ -343,15 +343,22 @@ async function augmentStats(request,env,ctx){
   return Response.json({...data,...audience,socialAttribution},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
 }
 
+export async function handleAudienceRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/audience-event'&&request.method==='POST')return ingestAudienceEvent(request,env);
+  if(url.pathname==='/api/audience/platform-capabilities'&&request.method==='GET')return Response.json({ok:true,health:socialPlatformCapabilityHealth(),platforms:SOCIAL_PLATFORM_CAPABILITIES},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
+  if(url.pathname==='/api/audience/dev-comments/candidates'&&request.method==='GET')return Response.json(await devCommentCandidates(env),{headers:{...jsonHeaders,'Cache-Control':'no-store'}});
+  if(url.pathname==='/api/audience/dev-comment/observe'&&request.method==='POST')return observeDevComment(request,env);
+  if(url.pathname==='/api/audience/bluesky-reply/health'&&request.method==='GET')return Response.json({ok:true,version:'public-facing-semantic-guard-v3',maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,requiresPrepareBeforePublish:true,blocksInternalControlText:true},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
+  if(url.pathname==='/api/audience/bluesky-reply/prepare'&&request.method==='POST')return prepareBlueskyReply(request,env);
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleAudienceRoute(request,env,ctx);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(url.pathname==='/api/audience-event'&&request.method==='POST')return ingestAudienceEvent(request,env);
-    if(url.pathname==='/api/audience/platform-capabilities'&&request.method==='GET')return Response.json({ok:true,health:socialPlatformCapabilityHealth(),platforms:SOCIAL_PLATFORM_CAPABILITIES},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
-    if(url.pathname==='/api/audience/dev-comments/candidates'&&request.method==='GET')return Response.json(await devCommentCandidates(env),{headers:{...jsonHeaders,'Cache-Control':'no-store'}});
-    if(url.pathname==='/api/audience/dev-comment/observe'&&request.method==='POST')return observeDevComment(request,env);
-    if(url.pathname==='/api/audience/bluesky-reply/health'&&request.method==='GET')return Response.json({ok:true,version:'public-facing-semantic-guard-v3',maxGraphemes:BLUESKY_MAX_GRAPHEMES,maxBytes:BLUESKY_MAX_BYTES,targetGraphemes:BLUESKY_REPLY_TARGET_GRAPHEMES,requiresPrepareBeforePublish:true,blocksInternalControlText:true},{headers:{...jsonHeaders,'Cache-Control':'public, max-age=60'}});
-    if(url.pathname==='/api/audience/bluesky-reply/prepare'&&request.method==='POST')return prepareBlueskyReply(request,env);
     if(url.pathname==='/api/stats'&&request.method==='GET')return augmentStats(request,env,ctx);
     if(url.pathname==='/analytics.html'&&request.method==='GET'){
       const response=await base.fetch(request,env,ctx);
