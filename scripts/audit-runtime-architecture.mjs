@@ -4,7 +4,7 @@ import {ROUTE_GROUPS,EARLY_DISPATCH_OWNERS} from '../runtime-route-contract.js';
 
 const ROOT=process.cwd();
 const ENTRY='compute-router-worker.js';
-const MAX_LEGACY_EDGES=10;
+const MAX_LEGACY_EDGES=9;
 const MIN_DIRECT_ROUTE_COVERAGE_PCT=100;
 const ALLOWED_LEGACY_GROUPS=new Set([]);
 
@@ -59,6 +59,7 @@ const directOwnerFiles={
   distribution_learning_runtime:'distribution-learning-worker.js',
   distribution_sender_runtime:'distribution-sender-worker.js',
   distribution_contact_runtime:'distribution-contact-worker.js',
+  distribution_vendor_runtime:'distribution-vendor-worker.js',
   command_center_direct:'command-center-business-truth-runtime.js',
   command_center_resilient_health:'command-center-resilient-health-runtime.js',
   command_center_schema_control:'command-center-schema-control-runtime.js',
