@@ -45,6 +45,7 @@ test('generic traversal bypasses sender while public candidates preserve contact
   assert.doesNotMatch(compute,/import base from '\.\/distribution-sender-worker\.js'/);
   assert.match(runtime,/import base from '\.\/distribution-vendor-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionSenderRoute/);
-  assert.match(runtime,/const refreshed=await base\.fetch\(refreshRequest,env,ctx\)/);
+  assert.match(runtime,/import \{handleDistributionContactRoute\} from '\.\/distribution-contact-worker\.js'/);
+  assert.match(runtime,/handleDistributionContactRoute\(refreshRequest,env,ctx\)/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 });
