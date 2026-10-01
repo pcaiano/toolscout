@@ -6,7 +6,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('generic traversal bypasses throughput integrity wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-autonomous-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-submission-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-throughput-integrity-worker\.js'/);
 });
 
