@@ -6,7 +6,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('generic traversal bypasses throughput integrity wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-submission-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-discovery-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-throughput-integrity-worker\.js'/);
 });
 
@@ -17,7 +17,7 @@ test('IndexNow timestamp normalization is folded into throughput runtime',()=>{
   assert.match(runtime,/error LIKE 'retryable:indexnow_%'/);
   assert.match(runtime,/handleAutonomousDistributionRoute\(request,env,ctx\)/);
   assert.match(runtime,/await normalizeIndexNowAttemptTimestamps\(env\)/);
-  assert.match(runtime,/const result=base\.scheduled\?await base\.scheduled\(event,env,ctx\):undefined/);
+  assert.match(runtime,/const result=await runDistributionSubmissionScheduled\(event,env,ctx\)/);
 });
 
 test('throughput runtime remains schema-clean',()=>{

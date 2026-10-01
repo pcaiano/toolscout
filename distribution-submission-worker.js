@@ -195,23 +195,33 @@ async function verifySubmitted(request,env){
 
 async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 
+export async function handleDistributionSubmissionRoute(request,env,ctx){
+  const u=new URL(request.url);
+  if(u.pathname==='/api/distribution/submissions/package'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await packageQueue(request,env),{headers:H});}
+  if(u.pathname==='/api/distribution/submissions/execute'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await execute(request,env),{headers:H});}
+  if(u.pathname==='/api/distribution/submissions/verify'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await verifySubmitted(request,env),{headers:H});}
+  if(u.pathname==='/api/distribution/submissions'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});const r=await env.DB.prepare(`SELECT submission_id,surface_slug,asset_url,submission_type,status,action_url,attempts,submitted_at,response_url,error,human_required,updated_at FROM distribution_submissions ORDER BY created_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:r.results||[]},{headers:H});}
+  return null;
+}
+
+export async function runDistributionSubmissionScheduled(event,env,ctx){
+  const hourly=event?.cron==='15 * * * *';
+  const daily=event?.cron==='35 3 * * *';
+  if(base.scheduled)await base.scheduled(event,env,ctx);
+  if(hourly||daily){
+    await packageQueue(new Request('https://trytoolscout.org/'),env);
+    await execute(new Request('https://trytoolscout.org/'),env);
+    await verifySubmitted(new Request('https://trytoolscout.org/'),env);
+  }
+}
+
 export default {
   async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    if(u.pathname==='/api/distribution/submissions/package'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await packageQueue(request,env),{headers:H});}
-    if(u.pathname==='/api/distribution/submissions/execute'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await execute(request,env),{headers:H});}
-    if(u.pathname==='/api/distribution/submissions/verify'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await verifySubmitted(request,env),{headers:H});}
-    if(u.pathname==='/api/distribution/submissions'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});const r=await env.DB.prepare(`SELECT submission_id,surface_slug,asset_url,submission_type,status,action_url,attempts,submitted_at,response_url,error,human_required,updated_at FROM distribution_submissions ORDER BY created_at DESC LIMIT 100`).all();return Response.json({status:'connected',items:r.results||[]},{headers:H});}
+    const owned=await handleDistributionSubmissionRoute(request,env,ctx);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
-    const hourly=event?.cron==='15 * * * *';
-    const daily=event?.cron==='35 3 * * *';
-    if(base.scheduled)await base.scheduled(event,env,ctx);
-    if(hourly||daily){
-      await packageQueue(new Request('https://trytoolscout.org/'),env);
-      await execute(new Request('https://trytoolscout.org/'),env);
-      await verifySubmitted(new Request('https://trytoolscout.org/'),env);
-    }
+    return runDistributionSubmissionScheduled(event,env,ctx);
   }
 };

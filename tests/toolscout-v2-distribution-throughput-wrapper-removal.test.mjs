@@ -28,11 +28,13 @@ test('direct throughput owner preserves authorization boundary',async()=>{
 test('generic traversal bypasses distribution throughput wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-throughput-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-submission-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-discovery-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-throughput-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionThroughputRoute/);
   assert.match(runtime,/import \{handleAutonomousDistributionRoute\} from '\.\/distribution-autonomous-worker\.js'/);
+  assert.match(runtime,/import \{handleDistributionSubmissionRoute,runDistributionSubmissionScheduled\} from '\.\/distribution-submission-worker\.js'/);
   assert.match(runtime,/\?\(await handleAutonomousDistributionRoute\(request,env,ctx\)\)\|\|await base\.fetch\(request,env,ctx\)/);
+  assert.match(runtime,/\?\(await handleDistributionSubmissionRoute\(request,env,ctx\)\)\|\|await base\.fetch\(request,env,ctx\)/);
   assert.match(runtime,/await normalizeIndexNowAttemptTimestamps\(env\)/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 });
