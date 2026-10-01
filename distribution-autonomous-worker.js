@@ -1309,17 +1309,25 @@ export async function runAutonomousDistributionCycle(env){
   return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,obsoleteClassifierHumanGates,freshResearchHumanGates,openHumanGateStates,orphanHumanStates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
+
+export async function handleAutonomousDistributionRoute(request,env,ctx){
+  const u=new URL(request.url);
+  if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){
+    if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+    const cycleContext=missionCycleContextFromRequest(request,'distribution','autonomous_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);
+    return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api',singleFlightMinutes:15,cycleContext,cycleOwner},()=>runAutonomousDistributionCycle(env)),{headers:H});
+  }
+  if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){
+    if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
+    return Response.json(await autonomyMetrics(env),{headers:H});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    if(u.pathname==='/api/distribution/autonomous/refresh'&&request.method==='POST'){
-      if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      const cycleContext=missionCycleContextFromRequest(request,'distribution','autonomous_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'distribution',mission:'autonomous_cycle',triggerName:'manual_api',singleFlightMinutes:15,cycleContext,cycleOwner},()=>runAutonomousDistributionCycle(env)),{headers:H});
-    }
-    if(u.pathname==='/api/distribution/autonomy/metrics'&&request.method==='GET'){
-      if(!admin(request,env))return Response.json({error:'unauthorized'},{status:401,headers:H});
-      return Response.json(await autonomyMetrics(env),{headers:H});
-    }
+    const owned=await handleAutonomousDistributionRoute(request,env,ctx);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){
