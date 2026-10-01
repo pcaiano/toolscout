@@ -431,17 +431,23 @@ export async function runDistributionNetworkCycle(env){
   return {ok:true,competitiveSuppression,candidates,contacts,routeActions,routeReconciliation,adoption,materialChanges,write_policy:'material_change_only',closed_loop_routes:true,competitive_outreach_policy:COMPETITIVE_OUTREACH_POLICY_VERSION};
 }
 
+export async function handleDistributionNetworkRoute(request,env){
+  const u=new URL(request.url);
+  if(u.pathname==='/api/distribution/network/refresh'&&request.method==='POST'){
+    if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+    const cycleContext=missionCycleContextFromRequest(request,'distribution','network_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:'manual_api',cycleContext,cycleOwner},()=>runDistributionNetworkCycle(env)),{headers:JSON_H});
+  }
+  if(u.pathname==='/api/distribution/network/metrics'&&request.method==='GET'){
+    if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+    return Response.json(await metrics(env),{headers:JSON_H});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
-    const u=new URL(request.url);
-    if(u.pathname==='/api/distribution/network/refresh'&&request.method==='POST'){
-      if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      const cycleContext=missionCycleContextFromRequest(request,'distribution','network_cycle'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:'manual_api',cycleContext,cycleOwner},()=>runDistributionNetworkCycle(env)),{headers:JSON_H});
-    }
-    if(u.pathname==='/api/distribution/network/metrics'&&request.method==='GET'){
-      if(!(await authorized(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-      return Response.json(await metrics(env),{headers:JSON_H});
-    }
+    const owned=await handleDistributionNetworkRoute(request,env);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){

@@ -1094,3 +1094,19 @@ Implemented:
 
 Preservation rule:
 Publisher candidate discovery, competitor-outreach suppression, contact-route discovery, route-action materialization, strict-human attribution, adoption verification and network metrics remain unchanged.
+
+
+## Phase 81 - Remove Distribution Network request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-81`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-embed-worker.js`;
+- `POST /api/distribution/network/refresh` and `GET /api/distribution/network/metrics` gain direct `distribution_network_runtime` ownership;
+- direct dispatch reuses the existing Distribution Network handler and preserves authorization checks;
+- Phase 80 guarantees the direct owner is schema-clean;
+- scheduled Distribution Network behavior remains delegated through the existing scheduler/runtime imports;
+- the architecture edge budget ratchets from 24 to 23.
+
+Preservation rule:
+Publisher discovery, competitor-outreach suppression, contact-route discovery, autonomous route materialization, strict-human attribution, adoption verification, network metrics and public URLs/canonicals remain unchanged.
