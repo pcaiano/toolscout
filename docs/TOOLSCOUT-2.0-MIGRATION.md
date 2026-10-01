@@ -1063,3 +1063,19 @@ Implemented:
 
 Preservation rule:
 Social-profile discovery, affiliate social-policy classification, content brief generation, growth-action issuance, borrowed-audience route selection and social affiliate measurement semantics remain unchanged. Only lazy schema mutation is removed.
+
+
+## Phase 79 - Remove Content Engine request traversal
+
+Status: implemented on `architecture/toolscout-2.0-phase-79`.
+
+Implemented:
+- generic compute fallback now connects directly to `distribution-network-worker.js`;
+- Content Engine refresh, brief and metrics routes gain direct `content_engine_intelligence` ownership;
+- direct dispatch reuses the existing Content Engine handler and preserves proof authentication on refresh;
+- `/go/` remains owned by `affiliate_redirect`, so the legacy social-affiliate redirect post-processing path is not reintroduced into generic traversal;
+- Phase 78 guarantees the direct Content Engine owner is schema-clean;
+- the architecture edge budget ratchets from 25 to 24.
+
+Preservation rule:
+Content intelligence refresh, brief generation, metrics, affiliate/social policy logic, agent recommendation lower dependencies, affiliate redirects, public URLs/canonicals and ranking semantics remain unchanged.
