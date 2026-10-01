@@ -6,7 +6,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('generic request traversal bypasses the human action presentation wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-command-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-orchestrator-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/human-action-entry-worker\.js'/);
 });
 
