@@ -30,4 +30,46 @@ async function discoverContacts(env){const r=await env.DB.prepare(`SELECT tool_s
 async function readyQueue(env,limit=3){const r=await env.DB.prepare(`SELECT tool_slug,asset_url,priority_score,vendor_domain,contact_email,contact_name,contact_source_url,contact_method,suggested_subject,suggested_body FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_method='public_role_email' AND contact_email IS NOT NULL ORDER BY priority_score DESC LIMIT ?`).bind(Math.max(1,Math.min(10,Number(limit)||3))).all();return {status:'connected',items:r.results||[]}}
 async function markStatus(request,env){let b={};try{b=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:JSON_HEADERS})}if(!b.tool_slug||!b.asset_url)return Response.json({error:'tool_slug_and_asset_url_required'},{status:400,headers:JSON_HEADERS});const ok=b.status==='sent';await env.DB.prepare(`UPDATE distribution_vendor_amplification SET status=?,attempts=attempts+1,last_attempt_at=datetime('now'),outreach_sent_at=CASE WHEN ? THEN datetime('now') ELSE outreach_sent_at END,outreach_error=?,updated_at=datetime('now') WHERE tool_slug=? AND asset_url=?`).bind(ok?'sent':'send_failed',ok?1:0,ok?null:String(b.error||'send_failed').slice(0,1000),b.tool_slug,b.asset_url).run();await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,destination_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`vsend_${crypto.randomUUID()}`,ok?'vendor_outreach_sent':'vendor_outreach_failed',ok?'completed':'failed','vendor_amplification',b.tool_slug,b.asset_url,ok?'Vendor amplification outreach sent.':String(b.error||'Vendor outreach failed').slice(0,1000)).run();return Response.json({ok:true},{headers:JSON_HEADERS})}
 
-export default {async fetch(request,env,ctx){const url=new URL(request.url);if(url.pathname==='/api/distribution/vendor-amplification/ready'&&request.method==='GET'){if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return Response.json(await readyQueue(env,url.searchParams.get('limit')),{headers:JSON_HEADERS})}if(url.pathname==='/api/distribution/vendor-amplification/contact-scan'&&request.method==='POST'){if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return Response.json(await discoverContacts(env),{headers:JSON_HEADERS})}if(url.pathname==='/api/distribution/vendor-amplification/status'&&request.method==='POST'){if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return markStatus(request,env)}if(url.pathname==='/api/stats'&&request.method==='GET'){const upstream=await base.fetch(request,env,ctx);if(!upstream.ok)return upstream;const data=await upstream.json();let c={results:[]};try{c=await env.DB.prepare(`SELECT status,COUNT(*) n FROM distribution_vendor_amplification GROUP BY status`).all()}catch{}const counts=Object.fromEntries((c.results||[]).map(x=>[x.status,Number(x.n||0)]));return Response.json({...data,vendorAmplification:{...(data.vendorAmplification||{}),publicContactFound:counts.contact_found||0,fallbackNeeded:counts.needs_contact_fallback||0,sendFailed:counts.send_failed||0}},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}})}return base.fetch(request,env,ctx)},async scheduled(event,env,ctx){if(base.scheduled)await base.scheduled(event,env,ctx);ctx.waitUntil(discoverContacts(env).catch(()=>{}))}};
+export async function handleDistributionContactRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/distribution/vendor-amplification/ready'&&request.method==='GET'){
+    if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+    return Response.json(await readyQueue(env,url.searchParams.get('limit')),{headers:JSON_HEADERS});
+  }
+  if(url.pathname==='/api/distribution/vendor-amplification/contact-scan'&&request.method==='POST'){
+    if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+    return Response.json(await discoverContacts(env),{headers:JSON_HEADERS});
+  }
+  if(url.pathname==='/api/distribution/vendor-amplification/status'&&request.method==='POST'){
+    if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
+    return markStatus(request,env);
+  }
+  if(url.pathname==='/api/stats'&&request.method==='GET'){
+    const upstream=await base.fetch(request,env,ctx);
+    if(!upstream.ok)return upstream;
+    const data=await upstream.json();
+    let c={results:[]};
+    try{c=await env.DB.prepare(`SELECT status,COUNT(*) n FROM distribution_vendor_amplification GROUP BY status`).all()}catch{}
+    const counts=Object.fromEntries((c.results||[]).map(x=>[x.status,Number(x.n||0)]));
+    return Response.json({...data,vendorAmplification:{...(data.vendorAmplification||{}),publicContactFound:counts.contact_found||0,fallbackNeeded:counts.needs_contact_fallback||0,sendFailed:counts.send_failed||0}},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
+  }
+  return null;
+}
+
+export async function runDistributionContactScheduled(event,env,ctx){
+  if(base.scheduled)await base.scheduled(event,env,ctx);
+  const work=discoverContacts(env).catch(()=>{});
+  if(ctx?.waitUntil){ctx.waitUntil(work);return;}
+  await work;
+}
+
+export default {
+  async fetch(request,env,ctx){
+    const owned=await handleDistributionContactRoute(request,env,ctx);
+    if(owned)return owned;
+    return base.fetch(request,env,ctx);
+  },
+  async scheduled(event,env,ctx){
+    return runDistributionContactScheduled(event,env,ctx);
+  }
+};
