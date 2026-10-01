@@ -56,15 +56,22 @@ function publisherKit(){
 RSS: https://trytoolscout.org/distribution/feed.xml</pre><h2>Finder embed</h2><pre>&lt;script async src="https://trytoolscout.org/embed/toolscout-finder.js"&gt;&lt;/script&gt;</pre><h2>Compare embed</h2><pre>&lt;script async src="https://trytoolscout.org/embed/toolscout-compare.js" data-a="TOOL-A" data-b="TOOL-B"&gt;&lt;/script&gt;</pre><h2>Pick embed</h2><pre>&lt;script async src="https://trytoolscout.org/embed/toolscout-pick.js" data-tool="TOOL-SLUG"&gt;&lt;/script&gt;</pre><h2>Recommendation API</h2><p>Use the public recommendation endpoint for lightweight software discovery.</p><pre>GET https://trytoolscout.org/api/recommend?q=automate+client+follow+up</pre><h2>Machine readable details</h2><p><a href="https://trytoolscout.org/.well-known/toolscout-distribution.json">Distribution manifest</a> · <a href="https://trytoolscout.org/openapi.json">OpenAPI</a> · <a href="https://trytoolscout.org/.well-known/api-catalog">API catalog</a></p><p class="muted">ToolScout may earn a commission from some outbound vendor links. Affiliate relationships do not influence recommendation ranking.</p></main></body></html>`;
   return new Response(body,{headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=900'}});
 }
+export async function handleDistributionEmbedRoute(request,env){
+  const u=new URL(request.url);
+  if(u.pathname==='/distribution/publisher-kit'&&request.method==='GET')return publisherKit();
+  if(u.pathname==='/api/recommend'&&request.method==='GET')return recommend(request,env);
+  if(u.pathname==='/embed/toolscout.js'&&request.method==='GET')return new Response(widgetScript(),{headers:JS_H});
+  if(u.pathname==='/embed/badge.svg'&&request.method==='GET')return new Response(badgeSvg(),{headers:SVG_H});
+  if(u.pathname==='/distribution/feed.xml'&&request.method==='GET')return prioritizedDistributionFeed(request,env,'xml');
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
-    if(u.pathname==='/distribution/publisher-kit'&&request.method==='GET')return publisherKit();
-    if(u.pathname==='/api/recommend'&&request.method==='GET')return recommend(request,env);
-    if(u.pathname==='/embed/toolscout.js'&&request.method==='GET')return new Response(widgetScript(),{headers:JS_H});
-    if(u.pathname==='/embed/badge.svg'&&request.method==='GET')return new Response(badgeSvg(),{headers:SVG_H});
+    const owned=await handleDistributionEmbedRoute(request,env);
+    if(owned)return owned;
     if(u.pathname==='/api/distribution/feed.json'&&request.method==='GET')return prioritizedDistributionFeed(request,env,'json');
-    if(u.pathname==='/distribution/feed.xml'&&request.method==='GET')return prioritizedDistributionFeed(request,env,'xml');
     const discovery=await handleMachineDiscoveryCatalogRoute(request,env);
     if(discovery)return discovery;
     if(u.pathname==='/go/embed'&&request.method==='GET')return logEmbedClick(request,env);
