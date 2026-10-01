@@ -1,16 +1,6 @@
 const MONETIZABLE_SOCIAL_STATES=new Set(['link_acquired','active','verified','earning']);
 
-export async function ensureAffiliateSocialOnboardingSchema(env){
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS affiliate_social_policy_queue(
-    tool_slug TEXT PRIMARY KEY,
-    status TEXT NOT NULL DEFAULT 'pending',
-    source TEXT,
-    affiliate_url TEXT,
-    queued_at TEXT NOT NULL DEFAULT (datetime('now')),
-    processed_at TEXT,
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )`).run();
-}
+export async function ensureAffiliateSocialOnboardingSchema(_env){return true;}
 
 export async function queueAffiliateSocialPolicyReview(env,{toolSlug,status,affiliateUrl,source='affiliate_onboarding'}={}){
   const slug=String(toolSlug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
