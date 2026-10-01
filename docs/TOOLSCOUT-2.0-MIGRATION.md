@@ -1284,3 +1284,19 @@ Implemented:
 
 Preservation rule:
 No discovery sources, recursive-source learning, surface scoring, technical-host suppression, family-learning boosts, authorization, autonomous replenishment or periodic discovery behavior changes in this phase. Only ownership and explicit composition replace decorator traversal.
+
+
+## Phase 93 - Explicit Distribution Learning ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-93`.
+
+Implemented:
+- `POST|OPTIONS /api/distribution/embed-event` and `POST /api/distribution/learning/refresh` are declared under the explicit `distribution_learning_runtime` owner;
+- the public embed-event preflight remains public, while learning refresh retains its admin-token boundary;
+- `distribution-learning-worker.js` exports explicit HTTP and scheduled handlers;
+- `distribution-discovery-worker.js` composes the learning scheduler directly before discovery work;
+- generic request fallback now connects directly to `distribution-sender-worker.js`;
+- the architecture edge budget ratchets from 13 to 12.
+
+Preservation rule:
+No embed attribution, likely-human classification, confirmed-revenue evidence, learning snapshot semantics, CORS behavior, authorization or scheduled ordering changes in this phase. Only ownership and explicit composition replace decorator traversal.
