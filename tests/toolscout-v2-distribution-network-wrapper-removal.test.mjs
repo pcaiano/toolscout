@@ -26,7 +26,7 @@ test('direct Distribution Network owner preserves authorization',async()=>{
 test('generic traversal bypasses Distribution Network wrapper after schema migration',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-network-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-throughput-integrity-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-linkable-assets-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-network-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionNetworkRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
