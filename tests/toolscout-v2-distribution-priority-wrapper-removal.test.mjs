@@ -17,7 +17,7 @@ test('distribution priority routes remain direct-owned',()=>{
 test('generic traversal bypasses distribution priority wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-priority-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-sender-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-contact-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-priority-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionPriorityRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);

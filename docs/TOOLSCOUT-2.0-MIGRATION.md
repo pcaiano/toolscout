@@ -1318,3 +1318,19 @@ Why this phase is separate:
 
 Preservation rule:
 No email throughput target, reputation filter, owner override learning, public handoff authentication, vendor/network leasing, execution proof or outreach state transition changes in this phase.
+
+
+## Phase 95 - Explicit Distribution Sender ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-95`.
+
+Implemented:
+- the two sender GET surfaces and four sender POST mutation surfaces are declared under the explicit `distribution_sender_runtime` owner;
+- both integration-token and public-handoff authentication boundaries are preserved;
+- the public-candidates path continues to refresh contact discovery through the lower contact runtime before leasing outbound candidates;
+- generic request fallback now connects directly to `distribution-contact-worker.js`;
+- sender compatibility export remains available for isolated callers;
+- the architecture edge budget ratchets from 12 to 11.
+
+Preservation rule:
+No email throughput target, reputation filter, owner override learning, public handoff authentication, vendor/network leasing, contact refresh, execution proof or outreach state transition changes in this phase. Only route ownership and generic traversal change.

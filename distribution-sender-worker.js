@@ -496,8 +496,7 @@ async function publicStatus(request,env){
   const proof=await recordExecutionProof(env,{taskId,executor:'make_sender',status:ok?'verified':'failed',detail:ok?'exact_network_send_verified':'make_network_send_failed',externalId:token,evidence:{kind:'network',surface_slug:network.surface_slug,source_url:network.source_url,dispatch_token:token}});
   return Response.json({ok:true,kind:'network',task_id:taskId,proof},{headers:JSON_HEADERS});
 }
-export default {
-  async fetch(request,env,ctx){
+export async function handleDistributionSenderRoute(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/api/distribution/vendor-amplification/ready'&&request.method==='GET'){
       if(!(await integrationOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});
@@ -523,6 +522,13 @@ export default {
     if(url.pathname==='/api/distribution/outbound-reputation/override-validate'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return validateReputationOverride(request,env);}
     if(url.pathname==='/api/distribution/outbound-reputation/override-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return finalizeReputationOverride(request,env);}
     if(url.pathname==='/api/distribution/vendor-amplification/public-status'&&request.method==='POST'){if(!(await publicHandoffOk(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:JSON_HEADERS});return publicStatus(request,env);}
+    return null;
+}
+
+export default {
+  async fetch(request,env,ctx){
+    const owned=await handleDistributionSenderRoute(request,env,ctx);
+    if(owned)return owned;
     return base.fetch(request,env,ctx);
   },
   async scheduled(event,env,ctx){return base.scheduled?base.scheduled(event,env,ctx):undefined;}

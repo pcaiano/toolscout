@@ -28,12 +28,12 @@ test('generic traversal bypasses discovery wrapper while autonomous and submissi
   const autonomous=read('distribution-autonomous-worker.js');
   const submission=read('distribution-submission-worker.js');
 
-  assert.match(compute,/import base from '\.\/distribution-sender-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-contact-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-discovery-worker\.js'/);
 
   assert.match(discovery,/export async function handleDistributionDiscoveryRoute/);
   assert.match(discovery,/export async function runDistributionDiscoveryScheduled/);
-  assert.match(discovery,/import base from '\.\/distribution-sender-worker\.js'/);
+  assert.match(discovery,/import base from '\.\/distribution-contact-worker\.js'/);
   assert.match(discovery,/import \{runDistributionLearningScheduled\} from '\.\/distribution-learning-worker\.js'/);
   assert.match(discovery,/await runDistributionLearningScheduled\(event,env,ctx\)/);
   assert.doesNotMatch(discovery,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
