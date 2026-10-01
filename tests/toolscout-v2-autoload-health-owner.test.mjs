@@ -24,7 +24,7 @@ test('Command Center autoload health has a direct ToolScout 2.0 owner',()=>{
 
 test('generic traversal bypasses the autoload presentation wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/distribution-embed-worker\.js'/);
+  assert.match(compute,/import base from '\.\/distribution-command-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);
