@@ -1381,3 +1381,19 @@ Implemented:
 
 Preservation rule:
 No syndication feed selection, Search Console priority ordering, opportunity scoring, configured status resolution, radar authentication, event recording or scheduled refresh ordering changes in this phase.
+
+
+## Phase 99 - Explicit Distribution Engine ownership
+
+Status: implemented on `architecture/toolscout-2.0-phase-99`.
+
+Implemented:
+- `POST /api/distribution-event` is declared under the explicit `distribution_engine_runtime` owner;
+- `GET /api/stats` deliberately remains owned by `admin_stats`, preserving the current protected read-only stats composition;
+- Command Center HTML routes, including `/analytics.html`, deliberately remain owned by `command_center_direct`;
+- generic and compatibility fallbacks now connect directly to `audience-worker.js`;
+- the legacy distribution-engine stats and analytics decorators remain only as isolated compatibility code and are no longer part of production request traversal;
+- the architecture edge budget ratchets from 8 to 7.
+
+Preservation rule:
+No distribution event ingestion, stats authentication, Command Center ownership, distribution KPI truth, analytics UI ownership, or scheduler semantics change in this phase.

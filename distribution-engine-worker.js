@@ -124,10 +124,17 @@ async function augmentStats(request,env,ctx){
   return Response.json({...data,distribution},{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, max-age=60'}});
 }
 
+export async function handleDistributionEngineRoute(request,env,ctx){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/distribution-event'&&request.method==='POST')return ingestDistributionEvent(request,env);
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
+    const owned=await handleDistributionEngineRoute(request,env,ctx);
+    if(owned)return owned;
     const url=new URL(request.url);
-    if(url.pathname==='/api/distribution-event'&&request.method==='POST')return ingestDistributionEvent(request,env);
     if(url.pathname==='/api/stats'&&request.method==='GET')return augmentStats(request,env,ctx);
     if(url.pathname==='/analytics.html'&&request.method==='GET'){
       const response=await base.fetch(request,env,ctx);if(!response.ok)return response;
