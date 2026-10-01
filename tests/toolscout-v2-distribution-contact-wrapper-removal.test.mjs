@@ -44,6 +44,9 @@ test('generic traversal bypasses contact while sender and learning compose conta
   assert.match(runtime,/import base from '\.\/distribution-radar-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionContactRoute/);
   assert.match(runtime,/export async function runDistributionContactScheduled/);
+  assert.match(runtime,/import \{handleDistributionVendorRoute,runDistributionVendorScheduled\} from '\.\/distribution-vendor-worker\.js'/);
+  assert.match(runtime,/handleDistributionVendorRoute\(request,env,ctx\)/);
+  assert.match(runtime,/await runDistributionVendorScheduled\(event,env,ctx\)/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 
   assert.match(sender,/import \{handleDistributionContactRoute\} from '\.\/distribution-contact-worker\.js'/);
