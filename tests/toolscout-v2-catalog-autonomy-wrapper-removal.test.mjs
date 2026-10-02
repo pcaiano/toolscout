@@ -9,9 +9,10 @@ const baseChain=(start,max=20)=>{const out=[],seen=new Set();let current=start;w
 
 test('generic ToolScout 2.0 traversal bypasses catalog autonomy',()=>{
   const funnel=read('funnel-worker.js');
-  assert.match(funnel,/import base from '\.\/dynamic-worker\.js'/);
+  assert.match(funnel,/import base from '\.\/worker\.js'/);
   assert.doesNotMatch(funnel,/import base from '\.\/catalog-autonomy-worker\.js'/);
-  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,4),['compute-router-worker.js','funnel-worker.js','dynamic-worker.js','worker.js']);
+  assert.doesNotMatch(funnel,/import base from '\.\/dynamic-worker\.js'/);
+  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,4),['compute-router-worker.js','funnel-worker.js','worker.js']);
 });
 
 test('catalog autonomy control routes have an explicit owner',()=>{

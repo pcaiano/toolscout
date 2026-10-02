@@ -1,4 +1,5 @@
-import base from './dynamic-worker.js';
+import base from './worker.js';
+import dynamicCompatibility from './dynamic-worker.js';
 import { parseFunnelEvent, rate } from './funnel-model.js';
 import { classifySessionRequest, isSyntheticRequest, SESSION_CLASSIFICATIONS, SESSION_UPSERT_SQL } from './session-classification.js';
 
@@ -207,6 +208,13 @@ function injectTrafficDashboard(html) {
   return out;
 }
 
+export async function handleFunnelRuntimeRoute(request,env){
+  const url=new URL(request.url);
+  if(url.pathname==='/api/events'&&request.method==='OPTIONS')return new Response(null,{status:204,headers:eventHeaders(request)});
+  if(url.pathname==='/api/events'&&request.method==='POST')return ingest(request,env);
+  return null;
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -220,10 +228,10 @@ export default {
       const html=await dashboard.text();
       return new Response(injectTrafficDashboard(html),{status:dashboard.status,headers});
     }
-    if (url.pathname === '/api/events' && request.method === 'OPTIONS') return new Response(null, {status:204, headers:eventHeaders(request)});
-    if (url.pathname === '/api/events' && request.method === 'POST') return ingest(request, env);
+    const owned=await handleFunnelRuntimeRoute(request,env);
+    if(owned)return owned;
     if (url.pathname === '/api/stats' && request.method === 'GET') {
-      const response = await base.fetch(request, env, ctx);
+      const response = await dynamicCompatibility.fetch(request, env, ctx);
       if (!response.ok) return response;
       const stats = await response.json();
       try {
