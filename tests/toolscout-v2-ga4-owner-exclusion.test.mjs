@@ -23,7 +23,7 @@ test('GA4 external acquisition has a direct ToolScout 2.0 owner',()=>{
 
 test('generic fallback preserves owner attribution before SEO and social footer',()=>{
   const compute=read('compute-router-worker.js');
-  const base=compute.indexOf('await base.fetch(request,env,ctx)');
+  const base=compute.indexOf('await env.ASSETS.fetch(request)');
   const owner=compute.indexOf('await applyMarkedOwnerAnalytics(request,response)');
   const seo=compute.indexOf('await transformSeoPublicPage(request,response,env)');
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
