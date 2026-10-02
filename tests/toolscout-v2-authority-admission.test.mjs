@@ -53,3 +53,12 @@ test('orchestrator lane selection uses the same claimability predicates as admis
   assert.match(src,/executor='distribution_autonomous'\$\{autonomousAdmission\}/);
   assert.match(src,/executor='affiliate_cycle'\$\{affiliateAdmission\}/);
 });
+
+
+test('rebalance demotes generic pending tasks that are no longer currently actionable',()=>{
+  const src=read('growth-execution-contract.js');
+  assert.match(src,/deferred_not_currently_actionable/);
+  assert.match(src,/const allPending=await env\.DB\.prepare/);
+  assert.match(src,/const eligible=new Set\(pendingIds\)/);
+  assert.match(src,/ineligibleDemoted/);
+});
