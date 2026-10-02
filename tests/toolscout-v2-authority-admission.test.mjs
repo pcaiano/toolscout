@@ -12,7 +12,8 @@ test('distribution network admits only currently actionable external authority s
   assert.match(where,/publisher_contact_discovery/);
   assert.match(where,/execute_alternate_routes/);
   assert.match(where,/scale_proven_surface/);
-  assert.match(where,/authority_surface\.status IN \('discovered','candidate','research_required','deferred','stale'\)/);
+  assert.match(where,/authority_surface\.status IN \('discovered','candidate','research_required','stale'\)/);
+  assert.doesNotMatch(where,/research_required','deferred','stale/);
   assert.match(where,/growth_execution_contract\.action='scale_proven_surface' AND authority_surface\.status IN \('live','verified'\)/);
   assert.match(where,/COALESCE\(authority_surface\.human_required,0\)=0/);
   assert.match(where,/NOT LIKE 'https:\/\/trytoolscout\.org\/%'/);
@@ -24,6 +25,7 @@ test('autonomous distribution separates qualification from backlink verification
   assert.match(where,/autonomous_route_qualification/);
   assert.match(where,/verify_backlink_acquisition/);
   assert.match(where,/authority_surface\.status IN \('submitted','pending_review','live','verified'\)/);
+  assert.match(where,/authority_surface\.status IN \('discovered','candidate','research_required','stale'\)/);
   assert.doesNotMatch(where,/publisher_contact_discovery/);
   assert.doesNotMatch(where,/scale_proven_surface/);
 });
