@@ -25,7 +25,7 @@ test('distribution orchestrator routes remain direct-owned',()=>{
 test('generic traversal bypasses distribution orchestrator wrapper',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('distribution-orchestrator-worker.js');
-  assert.match(compute,/import base from '\.\/funnel-worker\.js'/);
+  assert.match(compute,/import base from '\.\/worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-orchestrator-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionOrchestratorRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
