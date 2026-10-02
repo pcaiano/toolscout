@@ -1,4 +1,4 @@
-export default {
+const coreRuntime = {
   async fetch(request, env) {
     const url = new URL(request.url);
     const cors = {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Access-Control-Allow-Headers':'Content-Type,Authorization'};
@@ -93,3 +93,12 @@ export default {
     try { if (ctx?.waitUntil) return ctx.waitUntil(run()); return await run(); } catch { return null; }
   }
 };
+
+export async function handleCoreRuntimeRoute(request,env){
+  const url=new URL(request.url);
+  if(request.method==='OPTIONS')return coreRuntime.fetch(request,env);
+  if(request.method==='POST'&&url.pathname==='/api/opportunities/refresh')return coreRuntime.fetch(request,env);
+  return null;
+}
+
+export default coreRuntime;
