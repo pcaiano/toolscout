@@ -249,7 +249,7 @@ function openApiAdapter(spec,source,homepage){
   return null;
 }
 async function findOpenApi(homepage,html){
-  const guesses=[...links(html,homepage).filter(u=>DOC_RE.test(u)).slice(0,2),new URL('/openapi.json',homepage).toString(),new URL('/swagger.json',homepage).toString()];
+  const guesses=[...links(html,homepage).filter(u=>DOC_RE.test(u)).slice(0,3),new URL('/openapi.json',homepage).toString(),new URL('/api/openapi.json',homepage).toString(),new URL('/swagger.json',homepage).toString(),new URL('/api/swagger.json',homepage).toString()];
   const unique=[...new Set(guesses)].filter(u=>sameHostFamily(u,homepage)).slice(0,4);
   const probes=await Promise.all(unique.map(u=>text(u,2500)));
   for(const r of probes){
