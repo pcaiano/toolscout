@@ -8,10 +8,10 @@ const orchestrator=fs.readFileSync(new URL('../distribution-orchestrator-worker.
 const commandCenter=fs.readFileSync(new URL('../command-center-light-theme-worker.js',import.meta.url),'utf8');
 const humanActions=fs.readFileSync(new URL('../human-action-entry-worker.js',import.meta.url),'utf8');
 
-assert.match(ledger,/\['distribution:autonomous_cycle',\{minutes:60,anchorMinute:15\}\]/,'autonomous cycle must have one hourly owner window');
+assert.match(ledger,/\['distribution:autonomous_cycle',\{minutes:15,anchorMinute:4\}\]/,'autonomous cycle must match the staggered 15-minute owner window');
 assert.match(ledger,/\['distribution:network_cycle',\{minutes:120,anchorMinute:15\}\]/,'network cycle must preserve the existing two-hour cadence');
-assert.match(ledger,/\['growth:execution_contract',\{minutes:60,anchorMinute:15\}\]/,'execution contract must have one hourly owner window');
-assert.match(ledger,/\['growth:opportunity_coordination',\{minutes:60,anchorMinute:15\}\]/,'opportunity coordination must have one hourly owner window');
+assert.match(ledger,/\['growth:execution_contract',\{minutes:15,anchorMinute:0\}\]/,'execution contract must match the primary 15-minute growth cadence');
+assert.match(ledger,/\['growth:opportunity_coordination',\{minutes:15,anchorMinute:0\}\]/,'opportunity coordination must match the primary 15-minute growth cadence');
 
 assert.match(ledger,/PRIMARY KEY\(engine,mission,cycle_key\)/,'cycle claims must be unique per mission and cycle');
 assert.match(ledger,/INSERT OR IGNORE INTO engine_cycle_claims/,'concurrent callers must race through a single atomic claim');
