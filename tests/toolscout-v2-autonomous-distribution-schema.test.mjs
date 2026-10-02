@@ -28,3 +28,15 @@ test('autonomous OpenAPI discovery probes common API-prefixed specs',()=>{
   assert.match(runtime,/new URL\('\/api\/swagger\.json',homepage\)/);
   assert.match(runtime,/filter\(u=>DOC_RE\.test\(u\)\)\.slice\(0,3\)/);
 });
+
+
+test('POST-only submission routes fall back to same-origin landing page for discovery only',()=>{
+  const runtime=read('distribution-autonomous-worker.js');
+  assert.match(runtime,/const originUrl=new URL\('\/',effectiveRow\.action_url\)\.toString\(\)/);
+  assert.match(runtime,/const landing=await text\(originUrl\)/);
+  assert.match(runtime,/if\(landing\)h=landing/);
+  assert.match(runtime,/keep the canonical submission action URL untouched/);
+  const failure=runtime.indexOf("recordExternalRouteFailure(env,effectiveRow,'homepage_unreachable')");
+  const landing=runtime.indexOf("const landing=await text(originUrl)");
+  assert.ok(landing>=0&&failure>landing,'external route failure must only be recorded after same-origin discovery fallback fails');
+});

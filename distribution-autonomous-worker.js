@@ -579,11 +579,26 @@ async function qualifyOne(env,row){
   }
   let h=await text(row.action_url);
   if(!h){
-    await recordExternalRouteFailure(env,row,'homepage_unreachable');
     const recovered=await rediscoverActionUrl(env,row);
     if(recovered){effectiveRow={...row,action_url:recovered.url};h=recovered.page}
   }
-  if(!h){await mark(env,effectiveRow,'research_required','homepage_unreachable');return 'research_required'}
+  // Submission endpoints are often POST-only and legitimately reject GET. In that case,
+  // use the same-origin landing page only as a discovery document so OpenAPI probing can
+  // continue; keep the canonical submission action URL untouched.
+  if(!h){
+    try{
+      const originUrl=new URL('/',effectiveRow.action_url).toString();
+      if(originUrl!==effectiveRow.action_url){
+        const landing=await text(originUrl);
+        if(landing)h=landing;
+      }
+    }catch{}
+  }
+  if(!h){
+    await recordExternalRouteFailure(env,effectiveRow,'homepage_unreachable');
+    await mark(env,effectiveRow,'research_required','homepage_unreachable');
+    return 'research_required';
+  }
   const relatedPolicy=await relatedPolicyText(h.url,h.body);
   if(POLICY_BLOCK_RE.test(h.body)||(relatedPolicy&&POLICY_BLOCK_RE.test(relatedPolicy))){
     await env.DB.prepare(`UPDATE distribution_opportunities SET status='policy_blocked',human_required=0,next_action='Autonomous policy scan found a payment, reciprocal-link or anti-automation blocker. Keep suppressed unless policy changes.',last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(effectiveRow.surface_slug).run();
