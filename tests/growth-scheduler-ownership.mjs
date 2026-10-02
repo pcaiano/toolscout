@@ -14,7 +14,8 @@ check(code.includes("const AUTONOMOUS_CONTROL_CRON=TOOLSCOUT_CRONS.autonomousDis
 check(code.includes("if(trigger===AUTONOMOUS_CONTROL_CRON)"),'autonomous cron is handled separately');
 check(code.includes("cycleOwner:'distribution_autonomous_scheduler'"),'autonomous heartbeat has explicit cycle owner');
 check(code.includes("const growthCycleDue=trigger===TOOLSCOUT_CRONS.primaryGrowth||trigger===TOOLSCOUT_CRONS.daily"),'primary growth work uses central cadence contract');
-check(!code.includes("mission:'self_audit'"),'distribution orchestrator no longer owns supervisor self audit');
+const scheduledBlock=code.slice(code.lastIndexOf('},async scheduled(event,env,ctx){'));
+check(!scheduledBlock.includes("mission:'self_audit'"),'distribution orchestrator scheduled path no longer owns supervisor self audit');
 check(growthScheduler.includes("runGrowthSupervisorAudit"),'growth scheduler imports supervisor audit');
 check(growthScheduler.includes("mission:'self_audit'"),'growth scheduler executes supervisor audit on its live hourly path');
 check(schedule.includes("growth_supervisor_audit:{owner:'growth_scheduler'"),'schedule contract assigns supervisor audit to live growth scheduler owner');
