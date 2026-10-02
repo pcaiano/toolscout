@@ -243,6 +243,10 @@ async function refreshContactSupplyMetrics(env){
         OR EXISTS(SELECT 1 FROM distribution_network_outreach n
           WHERE lower(n.domain)=contact_supply_domain.domain
             AND n.status='contact_found' AND n.contact_email IS NOT NULL)
+      ) AND NOT EXISTS(
+        SELECT 1 FROM distribution_opportunities o
+        WHERE o.surface_slug=contact_supply_domain.source_key
+          AND o.status='policy_blocked'
       ) THEN 1 ELSE 0 END) ready_email,
       SUM(CASE WHEN status='ready_route' AND route_url IS NOT NULL THEN 1 ELSE 0 END) ready_route,
       SUM(CASE WHEN status='cooldown' THEN 1 ELSE 0 END) cooldown,
