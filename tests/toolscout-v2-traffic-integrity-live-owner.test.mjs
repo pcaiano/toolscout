@@ -25,7 +25,7 @@ test('page-confirmed browser gate remains before lower runtime persistence',()=>
   assert.match(runtime,/event_type!=='page_confirmed'/);
   assert.match(runtime,/browser_proof_required/);
   const gate=compute.indexOf('await gateTrafficIntegrityEvent(request)');
-  const base=compute.indexOf('await base.fetch(request,env,ctx)');
+  const base=compute.indexOf('await env.ASSETS.fetch(request)');
   assert.ok(gate>=0&&base>gate,'page confirmation gate must run before lower runtime');
 });
 
