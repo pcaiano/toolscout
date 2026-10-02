@@ -49,3 +49,6 @@ console.log('Contact Supply Engine v2 keeps recipient discovery domain-deduped, 
 assert.match(router,/EXISTS\(SELECT 1 FROM distribution_vendor_amplification v[\s\S]*v\.status='contact_found'[\s\S]*EXISTS\(SELECT 1 FROM distribution_network_outreach n[\s\S]*n\.status='contact_found'/);
 assert.match(router,/status NOT IN \('sent','adopted','reputation_quarantine','suppressed_competitor'\)/);
 console.log('Contact Supply ready_email counts sender-admissible recipients and cannot reopen competitor-suppressed outreach.');
+
+assert.match(router,/WHERE o\.surface_slug=contact_supply_domain\.source_key[\s\S]*o\.status='policy_blocked'/);
+console.log('Policy-blocked surfaces are excluded from the sender-ready contact buffer.');
