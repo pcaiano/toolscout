@@ -936,14 +936,12 @@ async function runGrowthExecutionContractCycle(env){
       }else if(executor==='seo_cloudflare'&&out?.verified===true&&out?.pathname){
         directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
       }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&out?.taskProof?.verified===true){
-        directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:String(out.taskProof.kind||'task_specific_distribution_proof'),externalId:out.taskProof.routeUrl||out.taskProof.surfaceSlug||null,evidence:out.taskProof});
-      }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&out?.taskProof?.verified===true){
         const proof=out.taskProof;
         directProof=await recordExecutionProof(env,{
           taskId:task.task_id,
           executor,
           status:'verified',
-          detail:`${proof.kind||task.action||'distribution_task'}_verified_v1`,
+          detail:`${proof.kind||task.action||'task_specific_distribution_proof'}_verified_v1`,
           externalId:proof.publicUrl||proof.routeUrl||proof.liveUrl||proof.surfaceSlug||task.subject_key||null,
           evidence:proof
         });
@@ -973,8 +971,17 @@ async function runGrowthExecutionContractCycle(env){
   // The primary internal lane is the bounded execution-contract work selected above.
   // Run it before unrelated SEO batch work so a slow SEO asset can never starve a
   // stalled catalog, affiliate, content or distribution contract.
-  if(selectedInternalLane==='distribution_network')await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
-  if(selectedInternalLane==='distribution_autonomous')await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
+  if(selectedInternalLane==='distribution_network'){
+    await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
+    // Authority has two independent bounded executors. Drain one task from the
+    // autonomous lane in the same cycle when available instead of leaving an
+    // already-admitted authority task idle for another 15 minutes.
+    await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
+  }
+  if(selectedInternalLane==='distribution_autonomous'){
+    await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
+    await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
+  }
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
   if(selectedInternalLane==='affiliate_cycle')await runInternal('affiliate_cycle',async(task)=>{
     const affiliate=await runAffiliateCoverageCycle(env,task);
@@ -1004,7 +1011,7 @@ async function runGrowthExecutionContractCycle(env){
   results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
   const after=await reconcileExecutionContracts(env);
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,boundedExecution:{maxPrimaryInternalLanesPerRun:1,selectedInternalLane,seoBatchMax:8,seoExecutor:'cloudflare_internal',externalExecutorsClaimOnly:true,contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
+  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,boundedExecution:{maxPrimaryInternalLanesPerRun:selectedInternalLane==='distribution_network'||selectedInternalLane==='distribution_autonomous'?2:1,selectedInternalLane,authorityCounterpartDrain:true,seoBatchMax:8,seoExecutor:'cloudflare_internal',externalExecutorsClaimOnly:true,contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
 }
 async function runBoundedPublicExecutionReconcile(env){
   const synced=await syncExecutionContracts(env);
