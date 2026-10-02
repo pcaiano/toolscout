@@ -1,5 +1,5 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './revenue-worker.js';
+import base from './funnel-worker.js';
 import {handleAffiliateWorkflowRoute} from './affiliate-workflow-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';

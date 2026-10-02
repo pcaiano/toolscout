@@ -42,7 +42,7 @@ test('generic traversal bypasses affiliate workflow while compatibility module t
   const compute=read('compute-router-worker.js');
   const runtime=read('affiliate-workflow-worker.js');
 
-  assert.match(compute,/import base from '\.\/revenue-worker\.js'/);
+  assert.match(compute,/import base from '\.\/funnel-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/affiliate-workflow-worker\.js'/);
   assert.match(runtime,/import base from '\.\/revenue-worker\.js'/);
   assert.match(runtime,/export async function handleAffiliateWorkflowRoute/);

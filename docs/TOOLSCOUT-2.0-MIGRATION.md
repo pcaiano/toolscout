@@ -1419,3 +1419,6 @@ No social-platform capability policy, Bluesky reply semantic guard, DEV comment 
 
 Direct-own the affiliate and distribution workflow control surfaces while preserving their existing behavior and the canonical `/go/` affiliate redirect owner. The generic compute fallback now skips `affiliate-workflow-worker.js` and enters `revenue-worker.js` directly. Directly owned runtime modules that previously bypassed to the affiliate workflow wrapper now bypass to revenue as well. The architecture ratchet moves from 6 to 5 legacy edges.
 
+### Phase 102 - revenue traversal removal
+
+Remove `revenue-worker.js` from the generic compute traversal while retaining it as a bounded internal compatibility layer for the protected admin stats composition. The canonical `/api/stats` and Command Center surfaces remain directly owned by ToolScout 2.0, and the protected stats chain continues to preserve revenue, commercial, traffic and tracking enrichments. The architecture ratchet moves from 5 to 4 legacy edges.
