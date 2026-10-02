@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {SCHEDULED_MISSIONS,missionOwner,scheduleContract} from '../runtime-schedule-contract.js';
+import {TOOLSCOUT_CRONS,SCHEDULED_MISSIONS,missionOwner,scheduleContract} from '../runtime-schedule-contract.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
@@ -41,7 +41,8 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(compute,/runGrowthRuntimeIntegrityScheduled/);
   assert.equal(missionOwner('authority_gap_recovery'),'growth_runtime_integrity');
   assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
-  assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'15 * * * *');
+  assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'20 * * * *');
+  assert.notEqual(TOOLSCOUT_CRONS.hourly,TOOLSCOUT_CRONS.primaryGrowth,'hourly authority recovery must not race the quarter-hour growth cycle');
   assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
