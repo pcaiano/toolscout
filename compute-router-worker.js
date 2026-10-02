@@ -77,6 +77,8 @@ import {handleDistributionRadarRoute} from './distribution-radar-worker.js';
 import {handleDistributionEngineRoute} from './distribution-engine-worker.js';
 import {handleAudienceRoute} from './audience-worker.js';
 import {handleCatalogAutonomyRoute} from './catalog-autonomy-worker.js';
+import {handleFunnelRuntimeRoute} from './funnel-worker.js';
+import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -1981,6 +1983,8 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='distribution_engine_runtime')response=await handleDistributionEngineRoute(request,env,ctx);
   else if(ownership.owner==='audience_runtime')response=await handleAudienceRoute(request,env,ctx);
   else if(ownership.owner==='catalog_autonomy_runtime')response=await handleCatalogAutonomyRoute(request,env);
+  else if(ownership.owner==='funnel_runtime')response=await handleFunnelRuntimeRoute(request,env);
+  else if(ownership.owner==='dynamic_runtime')response=await handleDynamicRuntimeRoute(request,env,ctx);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
