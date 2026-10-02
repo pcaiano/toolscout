@@ -82,7 +82,7 @@ import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
-async function legacyFallback(request,env,ctx){
+async function publicAssetPipeline(request,env,ctx){
   const canonicalOwned=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
   if(canonicalOwned)return canonicalOwned;
   const url=new URL(request.url);
@@ -2067,7 +2067,7 @@ export default{
     if(request.method==='GET'&&u.pathname==='/api/runtime/route-owner')return Response.json(routeOwner(u.searchParams.get('path')||'/',{method:u.searchParams.get('method')||'GET'}),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await handleCloudflarePrimaryRuntimeRoute(request,env,ctx),env);
     if(request.method==='POST'&&u.pathname==='/api/runtime/cloudflare-primary-cycle')return handleCloudflarePrimaryRuntimeRoute(request,env,ctx);
-    return legacyFallback(request,env,ctx);
+    return publicAssetPipeline(request,env,ctx);
   },
   async scheduled(scheduledEvent,env,ctx){
     const trigger=scheduledEvent?.cron||'scheduled';
