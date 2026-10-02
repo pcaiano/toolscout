@@ -38,3 +38,13 @@ test('throughput explicitly composes autonomous refresh while generic traversal 
   assert.match(runtime,/await handleDistributionDiscoveryRoute\(new Request\('https:\/\/trytoolscout\.org\/api\/distribution\/discovery\/refresh'/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 });
+
+
+test('Render remains overflow and does not disable Cloudflare machine-safe execution',()=>{
+  const runtime=read('distribution-autonomous-worker.js');
+  assert.doesNotMatch(runtime,/if\(env\.OVERFLOW_COMPUTE_URL\)return \{sent:0,failed:0,deduped:0/);
+  assert.doesNotMatch(runtime,/status:'delegated_to_render'/);
+  assert.match(runtime,/execution_plane:'cloudflare_primary'/);
+  assert.match(runtime,/verification_plane:'cloudflare_primary'/);
+  assert.match(runtime,/render_overflow_available:renderOverflowAvailable/);
+});
