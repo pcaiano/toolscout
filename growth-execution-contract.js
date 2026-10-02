@@ -528,7 +528,10 @@ export async function rebalanceExecutionAdmission(env){
           AND COALESCE(last_result,'') NOT LIKE 'cloudflare_seo_batch_error:%')
         OR updated_at<=datetime('now','-15 minutes')
       )`:'';
-      const deferredWhere=(GENERIC_BATCH_EXECUTORS.has(executor)?genericBatchAdmissionWhere(executor):senderReadyWhere)+seoRetryWhere;
+      const authorityNoProofCooldown=executor==='distribution_network'||executor==='distribution_autonomous'
+        ?` AND (COALESCE(last_result,'')<>'cycle_completed_without_task_specific_proof_v3' OR updated_at<=datetime('now','-90 minutes'))`
+        :'';
+      const deferredWhere=(GENERIC_BATCH_EXECUTORS.has(executor)?genericBatchAdmissionWhere(executor):senderReadyWhere)+seoRetryWhere+authorityNoProofCooldown;
       const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 WHEN executor='catalog_cycle' AND subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
