@@ -92,6 +92,10 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   const closedLoop=read('growth-runtime-closed-loop-worker.js');
   assert.match(closedLoop,/export async function runGrowthClosedLoopScheduled/);
   assert.match(closedLoop,/authority_closed_loop_scheduler/);
+
+  assert.doesNotMatch(authority,/authorityInternal\(request,env,ctx,'\/api\/growth\/execution\/dispatch'\)/,'authority acquisition must not own growth execution dispatch');
+  assert.doesNotMatch(closedLoop,/internalJson\(request,env,ctx,'\/api\/growth\/execution\/dispatch'\)/,'authority closed loop must not own growth execution dispatch');
+  assert.doesNotMatch(closedLoop,/internalJson\(request,env,ctx,'\/api\/growth\/opportunities\/refresh'\)/,'authority closed loop must not own growth opportunity coordination');
   const integrity=read('growth-runtime-integrity-worker.js');
   assert.match(integrity,/export async function runGrowthRuntimeIntegrityScheduled/);
   assert.match(integrity,/authority_execution_recovery/);
