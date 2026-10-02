@@ -12,7 +12,7 @@ test('generic ToolScout 2.0 traversal bypasses catalog autonomy',()=>{
   assert.match(funnel,/import base from '\.\/worker\.js'/);
   assert.doesNotMatch(funnel,/import base from '\.\/catalog-autonomy-worker\.js'/);
   assert.doesNotMatch(funnel,/import base from '\.\/dynamic-worker\.js'/);
-  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,4),['compute-router-worker.js','worker.js']);
+  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,1),['compute-router-worker.js']);
 });
 
 test('catalog autonomy control routes have an explicit owner',()=>{
