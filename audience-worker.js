@@ -1,4 +1,4 @@
-import base from './affiliate-workflow-worker.js';
+import base from './revenue-worker.js';
 import {recordExecutionProof} from './growth-execution-contract.js';
 import {SOCIAL_PLATFORM_CAPABILITIES,socialPlatformCapabilityHealth} from './social-platform-capabilities.js';
 
