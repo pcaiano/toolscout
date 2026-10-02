@@ -1,0 +1,66 @@
+name: One Shot Phase 128 Truth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase128-truth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect current authority and execution truth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          echo AUTHORITY_STATES
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT executor,action,status,source_kind,subject_type,COUNT(*) AS n
+          FROM growth_execution_contract
+          WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification','repair_stalled_route_execution','scale_proven_surface')
+            AND status IN ('pending','claimed','attempted','deferred','stalled','verified','blocked','cancelled')
+          GROUP BY executor,action,status,source_kind,subject_type
+          ORDER BY executor,status,action;
+          "
+          echo RECENT_RUNS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,substr(detail,1,600) AS detail,substr(evidence_json,1,2200) AS evidence_json
+          FROM engine_runs
+          WHERE started_at>=datetime('now','-4 hours')
+            AND ((engine='growth' AND mission IN ('execution_contract','opportunity_coordination','self_audit'))
+              OR (engine='distribution' AND mission IN ('autonomous_cycle','authority_execution_recovery','network_cycle')))
+          ORDER BY started_at DESC LIMIT 30;
+          "
+          echo RECENT_AUTHORITY_EVENTS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT event_type,status,substr(detail,1,900) AS detail,created_at
+          FROM distribution_events
+          WHERE created_at>=datetime('now','-4 hours')
+            AND (event_type LIKE '%authority%' OR event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent','autonomous_submission_verification','autonomous_distribution_qualification'))
+          ORDER BY created_at DESC LIMIT 40;
+          "
+          echo RECENT_EXECUTION_EVENTS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT e.task_id,e.event_type,e.executor,e.status,substr(e.detail,1,700) AS detail,e.created_at
+          FROM growth_execution_events e
+          JOIN growth_execution_contract g ON g.task_id=e.task_id
+          WHERE e.created_at>=datetime('now','-4 hours')
+            AND g.action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification','scale_proven_surface','backlink_reference_outreach')
+          ORDER BY e.created_at DESC LIMIT 50;
+          "
+          echo STRICT_HUMANS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT COUNT(DISTINCT visitor_id) AS strict_humans_24h
+          FROM visitor_sessions
+          WHERE started_at>=datetime('now','-24 hours') AND COALESCE(is_human,0)=1;
+          " || true
