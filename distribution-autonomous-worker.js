@@ -1058,7 +1058,7 @@ async function executeCredentialedAdapters(env){
 }
 
 async function packageAndExecute(env){
-  if(env.OVERFLOW_COMPUTE_URL)return {sent:0,failed:0,deduped:0,per_cycle_limit:0,external_execution_plane:true,status:'delegated_to_render'};
+  const renderOverflowAvailable=Boolean(env.OVERFLOW_COMPUTE_URL);
   const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url
     FROM distribution_auto_adapters a
     JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
@@ -1094,10 +1094,10 @@ async function packageAndExecute(env){
       return 'failed';
     }
   }));
-  return {sent:outcomes.filter(x=>x==='sent').length,failed:outcomes.filter(x=>x==='failed').length,deduped:outcomes.filter(x=>x==='deduped').length,per_cycle_limit:EXECUTION_LIMIT};
+  return {sent:outcomes.filter(x=>x==='sent').length,failed:outcomes.filter(x=>x==='failed').length,deduped:outcomes.filter(x=>x==='deduped').length,per_cycle_limit:EXECUTION_LIMIT,execution_plane:'cloudflare_primary',render_overflow_available:renderOverflowAvailable};
 }
 async function verifyAutoSubmitted(env){
-  if(env.OVERFLOW_COMPUTE_URL)return {checked:0,verified:0,pending:0,missingVerification:0,errors:0,external_execution_plane:true,status:'delegated_to_render'};
+  const renderOverflowAvailable=Boolean(env.OVERFLOW_COMPUTE_URL);
   const q=await env.DB.prepare(`SELECT ds.submission_id,ds.surface_slug,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url FROM distribution_submissions ds JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug WHERE ds.submission_type='auto_discovered_json' AND ds.status='submitted' AND COALESCE(o.status,'') NOT IN ('verified','live') ORDER BY ds.submitted_at DESC LIMIT 6`).all();
   const outcomes=await Promise.all((q.results||[]).map(async row=>{
     const candidates=[row.response_url,row.verification_endpoint,row.public_url]
@@ -1122,7 +1122,7 @@ async function verifyAutoSubmitted(env){
   if(checked||missingVerification){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`autoverify_${crypto.randomUUID()}`,'autonomous_submission_verification',errors?'partial':'completed','distribution_engine',`Autonomous verification checked ${checked} submitted surface(s): ${verified} verified, ${pending} still pending, ${missingVerification} still lack a safe verification URL, ${errors} verification error(s).`).run();
   }
-  return {checked,verified,pending,missingVerification,errors};
+  return {checked,verified,pending,missingVerification,errors,verification_plane:'cloudflare_primary',render_overflow_available:renderOverflowAvailable};
 }
 
 let autonomySchemaReady=null;

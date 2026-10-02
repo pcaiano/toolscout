@@ -134,6 +134,10 @@ async function discoverySnapshot(request,env){
     semantics:{machineVerified:'Verified autonomous route placement or strict-human impact only.',machineEligible:'Autonomous qualification routes not blocked by policy, authentication or human-only gates.',submittedPending:'Current D1 submission states, not legacy endpoint fallbacks.',agentReady:'Public agent card plus llms.txt plus OpenAPI or APIs catalog are reachable.'}
   };
 }
+export function isQualifyingAuthorityBacklog(state,{externalAttemptObserved=false,handoffReady=false}={}){
+  return !externalAttemptObserved&&!handoffReady&&Number(state?.runnableQueue||0)<=0&&Number(state?.deferredQueue||0)>0;
+}
+
 async function closeAuthorityExecutionLoop(request,env,ctx){
   const before=await authoritySnapshot(env);
   if(before.queue<=0){
@@ -177,7 +181,7 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   };
   const coreStagesOk=stages.submissionPackage&&stages.submissionExecute&&stages.submissionVerify&&stages.autonomous&&stages.network&&stages.coordination&&stages.execution&&stages.senderHandoff;
 
-  const qualifyingBacklog=coreStagesOk&&!externalAttemptObserved&&!handoffReady&&after.runnableQueue<=0&&after.deferredQueue>0;
+  const qualifyingBacklog=isQualifyingAuthorityBacklog(after,{externalAttemptObserved,handoffReady});
   if(externalAttemptObserved){
     await recordEvent(env,'authority_closed_loop_external_attempt','completed',`Closed-loop authority recovery increased real external attempts from ${before.attempts24} to ${after.attempts24}.`);
   }else if(handoffReady){
@@ -191,11 +195,11 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   }
 
   return {
-    ok:coreStagesOk&&(externalAttemptObserved||handoffReady||qualifyingBacklog),
+    ok:qualifyingBacklog||(coreStagesOk&&(externalAttemptObserved||handoffReady)),
     status:externalAttemptObserved?'external_attempt_confirmed':handoffReady?'pending_external_confirmation':qualifyingBacklog?'qualifying_backlog':'failed',
     reason:(!externalAttemptObserved&&!handoffReady&&!qualifyingBacklog)?'authority_queue_without_external_handoff':null,
     pendingExternalConfirmation:!externalAttemptObserved&&handoffReady,
-    pipelineClosed:coreStagesOk,externalAttemptObserved,handoffReady,handoffCandidateCount:handoffItems.length,stages,before,after,
+    pipelineClosed:coreStagesOk||qualifyingBacklog,externalAttemptObserved,handoffReady,handoffCandidateCount:handoffItems.length,stages,before,after,
     submissionPackage:submissionPackage.payload||submissionPackage.error||null,submissionExecute:submissionExecute.payload||submissionExecute.error||null,submissionVerify:submissionVerify.payload||submissionVerify.error||null,
     network:network.payload||network.error||null,autonomous:autonomous.payload||autonomous.error||null,coordination:coordination.payload||coordination.error||null,execution:execution.payload||execution.error||null,
     senderHandoff:{ok:senderHandoff.ok,httpStatus:senderHandoff.httpStatus,status:senderHandoff?.payload?.status||null,reason:senderHandoff?.payload?.reason||null,items:handoffItems.map(x=>({kind:x.kind||null,task_id:x.task_id||null,task_action:x.task_action||null,tool_slug:x.tool_slug||null,asset_url:x.asset_url||null,vendor_domain:x.vendor_domain||null}))},
