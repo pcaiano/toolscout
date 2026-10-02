@@ -533,21 +533,24 @@ async function coordinateGrowthOpportunities(env){
       +(network==='contact_route_found'?4:0)+(network==='contact_found'?7:0)+(network==='sent'?10:0)+(network==='adopted'?18:0)
       +(audienceStrategy.borrowedFirst?15:0)+distBoost+backlinkSurfaceBoost+referringDomainDiversityBoost+authorityUrgencyBoost-repeatDomainAuthorityPenalty));
     const actions=['distribution_measurement'];
-    const machineSafeDirect=Number(row.human_required||0)===0
+    const surfaceStatus=String(row.status||'');
+    const acquisitionOpen=externalSurface&&['discovered','candidate','research_required','stale'].includes(surfaceStatus);
+    const machineSafeDirect=acquisitionOpen
+      &&Number(row.human_required||0)===0
       &&Number(row.automation_potential||0)>=90
       &&Boolean(row.action_url)
       &&(/(^|_)(api|machine|agent_readiness)(_|$)/i.test(String(row.surface_type||''))||(()=>{try{return /\/api\//i.test(new URL(String(row.action_url)).pathname)}catch{return false}})());
-    if(backlinkAcquisition&&externalSurface&&['live','verified'].includes(String(row.status||''))&&!backlinkVerified)actions.unshift('verify_backlink_acquisition');
+    if(backlinkAcquisition&&externalSurface&&['live','verified'].includes(surfaceStatus)&&!backlinkVerified)actions.unshift('verify_backlink_acquisition');
     if(machineSafeDirect)actions.unshift('autonomous_route_qualification');
-    else if(!network||network==='queued'||network==='send_failed')actions.unshift('publisher_contact_discovery');
-    if(network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
-    if(Number(row.route_content||0)>0)actions.unshift('content_relevance_amplification');
-    if(Number(row.route_auto||0)>0)actions.unshift('autonomous_route_qualification');
-    if(Number(row.route_auth||0)>0)actions.unshift('resolve_supported_route_auth');
-    if(Number(row.route_human||0)>0)actions.unshift('surface_only_true_human_route_gate');
-    if(Number(row.route_stalled||0)>0)actions.unshift('repair_stalled_route_execution');
-    if(network==='contact_found')actions.unshift('publisher_outreach');
-    if(network==='adopted'||Number(row.route_verified||0)>0)actions.unshift('scale_proven_surface');
+    else if(acquisitionOpen&&(!network||network==='queued'||network==='send_failed'))actions.unshift('publisher_contact_discovery');
+    if(acquisitionOpen&&network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
+    if(acquisitionOpen&&Number(row.route_content||0)>0)actions.unshift('content_relevance_amplification');
+    if(acquisitionOpen&&!machineSafeDirect&&Number(row.route_auto||0)>0)actions.unshift('autonomous_route_qualification');
+    if(acquisitionOpen&&Number(row.route_auth||0)>0)actions.unshift('resolve_supported_route_auth');
+    if(acquisitionOpen&&Number(row.route_human||0)>0)actions.unshift('surface_only_true_human_route_gate');
+    if(acquisitionOpen&&Number(row.route_stalled||0)>0)actions.unshift('repair_stalled_route_execution');
+    if(externalSurface&&network==='contact_found')actions.unshift('publisher_outreach');
+    if(externalSurface&&(network==='adopted'||Number(row.route_verified||0)>0))actions.unshift('scale_proven_surface');
     const signals={surface_status:row.status,human_required:Number(row.human_required||0),automation_potential:Number(row.automation_potential||0),machine_safe_direct:machineSafeDirect,network_status:network||null,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,alternate_routes:Number(row.route_actions||0),alternate_routes_autonomous:Number(row.route_auto||0),alternate_routes_content:Number(row.route_content||0),alternate_routes_human:Number(row.route_human||0),alternate_routes_auth:Number(row.route_auth||0),alternate_routes_verified:Number(row.route_verified||0),alternate_routes_stalled:Number(row.route_stalled||0),audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0,backlink_acquisition:backlinkAcquisition,backlink_value:Number(row.backlink_value||0),backlink_verified:backlinkVerified,backlink_priority_boost:Number((backlinkSurfaceBoost+referringDomainDiversityBoost+authorityUrgencyBoost-repeatDomainAuthorityPenalty).toFixed(2)),backlink_quality_only:true,candidate_referring_domain:candidateReferringDomain||null,known_referring_domain:knownReferringDomain,referring_domain_diversity_boost:referringDomainDiversityBoost,repeat_domain_authority_penalty:repeatDomainAuthorityPenalty,authority_objective:'expand_unique_independent_referring_domains',repeat_domain_rule:'secondary_unless_verified_human_or_commercial_signal',backlink_throughput_gap:Boolean(backlinkConfig.backlink_throughput_gap),backlink_stagnating:Boolean(backlinkConfig.backlink_stagnating),authority_urgency_boost:authorityUrgencyBoost};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
