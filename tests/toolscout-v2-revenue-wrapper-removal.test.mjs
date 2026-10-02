@@ -22,7 +22,7 @@ const baseChain=(start,max=100)=>{
 
 test('generic ToolScout 2.0 traversal bypasses revenue',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/funnel-worker\.js'/);
+  assert.match(compute,/import base from '\.\/worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/revenue-worker\.js'/);
 
   const chain=baseChain('compute-router-worker.js');
@@ -47,7 +47,7 @@ test('revenue remains bounded inside the protected admin stats compatibility com
   assert.ok(protectedChain.indexOf('revenue-worker.js')>protectedChain.indexOf('distribution-discovery-worker.js'));
 
   const revenue=read('revenue-worker.js');
-  assert.match(revenue,/import base from '\.\/funnel-worker\.js'/);
+  assert.match(revenue,/import base from '\.\/worker\.js'/);
   assert.match(revenue,/url\.pathname === '\/api\/stats'/);
   assert.match(revenue,/revenueSnapshot/);
   assert.match(revenue,/commercialSnapshot/);
