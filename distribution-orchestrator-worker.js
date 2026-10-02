@@ -1509,7 +1509,6 @@ export default {async fetch(request,env,ctx){
     return;
   }
   const growthCycleDue=trigger===TOOLSCOUT_CRONS.primaryGrowth||trigger===TOOLSCOUT_CRONS.daily;
-  const auditDue=trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily;
   if(growthCycleDue){
     await normalizeEditorialQueue(env);
     // Drain already-qualified work first. Learning/planning must never starve execution.
@@ -1522,8 +1521,7 @@ export default {async fetch(request,env,ctx){
   }else if(trigger===TOOLSCOUT_CRONS.hourly&&await growthRndAuditDue(env,12)){
     await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger+':cadence_recovery'},()=>runGrowthRndAudit(env)).catch(()=>null);
   }
-  if(auditDue){
-    await runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:trigger,singleFlightMinutes:20},()=>runGrowthSupervisorAudit(env)).catch(()=>null);
+  if(trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily){
     await auditArchitectureEscalations(env).catch(()=>null);
   }
   if(base.scheduled)await base.scheduled(event,env,ctx);
