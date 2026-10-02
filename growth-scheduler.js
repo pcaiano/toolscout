@@ -66,7 +66,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
   const affiliateMaintenance=affiliateSupervisor?.config?.mode==='maintenance_only';
   const catalogDemandLed=catalogSupervisor?.config?.mode==='demand_led_quality';
 
-  if(hourly||daily){
+  if(trigger===TOOLSCOUT_CRONS.primaryGrowth||hourly||daily){
     scheduleTask(ctx,runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:trigger,singleFlightMinutes:20},()=>runGrowthSupervisorAudit(env)));
   }
 
