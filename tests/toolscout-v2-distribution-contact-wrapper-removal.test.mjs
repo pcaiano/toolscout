@@ -39,7 +39,7 @@ test('generic traversal bypasses contact while sender and learning compose conta
   const sender=read('distribution-sender-worker.js');
   const learning=read('distribution-learning-worker.js');
 
-  assert.match(compute,/import base from '\.\/funnel-worker\.js'/);
+  assert.match(compute,/import base from '\.\/worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-contact-worker\.js'/);
   assert.match(runtime,/import base from '\.\/revenue-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionContactRoute/);
