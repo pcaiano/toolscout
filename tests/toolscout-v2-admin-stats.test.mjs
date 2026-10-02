@@ -75,9 +75,9 @@ function stableShape(value,prefix=''){
   return out.sort();
 }
 
-test('admin stats GET has a direct owner while POST remains legacy',()=>{
+test('admin stats GET has a direct owner while POST falls through the public asset pipeline',()=>{
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
-  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'legacy_chain');
+  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'compute_router');
 });
 
 test('admin stats public host preserves Cloudflare Access boundary',async()=>{

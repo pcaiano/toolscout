@@ -1,6 +1,6 @@
 # ToolScout 2.0 Migration Status
 
-Last updated: 2026-09-30
+Last updated: 2026-10-02
 
 This file is the handoff ledger for the ToolScout 2.0 migration. It exists to prevent architectural work from becoming an opaque sequence of patches.
 
@@ -1422,3 +1422,70 @@ Direct-own the affiliate and distribution workflow control surfaces while preser
 ### Phase 102 - revenue traversal removal
 
 Remove `revenue-worker.js` from the generic compute traversal while retaining it as a bounded internal compatibility layer for the protected admin stats composition. The canonical `/api/stats` and Command Center surfaces remain directly owned by ToolScout 2.0, and the protected stats chain continues to preserve revenue, commercial, traffic and tracking enrichments. The architecture ratchet moves from 5 to 4 legacy edges.
+
+
+### Phase 103 - catalog autonomy traversal removal
+
+Status: implemented and merged.
+
+Implemented:
+- catalog-autonomy control and inventory routes are explicitly owned by `catalog_autonomy_runtime`;
+- `catalog-autonomy-worker.js` is no longer traversed for unrelated requests;
+- the generic runtime chain ratcheted from 4 to 3 edges.
+
+Preservation rule:
+Public catalog, canonical URLs, affiliate redirects and Command Center ownership remain unchanged.
+
+### Phase 104 - dynamic traversal removal
+
+Status: implemented and merged.
+
+Implemented:
+- dynamic tracking, content signals and robots behavior are direct-owned;
+- unrelated public requests no longer traverse `dynamic-worker.js`;
+- the generic runtime chain ratcheted from 3 to 2 edges.
+
+Preservation rule:
+Tracking, sitemap/canonical behavior, public decision pages and affiliate routing remain behaviorally preserved.
+
+### Phase 105 - funnel traversal removal
+
+Status: implemented and merged.
+
+Implemented:
+- funnel ingestion remains explicitly owned at `/api/events`;
+- protected stats compatibility remains bounded instead of forming the generic request path;
+- generic public requests bypass the funnel wrapper and reach the core runtime directly;
+- the generic runtime chain ratcheted from 2 to 1 edge.
+
+Preservation rule:
+Traffic-integrity gating, event persistence semantics and protected stats composition remain intact.
+
+### Phase 106 - zero legacy traversal
+
+Status: implemented and merged to `main` at commit `679d2cf21a70cf7d4ddb69b16a04a85f8dc92c8e`.
+
+Implemented:
+- the final generic `compute-router-worker.js -> worker.js` traversal edge is removed;
+- generic public responses start from the Cloudflare ASSETS binding and then pass through explicit response transforms;
+- `core_runtime` directly owns the remaining core control behavior;
+- architecture audit now enforces `MAX_LEGACY_EDGES=0` and 100% declared route ownership;
+- public analytics consent and traffic/browser guards are explicitly preserved after the zero-edge cutover.
+
+Production rule:
+Phase 106 is not considered deployed merely because it is merged. Production closure requires the Phase 107 fingerprint and post-deploy smoke to succeed against the live site.
+
+### Phase 107 - production closure and growth proof
+
+Status: implemented on `architecture/toolscout-2.0-phase-107`; production deployment pending.
+
+Implemented:
+- `GET /api/runtime/closure-health` exposes a read-only deployment fingerprint for ToolScout 2.0;
+- the fingerprint reports Phase 107, zero legacy edges, declared route coverage and architecture-closure state;
+- the closure endpoint has explicit `toolscout_v2_closure` ownership ahead of the generic `/api/runtime/` control prefix;
+- the post-deploy live smoke now fails unless the exact Phase 107 fingerprint is present in production;
+- the generic zero-edge path is named `publicAssetPipeline` rather than a legacy fallback, and unmatched routes are described as compute-owned public asset pipeline traffic;
+- CI and recovery deploy validation include the closure runtime and regression tests.
+
+Exit criterion:
+ToolScout 2.0 architecture is considered production-closed only when the live closure endpoint reports `legacyEdges: 0`, `directCoveragePct: 100`, no legacy-declared route groups, and the full live preservation smoke passes. After that point, optimization work is measured primarily by strict verified humans, search visibility, independent referring domains, qualified outbound activity and monetization evidence rather than migration phase count.

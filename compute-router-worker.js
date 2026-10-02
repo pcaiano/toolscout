@@ -1,5 +1,6 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
 import {handleCoreRuntimeRoute} from './worker.js';
+import {handleToolScoutV2ClosureRoute} from './toolscout-v2-closure-runtime.js';
 import {handleAffiliateWorkflowRoute} from './affiliate-workflow-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
@@ -81,7 +82,7 @@ import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
-async function legacyFallback(request,env,ctx){
+async function publicAssetPipeline(request,env,ctx){
   const canonicalOwned=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
   if(canonicalOwned)return canonicalOwned;
   const url=new URL(request.url);
@@ -1976,6 +1977,7 @@ async function earlyOwnedRoute(request,env,ctx){
   }
   else if(ownership.owner==='dynamic_runtime')response=await handleDynamicRuntimeRoute(request,env,ctx);
   else if(ownership.owner==='core_runtime')response=await handleCoreRuntimeRoute(request,env);
+  else if(ownership.owner==='toolscout_v2_closure')response=await handleToolScoutV2ClosureRoute(request);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
@@ -2065,7 +2067,7 @@ export default{
     if(request.method==='GET'&&u.pathname==='/api/runtime/route-owner')return Response.json(routeOwner(u.searchParams.get('path')||'/',{method:u.searchParams.get('method')||'GET'}),{headers:JSON_H});
     if(request.method==='GET'&&u.pathname==='/api/runtime/executors')return augmentRuntime(await handleCloudflarePrimaryRuntimeRoute(request,env,ctx),env);
     if(request.method==='POST'&&u.pathname==='/api/runtime/cloudflare-primary-cycle')return handleCloudflarePrimaryRuntimeRoute(request,env,ctx);
-    return legacyFallback(request,env,ctx);
+    return publicAssetPipeline(request,env,ctx);
   },
   async scheduled(scheduledEvent,env,ctx){
     const trigger=scheduledEvent?.cron||'scheduled';
