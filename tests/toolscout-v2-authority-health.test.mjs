@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {handleAuthorityHealthRoute} from '../authority-health-runtime.js';
 import {routeOwner} from '../runtime-route-contract.js';
+import {classifyAuthorityExecution} from '../growth-runtime-integrity-worker.js';
+import {isQualifyingAuthorityBacklog} from '../growth-runtime-closed-loop-worker.js';
 
 function readOnlyDb(){
   let writes=0;
@@ -50,4 +52,20 @@ test('authority health owner does not claim unrelated requests',async()=>{
   );
   assert.equal(response,null);
   assert.equal(state.writes,0);
+});
+
+
+test('deferred-only authority inventory is qualification backlog, not execution failure',()=>{
+  assert.equal(classifyAuthorityExecution({required:true,runnableQueue:0,deferredQueue:79,attempts24:0,attemptMin24h:4}),'qualifying_backlog');
+  assert.equal(isQualifyingAuthorityBacklog({runnableQueue:0,deferredQueue:79},{externalAttemptObserved:false,handoffReady:false}),true);
+});
+
+test('runnable authority work with zero attempts remains a real failure',()=>{
+  assert.equal(classifyAuthorityExecution({required:true,runnableQueue:3,deferredQueue:20,attempts24:0,attemptMin24h:4}),'failed');
+  assert.equal(isQualifyingAuthorityBacklog({runnableQueue:3,deferredQueue:20},{externalAttemptObserved:false,handoffReady:false}),false);
+});
+
+test('authority minimum attempt floor is aligned with the closed-loop contract',()=>{
+  assert.equal(classifyAuthorityExecution({required:true,runnableQueue:2,deferredQueue:0,attempts24:3,attemptMin24h:4}),'underpowered');
+  assert.equal(classifyAuthorityExecution({required:true,runnableQueue:2,deferredQueue:0,attempts24:4,attemptMin24h:4}),'executing');
 });
