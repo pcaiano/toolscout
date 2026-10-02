@@ -39,8 +39,8 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/api/distribution/rss/status',{method:'GET'}).owner,'rss_distribution');
   assert.equal(routeOwner('/api/distribution/rss/publish',{method:'POST'}).owner,'rss_distribution');
   assert.equal(routeOwner('/api/stats',{method:'GET'}).owner,'admin_stats');
-  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'legacy_chain');
-  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'legacy_chain');
+  assert.equal(routeOwner('/api/stats',{method:'POST'}).owner,'compute_router');
+  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'compute_router');
   assert.equal(routeOwner('/analytics/api/chairman-queue',{method:'GET'}).owner,'analytics_chairman');
   assert.equal(routeOwner('/analytics/api/stats',{method:'GET'}).owner,'analytics_stats');
   assert.equal(routeOwner('/analytics/api/google/external-24h',{method:'GET'}).owner,'analytics_owner_exclusion');
@@ -79,17 +79,17 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeOwner('/crm-tools',{method:'GET'}).owner,'public_navigation');
   assert.equal(routeOwner('/seo-tools',{method:'GET'}).owner,'public_navigation');
   assert.equal(routeOwner('/blog/',{method:'GET'}).owner,'public_navigation');
-  assert.equal(routeOwner('/blog',{method:'GET'}).owner,'legacy_chain');
-  assert.equal(routeOwner('/blog/article',{method:'GET'}).owner,'legacy_chain');
+  assert.equal(routeOwner('/blog',{method:'GET'}).owner,'compute_router');
+  assert.equal(routeOwner('/blog/article',{method:'GET'}).owner,'compute_router');
   assert.equal(routeOwner('/go/airtable',{method:'GET'}).owner,'affiliate_redirect');
   assert.equal(routeOwner('/go/embed',{method:'GET'}).owner,'affiliate_redirect');
   assert.ok(routeContract().earlyDispatchOwners.includes('affiliate_redirect'));
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
-test('unknown routes remain on the legacy fallback during staged migration',()=>{
+test('unknown routes remain on the public asset pipeline during staged migration',()=>{
   const route=routeOwner('/some-unmigrated-path',{method:'GET'});
-  assert.equal(route.owner,'legacy_chain');
+  assert.equal(route.owner,'compute_router');
   assert.equal(route.plane,'legacy');
 });
 
@@ -195,7 +195,7 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/X-ToolScout-Route-Owner/);
   assert.match(src,/\/api\/runtime\/route-contract/);
   assert.match(src,/\/api\/runtime\/route-owner/);
-  assert.match(src,/return legacyFallback\(request,env,ctx\)/);
+  assert.match(src,/return publicAssetPipeline\(request,env,ctx\)/);
 });
 
 test('migrated route owners expose null-returning direct handlers',()=>{
