@@ -68,7 +68,7 @@ function stableShape(value,prefix=''){
 
 test('traffic integrity health has a direct ToolScout 2.0 owner',()=>{
   assert.equal(routeOwner('/api/traffic-integrity-health',{method:'GET'}).owner,'traffic_integrity_health');
-  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'legacy_chain');
+  assert.equal(routeOwner('/api/traffic-integrity-health',{method:'POST'}).owner,'compute_router');
 });
 
 test('direct traffic integrity health matches legacy semantic shape without writes',async()=>{
