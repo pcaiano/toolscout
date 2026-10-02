@@ -937,6 +937,16 @@ async function runGrowthExecutionContractCycle(env){
         directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
       }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&out?.taskProof?.verified===true){
         directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:String(out.taskProof.kind||'task_specific_distribution_proof'),externalId:out.taskProof.routeUrl||out.taskProof.surfaceSlug||null,evidence:out.taskProof});
+      }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&out?.taskProof?.verified===true){
+        const proof=out.taskProof;
+        directProof=await recordExecutionProof(env,{
+          taskId:task.task_id,
+          executor,
+          status:'verified',
+          detail:`${proof.kind||task.action||'distribution_task'}_verified_v1`,
+          externalId:proof.publicUrl||proof.routeUrl||proof.liveUrl||proof.surfaceSlug||task.subject_key||null,
+          evidence:proof
+        });
       }else if(task?.source_kind==='supervisor'){
         await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
         attemptRecorded=true;
