@@ -469,6 +469,25 @@ async function status(env){
   return{ok:true,version:'1.1',state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Number(candidates?.total||0),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
 }
 
+export async function handleCatalogAutonomyRoute(request,env){
+  const u=new URL(request.url);
+  if(request.method==='GET'&&u.pathname==='/api/catalog-autonomy/status'){
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+    return Response.json(await status(env),{headers:JSON_H});
+  }
+  if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/run'){
+    if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+    const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api'},()=>verifyBatch(env));
+    const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api'},()=>admitTrustedCandidates(env));
+    return Response.json({ok:true,verify,admit},{headers:JSON_H});
+  }
+  if(request.method==='GET'&&(u.pathname==='/data/catalog-inventory.json'||u.pathname==='/api/catalog-inventory')){
+    const inventory=await publicCatalogInventory(env).catch(async()=>{const tools=await assetJson(env,'/data/tools.json',[]);return{ok:false,version:'canonical-catalog-v1',degraded:true,total:Array.isArray(tools)?tools.length:0,static_unique:Array.isArray(tools)?tools.length:0,runtime_unique:0,affiliate:{active_tools:0,uncovered_tools:Array.isArray(tools)?tools.length:0,catalog_coverage_pct:0},tools:(Array.isArray(tools)?tools:[]).map(x=>({slug:x.slug,name:x.name,category:x.category||null,origin:'static',affiliate_status:'unknown',affiliate_active:false})),generated_at:new Date().toISOString()}});
+    return Response.json(inventory,{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60','X-ToolScout-Catalog':'canonical-inventory'}});
+  }
+  return null;
+}
+
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
