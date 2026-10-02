@@ -121,6 +121,11 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(scheduler,/verifyCatalogBatch/);
   assert.match(scheduler,/runContentSocialIntelligenceCycle/);
   assert.match(scheduler,/verifyNewsSources/);
+  assert.match(scheduler,/runGrowthSupervisorAudit/);
+  assert.match(scheduler,/mission:'self_audit'/);
+  assert.equal(missionOwner('growth_supervisor_audit'),'growth_scheduler');
+  const orchestrator=read('distribution-orchestrator-worker.js');
+  assert.doesNotMatch(orchestrator,/mission:'self_audit'/,'distribution orchestrator must not duplicate supervisor audit ownership');
 });
 
 test('runtime schedule contract is observable from the entrypoint',()=>{
