@@ -46,7 +46,7 @@ test('revenue remains bounded inside the protected admin stats compatibility com
   assert.ok(protectedChain.indexOf('revenue-worker.js')>protectedChain.indexOf('distribution-discovery-worker.js'));
 
   const revenue=read('revenue-worker.js');
-  assert.match(revenue,/import base from '\.\/worker\.js'/);
+  assert.match(revenue,/import base from '\.\/funnel-worker\.js'/);
   assert.match(revenue,/url\.pathname === '\/api\/stats'/);
   assert.match(revenue,/revenueSnapshot/);
   assert.match(revenue,/commercialSnapshot/);
