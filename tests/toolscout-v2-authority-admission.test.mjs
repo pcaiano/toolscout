@@ -70,3 +70,14 @@ test('no-proof authority work cools down before re-admission',()=>{
   assert.match(src,/cycle_completed_without_task_specific_proof_v3/);
   assert.match(src,/updated_at<=datetime\('now','-90 minutes'\)/);
 });
+
+
+test('growth execution lane prioritizes authority proof over no-proof scaling',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  const start=src.indexOf("SELECT executor FROM growth_execution_contract");
+  const end=src.indexOf("LIMIT 1`).first()",start);
+  assert.ok(start>=0&&end>start);
+  const selector=src.slice(start,end);
+  assert.ok(selector.indexOf("verify_backlink_acquisition")<selector.indexOf("scale_proven_surface"));
+  assert.match(selector,/priority_score DESC/);
+});
