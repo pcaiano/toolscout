@@ -17,7 +17,7 @@ test('agent protocol routes remain direct-owned',()=>{
 test('generic traversal bypasses agent protocol core while protocol recommendations keep their lower dependency',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('agent-protocol-core-worker.js');
-  assert.match(compute,/import base from '\.\/funnel-worker\.js'/);
+  assert.match(compute,/import base from '\.\/worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/agent-protocol-core-worker\.js'/);
   assert.match(runtime,/import base from '\.\/content-engine-intelligence-worker\.js'/);
   assert.match(runtime,/const response=await base\.fetch\(internal,env,ctx\)/);
