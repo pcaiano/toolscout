@@ -1,4 +1,4 @@
-import base from './affiliate-workflow-worker.js';
+import base from './revenue-worker.js';
 import {runDistributionLearningScheduled} from './distribution-learning-worker.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
