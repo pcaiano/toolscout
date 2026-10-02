@@ -908,7 +908,16 @@ async function runGrowthExecutionContractCycle(env){
             OR (executor='affiliate_cycle'${affiliateAdmission})
             OR executor IN ('content_issue','catalog_cycle')
           )
-        ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT 1`).first();
+        ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,
+          CASE action
+            WHEN 'verify_backlink_acquisition' THEN 0
+            WHEN 'execute_alternate_routes' THEN 1
+            WHEN 'publisher_contact_discovery' THEN 2
+            WHEN 'autonomous_route_qualification' THEN 3
+            WHEN 'scale_proven_surface' THEN 5
+            ELSE 4
+          END,
+          created_at ASC LIMIT 1`).first();
       selectedInternalLane=String(next?.executor||'')||null;
     }
   }catch{}
