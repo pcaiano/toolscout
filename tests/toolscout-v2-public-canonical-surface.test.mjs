@@ -38,7 +38,7 @@ test('sitemap and tools data preserve canonical public behavior',()=>{
 
 test('generic fallback preserves canonical transform ordering before attribution SEO and footer',()=>{
   const compute=read('compute-router-worker.js');
-  const lower=compute.indexOf('await base.fetch(request,env,ctx)');
+  const lower=compute.indexOf('await env.ASSETS.fetch(request)');
   const canonical=compute.indexOf('await transformPublicCanonicalResponse(request,response)');
   const owner=compute.indexOf('await applyMarkedOwnerAnalytics(request,response)');
   const seo=compute.indexOf('await transformSeoPublicPage(request,response,env)');
