@@ -1,5 +1,6 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './affiliate-workflow-worker.js';
+import base from './revenue-worker.js';
+import {handleAffiliateWorkflowRoute} from './affiliate-workflow-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
@@ -1960,6 +1961,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='public_analytics_consent')response=await handlePublicAnalyticsRoute(request);
   else if(ownership.owner==='command_center_local_login')response=await handleCommandCenterLocalLoginRoute(request,env);
   else if(ownership.owner==='command_center_growth_actions')response=await handleGrowthCommandCenterActionRoute(request,env);
+  else if(ownership.owner==='affiliate_workflow_runtime')response=await handleAffiliateWorkflowRoute(request,env,ctx);
   else if(ownership.owner==='affiliate_human_actions')response=await handleAffiliateHumanActionRoute(request,env);
   else if(ownership.owner==='affiliate_coverage_runtime')response=await handleAffiliateCoverageRoute(request,env);
   else if(ownership.owner==='content_engine_intelligence')response=await handleContentEngineIntelligenceRoute(request,env);
