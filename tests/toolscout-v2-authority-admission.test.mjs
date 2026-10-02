@@ -117,3 +117,10 @@ test('rebalance promotion and executor claims share acquisition-first ordering',
   assert.match(src,/status='deferred'.*ORDER BY \$\{taskOrder\},priority_score DESC/s);
   assert.match(src,/status IN \('pending','stalled'\).*ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,\$\{taskOrder\},priority_score DESC/s);
 });
+
+
+test('non-authority executor ordering is a SQLite expression, never positional ORDER BY 0',()=>{
+  const order=executorTaskOrderSql('content_issue');
+  assert.notEqual(order,'0');
+  assert.match(order,/^CASE /);
+});
