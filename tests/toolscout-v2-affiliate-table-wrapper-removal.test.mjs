@@ -31,5 +31,5 @@ test('generic request traversal bypasses the affiliate table compatibility wrapp
   const compute=read('compute-router-worker.js');
   assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-affiliate-table-worker\.js'/);
-  assert.match(compute,/const protectedLegacyBase=withPrivateAssets\(/);
+  assert.match(compute,/await env\.ASSETS\.fetch\(request\)/);
 });
