@@ -22,7 +22,7 @@ const baseChain=(start,max=100)=>{
 
 test('generic ToolScout 2.0 traversal bypasses revenue',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/revenue-worker\.js'/);
 
   const chain=baseChain('compute-router-worker.js');
