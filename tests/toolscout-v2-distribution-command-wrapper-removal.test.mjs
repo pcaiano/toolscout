@@ -14,7 +14,7 @@ test('distribution command legacy surfaces are already direct-owned',()=>{
 
 test('generic traversal bypasses distribution command presentation wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/affiliate-workflow-worker\.js'/);
+  assert.match(compute,/import base from '\.\/revenue-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-command-worker\.js'/);
 });
 
