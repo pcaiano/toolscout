@@ -30,7 +30,7 @@ test('generic traversal bypasses distribution engine while production stats and 
   const runtime=read('distribution-engine-worker.js');
   const contract=read('runtime-route-contract.js');
 
-  assert.match(compute,/import base from '\.\/revenue-worker\.js'/);
+  assert.match(compute,/import base from '\.\/funnel-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-engine-worker\.js'/);
   assert.match(runtime,/import base from '\.\/revenue-worker\.js'/);
   assert.match(runtime,/export async function handleDistributionEngineRoute/);
