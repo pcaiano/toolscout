@@ -918,12 +918,13 @@ async function runGrowthExecutionContractCycle(env){
           )
         ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,
           CASE action
-            WHEN 'verify_backlink_acquisition' THEN 0
-            WHEN 'execute_alternate_routes' THEN 1
-            WHEN 'publisher_contact_discovery' THEN 2
-            WHEN 'autonomous_route_qualification' THEN 3
-            WHEN 'scale_proven_surface' THEN 5
-            ELSE 4
+            WHEN 'execute_alternate_routes' THEN 0
+            WHEN 'autonomous_route_qualification' THEN 1
+            WHEN 'repair_stalled_route_execution' THEN 2
+            WHEN 'publisher_contact_discovery' THEN 3
+            WHEN 'verify_backlink_acquisition' THEN 4
+            WHEN 'scale_proven_surface' THEN 6
+            ELSE 5
           END,
           created_at ASC LIMIT 1`).first();
       selectedInternalLane=String(next?.executor||'')||null;
