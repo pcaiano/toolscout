@@ -9,9 +9,9 @@ const baseChain=(start,max=20)=>{const out=[],seen=new Set();let current=start;w
 
 test('generic ToolScout 2.0 traversal bypasses funnel and reaches the core worker directly',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/funnel-worker\.js'/);
-  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,2),['compute-router-worker.js','worker.js']);
+  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,1),['compute-router-worker.js']);
 });
 
 test('funnel remains bounded to explicit event ownership and protected stats compatibility',()=>{

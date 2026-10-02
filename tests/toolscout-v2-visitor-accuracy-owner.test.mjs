@@ -31,7 +31,7 @@ test('analytics pages stay outside the public visitor tracker stage',async()=>{
 
 test('generic response ordering preserves visitor accuracy before later public transforms',()=>{
   const compute=read('compute-router-worker.js');
-  const lower=compute.indexOf('await base.fetch(request,env,ctx)');
+  const lower=compute.indexOf('await env.ASSETS.fetch(request)');
   const accuracy=compute.indexOf('transformVisitorAccuracyPublicResponse(request,response)');
   const rss=compute.indexOf('transformRssPublicResponse(request,response)');
   const core=compute.indexOf('transformTrafficIntegrityCoreResponse(request,response)');
@@ -45,7 +45,7 @@ test('generic response ordering preserves visitor accuracy before later public t
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   const order=[lower,accuracy,rss,core,guard,live,visitorLink,visitorCookie,canonical,owner,seo,footer];
   assert.ok(order.every((v,i)=>v>=0&&(i===0||v>order[i-1])));
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
 });

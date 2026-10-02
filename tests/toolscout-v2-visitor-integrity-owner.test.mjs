@@ -20,14 +20,14 @@ test('visitor identity health has a direct ToolScout 2.0 owner',()=>{
 test('visitor event context is prepared before lower runtime execution',()=>{
   const compute=read('compute-router-worker.js');
   const prep=compute.indexOf('prepareVisitorIntegrityEvent(request,url)');
-  const lower=compute.indexOf('await base.fetch(request,env,ctx)');
+  const lower=compute.indexOf('await env.ASSETS.fetch(request)');
   const link=compute.indexOf('applyVisitorIntegrityLink(request,env,url,response,visitorEvent)');
   assert.ok(prep>=0&&lower>prep&&link>lower,'event context must be prepared before base fetch and linked after persistence');
 });
 
 test('generic response stages preserve visitor -> canonical -> owner -> SEO -> footer ordering',()=>{
   const compute=read('compute-router-worker.js');
-  const lower=compute.indexOf('await base.fetch(request,env,ctx)');
+  const lower=compute.indexOf('await env.ASSETS.fetch(request)');
   const link=compute.indexOf('applyVisitorIntegrityLink(request,env,url,response,visitorEvent)');
   const visitor=compute.indexOf('decorateVisitorIntegrityResponse(request,url,response)');
   const canonical=compute.indexOf('transformPublicCanonicalResponse(request,response)');
@@ -35,7 +35,7 @@ test('generic response stages preserve visitor -> canonical -> owner -> SEO -> f
   const seo=compute.indexOf('transformSeoPublicPage(request,response,env)');
   const footer=compute.indexOf('injectToolScoutSocialFooter(response)');
   assert.ok(lower>=0&&link>lower&&visitor>link&&canonical>visitor&&owner>canonical&&seo>owner&&footer>seo);
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);

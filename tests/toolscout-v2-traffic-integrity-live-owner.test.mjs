@@ -25,7 +25,7 @@ test('page-confirmed browser gate remains before lower runtime persistence',()=>
   assert.match(runtime,/event_type!=='page_confirmed'/);
   assert.match(runtime,/browser_proof_required/);
   const gate=compute.indexOf('await gateTrafficIntegrityEvent(request)');
-  const base=compute.indexOf('await base.fetch(request,env,ctx)');
+  const base=compute.indexOf('await env.ASSETS.fetch(request)');
   assert.ok(gate>=0&&base>gate,'page confirmation gate must run before lower runtime');
 });
 
@@ -49,7 +49,7 @@ test('public response stage keeps traffic transforms before visitor and later ou
 
 test('generic traversal bypasses the live traffic wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);

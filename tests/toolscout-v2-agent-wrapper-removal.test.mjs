@@ -16,9 +16,9 @@ test('analytics consent has direct ToolScout 2.0 ownership',()=>{
 
 test('generic request traversal bypasses the agent protocol compatibility wrapper',()=>{
   const compute=read('compute-router-worker.js');
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/agent-protocol-worker\.js'/);
-  assert.match(compute,/const protectedLegacyBase=withPrivateAssets\(/);
+  assert.match(compute,/await env\.ASSETS\.fetch\(request\)/);
   assert.match(compute,/transformPublicAnalyticsResponse\(request,response\)/);
 });
 
@@ -38,8 +38,8 @@ test('legacy public response stage preserves canonical markup cleanup and consen
 
 test('legacy protection remains before later public response transforms',()=>{
   const compute=read('compute-router-worker.js');
-  const lower=compute.indexOf('protectedLegacyBase.fetch(request,env,ctx)');
+  const lower=compute.indexOf('await env.ASSETS.fetch(request)');
   const analytics=compute.indexOf('transformPublicAnalyticsResponse(request,response)');
   const visitor=compute.indexOf('transformVisitorAccuracyPublicResponse(request,response)');
-  assert.ok(analytics>=0&&lower>=0&&visitor>lower);
+  assert.ok(lower>=0&&analytics>lower&&visitor>analytics);
 });

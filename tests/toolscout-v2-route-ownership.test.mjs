@@ -102,7 +102,8 @@ test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
   assert.match(src,/ownership\.owner==='distribution_orchestrator'/);
   assert.match(src,/ownership\.owner==='seo_runtime'/);
   assert.match(src,/ownership\.owner==='authority_acquisition'/);
-  assert.match(src,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(src,/import base from /);
+  assert.match(src,/handleCoreRuntimeRoute.*from '\.\/worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/posthog-behavior-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/visitor-accuracy-worker\.js'/);
   assert.doesNotMatch(src,/import base from '\.\/visitor-dashboard-metrics-worker\.js'/);

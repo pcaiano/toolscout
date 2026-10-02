@@ -4,7 +4,7 @@ import {ROUTE_GROUPS,EARLY_DISPATCH_OWNERS} from '../runtime-route-contract.js';
 
 const ROOT=process.cwd();
 const ENTRY='compute-router-worker.js';
-const MAX_LEGACY_EDGES=1;
+const MAX_LEGACY_EDGES=0;
 const MIN_DIRECT_ROUTE_COVERAGE_PCT=100;
 const ALLOWED_LEGACY_GROUPS=new Set([]);
 
@@ -26,6 +26,7 @@ while(current){
 }
 const edges=Math.max(0,chain.length-1);
 const terminus=chain.at(-1)||null;
+const expectedTerminus=edges===0?ENTRY:'worker.js';
 const directSource=fs.readFileSync(path.join(ROOT,ENTRY),'utf8');
 const directOwners=EARLY_DISPATCH_OWNERS.filter(owner=>
   directSource.includes(`ownership.owner==='${owner}'`)||
@@ -66,6 +67,7 @@ const directOwnerFiles={
   catalog_autonomy_runtime:'catalog-autonomy-worker.js',
   funnel_runtime:'funnel-worker.js',
   dynamic_runtime:'dynamic-worker.js',
+  core_runtime:'worker.js',
   affiliate_workflow_runtime:'affiliate-workflow-worker.js',
   command_center_direct:'command-center-business-truth-runtime.js',
   command_center_resilient_health:'command-center-resilient-health-runtime.js',
@@ -113,7 +115,7 @@ const report={
   generatedAt:new Date().toISOString(),
   architecture:'toolscout-2.0',
   entrypoint:ENTRY,
-  legacyChain:{edges,files:chain.length,terminus,chain},
+  legacyChain:{edges,files:chain.length,terminus,expectedTerminus,chain},
   earlyDispatchOwners:directOwners,
   routeOwnership:{
     declaredGroups:ROUTE_GROUPS.length,
@@ -139,8 +141,8 @@ if(edges>MAX_LEGACY_EDGES){
   console.error('Legacy wrapper depth increased. New runtime behavior must use explicit ownership rather than adding another decorator.');
   process.exitCode=1;
 }
-if(terminus!=='worker.js'){
-  console.error('Unexpected runtime chain terminus: '+terminus);
+if(terminus!==expectedTerminus){
+  console.error('Unexpected runtime chain terminus: '+terminus+' expected '+expectedTerminus);
   process.exitCode=1;
 }
 
