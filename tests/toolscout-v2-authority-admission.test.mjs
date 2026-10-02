@@ -5,15 +5,27 @@ import {genericBatchAdmissionWhere} from '../growth-execution-contract.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('distribution executors admit bounded authority opportunity work as well as supervisor directives',()=>{
-  for(const executor of ['distribution_network','distribution_autonomous']){
-    const where=genericBatchAdmissionWhere(executor);
-    assert.match(where,/source_kind='supervisor'/);
-    assert.match(where,/source_kind='opportunity'/);
-    assert.match(where,/publisher_contact_discovery/);
-    assert.match(where,/autonomous_route_qualification/);
-    assert.match(where,/verify_backlink_acquisition/);
-  }
+test('distribution network admits only currently actionable external authority surfaces',()=>{
+  const where=genericBatchAdmissionWhere('distribution_network');
+  assert.match(where,/source_kind='supervisor'/);
+  assert.match(where,/source_kind='opportunity'/);
+  assert.match(where,/publisher_contact_discovery/);
+  assert.match(where,/execute_alternate_routes/);
+  assert.match(where,/scale_proven_surface/);
+  assert.match(where,/authority_surface\.status IN \('discovered','candidate','research_required','deferred','stale'\)/);
+  assert.match(where,/growth_execution_contract\.action='scale_proven_surface' AND authority_surface\.status IN \('live','verified'\)/);
+  assert.match(where,/COALESCE\(authority_surface\.human_required,0\)=0/);
+  assert.match(where,/NOT LIKE 'https:\/\/trytoolscout\.org\/%'/);
+  assert.match(where,/toolscout-machine-discovery/);
+});
+
+test('autonomous distribution separates qualification from backlink verification states',()=>{
+  const where=genericBatchAdmissionWhere('distribution_autonomous');
+  assert.match(where,/autonomous_route_qualification/);
+  assert.match(where,/verify_backlink_acquisition/);
+  assert.match(where,/authority_surface\.status IN \('submitted','pending_review','live','verified'\)/);
+  assert.doesNotMatch(where,/publisher_contact_discovery/);
+  assert.doesNotMatch(where,/scale_proven_surface/);
 });
 
 test('affiliate generic batch remains supervisor-only',()=>{
