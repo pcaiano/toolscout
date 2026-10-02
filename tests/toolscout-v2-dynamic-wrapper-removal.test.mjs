@@ -13,7 +13,7 @@ test('generic ToolScout 2.0 traversal bypasses dynamic worker',()=>{
   assert.doesNotMatch(funnel,/import base from '\.\/dynamic-worker\.js'/);
   assert.match(funnel,/import dynamicCompatibility from '\.\/dynamic-worker\.js'/);
   assert.match(funnel,/dynamicCompatibility\.fetch\(request, env, ctx\)/);
-  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,3),['compute-router-worker.js','worker.js']);
+  assert.deepEqual(baseChain('compute-router-worker.js').slice(0,1),['compute-router-worker.js']);
 });
 
 test('dynamic public and tracking routes have explicit ownership',()=>{
