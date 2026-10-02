@@ -1,0 +1,70 @@
+name: One Shot Phase 166 Direct Human Integrity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-166-direct-human-integrity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect direct strict-human concentration
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          WITH direct_strict AS (
+            SELECT session_id,first_evidence_at,country,asn
+            FROM traffic_human_evidence
+            WHERE first_evidence_at>=datetime('now','-7 days')
+              AND COALESCE(NULLIF(source,''),'direct')='direct'
+          ), guard AS (
+            SELECT session_id,fingerprint,ua_hash,asn,country,created_at,
+              ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC) rn
+            FROM traffic_guard_events
+            WHERE decision='allowed' AND created_at>=datetime('now','-7 days')
+          )
+          SELECT d.session_id,d.first_evidence_at,
+                 COALESCE(d.country,g.country) country,
+                 COALESCE(d.asn,g.asn) asn,
+                 g.fingerprint,g.ua_hash,g.created_at guard_first_at
+          FROM direct_strict d
+          LEFT JOIN guard g ON g.session_id=d.session_id AND g.rn=1
+          ORDER BY d.first_evidence_at DESC;
+          "
+          echo CLUSTERS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          WITH direct_strict AS (
+            SELECT session_id,first_evidence_at
+            FROM traffic_human_evidence
+            WHERE first_evidence_at>=datetime('now','-7 days')
+              AND COALESCE(NULLIF(source,''),'direct')='direct'
+          ), guard AS (
+            SELECT session_id,fingerprint,ua_hash,asn,country,
+              ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC) rn
+            FROM traffic_guard_events
+            WHERE decision='allowed' AND created_at>=datetime('now','-7 days')
+          )
+          SELECT COALESCE(CAST(g.asn AS TEXT),'unknown') asn,
+                 COALESCE(g.country,'unknown') country,
+                 COALESCE(g.fingerprint,'unknown') fingerprint,
+                 COALESCE(g.ua_hash,'unknown') ua_hash,
+                 COUNT(*) sessions,
+                 MIN(d.first_evidence_at) first_at,
+                 MAX(d.first_evidence_at) last_at
+          FROM direct_strict d
+          LEFT JOIN guard g ON g.session_id=d.session_id AND g.rn=1
+          GROUP BY asn,country,fingerprint,ua_hash
+          ORDER BY sessions DESC,first_at;
+          "
