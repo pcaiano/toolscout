@@ -1,4 +1,4 @@
-name: One Shot Phase 148 Stremit Reconcile
+name: One Shot Phase 152 Post Proof Cycle
 
 on:
   push:
@@ -10,58 +10,38 @@ permissions:
   contents: read
 
 jobs:
-  reconcile:
+  prove:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Reconcile pre-cooldown Stremit pending state
+      - name: Cross next quarter-hour cycle
+        run: sleep 180
+      - name: Prove authority proof consumption
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
+          echo TARGET
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          UPDATE growth_execution_contract
-          SET status='deferred',
-              claim_deadline=NULL,
-              attempt_deadline=NULL,
-              verify_deadline=NULL,
-              claimed_at=NULL,
-              attempted_at=NULL,
-              last_result='cycle_completed_without_task_specific_proof_v3',
-              updated_at=datetime('now')
-          WHERE task_id='opportunity|surface:stremit|scale_proven_surface'
-            AND status='pending'
-            AND EXISTS(
-              SELECT 1 FROM growth_execution_events e
-              WHERE e.task_id=growth_execution_contract.task_id
-                AND e.event_type='deferred'
-                AND e.detail='cycle_completed_without_task_specific_proof_v3'
-                AND e.created_at>=datetime('now','-6 hours')
-            );
-          "
-      - name: Verify authority ready queue
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT task_id,executor,action,subject_key,status,last_result,updated_at
+          SELECT task_id,executor,action,subject_key,status,last_result,claimed_at,attempted_at,verified_at,updated_at
           FROM growth_execution_contract
-          WHERE action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification','scale_proven_surface')
-            AND status IN ('pending','claimed','attempted','stalled')
-          ORDER BY priority_score DESC,
-            CASE action
-              WHEN 'verify_backlink_acquisition' THEN 0
-              WHEN 'execute_alternate_routes' THEN 1
-              WHEN 'publisher_contact_discovery' THEN 2
-              WHEN 'autonomous_route_qualification' THEN 3
-              WHEN 'scale_proven_surface' THEN 5
-              ELSE 4
-            END,
-            updated_at ASC
-          LIMIT 20;
+          WHERE task_id='opportunity|surface:peerlist-launchpad|verify_backlink_acquisition';
+          "
+          echo EXECUTION
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,substr(evidence_json,1,6000) evidence_json
+          FROM engine_runs
+          WHERE engine='growth' AND mission='execution_contract'
+            AND started_at>=datetime('now','-20 minutes')
+          ORDER BY started_at DESC LIMIT 3;
+          "
+          echo PROOF_EVENTS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT event_type,status,detail,created_at
+          FROM growth_execution_events
+          WHERE task_id='opportunity|surface:peerlist-launchpad|verify_backlink_acquisition'
+          ORDER BY created_at DESC LIMIT 10;
           "
