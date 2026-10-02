@@ -93,6 +93,13 @@ const READY_CAPS=Object.freeze({
   growth_supervisor:1
 });
 const GENERIC_BATCH_EXECUTORS=new Set(['distribution_network','distribution_autonomous','affiliate_cycle']);
+const AUTHORITY_GENERIC_ACTIONS=Object.freeze(['execute_alternate_routes','publisher_contact_discovery','autonomous_route_qualification','repair_stalled_route_execution','scale_proven_surface','verify_backlink_acquisition']);
+const AUTHORITY_GENERIC_ACTION_SQL=AUTHORITY_GENERIC_ACTIONS.map(x=>"'"+x+"'").join(',');
+export function genericBatchAdmissionWhere(executor){
+  if(executor==='distribution_network'||executor==='distribution_autonomous')return ` AND (source_kind='supervisor' OR (source_kind='opportunity' AND action IN (${AUTHORITY_GENERIC_ACTION_SQL})))`;
+  if(executor==='affiliate_cycle')return " AND source_kind='supervisor'";
+  return '';
+}
 const MAKE_SENDER_READY_CONDITION=`(
   (
     growth_execution_contract.subject_type='tool'
@@ -464,7 +471,7 @@ export async function rebalanceExecutionAdmission(env){
     const inFlight=n(inFlightRow?.n),readySlots=Math.max(0,cap-inFlight);
 
     const senderReadyWhere=executor==='make_sender'&&makeSenderReadinessAvailable?` AND ${MAKE_SENDER_READY_CONDITION}`:"";
-    const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":senderReadyWhere;
+    const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?genericBatchAdmissionWhere(executor):senderReadyWhere;
     const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 WHEN executor='catalog_cycle' AND subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC`).bind(executor).all();
     const pendingIds=(pending.results||[]).map(x=>x.task_id);
     const keep=pendingIds.slice(0,readySlots),demote=pendingIds.slice(readySlots);
@@ -483,7 +490,7 @@ export async function rebalanceExecutionAdmission(env){
           AND COALESCE(last_result,'') NOT LIKE 'cloudflare_seo_batch_error:%')
         OR updated_at<=datetime('now','-15 minutes')
       )`:'';
-      const deferredWhere=(GENERIC_BATCH_EXECUTORS.has(executor)?" AND source_kind='supervisor'":senderReadyWhere)+seoRetryWhere;
+      const deferredWhere=(GENERIC_BATCH_EXECUTORS.has(executor)?genericBatchAdmissionWhere(executor):senderReadyWhere)+seoRetryWhere;
       const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 WHEN executor='catalog_cycle' AND subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
@@ -510,6 +517,7 @@ export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null
   }
   if(effective<=0)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   let claimReadyWhere='';
+  if(GENERIC_BATCH_EXECUTORS.has(executor))claimReadyWhere=genericBatchAdmissionWhere(executor);
   if(executor==='make_sender'){
     const senderTables=await first(env,`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN ('distribution_vendor_amplification','distribution_network_outreach')`);
     if(n(senderTables?.n)===2)claimReadyWhere=` AND ${MAKE_SENDER_READY_CONDITION}`;
