@@ -167,8 +167,8 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   }
 
   const network=await internalJson(request,env,ctx,'/api/distribution/network/refresh');
-  const coordination=await internalJson(request,env,ctx,'/api/growth/opportunities/refresh');
-  const execution=await internalJson(request,env,ctx,'/api/growth/execution/dispatch');
+  const coordination={ok:true,httpStatus:0,payload:{status:'delegated_to_distribution_orchestrator',owner:'distribution_orchestrator'}};
+  const execution={ok:true,httpStatus:0,payload:{status:'delegated_to_distribution_orchestrator',owner:'distribution_orchestrator'}};
   const senderHandoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=8',{method:'GET'});
 
   const after=await authoritySnapshot(env);

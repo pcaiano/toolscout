@@ -3,8 +3,8 @@ let schemaReady=null;
 const CYCLE_OWNED_MISSIONS=new Map([
   ['distribution:autonomous_cycle',{minutes:15,anchorMinute:4}],
   ['distribution:network_cycle',{minutes:120,anchorMinute:15}],
-  ['growth:execution_contract',{minutes:60,anchorMinute:15}],
-  ['growth:opportunity_coordination',{minutes:60,anchorMinute:15}]
+  ['growth:execution_contract',{minutes:15,anchorMinute:0}],
+  ['growth:opportunity_coordination',{minutes:15,anchorMinute:0}]
 ]);
 const CYCLE_STALE_TAKEOVER_MINUTES=30;
 const MISSION_CYCLE_AT_HEADER='X-ToolScout-Scheduled-Cycle-At';

@@ -1493,12 +1493,13 @@ export default {async fetch(request,env,ctx){
   const auditDue=trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily;
   if(growthCycleDue){
     await normalizeEditorialQueue(env);
+    // Drain already-qualified work first. Learning/planning must never starve execution.
+    const executionCycle=missionCycleContext('growth','execution_contract',Number(event?.scheduledTime)||Date.now());
+    await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:12,cycleContext:executionCycle,cycleOwner:'distribution_orchestrator_scheduler'},()=>runGrowthExecutionContractCycle(env)).catch(()=>null);
     await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:trigger,singleFlightMinutes:12},()=>learnEconomics(env)).catch(()=>null);
     const opportunityCycle=missionCycleContext('growth','opportunity_coordination',Number(event?.scheduledTime)||Date.now());
     await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:trigger,singleFlightMinutes:12,cycleContext:opportunityCycle,cycleOwner:'distribution_orchestrator_scheduler'},()=>coordinateGrowthOpportunities(env)).catch(()=>null);
     if(trigger===TOOLSCOUT_CRONS.daily)await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger},()=>runGrowthRndAudit(env)).catch(()=>null);
-    const executionCycle=missionCycleContext('growth','execution_contract',Number(event?.scheduledTime)||Date.now());
-    await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:trigger,singleFlightMinutes:12,cycleContext:executionCycle,cycleOwner:'distribution_orchestrator_scheduler'},()=>runGrowthExecutionContractCycle(env)).catch(()=>null);
   }else if(trigger===TOOLSCOUT_CRONS.hourly&&await growthRndAuditDue(env,12)){
     await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger+':cadence_recovery'},()=>runGrowthRndAudit(env)).catch(()=>null);
   }
