@@ -68,6 +68,7 @@ const directOwnerFiles={
   funnel_runtime:'funnel-worker.js',
   dynamic_runtime:'dynamic-worker.js',
   core_runtime:'worker.js',
+  toolscout_v2_closure:'toolscout-v2-closure-runtime.js',
   affiliate_workflow_runtime:'affiliate-workflow-worker.js',
   command_center_direct:'command-center-business-truth-runtime.js',
   command_center_resilient_health:'command-center-resilient-health-runtime.js',
