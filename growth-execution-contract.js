@@ -127,6 +127,12 @@ export function genericBatchAdmissionWhere(executor){
   if(executor==='affiliate_cycle')return " AND source_kind='supervisor'";
   return '';
 }
+export function executorTaskOrderSql(executor){
+  if(executor==='distribution_network')return "CASE action WHEN 'execute_alternate_routes' THEN 0 WHEN 'repair_stalled_route_execution' THEN 1 WHEN 'publisher_contact_discovery' THEN 2 WHEN 'scale_proven_surface' THEN 5 ELSE 4 END";
+  if(executor==='distribution_autonomous')return "CASE action WHEN 'autonomous_route_qualification' THEN 0 WHEN 'verify_backlink_acquisition' THEN 3 ELSE 4 END";
+  if(executor==='catalog_cycle')return "CASE WHEN subject_type='catalog_gap' THEN 0 WHEN subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END";
+  return "0";
+}
 const MAKE_SENDER_READY_CONDITION=`(
   (
     growth_execution_contract.subject_type='tool'
@@ -499,7 +505,8 @@ export async function rebalanceExecutionAdmission(env){
 
     const senderReadyWhere=executor==='make_sender'&&makeSenderReadinessAvailable?` AND ${MAKE_SENDER_READY_CONDITION}`:"";
     const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?genericBatchAdmissionWhere(executor):senderReadyWhere;
-    const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 WHEN executor='catalog_cycle' AND subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC`).bind(executor).all();
+    const taskOrder=executorTaskOrderSql(executor);
+    const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY ${taskOrder},priority_score DESC,created_at ASC`).bind(executor).all();
     const pendingIds=(pending.results||[]).map(x=>x.task_id);
     let ineligibleDemoted=0;
     if(GENERIC_BATCH_EXECUTORS.has(executor)){
@@ -532,7 +539,7 @@ export async function rebalanceExecutionAdmission(env){
         ?` AND (COALESCE(last_result,'')<>'cycle_completed_without_task_specific_proof_v3' OR updated_at<=datetime('now','-90 minutes'))`
         :'';
       const deferredWhere=(GENERIC_BATCH_EXECUTORS.has(executor)?genericBatchAdmissionWhere(executor):senderReadyWhere)+seoRetryWhere+authorityNoProofCooldown;
-      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 WHEN executor='catalog_cycle' AND subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
+      const rows=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='deferred'${deferredWhere} ORDER BY ${taskOrder},priority_score DESC,created_at ASC LIMIT ?`).bind(executor,remaining).all();
       const ids=(rows.results||[]).map(x=>x.task_id);
       if(ids.length){
         const marks=ids.map(()=>'?').join(',');
@@ -563,7 +570,8 @@ export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null
     const senderTables=await first(env,`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN ('distribution_vendor_amplification','distribution_network_outreach')`);
     if(n(senderTables?.n)===2)claimReadyWhere=` AND ${MAKE_SENDER_READY_CONDITION}`;
   }
-  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled')${claimReadyWhere} ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 WHEN executor='catalog_cycle' AND subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
+  const taskOrder=executorTaskOrderSql(executor);
+  const rows=await env.DB.prepare(`SELECT task_id,source_kind,source_id,opportunity_key,subject_type,subject_key,action,executor,engine,priority_score,status,created_at FROM growth_execution_contract WHERE executor=? AND status IN ('pending','stalled')${claimReadyWhere} ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,${taskOrder},priority_score DESC,created_at ASC LIMIT ?`).bind(executor,effective).all();
   const tasks=rows.results||[],ids=tasks.map(x=>x.task_id);
   if(!ids.length)return{claimed:0,taskIds:[],tasks:[],inFlight,capacity:Number(maxInFlight||limit||0)};
   const qs=ids.map(()=>'?').join(',');

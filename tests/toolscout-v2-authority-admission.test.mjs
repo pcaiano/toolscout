@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {genericBatchAdmissionWhere} from '../growth-execution-contract.js';
+import {genericBatchAdmissionWhere,executorTaskOrderSql} from '../growth-execution-contract.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
@@ -89,4 +89,31 @@ test('distribution task-specific proof closes the execution contract',()=>{
   assert.match(src,/out\?\.taskProof\?\.verified===true/);
   assert.match(src,/recordExecutionProof\(env,/);
   assert.match(src,/proof\.publicUrl\|\|proof\.routeUrl\|\|proof\.liveUrl/);
+});
+
+
+test('authority executor queues prioritize acquisition work before verification-only work',()=>{
+  const network=executorTaskOrderSql('distribution_network');
+  const autonomous=executorTaskOrderSql('distribution_autonomous');
+  assert.ok(network.indexOf("execute_alternate_routes")<network.indexOf("publisher_contact_discovery"));
+  assert.ok(network.indexOf("publisher_contact_discovery")<network.indexOf("scale_proven_surface"));
+  assert.ok(autonomous.indexOf("autonomous_route_qualification")<autonomous.indexOf("verify_backlink_acquisition"));
+});
+
+test('growth lane selector is acquisition-first while the authority backlog is active',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  const start=src.indexOf("SELECT executor FROM growth_execution_contract");
+  const end=src.indexOf("created_at ASC LIMIT 1",start);
+  assert.ok(start>=0&&end>start);
+  const selector=src.slice(start,end);
+  assert.ok(selector.indexOf("execute_alternate_routes")<selector.indexOf("verify_backlink_acquisition"));
+  assert.ok(selector.indexOf("autonomous_route_qualification")<selector.indexOf("verify_backlink_acquisition"));
+  assert.ok(selector.indexOf("verify_backlink_acquisition")<selector.indexOf("scale_proven_surface"));
+});
+
+test('rebalance promotion and executor claims share acquisition-first ordering',()=>{
+  const src=read('growth-execution-contract.js');
+  assert.match(src,/const taskOrder=executorTaskOrderSql\(executor\)/);
+  assert.match(src,/status='deferred'.*ORDER BY \$\{taskOrder\},priority_score DESC/s);
+  assert.match(src,/status IN \('pending','stalled'\).*ORDER BY CASE WHEN status='stalled' THEN 0 ELSE 1 END,\$\{taskOrder\},priority_score DESC/s);
 });
