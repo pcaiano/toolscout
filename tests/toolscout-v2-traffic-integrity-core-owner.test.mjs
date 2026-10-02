@@ -19,7 +19,7 @@ test('confirmed visitor has direct traffic integrity core ownership',()=>{
 
 test('generic fallback preserves confirmed visitor injection before guard and live transforms',()=>{
   const compute=read('compute-router-worker.js');
-  const base=compute.indexOf('await base.fetch(request,env,ctx)');
+  const base=compute.indexOf('await env.ASSETS.fetch(request)');
   const core=compute.indexOf('await transformTrafficIntegrityCoreResponse(request,response)');
   const guard=compute.indexOf('await transformTrafficIntegrityGuardResponse(request,response)');
   const live=compute.indexOf('await transformTrafficIntegrityLiveResponse(request,response)');
