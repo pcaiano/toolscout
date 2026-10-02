@@ -3,7 +3,7 @@ import {distributionSurfaceMetrics} from './distribution-impact-worker.js';
 import {runWithLedger,missionCycleContext,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
 import { verifyBatch as auditVerifyCatalogBatch } from './catalog-autonomy-worker.js';
 import {runGrowthSupervisorAudit,growthSupervisorSnapshot,growthSupervisorDirective} from './growth-supervisor.js';
-import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,recordExecutionProof,deferExecutionTask,runExecutionIntegritySelfTest,executionContractSnapshot} from './growth-execution-contract.js';
+import {syncExecutionContracts,reconcileExecutionContracts,reconcileExecutionDeadlines,claimExecutorTasks,markExecutorAttempt,verifySupervisorExecutorTasks,recordExecutionProof,deferExecutionTask,runExecutionIntegritySelfTest,executionContractSnapshot,genericBatchAdmissionWhere} from './growth-execution-contract.js';
 import {runAutonomousDistributionCycle,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runAffiliateCoverageCycle} from './affiliate-coverage-cycle-worker.js';
@@ -897,7 +897,18 @@ async function runGrowthExecutionContractCycle(env){
     if(contentState?.status==='execution_gap'&&contentReady?.ok){
       selectedInternalLane='content_issue';
     }else{
-      const next=await env.DB.prepare("SELECT executor FROM growth_execution_contract WHERE executor IN ('distribution_network','distribution_autonomous','content_issue','affiliate_cycle','catalog_cycle') AND status IN ('pending','stalled') ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT 1").first();
+      const networkAdmission=genericBatchAdmissionWhere('distribution_network');
+      const autonomousAdmission=genericBatchAdmissionWhere('distribution_autonomous');
+      const affiliateAdmission=genericBatchAdmissionWhere('affiliate_cycle');
+      const next=await env.DB.prepare(`SELECT executor FROM growth_execution_contract
+        WHERE status IN ('pending','stalled')
+          AND (
+            (executor='distribution_network'${networkAdmission})
+            OR (executor='distribution_autonomous'${autonomousAdmission})
+            OR (executor='affiliate_cycle'${affiliateAdmission})
+            OR executor IN ('content_issue','catalog_cycle')
+          )
+        ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,created_at ASC LIMIT 1`).first();
       selectedInternalLane=String(next?.executor||'')||null;
     }
   }catch{}
