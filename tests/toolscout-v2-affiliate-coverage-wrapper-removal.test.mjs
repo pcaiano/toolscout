@@ -29,7 +29,7 @@ test('direct affiliate coverage owner preserves method and auth boundaries',asyn
 test('generic traversal bypasses affiliate coverage wrapper after schema migration',()=>{
   const compute=read('compute-router-worker.js');
   const runtime=read('affiliate-coverage-entry-worker.js');
-  assert.match(compute,/import base from '\.\/affiliate-workflow-worker\.js'/);
+  assert.match(compute,/import base from '\.\/revenue-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/affiliate-coverage-entry-worker\.js'/);
   assert.match(runtime,/export async function handleAffiliateCoverageRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
