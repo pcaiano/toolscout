@@ -1,0 +1,51 @@
+name: One Shot Phase 198 AgentTool Post Origin Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-198-agenttool-post-origin-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Align with next autonomous Cloudflare cron
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const now=new Date(), slots=[4,19,34,49]; let target=null;
+          for(let h=0;h<2&&!target;h++){
+            const base=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),now.getUTCHours()+h,0,0));
+            for(const m of slots){const t=new Date(base);t.setUTCMinutes(m,0,0);if(t>Date.now()+15000){target=t;break}}
+          }
+          const seconds=Math.max(0,Math.ceil((target-Date.now())/1000)+90);
+          require('fs').writeFileSync('/tmp/sleep_seconds',String(seconds));
+          console.log(JSON.stringify({now:now.toISOString(),target:target.toISOString(),proofAfterSeconds:seconds}));
+          NODE
+          sleep "$(cat /tmp/sleep_seconds)"
+      - name: Prove AgentTool canonical adapter and dedupe
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT 'ADAPTER' kind,surface_slug,endpoint,method,content_type,confidence,policy_state,verification_source,verification_endpoint,public_url,updated_at
+          FROM distribution_auto_adapters WHERE surface_slug='agenttool-sh';
+          SELECT 'OPPORTUNITY' kind,surface_slug,status,human_required,action_url,next_action,last_checked_at,updated_at
+          FROM distribution_opportunities WHERE surface_slug='agenttool-sh';
+          SELECT 'SUBMISSION' kind,submission_id,status,attempts,last_attempt_at,submitted_at,response_url,error,updated_at
+          FROM distribution_submissions WHERE surface_slug='agenttool-sh' ORDER BY created_at DESC LIMIT 5;
+          SELECT 'QUALIFICATION' kind,result,detail,created_at
+          FROM distribution_qualification_events WHERE surface_slug='agenttool-sh' ORDER BY created_at DESC LIMIT 8;
+          SELECT 'ENGINE_RUN' kind,status,started_at,completed_at,detail
+          FROM engine_runs WHERE engine='distribution' AND mission='autonomous_cycle' ORDER BY started_at DESC LIMIT 2;
+          "
