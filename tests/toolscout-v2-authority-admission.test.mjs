@@ -62,3 +62,11 @@ test('rebalance demotes generic pending tasks that are no longer currently actio
   assert.match(src,/const eligible=new Set\(pendingIds\)/);
   assert.match(src,/ineligibleDemoted/);
 });
+
+
+test('no-proof authority work cools down before re-admission',()=>{
+  const src=read('growth-execution-contract.js');
+  assert.match(src,/authorityNoProofCooldown/);
+  assert.match(src,/cycle_completed_without_task_specific_proof_v3/);
+  assert.match(src,/updated_at<=datetime\('now','-90 minutes'\)/);
+});
