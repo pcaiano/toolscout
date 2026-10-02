@@ -19,7 +19,7 @@ export const SCHEDULED_MISSIONS=Object.freeze({
   autonomous_distribution:{owner:'distribution_orchestrator',cron:TOOLSCOUT_CRONS.autonomousDistribution,plane:'growth_planner'},
   growth_opportunity_coordination:{owner:'distribution_orchestrator',cron:TOOLSCOUT_CRONS.primaryGrowth,plane:'growth_planner'},
   growth_execution_contract:{owner:'distribution_orchestrator',cron:TOOLSCOUT_CRONS.primaryGrowth,plane:'growth_planner'},
-  growth_supervisor_audit:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,plane:'signals'},
+  growth_supervisor_audit:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.primaryGrowth,plane:'signals'},
   growth_rnd_audit:{owner:'distribution_orchestrator',cron:TOOLSCOUT_CRONS.daily,plane:'growth_planner'},
 
   authority_vetted_acquisition:{owner:'authority_acquisition',cron:TOOLSCOUT_CRONS.hourly,plane:'executor'},
