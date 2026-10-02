@@ -40,3 +40,14 @@ test('rebalance and claim share the same authority admission predicate',()=>{
   assert.match(src,/distribution_network:1/);
   assert.match(src,/distribution_autonomous:1/);
 });
+
+
+test('orchestrator lane selection uses the same claimability predicates as admission and claim',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  assert.match(src,/genericBatchAdmissionWhere\('distribution_network'\)/);
+  assert.match(src,/genericBatchAdmissionWhere\('distribution_autonomous'\)/);
+  assert.match(src,/genericBatchAdmissionWhere\('affiliate_cycle'\)/);
+  assert.match(src,/executor='distribution_network'\$\{networkAdmission\}/);
+  assert.match(src,/executor='distribution_autonomous'\$\{autonomousAdmission\}/);
+  assert.match(src,/executor='affiliate_cycle'\$\{affiliateAdmission\}/);
+});
