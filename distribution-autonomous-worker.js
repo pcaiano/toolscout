@@ -1057,18 +1057,20 @@ async function executeCredentialedAdapters(env){
   return{ok:true,observed:(q.results||[]).length,sent,failed,deduped,authRejected,execution_plane:'cloudflare_secret_safe'};
 }
 
-async function packageAndExecute(env){
+async function packageAndExecute(env,{surfaceSlug=null}={}){
   const renderOverflowAvailable=Boolean(env.OVERFLOW_COMPUTE_URL);
+  const target=safe(surfaceSlug||'',120);
   const q=await env.DB.prepare(`SELECT a.surface_slug,a.endpoint,a.method,a.content_type,a.payload_template_json,a.verification_endpoint,a.public_url
     FROM distribution_auto_adapters a
     JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
     LEFT JOIN distribution_economic_learning l ON l.surface_slug=a.surface_slug
     LEFT JOIN distribution_surface_costs c ON c.surface_slug=a.surface_slug
     WHERE a.policy_state='verified' AND a.confidence>=95 AND o.status='ready_to_submit'
+      AND (?='' OR a.surface_slug=?)
       AND COALESCE(c.cost_amount,0)=0
       AND COALESCE(l.operating_decision,'explore') IN ('explore','measure','scale')
     ORDER BY CASE COALESCE(l.operating_decision,'explore') WHEN 'scale' THEN 0 WHEN 'measure' THEN 1 ELSE 2 END,o.distribution_score DESC
-    LIMIT ${EXECUTION_LIMIT}`).all();
+    LIMIT ${EXECUTION_LIMIT}`).bind(target,target).all();
   const outcomes=await Promise.all((q.results||[]).map(async a=>{
     const prior=await env.DB.prepare(`SELECT submission_id,status,attempts FROM distribution_submissions WHERE surface_slug=? AND asset_url='https://trytoolscout.org/' AND submission_type='auto_discovered_json' LIMIT 1`).bind(a.surface_slug).first();
     if(prior&&['submitted','queued_external','pending_review','verified'].includes(String(prior.status||'')))return 'deduped';
@@ -1094,11 +1096,12 @@ async function packageAndExecute(env){
       return 'failed';
     }
   }));
-  return {sent:outcomes.filter(x=>x==='sent').length,failed:outcomes.filter(x=>x==='failed').length,deduped:outcomes.filter(x=>x==='deduped').length,per_cycle_limit:EXECUTION_LIMIT,execution_plane:'cloudflare_primary',render_overflow_available:renderOverflowAvailable};
+  return {sent:outcomes.filter(x=>x==='sent').length,failed:outcomes.filter(x=>x==='failed').length,deduped:outcomes.filter(x=>x==='deduped').length,per_cycle_limit:EXECUTION_LIMIT,target:target||null,execution_plane:'cloudflare_primary',render_overflow_available:renderOverflowAvailable};
 }
-async function verifyAutoSubmitted(env){
+async function verifyAutoSubmitted(env,{surfaceSlug=null}={}){
+  const target=safe(surfaceSlug||'',120);
   const renderOverflowAvailable=Boolean(env.OVERFLOW_COMPUTE_URL);
-  const q=await env.DB.prepare(`SELECT ds.submission_id,ds.surface_slug,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url FROM distribution_submissions ds JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug WHERE ds.submission_type='auto_discovered_json' AND ds.status='submitted' AND COALESCE(o.status,'') NOT IN ('verified','live') ORDER BY ds.submitted_at DESC LIMIT 6`).all();
+  const q=await env.DB.prepare(`SELECT ds.submission_id,ds.surface_slug,ds.response_url,ds.action_url,a.verification_endpoint,a.public_url FROM distribution_submissions ds JOIN distribution_auto_adapters a ON a.surface_slug=ds.surface_slug LEFT JOIN distribution_opportunities o ON o.surface_slug=ds.surface_slug WHERE ds.submission_type='auto_discovered_json' AND ds.status='submitted' AND COALESCE(o.status,'') NOT IN ('verified','live') AND (?='' OR ds.surface_slug=?) ORDER BY ds.submitted_at DESC LIMIT 6`).bind(target,target).all();
   const outcomes=await Promise.all((q.results||[]).map(async row=>{
     const candidates=[row.response_url,row.verification_endpoint,row.public_url]
       .map(v=>externalEvidenceUrl(v,row.action_url||row.verification_endpoint||row.public_url||'https://example.com/'))
@@ -1122,7 +1125,7 @@ async function verifyAutoSubmitted(env){
   if(checked||missingVerification){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`autoverify_${crypto.randomUUID()}`,'autonomous_submission_verification',errors?'partial':'completed','distribution_engine',`Autonomous verification checked ${checked} submitted surface(s): ${verified} verified, ${pending} still pending, ${missingVerification} still lack a safe verification URL, ${errors} verification error(s).`).run();
   }
-  return {checked,verified,pending,missingVerification,errors,verification_plane:'cloudflare_primary',render_overflow_available:renderOverflowAvailable};
+  return {checked,verified,pending,missingVerification,errors,target:target||null,verification_plane:'cloudflare_primary',render_overflow_available:renderOverflowAvailable};
 }
 
 let autonomySchemaReady=null;
@@ -1178,8 +1181,9 @@ function backlinkEvidence(html){
   }
   return {found:false,rel:null};
 }
-async function verifyFootprint(env){
+async function verifyFootprint(env,{surfaceSlug=null,force=false}={}){
   await ensureAutonomySchema(env);
+  const target=safe(surfaceSlug||'',120);
   let rows=[];
   try{
     const q=await env.DB.prepare(`SELECT o.surface_slug,COALESCE(p.public_url,o.live_url,ds.response_url,o.action_url) public_url,p.last_checked_at
@@ -1188,11 +1192,12 @@ async function verifyFootprint(env){
       LEFT JOIN distribution_placements p ON p.surface_slug=o.surface_slug
       WHERE o.status IN ('verified','live')
         AND o.surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery','indexnow')
+        AND (?='' OR o.surface_slug=?)
         AND COALESCE(p.public_url,o.live_url,ds.response_url,o.action_url) IS NOT NULL
-        AND (p.last_checked_at IS NULL OR p.last_checked_at<=datetime('now','-24 hours'))
+        AND (?=1 OR p.last_checked_at IS NULL OR p.last_checked_at<=datetime('now','-24 hours'))
       GROUP BY o.surface_slug
       ORDER BY COALESCE(p.last_checked_at,'1970-01-01') ASC
-      LIMIT 6`).all();
+      LIMIT 6`).bind(target,target,force?1:0).all();
     rows=q.results||[];
   }catch{return {checked:0,placements:0,backlinks:0,errors:1};}
   const outcomes=await Promise.all(rows.map(async row=>{
@@ -1262,8 +1267,25 @@ async function authorityLoopState(env){
   const recoveryDue=required&&(throughputGap||stagnating)&&(!Number.isFinite(lastRecoveryMs)||(now-lastRecoveryMs)>=AUTHORITY_RECOVERY_COOLDOWN_HOURS*3600000);
   return {required,bootstrapIncomplete,backlogActive,acquisitionMode:'exhaustive_backlog',slowdownAllowed:!bootstrapIncomplete&&!backlogActive,verifiedReferringDomains,internalVerifiedReferringDomains,seRankingReferringDomains,seRankingObservedAt:seRankingFresh?seRanking.observedAt:null,referringDomainSource:seRankingFresh?'SE Ranking + internal verified ledger':'internal verified ledger',bootstrapFloor:10,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,attemptTarget24h:AUTHORITY_ATTEMPT_TARGET_24H,authorityQueue,lastVerifiedAt,lastVerifiedAgeHours:lastVerifiedAgeHours==null?null:Number(lastVerifiedAgeHours.toFixed(1)),throughputGap,stagnating,stagnationHours:AUTHORITY_STAGNATION_HOURS,recoveryDue,lastRecoveryAt};
 }
-export async function runAutonomousDistributionCycle(env){
+export async function runAutonomousDistributionCycle(env,task=null){
   await ensureAutonomySchema(env);
+  const taskTarget=task?.source_kind==='opportunity'&&task?.subject_type==='surface'?safe(task.subject_key,120):null;
+  const taskAction=taskTarget?String(task?.action||''):null;
+  if(taskTarget&&taskAction==='autonomous_route_qualification'){
+    await ensureHumanGateSchema(env);
+    const qualification=await qualifyDistributionSurfaces(env,[taskTarget]);
+    const before=await env.DB.prepare('SELECT status,human_required,live_url FROM distribution_opportunities WHERE surface_slug=? LIMIT 1').bind(taskTarget).first().catch(()=>null);
+    const execution=String(before?.status||'')==='ready_to_submit'?await packageAndExecute(env,{surfaceSlug:taskTarget}):{sent:0,failed:0,deduped:0,target:taskTarget,skipped:true};
+    const verification=await verifyAutoSubmitted(env,{surfaceSlug:taskTarget});
+    const after=await env.DB.prepare('SELECT status,human_required,live_url FROM distribution_opportunities WHERE surface_slug=? LIMIT 1').bind(taskTarget).first().catch(()=>null);
+    const conclusive=['ready_to_submit','submitted','pending_review','auth_required','human_action_required','policy_blocked','rejected','skipped','unavailable_free','verified','live'].includes(String(after?.status||''));
+    return {ok:true,targeted:true,target:taskTarget,action:taskAction,qualification,execution,verification,taskProof:{verified:conclusive,kind:'autonomous_route_qualification',surfaceSlug:taskTarget,status:after?.status||null,humanRequired:Number(after?.human_required||0),liveUrl:after?.live_url||null,externalAttempt:Boolean(execution?.sent)}};
+  }
+  if(taskTarget&&taskAction==='verify_backlink_acquisition'){
+    const footprint=await verifyFootprint(env,{surfaceSlug:taskTarget,force:true});
+    const placement=await env.DB.prepare('SELECT public_url,placement_verified,backlink_verified,link_rel,last_checked_at FROM distribution_placements WHERE surface_slug=? LIMIT 1').bind(taskTarget).first().catch(()=>null);
+    return {ok:true,targeted:true,target:taskTarget,action:taskAction,footprint,taskProof:{verified:Number(placement?.backlink_verified||0)===1,kind:'verify_backlink_acquisition',surfaceSlug:taskTarget,publicUrl:placement?.public_url||null,placementVerified:Number(placement?.placement_verified||0)===1,backlinkVerified:Number(placement?.backlink_verified||0)===1,linkRel:placement?.link_rel||null,lastCheckedAt:placement?.last_checked_at||null}};
+  }
   const discovery={ok:true,delegated:true,synchronous:false,mode:'scheduled_discovery_sidecar_and_render_overflow'};
   await env.DB.prepare(`UPDATE distribution_opportunities
     SET status='ready_to_submit',human_required=0,next_action='Automatically submit newly discovered ToolScout URLs to IndexNow and track successful API acknowledgements.',updated_at=datetime('now')
