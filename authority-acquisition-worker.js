@@ -195,14 +195,14 @@ async function authorityInternal(request,env,ctx,path,{method='POST'}={}){
 }
 async function recoverAuthorityPipeline(request,env,ctx){
   const stages={};
-  stages.dispatchBefore=await authorityInternal(request,env,ctx,'/api/growth/execution/dispatch');
+  stages.dispatchBefore={ok:true,status:0,body:{status:'delegated_to_distribution_orchestrator',owner:'distribution_orchestrator'}};
   stages.candidateBefore=await authorityInternal(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=1',{method:'GET'});
   if(Array.isArray(stages.candidateBefore?.body?.items)&&stages.candidateBefore.body.items.length){
     return {ok:true,status:'candidate_ready',replenished:false,stages,candidate:stages.candidateBefore.body.items[0]};
   }
   stages.network=await authorityInternal(request,env,ctx,'/api/distribution/network/refresh');
   stages.discovery=await authorityInternal(request,env,ctx,'/api/distribution/discovery/refresh');
-  stages.dispatchAfter=await authorityInternal(request,env,ctx,'/api/growth/execution/dispatch');
+  stages.dispatchAfter={ok:true,status:0,body:{status:'delegated_to_distribution_orchestrator',owner:'distribution_orchestrator'}};
   stages.candidateAfter=await authorityInternal(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=1',{method:'GET'});
   const candidate=Array.isArray(stages.candidateAfter?.body?.items)?stages.candidateAfter.body.items[0]||null:null;
   return {
