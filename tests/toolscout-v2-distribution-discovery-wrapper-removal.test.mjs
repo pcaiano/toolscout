@@ -28,7 +28,7 @@ test('generic traversal bypasses discovery wrapper while autonomous and submissi
   const autonomous=read('distribution-autonomous-worker.js');
   const submission=read('distribution-submission-worker.js');
 
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-discovery-worker\.js'/);
 
   assert.match(discovery,/export async function handleDistributionDiscoveryRoute/);
