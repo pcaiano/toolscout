@@ -35,7 +35,7 @@ test('generic traversal bypasses learning wrapper while discovery composes its s
   const learning=read('distribution-learning-worker.js');
   const discovery=read('distribution-discovery-worker.js');
 
-  assert.match(compute,/import base from '\.\/worker\.js'/);
+  assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-learning-worker\.js'/);
 
   assert.match(learning,/export async function handleDistributionLearningRoute/);
