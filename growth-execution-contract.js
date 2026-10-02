@@ -131,7 +131,7 @@ export function executorTaskOrderSql(executor){
   if(executor==='distribution_network')return "CASE action WHEN 'execute_alternate_routes' THEN 0 WHEN 'repair_stalled_route_execution' THEN 1 WHEN 'publisher_contact_discovery' THEN 2 WHEN 'scale_proven_surface' THEN 5 ELSE 4 END";
   if(executor==='distribution_autonomous')return "CASE action WHEN 'autonomous_route_qualification' THEN 0 WHEN 'verify_backlink_acquisition' THEN 3 ELSE 4 END";
   if(executor==='catalog_cycle')return "CASE WHEN subject_type='catalog_gap' THEN 0 WHEN subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END";
-  return "0";
+  return "CASE WHEN action IS NULL THEN 0 ELSE 0 END";
 }
 const MAKE_SENDER_READY_CONDITION=`(
   (
