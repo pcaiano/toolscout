@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {SCHEDULED_MISSIONS,missionOwner,scheduleContract} from '../runtime-schedule-contract.js';
+import {TOOLSCOUT_CRONS,SCHEDULED_MISSIONS,missionOwner,scheduleContract} from '../runtime-schedule-contract.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
