@@ -94,9 +94,36 @@ const READY_CAPS=Object.freeze({
 });
 const GENERIC_BATCH_EXECUTORS=new Set(['distribution_network','distribution_autonomous','affiliate_cycle']);
 const AUTHORITY_GENERIC_ACTIONS=Object.freeze(['execute_alternate_routes','publisher_contact_discovery','autonomous_route_qualification','repair_stalled_route_execution','scale_proven_surface','verify_backlink_acquisition']);
-const AUTHORITY_GENERIC_ACTION_SQL=AUTHORITY_GENERIC_ACTIONS.map(x=>"'"+x+"'").join(',');
+const FIRST_PARTY_AUTHORITY_SURFACES=Object.freeze(['rss','toolscout-ard','toolscout-machine-discovery']);
+const sqlList=items=>items.map(x=>"'"+String(x).replaceAll("'","''")+"'").join(',');
+const FIRST_PARTY_AUTHORITY_SQL=sqlList(FIRST_PARTY_AUTHORITY_SURFACES);
+function actionableSurfaceAuthoritySql(executor){
+  const identity=`growth_execution_contract.subject_type='surface'
+    AND growth_execution_contract.subject_key NOT IN (${FIRST_PARTY_AUTHORITY_SQL})
+    AND EXISTS (
+      SELECT 1 FROM distribution_opportunities authority_surface
+      WHERE authority_surface.surface_slug=growth_execution_contract.subject_key
+        AND COALESCE(authority_surface.human_required,0)=0
+        AND lower(COALESCE(authority_surface.action_url,'')) NOT LIKE 'https://trytoolscout.org/%'`;
+  if(executor==='distribution_network')return `${identity}
+        AND (
+          (growth_execution_contract.action IN ('publisher_contact_discovery','execute_alternate_routes','repair_stalled_route_execution')
+            AND authority_surface.status IN ('discovered','candidate','research_required','deferred','stale'))
+          OR (growth_execution_contract.action='scale_proven_surface' AND authority_surface.status IN ('live','verified'))
+        )
+    )`;
+  if(executor==='distribution_autonomous')return `${identity}
+        AND (
+          (growth_execution_contract.action='autonomous_route_qualification'
+            AND authority_surface.status IN ('discovered','candidate','research_required','deferred','stale'))
+          OR (growth_execution_contract.action='verify_backlink_acquisition'
+            AND authority_surface.status IN ('submitted','pending_review','live','verified'))
+        )
+    )`;
+  return '0';
+}
 export function genericBatchAdmissionWhere(executor){
-  if(executor==='distribution_network'||executor==='distribution_autonomous')return ` AND (source_kind='supervisor' OR (source_kind='opportunity' AND action IN (${AUTHORITY_GENERIC_ACTION_SQL})))`;
+  if(executor==='distribution_network'||executor==='distribution_autonomous')return ` AND (source_kind='supervisor' OR (source_kind='opportunity' AND (${actionableSurfaceAuthoritySql(executor)})))`;
   if(executor==='affiliate_cycle')return " AND source_kind='supervisor'";
   return '';
 }
