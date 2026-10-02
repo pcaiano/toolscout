@@ -31,7 +31,7 @@ test('analytics pages stay outside the public visitor tracker stage',async()=>{
 
 test('generic response ordering preserves visitor accuracy before later public transforms',()=>{
   const compute=read('compute-router-worker.js');
-  const lower=compute.indexOf('await base.fetch(request,env,ctx)');
+  const lower=compute.indexOf('await env.ASSETS.fetch(request)');
   const accuracy=compute.indexOf('transformVisitorAccuracyPublicResponse(request,response)');
   const rss=compute.indexOf('transformRssPublicResponse(request,response)');
   const core=compute.indexOf('transformTrafficIntegrityCoreResponse(request,response)');
