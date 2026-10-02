@@ -1,0 +1,107 @@
+name: One Shot Phase 134 Pending Reconcile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase134-pending-reconcile.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reconcile stale pending authority tasks
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          UPDATE growth_execution_contract
+          SET status='deferred',
+              claim_deadline=NULL,
+              attempt_deadline=NULL,
+              verify_deadline=NULL,
+              last_result='deferred_not_currently_actionable',
+              updated_at=datetime('now')
+          WHERE status='pending'
+            AND executor='distribution_network'
+            AND source_kind='opportunity'
+            AND subject_type='surface'
+            AND action IN ('publisher_contact_discovery','execute_alternate_routes','repair_stalled_route_execution','scale_proven_surface')
+            AND NOT (
+              subject_key NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')
+              AND EXISTS (
+                SELECT 1
+                FROM distribution_opportunities o
+                WHERE o.surface_slug=growth_execution_contract.subject_key
+                  AND COALESCE(o.human_required,0)=0
+                  AND lower(COALESCE(o.action_url,'')) NOT LIKE 'https://trytoolscout.org/%'
+                  AND (
+                    (growth_execution_contract.action IN ('publisher_contact_discovery','execute_alternate_routes','repair_stalled_route_execution')
+                      AND o.status IN ('discovered','candidate','research_required','stale'))
+                    OR (growth_execution_contract.action='scale_proven_surface' AND o.status IN ('live','verified'))
+                  )
+              )
+            );
+
+          UPDATE growth_execution_contract
+          SET status='deferred',
+              claim_deadline=NULL,
+              attempt_deadline=NULL,
+              verify_deadline=NULL,
+              last_result='deferred_not_currently_actionable',
+              updated_at=datetime('now')
+          WHERE status='pending'
+            AND executor='distribution_autonomous'
+            AND source_kind='opportunity'
+            AND subject_type='surface'
+            AND action IN ('autonomous_route_qualification','verify_backlink_acquisition')
+            AND NOT (
+              subject_key NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')
+              AND EXISTS (
+                SELECT 1
+                FROM distribution_opportunities o
+                WHERE o.surface_slug=growth_execution_contract.subject_key
+                  AND COALESCE(o.human_required,0)=0
+                  AND lower(COALESCE(o.action_url,'')) NOT LIKE 'https://trytoolscout.org/%'
+                  AND (
+                    (growth_execution_contract.action='autonomous_route_qualification'
+                      AND o.status IN ('discovered','candidate','research_required','stale'))
+                    OR (growth_execution_contract.action='verify_backlink_acquisition'
+                      AND o.status IN ('submitted','pending_review','live','verified'))
+                  )
+              )
+            );
+          "
+
+      - name: Verify active authority after reconciliation
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT g.task_id,g.executor,g.action,g.subject_key,g.status,g.last_result,
+                 o.status AS surface_status,o.human_required,o.action_url,o.live_url
+          FROM growth_execution_contract g
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=g.subject_key
+          WHERE g.action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification','scale_proven_surface','backlink_reference_outreach')
+            AND g.status IN ('pending','claimed','attempted','stalled')
+          ORDER BY g.priority_score DESC,g.updated_at DESC
+          LIMIT 30;
+          "
+
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT task_id,executor,action,subject_key,status,last_result,updated_at
+          FROM growth_execution_contract
+          WHERE subject_key IN ('stackshare','peerlist-launchpad')
+          ORDER BY updated_at DESC;
+          "
