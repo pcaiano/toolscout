@@ -941,7 +941,7 @@ async function runGrowthExecutionContractCycle(env){
           taskId:task.task_id,
           executor,
           status:'verified',
-          detail:`${proof.kind||task.action||'distribution_task'}_verified_v1`,
+          detail:`${proof.kind||task.action||'task_specific_distribution_proof'}_verified_v1`,
           externalId:proof.publicUrl||proof.routeUrl||proof.liveUrl||proof.surfaceSlug||task.subject_key||null,
           evidence:proof
         });
