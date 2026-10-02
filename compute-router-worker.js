@@ -1,11 +1,11 @@
 import {handleAffiliateRedirectRoute} from './affiliate-redirect-runtime.js';
-import base from './worker.js';
+import {handleCoreRuntimeRoute} from './worker.js';
 import {handleAffiliateWorkflowRoute} from './affiliate-workflow-worker.js';
 import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
 import {handleTrafficIntegrityLiveRoute,gateTrafficIntegrityEvent,transformTrafficIntegrityLiveResponse} from './traffic-integrity-live-worker.js';
-import {handleTrafficIntegrityGuardRoute,processTrafficIntegrityGuardEvent,transformTrafficIntegrityGuardResponse,runTrafficIntegrityGuardScheduled} from './traffic-integrity-guard-worker.js';
+import {handleTrafficIntegrityGuardRoute,transformTrafficIntegrityGuardResponse,runTrafficIntegrityGuardScheduled} from './traffic-integrity-guard-worker.js';
 import {handleOwnerExclusionRoute} from './owner-exclusion-worker.js';
 import {handleTrafficIntegrityCoreRoute,transformTrafficIntegrityCoreResponse,runTrafficIntegrityCoreScheduled} from './traffic-integrity-worker.js';
 import {handleHumanTruthChartRoute} from './command-center-human-truth-chart-worker.js';
@@ -56,8 +56,7 @@ import {renderPublicDecisionPage} from './public-decision-runtime.js';
 import {renderPublicNavigationPage} from './public-navigation-runtime.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
-import {withPrivateAssets} from './private-assets.js';
-import {handlePublicAnalyticsRoute,transformPublicAnalyticsResponse} from './public-analytics-runtime.js';
+import {handlePublicAnalyticsRoute} from './public-analytics-runtime.js';
 import {handleCommandCenterLocalLoginRoute} from './command-center-local-login-runtime.js';
 import {handleGrowthCommandCenterActionRoute} from './growth-command-center-v2-worker.js';
 import {handleAffiliateHumanActionRoute} from './affiliate-human-action-entry-worker.js';
@@ -79,20 +78,9 @@ import {handleAudienceRoute} from './audience-worker.js';
 import {handleCatalogAutonomyRoute} from './catalog-autonomy-worker.js';
 import {handleFunnelRuntimeRoute} from './funnel-worker.js';
 import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
+import {handleCoreRuntimeRoute as handleCoreOwnerRoute} from './worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-
-const LEGACY_ANALYTICS_PATHS=new Set(['/analytics','/analytics/','/analytics.html','/analytics-v2','/analytics-v2/','/analytics-v2.html']);
-const protectedLegacyBase=withPrivateAssets({
-  async fetch(request,env,ctx){
-    let response=await protectedLegacyBase.fetch(request,env,ctx);
-    const url=new URL(request.url);
-    if(request.method==='GET'&&!LEGACY_ANALYTICS_PATHS.has(url.pathname)){
-      response=await transformPublicAnalyticsResponse(request,response);
-    }
-    return response;
-  }
-});
 
 async function legacyFallback(request,env,ctx){
   const canonicalOwned=await handlePublicCanonicalSurfaceRoute(request,env,ctx);
@@ -101,12 +89,9 @@ async function legacyFallback(request,env,ctx){
   const trafficGate=await gateTrafficIntegrityEvent(request);
   if(trafficGate)return trafficGate;
   const visitorEvent=await prepareVisitorIntegrityEvent(request,url);
-  let response;
-  if(url.pathname==='/api/events'){
-    response=await processTrafficIntegrityGuardEvent(request,env,ctx,(nextRequest)=>protectedLegacyBase.fetch(nextRequest,env,ctx));
-  }else{
-    response=await base.fetch(request,env,ctx);
-  }
+  let response=env.ASSETS
+    ?await env.ASSETS.fetch(request)
+    :new Response('Not found',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8'}});
   response=await transformVisitorAccuracyPublicResponse(request,response);
   response=await transformRssPublicResponse(request,response);
   response=await transformTrafficIntegrityCoreResponse(request,response);
@@ -1985,6 +1970,7 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='catalog_autonomy_runtime')response=await handleCatalogAutonomyRoute(request,env);
   else if(ownership.owner==='funnel_runtime')response=await handleFunnelRuntimeRoute(request,env);
   else if(ownership.owner==='dynamic_runtime')response=await handleDynamicRuntimeRoute(request,env,ctx);
+  else if(ownership.owner==='core_runtime')response=await handleCoreOwnerRoute(request,env);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
   else if(ownership.owner==='command_center_resilient_health')response=await handleCommandCenterResilientHealthRoute(request,env);
   else if(ownership.owner==='command_center_schema_control')response=await handleCommandCenterSchemaControlRoute(request,env);
