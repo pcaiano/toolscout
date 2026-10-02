@@ -20,3 +20,11 @@ test('autonomous distribution placement schema is migration-owned',()=>{
   assert.match(migration,/backlink_verified INTEGER NOT NULL DEFAULT 0/);
   assert.match(migration,/CREATE INDEX IF NOT EXISTS idx_distribution_placements_backlink/);
 });
+
+
+test('autonomous OpenAPI discovery probes common API-prefixed specs',()=>{
+  const runtime=read('distribution-autonomous-worker.js');
+  assert.match(runtime,/new URL\('\/api\/openapi\.json',homepage\)/);
+  assert.match(runtime,/new URL\('\/api\/swagger\.json',homepage\)/);
+  assert.match(runtime,/filter\(u=>DOC_RE\.test\(u\)\)\.slice\(0,3\)/);
+});
