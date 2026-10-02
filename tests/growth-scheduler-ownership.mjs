@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 const code=fs.readFileSync('distribution-orchestrator-worker.js','utf8');
+const growthScheduler=fs.readFileSync('growth-scheduler.js','utf8');
 const wrangler=fs.readFileSync('wrangler.toml','utf8');
 const commandCenter=fs.readFileSync('command-center-light-theme-worker.js','utf8');
 const ledger=fs.readFileSync('engine-run-ledger.js','utf8');
@@ -13,7 +14,11 @@ check(code.includes("const AUTONOMOUS_CONTROL_CRON=TOOLSCOUT_CRONS.autonomousDis
 check(code.includes("if(trigger===AUTONOMOUS_CONTROL_CRON)"),'autonomous cron is handled separately');
 check(code.includes("cycleOwner:'distribution_autonomous_scheduler'"),'autonomous heartbeat has explicit cycle owner');
 check(code.includes("const growthCycleDue=trigger===TOOLSCOUT_CRONS.primaryGrowth||trigger===TOOLSCOUT_CRONS.daily"),'primary growth work uses central cadence contract');
-check(code.includes("const auditDue=trigger===TOOLSCOUT_CRONS.hourly||trigger===TOOLSCOUT_CRONS.daily"),'hourly audit uses central cadence contract');
+const scheduledBlock=code.slice(code.lastIndexOf('},async scheduled(event,env,ctx){'));
+check(!scheduledBlock.includes("mission:'self_audit'"),'distribution orchestrator scheduled path no longer owns supervisor self audit');
+check(growthScheduler.includes("runGrowthSupervisorAudit"),'growth scheduler imports supervisor audit');
+check(growthScheduler.includes("mission:'self_audit'"),'growth scheduler executes supervisor audit on its live hourly path');
+check(schedule.includes("growth_supervisor_audit:{owner:'growth_scheduler'"),'schedule contract assigns supervisor audit to live growth scheduler owner');
 check(code.includes("autonomousDistribution','distribution','autonomous_cycle'"),'engine-health recovery exercises autonomous distribution');
 check(!commandCenter.includes("runAutonomousDistributionCycle"),'Command Center does not own autonomous distribution scheduling');
 check(!commandCenter.includes("runGrowthScheduler"),'Command Center does not own Growth Scheduler execution');
