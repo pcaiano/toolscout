@@ -1,0 +1,80 @@
+name: One Shot Phase 137 Quarter Hour Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase137-quarter-hour-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Cross first post-cutover quarter-hour boundary
+        run: sleep 105
+      - name: Prove scheduler ownership and execution
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          echo ENGINE_RUNS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,
+                 substr(detail,1,600) AS detail,substr(evidence_json,1,3600) AS evidence_json
+          FROM engine_runs
+          WHERE started_at>='2026-10-02 13:14:00'
+            AND (
+              (engine='growth' AND mission IN ('execution_contract','opportunity_coordination','self_audit'))
+              OR (engine='distribution' AND mission IN ('economic_learning','authority_execution_recovery','autonomous_cycle'))
+            )
+          ORDER BY started_at DESC LIMIT 30;
+          "
+          echo CYCLE_CLAIMS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,cycle_key,owner,run_id,status,attempts,acquired_at,completed_at,updated_at
+          FROM engine_cycle_claims
+          WHERE updated_at>='2026-10-02 13:14:00'
+            AND engine='growth'
+            AND mission IN ('execution_contract','opportunity_coordination')
+          ORDER BY updated_at DESC LIMIT 20;
+          "
+          echo TARGET_TASKS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT task_id,executor,action,subject_key,status,last_result,claimed_at,attempted_at,verified_at,updated_at
+          FROM growth_execution_contract
+          WHERE subject_key IN ('peerlist-launchpad','stackshare')
+          ORDER BY updated_at DESC;
+          "
+          echo TARGET_EVENTS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT e.task_id,e.event_type,e.executor,e.status,substr(e.detail,1,1000) AS detail,e.created_at
+          FROM growth_execution_events e
+          WHERE e.created_at>='2026-10-02 13:14:00'
+            AND e.task_id IN (
+              'opportunity|surface:peerlist-launchpad|verify_backlink_acquisition',
+              'opportunity|surface:stackshare|publisher_contact_discovery'
+            )
+          ORDER BY e.created_at DESC LIMIT 30;
+          "
+          echo SUPERVISOR_STATE
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,last_evaluated_at
+          FROM growth_supervisor_state
+          WHERE engine IN ('growth_brain','distribution','content','audience','seo_geo_aio')
+          ORDER BY engine;
+          "
+          echo SELF_AUDIT_RUNS
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,substr(detail,1,900) AS detail
+          FROM engine_runs
+          WHERE engine='growth' AND mission='self_audit'
+          ORDER BY started_at DESC LIMIT 12;
+          "
