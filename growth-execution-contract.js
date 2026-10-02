@@ -108,14 +108,14 @@ function actionableSurfaceAuthoritySql(executor){
   if(executor==='distribution_network')return `${identity}
         AND (
           (growth_execution_contract.action IN ('publisher_contact_discovery','execute_alternate_routes','repair_stalled_route_execution')
-            AND authority_surface.status IN ('discovered','candidate','research_required','deferred','stale'))
+            AND authority_surface.status IN ('discovered','candidate','research_required','stale'))
           OR (growth_execution_contract.action='scale_proven_surface' AND authority_surface.status IN ('live','verified'))
         )
     )`;
   if(executor==='distribution_autonomous')return `${identity}
         AND (
           (growth_execution_contract.action='autonomous_route_qualification'
-            AND authority_surface.status IN ('discovered','candidate','research_required','deferred','stale'))
+            AND authority_surface.status IN ('discovered','candidate','research_required','stale'))
           OR (growth_execution_contract.action='verify_backlink_acquisition'
             AND authority_surface.status IN ('submitted','pending_review','live','verified'))
         )
