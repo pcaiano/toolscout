@@ -40,3 +40,10 @@ test('POST-only submission routes fall back to same-origin landing page for disc
   const landing=runtime.indexOf("const landing=await text(originUrl)");
   assert.ok(landing>=0&&failure>landing,'external route failure must only be recorded after same-origin discovery fallback fails');
 });
+
+
+test('stale submissions without a verified adapter re-enter autonomous qualification',()=>{
+  const runtime=read('distribution-autonomous-worker.js');
+  assert.match(runtime,/o\.status IN \('ready_to_submit','stale'\) AND NOT EXISTS/);
+  assert.match(runtime,/CASE WHEN o\.status IN \('ready_to_submit','stale'\) THEN 0 ELSE 1 END/);
+});
