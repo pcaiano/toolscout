@@ -45,3 +45,7 @@ assert.match(cc,/unique-domain email buffer/);
 assert.match(cc,/Apollo-eligible/);
 
 console.log('Contact Supply Engine v2 keeps recipient discovery domain-deduped, quality-gated and visible.');
+
+assert.match(router,/EXISTS\(SELECT 1 FROM distribution_vendor_amplification v[\s\S]*v\.status='contact_found'[\s\S]*EXISTS\(SELECT 1 FROM distribution_network_outreach n[\s\S]*n\.status='contact_found'/);
+assert.match(router,/status NOT IN \('sent','adopted','reputation_quarantine','suppressed_competitor'\)/);
+console.log('Contact Supply ready_email counts sender-admissible recipients and cannot reopen competitor-suppressed outreach.');
