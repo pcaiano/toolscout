@@ -1,4 +1,4 @@
-name: One Shot Phase 138 Scheduler Race Truth
+name: One Shot Phase 144 Authority Runnable Truth
 
 on:
   push:
@@ -17,84 +17,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Prove latest scheduler ownership and execution
+      - name: Read current runnable authority truth
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
-          echo ENGINE_RUNS
+          echo RUNNABLE
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT engine,mission,status,trigger_name,started_at,completed_at,
-                 substr(detail,1,600) AS detail,substr(evidence_json,1,3600) AS evidence_json
-          FROM engine_runs
-          WHERE started_at>=datetime('now','-90 minutes')
-            AND (
-              (engine='growth' AND mission IN ('execution_contract','opportunity_coordination','self_audit'))
-              OR (engine='distribution' AND mission IN ('economic_learning','authority_execution_recovery','autonomous_cycle'))
-            )
-          ORDER BY started_at DESC LIMIT 30;
-          "
-          echo CYCLE_CLAIMS
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT engine,mission,cycle_key,owner,run_id,status,attempts,acquired_at,completed_at,updated_at
-          FROM engine_cycle_claims
-          WHERE updated_at>=datetime('now','-90 minutes')
-            AND engine='growth'
-            AND mission IN ('execution_contract','opportunity_coordination')
-          ORDER BY updated_at DESC LIMIT 20;
-          "
-          echo TARGET_TASKS
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT task_id,executor,action,subject_key,status,last_result,claimed_at,attempted_at,verified_at,updated_at
-          FROM growth_execution_contract
-          WHERE subject_key IN ('peerlist-launchpad','stackshare','stremit')
-          ORDER BY updated_at DESC;
-          "
-          echo TARGET_EVENTS
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT e.task_id,e.event_type,e.executor,e.status,substr(e.detail,1,1000) AS detail,e.created_at
-          FROM growth_execution_events e
-          WHERE e.created_at>=datetime('now','-90 minutes')
-            AND e.task_id IN (
-              'opportunity|surface:peerlist-launchpad|verify_backlink_acquisition',
-              'opportunity|surface:stackshare|publisher_contact_discovery'
-            )
-          ORDER BY e.created_at DESC LIMIT 30;
-          "
-          echo SUPERVISOR_STATE
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT engine,status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,last_evaluated_at
-          FROM growth_supervisor_state
-          WHERE engine IN ('growth_brain','distribution','content','audience','seo_geo_aio')
-          ORDER BY engine;
-          "
-          echo SELF_AUDIT_RUNS
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT engine,mission,status,trigger_name,started_at,completed_at,substr(detail,1,900) AS detail
-          FROM engine_runs
-          WHERE engine='growth' AND mission='self_audit'
-          ORDER BY started_at DESC LIMIT 12;
-          "
-
-      - name: Inspect authority queue and race window
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          echo AUTHORITY_QUEUE
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT executor,status,COUNT(*) n
+          SELECT task_id,executor,action,subject_type,subject_key,priority_score,status,last_result,claimed_at,attempted_at,updated_at
           FROM growth_execution_contract
           WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification','repair_stalled_route_execution','scale_proven_surface')
-            AND status IN ('pending','claimed','attempted','deferred','stalled')
-          GROUP BY executor,status ORDER BY executor,status;
+            AND status IN ('pending','claimed','attempted','stalled')
+          ORDER BY priority_score DESC,updated_at ASC LIMIT 30;
           "
-          echo AUTHORITY_RUNS
+          echo RECENT_EXECUTION
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT engine,mission,status,trigger_name,started_at,completed_at,detail
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,substr(evidence_json,1,4200) evidence_json
           FROM engine_runs
-          WHERE started_at>=datetime('now','-90 minutes')
-            AND ((engine='growth' AND mission='execution_contract') OR (engine='distribution' AND mission='authority_execution_recovery'))
-          ORDER BY started_at DESC LIMIT 24;
+          WHERE ((engine='growth' AND mission='execution_contract') OR (engine='distribution' AND mission='authority_execution_recovery'))
+          ORDER BY started_at DESC LIMIT 12;
+          "
+          echo STREMIT
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT task_id,executor,action,status,last_result,updated_at
+          FROM growth_execution_contract
+          WHERE subject_key='stremit'
+          ORDER BY updated_at DESC;
           "
