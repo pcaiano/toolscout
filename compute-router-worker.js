@@ -2111,11 +2111,15 @@ export default{
       // Overflow is an execution sidecar, never the owner of the scheduler chain.
       // Always delegate the same cron event so Growth Brain, engine recovery,
       // execution contracts and observability continue to run 24/7.
+      const growth=Promise.resolve(runGrowthScheduler(scheduledEvent,env,ctx)).catch(async error=>{
+        await event(env,'growth_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+        return null;
+      });
       const inherited=Promise.resolve(runCommandCenterIntegrityScheduled(scheduledEvent,env,ctx)).catch(async error=>{
         await event(env,'inherited_scheduler_failed','failed',safe(error?.message||error,800));
         return null;
       });
-      const combined=Promise.allSettled([overflowWork,inherited]);
+      const combined=Promise.allSettled([overflowWork,growth,inherited]);
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;
       return;
