@@ -26,11 +26,9 @@ test('generic ToolScout 2.0 traversal bypasses revenue',()=>{
   assert.doesNotMatch(compute,/import base from '\.\/revenue-worker\.js'/);
 
   const chain=baseChain('compute-router-worker.js');
-  assert.deepEqual(chain.slice(0,5),[
+  assert.deepEqual(chain.slice(0,3),[
     'compute-router-worker.js',
     'funnel-worker.js',
-    'catalog-autonomy-worker.js',
-    'dynamic-worker.js',
     'worker.js'
   ]);
 });
