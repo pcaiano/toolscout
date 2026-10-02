@@ -1,0 +1,60 @@
+name: One Shot Phase 191 Publisher Supply Truth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-191-publisher-supply-truth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect publisher outreach supply
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT status,COUNT(*) n,MAX(updated_at) latest
+          FROM distribution_network_outreach
+          GROUP BY status ORDER BY n DESC;
+
+          SELECT surface_slug,domain,status,priority_score,contact_email,contact_source_url,discovery_attempts,updated_at
+          FROM distribution_network_outreach
+          WHERE status IN ('contact_found','contact_route_found','queued')
+          ORDER BY CASE status WHEN 'contact_found' THEN 0 WHEN 'contact_route_found' THEN 1 ELSE 2 END,priority_score DESC
+          LIMIT 80;
+
+          SELECT COUNT(*) publisher_tasks,
+                 SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred,
+                 SUM(CASE WHEN status IN ('pending','claimed','attempted','stalled') THEN 1 ELSE 0 END) runnable
+          FROM growth_execution_contract
+          WHERE executor='make_sender' AND subject_type='surface';
+
+          SELECT c.task_id,c.action,c.subject_key,c.status,c.priority_score,c.last_result,
+                 n.status network_status,n.contact_email,n.domain,n.priority_score network_priority
+          FROM growth_execution_contract c
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=c.subject_key
+          WHERE c.executor='make_sender' AND c.subject_type='surface'
+          ORDER BY c.priority_score DESC
+          LIMIT 80;
+
+          SELECT COUNT(DISTINCT lower(contact_email)) unique_ready_emails
+          FROM distribution_network_outreach n
+          WHERE n.status='contact_found' AND n.contact_email IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1 FROM distribution_network_outreach prior
+              WHERE prior.status='sent'
+                AND prior.outreach_sent_at>=datetime('now','-30 days')
+                AND lower(COALESCE(prior.contact_email,''))=lower(COALESCE(n.contact_email,''))
+            );
+          "
