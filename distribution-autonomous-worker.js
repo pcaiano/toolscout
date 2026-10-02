@@ -747,12 +747,12 @@ async function qualify(env){
       AND (
         o.status IN ('discovered','candidate')
         OR (o.status='research_required' AND (o.last_checked_at IS NULL OR o.last_checked_at<=datetime('now','-${RESEARCH_COOLDOWN_HOURS} hours')))
-        OR (o.status='ready_to_submit' AND NOT EXISTS (
+        OR (o.status IN ('ready_to_submit','stale') AND NOT EXISTS (
           SELECT 1 FROM distribution_auto_adapters a
           WHERE a.surface_slug=o.surface_slug AND a.policy_state='verified' AND a.confidence>=95
         ))
       )
-    ORDER BY CASE WHEN o.status='ready_to_submit' THEN 0 ELSE 1 END,o.distribution_score DESC,CASE WHEN o.status IN ('discovered','candidate') THEN 0 ELSE 1 END,o.last_checked_at ASC
+    ORDER BY CASE WHEN o.status IN ('ready_to_submit','stale') THEN 0 ELSE 1 END,o.distribution_score DESC,CASE WHEN o.status IN ('discovered','candidate') THEN 0 ELSE 1 END,o.last_checked_at ASC
     LIMIT ${Math.min(QUALIFY_LIMIT*4,100)}`).all();
   const known=await knownReferringDomains(env);
   const candidates=prioritizeIndependentDomains(q.results||[],known,QUALIFY_LIMIT);
