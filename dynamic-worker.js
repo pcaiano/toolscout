@@ -110,7 +110,11 @@ export async function handleDynamicRuntimeRoute(request,env,ctx){
   }
   if(url.pathname==='/api/click'&&request.method==='POST')return trackedClick(request,env);
   if(url.pathname==='/api/search'&&request.method==='POST')return trackedSearch(request,env);
-  if(url.pathname==='/robots.txt'&&request.method==='GET')return new Response(`User-agent: *\\nAllow: /\\n\\nSitemap: ${BASE}/sitemap.xml\\n`,{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'public, max-age=300, s-maxage=3600'}});
+  if(url.pathname==='/robots.txt'&&request.method==='GET')return new Response(`User-agent: *
+Allow: /
+
+Sitemap: ${BASE}/sitemap.xml
+`,{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'public, max-age=300, s-maxage=3600'}});
   return null;
 }
 
