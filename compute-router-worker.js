@@ -236,7 +236,14 @@ async function refreshContactSupplyMetrics(env){
       SUM(CASE WHEN source_type='catalog_vendor' THEN 1 ELSE 0 END) catalog_domains,
       SUM(CASE WHEN source_type IN ('publisher_network','distribution_surface') THEN 1 ELSE 0 END) network_domains,
       SUM(CASE WHEN source_type='vendor_amplification' THEN 1 ELSE 0 END) vendor_domains,
-      SUM(CASE WHEN status='ready_email' AND contact_email IS NOT NULL THEN 1 ELSE 0 END) ready_email,
+      SUM(CASE WHEN status='ready_email' AND contact_email IS NOT NULL AND (
+        EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+          WHERE lower(v.vendor_domain)=contact_supply_domain.domain
+            AND v.status='contact_found' AND v.contact_email IS NOT NULL)
+        OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+          WHERE lower(n.domain)=contact_supply_domain.domain
+            AND n.status='contact_found' AND n.contact_email IS NOT NULL)
+      ) THEN 1 ELSE 0 END) ready_email,
       SUM(CASE WHEN status='ready_route' AND route_url IS NOT NULL THEN 1 ELSE 0 END) ready_route,
       SUM(CASE WHEN status='cooldown' THEN 1 ELSE 0 END) cooldown,
       SUM(CASE WHEN status='researching' THEN 1 ELSE 0 END) researching,
@@ -360,7 +367,7 @@ async function seedContactSupply(env){
       contact_email=(SELECT cs.contact_email FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_network_outreach.domain) AND cs.status='ready_email' LIMIT 1),
       contact_source_url=COALESCE(contact_source_url,(SELECT cs.contact_source_url FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_network_outreach.domain) AND cs.status='ready_email' LIMIT 1)),
       contact_checked_at=datetime('now'),status='contact_found',updated_at=datetime('now')
-    WHERE contact_email IS NULL AND status NOT IN ('sent','adopted','reputation_quarantine')
+    WHERE contact_email IS NULL AND status NOT IN ('sent','adopted','reputation_quarantine','suppressed_competitor')
       AND EXISTS(SELECT 1 FROM contact_supply_domain cs WHERE cs.domain=lower(distribution_network_outreach.domain) AND cs.status='ready_email' AND cs.contact_email IS NOT NULL)`).run().catch(()=>{});
   const metrics=await refreshContactSupplyMetrics(env);
   await event(env,'contact_supply_seeded','completed',`Contact Supply Engine reconciled domain inventory. Ready email buffer ${num(metrics?.ready_email)}/${CONTACT_SUPPLY_TARGET}; catalog/network/vendor sources deduplicated by domain.`);
@@ -1776,7 +1783,7 @@ async function applyContactSupplyResult(env,job,result){
       .bind(email,source,domain).run().catch(()=>{});
     await env.DB.prepare(`UPDATE distribution_network_outreach SET
       contact_email=?,contact_source_url=?,contact_checked_at=datetime('now'),status='contact_found',updated_at=datetime('now')
-      WHERE lower(domain)=? AND contact_email IS NULL AND status NOT IN ('sent','adopted','reputation_quarantine')`)
+      WHERE lower(domain)=? AND contact_email IS NULL AND status NOT IN ('sent','adopted','reputation_quarantine','suppressed_competitor')`)
       .bind(email,source,domain).run().catch(()=>{});
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at)
       VALUES(?, 'contact_supply_email_found','completed','contact_supply',?,?,?,datetime('now'),datetime('now'))`)
