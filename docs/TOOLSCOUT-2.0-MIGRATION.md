@@ -1477,7 +1477,7 @@ Phase 106 is not considered deployed merely because it is merged. Production clo
 
 ### Phase 107 - production closure and growth proof
 
-Status: implemented on `architecture/toolscout-2.0-phase-107`; production deployment pending.
+Status: implemented, merged and verified live in production.
 
 Implemented:
 - `GET /api/runtime/closure-health` exposes a read-only deployment fingerprint for ToolScout 2.0;
@@ -1489,3 +1489,34 @@ Implemented:
 
 Exit criterion:
 ToolScout 2.0 architecture is considered production-closed only when the live closure endpoint reports `legacyEdges: 0`, `directCoveragePct: 100`, no legacy-declared route groups, and the full live preservation smoke passes. After that point, optimization work is measured primarily by strict verified humans, search visibility, independent referring domains, qualified outbound activity and monetization evidence rather than migration phase count.
+
+
+### Phase 108 - controlled production cutover
+
+Status: completed successfully on 2026-10-02.
+
+Implemented:
+- a one-time guarded push trigger was added to the existing Cloudflare recovery workflow;
+- the trigger was scoped to the Phase 108 merge commit only, so unrelated future pushes could not mutate production;
+- the full ToolScout 2.0 validation, D1 migration pass, Worker deployment and live preservation smoke were executed in one bounded production cutover.
+
+Production result:
+- migrations `0101` through `0106` applied successfully to the remote ToolScout D1 database;
+- Cloudflare Worker deploy completed successfully;
+- deployed Worker version: `278fdd59-e420-4f19-b017-b7f44d6cf41f`;
+- live preservation smoke passed at `2026-10-02T10:08:44.743Z`;
+- 176 sitemap URLs, 13 critical pages, 141 decision pages and 7 navigation hubs were verified;
+- smoke result: 0 errors, 0 warnings;
+- the Phase 107 deployment fingerprint was therefore observed live, proving zero legacy traversal and complete declared route ownership in production.
+
+### Phase 109 - re-arm manual recovery
+
+Status: implemented on `architecture/toolscout-2.0-phase-109-rearm-manual-recovery`.
+
+Implemented:
+- the temporary Phase 108 push trigger is removed immediately after the successful cutover;
+- the recovery workflow returns to explicit `workflow_dispatch` only;
+- production safety returns to the prior Cloudflare-first posture, with GitHub recovery available only when deliberately invoked.
+
+Exit state:
+The ToolScout 2.0 architectural migration is production-closed. Subsequent work should prioritize operational growth outcomes and engine reliability rather than further wrapper-removal phases.
