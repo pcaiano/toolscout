@@ -5,7 +5,7 @@ import {handleMissionIntegrityRoute} from './mission-integrity-v2-worker.js';
 import {runCommandCenterIntegrityScheduled} from './command-center-integrity-worker.js';
 import {handleVisitorIntegrityRoute,prepareVisitorIntegrityEvent,applyVisitorIntegrityLink,decorateVisitorIntegrityResponse} from './visitor-integrity-worker.js';
 import {handleTrafficIntegrityLiveRoute,gateTrafficIntegrityEvent,transformTrafficIntegrityLiveResponse} from './traffic-integrity-live-worker.js';
-import {handleTrafficIntegrityGuardRoute,transformTrafficIntegrityGuardResponse,runTrafficIntegrityGuardScheduled} from './traffic-integrity-guard-worker.js';
+import {handleTrafficIntegrityGuardRoute,processTrafficIntegrityGuardEvent,transformTrafficIntegrityGuardResponse,runTrafficIntegrityGuardScheduled} from './traffic-integrity-guard-worker.js';
 import {handleOwnerExclusionRoute} from './owner-exclusion-worker.js';
 import {handleTrafficIntegrityCoreRoute,transformTrafficIntegrityCoreResponse,runTrafficIntegrityCoreScheduled} from './traffic-integrity-worker.js';
 import {handleHumanTruthChartRoute} from './command-center-human-truth-chart-worker.js';
@@ -56,7 +56,7 @@ import {renderPublicDecisionPage} from './public-decision-runtime.js';
 import {renderPublicNavigationPage} from './public-navigation-runtime.js';
 import {runGrowthScheduler} from './growth-scheduler.js';
 import {handlePublicEditorialRoute} from './public-editorial-runtime.js';
-import {handlePublicAnalyticsRoute} from './public-analytics-runtime.js';
+import {handlePublicAnalyticsRoute,transformPublicAnalyticsResponse} from './public-analytics-runtime.js';
 import {handleCommandCenterLocalLoginRoute} from './command-center-local-login-runtime.js';
 import {handleGrowthCommandCenterActionRoute} from './growth-command-center-v2-worker.js';
 import {handleAffiliateHumanActionRoute} from './affiliate-human-action-entry-worker.js';
@@ -91,6 +91,7 @@ async function legacyFallback(request,env,ctx){
   let response=env.ASSETS
     ?await env.ASSETS.fetch(request)
     :new Response('Not found',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8'}});
+  if(request.method==='GET')response=await transformPublicAnalyticsResponse(request,response);
   response=await transformVisitorAccuracyPublicResponse(request,response);
   response=await transformRssPublicResponse(request,response);
   response=await transformTrafficIntegrityCoreResponse(request,response);
@@ -1967,7 +1968,12 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='distribution_engine_runtime')response=await handleDistributionEngineRoute(request,env,ctx);
   else if(ownership.owner==='audience_runtime')response=await handleAudienceRoute(request,env,ctx);
   else if(ownership.owner==='catalog_autonomy_runtime')response=await handleCatalogAutonomyRoute(request,env);
-  else if(ownership.owner==='funnel_runtime')response=await handleFunnelRuntimeRoute(request,env);
+  else if(ownership.owner==='funnel_runtime'){
+    const trafficGate=await gateTrafficIntegrityEvent(request);
+    if(trafficGate)response=trafficGate;
+    else if(request.method==='POST')response=await processTrafficIntegrityGuardEvent(request,env,ctx,(nextRequest)=>handleFunnelRuntimeRoute(nextRequest,env));
+    else response=await handleFunnelRuntimeRoute(request,env);
+  }
   else if(ownership.owner==='dynamic_runtime')response=await handleDynamicRuntimeRoute(request,env,ctx);
   else if(ownership.owner==='core_runtime')response=await handleCoreRuntimeRoute(request,env);
   else if(ownership.owner==='command_center_direct')response=await handleCommandCenterDirectRoute(request,env);
