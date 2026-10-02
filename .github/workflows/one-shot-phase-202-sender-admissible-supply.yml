@@ -1,0 +1,64 @@
+name: One Shot Phase 202 Sender Admissible Supply
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-202-sender-admissible-supply.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect sender-admissible contact supply
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT cs.domain,cs.source_type,cs.source_key,cs.contact_email,cs.priority_score,
+                 CASE WHEN EXISTS(
+                   SELECT 1 FROM distribution_vendor_amplification v
+                   WHERE lower(v.vendor_domain)=cs.domain
+                     AND v.status='contact_found' AND v.contact_email IS NOT NULL
+                 ) THEN 1 ELSE 0 END vendor_lane_ready,
+                 CASE WHEN EXISTS(
+                   SELECT 1 FROM distribution_network_outreach n
+                   WHERE lower(n.domain)=cs.domain
+                     AND n.status='contact_found' AND n.contact_email IS NOT NULL
+                 ) THEN 1 ELSE 0 END network_lane_ready,
+                 CASE WHEN EXISTS(
+                   SELECT 1 FROM distribution_opportunities o
+                   WHERE o.surface_slug=cs.source_key AND o.status='policy_blocked'
+                 ) THEN 1 ELSE 0 END source_policy_blocked
+          FROM contact_supply_domain cs
+          WHERE cs.status='ready_email' AND cs.contact_email IS NOT NULL
+          ORDER BY cs.priority_score DESC;
+
+          SELECT
+            SUM(CASE WHEN cs.status='ready_email' AND cs.contact_email IS NOT NULL THEN 1 ELSE 0 END) discovered_ready_email,
+            SUM(CASE WHEN cs.status='ready_email' AND cs.contact_email IS NOT NULL AND (
+              EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+                WHERE lower(v.vendor_domain)=cs.domain AND v.status='contact_found' AND v.contact_email IS NOT NULL)
+              OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+                WHERE lower(n.domain)=cs.domain AND n.status='contact_found' AND n.contact_email IS NOT NULL)
+            ) THEN 1 ELSE 0 END) lane_ready_email,
+            SUM(CASE WHEN cs.status='ready_email' AND cs.contact_email IS NOT NULL AND (
+              EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+                WHERE lower(v.vendor_domain)=cs.domain AND v.status='contact_found' AND v.contact_email IS NOT NULL)
+              OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+                WHERE lower(n.domain)=cs.domain AND n.status='contact_found' AND n.contact_email IS NOT NULL)
+            ) AND NOT EXISTS(
+              SELECT 1 FROM distribution_opportunities o
+              WHERE o.surface_slug=cs.source_key AND o.status='policy_blocked'
+            ) THEN 1 ELSE 0 END) policy_clean_lane_ready_email
+          FROM contact_supply_domain cs;
+          "
