@@ -81,3 +81,12 @@ test('growth execution lane prioritizes authority proof over no-proof scaling',(
   assert.ok(selector.indexOf("verify_backlink_acquisition")<selector.indexOf("scale_proven_surface"));
   assert.match(selector,/priority_score DESC/);
 });
+
+
+test('distribution task-specific proof closes the execution contract',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  assert.match(src,/executor==='distribution_network'\|\|executor==='distribution_autonomous'/);
+  assert.match(src,/out\?\.taskProof\?\.verified===true/);
+  assert.match(src,/recordExecutionProof\(env,/);
+  assert.match(src,/proof\.publicUrl\|\|proof\.routeUrl\|\|proof\.liveUrl/);
+});
