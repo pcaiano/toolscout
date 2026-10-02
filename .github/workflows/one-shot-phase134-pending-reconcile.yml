@@ -1,4 +1,4 @@
-name: One Shot Phase 134 Final Truth
+name: One Shot Phase 134 Cycle Ownership Truth
 
 on:
   push:
@@ -143,4 +143,22 @@ jobs:
           WHERE created_at>='2026-10-02 12:40:00'
             AND (event_type LIKE '%authority%' OR event_type LIKE '%autonomous%' OR event_type LIKE '%network%')
           ORDER BY created_at DESC LIMIT 50;
+          "
+
+      - name: Inspect growth mission cycle ownership
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,cycle_key,owner,run_id,status,attempts,acquired_at,completed_at,updated_at
+          FROM engine_cycle_claims
+          WHERE engine='growth' AND mission IN ('execution_contract','opportunity_coordination')
+          ORDER BY updated_at DESC LIMIT 20;
+          "
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,run_id,acquired_at,expires_at
+          FROM engine_run_leases
+          WHERE engine='growth' AND mission IN ('execution_contract','opportunity_coordination')
+          ORDER BY acquired_at DESC;
           "
