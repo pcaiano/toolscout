@@ -7,7 +7,7 @@ export const TOOLSCOUT_CRONS=Object.freeze({
   primaryGrowth:'*/15 * * * *',
   autonomousDistribution:'4,19,34,49 * * * *',
   renderKeepalive:'7,22,37,52 * * * *',
-  hourly:'15 * * * *',
+  hourly:'20 * * * *',
   daily:'35 3 * * *'
 });
 
