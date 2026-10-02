@@ -358,6 +358,24 @@ export async function syncExecutionContracts(env){
           AND current.status<>'cancelled'
       )`).run();
 
+  const staleSurfaceAuthority=await env.DB.prepare(`UPDATE growth_execution_contract
+    SET status='cancelled',last_result='surface_state_superseded_authority_action',completed_at=datetime('now'),updated_at=datetime('now')
+    WHERE source_kind='opportunity'
+      AND subject_type='surface'
+      AND status IN ('pending','claimed','attempted','deferred','stalled')
+      AND action IN ('publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification')
+      AND (
+        subject_key IN ('rss','toolscout-ard','toolscout-machine-discovery')
+        OR EXISTS(
+          SELECT 1 FROM distribution_opportunities o
+          WHERE o.surface_slug=growth_execution_contract.subject_key
+            AND (
+              COALESCE(o.human_required,0)=1
+              OR o.status IN ('live','verified','pending_review','scheduled','submitted','approval_required','human_action_required','policy_blocked','rejected','skipped','unavailable_free')
+            )
+        )
+      )`).run().catch(()=>null);
+
   const supervisors=await all(env,`SELECT engine,status,directive FROM growth_supervisor_state WHERE engine IN ('distribution','content','audience','seo_geo_aio','affiliate','catalog')`);
   let supervisorTasks=0,missing=0;
   const activeSupervisorIds=new Set();
@@ -420,7 +438,7 @@ export async function syncExecutionContracts(env){
     SUM(CASE WHEN status='human_required' THEN 1 ELSE 0 END) human_required,
     SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred
     FROM growth_execution_contract`);
-  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),staleLegacyClaimsReleased:Number(staleLegacyClaims?.meta?.changes||staleLegacyClaims?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v3'};
+  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),staleLegacyClaimsReleased:Number(staleLegacyClaims?.meta?.changes||staleLegacyClaims?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),staleSurfaceAuthorityCancelled:Number(staleSurfaceAuthority?.meta?.changes||staleSurfaceAuthority?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v4'};
 }
 
 export async function rebalanceExecutionAdmission(env){
