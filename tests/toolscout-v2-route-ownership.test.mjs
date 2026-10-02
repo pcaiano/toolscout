@@ -87,10 +87,10 @@ test('route contract assigns one explicit owner to migrated control routes',()=>
   assert.equal(routeContract().invariant,'one_declared_owner_per_route_group');
 });
 
-test('unknown routes remain on the public asset pipeline during staged migration',()=>{
+test('unknown routes remain on the compute-owned public asset pipeline',()=>{
   const route=routeOwner('/some-unmigrated-path',{method:'GET'});
   assert.equal(route.owner,'compute_router');
-  assert.equal(route.plane,'legacy');
+  assert.equal(route.plane,'public_site');
 });
 
 test('compute entrypoint early-dispatches only explicitly migrated owners',()=>{
