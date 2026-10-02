@@ -127,7 +127,7 @@ export function routeOwner(input,{method='GET'}={}){
     if(group.matcher&&namedMatcher(group.matcher,pathname))return{...group,pathname,method:verb};
     if(group.prefixes?.some(prefix=>pathname===prefix||pathname.startsWith(prefix)))return{...group,pathname,method:verb};
   }
-  return{id:'legacy_fallback',owner:'legacy_chain',plane:'legacy',pathname,method:verb};
+  return{id:'public_asset_pipeline',owner:'compute_router',plane:'public_site',pathname,method:verb};
 }
 
 export function routeContract(){
