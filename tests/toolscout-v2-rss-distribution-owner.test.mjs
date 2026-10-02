@@ -19,7 +19,7 @@ test('RSS distribution admin routes have a direct owner',()=>{
 
 test('RSS public response transform remains explicit and ordered immediately after lower runtime',()=>{
   const compute=read('compute-router-worker.js');
-  const lower=compute.indexOf('base.fetch(request,env,ctx)');
+  const lower=compute.indexOf('await env.ASSETS.fetch(request)');
   const rss=compute.indexOf('transformRssPublicResponse(request,response)');
   const core=compute.indexOf('transformTrafficIntegrityCoreResponse(request,response)');
   assert.ok(lower>=0&&rss>lower&&core>rss,'RSS transform must remain after lower runtime and before later response transforms');
