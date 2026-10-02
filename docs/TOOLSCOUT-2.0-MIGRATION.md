@@ -1414,3 +1414,8 @@ Implemented:
 
 Preservation rule:
 No social-platform capability policy, Bluesky reply semantic guard, DEV comment verification, audience event truth, stats ownership, Command Center ownership, or scheduler semantics change in this phase.
+
+### Phase 101 - affiliate workflow traversal removal
+
+Direct-own the affiliate and distribution workflow control surfaces while preserving their existing behavior and the canonical `/go/` affiliate redirect owner. The generic compute fallback now skips `affiliate-workflow-worker.js` and enters `revenue-worker.js` directly. Directly owned runtime modules that previously bypassed to the affiliate workflow wrapper now bypass to revenue as well. The architecture ratchet moves from 6 to 5 legacy edges.
+

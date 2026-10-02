@@ -1,4 +1,4 @@
-import base from './affiliate-workflow-worker.js';
+import base from './revenue-worker.js';
 
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const XML_HEADERS={'Content-Type':'application/rss+xml; charset=UTF-8','Cache-Control':'public, max-age=900'};

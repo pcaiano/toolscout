@@ -1,4 +1,4 @@
-import base from './affiliate-workflow-worker.js';
+import base from './revenue-worker.js';
 import {runDistributionRadarScheduled} from './distribution-radar-worker.js';
 import {vendorAssetCoherence} from './distribution-vendor-integrity.js';
 

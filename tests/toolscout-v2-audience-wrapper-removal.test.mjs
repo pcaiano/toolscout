@@ -49,9 +49,9 @@ test('generic traversal bypasses audience while protected stats and Command Cent
   const runtime=read('audience-worker.js');
   const contract=read('runtime-route-contract.js');
 
-  assert.match(compute,/import base from '\.\/affiliate-workflow-worker\.js'/);
+  assert.match(compute,/import base from '\.\/revenue-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/audience-worker\.js'/);
-  assert.match(runtime,/import base from '\.\/affiliate-workflow-worker\.js'/);
+  assert.match(runtime,/import base from '\.\/revenue-worker\.js'/);
   assert.match(runtime,/export async function handleAudienceRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 
