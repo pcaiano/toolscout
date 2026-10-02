@@ -104,6 +104,6 @@ test('Command Center read paths bypass the legacy wrapper chain',()=>{
   assert.doesNotMatch(entry,/import base from '\.\/command-center-ga4-worker\.js'/);
   assert.doesNotMatch(entry,/import base from '\.\/d1-read-budget-worker\.js'/);
   assert.match(entry,/injectToolScoutSocialFooter/);
-  assert.match(entry,/async function legacyFallback/);
+  assert.match(entry,/async function publicAssetPipeline/);
   assert.equal(fs.existsSync(new URL('../operational-truth-reconciliation-worker.js',import.meta.url)),false);
 });
