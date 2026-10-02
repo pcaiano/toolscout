@@ -501,6 +501,17 @@ export async function rebalanceExecutionAdmission(env){
     const pendingWhere=GENERIC_BATCH_EXECUTORS.has(executor)?genericBatchAdmissionWhere(executor):senderReadyWhere;
     const pending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'${pendingWhere} ORDER BY CASE WHEN executor='catalog_cycle' AND subject_type='catalog_gap' THEN 0 WHEN executor='catalog_cycle' AND subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END,priority_score DESC,created_at ASC`).bind(executor).all();
     const pendingIds=(pending.results||[]).map(x=>x.task_id);
+    let ineligibleDemoted=0;
+    if(GENERIC_BATCH_EXECUTORS.has(executor)){
+      const allPending=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor=? AND status='pending'`).bind(executor).all();
+      const eligible=new Set(pendingIds);
+      const ineligible=(allPending.results||[]).map(x=>x.task_id).filter(id=>!eligible.has(id));
+      for(let i=0;i<ineligible.length;i+=40){
+        const ids=ineligible.slice(i,i+40),marks=ids.map(()=>'?').join(',');
+        const w=await env.DB.prepare(`UPDATE growth_execution_contract SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,last_result='deferred_not_currently_actionable',updated_at=datetime('now') WHERE task_id IN (${marks}) AND status='pending'`).bind(...ids).run();
+        const changed=Number(w?.meta?.changes||w?.changes||0);ineligibleDemoted+=changed;result.deferred+=changed;
+      }
+    }
     const keep=pendingIds.slice(0,readySlots),demote=pendingIds.slice(readySlots);
     if(demote.length){
       for(let i=0;i<demote.length;i+=40){
@@ -527,7 +538,7 @@ export async function rebalanceExecutionAdmission(env){
         promoted=Number(w?.meta?.changes||w?.changes||0);result.promoted+=promoted;
       }
     }
-    result.executors[executor]={cap,available:true,inFlight,pendingKept:keep.length,promoted};
+    result.executors[executor]={cap,available:true,inFlight,pendingKept:keep.length,promoted,ineligibleDemoted};
   }
   return result;
 }
