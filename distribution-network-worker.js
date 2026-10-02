@@ -94,14 +94,16 @@ async function suppressCompetitiveOutreach(env){
   return {checked:(q.results||[]).length,suppressed,policy:COMPETITIVE_OUTREACH_POLICY_VERSION};
 }
 
-async function refreshCandidates(env){
+async function refreshCandidates(env,{surfaceSlug=null}={}){
   await ensureSchema(env);
+  const target=safe(surfaceSlug||'',100);
   const [opps,vendors]=await Promise.all([
     env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.action_url,o.distribution_score,o.status,
       n.surface_slug AS network_existing,n.status AS network_status,n.source_url AS network_source_url,n.updated_at AS network_updated_at
       FROM distribution_opportunities o
       LEFT JOIN distribution_network_outreach n ON n.surface_slug=o.surface_slug
       WHERE o.action_url IS NOT NULL
+        AND (?='' OR o.surface_slug=?)
         AND o.surface_type!='publisher_contact_route'
         AND o.status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')
         AND (
@@ -113,7 +115,7 @@ async function refreshCandidates(env){
           )
         )
       ORDER BY CASE WHEN n.surface_slug IS NULL THEN 0 ELSE 1 END,o.distribution_score DESC
-      LIMIT 120`).all(),
+      LIMIT 120`).bind(target,target).all(),
     env.DB.prepare(`SELECT DISTINCT lower(vendor_domain) domain FROM distribution_vendor_amplification WHERE vendor_domain IS NOT NULL`).all().catch(()=>({results:[]}))
   ]);
   const vendorDomains=new Set((vendors.results||[]).map(x=>String(x.domain||'').replace(/^www\./,'')));
@@ -246,17 +248,19 @@ async function scanContact(row,env){
   }
   return {found:false,routed:false,status};
 }
-async function discoverContacts(env){
+async function discoverContacts(env,{surfaceSlug=null}={}){
   await ensureSchema(env);
-  const r=await env.DB.prepare(`SELECT surface_slug,domain,discovery_attempts FROM distribution_network_outreach WHERE status='queued' AND (contact_checked_at IS NULL OR contact_checked_at<datetime('now','-20 hours')) ORDER BY priority_score DESC LIMIT ?`).bind(MAX_CONTACT_SCANS).all();
+  const target=safe(surfaceSlug||'',100);
+  const r=await env.DB.prepare(`SELECT surface_slug,domain,discovery_attempts FROM distribution_network_outreach WHERE status='queued' AND (?='' OR surface_slug=?) AND (contact_checked_at IS NULL OR contact_checked_at<datetime('now','-20 hours')) ORDER BY priority_score DESC LIMIT ?`).bind(target,target,MAX_CONTACT_SCANS).all();
   let scanned=0,found=0,routed=0,suppressed=0;
   for(const row of r.results||[]){scanned++;const x=await scanContact(row,env);if(x.found)found++;if(x.routed)routed++;if(x.status==='suppressed_no_contact')suppressed++}
   return {scanned,found,routed,suppressed};
 }
 
 
-async function materializeRouteActions(env){
+async function materializeRouteActions(env,{surfaceSlug=null}={}){
   await ensureSchema(env);
+  const target=safe(surfaceSlug||'',100);
   const q=await env.DB.prepare(`SELECT r.route_id,r.surface_slug,r.domain,r.route_type,r.route_url,r.source_url,r.status route_status,
       n.surface_name,n.priority_score,n.suggested_subject,n.suggested_body,
       a.execution_mode,a.status action_status,a.opportunity_slug,a.attempts,a.last_attempt_at
@@ -264,6 +268,7 @@ async function materializeRouteActions(env){
     JOIN distribution_network_outreach n ON n.surface_slug=r.surface_slug
     LEFT JOIN distribution_contact_route_actions a ON a.route_id=r.route_id
     WHERE r.status IN ('discovered','in_loop')
+      AND (?='' OR r.surface_slug=?)
       AND NOT (r.route_type='form' AND EXISTS (SELECT 1 FROM distribution_opportunities canonical WHERE canonical.surface_slug=r.surface_slug AND canonical.status IN ('submitted','pending_review','scheduled','live','verified')))
       AND (
         a.route_id IS NULL
@@ -271,7 +276,7 @@ async function materializeRouteActions(env){
         OR (a.status='issued_to_content' AND a.last_attempt_at<=datetime('now','-${ROUTE_CONTENT_RETRY_HOURS} hours') AND a.attempts<?)
       )
     ORDER BY n.priority_score DESC,r.first_seen_at ASC
-    LIMIT ?`).bind(MAX_ROUTE_CONTENT_ATTEMPTS,MAX_ROUTE_ACTIONS_PER_CYCLE).all();
+    LIMIT ?`).bind(target,target,MAX_ROUTE_CONTENT_ATTEMPTS,MAX_ROUTE_ACTIONS_PER_CYCLE).all();
   let queued=0,synthetic=0,content=0,retried=0;
   for(const row of q.results||[]){
     const mode=routeMode(row.route_type);
@@ -340,8 +345,9 @@ async function materializeRouteActions(env){
   return {considered:(q.results||[]).length,queued,synthetic,content,retried};
 }
 
-async function reconcileRouteActions(env){
+async function reconcileRouteActions(env,{surfaceSlug=null}={}){
   await ensureSchema(env);
+  const target=safe(surfaceSlug||'',100);
   const q=await env.DB.prepare(`SELECT a.route_id,a.surface_slug,a.route_type,a.execution_mode,a.status,a.opportunity_slug,a.attempts,a.last_attempt_at,
       r.domain,r.route_url,n.status network_status,
       o.status opportunity_status,o.last_checked_at,
@@ -356,7 +362,8 @@ async function reconcileRouteActions(env){
     LEFT JOIN distribution_network_outreach n ON n.surface_slug=a.surface_slug
     LEFT JOIN distribution_opportunities o ON o.surface_slug=a.opportunity_slug
     WHERE a.status NOT IN ('verified_human_impact','verified_placement','policy_blocked','exhausted')
-    ORDER BY a.updated_at ASC LIMIT 80`).all().catch(()=>({results:[]}));
+      AND (?='' OR a.surface_slug=?)
+    ORDER BY a.updated_at ASC LIMIT 80`).bind(target,target).all().catch(()=>({results:[]}));
   let changed=0,verifiedHuman=0,verifiedPlacement=0,stalled=0,retryDue=0;
   for(const row of q.results||[]){
     let next=String(row.status||'queued'),result=null;
@@ -386,14 +393,16 @@ async function reconcileRouteActions(env){
   return {checked:(q.results||[]).length,changed,verifiedHuman,verifiedPlacement,stalled,retryDue};
 }
 
-async function verifyAdoption(env){
+async function verifyAdoption(env,{surfaceSlug=null}={}){
   await ensureSchema(env);
+  const target=safe(surfaceSlug||'',100);
   const r=await env.DB.prepare(`SELECT n.surface_slug,n.domain,n.status,
     EXISTS(SELECT 1 FROM distribution_embeds e WHERE lower(replace(e.publisher_host,'www.',''))=n.domain AND COALESCE(e.impressions,0)>0) embed_live,
     EXISTS(SELECT 1 FROM distribution_embed_clicks c WHERE lower(replace(c.source_host,'www.',''))=n.domain) embed_click,
     EXISTS(SELECT 1 FROM distribution_placements p WHERE p.surface_slug=n.surface_slug AND p.backlink_verified=1) backlink_live
     FROM distribution_network_outreach n
-    WHERE n.status IN ('contact_route_found','contact_found','sent','adopted')`).all().catch(()=>({results:[]}));
+    WHERE n.status IN ('contact_route_found','contact_found','sent','adopted')
+      AND (?='' OR n.surface_slug=?)`).bind(target,target).all().catch(()=>({results:[]}));
   let adopted=0;
   for(const row of r.results||[]){
     const kind=Number(row.embed_live)?'embed':Number(row.embed_click)?'embed_click':Number(row.backlink_live)?'backlink':null;
@@ -417,18 +426,39 @@ async function metrics(env){
   return {status:'connected',states:Object.fromEntries((status.results||[]).map(x=>[x.status,Number(x.n||0)])),adoption:Object.fromEntries((adoption.results||[]).map(x=>[x.adoption_kind,Number(x.n||0)])),routeActions:Object.fromEntries((routeActions.results||[]).map(x=>[x.status,Number(x.n||0)]))};
 }
 
-export async function runDistributionNetworkCycle(env){
-  const competitiveSuppression=await suppressCompetitiveOutreach(env);
-  const candidates=await refreshCandidates(env);
-  const contacts=await discoverContacts(env);
-  const routeActions=await materializeRouteActions(env);
-  const routeReconciliation=await reconcileRouteActions(env);
-  const adoption=await verifyAdoption(env);
+export async function runDistributionNetworkCycle(env,task=null){
+  const target=task?.source_kind==='opportunity'&&task?.subject_type==='surface'?safe(task.subject_key,100):null;
+  const action=target?String(task?.action||''):null;
+  const targeted=Boolean(target&&['publisher_contact_discovery','execute_alternate_routes','repair_stalled_route_execution','scale_proven_surface'].includes(action));
+  const competitiveSuppression=targeted?{checked:0,suppressed:0,policy:COMPETITIVE_OUTREACH_POLICY_VERSION}:await suppressCompetitiveOutreach(env);
+  const candidates=await refreshCandidates(env,{surfaceSlug:targeted?target:null});
+  const contacts=(!targeted||['publisher_contact_discovery','execute_alternate_routes','repair_stalled_route_execution'].includes(action))
+    ?await discoverContacts(env,{surfaceSlug:targeted?target:null})
+    :{scanned:0,found:0,routed:0,suppressed:0};
+  const routeActions=(!targeted||['execute_alternate_routes','repair_stalled_route_execution','scale_proven_surface'].includes(action))
+    ?await materializeRouteActions(env,{surfaceSlug:targeted?target:null})
+    :{considered:0,queued:0,synthetic:0,content:0,retried:0};
+  const routeReconciliation=await reconcileRouteActions(env,{surfaceSlug:targeted?target:null});
+  const adoption=await verifyAdoption(env,{surfaceSlug:targeted?target:null});
   const materialChanges=Number(competitiveSuppression.suppressed||0)+Number(candidates.newQueued||0)+Number(candidates.reopened||0)+Number(contacts.found||0)+Number(contacts.routed||0)+Number(contacts.suppressed||0)+Number(routeActions.queued||0)+Number(routeActions.synthetic||0)+Number(routeActions.content||0)+Number(routeReconciliation.changed||0)+Number(adoption.adopted||0);
   if(materialChanges>0){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`netcycle_${crypto.randomUUID()}`,'distribution_network_cycle','completed','distribution_network',`Distribution Network 2.1 materially changed ${materialChanges} item(s): ${candidates.newQueued} newly queued, ${candidates.reopened} reopened, ${contacts.found} role emails found, ${contacts.routed} alternate routes found, ${routeActions.queued} route actions queued, ${routeActions.synthetic} autonomous route opportunities materialized, ${routeActions.content} content-amplification routes prepared, ${routeReconciliation.verifiedHuman} strict-human route impacts verified, ${routeReconciliation.verifiedPlacement} route placements verified, ${routeReconciliation.retryDue} retries due, ${contacts.suppressed} suppressed and ${adoption.adopted} new adoptions verified. No-change cycles are not persisted.`).run().catch(()=>{});
   }
-  return {ok:true,competitiveSuppression,candidates,contacts,routeActions,routeReconciliation,adoption,materialChanges,write_policy:'material_change_only',closed_loop_routes:true,competitive_outreach_policy:COMPETITIVE_OUTREACH_POLICY_VERSION};
+  let taskProof=null;
+  if(targeted){
+    const network=await env.DB.prepare('SELECT status,contact_email,contact_source_url,discovery_attempts FROM distribution_network_outreach WHERE surface_slug=? LIMIT 1').bind(target).first().catch(()=>null);
+    const route=await env.DB.prepare(`SELECT status,route_type,route_url,execution_mode,last_result FROM distribution_contact_route_actions WHERE surface_slug=? ORDER BY updated_at DESC LIMIT 1`).bind(target).first().catch(()=>null);
+    if(action==='publisher_contact_discovery'){
+      const done=['contact_found','contact_route_found','suppressed_no_contact','suppressed_technical','sent','adopted'].includes(String(network?.status||''));
+      taskProof={verified:done,kind:'publisher_contact_discovery',surfaceSlug:target,status:network?.status||null,contactFound:Boolean(network?.contact_email),routeFound:Boolean(network?.contact_source_url),attempts:Number(network?.discovery_attempts||0)};
+    }else if(['execute_alternate_routes','repair_stalled_route_execution'].includes(action)){
+      const executed=['executed_waiting_verification','verified_human_impact','verified_placement'].includes(String(route?.status||''));
+      taskProof={verified:executed,kind:action,surfaceSlug:target,status:route?.status||null,routeType:route?.route_type||null,routeUrl:route?.route_url||null,executionMode:route?.execution_mode||null};
+    }else if(action==='scale_proven_surface'){
+      taskProof={verified:Number(adoption?.adopted||0)>0,kind:action,surfaceSlug:target,adopted:Number(adoption?.adopted||0),routeStatus:route?.status||null};
+    }
+  }
+  return {ok:true,targeted,target:target||null,action:action||null,taskProof,competitiveSuppression,candidates,contacts,routeActions,routeReconciliation,adoption,materialChanges,write_policy:'material_change_only',closed_loop_routes:true,competitive_outreach_policy:COMPETITIVE_OUTREACH_POLICY_VERSION};
 }
 
 export async function handleDistributionNetworkRoute(request,env){
