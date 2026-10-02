@@ -30,7 +30,8 @@ const paths={
   bluesky:"/api/audience/bluesky-reply/health",
   commandCenter:"/api/command-center-resilient-health",
   discovery:"/api/distribution/discovery-health",
-  schedule:"/api/runtime/schedule-contract"
+  schedule:"/api/runtime/schedule-contract",
+  supervisor:"/api/growth/supervisor/public"
 };
 
 const entries=await Promise.all(Object.entries(paths).map(async ([name,path])=>[name,await read(path)]));
@@ -90,7 +91,27 @@ const report={
   checkedAt:new Date().toISOString(),
   architecture:{phase:closure.phase||null,legacyEdges:closure.legacyEdges??null,directCoveragePct:closure.routeOwnership?.directCoveragePct??null,fingerprint:closure.deploymentFingerprint||null},
   growth:{status:overall.status||null,strictHumans24h:Number(overall.strictHumans24h||0),strictHumans7d:Number(overall.strictHumans7d||0),externalExecutions24h:Number(overall.externalExecutions24h||0),externalExecutions7d:Number(overall.externalExecutions7d||0),authorityStatus:overall.authorityStatus||null,engines},
-  authority:{status:authority.status||null,senderClaimed:Number(authority.senderClaimed||0),senderDispatchReady:Number(authority.senderDispatchReady||0)},
+  authority:{
+    status:authority.status||null,
+    attempts24:Number(authority.attempts24||0),
+    attemptMin24h:Number(authority.attemptMin24h||0),
+    attemptTarget24h:Number(authority.attemptTarget24h||0),
+    queue:Number(authority.queue||0),
+    runnableQueue:Number(authority.runnableQueue||0),
+    deferredQueue:Number(authority.deferredQueue||0),
+    prepared:Number(authority.prepared||0),
+    senderClaimed:Number(authority.senderClaimed||0),
+    senderDispatchReady:Number(authority.senderDispatchReady||0),
+    recentEvents:Array.isArray(authority.recentEvents)?authority.recentEvents.slice(0,5):[]
+  },
+  discovery:probes.discovery.data||{},
+  supervisor:{
+    brain:probes.supervisor.data?.brain||null,
+    generatedAt:probes.supervisor.data?.generatedAt||null,
+    executionContract:probes.supervisor.data?.executionContract||{},
+    directives:Array.isArray(probes.supervisor.data?.directives)?probes.supervisor.data.directives:[],
+    topSearchTargets:Array.isArray(probes.supervisor.data?.topSearchTargets)?probes.supervisor.data.topSearchTargets:[]
+  },
   content:{lastBriefAt,profiles:content.profiles||{},briefs:content.briefs||{}},
   audience:{health:audience.health||null,platformCount:Array.isArray(audience.platforms)?audience.platforms.length:0,blueskyGuardVersion:bluesky.version||null},
   commandCenter:{ok:cc.ok===true,version:cc.version||null,preparedEditorialCount:Number(cc.preparedEditorialCount||0)},
