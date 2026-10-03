@@ -38,3 +38,15 @@ test('live or verified surfaces without backlinks advance into publisher authori
   assert.match(src,/backlinkMissing&&\(!network\|\|network==='queued'\|\|network==='send_failed'\).*publisher_contact_discovery/);
   assert.match(src,/backlinkMissing&&network==='contact_route_found'.*execute_alternate_routes/);
 });
+
+
+test('publisher contact discovery respects its 20 hour network scan cooldown',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  assert.match(src,/n\.contact_email network_contact_email/);
+  assert.match(src,/n\.contact_checked_at network_contact_checked_at/);
+  assert.match(src,/const contactDiscoveryDue=!network/);
+  assert.match(src,/Date\.now\(\)-networkContactCheckedAt>=20\*3600000/);
+  assert.match(src,/backlinkMissing&&contactDiscoveryDue/);
+  assert.match(src,/acquisitionOpen&&contactDiscoveryDue/);
+  assert.match(src,/contact_discovery_due:contactDiscoveryDue/);
+});
