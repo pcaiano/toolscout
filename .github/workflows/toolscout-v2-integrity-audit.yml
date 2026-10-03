@@ -6,6 +6,23 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/toolscout-v2-integrity-audit.yml'
+      - '.github/workflows/deploy-worker.yml'
+      - 'distribution-orchestrator-worker.js'
+      - 'distribution-autonomous-worker.js'
+      - 'distribution-network-worker.js'
+      - 'growth-execution-contract.js'
+      - 'growth-supervisor.js'
+      - 'growth-scheduler.js'
+      - 'runtime-schedule-contract.js'
+      - 'compute-router-worker.js'
+      - 'sender-capacity-policy.js'
+      - 'command-center-business-truth-runtime.js'
+      - 'command-center-simplified-view.js'
+      - 'command-center-ga4-worker.js'
+      - 'migrations/**'
+      - 'scripts/audit-runtime-architecture.mjs'
+      - 'scripts/validate-v2-preservation.mjs'
+      - 'tests/toolscout-v2-*.test.mjs'
 
 permissions:
   contents: read
