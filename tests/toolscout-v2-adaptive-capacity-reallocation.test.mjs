@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import {senderCapacityDirective} from '../sender-capacity-policy.js';
 
 const orchestrator=fs.readFileSync(new URL('../distribution-orchestrator-worker.js',import.meta.url),'utf8');
+const executionContract=fs.readFileSync(new URL('../growth-execution-contract.js',import.meta.url),'utf8');
 const supervisor=fs.readFileSync(new URL('../growth-supervisor.js',import.meta.url),'utf8');
 const commandCenter=fs.readFileSync(new URL('../command-center-simplified-view.js',import.meta.url),'utf8');
 
@@ -48,4 +49,12 @@ test('sender exhaustion materially reallocates bounded capacity to autonomous au
   assert.match(orchestrator,/runInternal\('distribution_autonomous',[\s\S]+?\{limit:autonomousBatchLimit,maxInFlight:autonomousBatchLimit\}\)/);
   assert.match(orchestrator,/taskIds:\[task\.task_id\]/);
   assert.match(orchestrator,/adaptiveAuthorityBatch:senderSupplyExhausted/);
+});
+
+test('adaptive authority batch overrides the admission cap instead of being re-capped at one',()=>{
+  assert.match(executionContract,/rebalanceExecutionAdmission\(env,\{readyCaps=\{\}\}=\{\}\)/);
+  assert.match(executionContract,/readyCaps\?\.\[executor\]\?\?READY_CAPS\[executor\]/);
+  assert.match(executionContract,/admissionCap=null/);
+  assert.match(executionContract,/\{\[executor\]:requestedAdmissionCap\}/);
+  assert.match(orchestrator,/admissionCap:batchLimit/);
 });
