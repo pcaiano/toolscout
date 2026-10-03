@@ -400,22 +400,35 @@ async function reconcileRouteActions(env,{surfaceSlug=null}={}){
       else if(s==='auth_required'){next='auth_required';result='authentication_required';}
       else if(['policy_blocked','rejected','skipped','unavailable_free'].includes(s)){next='policy_blocked';result=`route_opportunity_${s}`;}
       else if(s==='research_required'){
-        const researchAttempts=Number(row.research_attempts||0),researchActive=Number(row.research_active||0)>0;
+        const researchAttempts=Number(row.research_attempts||0),routeAttempts=Number(row.attempts||0),effectiveAttempts=Math.max(researchAttempts,routeAttempts),researchActive=Number(row.research_active||0)>0;
         const staleCutoff=new Date(Date.now()-ROUTE_RESEARCH_STALE_HOURS*3600000).toISOString().replace('T',' ').slice(0,19);
         const staleResearch=row.status==='researching'&&String(row.action_updated_at||'')<=staleCutoff;
         if(researchActive){next='researching';result='autonomous_qualification_research_active';}
-        else if(researchAttempts>=MAX_ROUTE_RESEARCH_ATTEMPTS){
-          next='exhausted';result=`autonomous_qualification_research_exhausted:${researchAttempts}`;researchExhausted++;
-          const detail=`Alternate-route research exhausted after ${researchAttempts} terminal research attempts without a conclusive submission, human-gate or placement outcome.`;
+        else if(effectiveAttempts>=MAX_ROUTE_RESEARCH_ATTEMPTS){
+          next='exhausted';result=`autonomous_qualification_research_exhausted:${effectiveAttempts}`;researchExhausted++;
+          const detail=`Alternate-route research exhausted after ${effectiveAttempts} bounded research attempts without a conclusive submission, human-gate or placement outcome.`;
           await env.DB.prepare(`UPDATE distribution_opportunities
             SET status='skipped',human_required=0,next_action=?,updated_at=datetime('now')
             WHERE surface_slug=? AND status='research_required'`).bind(detail,row.opportunity_slug).run().catch(()=>{});
         }else if(staleResearch){
-          next='retry_due';result=`autonomous_qualification_retry_due:${researchAttempts}`;retryDue++;
-          const detail=`Alternate-route research lease expired after ${ROUTE_RESEARCH_STALE_HOURS}h without active overflow work. Requeue bounded research attempt ${researchAttempts+1}/${MAX_ROUTE_RESEARCH_ATTEMPTS}.`;
-          await env.DB.prepare(`UPDATE distribution_opportunities
-            SET status='research_required',human_required=0,last_checked_at=NULL,next_action=?,updated_at=datetime('now')
-            WHERE surface_slug=? AND status='research_required'`).bind(detail,row.opportunity_slug).run().catch(()=>{});
+          const nextAttempt=effectiveAttempts+1;
+          if(nextAttempt>=MAX_ROUTE_RESEARCH_ATTEMPTS){
+            next='exhausted';result=`autonomous_qualification_research_exhausted:${nextAttempt}`;researchExhausted++;
+            const detail=`Alternate-route research exhausted after ${nextAttempt} bounded research attempts without a conclusive submission, human-gate or placement outcome.`;
+            await env.DB.batch([
+              env.DB.prepare(`UPDATE distribution_contact_route_actions SET attempts=MAX(attempts,?),last_attempt_at=datetime('now') WHERE route_id=?`).bind(nextAttempt,row.route_id),
+              env.DB.prepare(`UPDATE distribution_opportunities SET status='skipped',human_required=0,next_action=?,updated_at=datetime('now') WHERE surface_slug=? AND status='research_required'`).bind(detail,row.opportunity_slug)
+            ]).catch(()=>{});
+          }else{
+            next='retry_due';result=`autonomous_qualification_retry_due:${nextAttempt}`;retryDue++;
+            const detail=`Alternate-route research lease expired after ${ROUTE_RESEARCH_STALE_HOURS}h without active overflow work. Requeue bounded research attempt ${nextAttempt}/${MAX_ROUTE_RESEARCH_ATTEMPTS}.`;
+            await env.DB.batch([
+              env.DB.prepare(`UPDATE distribution_contact_route_actions SET attempts=MAX(attempts,?),last_attempt_at=datetime('now') WHERE route_id=?`).bind(nextAttempt,row.route_id),
+              env.DB.prepare(`UPDATE distribution_opportunities
+                SET status='research_required',human_required=0,last_checked_at=NULL,next_action=?,updated_at=datetime('now')
+                WHERE surface_slug=? AND status='research_required'`).bind(detail,row.opportunity_slug)
+            ]).catch(()=>{});
+          }
         }else{next='researching';result='autonomous_qualification_in_progress';}
       }
       else if(!s){next='stalled';result='missing_synthetic_opportunity';stalled++;}
