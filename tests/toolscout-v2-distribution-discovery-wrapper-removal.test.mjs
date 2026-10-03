@@ -45,3 +45,17 @@ test('generic traversal bypasses discovery wrapper while autonomous and submissi
   assert.match(submission,/import \{runDistributionDiscoveryScheduled\} from '\.\/distribution-discovery-worker\.js'/);
   assert.match(submission,/await runDistributionDiscoveryScheduled\(event,env,ctx\)/);
 });
+
+
+test('recursive discovery drains more than one dynamic source per refresh and rejects asset noise',()=>{
+  const discovery=read('distribution-discovery-worker.js');
+  const config=JSON.parse(read('data/distribution-discovery-sources.json'));
+  const enabled=(config.sources||[]).filter(x=>x.enabled).length;
+  assert.ok(Number(config.guardrails?.max_fetches_per_run||0)>=16);
+  assert.ok(Number(config.guardrails.max_fetches_per_run)-enabled>=10,'at least ten dynamic source slots should remain after static sources');
+  assert.match(discovery,/STATIC_SOURCE_PATH_RE/);
+  assert.match(discovery,/wp-content\\/uploads/);
+  assert.match(discovery,/storage\\/v1\\/object\\/public/);
+  assert.match(discovery,/recursive_source_noise_pruned/);
+  assert.match(discovery,/!item\?\.usable\)\{if\(item\?\.attempted&&String\(item\?\.s\?\.type\|\|''\)==='recursive'\)await markScanned/);
+});
