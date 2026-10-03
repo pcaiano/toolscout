@@ -901,6 +901,43 @@ async function reconcileOpenHumanGateStates(env){
   return {reconciled};
 }
 
+async function reconcileTerminalOpenHumanGates(env){
+  await ensureHumanGateSchema(env);
+  const q=await env.DB.prepare(`SELECT g.gate_key,g.subject_key,g.gate_type,g.action_url,
+      o.status opportunity_status,o.live_url
+    FROM human_gate_contract g
+    LEFT JOIN distribution_opportunities o ON o.surface_slug=g.subject_key
+    WHERE g.engine='distribution' AND g.status='open'
+      AND (
+        o.surface_slug IS NULL
+        OR o.status IN ('submitted','pending_review','scheduled','verified','live','policy_blocked','rejected','skipped','unavailable_free')
+      )
+    ORDER BY g.updated_at ASC LIMIT 100`).all().catch(()=>({results:[]}));
+  let cancelled=0,resolved=0,missing=0;
+  for(const row of q.results||[]){
+    const s=String(row.opportunity_status||'');
+    const achieved=['verified','live'].includes(s);
+    const status=achieved?'resolved':'cancelled';
+    const detail=!s
+      ?'Human Gate closed because its distribution opportunity no longer exists.'
+      :achieved
+        ?`Human Gate resolved because the distribution opportunity is already ${s}.`
+        :`Human Gate cancelled because the distribution opportunity advanced to terminal/superseding state ${s}; owner action is no longer required.`;
+    const w=await env.DB.prepare(`UPDATE human_gate_contract SET
+        status=?,resolved_at=datetime('now'),next_verification_at=NULL,verification_detail=?,updated_at=datetime('now')
+      WHERE gate_key=? AND status='open'`).bind(status,detail,row.gate_key).run().catch(()=>null);
+    const changed=Number(w?.meta?.changes||w?.changes||0);
+    if(!changed)continue;
+    if(status==='resolved')resolved+=changed;else cancelled+=changed;
+    if(!s)missing+=changed;
+    await env.DB.prepare(`INSERT INTO distribution_events(
+        event_id,surface_slug,event_type,status,destination_url,detail,observed_at,created_at
+      ) VALUES(?,?,'terminal_human_gate_reconciled',?,?,?,datetime('now'),datetime('now'))`)
+      .bind(`gateterm_${crypto.randomUUID()}`,row.subject_key,status,row.live_url||row.action_url||null,detail).run().catch(()=>{});
+  }
+  return{checked:(q.results||[]).length,cancelled,resolved,missing};
+}
+
 async function reconcileOrphanHumanStates(env){
   await ensureHumanGateSchema(env);
   const q=await env.DB.prepare(`SELECT o.surface_slug,o.status,o.action_url
@@ -1321,6 +1358,7 @@ export async function runAutonomousDistributionCycle(env,task=null){
   const legacyGenericHumanGates=await reconcileLegacyGenericHumanGates(env);
   const obsoleteClassifierHumanGates=await reconcileObsoleteClassifierHumanGates(env);
   const freshResearchHumanGates=await reconcileFreshResearchHumanGates(env);
+  const terminalOpenHumanGates=await reconcileTerminalOpenHumanGates(env);
   const openHumanGateStates=await reconcileOpenHumanGateStates(env);
   const orphanHumanStates=await reconcileOrphanHumanStates(env);
   const duplicateGates=await reconcileDuplicateSubmissionGates(env);
@@ -1354,7 +1392,7 @@ export async function runAutonomousDistributionCycle(env,task=null){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`)
       .bind(`human_sidecar_${crypto.randomUUID()}`,'human_gate_sidecar_error','partial','distribution_engine',`Human-gate sidecar failed after autonomous work completed: ${humanSidecar.error}`).run().catch(()=>{});
   }
-  return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,obsoleteClassifierHumanGates,freshResearchHumanGates,openHumanGateStates,orphanHumanStates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
+  return {ok:true,discovery,technicalSuppressed,normalized,legacyGenericHumanGates,obsoleteClassifierHumanGates,freshResearchHumanGates,terminalOpenHumanGates,openHumanGateStates,orphanHumanStates,duplicateGates,duplicateHumanGates,machineGateRecovery,authAutomation,routeRefresh,qualification,authAutomationAfterQualification,credentialExecution,execution,verification,footprint,authority,authorityRecovery,humanSidecar,human_gate_execution_policy:'non_blocking_sidecar_v2'};
 }
 function admin(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
 
