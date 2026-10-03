@@ -1,14 +1,76 @@
-name: ToolScout GitHub Actions Conservation Mode
+name: One Shot Phase 251 Discovery Frontier Proof
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/manual-distribution-discovery.yml'
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
-  conservation-notice:
+  prove:
     runs-on: ubuntu-latest
     steps:
-      - name: Conservation mode notice
-        run: echo 'GitHub Actions conservation mode is active until 2026-10-01. Restore the original workflows from branch pre-conservation-2026-09-13 only after confirming the monthly Actions quota has reset.'
+      - name: Get ToolScout discovery OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=toolscout-discovery")"
+          token="$(node -e "const x=JSON.parse(process.argv[1]); if(!x.value) process.exit(1); process.stdout.write(x.value)" "$response")"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Exercise live Phase 251 discovery frontier
+        env:
+          TOOLSCOUT_DISCOVERY_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            http_code="$(curl -sS -o "/tmp/phase251-${attempt}.json" -w '%{http_code}' \
+              -X POST 'https://trytoolscout.org/api/distribution/discovery/refresh' \
+              -H "Authorization: Bearer $TOOLSCOUT_DISCOVERY_TOKEN" \
+              -H 'Content-Type: application/json')"
+            cat "/tmp/phase251-${attempt}.json"
+            test "$http_code" -ge 200
+            test "$http_code" -lt 300
+            ATTEMPT="$attempt" node - <<'NODE'
+          const fs=require('fs');
+          const n=process.env.ATTEMPT;
+          const x=JSON.parse(fs.readFileSync('/tmp/phase251-'+n+'.json','utf8'));
+          if(x?.ok!==true) throw new Error('discovery refresh failed: '+JSON.stringify(x));
+          if(Number(x?.source_rescan_hours)!==6) throw new Error('Phase 251 freshness contract missing');
+          if(Number(x?.scanned||0)>16) throw new Error('Phase 251 exceeded bounded scan size');
+          if(x?.configured_sources==null) throw new Error('configured source persistence truth missing');
+          NODE
+            due="$(node -p "JSON.parse(require('fs').readFileSync('/tmp/phase251-${attempt}.json','utf8')).due_sources_after||0")"
+            if [ "$due" -le 0 ]; then break; fi
+          done
+
+          node - <<'NODE'
+          const fs=require('fs');
+          const files=fs.readdirSync('/tmp').filter(x=>/^phase251-\d+\.json$/.test(x)).sort();
+          const rows=files.map(f=>JSON.parse(fs.readFileSync('/tmp/'+f,'utf8')));
+          const sum=k=>rows.reduce((n,x)=>n+Number(x?.[k]||0),0);
+          const proof={
+            ok:true,
+            cycles:rows.length,
+            scanned:sum('scanned'),
+            found:sum('found'),
+            inserted:sum('inserted'),
+            knownDuplicates:sum('known_duplicates'),
+            insertConflicts:sum('insert_conflicts'),
+            recursiveSourcesLearned:sum('recursive_sources_learned'),
+            configuredSeedsAdded:rows.reduce((n,x)=>n+Number(x?.configured_sources?.seeded||0),0),
+            firstDue:Number(rows[0]?.due_sources_before||0),
+            lastDue:Number(rows.at(-1)?.due_sources_after||0)
+          };
+          console.log(JSON.stringify(proof,null,2));
+          if(proof.scanned<=0) throw new Error('Phase 251 scanned no due source');
+          if(proof.inserted<=0 && proof.recursiveSourcesLearned<=0){
+            throw new Error('Phase 251 rotated sources but replenished neither opportunity nor source supply: '+JSON.stringify(proof));
+          }
+          NODE
