@@ -50,3 +50,11 @@ test('publisher contact discovery respects its 20 hour network scan cooldown',()
   assert.match(src,/acquisitionOpen&&contactDiscoveryDue/);
   assert.match(src,/contact_discovery_due:contactDiscoveryDue/);
 });
+
+
+test('publisher contact discovery is limited to complementary network surface types',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  assert.match(src,/const publisherNetworkEligible=isPublisherNetworkSurfaceType\(row\.surface_type\)/);
+  assert.match(src,/const contactDiscoveryDue=publisherNetworkEligible&&/);
+  assert.match(src,/publisher_network_eligible:publisherNetworkEligible/);
+});
