@@ -47,15 +47,16 @@ test('generic traversal bypasses discovery wrapper while autonomous and submissi
 });
 
 
-test('recursive discovery drains more than one dynamic source per refresh and rejects asset noise',()=>{
+test('recursive discovery drains a freshness-rotated D1 frontier and rejects asset noise',()=>{
   const discovery=read('distribution-discovery-worker.js');
   const config=JSON.parse(read('data/distribution-discovery-sources.json'));
-  const enabled=(config.sources||[]).filter(x=>x.enabled).length;
   assert.ok(Number(config.guardrails?.max_fetches_per_run||0)>=16);
-  assert.ok(Number(config.guardrails.max_fetches_per_run)-enabled>=10,'at least ten dynamic source slots should remain after static sources');
+  assert.match(discovery,/ensureConfiguredSources\(env,c\.sources\|\|\[\]\)/);
+  assert.match(discovery,/SOURCE_RESCAN_HOURS=6/);
+  assert.match(discovery,/CASE WHEN s\.last_scanned_at IS NULL THEN 0 ELSE 1 END/);
   assert.match(discovery,/STATIC_SOURCE_PATH_RE/);
   assert.match(discovery,/wp-content/);
   assert.match(discovery,/storage/);
   assert.match(discovery,/recursive_source_noise_pruned/);
-  assert.match(discovery,/!item\?\.usable\)\{if\(item\?\.attempted&&String\(item\?\.s\?\.type\|\|''\)==='recursive'\)await markScanned/);
+  assert.match(discovery,/!item\?\.usable\)\{if\(item\?\.attempted\)await markScanned/);
 });
