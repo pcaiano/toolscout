@@ -249,6 +249,34 @@ async function materializeVendorContactRoute(env,{domain,routeType,routeUrl,payl
   return {materialized:changed>0,surfaceSlug,reason:null};
 }
 
+async function backfillVendorContactRoutes(env,limit=24){
+  const bounded=Math.max(1,Math.min(40,num(limit)||24));
+  const q=await env.DB.prepare(`SELECT cs.domain,cs.source_type,cs.source_key,cs.source_name,cs.route_type,cs.route_url
+    FROM contact_supply_domain cs
+    WHERE cs.status='ready_route'
+      AND cs.route_url IS NOT NULL
+      AND cs.source_type IN ('vendor_amplification','catalog_vendor')
+      AND NOT EXISTS(
+        SELECT 1 FROM distribution_opportunities o
+        WHERE o.surface_type='vendor_contact_route' AND o.action_url=cs.route_url
+      )
+    ORDER BY cs.priority_score DESC,cs.updated_at ASC
+    LIMIT ?`).bind(bounded).all().catch(()=>({results:[]}));
+  let checked=0,materialized=0,excluded=0;
+  for(const row of rows(q)){
+    checked++;
+    const out=await materializeVendorContactRoute(env,{
+      domain:row.domain,
+      routeType:row.route_type||'contact_page',
+      routeUrl:row.route_url,
+      payload:{sourceType:row.source_type,sourceKey:row.source_key,sourceName:row.source_name}
+    }).catch(()=>({materialized:false,reason:'materialize_failed'}));
+    if(out?.materialized)materialized++;
+    else if(out?.reason)excluded++;
+  }
+  return {checked,materialized,excluded,bounded};
+}
+
 async function upsertContactSupplyDomain(env,{domain,sourceType,sourceKey=null,sourceName=null,sourceUrl=null,priority=0}){
   const d=contactDomain(domain);if(!contactDomainEligible(d))return 0;
   const w=await env.DB.prepare(`INSERT INTO contact_supply_domain(domain,source_type,source_key,source_name,source_url,priority_score,status,next_research_at,created_at,updated_at)
@@ -1414,6 +1442,7 @@ async function runOverflowTick(env){
   const foldedContactResearch=await isolatedOverflowStage(env,'contact_route_fold',()=>reconcileRedundantContactRouteJobs(env),0);
   const unreachableCompaction=await isolatedOverflowStage(env,'source_unreachable_compaction',()=>reconcileSourceUnreachableBacklog(env),0);
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
+  const vendorRouteBackfill=await isolatedOverflowStage(env,'vendor_contact_route_backfill',()=>backfillVendorContactRoutes(env,24),{checked:0,materialized:0,excluded:0,bounded:24});
   const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
   const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
 
@@ -1433,11 +1462,11 @@ async function runOverflowTick(env){
   const runs=[...preRuns,...postRuns];
   const first=runs[0]||null;
   const dispatched=runs.filter(x=>x.dispatch?.ok).length;
-  const failedStages=[contactSupply,qualification,execution,research].filter(x=>x&&x.ok===false).length;
+  const failedStages=[contactSupply,vendorRouteBackfill,qualification,execution,research].filter(x=>x&&x.ok===false).length;
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,genericDomainConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
+    ok,status,contactSupply,vendorRouteBackfill,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,genericDomainConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
     nonSubmissionNoisePruned,batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages

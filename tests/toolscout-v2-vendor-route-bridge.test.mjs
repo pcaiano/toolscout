@@ -56,3 +56,14 @@ test('Growth Brain qualifies vendor routes but excludes them from backlink autho
   assert.match(orchestrator,/if\(vendorRouteQualification\)actions\.unshift\('autonomous_route_qualification'\)/);
   assert.match(orchestrator,/const backlinkMissing=backlinkAcquisition&&authoritySurface/);
 });
+
+test('existing vendor ready routes are backfilled incrementally without reopening generic outreach',()=>{
+  assert.match(compute,/async function backfillVendorContactRoutes\(env,limit=24\)/);
+  assert.match(compute,/cs\.status='ready_route'/);
+  assert.match(compute,/cs\.source_type IN \('vendor_amplification','catalog_vendor'\)/);
+  assert.match(compute,/o\.surface_type='vendor_contact_route' AND o\.action_url=cs\.route_url/);
+  assert.match(compute,/Math\.min\(40,num\(limit\)\|\|24\)/);
+  assert.match(compute,/vendor_contact_route_backfill/);
+  assert.match(compute,/backfillVendorContactRoutes\(env,24\)/);
+});
+
