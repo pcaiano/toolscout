@@ -2045,6 +2045,16 @@ async function applyRoleEmailResult(env,job,result){
   }
   return{applied:false,reason:'unsupported_email_research_job'};
 }
+async function updateContactSupplySourceResult(env,payload,status,lastResult,delayDays){
+  const sourceId=safe(payload?.supplySourceId||'',120);
+  if(!sourceId)return 0;
+  const w=await env.DB.prepare(`UPDATE contact_supply_source SET
+      status=?,last_result=?,next_research_at=datetime('now','+'||?||' days'),updated_at=datetime('now')
+      WHERE source_id=?`)
+    .bind(safe(status,40),safe(lastResult,500),Math.max(1,num(delayDays)||1),sourceId).run().catch(()=>null);
+  return num(w?.meta?.changes||w?.changes);
+}
+
 async function applyContactSupplyResult(env,job,result){
   let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
   if(payload.authorizationClass!=='public_role_email_discovery_v1')return{applied:false,reason:'contact_supply_contract_mismatch'};
@@ -2092,7 +2102,8 @@ async function applyContactSupplyResult(env,job,result){
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at)
       VALUES(?, 'contact_supply_email_found','completed','contact_supply',?,?,?,datetime('now'),datetime('now'))`)
       .bind(`contact_supply_${crypto.randomUUID()}`,domain,source,`Contact Supply Engine validated a public same-domain role mailbox for ${domain} and propagated it to eligible outreach lanes.`).run().catch(()=>{});
-      return{applied:applied>0,email,domain,status:supplyStatus,senderAdmissible:admitted};
+      await updateContactSupplySourceResult(env,payload,'email_found','public_role_email_found',90);
+      return{applied:applied>0,email,domain,status:supplyStatus,senderAdmissible:admitted,sourceId:payload.supplySourceId||null};
   }
 
   if(bestRoute){
@@ -2113,7 +2124,8 @@ async function applyContactSupplyResult(env,job,result){
         .bind(routeUrl,row.surface_slug).run().catch(()=>{});
     }
     const vendorBridge=await materializeVendorContactRoute(env,{domain,routeType,routeUrl,payload}).catch(error=>({materialized:false,reason:String(error?.message||error).slice(0,300)}));
-    return{applied:applied>0,domain,status:'ready_route',route:bestRoute,vendorBridge};
+    await updateContactSupplySourceResult(env,payload,'route_found',`public_contact_route_found:${routeType}`,30);
+    return{applied:applied>0,domain,status:'ready_route',route:bestRoute,vendorBridge,sourceId:payload.supplySourceId||null};
   }
 
   const attempts=await env.DB.prepare(`SELECT public_attempts FROM contact_supply_domain WHERE domain=? LIMIT 1`).bind(domain).first().catch(()=>({public_attempts:0}));
@@ -2125,9 +2137,11 @@ async function applyContactSupplyResult(env,job,result){
     apollo_status='plan_blocked',updated_at=datetime('now')
     WHERE domain=? AND contact_email IS NULL`).bind(newStatus,nextAttempts,delay,domain).run().catch(()=>null);
   applied+=Number(w?.meta?.changes||w?.changes||0);
-  return{applied:applied>0,domain,status:newStatus,reason:'no_public_contact_evidence'};
+  await updateContactSupplySourceResult(env,payload,'exhausted','no_public_contact_evidence',30);
+  return{applied:applied>0,domain,status:newStatus,reason:'no_public_contact_evidence',sourceId:payload.supplySourceId||null};
 }
 async function applyContactSupplyFailure(env,job,result){
+  let payload={};try{payload=JSON.parse(job.payload_json||'{}')}catch{}
   const domain=contactDomain(job.subject_key);if(!contactDomainEligible(domain))return{applied:false};
   const row=await env.DB.prepare(`SELECT public_attempts FROM contact_supply_domain WHERE domain=? LIMIT 1`).bind(domain).first().catch(()=>({public_attempts:0}));
   const attempts=num(row?.public_attempts)+1;
@@ -2135,7 +2149,9 @@ async function applyContactSupplyFailure(env,job,result){
   const delay=attempts>=2?30:1;
   const w=await env.DB.prepare(`UPDATE contact_supply_domain SET status=?,public_attempts=?,last_researched_at=datetime('now'),next_research_at=datetime('now','+'||?||' days'),apollo_status='plan_blocked',updated_at=datetime('now') WHERE domain=? AND contact_email IS NULL`)
     .bind(status,attempts,delay,domain).run().catch(()=>null);
-  return{applied:Number(w?.meta?.changes||w?.changes||0)>0,status,domain,error:safe(result?.error||'research_failed',300)};
+  const sourceError=safe(result?.error||'research_failed',300);
+  await updateContactSupplySourceResult(env,payload,sourceError==='source_unreachable'?'unreachable':'retry',sourceError,sourceError==='source_unreachable'?7:3);
+  return{applied:Number(w?.meta?.changes||w?.changes||0)>0,status,domain,error:sourceError,sourceId:payload.supplySourceId||null};
 }
 async function completeBatch(request,env,ctx,batchId){
   await ensureSchema(env);
