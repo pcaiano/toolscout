@@ -30,3 +30,8 @@ test('manual execution dispatch refreshes opportunities before claiming tasks',(
   const exec=src.indexOf("triggerName:'manual_api'",coord);
   assert.ok(coord>=0&&exec>coord);
 });
+
+test('execution-scoped OIDC may refresh canonical opportunities but does not open general admin routes',()=>{
+  assert.match(src,/\/api\/growth\/opportunities\/refresh'.*POST.*executionAuth\(request,env\)/s);
+  assert.match(src,/\/api\/growth\/supervisor\/audit'.*POST.*auth\(request,env\)/s);
+});
