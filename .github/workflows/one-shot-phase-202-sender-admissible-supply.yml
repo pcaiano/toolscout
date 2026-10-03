@@ -1,4 +1,4 @@
-name: One Shot Phase 207 Post Cron Authority Proof
+name: One Shot Phase 208 Confirm Post Cron Authority Proof
 
 on:
   push:
