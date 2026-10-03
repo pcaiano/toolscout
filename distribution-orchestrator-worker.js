@@ -14,6 +14,7 @@ import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
+// Phase 216: publisher-network work is gated by the executor's eligibility contract.
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const AUTONOMOUS_CONTROL_CRON=TOOLSCOUT_CRONS.autonomousDistribution;
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
