@@ -13,6 +13,7 @@ import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
+import {senderCapacitySnapshot} from './sender-capacity-policy.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const AUTONOMOUS_CONTROL_CRON=TOOLSCOUT_CRONS.autonomousDistribution;
@@ -948,6 +949,8 @@ async function executeCatalogImpactReviewTask(env,task={}){
 async function runGrowthExecutionContractCycle(env){
   const synced=await syncExecutionContracts(env);
   const before=await reconcileExecutionContracts(env);
+  const senderCapacity=await senderCapacitySnapshot(env);
+  const senderSupplyExhausted=Boolean(senderCapacity?.exhausted);
   const results={};
   let selectedInternalLane=null;
   try{
@@ -969,7 +972,7 @@ async function runGrowthExecutionContractCycle(env){
             OR (executor='affiliate_cycle'${affiliateAdmission})
             OR executor IN ('content_issue','catalog_cycle')
           )
-        ORDER BY CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,
+        ORDER BY ${senderSupplyExhausted?"CASE executor WHEN 'distribution_network' THEN 0 WHEN 'distribution_autonomous' THEN 1 WHEN 'content_issue' THEN 2 WHEN 'catalog_cycle' THEN 4 WHEN 'affiliate_cycle' THEN 5 ELSE 3 END,":""} CASE status WHEN 'stalled' THEN 0 ELSE 1 END,priority_score DESC,
           CASE action
             WHEN 'execute_alternate_routes' THEN 0
             WHEN 'autonomous_route_qualification' THEN 1
@@ -1064,9 +1067,13 @@ async function runGrowthExecutionContractCycle(env){
     if(catalogImpactReady?.ok)await runInternal('catalog_cycle',runCatalogTask);
   }
 
-  const senderClaim=await claimExecutorTasks(env,'make_sender',{limit:12,maxInFlight:12,result:'make_sender_waiting_for_exact_external_send'});
-  const senderWake=await wakeMakeSender(env,senderClaim.claimed);
-  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:12,deliveryMode:'instant_webhook',wake:senderWake};
+  const senderClaim=senderSupplyExhausted
+    ?{claimed:0,taskIds:[],tasks:[],capacity:0}
+    :await claimExecutorTasks(env,'make_sender',{limit:12,maxInFlight:12,result:'make_sender_waiting_for_exact_external_send'});
+  const senderWake=senderSupplyExhausted
+    ?{triggered:false,reason:'sender_supply_exhausted_capacity_reallocated'}
+    :await wakeMakeSender(env,senderClaim.claimed);
+  results.make_sender={claimed:senderClaim.claimed,external:true,task:senderClaim.tasks?.[0]||null,tasks:senderClaim.tasks||[],batchCapacity:senderSupplyExhausted?0:12,deliveryMode:'instant_webhook',wake:senderWake,capacityState:senderCapacity};
 
   results.seo_cloudflare=await runSeoExecutionBatch(env,8,'growth_execution_contract');
 
@@ -1074,7 +1081,7 @@ async function runGrowthExecutionContractCycle(env){
   results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
   const after=await reconcileExecutionContracts(env);
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,boundedExecution:{maxPrimaryInternalLanesPerRun:selectedInternalLane==='distribution_network'||selectedInternalLane==='distribution_autonomous'?2:1,selectedInternalLane,authorityCounterpartDrain:true,seoBatchMax:8,seoExecutor:'cloudflare_internal',externalExecutorsClaimOnly:true,contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
+  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,senderCapacity,capacityReallocation:{active:senderSupplyExhausted,from:'make_sender',to:senderSupplyExhausted?['distribution_network','distribution_autonomous','seo_cloudflare','content_issue']:[],reason:senderSupplyExhausted?'sender_supply_exhausted':null},boundedExecution:{maxPrimaryInternalLanesPerRun:selectedInternalLane==='distribution_network'||selectedInternalLane==='distribution_autonomous'?2:1,selectedInternalLane,authorityCounterpartDrain:true,seoBatchMax:8,seoExecutor:'cloudflare_internal',externalExecutorsClaimOnly:true,contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
 }
 async function runBoundedPublicExecutionReconcile(env){
   const synced=await syncExecutionContracts(env);
