@@ -376,17 +376,26 @@ async function refreshContactSupplyMetrics(env){
       SUM(CASE WHEN status='cooldown' THEN 1 ELSE 0 END) cooldown,
       SUM(CASE WHEN status='researching' THEN 1 ELSE 0 END) researching,
       SUM(CASE WHEN status IN ('queued','unresolved','provider_blocked') THEN 1 ELSE 0 END) unresolved,
-      SUM(CASE WHEN status IN ('unresolved','provider_blocked') AND contact_email IS NULL THEN 1 ELSE 0 END) apollo_eligible
+      SUM(CASE WHEN status IN ('unresolved','provider_blocked') AND contact_email IS NULL THEN 1 ELSE 0 END) apollo_eligible,
+      SUM(CASE WHEN status='route_filtered' THEN 1 ELSE 0 END) route_filtered,
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route') vendor_routes_total,
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route' AND status IN ('candidate','discovered','research_required')) vendor_routes_research,
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route' AND status='policy_blocked') vendor_routes_policy_blocked,
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route' AND status='skipped') vendor_routes_skipped,
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route' AND human_required=1) vendor_routes_human_required,
+      (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route' AND status IN ('live','verified')) vendor_routes_authority_like
     FROM contact_supply_domain`).first().catch(()=>null);
   await env.DB.prepare(`UPDATE contact_supply_metrics SET
       target_ready=?,min_ready=?,catalog_domains=?,network_domains=?,vendor_domains=?,ready_email=?,ready_route=?,cooldown=?,researching=?,unresolved=?,apollo_eligible=?,
+      route_filtered=?,vendor_routes_total=?,vendor_routes_research=?,vendor_routes_policy_blocked=?,vendor_routes_skipped=?,vendor_routes_human_required=?,vendor_routes_authority_like=?,
       updated_at=datetime('now') WHERE id='global'`)
-    .bind(CONTACT_SUPPLY_TARGET,CONTACT_SUPPLY_MIN,num(row?.catalog_domains),num(row?.network_domains),num(row?.vendor_domains),num(row?.ready_email),num(row?.ready_route),num(row?.cooldown),num(row?.researching),num(row?.unresolved),num(row?.apollo_eligible)).run().catch(()=>{});
+    .bind(CONTACT_SUPPLY_TARGET,CONTACT_SUPPLY_MIN,num(row?.catalog_domains),num(row?.network_domains),num(row?.vendor_domains),num(row?.ready_email),num(row?.ready_route),num(row?.cooldown),num(row?.researching),num(row?.unresolved),num(row?.apollo_eligible),
+      num(row?.route_filtered),num(row?.vendor_routes_total),num(row?.vendor_routes_research),num(row?.vendor_routes_policy_blocked),num(row?.vendor_routes_skipped),num(row?.vendor_routes_human_required),num(row?.vendor_routes_authority_like)).run().catch(()=>{});
   return {...row,targetReady:CONTACT_SUPPLY_TARGET,minReady:CONTACT_SUPPLY_MIN};
 }
 async function contactSupplyHealth(env){
   await ensureSchema(env);
-  const row=await env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,updated_at FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+  const row=await env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,route_filtered,vendor_routes_total,vendor_routes_research,vendor_routes_policy_blocked,vendor_routes_skipped,vendor_routes_human_required,vendor_routes_authority_like,updated_at FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
   return {
     status:'active',
     targetReady:num(row?.target_ready||CONTACT_SUPPLY_TARGET),
@@ -400,6 +409,13 @@ async function contactSupplyHealth(env){
     networkDomains:num(row?.network_domains),
     vendorDomains:num(row?.vendor_domains),
     apolloEligible:num(row?.apollo_eligible),
+    routeFiltered:num(row?.route_filtered),
+    vendorRoutesTotal:num(row?.vendor_routes_total),
+    vendorRoutesResearch:num(row?.vendor_routes_research),
+    vendorRoutesPolicyBlocked:num(row?.vendor_routes_policy_blocked),
+    vendorRoutesSkipped:num(row?.vendor_routes_skipped),
+    vendorRoutesHumanRequired:num(row?.vendor_routes_human_required),
+    vendorRoutesAuthorityLike:num(row?.vendor_routes_authority_like),
     apolloStatus:row?.apollo_status||'plan_blocked_people_api',
     apolloReason:'Apollo Free plan blocks People API search; public discovery and route fallback remain autonomous.',
     updatedAt:row?.updated_at||null

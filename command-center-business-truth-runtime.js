@@ -146,7 +146,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       (SELECT COUNT(*) FROM distribution_vendor_amplification WHERE status='reputation_quarantine')+
       (SELECT COUNT(*) FROM distribution_network_outreach WHERE status='reputation_quarantine') reputation_quarantine`).first().catch(()=>({sent24:0,leased_recent:0,ready_contacts:0,reputation_quarantine:0})),
     env.DB.prepare(`SELECT value,updated_at FROM external_runtime_config WHERE key='make_sender_webhook_url' LIMIT 1`).first().catch(()=>null),
-    env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,updated_at
+    env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,route_filtered,vendor_routes_total,vendor_routes_research,vendor_routes_policy_blocked,vendor_routes_skipped,vendor_routes_human_required,vendor_routes_authority_like,updated_at
       FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT incident_id,severity,title,summary,engine,executor,action,approval_required,last_detected_at
       FROM growth_architecture_incidents
@@ -447,6 +447,13 @@ async function buildCommandCenterBusinessTruth(request,env){
       contactSupplyResearching:truthNum(contactSupplyMetrics?.researching),
       contactSupplyUnresolved:truthNum(contactSupplyMetrics?.unresolved),
       contactSupplyApolloEligible:truthNum(contactSupplyMetrics?.apollo_eligible),
+      contactSupplyRouteFiltered:truthNum(contactSupplyMetrics?.route_filtered),
+      contactSupplyVendorRoutesTotal:truthNum(contactSupplyMetrics?.vendor_routes_total),
+      contactSupplyVendorRoutesResearch:truthNum(contactSupplyMetrics?.vendor_routes_research),
+      contactSupplyVendorRoutesPolicyBlocked:truthNum(contactSupplyMetrics?.vendor_routes_policy_blocked),
+      contactSupplyVendorRoutesSkipped:truthNum(contactSupplyMetrics?.vendor_routes_skipped),
+      contactSupplyVendorRoutesHumanRequired:truthNum(contactSupplyMetrics?.vendor_routes_human_required),
+      contactSupplyVendorRoutesAuthorityLike:truthNum(contactSupplyMetrics?.vendor_routes_authority_like),
       contactSupplyApolloStatus:contactSupplyMetrics?.apollo_status||'plan_blocked_people_api',
       contactSupplyUpdatedAt:contactSupplyMetrics?.updated_at||null,
       emailDeliveryMode:makeSenderConfig?.value?'instant_webhook_plus_3h_fallback':'3h_polling_fallback',

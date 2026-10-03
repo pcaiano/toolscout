@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 231 - enforce vendor route semantic quality'))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 232 - expose vendor route bridge truth'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current main
