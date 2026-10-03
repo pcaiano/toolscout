@@ -1,4 +1,4 @@
-name: One Shot Phase 212 Authority Progression Proof
+name: One Shot Phase 214 Post New Runtime Cycle Proof
 
 on:
   push:
@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Cross the next canonical 15m cycle boundary
+        run: sleep 360
       - name: Inspect sender-admissible contact supply and runnable authority
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
