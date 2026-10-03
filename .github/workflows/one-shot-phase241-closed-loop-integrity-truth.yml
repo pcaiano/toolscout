@@ -42,6 +42,23 @@ jobs:
            AND c.action=a.action;
 
           WITH active_actions AS (
+            SELECT g.opportunity_key,g.subject_type,g.subject_key,j.value action
+            FROM growth_opportunity_state g,json_each(g.action_json) j
+            WHERE g.status='active'
+              AND j.value NOT IN ('distribution_measurement','search_measurement')
+          )
+          SELECT a.opportunity_key,a.subject_type,a.subject_key,a.action,
+                 c.task_id,c.executor,c.status,c.last_result,c.updated_at
+          FROM active_actions a
+          LEFT JOIN growth_execution_contract c
+            ON c.source_kind='opportunity'
+           AND c.source_id=a.opportunity_key
+           AND c.action=a.action
+          WHERE c.task_id IS NULL OR c.executor IS NULL OR c.status='executor_missing'
+          ORDER BY a.subject_type,a.opportunity_key,a.action
+          LIMIT 100;
+
+          WITH active_actions AS (
             SELECT g.opportunity_key,j.value action
             FROM growth_opportunity_state g,json_each(g.action_json) j
             WHERE g.status='active'
@@ -101,7 +118,7 @@ jobs:
               OR (engine='distribution' AND mission IN ('autonomous_cycle','economic_learning','network_cycle','authority_execution_recovery'))
               OR (engine='seo_geo_aio' AND mission='execution_batch_v2')
               OR (engine='affiliate' AND mission IN ('coverage_cycle','affiliate_coverage'))
-              OR (engine='catalog' AND mission IN ('quality_control','gap_growth'))
+              OR (engine='catalog' AND mission IN ('runtime_quality','runtime_coverage'))
             )
           ORDER BY engine,mission;
 

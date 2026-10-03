@@ -760,7 +760,7 @@ async function coordinateGrowthOpportunities(env){
     const id=String(item?.id||'').trim(),slug=String(item?.toolSlug||'').toLowerCase();if(!id)continue;
     const t=Date.parse(item?.publishedAt||''),ageDays=Number.isFinite(t)?Math.max(0,(Date.now()-t)/86400000):30,ageBucketDays=Math.floor(ageDays),recency=Math.max(0,25-Math.min(25,ageBucketDays*3)),searchBoost=Number(searchBoostByTool.get(slug)||0);
     const score=Math.min(100,35+recency+searchBoost+(slug?8:0));
-    const actions=['catalog_impact_review','search_update_angle','content_amplification','distribution_amplification'];
+    const actions=['catalog_impact_review','search_update_angle','content_amplification'];
     const signals={tool_slug:slug||null,title:item?.title||null,source_url:item?.sourceUrl||null,article_url:item?.articleUrl||null,published_at:item?.publishedAt||null,partner_update:Boolean(item?.partnerUpdate),search_priority_boost:Number(searchBoost.toFixed(2)),verified_source:true};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
@@ -789,8 +789,9 @@ async function coordinateGrowthOpportunities(env){
   for(const op of searchOpportunities.slice(0,40)){
     const intent=String(op?.intent||'').trim();if(!intent)continue;
     const priority=Math.max(0,Math.min(100,Number(op?.priorityScore||0)+(audienceStrategy.borrowedFirst?15:0)+seoBoost));
-    const execution=Array.isArray(op?.executionPlan)?op.executionPlan:[];
-    const actions=[...new Set([...execution,'content_amplification','distribution_amplification','search_measurement'])];
+    const execution=(Array.isArray(op?.executionPlan)?op.executionPlan:[])
+      .filter(action=>!['distribution_amplification','backlink_reference_outreach'].includes(String(action||'')));
+    const actions=[...new Set([...execution,'content_amplification','search_measurement'])];
     const signals={
       lane:op?.lane||null,
       action:op?.action||null,
@@ -826,11 +827,9 @@ async function coordinateGrowthOpportunities(env){
     const actions=['search_measurement'];
     if(row.position>20&&row.impressions>=20){
       actions.unshift('content_amplification','deepen_existing_search_asset');
-      if(concentrationTarget)actions.unshift('distribution_amplification');
     }
     else if(row.position>10&&row.position<=20&&row.impressions>=10){
       actions.unshift('content_amplification','strengthen_internal_links');
-      if(concentrationTarget)actions.unshift('distribution_amplification');
     }
     else if(row.position>0&&row.position<=10&&row.impressions>=10)actions.unshift('protect_current_ranking','improve_click_capture');
     else if(row.position>0&&row.position<=20)actions.unshift('observe_low_sample_ranking');
@@ -871,8 +870,8 @@ async function coordinateGrowthOpportunities(env){
   }
   if(humanSprintActive()){
     for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
-      const actions=['content_amplification','distribution_amplification','search_measurement'];
-      if(target.tool_slug)actions.unshift('vendor_amplification','content_mention');
+      const actions=['content_amplification','search_measurement'];
+      if(target.tool_slug)actions.unshift('content_mention');
       const signals={
         lane:'human_acquisition_sprint',
         action:'amplify_gsc_observed_demand',
@@ -1601,6 +1600,9 @@ export default {async fetch(request,env,ctx){
     await runWithLedger(env,{engine:'distribution',mission:'economic_learning',triggerName:trigger,singleFlightMinutes:12},()=>learnEconomics(env)).catch(()=>null);
     const opportunityCycle=missionCycleContext('growth','opportunity_coordination',Number(event?.scheduledTime)||Date.now());
     await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:trigger,singleFlightMinutes:12,cycleContext:opportunityCycle,cycleOwner:'distribution_orchestrator_scheduler'},()=>coordinateGrowthOpportunities(env)).catch(()=>null);
+    // Materialize ownership immediately after planning without letting planning starve
+    // the execution slot that intentionally ran first in this cycle.
+    await syncExecutionContracts(env).catch(()=>null);
     if(trigger===TOOLSCOUT_CRONS.daily)await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger},()=>runGrowthRndAudit(env)).catch(()=>null);
   }else if(trigger===TOOLSCOUT_CRONS.hourly&&await growthRndAuditDue(env,12)){
     await runWithLedger(env,{engine:'growth',mission:'rnd_audit',triggerName:trigger+':cadence_recovery'},()=>runGrowthRndAudit(env)).catch(()=>null);

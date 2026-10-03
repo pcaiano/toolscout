@@ -32,7 +32,7 @@ export const SCHEDULED_MISSIONS=Object.freeze({
   traffic_integrity_heartbeat:{owner:'traffic_integrity_core',cron:TOOLSCOUT_CRONS.primaryGrowth,plane:'signals'},
 
   distribution_network:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h',plane:'executor'},
-  affiliate_coverage:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h_or_recovery',plane:'executor'},
+  affiliate_coverage:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h_active_12h_maintenance_or_recovery',plane:'executor'},
   distribution_priorities:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h_or_recovery',plane:'growth_planner'},
   catalog_runtime_quality:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'6h_or_recovery',plane:'signals'},
   content_social_intelligence:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'6h_or_recovery',plane:'growth_planner'},
