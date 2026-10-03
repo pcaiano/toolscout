@@ -41,3 +41,11 @@ test('Command Center shows reallocation instead of treating zero email supply as
   assert.match(commandCenter,/Adaptive sender capacity/);
   assert.match(commandCenter,/Capacity reassigned to self-service distribution, authority and search\/content/);
 });
+
+test('sender exhaustion materially reallocates bounded capacity to autonomous authority work',()=>{
+  assert.match(orchestrator,/AUTONOMOUS_REALLOCATED_BATCH_LIMIT=4/);
+  assert.match(orchestrator,/autonomousBatchLimit=senderSupplyExhausted\?AUTONOMOUS_REALLOCATED_BATCH_LIMIT:1/);
+  assert.match(orchestrator,/runInternal\('distribution_autonomous',[\s\S]+?\{limit:autonomousBatchLimit,maxInFlight:autonomousBatchLimit\}\)/);
+  assert.match(orchestrator,/taskIds:\[task\.task_id\]/);
+  assert.match(orchestrator,/adaptiveAuthorityBatch:senderSupplyExhausted/);
+});
