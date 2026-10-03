@@ -1,4 +1,4 @@
-name: One Shot Phase 208 Confirm Post Cron Authority Proof
+name: One Shot Phase 212 Authority Progression Proof
 
 on:
   push:
@@ -106,4 +106,25 @@ jobs:
             )
           ORDER BY created_at DESC
           LIMIT 60;
+
+          SELECT task_id,executor,action,subject_key,status,last_result,claimed_at,attempted_at,verified_at,completed_at,updated_at
+          FROM growth_execution_contract
+          WHERE subject_key IN ('tiny-startups','feedmyapp-com','aitools-love')
+            AND action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach')
+          ORDER BY subject_key,action,updated_at DESC;
+
+          SELECT opportunity_key,subject_key,action_json,status,last_evaluated_at,updated_at
+          FROM growth_opportunity_state
+          WHERE opportunity_key IN ('surface:tiny-startups','surface:feedmyapp-com','surface:aitools-love')
+          ORDER BY opportunity_key;
+
+          SELECT surface_slug,status,domain,contact_email,contact_source_url,discovery_attempts,updated_at
+          FROM distribution_network_outreach
+          WHERE surface_slug IN ('tiny-startups','feedmyapp-com','aitools-love')
+          ORDER BY surface_slug;
+
+          SELECT surface_slug,public_url,placement_verified,backlink_verified,link_rel,last_checked_at
+          FROM distribution_placements
+          WHERE surface_slug IN ('tiny-startups','feedmyapp-com','aitools-love')
+          ORDER BY surface_slug;
           "
