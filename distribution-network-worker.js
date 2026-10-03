@@ -4,6 +4,16 @@ import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION} from '
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const NETWORK_TYPES=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface)/i;
+export function networkOutreachEligibility(row={}){
+  const surfaceType=String(row.surface_type||'');
+  const actionUrl=String(row.action_url||row.source_url||'');
+  const domain=hostOf(actionUrl);
+  if(!NETWORK_TYPES.test(surfaceType))return {eligible:false,reason:'surface_type_not_network_outreach'};
+  if(!domain||domain==='trytoolscout.org'||isTechnicalHost(domain))return {eligible:false,reason:'non_external_or_technical_host'};
+  const policy=competitiveOutreachExclusion({domain,surface_type:surfaceType,surface_name:row.surface_name,action_url:actionUrl});
+  if(policy.excluded)return {eligible:false,reason:`competitive_outreach_suppressed:${policy.reason}`};
+  return {eligible:true,reason:null,domain};
+}
 const ROLE_PRIORITY=['editorial','editor','partnerships','partners','partner','submissions','submit','newsletter','press','media','growth','marketing','hello','contact'];
 const MAX_CANDIDATES_PER_CYCLE=16;
 const MAX_CONTACT_SCANS=6;
@@ -450,7 +460,17 @@ export async function runDistributionNetworkCycle(env,task=null){
     const route=await env.DB.prepare(`SELECT status,route_type,route_url,execution_mode,last_result FROM distribution_contact_route_actions WHERE surface_slug=? ORDER BY updated_at DESC LIMIT 1`).bind(target).first().catch(()=>null);
     if(action==='publisher_contact_discovery'){
       const done=['contact_found','contact_route_found','suppressed_no_contact','suppressed_technical','sent','adopted'].includes(String(network?.status||''));
-      taskProof={verified:done,kind:'publisher_contact_discovery',surfaceSlug:target,status:network?.status||null,contactFound:Boolean(network?.contact_email),routeFound:Boolean(network?.contact_source_url),attempts:Number(network?.discovery_attempts||0)};
+      if(!network){
+        const opportunity=await env.DB.prepare('SELECT surface_name,surface_type,action_url,status FROM distribution_opportunities WHERE surface_slug=? LIMIT 1').bind(target).first().catch(()=>null);
+        const eligibility=networkOutreachEligibility(opportunity||{});
+        if(!eligibility.eligible){
+          taskProof={verified:false,conclusive:true,outcome:'network_outreach_ineligible',reason:eligibility.reason,kind:'publisher_contact_discovery',surfaceSlug:target,status:opportunity?.status||null,contactFound:false,routeFound:false,attempts:0};
+        }else{
+          taskProof={verified:false,kind:'publisher_contact_discovery',surfaceSlug:target,status:null,contactFound:false,routeFound:false,attempts:0};
+        }
+      }else{
+        taskProof={verified:done,kind:'publisher_contact_discovery',surfaceSlug:target,status:network?.status||null,contactFound:Boolean(network?.contact_email),routeFound:Boolean(network?.contact_source_url),attempts:Number(network?.discovery_attempts||0)};
+      }
     }else if(['execute_alternate_routes','repair_stalled_route_execution'].includes(action)){
       const executed=['executed_waiting_verification','verified_human_impact','verified_placement'].includes(String(route?.status||''));
       taskProof={verified:executed,kind:action,surfaceSlug:target,status:route?.status||null,routeType:route?.route_type||null,routeUrl:route?.route_url||null,executionMode:route?.execution_mode||null};
