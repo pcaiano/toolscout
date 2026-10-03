@@ -46,7 +46,7 @@ test('publisher contact discovery respects its 20 hour network scan cooldown',()
   assert.match(src,/n\.contact_checked_at network_contact_checked_at/);
   assert.match(src,/const contactDiscoveryDue=!network/);
   assert.match(src,/Date\.now\(\)-networkContactCheckedAt>=20\*3600000/);
-  assert.match(src,/backlinkMissing&&contactDiscoveryDue/);
+  assert.match(src,/backlinkMissing&&networkOutreachEligible&&contactDiscoveryDue/);
   assert.match(src,/acquisitionOpen&&networkOutreachEligible&&contactDiscoveryDue/);
   assert.match(src,/contact_discovery_due:contactDiscoveryDue/);
 });
