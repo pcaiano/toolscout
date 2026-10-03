@@ -17,7 +17,9 @@ test('autonomous backlink verification is exact and force-refreshes the target',
   const src=read('distribution-autonomous-worker.js');
   assert.match(src,/taskAction==='verify_backlink_acquisition'/);
   assert.match(src,/verifyFootprint\(env,\{surfaceSlug:taskTarget,force:true\}\)/);
-  assert.match(src,/backlinkVerified:Number\(placement\?\.backlink_verified\|\|0\)===1/);
+  assert.match(src,/const conclusive=Number\(footprint\?\.checked\|\|0\)>0/);
+  assert.match(src,/outcome=backlinkVerified\?'backlink_confirmed':conclusive\?'backlink_absent':'verification_inconclusive'/);
+  assert.match(src,/taskProof:\{verified:backlinkVerified,conclusive,outcome/);
 });
 
 test('autonomous helper queries can be scoped to one surface',()=>{
