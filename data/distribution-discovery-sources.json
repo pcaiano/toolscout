@@ -34,6 +34,48 @@
       "type": "directory_registry",
       "url": "https://launchdirectories.com/",
       "enabled": true
+    },
+    {
+      "slug": "man0l-ai-directories-2026",
+      "name": "man0l AI directories database",
+      "type": "directory_registry",
+      "url": "https://raw.githubusercontent.com/man0l/ai-directories/main/directories.json",
+      "enabled": true
+    },
+    {
+      "slug": "tiorai-awesome-ai-directories",
+      "name": "TiorAI curated AI directory list",
+      "type": "directory_registry",
+      "url": "https://raw.githubusercontent.com/tioraicom/awesome-ai-directories/main/README.md",
+      "enabled": true
+    },
+    {
+      "slug": "thestacc-saas-directories-2026",
+      "name": "theStacc SaaS directories 2026",
+      "type": "editorial_registry",
+      "url": "https://thestacc.com/blog/saas-directories-list/",
+      "enabled": true
+    },
+    {
+      "slug": "position-digital-saas-directories-2026",
+      "name": "Position Digital SaaS directories 2026",
+      "type": "editorial_registry",
+      "url": "https://www.position.digital/blog/saas-directories/",
+      "enabled": true
+    },
+    {
+      "slug": "speartip-saas-submission-guide-2026",
+      "name": "Speartip SaaS submission guide 2026",
+      "type": "editorial_registry",
+      "url": "https://speartip.eu/en/journal/where-to-submit-saas",
+      "enabled": true
+    },
+    {
+      "slug": "vioscale-saas-directories-2026",
+      "name": "Vioscale SaaS directories 2026",
+      "type": "editorial_registry",
+      "url": "https://www.vioscale.ai/blog/where-to-list-your-saas",
+      "enabled": true
     }
   ],
   "guardrails": {
