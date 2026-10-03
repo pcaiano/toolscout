@@ -1,6 +1,11 @@
 import base from './growth-runtime-integrity-worker.js';
 import {runWithLedger,missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
+import {routeOwner} from './runtime-route-contract.js';
+import {handleDistributionThroughputRoute} from './distribution-throughput-worker.js';
+import {handleDistributionSubmissionRoute} from './distribution-submission-worker.js';
+import {handleDistributionNetworkRoute} from './distribution-network-worker.js';
+import {handleDistributionSenderRoute} from './distribution-sender-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const AUTHORITY_ATTEMPT_MIN_24H=4;
@@ -91,16 +96,28 @@ function authorized(request,env){
   const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
   return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);
 }
+export function authorityInternalOwner(path,{method='POST'}={}){
+  return routeOwner(new URL(path,'https://trytoolscout.org').toString(),{method}).owner;
+}
+async function dispatchAuthorityInternalRoute(request,env,ctx){
+  const owner=routeOwner(request.url,{method:request.method}).owner;
+  if(owner==='distribution_throughput_runtime')return handleDistributionThroughputRoute(request,env,ctx);
+  if(owner==='distribution_submission_runtime')return handleDistributionSubmissionRoute(request,env,ctx);
+  if(owner==='distribution_network_runtime')return handleDistributionNetworkRoute(request,env,ctx);
+  if(owner==='distribution_sender_runtime')return handleDistributionSenderRoute(request,env,ctx);
+  return null;
+}
 async function internalJson(baseRequest,env,ctx,path,{method='POST',body=null}={}){
   if(!env.ADMIN_TOKEN)return {ok:false,httpStatus:0,error:'admin_token_unavailable'};
   const headers=new Headers({Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'});copyMissionCycleHeaders(baseRequest,headers);
   const init={method,headers};
   if(body!=null)init.body=JSON.stringify(body);
   try{
-    const response=await base.fetch(new Request(new URL(path,baseRequest.url),init),env,ctx);
+    const request=new Request(new URL(path,baseRequest.url),init);
+    const response=(await dispatchAuthorityInternalRoute(request,env,ctx))||await base.fetch(request,env,ctx);
     let payload=null;try{payload=await response.json()}catch{}
-    return {ok:response.ok,httpStatus:response.status,payload};
-  }catch(error){return {ok:false,httpStatus:0,error:String(error?.message||error).slice(0,500)}}
+    return {ok:response.ok,httpStatus:response.status,payload,owner:authorityInternalOwner(path,{method})};
+  }catch(error){return {ok:false,httpStatus:0,error:String(error?.message||error).slice(0,500),owner:authorityInternalOwner(path,{method})}}
 }
 async function assetExists(request,env,path){
   try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok}catch{return false}

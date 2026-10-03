@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import {handleAuthorityHealthRoute} from '../authority-health-runtime.js';
 import {routeOwner} from '../runtime-route-contract.js';
 import {classifyAuthorityExecution} from '../growth-runtime-integrity-worker.js';
-import {isQualifyingAuthorityBacklog} from '../growth-runtime-closed-loop-worker.js';
+import {isQualifyingAuthorityBacklog,authorityInternalOwner} from '../growth-runtime-closed-loop-worker.js';
 
 const closedLoopSource=fs.readFileSync(new URL('../growth-runtime-closed-loop-worker.js',import.meta.url),'utf8');
 
@@ -71,6 +71,18 @@ test('qualification-only inventory is not treated as externally runnable authori
 test('authority snapshot separates external execution from qualification work',()=>{
   assert.ok(closedLoopSource.includes("action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted')) runnable_external_queue"));
   assert.ok(closedLoopSource.includes("action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_queue"));
+});
+
+test('authority closed loop dispatches internal stages through canonical ToolScout 2.0 owners',()=>{
+  assert.equal(authorityInternalOwner('/api/distribution/submissions/package',{method:'POST'}),'distribution_submission_runtime');
+  assert.equal(authorityInternalOwner('/api/distribution/submissions/execute',{method:'POST'}),'distribution_throughput_runtime');
+  assert.equal(authorityInternalOwner('/api/distribution/submissions/verify',{method:'POST'}),'distribution_submission_runtime');
+  assert.equal(authorityInternalOwner('/api/distribution/autonomous/refresh',{method:'POST'}),'distribution_throughput_runtime');
+  assert.equal(authorityInternalOwner('/api/distribution/network/refresh',{method:'POST'}),'distribution_network_runtime');
+  assert.equal(authorityInternalOwner('/api/distribution/vendor-amplification/public-candidates',{method:'GET'}),'distribution_sender_runtime');
+  assert.match(closedLoopSource,/dispatchAuthorityInternalRoute\(request,env,ctx\)/);
+  assert.match(closedLoopSource,/owner==='distribution_submission_runtime'/);
+  assert.match(closedLoopSource,/owner==='distribution_sender_runtime'/);
 });
 
 test('runnable authority work with zero attempts remains a real failure',()=>{
