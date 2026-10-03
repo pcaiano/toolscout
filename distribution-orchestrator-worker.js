@@ -870,8 +870,8 @@ async function coordinateGrowthOpportunities(env){
   }
   if(humanSprintActive()){
     for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
-      const actions=['content_amplification','distribution_amplification','search_measurement'];
-      if(target.tool_slug)actions.unshift('vendor_amplification','content_mention');
+      const actions=['content_amplification','search_measurement'];
+      if(target.tool_slug)actions.unshift('content_mention');
       const signals={
         lane:'human_acquisition_sprint',
         action:'amplify_gsc_observed_demand',
