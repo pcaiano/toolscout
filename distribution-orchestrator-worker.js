@@ -589,15 +589,16 @@ async function coordinateGrowthOpportunities(env){
       &&(/(^|_)(api|machine|agent_readiness)(_|$)/i.test(String(row.surface_type||''))||(()=>{try{return /\/api\//i.test(new URL(String(row.action_url)).pathname)}catch{return false}})());
     const backlinkMissing=backlinkAcquisition&&authoritySurface&&['live','verified'].includes(surfaceStatus)&&!backlinkVerified;
     const vendorRouteQualification=acquisitionOpen&&vendorContactRoute&&Number(row.human_required||0)===0&&Boolean(row.action_url);
+    const unresolvedAuthorityRoute=acquisitionOpen&&authoritySurface&&Number(row.human_required||0)===0&&Boolean(row.action_url)
+      &&!['submitted','pending_review','live','verified','auth_required','human_action_required','policy_blocked','rejected','skipped','unavailable_free'].includes(surfaceStatus);
     if(backlinkMissing)actions.unshift('verify_backlink_acquisition');
     if(backlinkMissing&&networkOutreachEligible&&contactDiscoveryDue)actions.unshift('publisher_contact_discovery');
     if(backlinkMissing&&network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
-    if(vendorRouteQualification)actions.unshift('autonomous_route_qualification');
-    else if(machineSafeDirect)actions.unshift('autonomous_route_qualification');
-    else if(acquisitionOpen&&networkOutreachEligible&&contactDiscoveryDue)actions.unshift('publisher_contact_discovery');
+    if(vendorRouteQualification||machineSafeDirect||unresolvedAuthorityRoute)actions.unshift('autonomous_route_qualification');
+    if(acquisitionOpen&&networkOutreachEligible&&contactDiscoveryDue)actions.unshift('publisher_contact_discovery');
     if(acquisitionOpen&&network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
     if(acquisitionOpen&&Number(row.route_content||0)>0)actions.unshift('content_relevance_amplification');
-    if(acquisitionOpen&&!machineSafeDirect&&Number(row.route_auto||0)>0)actions.unshift('autonomous_route_qualification');
+    if(acquisitionOpen&&!actions.includes('autonomous_route_qualification')&&!machineSafeDirect&&Number(row.route_auto||0)>0)actions.unshift('autonomous_route_qualification');
     if(acquisitionOpen&&Number(row.route_auth||0)>0)actions.unshift('resolve_supported_route_auth');
     if(acquisitionOpen&&Number(row.route_human||0)>0)actions.unshift('surface_only_true_human_route_gate');
     if(acquisitionOpen&&Number(row.route_stalled||0)>0)actions.unshift('repair_stalled_route_execution');

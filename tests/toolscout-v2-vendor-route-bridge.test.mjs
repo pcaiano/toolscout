@@ -53,7 +53,7 @@ test('Growth Brain qualifies vendor routes but excludes them from backlink autho
   assert.match(orchestrator,/const vendorContactRoute=String\(row\.surface_type\|\|''\)==='vendor_contact_route'/);
   assert.match(orchestrator,/const authoritySurface=externalSurface&&!vendorContactRoute/);
   assert.match(orchestrator,/const vendorRouteQualification=acquisitionOpen&&vendorContactRoute/);
-  assert.match(orchestrator,/if\(vendorRouteQualification\)actions\.unshift\('autonomous_route_qualification'\)/);
+  assert.match(orchestrator,/if\(vendorRouteQualification\|\|machineSafeDirect\|\|unresolvedAuthorityRoute\)actions\.unshift\('autonomous_route_qualification'\)/);
   assert.match(orchestrator,/const backlinkMissing=backlinkAcquisition&&authoritySurface/);
 });
 
