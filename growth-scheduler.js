@@ -1,4 +1,4 @@
-import {runDistributionNetworkCycle} from './distribution-network-worker.js';
+import {runDistributionNetworkCycle,reconcileDistributionNetworkState} from './distribution-network-worker.js';
 import {runWithLedger,reapStaleEngineRuns,missionCycleContext} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
 import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources} from './catalog-autonomy-worker.js';
@@ -80,6 +80,9 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
       if(!affiliateMaintenance||twelveHourly||affiliateRecovery){
         scheduleTask(ctx,runAuditedAffiliateCoverageCycle(env,affiliateRecovery?trigger+':recovery':trigger));
       }
+    }else{
+      const routeReconcileCycle=missionCycleContext('distribution','route_state_reconciliation',Number(event?.scheduledTime)||Date.now());
+      scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'route_state_reconciliation',triggerName:trigger,singleFlightMinutes:20,cycleContext:routeReconcileCycle,cycleOwner:'growth_scheduler'},()=>reconcileDistributionNetworkState(env)));
     }
     if(twoHourly||prioritiesRecovery){
       scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:prioritiesRecovery?trigger+':recovery':trigger,singleFlightMinutes:20},()=>rebalanceDistributionPriorities(env)));
