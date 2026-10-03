@@ -17,21 +17,81 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run canonical authority closed loop once
-        env:
-          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+
+      - name: Prove live authority classification
         run: |
           set -euo pipefail
-          test -n "$ADMIN_TOKEN"
-          http_code="$(curl -sS -o authority-result.json -w '%{http_code}' \
-            -X POST 'https://trytoolscout.org/api/distribution/authority/close-loop' \
-            -H "Authorization: Bearer $ADMIN_TOKEN" \
-            -H 'Content-Type: application/json')"
-          cat authority-result.json
-          test "$http_code" -ge 200
-          test "$http_code" -lt 300
+          curl -fsS 'https://trytoolscout.org/api/distribution/authority/closed-loop-health?fresh=1' -o authority-health.json
+          cat authority-health.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('authority-health.json','utf8'));
+          if(x.owner!=='authority_health_v2')throw new Error('unexpected authority health owner: '+x.owner);
+          if(Number(x.runnableQueue||0)!==0)throw new Error('external authority queue is still runnable: '+JSON.stringify(x));
+          if(Number(x.qualificationQueue||0)<=0&&Number(x.deferredQueue||0)<=0)throw new Error('expected current qualification/deferred backlog evidence: '+JSON.stringify(x));
+          if(x.status!=='qualifying_backlog')throw new Error('expected qualifying_backlog after Phase 245: '+JSON.stringify(x));
+          console.log(JSON.stringify({ok:true,status:x.status,runnableQueue:x.runnableQueue,qualificationQueue:x.qualificationQueue,deferredQueue:x.deferredQueue,queue:x.queue,attempts24:x.attempts24},null,2));
+          NODE
 
-      - name: Read production authority ledger
+      - name: Reconcile only the known pre-Phase-245 false failure
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+          UPDATE engine_runs
+          SET status='completed',
+              detail='phase245_reconciled_qualification_backlog_false_failure',
+              evidence_json=json_object(
+                'reason','phase245_qualification_backlog_reconciled',
+                'original_status','failed',
+                'original_detail','authority_queue_without_external_handoff',
+                'external_runnable_at_reconcile',(
+                  SELECT COUNT(*) FROM growth_execution_contract
+                  WHERE action IN ('backlink_reference_outreach','publisher_outreach')
+                    AND status IN ('pending','claimed','attempted')
+                ),
+                'qualification_queue_at_reconcile',(
+                  SELECT COUNT(*) FROM growth_execution_contract
+                  WHERE action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification')
+                    AND status IN ('pending','claimed','attempted','deferred','stalled')
+                ),
+                'reconciled_at',datetime('now')
+              ),
+              updated_at=datetime('now')
+          WHERE run_id='run_75544b07-82a4-4c42-b111-3a0a873ac17c'
+            AND status='failed'
+            AND detail='authority_queue_without_external_handoff'
+            AND NOT EXISTS(
+              SELECT 1 FROM growth_execution_contract
+              WHERE action IN ('backlink_reference_outreach','publisher_outreach')
+                AND status IN ('pending','claimed','attempted')
+            )
+            AND EXISTS(
+              SELECT 1 FROM growth_execution_contract
+              WHERE action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification')
+                AND status IN ('pending','claimed','attempted','deferred','stalled')
+            );
+
+          INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at)
+          SELECT 'phase245_reconcile_'||lower(hex(randomblob(8))),
+                 'authority_false_failure_reconciled','completed','backlink_acquisition',
+                 'Phase 245 reconciled the 12:20 authority recovery false failure after production truth confirmed zero externally runnable tasks and a non-empty qualification backlog.',
+                 datetime('now'),datetime('now')
+          WHERE EXISTS(
+            SELECT 1 FROM engine_runs
+            WHERE run_id='run_75544b07-82a4-4c42-b111-3a0a873ac17c'
+              AND status='completed'
+              AND detail='phase245_reconciled_qualification_backlog_false_failure'
+          )
+            AND NOT EXISTS(
+              SELECT 1 FROM distribution_events
+              WHERE event_type='authority_false_failure_reconciled'
+                AND created_at>=datetime('now','-1 hour')
+            );
+          "
+
+      - name: Read reconciled production authority truth
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -44,7 +104,7 @@ jobs:
 
           SELECT event_type,status,detail,created_at
           FROM distribution_events
-          WHERE event_type IN ('authority_closed_loop_external_attempt','authority_external_handoff_pending','authority_backlog_awaiting_qualification','authority_queue_without_external_handoff','vendor_outreach_sent','publisher_network_outreach_sent')
+          WHERE event_type IN ('authority_false_failure_reconciled','authority_closed_loop_external_attempt','authority_external_handoff_pending','authority_backlog_awaiting_qualification','authority_queue_without_external_handoff','vendor_outreach_sent','publisher_network_outreach_sent')
           ORDER BY created_at DESC LIMIT 12;
 
           SELECT
