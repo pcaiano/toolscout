@@ -45,9 +45,9 @@ button,a{font:inherit}.wrap{max-width:1460px;margin:0 auto;padding:28px 22px 60p
 </main>
 </div>
 <script>
-const endpoints={acquisition:'/analytics/api/google/acquisition',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
-let data={acquisition:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
-const sourceErrors={acquisition:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+const endpoints={acquisition:'/analytics/api/google/acquisition',commerce:'/analytics/api/commerce',queue:'/analytics/api/chairman-queue',truth:'/api/command-center-business-truth',runtime:'/api/runtime/executors',authority:'/api/distribution/authority/closed-loop-health',compute:'/api/compute/health',auth:'/api/auth-plane/health'};
+let data={acquisition:null,commerce:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
+const sourceErrors={acquisition:null,commerce:null,queue:null,truth:null,runtime:null,authority:null,compute:null,auth:null};
 let sessionRefreshPromise=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const n=v=>(v===null||v===undefined||v==='')?'Unavailable':(Number.isFinite(Number(v))?Number(v).toLocaleString():'Unavailable');
@@ -125,26 +125,27 @@ async function get(url,fresh=false,timeoutMs=12000){
  return r.json();
 }
 function business(){
- const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},ed=t.editorial||{},a=data.acquisition||{},q=data.queue||{};
- const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=t.search||{},out24=a?.outbound?.last24Hours||{},outMtd=a?.outbound?.monthToDate||{};
- const visitors=a.status==='connected'?(gaUsers.activeToday??gaUsers.today):null;
- const sessions24=a.status==='connected'?gaSessions.last24Hours:null;
- const googleClicks=gsc?.clicks??null;
- const outbound24=a.status==='connected'?out24.outbound:null;
- const monetized24=a.status==='connected'?out24.monetized:null;
+ const t=data.truth||{},b=t.authority||{},aff=t.affiliate||{},ed=t.editorial||{},a=data.acquisition||{},commerce=data.commerce||{},q=data.queue||{};
+ const gaSessions=a.sessions||{},gaUsers=a.users||{},gsc=t.search||{},out24=commerce?.last24Hours||{},outMtd=commerce?.monthToDate||{};
+ const gaConnected=a.status==='connected',commerceConnected=commerce.status==='connected',gscAvailable=['connected','stale'].includes(String(gsc.status||''));
+ const visitors=gaConnected?(gaUsers.activeToday??gaUsers.today):null;
+ const sessions24=gaConnected?gaSessions.last24Hours:null;
+ const googleClicks=gscAvailable?gsc.clicks:null;
+ const outbound24=commerceConnected?out24.outbound:null;
+ const monetized24=commerceConnected?out24.monetized:null;
  const kpiHealthy=[visitors,sessions24,googleClicks,outbound24,monetized24].filter(v=>v!==null&&v!==undefined).length;
  let headline='Core business metrics are available.';
- let detail='GA4 is canonical for visitors, sessions and browser outbound clicks. Search Console is canonical for Google clicks. Server /go/ requests are diagnostic only.';
- if(kpiHealthy<5){headline='One or more core metrics are unavailable.';detail='Each KPI keeps its own canonical source. Missing data stays unavailable rather than being replaced by server request counts.'}
- document.getElementById('businessMeta').textContent='GA4 + Google Search Console';
+ let detail='GA4 is canonical for visitors and sessions. Search Console is canonical for Google clicks. The ToolScout server redirect ledger is canonical for outbound and monetized outbound.';
+ if(kpiHealthy<5){headline='One or more core metrics are unavailable.';detail='Each KPI keeps its own canonical source. Missing data stays unavailable and no diagnostic or secondary source is promoted to zero-filled truth.'}
+ document.getElementById('businessMeta').textContent='GA4 + Google Search Console + server outbound';
  document.getElementById('businessBody').innerHTML=
   '<div class="headline"><b>'+esc(headline)+'</b><span>'+esc(detail)+'</span></div>'+
   '<div class="metrics">'+
-   metric('Visitors - today',n(visitors),a.status==='connected'?'GA4 users · '+n(gaUsers.monthToDate)+' MTD':'GA4 unavailable')+
-   metric('Sessions - 24h',n(sessions24),a.status==='connected'?n(gaSessions.monthToDate)+' MTD · GA4':'GA4 unavailable')+
-   metric('Google clicks - 28d',n(googleClicks),'Google Search Console')+
-   metric('Outbound clicks - 24h',n(outbound24),a.status==='connected'?n(outMtd.outbound)+' MTD · GA4 vendor_outbound':'GA4 outbound unavailable')+
-   metric('Monetized outbound - 24h',n(monetized24),a.status==='connected'?'GA4 monetized_outbound · tracking from 29 Sep':'GA4 outbound unavailable')+
+   metric('Visitors - today',visitors==null?'Unavailable':n(visitors),gaConnected?'GA4 users · '+n(gaUsers.monthToDate)+' MTD':'GA4 unavailable')+
+   metric('Sessions - 24h',sessions24==null?'Unavailable':n(sessions24),gaConnected?n(gaSessions.monthToDate)+' MTD · GA4':'GA4 unavailable')+
+   metric('Google clicks - 28d',googleClicks==null?'Unavailable':n(googleClicks),gscAvailable?'Google Search Console'+(gsc.status==='stale'?' · stale':''):'Google Search Console unavailable')+
+   metric('Outbound clicks - 24h',outbound24==null?'Unavailable':n(outbound24),commerceConnected?n(outMtd.outbound)+' MTD · server redirect ledger':'Server outbound unavailable')+
+   metric('Monetized outbound - 24h',monetized24==null?'Unavailable':n(monetized24),commerceConnected?n(outMtd.monetized)+' MTD · affiliate active at click':'Server outbound unavailable')+
    metric('Referring domains',b.seRankingReferringDomains==null&&b.referringDomains==null?'Unavailable':n(b.seRankingReferringDomains??b.referringDomains),'External authority truth')+
    metric('Editorial portfolio',ed.averagePriorityScore==null?'Unavailable':dec(ed.averagePriorityScore,1)+' / '+n(ed.targetScore),n(ed.belowTarget)+' below target')+
   '</div>'+
@@ -157,13 +158,21 @@ function business(){
 }
 
 function trafficProgress(){
- const a=data.acquisition||{},rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),users:Number(x.users||0)})):[];
+ const a=data.acquisition||{};
+ if(a.status!=='connected'){
+  document.getElementById('trafficProgressMeta').textContent='GA4 unavailable';
+  document.getElementById('trafficProgressBody').innerHTML='<div class="headline"><b>GA4 traffic unavailable</b><span>'+esc(a.reason||sourceErrors.acquisition||'Google Analytics did not return a current reporting snapshot.')+'</span></div><div class="sourceLine">Traffic Quality diagnostics are intentionally not substituted for GA4 users or sessions.</div>';
+  return;
+ }
+ const rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),users:Number(x.users||0)})):[];
  const last7=rows.slice(-7),prev7=rows.slice(-14,-7),sum=(xs,key)=>xs.reduce((acc,row)=>acc+Number(row[key]||0),0),cur=sum(last7,'sessions'),prev=sum(prev7,'sessions'),chg=prev?((cur-prev)/prev*100):null;
+ const countries=Array.isArray(a.countries)?a.countries.slice(0,20):[];
  document.getElementById('trafficProgressMeta').textContent=a.fetchedAt?'GA4 refreshed '+dt(a.fetchedAt):'GA4';
  document.getElementById('trafficProgressBody').innerHTML=
   '<div class="progressStats"><div class="progressStat"><small>Sessions last 7d</small><b>'+n(cur)+'</b></div><div class="progressStat"><small>Visitors last 7d</small><b>'+n(sum(last7,'users'))+'</b></div><div class="progressStat"><small>7d vs prior 7d</small><b class="'+deltaClass(chg)+'">'+signedPct(chg)+'</b></div><div class="progressStat"><small>Sessions MTD</small><b>'+n(a?.sessions?.monthToDate)+'</b></div></div>'+
   '<div class="chartBox">'+seriesChart(rows,[{key:'sessions',label:'GA4 sessions',cls:'primary'},{key:'users',label:'GA4 users',cls:'good'}])+'</div>'+
-  '<div class="sourceLine">GA4 is the traffic source for this chart. Internal bot diagnostics do not alter these totals.</div>';
+  '<div class="section"><div class="sectionTitle">Countries MTD</div>'+(countries.length?countries.map(x=>row(x.country,n(x.sessions)+' sessions',n(x.users)+' users')).join(''):'<div class="empty">No country rows in the current GA4 reporting population.</div>')+'</div>'+
+  '<div class="sourceLine">GA4 is the traffic source for this chart and country list. Internal bot diagnostics do not alter these totals.</div>';
 }
 
 function authorityProgress(){
@@ -196,13 +205,19 @@ function authorityProgress(){
   '<div class="sourceLine">'+(status==='fresh'?'SE Ranking Data API is the current external backlink truth.':'The last SE Ranking snapshot is retained for reference but is not treated as current external truth while stale or unavailable.')+' Backlinks are individual source link URLs and referring domains are unique source domains. Internal placement verification remains a separate operational diagnostic.</div>';
 }
 function gscProgress(){
- const g=data?.truth?.search||{},rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{},pc=g.periodComparison||{};
+ const g=data?.truth?.search||{};
+ if(!['connected','stale'].includes(String(g.status||''))){
+  document.getElementById('gscProgressMeta').textContent='Google Search Console unavailable';
+  document.getElementById('gscProgressBody').innerHTML='<div class="headline"><b>Search Console evidence unavailable</b><span>No current Search Console snapshot is being converted to zero.</span></div><div class="sourceLine">The card will resume with Google clicks, impressions and average position when canonical GSC evidence is available.</div>';
+  return;
+ }
+ const rows=Array.isArray(g.daily28)?g.daily28:[],chg=g.change7d||{},pc=g.periodComparison||{};
  const losses=Array.isArray(pc?.pages?.losses)?pc.pages.losses.slice(0,3):[],gains=Array.isArray(pc?.pages?.gains)?pc.pages.gains.slice(0,3):[];
  const moverRows=(losses.length||gains.length)?'<div class="section"><div class="sectionTitle">Largest finalized weekly movers</div>'+
    losses.map(x=>row(x.page,(Number(x.impressionsDelta)>0?'+':'')+n(x.impressionsDelta)+' impressions','Now '+n(x.impressions)+' vs '+n(x.previousImpressions)+' prior week · position '+(x.position==null?'Unavailable':Number(x.position).toFixed(1)))).join('')+
    gains.map(x=>row(x.page,'+'+n(x.impressionsDelta)+' impressions','Now '+n(x.impressions)+' vs '+n(x.previousImpressions)+' prior week · position '+(x.position==null?'Unavailable':Number(x.position).toFixed(1)))).join('')+
    '</div>':'';
- document.getElementById('gscProgressMeta').textContent=(g.verifiedThroughDate?'Finalized through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
+ document.getElementById('gscProgressMeta').textContent=(g.status==='stale'?'Stale · ':'')+(g.verifiedThroughDate?'Finalized through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
  document.getElementById('gscProgressBody').innerHTML=
   '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Final 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>7d avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
   '<div class="chartBox"><div class="sectionTitle">Google impressions</div>'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
@@ -359,7 +374,7 @@ function results(){
  document.getElementById('resultsBody').innerHTML=summary+items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
 }
 function health(){
- const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},compute=data.compute||{},auth=data.auth||{},issues=[];
+ const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},compute=data.compute||{},auth=data.auth||{},ga=data.acquisition||{},commerce=data.commerce||{},issues=[];
  const ec=t.executionContract||{},arch=t.architecture||{},g=t.search||{},growth=t.growth||{};
  if(Number(ec.missingExecutors||0)>0)issues.push({level:'bad',title:'Missing execution contracts',detail:n(ec.missingExecutors)+' executor mappings are missing.'});
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
@@ -367,7 +382,10 @@ function health(){
    const top=Array.isArray(arch.items)&&arch.items.length?arch.items[0]:null;
    issues.push({level:'bad',title:'Architecture incidents',detail:top?(n(arch.openIncidents)+' open · '+human(top.severity||'')+' · '+human(top.title||'Architecture incident')):(n(arch.openIncidents)+' open architecture incidents.')});
  }
- if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
+ if(data.acquisition&&ga.status!=='connected')issues.push({level:'bad',title:'GA4 acquisition unavailable',detail:ga.reason||sourceErrors.acquisition||'Canonical visitor/session source unavailable.'});
+ if(data.commerce&&commerce.status!=='connected')issues.push({level:'bad',title:'Server outbound ledger unavailable',detail:commerce.reason||sourceErrors.commerce||'Canonical outbound/monetized-outbound source unavailable.'});
+ if(data.truth&&g.status==='unavailable')issues.push({level:'bad',title:'Google Search Console unavailable',detail:'Canonical Google clicks and search progress are unavailable; zeros are not substituted.'});
+ else if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
  const authorityFailureStates=new Set(['execution_required','external_handoff_timeout','handoff_reconciliation_required','failed']);
  if(a.status&&authorityFailureStates.has(String(a.status))){
    if(a.senderFreshClaim&&Number(a.senderClaimed||0)>0)issues.push({level:'warn',title:'Authority handoff in progress',detail:n(a.senderClaimed)+' sender task is claimed since '+dt(a.senderNewestClaimedAt)+'. Waiting for external callback evidence.'});
@@ -381,6 +399,8 @@ function health(){
  if(auth.status==='configured'&&auth.brokerRuntime?.serviceOk===true&&auth.brokerRuntime?.browserVerified===false)issues.push({level:'warn',title:'Auth browser diagnostic delayed',detail:'Auth broker service is live; Chromium diagnostic reports '+human(auth.brokerRuntime.diagnosticStatus||'degraded')+'. This does not block the control plane unless an auth handoff itself fails.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh, authority, external compute and Auth Plane have no current measurable failure.'});
  const rows=[
+  ['GA4 acquisition',data.acquisition?(ga.status==='connected'?'Observed':'Unavailable'):'Loading',ga.status==='connected'?'Canonical users and sessions · refreshed '+dt(ga.fetchedAt):(ga.reason||sourceErrors.acquisition||'')],
+  ['Server outbound',data.commerce?(commerce.status==='connected'?'Observed':'Unavailable'):'Loading',commerce.status==='connected'?n(commerce.last24Hours?.outbound)+' outbound · '+n(commerce.last24Hours?.monetized)+' monetized / 24h':(commerce.reason||sourceErrors.commerce||'')],
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
   ['External compute',compute.status||'Unavailable',n(compute.completedToday)+' completed today · '+n(compute.queued)+' queued'],
   ['Email plane',growth.emailDeliveryMode||'Unavailable',n(growth.emailSent24h)+' sent / 24h · '+n(growth.emailReadyContacts)+' ready contacts'],
@@ -427,7 +447,7 @@ document.addEventListener('click',e=>{
  const rep=e.target.closest('[data-reputation]');if(rep){e.preventDefault();reviewReputation(rep);return}
  const b=e.target.closest('[data-resolve]');if(b){e.preventDefault();resolveTask(b)}
 });
-const FAST_KEYS=['queue','runtime','authority','compute','auth'];
+const FAST_KEYS=['commerce','queue','runtime','authority','compute','auth'];
 const HEAVY_KEYS=['acquisition','truth'];
 let fastBusy=false,heavyBusy=false,lastFast=0,lastHeavy=0;
 

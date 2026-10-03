@@ -306,6 +306,8 @@ async function buildCommandCenterBusinessTruth(request,env){
   const gsc=parse(gscSignals?.payload_json,{});
   const reality=parse(gscReality?.payload_json,{});
   const gh=parse(gscHealth?.payload_json,{});
+  const gscEvidenceAvailable=Boolean(gscSignals?.payload_json||gscReality?.payload_json||gscDailyTrend?.generatedAt);
+  const gscStatus=gscEvidenceAvailable?(gh?.ok===false?'stale':'connected'):'unavailable';
   const w=reality?.searchPerformance?.window28d||gsc?.siteTotals||{};
   const idx=reality?.indexHealth||{};
   const sitemap=reality?.sitemaps||{};
@@ -591,7 +593,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       referringDomains:authorityVerifiedDomains,
       verifiedReferringDomains:authorityVerifiedDomains,
       internalVerifiedReferringDomains:internalAuthorityVerifiedDomains,
-      seRankingReferringDomains,
+      seRankingReferringDomains:seRankingFresh?seRankingReferringDomains:null,
       referringDomainItems:seRankingReferringDomainItems,
       seRankingBacklinks:seRankingFresh?seRankingBacklinks:null,
       seRankingDofollowBacklinks:seRankingFresh?seRankingDofollowBacklinks:null,
@@ -643,17 +645,19 @@ async function buildCommandCenterBusinessTruth(request,env){
       source:'canonical affiliate registry + affiliate pipeline + D1 workflow'
     },
     search:{
+      status:gscStatus,
+      available:gscEvidenceAvailable,
       generatedAt:gscSignals?.source_generated_at||gsc?.generatedAt||null,
       runtimeGeneratedAt:gh?.generatedAt||gscHealth?.source_generated_at||null,
-      runtimeOk:gh?.ok===true,
-      runtimeStatus:gh?.status||null,
-      impressions:daily28.length?truthNum(finalizedWindow.impressions):truthNum(w.impressions||gh?.impressions),
-      clicks:daily28.length?truthNum(finalizedWindow.clicks):truthNum(w.clicks||gh?.clicks),
-      observedPages:truthNum(gsc?.searchPerformance?.observedPages||gh?.observedPages),
-      indexed:truthMaybeNum(idx.indexed),
-      inspected:truthMaybeNum(idx.inspected),
-      indexRecoveryCandidates:truthMaybeNum(idx.recoveryCandidates??idx.indexRecoveryCandidates),
-      sitemaps:truthNum(sitemap.submittedCount||gh?.sitemaps),
+      runtimeOk:gscEvidenceAvailable?gh?.ok===true:false,
+      runtimeStatus:gscEvidenceAvailable?(gh?.status||null):'unavailable',
+      impressions:gscEvidenceAvailable?(daily28.length?truthNum(finalizedWindow.impressions):truthNum(w.impressions??gh?.impressions)):null,
+      clicks:gscEvidenceAvailable?(daily28.length?truthNum(finalizedWindow.clicks):truthNum(w.clicks??gh?.clicks)):null,
+      observedPages:gscEvidenceAvailable?truthMaybeNum(gsc?.searchPerformance?.observedPages??gh?.observedPages):null,
+      indexed:gscEvidenceAvailable?truthMaybeNum(idx.indexed):null,
+      inspected:gscEvidenceAvailable?truthMaybeNum(idx.inspected):null,
+      indexRecoveryCandidates:gscEvidenceAvailable?truthMaybeNum(idx.recoveryCandidates??idx.indexRecoveryCandidates):null,
+      sitemaps:gscEvidenceAvailable?truthMaybeNum(sitemap.submittedCount??gh?.sitemaps):null,
       daily28,
       dailyGeneratedAt:gscDailyTrend?.generatedAt||reality?.searchPerformance?.trendGeneratedAt||null,
       dailySource:assetDaily28.length>=2?'gsc-daily-trend-asset':'gsc-search-reality-cache',
