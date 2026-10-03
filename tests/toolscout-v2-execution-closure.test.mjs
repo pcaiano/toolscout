@@ -34,3 +34,16 @@ test('terminal gate reconciliation runs before restoring active open-gate states
   assert.ok(open>terminal);
   assert.match(autonomous,/terminalOpenHumanGates,openHumanGateStates,orphanHumanStates/);
 });
+
+const scheduler=fs.readFileSync(new URL('../growth-scheduler.js',import.meta.url),'utf8');
+const scheduleContract=fs.readFileSync(new URL('../runtime-schedule-contract.js',import.meta.url),'utf8');
+
+test('route-state reconciliation has an hourly owner without duplicating heavy network discovery',()=>{
+  assert.match(network,/export async function reconcileDistributionNetworkState/);
+  assert.match(network,/mode:'d1_reconciliation_only'/);
+  assert.match(network,/externalDiscovery:false/);
+  assert.match(scheduler,/reconcileDistributionNetworkState/);
+  assert.match(scheduler,/mission:'route_state_reconciliation'/);
+  assert.match(scheduler,/if\(twoHourly\)[\s\S]*?runDistributionNetworkCycle[\s\S]*?\}else\{[\s\S]*?reconcileDistributionNetworkState/);
+  assert.match(scheduleContract,/distribution_route_state_reconciliation:\{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS\.hourly,subcadence:'odd_hours'/);
+});
