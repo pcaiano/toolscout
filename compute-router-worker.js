@@ -378,6 +378,7 @@ async function refreshContactSupplyMetrics(env){
       SUM(CASE WHEN status IN ('queued','unresolved','provider_blocked') THEN 1 ELSE 0 END) unresolved,
       SUM(CASE WHEN status IN ('unresolved','provider_blocked') AND contact_email IS NULL THEN 1 ELSE 0 END) apollo_eligible,
       SUM(CASE WHEN status='route_filtered' THEN 1 ELSE 0 END) route_filtered,
+      SUM(CASE WHEN status='email_discovered_unrouted' AND contact_email IS NOT NULL THEN 1 ELSE 0 END) email_discovered_unrouted,
       (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route') vendor_routes_total,
       (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route' AND status IN ('candidate','discovered','research_required')) vendor_routes_research,
       (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route' AND status='policy_blocked') vendor_routes_policy_blocked,
@@ -387,15 +388,15 @@ async function refreshContactSupplyMetrics(env){
     FROM contact_supply_domain`).first().catch(()=>null);
   await env.DB.prepare(`UPDATE contact_supply_metrics SET
       target_ready=?,min_ready=?,catalog_domains=?,network_domains=?,vendor_domains=?,ready_email=?,ready_route=?,cooldown=?,researching=?,unresolved=?,apollo_eligible=?,
-      route_filtered=?,vendor_routes_total=?,vendor_routes_research=?,vendor_routes_policy_blocked=?,vendor_routes_skipped=?,vendor_routes_human_required=?,vendor_routes_authority_like=?,
+      route_filtered=?,email_discovered_unrouted=?,vendor_routes_total=?,vendor_routes_research=?,vendor_routes_policy_blocked=?,vendor_routes_skipped=?,vendor_routes_human_required=?,vendor_routes_authority_like=?,
       updated_at=datetime('now') WHERE id='global'`)
     .bind(CONTACT_SUPPLY_TARGET,CONTACT_SUPPLY_MIN,num(row?.catalog_domains),num(row?.network_domains),num(row?.vendor_domains),num(row?.ready_email),num(row?.ready_route),num(row?.cooldown),num(row?.researching),num(row?.unresolved),num(row?.apollo_eligible),
-      num(row?.route_filtered),num(row?.vendor_routes_total),num(row?.vendor_routes_research),num(row?.vendor_routes_policy_blocked),num(row?.vendor_routes_skipped),num(row?.vendor_routes_human_required),num(row?.vendor_routes_authority_like)).run().catch(()=>{});
+      num(row?.route_filtered),num(row?.email_discovered_unrouted),num(row?.vendor_routes_total),num(row?.vendor_routes_research),num(row?.vendor_routes_policy_blocked),num(row?.vendor_routes_skipped),num(row?.vendor_routes_human_required),num(row?.vendor_routes_authority_like)).run().catch(()=>{});
   return {...row,targetReady:CONTACT_SUPPLY_TARGET,minReady:CONTACT_SUPPLY_MIN};
 }
 async function contactSupplyHealth(env){
   await ensureSchema(env);
-  const row=await env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,route_filtered,vendor_routes_total,vendor_routes_research,vendor_routes_policy_blocked,vendor_routes_skipped,vendor_routes_human_required,vendor_routes_authority_like,updated_at FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
+  const row=await env.DB.prepare(`SELECT target_ready,min_ready,catalog_domains,network_domains,vendor_domains,ready_email,ready_route,cooldown,researching,unresolved,apollo_eligible,apollo_status,route_filtered,email_discovered_unrouted,vendor_routes_total,vendor_routes_research,vendor_routes_policy_blocked,vendor_routes_skipped,vendor_routes_human_required,vendor_routes_authority_like,updated_at FROM contact_supply_metrics WHERE id='global' LIMIT 1`).first().catch(()=>null);
   return {
     status:'active',
     targetReady:num(row?.target_ready||CONTACT_SUPPLY_TARGET),
@@ -410,6 +411,7 @@ async function contactSupplyHealth(env){
     vendorDomains:num(row?.vendor_domains),
     apolloEligible:num(row?.apollo_eligible),
     routeFiltered:num(row?.route_filtered),
+    emailDiscoveredUnrouted:num(row?.email_discovered_unrouted),
     vendorRoutesTotal:num(row?.vendor_routes_total),
     vendorRoutesResearch:num(row?.vendor_routes_research),
     vendorRoutesPolicyBlocked:num(row?.vendor_routes_policy_blocked),
@@ -421,6 +423,71 @@ async function contactSupplyHealth(env){
     updatedAt:row?.updated_at||null
   };
 }
+async function reconcileContactEmailAdmissibility(env){
+  const cooldown=await env.DB.prepare(`UPDATE contact_supply_domain SET status='cooldown',updated_at=datetime('now')
+    WHERE contact_email IS NOT NULL
+      AND status IN ('ready_email','email_discovered_unrouted','cooldown')
+      AND (
+        EXISTS(SELECT 1 FROM distribution_vendor_amplification sent
+          WHERE lower(sent.vendor_domain)=contact_supply_domain.domain
+            AND sent.status='sent' AND sent.outreach_sent_at>=datetime('now','-30 days'))
+        OR EXISTS(SELECT 1 FROM distribution_network_outreach sent
+          WHERE lower(sent.domain)=contact_supply_domain.domain
+            AND sent.status IN ('sent','adopted') AND sent.outreach_sent_at>=datetime('now','-30 days'))
+      )`).run().catch(()=>null);
+
+  const ready=await env.DB.prepare(`UPDATE contact_supply_domain SET status='ready_email',updated_at=datetime('now')
+    WHERE contact_email IS NOT NULL
+      AND status IN ('ready_email','email_discovered_unrouted','cooldown')
+      AND NOT EXISTS(SELECT 1 FROM distribution_vendor_amplification sent
+        WHERE lower(sent.vendor_domain)=contact_supply_domain.domain
+          AND sent.status='sent' AND sent.outreach_sent_at>=datetime('now','-30 days'))
+      AND NOT EXISTS(SELECT 1 FROM distribution_network_outreach sent
+        WHERE lower(sent.domain)=contact_supply_domain.domain
+          AND sent.status IN ('sent','adopted') AND sent.outreach_sent_at>=datetime('now','-30 days'))
+      AND (
+        EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+          WHERE lower(v.vendor_domain)=contact_supply_domain.domain
+            AND v.status='contact_found' AND v.contact_email IS NOT NULL)
+        OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+          WHERE lower(n.domain)=contact_supply_domain.domain
+            AND n.status='contact_found' AND n.contact_email IS NOT NULL
+            AND NOT EXISTS(
+              SELECT 1 FROM distribution_opportunities o
+              WHERE o.surface_slug=n.surface_slug AND o.status='policy_blocked'
+            ))
+      )`).run().catch(()=>null);
+
+  const unrouted=await env.DB.prepare(`UPDATE contact_supply_domain SET status='email_discovered_unrouted',updated_at=datetime('now')
+    WHERE contact_email IS NOT NULL
+      AND status IN ('ready_email','email_discovered_unrouted','cooldown')
+      AND NOT EXISTS(SELECT 1 FROM distribution_vendor_amplification sent
+        WHERE lower(sent.vendor_domain)=contact_supply_domain.domain
+          AND sent.status='sent' AND sent.outreach_sent_at>=datetime('now','-30 days'))
+      AND NOT EXISTS(SELECT 1 FROM distribution_network_outreach sent
+        WHERE lower(sent.domain)=contact_supply_domain.domain
+          AND sent.status IN ('sent','adopted') AND sent.outreach_sent_at>=datetime('now','-30 days'))
+      AND NOT (
+        EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+          WHERE lower(v.vendor_domain)=contact_supply_domain.domain
+            AND v.status='contact_found' AND v.contact_email IS NOT NULL)
+        OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+          WHERE lower(n.domain)=contact_supply_domain.domain
+            AND n.status='contact_found' AND n.contact_email IS NOT NULL
+            AND NOT EXISTS(
+              SELECT 1 FROM distribution_opportunities o
+              WHERE o.surface_slug=n.surface_slug AND o.status='policy_blocked'
+            ))
+      )`).run().catch(()=>null);
+
+  const out={cooldown:num(cooldown?.meta?.changes||cooldown?.changes),ready:num(ready?.meta?.changes||ready?.changes),unrouted:num(unrouted?.meta?.changes||unrouted?.changes)};
+  if(out.cooldown||out.ready||out.unrouted){
+    await refreshContactSupplyMetrics(env).catch(()=>null);
+    await event(env,'contact_supply_sender_admissibility_reconciled','completed',`Reconciled sender admissibility: ${out.ready} ready, ${out.unrouted} discovered-but-unrouted, ${out.cooldown} cooldown transition(s).`,out).catch(()=>{});
+  }
+  return out;
+}
+
 async function domainInOutreachCooldown(env,domain){
   const row=await env.DB.prepare(`SELECT
     (SELECT COUNT(*) FROM distribution_vendor_amplification
@@ -533,6 +600,18 @@ async function enqueueContactSupplyResearch(env,remaining){
     FROM contact_supply_domain
     WHERE contact_email IS NULL AND status IN ('queued','unresolved','provider_blocked','ready_route')
       AND next_research_at<=datetime('now')
+      AND (
+        EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+          WHERE lower(v.vendor_domain)=contact_supply_domain.domain
+            AND v.status NOT IN ('sent','reputation_quarantine','suppressed_asset_mismatch'))
+        OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+          WHERE lower(n.domain)=contact_supply_domain.domain
+            AND n.status NOT IN ('sent','adopted','reputation_quarantine','suppressed_competitor','suppressed_technical')
+            AND NOT EXISTS(
+              SELECT 1 FROM distribution_opportunities o
+              WHERE o.surface_slug=n.surface_slug AND o.status='policy_blocked'
+            ))
+      )
     ORDER BY CASE status WHEN 'queued' THEN 0 WHEN 'unresolved' THEN 1 ELSE 2 END,priority_score DESC,updated_at ASC
     LIMIT ?`).bind(Math.min(CONTACT_SUPPLY_RESEARCH_BATCH,need,remaining)).all().catch(()=>({results:[]}));
   let enqueued=0;
@@ -1516,6 +1595,7 @@ async function runOverflowTick(env){
   const foldedContactResearch=await isolatedOverflowStage(env,'contact_route_fold',()=>reconcileRedundantContactRouteJobs(env),0);
   const unreachableCompaction=await isolatedOverflowStage(env,'source_unreachable_compaction',()=>reconcileSourceUnreachableBacklog(env),0);
   const contactSupply=await isolatedOverflowStage(env,'contact_supply_seed',()=>ensureContactSupplySeeded(env),{skipped:true});
+  const contactEmailAdmissibility=await isolatedOverflowStage(env,'contact_supply_sender_admissibility',()=>reconcileContactEmailAdmissibility(env),{cooldown:0,ready:0,unrouted:0});
   const vendorRouteBackfill=await isolatedOverflowStage(env,'vendor_contact_route_backfill',()=>backfillVendorContactRoutes(env,24),{checked:0,materialized:0,excluded:0,bounded:24});
   const requeueStage=await isolatedOverflowStage(env,'stale_batch_requeue',()=>requeueStaleBatches(env),0);
   const requeued=typeof requeueStage==='number'?requeueStage:num(requeueStage?.requeued);
@@ -1536,11 +1616,11 @@ async function runOverflowTick(env){
   const runs=[...preRuns,...postRuns];
   const first=runs[0]||null;
   const dispatched=runs.filter(x=>x.dispatch?.ok).length;
-  const failedStages=[contactSupply,vendorRouteBackfill,qualification,execution,research].filter(x=>x&&x.ok===false).length;
+  const failedStages=[contactSupply,contactEmailAdmissibility,vendorRouteBackfill,qualification,execution,research].filter(x=>x&&x.ok===false).length;
   const ok=dispatched>0||(!runs.length&&failedStages===0);
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
-    ok,status,contactSupply,vendorRouteBackfill,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,genericDomainConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
+    ok,status,contactSupply,contactEmailAdmissibility,vendorRouteBackfill,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,genericDomainConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
     nonSubmissionNoisePruned,vendorRouteSemanticNoise,batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
@@ -1917,11 +1997,6 @@ async function applyContactSupplyResult(env,job,result){
   if(candidate){
     const email=candidate.parsed.email,source=safe(candidate.sourceUrl||payload.url||`https://${domain}/`,2000);
     const cooldown=await domainInOutreachCooldown(env,domain);
-    const w=await env.DB.prepare(`UPDATE contact_supply_domain SET
-      status=?,contact_email=?,contact_source='public_role_email',contact_source_url=?,provider='public_web',
-      public_attempts=public_attempts+1,last_researched_at=datetime('now'),next_research_at=datetime('now','+30 days'),updated_at=datetime('now')
-      WHERE domain=?`).bind(cooldown?'cooldown':'ready_email',email,source,domain).run().catch(()=>null);
-    applied+=Number(w?.meta?.changes||w?.changes||0);
 
     await env.DB.prepare(`UPDATE distribution_vendor_amplification SET
       contact_email=?,contact_source_url=?,contact_method='public_role_email',status='contact_found',updated_at=datetime('now')
@@ -1929,12 +2004,34 @@ async function applyContactSupplyResult(env,job,result){
       .bind(email,source,domain).run().catch(()=>{});
     await env.DB.prepare(`UPDATE distribution_network_outreach SET
       contact_email=?,contact_source_url=?,contact_checked_at=datetime('now'),status='contact_found',updated_at=datetime('now')
-      WHERE lower(domain)=? AND contact_email IS NULL AND status NOT IN ('sent','adopted','reputation_quarantine','suppressed_competitor')`)
+      WHERE lower(domain)=? AND contact_email IS NULL
+        AND status NOT IN ('sent','adopted','reputation_quarantine','suppressed_competitor','suppressed_technical')
+        AND NOT EXISTS(
+          SELECT 1 FROM distribution_opportunities o
+          WHERE o.surface_slug=distribution_network_outreach.surface_slug AND o.status='policy_blocked'
+        )`)
       .bind(email,source,domain).run().catch(()=>{});
+
+    const lane=await env.DB.prepare(`SELECT
+      (SELECT COUNT(*) FROM distribution_vendor_amplification v
+        WHERE lower(v.vendor_domain)=? AND v.status='contact_found' AND v.contact_email IS NOT NULL)
+      +(SELECT COUNT(*) FROM distribution_network_outreach n
+        WHERE lower(n.domain)=? AND n.status='contact_found' AND n.contact_email IS NOT NULL
+          AND NOT EXISTS(SELECT 1 FROM distribution_opportunities o
+            WHERE o.surface_slug=n.surface_slug AND o.status='policy_blocked')) n`)
+      .bind(domain,domain).first().catch(()=>({n:0}));
+    const admitted=num(lane?.n)>0;
+    const supplyStatus=cooldown?'cooldown':(admitted?'ready_email':'email_discovered_unrouted');
+    const w=await env.DB.prepare(`UPDATE contact_supply_domain SET
+      status=?,contact_email=?,contact_source='public_role_email',contact_source_url=?,provider='public_web',
+      public_attempts=public_attempts+1,last_researched_at=datetime('now'),next_research_at=datetime('now','+30 days'),updated_at=datetime('now')
+      WHERE domain=?`).bind(supplyStatus,email,source,domain).run().catch(()=>null);
+    applied+=Number(w?.meta?.changes||w?.changes||0);
+
     await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at)
       VALUES(?, 'contact_supply_email_found','completed','contact_supply',?,?,?,datetime('now'),datetime('now'))`)
       .bind(`contact_supply_${crypto.randomUUID()}`,domain,source,`Contact Supply Engine validated a public same-domain role mailbox for ${domain} and propagated it to eligible outreach lanes.`).run().catch(()=>{});
-      return{applied:applied>0,email,domain,status:cooldown?'cooldown':'ready_email'};
+      return{applied:applied>0,email,domain,status:supplyStatus,senderAdmissible:admitted};
   }
 
   if(bestRoute){
