@@ -1,0 +1,81 @@
+name: One Shot Phase 239 Source Pool Truth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase239-source-pool-truth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect diversified Contact Supply truth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT COUNT(*) total_sources,
+                 COUNT(DISTINCT domain) source_domains,
+                 SUM(CASE WHEN status IN ('candidate','retry','route_found','exhausted','unreachable') AND next_research_at<=datetime('now') THEN 1 ELSE 0 END) due_sources,
+                 SUM(CASE WHEN status IN ('exhausted','unreachable') THEN 1 ELSE 0 END) exhausted_sources
+          FROM contact_supply_source;
+
+          SELECT source_type,status,COUNT(*) n
+          FROM contact_supply_source
+          GROUP BY source_type,status
+          ORDER BY n DESC,source_type,status;
+
+          SELECT COUNT(*) eligible_due_sources,
+                 COUNT(DISTINCT cs.domain) eligible_due_domains
+          FROM contact_supply_domain cs
+          JOIN contact_supply_source src ON src.domain=cs.domain
+          WHERE cs.contact_email IS NULL
+            AND cs.status IN ('queued','unresolved','provider_blocked','ready_route','researching')
+            AND src.status IN ('candidate','retry','route_found','exhausted','unreachable')
+            AND src.next_research_at<=datetime('now')
+            AND (
+              EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+                WHERE lower(v.vendor_domain)=cs.domain
+                  AND v.status NOT IN ('sent','reputation_quarantine','suppressed_asset_mismatch'))
+              OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+                WHERE lower(n.domain)=cs.domain
+                  AND n.status NOT IN ('sent','adopted','reputation_quarantine','suppressed_competitor','suppressed_technical')
+                  AND NOT EXISTS(SELECT 1 FROM distribution_opportunities o
+                    WHERE o.surface_slug=n.surface_slug AND o.status='policy_blocked'))
+            );
+
+          SELECT COUNT(*) fallback_vendor_home_sources,
+                 COUNT(DISTINCT src.domain) fallback_vendor_home_domains
+          FROM contact_supply_source src
+          WHERE src.source_type='vendor_home'
+            AND EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+              WHERE lower(v.vendor_domain)=src.domain
+                AND v.status='fallback_exhausted'
+                AND v.contact_email IS NULL);
+
+          SELECT status,COUNT(*) n,MIN(created_at) oldest,MAX(created_at) newest
+          FROM compute_overflow_jobs
+          WHERE job_type='contact_supply_public_research'
+          GROUP BY status ORDER BY n DESC,status;
+
+          SELECT target_ready,min_ready,ready_email,email_discovered_unrouted,ready_route,
+                 diversified_sources,diversified_sources_due,diversified_sources_exhausted,
+                 cooldown,researching,unresolved,route_filtered,updated_at
+          FROM contact_supply_metrics WHERE id='global';
+
+          SELECT source_type,domain,source_url,priority_score,status,attempts,next_research_at
+          FROM contact_supply_source
+          WHERE status IN ('candidate','retry','route_found','exhausted','unreachable')
+            AND next_research_at<=datetime('now')
+          ORDER BY priority_score DESC,attempts ASC
+          LIMIT 40;
+          "
