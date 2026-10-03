@@ -8,6 +8,7 @@ const SOURCE_LIKE=/(directories|directory-list|registr(?:y|ies)|resource-list|re
 const FAMILY_BOOST_CAP=10;
 const TECHNICAL_HOST_RE=/^(?:api|cdn|static|assets|asset|img|images|media|js|css|fonts|edge|storage)\./i;
 const TECHNICAL_HOST_SUFFIXES=['githubassets.com','githubusercontent.com','cloudfront.net','akamaized.net','jsdelivr.net','unpkg.com','cdnjs.com'];
+const STATIC_SOURCE_PATH_RE=/\.(?:png|jpe?g|gif|webp|svg|ico|css|m?js|map|woff2?|ttf|otf|mp4|webm|mov|avi|zip|gz|tar|pdf)(?:$|[?#])/i;
 function technicalHost(host){
   const h=String(host||'').toLowerCase().replace(/^www\./,'');
   return TECHNICAL_HOST_RE.test(h)||TECHNICAL_HOST_SUFFIXES.some(x=>h===x||h.endsWith('.'+x));
@@ -44,7 +45,7 @@ async function githubOidcValid(token){try{const parts=String(token||'').split('.
 async function authorized(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return githubOidcValid(t);}
 function publicHttps(raw){try{const u=new URL(raw);if(u.protocol!=='https:')return null;const h=u.hostname.toLowerCase().replace(/^www\./,'');if(!h||h==='localhost'||h.endsWith('.local')||h.endsWith('.internal'))return null;if(/^127\.|^10\.|^169\.254\.|^192\.168\.|^0\./.test(h))return null;const m=h.match(/^172\.(\d+)\./);if(m&&Number(m[1])>=16&&Number(m[1])<=31)return null;if(h==='::1'||h.startsWith('fc')||h.startsWith('fd')||h.startsWith('fe80:'))return null;return u;}catch{return null}}
 function candidate(raw,source,guardrails={}){const x=publicHttps(raw);if(!x)return null;const host=x.hostname.toLowerCase(),bareHost=host.replace(/^www\./,'');if(bareHost==='trytoolscout.org'||technicalHost(bareHost))return null;const canonical=guardrails.canonical_hosts||{},overrides=guardrails.host_status_overrides||{},override=overrides[bareHost]||{},slug=String(canonical[bareHost]||hostSlug(bareHost));if(!slug)return null;const text=(bareHost+' '+x.pathname).toLowerCase();if(!RELEVANT.test(text))return null;const type=/\b(ard|registry|mcp|a2a|agent)\b/.test(text)?'agent_registry':/\bapi\b/.test(text)?'api_directory':/newsletter/.test(text)?'newsletter':/partner/.test(text)?'partner_resource':/community/.test(text)?'community_resource':/resource|editorial|publisher|media|press|roundup|comparison|review|curated|contribute|write-for-us/.test(text)?'editorial_resource':/launch|startup/.test(text)?'launch_surface':/directory|tool|software|app/.test(text)?'directory':'distribution_surface';return {slug,name:bareHost,type,url:x.origin+'/',host:bareHost,source,status:String(override.status||'discovered'),human_required:Number(override.human_required||0),next_action:String(override.next_action||`Verify opportunity discovered via ${source}; classify submission path before execution.`)};}
-function recursiveSource(raw,parent){const u=publicHttps(raw);if(!u)return null;const host=u.hostname.toLowerCase().replace(/^www\./,'');if(host==='trytoolscout.org'||technicalHost(host))return null;const fingerprint=`${host}${u.pathname}`;if(!SOURCE_LIKE.test(fingerprint))return null;u.hash='';for(const k of [...u.searchParams.keys()])if(/^utm_|ref$|source$/i.test(k))u.searchParams.delete(k);return {slug:`recursive-${hostSlug(host+'-'+u.pathname)}`.slice(0,120),url:u.toString(),host,parent};}
+function recursiveSource(raw,parent){const u=publicHttps(raw);if(!u)return null;const host=u.hostname.toLowerCase().replace(/^www\./,'');if(host==='trytoolscout.org'||technicalHost(host))return null;const rawPath=String(u.pathname||'');let path=rawPath;try{path=decodeURIComponent(rawPath)}catch{}if(STATIC_SOURCE_PATH_RE.test(path)||/\/wp-content\/uploads\//i.test(path)||/\/storage\/v1\/object\/public\//i.test(path)||/%(?:22|7b|7d)/i.test(rawPath)||path.length>260)return null;const fingerprint=`${host}${path}`;if(!SOURCE_LIKE.test(fingerprint))return null;u.hash='';for(const k of [...u.searchParams.keys()])if(/^utm_|ref$|source$/i.test(k))u.searchParams.delete(k);return {slug:`recursive-${hostSlug(host+'-'+u.pathname)}`.slice(0,120),url:u.toString(),host,parent};}
 async function familySignals(env){
   try{
     const q=await env.DB.prepare(`SELECT o.surface_type,COUNT(*) evidence_surfaces,AVG(COALESCE(e.economic_boost,0)) avg_boost,SUM(COALESCE(e.human_sessions_30d,0)) humans,SUM(COALESCE(e.monetized_outbound_30d,0)) monetized,SUM(COALESCE(e.confirmed_revenue_30d,0)) revenue FROM distribution_opportunities o JOIN distribution_economic_learning e ON e.surface_slug=o.surface_slug WHERE COALESCE(e.economic_boost,0)>0 GROUP BY o.surface_type`).all();
@@ -60,8 +61,15 @@ async function familySignals(env){
 async function dynamicSources(env,limit){try{const q=await env.DB.prepare(`SELECT s.source_slug AS slug,s.source_url AS url,'recursive' AS type,1 AS enabled,COALESCE(e.economic_boost,0) parent_economic_boost FROM distribution_discovery_sources s LEFT JOIN distribution_opportunities o ON o.surface_slug=s.parent_surface_slug LEFT JOIN distribution_economic_learning e ON e.surface_slug=o.surface_slug WHERE s.status='active' AND s.confidence>=60 ORDER BY COALESCE(e.economic_boost,0) DESC,COALESCE(s.last_scanned_at,'') ASC,s.confidence DESC LIMIT ?`).bind(limit).all();return q.results||[];}catch{return[]}}
 async function rememberSource(env,s,parent){try{const r=await env.DB.prepare(`INSERT OR IGNORE INTO distribution_discovery_sources(source_slug,source_url,source_host,source_type,parent_surface_slug,confidence,status,created_at,updated_at) VALUES(?,?,?,?,?,60,'active',datetime('now'),datetime('now'))`).bind(s.slug,s.url,s.host,'recursive',parent||null).run();return Number(r?.meta?.changes||r?.changes||0)>0;}catch{return false}}
 async function markScanned(env,slug,total,relevant){try{await env.DB.prepare(`UPDATE distribution_discovery_sources SET last_scanned_at=datetime('now'),links_seen=?,relevant_links_seen=?,confidence=MIN(95,confidence+CASE WHEN ?>=5 THEN 5 WHEN ?=0 THEN -10 ELSE 0 END),status=CASE WHEN confidence<=20 THEN 'deprioritized' ELSE status END,updated_at=datetime('now') WHERE source_slug=?`).bind(total,relevant,relevant,relevant,slug).run();}catch{}}
+async function pruneRecursiveSourceNoise(env){try{const r=await env.DB.prepare(`UPDATE distribution_discovery_sources
+  SET status='deprioritized',confidence=0,updated_at=datetime('now')
+  WHERE source_type='recursive' AND status='active' AND (
+    LOWER(source_url) LIKE '%.png%' OR LOWER(source_url) LIKE '%.jpg%' OR LOWER(source_url) LIKE '%.jpeg%'
+    OR LOWER(source_url) LIKE '%.webp%' OR LOWER(source_url) LIKE '%.gif%' OR LOWER(source_url) LIKE '%.svg%'
+    OR LOWER(source_url) LIKE '%/wp-content/uploads/%' OR LOWER(source_url) LIKE '%/storage/v1/object/public/%'
+  )`).run();return Number(r?.meta?.changes||r?.changes||0)}catch{return 0}}
 async function discover(request,env){
-  const technicalSuppressed=await suppressTechnicalNoise(env);
+  const [technicalSuppressed,recursiveNoisePruned]=await Promise.all([suppressTechnicalNoise(env),pruneRecursiveSourceNoise(env)]);
   const [c,families]=await Promise.all([config(request,env),familySignals(env)]),maxFetch=Math.max(1,Math.min(24,Number(c.guardrails?.max_fetches_per_run||16))),staticSources=(c.sources||[]).filter(x=>x.enabled),dynamic=await dynamicSources(env,Math.max(0,maxFetch-staticSources.length)),sources=[...staticSources,...dynamic].slice(0,maxFetch);
   const existing=await env.DB.prepare('SELECT surface_slug FROM distribution_opportunities').all(),known=new Set((existing.results||[]).map(x=>String(x.surface_slug)));
   let scanned=0,found=0,inserted=0,recursiveAdded=0,familyBoosted=0;
@@ -78,7 +86,7 @@ async function discover(request,env){
   }));
   scanned=fetched.filter(x=>x?.attempted).length;
   for(const item of fetched){
-    if(!item?.usable)continue;
+    if(!item?.usable){if(item?.attempted&&String(item?.s?.type||'')==='recursive')await markScanned(env,item.s.slug,0,0);continue;}
     const {s,sourceUrl,allLinks}=item;let relevantOnSource=0;
     for(const raw of allLinks.slice(0,c.guardrails?.max_candidates_per_source||50)){
       const rs=recursiveSource(raw,s.slug);if(rs&&await rememberSource(env,rs,s.slug))recursiveAdded++;
@@ -101,8 +109,8 @@ async function discover(request,env){
     if(String(s.type||'')==='recursive')await markScanned(env,s.slug,allLinks.length,relevantOnSource);
   }
   const familySummary=[...families.entries()].sort((a,b)=>b[1].boost-a[1].boost).slice(0,5).map(([type,v])=>`${type}:${v.boost}`).join(', ')||'none';
-  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`discover_${crypto.randomUUID()}`,'external_discovery_refresh','completed','distribution_engine',`Self-expanding discovery scanned ${scanned} sources, found ${found} relevant links, added ${inserted} surfaces, learned ${recursiveAdded} recursive source candidates and family-boosted ${familyBoosted} new surfaces. Positive-only family signals: ${familySummary}.`).run();
-  return {ok:true,scanned,found,inserted,technical_surfaces_suppressed:technicalSuppressed,recursive_sources_learned:recursiveAdded,family_boosted:familyBoosted,family_signals:Object.fromEntries(families)};
+  await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`discover_${crypto.randomUUID()}`,'external_discovery_refresh','completed','distribution_engine',`Self-expanding discovery scanned ${scanned} sources, found ${found} relevant links, added ${inserted} surfaces, learned ${recursiveAdded} recursive source candidates, pruned ${recursiveNoisePruned} recursive asset/noise sources and family-boosted ${familyBoosted} new surfaces. Positive-only family signals: ${familySummary}.`).run();
+  return {ok:true,scanned,found,inserted,technical_surfaces_suppressed:technicalSuppressed,recursive_source_noise_pruned:recursiveNoisePruned,recursive_sources_learned:recursiveAdded,family_boosted:familyBoosted,family_signals:Object.fromEntries(families)};
 }
 export async function handleDistributionDiscoveryRoute(request,env,ctx){
   const u=new URL(request.url);
