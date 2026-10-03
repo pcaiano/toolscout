@@ -38,8 +38,8 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(ccIntegrity,/await base\.scheduled\(event,env,ctx\)/);
   assert.match(ccIntegrity,/refreshDailyMetrics\(env,event\?\.cron==='15 3 \* \* \*'\?8:2\)/);
   assert.match(compute,/runGrowthClosedLoopScheduled/);
-  assert.match(compute,/runGrowthRuntimeIntegrityScheduled/);
-  assert.equal(missionOwner('authority_gap_recovery'),'growth_runtime_integrity');
+  assert.equal(missionOwner('authority_closed_loop'),'growth_runtime_closed_loop');
+  assert.equal(missionOwner('authority_gap_recovery'),null);
   assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
   assert.equal(SCHEDULED_MISSIONS.authority_sender_drain.cron,'20 * * * *');
   assert.notEqual(TOOLSCOUT_CRONS.hourly,TOOLSCOUT_CRONS.primaryGrowth,'hourly authority recovery must not race the quarter-hour growth cycle');
@@ -99,17 +99,19 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.doesNotMatch(closedLoop,/internalJson\(request,env,ctx,'\/api\/growth\/opportunities\/refresh'\)/,'authority closed loop must not own growth opportunity coordination');
   const integrity=read('growth-runtime-integrity-worker.js');
   assert.match(integrity,/export async function runGrowthRuntimeIntegrityScheduled/);
-  assert.match(integrity,/authority_execution_recovery/);
+  assert.match(integrity,/status:'observer_only'/);
+  assert.doesNotMatch(integrity,/runWithLedger/);
+  assert.doesNotMatch(integrity,/runAutonomousDistributionCycle/);
+  assert.doesNotMatch(integrity,/runDistributionNetworkCycle/);
   const drain=read('growth-runtime-authority-drain-worker.js');
   assert.match(drain,/export async function runAuthorityDrainScheduled/);
   assert.match(drain,/authority_drain_scheduler/);
   const hourlyCore=compute.indexOf('await Promise.allSettled([growth,authority,primary,seo])');
   const closedLoopCall=compute.indexOf('await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx)');
-  const integrityCall=compute.indexOf('await runGrowthRuntimeIntegrityScheduled(scheduledEvent,env,ctx)');
   const drainCall=compute.indexOf('await runAuthorityDrainScheduled(scheduledEvent,env,ctx)');
   assert.ok(hourlyCore>=0&&closedLoopCall>hourlyCore,'authority closed loop must execute after hourly core scheduling settles');
-  assert.ok(integrityCall>closedLoopCall,'authority integrity recovery must execute after authority closed loop');
-  assert.ok(drainCall>integrityCall,'authority sender drain must execute after integrity recovery');
+  assert.doesNotMatch(compute,/runGrowthRuntimeIntegrityScheduled/,'observer layer must not own a second authority recovery execution');
+  assert.ok(drainCall>closedLoopCall,'authority sender drain must execute after the canonical authority closed loop');
   assert.match(compute,/trigger===TOOLSCOUT_CRONS\.hourly\|\|trigger===TOOLSCOUT_CRONS\.daily/);
   assert.equal(scheduleContract().dispatcher,'compute_router');
 

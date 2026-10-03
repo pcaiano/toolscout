@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {handleAuthorityHealthRoute} from '../authority-health-runtime.js';
 import {routeOwner} from '../runtime-route-contract.js';
 import {classifyAuthorityExecution} from '../growth-runtime-integrity-worker.js';
 import {isQualifyingAuthorityBacklog} from '../growth-runtime-closed-loop-worker.js';
+
+const closedLoopSource=fs.readFileSync(new URL('../growth-runtime-closed-loop-worker.js',import.meta.url),'utf8');
 
 function readOnlyDb(){
   let writes=0;
@@ -58,6 +61,16 @@ test('authority health owner does not claim unrelated requests',async()=>{
 test('deferred-only authority inventory is qualification backlog, not execution failure',()=>{
   assert.equal(classifyAuthorityExecution({required:true,runnableQueue:0,deferredQueue:79,attempts24:0,attemptMin24h:4}),'qualifying_backlog');
   assert.equal(isQualifyingAuthorityBacklog({runnableQueue:0,deferredQueue:79},{externalAttemptObserved:false,handoffReady:false}),true);
+});
+
+test('qualification-only inventory is not treated as externally runnable authority work',()=>{
+  assert.equal(classifyAuthorityExecution({required:true,runnableQueue:0,deferredQueue:0,qualificationQueue:1,attempts24:0,attemptMin24h:4}),'qualifying_backlog');
+  assert.equal(isQualifyingAuthorityBacklog({runnableQueue:0,deferredQueue:0,qualificationQueue:1},{externalAttemptObserved:false,handoffReady:false}),true);
+});
+
+test('authority snapshot separates external execution from qualification work',()=>{
+  assert.ok(closedLoopSource.includes("action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted')) runnable_external_queue"));
+  assert.ok(closedLoopSource.includes("action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_queue"));
 });
 
 test('runnable authority work with zero attempts remains a real failure',()=>{
