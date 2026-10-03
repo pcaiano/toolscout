@@ -1,9 +1,8 @@
 import base from './distribution-embed-worker.js';
 import {runWithLedger,missionCycleContextFromRequest,missionCycleOwnerFromRequest} from './engine-run-ledger.js';
-import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION} from './distribution-outreach-policy.js';
+import {competitiveOutreachExclusion,COMPETITIVE_OUTREACH_POLICY_VERSION,isPublisherNetworkSurfaceType} from './distribution-outreach-policy.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-const NETWORK_TYPES=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface)/i;
 const ROLE_PRIORITY=['editorial','editor','partnerships','partners','partner','submissions','submit','newsletter','press','media','growth','marketing','hello','contact'];
 const MAX_CANDIDATES_PER_CYCLE=16;
 const MAX_CONTACT_SCANS=6;
@@ -122,7 +121,7 @@ async function refreshCandidates(env,{surfaceSlug=null}={}){
   let considered=0,queued=0,newQueued=0,reopened=0;
   for(const row of opps.results||[]){
     if(considered>=MAX_CANDIDATES_PER_CYCLE)break;
-    if(!NETWORK_TYPES.test(String(row.surface_type||'')))continue;
+    if(!isPublisherNetworkSurfaceType(row.surface_type))continue;
     const domain=hostOf(row.action_url);
     if(!domain||domain==='trytoolscout.org'||vendorDomains.has(domain)||isTechnicalHost(domain))continue;
     const outreachPolicy=competitiveOutreachExclusion({domain,surface_type:row.surface_type,surface_name:row.surface_name,action_url:row.action_url});
