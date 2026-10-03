@@ -20,8 +20,9 @@ test('execution dispatch remains protected by auth',()=>{
 
 
 test('GitHub OIDC does not widen unrelated admin routes',()=>{
-  assert.match(src,/async function auth\(request,env\).*return Boolean\(env\.ADMIN_TOKEN&&t===env\.ADMIN_TOKEN\)/s);
-  assert.doesNotMatch(src,/async function auth\(request,env\).*githubExecutionOidcValid/s);
+  const adminAuth=src.match(/async function auth\(request,env\)\{[^}]+\}/s)?.[0]||'';
+  assert.match(adminAuth,/return Boolean\(env\.ADMIN_TOKEN&&t===env\.ADMIN_TOKEN\)/);
+  assert.doesNotMatch(adminAuth,/githubExecutionOidcValid/);
 });
 
 test('manual execution dispatch refreshes opportunities before claiming tasks',()=>{
