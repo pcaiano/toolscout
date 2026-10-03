@@ -1,0 +1,76 @@
+name: One Shot Phase 247 Qualification Backlog Truth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-247-qualification-backlog.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect qualification backlog
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT c.task_id,c.executor,c.action,c.subject_key,c.status,c.attempts,c.last_result,c.created_at,c.updated_at,
+                 o.status opportunity_status,o.surface_type,o.human_required,o.action_url,o.last_checked_at,o.next_action,
+                 a.status route_status,a.execution_mode,a.attempts route_attempts,a.last_attempt_at,a.last_result route_last_result,a.updated_at route_updated_at,
+                 (
+                   SELECT COUNT(*) FROM compute_overflow_jobs j
+                   WHERE j.subject_key=c.subject_key
+                     AND j.job_type='distribution_route_research'
+                     AND j.status IN ('queued','leased')
+                 ) active_research_jobs,
+                 (
+                   SELECT MAX(COALESCE(j.completed_at,j.updated_at,j.created_at)) FROM compute_overflow_jobs j
+                   WHERE j.subject_key=c.subject_key
+                     AND j.job_type='distribution_route_research'
+                 ) last_research_at,
+                 (
+                   SELECT json_extract(j.result_json,'$.classification') FROM compute_overflow_jobs j
+                   WHERE j.subject_key=c.subject_key
+                     AND j.job_type='distribution_route_research'
+                   ORDER BY COALESCE(j.completed_at,j.updated_at,j.created_at) DESC LIMIT 1
+                 ) last_research_classification,
+                 (
+                   SELECT json_extract(j.result_json,'$.routeSummary.machineCandidates') FROM compute_overflow_jobs j
+                   WHERE j.subject_key=c.subject_key
+                     AND j.job_type='distribution_route_research'
+                   ORDER BY COALESCE(j.completed_at,j.updated_at,j.created_at) DESC LIMIT 1
+                 ) last_machine_candidates,
+                 (
+                   SELECT json_extract(j.result_json,'$.routeSummary.humanGateCandidates') FROM compute_overflow_jobs j
+                   WHERE j.subject_key=c.subject_key
+                     AND j.job_type='distribution_route_research'
+                   ORDER BY COALESCE(j.completed_at,j.updated_at,j.created_at) DESC LIMIT 1
+                 ) last_human_candidates
+          FROM growth_execution_contract c
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+          LEFT JOIN distribution_contact_route_actions a ON a.opportunity_slug=c.subject_key
+          WHERE c.action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification')
+            AND c.status IN ('pending','claimed','attempted','deferred','stalled')
+          ORDER BY c.status,c.executor,c.priority_score DESC,c.updated_at ASC;
+
+          SELECT c.executor,c.action,c.status,c.last_result,COUNT(*) n
+          FROM growth_execution_contract c
+          WHERE c.action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification')
+            AND c.status IN ('pending','claimed','attempted','deferred','stalled')
+          GROUP BY c.executor,c.action,c.status,c.last_result
+          ORDER BY c.executor,c.action,c.status,c.last_result;
+
+          SELECT status,COUNT(*) n,MIN(created_at) oldest,MAX(updated_at) newest
+          FROM compute_overflow_jobs
+          WHERE job_type='distribution_route_research'
+          GROUP BY status ORDER BY status;
+          "
