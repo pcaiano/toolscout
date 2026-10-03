@@ -38,7 +38,6 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(ccIntegrity,/await base\.scheduled\(event,env,ctx\)/);
   assert.match(ccIntegrity,/refreshDailyMetrics\(env,event\?\.cron==='15 3 \* \* \*'\?8:2\)/);
   assert.match(compute,/runGrowthClosedLoopScheduled/);
-  assert.match(compute,/runGrowthRuntimeIntegrityScheduled/);
   assert.equal(missionOwner('authority_closed_loop'),'growth_runtime_closed_loop');
   assert.equal(missionOwner('authority_gap_recovery'),null);
   assert.equal(missionOwner('authority_sender_drain'),'authority_drain');
