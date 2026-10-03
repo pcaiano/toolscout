@@ -68,22 +68,27 @@ INSERT OR IGNORE INTO contact_supply_source(
   source_id,domain,source_type,source_key,source_name,source_url,priority_score,status,next_research_at,created_at,updated_at
 )
 SELECT 'surface_'||lower(hex(randomblob(16))),
-       lower(replace(
-         substr(action_url,instr(action_url,'://')+3,
-           CASE WHEN instr(substr(action_url,instr(action_url,'://')+3),'/')>0
-             THEN instr(substr(action_url,instr(action_url,'://')+3),'/')-1
-             ELSE length(action_url)
-           END
-         ),'www.',''
-       )),
+       x.domain,
        'distribution_surface',
-       surface_slug,
-       surface_name,
-       action_url,
-       760+COALESCE(distribution_score,0),
+       x.surface_slug,
+       x.surface_name,
+       x.action_url,
+       760+COALESCE(x.distribution_score,0),
        'candidate',datetime('now'),datetime('now'),datetime('now')
-FROM distribution_opportunities
-WHERE action_url LIKE 'http%';
+FROM (
+  SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,
+         lower(replace(
+           substr(o.action_url,instr(o.action_url,'://')+3,
+             CASE WHEN instr(substr(o.action_url,instr(o.action_url,'://')+3),'/')>0
+               THEN instr(substr(o.action_url,instr(o.action_url,'://')+3),'/')-1
+               ELSE length(o.action_url)
+             END
+           ),'www.',''
+         )) domain
+  FROM distribution_opportunities o
+  WHERE o.action_url LIKE 'http%'
+) x
+JOIN contact_supply_domain cs ON cs.domain=x.domain;
 
 INSERT OR IGNORE INTO contact_supply_source(
   source_id,domain,source_type,source_key,source_url,priority_score,status,next_research_at,created_at,updated_at
