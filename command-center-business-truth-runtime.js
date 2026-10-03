@@ -1,5 +1,6 @@
 import {commandCenterHtml} from './command-center-simplified-view.js';
 import {withOwnerMarker} from './ga4-owner-context.js';
+import {senderCapacitySnapshot} from './sender-capacity-policy.js';
 
 const AUTHORITY_POLICY_MIN_24H=4;
 const AUTHORITY_POLICY_TARGET_24H=50;
@@ -209,6 +210,7 @@ async function buildCommandCenterBusinessTruth(request,env){
     env.DB.prepare(`SELECT value FROM outbound_integrity_meta WHERE key='tracking_started_at' LIMIT 1`).first().catch(()=>null),
     ccAssetJson(request,env,'/reports/editorial-authority-portfolio.json',{summary:{},portfolio:[],all:[]})
   ]);
+  const senderCapacity=await senderCapacitySnapshot(env);
   const parse=(v,fallback={})=>{try{return JSON.parse(v||'')}catch{return fallback}};
   const byEngine=new Map(supervisorRows.map(x=>[x.engine,x]));
   const growth=byEngine.get('growth_brain')||{};
@@ -460,6 +462,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       emailDeliveryMode:makeSenderConfig?.value?'instant_webhook_plus_3h_fallback':'3h_polling_fallback',
       emailPushConfigured:Boolean(makeSenderConfig?.value),
       emailPushConfiguredAt:makeSenderConfig?.updated_at||null,
+      senderCapacity,
+      adaptiveCapacityReallocation:Boolean(senderCapacity?.exhausted),
       reputationSensitiveActionMax24h:EMAIL_MAX_24H,
       machineSafeExternalActionMax24h:MACHINE_SAFE_EXTERNAL_MAX_24H,
       researchExternalJobMax24h:RESEARCH_EXTERNAL_MAX_24H,
@@ -469,7 +473,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       contactSupplyPlane:'catalog_plus_distribution_domains_render_public_discovery_provider_fallback',
       authPlane:'cloudflare_vault_render_browser_human_challenge_resume',
       activityIsNotSuccess:true,
-      channelAllocationPct:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
+      channelAllocationPct:senderCapacity?.exhausted?{existingDemandSearch:65,selfServiceAuthority:25,aiAeoDiscovery:10,emailOutreach:0}:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
       canonicalAcquisitionSource:'ga4',
       strictHumanRole:'action_attribution_quality',
       waitForTrafficThreshold:false
