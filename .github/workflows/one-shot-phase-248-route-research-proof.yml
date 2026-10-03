@@ -1,0 +1,109 @@
+name: One Shot Phase 248 Route Research Continuation Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-248-route-research-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Exercise one natural primary-growth cycle against remote D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --test-scheduled --port 8787 --show-interactive-dev-session=false >/tmp/phase248-wrangler.log 2>&1 &
+          PID=$!
+          cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS 'http://127.0.0.1:8787/api/runtime/schedule-contract' >/tmp/schedule.json 2>/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then tail -150 /tmp/phase248-wrangler.log; exit 1; fi
+          curl -fsS 'http://127.0.0.1:8787/__scheduled?cron=*%2F15%20*%20*%20*%20*' -o /tmp/scheduled.txt
+          cat /tmp/scheduled.txt
+          sleep 8
+
+      - name: Inspect Phase 247 subjects in route research
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          WITH phase247 AS (
+            SELECT DISTINCT subject_key
+            FROM growth_execution_contract
+            WHERE action='autonomous_route_qualification'
+              AND updated_at>=datetime('now','-30 minutes')
+          )
+          SELECT j.status,COUNT(*) n,
+                 MIN(j.created_at) oldest,
+                 MAX(COALESCE(j.completed_at,j.updated_at,j.created_at)) newest
+          FROM compute_overflow_jobs j
+          JOIN phase247 p ON p.subject_key=j.subject_key
+          WHERE j.job_type='distribution_route_research'
+            AND j.created_at>=datetime('now','-30 minutes')
+          GROUP BY j.status ORDER BY j.status;
+
+          WITH phase247 AS (
+            SELECT DISTINCT subject_key
+            FROM growth_execution_contract
+            WHERE action='autonomous_route_qualification'
+              AND updated_at>=datetime('now','-30 minutes')
+          ),
+          latest AS (
+            SELECT j.subject_key,j.status,j.created_at,j.completed_at,j.result_json,j.last_error,
+                   ROW_NUMBER() OVER(PARTITION BY j.subject_key ORDER BY j.created_at DESC) rn
+            FROM compute_overflow_jobs j
+            JOIN phase247 p ON p.subject_key=j.subject_key
+            WHERE j.job_type='distribution_route_research'
+          )
+          SELECT subject_key,status,created_at,completed_at,last_error,
+                 json_extract(result_json,'$.classification') classification,
+                 COALESCE(json_extract(result_json,'$.routeSummary.submissionRoutes'),0) submission_routes,
+                 COALESCE(json_extract(result_json,'$.routeSummary.machineCandidates'),0) machine_candidates,
+                 COALESCE(json_extract(result_json,'$.routeSummary.humanGateCandidates'),0) human_candidates
+          FROM latest WHERE rn=1
+          ORDER BY COALESCE(completed_at,created_at) DESC LIMIT 40;
+
+          SELECT
+            (SELECT COUNT(*) FROM growth_execution_contract
+             WHERE action='autonomous_route_qualification'
+               AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_contracts,
+            (SELECT COUNT(*) FROM compute_overflow_jobs
+             WHERE job_type='distribution_route_research'
+               AND status='queued') route_research_queued,
+            (SELECT COUNT(*) FROM compute_overflow_jobs
+             WHERE job_type='distribution_route_research'
+               AND status='leased') route_research_leased,
+            (SELECT COUNT(*) FROM compute_overflow_jobs
+             WHERE job_type='distribution_route_research'
+               AND status='completed'
+               AND completed_at>=datetime('now','-30 minutes')) route_research_completed_30m,
+            (SELECT COUNT(*) FROM distribution_opportunities
+             WHERE status='ready_to_submit') ready_to_submit;
+          " | tee /tmp/phase248-proof.json
+
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/phase248-proof.json','utf8'));
+          const recent=(x[0]?.results||[]).reduce((s,r)=>s+Number(r.n||0),0);
+          const summary=x[2]?.results?.[0]||{};
+          if(Number(summary.qualification_contracts||0)>0 && recent<=0){
+            throw new Error('qualification contracts exist but no recent route-research jobs were created: '+JSON.stringify(summary));
+          }
+          console.log(JSON.stringify({ok:true,recentPhase247ResearchJobs:recent,...summary},null,2));
+          NODE
