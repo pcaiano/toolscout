@@ -1,0 +1,59 @@
+name: One Shot Phase 233 Overflow Truth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase233-overflow-truth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect scheduler and vendor route bridge truth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,detail
+          FROM engine_runs
+          WHERE started_at>=datetime('now','-30 minutes')
+          ORDER BY started_at DESC LIMIT 40;
+
+          SELECT event_type,status,detail,created_at
+          FROM compute_overflow_events
+          WHERE created_at>=datetime('now','-30 minutes')
+          ORDER BY created_at DESC LIMIT 40;
+
+          SELECT event_type,status,detail,created_at
+          FROM distribution_events
+          WHERE created_at>=datetime('now','-30 minutes')
+            AND event_type IN (
+              'vendor_contact_route_materialized',
+              'vendor_contact_route_filtered',
+              'vendor_contact_route_semantic_noise_pruned',
+              'overflow_tick_failed',
+              'growth_scheduler_failed'
+            )
+          ORDER BY created_at DESC LIMIT 80;
+
+          SELECT target_ready,min_ready,ready_email,ready_route,route_filtered,
+                 vendor_routes_total,vendor_routes_research,vendor_routes_policy_blocked,
+                 vendor_routes_skipped,vendor_routes_human_required,vendor_routes_authority_like,
+                 updated_at
+          FROM contact_supply_metrics WHERE id='global';
+
+          SELECT status,COUNT(*) n
+          FROM distribution_opportunities
+          WHERE surface_type='vendor_contact_route'
+          GROUP BY status ORDER BY n DESC,status;
+          "
