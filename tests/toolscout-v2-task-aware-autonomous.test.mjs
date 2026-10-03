@@ -28,3 +28,13 @@ test('autonomous helper queries can be scoped to one surface',()=>{
   assert.match(src,/verifyAutoSubmitted\(env,\{surfaceSlug=null\}=\{\}\)/);
   assert.match(src,/verifyFootprint\(env,\{surfaceSlug=null,force=false\}=\{\}\)/);
 });
+
+
+test('Growth Brain does not plan unresolved route qualification while research is in cooldown',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  assert.match(src,/const routeResearchDue=String\(row\.route_adapter_policy_state\|\|''\)==='revalidation_required'/);
+  assert.match(src,/Number\(row\.route_research_recent\|\|0\)===0/);
+  assert.match(src,/Number\(row\.route_research_noyield\|\|0\)===0/);
+  assert.match(src,/Number\(row\.route_research_unreachable_cooldown\|\|0\)===0/);
+  assert.match(src,/const unresolvedAuthorityRoute=[\s\S]*&&routeResearchDue/);
+});
