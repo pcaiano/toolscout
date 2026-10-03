@@ -1299,7 +1299,10 @@ export async function runAutonomousDistributionCycle(env,task=null){
   if(taskTarget&&taskAction==='verify_backlink_acquisition'){
     const footprint=await verifyFootprint(env,{surfaceSlug:taskTarget,force:true});
     const placement=await env.DB.prepare('SELECT public_url,placement_verified,backlink_verified,link_rel,last_checked_at FROM distribution_placements WHERE surface_slug=? LIMIT 1').bind(taskTarget).first().catch(()=>null);
-    return {ok:true,targeted:true,target:taskTarget,action:taskAction,footprint,taskProof:{verified:Number(placement?.backlink_verified||0)===1,kind:'verify_backlink_acquisition',surfaceSlug:taskTarget,publicUrl:placement?.public_url||null,placementVerified:Number(placement?.placement_verified||0)===1,backlinkVerified:Number(placement?.backlink_verified||0)===1,linkRel:placement?.link_rel||null,lastCheckedAt:placement?.last_checked_at||null}};
+    const backlinkVerified=Number(placement?.backlink_verified||0)===1;
+    const conclusive=Number(footprint?.checked||0)>0&&Number(footprint?.errors||0)===0&&Number(placement?.placement_verified||0)===1;
+    const outcome=backlinkVerified?'backlink_confirmed':conclusive?'backlink_absent':'verification_inconclusive';
+    return {ok:true,targeted:true,target:taskTarget,action:taskAction,footprint,taskProof:{verified:backlinkVerified,conclusive,outcome,kind:'verify_backlink_acquisition',surfaceSlug:taskTarget,publicUrl:placement?.public_url||null,placementVerified:Number(placement?.placement_verified||0)===1,backlinkVerified,linkRel:placement?.link_rel||null,lastCheckedAt:placement?.last_checked_at||null}};
   }
   const discovery={ok:true,delegated:true,synchronous:false,mode:'scheduled_discovery_sidecar_and_render_overflow'};
   await env.DB.prepare(`UPDATE distribution_opportunities
