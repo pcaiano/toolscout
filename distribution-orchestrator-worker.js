@@ -556,15 +556,17 @@ async function coordinateGrowthOpportunities(env){
     const evidence=String(row.evidence_grade||'none');
     const network=String(row.network_status||'');
     const externalSurface=!['rss','toolscout-ard','toolscout-machine-discovery','indexnow'].includes(String(row.surface_slug||''));
+    const vendorContactRoute=String(row.surface_type||'')==='vendor_contact_route';
+    const authoritySurface=externalSurface&&!vendorContactRoute;
     const backlinkVerified=Number(row.backlink_verified||0)>0;
     const candidateReferringDomain=authorityDomain(row.placement_url||row.live_url||row.action_url);
     const knownReferringDomain=isKnownReferringDomain(candidateReferringDomain,knownReferringDomains);
     const humanOrCommercialSignal=(GROWTH_EVIDENCE_RANK[evidence]||0)>0||Number(row.browser_confirmed_sessions_30d||0)>0||Number(row.outbound_clicks_30d||0)>0||Number(row.monetized_outbound_30d||0)>0||network==='adopted';
-    const backlinkSurfaceBoost=backlinkAcquisition&&externalSurface&&!backlinkVerified
+    const backlinkSurfaceBoost=backlinkAcquisition&&authoritySurface&&!backlinkVerified
       ?(knownReferringDomain?Math.min(5,Math.max(1,Number(row.backlink_value||0)*0.05)):Math.min(20,Math.max(4,Number(row.backlink_value||0)*0.2)))
       :0;
-    const referringDomainDiversityBoost=backlinkAcquisition&&externalSurface&&candidateReferringDomain&&!knownReferringDomain?18:0;
-    const repeatDomainAuthorityPenalty=backlinkAcquisition&&externalSurface&&candidateReferringDomain&&knownReferringDomain&&!humanOrCommercialSignal?10:0;
+    const referringDomainDiversityBoost=backlinkAcquisition&&authoritySurface&&candidateReferringDomain&&!knownReferringDomain?18:0;
+    const repeatDomainAuthorityPenalty=backlinkAcquisition&&authoritySurface&&candidateReferringDomain&&knownReferringDomain&&!humanOrCommercialSignal?10:0;
     const score=Math.min(100,Math.max(0,Number(row.distribution_score||0)
       +(GROWTH_EVIDENCE_RANK[evidence]||0)*4
       +(network==='contact_route_found'?4:0)+(network==='contact_found'?7:0)+(network==='sent'?10:0)+(network==='adopted'?18:0)
@@ -584,11 +586,13 @@ async function coordinateGrowthOpportunities(env){
       &&Number(row.automation_potential||0)>=90
       &&Boolean(row.action_url)
       &&(/(^|_)(api|machine|agent_readiness)(_|$)/i.test(String(row.surface_type||''))||(()=>{try{return /\/api\//i.test(new URL(String(row.action_url)).pathname)}catch{return false}})());
-    const backlinkMissing=backlinkAcquisition&&externalSurface&&['live','verified'].includes(surfaceStatus)&&!backlinkVerified;
+    const backlinkMissing=backlinkAcquisition&&authoritySurface&&['live','verified'].includes(surfaceStatus)&&!backlinkVerified;
+    const vendorRouteQualification=acquisitionOpen&&vendorContactRoute&&Number(row.human_required||0)===0&&Boolean(row.action_url);
     if(backlinkMissing)actions.unshift('verify_backlink_acquisition');
     if(backlinkMissing&&networkOutreachEligible&&contactDiscoveryDue)actions.unshift('publisher_contact_discovery');
     if(backlinkMissing&&network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
-    if(machineSafeDirect)actions.unshift('autonomous_route_qualification');
+    if(vendorRouteQualification)actions.unshift('autonomous_route_qualification');
+    else if(machineSafeDirect)actions.unshift('autonomous_route_qualification');
     else if(acquisitionOpen&&networkOutreachEligible&&contactDiscoveryDue)actions.unshift('publisher_contact_discovery');
     if(acquisitionOpen&&network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
     if(acquisitionOpen&&Number(row.route_content||0)>0)actions.unshift('content_relevance_amplification');
@@ -598,7 +602,7 @@ async function coordinateGrowthOpportunities(env){
     if(acquisitionOpen&&Number(row.route_stalled||0)>0)actions.unshift('repair_stalled_route_execution');
     if(externalSurface&&networkOutreachEligible&&network==='contact_found')actions.unshift('publisher_outreach');
     if(externalSurface&&(network==='adopted'||Number(row.route_verified||0)>0))actions.unshift('scale_proven_surface');
-    const signals={surface_status:row.status,human_required:Number(row.human_required||0),automation_potential:Number(row.automation_potential||0),machine_safe_direct:machineSafeDirect,network_status:network||null,network_contact_checked_at:row.network_contact_checked_at||null,network_discovery_attempts:Number(row.network_discovery_attempts||0),contact_discovery_due:contactDiscoveryDue,network_outreach_eligible:networkOutreachEligible,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,alternate_routes:Number(row.route_actions||0),alternate_routes_autonomous:Number(row.route_auto||0),alternate_routes_content:Number(row.route_content||0),alternate_routes_human:Number(row.route_human||0),alternate_routes_auth:Number(row.route_auth||0),alternate_routes_verified:Number(row.route_verified||0),alternate_routes_stalled:Number(row.route_stalled||0),audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0,backlink_acquisition:backlinkAcquisition,backlink_value:Number(row.backlink_value||0),backlink_verified:backlinkVerified,backlink_priority_boost:Number((backlinkSurfaceBoost+referringDomainDiversityBoost+authorityUrgencyBoost-repeatDomainAuthorityPenalty).toFixed(2)),backlink_quality_only:true,candidate_referring_domain:candidateReferringDomain||null,known_referring_domain:knownReferringDomain,referring_domain_diversity_boost:referringDomainDiversityBoost,repeat_domain_authority_penalty:repeatDomainAuthorityPenalty,authority_objective:'expand_unique_independent_referring_domains',repeat_domain_rule:'secondary_unless_verified_human_or_commercial_signal',backlink_throughput_gap:Boolean(backlinkConfig.backlink_throughput_gap),backlink_stagnating:Boolean(backlinkConfig.backlink_stagnating),authority_urgency_boost:authorityUrgencyBoost};
+    const signals={surface_status:row.status,vendor_contact_route:vendorContactRoute,vendor_route_qualification:vendorRouteQualification,human_required:Number(row.human_required||0),automation_potential:Number(row.automation_potential||0),machine_safe_direct:machineSafeDirect,network_status:network||null,network_contact_checked_at:row.network_contact_checked_at||null,network_discovery_attempts:Number(row.network_discovery_attempts||0),contact_discovery_due:contactDiscoveryDue,network_outreach_eligible:networkOutreachEligible,evidence_grade:evidence,browser_confirmed_sessions_30d:Number(row.browser_confirmed_sessions_30d||0),outbound_clicks_30d:Number(row.outbound_clicks_30d||0),monetized_outbound_30d:Number(row.monetized_outbound_30d||0),adoption_kind:row.adoption_kind||null,alternate_routes:Number(row.route_actions||0),alternate_routes_autonomous:Number(row.route_auto||0),alternate_routes_content:Number(row.route_content||0),alternate_routes_human:Number(row.route_human||0),alternate_routes_auth:Number(row.route_auth||0),alternate_routes_verified:Number(row.route_verified||0),alternate_routes_stalled:Number(row.route_stalled||0),audience_strategy:audienceStrategy.phase,acquisition_mode:'borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?15:0,backlink_acquisition:backlinkAcquisition,backlink_value:Number(row.backlink_value||0),backlink_verified:backlinkVerified,backlink_priority_boost:Number((backlinkSurfaceBoost+referringDomainDiversityBoost+authorityUrgencyBoost-repeatDomainAuthorityPenalty).toFixed(2)),backlink_quality_only:true,candidate_referring_domain:candidateReferringDomain||null,known_referring_domain:knownReferringDomain,referring_domain_diversity_boost:referringDomainDiversityBoost,repeat_domain_authority_penalty:repeatDomainAuthorityPenalty,authority_objective:'expand_unique_independent_referring_domains',repeat_domain_rule:'secondary_unless_verified_human_or_commercial_signal',backlink_throughput_gap:Boolean(backlinkConfig.backlink_throughput_gap),backlink_stagnating:Boolean(backlinkConfig.backlink_stagnating),authority_urgency_boost:authorityUrgencyBoost};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
