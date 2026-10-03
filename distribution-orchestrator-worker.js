@@ -95,7 +95,10 @@ async function wakeMakeSender(env,claimed){
   }
 }
 
-async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
+function oidcB64url(value){const s=String(value||'').replace(/-/g,'+').replace(/_/g,'/');return atob(s+'='.repeat((4-s.length%4)%4));}
+function oidcBytes(value){const s=oidcB64url(value),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+async function githubExecutionOidcValid(token){try{const parts=String(token||'').split('.');if(parts.length!==3)return false;const header=JSON.parse(oidcB64url(parts[0])),claims=JSON.parse(oidcB64url(parts[1]));if(header.alg!=='RS256'||!header.kid)return false;const now=Math.floor(Date.now()/1000);if(claims.iss!=='https://token.actions.githubusercontent.com'||claims.aud!=='toolscout-execution'||claims.repository!=='pcaiano/toolscout'||claims.ref!=='refs/heads/main'||Number(claims.exp||0)<now||Number(claims.nbf||0)>now)return false;const jwks=await fetch('https://token.actions.githubusercontent.com/.well-known/jwks',{headers:{Accept:'application/json'}});if(!jwks.ok)return false;const data=await jwks.json(),jwk=(data.keys||[]).find(x=>x.kid===header.kid&&x.kty==='RSA');if(!jwk)return false;const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);return await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,oidcBytes(parts[2]),new TextEncoder().encode(`${parts[0]}.${parts[1]}`));}catch{return false}}
+async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return githubExecutionOidcValid(t)}
 const GROWTH_ESCALATION_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
 async function sha256Hex(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function growthEscalationHandoffOk(request){const h=String(request.headers.get('X-ToolScout-Handoff')||'');return Boolean(h)&&(await sha256Hex(h))===GROWTH_ESCALATION_HANDOFF_SHA256}
