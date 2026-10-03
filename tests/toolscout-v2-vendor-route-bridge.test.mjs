@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {vendorContactRouteBridgePolicy} from '../compute-router-worker.js';
+import {vendorContactRouteBridgePolicy,vendorContactRoutePurpose} from '../compute-router-worker.js';
 
 const compute=fs.readFileSync(new URL('../compute-router-worker.js',import.meta.url),'utf8');
 const autonomous=fs.readFileSync(new URL('../distribution-autonomous-worker.js',import.meta.url),'utf8');
@@ -65,5 +65,35 @@ test('existing vendor ready routes are backfilled incrementally without reopenin
   assert.match(compute,/Math\.min\(40,num\(limit\)\|\|24\)/);
   assert.match(compute,/vendor_contact_route_backfill/);
   assert.match(compute,/backfillVendorContactRoutes\(env,24\)/);
+});
+
+test('vendor route semantics accept explicit contact and partnership paths but reject accidental keyword matches',()=>{
+  assert.equal(vendorContactRoutePurpose('https://miro.com/partners/solution-partners/'),'partnership');
+  assert.equal(vendorContactRoutePurpose('https://www.gorgias.com/tech-partner'),'partnership');
+  assert.equal(vendorContactRoutePurpose('https://www.notion.com/contact-sales'),'contact');
+  assert.equal(vendorContactRoutePurpose('https://moz.com/about/contact'),'contact');
+  assert.equal(vendorContactRoutePurpose('https://clickup.com/press'),'media');
+  assert.equal(vendorContactRoutePurpose('https://example.com/submit'),'submission');
+  assert.equal(vendorContactRoutePurpose('https://www.descript.com/eye-contact'),null);
+  assert.equal(vendorContactRoutePurpose('https://www.typeform.com/contacts-and-automations'),null);
+  assert.equal(vendorContactRoutePurpose('https://www.jotform.com/integrations/constant-contact'),null);
+  assert.equal(vendorContactRoutePurpose('https://ahrefs.com/web-analytics'),null);
+  assert.equal(vendorContactRoutePurpose('https://mailchimp.com/de/integrations/wordpress/'),null);
+});
+
+test('semantic mismatches never materialize and are retired from repeated ready-route backfill',()=>{
+  const rejected=vendorContactRouteBridgePolicy({
+    sourceType:'vendor_amplification',
+    domain:'descript.com',
+    routeUrl:'https://www.descript.com/eye-contact',
+    sourceName:'Descript'
+  });
+  assert.equal(rejected.eligible,false);
+  assert.equal(rejected.reason,'vendor_route_semantic_mismatch');
+  assert.match(compute,/status='route_filtered'/);
+  assert.match(compute,/vendor_contact_route_filtered/);
+  assert.match(compute,/reconcileVendorContactRouteSemanticNoise/);
+  assert.match(compute,/vendor_contact_route_semantic_quality/);
+  assert.match(compute,/vendor_contact_route_semantic_noise_pruned/);
 });
 
