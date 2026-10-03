@@ -11,6 +11,11 @@ const KNOWN_COMPETITOR_HOSTS=new Set([
 
 const COMPETITIVE_DISCOVERY_TYPE_RE=/(?:^|_)(?:ai|software|tool|app)_?directory(?:_|$)|directory_syndication|discovery_directory|recommendation_directory/i;
 const COMPETITIVE_DISCOVERY_NAME_RE=/\b(best of ai|dynamite ai|ai tools? directory|software directory|tool directory|software discovery|ai tool discovery)\b/i;
+const PUBLISHER_NETWORK_TYPE_RE=/(newsletter|editorial|media|journal|syndication|resource|community|distribution_surface|startup_directory)/i;
+
+export function isPublisherNetworkSurfaceType(value){
+  return PUBLISHER_NETWORK_TYPE_RE.test(String(value||''));
+}
 
 export function normalizeOutreachHost(value){
   try{
