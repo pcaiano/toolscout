@@ -27,7 +27,8 @@ async function authoritySnapshot(env){
       (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
       (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) queue,
-      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','stalled')) runnable_queue,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted')) runnable_external_queue,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_queue,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status='deferred') deferred_queue,
       (SELECT COUNT(*) FROM growth_action_events WHERE status='prepared' AND engine IN ('distribution_route','distribution_network','vendor_amplification')) prepared,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_claimed,
@@ -46,8 +47,9 @@ async function authoritySnapshot(env){
   const senderClaimed=num(row?.sender_claimed);
   const senderFreshClaim=senderClaimed>0&&senderClaimAgeMinutes!==null&&senderClaimAgeMinutes<=SENDER_HANDOFF_TIMEOUT_MINUTES;
   const senderWarning=senderFreshClaim&&senderClaimAgeMinutes>SENDER_HANDOFF_WARN_MINUTES;
+  const runnableQueue=num(row?.runnable_external_queue),qualificationQueue=num(row?.qualification_queue);
   return {
-    attempts24:num(row?.attempts24),queue:num(row?.queue),runnableQueue:num(row?.runnable_queue),deferredQueue:num(row?.deferred_queue),prepared:num(row?.prepared),senderClaimed,
+    attempts24:num(row?.attempts24),queue:num(row?.queue),runnableQueue,externalRunnableQueue:runnableQueue,qualificationQueue,deferredQueue:num(row?.deferred_queue),prepared:num(row?.prepared),senderClaimed,
     senderNewestClaimedAt,senderOldestClaimedAt,senderClaimAgeMinutes,senderFreshClaim,senderWarning,
     senderHandoffTimeoutMinutes:SENDER_HANDOFF_TIMEOUT_MINUTES,recentEvents,recentTasks
   };
@@ -56,7 +58,7 @@ function authorityStatus(state){
   if(state.senderFreshClaim)return'waiting_external_confirmation';
   if(state.senderClaimed>0)return'external_handoff_timeout';
   if(state.queue<=0)return'queue_drained';
-  if(state.runnableQueue<=0&&state.deferredQueue>0)return'qualifying_backlog';
+  if(state.runnableQueue<=0&&(state.deferredQueue>0||state.qualificationQueue>0))return'qualifying_backlog';
   if(state.attempts24>=AUTHORITY_ATTEMPT_MIN_24H)return'executing_backlog';
   return'execution_required';
 }
@@ -135,7 +137,7 @@ async function discoverySnapshot(request,env){
   };
 }
 export function isQualifyingAuthorityBacklog(state,{externalAttemptObserved=false,handoffReady=false}={}){
-  return !externalAttemptObserved&&!handoffReady&&Number(state?.runnableQueue||0)<=0&&Number(state?.deferredQueue||0)>0;
+  return !externalAttemptObserved&&!handoffReady&&Number(state?.runnableQueue||0)<=0&&(Number(state?.deferredQueue||0)>0||Number(state?.qualificationQueue||0)>0);
 }
 
 async function closeAuthorityExecutionLoop(request,env,ctx){
@@ -188,10 +190,10 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
     await normalizeFalseAsyncFailure(env,after);
     await recordEvent(env,'authority_external_handoff_pending','pending',`Authority pipeline reached the external sender. ${after.senderClaimed} task(s) claimed; oldest claim age ${after.senderClaimAgeMinutes??0} min. No external attempt is counted until callback confirmation.`);
   }else if(qualifyingBacklog){
-    await recordEvent(env,'authority_backlog_awaiting_qualification','pending',`Authority backlog contains ${after.deferredQueue} deferred opportunity task(s) and no currently runnable external route. This is acquisition inventory awaiting fresh route/contact evidence, not an execution failure. Total backlog ${after.queue}.`);
+    await recordEvent(env,'authority_backlog_awaiting_qualification','pending',`Authority backlog contains ${after.deferredQueue} deferred and ${after.qualificationQueue} qualification task(s) with no currently runnable external route. This is acquisition inventory awaiting fresh route/contact evidence, not an execution failure. Total backlog ${after.queue}.`);
   }else{
     const failed=Object.entries(stages).filter(([,ok])=>!ok).map(([name])=>name).join(',')||'external_sender_no_candidate';
-    await recordEvent(env,'authority_queue_without_external_handoff','failed',`Authority pipeline produced no verified external attempt and no sender handoff while runnable work remained. Failed or empty stage: ${failed}. Queue ${after.queue}; runnable ${after.runnableQueue}; deferred ${after.deferredQueue}; prepared ${after.prepared}; sender claimed ${after.senderClaimed}.`);
+    await recordEvent(env,'authority_queue_without_external_handoff','failed',`Authority pipeline produced no verified external attempt and no sender handoff while externally runnable work remained. Failed or empty stage: ${failed}. Queue ${after.queue}; external runnable ${after.runnableQueue}; qualification ${after.qualificationQueue}; deferred ${after.deferredQueue}; prepared ${after.prepared}; sender claimed ${after.senderClaimed}.`);
   }
 
   return {
