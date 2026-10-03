@@ -62,3 +62,14 @@ assert.match(cc,/Vendor route bridge/);
 assert.match(cc,/Vendor route safety/);
 assert.match(cc,/leakage sentinel, not authority credit/);
 console.log('Vendor route bridge observability separates research, filtering, policy and leakage sentinels from authority credit.');
+
+const senderAdmissibilityMigration=read('migrations/0108_contact_supply_sender_admissibility.sql');
+assert.match(senderAdmissibilityMigration,/email_discovered_unrouted/);
+assert.match(router,/reconcileContactEmailAdmissibility/);
+assert.match(router,/contact_supply_sender_admissibility/);
+assert.match(router,/email_discovered_unrouted/);
+assert.match(router,/status NOT IN \('sent','adopted','reputation_quarantine','suppressed_competitor','suppressed_technical'\)/);
+assert.match(router,/o\.surface_slug=n\.surface_slug AND o\.status='policy_blocked'/);
+assert.match(cc,/sender-admissible emails/);
+assert.match(cc,/discovered but unrouted/);
+console.log('Contact Supply separates discovered email inventory from sender-admissible outreach supply and never promotes policy-blocked or terminal lanes.');
