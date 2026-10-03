@@ -44,7 +44,7 @@ test('publisher contact discovery respects its 20 hour network scan cooldown',()
   const src=read('distribution-orchestrator-worker.js');
   assert.match(src,/n\.contact_email network_contact_email/);
   assert.match(src,/n\.contact_checked_at network_contact_checked_at/);
-  assert.match(src,/const contactDiscoveryDue=!network/);
+  assert.match(src,/const contactDiscoveryDue=publisherNetworkEligible&&/);
   assert.match(src,/Date\.now\(\)-networkContactCheckedAt>=20\*3600000/);
   assert.match(src,/backlinkMissing&&contactDiscoveryDue/);
   assert.match(src,/acquisitionOpen&&contactDiscoveryDue/);
