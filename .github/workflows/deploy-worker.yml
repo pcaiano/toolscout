@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 232 - expose vendor route bridge truth'))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 235 - sender admissible contact supply'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current main
