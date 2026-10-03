@@ -1,4 +1,4 @@
-name: One Shot Phase 251 Discovery Frontier Proof
+name: One Shot Phase 251 Discovery To Execution Proof
 
 on:
   push:
@@ -14,63 +14,80 @@ jobs:
   prove:
     runs-on: ubuntu-latest
     steps:
-      - name: Get ToolScout discovery OIDC token
+      - name: Get ToolScout execution OIDC token
         id: oidc
         shell: bash
         run: |
           set -euo pipefail
-          response="$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=toolscout-discovery")"
+          response="$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=toolscout-execution")"
           token="$(node -e "const x=JSON.parse(process.argv[1]); if(!x.value) process.exit(1); process.stdout.write(x.value)" "$response")"
           echo "token=$token" >> "$GITHUB_OUTPUT"
 
-      - name: Exercise live Phase 251 discovery frontier
+      - name: Materialize growth opportunities from replenished discovery supply
         env:
-          TOOLSCOUT_DISCOVERY_TOKEN: ${{ steps.oidc.outputs.token }}
+          TOOLSCOUT_EXECUTION_TOKEN: ${{ steps.oidc.outputs.token }}
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in 1 2 3 4; do
-            http_code="$(curl -sS -o "/tmp/phase251-${attempt}.json" -w '%{http_code}' \
-              -X POST 'https://trytoolscout.org/api/distribution/discovery/refresh' \
-              -H "Authorization: Bearer $TOOLSCOUT_DISCOVERY_TOKEN" \
+          http_code="$(curl --max-time 180 -sS -o /tmp/phase251-coordinate.json -w '%{http_code}' \
+            -X POST 'https://trytoolscout.org/api/growth/opportunities/refresh' \
+            -H "Authorization: Bearer $TOOLSCOUT_EXECUTION_TOKEN" \
+            -H 'Content-Type: application/json')"
+          cat /tmp/phase251-coordinate.json
+          test "$http_code" -ge 200
+          test "$http_code" -lt 300
+
+      - name: Prove adaptive autonomous execution has real supply
+        env:
+          TOOLSCOUT_EXECUTION_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          success=0
+          for attempt in 1 2 3; do
+            http_code="$(curl --max-time 360 -sS -o "/tmp/phase251-execution-${attempt}.json" -w '%{http_code}' \
+              -X POST 'https://trytoolscout.org/api/growth/execution/dispatch' \
+              -H "Authorization: Bearer $TOOLSCOUT_EXECUTION_TOKEN" \
               -H 'Content-Type: application/json')"
-            cat "/tmp/phase251-${attempt}.json"
+            cat "/tmp/phase251-execution-${attempt}.json"
             test "$http_code" -ge 200
             test "$http_code" -lt 300
-            ATTEMPT="$attempt" node - <<'NODE'
+
+            if ATTEMPT="$attempt" node - <<'NODE'
           const fs=require('fs');
-          const n=process.env.ATTEMPT;
-          const x=JSON.parse(fs.readFileSync('/tmp/phase251-'+n+'.json','utf8'));
-          if(x?.ok!==true) throw new Error('discovery refresh failed: '+JSON.stringify(x));
-          if(Number(x?.source_rescan_hours)!==6) throw new Error('Phase 251 freshness contract missing');
-          if(Number(x?.scanned||0)>16) throw new Error('Phase 251 exceeded bounded scan size');
-          if(x?.configured_sources==null) throw new Error('configured source persistence truth missing');
+          const attempt=process.env.ATTEMPT;
+          const x=JSON.parse(fs.readFileSync('/tmp/phase251-execution-'+attempt+'.json','utf8'));
+          if(x?.ok!==true)process.exit(1);
+          if(x?.boundedExecution?.adaptiveAuthorityBatch!==true)process.exit(1);
+          if(Number(x?.boundedExecution?.autonomousBatchLimit||0)!==4)process.exit(1);
+          const a=x?.results?.distribution_autonomous;
+          if(!a)process.exit(1);
+          const claimed=Number(a.claimed||0);
+          const processed=Number(a.processed??claimed);
+          if(claimed<2||processed<2)process.exit(1);
+          fs.writeFileSync('/tmp/phase251-pipeline-success.json',JSON.stringify({
+            ok:true,
+            attempt:Number(attempt),
+            selectedInternalLane:x?.boundedExecution?.selectedInternalLane||null,
+            senderExhausted:x?.senderCapacity?.exhausted===true,
+            autonomousBatchLimit:Number(x?.boundedExecution?.autonomousBatchLimit||0),
+            claimed,
+            processed,
+            verified:Number(a.verified||0),
+            deferred:Number(a.deferred||0),
+            failed:Number(a.failed||0),
+            capacityReallocation:x?.capacityReallocation||null
+          },null,2));
           NODE
-            due="$(node -p "JSON.parse(require('fs').readFileSync('/tmp/phase251-${attempt}.json','utf8')).due_sources_after||0")"
-            if [ "$due" -le 0 ]; then break; fi
+            then
+              success=1
+              break
+            fi
           done
 
-          node - <<'NODE'
-          const fs=require('fs');
-          const files=fs.readdirSync('/tmp').filter(x=>/^phase251-\d+\.json$/.test(x)).sort();
-          const rows=files.map(f=>JSON.parse(fs.readFileSync('/tmp/'+f,'utf8')));
-          const sum=k=>rows.reduce((n,x)=>n+Number(x?.[k]||0),0);
-          const proof={
-            ok:true,
-            cycles:rows.length,
-            scanned:sum('scanned'),
-            found:sum('found'),
-            inserted:sum('inserted'),
-            knownDuplicates:sum('known_duplicates'),
-            insertConflicts:sum('insert_conflicts'),
-            recursiveSourcesLearned:sum('recursive_sources_learned'),
-            configuredSeedsAdded:rows.reduce((n,x)=>n+Number(x?.configured_sources?.seeded||0),0),
-            firstDue:Number(rows[0]?.due_sources_before||0),
-            lastDue:Number(rows.at(-1)?.due_sources_after||0)
-          };
-          console.log(JSON.stringify(proof,null,2));
-          if(proof.scanned<=0) throw new Error('Phase 251 scanned no due source');
-          if(proof.inserted<=0 && proof.recursiveSourcesLearned<=0){
-            throw new Error('Phase 251 rotated sources but replenished neither opportunity nor source supply: '+JSON.stringify(proof));
-          }
-          NODE
+          if [ "$success" -ne 1 ]; then
+            echo "No multi-task autonomous authority batch was observed in three production dispatches."
+            for f in /tmp/phase251-execution-*.json; do [ -f "$f" ] && cat "$f"; done
+            exit 1
+          fi
+          cat /tmp/phase251-pipeline-success.json
