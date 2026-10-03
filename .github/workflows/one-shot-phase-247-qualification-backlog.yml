@@ -151,6 +151,25 @@ jobs:
           ORDER BY a.action,a.subject_key
           LIMIT 120;
 
+          WITH active_authority_subjects AS (
+            SELECT DISTINCT g.subject_key
+            FROM growth_opportunity_state g,json_each(g.action_json) j
+            WHERE g.status='active' AND g.subject_type='surface'
+              AND j.value IN ('backlink_reference_outreach','publisher_outreach','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification','verify_backlink_acquisition')
+          )
+          SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.human_required,o.automation_potential,o.distribution_score,o.backlink_value,o.action_url,o.last_checked_at,o.next_action,
+                 n.status network_status,n.contact_email,n.contact_source_url,n.discovery_attempts,
+                 CASE WHEN a.subject_key IS NULL THEN 0 ELSE 1 END has_authority_action
+          FROM distribution_opportunities o
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=o.surface_slug
+          LEFT JOIN active_authority_subjects a ON a.subject_key=o.surface_slug
+          WHERE o.status IN ('discovered','candidate','research_required','stale')
+            AND COALESCE(o.human_required,0)=0
+            AND lower(COALESCE(o.action_url,'')) NOT LIKE 'https://trytoolscout.org/%'
+            AND a.subject_key IS NULL
+          ORDER BY o.distribution_score DESC,o.backlink_value DESC,o.last_checked_at ASC
+          LIMIT 100;
+
           SELECT status,COUNT(*) n,MIN(created_at) oldest,MAX(updated_at) newest
           FROM compute_overflow_jobs
           WHERE job_type='distribution_route_research'
