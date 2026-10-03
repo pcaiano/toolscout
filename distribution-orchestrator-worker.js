@@ -1027,7 +1027,7 @@ async function runGrowthExecutionContractCycle(env){
   const runInternal=async(executor,fn,{limit=1,maxInFlight=1}={})=>{
     const batchLimit=Math.max(1,Math.min(6,Number(limit)||1));
     const inFlightLimit=Math.max(1,Math.min(6,Number(maxInFlight)||batchLimit));
-    const claim=await claimExecutorTasks(env,executor,{limit:batchLimit,maxInFlight:inFlightLimit,result:'growth_brain_dispatched_task_v2'});
+    const claim=await claimExecutorTasks(env,executor,{limit:batchLimit,maxInFlight:inFlightLimit,admissionCap:batchLimit,result:'growth_brain_dispatched_task_v2'});
     if(!claim.claimed){results[executor]={claimed:0,batchLimit};return}
     const items=[];
     for(const task of claim.tasks||[]){
@@ -1096,9 +1096,9 @@ async function runGrowthExecutionContractCycle(env){
   // stalled catalog, affiliate, content or distribution contract.
   if(selectedInternalLane==='distribution_network'){
     await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
-    // Authority has two independent bounded executors. Drain one task from the
-    // autonomous lane in the same cycle when available instead of leaving an
-    // already-admitted authority task idle for another 15 minutes.
+    // Authority has two independent bounded executors. When sender capacity is
+    // reallocated, drain a bounded autonomous batch in the same cycle instead
+    // of leaving already-admitted authority tasks idle for later cycles.
     await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task),{limit:autonomousBatchLimit,maxInFlight:autonomousBatchLimit});
   }
   if(selectedInternalLane==='distribution_autonomous'){

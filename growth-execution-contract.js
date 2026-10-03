@@ -429,7 +429,7 @@ export async function syncExecutionContracts(env){
   return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),staleLegacyClaimsReleased:Number(staleLegacyClaims?.meta?.changes||staleLegacyClaims?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v3'};
 }
 
-export async function rebalanceExecutionAdmission(env){
+export async function rebalanceExecutionAdmission(env,{readyCaps={}}={}){
   await ensureExecutionContractSchema(env);
   const availability=await executionAvailability(env);
   const senderTables=await first(env,`SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name IN ('distribution_vendor_amplification','distribution_network_outreach')`);
@@ -495,7 +495,7 @@ export async function rebalanceExecutionAdmission(env){
 
   for(const [executor,spec] of Object.entries(EXECUTORS)){
     if(spec.mode==='human')continue;
-    const cap=Math.max(1,Number(READY_CAPS[executor]||1));
+    const cap=Math.max(1,Math.min(100,Number(readyCaps?.[executor]??READY_CAPS[executor]??1)));
     if(executor==='seo_cloudflare'&&availability?.seo_cloudflare?.available===false){
       result.executors[executor]={cap,available:false,reason:availability.seo_cloudflare.reason||'cloudflare_runtime_unavailable',inFlight:0,pendingKept:0,promoted:0};
       continue;
@@ -553,9 +553,10 @@ export async function rebalanceExecutionAdmission(env){
   return result;
 }
 
-export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null,result='executor_claimed'}={}){
+export async function claimExecutorTasks(env,executor,{limit=50,maxInFlight=null,admissionCap=null,result='executor_claimed'}={}){
   await ensureExecutionContractSchema(env);
-  await rebalanceExecutionAdmission(env);
+  const requestedAdmissionCap=admissionCap==null?null:Math.max(1,Math.min(100,Number(admissionCap)||1));
+  await rebalanceExecutionAdmission(env,{readyCaps:requestedAdmissionCap==null?{}:{[executor]:requestedAdmissionCap}});
   const spec=EXECUTORS[executor]||null;
   let effective=Math.max(0,Math.min(100,Number(limit)||0)),inFlight=0;
   if(maxInFlight!=null){
