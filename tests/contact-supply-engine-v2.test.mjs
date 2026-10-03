@@ -73,3 +73,10 @@ assert.match(router,/o\.surface_slug=n\.surface_slug AND o\.status='policy_block
 assert.match(cc,/sender-admissible emails/);
 assert.match(cc,/discovered but unrouted/);
 console.log('Contact Supply separates discovered email inventory from sender-admissible outreach supply and never promotes policy-blocked or terminal lanes.');
+
+const existingEmailReconcileMigration=read('migrations/0109_contact_supply_existing_email_reconcile.sql');
+assert.match(existingEmailReconcileMigration,/email_discovered_unrouted/);
+assert.match(existingEmailReconcileMigration,/o\.surface_slug=n\.surface_slug/);
+assert.match(existingEmailReconcileMigration,/o\.status='policy_blocked'/);
+assert.match(existingEmailReconcileMigration,/UPDATE contact_supply_metrics/);
+console.log('Existing discovered emails are reconciled in-place against the sender-admissibility contract without widening outreach.');
