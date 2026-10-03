@@ -540,7 +540,10 @@ async function coordinateGrowthOpportunities(env){
       &&Number(row.automation_potential||0)>=90
       &&Boolean(row.action_url)
       &&(/(^|_)(api|machine|agent_readiness)(_|$)/i.test(String(row.surface_type||''))||(()=>{try{return /\/api\//i.test(new URL(String(row.action_url)).pathname)}catch{return false}})());
-    if(backlinkAcquisition&&externalSurface&&['live','verified'].includes(surfaceStatus)&&!backlinkVerified)actions.unshift('verify_backlink_acquisition');
+    const backlinkMissing=backlinkAcquisition&&externalSurface&&['live','verified'].includes(surfaceStatus)&&!backlinkVerified;
+    if(backlinkMissing)actions.unshift('verify_backlink_acquisition');
+    if(backlinkMissing&&(!network||network==='queued'||network==='send_failed'))actions.unshift('publisher_contact_discovery');
+    if(backlinkMissing&&network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
     if(machineSafeDirect)actions.unshift('autonomous_route_qualification');
     else if(acquisitionOpen&&(!network||network==='queued'||network==='send_failed'))actions.unshift('publisher_contact_discovery');
     if(acquisitionOpen&&network==='contact_route_found'&&Number(row.route_actions||0)>0)actions.unshift('execute_alternate_routes');
@@ -944,13 +947,14 @@ async function runGrowthExecutionContractCycle(env){
         directProof={verified:false,pendingPublication:true,brief_id:out.brief.brief_id||null,growth_opportunity_key:out.brief.growth_opportunity_key||null};
       }else if(executor==='seo_cloudflare'&&out?.verified===true&&out?.pathname){
         directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
-      }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&out?.taskProof?.verified===true){
+      }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&(out?.taskProof?.verified===true||out?.taskProof?.conclusive===true)){
         const proof=out.taskProof;
+        const outcome=proof.outcome||(proof.verified===true?'positive':'conclusive');
         directProof=await recordExecutionProof(env,{
           taskId:task.task_id,
           executor,
           status:'verified',
-          detail:`${proof.kind||task.action||'task_specific_distribution_proof'}_verified_v1`,
+          detail:`${proof.kind||task.action||'task_specific_distribution_proof'}_${outcome}_completed_v1`,
           externalId:proof.publicUrl||proof.routeUrl||proof.liveUrl||proof.surfaceSlug||task.subject_key||null,
           evidence:proof
         });
