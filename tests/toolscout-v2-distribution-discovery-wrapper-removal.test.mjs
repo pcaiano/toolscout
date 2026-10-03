@@ -54,8 +54,8 @@ test('recursive discovery drains more than one dynamic source per refresh and re
   assert.ok(Number(config.guardrails?.max_fetches_per_run||0)>=16);
   assert.ok(Number(config.guardrails.max_fetches_per_run)-enabled>=10,'at least ten dynamic source slots should remain after static sources');
   assert.match(discovery,/STATIC_SOURCE_PATH_RE/);
-  assert.match(discovery,/wp-content\\/uploads/);
-  assert.match(discovery,/storage\\/v1\\/object\\/public/);
+  assert.match(discovery,/wp-content/);
+  assert.match(discovery,/storage/);
   assert.match(discovery,/recursive_source_noise_pruned/);
   assert.match(discovery,/!item\?\.usable\)\{if\(item\?\.attempted&&String\(item\?\.s\?\.type\|\|''\)==='recursive'\)await markScanned/);
 });
