@@ -16,6 +16,38 @@ import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const AUTONOMOUS_CONTROL_CRON=TOOLSCOUT_CRONS.autonomousDistribution;
+export function collapseVendorGrowthRows(rows=[],nowMs=Date.now()){
+  const groups=new Map();
+  for(const raw of Array.isArray(rows)?rows:[]){
+    const slug=String(raw?.tool_slug||'').toLowerCase();
+    if(!slug)continue;
+    if(!groups.has(slug))groups.set(slug,[]);
+    groups.get(slug).push(raw);
+  }
+  const cutoff=Number(nowMs)-30*24*3600000;
+  const stamp=v=>{const s=String(v||'');const t=Date.parse(s.includes('T')?s:s.replace(' ','T')+'Z');return Number.isFinite(t)?t:0};
+  const rank=row=>{
+    const status=String(row?.vendor_status||'');
+    if(status==='contact_found'&&row?.vendor_contact_email&&row?.vendor_contact_method==='public_role_email')return 5;
+    if(status==='sent')return 4;
+    if(status==='queued'||status==='send_failed')return 3;
+    if(status==='needs_contact_fallback')return 2;
+    if(status==='fallback_exhausted')return 1;
+    return 0;
+  };
+  const out=[];
+  for(const [slug,items] of groups){
+    const recentSent=items.some(x=>String(x?.vendor_status||'')==='sent'&&stamp(x?.outreach_sent_at)>=cutoff);
+    const ready=recentSent?null:items
+      .filter(x=>String(x?.vendor_status||'')==='contact_found'&&x?.vendor_contact_email&&x?.vendor_contact_method==='public_role_email')
+      .sort((a,b)=>Number(b?.priority_score||0)-Number(a?.priority_score||0))[0]||null;
+    const best=ready||[...items].sort((a,b)=>rank(b)-rank(a)||Number(b?.priority_score||0)-Number(a?.priority_score||0))[0];
+    const state=recentSent?'cooldown':ready?'contact_found':String(best?.vendor_status||'');
+    out.push({...best,tool_slug:slug,vendor_status:state,vendor_outreach_ready:Boolean(ready&&!recentSent),vendor_recently_sent:recentSent});
+  }
+  return out;
+}
+
 const HUMAN_ACQUISITION_SPRINT=Object.freeze({
   id:'human-acquisition-v4',
   startAt:'2026-09-24T00:00:00.000Z',
@@ -278,6 +310,7 @@ async function coordinateGrowthOpportunities(env){
       ) ra ON ra.surface_slug=o.surface_slug
       WHERE o.surface_slug IS NOT NULL AND o.surface_type!='publisher_contact_route' AND o.status NOT IN ('policy_blocked','rejected','skipped','unavailable_free')`),
     growthRows(env,`SELECT v.tool_slug,v.priority_score,v.status vendor_status,v.asset_url,
+      v.vendor_domain,v.contact_email vendor_contact_email,v.contact_method vendor_contact_method,v.outreach_sent_at,
       p.status profile_status,a.policy_status,a.organic_social_allowed,a.direct_affiliate_link_allowed
       FROM distribution_vendor_amplification v
       LEFT JOIN content_social_profiles p ON p.tool_slug=v.tool_slug
@@ -575,21 +608,23 @@ async function coordinateGrowthOpportunities(env){
          OR growth_opportunity_state.status IS NOT 'active'`).bind(`surface:${row.surface_slug}`,'surface',row.surface_slug,coordinatedGrowthPriority('surface',score,audienceStrategy),JSON.stringify(signals),JSON.stringify(actions)));activeKeys.push(`surface:${row.surface_slug}`);
     active++;surfaceCount++;
   }
-  for(const row of tools){
+  const consolidatedToolRows=collapseVendorGrowthRows(tools);
+  for(const row of consolidatedToolRows){
     const profile=String(row.profile_status||'')==='verified';
     const affiliate=Number(row.organic_social_allowed)===1&&Number(row.direct_affiliate_link_allowed)===1;
     const vendor=String(row.vendor_status||'');
+    const vendorOutreachReady=Boolean(row.vendor_outreach_ready);
     const toolSlug=String(row.tool_slug||'').toLowerCase(),searchBoost=Number(searchBoostByTool.get(toolSlug)||0),newsBoost=Number(newsByTool.get(toolSlug)||0);
     const backlinkBoost=backlinkAcquisition?Math.min(18,8+Math.max(0,searchBoost)*0.35):0;
     const score=Math.min(100,Math.max(0,Number(row.priority_score||0)+(profile?8:0)+(affiliate?12:0)+(vendor==='contact_found'?6:0)+(vendor==='sent'?10:0)+searchBoost+newsBoost+(audienceStrategy.borrowedFirst?10:0)+distBoost+backlinkBoost+authorityUrgencyBoost));
     const actions=[];
-    const vendorExecutable=!['needs_contact_fallback','fallback_exhausted'].includes(vendor);
-    if(vendorExecutable&&backlinkAcquisition)actions.push('backlink_reference_outreach');
-    if(vendorExecutable)actions.push('vendor_amplification');
+    const vendorExecutable=vendorOutreachReady;
+    if(vendorOutreachReady&&backlinkAcquisition)actions.push('backlink_reference_outreach');
+    if(vendorOutreachReady)actions.push('vendor_amplification');
     if(profile)actions.push('content_mention');
     if(affiliate)actions.push('affiliate_social');
     if(!actions.length)continue;
-    const signals={vendor_status:vendor,vendor_execution_available:vendorExecutable,verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),news_priority_boost:Number(newsBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'vendor_borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?10:0,backlink_acquisition:backlinkAcquisition,backlink_quality_only:true,verified_referring_domains:verifiedReferringDomains,referring_domain_bootstrap_floor:backlinkBootstrapFloor,backlink_priority_boost:Number((backlinkBoost+authorityUrgencyBoost).toFixed(2)),backlink_throughput_gap:Boolean(backlinkConfig.backlink_throughput_gap),backlink_stagnating:Boolean(backlinkConfig.backlink_stagnating),authority_urgency_boost:authorityUrgencyBoost,paid_links_allowed:false,reciprocal_links_required:false};
+    const signals={vendor_status:vendor,vendor_execution_available:vendorExecutable,vendor_recently_sent:Boolean(row.vendor_recently_sent),verified_social_profile:profile,affiliate_social_allowed:affiliate,search_priority_boost:Number(searchBoost.toFixed(2)),news_priority_boost:Number(newsBoost.toFixed(2)),asset_url:row.asset_url||null,policy_status:row.policy_status||null,audience_strategy:audienceStrategy.phase,acquisition_mode:'vendor_borrowed_audience',borrowed_first_boost:audienceStrategy.borrowedFirst?10:0,backlink_acquisition:backlinkAcquisition,backlink_quality_only:true,verified_referring_domains:verifiedReferringDomains,referring_domain_bootstrap_floor:backlinkBootstrapFloor,backlink_priority_boost:Number((backlinkBoost+authorityUrgencyBoost).toFixed(2)),backlink_throughput_gap:Boolean(backlinkConfig.backlink_throughput_gap),backlink_stagnating:Boolean(backlinkConfig.backlink_stagnating),authority_urgency_boost:authorityUrgencyBoost,paid_links_allowed:false,reciprocal_links_required:false};
     growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
       VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
       ON CONFLICT(opportunity_key) DO UPDATE SET priority_score=excluded.priority_score,signal_json=excluded.signal_json,action_json=excluded.action_json,status='active',last_evaluated_at=datetime('now'),updated_at=datetime('now')
