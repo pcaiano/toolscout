@@ -104,13 +104,13 @@ jobs:
           GROUP BY job_type,status
           ORDER BY job_type,status;
 
-          SELECT policy_state,auth_required,COUNT(*) n,
+          SELECT policy_state,COALESCE(auth_type,'none') auth_type,COUNT(*) n,
                  SUM(CASE WHEN updated_at<datetime('now','-24 hours') THEN 1 ELSE 0 END) stale_24h,
                  MIN(updated_at) oldest_updated,
                  MAX(updated_at) newest_updated
           FROM distribution_auto_adapters
-          GROUP BY policy_state,auth_required
-          ORDER BY n DESC,policy_state,auth_required;
+          GROUP BY policy_state,COALESCE(auth_type,'none')
+          ORDER BY n DESC,policy_state,auth_type;
 
           SELECT status,COUNT(*) n,
                  SUM(CASE WHEN updated_at<datetime('now','-24 hours') THEN 1 ELSE 0 END) stale_24h,
