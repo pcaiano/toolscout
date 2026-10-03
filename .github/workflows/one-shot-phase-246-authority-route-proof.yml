@@ -1,0 +1,89 @@
+name: One Shot Phase 246 Authority Route Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-246-authority-route-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Exercise canonical authority closed loop against remote D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --port 8787 --show-interactive-dev-session=false --var ADMIN_TOKEN:phase246_ephemeral_proof >/tmp/phase246-wrangler.log 2>&1 &
+          WRANGLER_PID=$!
+          cleanup(){ kill "$WRANGLER_PID" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS 'http://127.0.0.1:8787/api/runtime/route-owner?path=%2Fapi%2Fdistribution%2Fsubmissions%2Fpackage&method=POST' >/tmp/route-owner.json 2>/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            tail -120 /tmp/phase246-wrangler.log
+            exit 1
+          fi
+
+          http_code="$(curl -sS -o /tmp/phase246-result.json -w '%{http_code}' \
+            -X POST 'http://127.0.0.1:8787/api/distribution/authority/close-loop' \
+            -H 'Authorization: Bearer phase246_ephemeral_proof' \
+            -H 'Content-Type: application/json')"
+          test "$http_code" -ge 200
+          test "$http_code" -lt 300
+
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/phase246-result.json','utf8'));
+          const expected={
+            submissionPackage:'distribution_submission_runtime',
+            submissionExecute:'distribution_throughput_runtime',
+            submissionVerify:'distribution_submission_runtime',
+            autonomous:'distribution_throughput_runtime',
+            network:'distribution_network_runtime',
+            senderHandoff:'distribution_sender_runtime'
+          };
+          const summary={status:x.status||null,pipelineClosed:Boolean(x.pipelineClosed),externalAttemptObserved:Boolean(x.externalAttemptObserved),stages:{}};
+          for(const [key,owner] of Object.entries(expected)){
+            const stage=x[key];
+            if(!stage)throw new Error('missing stage '+key+': '+JSON.stringify(Object.keys(x)));
+            if(stage.httpStatus===404)throw new Error(key+' still returned 404');
+            if(stage.owner&&stage.owner!==owner)throw new Error(key+' owner mismatch '+stage.owner+' != '+owner);
+            summary.stages[key]={ok:Boolean(stage.ok),httpStatus:stage.httpStatus??null,owner:stage.owner||owner,reason:stage.payload?.reason||stage.reason||null};
+          }
+          console.log(JSON.stringify(summary,null,2));
+          NODE
+
+      - name: Read latest authority production truth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT run_id,mission,trigger_name,status,started_at,completed_at,detail
+          FROM engine_runs
+          WHERE engine='distribution' AND mission='authority_execution_recovery'
+          ORDER BY started_at DESC LIMIT 4;
+
+          SELECT
+            SUM(CASE WHEN action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted') THEN 1 ELSE 0 END) external_runnable,
+            SUM(CASE WHEN action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled') THEN 1 ELSE 0 END) qualification_queue,
+            SUM(CASE WHEN action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status='deferred' THEN 1 ELSE 0 END) deferred_queue
+          FROM growth_execution_contract;
+          "
