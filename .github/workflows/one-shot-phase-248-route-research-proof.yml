@@ -1,4 +1,4 @@
-name: One Shot Phase 248 Route Research Continuation Proof
+name: One Shot Phase 248 Discovery Breadth Truth
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  prove:
+  inspect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,187 +18,34 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Exercise one natural primary-growth cycle against remote D1
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          npx wrangler dev --remote --test-scheduled --port 8787 --show-interactive-dev-session=false >/tmp/phase248-wrangler.log 2>&1 &
-          PID=$!
-          cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
-          trap cleanup EXIT
-          ready=0
-          for i in $(seq 1 60); do
-            if curl -fsS 'http://127.0.0.1:8787/api/runtime/schedule-contract' >/tmp/schedule.json 2>/dev/null; then ready=1; break; fi
-            sleep 1
-          done
-          if [ "$ready" -ne 1 ]; then tail -150 /tmp/phase248-wrangler.log; exit 1; fi
-          curl -fsS 'http://127.0.0.1:8787/__scheduled?cron=*%2F15%20*%20*%20*%20*' -o /tmp/scheduled.txt
-          cat /tmp/scheduled.txt
-          sleep 8
-
-      - name: Inspect Phase 247 subjects in route research
+      - name: Inspect recursive discovery source backlog
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          WITH phase247 AS (
-            SELECT DISTINCT subject_key
-            FROM growth_execution_contract
-            WHERE action='autonomous_route_qualification'
-              AND updated_at>=datetime('now','-30 minutes')
-          )
-          SELECT j.status,COUNT(*) n,
-                 MIN(j.created_at) oldest,
-                 MAX(COALESCE(j.completed_at,j.updated_at,j.created_at)) newest
-          FROM compute_overflow_jobs j
-          JOIN phase247 p ON p.subject_key=j.subject_key
-          WHERE j.job_type='distribution_route_research'
-            AND j.created_at>=datetime('now','-30 minutes')
-          GROUP BY j.status ORDER BY j.status;
+          SELECT status,source_type,COUNT(*) n,
+                 SUM(CASE WHEN last_scanned_at IS NULL THEN 1 ELSE 0 END) never_scanned,
+                 MIN(last_scanned_at) oldest_scan,
+                 MAX(last_scanned_at) newest_scan
+          FROM distribution_discovery_sources
+          GROUP BY status,source_type
+          ORDER BY status,source_type;
 
-          WITH phase247 AS (
-            SELECT DISTINCT subject_key
-            FROM growth_execution_contract
-            WHERE action='autonomous_route_qualification'
-              AND updated_at>=datetime('now','-30 minutes')
-          ),
-          latest AS (
-            SELECT j.subject_key,j.status,j.created_at,j.completed_at,j.result_json,j.last_error,
-                   ROW_NUMBER() OVER(PARTITION BY j.subject_key ORDER BY j.created_at DESC) rn
-            FROM compute_overflow_jobs j
-            JOIN phase247 p ON p.subject_key=j.subject_key
-            WHERE j.job_type='distribution_route_research'
-          )
-          SELECT subject_key,status,created_at,completed_at,last_error,
-                 json_extract(result_json,'$.classification') classification,
-                 COALESCE(json_extract(result_json,'$.routeSummary.submissionRoutes'),0) submission_routes,
-                 COALESCE(json_extract(result_json,'$.routeSummary.machineCandidates'),0) machine_candidates,
-                 COALESCE(json_extract(result_json,'$.routeSummary.humanGateCandidates'),0) human_candidates
-          FROM latest WHERE rn=1
-          ORDER BY COALESCE(completed_at,created_at) DESC LIMIT 40;
+          SELECT source_slug,source_url,source_host,parent_surface_slug,confidence,status,last_scanned_at,links_seen,relevant_links_seen,updated_at
+          FROM distribution_discovery_sources
+          WHERE status='active'
+          ORDER BY CASE WHEN last_scanned_at IS NULL THEN 0 ELSE 1 END,last_scanned_at ASC,confidence DESC
+          LIMIT 80;
+
+          SELECT event_type,status,detail,created_at
+          FROM distribution_events
+          WHERE event_type='external_discovery_refresh'
+          ORDER BY created_at DESC LIMIT 12;
 
           SELECT
-            (SELECT COUNT(*) FROM distribution_opportunities o
-             WHERE COALESCE(o.human_required,0)=0
-               AND o.action_url IS NOT NULL
-               AND o.status IN ('candidate','discovered','research_required')
-               AND COALESCE(o.external_value_score,0)>=35
-               AND NOT EXISTS (
-                 SELECT 1 FROM compute_overflow_jobs j
-                 WHERE j.subject_key=o.surface_slug
-                   AND j.job_type='distribution_route_research'
-               )) never_researched,
-            (SELECT COUNT(*) FROM distribution_opportunities o
-             WHERE COALESCE(o.human_required,0)=0
-               AND o.action_url IS NOT NULL
-               AND o.status IN ('candidate','discovered','research_required')
-               AND COALESCE(o.external_value_score,0)>=35
-               AND EXISTS (
-                 SELECT 1 FROM compute_overflow_jobs j
-                 WHERE j.subject_key=o.surface_slug
-                   AND j.job_type='distribution_route_research'
-                   AND j.status='completed'
-                   AND j.completed_at>=datetime('now','-24 hours')
-                   AND COALESCE(json_extract(j.result_json,'$.routeSummary.submissionRoutes'),0)=0
-                   AND COALESCE(json_extract(j.result_json,'$.routeSummary.machineCandidates'),0)=0
-               )) noyield_cooldown_24h,
-            (SELECT COUNT(*) FROM distribution_opportunities o
-             WHERE COALESCE(o.human_required,0)=0
-               AND o.action_url IS NOT NULL
-               AND o.status IN ('candidate','discovered','research_required')
-               AND COALESCE(o.external_value_score,0)>=35
-               AND EXISTS (
-                 SELECT 1 FROM compute_overflow_jobs j
-                 WHERE j.subject_key=o.surface_slug
-                   AND j.job_type='distribution_route_research'
-                   AND j.status='completed'
-                   AND json_extract(j.result_json,'$.outcome')='external_source_unreachable_exhausted'
-                   AND (
-                     (json_extract(j.result_json,'$.retryClass')='not_found' AND j.completed_at>=datetime('now','-72 hours'))
-                     OR (json_extract(j.result_json,'$.retryClass')='access_blocked' AND j.completed_at>=datetime('now','-24 hours'))
-                     OR (json_extract(j.result_json,'$.retryClass') IN ('transport_unreachable','edge_error') AND j.completed_at>=datetime('now','-12 hours'))
-                     OR (json_extract(j.result_json,'$.retryClass')='transient' AND j.completed_at>=datetime('now','-6 hours'))
-                   )
-               )) unreachable_cooldown,
-            (SELECT COUNT(*) FROM distribution_opportunities o
-             WHERE COALESCE(o.human_required,0)=0
-               AND o.action_url IS NOT NULL
-               AND o.status IN ('candidate','discovered','research_required')
-               AND COALESCE(o.external_value_score,0)>=35
-               AND NOT EXISTS (
-                 SELECT 1 FROM compute_overflow_jobs recent
-                 WHERE recent.subject_key=o.surface_slug
-                   AND recent.job_type='distribution_route_research'
-                   AND recent.created_at>=datetime('now','-6 hours')
-                   AND CAST(COALESCE(json_extract(recent.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
-               )
-               AND NOT EXISTS (
-                 SELECT 1 FROM compute_overflow_jobs noyield
-                 WHERE noyield.subject_key=o.surface_slug
-                   AND noyield.job_type='distribution_route_research'
-                   AND noyield.status='completed'
-                   AND noyield.completed_at>=datetime('now','-24 hours')
-                   AND CAST(COALESCE(json_extract(noyield.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
-                   AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.submissionRoutes'),0)=0
-                   AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
-               )) route_research_due_estimate;
-
-          SELECT * FROM compute_overflow_budget ORDER BY kind;
-
-          SELECT o.surface_slug,o.surface_name,o.status,o.surface_type,o.distribution_score,o.external_value_score,o.action_url,o.updated_at,
-                 (SELECT MAX(j.created_at) FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research') last_research_created,
-                 (SELECT MAX(j.completed_at) FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' AND j.status='completed') last_research_completed,
-                 (SELECT json_extract(j.result_json,'$.classification') FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' ORDER BY j.created_at DESC LIMIT 1) last_classification,
-                 (SELECT json_extract(j.result_json,'$.outcome') FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' ORDER BY j.created_at DESC LIMIT 1) last_outcome,
-                 (SELECT json_extract(j.result_json,'$.retryClass') FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' ORDER BY j.created_at DESC LIMIT 1) last_retry_class
-          FROM distribution_opportunities o
-          WHERE COALESCE(o.human_required,0)=0
-            AND o.action_url IS NOT NULL
-            AND o.status IN ('candidate','discovered','research_required')
-            AND COALESCE(o.external_value_score,0)>=35
-            AND NOT EXISTS (
-              SELECT 1 FROM compute_overflow_jobs recent
-              WHERE recent.subject_key=o.surface_slug
-                AND recent.job_type='distribution_route_research'
-                AND recent.created_at>=datetime('now','-6 hours')
-                AND CAST(COALESCE(json_extract(recent.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
-            )
-            AND NOT EXISTS (
-              SELECT 1 FROM compute_overflow_jobs noyield
-              WHERE noyield.subject_key=o.surface_slug
-                AND noyield.job_type='distribution_route_research'
-                AND noyield.status='completed'
-                AND noyield.completed_at>=datetime('now','-24 hours')
-                AND CAST(COALESCE(json_extract(noyield.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
-                AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.submissionRoutes'),0)=0
-                AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
-            )
-          ORDER BY o.distribution_score DESC,o.updated_at ASC LIMIT 20;
-
-          SELECT
-            (SELECT COUNT(*) FROM growth_execution_contract
-             WHERE action='autonomous_route_qualification'
-               AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_contracts,
-            (SELECT COUNT(*) FROM compute_overflow_jobs
-             WHERE job_type='distribution_route_research'
-               AND status='queued') route_research_queued,
-            (SELECT COUNT(*) FROM compute_overflow_jobs
-             WHERE job_type='distribution_route_research'
-               AND status='leased') route_research_leased,
-            (SELECT COUNT(*) FROM compute_overflow_jobs
-             WHERE job_type='distribution_route_research'
-               AND status='completed'
-               AND completed_at>=datetime('now','-30 minutes')) route_research_completed_30m,
-            (SELECT COUNT(*) FROM distribution_opportunities
-             WHERE status='ready_to_submit') ready_to_submit;
-          " | tee /tmp/phase248-proof.json
-
-          node - <<'NODE'
-          const fs=require('fs');
-          const x=JSON.parse(fs.readFileSync('/tmp/phase248-proof.json','utf8'));
-          const recent=(x[0]?.results||[]).reduce((s,r)=>s+Number(r.n||0),0);
-          const summary=x[2]?.results?.[0]||{};
-          console.log(JSON.stringify({ok:true,recentPhase247ResearchJobs:recent,...summary},null,2));
-          NODE
+            (SELECT COUNT(*) FROM distribution_discovery_sources WHERE status='active') active_dynamic_sources,
+            (SELECT COUNT(*) FROM distribution_discovery_sources WHERE status='active' AND last_scanned_at IS NULL) active_never_scanned,
+            (SELECT COUNT(*) FROM distribution_discovery_sources WHERE status='active' AND (last_scanned_at IS NULL OR last_scanned_at<=datetime('now','-6 hours'))) active_due_6h,
+            (SELECT COUNT(*) FROM distribution_discovery_sources WHERE status='active' AND (last_scanned_at IS NULL OR last_scanned_at<=datetime('now','-24 hours'))) active_due_24h;
+          "
