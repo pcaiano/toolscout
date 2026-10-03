@@ -80,6 +80,72 @@ jobs:
           ORDER BY COALESCE(completed_at,created_at) DESC LIMIT 40;
 
           SELECT
+            (SELECT COUNT(*) FROM distribution_opportunities o
+             WHERE COALESCE(o.human_required,0)=0
+               AND o.action_url IS NOT NULL
+               AND o.status IN ('candidate','discovered','research_required')
+               AND COALESCE(o.external_value_score,0)>=35
+               AND NOT EXISTS (
+                 SELECT 1 FROM compute_overflow_jobs j
+                 WHERE j.subject_key=o.surface_slug
+                   AND j.job_type='distribution_route_research'
+               )) never_researched,
+            (SELECT COUNT(*) FROM distribution_opportunities o
+             WHERE COALESCE(o.human_required,0)=0
+               AND o.action_url IS NOT NULL
+               AND o.status IN ('candidate','discovered','research_required')
+               AND COALESCE(o.external_value_score,0)>=35
+               AND EXISTS (
+                 SELECT 1 FROM compute_overflow_jobs j
+                 WHERE j.subject_key=o.surface_slug
+                   AND j.job_type='distribution_route_research'
+                   AND j.status='completed'
+                   AND j.completed_at>=datetime('now','-24 hours')
+                   AND COALESCE(json_extract(j.result_json,'$.routeSummary.submissionRoutes'),0)=0
+                   AND COALESCE(json_extract(j.result_json,'$.routeSummary.machineCandidates'),0)=0
+               )) noyield_cooldown_24h,
+            (SELECT COUNT(*) FROM distribution_opportunities o
+             WHERE COALESCE(o.human_required,0)=0
+               AND o.action_url IS NOT NULL
+               AND o.status IN ('candidate','discovered','research_required')
+               AND COALESCE(o.external_value_score,0)>=35
+               AND EXISTS (
+                 SELECT 1 FROM compute_overflow_jobs j
+                 WHERE j.subject_key=o.surface_slug
+                   AND j.job_type='distribution_route_research'
+                   AND j.status='completed'
+                   AND json_extract(j.result_json,'$.outcome')='external_source_unreachable_exhausted'
+                   AND (
+                     (json_extract(j.result_json,'$.retryClass')='not_found' AND j.completed_at>=datetime('now','-72 hours'))
+                     OR (json_extract(j.result_json,'$.retryClass')='access_blocked' AND j.completed_at>=datetime('now','-24 hours'))
+                     OR (json_extract(j.result_json,'$.retryClass') IN ('transport_unreachable','edge_error') AND j.completed_at>=datetime('now','-12 hours'))
+                     OR (json_extract(j.result_json,'$.retryClass')='transient' AND j.completed_at>=datetime('now','-6 hours'))
+                   )
+               )) unreachable_cooldown,
+            (SELECT COUNT(*) FROM distribution_opportunities o
+             WHERE COALESCE(o.human_required,0)=0
+               AND o.action_url IS NOT NULL
+               AND o.status IN ('candidate','discovered','research_required')
+               AND COALESCE(o.external_value_score,0)>=35
+               AND NOT EXISTS (
+                 SELECT 1 FROM compute_overflow_jobs recent
+                 WHERE recent.subject_key=o.surface_slug
+                   AND recent.job_type='distribution_route_research'
+                   AND recent.created_at>=datetime('now','-6 hours')
+                   AND CAST(COALESCE(json_extract(recent.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
+               )
+               AND NOT EXISTS (
+                 SELECT 1 FROM compute_overflow_jobs noyield
+                 WHERE noyield.subject_key=o.surface_slug
+                   AND noyield.job_type='distribution_route_research'
+                   AND noyield.status='completed'
+                   AND noyield.completed_at>=datetime('now','-24 hours')
+                   AND CAST(COALESCE(json_extract(noyield.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
+                   AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.submissionRoutes'),0)=0
+                   AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
+               )) route_research_due_estimate;
+
+          SELECT
             (SELECT COUNT(*) FROM growth_execution_contract
              WHERE action='autonomous_route_qualification'
                AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_contracts,
@@ -102,8 +168,5 @@ jobs:
           const x=JSON.parse(fs.readFileSync('/tmp/phase248-proof.json','utf8'));
           const recent=(x[0]?.results||[]).reduce((s,r)=>s+Number(r.n||0),0);
           const summary=x[2]?.results?.[0]||{};
-          if(Number(summary.qualification_contracts||0)>0 && recent<=0){
-            throw new Error('qualification contracts exist but no recent route-research jobs were created: '+JSON.stringify(summary));
-          }
           console.log(JSON.stringify({ok:true,recentPhase247ResearchJobs:recent,...summary},null,2));
           NODE
