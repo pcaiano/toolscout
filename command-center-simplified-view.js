@@ -374,7 +374,7 @@ function results(){
  document.getElementById('resultsBody').innerHTML=summary+items.map(i=>'<div class="log"><div class="logTime">'+esc(dt(i.at))+'</div><div class="logEngine">'+esc(human(i.engine||'engine'))+'</div><div class="logMain"><b>'+esc(i.label||i.type||i.id||'Execution')+'</b><span>'+esc(i.detail||human(i.type||''))+'</span></div><div class="logStatus">'+pill(human(i.status||'observed'),statusState(i.status))+'</div></div>').join('');
 }
 function health(){
- const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},compute=data.compute||{},auth=data.auth||{},issues=[];
+ const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},compute=data.compute||{},auth=data.auth||{},ga=data.acquisition||{},commerce=data.commerce||{},issues=[];
  const ec=t.executionContract||{},arch=t.architecture||{},g=t.search||{},growth=t.growth||{};
  if(Number(ec.missingExecutors||0)>0)issues.push({level:'bad',title:'Missing execution contracts',detail:n(ec.missingExecutors)+' executor mappings are missing.'});
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
@@ -382,7 +382,10 @@ function health(){
    const top=Array.isArray(arch.items)&&arch.items.length?arch.items[0]:null;
    issues.push({level:'bad',title:'Architecture incidents',detail:top?(n(arch.openIncidents)+' open · '+human(top.severity||'')+' · '+human(top.title||'Architecture incident')):(n(arch.openIncidents)+' open architecture incidents.')});
  }
- if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
+ if(data.acquisition&&ga.status!=='connected')issues.push({level:'bad',title:'GA4 acquisition unavailable',detail:ga.reason||sourceErrors.acquisition||'Canonical visitor/session source unavailable.'});
+ if(data.commerce&&commerce.status!=='connected')issues.push({level:'bad',title:'Server outbound ledger unavailable',detail:commerce.reason||sourceErrors.commerce||'Canonical outbound/monetized-outbound source unavailable.'});
+ if(data.truth&&g.status==='unavailable')issues.push({level:'bad',title:'Google Search Console unavailable',detail:'Canonical Google clicks and search progress are unavailable; zeros are not substituted.'});
+ else if(g.runtimeOk===false)issues.push({level:'bad',title:'GSC refresh failed',detail:g.runtimeStatus||'Search evidence refresh failed.'});
  const authorityFailureStates=new Set(['execution_required','external_handoff_timeout','handoff_reconciliation_required','failed']);
  if(a.status&&authorityFailureStates.has(String(a.status))){
    if(a.senderFreshClaim&&Number(a.senderClaimed||0)>0)issues.push({level:'warn',title:'Authority handoff in progress',detail:n(a.senderClaimed)+' sender task is claimed since '+dt(a.senderNewestClaimedAt)+'. Waiting for external callback evidence.'});
@@ -396,6 +399,8 @@ function health(){
  if(auth.status==='configured'&&auth.brokerRuntime?.serviceOk===true&&auth.brokerRuntime?.browserVerified===false)issues.push({level:'warn',title:'Auth browser diagnostic delayed',detail:'Auth broker service is live; Chromium diagnostic reports '+human(auth.brokerRuntime.diagnosticStatus||'degraded')+'. This does not block the control plane unless an auth handoff itself fails.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh, authority, external compute and Auth Plane have no current measurable failure.'});
  const rows=[
+  ['GA4 acquisition',data.acquisition?(ga.status==='connected'?'Observed':'Unavailable'):'Loading',ga.status==='connected'?'Canonical users and sessions · refreshed '+dt(ga.fetchedAt):(ga.reason||sourceErrors.acquisition||'')],
+  ['Server outbound',data.commerce?(commerce.status==='connected'?'Observed':'Unavailable'):'Loading',commerce.status==='connected'?n(commerce.last24Hours?.outbound)+' outbound · '+n(commerce.last24Hours?.monetized)+' monetized / 24h':(commerce.reason||sourceErrors.commerce||'')],
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
   ['External compute',compute.status||'Unavailable',n(compute.completedToday)+' completed today · '+n(compute.queued)+' queued'],
   ['Email plane',growth.emailDeliveryMode||'Unavailable',n(growth.emailSent24h)+' sent / 24h · '+n(growth.emailReadyContacts)+' ready contacts'],
