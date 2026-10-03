@@ -16,6 +16,7 @@ import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 import {senderCapacitySnapshot} from './sender-capacity-policy.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
+const AUTONOMOUS_REALLOCATED_BATCH_LIMIT=4;
 const AUTONOMOUS_CONTROL_CRON=TOOLSCOUT_CRONS.autonomousDistribution;
 export function collapseVendorGrowthRows(rows=[],nowMs=Date.now()){
   const groups=new Map();
@@ -986,6 +987,7 @@ async function runGrowthExecutionContractCycle(env){
   const before=await reconcileExecutionContracts(env);
   const senderCapacity=await senderCapacitySnapshot(env);
   const senderSupplyExhausted=Boolean(senderCapacity?.exhausted);
+  const autonomousBatchLimit=senderSupplyExhausted?AUTONOMOUS_REALLOCATED_BATCH_LIMIT:1;
   const results={};
   let selectedInternalLane=null;
   try{
@@ -1022,51 +1024,71 @@ async function runGrowthExecutionContractCycle(env){
     }
   }catch{}
 
-  const runInternal=async(executor,fn)=>{
-    const claim=await claimExecutorTasks(env,executor,{limit:1,maxInFlight:1,result:'growth_brain_dispatched_task_v2'});
-    if(!claim.claimed){results[executor]={claimed:0};return}
-    const task=claim.tasks?.[0]||null;
-    try{
-      const out=await boundedExecution(Promise.resolve().then(()=>fn(task)),60000,`executor_${executor}`);
-      let supervisorProof={verified:0},attemptRecorded=false,directProof=null,deferred=null;
-      if(executor==='content_issue'&&out?.brief?.issued===true&&out?.brief?.execution_task_id===task?.task_id){
-        await markExecutorAttempt(env,executor,'content_brief_issued_waiting_for_publication',{taskIds:claim.taskIds});
-        attemptRecorded=true;
-        directProof={verified:false,pendingPublication:true,brief_id:out.brief.brief_id||null,growth_opportunity_key:out.brief.growth_opportunity_key||null};
-      }else if(executor==='seo_cloudflare'&&out?.verified===true&&out?.pathname){
-        directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
-      }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&(out?.taskProof?.verified===true||out?.taskProof?.conclusive===true)){
-        const proof=out.taskProof;
-        const outcome=proof.outcome||(proof.verified===true?'positive':'conclusive');
-        directProof=await recordExecutionProof(env,{
-          taskId:task.task_id,
-          executor,
-          status:'verified',
-          detail:`${proof.kind||task.action||'task_specific_distribution_proof'}_${outcome}_completed_v1`,
-          externalId:proof.publicUrl||proof.routeUrl||proof.liveUrl||proof.surfaceSlug||task.subject_key||null,
-          evidence:proof
-        });
-      }else if(task?.source_kind==='supervisor'){
-        await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:claim.taskIds});
-        attemptRecorded=true;
-        supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v3',claim.taskIds);
-      }else if(executor==='catalog_cycle'&&out?.task?.verified===true&&task?.subject_type==='catalog_gap'){
-        const related=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='catalog_cycle' AND subject_type='catalog_gap' AND subject_key=? AND status NOT IN ('verified','blocked','cancelled','human_required')`).bind(task.subject_key).all();
-        const ids=(related.results||[]).map(x=>x.task_id);
-        for(const taskId of ids)await recordExecutionProof(env,{taskId,executor,status:'verified',detail:out.task.admitted?'catalog_gap_admitted_from_first_party_evidence':'catalog_gap_already_admitted',externalId:out.task.toolscoutUrl||null,evidence:{slug:out.task.slug||task.subject_key,toolscout_url:out.task.toolscoutUrl||null,source_url:out.task.profile?.sourceUrl||null,category:out.task.profile?.category||null,admitted:Boolean(out.task.admitted)}});
-        await env.DB.prepare(`UPDATE growth_opportunity_state SET status='resolved',last_evaluated_at=datetime('now'),updated_at=datetime('now') WHERE status='active' AND subject_type='catalog_gap' AND subject_key=?`).bind(task.subject_key).run().catch(()=>{});
-        directProof={verified:ids.length,subject_key:task.subject_key,admitted:Boolean(out.task.admitted),toolscout_url:out.task.toolscoutUrl||null};
-      }else if(executor==='catalog_cycle'&&out?.task?.verified===true&&task?.subject_type==='news_update'&&task?.action==='catalog_impact_review'){
-        directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'catalog_impact_review_completed',externalId:out.task.source_url||null,evidence:out.task});
-      }else{
-        deferred=await deferExecutionTask(env,task.task_id,'cycle_completed_without_task_specific_proof_v3');
+  const runInternal=async(executor,fn,{limit=1,maxInFlight=1}={})=>{
+    const batchLimit=Math.max(1,Math.min(6,Number(limit)||1));
+    const inFlightLimit=Math.max(1,Math.min(6,Number(maxInFlight)||batchLimit));
+    const claim=await claimExecutorTasks(env,executor,{limit:batchLimit,maxInFlight:inFlightLimit,result:'growth_brain_dispatched_task_v2'});
+    if(!claim.claimed){results[executor]={claimed:0,batchLimit};return}
+    const items=[];
+    for(const task of claim.tasks||[]){
+      try{
+        const out=await boundedExecution(Promise.resolve().then(()=>fn(task)),60000,`executor_${executor}`);
+        let supervisorProof={verified:0},attemptRecorded=false,directProof=null,deferred=null;
+        if(executor==='content_issue'&&out?.brief?.issued===true&&out?.brief?.execution_task_id===task?.task_id){
+          await markExecutorAttempt(env,executor,'content_brief_issued_waiting_for_publication',{taskIds:[task.task_id]});
+          attemptRecorded=true;
+          directProof={verified:false,pendingPublication:true,brief_id:out.brief.brief_id||null,growth_opportunity_key:out.brief.growth_opportunity_key||null};
+        }else if(executor==='seo_cloudflare'&&out?.verified===true&&out?.pathname){
+          directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'cloudflare_seo_task_verified_v1',externalId:out.pathname,evidence:out});
+        }else if((executor==='distribution_network'||executor==='distribution_autonomous')&&(out?.taskProof?.verified===true||out?.taskProof?.conclusive===true)){
+          const proof=out.taskProof;
+          const outcome=proof.outcome||(proof.verified===true?'positive':'conclusive');
+          directProof=await recordExecutionProof(env,{
+            taskId:task.task_id,
+            executor,
+            status:'verified',
+            detail:`${proof.kind||task.action||'task_specific_distribution_proof'}_${outcome}_completed_v1`,
+            externalId:proof.publicUrl||proof.routeUrl||proof.liveUrl||proof.surfaceSlug||task.subject_key||null,
+            evidence:proof
+          });
+        }else if(task?.source_kind==='supervisor'){
+          await markExecutorAttempt(env,executor,JSON.stringify(out||{}).slice(0,900),{taskIds:[task.task_id]});
+          attemptRecorded=true;
+          supervisorProof=await verifySupervisorExecutorTasks(env,executor,'supervisor_executor_completed_v3',[task.task_id]);
+        }else if(executor==='catalog_cycle'&&out?.task?.verified===true&&task?.subject_type==='catalog_gap'){
+          const related=await env.DB.prepare(`SELECT task_id FROM growth_execution_contract WHERE executor='catalog_cycle' AND subject_type='catalog_gap' AND subject_key=? AND status NOT IN ('verified','blocked','cancelled','human_required')`).bind(task.subject_key).all();
+          const ids=(related.results||[]).map(x=>x.task_id);
+          for(const taskId of ids)await recordExecutionProof(env,{taskId,executor,status:'verified',detail:out.task.admitted?'catalog_gap_admitted_from_first_party_evidence':'catalog_gap_already_admitted',externalId:out.task.toolscoutUrl||null,evidence:{slug:out.task.slug||task.subject_key,toolscout_url:out.task.toolscoutUrl||null,source_url:out.task.profile?.sourceUrl||null,category:out.task.profile?.category||null,admitted:Boolean(out.task.admitted)}});
+          await env.DB.prepare(`UPDATE growth_opportunity_state SET status='resolved',last_evaluated_at=datetime('now'),updated_at=datetime('now') WHERE status='active' AND subject_type='catalog_gap' AND subject_key=?`).bind(task.subject_key).run().catch(()=>{});
+          directProof={verified:ids.length,subject_key:task.subject_key,admitted:Boolean(out.task.admitted),toolscout_url:out.task.toolscoutUrl||null};
+        }else if(executor==='catalog_cycle'&&out?.task?.verified===true&&task?.subject_type==='news_update'&&task?.action==='catalog_impact_review'){
+          directProof=await recordExecutionProof(env,{taskId:task.task_id,executor,status:'verified',detail:'catalog_impact_review_completed',externalId:out.task.source_url||null,evidence:out.task});
+        }else{
+          deferred=await deferExecutionTask(env,task.task_id,'cycle_completed_without_task_specific_proof_v3');
+        }
+        items.push({ok:true,task:{task_id:task?.task_id||null,source_kind:task?.source_kind||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},attemptRecorded,supervisorVerified:supervisorProof.verified,directProof,deferred,result:out||null});
+      }catch(error){
+        const message=String(error?.message||error).slice(0,800);
+        await markExecutorAttempt(env,executor,`executor_error:${message}`,{failed:true,taskIds:[task.task_id]});
+        items.push({ok:false,task:{task_id:task?.task_id||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},error:message});
       }
-      results[executor]={claimed:claim.claimed,ok:true,task:{task_id:task?.task_id||null,source_kind:task?.source_kind||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},attemptRecorded,supervisorVerified:supervisorProof.verified,directProof,deferred,result:out||null};
-    }catch(error){
-      const message=String(error?.message||error).slice(0,800);
-      await markExecutorAttempt(env,executor,`executor_error:${message}`,{failed:true,taskIds:claim.taskIds});
-      results[executor]={claimed:claim.claimed,ok:false,task:{task_id:task?.task_id||null,action:task?.action||null,subject_type:task?.subject_type||null,subject_key:task?.subject_key||null},error:message};
     }
+    if(batchLimit===1&&items.length===1){
+      results[executor]={claimed:claim.claimed,batchLimit,...items[0]};
+      return;
+    }
+    results[executor]={
+      claimed:claim.claimed,
+      ok:items.every(x=>x.ok!==false),
+      batchLimit,
+      processed:items.length,
+      verified:items.filter(x=>Boolean(x?.directProof?.verified)||Number(x?.supervisorVerified||0)>0).length,
+      deferred:items.filter(x=>Boolean(x?.deferred)).length,
+      failed:items.filter(x=>x.ok===false).length,
+      task:items[0]?.task||null,
+      result:items[0]?.result||null,
+      items
+    };
   };
 
   // The primary internal lane is the bounded execution-contract work selected above.
@@ -1077,10 +1099,10 @@ async function runGrowthExecutionContractCycle(env){
     // Authority has two independent bounded executors. Drain one task from the
     // autonomous lane in the same cycle when available instead of leaving an
     // already-admitted authority task idle for another 15 minutes.
-    await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
+    await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task),{limit:autonomousBatchLimit,maxInFlight:autonomousBatchLimit});
   }
   if(selectedInternalLane==='distribution_autonomous'){
-    await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task));
+    await runInternal('distribution_autonomous',(task)=>runAutonomousDistributionCycle(env,task),{limit:autonomousBatchLimit,maxInFlight:autonomousBatchLimit});
     await runInternal('distribution_network',(task)=>runDistributionNetworkCycle(env,task));
   }
   if(selectedInternalLane==='content_issue')await runInternal('content_issue',async(task)=>({brief:await issueGrowthContentBrief(env,task)}));
@@ -1116,7 +1138,7 @@ async function runGrowthExecutionContractCycle(env){
   results.audience_make={claimed:audienceClaim.claimed,external:true,task:audienceClaim.tasks?.[0]||null};
   const after=await reconcileExecutionContracts(env);
   const snapshot=await executionContractSnapshot(env);
-  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,senderCapacity,capacityReallocation:{active:senderSupplyExhausted,from:'make_sender',to:senderSupplyExhausted?['distribution_network','distribution_autonomous','seo_cloudflare','content_issue']:[],reason:senderSupplyExhausted?'sender_supply_exhausted':null},boundedExecution:{maxPrimaryInternalLanesPerRun:selectedInternalLane==='distribution_network'||selectedInternalLane==='distribution_autonomous'?2:1,selectedInternalLane,authorityCounterpartDrain:true,seoBatchMax:8,seoExecutor:'cloudflare_internal',externalExecutorsClaimOnly:true,contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
+  return{ok:true,integrityVersion:'task-specific-bounded-v3',synced,before,results,after,senderCapacity,capacityReallocation:{active:senderSupplyExhausted,from:'make_sender',to:senderSupplyExhausted?['distribution_network','distribution_autonomous','seo_cloudflare','content_issue']:[],reason:senderSupplyExhausted?'sender_supply_exhausted':null},boundedExecution:{maxPrimaryInternalLanesPerRun:selectedInternalLane==='distribution_network'||selectedInternalLane==='distribution_autonomous'?2:1,selectedInternalLane,authorityCounterpartDrain:true,autonomousBatchLimit,adaptiveAuthorityBatch:senderSupplyExhausted,seoBatchMax:8,seoExecutor:'cloudflare_internal',externalExecutorsClaimOnly:true,contentProof:'public_event_required',duplicatedNetworkPreparation:false},architectureEscalation:{deferred:true,reason:'post_core_mission_audit'},snapshot};
 }
 async function runBoundedPublicExecutionReconcile(env){
   const synced=await syncExecutionContracts(env);
