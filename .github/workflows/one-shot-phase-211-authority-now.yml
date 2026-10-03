@@ -1,4 +1,4 @@
-name: One Shot Phase 211 Authority Now
+name: One Shot Phase 213 Opportunity Coordinator Truth
 
 on:
   push:
@@ -50,4 +50,16 @@ jobs:
             SELECT event_id FROM distribution_events
             WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')
           );
+
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,detail,evidence_json
+          FROM engine_runs
+          WHERE mission='opportunity_coordination'
+          ORDER BY started_at DESC
+          LIMIT 12;
+
+          SELECT MAX(last_evaluated_at) newest_surface_evaluation,
+                 MIN(last_evaluated_at) oldest_surface_evaluation,
+                 COUNT(*) active_surface_opportunities
+          FROM growth_opportunity_state
+          WHERE status='active' AND subject_type='surface';
           "
