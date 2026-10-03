@@ -51,7 +51,7 @@ jobs:
           GROUP BY job_type,status
           ORDER BY job_type,status;
 
-          SELECT job_id,job_type,subject_key,status,attempts,error,created_at,leased_at,completed_at,result_json
+          SELECT job_id,job_type,subject_key,status,attempts,created_at,leased_at,completed_at,result_json
           FROM compute_overflow_jobs
           WHERE job_type IN ('contact_supply_public_research','vendor_role_email_research')
             AND created_at>=datetime('now','-24 hours')
