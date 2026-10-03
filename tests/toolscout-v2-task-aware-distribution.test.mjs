@@ -25,7 +25,16 @@ test('publisher contact discovery emits task-specific proof only after a concret
 
 test('orchestrator records verified task-specific distribution proof',()=>{
   const src=read('distribution-orchestrator-worker.js');
-  assert.match(src,/out\?\.taskProof\?\.verified===true/);
+  assert.match(src,/out\?\.taskProof\?\.verified===true\|\|out\?\.taskProof\?\.conclusive===true/);
   assert.match(src,/task_specific_distribution_proof/);
+  assert.match(src,/proof\.outcome/);
   assert.match(src,/recordExecutionProof/);
+});
+
+
+test('live or verified surfaces without backlinks advance into publisher authority recovery',()=>{
+  const src=read('distribution-orchestrator-worker.js');
+  assert.match(src,/const backlinkMissing=backlinkAcquisition&&externalSurface&&\['live','verified'\]\.includes\(surfaceStatus\)&&!backlinkVerified/);
+  assert.match(src,/backlinkMissing&&\(!network\|\|network==='queued'\|\|network==='send_failed'\).*publisher_contact_discovery/);
+  assert.match(src,/backlinkMissing&&network==='contact_route_found'.*execute_alternate_routes/);
 });
