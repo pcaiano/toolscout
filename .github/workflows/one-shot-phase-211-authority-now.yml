@@ -1,4 +1,4 @@
-name: One Shot Phase 213 Opportunity Coordinator Truth
+name: One Shot Phase 216 Authority Target Eligibility Truth
 
 on:
   push:
@@ -62,4 +62,14 @@ jobs:
                  COUNT(*) active_surface_opportunities
           FROM growth_opportunity_state
           WHERE status='active' AND subject_type='surface';
+
+          SELECT surface_slug,surface_name,surface_type,status,human_required,automation_potential,distribution_score,backlink_value,action_url,live_url
+          FROM distribution_opportunities
+          WHERE surface_slug IN ('aitools-love','feedmyapp-com','tiny-startups','aitoolguru-com')
+          ORDER BY surface_slug;
+
+          SELECT surface_slug,surface_type,domain,status,contact_email,contact_checked_at,discovery_attempts,source_url
+          FROM distribution_network_outreach
+          WHERE surface_slug IN ('aitools-love','feedmyapp-com','tiny-startups','aitoolguru-com')
+          ORDER BY surface_slug;
           "
