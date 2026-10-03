@@ -18,13 +18,16 @@ test('alternate-route research has a bounded SLA and cannot remain researching f
 });
 
 test('human gates are closed only after their opportunity is terminal or superseding',()=>{
-  assert.match(autonomous,/async function reconcileTerminalOpenHumanGates/);
-  assert.match(autonomous,/g\.status='open'/);
-  assert.match(autonomous,/o\.status IN \('submitted','pending_review','scheduled','verified','live','policy_blocked','rejected','skipped','unavailable_free'\)/);
-  assert.match(autonomous,/const achieved=\['verified','live'\]\.includes\(s\)/);
-  assert.match(autonomous,/const status=achieved\?'resolved':'cancelled'/);
-  assert.doesNotMatch(autonomous,/o\.status IN \([^\n]*'auth_required'[^\n]*\)/);
-  assert.doesNotMatch(autonomous,/o\.status IN \([^\n]*'human_action_required'[^\n]*\)/);
+  const start=autonomous.indexOf('async function reconcileTerminalOpenHumanGates');
+  const end=autonomous.indexOf('async function reconcileOrphanHumanStates',start);
+  assert.ok(start>=0&&end>start);
+  const terminalReconcile=autonomous.slice(start,end);
+  assert.match(terminalReconcile,/g\.status='open'/);
+  assert.match(terminalReconcile,/o\.status IN \('submitted','pending_review','scheduled','verified','live','policy_blocked','rejected','skipped','unavailable_free'\)/);
+  assert.match(terminalReconcile,/const achieved=\['verified','live'\]\.includes\(s\)/);
+  assert.match(terminalReconcile,/const status=achieved\?'resolved':'cancelled'/);
+  assert.doesNotMatch(terminalReconcile,/o\.status IN \([^\n]*'auth_required'[^\n]*\)/);
+  assert.doesNotMatch(terminalReconcile,/o\.status IN \([^\n]*'human_action_required'[^\n]*\)/);
 });
 
 test('terminal gate reconciliation runs before restoring active open-gate states',()=>{
