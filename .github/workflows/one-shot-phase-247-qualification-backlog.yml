@@ -91,6 +91,27 @@ jobs:
           GROUP BY c.executor,c.action,c.status,c.last_result
           ORDER BY c.executor,c.action,c.status,c.last_result;
 
+          SELECT status,surface_type,COUNT(*) n
+          FROM distribution_opportunities
+          WHERE COALESCE(action_url,'')<>'' AND lower(action_url) NOT LIKE 'https://trytoolscout.org/%'
+          GROUP BY status,surface_type
+          ORDER BY status,surface_type;
+
+          SELECT subject_type,
+                 SUM(CASE WHEN EXISTS(SELECT 1 FROM json_each(action_json) j WHERE j.value IN ('backlink_reference_outreach','publisher_outreach','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification','verify_backlink_acquisition')) THEN 1 ELSE 0 END) authority_action_opportunities,
+                 COUNT(*) active_total
+          FROM growth_opportunity_state
+          WHERE status='active'
+          GROUP BY subject_type ORDER BY subject_type;
+
+          SELECT
+            (SELECT COUNT(*) FROM distribution_vendor_amplification WHERE status='contact_found' AND contact_email IS NOT NULL) vendor_contact_found,
+            (SELECT COUNT(*) FROM distribution_network_outreach WHERE status='contact_found' AND contact_email IS NOT NULL) publisher_contact_found,
+            (SELECT COUNT(*) FROM distribution_network_outreach WHERE status='contact_route_found') publisher_route_found,
+            (SELECT COUNT(*) FROM distribution_auto_adapters WHERE policy_state='verified') verified_auto_adapters,
+            (SELECT COUNT(*) FROM distribution_opportunities WHERE status='ready_to_submit') ready_to_submit,
+            (SELECT COUNT(*) FROM distribution_opportunities WHERE status IN ('discovered','candidate','research_required','stale') AND COALESCE(human_required,0)=0) researchable_surfaces;
+
           SELECT status,COUNT(*) n,MIN(created_at) oldest,MAX(updated_at) newest
           FROM compute_overflow_jobs
           WHERE job_type='distribution_route_research'
