@@ -98,7 +98,8 @@ async function wakeMakeSender(env,claimed){
 function oidcB64url(value){const s=String(value||'').replace(/-/g,'+').replace(/_/g,'/');return atob(s+'='.repeat((4-s.length%4)%4));}
 function oidcBytes(value){const s=oidcB64url(value),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
 async function githubExecutionOidcValid(token){try{const parts=String(token||'').split('.');if(parts.length!==3)return false;const header=JSON.parse(oidcB64url(parts[0])),claims=JSON.parse(oidcB64url(parts[1]));if(header.alg!=='RS256'||!header.kid)return false;const now=Math.floor(Date.now()/1000);if(claims.iss!=='https://token.actions.githubusercontent.com'||claims.aud!=='toolscout-execution'||claims.repository!=='pcaiano/toolscout'||claims.ref!=='refs/heads/main'||Number(claims.exp||0)<now||Number(claims.nbf||0)>now)return false;const jwks=await fetch('https://token.actions.githubusercontent.com/.well-known/jwks',{headers:{Accept:'application/json'}});if(!jwks.ok)return false;const data=await jwks.json(),jwk=(data.keys||[]).find(x=>x.kid===header.kid&&x.kty==='RSA');if(!jwk)return false;const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);return await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,oidcBytes(parts[2]),new TextEncoder().encode(`${parts[0]}.${parts[1]}`));}catch{return false}}
-async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return githubExecutionOidcValid(t)}
+async function auth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)}
+async function executionAuth(request,env){const t=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(env.ADMIN_TOKEN&&t===env.ADMIN_TOKEN)return true;return githubExecutionOidcValid(t)}
 const GROWTH_ESCALATION_HANDOFF_SHA256='54ed9bf169f84acd97387ebbb4f69c603606b074dccf2552c32e781f0a627178';
 async function sha256Hex(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v||'')));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function growthEscalationHandoffOk(request){const h=String(request.headers.get('X-ToolScout-Handoff')||'');return Boolean(h)&&(await sha256Hex(h))===GROWTH_ESCALATION_HANDOFF_SHA256}
@@ -1509,7 +1510,14 @@ if(u.pathname==='/api/growth/execution/external-status'&&request.method==='POST'
   const out=await recordExternalExecutorStatus(env,body);
   return Response.json(out,{status:out?.ok?200:409,headers:H});
 }
-if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});const cycleContext=missionCycleContextFromRequest(request,'growth','execution_contract'),cycleOwner=missionCycleOwnerFromRequest(request);return Response.json(await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'manual_api',singleFlightMinutes:20,cycleContext,cycleOwner},()=>runGrowthExecutionContractCycle(env)),{headers:H});}
+if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){
+  if(!(await executionAuth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  const coordination=await runWithLedger(env,{engine:'growth',mission:'opportunity_coordination',triggerName:'manual_execution_dispatch',singleFlightMinutes:15},()=>coordinateGrowthOpportunities(env)).catch(error=>({status:'failed',detail:String(error?.message||error).slice(0,500)}));
+  const cycleContext=missionCycleContextFromRequest(request,'growth','execution_contract'),cycleOwner=missionCycleOwnerFromRequest(request);
+  const execution=await runWithLedger(env,{engine:'growth',mission:'execution_contract',triggerName:'manual_api',singleFlightMinutes:20,cycleContext,cycleOwner},()=>runGrowthExecutionContractCycle(env));
+  if(execution&&typeof execution==='object')execution.preExecutionCoordination={status:coordination?.status||null,ok:coordination?.ok??null};
+  return Response.json(execution,{headers:H});
+}
 if(u.pathname==='/api/growth/execution'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await executionContractSnapshot(env),{headers:H});}
 if(u.pathname==='/api/growth/architecture-escalations/public-candidates'&&request.method==='GET'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
