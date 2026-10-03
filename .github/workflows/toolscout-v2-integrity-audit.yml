@@ -22,6 +22,7 @@ on:
       - 'migrations/**'
       - 'scripts/audit-runtime-architecture.mjs'
       - 'scripts/validate-v2-preservation.mjs'
+      - 'scripts/evaluate-v2-integrity-audit.mjs'
       - 'tests/toolscout-v2-*.test.mjs'
 
 permissions:
@@ -99,7 +100,25 @@ jobs:
             AND o.status IN ('verified','live','policy_blocked','rejected','skipped','unavailable_free');
 
           SELECT engine,mission,status,started_at,completed_at,
-                 CAST((julianday('now')-julianday(COALESCE(completed_at,started_at)))*24*60 AS INTEGER) age_minutes
+                 CAST((julianday('now')-julianday(COALESCE(completed_at,started_at)))*24*60 AS INTEGER) age_minutes,
+                 (
+                   SELECT MAX(x.completed_at)
+                   FROM engine_runs x
+                   WHERE x.engine=r.engine
+                     AND x.mission=r.mission
+                     AND x.status='completed'
+                     AND x.completed_at IS NOT NULL
+                 ) last_completed_at,
+                 CAST((
+                   julianday('now')-julianday((
+                     SELECT MAX(x.completed_at)
+                     FROM engine_runs x
+                     WHERE x.engine=r.engine
+                       AND x.mission=r.mission
+                       AND x.status='completed'
+                       AND x.completed_at IS NOT NULL
+                   ))
+                 )*24*60 AS INTEGER) completed_age_minutes
           FROM engine_runs r
           WHERE r.run_id IN (
             SELECT run_id FROM engine_runs x
@@ -126,61 +145,4 @@ jobs:
             (SELECT COUNT(DISTINCT surface_slug) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1) internal_verified_authority_surfaces;
           " | tee integrity.json
 
-          node - <<'NODE'
-          const fs=require('fs');
-          const payload=JSON.parse(fs.readFileSync('integrity.json','utf8'));
-          const rows=i=>(payload[i]&&Array.isArray(payload[i].results)?payload[i].results:[]);
-          const one=i=>rows(i)[0]||{};
-          const fail=(message,evidence)=>{throw new Error(message+': '+JSON.stringify(evidence))};
-
-          const coverage=one(0);
-          if(Number(coverage.missing_contracts||0)!==0)fail('active actions without execution contracts',coverage);
-          if(Number(coverage.missing_executors||0)!==0)fail('execution executor mapping gap',coverage);
-
-          const orphan=one(1);
-          if(Number(orphan.orphan_nonterminal_contracts||0)!==0)fail('orphan nonterminal contracts',orphan);
-
-          const architecture=one(2);
-          if(Number(architecture.architecture_incidents_open||0)!==0)fail('open architecture incidents',architecture);
-
-          const compute=one(3);
-          if(Number(compute.stale_compute_leases||0)!==0)fail('stale compute leases',compute);
-
-          const gates=one(4);
-          if(Number(gates.invalid_human_gates||0)!==0)fail('human gates conflict with terminal surface truth',gates);
-
-          const limits={
-            'growth:execution_contract':45,
-            'growth:opportunity_coordination':45,
-            'growth:self_audit':90,
-            'distribution:autonomous_cycle':45,
-            'distribution:economic_learning':45,
-            'distribution:network_cycle':150,
-            'distribution:authority_execution_recovery':120,
-            'seo_geo_aio:execution_batch_v2':45,
-            'affiliate:coverage_cycle':780,
-            'catalog:runtime_quality':480,
-            'catalog:runtime_coverage':1560
-          };
-          const missionRows=rows(5),seen=new Set();
-          for(const row of missionRows){
-            const key=row.engine+':'+row.mission;
-            if(!(key in limits))continue;
-            seen.add(key);
-            if(row.status!=='completed')fail('critical mission not completed',row);
-            if(Number(row.age_minutes)>limits[key])fail('critical mission outside cadence',row);
-          }
-          for(const key of Object.keys(limits))if(!seen.has(key))fail('critical mission missing',{key});
-
-          const supply=one(6);
-          if(Number(supply.diversified_sources||0)<=0)fail('Contact Supply diversified source pool missing',supply);
-
-          console.log(JSON.stringify({
-            ok:true,
-            coverage,
-            compute,
-            contactSupply:supply,
-            sourceSnapshot:one(7),
-            missions:missionRows.map(x=>({engine:x.engine,mission:x.mission,age_minutes:x.age_minutes,status:x.status}))
-          },null,2));
-          NODE
+          node scripts/evaluate-v2-integrity-audit.mjs integrity.json
