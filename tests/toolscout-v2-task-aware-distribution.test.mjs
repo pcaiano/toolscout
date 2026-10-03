@@ -35,7 +35,7 @@ test('orchestrator records verified task-specific distribution proof',()=>{
 test('live or verified surfaces without backlinks advance into publisher authority recovery',()=>{
   const src=read('distribution-orchestrator-worker.js');
   assert.match(src,/const backlinkMissing=backlinkAcquisition&&externalSurface&&\['live','verified'\]\.includes\(surfaceStatus\)&&!backlinkVerified/);
-  assert.match(src,/backlinkMissing&&contactDiscoveryDue.*publisher_contact_discovery/);
+  assert.match(src,/backlinkMissing&&networkOutreachEligible&&contactDiscoveryDue.*publisher_contact_discovery/);
   assert.match(src,/backlinkMissing&&network==='contact_route_found'.*execute_alternate_routes/);
 });
 
@@ -47,6 +47,6 @@ test('publisher contact discovery respects its 20 hour network scan cooldown',()
   assert.match(src,/const contactDiscoveryDue=!network/);
   assert.match(src,/Date\.now\(\)-networkContactCheckedAt>=20\*3600000/);
   assert.match(src,/backlinkMissing&&contactDiscoveryDue/);
-  assert.match(src,/acquisitionOpen&&contactDiscoveryDue/);
+  assert.match(src,/acquisitionOpen&&networkOutreachEligible&&contactDiscoveryDue/);
   assert.match(src,/contact_discovery_due:contactDiscoveryDue/);
 });
