@@ -1,0 +1,50 @@
+name: One Shot Phase 221 Authority Truth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-221-authority-truth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect current authority backlog
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT g.executor,g.action,g.status,g.subject_key,g.priority_score,g.last_result,g.updated_at,
+                 o.status AS surface_status,o.surface_type,o.human_required,o.action_url,o.live_url,o.last_checked_at,o.next_action,
+                 n.status AS network_status,n.contact_email,n.contact_source_url,n.contact_checked_at,n.discovery_attempts
+          FROM growth_execution_contract g
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=g.subject_key
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=g.subject_key
+          WHERE g.action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification','repair_stalled_route_execution','scale_proven_surface')
+            AND g.status IN ('pending','claimed','attempted','deferred','stalled')
+          ORDER BY g.priority_score DESC,g.updated_at DESC
+          LIMIT 80;
+
+          SELECT executor,action,status,COUNT(*) n
+          FROM growth_execution_contract
+          WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification','repair_stalled_route_execution','scale_proven_surface')
+            AND status IN ('pending','claimed','attempted','deferred','stalled','verified','cancelled')
+          GROUP BY executor,action,status
+          ORDER BY executor,status,action;
+
+          SELECT event_type,status,detail,created_at
+          FROM distribution_events
+          WHERE created_at>=datetime('now','-6 hours')
+            AND (event_type LIKE 'authority_%' OR event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent','autonomous_submission_execution','autonomous_submission_verification'))
+          ORDER BY created_at DESC LIMIT 60;
+          "
