@@ -9,7 +9,8 @@ test('execution dispatch keeps admin auth and adds repo-scoped GitHub OIDC',()=>
   assert.match(src,/claims\.ref!=='refs\/heads\/main'/);
   assert.match(src,/claims\.iss!=='https:\/\/token\.actions\.githubusercontent\.com'/);
   assert.match(src,/env\.ADMIN_TOKEN&&t===env\.ADMIN_TOKEN/);
-  assert.match(src,/async function executionAuth\(request,env\)/);\n  assert.match(src,/return githubExecutionOidcValid\(t\)/);
+  assert.match(src,/async function executionAuth\(request,env\)/);
+  assert.match(src,/return githubExecutionOidcValid\(t\)/);
 });
 
 test('execution dispatch remains protected by auth',()=>{
