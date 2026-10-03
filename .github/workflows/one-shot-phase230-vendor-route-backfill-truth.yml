@@ -1,0 +1,82 @@
+name: One Shot Phase 230 Vendor Route Backfill Truth
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase230-vendor-route-backfill-truth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect vendor route backfill truth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT COUNT(*) AS vendor_contact_routes,
+                 SUM(CASE WHEN human_required=1 THEN 1 ELSE 0 END) AS human_required,
+                 SUM(CASE WHEN status='research_required' THEN 1 ELSE 0 END) AS research_required,
+                 SUM(CASE WHEN status IN ('live','verified') THEN 1 ELSE 0 END) AS authority_like_status
+          FROM distribution_opportunities
+          WHERE surface_type='vendor_contact_route';
+
+          SELECT status,COUNT(*) AS n
+          FROM distribution_opportunities
+          WHERE surface_type='vendor_contact_route'
+          GROUP BY status
+          ORDER BY n DESC,status;
+
+          SELECT COUNT(*) AS eligible_ready_routes,
+                 SUM(CASE WHEN EXISTS(
+                   SELECT 1 FROM distribution_opportunities o
+                   WHERE o.surface_type='vendor_contact_route' AND o.action_url=cs.route_url
+                 ) THEN 1 ELSE 0 END) AS bridged,
+                 SUM(CASE WHEN NOT EXISTS(
+                   SELECT 1 FROM distribution_opportunities o
+                   WHERE o.surface_type='vendor_contact_route' AND o.action_url=cs.route_url
+                 ) THEN 1 ELSE 0 END) AS remaining
+          FROM contact_supply_domain cs
+          WHERE cs.status='ready_route'
+            AND cs.route_url IS NOT NULL
+            AND cs.source_type IN ('vendor_amplification','catalog_vendor');
+
+          SELECT cs.domain,cs.source_type,cs.source_key,cs.route_type,cs.route_url,
+                 o.surface_slug,o.status,o.human_required,o.backlink_value,o.authority,o.next_action
+          FROM contact_supply_domain cs
+          LEFT JOIN distribution_opportunities o
+            ON o.surface_type='vendor_contact_route' AND o.action_url=cs.route_url
+          WHERE cs.status='ready_route'
+            AND cs.route_url IS NOT NULL
+            AND cs.source_type IN ('vendor_amplification','catalog_vendor')
+          ORDER BY (o.surface_slug IS NULL) ASC,cs.priority_score DESC
+          LIMIT 40;
+
+          SELECT event_type,status,COUNT(*) AS n,MAX(created_at) AS latest
+          FROM distribution_events
+          WHERE event_type='vendor_contact_route_materialized'
+          GROUP BY event_type,status;
+
+          SELECT COUNT(*) AS growth_authority_leak
+          FROM growth_opportunity_state
+          WHERE subject_type='surface'
+            AND subject_key IN (
+              SELECT surface_slug FROM distribution_opportunities WHERE surface_type='vendor_contact_route'
+            )
+            AND (
+              signal_json LIKE '%\"backlink_missing\":true%'
+              OR action_json LIKE '%verify_backlink_acquisition%'
+              OR action_json LIKE '%publisher_contact_discovery%'
+              OR action_json LIKE '%publisher_outreach%'
+            );
+          "
