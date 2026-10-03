@@ -1,0 +1,149 @@
+name: One Shot Phase 250 Adaptive Authority Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-250-adaptive-authority-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Capture adaptive authority baseline
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT
+            (SELECT COUNT(*)
+             FROM growth_execution_contract c
+             JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+             WHERE c.executor='distribution_autonomous'
+               AND c.action='autonomous_route_qualification'
+               AND c.subject_type='surface'
+               AND c.status IN ('pending','stalled','deferred')
+               AND (c.status<>'deferred'
+                    OR COALESCE(c.last_result,'')<>'cycle_completed_without_task_specific_proof_v3'
+                    OR c.updated_at<=datetime('now','-90 minutes'))
+               AND COALESCE(o.human_required,0)=0
+               AND o.action_url IS NOT NULL
+               AND o.surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')
+               AND o.status IN ('discovered','candidate','research_required','stale')) eligible_qualification,
+            (SELECT COUNT(*)
+             FROM growth_execution_contract
+             WHERE executor='distribution_autonomous'
+               AND action='autonomous_route_qualification'
+               AND status IN ('pending','stalled','deferred')) qualification_backlog,
+            (SELECT COUNT(*)
+             FROM growth_execution_contract
+             WHERE executor='distribution_autonomous'
+               AND status IN ('claimed','attempted')) autonomous_in_flight;
+          " > /tmp/phase250-before.json
+          cat /tmp/phase250-before.json
+
+      - name: Exercise adaptive authority dispatch against remote D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --port 8787 --show-interactive-dev-session=false --var ADMIN_TOKEN:phase250_ephemeral_proof >/tmp/phase250-wrangler.log 2>&1 &
+          WRANGLER_PID=$!
+          cleanup(){ kill "$WRANGLER_PID" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS 'http://127.0.0.1:8787/api/runtime/route-owner?path=%2Fapi%2Fgrowth%2Fexecution%2Fdispatch&method=POST' >/tmp/route-owner.json 2>/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            tail -150 /tmp/phase250-wrangler.log
+            exit 1
+          fi
+
+          success=0
+          for attempt in 1 2 3; do
+            http_code="$(curl -sS -o "/tmp/phase250-result-${attempt}.json" -w '%{http_code}' \
+              -X POST 'http://127.0.0.1:8787/api/growth/execution/dispatch' \
+              -H 'Authorization: Bearer phase250_ephemeral_proof' \
+              -H 'Content-Type: application/json')"
+            cat "/tmp/phase250-result-${attempt}.json"
+            test "$http_code" -ge 200
+            test "$http_code" -lt 300
+            if ATTEMPT="$attempt" node - <<'NODE'
+          const fs=require('fs');
+          const attempt=process.env.ATTEMPT;
+          const before=JSON.parse(fs.readFileSync('/tmp/phase250-before.json','utf8'))[0]?.results?.[0]||{};
+          const x=JSON.parse(fs.readFileSync('/tmp/phase250-result-'+attempt+'.json','utf8'));
+          const adaptive=x?.boundedExecution?.adaptiveAuthorityBatch===true;
+          const limit=Number(x?.boundedExecution?.autonomousBatchLimit||0);
+          const a=x?.results?.distribution_autonomous||null;
+          if(!adaptive||limit!==4||!a)process.exit(1);
+          const eligible=Number(before.eligible_qualification||0);
+          const claimed=Number(a.claimed||0);
+          const processed=Number(a.processed??claimed);
+          if(eligible>=2 && (claimed<2||processed<2)){
+            throw new Error('Phase 250 adaptive admission stayed effectively single-task: '+JSON.stringify({eligible,claimed,processed,boundedExecution:x.boundedExecution,autonomous:a}));
+          }
+          fs.writeFileSync('/tmp/phase250-success.json',JSON.stringify({
+            ok:true,
+            attempt:Number(attempt),
+            eligibleAtBaseline:eligible,
+            backlogAtBaseline:Number(before.qualification_backlog||0),
+            adaptiveAuthorityBatch:adaptive,
+            autonomousBatchLimit:limit,
+            claimed,
+            processed,
+            verified:Number(a.verified||0),
+            deferred:Number(a.deferred||0),
+            failed:Number(a.failed||0)
+          },null,2));
+          NODE
+            then
+              success=1
+              break
+            fi
+          done
+
+          if [ "$success" -ne 1 ]; then
+            echo "Phase 250 adaptive path was not exercised successfully in three bounded dispatches."
+            for f in /tmp/phase250-result-*.json; do [ -f "$f" ] && cat "$f"; done
+            exit 1
+          fi
+          cat /tmp/phase250-success.json
+
+      - name: Prove task-specific queue movement
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT action,status,COUNT(*) n
+          FROM growth_execution_contract
+          WHERE executor='distribution_autonomous'
+            AND action IN ('autonomous_route_qualification','verify_backlink_acquisition')
+            AND updated_at>=datetime('now','-20 minutes')
+          GROUP BY action,status
+          ORDER BY action,status;
+
+          SELECT task_id,subject_key,action,status,last_result,updated_at
+          FROM growth_execution_contract
+          WHERE executor='distribution_autonomous'
+            AND updated_at>=datetime('now','-20 minutes')
+          ORDER BY updated_at DESC
+          LIMIT 20;
+          " | tee /tmp/phase250-after.json
+          cat /tmp/phase250-success.json
