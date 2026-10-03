@@ -1,12 +1,7 @@
 import base from './command-center-light-theme-worker.js';
-import {runAutonomousDistributionCycle} from './distribution-autonomous-worker.js';
-import {runDistributionNetworkCycle} from './distribution-network-worker.js';
-import {runWithLedger} from './engine-run-ledger.js';
-import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const AUTHORITY_ATTEMPT_MIN_24H=4;
 const AUTHORITY_REFERRING_DOMAIN_FLOOR=10;
-const RECOVERY_COOLDOWN_MINUTES=90;
 
 const UI_REPAIR=`<style id="toolscout-runtime-integrity-style">
 .tsRuntimeHealth{border:1px solid var(--line);background:var(--card2);border-radius:14px;padding:12px 13px;margin-top:10px}
@@ -90,10 +85,10 @@ async function safeAll(env,sql){try{return (await env.DB.prepare(sql).all()).res
 async function assetJson(request,env,path,fallback=null){
   try{const r=await env.ASSETS.fetch(new Request(new URL(path,request.url)));return r.ok?await r.json():fallback}catch{return fallback}
 }
-export function classifyAuthorityExecution({required=false,runnableQueue=0,deferredQueue=0,attempts24=0,attemptMin24h=AUTHORITY_ATTEMPT_MIN_24H}={}){
-  const runnable=Math.max(0,Number(runnableQueue||0)),deferred=Math.max(0,Number(deferredQueue||0)),attempts=Math.max(0,Number(attempts24||0));
+export function classifyAuthorityExecution({required=false,runnableQueue=0,deferredQueue=0,qualificationQueue=0,attempts24=0,attemptMin24h=AUTHORITY_ATTEMPT_MIN_24H}={}){
+  const runnable=Math.max(0,Number(runnableQueue||0)),deferred=Math.max(0,Number(deferredQueue||0)),qualification=Math.max(0,Number(qualificationQueue||0)),attempts=Math.max(0,Number(attempts24||0));
   if(!required)return'healthy';
-  if(runnable===0&&deferred>0)return'qualifying_backlog';
+  if(runnable===0&&(deferred>0||qualification>0))return'qualifying_backlog';
   if(runnable>0&&attempts===0)return'failed';
   if(attempts<Math.max(1,Number(attemptMin24h||AUTHORITY_ATTEMPT_MIN_24H)))return'underpowered';
   return'executing';
@@ -107,7 +102,8 @@ async function authorityState(env){
       (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days'))+
       (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-7 days')) attempts7,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) queue,
-      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','stalled')) runnable_queue,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted')) runnable_external_queue,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_queue,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status='deferred') deferred_queue,
       (SELECT MAX(first_verified_at) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1 AND surface_slug NOT IN ('rss','toolscout-ard','toolscout-machine-discovery')) last_verified_at,
       (SELECT MAX(started_at) FROM engine_runs WHERE engine='distribution' AND mission='authority_execution_recovery') last_recovery_at`),
@@ -118,12 +114,12 @@ async function authorityState(env){
   ]);
   const domains=new Set();
   for(const row of placements){try{const h=new URL(String(row.public_url||'')).hostname.toLowerCase().replace(/^www\./,'');if(h&&h!=='trytoolscout.org'&&!h.endsWith('.trytoolscout.org'))domains.add(h)}catch{}}
-  const attempts24=Number(m?.attempts24||0),attempts7=Number(m?.attempts7||0),queue=Number(m?.queue||0),runnableQueue=Number(m?.runnable_queue||0),deferredQueue=Number(m?.deferred_queue||0),verifiedReferringDomains=domains.size;
+  const attempts24=Number(m?.attempts24||0),attempts7=Number(m?.attempts7||0),queue=Number(m?.queue||0),runnableQueue=Number(m?.runnable_external_queue||0),qualificationQueue=Number(m?.qualification_queue||0),deferredQueue=Number(m?.deferred_queue||0),verifiedReferringDomains=domains.size;
   const required=verifiedReferringDomains<AUTHORITY_REFERRING_DOMAIN_FLOOR||queue>0;
   const throughputGap=required&&attempts24<AUTHORITY_ATTEMPT_MIN_24H;
-  const status=classifyAuthorityExecution({required,runnableQueue,deferredQueue,attempts24,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H});
-  const detail=status==='failed'?'Runnable authority work produced zero external attempts in 24h. Recovery must execute qualified work before expanding discovery.':status==='qualifying_backlog'?'Authority inventory exists but is deferred pending fresh route or contact evidence; it is not an execution failure.':status==='underpowered'?'Authority execution is below the minimum external-attempt floor.':'Authority execution is producing measurable external throughput.';
-  return {status,required,throughputGap,verifiedReferringDomains,bootstrapFloor:AUTHORITY_REFERRING_DOMAIN_FLOOR,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,queue,runnableQueue,deferredQueue,lastVerifiedAt:m?.last_verified_at||null,lastRecoveryAt:m?.last_recovery_at||null,lastActions,detail};
+  const status=classifyAuthorityExecution({required,runnableQueue,deferredQueue,qualificationQueue,attempts24,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H});
+  const detail=status==='failed'?'Externally runnable authority work produced zero external attempts in 24h. The canonical closed loop must execute or hand off that work.':status==='qualifying_backlog'?'Authority inventory is in qualification or deferred state with no externally runnable task; it is not an execution failure.':status==='underpowered'?'Authority execution is below the minimum external-attempt floor.':'Authority execution is producing measurable external throughput.';
+  return {status,required,throughputGap,verifiedReferringDomains,bootstrapFloor:AUTHORITY_REFERRING_DOMAIN_FLOOR,attempts24,attempts7,attemptMin24h:AUTHORITY_ATTEMPT_MIN_24H,queue,runnableQueue,externalRunnableQueue:runnableQueue,qualificationQueue,deferredQueue,lastVerifiedAt:m?.last_verified_at||null,lastRecoveryAt:m?.last_recovery_at||null,lastActions,detail};
 }
 async function systemHealth(env,authority){
   const rows=await safeAll(env,`SELECT engine,status,directive,strict_humans_24h,strict_humans_7d,external_executions_24h,external_executions_7d,last_evaluated_at FROM growth_supervisor_state WHERE engine IN ('growth_brain','distribution','content','audience','seo_geo_aio') ORDER BY engine`);
@@ -165,47 +161,10 @@ async function injectUi(response){
   if(!html.includes('id="toolscout-runtime-integrity-ui"'))html=html.includes('</body>')?html.replace('</body>',UI_REPAIR+'</body>'):html+UI_REPAIR;
   return new Response(html,{status:response.status,statusText:response.statusText,headers:htmlHeaders(response)});
 }
-async function recoveryCoolingDown(env){
-  const row=await safeFirst(env,`SELECT started_at FROM engine_runs WHERE engine='distribution' AND mission='authority_execution_recovery' ORDER BY started_at DESC LIMIT 1`);
-  if(!row?.started_at)return false;
-  const t=Date.parse(String(row.started_at).replace(' ','T')+'Z');
-  return Number.isFinite(t)&&(Date.now()-t)<RECOVERY_COOLDOWN_MINUTES*60000;
-}
-async function recordAuthorityEvent(env,type,status,detail){
-  try{await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,detail,observed_at,created_at) VALUES(?,?,?,?,?,datetime('now'),datetime('now'))`).bind(`authority_runtime_${crypto.randomUUID()}`,type,status,'backlink_acquisition',String(detail||'').slice(0,1800)).run()}catch{}
-}
-async function runAuthorityExecutionRecovery(env){
-  const before=await authorityState(env);
-  if(!before.required||!before.throughputGap||before.queue<=0)return {ok:true,skipped:true,reason:'authority_recovery_not_required',before};
-  const network=await runDistributionNetworkCycle(env);
-  const autonomous=await runAutonomousDistributionCycle(env);
-  const after=await authorityState(env);
-  const produced=after.attempts24>before.attempts24;
-  if(!produced){
-    await recordAuthorityEvent(env,'authority_execution_gap','failed',`Authority recovery executed network and autonomous batches but external attempts did not increase. Queue ${after.queue}; attempts24 ${after.attempts24}/${after.attemptMin24h}; referring domains ${after.verifiedReferringDomains}/${after.bootstrapFloor}. Discovery alone is not counted as authority execution.`);
-    return {ok:false,reason:'authority_queue_without_external_throughput',before,after,network,autonomous};
-  }
-  await recordAuthorityEvent(env,'authority_execution_recovered','completed',`Authority recovery increased external attempts from ${before.attempts24} to ${after.attempts24} in the rolling 24h window.`);
-  return {ok:true,before,after,network,autonomous};
-}
-
 function analyticsPath(path){return path==='/analytics'||path==='/analytics/'||path==='/analytics.html'||path==='/analytics-v2'||path==='/analytics-v2/'||path==='/analytics-v2.html'}
 
-export async function runGrowthRuntimeIntegrityScheduled(event,env,ctx){
-  const trigger=event?.cron||'scheduled';
-  if(trigger!==TOOLSCOUT_CRONS.hourly)return {ok:true,status:'not_due'};
-  const task=(async()=>{
-    const state=await authorityState(env);
-    if(!state.required||!state.throughputGap||state.queue<=0)return {ok:true,status:'not_required',state};
-    if(await recoveryCoolingDown(env))return {ok:true,status:'cooldown',state};
-    const result=await runWithLedger(env,{engine:'distribution',mission:'authority_execution_recovery',triggerName:trigger,singleFlightMinutes:75},()=>runAuthorityExecutionRecovery(env));
-    return {ok:true,status:'completed',result};
-  })();
-  if(ctx?.waitUntil){
-    const tracked=task.catch(()=>null);
-    ctx.waitUntil(tracked);
-  }
-  return task;
+export async function runGrowthRuntimeIntegrityScheduled(){
+  return {ok:true,status:'observer_only',owner:'growth_runtime_closed_loop'};
 }
 
 export default {
@@ -218,7 +177,6 @@ export default {
     return response;
   },
   async scheduled(event,env,ctx){
-    await runGrowthRuntimeIntegrityScheduled(event,env,ctx).catch(()=>null);
     if(typeof base.scheduled==='function')return base.scheduled(event,env,ctx);
   }
 };
