@@ -112,6 +112,45 @@ jobs:
             (SELECT COUNT(*) FROM distribution_opportunities WHERE status='ready_to_submit') ready_to_submit,
             (SELECT COUNT(*) FROM distribution_opportunities WHERE status IN ('discovered','candidate','research_required','stale') AND COALESCE(human_required,0)=0) researchable_surfaces;
 
+          WITH authority_actions AS (
+            SELECT g.opportunity_key,g.subject_key,j.value action
+            FROM growth_opportunity_state g,json_each(g.action_json) j
+            WHERE g.status='active'
+              AND g.subject_type='surface'
+              AND j.value IN ('backlink_reference_outreach','publisher_outreach','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification','verify_backlink_acquisition')
+          )
+          SELECT COALESCE(c.status,'missing_contract') contract_status,COUNT(*) n
+          FROM authority_actions a
+          LEFT JOIN growth_execution_contract c
+            ON c.source_kind='opportunity'
+           AND c.source_id=a.opportunity_key
+           AND c.action=a.action
+          GROUP BY COALESCE(c.status,'missing_contract')
+          ORDER BY contract_status;
+
+          WITH authority_actions AS (
+            SELECT g.opportunity_key,g.subject_key,j.value action
+            FROM growth_opportunity_state g,json_each(g.action_json) j
+            WHERE g.status='active'
+              AND g.subject_type='surface'
+              AND j.value IN ('backlink_reference_outreach','publisher_outreach','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification','verify_backlink_acquisition')
+          )
+          SELECT a.subject_key,a.action,
+                 COALESCE(c.status,'missing_contract') contract_status,
+                 c.last_result,c.updated_at,
+                 o.status opportunity_status,o.surface_type,o.action_url,
+                 n.status network_status,n.contact_email,n.contact_source_url
+          FROM authority_actions a
+          LEFT JOIN growth_execution_contract c
+            ON c.source_kind='opportunity'
+           AND c.source_id=a.opportunity_key
+           AND c.action=a.action
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=a.subject_key
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=a.subject_key
+          WHERE c.task_id IS NULL OR c.status IN ('verified','blocked','human_required','cancelled')
+          ORDER BY a.action,a.subject_key
+          LIMIT 120;
+
           SELECT status,COUNT(*) n,MIN(created_at) oldest,MAX(updated_at) newest
           FROM compute_overflow_jobs
           WHERE job_type='distribution_route_research'
