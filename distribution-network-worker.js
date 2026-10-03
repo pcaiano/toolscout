@@ -469,6 +469,21 @@ async function verifyAdoption(env,{surfaceSlug=null}={}){
   return {checked:(r.results||[]).length,adopted};
 }
 
+export async function reconcileDistributionNetworkState(env){
+  await ensureSchema(env);
+  const routeActions=await materializeRouteActions(env);
+  const routeReconciliation=await reconcileRouteActions(env);
+  const adoption=await verifyAdoption(env);
+  return {
+    ok:true,
+    mode:'d1_reconciliation_only',
+    routeActions,
+    routeReconciliation,
+    adoption,
+    externalDiscovery:false
+  };
+}
+
 async function metrics(env){
   await ensureSchema(env);
   const [status,adoption,routeActions]=await Promise.all([
