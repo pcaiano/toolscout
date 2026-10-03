@@ -42,6 +42,11 @@ jobs:
           GROUP BY executor,action,status
           ORDER BY executor,status,action;
 
+          SELECT run_id,engine,mission,trigger_name,status,started_at,completed_at,detail,evidence_json
+          FROM engine_runs
+          WHERE engine='distribution' AND mission='authority_execution_recovery'
+          ORDER BY started_at DESC LIMIT 8;
+
           SELECT event_type,status,detail,created_at
           FROM distribution_events
           WHERE created_at>=datetime('now','-6 hours')
