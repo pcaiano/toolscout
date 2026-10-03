@@ -211,14 +211,31 @@ function contactDomainEligible(domain){
   if(['x.com','twitter.com','linkedin.com','facebook.com','instagram.com','youtube.com','tiktok.com','github.com','bsky.app','google.com','schema.org'].includes(d))return false;
   return !/^(api|cdn|static|assets?|img|images|media|js|css|fonts)\./.test(d);
 }
+export function vendorContactRoutePurpose(routeUrl=''){
+  try{
+    const u=new URL(String(routeUrl||''));
+    if(u.protocol!=='https:')return null;
+    const segments=decodeURIComponent(u.pathname||'/').toLowerCase().split('/').filter(Boolean)
+      .map(x=>x.replace(/\.(?:html?|php|aspx?)$/i,''));
+    const query=(u.search||'').toLowerCase();
+    if(segments.some(x=>/^(?:submit|submission|apply|apply-now|add-(?:tool|product|software|app)|list-your-(?:tool|product|software|app))$/.test(x))
+      ||/(?:^|[?&])intent=submit(?:&|$)/.test(query))return 'submission';
+    if(segments.some(x=>/^(?:become-a-partner|partner-program|partnerships?|(?:[a-z0-9]+-)*partner(?:s|-[a-z0-9]+)*)$/.test(x)))return 'partnership';
+    if(segments.some(x=>/^(?:contact|contact-us|contactus|contact-sales)$/.test(x)))return 'contact';
+    if(segments.some(x=>/^(?:press|media|press-coverage)$/.test(x)))return 'media';
+    return null;
+  }catch{return null}
+}
 export function vendorContactRouteBridgePolicy({sourceType='',domain='',routeUrl='',sourceName=''}={}){
   const type=String(sourceType||'');
   const vendorSource=type==='vendor_amplification'||type==='catalog_vendor';
   const url=String(routeUrl||'');
   if(!vendorSource||!contactDomainEligible(domain)||!/^https:\/\//i.test(url))return {eligible:false,reason:'not_vendor_public_route'};
+  const purpose=vendorContactRoutePurpose(url);
+  if(!purpose)return {eligible:false,reason:'vendor_route_semantic_mismatch'};
   const policy=competitiveOutreachExclusion({domain,surface_type:'vendor_contact_route',surface_name:sourceName,action_url:url});
-  if(policy.excluded)return {eligible:false,reason:policy.reason,policy:policy.policy};
-  return {eligible:true,reason:null,policy:policy.policy};
+  if(policy.excluded)return {eligible:false,reason:policy.reason,policy:policy.policy,purpose};
+  return {eligible:true,reason:null,policy:policy.policy,purpose};
 }
 async function materializeVendorContactRoute(env,{domain,routeType,routeUrl,payload}){
   const sourceType=String(payload?.sourceType||'');
@@ -262,7 +279,7 @@ async function backfillVendorContactRoutes(env,limit=24){
       )
     ORDER BY cs.priority_score DESC,cs.updated_at ASC
     LIMIT ?`).bind(bounded).all().catch(()=>({results:[]}));
-  let checked=0,materialized=0,excluded=0;
+  let checked=0,materialized=0,excluded=0,filtered=0;
   for(const row of rows(q)){
     checked++;
     const out=await materializeVendorContactRoute(env,{
@@ -272,9 +289,49 @@ async function backfillVendorContactRoutes(env,limit=24){
       payload:{sourceType:row.source_type,sourceKey:row.source_key,sourceName:row.source_name}
     }).catch(()=>({materialized:false,reason:'materialize_failed'}));
     if(out?.materialized)materialized++;
-    else if(out?.reason)excluded++;
+    else if(out?.reason){
+      excluded++;
+      if(out.reason!=='materialize_failed'){
+        const w=await env.DB.prepare(`UPDATE contact_supply_domain
+          SET status='route_filtered',next_research_at=datetime('now','+30 days'),updated_at=datetime('now')
+          WHERE domain=? AND status='ready_route' AND route_url=?`).bind(row.domain,row.route_url).run().catch(()=>null);
+        const changed=num(w?.meta?.changes||w?.changes);
+        filtered+=changed;
+        if(changed)await event(env,'vendor_contact_route_filtered','completed',`Filtered vendor route ${row.domain}: ${out.reason}.`,{domain:row.domain,routeUrl:row.route_url,reason:out.reason}).catch(()=>{});
+      }
+    }
   }
-  return {checked,materialized,excluded,bounded};
+  if(filtered)await refreshContactSupplyMetrics(env).catch(()=>null);
+  return {checked,materialized,excluded,filtered,bounded};
+}
+
+async function reconcileVendorContactRouteSemanticNoise(env,limit=120){
+  const q=await env.DB.prepare(`SELECT surface_slug,action_url FROM distribution_opportunities
+    WHERE surface_type='vendor_contact_route'
+      AND status IN ('candidate','discovered','research_required')
+    ORDER BY updated_at ASC
+    LIMIT ?`).bind(Math.max(1,Math.min(200,num(limit)||120))).all().catch(()=>({results:[]}));
+  let checked=0,pruned=0,supplyFiltered=0;
+  for(const row of rows(q)){
+    checked++;
+    if(vendorContactRoutePurpose(row.action_url))continue;
+    const detail='Vendor route failed semantic route-quality gate. Accidental contact/product/integration matches remain outside autonomous distribution and human queues.';
+    const w=await env.DB.prepare(`UPDATE distribution_opportunities
+      SET status='skipped',human_required=0,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now')
+      WHERE surface_slug=? AND surface_type='vendor_contact_route'
+        AND status IN ('candidate','discovered','research_required')`).bind(detail,row.surface_slug).run().catch(()=>null);
+    const changed=num(w?.meta?.changes||w?.changes);
+    pruned+=changed;
+    if(changed){
+      const s=await env.DB.prepare(`UPDATE contact_supply_domain
+        SET status='route_filtered',next_research_at=datetime('now','+30 days'),updated_at=datetime('now')
+        WHERE status='ready_route' AND route_url=?`).bind(row.action_url).run().catch(()=>null);
+      supplyFiltered+=num(s?.meta?.changes||s?.changes);
+    }
+  }
+  if(pruned)await event(env,'vendor_contact_route_semantic_noise_pruned','completed',`Pruned ${pruned} synthetic vendor route(s) that failed explicit path semantics.`,{checked,pruned,supplyFiltered}).catch(()=>{});
+  if(supplyFiltered)await refreshContactSupplyMetrics(env).catch(()=>null);
+  return {checked,pruned,supplyFiltered};
 }
 
 async function upsertContactSupplyDomain(env,{domain,sourceType,sourceKey=null,sourceName=null,sourceUrl=null,priority=0}){
@@ -1437,6 +1494,7 @@ async function runOverflowTick(env){
   const duplicateRouteConsolidation=await isolatedOverflowStage(env,'duplicate_route_consolidation',()=>reconcileDuplicateRouteSurfaces(env),0);
   const genericDomainConsolidation=await isolatedOverflowStage(env,'generic_domain_route_consolidation',()=>reconcileGenericDomainDuplicates(env),0);
   const nonSubmissionNoisePruned=await isolatedOverflowStage(env,'non_submission_research_noise',()=>reconcileNonSubmissionResearchNoise(env),0);
+  const vendorRouteSemanticNoise=await isolatedOverflowStage(env,'vendor_contact_route_semantic_quality',()=>reconcileVendorContactRouteSemanticNoise(env,120),{checked:0,pruned:0,supplyFiltered:0});
   const freshHumanGateReconciliation=await isolatedOverflowStage(env,'fresh_research_human_gate_reconciliation',()=>reconcileFreshResearchHumanGates(env),{checked:0,opened:0});
   const verificationTruthRecovery=await isolatedOverflowStage(env,'verification_truth_recovery',()=>reconcileFalseSubmissionRouteVerifications(env),{corrected:0,verifiedToday:0});
   const foldedContactResearch=await isolatedOverflowStage(env,'contact_route_fold',()=>reconcileRedundantContactRouteJobs(env),0);
@@ -1467,7 +1525,7 @@ async function runOverflowTick(env){
   const status=dispatched>0?(failedStages?'degraded_dispatched':'dispatched'):(failedStages?'degraded':'idle');
   return{
     ok,status,contactSupply,vendorRouteBackfill,qualification,execution,research,requeued,rejectedAdapterRecovery,duplicateRouteConsolidation,genericDomainConsolidation,freshHumanGateReconciliation,verificationTruthRecovery,
-    nonSubmissionNoisePruned,batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
+    nonSubmissionNoisePruned,vendorRouteSemanticNoise,batch:first?.batch||null,dispatch:first?.dispatch||{ok:true,skipped:true,reason:'no_batch_available'},
     batches:runs.map(x=>x.batch),dispatches:runs.map(x=>x.dispatch),
     dispatchSlotsUsed:runs.length,dispatchSlotsMax:MAX_ACTIVE_BATCHES,failedStages
   };
