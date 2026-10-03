@@ -150,7 +150,7 @@ async function serverCommerceSnapshot(env){
       SUM(CASE WHEN created_at>=? THEN 1 ELSE 0 END) outbound_mtd,
       SUM(CASE WHEN created_at>=? AND affiliate_active_at_click=1 THEN 1 ELSE 0 END) monetized_mtd,
       SUM(CASE WHEN created_at>=? AND affiliate_active_at_click IS NULL THEN 1 ELSE 0 END) unknown_monetization_mtd
-      FROM click_events WHERE COALESCE(source,'')<>'internal-test'`).bind(sqlUtc(todayStart),sqlUtc(todayStart),sqlUtc(monthStart),sqlUtc(monthStart),sqlUtc(monthStart)).first();
+      FROM click_events c LEFT JOIN sessions s ON s.session_id=c.session_id WHERE COALESCE(c.source,'')<>'internal-test' AND COALESCE(s.classification,'')<>'owner'`).bind(sqlUtc(todayStart),sqlUtc(todayStart),sqlUtc(monthStart),sqlUtc(monthStart),sqlUtc(monthStart)).first();
     return {status:'connected',canonical:true,source:'ToolScout server redirect ledger',definition:'Every non-owner /go/ redirect recorded by the ToolScout Worker. Monetized means affiliate_active_at_click=1 at redirect time.',last24Hours:{outbound:n(row?.outbound_24h),monetized:n(row?.monetized_24h)},today:{outbound:n(row?.outbound_today),monetized:n(row?.monetized_today)},monthToDate:{outbound:n(row?.outbound_mtd),monetized:n(row?.monetized_mtd),unknownMonetization:n(row?.unknown_monetization_mtd)},fetchedAt:new Date().toISOString()};
   }catch(error){return {status:'unavailable',canonical:true,source:'ToolScout server redirect ledger',reason:String(error?.message||error),fetchedAt:new Date().toISOString()}}
 }
