@@ -1,0 +1,95 @@
+name: One Shot Phase 247 Authority Supply Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-247-authority-supply-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Exercise Growth Brain authority replenishment against remote D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --port 8787 --show-interactive-dev-session=false --var ADMIN_TOKEN:phase247_ephemeral_proof >/tmp/phase247-wrangler.log 2>&1 &
+          WRANGLER_PID=$!
+          cleanup(){ kill "$WRANGLER_PID" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS 'http://127.0.0.1:8787/api/runtime/route-owner?path=%2Fapi%2Fgrowth%2Fexecution%2Fdispatch&method=POST' >/tmp/route-owner.json 2>/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            tail -120 /tmp/phase247-wrangler.log
+            exit 1
+          fi
+
+          http_code="$(curl -sS -o /tmp/phase247-result.json -w '%{http_code}' \
+            -X POST 'http://127.0.0.1:8787/api/growth/execution/dispatch' \
+            -H 'Authorization: Bearer phase247_ephemeral_proof' \
+            -H 'Content-Type: application/json')"
+          cat /tmp/phase247-result.json
+          test "$http_code" -ge 200
+          test "$http_code" -lt 300
+
+      - name: Prove replenished authority execution contracts
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT action,status,COUNT(*) n
+          FROM growth_execution_contract
+          WHERE action IN ('autonomous_route_qualification','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','backlink_reference_outreach')
+            AND status IN ('pending','claimed','attempted','deferred','stalled')
+          GROUP BY action,status ORDER BY action,status;
+
+          SELECT c.task_id,c.subject_key,c.action,c.executor,c.status,c.last_result,c.updated_at,
+                 o.status opportunity_status,o.surface_type,o.action_url
+          FROM growth_execution_contract c
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+          WHERE c.action='autonomous_route_qualification'
+            AND c.updated_at>=datetime('now','-20 minutes')
+          ORDER BY c.updated_at DESC LIMIT 40;
+
+          SELECT
+            (SELECT COUNT(*) FROM growth_execution_contract
+             WHERE action IN ('autonomous_route_qualification','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','backlink_reference_outreach')
+               AND status IN ('pending','claimed','attempted','deferred','stalled')) authority_queue,
+            (SELECT COUNT(*) FROM growth_execution_contract
+             WHERE action='autonomous_route_qualification'
+               AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_queue,
+            (SELECT COUNT(*) FROM distribution_opportunities
+             WHERE status IN ('discovered','candidate','research_required','stale')
+               AND COALESCE(human_required,0)=0) researchable_surfaces;
+          " | tee /tmp/phase247-proof.json
+
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/phase247-proof.json','utf8'));
+          const summary=x[2]?.results?.[0]||{};
+          if(Number(summary.researchable_surfaces||0)>0&&Number(summary.authority_queue||0)<=0){
+            throw new Error('Phase 247 failed to replenish authority queue: '+JSON.stringify(summary));
+          }
+          if(Number(summary.researchable_surfaces||0)>0&&Number(summary.qualification_queue||0)<=0){
+            throw new Error('Phase 247 failed to materialize autonomous qualification: '+JSON.stringify(summary));
+          }
+          console.log(JSON.stringify({ok:true,...summary},null,2));
+          NODE
