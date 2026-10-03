@@ -1,0 +1,55 @@
+name: One Shot Phase 245 Authority Production Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-245-authority-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run canonical authority closed loop once
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$ADMIN_TOKEN"
+          http_code="$(curl -sS -o authority-result.json -w '%{http_code}' \
+            -X POST 'https://trytoolscout.org/api/distribution/authority/close-loop' \
+            -H "Authorization: Bearer $ADMIN_TOKEN" \
+            -H 'Content-Type: application/json')"
+          cat authority-result.json
+          test "$http_code" -ge 200
+          test "$http_code" -lt 300
+
+      - name: Read production authority ledger
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT run_id,engine,mission,trigger_name,status,started_at,completed_at,detail,evidence_json
+          FROM engine_runs
+          WHERE engine='distribution' AND mission='authority_execution_recovery'
+          ORDER BY started_at DESC LIMIT 4;
+
+          SELECT event_type,status,detail,created_at
+          FROM distribution_events
+          WHERE event_type IN ('authority_closed_loop_external_attempt','authority_external_handoff_pending','authority_backlog_awaiting_qualification','authority_queue_without_external_handoff','vendor_outreach_sent','publisher_network_outreach_sent')
+          ORDER BY created_at DESC LIMIT 12;
+
+          SELECT
+            SUM(CASE WHEN action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted') THEN 1 ELSE 0 END) external_runnable,
+            SUM(CASE WHEN action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled') THEN 1 ELSE 0 END) qualification_queue,
+            SUM(CASE WHEN action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status='deferred' THEN 1 ELSE 0 END) deferred_queue
+          FROM growth_execution_contract;
+          "
