@@ -116,7 +116,7 @@ jobs:
                  SUM(CASE WHEN updated_at<datetime('now','-24 hours') THEN 1 ELSE 0 END) stale_24h,
                  MIN(updated_at) oldest_updated,
                  MAX(updated_at) newest_updated
-          FROM auth_handoff_contract
+          FROM auth_handoff
           GROUP BY status
           ORDER BY n DESC,status;
 
