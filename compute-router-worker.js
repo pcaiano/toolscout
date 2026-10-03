@@ -33,6 +33,7 @@ import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedRes
 import {handleAutonomousDistributionRoute,qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
+import {competitiveOutreachExclusion} from './distribution-outreach-policy.js';
 import {TOOLSCOUT_CRONS,scheduleContract} from './runtime-schedule-contract.js';
 import {routeContract,routeOwner} from './runtime-route-contract.js';
 import {handleDistributionPriorityRoute} from './distribution-priority-worker.js';
@@ -210,6 +211,44 @@ function contactDomainEligible(domain){
   if(['x.com','twitter.com','linkedin.com','facebook.com','instagram.com','youtube.com','tiktok.com','github.com','bsky.app','google.com','schema.org'].includes(d))return false;
   return !/^(api|cdn|static|assets?|img|images|media|js|css|fonts)\./.test(d);
 }
+export function vendorContactRouteBridgePolicy({sourceType='',domain='',routeUrl='',sourceName=''}={}){
+  const type=String(sourceType||'');
+  const vendorSource=type==='vendor_amplification'||type==='catalog_vendor';
+  const url=String(routeUrl||'');
+  if(!vendorSource||!contactDomainEligible(domain)||!/^https:\/\//i.test(url))return {eligible:false,reason:'not_vendor_public_route'};
+  const policy=competitiveOutreachExclusion({domain,surface_type:'vendor_contact_route',surface_name:sourceName,action_url:url});
+  if(policy.excluded)return {eligible:false,reason:policy.reason,policy:policy.policy};
+  return {eligible:true,reason:null,policy:policy.policy};
+}
+async function materializeVendorContactRoute(env,{domain,routeType,routeUrl,payload}){
+  const sourceType=String(payload?.sourceType||'');
+  const sourceKey=safe(payload?.sourceKey||'',120);
+  const sourceName=safe(payload?.sourceName||sourceKey||domain,200);
+  const gate=vendorContactRouteBridgePolicy({sourceType,domain,routeUrl,sourceName});
+  if(!gate.eligible)return {materialized:false,reason:gate.reason};
+  const hash=await shortHash(`${domain}|${routeType}|${routeUrl}`);
+  const surfaceSlug=safe(`vendor-route-${hash}`,100);
+  const detail='Public vendor contact or partnership route discovered. Qualify autonomously, but never execute the listing payload unless the route proves exact self-service listing/submission intent.';
+  const w=await env.DB.prepare(`INSERT INTO distribution_opportunities(
+      surface_slug,surface_name,surface_type,audience_fit,authority,traffic_potential,backlink_value,acceptance_probability,automation_potential,effort_cost,distribution_score,status,action_url,human_required,next_action,created_at,updated_at)
+    VALUES(?,?, 'vendor_contact_route',0,0,0,0,35,55,20,?,'research_required',?,0,?,datetime('now'),datetime('now'))
+    ON CONFLICT(surface_slug) DO UPDATE SET
+      surface_name=excluded.surface_name,action_url=excluded.action_url,distribution_score=MAX(distribution_opportunities.distribution_score,excluded.distribution_score),
+      next_action=excluded.next_action,
+      status=CASE WHEN distribution_opportunities.status IN ('submitted','pending_review','scheduled','live','verified','policy_blocked','auth_required','human_action_required') THEN distribution_opportunities.status ELSE 'research_required' END,
+      human_required=CASE WHEN distribution_opportunities.status IN ('auth_required','human_action_required') THEN distribution_opportunities.human_required ELSE 0 END,
+      updated_at=datetime('now')
+    WHERE distribution_opportunities.action_url IS NOT excluded.action_url
+       OR distribution_opportunities.next_action IS NOT excluded.next_action
+       OR distribution_opportunities.status IN ('discovered','candidate','stale')`)
+    .bind(surfaceSlug,`${sourceName} public route`,Math.max(40,Math.min(90,700/10)),routeUrl,detail).run().catch(()=>null);
+  const changed=Number(w?.meta?.changes||w?.changes||0);
+  if(changed)await env.DB.prepare(`INSERT INTO distribution_events(event_id,surface_slug,event_type,status,asset_type,destination_url,detail,observed_at,created_at)
+      VALUES(?,?,'vendor_contact_route_materialized','research_required','vendor_contact_route',?,?,datetime('now'),datetime('now'))`)
+    .bind(`vendorroute_${crypto.randomUUID()}`,surfaceSlug,routeUrl,`${detail} Source ${sourceType}:${sourceKey||domain}.`).run().catch(()=>{});
+  return {materialized:changed>0,surfaceSlug,reason:null};
+}
+
 async function upsertContactSupplyDomain(env,{domain,sourceType,sourceKey=null,sourceName=null,sourceUrl=null,priority=0}){
   const d=contactDomain(domain);if(!contactDomainEligible(d))return 0;
   const w=await env.DB.prepare(`INSERT INTO contact_supply_domain(domain,source_type,source_key,source_name,source_url,priority_score,status,next_research_at,created_at,updated_at)
@@ -1812,7 +1851,8 @@ async function applyContactSupplyResult(env,job,result){
       await env.DB.prepare(`UPDATE distribution_network_outreach SET contact_source_url=COALESCE(contact_source_url,?),status=CASE WHEN status IN ('queued','suppressed_no_contact') THEN 'contact_route_found' ELSE status END,updated_at=datetime('now') WHERE surface_slug=?`)
         .bind(routeUrl,row.surface_slug).run().catch(()=>{});
     }
-      return{applied:applied>0,domain,status:'ready_route',route:bestRoute};
+    const vendorBridge=await materializeVendorContactRoute(env,{domain,routeType,routeUrl,payload}).catch(error=>({materialized:false,reason:String(error?.message||error).slice(0,300)}));
+    return{applied:applied>0,domain,status:'ready_route',route:bestRoute,vendorBridge};
   }
 
   const attempts=await env.DB.prepare(`SELECT public_attempts FROM contact_supply_domain WHERE domain=? LIMIT 1`).bind(domain).first().catch(()=>({public_attempts:0}));

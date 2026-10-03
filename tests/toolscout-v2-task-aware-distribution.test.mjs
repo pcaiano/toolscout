@@ -34,7 +34,7 @@ test('orchestrator records verified task-specific distribution proof',()=>{
 
 test('live or verified surfaces without backlinks advance into publisher authority recovery',()=>{
   const src=read('distribution-orchestrator-worker.js');
-  assert.match(src,/const backlinkMissing=backlinkAcquisition&&externalSurface&&\['live','verified'\]\.includes\(surfaceStatus\)&&!backlinkVerified/);
+  assert.match(src,/const backlinkMissing=backlinkAcquisition&&authoritySurface&&\['live','verified'\]\.includes\(surfaceStatus\)&&!backlinkVerified/);
   assert.match(src,/backlinkMissing&&networkOutreachEligible&&contactDiscoveryDue.*publisher_contact_discovery/);
   assert.match(src,/backlinkMissing&&network==='contact_route_found'.*execute_alternate_routes/);
 });

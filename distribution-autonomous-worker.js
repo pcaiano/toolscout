@@ -609,6 +609,13 @@ async function qualifyOne(env,row){
   // login widget or contact form on a generic page is evidence about that page, not a
   // ToolScout submission route.
   const currentSubmissionIntent=hasExactSubmissionIntent(h.url,h.body);
+  const vendorContactRoute=String(effectiveRow.surface_type||'')==='vendor_contact_route';
+  if(vendorContactRoute&&!currentSubmissionIntent){
+    const detail='Vendor public contact/partnership route is reachable, but it is not an exact self-service ToolScout listing/submission route. Keep research-only until a dedicated partnership outreach executor exists; do not reuse the listing payload and do not create a generic human gate.';
+    await env.DB.prepare(`UPDATE distribution_opportunities SET status='research_required',human_required=0,next_action=?,last_checked_at=datetime('now'),updated_at=datetime('now') WHERE surface_slug=?`).bind(detail,effectiveRow.surface_slug).run().catch(()=>{});
+    await mark(env,effectiveRow,'research_required','vendor_contact_route_requires_partnership_executor');
+    return 'research_required';
+  }
   const adapter=await findOpenApi(h.url,h.body);
   if(adapter){
     if(adapter.auth_required){
@@ -741,7 +748,7 @@ async function qualifyOne(env,row){
   return 'research_required';
 }
 async function qualify(env){
-  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,o.status,o.last_checked_at
+  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.action_url,o.distribution_score,o.status,o.last_checked_at
     FROM distribution_opportunities o
     WHERE o.human_required=0 AND o.action_url IS NOT NULL AND o.surface_slug<>'indexnow'
       AND (
@@ -778,7 +785,7 @@ export async function qualifyDistributionSurfaces(env,surfaceSlugs=[]){
   const slugs=[...new Set((Array.isArray(surfaceSlugs)?surfaceSlugs:[]).map(x=>safe(x,120)).filter(Boolean))].slice(0,25);
   if(!slugs.length)return {ok:true,checked:0,ready:0,authRequired:0,blocked:0,human:0,research:0,skipped:0,requested:0};
   const placeholders=slugs.map(()=>'?').join(',');
-  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.action_url,o.distribution_score,o.status,o.last_checked_at
+  const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.action_url,o.distribution_score,o.status,o.last_checked_at
     FROM distribution_opportunities o
     WHERE o.surface_slug IN (${placeholders})
       AND o.human_required=0
