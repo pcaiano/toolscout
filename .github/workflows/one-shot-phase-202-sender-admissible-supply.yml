@@ -1,4 +1,4 @@
-name: One Shot Phase 206 Authority Execution Truth
+name: One Shot Phase 207 Post Cron Authority Proof
 
 on:
   push:
@@ -74,4 +74,36 @@ jobs:
             AND status IN ('pending','claimed','attempted','deferred','stalled')
           GROUP BY executor,status
           ORDER BY executor,status;
+
+          SELECT task_id,executor,action,subject_key,status,last_result,claimed_at,attempted_at,verified_at,updated_at
+          FROM growth_execution_contract
+          WHERE task_id IN (
+            'opportunity|surface:feedmyapp-com|publisher_contact_discovery',
+            'opportunity|surface:tiny-startups|verify_backlink_acquisition'
+          )
+          ORDER BY task_id;
+
+          SELECT engine,mission,status,trigger_name,started_at,completed_at,detail
+          FROM engine_runs
+          WHERE mission IN ('execution_contract','network_cycle','autonomous_cycle','authority_execution_recovery')
+            AND started_at>=datetime('now','-45 minutes')
+          ORDER BY started_at DESC
+          LIMIT 30;
+
+          SELECT event_type,status,asset_id,source_url,destination_url,detail,created_at
+          FROM distribution_events
+          WHERE created_at>=datetime('now','-45 minutes')
+            AND (
+              lower(COALESCE(asset_id,'')) LIKE '%feedmyapp%'
+              OR lower(COALESCE(source_url,'')) LIKE '%feedmyapp%'
+              OR lower(COALESCE(destination_url,'')) LIKE '%feedmyapp%'
+              OR lower(COALESCE(detail,'')) LIKE '%feedmyapp%'
+              OR lower(COALESCE(asset_id,'')) LIKE '%tiny-startups%'
+              OR lower(COALESCE(source_url,'')) LIKE '%tinystartups%'
+              OR lower(COALESCE(destination_url,'')) LIKE '%tinystartups%'
+              OR lower(COALESCE(detail,'')) LIKE '%tiny-startups%'
+              OR event_type LIKE 'authority_%'
+            )
+          ORDER BY created_at DESC
+          LIMIT 60;
           "
