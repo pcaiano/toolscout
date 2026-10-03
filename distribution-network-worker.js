@@ -24,6 +24,8 @@ const ROUTE_PRIORITY={form:0,linkedin:1,x:2,bluesky:3,github:4};
 const MAX_ROUTE_ACTIONS_PER_CYCLE=8;
 const ROUTE_CONTENT_RETRY_HOURS=72;
 const MAX_ROUTE_CONTENT_ATTEMPTS=2;
+const ROUTE_RESEARCH_STALE_HOURS=6;
+const MAX_ROUTE_RESEARCH_ATTEMPTS=3;
 let schemaReady=null;
 
 const safe=(v,n=2000)=>String(v??'').slice(0,n);
@@ -358,9 +360,19 @@ async function materializeRouteActions(env,{surfaceSlug=null}={}){
 async function reconcileRouteActions(env,{surfaceSlug=null}={}){
   await ensureSchema(env);
   const target=safe(surfaceSlug||'',100);
-  const q=await env.DB.prepare(`SELECT a.route_id,a.surface_slug,a.route_type,a.execution_mode,a.status,a.opportunity_slug,a.attempts,a.last_attempt_at,
+  const q=await env.DB.prepare(`SELECT a.route_id,a.surface_slug,a.route_type,a.execution_mode,a.status,a.opportunity_slug,a.attempts,a.last_attempt_at,a.updated_at action_updated_at,
       r.domain,r.route_url,n.status network_status,
       o.status opportunity_status,o.last_checked_at,
+      (SELECT COUNT(*) FROM compute_overflow_jobs j
+        WHERE j.subject_key=a.opportunity_slug
+          AND j.job_type='distribution_route_research'
+          AND j.status IN ('completed','failed')) research_attempts,
+      EXISTS(
+        SELECT 1 FROM compute_overflow_jobs active_job
+        WHERE active_job.subject_key=a.opportunity_slug
+          AND active_job.job_type='distribution_route_research'
+          AND active_job.status IN ('queued','leased')
+      ) research_active,
       EXISTS(
         SELECT 1 FROM confirmed_visitor_events v
         JOIN traffic_human_evidence h ON h.session_id=v.session_id
@@ -374,7 +386,7 @@ async function reconcileRouteActions(env,{surfaceSlug=null}={}){
     WHERE a.status NOT IN ('verified_human_impact','verified_placement','policy_blocked','exhausted')
       AND (?='' OR a.surface_slug=?)
     ORDER BY a.updated_at ASC LIMIT 80`).bind(target,target).all().catch(()=>({results:[]}));
-  let changed=0,verifiedHuman=0,verifiedPlacement=0,stalled=0,retryDue=0;
+  let changed=0,verifiedHuman=0,verifiedPlacement=0,stalled=0,retryDue=0,researchExhausted=0;
   for(const row of q.results||[]){
     let next=String(row.status||'queued'),result=null;
     if(Number(row.referral_human||0)>0){next='verified_human_impact';result='strict_human_referral_verified';verifiedHuman++;}
@@ -387,7 +399,25 @@ async function reconcileRouteActions(env,{surfaceSlug=null}={}){
       else if(s==='human_action_required'){next='human_action_required';result='hard_human_gate';}
       else if(s==='auth_required'){next='auth_required';result='authentication_required';}
       else if(['policy_blocked','rejected','skipped','unavailable_free'].includes(s)){next='policy_blocked';result=`route_opportunity_${s}`;}
-      else if(s==='research_required'){next='researching';result='autonomous_qualification_in_progress';}
+      else if(s==='research_required'){
+        const researchAttempts=Number(row.research_attempts||0),researchActive=Number(row.research_active||0)>0;
+        const staleCutoff=new Date(Date.now()-ROUTE_RESEARCH_STALE_HOURS*3600000).toISOString().replace('T',' ').slice(0,19);
+        const staleResearch=row.status==='researching'&&String(row.action_updated_at||'')<=staleCutoff;
+        if(researchActive){next='researching';result='autonomous_qualification_research_active';}
+        else if(researchAttempts>=MAX_ROUTE_RESEARCH_ATTEMPTS){
+          next='exhausted';result=`autonomous_qualification_research_exhausted:${researchAttempts}`;researchExhausted++;
+          const detail=`Alternate-route research exhausted after ${researchAttempts} terminal research attempts without a conclusive submission, human-gate or placement outcome.`;
+          await env.DB.prepare(`UPDATE distribution_opportunities
+            SET status='skipped',human_required=0,next_action=?,updated_at=datetime('now')
+            WHERE surface_slug=? AND status='research_required'`).bind(detail,row.opportunity_slug).run().catch(()=>{});
+        }else if(staleResearch){
+          next='retry_due';result=`autonomous_qualification_retry_due:${researchAttempts}`;retryDue++;
+          const detail=`Alternate-route research lease expired after ${ROUTE_RESEARCH_STALE_HOURS}h without active overflow work. Requeue bounded research attempt ${researchAttempts+1}/${MAX_ROUTE_RESEARCH_ATTEMPTS}.`;
+          await env.DB.prepare(`UPDATE distribution_opportunities
+            SET status='research_required',human_required=0,last_checked_at=NULL,next_action=?,updated_at=datetime('now')
+            WHERE surface_slug=? AND status='research_required'`).bind(detail,row.opportunity_slug).run().catch(()=>{});
+        }else{next='researching';result='autonomous_qualification_in_progress';}
+      }
       else if(!s){next='stalled';result='missing_synthetic_opportunity';stalled++;}
     }else if(row.execution_mode==='content_amplification'){
       if(row.status==='issued_to_content'&&row.last_attempt_at&&String(row.last_attempt_at)<=new Date(Date.now()-ROUTE_CONTENT_RETRY_HOURS*3600000).toISOString().replace('T',' ').slice(0,19)){
@@ -400,7 +430,7 @@ async function reconcileRouteActions(env,{surfaceSlug=null}={}){
       if(Number(w?.meta?.changes||w?.changes||0)>0)changed++;
     }
   }
-  return {checked:(q.results||[]).length,changed,verifiedHuman,verifiedPlacement,stalled,retryDue};
+  return {checked:(q.results||[]).length,changed,verifiedHuman,verifiedPlacement,stalled,retryDue,researchExhausted,researchSlaHours:ROUTE_RESEARCH_STALE_HOURS,maxResearchAttempts:MAX_ROUTE_RESEARCH_ATTEMPTS};
 }
 
 async function verifyAdoption(env,{surfaceSlug=null}={}){
