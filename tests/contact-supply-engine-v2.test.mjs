@@ -52,3 +52,13 @@ console.log('Contact Supply ready_email counts sender-admissible recipients and 
 
 assert.match(router,/WHERE o\.surface_slug=contact_supply_domain\.source_key[\s\S]*o\.status='policy_blocked'/);
 console.log('Policy-blocked surfaces are excluded from the sender-ready contact buffer.');
+
+const vendorMetricsMigration=read('migrations/0107_contact_supply_vendor_route_metrics.sql');
+assert.match(vendorMetricsMigration,/route_filtered/);
+assert.match(vendorMetricsMigration,/vendor_routes_authority_like/);
+assert.match(router,/vendorRoutesAuthorityLike/);
+assert.match(router,/vendor_routes_policy_blocked/);
+assert.match(cc,/Vendor route bridge/);
+assert.match(cc,/Vendor route safety/);
+assert.match(cc,/leakage sentinel, not authority credit/);
+console.log('Vendor route bridge observability separates research, filtering, policy and leakage sentinels from authority credit.');
