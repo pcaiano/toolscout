@@ -145,6 +145,38 @@ jobs:
                    AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
                )) route_research_due_estimate;
 
+          SELECT * FROM compute_overflow_budget ORDER BY kind;
+
+          SELECT o.surface_slug,o.surface_name,o.status,o.surface_type,o.distribution_score,o.external_value_score,o.action_url,o.updated_at,
+                 (SELECT MAX(j.created_at) FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research') last_research_created,
+                 (SELECT MAX(j.completed_at) FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' AND j.status='completed') last_research_completed,
+                 (SELECT json_extract(j.result_json,'$.classification') FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' ORDER BY j.created_at DESC LIMIT 1) last_classification,
+                 (SELECT json_extract(j.result_json,'$.outcome') FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' ORDER BY j.created_at DESC LIMIT 1) last_outcome,
+                 (SELECT json_extract(j.result_json,'$.retryClass') FROM compute_overflow_jobs j WHERE j.subject_key=o.surface_slug AND j.job_type='distribution_route_research' ORDER BY j.created_at DESC LIMIT 1) last_retry_class
+          FROM distribution_opportunities o
+          WHERE COALESCE(o.human_required,0)=0
+            AND o.action_url IS NOT NULL
+            AND o.status IN ('candidate','discovered','research_required')
+            AND COALESCE(o.external_value_score,0)>=35
+            AND NOT EXISTS (
+              SELECT 1 FROM compute_overflow_jobs recent
+              WHERE recent.subject_key=o.surface_slug
+                AND recent.job_type='distribution_route_research'
+                AND recent.created_at>=datetime('now','-6 hours')
+                AND CAST(COALESCE(json_extract(recent.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM compute_overflow_jobs noyield
+              WHERE noyield.subject_key=o.surface_slug
+                AND noyield.job_type='distribution_route_research'
+                AND noyield.status='completed'
+                AND noyield.completed_at>=datetime('now','-24 hours')
+                AND CAST(COALESCE(json_extract(noyield.payload_json,'$.classifierVersion'),0) AS INTEGER)>=16
+                AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.submissionRoutes'),0)=0
+                AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
+            )
+          ORDER BY o.distribution_score DESC,o.updated_at ASC LIMIT 20;
+
           SELECT
             (SELECT COUNT(*) FROM growth_execution_contract
              WHERE action='autonomous_route_qualification'
