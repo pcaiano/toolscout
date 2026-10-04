@@ -11,6 +11,9 @@ test('Growth Sprint 1 is grounded in current Google demand and has an explicit b
   assert.equal(sprint.baseline.gsc28d.clicks,7);
   assert.equal(sprint.allocationPct.existingDemandSearch,65);
   assert.equal(sprint.allocationPct.authorityVendorNetwork,30);
+  assert.equal(sprint.baseline.authority.measurementMode,'machine_observed_only');
+  assert.equal(sprint.baseline.authority.ahrefs.status,'unavailable');
+  assert.equal(sprint.baseline.authority.seRanking.backlinks,95);
   assert.ok(sprint.targets.length>=10);
   assert.ok(sprint.targets.some(x=>x.path==='/best-seo-tools-for-agencies'&&x.impressions>=1800));
   assert.ok(sprint.targets.some(x=>x.path==='/best-project-management-tools'&&x.position<50));
@@ -26,27 +29,33 @@ test('Growth Brain consumes the sprint asset and materializes explicit sprint se
   assert.equal((runtime.match(/HUMAN_ACQUISITION_GSC_TARGETS/g)||[]).length,0);
 });
 
-test('Authority truth keeps contradictory providers separate instead of inventing a merged authority score',()=>{
+test('Authority truth admits only machine-observed provider metrics',()=>{
   const authority=JSON.parse(read('data/authority-truth.json'));
-  assert.equal(authority.sources.ahrefsDirect.value,2.3);
-  assert.equal(authority.sources.ahrefsDirect.canonicalForMetric,true);
-  assert.equal(authority.sources.tinyStartups.value,31);
-  assert.equal(authority.sources.tinyStartups.canonicalForMetric,false);
-  assert.equal(authority.sources.seRanking.backlinks,95);
-  assert.equal(authority.sources.seRanking.referringDomains,29);
-  assert.equal(authority.reconciliation.status,'source_disagreement_explained_not_merged');
+  assert.equal(authority.policy.mode,'machine_observed_only');
+  assert.equal(authority.sources.ahrefs.status,'unavailable');
+  assert.equal(authority.sources.ahrefs.reason,'insufficient_plan');
+  assert.equal(authority.sources.ahrefs.metrics.domainRating,null);
+  assert.equal(authority.sources.ahrefs.metrics.backlinks,null);
+  assert.equal(authority.sources.seRanking.status,'available');
+  assert.equal(authority.sources.seRanking.metrics.backlinks,95);
+  assert.equal(authority.sources.seRanking.metrics.referringDomains,29);
+  assert.equal(authority.sources.seRanking.metrics.dofollowBacklinks,14);
+  assert.equal(authority.sources.seRanking.metrics.domainInlinkRank,2);
+  assert.equal(authority.reconciliation.status,'machine_observed_partial');
+  assert.doesNotMatch(JSON.stringify(authority),/user_observed|Tiny Startups|ahrefsThirdPartySnapshot|2\.3|600\+/i);
 });
 
-test('Command Center exposes Ahrefs direct, Tiny Startups and SE Ranking as separate authority observations',()=>{
+test('Command Center exposes unavailable Ahrefs and machine-measured SE Ranking without manual fallback values',()=>{
   const truth=read('command-center-business-truth-runtime.js');
   const ui=read('command-center-simplified-view.js');
   assert.match(truth,/\/data\/authority-truth\.json/);
-  assert.match(truth,/canonicalAhrefsDomainRating/);
-  assert.match(truth,/tinyStartupsAhrefsSnapshot/);
-  assert.match(ui,/Ahrefs direct DR/);
-  assert.match(ui,/Tiny Startups Ahrefs snapshot/);
+  assert.match(truth,/measurementMode/);
+  assert.match(truth,/ahrefsStatus/);
+  assert.match(truth,/seRankingObservedAt/);
+  assert.match(ui,/Machine-observed authority truth/);
+  assert.match(ui,/Connected API:/);
   assert.match(ui,/SE Ranking profile/);
-  assert.match(ui,/Third-party/);
+  assert.doesNotMatch(ui,/Tiny Startups Ahrefs snapshot|Ahrefs direct DR/);
 });
 
 

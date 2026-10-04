@@ -10,9 +10,18 @@
       "ctrPct": 0.1176
     },
     "authority": {
-      "ahrefsDomainRatingDirect": 2.3,
-      "seRankingBacklinks": 95,
-      "seRankingReferringDomains": 29
+      "measurementMode": "machine_observed_only",
+      "ahrefs": {
+        "status": "unavailable",
+        "reason": "insufficient_plan"
+      },
+      "seRanking": {
+        "observedAt": "2026-10-04T12:00:53Z",
+        "backlinks": 95,
+        "referringDomains": 29,
+        "dofollowBacklinks": 14,
+        "domainInlinkRank": 2
+      }
     }
   },
   "allocationPct": {
