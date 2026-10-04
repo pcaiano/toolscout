@@ -95,3 +95,10 @@ test('GA4 reuses the existing GSC service account when GA4-specific credentials 
   assert.match(runtime,/env\.GA4_SERVICE_ACCOUNT_JSON\|\|env\.GSC_SERVICE_ACCOUNT_JSON/);
   assert.match(runtime,/propertyId:String\(env\.GA4_PROPERTY_ID\|\|''\)/);
 });
+
+
+test('GA4 service account uses the RFC 7523 JWT bearer grant type',()=>{
+  const runtime=read('command-center-ga4-worker.js');
+  assert.match(runtime,/grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer'/);
+  assert.doesNotMatch(runtime,/grant_type:'urn:ietf:params:oauth-grant-type:jwt-bearer'/);
+});
