@@ -56,7 +56,7 @@ jobs:
           ORDER BY
             CASE WHEN COALESCE(l.browser_confirmed_sessions_30d,0)>0 THEN 0
                  WHEN n.status='adopted' THEN 1 ELSE 2 END,
-            o.priority_score DESC,o.updated_at DESC
+            o.distribution_score DESC,o.updated_at DESC
           LIMIT 80;
           " | tee /tmp/candidates.json
 
