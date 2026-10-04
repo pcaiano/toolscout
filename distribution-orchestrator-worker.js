@@ -60,16 +60,15 @@ const HUMAN_ACQUISITION_SPRINT=Object.freeze({
   permanent:true
 });
 const AUDIENCE_ACQUISITION_POLICY=Object.freeze({
-  id:'human-demand-first-v4',
+  id:'growth-sprint-1-search-winners',
   objective:'Acquire qualified humans from existing search demand, borrowed audiences and vendor audiences; scale only channels that produce verified human or commercial outcomes.',
   primaryModes:['existing_demand_search','borrowed_audience_distribution','vendor_audience_amplification'],
-  allocationPct:{existingDemandSearch:60,authorityVendorNetwork:25,aiAeoDiscovery:10,growthRnd:5},
+  allocationPct:{existingDemandSearch:65,authorityVendorNetwork:30,aiAeoDiscovery:5,growthRnd:0},
   activityIsNotSuccess:true,
   ownedChannelsRole:'support_and_optional_expansion_after_repeatable_external_acquisition',
   externalDemandRemainsPrimary:true,
   ownedExpansionGate:{strictVerifiedHumanSessions30d:100,provenExternalSources:2,strictHumansPerProvenSource30d:3}
 });
-const HUMAN_ACQUISITION_GSC_TARGETS=Object.freeze([]);
 function humanSprintActive(){return true;}
 function coordinatedGrowthPriority(subjectType,score,audienceStrategy){
   let priority=Math.max(0,Math.min(100,Number(score)||0));
@@ -286,7 +285,7 @@ async function coordinateGrowthOpportunities(env){
   const authorityUrgencyBoost=backlinkAcquisition?Math.min(22,(backlinkConfig.backlink_stagnating?14:0)+(backlinkConfig.backlink_throughput_gap?8:0)):0;
   const affiliateCap=Math.max(5,Math.min(45,Number(supervisor.get('affiliate')?.config?.priority_cap||45)));
   const catalogCap=Math.max(15,Math.min(55,Number(supervisor.get('catalog')?.config?.priority_cap||55)));
-  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,gscReality,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates,strictSearchHumans]=await Promise.all([
+  const [surfaces,tools,affiliateRows,catalogRuntime,catalogCandidates,catalogGaps,newsCandidates,organicGrowth,gscSignals,gscReality,aeoGeo,machineReadability,catalogFreshness,catalogHealth,toolProfileHolds,catalogEngine,catalogTools,softwareUpdates,growthSprint,strictSearchHumans]=await Promise.all([
     growthRows(env,`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.human_required,o.automation_potential,o.distribution_score,o.backlink_value,o.action_url,o.live_url,
       (SELECT bp2.public_url FROM distribution_placements bp2 WHERE bp2.surface_slug=o.surface_slug AND bp2.placement_verified=1 ORDER BY COALESCE(bp2.last_checked_at,bp2.first_verified_at) DESC LIMIT 1) placement_url,
       EXISTS(SELECT 1 FROM distribution_placements bp WHERE bp.surface_slug=o.surface_slug AND bp.backlink_verified=1) backlink_verified,
@@ -371,6 +370,7 @@ async function coordinateGrowthOpportunities(env){
     growthAssetJson(env,'/data/catalog-engine.json',{cadence:{freshnessTargetDays:7},coverage:{minimumToolsPerIntentCategory:5}}),
     growthAssetJson(env,'/data/tools.json',[]),
     growthAssetJson(env,'/data/software-updates.json',{updatedAt:null,items:[]}),
+    growthAssetJson(env,'/reports/growth-sprint-1.json',{id:null,startedAt:null,targets:[],allocationPct:{}}),
     growthRows(env,`SELECT
         COALESCE(NULLIF(first_path,''),NULLIF(last_path,''),'/') path,
         COUNT(DISTINCT session_id) strict_sessions_7d,
@@ -386,6 +386,9 @@ async function coordinateGrowthOpportunities(env){
       ORDER BY strict_sessions_7d DESC,last_evidence_at DESC
       LIMIT 20`)
   ]);
+  const sprintTargets=Array.isArray(growthSprint?.targets)
+    ?growthSprint.targets.filter(target=>String(target?.path||'').startsWith('/')).slice(0,20)
+    :[];
   const inputFreshness={
     organicGrowth:{ageHours:assetAgeHours(organicGrowth?.generatedAt),fresh:false},
     gsc:{ageHours:assetAgeHours(gscSignals?.generatedAt),fresh:false},
@@ -559,7 +562,7 @@ async function coordinateGrowthOpportunities(env){
     active++;searchCount++;
   }
   if(humanSprintActive()){
-    for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
+    for(const target of sprintTargets){
       if(target.tool_slug)searchBoostByTool.set(target.tool_slug,Math.max(searchBoostByTool.get(target.tool_slug)||0,25));
     }
   }
@@ -929,7 +932,7 @@ async function coordinateGrowthOpportunities(env){
         position:target.position,
         tool_slug:target.tool_slug||null,
         north_star:HUMAN_ACQUISITION_SPRINT.northStar,
-        sprint_id:HUMAN_ACQUISITION_SPRINT.id
+        sprint_id:growthSprint?.id||HUMAN_ACQUISITION_SPRINT.id
       };
       growthWrites.push(env.DB.prepare(`INSERT INTO growth_opportunity_state(opportunity_key,subject_type,subject_key,priority_score,signal_json,action_json,status,first_seen_at,last_evaluated_at,updated_at)
         VALUES(?,?,?,?,?,?,'active',datetime('now'),datetime('now'),datetime('now'))
