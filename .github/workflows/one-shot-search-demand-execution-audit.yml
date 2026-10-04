@@ -1,0 +1,115 @@
+name: One Shot Search Demand Execution Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-search-demand-execution-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reconcile GSC demand with SEO execution
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT
+            json_extract(payload_json,'$.generatedAt') generated_at,
+            json_extract(payload_json,'$.searchPerformance.window28d.clicks') clicks_28d,
+            json_extract(payload_json,'$.searchPerformance.window28d.impressions') impressions_28d,
+            json_extract(payload_json,'$.searchPerformance.window28d.position') position_28d,
+            updated_at cache_updated_at
+          FROM growth_asset_cache
+          WHERE path='/data/gsc-search-reality.json';
+
+          SELECT
+            json_extract(j.value,'$.page') page,
+            json_extract(j.value,'$.kind') kind,
+            CAST(json_extract(j.value,'$.score') AS REAL) score,
+            CAST(json_extract(j.value,'$.impressions') AS INTEGER) impressions,
+            CAST(json_extract(j.value,'$.clicks') AS INTEGER) clicks,
+            CAST(json_extract(j.value,'$.position') AS REAL) position,
+            json_extract(j.value,'$.action') action
+          FROM growth_asset_cache c,json_each(c.payload_json,'$.queues.ranking_opportunities.top') j
+          WHERE c.path='/data/gsc-search-reality.json'
+          ORDER BY score DESC
+          LIMIT 20;
+
+          SELECT pathname,reason,impressions,clicks,position,active,source_generated_at,
+                 first_activated_at,last_evaluated_at,indexnow_queued_at,updated_at
+          FROM seo_runtime_state
+          WHERE active=1
+          ORDER BY impressions DESC,position ASC
+          LIMIT 40;
+
+          SELECT task_id,source_kind,source_id,subject_type,subject_key,action,priority_score,status,
+                 attempts,last_result,created_at,claimed_at,attempted_at,verified_at,updated_at
+          FROM growth_execution_contract
+          WHERE executor='seo_cloudflare'
+          ORDER BY CASE status WHEN 'pending' THEN 0 WHEN 'claimed' THEN 1 WHEN 'attempted' THEN 2
+                               WHEN 'stalled' THEN 3 WHEN 'deferred' THEN 4 ELSE 5 END,
+                   priority_score DESC,updated_at DESC
+          LIMIT 100;
+
+          SELECT opportunity_key,subject_type,subject_key,priority_score,status,action_json,
+                 evidence_json,last_evaluated_at,updated_at
+          FROM growth_opportunity_state
+          WHERE status='active'
+            AND (
+              subject_type='search'
+              OR action_json LIKE '%seo_%'
+              OR action_json LIKE '%search_%'
+              OR action_json LIKE '%internal_link%'
+              OR action_json LIKE '%deepen_existing_search_asset%'
+            )
+          ORDER BY priority_score DESC,updated_at DESC
+          LIMIT 80;
+
+          SELECT engine,mission,status,started_at,completed_at,detail
+          FROM engine_runs
+          WHERE engine='seo_geo_aio'
+          ORDER BY started_at DESC
+          LIMIT 20;
+          " | tee /tmp/seo-audit.json
+
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('/tmp/seo-audit.json','utf8'));
+          const gsc=p[0]?.results?.[0]||{};
+          const opps=p[1]?.results||[];
+          const runtime=p[2]?.results||[];
+          const contracts=p[3]?.results||[];
+          const growth=p[4]?.results||[];
+          const engines=p[5]?.results||[];
+          const runtimeByPath=new Map(runtime.map(x=>[x.pathname,x]));
+          const contractText=JSON.stringify(contracts);
+          const growthText=JSON.stringify(growth);
+          const top=opps.map(o=>({
+            ...o,
+            runtime:runtimeByPath.get(o.page)||null,
+            representedInContracts:contractText.includes(String(o.page)),
+            representedInGrowth:growthText.includes(String(o.page))
+          }));
+          console.log('=== SEARCH DEMAND EXECUTION SUMMARY ===');
+          console.log(JSON.stringify({
+            gsc,
+            top,
+            seoContracts:{
+              total:contracts.length,
+              byStatus:Object.fromEntries([...new Set(contracts.map(x=>x.status))].map(s=>[s,contracts.filter(x=>x.status===s).length])),
+              active:contracts.filter(x=>['pending','claimed','attempted','stalled'].includes(x.status)).slice(0,20)
+            },
+            growthSearchOpportunities:growth.slice(0,20),
+            recentSeoRuns:engines.slice(0,10)
+          },null,2));
+          NODE
