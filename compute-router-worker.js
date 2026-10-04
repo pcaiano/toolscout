@@ -112,6 +112,7 @@ const DAILY_JOB_BUDGET=1500;
 const EXECUTION_DAILY_JOB_BUDGET=800;
 const AUTHORIZED_EXECUTION_VERSION=2;
 const DISTRIBUTION_RESEARCH_BUCKET_HOURS=6;
+const ROUTE_ZERO_YIELD_COOLDOWN_HOURS=168;
 const DISTRIBUTION_CLASSIFIER_VERSION=17;
 const HUMAN_GATE_EVIDENCE_VERSION=16;
 const ROLE_EMAIL_RESEARCH_BUCKET_HOURS=24;
@@ -405,9 +406,34 @@ async function refreshContactSupplyMetrics(env){
       SUM(CASE WHEN status='route_filtered' THEN 1 ELSE 0 END) route_filtered,
       SUM(CASE WHEN status='email_discovered_unrouted' AND contact_email IS NOT NULL THEN 1 ELSE 0 END) email_discovered_unrouted,
       (SELECT COUNT(*) FROM contact_supply_source) diversified_sources,
-      (SELECT COUNT(*) FROM contact_supply_source
-        WHERE status IN ('candidate','retry','route_found','exhausted','unreachable')
-          AND next_research_at<=datetime('now')) diversified_sources_due,
+      (SELECT COUNT(*)
+        FROM contact_supply_source src
+        JOIN contact_supply_domain cs ON cs.domain=src.domain
+        WHERE cs.contact_email IS NULL
+          AND cs.status IN ('queued','unresolved','provider_blocked','ready_route','researching')
+          AND src.status IN ('candidate','retry','route_found','exhausted','unreachable')
+          AND src.next_research_at<=datetime('now')
+          AND src.source_id=(
+            SELECT s2.source_id FROM contact_supply_source s2
+            WHERE s2.domain=cs.domain
+              AND s2.status IN ('candidate','retry','route_found','exhausted','unreachable')
+              AND s2.next_research_at<=datetime('now')
+            ORDER BY s2.priority_score DESC,s2.attempts ASC,s2.updated_at ASC
+            LIMIT 1
+          )
+          AND (
+            EXISTS(SELECT 1 FROM distribution_vendor_amplification v
+              WHERE lower(v.vendor_domain)=cs.domain
+                AND v.status NOT IN ('sent','reputation_quarantine','suppressed_asset_mismatch'))
+            OR EXISTS(SELECT 1 FROM distribution_network_outreach n
+              WHERE lower(n.domain)=cs.domain
+                AND n.status NOT IN ('sent','adopted','reputation_quarantine','suppressed_competitor','suppressed_technical')
+                AND NOT EXISTS(
+                  SELECT 1 FROM distribution_opportunities o
+                  WHERE o.surface_slug=n.surface_slug AND o.status='policy_blocked'
+                ))
+          )
+      ) diversified_sources_due,
       (SELECT COUNT(*) FROM contact_supply_source
         WHERE status IN ('exhausted','unreachable')) diversified_sources_exhausted,
       (SELECT COUNT(*) FROM distribution_opportunities WHERE surface_type='vendor_contact_route') vendor_routes_total,
@@ -898,7 +924,7 @@ async function health(env){
             WHERE noyield.subject_key=o.surface_slug
               AND noyield.job_type='distribution_route_research'
               AND noyield.status='completed'
-              AND noyield.completed_at>=datetime('now','-24 hours')
+              AND noyield.completed_at>=datetime('now','-${ROUTE_ZERO_YIELD_COOLDOWN_HOURS} hours')
               AND CAST(COALESCE(json_extract(noyield.payload_json,'$.classifierVersion'),0) AS INTEGER)>=${DISTRIBUTION_CLASSIFIER_VERSION}
               AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.submissionRoutes'),0)=0
               AND COALESCE(json_extract(noyield.result_json,'$.routeSummary.machineCandidates'),0)=0
@@ -961,7 +987,7 @@ async function health(env){
     dailyJobBudget:DAILY_JOB_BUDGET,researchUsedToday:num(usage.research),
     executionDailyJobBudget:EXECUTION_DAILY_JOB_BUDGET,executionUsedToday:num(usage.execution),
     batchSize:BATCH_SIZE,maxActiveBatches:MAX_ACTIVE_BATCHES,
-    distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
+    distributionResearchBucketHours:DISTRIBUTION_RESEARCH_BUCKET_HOURS,routeZeroYieldCooldownHours:ROUTE_ZERO_YIELD_COOLDOWN_HOURS,distributionClassifierVersion:DISTRIBUTION_CLASSIFIER_VERSION,roleEmailResearchBucketHours:ROLE_EMAIL_RESEARCH_BUCKET_HOURS,
     queued:num(live?.canonical_queued),runnableQueued:num(live?.runnable_queued),deferredQueued:num(live?.deferred_queued),sourceUnreachableDeferred:num(live?.source_unreachable_deferred),sourceUnreachableSuppressedToday:num(live?.source_unreachable_suppressed_today),foldedContactResearchToday:num(live?.folded_contact_research_today),nextAvailableAt:live?.next_available_at||null,
     leased:num(live?.canonical_leased),completedToday:num(m?.completed_today),failedToday:num(m?.failed_today),createdToday:num(m?.created_today),
     activeBatches:num(live?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastSchedulerTickAt:live?.last_scheduler_tick_at||null,lastAutonomousSchedulerAt:live?.last_autonomous_scheduler_at||null,lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,

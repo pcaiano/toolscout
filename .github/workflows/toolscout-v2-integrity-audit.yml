@@ -49,7 +49,8 @@ jobs:
             tests/toolscout-v2-closed-loop-integrity.test.mjs \
             tests/toolscout-v2-command-center-final-truth.test.mjs \
             tests/toolscout-v2-scheduler-ownership.test.mjs \
-            tests/toolscout-v2-outcome-recovery.test.mjs
+            tests/toolscout-v2-outcome-recovery.test.mjs \
+            tests/toolscout-v2-growth-outcome-efficiency.test.mjs
 
       - name: Audit production closed-loop truth
         env:
