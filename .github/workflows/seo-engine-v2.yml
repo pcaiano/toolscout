@@ -2,7 +2,7 @@ name: ToolScout SEO Engine v2
 
 on:
   schedule:
-    - cron: '17 5 * 10 *'
+    - cron: '17 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -22,17 +22,6 @@ jobs:
           fetch-depth: 0
       - name: Enforce post-conservation compatibility interlock
         run: node scripts/validate-actions-resume-safety.mjs
-      - name: Restore daily cadence after conservation window
-        if: github.event_name == 'schedule'
-        run: |
-          node scripts/restore-seo-schedule-after-conservation.mjs
-          if ! git diff --quiet -- .github/workflows/seo-engine-v2.yml; then
-            git config user.name "toolscout-seo-bot"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add .github/workflows/seo-engine-v2.yml
-            git commit -m "Restore daily SEO engine cadence after conservation"
-            git push origin HEAD:main
-          fi
       - name: Validate intent coverage
         run: node scripts/validate-intent-coverage.mjs
       - name: Sync Google Search Console performance signals
@@ -65,6 +54,8 @@ jobs:
         run: node scripts/build-search-commercial-routing.mjs
       - name: Build indexing-aware organic opportunities
         run: node scripts/build-organic-growth-opportunities-v6.mjs
+      - name: Require linked search evidence freshness
+        run: node scripts/check-search-evidence-freshness.mjs --require-fresh
       - name: Fetch shared autonomous growth directives
         run: node scripts/fetch-shared-growth-directives.mjs
       - name: Run indexing-aware closed loop controller
