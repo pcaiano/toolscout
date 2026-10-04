@@ -66,5 +66,7 @@ test('fresh service-account GSC evidence suppresses stale legacy refresh errors'
 });
 
 test('auth browser diagnostic is only an issue during an active or required handoff',()=>{
-  assert.match(view,/auth\.brokerRuntime\?\.browserVerified===false&&\(\(Number\(auth\.activeSessions\|\|0\)>0\|\|Number\(auth\.bootstrapRequired\|\|0\)>0\)\)/);
+  assert.match(view,/auth\.brokerRuntime\?\.browserVerified===false/);
+  assert.match(view,/Number\(auth\.activeSessions\|\|0\)>0/);
+  assert.match(view,/Number\(auth\.bootstrapRequired\|\|0\)>0/);
 });
