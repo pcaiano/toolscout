@@ -348,9 +348,10 @@ export async function syncExecutionContracts(env){
   const claimCase=Object.entries(EXECUTORS).filter(([,s])=>s.claim!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.claim)} minutes')`).join(' ');
   const attemptCase=Object.entries(EXECUTORS).filter(([,s])=>s.attempt!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.attempt)} minutes')`).join(' ');
   const verifyCase=Object.entries(EXECUTORS).filter(([,s])=>s.verify!=null).map(([e,s])=>`WHEN ${q(e)} THEN datetime('now','+${Number(s.verify)} minutes')`).join(' ');
+  const searchExecutableSql=Object.keys(ACTION_EXECUTOR).map(q).join(',');
   const mapped=`CASE
     WHEN g.subject_type='search' AND j.value IN ('distribution_amplification','backlink_reference_outreach') THEN 'distribution_network'
-    ELSE CASE j.value ${executorCase} ELSE CASE WHEN g.subject_type='search' THEN 'seo_cloudflare' ELSE NULL END END
+    ELSE CASE j.value ${executorCase} ELSE NULL END
   END`;
 
   await env.DB.prepare(`INSERT INTO growth_execution_contract(
@@ -372,6 +373,7 @@ export async function syncExecutionContracts(env){
       datetime('now'),datetime('now')
     FROM growth_opportunity_state g, json_each(g.action_json) j
     WHERE g.status='active'
+      AND (g.subject_type<>'search' OR j.value IN (${searchExecutableSql}))
       AND j.value NOT IN ('distribution_measurement','search_measurement')
     ON CONFLICT(task_id) DO UPDATE SET
       opportunity_key=excluded.opportunity_key,subject_type=excluded.subject_type,subject_key=excluded.subject_key,
@@ -405,6 +407,7 @@ export async function syncExecutionContracts(env){
         WHERE g.status='active'
           AND g.opportunity_key=growth_execution_contract.source_id
           AND j.value=growth_execution_contract.action
+          AND (g.subject_type<>'search' OR j.value IN (${searchExecutableSql}))
           AND j.value NOT IN ('distribution_measurement','search_measurement')
       )`).run();
 
