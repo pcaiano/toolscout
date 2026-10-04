@@ -25,7 +25,8 @@ function pemBytes(value){
 }
 function gaConfig(env){
   let service={};
-  if(env.GA4_SERVICE_ACCOUNT_JSON){try{service=JSON.parse(String(env.GA4_SERVICE_ACCOUNT_JSON))}catch{service={}}}
+  const serviceJson=env.GA4_SERVICE_ACCOUNT_JSON||env.GSC_SERVICE_ACCOUNT_JSON||'';
+  if(serviceJson){try{service=JSON.parse(String(serviceJson))}catch{service={}}}
   return {
     propertyId:String(env.GA4_PROPERTY_ID||'').replace(/^properties\//,''),
     measurementId:String(env.GA4_MEASUREMENT_ID||DEFAULT_MEASUREMENT_ID),
