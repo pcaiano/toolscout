@@ -3,9 +3,6 @@ name: ToolScout Worker Recovery Fallback
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -16,7 +13,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 243 - final integrity cutover') || contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 248 - production recovery deploy') || contains(github.event.head_commit.message, 'ToolScout Search Evidence - production recovery deploy') || contains(github.event.head_commit.message, 'ToolScout Search Execution - production recovery deploy') || contains(github.event.head_commit.message, 'ToolScout Search Truth - production recovery deploy') || contains(github.event.head_commit.message, 'ToolScout Search Quality - production recovery deploy') || contains(github.event.head_commit.message, 'ToolScout Search Contracts - production recovery deploy')))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current main
