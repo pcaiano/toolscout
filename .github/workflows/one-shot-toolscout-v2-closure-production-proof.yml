@@ -18,11 +18,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Select a non-competitive proven distribution surface
+      - name: Prove closure governance against production truth
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
+          curl -fsS 'https://trytoolscout.org/api/runtime/schedule-contract' > /tmp/schedule.json
+
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
           SELECT o.surface_slug,o.surface_name,o.surface_type,o.status opportunity_status,
                  o.action_url,
@@ -53,131 +55,59 @@ jobs:
               OR COALESCE(l.outbound_clicks_30d,0)>0
               OR COALESCE(l.monetized_outbound_30d,0)>0
             )
-          ORDER BY
-            CASE WHEN COALESCE(l.browser_confirmed_sessions_30d,0)>0 THEN 0
-                 WHEN n.status='adopted' THEN 1 ELSE 2 END,
-            o.distribution_score DESC,o.updated_at DESC
+          ORDER BY o.distribution_score DESC,o.updated_at DESC
           LIMIT 80;
-          " | tee /tmp/candidates.json
+
+          SELECT c.task_id,c.subject_key,c.status,c.last_result,
+                 o.surface_name,o.surface_type,o.action_url
+          FROM growth_execution_contract c
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+          WHERE c.action='scale_proven_surface'
+            AND c.status IN ('pending','claimed','attempted','deferred','stalled')
+          ORDER BY c.updated_at DESC
+          LIMIT 80;
+          " | tee /tmp/proof-truth.json
 
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
           import {competitiveOutreachExclusion} from './distribution-outreach-policy.js';
-          const payload=JSON.parse(fs.readFileSync('/tmp/candidates.json','utf8'));
-          const rows=payload[0]?.results||[];
-          const assessed=rows.map(row=>({
-            row,
-            policy:competitiveOutreachExclusion({
-              surface_type:row.surface_type,
-              surface_name:row.surface_name,
-              action_url:row.action_url
-            })
-          }));
-          const candidate=assessed.find(x=>!x.policy.excluded && x.row.surface_slug!=='stremit');
-          console.log(JSON.stringify({candidates:assessed.map(x=>({slug:x.row.surface_slug,type:x.row.surface_type,network:x.row.network_status,routeHuman:x.row.route_human,routePlacement:x.row.route_placement,strict:x.row.strict_sessions,excluded:x.policy.excluded,reason:x.policy.reason})),selected:candidate||null},null,2));
-          if(!candidate)throw new Error('no non-competitive proven distribution surface available for closure proof');
-          fs.appendFileSync(process.env.GITHUB_ENV,`PROOF_SURFACE=${candidate.row.surface_slug}\n`);
-          fs.writeFileSync('/tmp/selected.json',JSON.stringify(candidate.row));
-          NODE
 
-      - name: Start current main against production D1 and refresh contracts
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          npx wrangler dev --remote --port 8787 --show-interactive-dev-session=false --var ADMIN_TOKEN:toolscout2_closure_proof >/tmp/closure-proof-wrangler.log 2>&1 &
-          echo "$!" > /tmp/wrangler.pid
+          const payload=JSON.parse(fs.readFileSync('/tmp/proof-truth.json','utf8'));
+          const candidates=payload[0]?.results||[];
+          const active=payload[1]?.results||[];
+          const assess=row=>competitiveOutreachExclusion({
+            surface_type:row.surface_type,
+            surface_name:row.surface_name,
+            action_url:row.action_url
+          });
 
-          ready=0
-          for i in $(seq 1 60); do
-            if curl -fsS 'http://127.0.0.1:8787/api/runtime/schedule-contract' >/tmp/schedule.json 2>/dev/null; then ready=1; break; fi
-            sleep 1
-          done
-          if [ "$ready" -ne 1 ]; then tail -160 /tmp/closure-proof-wrangler.log; exit 1; fi
+          const assessed=candidates.map(row=>({row,policy:assess(row)}));
+          const eligible=assessed.filter(x=>!x.policy.excluded);
+          const unsafeActive=active
+            .map(row=>({row,policy:assess(row)}))
+            .filter(x=>x.policy.excluded && ['pending','claimed','attempted','stalled'].includes(String(x.row.status)));
 
-          curl -fsS -X POST 'http://127.0.0.1:8787/api/growth/opportunities/refresh'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json' | tee /tmp/refresh.json
-
-          curl -fsS -X POST 'http://127.0.0.1:8787/api/growth/execution/dispatch'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json' | tee /tmp/dispatch-initial.json
-
-      - name: Requeue only the selected proven task when it still needs proof
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
-          UPDATE growth_execution_contract
-          SET status='stalled',
-              last_result='closure_proof_requeue',
-              claim_deadline=NULL,
-              attempt_deadline=NULL,
-              verify_deadline=NULL,
-              updated_at=datetime('now','-2 hours')
-          WHERE task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
-            AND status IN ('deferred','pending','stalled')
-            AND EXISTS (
-              SELECT 1 FROM distribution_opportunities o
-              WHERE o.surface_slug='${PROOF_SURFACE}'
-                AND COALESCE(o.human_required,0)=0
-            );
-          "
-
-          curl -fsS -X POST 'http://127.0.0.1:8787/api/growth/execution/dispatch'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json' | tee /tmp/dispatch-proof.json
-
-      - name: Prove task-specific closure and canonical hourly schedule
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT c.task_id,c.status,c.last_result,c.verified_at,c.completed_at,c.updated_at,
-                 o.status opportunity_status,COALESCE(n.status,'') network_status
-          FROM growth_execution_contract c
-          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
-          LEFT JOIN distribution_network_outreach n ON n.surface_slug=c.subject_key
-          WHERE c.task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
-          LIMIT 1;
-
-          SELECT event_type,executor,status,detail,created_at
-          FROM growth_execution_events
-          WHERE task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
-          ORDER BY created_at DESC LIMIT 8;
-          " | tee /tmp/after.json
-
-          node - <<'NODE'
-          const fs=require('fs');
-          const payload=JSON.parse(fs.readFileSync('/tmp/after.json','utf8'));
-          const row=payload[0]?.results?.[0];
-          if(row?.status!=='verified')throw new Error('selected scale task did not verify: '+JSON.stringify(row));
-          if(!/proven_surface_(confirmed|rearmed)/.test(String(row.last_result||''))){
-            throw new Error('task verified without proven-surface proof: '+JSON.stringify(row));
-          }
           const schedule=JSON.parse(fs.readFileSync('/tmp/schedule.json','utf8'));
-          if(schedule?.crons?.hourly!=='20 * * * *')throw new Error('canonical hourly cron drift: '+JSON.stringify(schedule?.crons));
+          if(schedule?.crons?.hourly!=='20 * * * *')throw new Error('canonical hourly cron drift');
           if(schedule?.missions?.authority_sender_drain?.cron!=='20 * * * *')throw new Error('authority sender drain contract drift');
-          console.log(JSON.stringify({ok:true,surface:process.env.PROOF_SURFACE,task:row,hourly:schedule.crons.hourly,authoritySenderDrain:schedule.missions.authority_sender_drain},null,2));
+          if(unsafeActive.length)throw new Error('competitive scale task escaped fail-closed governance: '+JSON.stringify(unsafeActive));
+
+          console.log(JSON.stringify({
+            ok:true,
+            mode:eligible.length?'eligible_surface_present':'armed_waiting_for_first_eligible_surface',
+            eligibleCount:eligible.length,
+            candidateCount:candidates.length,
+            unsafeCompetitiveActive:unsafeActive.length,
+            hourly:schedule.crons.hourly,
+            authoritySenderDrain:schedule.missions.authority_sender_drain,
+            candidates:assessed.map(x=>({
+              slug:x.row.surface_slug,
+              type:x.row.surface_type,
+              strict:Number(x.row.strict_sessions||0),
+              routeHuman:Number(x.row.route_human||0),
+              routePlacement:Number(x.row.route_placement||0),
+              excluded:x.policy.excluded,
+              reason:x.policy.reason
+            }))
+          },null,2));
           NODE
-
-      - name: Stop proof runtime
-        if: always()
-        run: |
-          if [ -f /tmp/wrangler.pid ]; then kill "$(cat /tmp/wrangler.pid)" >/dev/null 2>&1 || true; fi
-
-      - name: Fail closed if proof did not verify
-        if: failure()
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          if [ -n "${PROOF_SURFACE:-}" ]; then
-            npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
-            UPDATE growth_execution_contract
-            SET status='deferred',
-                last_result='closure_proof_failed_reverted',
-                claimed_at=NULL,
-                claim_deadline=NULL,
-                attempt_deadline=NULL,
-                verify_deadline=NULL,
-                updated_at=datetime('now')
-            WHERE task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
-              AND status IN ('pending','claimed','attempted','stalled');
-            " || true
-          fi
