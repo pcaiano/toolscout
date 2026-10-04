@@ -68,6 +68,190 @@ async function ccAssetJson(request,env,path,fallback){
     return await r.json();
   }catch{return fallback}
 }
+async function buildStaticBusinessTruthFallback(request,env,reason='runtime_truth_unavailable'){
+  const [gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,seRanking,authorityTruth,editorial]=await Promise.all([
+    ccAssetJson(request,env,'/reports/gsc-signals.json',{}),
+    ccAssetJson(request,env,'/data/gsc-search-reality.json',{}),
+    ccAssetJson(request,env,'/runtime/gsc-refresh-health.json',{}),
+    ccAssetJson(request,env,'/data/gsc-daily-trend.json',{daily:[]}),
+    ccAssetJson(request,env,'/data/affiliate.json',{}),
+    ccAssetJson(request,env,'/data/affiliate-pipeline.json',{verified_programs:[]}),
+    ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]}),
+    ccAssetJson(request,env,'/data/authority-truth.json',{generatedAt:null,sources:{},reconciliation:{}}),
+    ccAssetJson(request,env,'/reports/editorial-authority-portfolio.json',{summary:{},portfolio:[],all:[]})
+  ]);
+  const lisbonDate=(()=>{try{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const map=Object.fromEntries(parts.map(p=>[p.type,p.value]));return map.year+'-'+map.month+'-'+map.day}catch{return new Date().toISOString().slice(0,10)}})();
+  const rawDaily=Array.isArray(gscDailyTrend?.daily)&&gscDailyTrend.daily.length>=2?gscDailyTrend.daily:(Array.isArray(gscReality?.searchPerformance?.daily28)?gscReality.searchPerformance.daily28:[]);
+  const completed=rawDaily.filter(row=>String(row?.date||'')<lisbonDate);
+  let lastEvidence=completed.length-1;
+  while(lastEvidence>=0){
+    const row=completed[lastEvidence];
+    if(truthNum(row?.impressions)>0||truthNum(row?.clicks)>0||truthNum(row?.position)>0)break;
+    lastEvidence--;
+  }
+  const daily28=lastEvidence>=0?completed.slice(0,lastEvidence+1):[];
+  const aggregate=rows=>{
+    const clicks=rows.reduce((sum,row)=>sum+truthNum(row?.clicks),0);
+    const impressions=rows.reduce((sum,row)=>sum+truthNum(row?.impressions),0);
+    const weighted=rows.reduce((sum,row)=>sum+truthNum(row?.position)*truthNum(row?.impressions),0);
+    return{startDate:rows[0]?.date||null,endDate:rows.at(-1)?.date||null,clicks,impressions,ctr:impressions?clicks/impressions*100:0,position:impressions?weighted/impressions:null};
+  };
+  const recentRows=daily28.slice(-7),previousRows=daily28.slice(-14,-7),recent7=aggregate(recentRows),previous7=aggregate(previousRows);
+  const pct=(cur,prev)=>prev?((cur-prev)/prev*100):(cur?100:0);
+  const hasComparison=recentRows.length===7&&previousRows.length===7;
+  const finalized=aggregate(daily28);
+  const gscWindow=gscReality?.searchPerformance?.window28d||gscSignals?.siteTotals||{};
+  const gscEvidence=Boolean(gscDailyTrend?.generatedAt||gscReality?.generatedAt||gscSignals?.generatedAt);
+  const runtimeOk=gscHealth?.ok===true;
+  const searchStatus=gscEvidence?(gscHealth?.ok===false?'stale':'connected'):'unavailable';
+
+  const seObservedAt=seRanking?.observedAt||null;
+  const seObservedMs=Date.parse(String(seObservedAt||''));
+  const seFreshnessHours=Math.max(1,truthNum(seRanking?.freshnessHours)||48);
+  const seAgeHours=Number.isFinite(seObservedMs)?Math.max(0,(Date.now()-seObservedMs)/3600000):null;
+  const seSnapshot=Number.isFinite(seObservedMs)&&seRanking?.metrics?.backlinks!=null&&seRanking?.metrics?.referringDomains!=null;
+  const seFresh=seSnapshot&&seAgeHours<=seFreshnessHours;
+  const sem=seRanking?.metrics||{};
+  const sourceComparison={
+    generatedAt:authorityTruth?.generatedAt||null,
+    measurementMode:authorityTruth?.policy?.mode||'machine_observed_only',
+    ahrefsStatus:authorityTruth?.sources?.ahrefs?.status||'unavailable',
+    ahrefsReason:authorityTruth?.sources?.ahrefs?.reason||null,
+    ahrefsLastAttemptAt:authorityTruth?.sources?.ahrefs?.lastAttemptAt||null,
+    ahrefsDomainRating:authorityTruth?.sources?.ahrefs?.metrics?.domainRating??null,
+    ahrefsBacklinks:authorityTruth?.sources?.ahrefs?.metrics?.backlinks??null,
+    ahrefsReferringDomains:authorityTruth?.sources?.ahrefs?.metrics?.referringDomains??null,
+    seRankingStatus:authorityTruth?.sources?.seRanking?.status||(seSnapshot?'available':'unavailable'),
+    seRankingObservedAt:authorityTruth?.sources?.seRanking?.observedAt||seObservedAt,
+    seRankingBacklinks:authorityTruth?.sources?.seRanking?.metrics?.backlinks??sem.backlinks??null,
+    seRankingReferringDomains:authorityTruth?.sources?.seRanking?.metrics?.referringDomains??sem.referringDomains??null,
+    seRankingDofollowBacklinks:authorityTruth?.sources?.seRanking?.metrics?.dofollowBacklinks??sem.dofollowBacklinks??null,
+    seRankingDofollowReferringDomains:authorityTruth?.sources?.seRanking?.metrics?.dofollowReferringDomains??sem.dofollowReferringDomains??null,
+    seRankingInlinkRank:authorityTruth?.sources?.seRanking?.metrics?.inlinkRank??sem.inlinkRank??null,
+    seRankingDomainInlinkRank:authorityTruth?.sources?.seRanking?.metrics?.domainInlinkRank??sem.domainInlinkRank??sem.domainAuthority??null,
+    status:authorityTruth?.reconciliation?.status||'degraded_runtime_fallback',
+    primaryAvailableSource:authorityTruth?.reconciliation?.primaryAvailableSource||(seSnapshot?'SE Ranking':null),
+    note:authorityTruth?.reconciliation?.note||'Canonical provider assets remain visible while the D1 runtime truth model recovers.'
+  };
+  const referringDomainItems=Array.isArray(seRanking?.referringDomains)?seRanking.referringDomains.map(x=>({
+    domain:String(x?.domain||'').toLowerCase().replace(/^www\./,''),
+    backlinks:truthNum(x?.backlinks),
+    dofollowBacklinks:truthNum(x?.dofollowBacklinks),
+    domainAuthority:truthNum(x?.domainInlinkRank),
+    firstSeen:x?.firstSeen||null
+  })).filter(x=>x.domain):[];
+
+  const productionRoutes=Object.entries(affiliateRegistry||{}).filter(([,v])=>Boolean(v?.enabled&&v?.url));
+  const programmes=Array.isArray(affiliatePipeline?.verified_programs)?affiliatePipeline.verified_programs:[];
+  const activeRows=programmes.filter(p=>String(p?.status||'')==='active');
+  const productionSlugs=productionRoutes.map(([slug])=>slug).sort();
+  const activeSlugs=activeRows.map(p=>String(p?.slug||'')).filter(Boolean).sort();
+  const activeSet=new Set(activeSlugs),productionSet=new Set(productionSlugs);
+
+  const portfolio=Array.isArray(editorial?.portfolio)?editorial.portfolio:[];
+  const editorialTarget=truthNum(editorial?.targetScore)||70;
+  const editorialAverage=portfolio.length?Number((portfolio.reduce((sum,row)=>sum+truthNum(row?.editorialAuthorityScore),0)/portfolio.length).toFixed(1)):null;
+  const editorialPriority=portfolio.slice(0,10).map(row=>({
+    page:row.page,pageType:row.pageType,score:truthNum(row.editorialAuthorityScore),target:truthNum(row.targetScore)||editorialTarget,
+    impressions:truthNum(row.impressions),clicks:truthNum(row.clicks),position:row.position==null?null:Number(row.position),
+    action:row.action||'observe',primarySourceLinks:truthNum(row.primarySourceLinks),
+    hasAnalysis:Boolean(row.hasAnalysis),hasTradeoffs:Boolean(row.hasTradeoffs),hasVerification:Boolean(row.hasVerification)
+  }));
+
+  return{
+    ok:true,
+    degraded:true,
+    version:'command-center-business-truth-static-fallback-v1',
+    degradedSources:['runtime_d1_truth'],
+    fallbackReason:String(reason||'runtime_truth_unavailable').slice(0,500),
+    generatedAt:new Date().toISOString(),
+    authority:{
+      observedBacklinks:seFresh?truthNum(sem.backlinks):null,
+      referringDomains:seFresh?truthNum(sem.referringDomains):null,
+      verifiedReferringDomains:seFresh?truthNum(sem.referringDomains):null,
+      seRankingReferringDomains:seFresh?truthNum(sem.referringDomains):null,
+      seRankingBacklinks:seFresh?truthNum(sem.backlinks):null,
+      seRankingDofollowBacklinks:seFresh?truthNum(sem.dofollowBacklinks):null,
+      seRankingDofollowReferringDomains:seFresh?truthNum(sem.dofollowReferringDomains):null,
+      domainAuthority:seFresh?truthNum(sem.domainAuthority??sem.domainInlinkRank):null,
+      domainAuthoritySource:seFresh?'SE Ranking':null,
+      seRankingStatus:seSnapshot?(seFresh?'fresh':'stale'):'unavailable',
+      seRankingAgeHours:seAgeHours,
+      seRankingFreshnessHours:seFreshnessHours,
+      seRankingObservedAt:seSnapshot?seObservedAt:null,
+      seRankingLastBacklinks:seSnapshot?truthNum(sem.backlinks):null,
+      seRankingLastReferringDomains:seSnapshot?truthNum(sem.referringDomains):null,
+      seRankingLastDofollowBacklinks:seSnapshot?truthNum(sem.dofollowBacklinks):null,
+      seRankingLastDofollowReferringDomains:seSnapshot?truthNum(sem.dofollowReferringDomains):null,
+      seRankingLastDomainAuthority:seSnapshot?truthNum(sem.domainAuthority??sem.domainInlinkRank):null,
+      referringDomainItems,
+      bootstrapFloor:10,
+      attempts24h:null,
+      attempts7d:null,
+      attemptMin24h:AUTHORITY_POLICY_MIN_24H,
+      attemptTarget24h:AUTHORITY_POLICY_TARGET_24H,
+      authorityQueue:null,
+      history30:[],
+      sourceComparison
+    },
+    affiliate:{
+      productionRoutes:productionRoutes.length,
+      pipelineActivePrograms:activeRows.length,
+      pipelineTrackedPrograms:programmes.length,
+      productionSlugs,activePipelineSlugs:activeSlugs,
+      productionWithoutActivePipeline:productionSlugs.filter(slug=>!activeSet.has(slug)),
+      activePipelineWithoutProduction:activeSlugs.filter(slug=>!productionSet.has(slug)),
+      reconciled:productionSlugs.every(slug=>activeSet.has(slug))&&activeSlugs.every(slug=>productionSet.has(slug)),
+      source:'canonical static affiliate registry + pipeline'
+    },
+    search:{
+      status:searchStatus,
+      available:gscEvidence,
+      generatedAt:gscSignals?.generatedAt||gscReality?.generatedAt||null,
+      runtimeGeneratedAt:gscHealth?.generatedAt||null,
+      runtimeOk:gscEvidence?runtimeOk:false,
+      runtimeStatus:gscEvidence?(gscHealth?.status||(runtimeOk?'connected':'asset_fallback')):'unavailable',
+      impressions:gscEvidence?(daily28.length?finalized.impressions:truthNum(gscWindow.impressions)):null,
+      clicks:gscEvidence?(daily28.length?finalized.clicks:truthNum(gscWindow.clicks)):null,
+      observedPages:gscEvidence?truthMaybeNum(gscReality?.searchPerformance?.observedPages??gscSignals?.pageCount):null,
+      indexed:gscEvidence?truthMaybeNum(gscReality?.indexHealth?.indexed):null,
+      inspected:gscEvidence?truthMaybeNum(gscReality?.indexHealth?.inspected):null,
+      indexRecoveryCandidates:gscEvidence?truthMaybeNum(gscReality?.indexHealth?.recoveryCandidates??gscReality?.indexHealth?.indexRecoveryCandidates):null,
+      sitemaps:gscEvidence?truthMaybeNum(gscReality?.sitemaps?.submittedCount):null,
+      daily28,
+      dailyGeneratedAt:gscDailyTrend?.generatedAt||gscReality?.searchPerformance?.trendGeneratedAt||null,
+      dailySource:Array.isArray(gscDailyTrend?.daily)&&gscDailyTrend.daily.length>=2?'gsc-daily-trend-asset':'gsc-search-reality-asset',
+      dailyDataState:gscDailyTrend?.dataState||null,
+      periodComparison:gscDailyTrend?.periodComparison||null,
+      verifiedThroughDate:daily28.at(-1)?.date||null,
+      recent7,previous7,
+      change7d:{
+        clicksPct:hasComparison?pct(recent7.clicks,previous7.clicks):null,
+        impressionsPct:hasComparison?pct(recent7.impressions,previous7.impressions):null,
+        positionDelta:hasComparison&&recent7.position!=null&&previous7.position!=null?recent7.position-previous7.position:null
+      },
+      execution:{available:false,states:null,actions:null,total:null,ready:null,inFlight:null,deferred:null,verified:null,stalled:null,blocked:null,humanRequired:null,missingExecutors:null,updatedAt:null}
+    },
+    editorial:{
+      targetScore:editorialTarget,
+      averagePriorityScore:editorialAverage,
+      evaluated:truthNum(editorial?.summary?.evaluated),
+      belowTarget:truthNum(editorial?.summary?.belowTarget),
+      priorityCount:portfolio.length,
+      generatedAt:editorial?.generatedAt||null,
+      model:editorial?.model||'toolscout-editorial-authority-v1',
+      priority:editorialPriority,
+      source:'/reports/editorial-authority-portfolio.json'
+    },
+    sourceProof:{
+      fallback:'static canonical assets',
+      authority:'/data/se-ranking-backlink-truth.json + /data/authority-truth.json',
+      search:'/reports/gsc-signals.json + /data/gsc-search-reality.json + /data/gsc-daily-trend.json',
+      editorial:'/reports/editorial-authority-portfolio.json'
+    }
+  };
+}
+
 async function buildCommandCenterBusinessTruth(request,env){
   const affiliateEvidenceSchema=await affiliateNetworkEvidenceSchemaState(env);
   const affiliateEvidenceSchemaOk=affiliateEvidenceSchema.ok===true;
@@ -770,11 +954,39 @@ async function buildCommandCenterBusinessTruth(request,env){
     }
   };
 }
+const BUSINESS_TRUTH_BUILD_TIMEOUT_MS=8000;
 async function commandCenterBusinessTruth(request,env,{fresh=false}={}){
   const now=Date.now();
   if(!fresh&&businessTruthCache.value&&now-businessTruthCache.at<BUSINESS_TRUTH_CACHE_MS)return businessTruthCache.value;
   if(!fresh&&businessTruthCache.promise)return businessTruthCache.promise;
-  const work=buildCommandCenterBusinessTruth(request,env).then(value=>{businessTruthCache={at:Date.now(),value,promise:null};return value}).catch(error=>{businessTruthCache.promise=null;throw error});
+  const full=buildCommandCenterBusinessTruth(request,env);
+  const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('business_truth_build_timeout')),BUSINESS_TRUTH_BUILD_TIMEOUT_MS));
+  const work=(async()=>{
+    try{
+      const value=await Promise.race([full,timeout]);
+      businessTruthCache={at:Date.now(),value,promise:null};
+      return value;
+    }catch(error){
+      const fallback=await buildStaticBusinessTruthFallback(request,env,error?.message||error);
+      if(businessTruthCache.value){
+        return{
+          ...fallback,
+          growth:businessTruthCache.value.growth,
+          commercialActivity:businessTruthCache.value.commercialActivity,
+          executionContract:businessTruthCache.value.executionContract,
+          architecture:businessTruthCache.value.architecture,
+          recentResults:businessTruthCache.value.recentResults,
+          growthActivity:businessTruthCache.value.growthActivity,
+          growthActions:businessTruthCache.value.growthActions,
+          engines:businessTruthCache.value.engines,
+          runtimeTruthLastGoodAt:new Date(businessTruthCache.at).toISOString()
+        };
+      }
+      return fallback;
+    }finally{
+      businessTruthCache.promise=null;
+    }
+  })();
   businessTruthCache.promise=work;
   return work;
 }
