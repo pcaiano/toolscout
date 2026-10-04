@@ -1,5 +1,6 @@
 import base from './growth-runtime-observability-worker.js';
 import {missionCycleHeaders,copyMissionCycleHeaders} from './engine-run-ledger.js';
+import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const MAX_DRAIN_PASSES=4;
@@ -81,7 +82,7 @@ async function correctStats(response,env){
 }
 
 export async function runAuthorityDrainScheduled(event,env,ctx){
-  if((event?.cron||'scheduled')!=='15 * * * *')return {ok:true,status:'not_due'};
+  if((event?.cron||'scheduled')!==TOOLSCOUT_CRONS.hourly)return {ok:true,status:'not_due'};
   const req=new Request('https://trytoolscout.org/api/distribution/authority/post-schedule-drain',{headers:missionCycleHeaders(event,'authority_drain_scheduler')});
   try{
     const result=await drainSender(req,env,ctx);
