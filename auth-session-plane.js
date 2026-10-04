@@ -37,6 +37,22 @@ async function config(env,key){
 async function configRow(env,key){
   try{return await env.DB.prepare('SELECT value,updated_at FROM external_runtime_config WHERE key=? LIMIT 1').bind(key).first()}catch{return null}
 }
+export async function warmAuthBrokerService(env,{timeoutMs=25000}={}){
+  const brokerUrl=(await config(env,'auth_broker_url')).replace(/\/$/,'');
+  if(!httpsUrl(brokerUrl))return{ok:false,serviceOk:false,error:'auth_broker_not_configured'};
+  const checkedAt=new Date().toISOString();
+  try{
+    const response=await fetch(brokerUrl+'/health',{headers:{'User-Agent':'ToolScout-Auth-Keepalive/1.0'},signal:AbortSignal.timeout(Math.max(5000,Math.min(45000,Number(timeoutMs)||25000)))});
+    let data={};try{data=await response.json()}catch{}
+    if(!response.ok||!data.ok)return{ok:false,serviceOk:false,httpStatus:response.status,checkedAt,error:data.error||'auth_broker_service_health_failed'};
+    const result={ok:true,serviceOk:true,httpStatus:response.status,browser:null,version:data.version||null,browserVerified:false,checkedAt,diagnosticStatus:'service_warm_browser_not_rechecked',warning:'Chromium diagnostic is checked only on an explicit fresh Auth Plane health request.',error:null};
+    await env.DB.prepare(`INSERT INTO external_runtime_config(key,value,updated_at) VALUES('auth_broker_runtime_health',?,datetime('now'))
+      ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=datetime('now')`).bind(JSON.stringify(result)).run().catch(()=>{});
+    return result;
+  }catch(error){
+    return{ok:false,serviceOk:false,httpStatus:0,checkedAt,error:safe(error?.message||error,300)};
+  }
+}
 export async function refreshAuthBrokerRuntimeHealth(env,{force=false}={}){
   const existing=await configRow(env,'auth_broker_runtime_health');
   if(!force&&existing?.updated_at&&Date.now()-Date.parse(String(existing.updated_at).replace(' ','T')+'Z')<10*60*1000){
