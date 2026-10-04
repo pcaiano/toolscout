@@ -96,6 +96,28 @@ function shortenTitle(html,pathname){
   if(!next||next.length>65)return html;
   return html.replace(/<title>[\s\S]*?<\/title>/i,`<title>${esc(next)}</title>`);
 }
+function clickCaptureDescription(html,pathname){
+  const h1=strip(html.match(/<h1\\b[^>]*>([\\s\\S]*?)<\\/h1>/i)?.[1]||'');
+  const paragraphs=[...html.matchAll(/<p\\b[^>]*>([\\s\\S]*?)<\\/p>/gi)]
+    .map(x=>strip(x[1]))
+    .filter(x=>x.length>=70&&!/cookie|privacy|copyright/i.test(x));
+  let value=paragraphs[0]||(
+    h1
+      ? `Independent ToolScout analysis of ${h1} with practical fit criteria, tradeoffs, pricing context and alternatives.`
+      : 'Independent ToolScout software analysis with practical fit criteria, tradeoffs, pricing context and alternatives.'
+  );
+  value=value.replace(/\\s+/g,' ').trim();
+  if(value.length<70&&h1)value=(value+' Compare the shortlist on real workflow fit before choosing.').trim();
+  if(value.length>155)value=value.slice(0,152).replace(/\\s+\\S*$/,'').trim()+'...';
+  return value;
+}
+function improveClickCapture(html,pathname){
+  const description=clickCaptureDescription(html,pathname);
+  if(!description)return html;
+  const tag=`<meta name="description" content="${esc(description)}" data-toolscout-click-capture="1">`;
+  const re=/<meta\\b[^>]*name=["']description["'][^>]*>/i;
+  return re.test(html)?html.replace(re,tag):html.replace(/<\\/head>/i,tag+'</head>');
+}
 function ensureCanonical(html,pathname,cfg){
   const slug=pathname.replace(/^\//,'');
   if(cfg.consolidations?.[slug])return html;
@@ -117,6 +139,12 @@ function validate(html,pathname,cfg){
     const c=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)?.[1]||html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)?.[1]||'';
     if(c!==`https://trytoolscout.org${pathname}`)failures.push('canonical_mismatch');
   }
+  if(/data-toolscout-click-capture="1"/.test(html)){
+    const tag=html.match(/<meta\\b[^>]*data-toolscout-click-capture=["']1["'][^>]*>/i)?.[0]||'';
+    const description=strip(tag.match(/content=["']([^"']*)["']/i)?.[1]||'');
+    if(description.length<70)failures.push('click_capture_description_too_short');
+    if(description.length>160)failures.push('click_capture_description_too_long');
+  }
   if(/organic-growth:runtime-start/.test(html)&&/[—–]/.test(html.match(/<!-- organic-growth:runtime-start -->[\s\S]*?<!-- organic-growth:runtime-end -->/)?.[0]||''))failures.push('runtime_block_long_dash');
   return {ok:failures.length===0,failures};
 }
@@ -131,6 +159,8 @@ async function transformPage(request,response,env){
     html=shortenTitle(html,pathname);
     html=ensureCanonical(html,pathname,cfg);
     const state=await activeState(env,pathname);
+    const taskSpecificClickCapture=state&&String(state.reason||'')==='execution_contract:improve_click_capture';
+    if(taskSpecificClickCapture)html=improveClickCapture(html,pathname);
     const taskSpecificDepth=state&&String(state.reason||'')==='execution_contract:deepen_existing_search_asset';
     const bestPageDepth=state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
     if((taskSpecificDepth||bestPageDepth)&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
