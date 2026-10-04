@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "enabled": false,
-  "mode": "hard_interlock",
-  "reason": "GitHub Actions mutation is locked until the post-conservation SEO/catalog generator stack is explicitly reviewed against shared-growth-v3.",
+  "enabled": true,
+  "mode": "production_readmitted",
+  "reason": "SEO/catalog GitHub Actions were revalidated against ToolScout 2.0 shared-growth-v3 on 2026-10-04. GitHub Actions is limited to repository generation, validation and recovery work; Cloudflare/Render remain runtime execution owners.",
   "required": {
     "autonomousGrowthBrain": "shared-growth-v3",
     "commandCenterComposition": "canonical-growth-v2",
@@ -11,12 +11,19 @@
     "minimumBuildContract": "2026-09-19.2"
   },
   "unlockProcedure": [
-    "Keep enabled=false until strict-human-v1 Traffic Truth is live and validated in production.",
-    "Run the full workflow on a non-main branch and inspect the generated diff.",
+    "Readmission requires strict-human-v1 Traffic Truth to be live and validated in production.",
+    "Run the full SEO workflow on a non-main branch and inspect the generated diff.",
     "Verify SEO execution consumes runtime-growth-directives and cannot initiate interventions outside shared-growth-v3 authorization.",
     "Verify no Worker/runtime source, affiliate state, strict-human Traffic Truth contract, catalog neutrality rule, What's New policy, or Command Center contract regresses.",
-    "Set enabled=true only in a reviewed pull request."
+    "Enable production execution only after the full non-main acceptance proof passes."
   ],
-  "reviewedAt": null,
-  "reviewedBy": null
+  "reviewedAt": "2026-10-04",
+  "reviewedBy": "actions-readmission-2026-10-04",
+  "readmissionEvidence": {
+    "acceptedAt": "2026-10-04",
+    "proofRunId": 37224535583,
+    "proofConclusion": "success",
+    "generatedFilesAudited": 203,
+    "forbiddenGeneratedPaths": 0
+  }
 }

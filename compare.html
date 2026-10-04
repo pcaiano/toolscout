@@ -24,6 +24,23 @@ function editorialConclusion(a,b){
   const third=overlap.length?'Because both list '+listPhrase(overlap)+', compare the depth of those shared capabilities against your workflow before choosing.':'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
   return [first,second,third].filter(Boolean).join(' ');
 }
+function decisionGuidance(a,b){
+  const ranked=comparisonDimensions
+    .map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)}))
+    .sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
+  const lead=ranked.find(item=>item.diff!==0);
+  if(lead){
+    const winner=lead.diff>0?a:b,other=lead.diff>0?b:a;
+    const otherFit=(other.bestFor||[])[0]||other.category||'your alternative workflow';
+    return 'Choose '+winner.name+' if '+(dimensionLabel[lead.key]||lead.key)+' is the stronger priority for your workflow; choose '+other.name+' when '+otherFit+' better matches the job you need to do.';
+  }
+  const aFit=(a.bestFor||[])[0]||a.category||'your workflow';
+  const bFit=(b.bestFor||[])[0]||b.category||'your workflow';
+  return 'Choose '+a.name+' if '+aFit+' better matches your workflow; choose '+b.name+' when '+bFit+' is the closer fit.';
+}
+function comparisonMethodology(){
+  return 'ToolScout compares catalog-backed pricing, capabilities, use cases and score dimensions using first-party vendor sources and recorded verification dates. The conclusion is a workflow fit judgment, not a universal product claim, and affiliate relationships do not influence the comparison.';
+}
 function overlapValues(a,b,key){
   const bSet=new Set((b[key]||[]).map(v=>String(v).toLowerCase()));
   return (a[key]||[]).filter(v=>bSet.has(String(v).toLowerCase()));
@@ -103,7 +120,7 @@ async function boot(){
     const head=t=>{const icon=iconSources(t,assets);const img=icon.src?'<img src="'+icon.src+'" data-first="'+icon.first+'" data-google="'+icon.google+'" data-stage="'+icon.stage+'" alt="'+t.name+' logo" width="25" height="25" loading="lazy" referrerpolicy="no-referrer" onerror="nextIcon(this)">':'';return '<div class="head"><div class="logo"><span class="logo-fallback">'+initials(t.name)+'</span>'+img+'</div>'+t.name+'</div>'};
     const cta=t=>'<div class="actions"><a class="btn secondary" href="./tools/'+encodeURIComponent(t.slug)+'">Profile</a><a class="btn" href="/go/'+encodeURIComponent(t.slug)+'?source=compare" target="_blank" rel="nofollow sponsored noopener">Visit '+t.name+'</a></div>';
     table.innerHTML='<div class="row"><div class="cell label">Compare</div><div class="cell">'+head(x)+cta(x)+'</div><div class="cell">'+head(y)+cta(y)+'</div></div>'+rows.map(r=>'<div class="row"><div class="cell label">'+r[0]+'</div><div class="cell value">'+r[1]+'</div><div class="cell value">'+r[2]+'</div></div>').join('');
-    analysis.innerHTML='<div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>'+escapeHtml(editorialConclusion(x,y))+'</p>';suggestions.innerHTML=suggestionsHtml(x,y,tools,assets);
+    analysis.innerHTML='<div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>'+escapeHtml(editorialConclusion(x,y))+'</p><p class="decision"><strong>Decision:</strong> '+escapeHtml(decisionGuidance(x,y))+'</p><h3>How this comparison works</h3><p>'+escapeHtml(comparisonMethodology())+'</p>';suggestions.innerHTML=suggestionsHtml(x,y,tools,assets);
     if(!started){started=true;event('comparison_started',pair,x.slug)}
     if(!seenPairs.has(pair)){seenPairs.add(pair);event('comparison_viewed',pair,x.slug)}
   }

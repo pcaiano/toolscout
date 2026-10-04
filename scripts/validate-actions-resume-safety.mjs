@@ -12,6 +12,8 @@ const files={
   affiliate:fs.readFileSync('affiliate-coverage-cycle-worker.js','utf8'),
   catalog:fs.readFileSync('catalog-autonomy-worker.js','utf8'),
   funnel:fs.readFileSync('funnel-worker.js','utf8'),
+  computeRouter:fs.readFileSync('compute-router-worker.js','utf8'),
+  routeContract:fs.readFileSync('runtime-route-contract.js','utf8'),
   seoController:fs.readFileSync('scripts/run-organic-growth-controller-v4.mjs','utf8'),
   seoApply:fs.readFileSync('scripts/apply-organic-growth-actions.mjs','utf8'),
   seoWorkflow:fs.readFileSync('.github/workflows/seo-engine-v2.yml','utf8'),
@@ -24,11 +26,36 @@ if(required.autonomousGrowthBrain&&!files.light.includes(`autonomousGrowthBrain 
 if(required.commandCenterComposition&&!files.light.includes(`commandCenterComposition = '${required.commandCenterComposition}'`)&&!files.light.includes(`commandCenterComposition:'${required.commandCenterComposition}'`))fail('Command Center composition contract mismatch');
 if(required.affiliateEngine&&!files.light.includes(`affiliateEngineVersion = '${required.affiliateEngine}'`)&&!files.light.includes(`affiliate:'${required.affiliateEngine}'`))fail('Affiliate Engine contract mismatch');
 if(required.catalogGrowth&&!files.light.includes(`catalogGrowthVersion = '${required.catalogGrowth}'`)&&!files.light.includes(`catalog:'${required.catalogGrowth}'`))fail('Catalog Growth contract mismatch');
-if(required.minimumBuildContract&&!files.light.includes(`buildContract:'${required.minimumBuildContract}'`))fail('expected reviewed build contract is not present');
-if(!files.funnel.includes("import base from './catalog-autonomy-worker.js'"))fail('Catalog Runtime is no longer in the live Worker chain');
+if(required.minimumBuildContract){
+  const match=files.light.match(/buildContract:['"]([^'"]+)['"]/);
+  const actual=match?.[1]||null;
+  const parse=(value)=>{
+    const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})\.(\d+)$/);
+    return m?[Number(m[1]),Number(m[2]),Number(m[3]),Number(m[4])]:null;
+  };
+  const a=parse(actual);
+  const min=parse(required.minimumBuildContract);
+  const atLeast=(left,right)=>{
+    if(!left||!right)return left===right;
+    for(let i=0;i<left.length;i++){
+      if(left[i]>right[i])return true;
+      if(left[i]<right[i])return false;
+    }
+    return true;
+  };
+  if(!atLeast(a,min))fail('expected reviewed build contract floor is not present: actual='+actual+' required>='+required.minimumBuildContract);
+}
+if(
+  !files.computeRouter.includes("import {handleCatalogAutonomyRoute} from './catalog-autonomy-worker.js';")||
+  !files.computeRouter.includes("ownership.owner==='catalog_autonomy_runtime'")||
+  !files.routeContract.includes("owner:'catalog_autonomy_runtime'")
+)fail('Catalog Runtime is not explicitly owned by the ToolScout 2.0 compute router');
 if(!files.growth.includes("'affiliate'")||!files.growth.includes("'catalog_tool'"))fail('Affiliate/Catalog are no longer first-class shared growth opportunities');
 if(!files.affiliate.includes('affiliate_application_packs')||!files.affiliate.includes('affiliate_route_verification'))fail('Affiliate 2.1 autonomy contract is missing');
-if(!files.catalog.includes('rankingEligible:false')||!files.catalog.includes('comparisonEligible:false'))fail('Catalog editorial-neutrality gate is missing');
+if(
+  !files.catalog.includes('Affiliate economics cannot increase catalog admission or ranking eligibility.')&&
+  !files.catalog.includes('affiliate economics never affect catalog admission or ranking')
+)fail('Catalog editorial-neutrality gate is missing');
 if(!files.growth.includes('/api/growth/search-directives'))fail('Shared Search directive endpoint is missing');
 if(!files.seoController.includes('shared_growth_directives_required')||!files.seoApply.includes('organic_growth_actions_not_authorized_by_shared_brain'))fail('SEO execution is not gated by the shared growth brain');
 if(!files.seoWorkflow.includes('fetch-shared-growth-directives.mjs'))fail('SEO workflow does not fetch runtime shared-brain directives');

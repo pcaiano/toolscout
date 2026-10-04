@@ -38,12 +38,16 @@ test('registered static comparisons use the dynamic comparator surface',()=>{
     assert.match(html,/class="table"/);
     assert.match(html,/ToolScout analysis/);
     assert.match(html,/What this comparison means in practice/);
+    assert.match(html,/class="decision"/);
+    assert.match(html,/Choose\s+[^<]+\s+(?:if|when)\s+[^<]+/i);
+    assert.match(html,/How this comparison works/);
+    assert.match(html,/not a universal product claim|workflow fit/i);
     assert.match(html,/id="suggestions"/);
     assert.match(html,/Also worth comparing/);
     assert.match(html,/source=comparison-suggestions/);
     assert.match(html,/class=['"]suggestion-top['"]/);
     assert.match(html,/alt=['"][^'"]+ logo['"]/);
-    assert.doesNotMatch(html,/Frequently asked questions|Related buying guides|How this comparison works|class="decision"/);
+    assert.doesNotMatch(html,/Frequently asked questions|Related buying guides/);
     assert.doesNotMatch(html,/[\u2013\u2014]/);
   }
 });
@@ -60,7 +64,8 @@ test('comparison generator derives static pages from compare.html',()=>{
   assert.match(generator,/suggestionLogoHtml\(item\.tool\)/);
   assert.match(generator,/suggestionsHtml\(a,b\)/);
   assert.doesNotMatch(generator,/affiliateUrl|commission/);
-  assert.doesNotMatch(generator,/Related buying guides|Frequently asked questions|How this comparison works/);
+  assert.match(generator,/How this comparison works/);
+  assert.doesNotMatch(generator,/Related buying guides|Frequently asked questions/);
 });
 
 test('dynamic comparator stays within a mobile viewport',()=>{

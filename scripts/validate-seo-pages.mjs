@@ -55,7 +55,7 @@ for(const intent of intents){
   if(/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html))failures.push(`${filename}: eligible guide is unexpectedly noindex`);
   const canonical=html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i)?.[1];
   if(!canonical)failures.push(`${filename}: missing canonical`);else if(seenCanonicals.has(canonical))failures.push(`${filename}: duplicate canonical ${canonical}`);else seenCanonicals.add(canonical);
-  const selected=[...html.matchAll(/href=["']\/tools\/([a-z0-9-]+)\.html["']/gi)].map(m=>m[1]).filter((slug,index,all)=>all.indexOf(slug)===index).slice(0,MAX_TOOLS);
+  const selected=[...html.matchAll(/href=["']\/tools\/([a-z0-9-]+)(?:\.html)?(?:[?#][^"']*)?["']/gi)].map(m=>m[1]).filter((slug,index,all)=>all.indexOf(slug)===index).slice(0,MAX_TOOLS);
   const expected=Math.min(MAX_TOOLS,eligible.length);
   if(selected.length!==expected)failures.push(`${filename}: expected ${expected} ranked eligible tools but found ${selected.length}`);
   for(const slug of selected){
