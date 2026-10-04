@@ -1,54 +1,56 @@
 {
-  "generatedAt": "2026-10-04T11:32:46Z",
+  "generatedAt": "2026-10-04T12:00:53Z",
   "target": "trytoolscout.org",
-  "canonicalPolicy": {
-    "ahrefsDomainRating": "Prefer the value observed directly in Ahrefs for the same root domain. Third-party Ahrefs-powered checkers remain comparison evidence only when they disagree.",
-    "backlinkCounts": "Never merge backlink counts across providers. Keep Ahrefs and SE Ranking backlink/referring-domain counts separate because each provider uses its own index.",
-    "interpretation": "Backlink volume is not equivalent to Domain Rating. DR depends primarily on unique followed referring domains and their link profiles."
+  "policy": {
+    "mode": "machine_observed_only",
+    "rule": "Only metrics observed directly through connected machine-readable provider APIs may appear as authority truth. User-reported or third-party cached values are excluded.",
+    "unavailable": "If a provider cannot be queried autonomously, its metric is unavailable rather than carried forward from manual observation."
   },
   "sources": {
-    "ahrefsDirect": {
+    "ahrefs": {
       "provider": "Ahrefs",
-      "metric": "Domain Rating",
-      "value": 2.3,
-      "observedAt": "2026-10-04T11:32:46Z",
-      "status": "user_observed_direct",
-      "canonicalForMetric": true,
-      "backlinksObserved": "600+",
-      "backlinksExact": false,
-      "apiVerification": "unavailable_insufficient_plan",
-      "note": "Direct Ahrefs UI observation supplied by the owner. API connector cannot independently verify on the current plan."
-    },
-    "tinyStartups": {
-      "provider": "Tiny Startups",
-      "upstream": "Ahrefs public DR endpoint",
-      "metric": "Domain Rating",
-      "value": 31,
-      "observedAt": "2026-10-04T11:29:18Z",
-      "status": "conflicting_third_party_snapshot",
-      "canonicalForMetric": false,
-      "refreshCadence": "weekly",
-      "note": "Tiny Startups states its DR leaderboard is refreshed weekly. This value conflicts materially with the direct Ahrefs observation and must not replace it."
+      "status": "unavailable",
+      "lastAttemptAt": "2026-10-04T12:00:53Z",
+      "reason": "insufficient_plan",
+      "measurement": "connected Ahrefs API",
+      "metrics": {
+        "domainRating": null,
+        "backlinks": null,
+        "referringDomains": null,
+        "dofollowBacklinks": null,
+        "dofollowReferringDomains": null
+      },
+      "attemptedEndpoints": [
+        "public-domain-rating-free",
+        "batch-analysis",
+        "site-explorer-domain-rating",
+        "site-explorer-backlinks-stats"
+      ]
     },
     "seRanking": {
       "provider": "SE Ranking",
-      "metricFamily": "backlink profile",
-      "observedAt": "2026-10-04T10:10:00Z",
-      "status": "fresh",
-      "backlinks": 95,
-      "referringDomains": 29,
-      "dofollowBacklinks": 14,
-      "dofollowReferringDomains": 11,
-      "domainInlinkRank": 2,
-      "note": "SE Ranking uses its own backlink index and authority metric; these values are not Ahrefs DR."
+      "status": "available",
+      "observedAt": "2026-10-04T12:00:53Z",
+      "measurement": "SE Ranking Data API",
+      "metrics": {
+        "backlinks": 95,
+        "referringDomains": 29,
+        "subnets": 24,
+        "ips": 24,
+        "dofollowBacklinks": 14,
+        "nofollowBacklinks": 81,
+        "dofollowReferringDomains": 11,
+        "inlinkRank": 1,
+        "domainInlinkRank": 2
+      }
     }
   },
   "reconciliation": {
-    "status": "source_disagreement_explained_not_merged",
-    "ahrefsDomainRating": 2.3,
-    "ahrefsThirdPartySnapshot": 31,
-    "seRankingBacklinks": 95,
-    "seRankingReferringDomains": 29,
-    "reason": "Provider indexes and refresh cadences differ. Tiny Startups is a weekly third-party cache while direct Ahrefs is the canonical Ahrefs observation. Backlink totals from Ahrefs and SE Ranking are intentionally kept separate."
+    "status": "machine_observed_partial",
+    "primaryAvailableSource": "SE Ranking Data API",
+    "ahrefsStatus": "unavailable",
+    "ahrefsReason": "insufficient_plan",
+    "seRankingObservedAt": "2026-10-04T12:00:53Z",
+    "note": "No Ahrefs numeric value is retained while the connected API cannot measure the domain. Provider metrics remain separate."
   }
 }
