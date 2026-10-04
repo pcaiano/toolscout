@@ -97,12 +97,20 @@ function sourceRows(report){
   return (report?.rows||[]).map(row=>({source:row.dimensionValues?.[0]?.value||'(not set)',medium:row.dimensionValues?.[1]?.value||'(not set)',channel:row.dimensionValues?.[2]?.value||'(not set)',landingPage:row.dimensionValues?.[3]?.value||'(not set)',sessions:n(row.metricValues?.[0]?.value)})).filter(row=>row.sessions>0);
 }
 async function ga4Snapshot(env,request=null){
-  const cfg=gaConfig(env),oauthBefore=await googleAnalyticsOAuthStatus(env,request);
-  let token=null,propertyId=null,authMode=null,connectedEmail=null;
+  const cfg=gaConfig(env);
+  let oauthBefore={configured:false,connected:false};
+  try{oauthBefore=await googleAnalyticsOAuthStatus(env,request)}catch{}
+  let token=null,propertyId=null,authMode=null,connectedEmail=null,authFallbackReason=null;
   try{
     if(oauthBefore.connected){
-      const oauth=await googleAnalyticsOAuthAccess(env,request);if(!oauth)throw new Error('google_oauth_connection_unavailable');
-      token=oauth.token;propertyId=oauth.propertyId;authMode='oauth';connectedEmail=oauth.ownerEmail;
+      try{
+        const oauth=await googleAnalyticsOAuthAccess(env,request);if(!oauth)throw new Error('google_oauth_connection_unavailable');
+        token=oauth.token;propertyId=oauth.propertyId;authMode='oauth';connectedEmail=oauth.ownerEmail;
+      }catch(oauthError){
+        if(!(cfg.clientEmail&&cfg.privateKey))throw oauthError;
+        token=await serviceAccountAccessToken(env);propertyId=await resolvePropertyId(env,token);authMode='service_account_fallback';connectedEmail=cfg.clientEmail;
+        authFallbackReason=String(oauthError?.message||oauthError||'google_oauth_connection_unavailable');
+      }
     }else if(cfg.clientEmail&&cfg.privateKey){
       token=await serviceAccountAccessToken(env);propertyId=await resolvePropertyId(env,token);authMode='service_account';connectedEmail=cfg.clientEmail;
     }else{
@@ -139,8 +147,11 @@ async function ga4Snapshot(env,request=null){
     const sessionsToday=firstMetric(todayReport,0),mtd=firstMetric(mtdReport,0),elapsedDays=Math.max(1,local.day),dailyAverage=mtd/elapsedDays,projection=dailyAverage*daysInMonth(local.year,local.month),timeZone=todayReport?.metadata?.timeZone||mtdReport?.metadata?.timeZone||BUSINESS_TIME_ZONE,oauth=await googleAnalyticsOAuthStatus(env,request);
     const daily30=(dailyReport?.rows||[]).map(row=>({date:String(row.dimensionValues?.[0]?.value||''),sessions:n(row.metricValues?.[0]?.value),users:n(row.metricValues?.[1]?.value)})).filter(x=>x.date);
     const countries=(countryReport?.rows||[]).map(row=>({country:row.dimensionValues?.[0]?.value||'(not set)',sessions:n(row.metricValues?.[0]?.value),users:n(row.metricValues?.[1]?.value)})).filter(row=>row.sessions>0||row.users>0);
-    return {status:'connected',canonical:true,source:'Google Analytics 4 Data API',propertyId,measurementId:cfg.measurementId,timeZone,authMode,connectedEmail,oauth,sessions:{today:sessionsToday,last24Hours,monthToDate:mtd,dailyAverageMTD:Number(dailyAverage.toFixed(2)),projectedMonth:Math.round(projection)},users:{today:firstMetric(todayReport,1),activeToday:firstMetric(todayReport,2),monthToDate:firstMetric(mtdReport,1)},outbound:{source:'GA4 browser events',population:'GA4 consented reporting population',role:'quality_and_browser_population',last24Hours:{outbound:outboundHourReport?outbound24:null,monetized:outboundHourReport?monetized24:null},monthToDate:{outbound:outboundMtdReport?outboundMtd:null,monetized:outboundMtdReport?monetizedMtd:null},monetizedTrackingStartedAt:'2026-09-29T11:02:00Z',definition:'GA4 outbound events describe the consented browser reporting population. ToolScout server /go/ redirects remain the canonical outbound and monetized-outbound business ledger.'},daily30,sources:sourceRows(sourcesReport),countries,fetchedAt:new Date().toISOString(),consentNote:'GA4 is canonical for users and sessions. ToolScout server redirects are canonical for outbound and monetized outbound. GA4 outbound remains a separate consent-dependent browser population and is never summed with the server ledger.'};
-  }catch(error){return {status:'unavailable',canonical:true,source:'Google Analytics 4 Data API',reason:String(error?.message||error),measurementId:cfg.measurementId,authMode,connectedEmail,oauth:await googleAnalyticsOAuthStatus(env,request),fetchedAt:new Date().toISOString()}}
+    return {status:'connected',canonical:true,source:'Google Analytics 4 Data API',propertyId,measurementId:cfg.measurementId,timeZone,authMode,connectedEmail,authFallbackReason,oauth,sessions:{today:sessionsToday,last24Hours,monthToDate:mtd,dailyAverageMTD:Number(dailyAverage.toFixed(2)),projectedMonth:Math.round(projection)},users:{today:firstMetric(todayReport,1),activeToday:firstMetric(todayReport,2),monthToDate:firstMetric(mtdReport,1)},outbound:{source:'GA4 browser events',population:'GA4 consented reporting population',role:'quality_and_browser_population',last24Hours:{outbound:outboundHourReport?outbound24:null,monetized:outboundHourReport?monetized24:null},monthToDate:{outbound:outboundMtdReport?outboundMtd:null,monetized:outboundMtdReport?monetizedMtd:null},monetizedTrackingStartedAt:'2026-09-29T11:02:00Z',definition:'GA4 outbound events describe the consented browser reporting population. ToolScout server /go/ redirects remain the canonical outbound and monetized-outbound business ledger.'},daily30,sources:sourceRows(sourcesReport),countries,fetchedAt:new Date().toISOString(),consentNote:'GA4 is canonical for users and sessions. ToolScout server redirects are canonical for outbound and monetized outbound. GA4 outbound remains a separate consent-dependent browser population and is never summed with the server ledger.'};
+  }catch(error){
+    let oauth=oauthBefore;try{oauth=await googleAnalyticsOAuthStatus(env,request)}catch{}
+    return {status:'unavailable',canonical:true,source:'Google Analytics 4 Data API',reason:String(error?.message||error),measurementId:cfg.measurementId,authMode,connectedEmail,authFallbackReason,oauth,fetchedAt:new Date().toISOString()}
+  }
 }
 async function serverCommerceSnapshot(env){
   try{
