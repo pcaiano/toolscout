@@ -42,6 +42,46 @@ jobs:
         run: |
           set -euo pipefail
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at FROM growth_action_events WHERE status='pending' ORDER BY created_at ASC LIMIT 40;" || true
+      - name: Test GSC service account against GA4
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: |
+          node <<'NODE'
+          const crypto = require('node:crypto');
+          const raw=process.env.GSC_SERVICE_ACCOUNT_JSON||'';
+          if(!raw){console.log(JSON.stringify({configured:false}));process.exit(0)}
+          let creds;try{creds=JSON.parse(raw)}catch(e){console.log(JSON.stringify({configured:true,validJson:false}));process.exit(0)}
+          const b64=v=>Buffer.from(v).toString('base64url');
+          const now=Math.floor(Date.now()/1000);
+          const unsigned=b64(JSON.stringify({alg:'RS256',typ:'JWT'}))+'.'+b64(JSON.stringify({iss:creds.client_email,scope:'https://www.googleapis.com/auth/analytics.readonly',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600}));
+          const signer=crypto.createSign('RSA-SHA256');signer.update(unsigned);signer.end();
+          const assertion=unsigned+'.'+signer.sign(creds.private_key,'base64url');
+          const tok=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion})});
+          const tj=await tok.json().catch(()=>({}));
+          if(!tok.ok||!tj.access_token){console.log(JSON.stringify({configured:true,clientEmail:creds.client_email,tokenOk:false,status:tok.status,error:tj.error||null}));process.exit(0)}
+          const rr=await fetch('https://analyticsdata.googleapis.com/v1beta/properties/554080029:runReport',{method:'POST',headers:{authorization:'Bearer '+tj.access_token,'content-type':'application/json'},body:JSON.stringify({dateRanges:[{startDate:'7daysAgo',endDate:'today'}],metrics:[{name:'sessions'}]})});
+          const rj=await rr.json().catch(()=>({}));
+          console.log(JSON.stringify({configured:true,clientEmail:creds.client_email,tokenOk:true,ga4Status:rr.status,ga4Ok:rr.ok,sessions:rj.rows?.[0]?.metricValues?.[0]?.value||null,error:rj.error?.message||null},null,2));
+          NODE
+      - name: Probe public SEO runtime markers
+        run: |
+          set -euo pipefail
+          for path in /best-seo-keyword-research-tools /best-crm-for-sales-teams /asana-vs-clickup /news/notion-mail-shuts-down; do
+            echo "=== $path ==="
+            curl -sS --max-time 20 -D /tmp/h -o /tmp/b "https://trytoolscout.org$path?__diag=$(date +%s)"
+            grep -iE '^(HTTP/|x-toolscout-|content-type:)' /tmp/h || true
+            node - "$path" /tmp/b <<'NODE'
+          const fs=require('fs');const p=process.argv[2],f=process.argv[3],h=fs.readFileSync(f,'utf8');
+          console.log(JSON.stringify({path:p,depth:h.includes('organic-growth:runtime-start')||h.includes('organic-growth:start'),clickCapture:/data-toolscout-click-capture=["']1["']/i.test(h),recoveryLinks:h.includes('data-toolscout-index-recovery-links="1"'),length:h.length}));
+          NODE
+          done
+      - name: Probe Render SEO proof
+        run: |
+          set -euo pipefail
+          curl -sS --max-time 25 'https://toolscout-overflow.onrender.com/seo-proof?path=%2Fbest-seo-keyword-research-tools&action=deepen_existing_search_asset' || true
+          echo
+          curl -sS --max-time 25 'https://toolscout-overflow.onrender.com/seo-proof?path=%2Fbest-crm-for-sales-teams&action=deepen_existing_search_asset' || true
+          echo
       - name: Live GA4 acquisition endpoint
         run: |
           set -euo pipefail
