@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {executableIntentSearchActions} from '../search-action-policy.js';
 
 const orchestrator=fs.readFileSync(new URL('../distribution-orchestrator-worker.js',import.meta.url),'utf8');
 const schedules=fs.readFileSync(new URL('../runtime-schedule-contract.js',import.meta.url),'utf8');
@@ -10,8 +11,14 @@ test('search and news opportunity generators do not emit unexecutable distributi
     orchestrator.indexOf('for(const op of searchOpportunities.slice(0,40))'),
     orchestrator.indexOf('for(const row of normalizedGscPages')
   );
-  assert.match(searchBlock,/filter\(action=>!\['distribution_amplification','backlink_reference_outreach'\]/);
-  assert.doesNotMatch(searchBlock,/\.\.\.execution,'content_amplification','distribution_amplification'/);
+  assert.match(searchBlock,/const intentExecution=executableIntentSearchActions\(op\)/);
+  assert.match(searchBlock,/const actions=intentExecution\.actions/);
+  assert.doesNotMatch(searchBlock,/distribution_amplification|backlink_reference_outreach/);
+  for(const lane of ['seo-aeo-snippet','seo-striking-distance','seo-authority-depth','commercial-intent','seo-first-page-observation','seo-indexing-recovery','editorial-safety','measure']){
+    const policy=executableIntentSearchActions({lane,executionPlan:['distribution_amplification','backlink_reference_outreach','publish']});
+    assert.equal(policy.actions.includes('distribution_amplification'),false);
+    assert.equal(policy.actions.includes('backlink_reference_outreach'),false);
+  }
 
   const newsBlock=orchestrator.slice(
     orchestrator.indexOf('for(const item of Array.isArray\(softwareUpdates'),
