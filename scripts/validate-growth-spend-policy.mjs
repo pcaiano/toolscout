@@ -14,12 +14,22 @@ if(policy.unitEconomicsGate?.defaultDecisionWhenEvidenceMissing!=='decline_or_ho
 const historical=new Set((policy.historicalExperiments||[]).map(x=>String(x.slug||'')));
 const paidSignal=/\b(paid|\$\s*\d|€\s*\d|£\s*\d|premium|fast[- ]?track|priority\+?|featured|backlink upgrade|quick review)\b/i;
 const allowedState=/declin|skip|hold|unavailable|free route|free submission|free listing|free account|eligible_free|pending_review|scheduled|live|human_action_required|research_required/i;
+const executableApproval=/\b(paid selected|execute paid|upgrade approved|owner approved|approved paid|pay now|purchase approved|spend approved)\b/i;
+const purchaseVerb=/\b(buy|purchase|pay|upgrade)\b/i;
+function hasExecutablePaidDirective(item){
+  const actionText=[item.next_action,item.notes,item.blocker].filter(Boolean).join(' ');
+  if(executableApproval.test(actionText))return true;
+  const withoutExplicitDenials=actionText
+    .replace(/\b(?:do not|don't|never)\s+(?:buy|purchase|pay|upgrade)\b[^.;]*/gi,' ')
+    .replace(/\b(?:explicitly declined|declined|not justified|not authorized)\b[^.;]*/gi,' ');
+  return purchaseVerb.test(withoutExplicitDenials);
+}
 const violations=[];
 for(const item of workflow.items||[]){
   const text=[item.cost,item.next_action,item.notes,item.blocker,item.free_paid_status,item.status].filter(Boolean).join(' ');
   if(!paidSignal.test(text))continue;
   if(historical.has(String(item.slug||'')))continue;
-  if(allowedState.test(text)&&!/\b(buy|purchase|pay now|paid selected|execute paid|upgrade approved)\b/i.test(text))continue;
+  if(allowedState.test(text)&&!hasExecutablePaidDirective(item))continue;
   violations.push({slug:item.slug||null,status:item.status||null,cost:item.cost||null,reason:'Paid distribution appears executable without a whitelisted historical experiment and a fresh unit economics decision.'});
 }
 if(violations.length)errors.push(...violations.map(x=>`${x.slug}: ${x.reason}`));
