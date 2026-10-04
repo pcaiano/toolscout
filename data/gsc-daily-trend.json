@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T11:52:52.228Z",
+  "generatedAt": "2026-10-04T10:18:29.748Z",
   "source": "Google Search Console Search Analytics API - daily trend",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -8,8 +8,8 @@
   "range": {
     "startDate": "2026-09-02",
     "endDate": "2026-09-29",
-    "requestedStartDate": "2026-08-30",
-    "requestedEndDate": "2026-10-03",
+    "requestedStartDate": "2026-08-31",
+    "requestedEndDate": "2026-10-04",
     "days": 28
   },
   "metrics": [
