@@ -1,0 +1,70 @@
+name: ToolScout Search Evidence Watchdog
+
+on:
+  schedule:
+    - cron: '47 6 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seo-engine-v2
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'ToolScout Search Freshness - production recovery deploy'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check search evidence freshness
+        id: freshness
+        run: node scripts/check-search-evidence-freshness.mjs --github-output
+
+      - name: Sync Google Search Console performance signals
+        if: steps.freshness.outputs.refresh == 'true'
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+        run: node scripts/sync-gsc-signals.mjs
+
+      - name: Rebuild growth priority from fresh search evidence
+        if: steps.freshness.outputs.refresh == 'true'
+        run: node scripts/build-growth-priority.mjs
+
+      - name: Rebuild indexing-aware organic opportunities
+        if: steps.freshness.outputs.refresh == 'true'
+        run: node scripts/build-organic-growth-opportunities-v6.mjs
+
+      - name: Require linked search evidence to be fresh
+        if: steps.freshness.outputs.refresh == 'true'
+        run: node scripts/check-search-evidence-freshness.mjs --require-fresh
+
+      - name: Commit refreshed search evidence
+        if: steps.freshness.outputs.refresh == 'true'
+        run: |
+          if [ -z "$(git status --porcelain -- reports/gsc-signals.json reports/growth-priority.json reports/organic-growth-opportunities.json)" ]; then
+            echo "No search evidence changes to commit."
+            exit 0
+          fi
+          git config user.name "toolscout-search-watchdog"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- reports/gsc-signals.json reports/growth-priority.json reports/organic-growth-opportunities.json
+          git commit -m "Refresh search evidence watchdog"
+          git pull --rebase origin main
+          git push origin HEAD:main
