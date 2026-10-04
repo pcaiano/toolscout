@@ -3,16 +3,16 @@
   "source": "SE Ranking Data API",
   "target": "trytoolscout.org",
   "mode": "domain",
-  "observedAt": "2026-09-29T11:14:00Z",
+  "observedAt": "2026-10-04T10:10:00Z",
   "freshnessHours": 48,
   "metrics": {
-    "backlinks": 74,
-    "referringDomains": 15,
-    "subnets": 15,
-    "ips": 15,
-    "dofollowBacklinks": 7,
-    "nofollowBacklinks": 67,
-    "dofollowReferringDomains": 6,
+    "backlinks": 95,
+    "referringDomains": 29,
+    "subnets": 24,
+    "ips": 24,
+    "dofollowBacklinks": 14,
+    "nofollowBacklinks": 81,
+    "dofollowReferringDomains": 11,
     "eduBacklinks": 0,
     "govBacklinks": 0,
     "pageInlinkRank": 1,
@@ -21,84 +21,63 @@
   },
   "referringDomains": [
     {
-      "domain": "hypestar.org",
-      "backlinks": 52,
-      "dofollowBacklinks": 0,
-      "domainInlinkRank": 5,
-      "firstSeen": "2026-09-26"
-    },
-    {
-      "domain": "verifymcp.io",
-      "backlinks": 2,
-      "dofollowBacklinks": 0,
-      "domainInlinkRank": 13,
-      "firstSeen": "2026-09-26"
-    },
-    {
-      "domain": "techtwitter.io",
+      "domain": "www.uneed.best",
       "backlinks": 1,
       "dofollowBacklinks": 1,
-      "domainInlinkRank": 7,
-      "firstSeen": "2026-09-25"
+      "domainInlinkRank": 81,
+      "firstSeen": "2026-09-30"
     },
     {
-      "domain": "agentlair.dev",
+      "domain": "www.tinystartups.com",
       "backlinks": 1,
-      "dofollowBacklinks": 1,
-      "domainInlinkRank": 15,
-      "firstSeen": "2026-09-25"
-    },
-    {
-      "domain": "allagents.app",
-      "backlinks": 2,
       "dofollowBacklinks": 0,
-      "domainInlinkRank": 0,
-      "firstSeen": "2026-09-25"
+      "domainInlinkRank": 74,
+      "firstSeen": "2026-09-29"
     },
     {
-      "domain": "mcpcensus.com",
-      "backlinks": 2,
+      "domain": "tools.launchllama.co",
+      "backlinks": 3,
       "dofollowBacklinks": 0,
-      "domainInlinkRank": 8,
-      "firstSeen": "2026-09-24"
+      "domainInlinkRank": 71,
+      "firstSeen": "2026-09-30"
     },
     {
-      "domain": "claudemcp.org",
+      "domain": "www.claudemcp.org",
       "backlinks": 2,
       "dofollowBacklinks": 2,
       "domainInlinkRank": 37,
       "firstSeen": "2026-09-24"
     },
     {
-      "domain": "finderlaunch.com",
-      "backlinks": 1,
-      "dofollowBacklinks": 1,
-      "domainInlinkRank": 6,
-      "firstSeen": "2026-09-23"
-    },
-    {
-      "domain": "connectors.fun",
-      "backlinks": 1,
-      "dofollowBacklinks": 1,
-      "domainInlinkRank": 1,
-      "firstSeen": "2026-09-23"
-    },
-    {
-      "domain": "viralrank.lol",
+      "domain": "legit.show",
       "backlinks": 1,
       "dofollowBacklinks": 0,
-      "domainInlinkRank": 0,
-      "firstSeen": "2026-09-23"
+      "domainInlinkRank": 34,
+      "firstSeen": "2026-10-01"
     },
     {
-      "domain": "odel.app",
-      "backlinks": 2,
+      "domain": "stremit.io",
+      "backlinks": 1,
       "dofollowBacklinks": 0,
-      "domainInlinkRank": 10,
-      "firstSeen": "2026-09-23"
+      "domainInlinkRank": 32,
+      "firstSeen": "2026-09-29"
     },
     {
-      "domain": "uicomet.com",
+      "domain": "claudecode.directory",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 30,
+      "firstSeen": "2026-09-30"
+    },
+    {
+      "domain": "api.agentalog.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 25,
+      "firstSeen": "2026-09-30"
+    },
+    {
+      "domain": "launches.uicomet.com",
       "backlinks": 1,
       "dofollowBacklinks": 1,
       "domainInlinkRank": 20,
@@ -112,11 +91,18 @@
       "firstSeen": "2026-09-22"
     },
     {
-      "domain": "wellknown.network",
-      "backlinks": 4,
-      "dofollowBacklinks": 0,
-      "domainInlinkRank": 1,
-      "firstSeen": "2026-09-11"
+      "domain": "roninforge.org",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 18,
+      "firstSeen": "2026-10-03"
+    },
+    {
+      "domain": "agentlair.dev",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 15,
+      "firstSeen": "2026-09-25"
     },
     {
       "domain": "mcpindex.ai",
@@ -124,6 +110,118 @@
       "dofollowBacklinks": 0,
       "domainInlinkRank": 13,
       "firstSeen": "2026-09-10"
+    },
+    {
+      "domain": "verifymcp.io",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 13,
+      "firstSeen": "2026-09-26"
+    },
+    {
+      "domain": "mcp.market",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 12,
+      "firstSeen": "2026-09-30"
+    },
+    {
+      "domain": "odel.app",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 10,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "mcpcensus.com",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 8,
+      "firstSeen": "2026-09-24"
+    },
+    {
+      "domain": "outvote.lol",
+      "backlinks": 3,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 7,
+      "firstSeen": "2026-10-02"
+    },
+    {
+      "domain": "techtwitter.io",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 7,
+      "firstSeen": "2026-09-25"
+    },
+    {
+      "domain": "finderlaunch.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 6,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "hypestar.org",
+      "backlinks": 52,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 5,
+      "firstSeen": "2026-09-26"
+    },
+    {
+      "domain": "connectors.fun",
+      "backlinks": 1,
+      "dofollowBacklinks": 1,
+      "domainInlinkRank": 1,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "tracevero.com",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 1,
+      "firstSeen": "2026-10-03"
+    },
+    {
+      "domain": "wellknown.network",
+      "backlinks": 4,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 1,
+      "firstSeen": "2026-09-11"
+    },
+    {
+      "domain": "rateme12.com",
+      "backlinks": 3,
+      "dofollowBacklinks": 3,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-10-02"
+    },
+    {
+      "domain": "tracevero.de",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-10-01"
+    },
+    {
+      "domain": "viralrank.lol",
+      "backlinks": 1,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-09-23"
+    },
+    {
+      "domain": "appwatch.ai",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-10-01"
+    },
+    {
+      "domain": "allagents.app",
+      "backlinks": 2,
+      "dofollowBacklinks": 0,
+      "domainInlinkRank": 0,
+      "firstSeen": "2026-09-25"
     }
   ],
   "reconciliationPolicy": {
@@ -135,8 +233,8 @@
     "backlinkDefinition": "SE Ranking backlink count is the number of individual source link URLs observed for the domain.",
     "referringDomainDefinition": "Referring-domain count is the number of unique external domains and must not be compared as if it were a backlink count.",
     "internalLedgerDefinition": "The internal verified ledger counts ToolScout-verified backlink-bearing placement records; it remains separate from SE Ranking link-row totals.",
-    "lastFullLinkRowReconciliation": "2026-09-29T11:14:00Z",
-    "fullLinkRowsObserved": 74,
+    "lastFullLinkRowReconciliation": "2026-10-04T10:10:00Z",
+    "fullLinkRowsObserved": 95,
     "canonicalExternalTruth": "SE Ranking Data API",
     "commandCenterBacklinkTotal": "SE Ranking backlinks when fresh",
     "commandCenterReferringDomainTotal": "SE Ranking unique referring domains when fresh",
@@ -147,7 +245,7 @@
   },
   "authorityHistorySummary": {
     "windowStart": "2026-09-01",
-    "windowEnd": "2026-09-29",
+    "windowEnd": "2026-10-04",
     "startDomainAuthority": 1,
     "currentDomainAuthority": 2,
     "firstObservedAtCurrentValue": "2026-09-22"

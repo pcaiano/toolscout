@@ -69,3 +69,14 @@ test('generic traversal bypasses Command Center GA4 wrapper',()=>{
   assert.doesNotMatch(compute,/import base from '\.\/command-center-health-language-worker\.js'/);
   assert.doesNotMatch(compute,/import base from '\.\/command-center-ga4-worker\.js'/);
 });
+
+
+test('GA4 requests are bounded and optional dimensions cannot blank core traffic truth',()=>{
+  const runtime=read('command-center-ga4-worker.js');
+  assert.match(runtime,/const GA_FETCH_TIMEOUT_MS=8000/);
+  assert.match(runtime,/AbortSignal\.timeout\(GA_FETCH_TIMEOUT_MS\)/);
+  assert.match(runtime,/sessionSource[\s\S]*?\.catch\(\(\)=>null\)/);
+  assert.match(runtime,/dimensions:\[\{name:'country'\}\][\s\S]*?\.catch\(\(\)=>null\)/);
+  assert.match(runtime,/dimensions:\[\{name:'date'\}\][\s\S]*?\.catch\(\(\)=>null\)/);
+  assert.match(runtime,/dailyReport\?\.rows/);
+});
