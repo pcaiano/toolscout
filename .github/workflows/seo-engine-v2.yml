@@ -17,6 +17,8 @@ on:
       - 'tests/competitive-gap-catalog-parity.test.mjs'
       - 'scripts/validate-seo-pages.mjs'
       - 'tests/seo-extensionless-tool-link.test.mjs'
+      - 'scripts/validate-editorial-trust.mjs'
+      - 'tests/editorial-trust-extensionless-link.test.mjs'
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
@@ -93,7 +95,8 @@ jobs:
           node --test \
             tests/comparison-editorial-contract.test.mjs \
             tests/competitive-gap-catalog-parity.test.mjs \
-            tests/seo-extensionless-tool-link.test.mjs
+            tests/seo-extensionless-tool-link.test.mjs \
+            tests/editorial-trust-extensionless-link.test.mjs
       - name: Enrich comparisons with decision context
         run: node scripts/enrich-comparison-context.mjs
       - name: Generate indexable tool profiles
