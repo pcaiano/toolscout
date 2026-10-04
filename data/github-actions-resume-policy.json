@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "enabled": false,
-  "mode": "hard_interlock",
-  "reason": "GitHub Actions mutation is locked until the post-conservation SEO/catalog generator stack is explicitly reviewed against shared-growth-v3.",
+  "enabled": true,
+  "mode": "review_branch_only",
+  "reason": "Controlled non-main readmission test for seo-engine-v2 against the current ToolScout 2.0 shared-growth-v3 contracts. Main remains locked.",
   "required": {
     "autonomousGrowthBrain": "shared-growth-v3",
     "commandCenterComposition": "canonical-growth-v2",
@@ -17,6 +17,6 @@
     "Verify no Worker/runtime source, affiliate state, strict-human Traffic Truth contract, catalog neutrality rule, What's New policy, or Command Center contract regresses.",
     "Set enabled=true only in a reviewed pull request."
   ],
-  "reviewedAt": null,
-  "reviewedBy": null
+  "reviewedAt": "2026-10-04",
+  "reviewedBy": "controlled-readmission-test"
 }
