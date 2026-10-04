@@ -1,6 +1,12 @@
 name: ToolScout SEO Engine v2
 
 on:
+  push:
+    branches:
+      - actions-readmission-seo-20261004
+    paths:
+      - '.github/workflows/seo-engine-v2.yml'
+      - 'data/github-actions-resume-policy.json'
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
