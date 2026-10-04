@@ -19,7 +19,7 @@ function trust(tool,{strict=false}={}){
   return editorialTrust(tool,freshness?.tools?.[tool?.slug]||null,{maxFactualAgeDays:45,strictSource:strict,maxSourceCheckAgeDays:10});
 }
 function error(code,detail){errors.push({code,detail});}
-function rankedToolSlugs(html){return [...new Set([...String(html||'').matchAll(/href=["']\/tools\/([a-z0-9-]+)\.html["']/gi)].map(m=>m[1]))];}
+function rankedToolSlugs(html){return [...new Set([...String(html||'').matchAll(/href=["']\/tools\/([a-z0-9-]+)(?:\.html)?(?:[?#][^"']*)?["']/gi)].map(m=>m[1]))];}
 
 for(const tool of tools){
   const t=trust(tool);
@@ -65,7 +65,7 @@ if(!catalogOnly){
   const trendsHtmlPath=path.join(ROOT,'software-trends-index.html');
   if(fs.existsSync(trendsPath)){
     const trends=read('software-trends-index.json',{});
-    if(!/ToolScout first-party observations/i.test(String(trends.scope||'')))error('trends_scope_disclaimer_missing','software-trends-index.json');
+    if(!/ToolScout first-party (?:observations|editorial dataset)/i.test(String(trends.scope||'')))error('trends_scope_disclaimer_missing','software-trends-index.json');
     if(!/not a measure of global market share/i.test(String(trends.scope||'')))error('trends_market_scope_limit_missing','software-trends-index.json');
     for(const row of trends.shortlistLeaders||[]){
       const tool=toolBySlug.get(row.slug);
