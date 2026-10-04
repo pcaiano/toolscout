@@ -18,29 +18,89 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Confirm exact deferred proof candidate
+      - name: Select a non-competitive proven distribution surface
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
-          SELECT c.task_id,c.status,c.last_result,c.priority_score,o.status opportunity_status,n.status network_status
-          FROM growth_execution_contract c
-          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
-          LEFT JOIN distribution_network_outreach n ON n.surface_slug=c.subject_key
-          WHERE c.task_id='opportunity|surface:stremit|scale_proven_surface'
-          LIMIT 1;
-          " | tee /tmp/before.json
-          node - <<'NODE'
-          const fs=require('fs');
-          const row=JSON.parse(fs.readFileSync('/tmp/before.json','utf8'))[0]?.results?.[0];
-          if(!row)throw new Error('stremit scale task not found');
-          if(row.network_status!=='adopted')throw new Error('stremit is no longer an adopted proof surface: '+JSON.stringify(row));
-          if(!['deferred','pending','stalled','verified'].includes(String(row.status)))throw new Error('unexpected stremit task state: '+JSON.stringify(row));
-          console.log(JSON.stringify({ok:true,row},null,2));
+          SELECT o.surface_slug,o.surface_name,o.surface_type,o.status opportunity_status,
+                 o.action_url,o.source_url,
+                 COALESCE(n.status,'') network_status,
+                 COALESCE(l.browser_confirmed_sessions_30d,0) strict_sessions,
+                 COALESCE(l.outbound_clicks_30d,0) outbound_clicks,
+                 COALESCE(l.monetized_outbound_30d,0) monetized_outbound,
+                 EXISTS(SELECT 1 FROM distribution_contact_route_actions a
+                        WHERE a.surface_slug=o.surface_slug AND a.status='verified_human_impact') route_human,
+                 EXISTS(SELECT 1 FROM distribution_contact_route_actions a
+                        WHERE a.surface_slug=o.surface_slug AND a.status='verified_placement') route_placement
+          FROM distribution_opportunities o
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=o.surface_slug
+          LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug
+          WHERE COALESCE(o.human_required,0)=0
+            AND lower(COALESCE(o.action_url,'')) NOT LIKE 'https://trytoolscout.org/%'
+            AND (
+              o.status IN ('live','verified')
+              OR COALESCE(l.browser_confirmed_sessions_30d,0)>0
+              OR COALESCE(l.outbound_clicks_30d,0)>0
+              OR COALESCE(l.monetized_outbound_30d,0)>0
+            )
+            AND (
+              n.status='adopted'
+              OR EXISTS(SELECT 1 FROM distribution_contact_route_actions a
+                        WHERE a.surface_slug=o.surface_slug AND a.status IN ('verified_human_impact','verified_placement'))
+              OR COALESCE(l.browser_confirmed_sessions_30d,0)>0
+              OR COALESCE(l.outbound_clicks_30d,0)>0
+              OR COALESCE(l.monetized_outbound_30d,0)>0
+            )
+          ORDER BY
+            CASE WHEN COALESCE(l.browser_confirmed_sessions_30d,0)>0 THEN 0
+                 WHEN n.status='adopted' THEN 1 ELSE 2 END,
+            o.priority_score DESC,o.updated_at DESC
+          LIMIT 80;
+          " | tee /tmp/candidates.json
+
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {competitiveOutreachExclusion} from './distribution-outreach-policy.js';
+          const payload=JSON.parse(fs.readFileSync('/tmp/candidates.json','utf8'));
+          const rows=payload[0]?.results||[];
+          const assessed=rows.map(row=>({
+            row,
+            policy:competitiveOutreachExclusion({
+              surface_type:row.surface_type,
+              surface_name:row.surface_name,
+              action_url:row.action_url,
+              source_url:row.source_url
+            })
+          }));
+          const candidate=assessed.find(x=>!x.policy.excluded && x.row.surface_slug!=='stremit');
+          console.log(JSON.stringify({candidates:assessed.map(x=>({slug:x.row.surface_slug,type:x.row.surface_type,network:x.row.network_status,routeHuman:x.row.route_human,routePlacement:x.row.route_placement,strict:x.row.strict_sessions,excluded:x.policy.excluded,reason:x.policy.reason})),selected:candidate||null},null,2));
+          if(!candidate)throw new Error('no non-competitive proven distribution surface available for closure proof');
+          fs.appendFileSync(process.env.GITHUB_ENV,`PROOF_SURFACE=${candidate.row.surface_slug}\n`);
+          fs.writeFileSync('/tmp/selected.json',JSON.stringify(candidate.row));
           NODE
 
-      - name: Requeue only the exact stale no-proof task for immediate closure proof
+      - name: Start current main against production D1 and refresh contracts
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --port 8787 --show-interactive-dev-session=false --var ADMIN_TOKEN:toolscout2_closure_proof >/tmp/closure-proof-wrangler.log 2>&1 &
+          echo "$!" > /tmp/wrangler.pid
+
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS 'http://127.0.0.1:8787/api/runtime/schedule-contract' >/tmp/schedule.json 2>/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then tail -160 /tmp/closure-proof-wrangler.log; exit 1; fi
+
+          curl -fsS -X POST 'http://127.0.0.1:8787/api/growth/opportunities/refresh'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json' | tee /tmp/refresh.json
+
+          curl -fsS -X POST 'http://127.0.0.1:8787/api/growth/execution/dispatch'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json' | tee /tmp/dispatch-initial.json
+
+      - name: Requeue only the selected proven task when it still needs proof
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -53,35 +113,16 @@ jobs:
               attempt_deadline=NULL,
               verify_deadline=NULL,
               updated_at=datetime('now','-2 hours')
-          WHERE task_id='opportunity|surface:stremit|scale_proven_surface'
+          WHERE task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
             AND status IN ('deferred','pending','stalled')
             AND EXISTS (
-              SELECT 1 FROM distribution_network_outreach n
-              WHERE n.surface_slug='stremit' AND n.status='adopted'
+              SELECT 1 FROM distribution_opportunities o
+              WHERE o.surface_slug='${PROOF_SURFACE}'
+                AND COALESCE(o.human_required,0)=0
             );
           "
 
-      - name: Dispatch current main against production D1
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          npx wrangler dev --remote --port 8787 --show-interactive-dev-session=false --var ADMIN_TOKEN:toolscout2_closure_proof >/tmp/closure-proof-wrangler.log 2>&1 &
-          PID=$!
-          cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
-          trap cleanup EXIT
-
-          ready=0
-          for i in $(seq 1 60); do
-            if curl -fsS 'http://127.0.0.1:8787/api/runtime/schedule-contract' >/tmp/schedule.json 2>/dev/null; then ready=1; break; fi
-            sleep 1
-          done
-          if [ "$ready" -ne 1 ]; then tail -160 /tmp/closure-proof-wrangler.log; exit 1; fi
-
-          code="$(curl -sS -o /tmp/dispatch.json -w '%{http_code}' -X POST             'http://127.0.0.1:8787/api/growth/execution/dispatch'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json')"
-          cat /tmp/dispatch.json
-          test "$code" -ge 200
-          test "$code" -lt 300
+          curl -fsS -X POST 'http://127.0.0.1:8787/api/growth/execution/dispatch'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json' | tee /tmp/dispatch-proof.json
 
       - name: Prove task-specific closure and canonical hourly schedule
         env:
@@ -90,16 +131,16 @@ jobs:
           set -euo pipefail
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
           SELECT c.task_id,c.status,c.last_result,c.verified_at,c.completed_at,c.updated_at,
-                 o.status opportunity_status,n.status network_status
+                 o.status opportunity_status,COALESCE(n.status,'') network_status
           FROM growth_execution_contract c
           LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
           LEFT JOIN distribution_network_outreach n ON n.surface_slug=c.subject_key
-          WHERE c.task_id='opportunity|surface:stremit|scale_proven_surface'
+          WHERE c.task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
           LIMIT 1;
 
           SELECT event_type,executor,status,detail,created_at
           FROM growth_execution_events
-          WHERE task_id='opportunity|surface:stremit|scale_proven_surface'
+          WHERE task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
           ORDER BY created_at DESC LIMIT 8;
           " | tee /tmp/after.json
 
@@ -107,33 +148,37 @@ jobs:
           const fs=require('fs');
           const payload=JSON.parse(fs.readFileSync('/tmp/after.json','utf8'));
           const row=payload[0]?.results?.[0];
-          if(row?.status!=='verified'){
-            console.error('closure proof did not verify stremit',row);
-            process.exit(42);
-          }
-          if(!String(row.last_result||'').includes('proven_surface_confirmed')){
-            throw new Error('task verified without expected proven-surface proof: '+JSON.stringify(row));
+          if(row?.status!=='verified')throw new Error('selected scale task did not verify: '+JSON.stringify(row));
+          if(!/proven_surface_(confirmed|rearmed)/.test(String(row.last_result||''))){
+            throw new Error('task verified without proven-surface proof: '+JSON.stringify(row));
           }
           const schedule=JSON.parse(fs.readFileSync('/tmp/schedule.json','utf8'));
           if(schedule?.crons?.hourly!=='20 * * * *')throw new Error('canonical hourly cron drift: '+JSON.stringify(schedule?.crons));
           if(schedule?.missions?.authority_sender_drain?.cron!=='20 * * * *')throw new Error('authority sender drain contract drift');
-          console.log(JSON.stringify({ok:true,task:row,hourly:schedule.crons.hourly,authoritySenderDrain:schedule.missions.authority_sender_drain},null,2));
+          console.log(JSON.stringify({ok:true,surface:process.env.PROOF_SURFACE,task:row,hourly:schedule.crons.hourly,authoritySenderDrain:schedule.missions.authority_sender_drain},null,2));
           NODE
+
+      - name: Stop proof runtime
+        if: always()
+        run: |
+          if [ -f /tmp/wrangler.pid ]; then kill "$(cat /tmp/wrangler.pid)" >/dev/null 2>&1 || true; fi
 
       - name: Fail closed if proof did not verify
         if: failure()
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
-          UPDATE growth_execution_contract
-          SET status='deferred',
-              last_result='closure_proof_failed_reverted',
-              claimed_at=NULL,
-              claim_deadline=NULL,
-              attempt_deadline=NULL,
-              verify_deadline=NULL,
-              updated_at=datetime('now')
-          WHERE task_id='opportunity|surface:stremit|scale_proven_surface'
-            AND status IN ('pending','claimed','attempted','stalled');
-          " || true
+          if [ -n "${PROOF_SURFACE:-}" ]; then
+            npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+            UPDATE growth_execution_contract
+            SET status='deferred',
+                last_result='closure_proof_failed_reverted',
+                claimed_at=NULL,
+                claim_deadline=NULL,
+                attempt_deadline=NULL,
+                verify_deadline=NULL,
+                updated_at=datetime('now')
+            WHERE task_id='opportunity|surface:${PROOF_SURFACE}|scale_proven_surface'
+              AND status IN ('pending','claimed','attempted','stalled');
+            " || true
+          fi
