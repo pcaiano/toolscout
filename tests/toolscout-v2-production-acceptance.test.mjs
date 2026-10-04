@@ -47,3 +47,17 @@ test('Phase 260 acceptance deploy preserves the existing public and commercial i
   assert.match(workflow,/Apply D1 migrations/);
   assert.match(workflow,/Deploy final ToolScout 2\.0 Worker/);
 });
+
+
+test('phase260 unsupported search cleanup drains only non-terminal non-executable search contracts',()=>{
+  const migration=read('migrations/0115_phase260_unsupported_search_contract_cleanup.sql');
+  assert.match(migration,/subject_type='search'/);
+  assert.match(migration,/status NOT IN \('verified','blocked','cancelled','human_required'\)/);
+  assert.match(migration,/last_result='phase260_unsupported_search_contract_cleanup'/);
+  for(const action of [
+    'deepen_existing_search_asset','improve_click_capture','protect_current_ranking',
+    'strengthen_internal_links','observe_low_sample_ranking','repair_indexing',
+    'repair_canonical_alignment','content_amplification',
+    'distribution_amplification','backlink_reference_outreach'
+  ]) assert.match(migration,new RegExp("'" + action + "'"));
+});
