@@ -19,13 +19,20 @@ test('search evidence watchdog is independent, bounded and serialized with the S
   assert.match(watchdog,/ToolScout Search Freshness - production recovery deploy/);
   assert.match(watchdog,/check-search-evidence-freshness\.mjs --github-output/);
   assert.match(watchdog,/sync-gsc-signals\.mjs/);
+  assert.match(watchdog,/sync-gsc-daily-trend\.mjs/);
   assert.match(watchdog,/build-growth-priority\.mjs/);
   assert.match(watchdog,/build-organic-growth-opportunities-v6\.mjs/);
   assert.match(watchdog,/check-search-evidence-freshness\.mjs --require-fresh/);
 });
 
-test('watchdog commits only search evidence artifacts and does not mutate public pages',()=>{
-  assert.match(watchdog,/git add -- reports\/gsc-signals\.json reports\/growth-priority\.json reports\/organic-growth-opportunities\.json/);
+test('watchdog commits the complete generated search evidence set and does not mutate public pages',()=>{
+  for(const path of [
+    'reports/gsc-signals.json','reports/gsc-search-reality.json','data/gsc-search-reality.json',
+    'reports/gsc-daily-trend.json','data/gsc-daily-trend.json',
+    'reports/growth-priority.json','reports/organic-growth-opportunities.json'
+  ]) assert.match(watchdog,new RegExp(path.replace(/[./]/g,'\\test('watchdog commits only search evidence artifacts and does not mutate public pages',()=>{
+  assert.match(watchdog,/git add -- reports\/gsc-signals\.json reports\/growth-priority\.json reports\/organic-growth-opportunities\.json/);')));
+  assert.match(watchdog,/git add -- \$SEARCH_EVIDENCE_FILES/);
   assert.doesNotMatch(watchdog,/generate-seo-pages/);
   assert.doesNotMatch(watchdog,/generate-comparisons/);
   assert.doesNotMatch(watchdog,/wrangler deploy/);
@@ -33,6 +40,8 @@ test('watchdog commits only search evidence artifacts and does not mutate public
 
 test('freshness probe detects both absolute staleness and derived-report lag',()=>{
   assert.match(probe,/MAX_GSC_AGE_HOURS=30/);
+  assert.match(probe,/MAX_TREND_AGE_HOURS=30/);
+  assert.match(probe,/gsc_trend_stale/);
   assert.match(probe,/MAX_ORGANIC_AGE_HOURS=36/);
   assert.match(probe,/MAX_ORGANIC_LAG_HOURS=6/);
   assert.match(probe,/organic_lags_gsc/);
