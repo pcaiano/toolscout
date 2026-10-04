@@ -40,7 +40,7 @@ async function opportunityEvidence(env,task){
       impressions:Number(signal?.impressions||0),
       clicks:Number(signal?.clicks||0),
       position:Number(signal?.position||0),
-      generatedAt:signal?.generatedAt||signal?.source_generated_at||row?.last_evaluated_at||null
+      generatedAt:signal?.gsc_snapshot_generated_at||signal?.last_strict_human_at||signal?.generatedAt||signal?.source_generated_at||row?.last_evaluated_at||null
     };
   }catch{return {impressions:0,clicks:0,position:0,generatedAt:null}}
 }
