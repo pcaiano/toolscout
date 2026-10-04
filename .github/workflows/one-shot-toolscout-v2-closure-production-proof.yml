@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
           SELECT o.surface_slug,o.surface_name,o.surface_type,o.status opportunity_status,
-                 o.action_url,o.source_url,
+                 o.action_url,
                  COALESCE(n.status,'') network_status,
                  COALESCE(l.browser_confirmed_sessions_30d,0) strict_sessions,
                  COALESCE(l.outbound_clicks_30d,0) outbound_clicks,
@@ -70,8 +70,7 @@ jobs:
             policy:competitiveOutreachExclusion({
               surface_type:row.surface_type,
               surface_name:row.surface_name,
-              action_url:row.action_url,
-              source_url:row.source_url
+              action_url:row.action_url
             })
           }));
           const candidate=assessed.find(x=>!x.policy.excluded && x.row.surface_slug!=='stremit');
