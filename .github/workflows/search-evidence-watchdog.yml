@@ -43,6 +43,14 @@ jobs:
           GSC_LOOKBACK_DAYS: '28'
         run: node scripts/sync-gsc-signals.mjs
 
+      - name: Sync finalized Google Search Console daily trend
+        if: steps.freshness.outputs.refresh == 'true'
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_PROPERTY: sc-domain:trytoolscout.org
+          GSC_LOOKBACK_DAYS: '28'
+        run: node scripts/sync-gsc-daily-trend.mjs
+
       - name: Rebuild growth priority from fresh search evidence
         if: steps.freshness.outputs.refresh == 'true'
         run: node scripts/build-growth-priority.mjs
@@ -58,13 +66,23 @@ jobs:
       - name: Commit refreshed search evidence
         if: steps.freshness.outputs.refresh == 'true'
         run: |
-          if [ -z "$(git status --porcelain -- reports/gsc-signals.json reports/growth-priority.json reports/organic-growth-opportunities.json)" ]; then
+          SEARCH_EVIDENCE_FILES="reports/gsc-signals.json reports/gsc-search-reality.json data/gsc-search-reality.json reports/gsc-daily-trend.json data/gsc-daily-trend.json reports/growth-priority.json reports/organic-growth-opportunities.json"
+          if [ -z "$(git status --porcelain -- $SEARCH_EVIDENCE_FILES)" ]; then
             echo "No search evidence changes to commit."
             exit 0
           fi
           git config user.name "toolscout-search-watchdog"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- reports/gsc-signals.json reports/growth-priority.json reports/organic-growth-opportunities.json
+          git add -- $SEARCH_EVIDENCE_FILES
+          if [ -n "$(git status --porcelain --untracked-files=no | grep -vE '^(M |A |D |R |C ) (reports/gsc-signals.json|reports/gsc-search-reality.json|data/gsc-search-reality.json|reports/gsc-daily-trend.json|data/gsc-daily-trend.json|reports/growth-priority.json|reports/organic-growth-opportunities.json)
+          git commit -m "Refresh search evidence watchdog"
+          git pull --rebase origin main
+          git push origin HEAD:main
+ || true)" ]; then
+            echo "Unexpected unstaged tracked changes remain after staging search evidence."
+            git status --short
+            exit 1
+          fi
           git commit -m "Refresh search evidence watchdog"
           git pull --rebase origin main
           git push origin HEAD:main
