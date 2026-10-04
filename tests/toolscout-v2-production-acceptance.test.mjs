@@ -27,7 +27,8 @@ test('Phase 260 exposes a stable final ToolScout 2.0 release fingerprint without
 test('Phase 260 production acceptance is fail-closed on structural execution defects',()=>{
   const workflow=read('.github/workflows/toolscout-v2-production-acceptance.yml');
   const evaluator=read('scripts/evaluate-v2-production-acceptance.mjs');
-  assert.match(workflow,/ToolScout 2\.0 Phase 260 - production acceptance deploy/);
+  assert.match(workflow,/name: ToolScout 2\.0 Production Acceptance/);
+  assert.match(workflow,/workflow_dispatch:/);
   assert.match(workflow,/verify-v2-live-smoke\.mjs/);
   assert.match(workflow,/evaluate-v2-production-acceptance\.mjs/);
   assert.match(workflow,/probe-v2-operational-health\.mjs/);
@@ -77,4 +78,15 @@ test('business critical status remains visible without masquerading as structura
   assert.match(workflow,/if\(r\.ok!==true\|\|hard\.length>0\)/);
   assert.doesNotMatch(workflow,/r\.operationalStatus==='critical'/);
   assert.match(workflow,/operationalStatus:r\.operationalStatus\|\|null/);
+});
+
+
+test('final freeze leaves recovery and acceptance as manual-only controls',()=>{
+  const recovery=read('.github/workflows/deploy-worker.yml');
+  const acceptance=read('.github/workflows/toolscout-v2-production-acceptance.yml');
+  for(const workflow of [recovery,acceptance]){
+    assert.match(workflow,/workflow_dispatch:/);
+    assert.doesNotMatch(workflow,/\n\s*push:/);
+    assert.doesNotMatch(workflow,/github\.event\.head_commit/);
+  }
 });
