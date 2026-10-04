@@ -72,3 +72,11 @@ test('Growth Sprint production launcher is manual-only after successful launch',
   assert.doesNotMatch(workflow,/\n\s*push:/);
   assert.doesNotMatch(workflow,/github\.event\.head_commit/);
 });
+
+
+test('Machine authority production repair is manual-only after successful deployment',()=>{
+  const workflow=read('.github/workflows/authority-truth-production-repair.yml');
+  assert.match(workflow,/workflow_dispatch:/);
+  assert.doesNotMatch(workflow,/\n\s*push:/);
+  assert.doesNotMatch(workflow,/github\.event\.head_commit/);
+});
