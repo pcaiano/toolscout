@@ -55,7 +55,8 @@ jobs:
             tests/toolscout-v2-search-execution-mutations.test.mjs \
             tests/toolscout-v2-search-command-center-truth.test.mjs \
             tests/toolscout-v2-search-action-quality.test.mjs \
-            tests/toolscout-v2-search-plan-contract-separation.test.mjs
+            tests/toolscout-v2-search-plan-contract-separation.test.mjs \
+            tests/toolscout-v2-search-evidence-watchdog.test.mjs
 
       - name: Audit production closed-loop truth
         env:
