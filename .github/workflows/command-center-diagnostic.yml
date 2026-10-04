@@ -1,0 +1,49 @@
+name: ToolScout Command Center Diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'diag-command-center-20261004' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Worker secret binding names
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler secret list --config wrangler.toml || true
+      - name: GA4 OAuth connection state
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT provider,owner_email,property_id,measurement_id,scopes,connected_at,updated_at,last_refresh_at,last_error FROM google_oauth_connections WHERE provider='google_analytics';" || true
+      - name: SEO pending contract state
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT task_id,opportunity_key,subject_type,subject_key,action,executor,status,created_at,claimed_at,attempted_at,updated_at,last_result FROM growth_execution_contract WHERE executor='seo_cloudflare' AND status IN ('pending','claimed','attempted','deferred') ORDER BY created_at ASC LIMIT 40;" || true
+      - name: Old pending action events
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "SELECT action_id,opportunity_key,engine,channel,target_url,status,created_at,updated_at FROM growth_action_events WHERE status='pending' ORDER BY created_at ASC LIMIT 40;" || true
+      - name: Live GA4 acquisition endpoint
+        run: |
+          set -euo pipefail
+          body="$(curl -sS --max-time 30 -H 'Cf-Access-Authenticated-User-Email: pcaiano@gmail.com' -w '\nHTTP_STATUS:%{http_code}\n' https://trytoolscout.org/analytics/api/google/acquisition || true)"
+          printf '%s\n' "$body" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const m=s.match(/\\nHTTP_STATUS:(\\d+)\\n?$/);const code=m?Number(m[1]):0;const raw=m?s.slice(0,m.index):s;let j={};try{j=JSON.parse(raw)}catch{};console.log(JSON.stringify({http:code,status:j.status||null,reason:j.reason||null,authMode:j.authMode||null,connectedEmail:j.connectedEmail||null,propertyId:j.propertyId||null,oauth:j.oauth?{configured:j.oauth.configured,connected:j.oauth.connected,ownerEmail:j.oauth.ownerEmail,propertyId:j.oauth.propertyId,lastRefreshAt:j.oauth.lastRefreshAt,lastError:j.oauth.lastError,analyticsScopeGranted:j.oauth.analyticsScopeGranted}:null,fetchedAt:j.fetchedAt||null},null,2))})"
