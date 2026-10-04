@@ -69,3 +69,12 @@ test('acceptance search registry includes editorial content execution',()=>{
   assert.match(contracts,/content_amplification:'content_issue'/);
   assert.match(workflow,/'content_amplification','distribution_amplification','backlink_reference_outreach'/);
 });
+
+
+test('business critical status remains visible without masquerading as structural failure',()=>{
+  const workflow=read('.github/workflows/toolscout-v2-production-acceptance.yml');
+  assert.match(workflow,/const hard=Array\.isArray\(r\.hardFailures\)\?r\.hardFailures:\[\]/);
+  assert.match(workflow,/if\(r\.ok!==true\|\|hard\.length>0\)/);
+  assert.doesNotMatch(workflow,/r\.operationalStatus==='critical'/);
+  assert.match(workflow,/operationalStatus:r\.operationalStatus\|\|null/);
+});
