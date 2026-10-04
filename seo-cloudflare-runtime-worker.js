@@ -97,8 +97,8 @@ function shortenTitle(html,pathname){
   return html.replace(/<title>[\s\S]*?<\/title>/i,`<title>${esc(next)}</title>`);
 }
 function clickCaptureDescription(html,pathname){
-  const h1=strip(html.match(/<h1\\b[^>]*>([\\s\\S]*?)<\\/h1>/i)?.[1]||'');
-  const paragraphs=[...html.matchAll(/<p\\b[^>]*>([\\s\\S]*?)<\\/p>/gi)]
+  const h1=strip(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
+  const paragraphs=[...html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
     .map(x=>strip(x[1]))
     .filter(x=>x.length>=70&&!/cookie|privacy|copyright/i.test(x));
   let value=paragraphs[0]||(
@@ -106,17 +106,17 @@ function clickCaptureDescription(html,pathname){
       ? `Independent ToolScout analysis of ${h1} with practical fit criteria, tradeoffs, pricing context and alternatives.`
       : 'Independent ToolScout software analysis with practical fit criteria, tradeoffs, pricing context and alternatives.'
   );
-  value=value.replace(/\\s+/g,' ').trim();
+  value=value.replace(/\s+/g,' ').trim();
   if(value.length<70&&h1)value=(value+' Compare the shortlist on real workflow fit before choosing.').trim();
-  if(value.length>155)value=value.slice(0,152).replace(/\\s+\\S*$/,'').trim()+'...';
+  if(value.length>155)value=value.slice(0,152).replace(/\s+\S*$/,'').trim()+'...';
   return value;
 }
 function improveClickCapture(html,pathname){
   const description=clickCaptureDescription(html,pathname);
   if(!description)return html;
   const tag=`<meta name="description" content="${esc(description)}" data-toolscout-click-capture="1">`;
-  const re=/<meta\\b[^>]*name=["']description["'][^>]*>/i;
-  return re.test(html)?html.replace(re,tag):html.replace(/<\\/head>/i,tag+'</head>');
+  const re=/<meta\b[^>]*name=["']description["'][^>]*>/i;
+  return re.test(html)?html.replace(re,tag):html.replace(/<\/head>/i,tag+'</head>');
 }
 function ensureCanonical(html,pathname,cfg){
   const slug=pathname.replace(/^\//,'');
