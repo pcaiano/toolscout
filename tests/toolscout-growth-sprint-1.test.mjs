@@ -23,7 +23,7 @@ test('Growth Brain consumes the sprint asset and materializes explicit sprint se
   assert.match(runtime,/for\(const target of sprintTargets\)/);
   assert.match(runtime,/sprint_id:growthSprint\?\.id\|\|HUMAN_ACQUISITION_SPRINT\.id/);
   assert.match(runtime,/allocationPct:\{existingDemandSearch:65,authorityVendorNetwork:30,aiAeoDiscovery:5,growthRnd:0\}/);
-  assert.doesNotMatch(runtime,/HUMAN_ACQUISITION_GSC_TARGETS=Object\.freeze\(\[\]\)/);
+  assert.equal((runtime.match(/HUMAN_ACQUISITION_GSC_TARGETS/g)||[]).length,0);
 });
 
 test('Authority truth keeps contradictory providers separate instead of inventing a merged authority score',()=>{
