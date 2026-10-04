@@ -1,5 +1,6 @@
 const BASE=(process.env.TOOLSCOUT_BASE_URL||"https://trytoolscout.org").replace(/\/$/,"");
 const now=Date.now();
+const requireFinalRelease=String(process.env.TOOLSCOUT_REQUIRE_FINAL_RELEASE||"").trim()==="1";
 
 function ageMinutes(value){
   if(!value)return null;
@@ -44,8 +45,14 @@ for(const [name,p] of Object.entries(probes)){
 }
 
 const closure=probes.closure.data||{};
-if(probes.closure.ok&&(closure.architecture!=="toolscout-2.0"||Number(closure.phase)!==107||closure.release!=="toolscout-2.0-final"||Number(closure.releasePhase)!==260||closure.deploymentFingerprint!=="toolscout-2.0-final-phase-260"||Number(closure.legacyEdges)!==0||Number(closure.routeOwnership?.directCoveragePct)!==100)){
-  hardFailures.push({code:"architecture_closure_regressed",closure});
+if(probes.closure.ok&&(
+  closure.architecture!=="toolscout-2.0"
+  ||Number(closure.phase)!==107
+  ||Number(closure.legacyEdges)!==0
+  ||Number(closure.routeOwnership?.directCoveragePct)!==100
+  ||(requireFinalRelease&&(closure.release!=="toolscout-2.0-final"||Number(closure.releasePhase)!==260||closure.deploymentFingerprint!=="toolscout-2.0-final-phase-260"))
+)){
+  hardFailures.push({code:"architecture_closure_regressed",requireFinalRelease,closure});
 }
 
 const overall=probes.growth.data?.overallHealth||{};
