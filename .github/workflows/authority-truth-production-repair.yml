@@ -1,0 +1,75 @@
+name: ToolScout Machine Authority Truth Production Repair
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-machine-authority-truth-production-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: contains(github.event.head_commit.message, 'ToolScout Authority Truth - production deploy')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate machine-only authority truth
+        env:
+          TOOLSCOUT_V2_BASE_REF: a4bfbd36f0f6d049e3bf13dd6272f48276ada07e
+        run: |
+          set -euo pipefail
+          node --check command-center-business-truth-runtime.js
+          node --check command-center-simplified-view.js
+          node --test tests/toolscout-growth-sprint-1.test.mjs tests/toolscout-v2-command-center-final-truth.test.mjs
+          node scripts/validate-v2-preservation.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('data/authority-truth.json','utf8'));
+          if(a?.policy?.mode!=='machine_observed_only') throw new Error('authority_truth_not_machine_only');
+          if(a?.sources?.ahrefs?.metrics?.domainRating!==null) throw new Error('manual_ahrefs_value_present');
+          if(Number(a?.sources?.seRanking?.metrics?.backlinks)!==95) throw new Error('se_ranking_machine_snapshot_missing');
+          NODE
+
+      - name: Wrangler dry-run
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-machine-authority-truth
+
+      - name: Deploy machine-only authority truth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify ToolScout 2.0 preservation
+        run: node scripts/verify-v2-live-smoke.mjs
+
+      - name: Verify public machine-only authority truth
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error https://trytoolscout.org/data/authority-truth.json -o authority-truth-live.json
+          node - <<'NODE'
+          const x=require('./authority-truth-live.json');
+          if(x?.policy?.mode!=='machine_observed_only') throw new Error('live_authority_truth_not_machine_only');
+          if(x?.sources?.ahrefs?.status!=='unavailable') throw new Error('ahrefs_status_not_unavailable');
+          if(x?.sources?.ahrefs?.metrics?.domainRating!==null) throw new Error('live_manual_ahrefs_value_present');
+          if(Number(x?.sources?.seRanking?.metrics?.backlinks)!==95) throw new Error('live_se_ranking_backlinks_missing');
+          if(Number(x?.sources?.seRanking?.metrics?.referringDomains)!==29) throw new Error('live_se_ranking_refdomains_missing');
+          console.log(JSON.stringify({
+            mode:x.policy.mode,
+            ahrefs:x.sources.ahrefs.status,
+            seRanking:x.sources.seRanking.metrics
+          }));
+          NODE
