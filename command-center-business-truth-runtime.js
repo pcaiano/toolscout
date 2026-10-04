@@ -103,7 +103,10 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
   const gscWindow=gscReality?.searchPerformance?.window28d||gscSignals?.siteTotals||{};
   const gscEvidence=Boolean(gscDailyTrend?.generatedAt||gscReality?.generatedAt||gscSignals?.generatedAt);
   const runtimeOk=gscHealth?.ok===true;
-  const searchStatus=gscEvidence?(gscHealth?.ok===false?'stale':'connected'):'unavailable';
+  const gscEvidenceAt=gscSignals?.generatedAt||gscReality?.generatedAt||gscDailyTrend?.generatedAt||null;
+  const gscEvidenceMs=Date.parse(String(gscEvidenceAt||''));
+  const gscEvidenceAgeHours=Number.isFinite(gscEvidenceMs)?Math.max(0,(Date.now()-gscEvidenceMs)/3600000):null;
+  const searchStatus=gscEvidence?(gscEvidenceAgeHours!=null&&gscEvidenceAgeHours<=6?'connected':'stale'):'unavailable';
 
   const seObservedAt=seRanking?.observedAt||null;
   const seObservedMs=Date.parse(String(seObservedAt||''));
@@ -207,10 +210,20 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
     search:{
       status:searchStatus,
       available:gscEvidence,
-      generatedAt:gscSignals?.generatedAt||gscReality?.generatedAt||null,
+      generatedAt:gscEvidenceAt,
+      evidenceAgeHours:gscEvidenceAgeHours,
       runtimeGeneratedAt:gscHealth?.generatedAt||null,
       runtimeOk:gscEvidence?(gscHealth?.ok===false?false:(gscHealth?.ok===true?true:null)):false,
       runtimeStatus:gscEvidence?(gscHealth?.status||(runtimeOk?'connected':'asset_fallback')):'unavailable',
+      liveWindow:gscEvidence?{
+        startDate:gscWindow.startDate||null,
+        endDate:gscWindow.endDate||null,
+        clicks:truthMaybeNum(gscWindow.clicks),
+        impressions:truthMaybeNum(gscWindow.impressions),
+        ctr:truthMaybeNum(gscWindow.ctr),
+        position:truthMaybeNum(gscWindow.position)
+      }:null,
+      finalizedWindow:gscEvidence?finalized:null,
       impressions:gscEvidence?(daily28.length?finalized.impressions:truthNum(gscWindow.impressions)):null,
       clicks:gscEvidence?(daily28.length?finalized.clicks:truthNum(gscWindow.clicks)):null,
       observedPages:gscEvidence?truthMaybeNum(gscReality?.searchPerformance?.observedPages??gscSignals?.pageCount):null,
@@ -317,7 +330,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       FROM growth_action_events
       WHERE created_at>=datetime('now','-12 hours')
       ORDER BY updated_at DESC,created_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
-    env.DB.prepare(`SELECT task_id,opportunity_key,subject_type,subject_key,action,executor,engine,status,created_at,claimed_at,attempted_at,updated_at
+    env.DB.prepare(`SELECT task_id,opportunity_key,subject_type,subject_key,action,executor,engine,status,created_at,claimed_at,attempted_at,updated_at,last_result
       FROM growth_execution_contract
       WHERE updated_at>=datetime('now','-12 hours') AND status IN ('pending','claimed','attempted','verified','human_required')
       ORDER BY updated_at DESC LIMIT 20`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -529,8 +542,12 @@ async function buildCommandCenterBusinessTruth(request,env){
   const gsc=parse(gscSignals?.payload_json,{});
   const reality=parse(gscReality?.payload_json,{});
   const gh=parse(gscHealth?.payload_json,{});
+  const gscEvidenceAt=gscSignals?.source_generated_at||gsc?.generatedAt||gscReality?.source_generated_at||reality?.generatedAt||gscDailyTrend?.generatedAt||null;
+  const gscEvidenceMs=Date.parse(String(gscEvidenceAt||''));
+  const gscEvidenceAgeHours=Number.isFinite(gscEvidenceMs)?Math.max(0,(Date.now()-gscEvidenceMs)/3600000):null;
   const gscEvidenceAvailable=Boolean(gscSignals?.payload_json||gscReality?.payload_json||gscDailyTrend?.generatedAt);
-  const gscStatus=gscEvidenceAvailable?(gh?.ok===false?'stale':'connected'):'unavailable';
+  const gscEvidenceFresh=gscEvidenceAvailable&&gscEvidenceAgeHours!=null&&gscEvidenceAgeHours<=6;
+  const gscStatus=gscEvidenceAvailable?(gscEvidenceFresh?'connected':'stale'):'unavailable';
   const w=reality?.searchPerformance?.window28d||gsc?.siteTotals||{};
   const idx=reality?.indexHealth||{};
   const sitemap=reality?.sitemaps||{};
@@ -590,6 +607,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       updatedAt:x.updated_at||null,
       claimedAt:x.claimed_at||null,
       attemptedAt:x.attempted_at||null,
+      lastResult:x.last_result||null,
       engine:x.engine||x.executor||'growth',
       channel:x.action||x.executor||'execution',
       status:x.status,
@@ -891,10 +909,20 @@ async function buildCommandCenterBusinessTruth(request,env){
     search:{
       status:gscStatus,
       available:gscEvidenceAvailable,
-      generatedAt:gscSignals?.source_generated_at||gsc?.generatedAt||null,
+      generatedAt:gscEvidenceAt,
+      evidenceAgeHours:gscEvidenceAgeHours,
       runtimeGeneratedAt:gh?.generatedAt||gscHealth?.source_generated_at||null,
       runtimeOk:gscEvidenceAvailable?gh?.ok===true:false,
       runtimeStatus:gscEvidenceAvailable?(gh?.status||null):'unavailable',
+      liveWindow:gscEvidenceAvailable?{
+        startDate:w.startDate||null,
+        endDate:w.endDate||null,
+        clicks:truthMaybeNum(w.clicks),
+        impressions:truthMaybeNum(w.impressions),
+        ctr:truthMaybeNum(w.ctr),
+        position:truthMaybeNum(w.position)
+      }:null,
+      finalizedWindow:gscEvidenceAvailable?finalizedWindow:null,
       impressions:gscEvidenceAvailable?(daily28.length?truthNum(finalizedWindow.impressions):truthNum(w.impressions??gh?.impressions)):null,
       clicks:gscEvidenceAvailable?(daily28.length?truthNum(finalizedWindow.clicks):truthNum(w.clicks??gh?.clicks)):null,
       observedPages:gscEvidenceAvailable?truthMaybeNum(gsc?.searchPerformance?.observedPages??gh?.observedPages):null,
