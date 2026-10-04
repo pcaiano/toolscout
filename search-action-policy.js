@@ -58,3 +58,29 @@ export function classifySearchPageAction(row={}){
     impressions,clicks,ctr,position
   };
 }
+
+
+const INTENT_EDITORIAL_EXECUTION_LANES=new Set([
+  'seo-aeo-snippet',
+  'seo-striking-distance',
+  'seo-authority-depth',
+  'commercial-intent'
+]);
+
+export function executableIntentSearchActions(op={}){
+  const lane=String(op?.lane||'measure');
+  const planningActions=Array.isArray(op?.executionPlan)
+    ?[...new Set(op.executionPlan.map(x=>String(x||'').trim()).filter(Boolean))]
+    :[];
+  const actions=['search_measurement'];
+  const editorialExecution=INTENT_EDITORIAL_EXECUTION_LANES.has(lane);
+  if(editorialExecution)actions.unshift('content_amplification');
+  return{
+    actions,
+    planningActions,
+    planningOnlyActions:planningActions,
+    editorialExecution,
+    contractScope:'intent_level_executable_actions_only',
+    planningScope:'signal_only_not_execution_contract'
+  };
+}
