@@ -217,12 +217,27 @@ function gscProgress(){
    losses.map(x=>row(x.page,(Number(x.impressionsDelta)>0?'+':'')+n(x.impressionsDelta)+' impressions','Now '+n(x.impressions)+' vs '+n(x.previousImpressions)+' prior week · position '+(x.position==null?'Unavailable':Number(x.position).toFixed(1)))).join('')+
    gains.map(x=>row(x.page,'+'+n(x.impressionsDelta)+' impressions','Now '+n(x.impressions)+' vs '+n(x.previousImpressions)+' prior week · position '+(x.position==null?'Unavailable':Number(x.position).toFixed(1)))).join('')+
    '</div>':'';
+ const sx=g.execution||{},sxAvailable=sx.available===true;
+ const actionOrder=['repair_indexing','repair_canonical_alignment','deepen_existing_search_asset','improve_click_capture','strengthen_internal_links','protect_current_ranking','observe_low_sample_ranking'];
+ const actionEntries=sxAvailable&&sx.actions?Object.entries(sx.actions).sort((a,b)=>{const ai=actionOrder.indexOf(a[0]),bi=actionOrder.indexOf(b[0]);return (ai<0?99:ai)-(bi<0?99:bi)||a[0].localeCompare(b[0])}):[];
+ const executionRows=actionEntries.slice(0,8).map(([action,value])=>{const st=value?.states||{},inFlight=Number(st.claimed||0)+Number(st.attempted||0);return row(human(action),n(st.verified||0)+' verified',n(st.pending||0)+' ready · '+n(inFlight)+' in flight · '+n(st.deferred||0)+' deferred · '+n(st.stalled||0)+' stalled')}).join('');
+ const executionBlock=!sxAvailable
+   ?'<div class="section"><div class="sectionTitle">Search execution</div><div class="empty">SEO execution truth unavailable. Contract counts are not being converted to zero.</div></div>'
+   :'<div class="section"><div class="sectionTitle">Search execution · active demand contracts</div><div class="progressStats">'+
+      '<div class="progressStat"><small>Ready</small><b>'+n(sx.ready)+'</b></div>'+
+      '<div class="progressStat"><small>In flight</small><b>'+n(sx.inFlight)+'</b></div>'+
+      '<div class="progressStat"><small>Deferred</small><b>'+n(sx.deferred)+'</b></div>'+
+      '<div class="progressStat"><small>Verified</small><b>'+n(sx.verified)+'</b></div>'+
+      '<div class="progressStat"><small>Stalled</small><b>'+n(sx.stalled)+'</b></div>'+
+    '</div>'+(executionRows?'<div class="sectionTitle">By intervention</div>'+executionRows:'<div class="empty">No active search execution contracts.</div>')+
+    '<div class="sourceLine">Verified means the current active search contract has task-specific execution proof. Deferred work is preserved for later admission; stalled work remains visible until recovered or proved.</div></div>';
  document.getElementById('gscProgressMeta').textContent=(g.status==='stale'?'Stale · ':'')+(g.verifiedThroughDate?'Finalized through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
  document.getElementById('gscProgressBody').innerHTML=
   '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Final 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>7d avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
   '<div class="chartBox"><div class="sectionTitle">Google impressions</div>'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
   '<div class="chartBox"><div class="sectionTitle">Average position - lower is better</div>'+seriesChart(rows,[{key:'position',label:'Average position',cls:'warn'}],{zeroBaseline:false,invert:true,axisDecimals:1})+'</div>'+
   moverRows+
+  executionBlock+
   '<div class="sourceLine">Only Search Console days marked final by Google are plotted and used for the 28-day totals and 7-day comparison. Preliminary fresh-data days are withheld until finalized so incomplete ingestion cannot look like a traffic or ranking collapse. Average position is inverted so ranking improvement moves upward.</div>';
 }
 
