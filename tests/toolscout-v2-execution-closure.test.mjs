@@ -22,7 +22,7 @@ test('human gates are closed only after their opportunity is terminal or superse
   const end=autonomous.indexOf('async function reconcileOrphanHumanStates',start);
   assert.ok(start>=0&&end>start);
   const terminalReconcile=autonomous.slice(start,end);
-  assert.match(terminalReconcile,/g\.status='open'/);
+  assert.match(terminalReconcile,/g\.status IN \('open','verification_pending'\)/);
   assert.match(terminalReconcile,/o\.status IN \('submitted','pending_review','scheduled','verified','live','policy_blocked','rejected','skipped','unavailable_free'\)/);
   assert.match(terminalReconcile,/const achieved=\['verified','live'\]\.includes\(s\)/);
   assert.match(terminalReconcile,/const status=achieved\?'resolved':'cancelled'/);
