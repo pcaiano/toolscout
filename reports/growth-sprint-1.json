@@ -1,0 +1,135 @@
+{
+  "id": "growth-sprint-1-search-winners-2026-10-04",
+  "startedAt": "2026-10-04T11:32:46Z",
+  "northStar": "strict_verified_human_sessions",
+  "baseline": {
+    "gscGeneratedAt": "2026-10-04T10:18:29.329Z",
+    "gsc28d": {
+      "clicks": 7,
+      "impressions": 5950,
+      "ctrPct": 0.1176
+    },
+    "authority": {
+      "ahrefsDomainRatingDirect": 2.3,
+      "seRankingBacklinks": 95,
+      "seRankingReferringDomains": 29
+    }
+  },
+  "allocationPct": {
+    "existingDemandSearch": 65,
+    "authorityVendorNetwork": 30,
+    "aiAeoDiscovery": 5,
+    "growthRnd": 0
+  },
+  "targets": [
+    {
+      "key": "best-project-management-tools",
+      "cluster": "project-management",
+      "path": "/best-project-management-tools",
+      "title": "Best project management tools",
+      "impressions": 135,
+      "position": 42.7481,
+      "priority": 100
+    },
+    {
+      "key": "tally",
+      "cluster": "tool-profile",
+      "path": "/tools/tally",
+      "title": "Tally review",
+      "impressions": 91,
+      "position": 39.1648,
+      "priority": 99,
+      "tool_slug": "tally"
+    },
+    {
+      "key": "semrush",
+      "cluster": "tool-profile",
+      "path": "/tools/semrush",
+      "title": "Semrush review",
+      "impressions": 298,
+      "position": 55.8154,
+      "priority": 98,
+      "tool_slug": "semrush"
+    },
+    {
+      "key": "best-social-media-management-tools",
+      "cluster": "social-media",
+      "path": "/best-social-media-management-tools",
+      "title": "Best social media management tools",
+      "impressions": 172,
+      "position": 63.0523,
+      "priority": 96
+    },
+    {
+      "key": "klaviyo",
+      "cluster": "tool-profile",
+      "path": "/tools/klaviyo",
+      "title": "Klaviyo review",
+      "impressions": 160,
+      "position": 62.8188,
+      "priority": 95,
+      "tool_slug": "klaviyo"
+    },
+    {
+      "key": "moz-pro",
+      "cluster": "tool-profile",
+      "path": "/tools/moz-pro",
+      "title": "Moz Pro review",
+      "impressions": 163,
+      "position": 68.7853,
+      "priority": 94,
+      "tool_slug": "moz-pro"
+    },
+    {
+      "key": "airtable",
+      "cluster": "tool-profile",
+      "path": "/tools/airtable",
+      "title": "Airtable review",
+      "impressions": 453,
+      "position": 73.8985,
+      "priority": 93,
+      "tool_slug": "airtable"
+    },
+    {
+      "key": "best-seo-tools-for-agencies",
+      "cluster": "seo-agencies",
+      "path": "/best-seo-tools-for-agencies",
+      "title": "Best SEO tools for agencies",
+      "impressions": 1869,
+      "position": 80.2269,
+      "priority": 92
+    },
+    {
+      "key": "best-seo-keyword-research-tools",
+      "cluster": "seo-keyword-research",
+      "path": "/best-seo-keyword-research-tools",
+      "title": "Best SEO keyword research tools",
+      "impressions": 265,
+      "position": 76.4717,
+      "priority": 91
+    },
+    {
+      "key": "best-crm-for-small-business",
+      "cluster": "crm",
+      "path": "/best-crm-for-small-business",
+      "title": "Best CRM for small business",
+      "impressions": 268,
+      "position": 77.5821,
+      "priority": 90
+    },
+    {
+      "key": "best-funnel-builder",
+      "cluster": "funnels",
+      "path": "/best-funnel-builder",
+      "title": "Best funnel builder",
+      "impressions": 160,
+      "position": 75.4938,
+      "priority": 89
+    }
+  ],
+  "checkpoints": {
+    "search": "Track Google clicks, impressions, position and strict human sessions per target.",
+    "authority": "Prioritize new independent relevant referring domains and page-level links to sprint targets; repeat-domain volume is secondary.",
+    "monetization": "Track outbound and monetized outbound from sprint target sessions without changing editorial ranking."
+  }
+}
