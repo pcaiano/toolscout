@@ -1,4 +1,5 @@
 name: ToolScout Command Center Diagnostic
+# permission recheck
 
 on:
   pull_request:
