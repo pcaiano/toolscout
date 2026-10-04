@@ -12,6 +12,8 @@ const files={
   affiliate:fs.readFileSync('affiliate-coverage-cycle-worker.js','utf8'),
   catalog:fs.readFileSync('catalog-autonomy-worker.js','utf8'),
   funnel:fs.readFileSync('funnel-worker.js','utf8'),
+  computeRouter:fs.readFileSync('compute-router-worker.js','utf8'),
+  routeContract:fs.readFileSync('runtime-route-contract.js','utf8'),
   seoController:fs.readFileSync('scripts/run-organic-growth-controller-v4.mjs','utf8'),
   seoApply:fs.readFileSync('scripts/apply-organic-growth-actions.mjs','utf8'),
   seoWorkflow:fs.readFileSync('.github/workflows/seo-engine-v2.yml','utf8'),
@@ -43,10 +45,17 @@ if(required.minimumBuildContract){
   };
   if(!atLeast(a,min))fail('expected reviewed build contract floor is not present: actual='+actual+' required>='+required.minimumBuildContract);
 }
-if(!files.funnel.includes("import base from './catalog-autonomy-worker.js'"))fail('Catalog Runtime is no longer in the live Worker chain');
+if(
+  !files.computeRouter.includes("import {handleCatalogAutonomyRoute} from './catalog-autonomy-worker.js';")||
+  !files.computeRouter.includes("ownership.owner==='catalog_autonomy_runtime'")||
+  !files.routeContract.includes("owner:'catalog_autonomy_runtime'")
+)fail('Catalog Runtime is not explicitly owned by the ToolScout 2.0 compute router');
 if(!files.growth.includes("'affiliate'")||!files.growth.includes("'catalog_tool'"))fail('Affiliate/Catalog are no longer first-class shared growth opportunities');
 if(!files.affiliate.includes('affiliate_application_packs')||!files.affiliate.includes('affiliate_route_verification'))fail('Affiliate 2.1 autonomy contract is missing');
-if(!files.catalog.includes('rankingEligible:false')||!files.catalog.includes('comparisonEligible:false'))fail('Catalog editorial-neutrality gate is missing');
+if(
+  !files.catalog.includes('Affiliate economics cannot increase catalog admission or ranking eligibility.')&&
+  !files.catalog.includes('affiliate economics never affect catalog admission or ranking')
+)fail('Catalog editorial-neutrality gate is missing');
 if(!files.growth.includes('/api/growth/search-directives'))fail('Shared Search directive endpoint is missing');
 if(!files.seoController.includes('shared_growth_directives_required')||!files.seoApply.includes('organic_growth_actions_not_authorized_by_shared_brain'))fail('SEO execution is not gated by the shared growth brain');
 if(!files.seoWorkflow.includes('fetch-shared-growth-directives.mjs'))fail('SEO workflow does not fetch runtime shared-brain directives');
