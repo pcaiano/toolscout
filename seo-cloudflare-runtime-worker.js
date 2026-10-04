@@ -97,8 +97,10 @@ function shortenTitle(html,pathname){
   return html.replace(/<title>[\s\S]*?<\/title>/i,`<title>${esc(next)}</title>`);
 }
 function clickCaptureDescription(html,pathname){
-  const h1=strip(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
-  const paragraphs=[...html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
+  const h1Pattern=new RegExp('<h1\\b[^>]*>([\\s\\S]*?)</h1>','i');
+  const paragraphPattern=new RegExp('<p\\b[^>]*>([\\s\\S]*?)</p>','gi');
+  const h1=strip(html.match(h1Pattern)?.[1]||'');
+  const paragraphs=[...html.matchAll(paragraphPattern)]
     .map(x=>strip(x[1]))
     .filter(x=>x.length>=70&&!/cookie|privacy|copyright/i.test(x));
   let value=paragraphs[0]||(
@@ -115,8 +117,8 @@ function improveClickCapture(html,pathname){
   const description=clickCaptureDescription(html,pathname);
   if(!description)return html;
   const tag=`<meta name="description" content="${esc(description)}" data-toolscout-click-capture="1">`;
-  const re=/<meta\b[^>]*name=["']description["'][^>]*>/i;
-  return re.test(html)?html.replace(re,tag):html.replace(/<\/head>/i,tag+'</head>');
+  const descriptionPattern=new RegExp('<meta\\b[^>]*name=["\\']description["\\'][^>]*>','i');
+  return descriptionPattern.test(html)?html.replace(descriptionPattern,tag):html.replace('</head>',tag+'</head>');
 }
 function ensureCanonical(html,pathname,cfg){
   const slug=pathname.replace(/^\//,'');
