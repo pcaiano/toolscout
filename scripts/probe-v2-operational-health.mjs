@@ -44,7 +44,7 @@ for(const [name,p] of Object.entries(probes)){
 }
 
 const closure=probes.closure.data||{};
-if(probes.closure.ok&&(closure.architecture!=="toolscout-2.0"||Number(closure.phase)!==107||Number(closure.legacyEdges)!==0||Number(closure.routeOwnership?.directCoveragePct)!==100)){
+if(probes.closure.ok&&(closure.architecture!=="toolscout-2.0"||Number(closure.phase)!==107||closure.release!=="toolscout-2.0-final"||Number(closure.releasePhase)!==260||closure.deploymentFingerprint!=="toolscout-2.0-final-phase-260"||Number(closure.legacyEdges)!==0||Number(closure.routeOwnership?.directCoveragePct)!==100)){
   hardFailures.push({code:"architecture_closure_regressed",closure});
 }
 
@@ -89,7 +89,7 @@ const report={
   ok:hardFailures.length===0,
   operationalStatus:hardFailures.length?"invalid":alerts.some(x=>x.severity==="critical")?"critical":alerts.length?"underpowered":"operational",
   checkedAt:new Date().toISOString(),
-  architecture:{phase:closure.phase||null,legacyEdges:closure.legacyEdges??null,directCoveragePct:closure.routeOwnership?.directCoveragePct??null,fingerprint:closure.deploymentFingerprint||null},
+  architecture:{phase:closure.phase||null,release:closure.release||null,releasePhase:closure.releasePhase||null,legacyEdges:closure.legacyEdges??null,directCoveragePct:closure.routeOwnership?.directCoveragePct??null,fingerprint:closure.deploymentFingerprint||null},
   growth:{status:overall.status||null,strictHumans24h:Number(overall.strictHumans24h||0),strictHumans7d:Number(overall.strictHumans7d||0),externalExecutions24h:Number(overall.externalExecutions24h||0),externalExecutions7d:Number(overall.externalExecutions7d||0),authorityStatus:overall.authorityStatus||null,engines},
   authority:{
     status:authority.status||null,
