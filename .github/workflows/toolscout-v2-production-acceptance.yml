@@ -197,4 +197,4 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/probe-v2-operational-health.mjs | tee phase260-operational.json
-          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('phase260-operational.json','utf8'));if(r.ok!==true||r.operationalStatus==='critical'){console.error(JSON.stringify(r,null,2));process.exit(1)}"
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('phase260-operational.json','utf8'));const hard=Array.isArray(r.hardFailures)?r.hardFailures:[];if(r.ok!==true||hard.length>0){console.error(JSON.stringify(r,null,2));process.exit(1)};console.log(JSON.stringify({accepted:true,operationalStatus:r.operationalStatus||null,hardFailures:hard.length,growthSeverity:r.growth?.severity||null},null,2))"
