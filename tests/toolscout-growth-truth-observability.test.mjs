@@ -28,7 +28,8 @@ test('canonical external authority snapshot reflects the latest SE Ranking obser
 test('growth truth production repair proves GSC, authority and final release after deployment',()=>{
   const workflow=read('.github/workflows/growth-truth-production-repair.yml');
   const probe=read('scripts/probe-growth-truth-live.mjs');
-  assert.match(workflow,/ToolScout Growth Truth - production repair deploy/);
+  assert.match(workflow,/name: ToolScout Growth Truth Production Repair/);
+  assert.match(workflow,/workflow_dispatch:/);
   assert.match(workflow,/wrangler deploy --config wrangler\.toml --latest/);
   assert.match(workflow,/verify-v2-live-smoke\.mjs/);
   assert.match(workflow,/probe-growth-truth-live\.mjs/);

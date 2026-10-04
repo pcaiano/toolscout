@@ -1,9 +1,7 @@
 name: ToolScout Growth Truth Production Repair
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,7 +12,6 @@ concurrency:
 
 jobs:
   repair:
-    if: contains(github.event.head_commit.message, 'ToolScout Growth Truth - production repair deploy')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current main

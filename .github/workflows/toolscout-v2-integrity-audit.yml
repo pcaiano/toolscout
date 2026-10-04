@@ -153,4 +153,23 @@ jobs:
             (SELECT COUNT(DISTINCT surface_slug) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1) internal_verified_authority_surfaces;
           " | tee integrity.json
 
+          echo "Missing execution contract detail"
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          WITH active_actions AS (
+            SELECT g.opportunity_key,g.subject_type,g.subject_key,j.value action,g.updated_at
+            FROM growth_opportunity_state g,json_each(g.action_json) j
+            WHERE g.status='active'
+              AND j.value NOT IN ('distribution_measurement','search_measurement')
+          )
+          SELECT a.opportunity_key,a.subject_type,a.subject_key,a.action,a.updated_at
+          FROM active_actions a
+          LEFT JOIN growth_execution_contract c
+            ON c.source_kind='opportunity'
+           AND c.source_id=a.opportunity_key
+           AND c.action=a.action
+          WHERE c.task_id IS NULL
+          ORDER BY a.updated_at DESC,a.opportunity_key,a.action
+          LIMIT 30;
+          "
+
           node scripts/evaluate-v2-integrity-audit.mjs integrity.json
