@@ -1,26 +1,6 @@
 name: ToolScout SEO Engine v2
 
 on:
-  push:
-    branches:
-      - actions-readmission-seo-20261004
-    paths:
-      - '.github/workflows/seo-engine-v2.yml'
-      - 'data/github-actions-resume-policy.json'
-      - 'scripts/validate-actions-resume-safety.mjs'
-      - 'scripts/validate-growth-spend-policy.mjs'
-      - 'tests/growth-spend-policy.test.mjs'
-      - 'compare.html'
-      - 'scripts/generate-comparisons.mjs'
-      - 'scripts/generate-competitive-gap-profiles.mjs'
-      - 'tests/comparison-editorial-contract.test.mjs'
-      - 'tests/competitive-gap-catalog-parity.test.mjs'
-      - 'scripts/validate-seo-pages.mjs'
-      - 'tests/seo-extensionless-tool-link.test.mjs'
-      - 'scripts/validate-editorial-trust.mjs'
-      - 'tests/editorial-trust-extensionless-link.test.mjs'
-      - 'scripts/validate-public-surface.mjs'
-      - 'tests/unbounce-partnerstack-tracking.test.mjs'
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
