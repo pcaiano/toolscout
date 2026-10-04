@@ -30,12 +30,15 @@ test('GA4 exposes a country list and no map is required',()=>{
   assert.match(view,/countries\.map\(x=>row\(x\.country/);
 });
 
-test('GSC and SE Ranking stale or absent sources stay explicit',()=>{
-  assert.match(truth,/const gscStatus=gscEvidenceAvailable\?\(gh\?\.ok===false\?'stale':'connected'\):'unavailable'/);
-  assert.match(truth,/impressions:gscEvidenceAvailable\?/);
-  assert.match(truth,/clicks:gscEvidenceAvailable\?/);
+test('GSC freshness uses evidence age and keeps final data explicit',()=>{
+  assert.match(truth,/gscEvidenceAgeHours/);
+  assert.match(truth,/gscEvidenceFresh/);
+  assert.match(truth,/liveWindow:gscEvidenceAvailable/);
+  assert.match(truth,/finalizedWindow:gscEvidenceAvailable/);
   assert.match(truth,/seRankingReferringDomains:seRankingFresh\?seRankingReferringDomains:null/);
   assert.match(view,/Search Console evidence unavailable/);
+  assert.match(view,/current through/);
+  assert.match(view,/final through/);
 });
 
 test('canonical server outbound ledger excludes owner-classified sessions without deleting history',()=>{
