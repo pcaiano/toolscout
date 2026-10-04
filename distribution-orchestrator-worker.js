@@ -15,6 +15,7 @@ import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 import {senderCapacitySnapshot} from './sender-capacity-policy.js';
+import {classifySearchPageAction} from './search-action-policy.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const AUTONOMOUS_REALLOCATED_BATCH_LIMIT=4;
@@ -864,18 +865,11 @@ async function coordinateGrowthOpportunities(env){
     const key=row.pathname==='/'?'home':row.pathname;
     const concentrationRank=authorityConcentrationRank.get(row.pathname)||null;
     const concentrationTarget=Boolean(concentrationRank);
-    const actions=['search_measurement'];
-    if(row.position>20&&row.impressions>=20){
-      actions.unshift('content_amplification','deepen_existing_search_asset');
-    }
-    else if(row.position>10&&row.position<=20&&row.impressions>=10){
-      actions.unshift('content_amplification','strengthen_internal_links');
-    }
-    else if(row.position>0&&row.position<=10&&row.impressions>=10)actions.unshift('protect_current_ranking','improve_click_capture');
-    else if(row.position>0&&row.position<=20)actions.unshift('observe_low_sample_ranking');
+    const searchDecision=classifySearchPageAction(row);
+    const actions=searchDecision.actions;
     const signals={
-      lane:row.impressions<10&&row.position>0&&row.position<=20?'seo_low_sample_observation':(row.position>20?'seo_authority_depth':(row.position>10?'seo_striking_distance':(row.position>0?'seo_first_page':'seo_measure'))),
-      action:row.impressions<10&&row.position>0&&row.position<=20?'measure_low_sample':(row.position>20?'deepen_existing':(row.position>10?'strengthen_existing':(row.position>0?'protect_and_improve_ctr':'measure'))),
+      lane:searchDecision.lane,
+      action:searchDecision.action,
       evidence_confidence:row.evidenceConfidence,
       source:'Google Search Console Search Analytics',
       gsc_snapshot_generated_at:gscSignals?.generatedAt||null,
@@ -885,6 +879,10 @@ async function coordinateGrowthOpportunities(env){
       clicks:row.clicks,
       ctr:row.ctr,
       position:row.position,
+      click_capture_eligible:searchDecision.clickCaptureEligible,
+      click_capture_ctr_floor_pct:searchDecision.clickCaptureCtrFloorPct,
+      click_capture_min_impressions:searchDecision.clickCaptureMinImpressions,
+      click_capture_sample_ready:searchDecision.sampleForClickCapture,
       top_queries:row.topQueries,
       asset_path:row.pathname,
       asset_url:'https://trytoolscout.org'+row.pathname,
