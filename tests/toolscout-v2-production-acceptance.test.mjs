@@ -61,3 +61,11 @@ test('phase260 unsupported search cleanup drains only non-terminal non-executabl
     'distribution_amplification','backlink_reference_outreach'
   ]) assert.match(migration,new RegExp("'" + action + "'"));
 });
+
+
+test('acceptance search registry includes editorial content execution',()=>{
+  const workflow=read('.github/workflows/toolscout-v2-production-acceptance.yml');
+  const contracts=read('growth-execution-contract.js');
+  assert.match(contracts,/content_amplification:'content_issue'/);
+  assert.match(workflow,/'content_amplification','distribution_amplification','backlink_reference_outreach'/);
+});
