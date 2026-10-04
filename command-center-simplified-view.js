@@ -130,7 +130,7 @@ function business(){
  const gaConnected=a.status==='connected',commerceConnected=commerce.status==='connected',gscAvailable=['connected','stale'].includes(String(gsc.status||''));
  const visitors=gaConnected?(gaUsers.activeToday??gaUsers.today):null;
  const sessions24=gaConnected?gaSessions.last24Hours:null;
- const googleClicks=gscAvailable?gsc.clicks:null;
+ const googleClicks=gscAvailable?(gsc.liveWindow?.clicks??gsc.clicks):null;
  const outbound24=commerceConnected?out24.outbound:null;
  const monetized24=commerceConnected?out24.monetized:null;
  const kpiHealthy=[visitors,sessions24,googleClicks,outbound24,monetized24].filter(v=>v!==null&&v!==undefined).length;
@@ -143,7 +143,7 @@ function business(){
   '<div class="metrics">'+
    metric('Visitors - today',visitors==null?'Unavailable':n(visitors),gaConnected?'GA4 users · '+n(gaUsers.monthToDate)+' MTD':'GA4 unavailable')+
    metric('Sessions - 24h',sessions24==null?'Unavailable':n(sessions24),gaConnected?n(gaSessions.monthToDate)+' MTD · GA4':'GA4 unavailable')+
-   metric('Google clicks - 28d',googleClicks==null?'Unavailable':n(googleClicks),gscAvailable?'Google Search Console'+(gsc.status==='stale'?' · stale':''):'Google Search Console unavailable')+
+   metric('Google clicks - 28d',googleClicks==null?'Unavailable':n(googleClicks),gscAvailable?(gsc.liveWindow?.endDate?'GSC current through '+compactDate(gsc.liveWindow.endDate)+(gsc.verifiedThroughDate?' · final through '+compactDate(gsc.verifiedThroughDate):''):'Google Search Console'+(gsc.status==='stale'?' · stale':'')):'Google Search Console unavailable')+
    metric('Outbound clicks - 24h',outbound24==null?'Unavailable':n(outbound24),commerceConnected?n(outMtd.outbound)+' MTD · server redirect ledger':'Server outbound unavailable')+
    metric('Monetized outbound - 24h',monetized24==null?'Unavailable':n(monetized24),commerceConnected?n(outMtd.monetized)+' MTD · affiliate active at click':'Server outbound unavailable')+
    metric('Referring domains',b.seRankingReferringDomains==null&&b.referringDomains==null?'Unavailable':n(b.seRankingReferringDomains??b.referringDomains),'External authority truth')+
@@ -161,7 +161,7 @@ function trafficProgress(){
  const a=data.acquisition||{};
  if(a.status!=='connected'){
   document.getElementById('trafficProgressMeta').textContent='GA4 unavailable';
-  document.getElementById('trafficProgressBody').innerHTML='<div class="headline"><b>GA4 traffic unavailable</b><span>'+esc(a.reason||sourceErrors.acquisition||'Google Analytics did not return a current reporting snapshot.')+'</span></div><div class="sourceLine">Traffic Quality diagnostics are intentionally not substituted for GA4 users or sessions.</div>';
+  document.getElementById('trafficProgressBody').innerHTML='<div class="headline"><b>GA4 traffic unavailable</b><span>'+esc(a.reason||sourceErrors.acquisition||'Google Analytics did not return a current reporting snapshot.')+'</span></div><div class="section">'+row('Recovery','Reconnect Google Analytics','Open /analytics/api/google/connect while signed in to the Command Center. A durable service-account path will be used automatically once that account has GA4 property access.')+'</div><div class="sourceLine">Traffic Quality diagnostics are intentionally not substituted for GA4 users or sessions.</div>';
   return;
  }
  const rows=Array.isArray(a.daily30)?a.daily30.map(x=>({date:x.date,sessions:Number(x.sessions||0),users:Number(x.users||0)})):[];
@@ -235,14 +235,15 @@ function gscProgress(){
       '<div class="progressStat"><small>Stalled</small><b>'+n(sx.stalled)+'</b></div>'+
     '</div>'+(executionRows?'<div class="sectionTitle">By intervention</div>'+executionRows:'<div class="empty">No active search execution contracts.</div>')+
     '<div class="sourceLine">Verified means the current active search contract has task-specific execution proof. Deferred work is preserved for later admission; stalled work remains visible until recovered or proved.</div></div>';
- document.getElementById('gscProgressMeta').textContent=(g.status==='stale'?'Stale · ':'')+(g.verifiedThroughDate?'Finalized through '+esc(compactDate(g.verifiedThroughDate))+' - ':'')+'refreshed '+dt(g.dailyGeneratedAt||g.runtimeGeneratedAt||g.generatedAt);
+ const live=g.liveWindow||{},finalized=g.finalizedWindow||{};
+ document.getElementById('gscProgressMeta').textContent=(g.status==='stale'?'Source snapshot stale · ':'Fresh snapshot · ')+(live.endDate?'current through '+compactDate(live.endDate)+' · ':'')+(g.verifiedThroughDate?'final through '+compactDate(g.verifiedThroughDate)+' · ':'')+'refreshed '+dt(g.generatedAt||g.dailyGeneratedAt||g.runtimeGeneratedAt);
  document.getElementById('gscProgressBody').innerHTML=
-  '<div class="progressStats"><div class="progressStat"><small>Impressions 28d</small><b>'+n(g.impressions)+'</b></div><div class="progressStat"><small>Clicks 28d</small><b>'+n(g.clicks)+'</b></div><div class="progressStat"><small>Final 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>7d avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
+  '<div class="progressStats"><div class="progressStat"><small>Current impressions 28d</small><b>'+n(live.impressions??g.impressions)+'</b></div><div class="progressStat"><small>Current clicks 28d</small><b>'+n(live.clicks??g.clicks)+'</b></div><div class="progressStat"><small>Final clicks 28d</small><b>'+n(finalized.clicks??g.clicks)+'</b></div><div class="progressStat"><small>Final 7d change</small><b class="'+deltaClass(chg.impressionsPct)+'">'+signedPct(chg.impressionsPct)+'</b></div><div class="progressStat"><small>7d avg position change</small><b class="'+deltaClass(chg.positionDelta==null?null:-Number(chg.positionDelta))+'">'+(chg.positionDelta==null?'Unavailable':(Number(chg.positionDelta)>0?'+':'')+Number(chg.positionDelta).toFixed(1)+(g.recent7?.position==null?'':' ('+Number(g.recent7.position).toFixed(1)+')'))+'</b></div></div>'+
   '<div class="chartBox"><div class="sectionTitle">Google impressions</div>'+seriesChart(rows,[{key:'impressions',label:'Google impressions',cls:'primary'}])+'</div>'+
   '<div class="chartBox"><div class="sectionTitle">Average position - lower is better</div>'+seriesChart(rows,[{key:'position',label:'Average position',cls:'warn'}],{zeroBaseline:false,invert:true,axisDecimals:1})+'</div>'+
   moverRows+
   executionBlock+
-  '<div class="sourceLine">Only Search Console days marked final by Google are plotted and used for the 28-day totals and 7-day comparison. Preliminary fresh-data days are withheld until finalized so incomplete ingestion cannot look like a traffic or ranking collapse. Average position is inverted so ranking improvement moves upward.</div>';
+  '<div class="sourceLine">The headline current totals include Google\'s latest preliminary Search Console data. The charts and change comparisons use only days marked final by Google, so the finalized-through date can lag the current snapshot by several days without making the source stale. Average position is inverted so ranking improvement moves upward.</div>';
 }
 
 function editorialAuthority(){
@@ -276,7 +277,7 @@ function brain(){
  const activity=Array.isArray(t.growthActivity)?t.growthActivity.slice(0,7):[];
  if(activity.length)body.push('<div class="section"><div class="sectionTitle">Latest engine activity</div>'+activity.map(x=>row(human((x.engine||'engine')+' - '+(x.mission||'cycle')),human(x.status||'unknown'),dt(x.at)+(x.detail?' - '+human(x.detail):''))).join('')+'</div>');
  const actions=Array.isArray(t.growthActions)?t.growthActions.slice(0,6):[];
- if(actions.length)body.push('<div class="section"><div class="sectionTitle">Latest action pipeline · 6 most recent</div>'+actions.map(x=>{const created=x.createdAt||x.at,updated=x.updatedAt||x.at,status=String(x.status||'unknown'),waiting=['pending','claimed','attempted','stalled'].includes(status)?' - waiting '+ageLabel(created):'';return row(human((x.engine||'growth')+' - '+(x.channel||'action')),human(status),'Created '+dt(created)+' - updated '+dt(updated)+waiting+' - '+human(x.opportunityKey||x.id||''))}).join('')+'<div class="sourceLine">Created time is the original task age. Updated time is the last state change. Waiting time is measured from creation so refreshes cannot make an old task look new.</div></div>');
+ if(actions.length)body.push('<div class="section"><div class="sectionTitle">Latest action pipeline · 6 most recent</div>'+actions.map(x=>{const created=x.createdAt||x.at,updated=x.updatedAt||x.at,status=String(x.status||'unknown'),stateAge=['pending','claimed','attempted','stalled'].includes(status)?' - current state '+ageLabel(updated):'',originalAge=created&&updated&&created!==updated?' - original task '+ageLabel(created)+' old':'',reason=x.lastResult?' - '+human(x.lastResult):'';return row(human((x.engine||'growth')+' - '+(x.channel||'action')),human(status),'Created '+dt(created)+' - updated '+dt(updated)+stateAge+originalAge+reason+' - '+human(x.opportunityKey||x.id||''))}).join('')+'<div class="sourceLine">Created time preserves the original task age. Current-state age is measured from the last real state transition, so a recently re-queued task is not presented as having waited continuously for its full historical lifetime.</div></div>');
  const frontier=[];
  if(frontier.length)body.push('<div class="section"><div class="sectionTitle">Growth R&D - new acquisition ideas</div>'+
    frontier.map(x=>'<div class="task" style="margin-top:8px"><div class="taskTop"><div><div class="taskTitle">'+esc(x.title||x.id||'Acquisition idea')+'</div><div class="taskMeta">'+esc(human(x.implementation_mode||'candidate'))+' - automation '+n(x.automation_score)+'/100 - semi-passive '+n(x.semi_passive_score)+'/100</div></div>'+pill(human(x.status||'candidate'),'warn')+'</div><div class="taskText"><b>Mechanism:</b> '+esc(x.mechanism||'')+'</div><div class="taskText"><b>Next:</b> '+esc(x.next_step||'Research and bind a safe executor.')+'</div><div class="taskText"><b>Signal:</b> '+esc(human(x.expected_signal||'traffic impact'))+'</div></div>').join('')+
