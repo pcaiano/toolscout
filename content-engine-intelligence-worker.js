@@ -251,8 +251,13 @@ async function buildBrief(env,family,{issue=false,task=null}={}){
     FROM distribution_contact_route_actions a
     JOIN distribution_network_outreach n ON n.surface_slug=a.surface_slug
     WHERE a.execution_mode='content_amplification' AND a.status IN ('queued','retry_due')
-      AND a.attempts<2
-    ORDER BY n.priority_score DESC,a.updated_at ASC LIMIT 12`).all().catch(()=>({results:[]}));
+      AND (
+        a.attempts<2
+        OR (a.last_result='proven_human_source_repeat_due' AND a.attempts<4)
+      )
+    ORDER BY
+      CASE WHEN a.last_result='proven_human_source_repeat_due' THEN 0 ELSE 1 END,
+      n.priority_score DESC,a.updated_at ASC LIMIT 12`).all().catch(()=>({results:[]}));
   const catalogTools=await assetJson(env,'/data/tools.json',[]);
   const catalogBySlug=new Map((Array.isArray(catalogTools)?catalogTools:[]).map(x=>[x.slug,x]));
   const date=new Date().toISOString().slice(0,10),all=profiles.results||[],eligible=(commercial.results||[]).map(x=>{const catalog=catalogBySlug.get(x.tool_slug)||null;return{...x,catalog,tool_name:catalog?.name||x.tool_name}}),briefId=`brief_${crypto.randomUUID()}`;
