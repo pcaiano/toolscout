@@ -913,7 +913,7 @@ async function coordinateGrowthOpportunities(env){
     active++;searchCount++;
   }
   if(humanSprintActive()){
-    for(const target of HUMAN_ACQUISITION_GSC_TARGETS){
+    for(const target of sprintTargets){
       const actions=['content_amplification','search_measurement'];
       if(target.tool_slug)actions.unshift('content_mention');
       const signals={
