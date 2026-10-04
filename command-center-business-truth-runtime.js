@@ -213,8 +213,8 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
       generatedAt:gscEvidenceAt,
       evidenceAgeHours:gscEvidenceAgeHours,
       runtimeGeneratedAt:gscHealth?.generatedAt||null,
-      runtimeOk:gscEvidence?(gscHealth?.ok===false?false:(gscHealth?.ok===true?true:null)):false,
-      runtimeStatus:gscEvidence?(gscHealth?.status||(runtimeOk?'connected':'asset_fallback')):'unavailable',
+      runtimeOk:gscEvidence?(searchStatus==='connected'?true:(gscHealth?.ok===true?true:false)):false,
+      runtimeStatus:gscEvidence?(searchStatus==='connected'?'service_account_evidence_fresh':(gscHealth?.status||'asset_fallback')):'unavailable',
       liveWindow:gscEvidence?{
         startDate:gscWindow.startDate||null,
         endDate:gscWindow.endDate||null,
@@ -912,8 +912,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       generatedAt:gscEvidenceAt,
       evidenceAgeHours:gscEvidenceAgeHours,
       runtimeGeneratedAt:gh?.generatedAt||gscHealth?.source_generated_at||null,
-      runtimeOk:gscEvidenceAvailable?gh?.ok===true:false,
-      runtimeStatus:gscEvidenceAvailable?(gh?.status||null):'unavailable',
+      runtimeOk:gscEvidenceAvailable?(gscEvidenceFresh?true:gh?.ok===true):false,
+      runtimeStatus:gscEvidenceAvailable?(gscEvidenceFresh?'service_account_evidence_fresh':(gh?.status||null)):'unavailable',
       liveWindow:gscEvidenceAvailable?{
         startDate:w.startDate||null,
         endDate:w.endDate||null,
