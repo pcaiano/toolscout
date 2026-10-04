@@ -66,6 +66,7 @@ jobs:
       - name: Commit refreshed search evidence
         if: steps.freshness.outputs.refresh == 'true'
         run: |
+          set -euo pipefail
           SEARCH_EVIDENCE_FILES="reports/gsc-signals.json reports/gsc-search-reality.json data/gsc-search-reality.json reports/gsc-daily-trend.json data/gsc-daily-trend.json reports/growth-priority.json reports/organic-growth-opportunities.json"
           if [ -z "$(git status --porcelain -- $SEARCH_EVIDENCE_FILES)" ]; then
             echo "No search evidence changes to commit."
@@ -74,15 +75,11 @@ jobs:
           git config user.name "toolscout-search-watchdog"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- $SEARCH_EVIDENCE_FILES
-          if [ -n "$(git status --porcelain --untracked-files=no | grep -vE '^(M |A |D |R |C ) (reports/gsc-signals.json|reports/gsc-search-reality.json|data/gsc-search-reality.json|reports/gsc-daily-trend.json|data/gsc-daily-trend.json|reports/growth-priority.json|reports/organic-growth-opportunities.json)
-          git commit -m "Refresh search evidence watchdog"
-          git pull --rebase origin main
-          git push origin HEAD:main
- || true)" ]; then
-            echo "Unexpected unstaged tracked changes remain after staging search evidence."
+          if ! git diff --quiet -- . ':!reports/gsc-signals.json' ':!reports/gsc-search-reality.json' ':!data/gsc-search-reality.json' ':!reports/gsc-daily-trend.json' ':!data/gsc-daily-trend.json' ':!reports/growth-priority.json' ':!reports/organic-growth-opportunities.json'; then
+            echo "Unexpected tracked changes remain outside the search evidence allowlist."
             git status --short
             exit 1
           fi
           git commit -m "Refresh search evidence watchdog"
-          git pull --rebase origin main
+          git pull --rebase --autostash origin main
           git push origin HEAD:main
