@@ -71,10 +71,20 @@ async function ccAssetJson(request,env,path,fallback){
 async function buildCommandCenterBusinessTruth(request,env){
   const affiliateEvidenceSchema=await affiliateNetworkEvidenceSchemaState(env);
   const affiliateEvidenceSchemaOk=affiliateEvidenceSchema.ok===true;
-  const [supervisorRows,contractRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta,editorialAuthorityPortfolio]=await Promise.all([
+  const [supervisorRows,contractRows,seoExecutionRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta,editorialAuthorityPortfolio]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
+    env.DB.prepare(`SELECT c.action,c.status,COUNT(*) n,MAX(c.updated_at) updated_at
+      FROM growth_execution_contract c
+      JOIN growth_opportunity_state g ON g.opportunity_key=c.source_id
+      JOIN json_each(g.action_json) j ON j.value=c.action
+      WHERE c.source_kind='opportunity'
+        AND c.executor='seo_cloudflare'
+        AND c.subject_type='search'
+        AND g.status='active'
+      GROUP BY c.action,c.status
+      ORDER BY c.action,c.status`).all().then(r=>r.results||[]).catch(()=>null),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/reports/gsc-signals.json' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/data/gsc-search-reality.json' LIMIT 1`).first().catch(()=>null),
     env.DB.prepare(`SELECT payload_json,source_generated_at,updated_at FROM growth_asset_cache WHERE path='/runtime/gsc-refresh-health.json' LIMIT 1`).first().catch(()=>null),
@@ -287,6 +297,34 @@ async function buildCommandCenterBusinessTruth(request,env){
   contract.deferred=truthNum(contract.states.deferred);
   contract.missingExecutors=truthNum(contract.states.executor_missing);
   contract.stalled=truthNum(contract.states.stalled);
+
+  const searchExecutionAvailable=Array.isArray(seoExecutionRows);
+  const searchExecution=searchExecutionAvailable
+    ?{available:true,states:{},actions:{},total:0,ready:0,inFlight:0,deferred:0,verified:0,stalled:0,blocked:0,humanRequired:0,missingExecutors:0,updatedAt:null}
+    :{available:false,states:null,actions:null,total:null,ready:null,inFlight:null,deferred:null,verified:null,stalled:null,blocked:null,humanRequired:null,missingExecutors:null,updatedAt:null};
+  if(searchExecutionAvailable){
+    let latest=0;
+    for(const row of seoExecutionRows){
+      const action=String(row.action||'unknown'),status=String(row.status||'unknown'),count=truthNum(row.n);
+      searchExecution.total+=count;
+      searchExecution.states[status]=(searchExecution.states[status]||0)+count;
+      searchExecution.actions[action]=searchExecution.actions[action]||{total:0,states:{},updatedAt:null};
+      searchExecution.actions[action].total+=count;
+      searchExecution.actions[action].states[status]=(searchExecution.actions[action].states[status]||0)+count;
+      const at=Date.parse(String(row.updated_at||'').replace(' ','T')+'Z');
+      if(Number.isFinite(at)&&at>latest){latest=at;searchExecution.updatedAt=row.updated_at||null}
+      const actionAt=Date.parse(String(searchExecution.actions[action].updatedAt||'').replace(' ','T')+'Z');
+      if(!searchExecution.actions[action].updatedAt||(Number.isFinite(at)&&(!Number.isFinite(actionAt)||at>actionAt)))searchExecution.actions[action].updatedAt=row.updated_at||null;
+    }
+    searchExecution.ready=truthNum(searchExecution.states.pending);
+    searchExecution.inFlight=truthNum(searchExecution.states.claimed)+truthNum(searchExecution.states.attempted);
+    searchExecution.deferred=truthNum(searchExecution.states.deferred);
+    searchExecution.verified=truthNum(searchExecution.states.verified);
+    searchExecution.stalled=truthNum(searchExecution.states.stalled);
+    searchExecution.blocked=truthNum(searchExecution.states.blocked);
+    searchExecution.humanRequired=truthNum(searchExecution.states.human_required);
+    searchExecution.missingExecutors=truthNum(searchExecution.states.executor_missing);
+  }
 
   const productionRoutes=Object.entries(affiliateRegistry||{}).filter(([,v])=>Boolean(v?.enabled&&v?.url));
   const programmes=Array.isArray(affiliatePipeline?.verified_programs)?affiliatePipeline.verified_programs:[];
@@ -666,7 +704,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       verifiedThroughDate,
       recent7,
       previous7,
-      change7d
+      change7d,
+      execution:searchExecution
     },
     editorial:{
       targetScore:editorialTarget,
