@@ -15,7 +15,7 @@ import {runVendorContactDiscovery} from './distribution-contact-worker.js';
 import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 import {senderCapacitySnapshot} from './sender-capacity-policy.js';
-import {classifySearchPageAction} from './search-action-policy.js';
+import {classifySearchPageAction,executableIntentSearchActions} from './search-action-policy.js';
 
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const AUTONOMOUS_REALLOCATED_BATCH_LIMIT=4;
@@ -830,9 +830,8 @@ async function coordinateGrowthOpportunities(env){
   for(const op of searchOpportunities.slice(0,40)){
     const intent=String(op?.intent||'').trim();if(!intent)continue;
     const priority=Math.max(0,Math.min(100,Number(op?.priorityScore||0)+(audienceStrategy.borrowedFirst?15:0)+seoBoost));
-    const execution=(Array.isArray(op?.executionPlan)?op.executionPlan:[])
-      .filter(action=>!['distribution_amplification','backlink_reference_outreach'].includes(String(action||'')));
-    const actions=[...new Set([...execution,'content_amplification','search_measurement'])];
+    const intentExecution=executableIntentSearchActions(op);
+    const actions=intentExecution.actions;
     const signals={
       lane:op?.lane||null,
       action:op?.action||null,
@@ -848,6 +847,10 @@ async function coordinateGrowthOpportunities(env){
       machine_readability_failures:inputFreshness.machineReadability.fresh?Number(machineReadability?.failures||0):null,
       machine_readability_warnings:inputFreshness.machineReadability.fresh?Number(machineReadability?.warnings||0):null,
       organic_report_generated_at:organicGrowth?.generatedAt||null,
+      execution_plan:intentExecution.planningActions,
+      execution_plan_scope:intentExecution.planningScope,
+      contract_scope:intentExecution.contractScope,
+      editorial_execution:intentExecution.editorialExecution,
       audience_strategy:audienceStrategy.phase,
       acquisition_mode:'existing_demand_search',
       borrowed_first_boost:audienceStrategy.borrowedFirst?15:0
