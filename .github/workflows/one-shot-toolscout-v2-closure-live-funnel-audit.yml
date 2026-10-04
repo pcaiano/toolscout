@@ -1,0 +1,81 @@
+name: One Shot ToolScout 2.0 Closure Live Funnel Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-toolscout-v2-closure-live-funnel-audit.yml'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read live production health
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoints=(
+            "contact-supply|https://trytoolscout.org/api/contact-supply/health"
+            "compute|https://trytoolscout.org/api/compute/health"
+            "autonomous-growth|https://trytoolscout.org/api/autonomous-growth-health"
+            "schedule|https://trytoolscout.org/api/runtime/schedule-contract"
+          )
+          for item in "${endpoints[@]}"; do
+            name="${item%%|*}"
+            url="${item#*|}"
+            echo "::group::$name"
+            code="$(curl --max-time 45 -sS -o "/tmp/$name.json" -w '%{http_code}' "$url")"
+            echo "http=$code"
+            cat "/tmp/$name.json"
+            echo
+            test "$code" -ge 200
+            test "$code" -lt 300
+            echo "::endgroup::"
+          done
+
+      - name: Summarize closure bottleneck
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const read=n=>JSON.parse(fs.readFileSync('/tmp/'+n+'.json','utf8'));
+          const contact=read('contact-supply');
+          const compute=read('compute');
+          const growth=read('autonomous-growth');
+          const schedule=read('schedule');
+          const summary={
+            ok:true,
+            contactSupply:{
+              readyEmail:Number(contact.readyEmail||0),
+              readyRoute:Number(contact.readyRoute||0),
+              researching:Number(contact.researching||0),
+              unresolved:Number(contact.unresolved||0),
+              diversifiedSources:Number(contact.diversifiedSources||0),
+              diversifiedSourcesDue:Number(contact.diversifiedSourcesDue||0),
+              diversifiedSourcesExhausted:Number(contact.diversifiedSourcesExhausted||0),
+              vendorRoutesTotal:Number(contact.vendorRoutesTotal||0),
+              vendorRoutesResearch:Number(contact.vendorRoutesResearch||0),
+              vendorRoutesHumanRequired:Number(contact.vendorRoutesHumanRequired||0),
+              vendorRoutesAuthorityLike:Number(contact.vendorRoutesAuthorityLike||0)
+            },
+            compute:{
+              status:compute.status||null,
+              queued:Number(compute.queued||compute.metrics?.queued||0),
+              leased:Number(compute.leased||compute.metrics?.leased||0),
+              activeBatches:Number(compute.activeBatches||compute.metrics?.activeBatches||compute.metrics?.active_batches||0),
+              completedToday:Number(compute.completedToday||compute.metrics?.completedToday||compute.metrics?.completed_today||0),
+              failedToday:Number(compute.failedToday||compute.metrics?.failedToday||compute.metrics?.failed_today||0),
+              contactSupply:compute.contactSupply||null,
+              funnel:compute.funnel||compute.distributionFunnel||null
+            },
+            autonomousGrowth:growth,
+            scheduleVersion:schedule.version||null
+          };
+          console.log(JSON.stringify(summary,null,2));
+          fs.writeFileSync('/tmp/toolscout-v2-closure-live-funnel-summary.json',JSON.stringify(summary,null,2));
+          NODE
