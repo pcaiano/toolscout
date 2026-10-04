@@ -5,6 +5,9 @@ const ROOT = process.cwd();
 const BASE = 'https://trytoolscout.org';
 const profilesPath = path.join(ROOT,'data','competitive-gap-profiles.json');
 const profiles = fs.existsSync(profilesPath) ? JSON.parse(fs.readFileSync(profilesPath,'utf8')) : [];
+const catalogPath = path.join(ROOT,'data','tools.json');
+const catalogTools = fs.existsSync(catalogPath) ? JSON.parse(fs.readFileSync(catalogPath,'utf8')) : [];
+const catalogSlugs = new Set((catalogTools||[]).map(tool=>String(tool?.slug||'')).filter(Boolean));
 const out = path.join(ROOT,'tools');
 fs.mkdirSync(out,{recursive:true});
 
@@ -62,10 +65,14 @@ function render(profile) {
 }
 
 const holds = [];
-let created = 0, refreshed = 0;
+let created = 0, refreshed = 0, delegatedToCatalog = 0;
 for (const profile of profiles) {
   if (!valid(profile)) {
     holds.push({slug:profile?.slug || null, reason:'Competitive gap profile failed first-party evidence gates.'});
+    continue;
+  }
+  if (catalogSlugs.has(String(profile.slug||''))) {
+    delegatedToCatalog += 1;
     continue;
   }
   const file = path.join(out,`${profile.slug}.html`);
@@ -85,7 +92,8 @@ fs.writeFileSync(path.join(ROOT,'reports','competitive-gap-profile-publication.j
   profiles:profiles.length,
   created,
   refreshed,
+  delegatedToCatalog,
   held:holds.length,
   holds
 },null,2)+'\n');
-console.log(JSON.stringify({profiles:profiles.length,created,refreshed,held:holds.length}));
+console.log(JSON.stringify({profiles:profiles.length,created,refreshed,delegatedToCatalog,held:holds.length}));
