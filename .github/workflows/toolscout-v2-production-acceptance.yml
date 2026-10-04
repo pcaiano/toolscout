@@ -192,6 +192,8 @@ jobs:
           node scripts/evaluate-v2-production-acceptance.mjs phase260-acceptance.json
 
       - name: Probe final operational state
+        env:
+          TOOLSCOUT_REQUIRE_FINAL_RELEASE: '1'
         run: |
           set -euo pipefail
           node scripts/probe-v2-operational-health.mjs | tee phase260-operational.json
