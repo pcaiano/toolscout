@@ -907,7 +907,7 @@ async function reconcileTerminalOpenHumanGates(env){
       o.status opportunity_status,o.live_url
     FROM human_gate_contract g
     LEFT JOIN distribution_opportunities o ON o.surface_slug=g.subject_key
-    WHERE g.engine='distribution' AND g.status='open'
+    WHERE g.engine='distribution' AND g.status IN ('open','verification_pending')
       AND (
         o.surface_slug IS NULL
         OR o.status IN ('submitted','pending_review','scheduled','verified','live','policy_blocked','rejected','skipped','unavailable_free')
@@ -925,7 +925,7 @@ async function reconcileTerminalOpenHumanGates(env){
         :`Human Gate cancelled because the distribution opportunity advanced to terminal/superseding state ${s}; owner action is no longer required.`;
     const w=await env.DB.prepare(`UPDATE human_gate_contract SET
         status=?,resolved_at=datetime('now'),next_verification_at=NULL,verification_detail=?,updated_at=datetime('now')
-      WHERE gate_key=? AND status='open'`).bind(status,detail,row.gate_key).run().catch(()=>null);
+      WHERE gate_key=? AND status IN ('open','verification_pending')`).bind(status,detail,row.gate_key).run().catch(()=>null);
     const changed=Number(w?.meta?.changes||w?.changes||0);
     if(!changed)continue;
     if(status==='resolved')resolved+=changed;else cancelled+=changed;
