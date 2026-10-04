@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/seo-engine-v2.yml'
       - 'data/github-actions-resume-policy.json'
+      - 'scripts/validate-actions-resume-safety.mjs'
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
