@@ -6,7 +6,27 @@ export const COMPETITIVE_OUTREACH_POLICY_VERSION='competitive-outreach-v1';
 const KNOWN_COMPETITOR_HOSTS=new Set([
   'bestofai.com',
   'bestofai.io',
-  'dynamite-ai.com'
+  'dynamite-ai.com',
+  'alternativeto.net',
+  'saashub.com',
+  'sourceforge.net',
+  'getapp.com',
+  'softwareadvice.com',
+  'capterra.com',
+  'crozdesk.com',
+  'trustradius.com',
+  'solutions.trustradius.com',
+  'futurepedia.io',
+  'theresanaiforthat.com',
+  'futuretools.io',
+  'toolify.ai',
+  'aitools.fyi',
+  'aitoolmall.com',
+  'aitoolsdirectory.com',
+  'topai.tools',
+  'easywithai.com',
+  'allthingsai.com',
+  'aichief.com'
 ]);
 
 const COMPETITIVE_DISCOVERY_TYPE_RE=/(?:^|_)(?:ai|software|tool|app)_?directory(?:_|$)|directory_syndication|discovery_directory|recommendation_directory/i;
