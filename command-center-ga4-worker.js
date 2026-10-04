@@ -9,6 +9,7 @@ const GA_ADMIN_ORIGIN='https://analyticsadmin.googleapis.com';
 const DEFAULT_MEASUREMENT_ID='G-9VR80SYYH7';
 const BUSINESS_TIME_ZONE='Europe/Lisbon';
 const OWNER_EMAIL='pcaiano@gmail.com';
+const GA_FETCH_TIMEOUT_MS=8000;
 let tokenCache=null;
 let propertyCache=null;
 
@@ -43,7 +44,7 @@ async function serviceAccountAccessToken(env){
   const key=await crypto.subtle.importKey('pkcs8',pemBytes(cfg.privateKey),{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
   const signature=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned));
   const assertion=`${unsigned}.${b64url(new Uint8Array(signature))}`;
-  const response=await fetch(GA_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth-grant-type:jwt-bearer',assertion})});
+  const response=await fetch(GA_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth-grant-type:jwt-bearer',assertion}),signal:AbortSignal.timeout(GA_FETCH_TIMEOUT_MS)});
   const body=await response.json().catch(()=>({}));
   if(!response.ok||!body.access_token)throw new Error(`ga4_oauth_${response.status}:${body.error_description||body.error||'token_failed'}`);
   tokenCache={email:cfg.clientEmail,token:body.access_token,expiresAt:now+n(body.expires_in||3600)};
@@ -51,7 +52,8 @@ async function serviceAccountAccessToken(env){
 }
 async function googleJson(url,token,init={}){
   const headers=new Headers(init.headers||{});headers.set('Authorization',`Bearer ${token}`);if(init.body)headers.set('Content-Type','application/json');
-  const response=await fetch(url,{...init,headers});const body=await response.json().catch(()=>({}));
+  const signal=init.signal||AbortSignal.timeout(GA_FETCH_TIMEOUT_MS);
+  const response=await fetch(url,{...init,headers,signal});const body=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(`google_api_${response.status}:${body?.error?.message||'request_failed'}`);
   return body;
 }
@@ -114,9 +116,9 @@ async function ga4Snapshot(env,request=null){
       runReport(propertyId,token,{dateRanges:[{startDate:today,endDate:today}],metrics:[{name:'sessions'},{name:'totalUsers'},{name:'activeUsers'}]}),
       runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],metrics:[{name:'sessions'},{name:'totalUsers'}]}),
       runReport(propertyId,token,{dateRanges:[{startDate:yesterday,endDate:today}],dimensions:[{name:'dateHourMinute'}],metrics:[{name:'sessions'}],limit:'100000',orderBys:[{dimension:{dimensionName:'dateHourMinute'}}]}),
-      runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'sessionSource'},{name:'sessionMedium'},{name:'sessionDefaultChannelGroup'},{name:'landingPagePlusQueryString'}],metrics:[{name:'sessions'}],limit:'100',orderBys:[{metric:{metricName:'sessions'},desc:true}]}),
-      runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'country'}],metrics:[{name:'sessions'},{name:'totalUsers'}],limit:'50',orderBys:[{metric:{metricName:'sessions'},desc:true}]}),
-      runReport(propertyId,token,{dateRanges:[{startDate:historyStart,endDate:today}],dimensions:[{name:'date'}],metrics:[{name:'sessions'},{name:'totalUsers'}],limit:'100',orderBys:[{dimension:{dimensionName:'date'}}]}),
+      runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'sessionSource'},{name:'sessionMedium'},{name:'sessionDefaultChannelGroup'},{name:'landingPagePlusQueryString'}],metrics:[{name:'sessions'}],limit:'100',orderBys:[{metric:{metricName:'sessions'},desc:true}]}).catch(()=>null),
+      runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'country'}],metrics:[{name:'sessions'},{name:'totalUsers'}],limit:'50',orderBys:[{metric:{metricName:'sessions'},desc:true}]}).catch(()=>null),
+      runReport(propertyId,token,{dateRanges:[{startDate:historyStart,endDate:today}],dimensions:[{name:'date'}],metrics:[{name:'sessions'},{name:'totalUsers'}],limit:'100',orderBys:[{dimension:{dimensionName:'date'}}]}).catch(()=>null),
       runReport(propertyId,token,{dateRanges:[{startDate:yesterday,endDate:today}],dimensions:[{name:'dateHourMinute'},{name:'eventName'}],metrics:[{name:'eventCount'}],dimensionFilter:eventFilter,limit:'100000',orderBys:[{dimension:{dimensionName:'dateHourMinute'}}]}).catch(()=>null),
       runReport(propertyId,token,{dateRanges:[{startDate:monthStart,endDate:today}],dimensions:[{name:'eventName'}],metrics:[{name:'eventCount'}],dimensionFilter:eventFilter,limit:'100'}).catch(()=>null)
     ]);
@@ -135,7 +137,7 @@ async function ga4Snapshot(env,request=null){
       else if(eventName==='monetized_outbound')monetizedMtd+=count;
     }
     const sessionsToday=firstMetric(todayReport,0),mtd=firstMetric(mtdReport,0),elapsedDays=Math.max(1,local.day),dailyAverage=mtd/elapsedDays,projection=dailyAverage*daysInMonth(local.year,local.month),timeZone=todayReport?.metadata?.timeZone||mtdReport?.metadata?.timeZone||BUSINESS_TIME_ZONE,oauth=await googleAnalyticsOAuthStatus(env,request);
-    const daily30=(dailyReport.rows||[]).map(row=>({date:String(row.dimensionValues?.[0]?.value||''),sessions:n(row.metricValues?.[0]?.value),users:n(row.metricValues?.[1]?.value)})).filter(x=>x.date);
+    const daily30=(dailyReport?.rows||[]).map(row=>({date:String(row.dimensionValues?.[0]?.value||''),sessions:n(row.metricValues?.[0]?.value),users:n(row.metricValues?.[1]?.value)})).filter(x=>x.date);
     const countries=(countryReport?.rows||[]).map(row=>({country:row.dimensionValues?.[0]?.value||'(not set)',sessions:n(row.metricValues?.[0]?.value),users:n(row.metricValues?.[1]?.value)})).filter(row=>row.sessions>0||row.users>0);
     return {status:'connected',canonical:true,source:'Google Analytics 4 Data API',propertyId,measurementId:cfg.measurementId,timeZone,authMode,connectedEmail,oauth,sessions:{today:sessionsToday,last24Hours,monthToDate:mtd,dailyAverageMTD:Number(dailyAverage.toFixed(2)),projectedMonth:Math.round(projection)},users:{today:firstMetric(todayReport,1),activeToday:firstMetric(todayReport,2),monthToDate:firstMetric(mtdReport,1)},outbound:{source:'GA4 browser events',population:'GA4 consented reporting population',role:'quality_and_browser_population',last24Hours:{outbound:outboundHourReport?outbound24:null,monetized:outboundHourReport?monetized24:null},monthToDate:{outbound:outboundMtdReport?outboundMtd:null,monetized:outboundMtdReport?monetizedMtd:null},monetizedTrackingStartedAt:'2026-09-29T11:02:00Z',definition:'GA4 outbound events describe the consented browser reporting population. ToolScout server /go/ redirects remain the canonical outbound and monetized-outbound business ledger.'},daily30,sources:sourceRows(sourcesReport),countries,fetchedAt:new Date().toISOString(),consentNote:'GA4 is canonical for users and sessions. ToolScout server redirects are canonical for outbound and monetized outbound. GA4 outbound remains a separate consent-dependent browser population and is never summed with the server ledger.'};
   }catch(error){return {status:'unavailable',canonical:true,source:'Google Analytics 4 Data API',reason:String(error?.message||error),measurementId:cfg.measurementId,authMode,connectedEmail,oauth:await googleAnalyticsOAuthStatus(env,request),fetchedAt:new Date().toISOString()}}
