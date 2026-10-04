@@ -41,6 +41,23 @@ function editorialConclusion(a,b){
   const third=overlap.length?`Because both list ${listPhrase(overlap)}, compare the depth of those shared capabilities against your workflow before choosing.`:'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
   return clean([first,second,third].filter(Boolean).join(' '));
 }
+function decisionGuidance(a,b){
+  const ranked=dimensions
+    .map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)}))
+    .sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
+  const lead=ranked.find(item=>item.diff!==0);
+  if(lead){
+    const winner=lead.diff>0?a:b,other=lead.diff>0?b:a;
+    const otherFit=(other.bestFor||[])[0]||other.category||'your alternative workflow';
+    return clean(`Choose ${winner.name} if ${dimensionLabel[lead.key]||lead.key} is the stronger priority for your workflow; choose ${other.name} when ${otherFit} better matches the job you need to do.`);
+  }
+  const aFit=(a.bestFor||[])[0]||a.category||'your workflow';
+  const bFit=(b.bestFor||[])[0]||b.category||'your workflow';
+  return clean(`Choose ${a.name} if ${aFit} better matches your workflow; choose ${b.name} when ${bFit} is the closer fit.`);
+}
+function comparisonMethodology(){
+  return 'ToolScout compares catalog-backed pricing, capabilities, use cases and score dimensions using first-party vendor sources and recorded verification dates. The conclusion is a workflow fit judgment, not a universal product claim, and affiliate relationships do not influence the comparison.';
+}
 function overlapValues(a,b,key){
   const bSet=new Set((b[key]||[]).map(v=>String(v).toLowerCase()));
   return (a[key]||[]).filter(v=>bSet.has(String(v).toLowerCase()));
@@ -129,7 +146,7 @@ function render(a,b){
   html=html.replace('<body data-default-a="" data-default-b="">',`<body data-default-a="${esc(a.slug)}" data-default-b="${esc(b.slug)}">`);
   html=html.replace('<div id="pairNote"></div>',`<div id="pairNote"><div class="pairNote">Comparing <strong>${esc(a.name)}</strong> with <strong>${esc(b.name)}</strong>. Change either selector to explore another pair.</div></div>`);
   html=html.replace('<div id="table" class="table"></div>',`<div id="table" class="table">${initialTable(a,b)}</div>`);
-  html=html.replace('<section id="analysis" class="analysis" aria-live="polite"></section>',`<section id="analysis" class="analysis" aria-live="polite"><div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>${esc(editorialConclusion(a,b))}</p><p class="source-note"><strong>Primary sources:</strong> <a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.name)} official source</a> · <a href="${esc(b.sourceUrl)}" target="_blank" rel="noopener">${esc(b.name)} official source</a>. Catalog evidence last checked ${esc(a.lastVerified||'not recorded')} and ${esc(b.lastVerified||'not recorded')} respectively.</p></section>`);
+  html=html.replace('<section id="analysis" class="analysis" aria-live="polite"></section>',`<section id="analysis" class="analysis" aria-live="polite"><div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>${esc(editorialConclusion(a,b))}</p><p class="decision"><strong>Decision:</strong> ${esc(decisionGuidance(a,b))}</p><h3>How this comparison works</h3><p>${esc(comparisonMethodology())}</p><p class="source-note"><strong>Primary sources:</strong> <a href="${esc(a.sourceUrl)}" target="_blank" rel="noopener">${esc(a.name)} official source</a> · <a href="${esc(b.sourceUrl)}" target="_blank" rel="noopener">${esc(b.name)} official source</a>. Catalog evidence last checked ${esc(a.lastVerified||'not recorded')} and ${esc(b.lastVerified||'not recorded')} respectively.</p></section>`);
   html=html.replace('<section id="suggestions" class="suggestions" aria-live="polite"></section>',`<section id="suggestions" class="suggestions" aria-live="polite">${suggestionsHtml(a,b)}</section>`);
   return html;
 }
