@@ -109,7 +109,18 @@ function actionableSurfaceAuthoritySql(executor){
         AND (
           (growth_execution_contract.action IN ('publisher_contact_discovery','execute_alternate_routes','repair_stalled_route_execution')
             AND authority_surface.status IN ('discovered','candidate','research_required','stale'))
-          OR (growth_execution_contract.action='scale_proven_surface' AND authority_surface.status IN ('live','verified'))
+          OR (growth_execution_contract.action='scale_proven_surface' AND (
+            authority_surface.status IN ('live','verified')
+            OR EXISTS (
+              SELECT 1 FROM distribution_economic_learning proven
+              WHERE proven.surface_slug=authority_surface.surface_slug
+                AND (
+                  COALESCE(proven.browser_confirmed_sessions_30d,0)>0
+                  OR COALESCE(proven.outbound_clicks_30d,0)>0
+                  OR COALESCE(proven.monetized_outbound_30d,0)>0
+                )
+            )
+          ))
         )
     )`;
   if(executor==='distribution_autonomous')return `${identity}
