@@ -55,3 +55,11 @@ test('Growth Sprint runtime asset is included in the Worker static asset allowli
   assert.match(ignore,/^reports\/\*$/m);
   assert.match(ignore,/^!reports\/growth-sprint-1\.json$/m);
 });
+
+
+test('Growth Sprint production launcher is manual-only after successful launch',()=>{
+  const workflow=read('.github/workflows/growth-sprint-1-production.yml');
+  assert.match(workflow,/workflow_dispatch:/);
+  assert.doesNotMatch(workflow,/\n\s*push:/);
+  assert.doesNotMatch(workflow,/github\.event\.head_commit/);
+});
