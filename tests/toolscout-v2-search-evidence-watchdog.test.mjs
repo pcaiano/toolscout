@@ -30,15 +30,15 @@ test('watchdog commits the complete generated search evidence set and does not m
     'reports/gsc-signals.json','reports/gsc-search-reality.json','data/gsc-search-reality.json',
     'reports/gsc-daily-trend.json','data/gsc-daily-trend.json',
     'reports/growth-priority.json','reports/organic-growth-opportunities.json'
-  ]) assert.match(watchdog,new RegExp(path.replace(/[./]/g,'\\test('watchdog commits only search evidence artifacts and does not mutate public pages',()=>{
-  assert.match(watchdog,/git add -- reports\/gsc-signals\.json reports\/growth-priority\.json reports\/organic-growth-opportunities\.json/);')));
+  ]) assert.ok(watchdog.includes(path),'missing '+path);
   assert.match(watchdog,/git add -- \$SEARCH_EVIDENCE_FILES/);
+  assert.match(watchdog,/git pull --rebase --autostash origin main/);
   assert.doesNotMatch(watchdog,/generate-seo-pages/);
   assert.doesNotMatch(watchdog,/generate-comparisons/);
   assert.doesNotMatch(watchdog,/wrangler deploy/);
 });
 
-test('freshness probe detects both absolute staleness and derived-report lag',()=>{
+test('freshness probe detects GSC, trend and derived-report staleness',()=>{
   assert.match(probe,/MAX_GSC_AGE_HOURS=30/);
   assert.match(probe,/MAX_TREND_AGE_HOURS=30/);
   assert.match(probe,/gsc_trend_stale/);
