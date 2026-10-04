@@ -175,7 +175,7 @@ jobs:
                AND action NOT IN (
                  'deepen_existing_search_asset','improve_click_capture','protect_current_ranking',
                  'strengthen_internal_links','observe_low_sample_ranking','repair_indexing',
-                 'repair_canonical_alignment','distribution_amplification','backlink_reference_outreach'
+                 'repair_canonical_alignment','content_amplification','distribution_amplification','backlink_reference_outreach'
                )
               THEN 1 ELSE 0 END) unsupported_search_contracts,
             SUM(CASE WHEN status='stalled' AND updated_at<datetime('now','-6 hours') THEN 1 ELSE 0 END) stale_stalled_contracts,
