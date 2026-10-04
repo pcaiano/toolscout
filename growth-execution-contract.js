@@ -180,6 +180,7 @@ const MAKE_SENDER_READY_CONDITION=`(
 )`;
 const RECONCILE_ACTIVE_LIMIT=16;
 const RECONCILE_DEFERRED_PROOF_LIMIT=4;
+const SEO_EVIDENCE_REARM_LIMIT=8;
 
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const dt=minutes=>new Date(Date.now()+minutes*60000).toISOString().replace('T',' ').slice(0,19);
@@ -295,6 +296,49 @@ async function upsertTask(env,{sourceKind,sourceId,opportunityKey=null,subjectTy
   return taskId;
 }
 
+async function rearmSeoTasksForNewEvidence(env,{limit=SEO_EVIDENCE_REARM_LIMIT}={}){
+  const bounded=Math.max(1,Math.min(24,Number(limit)||SEO_EVIDENCE_REARM_LIMIT));
+  const rows=await all(env,`SELECT c.task_id,c.source_id,c.subject_key,c.action,c.priority_score,c.verified_at,
+      COALESCE(
+        NULLIF(json_extract(g.signal_json,'$.gsc_snapshot_generated_at'),''),
+        NULLIF(json_extract(g.signal_json,'$.last_strict_human_at'),''),
+        NULLIF(json_extract(g.signal_json,'$.source_generated_at'),''),
+        g.updated_at
+      ) evidence_at
+    FROM growth_execution_contract c
+    JOIN growth_opportunity_state g ON g.opportunity_key=c.source_id
+    JOIN json_each(g.action_json) j ON j.value=c.action
+    WHERE c.source_kind='opportunity'
+      AND c.executor='seo_cloudflare'
+      AND c.subject_type='search'
+      AND c.status='verified'
+      AND g.status='active'
+      AND datetime(COALESCE(
+        NULLIF(json_extract(g.signal_json,'$.gsc_snapshot_generated_at'),''),
+        NULLIF(json_extract(g.signal_json,'$.last_strict_human_at'),''),
+        NULLIF(json_extract(g.signal_json,'$.source_generated_at'),''),
+        g.updated_at
+      )) > datetime(COALESCE(c.verified_at,c.completed_at,c.updated_at))
+    ORDER BY c.priority_score DESC,datetime(evidence_at) ASC,c.task_id ASC
+    LIMIT ${bounded}`);
+  let rearmed=0;
+  const taskIds=[];
+  for(const row of rows){
+    const w=await env.DB.prepare(`UPDATE growth_execution_contract
+      SET status='deferred',claim_deadline=NULL,attempt_deadline=NULL,verify_deadline=NULL,
+          claimed_at=NULL,attempted_at=NULL,completed_at=NULL,verified_at=NULL,evidence_json=NULL,
+          last_result='new_search_evidence_rearmed_v1',updated_at=datetime('now')
+      WHERE task_id=? AND status='verified'`).bind(row.task_id).run();
+    const changed=Number(w?.meta?.changes||w?.changes||0);
+    if(!changed)continue;
+    rearmed+=changed;taskIds.push(row.task_id);
+    await env.DB.prepare(`INSERT INTO growth_execution_events(event_id,task_id,event_type,executor,status,detail,created_at)
+      VALUES(?,?, 'evidence_rearmed','seo_cloudflare','deferred',?,datetime('now'))`)
+      .bind(`ge_${crypto.randomUUID()}`,row.task_id,`New search evidence at ${String(row.evidence_at||'unknown')} is newer than the previous verified SEO execution. Task rearmed for fresh proof.`).run().catch(()=>{});
+  }
+  return{rearmed,taskIds,bounded,policy:'newer_search_evidence_only_v1'};
+}
+
 export async function syncExecutionContracts(env){
   await ensureExecutionContractSchema(env);
   const q=v=>"'"+String(v).replaceAll("'","''")+"'";
@@ -375,6 +419,8 @@ export async function syncExecutionContracts(env){
           AND current.status<>'cancelled'
       )`).run();
 
+  const seoEvidenceRearm=await rearmSeoTasksForNewEvidence(env);
+
   const supervisors=await all(env,`SELECT engine,status,directive FROM growth_supervisor_state WHERE engine IN ('distribution','content','audience','seo_geo_aio','affiliate','catalog')`);
   let supervisorTasks=0,missing=0;
   const activeSupervisorIds=new Set();
@@ -437,7 +483,7 @@ export async function syncExecutionContracts(env){
     SUM(CASE WHEN status='human_required' THEN 1 ELSE 0 END) human_required,
     SUM(CASE WHEN status='deferred' THEN 1 ELSE 0 END) deferred
     FROM growth_execution_contract`);
-  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),staleLegacyClaimsReleased:Number(staleLegacyClaims?.meta?.changes||staleLegacyClaims?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v3'};
+  return{ok:true,opportunityTasks:n(counts?.opportunity_tasks),supervisorTasks,missingExecutors:n(counts?.missing)+missing,humanRequired:n(counts?.human_required),deferred:n(counts?.deferred),seoEvidenceRearmed:Number(seoEvidenceRearm?.rearmed||0),seoEvidenceRearmedTaskIds:seoEvidenceRearm?.taskIds||[],legacyBacklogNormalized:Number(legacyBacklog?.meta?.changes||legacyBacklog?.changes||0),staleLegacyClaimsReleased:Number(staleLegacyClaims?.meta?.changes||staleLegacyClaims?.changes||0),contentTaskBindingRecovered:Number(contentTaskBindingRecovery?.meta?.changes||contentTaskBindingRecovery?.changes||0),admission,cancelledSupervisor:staleSupervisor.length,write_policy:'capacity_bounded_task_specific_v3'};
 }
 
 export async function rebalanceExecutionAdmission(env,{readyCaps={}}={}){
@@ -766,10 +812,11 @@ export async function reconcileExecutionContracts(env){
     }else if(t.executor==='seo_cloudflare'){
       if(!seoReport)seoReport=await assetJson(env,'/reports/organic-growth-actions.json',{generatedAt:null,newInterventions:[],activeOptimizations:[]});
       const report=seoReport;
-      const generated=Date.parse(String(report.generatedAt||'')),createdAt=Date.parse(String(t.created_at||'').replace(' ','T')+'Z');
+      const proofBoundary=t.claimed_at||t.updated_at||t.created_at;
+      const generated=Date.parse(String(report.generatedAt||'')),boundaryAt=Date.parse(String(proofBoundary||'').replace(' ','T')+'Z');
       const intent=subject.replace(/^\//,'').replace(/\.html$/,'');
       const matched=[...(report.newInterventions||[]),...(report.activeOptimizations||[])].some(x=>String(x?.intent||x?.path||'').replace(/^\//,'').replace(/\.html$/,'')===intent);
-      if(Number.isFinite(generated)&&Number.isFinite(createdAt)&&generated>=createdAt&&matched)evidence={generatedAt:report.generatedAt,intent,verified:true};
+      if(Number.isFinite(generated)&&Number.isFinite(boundaryAt)&&generated>=boundaryAt&&matched)evidence={generatedAt:report.generatedAt,intent,verified:true,proofBoundary};
     }else if(t.executor==='affiliate_cycle'){
       evidence=await first(env,`SELECT status,updated_at FROM affiliate_workflow WHERE tool_slug=? AND updated_at>=? ORDER BY updated_at DESC LIMIT 1`,[subject,created]);
       if(evidence)evidence={...evidence,verified:true};
