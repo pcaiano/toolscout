@@ -57,3 +57,14 @@ test('critical Command Center assets ship and runtime truth has a bounded static
   assert.match(truth,/\/data\/gsc-search-reality\.json/);
   assert.match(truth,/\/reports\/editorial-authority-portfolio\.json/);
 });
+
+
+test('fresh service-account GSC evidence suppresses stale legacy refresh errors',()=>{
+  assert.match(truth,/runtimeOk:gscEvidenceAvailable\?\(gscEvidenceFresh\?true:gh\?\.ok===true\):false/);
+  assert.match(truth,/runtimeStatus:gscEvidenceAvailable\?\(gscEvidenceFresh\?'service_account_evidence_fresh'/);
+  assert.match(view,/g\.status==='stale'&&g\.runtimeOk===false/);
+});
+
+test('auth browser diagnostic is only an issue during an active or required handoff',()=>{
+  assert.match(view,/auth\.brokerRuntime\?\.browserVerified===false&&\(\(Number\(auth\.activeSessions\|\|0\)>0\|\|Number\(auth\.bootstrapRequired\|\|0\)>0\)\)/);
+});
