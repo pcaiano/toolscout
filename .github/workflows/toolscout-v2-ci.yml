@@ -50,6 +50,7 @@ on:
       - 'reports/growth-sprint-1.json'
       - 'tests/toolscout-growth-sprint-1.test.mjs'
       - '.github/workflows/growth-sprint-1-production.yml'
+      - '.github/workflows/authority-truth-production-repair.yml'
       - 'ga4-owner-context.js'
       - 'ga4-owner-exclusion-runtime.js'
       - 'ga4-attribution-24h-worker.js'
