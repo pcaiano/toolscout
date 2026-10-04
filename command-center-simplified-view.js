@@ -395,6 +395,8 @@ function results(){
 function health(){
  const t=data.truth||{},rt=data.runtime||{},a=data.authority||{},compute=data.compute||{},auth=data.auth||{},ga=data.acquisition||{},commerce=data.commerce||{},issues=[];
  const ec=t.executionContract||{},arch=t.architecture||{},g=t.search||{},growth=t.growth||{};
+ if(t.degraded)issues.push({level:'warn',title:'Runtime truth degraded',detail:'Canonical static assets are still visible while the D1 runtime truth model recovers. '+human(t.fallbackReason||'runtime truth fallback')});
+ if(!data.truth&&sourceErrors.truth)issues.push({level:'bad',title:'Business truth unavailable',detail:'The canonical Command Center truth endpoint failed: '+human(sourceErrors.truth)+'.'});
  if(Number(ec.missingExecutors||0)>0)issues.push({level:'bad',title:'Missing execution contracts',detail:n(ec.missingExecutors)+' executor mappings are missing.'});
  if(Number(ec.stalled||0)>0)issues.push({level:'bad',title:'Stalled execution contracts',detail:n(ec.stalled)+' tasks are stalled.'});
  if(Number(arch.openIncidents||0)>0){
@@ -418,7 +420,8 @@ function health(){
  if(auth.status==='configured'&&auth.brokerRuntime?.serviceOk===true&&auth.brokerRuntime?.browserVerified===false)issues.push({level:'warn',title:'Auth browser diagnostic delayed',detail:'Auth broker service is live; Chromium diagnostic reports '+human(auth.brokerRuntime.diagnosticStatus||'degraded')+'. This does not block the control plane unless an auth handoff itself fails.'});
  if(!issues.length)issues.push({level:'good',title:'No active integrity issue',detail:'Execution contracts, architecture, GSC refresh, authority, external compute and Auth Plane have no current measurable failure.'});
  const rows=[
-  ['GA4 acquisition',data.acquisition?(ga.status==='connected'?'Observed':'Unavailable'):'Loading',ga.status==='connected'?'Canonical users and sessions · refreshed '+dt(ga.fetchedAt):(ga.reason||sourceErrors.acquisition||'')],
+  ['GA4 acquisition',data.acquisition?(ga.status==='connected'?'Observed':'Unavailable'):(sourceErrors.acquisition?'Unavailable':'Loading'),ga.status==='connected'?'Canonical users and sessions · refreshed '+dt(ga.fetchedAt):(ga.reason||sourceErrors.acquisition||'')],
+  ['Business truth',data.truth?(t.degraded?'Degraded fallback':'Observed'):(sourceErrors.truth?'Unavailable':'Loading'),data.truth?(t.degraded?'Canonical asset fallback · runtime D1 model recovering':'Canonical D1 + asset read model'):(sourceErrors.truth||'')],
   ['Server outbound',data.commerce?(commerce.status==='connected'?'Observed':'Unavailable'):'Loading',commerce.status==='connected'?n(commerce.last24Hours?.outbound)+' outbound · '+n(commerce.last24Hours?.monetized)+' monetized / 24h':(commerce.reason||sourceErrors.commerce||'')],
   ['Runtime',rt.architecture||'Unavailable',(rt.primary?.runtime||'')+' - scheduler '+(rt.primary?.scheduler||'')],
   ['External compute',compute.status||'Unavailable',n(compute.completedToday)+' completed today · '+n(compute.queued)+' queued'],

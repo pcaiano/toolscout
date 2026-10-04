@@ -38,3 +38,13 @@ test('growth truth production repair proves GSC, authority and final release aft
   assert.match(probe,/gsc_daily_trend_stale/);
   assert.match(probe,/toolscout-2\.0-final-phase-260/);
 });
+
+
+test('Render keepalive protects both overflow compute and the auth broker',()=>{
+  const auth=read('auth-session-plane.js');
+  const router=read('compute-router-worker.js');
+  assert.match(auth,/export async function warmAuthBrokerService/);
+  assert.match(auth,/ToolScout-Auth-Keepalive\/1\.0/);
+  assert.match(router,/warmAuthBrokerService\(env,\{timeoutMs:RENDER_TRIGGER_TIMEOUT_MS\}\)/);
+  assert.match(router,/Promise\.allSettled\(\[/);
+});

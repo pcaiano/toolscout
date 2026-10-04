@@ -80,3 +80,11 @@ test('GA4 requests are bounded and optional dimensions cannot blank core traffic
   assert.match(runtime,/dimensions:\[\{name:'date'\}\][\s\S]*?\.catch\(\(\)=>null\)/);
   assert.match(runtime,/dailyReport\?\.rows/);
 });
+
+
+test('GA4 falls back to the service account when a persisted owner OAuth connection is stale',()=>{
+  const runtime=read('command-center-ga4-worker.js');
+  assert.match(runtime,/authMode='service_account_fallback'/);
+  assert.match(runtime,/if\(!\(cfg\.clientEmail&&cfg\.privateKey\)\)throw oauthError/);
+  assert.match(runtime,/authFallbackReason/);
+});

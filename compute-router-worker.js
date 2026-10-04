@@ -28,7 +28,7 @@ import {handleCommandCenterResilientHealthRoute} from './command-center-resilien
 import {handleCommandCenterSchemaControlRoute} from './command-center-schema-control-runtime.js';
 import {handleTrafficIntegrityHealthRoute} from './traffic-integrity-health-runtime.js';
 import {handleAdminStatsRoute} from './admin-stats-runtime.js';
-import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth} from './auth-session-plane.js';
+import {classifyAuthBacklog,authPlaneHealth,completeAuthHandoff,authenticatedResumeSweep,refreshAuthBrokerRuntimeHealth,warmAuthBrokerService} from './auth-session-plane.js';
 import {handleAutonomousDistributionRoute,qualifyDistributionSurfaces,openDistributionHumanGateFromResearchEvidence,reconcileFreshResearchHumanGates} from './distribution-autonomous-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {MIN_EXTERNAL_VALUE_FOR_RESEARCH} from './acquisition-value-model.js';
@@ -2431,16 +2431,24 @@ export default{
     const trafficGuardCleanup=Promise.resolve(runTrafficIntegrityGuardScheduled(env)).catch(async error=>{await event(env,'traffic_guard_cleanup_failed','failed',safe(error?.message||error,800)).catch(()=>{});return null;});
     if(ctx?.waitUntil)ctx.waitUntil(trafficGuardCleanup);
     if(trigger===RENDER_KEEPALIVE_CRON){
-      if(!env.OVERFLOW_COMPUTE_URL)return;
-      const keepalive=(async()=>{
-        try{
-          const endpoint=new URL('/health',env.OVERFLOW_COMPUTE_URL).toString();
-          const response=await fetch(endpoint,{method:'GET',headers:{'User-Agent':'ToolScout-Render-Keepalive/1.0'},signal:AbortSignal.timeout(RENDER_TRIGGER_TIMEOUT_MS)});
-          if(!response.ok)await event(env,'render_keepalive_failed','failed',`HTTP ${response.status}`).catch(()=>{});
-        }catch(error){
-          await event(env,'render_keepalive_failed','failed',safe(error?.message||error,500)).catch(()=>{});
-        }
-      })();
+      const keepalive=Promise.allSettled([
+        (async()=>{
+          if(!env.OVERFLOW_COMPUTE_URL)return null;
+          try{
+            const endpoint=new URL('/health',env.OVERFLOW_COMPUTE_URL).toString();
+            const response=await fetch(endpoint,{method:'GET',headers:{'User-Agent':'ToolScout-Render-Keepalive/1.0'},signal:AbortSignal.timeout(RENDER_TRIGGER_TIMEOUT_MS)});
+            if(!response.ok)await event(env,'render_keepalive_failed','failed',`HTTP ${response.status}`).catch(()=>{});
+            return response.ok;
+          }catch(error){
+            await event(env,'render_keepalive_failed','failed',safe(error?.message||error,500)).catch(()=>{});
+            return false;
+          }
+        })(),
+        warmAuthBrokerService(env,{timeoutMs:RENDER_TRIGGER_TIMEOUT_MS}).catch(async error=>{
+          await event(env,'auth_broker_keepalive_failed','failed',safe(error?.message||error,500)).catch(()=>{});
+          return null;
+        })
+      ]);
       if(ctx?.waitUntil){ctx.waitUntil(keepalive);return;}
       await keepalive;return;
     }

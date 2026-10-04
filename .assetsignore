@@ -11,6 +11,7 @@ scripts/
 .github/
 reports/*
 !reports/gsc-signals.json
+!reports/editorial-authority-portfolio.json
 !reports/ga4-health.json
 !reports/organic-growth-opportunities.json
 !reports/growth-sprint-1.json
