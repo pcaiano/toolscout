@@ -78,3 +78,14 @@ test('business critical status remains visible without masquerading as structura
   assert.doesNotMatch(workflow,/r\.operationalStatus==='critical'/);
   assert.match(workflow,/operationalStatus:r\.operationalStatus\|\|null/);
 });
+
+
+test('final freeze leaves recovery and acceptance as manual-only controls',()=>{
+  const recovery=read('.github/workflows/deploy-worker.yml');
+  const acceptance=read('.github/workflows/toolscout-v2-production-acceptance.yml');
+  for(const workflow of [recovery,acceptance]){
+    assert.match(workflow,/workflow_dispatch:/);
+    assert.doesNotMatch(workflow,/\n\s*push:/);
+    assert.doesNotMatch(workflow,/github\.event\.head_commit/);
+  }
+});
