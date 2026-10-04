@@ -114,7 +114,20 @@
       "turbo0.com": "turbo0-com",
       "ardregistry.org": "ard-registry",
       "smartbench.ai": "smartbench-ard",
-      "neuronto.com": "neuronto-ard"
+      "neuronto.com": "neuronto-ard",
+      "sourceforge.net": "sourceforge",
+      "getapp.com": "getapp",
+      "softwareadvice.com": "software-advice",
+      "capterra.com": "capterra",
+      "crozdesk.com": "crozdesk",
+      "trustradius.com": "trustradius",
+      "solutions.trustradius.com": "trustradius",
+      "aitools.fyi": "aitools-fyi",
+      "easywithai.com": "easy-with-ai",
+      "allstartups.info": "allstartups",
+      "americanstartups.com": "american-startups",
+      "arcticstartup.com": "arctic-startup",
+      "appsumo.com": "appsumo"
     },
     "host_status_overrides": {
       "dododirectory.com": {
@@ -161,7 +174,149 @@
         "status": "policy_blocked",
         "human_required": 0,
         "next_action": "Free route requires reciprocal badge/backlink; blocked by ToolScout no-reciprocal-badge policy."
+      },
+      "androidappsreview.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "apprater.net": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appslisto.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appspy.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appagg.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appiod.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appolicious.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "apps400.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appsmirror.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appsthunder.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appvita.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "appysmarts.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Mobile-app review/discovery surface is not a fit for ToolScout's web software product; keep out of acquisition execution."
+      },
+      "office.angi.com": {
+        "surface_type": "distribution_surface",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Angi provider-office surface is unrelated to ToolScout software distribution; suppress as discovery noise."
+      },
+      "app.getfernand.com": {
+        "surface_type": "distribution_surface",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Fernand application surface is a software product, not a ToolScout distribution channel; suppress as discovery noise."
+      },
+      "app.thestacc.com": {
+        "surface_type": "distribution_surface",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "TheStacc application subdomain is source-owned product UI, not a separate distribution surface; suppress unless an exact submission route is observed."
+      },
+      "wordpress.org": {
+        "surface_type": "editorial_resource",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "WordPress.org is not an applicable distribution surface for ToolScout because ToolScout is not a WordPress plugin/theme."
+      },
+      "chromewebstore.google.com": {
+        "surface_type": "directory",
+        "status": "skipped",
+        "human_required": 0,
+        "next_action": "Chrome Web Store is not applicable because ToolScout is not a Chrome extension."
       }
+    },
+    "canonical_types": {
+      "producthunt.com": "launch_surface",
+      "fazier.com": "launch_surface",
+      "tinylaun.ch": "launch_surface",
+      "tinylaunch.com": "launch_surface",
+      "uneed.best": "directory",
+      "saashub.com": "directory",
+      "alternativeto.net": "directory",
+      "peerlist.io": "launch_surface",
+      "microlaunch.net": "launch_surface",
+      "betalist.com": "launch_surface",
+      "peerpush.net": "launch_surface",
+      "peerpush.com": "launch_surface",
+      "turbo0.com": "directory",
+      "ardregistry.org": "agent_registry",
+      "smartbench.ai": "agent_registry",
+      "neuronto.com": "agent_registry",
+      "sourceforge.net": "directory",
+      "getapp.com": "directory",
+      "softwareadvice.com": "directory",
+      "capterra.com": "directory",
+      "crozdesk.com": "directory",
+      "trustradius.com": "directory",
+      "solutions.trustradius.com": "directory",
+      "aitools.fyi": "directory",
+      "easywithai.com": "directory",
+      "aitoolmall.com": "directory",
+      "aitoolsdirectory.com": "directory",
+      "topai.tools": "directory",
+      "futurepedia.io": "directory",
+      "theresanaiforthat.com": "directory",
+      "futuretools.io": "directory",
+      "toolify.ai": "directory",
+      "allthingsai.com": "directory",
+      "aichief.com": "directory",
+      "allstartups.info": "launch_surface",
+      "americanstartups.com": "launch_surface",
+      "arcticstartup.com": "editorial_resource",
+      "appsumo.com": "launch_surface"
     }
   },
   "strategy": {

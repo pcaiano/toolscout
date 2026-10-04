@@ -17,6 +17,11 @@ function technicalHost(host){
   const h=String(host||'').toLowerCase().replace(/^www\./,'');
   return TECHNICAL_HOST_RE.test(h)||TECHNICAL_HOST_SUFFIXES.some(x=>h===x||h.endsWith('.'+x));
 }
+function sameHostFamily(a,b){
+  const x=String(a||'').toLowerCase().replace(/^www\./,'');
+  const y=String(b||'').toLowerCase().replace(/^www\./,'');
+  return Boolean(x&&y&&(x===y||x.endsWith('.'+y)||y.endsWith('.'+x)));
+}
 async function suppressTechnicalNoise(env){
   try{
     const r=await env.DB.prepare(`UPDATE distribution_opportunities
@@ -52,16 +57,17 @@ function candidate(raw,source,guardrails={}){
   const x=publicHttps(raw);if(!x)return null;
   const host=x.hostname.toLowerCase(),bareHost=host.replace(/^www\./,'');
   if(bareHost==='trytoolscout.org'||technicalHost(bareHost))return null;
-  const canonical=guardrails.canonical_hosts||{},overrides=guardrails.host_status_overrides||{},override=overrides[bareHost]||{},canonicalSlug=canonical[bareHost]||null;
+  const canonical=guardrails.canonical_hosts||{},canonicalTypes=guardrails.canonical_types||{},overrides=guardrails.host_status_overrides||{},override=overrides[bareHost]||{},canonicalSlug=canonical[bareHost]||null;
   const slug=String(canonicalSlug||hostSlug(bareHost));if(!slug)return null;
   const text=(bareHost+' '+x.pathname).toLowerCase();
   if(!RELEVANT.test(text))return null;
-  const curated=Boolean(canonicalSlug||overrides[bareHost]);
+  const curated=Boolean(canonicalSlug||canonicalTypes[bareHost]||overrides[bareHost]);
   if(!curated&&!DISTRIBUTION_SURFACE_RE.test(text))return null;
-  const type=/\b(ard|registry|mcp|a2a|agent)\b/.test(text)?'agent_registry':/\bapi\b/.test(text)?'api_directory':/newsletter/.test(text)?'newsletter':/partner/.test(text)?'partner_resource':/community/.test(text)?'community_resource':/resource|editorial|publisher|media|press|roundup|comparison|review|curated|contribute|write-for-us/.test(text)?'editorial_resource':/launch|startup/.test(text)?'launch_surface':/director(?:y|ies)|catalog|marketplace|showcase|tools?/.test(text)?'directory':'distribution_surface';
+  const inferredType=/\b(ard|registry|mcp|a2a|agent)\b/.test(text)?'agent_registry':/\bapi\b/.test(text)?'api_directory':/newsletter/.test(text)?'newsletter':/partner/.test(text)?'partner_resource':/community/.test(text)?'community_resource':/resource|editorial|publisher|media|press|roundup|comparison|review|curated|contribute|write-for-us/.test(text)?'editorial_resource':/launch|startup/.test(text)?'launch_surface':/director(?:y|ies)|catalog|marketplace|showcase|tools?/.test(text)?'directory':'distribution_surface';
+  const type=String(override.surface_type||canonicalTypes[bareHost]||inferredType);
   const directAction=DIRECT_ACTION_PATH_RE.test(String(x.pathname||'')+String(x.search||''));
   const actionUrl=directAction?x.toString():x.origin+'/';
-  return {slug,name:bareHost,type,url:actionUrl,host:bareHost,source,status:String(override.status||'discovered'),human_required:Number(override.human_required||0),next_action:String(override.next_action||`Verify opportunity discovered via ${source}; classify submission path before execution.`)};
+  return {slug,name:bareHost,type,url:actionUrl,host:bareHost,source,direct_action:directAction,status:String(override.status||'discovered'),human_required:Number(override.human_required||0),next_action:String(override.next_action||`Verify opportunity discovered via ${source}; classify submission path before execution.`)};
 }
 function recursiveSource(raw,parent){const u=publicHttps(raw);if(!u)return null;const host=u.hostname.toLowerCase().replace(/^www\./,'');if(host==='trytoolscout.org'||technicalHost(host))return null;const rawPath=String(u.pathname||'');let path=rawPath;try{path=decodeURIComponent(rawPath)}catch{}if(STATIC_SOURCE_PATH_RE.test(path)||/\/wp-content\/uploads\//i.test(path)||/\/storage\/v1\/object\/public\//i.test(path)||/%(?:22|7b|7d)/i.test(rawPath)||path.length>260)return null;const fingerprint=`${host}${path}`;if(!SOURCE_LIKE.test(fingerprint))return null;u.hash='';for(const k of [...u.searchParams.keys()])if(/^utm_|ref$|source$/i.test(k))u.searchParams.delete(k);return {slug:`recursive-${hostSlug(host+'-'+u.pathname)}`.slice(0,120),url:u.toString(),host,parent};}
 async function familySignals(env){
@@ -133,7 +139,7 @@ async function discover(request,env){
     const {s,sourceUrl,allLinks}=item;let relevantOnSource=0;
     for(const raw of allLinks.slice(0,c.guardrails?.max_candidates_per_source||50)){
       const rs=recursiveSource(raw,s.slug);if(rs&&await rememberSource(env,rs,s.slug))recursiveAdded++;
-      let x;try{x=candidate(raw,s.slug,c.guardrails||{})}catch{continue}if(!x)continue;let sourceHost=sourceUrl.hostname.toLowerCase().replace(/^www\./,'');if(c.guardrails?.exclude_source_hosts&&sourceHost&&x.host===sourceHost)continue;if((c.guardrails?.exclude_hosts||[]).some(h=>x.host===String(h).toLowerCase().replace(/^www\./,'')))continue;found++;relevantOnSource++;if(known.has(x.slug)){knownDuplicates++;continue;}
+      let x;try{x=candidate(raw,s.slug,c.guardrails||{})}catch{continue}if(!x)continue;let sourceHost=sourceUrl.hostname.toLowerCase().replace(/^www\./,'');if(c.guardrails?.exclude_source_hosts&&sourceHost&&sameHostFamily(x.host,sourceHost)&&!x.direct_action)continue;if((c.guardrails?.exclude_hosts||[]).some(h=>x.host===String(h).toLowerCase().replace(/^www\./,'')))continue;found++;relevantOnSource++;if(known.has(x.slug)){knownDuplicates++;continue;}
       const authorityProfile={
         editorial_resource:{base:82,audience:82,authority:88,traffic:76,backlink:94,acceptance:34,automation:28,effort:58},
         partner_resource:{base:80,audience:80,authority:86,traffic:72,backlink:92,acceptance:38,automation:30,effort:55},
