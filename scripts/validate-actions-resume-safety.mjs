@@ -24,7 +24,25 @@ if(required.autonomousGrowthBrain&&!files.light.includes(`autonomousGrowthBrain 
 if(required.commandCenterComposition&&!files.light.includes(`commandCenterComposition = '${required.commandCenterComposition}'`)&&!files.light.includes(`commandCenterComposition:'${required.commandCenterComposition}'`))fail('Command Center composition contract mismatch');
 if(required.affiliateEngine&&!files.light.includes(`affiliateEngineVersion = '${required.affiliateEngine}'`)&&!files.light.includes(`affiliate:'${required.affiliateEngine}'`))fail('Affiliate Engine contract mismatch');
 if(required.catalogGrowth&&!files.light.includes(`catalogGrowthVersion = '${required.catalogGrowth}'`)&&!files.light.includes(`catalog:'${required.catalogGrowth}'`))fail('Catalog Growth contract mismatch');
-if(required.minimumBuildContract&&!files.light.includes(`buildContract:'${required.minimumBuildContract}'`))fail('expected reviewed build contract is not present');
+if(required.minimumBuildContract){
+  const match=files.light.match(/buildContract:['"]([^'"]+)['"]/);
+  const actual=match?.[1]||null;
+  const parse=(value)=>{
+    const m=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})\.(\d+)$/);
+    return m?[Number(m[1]),Number(m[2]),Number(m[3]),Number(m[4])]:null;
+  };
+  const a=parse(actual);
+  const min=parse(required.minimumBuildContract);
+  const atLeast=(left,right)=>{
+    if(!left||!right)return left===right;
+    for(let i=0;i<left.length;i++){
+      if(left[i]>right[i])return true;
+      if(left[i]<right[i])return false;
+    }
+    return true;
+  };
+  if(!atLeast(a,min))fail('expected reviewed build contract floor is not present: actual='+actual+' required>='+required.minimumBuildContract);
+}
 if(!files.funnel.includes("import base from './catalog-autonomy-worker.js'"))fail('Catalog Runtime is no longer in the live Worker chain');
 if(!files.growth.includes("'affiliate'")||!files.growth.includes("'catalog_tool'"))fail('Affiliate/Catalog are no longer first-class shared growth opportunities');
 if(!files.affiliate.includes('affiliate_application_packs')||!files.affiliate.includes('affiliate_route_verification'))fail('Affiliate 2.1 autonomy contract is missing');
