@@ -209,7 +209,7 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
       available:gscEvidence,
       generatedAt:gscSignals?.generatedAt||gscReality?.generatedAt||null,
       runtimeGeneratedAt:gscHealth?.generatedAt||null,
-      runtimeOk:gscEvidence?runtimeOk:false,
+      runtimeOk:gscEvidence?(gscHealth?.ok===false?false:(gscHealth?.ok===true?true:null)):false,
       runtimeStatus:gscEvidence?(gscHealth?.status||(runtimeOk?'connected':'asset_fallback')):'unavailable',
       impressions:gscEvidence?(daily28.length?finalized.impressions:truthNum(gscWindow.impressions)):null,
       clicks:gscEvidence?(daily28.length?finalized.clicks:truthNum(gscWindow.clicks)):null,
