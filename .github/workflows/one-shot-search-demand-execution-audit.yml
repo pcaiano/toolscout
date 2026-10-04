@@ -62,7 +62,7 @@ jobs:
           LIMIT 100;
 
           SELECT opportunity_key,subject_type,subject_key,priority_score,status,action_json,
-                 evidence_json,last_evaluated_at,updated_at
+                 signal_json,last_evaluated_at,updated_at
           FROM growth_opportunity_state
           WHERE status='active'
             AND (
