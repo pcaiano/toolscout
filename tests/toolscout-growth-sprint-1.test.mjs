@@ -48,3 +48,10 @@ test('Command Center exposes Ahrefs direct, Tiny Startups and SE Ranking as sepa
   assert.match(ui,/SE Ranking profile/);
   assert.match(ui,/Third-party/);
 });
+
+
+test('Growth Sprint runtime asset is included in the Worker static asset allowlist',()=>{
+  const ignore=read('.assetsignore');
+  assert.match(ignore,/^reports\/\*$/m);
+  assert.match(ignore,/^!reports\/growth-sprint-1\.json$/m);
+});
