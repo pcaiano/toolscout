@@ -8,6 +8,8 @@ on:
       - '.github/workflows/seo-engine-v2.yml'
       - 'data/github-actions-resume-policy.json'
       - 'scripts/validate-actions-resume-safety.mjs'
+      - 'scripts/validate-growth-spend-policy.mjs'
+      - 'tests/growth-spend-policy.test.mjs'
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
@@ -113,6 +115,8 @@ jobs:
           node scripts/enforce-seo-hygiene.mjs
       - name: Enforce outbound UX
         run: node scripts/enforce-outbound-ux.mjs --fix
+      - name: Validate growth spend policy regression
+        run: node --test tests/growth-spend-policy.test.mjs
       - name: Validate free first growth spend policy
         run: node scripts/validate-growth-spend-policy.mjs
       - name: Generate distribution assets
@@ -137,6 +141,36 @@ jobs:
         run: node scripts/validate-public-surface.mjs
       - name: Validate commercial indexability and links
         run: node scripts/validate-commercial-indexability.mjs
+      - name: Audit generated diff on readmission branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git diff --check
+          echo "=== GENERATED STATUS ==="
+          git status --short
+          echo "=== GENERATED DIFF STAT ==="
+          git diff --stat
+          echo "=== GENERATED NAME STATUS ==="
+          git diff --name-status
+          node - <<'NODE'
+          const {execFileSync}=require('node:child_process');
+          const raw=execFileSync('git',['status','--porcelain=v1','--untracked-files=all'],{encoding:'utf8'});
+          const paths=raw.split(/\r?\n/).filter(Boolean).map(line=>{
+            let p=line.slice(3).trim();
+            if(p.includes(' -> '))p=p.split(' -> ').at(-1);
+            return p.replace(/^"(.*)"$/,'$1');
+          });
+          const exact=new Set([
+            'data/tools.json','data/competitive-gap-profiles.json','data/seo-longtail.json',
+            'data/catalog-quality-state.json','data/tool-assets.json','data/comparisons.json',
+            'data/search-commercial-routing.json','data/gsc-search-reality.json','data/gsc-daily-trend.json',
+            'sitemap.xml','robots.txt','feed.xml','llms.txt','software-trends-index.json'
+          ]);
+          const allowed=p=>exact.has(p)||/^[^/]+\.html$/.test(p)||/^tools\/.*\.html$/.test(p)||/^blog\/.*\.html$/.test(p)||/^reports\/.*\.json$/.test(p);
+          const forbidden=paths.filter(p=>!allowed(p));
+          console.log(JSON.stringify({changed:paths.length,forbidden,paths},null,2));
+          if(forbidden.length)process.exit(1);
+          NODE
       - name: Commit generated SEO assets
         if: github.ref == 'refs/heads/main'
         run: |
