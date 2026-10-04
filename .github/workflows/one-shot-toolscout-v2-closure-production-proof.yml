@@ -1,0 +1,139 @@
+name: One Shot ToolScout 2.0 Closure Production Proof
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-toolscout-v2-closure-production-proof.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Confirm exact deferred proof candidate
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT c.task_id,c.status,c.last_result,c.priority_score,o.status opportunity_status,n.status network_status
+          FROM growth_execution_contract c
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=c.subject_key
+          WHERE c.task_id='opportunity|surface:stremit|scale_proven_surface'
+          LIMIT 1;
+          " | tee /tmp/before.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const row=JSON.parse(fs.readFileSync('/tmp/before.json','utf8'))[0]?.results?.[0];
+          if(!row)throw new Error('stremit scale task not found');
+          if(row.network_status!=='adopted')throw new Error('stremit is no longer an adopted proof surface: '+JSON.stringify(row));
+          if(!['deferred','pending','stalled','verified'].includes(String(row.status)))throw new Error('unexpected stremit task state: '+JSON.stringify(row));
+          console.log(JSON.stringify({ok:true,row},null,2));
+          NODE
+
+      - name: Requeue only the exact stale no-proof task for immediate closure proof
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+          UPDATE growth_execution_contract
+          SET status='stalled',
+              last_result='closure_proof_requeue',
+              claim_deadline=NULL,
+              attempt_deadline=NULL,
+              verify_deadline=NULL,
+              updated_at=datetime('now','-2 hours')
+          WHERE task_id='opportunity|surface:stremit|scale_proven_surface'
+            AND status IN ('deferred','pending','stalled')
+            AND EXISTS (
+              SELECT 1 FROM distribution_network_outreach n
+              WHERE n.surface_slug='stremit' AND n.status='adopted'
+            );
+          "
+
+      - name: Dispatch current main against production D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler dev --remote --port 8787 --show-interactive-dev-session=false --var ADMIN_TOKEN:toolscout2_closure_proof >/tmp/closure-proof-wrangler.log 2>&1 &
+          PID=$!
+          cleanup(){ kill "$PID" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -fsS 'http://127.0.0.1:8787/api/runtime/schedule-contract' >/tmp/schedule.json 2>/dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then tail -160 /tmp/closure-proof-wrangler.log; exit 1; fi
+
+          code="$(curl -sS -o /tmp/dispatch.json -w '%{http_code}' -X POST             'http://127.0.0.1:8787/api/growth/execution/dispatch'             -H 'Authorization: Bearer toolscout2_closure_proof'             -H 'Content-Type: application/json')"
+          cat /tmp/dispatch.json
+          test "$code" -ge 200
+          test "$code" -lt 300
+
+      - name: Prove task-specific closure and canonical hourly schedule
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT c.task_id,c.status,c.last_result,c.verified_at,c.completed_at,c.updated_at,
+                 o.status opportunity_status,n.status network_status
+          FROM growth_execution_contract c
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=c.subject_key
+          WHERE c.task_id='opportunity|surface:stremit|scale_proven_surface'
+          LIMIT 1;
+
+          SELECT event_type,executor,status,detail,created_at
+          FROM growth_execution_events
+          WHERE task_id='opportunity|surface:stremit|scale_proven_surface'
+          ORDER BY created_at DESC LIMIT 8;
+          " | tee /tmp/after.json
+
+          node - <<'NODE'
+          const fs=require('fs');
+          const payload=JSON.parse(fs.readFileSync('/tmp/after.json','utf8'));
+          const row=payload[0]?.results?.[0];
+          if(row?.status!=='verified'){
+            console.error('closure proof did not verify stremit',row);
+            process.exit(42);
+          }
+          if(!String(row.last_result||'').includes('proven_surface_confirmed')){
+            throw new Error('task verified without expected proven-surface proof: '+JSON.stringify(row));
+          }
+          const schedule=JSON.parse(fs.readFileSync('/tmp/schedule.json','utf8'));
+          if(schedule?.crons?.hourly!=='20 * * * *')throw new Error('canonical hourly cron drift: '+JSON.stringify(schedule?.crons));
+          if(schedule?.missions?.authority_sender_drain?.cron!=='20 * * * *')throw new Error('authority sender drain contract drift');
+          console.log(JSON.stringify({ok:true,task:row,hourly:schedule.crons.hourly,authoritySenderDrain:schedule.missions.authority_sender_drain},null,2));
+          NODE
+
+      - name: Fail closed if proof did not verify
+        if: failure()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+          UPDATE growth_execution_contract
+          SET status='deferred',
+              last_result='closure_proof_failed_reverted',
+              claimed_at=NULL,
+              claim_deadline=NULL,
+              attempt_deadline=NULL,
+              verify_deadline=NULL,
+              updated_at=datetime('now')
+          WHERE task_id='opportunity|surface:stremit|scale_proven_surface'
+            AND status IN ('pending','claimed','attempted','stalled');
+          " || true
