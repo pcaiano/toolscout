@@ -88,3 +88,10 @@ test('GA4 falls back to the service account when a persisted owner OAuth connect
   assert.match(runtime,/if\(!\(cfg\.clientEmail&&cfg\.privateKey\)\)throw oauthError/);
   assert.match(runtime,/authFallbackReason/);
 });
+
+
+test('GA4 reuses the existing GSC service account when GA4-specific credentials are absent',()=>{
+  const runtime=read('command-center-ga4-worker.js');
+  assert.match(runtime,/env\.GA4_SERVICE_ACCOUNT_JSON\|\|env\.GSC_SERVICE_ACCOUNT_JSON/);
+  assert.match(runtime,/propertyId:String\(env\.GA4_PROPERTY_ID\|\|''\)/);
+});
