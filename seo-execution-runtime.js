@@ -108,7 +108,7 @@ async function verifyClickCaptureIntervention(env,pathname){
     if(!type.includes('text/html'))return {verified:false,reason:'click_capture_public_not_html',httpStatus:r.status};
     const html=await r.text();
     const marker=/data-toolscout-click-capture=["']1["']/i.test(html);
-    const meta=html.match(/<meta\\b[^>]*data-toolscout-click-capture=["']1["'][^>]*>/i)?.[0]||'';
+    const meta=html.match(/<meta\b[^>]*data-toolscout-click-capture=["']1["'][^>]*>/i)?.[0]||'';
     const description=(meta.match(/content=["']([^"']*)["']/i)||[])[1]||'';
     const verified=marker&&description.trim().length>=70&&description.trim().length<=160;
     return {verified,reason:verified?'click_capture_public_verified':'click_capture_marker_or_description_invalid',httpStatus:r.status,descriptionLength:description.trim().length};
