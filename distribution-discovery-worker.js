@@ -4,7 +4,7 @@ import {runDistributionLearningScheduled} from './distribution-learning-worker.j
 const H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 const hostSlug=h=>h.replace(/^www\./,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,110);
 const RELEVANT=/(ai|agent|mcp|a2a|ard|registry|api|tool|software|saas|startup|launch|directory|product|newsletter|app|resource|editorial|publisher|media|community|partner|press|roundup|comparison|review|curated|contribute|write-for-us)/i;
-const DISTRIBUTION_SURFACE_RE=/(director(?:y|ies)|registr(?:y|ies)|submit|submission|list(?:ing|ings)?|launch|startup|resource|newsletter|community|partner|publisher|media|press|roundup|comparison|review|curated|catalog|marketplace|showcase|discover|tools?)/i;
+const DISTRIBUTION_SURFACE_RE=/(?:^|[\\s./_-])(directory|directories|registry|registries|submit|submission|listing|listings|launch|startup|resource|resources|newsletter|community|partner|publisher|media|press|roundup|comparison|review|curated|catalog|marketplace|showcase|discover|tool|tools)(?:$|[\\s./_?&=-])/i;
 const DIRECT_ACTION_PATH_RE=/(submit|submission|add(?:-|_|\/)?(?:tool|startup|product)|new(?:-|_|\/)?(?:tool|startup|product)|register|sign(?:-|_|\/)?up|list(?:-|_|\/)?your)/i;
 const SOURCE_LIKE=/(directories|directory-list|registr(?:y|ies)|resource-list|resources|resource-page|software-resources|tool-list|software-list|best-tools|where-to-submit|submit-(?:your|to)|launch-list|startup-list|ai-tools-list|awesome-|curated-list|roundup|comparison|newsletter|publisher-list|media-list|community-list|partner-list|contribute|write-for-us|guest-post)/i;
 const FAMILY_BOOST_CAP=10;
