@@ -1,8 +1,8 @@
 {
   "version": 1,
   "enabled": true,
-  "mode": "review_branch_only",
-  "reason": "Controlled non-main readmission test for seo-engine-v2 against the current ToolScout 2.0 shared-growth-v3 contracts. Main remains locked.",
+  "mode": "production_readmitted",
+  "reason": "SEO/catalog GitHub Actions were revalidated against ToolScout 2.0 shared-growth-v3 on 2026-10-04. GitHub Actions is limited to repository generation, validation and recovery work; Cloudflare/Render remain runtime execution owners.",
   "required": {
     "autonomousGrowthBrain": "shared-growth-v3",
     "commandCenterComposition": "canonical-growth-v2",
@@ -18,5 +18,5 @@
     "Set enabled=true only in a reviewed pull request."
   ],
   "reviewedAt": "2026-10-04",
-  "reviewedBy": "controlled-readmission-test"
+  "reviewedBy": "actions-readmission-2026-10-04"
 }
