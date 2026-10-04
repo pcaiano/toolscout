@@ -92,6 +92,21 @@ jobs:
         run: node scripts/sync-comparison-demand.mjs
       - name: Generate commercial comparisons
         run: node scripts/generate-comparisons.mjs
+      - name: Probe generated comparison decision semantics
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const pairs=JSON.parse(fs.readFileSync('data/comparisons.json','utf8'));
+          const failures=[];
+          for(const pair of pairs){
+            const slug=Array.isArray(pair)?pair.join('-vs-'):pair.slug;
+            const html=fs.readFileSync(slug+'.html','utf8');
+            if(!/Choose\s+[^<]+\s+(?:if|when)\s+[^<]+/i.test(html))failures.push(slug+':decision');
+            if(!/How this comparison works/i.test(html))failures.push(slug+':methodology');
+          }
+          console.log(JSON.stringify({pairs:pairs.length,failures},null,2));
+          if(failures.length)process.exit(1);
+          NODE
       - name: Validate comparison editorial contract
         run: |
           node --test \
@@ -102,12 +117,12 @@ jobs:
             tests/unbounce-partnerstack-tracking.test.mjs
       - name: Enrich comparisons with decision context
         run: node scripts/enrich-comparison-context.mjs
+      - name: Generate verified competitive gap profiles
+        run: node scripts/generate-competitive-gap-profiles.mjs
       - name: Generate indexable tool profiles
         run: node scripts/generate-tool-pages.mjs
       - name: Prune orphan tool profiles
         run: node scripts/prune-orphan-tool-profiles.mjs
-      - name: Generate verified competitive gap profiles
-        run: node scripts/generate-competitive-gap-profiles.mjs
       - name: Link directory to indexable tool profiles
         run: node scripts/link-static-tool-profiles.mjs
       - name: Link guides to relevant comparisons
@@ -148,6 +163,21 @@ jobs:
         run: node scripts/audit-controlled-seo-surface.mjs
       - name: Validate AEO GEO readiness
         run: node scripts/validate-aeo-geo-readiness.mjs
+      - name: Recheck comparison decision semantics after enrichment
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const pairs=JSON.parse(fs.readFileSync('data/comparisons.json','utf8'));
+          const failures=[];
+          for(const pair of pairs){
+            const slug=Array.isArray(pair)?pair.join('-vs-'):pair.slug;
+            const html=fs.readFileSync(slug+'.html','utf8');
+            if(!/Choose\s+[^<]+\s+(?:if|when)\s+[^<]+/i.test(html))failures.push(slug+':decision');
+            if(!/How this comparison works/i.test(html))failures.push(slug+':methodology');
+          }
+          console.log(JSON.stringify({pairs:pairs.length,failures},null,2));
+          if(failures.length)process.exit(1);
+          NODE
       - name: Validate machine readability
         run: node scripts/validate-machine-readability.mjs
       - name: Validate SEO pages
