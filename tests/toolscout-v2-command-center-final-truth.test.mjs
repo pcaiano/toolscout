@@ -42,3 +42,15 @@ test('canonical server outbound ledger excludes owner-classified sessions withou
   assert.match(ga4,/LEFT JOIN sessions s ON s\.session_id=c\.session_id/);
   assert.match(ga4,/COALESCE\(s\.classification,''\)<>'owner'/);
 });
+
+
+test('critical Command Center assets ship and runtime truth has a bounded static fallback',()=>{
+  const assets=read('.assetsignore');
+  assert.match(assets,/!reports\/editorial-authority-portfolio\.json/);
+  assert.match(truth,/const BUSINESS_TRUTH_BUILD_TIMEOUT_MS=8000/);
+  assert.match(truth,/buildStaticBusinessTruthFallback/);
+  assert.match(truth,/command-center-business-truth-static-fallback-v1/);
+  assert.match(truth,/\/data\/se-ranking-backlink-truth\.json/);
+  assert.match(truth,/\/data\/gsc-search-reality\.json/);
+  assert.match(truth,/\/reports\/editorial-authority-portfolio\.json/);
+});
