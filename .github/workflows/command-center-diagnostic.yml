@@ -47,7 +47,7 @@ jobs:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
         run: |
           node <<'NODE'
-          const crypto = require('node:crypto');
+          const crypto = await import('node:crypto');
           const raw=process.env.GSC_SERVICE_ACCOUNT_JSON||'';
           if(!raw){console.log(JSON.stringify({configured:false}));process.exit(0)}
           let creds;try{creds=JSON.parse(raw)}catch(e){console.log(JSON.stringify({configured:true,validJson:false}));process.exit(0)}
