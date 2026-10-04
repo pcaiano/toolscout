@@ -10,6 +10,8 @@ on:
       - 'tests/seo-extensionless-tool-link.test.mjs'
       - 'scripts/validate-editorial-trust.mjs'
       - 'tests/editorial-trust-extensionless-link.test.mjs'
+      - 'scripts/validate-public-surface.mjs'
+      - 'tests/unbounce-partnerstack-tracking.test.mjs'
   workflow_dispatch:
 
 permissions:
@@ -42,7 +44,8 @@ jobs:
             tests/competitive-gap-catalog-parity.test.mjs \
             tests/growth-spend-policy.test.mjs \
             tests/seo-extensionless-tool-link.test.mjs \
-            tests/editorial-trust-extensionless-link.test.mjs
+            tests/editorial-trust-extensionless-link.test.mjs \
+            tests/unbounce-partnerstack-tracking.test.mjs
       - name: Validate generated SEO link contract
         run: |
           node scripts/generate-seo-pages.mjs
@@ -53,3 +56,7 @@ jobs:
         run: |
           node scripts/generate-software-trends-index.mjs
           node scripts/validate-editorial-trust.mjs
+      - name: Validate remaining public/commercial gates
+        run: |
+          node scripts/validate-public-surface.mjs
+          node scripts/validate-commercial-indexability.mjs
