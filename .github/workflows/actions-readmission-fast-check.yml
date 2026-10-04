@@ -1,0 +1,41 @@
+name: ToolScout Actions Readmission Fast Check
+
+on:
+  push:
+    branches:
+      - actions-readmission-seo-20261004
+    paths:
+      - '.github/workflows/actions-readmission-fast-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate readmission guards
+        run: |
+          node --check scripts/validate-actions-resume-safety.mjs
+          node --check scripts/validate-growth-spend-policy.mjs
+          node scripts/validate-actions-resume-safety.mjs
+          node scripts/validate-growth-spend-policy.mjs
+      - name: Validate updated generators
+        run: |
+          node --check scripts/generate-comparisons.mjs
+          node --check scripts/generate-competitive-gap-profiles.mjs
+          node scripts/generate-comparisons.mjs
+      - name: Run focused regression tests
+        run: |
+          node --test \
+            tests/comparison-editorial-contract.test.mjs \
+            tests/competitive-gap-catalog-parity.test.mjs \
+            tests/growth-spend-policy.test.mjs
+      - name: Validate machine readability after comparison regeneration
+        run: node scripts/validate-machine-readability.mjs
