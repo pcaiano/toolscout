@@ -1,8 +1,10 @@
 import {ROUTE_GROUPS,EARLY_DISPATCH_OWNERS} from './runtime-route-contract.js';
 
 export const TOOLSCOUT_V2_PHASE=107;
+export const TOOLSCOUT_V2_RELEASE_PHASE=260;
+export const TOOLSCOUT_V2_RELEASE='toolscout-2.0-final';
 export const TOOLSCOUT_V2_LEGACY_EDGES=0;
-export const TOOLSCOUT_V2_DEPLOYMENT_FINGERPRINT='toolscout-2.0-phase-107-zero-legacy';
+export const TOOLSCOUT_V2_DEPLOYMENT_FINGERPRINT='toolscout-2.0-final-phase-260';
 
 function ownershipSnapshot(){
   const directGroups=ROUTE_GROUPS.filter(group=>group.owner==='compute_router'||EARLY_DISPATCH_OWNERS.includes(group.owner));
@@ -25,10 +27,12 @@ export async function handleToolScoutV2ClosureRoute(request){
     ok:closed,
     architecture:'toolscout-2.0',
     phase:TOOLSCOUT_V2_PHASE,
+    release:TOOLSCOUT_V2_RELEASE,
+    releasePhase:TOOLSCOUT_V2_RELEASE_PHASE,
     deploymentFingerprint:TOOLSCOUT_V2_DEPLOYMENT_FINGERPRINT,
     legacyEdges:TOOLSCOUT_V2_LEGACY_EDGES,
     routeOwnership,
-    productionClosure:{status:closed?'architecture_closed':'incomplete',definition:'Zero generic legacy traversal plus complete declared route ownership.'}
+    productionClosure:{status:closed?'architecture_closed':'incomplete',releaseStatus:closed?'production_accepted':'incomplete',definition:'Zero generic legacy traversal plus complete declared route ownership.'}
   },{headers:{
     'Content-Type':'application/json; charset=UTF-8',
     'Cache-Control':'no-store',
