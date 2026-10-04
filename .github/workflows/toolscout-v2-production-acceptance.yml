@@ -1,0 +1,198 @@
+name: ToolScout 2.0 Production Acceptance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-v2-production-acceptance
+  cancel-in-progress: false
+
+jobs:
+  accept:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 260 - production acceptance deploy'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate final ToolScout 2.0 architecture
+        env:
+          TOOLSCOUT_V2_BASE_REF: a4bfbd36f0f6d049e3bf13dd6272f48276ada07e
+        run: |
+          set -euo pipefail
+          node --check toolscout-v2-closure-runtime.js
+          node --check scripts/verify-v2-live-smoke.mjs
+          node --check scripts/probe-v2-operational-health.mjs
+          node --check scripts/evaluate-v2-production-acceptance.mjs
+          node scripts/audit-runtime-architecture.mjs
+          node scripts/validate-v2-preservation.mjs
+          node --test \
+            tests/toolscout-v2-closed-loop-integrity.test.mjs \
+            tests/toolscout-v2-execution-closure.test.mjs \
+            tests/toolscout-v2-command-center-final-truth.test.mjs \
+            tests/toolscout-v2-scheduler-ownership.test.mjs \
+            tests/toolscout-v2-outcome-recovery.test.mjs \
+            tests/toolscout-v2-growth-outcome-efficiency.test.mjs \
+            tests/toolscout-v2-search-evidence-rearm.test.mjs \
+            tests/toolscout-v2-search-execution-mutations.test.mjs \
+            tests/toolscout-v2-search-command-center-truth.test.mjs \
+            tests/toolscout-v2-search-action-quality.test.mjs \
+            tests/toolscout-v2-search-plan-contract-separation.test.mjs \
+            tests/toolscout-v2-production-acceptance.test.mjs
+
+      - name: Wrangler dry-run build
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-v2-final-dry-run
+
+      - name: Final preservation gate before production mutation
+        env:
+          TOOLSCOUT_V2_BASE_REF: a4bfbd36f0f6d049e3bf13dd6272f48276ada07e
+        run: node scripts/validate-v2-preservation.mjs
+
+      - name: Apply D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler d1 migrations apply toolscout --remote --config wrangler.toml
+
+      - name: Deploy final ToolScout 2.0 Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify final release is live
+        run: node scripts/verify-v2-live-smoke.mjs
+
+      - name: Audit production closed-loop truth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          WITH active_actions AS (
+            SELECT g.opportunity_key,g.subject_type,g.subject_key,j.value action
+            FROM growth_opportunity_state g,json_each(g.action_json) j
+            WHERE g.status='active'
+              AND j.value NOT IN ('distribution_measurement','search_measurement')
+          )
+          SELECT COUNT(*) active_actions,
+                 SUM(CASE WHEN c.task_id IS NULL THEN 1 ELSE 0 END) missing_contracts,
+                 SUM(CASE WHEN c.task_id IS NOT NULL AND (c.executor IS NULL OR c.status='executor_missing') THEN 1 ELSE 0 END) missing_executors
+          FROM active_actions a
+          LEFT JOIN growth_execution_contract c
+            ON c.source_kind='opportunity'
+           AND c.source_id=a.opportunity_key
+           AND c.action=a.action;
+
+          SELECT COUNT(*) orphan_nonterminal_contracts
+          FROM growth_execution_contract c
+          WHERE c.source_kind='opportunity'
+            AND c.status NOT IN ('verified','blocked','cancelled','human_required')
+            AND NOT EXISTS(
+              SELECT 1 FROM growth_opportunity_state g,json_each(g.action_json) j
+              WHERE g.status='active'
+                AND g.opportunity_key=c.source_id
+                AND j.value=c.action
+                AND j.value NOT IN ('distribution_measurement','search_measurement')
+            );
+
+          SELECT COUNT(*) architecture_incidents_open
+          FROM growth_architecture_incidents
+          WHERE status='open';
+
+          SELECT
+            SUM(CASE WHEN status='leased' AND updated_at<datetime('now','-30 minutes') THEN 1 ELSE 0 END) stale_compute_leases,
+            SUM(CASE WHEN status='queued' AND available_at<=datetime('now') THEN 1 ELSE 0 END) due_compute_jobs
+          FROM compute_overflow_jobs;
+
+          SELECT COUNT(*) invalid_human_gates
+          FROM human_gate_contract h
+          JOIN distribution_opportunities o
+            ON h.engine='distribution' AND h.subject_type='surface' AND h.subject_key=o.surface_slug
+          WHERE h.status IN ('open','verification_pending')
+            AND o.status IN ('verified','live','policy_blocked','rejected','skipped','unavailable_free');
+
+          SELECT engine,mission,status,started_at,completed_at,
+                 CAST((julianday('now')-julianday(COALESCE(completed_at,started_at)))*24*60 AS INTEGER) age_minutes,
+                 (
+                   SELECT MAX(x.completed_at)
+                   FROM engine_runs x
+                   WHERE x.engine=r.engine
+                     AND x.mission=r.mission
+                     AND x.status='completed'
+                     AND x.completed_at IS NOT NULL
+                 ) last_completed_at,
+                 CAST((
+                   julianday('now')-julianday((
+                     SELECT MAX(x.completed_at)
+                     FROM engine_runs x
+                     WHERE x.engine=r.engine
+                       AND x.mission=r.mission
+                       AND x.status='completed'
+                       AND x.completed_at IS NOT NULL
+                   ))
+                 )*24*60 AS INTEGER) completed_age_minutes
+          FROM engine_runs r
+          WHERE r.run_id IN (
+            SELECT run_id FROM engine_runs x
+            WHERE x.engine=r.engine AND x.mission=r.mission
+            ORDER BY started_at DESC LIMIT 1
+          )
+            AND (
+              (engine='growth' AND mission IN ('execution_contract','opportunity_coordination','self_audit'))
+              OR (engine='distribution' AND mission IN ('autonomous_cycle','economic_learning','network_cycle','authority_execution_recovery'))
+              OR (engine='seo_geo_aio' AND mission='execution_batch_v2')
+              OR (engine='affiliate' AND mission='coverage_cycle')
+              OR (engine='catalog' AND mission IN ('runtime_quality','runtime_coverage'))
+            )
+          ORDER BY engine,mission;
+
+          SELECT diversified_sources,diversified_sources_due,diversified_sources_exhausted,
+                 ready_email,ready_route,cooldown,researching,email_discovered_unrouted,updated_at
+          FROM contact_supply_metrics WHERE id='global';
+
+          SELECT
+            (SELECT COUNT(*) FROM growth_asset_cache WHERE path IN ('/reports/gsc-signals.json','/data/gsc-search-reality.json')) gsc_cached_assets,
+            (SELECT COUNT(*) FROM click_events WHERE created_at>=datetime('now','-24 hours') AND COALESCE(source,'')<>'internal-test') outbound_events_24h,
+            (SELECT COUNT(*) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1) internal_verified_backlinks,
+            (SELECT COUNT(DISTINCT surface_slug) FROM distribution_placements WHERE placement_verified=1 AND backlink_verified=1) internal_verified_authority_surfaces;
+
+          SELECT
+            SUM(CASE
+              WHEN subject_type='search'
+               AND status NOT IN ('verified','blocked','cancelled','human_required')
+               AND action NOT IN (
+                 'deepen_existing_search_asset','improve_click_capture','protect_current_ranking',
+                 'strengthen_internal_links','observe_low_sample_ranking','repair_indexing',
+                 'repair_canonical_alignment','distribution_amplification','backlink_reference_outreach'
+               )
+              THEN 1 ELSE 0 END) unsupported_search_contracts,
+            SUM(CASE WHEN status='stalled' AND updated_at<datetime('now','-6 hours') THEN 1 ELSE 0 END) stale_stalled_contracts,
+            (
+              SELECT COUNT(*)
+              FROM seo_runtime_state
+              WHERE active=1
+                AND reason LIKE 'execution_contract:%'
+                AND source_generated_at IS NULL
+            ) search_execution_state_without_evidence
+          FROM growth_execution_contract;
+          " | tee phase260-acceptance.json
+
+          node scripts/evaluate-v2-production-acceptance.mjs phase260-acceptance.json
+
+      - name: Probe final operational state
+        run: |
+          set -euo pipefail
+          node scripts/probe-v2-operational-health.mjs | tee phase260-operational.json
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('phase260-operational.json','utf8'));if(r.ok!==true||r.operationalStatus==='critical'){console.error(JSON.stringify(r,null,2));process.exit(1)}"
