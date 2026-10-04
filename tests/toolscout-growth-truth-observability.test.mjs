@@ -29,12 +29,9 @@ test('growth truth production repair proves GSC, authority and final release aft
   const workflow=read('.github/workflows/growth-truth-production-repair.yml');
   const probe=read('scripts/probe-growth-truth-live.mjs');
   assert.match(workflow,/name: ToolScout Growth Truth Production Repair/);
-  if(/\n\s*push:/.test(workflow)){
-    assert.match(workflow,/branches: \[main\]/);
-    assert.match(workflow,/contains\(github\.event\.head_commit\.message, 'Command Center Truth Repair - production deploy'\)/);
-  }else{
-    assert.match(workflow,/workflow_dispatch:/);
-  }
+  assert.match(workflow,/workflow_dispatch:/);
+  assert.doesNotMatch(workflow,/\n\s*push:/);
+  assert.doesNotMatch(workflow,/github\.event\.head_commit/);
   assert.match(workflow,/wrangler deploy --config wrangler\.toml --latest/);
   assert.match(workflow,/verify-v2-live-smoke\.mjs/);
   assert.match(workflow,/probe-growth-truth-live\.mjs/);
