@@ -2,9 +2,11 @@ import fs from 'node:fs';
 
 const files={
   gsc:'reports/gsc-signals.json',
+  trend:'reports/gsc-daily-trend.json',
   organic:'reports/organic-growth-opportunities.json'
 };
 const MAX_GSC_AGE_HOURS=30;
+const MAX_TREND_AGE_HOURS=30;
 const MAX_ORGANIC_AGE_HOURS=36;
 const MAX_ORGANIC_LAG_HOURS=6;
 
@@ -21,13 +23,15 @@ function ageHours(t,now){
 }
 
 const now=Date.now();
-const gsc=readJson(files.gsc),organic=readJson(files.organic);
-const gscAt=stamp(gsc?.generatedAt),organicAt=stamp(organic?.generatedAt);
-const gscAgeHours=ageHours(gscAt,now),organicAgeHours=ageHours(organicAt,now);
+const gsc=readJson(files.gsc),trend=readJson(files.trend),organic=readJson(files.organic);
+const gscAt=stamp(gsc?.generatedAt),trendAt=stamp(trend?.generatedAt),organicAt=stamp(organic?.generatedAt);
+const gscAgeHours=ageHours(gscAt,now),trendAgeHours=ageHours(trendAt,now),organicAgeHours=ageHours(organicAt,now);
 const organicLagHours=gscAt!=null&&organicAt!=null?Math.max(0,(gscAt-organicAt)/3600000):null;
 const reasons=[];
 if(gscAt==null)reasons.push('gsc_missing_or_invalid');
 else if(gscAgeHours>MAX_GSC_AGE_HOURS)reasons.push('gsc_stale');
+if(trendAt==null)reasons.push('gsc_trend_missing_or_invalid');
+else if(trendAgeHours>MAX_TREND_AGE_HOURS)reasons.push('gsc_trend_stale');
 if(organicAt==null)reasons.push('organic_missing_or_invalid');
 else if(organicAgeHours>MAX_ORGANIC_AGE_HOURS)reasons.push('organic_stale');
 if(organicLagHours!=null&&organicLagHours>MAX_ORGANIC_LAG_HOURS)reasons.push('organic_lags_gsc');
@@ -36,8 +40,9 @@ const state={
   checkedAt:new Date(now).toISOString(),
   refresh,
   reasons,
-  thresholds:{maxGscAgeHours:MAX_GSC_AGE_HOURS,maxOrganicAgeHours:MAX_ORGANIC_AGE_HOURS,maxOrganicLagHours:MAX_ORGANIC_LAG_HOURS},
+  thresholds:{maxGscAgeHours:MAX_GSC_AGE_HOURS,maxTrendAgeHours:MAX_TREND_AGE_HOURS,maxOrganicAgeHours:MAX_ORGANIC_AGE_HOURS,maxOrganicLagHours:MAX_ORGANIC_LAG_HOURS},
   gsc:{generatedAt:gsc?.generatedAt||null,ageHours:gscAgeHours},
+  trend:{generatedAt:trend?.generatedAt||null,finalizedThroughDate:trend?.finalizedThroughDate||null,ageHours:trendAgeHours},
   organic:{generatedAt:organic?.generatedAt||null,ageHours:organicAgeHours,lagBehindGscHours:organicLagHours}
 };
 console.log(JSON.stringify(state));
