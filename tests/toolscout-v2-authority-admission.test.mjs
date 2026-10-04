@@ -14,7 +14,10 @@ test('distribution network admits only currently actionable external authority s
   assert.match(where,/scale_proven_surface/);
   assert.match(where,/authority_surface\.status IN \('discovered','candidate','research_required','stale'\)/);
   assert.doesNotMatch(where,/research_required','deferred','stale/);
-  assert.match(where,/growth_execution_contract\.action='scale_proven_surface' AND authority_surface\.status IN \('live','verified'\)/);
+  assert.match(where,/growth_execution_contract\.action='scale_proven_surface'/);
+  assert.match(where,/authority_surface\.status IN \('live','verified'\)/);
+  assert.match(where,/distribution_economic_learning proven/);
+  assert.match(where,/COALESCE\(proven\.browser_confirmed_sessions_30d,0\)>0/);
   assert.match(where,/COALESCE\(authority_surface\.human_required,0\)=0/);
   assert.match(where,/NOT LIKE 'https:\/\/trytoolscout\.org\/%'/);
   assert.match(where,/toolscout-machine-discovery/);
