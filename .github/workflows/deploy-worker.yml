@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 243 - final integrity cutover') || contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 248 - production recovery deploy')))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 243 - final integrity cutover') || contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 248 - production recovery deploy') || contains(github.event.head_commit.message, 'ToolScout 2.0 Phase 254 - production recovery deploy')))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current main
