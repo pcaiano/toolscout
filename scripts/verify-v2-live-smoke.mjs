@@ -61,10 +61,12 @@ const closureHealth=await fetchText('/api/runtime/closure-health',{headers:{'Cac
 if(!closureHealth.ok)errors.push({code:'phase107_closure_health_unavailable',status:closureHealth.status});
 else{
   if(closureHealth.headers.get('x-toolscout-route-owner')!=='toolscout_v2_closure')errors.push({code:'phase107_closure_wrong_owner',owner:closureHealth.headers.get('x-toolscout-route-owner')});
-  if(closureHealth.headers.get('x-toolscout-runtime')!=='toolscout-2.0-phase-107-zero-legacy')errors.push({code:'phase107_runtime_fingerprint_missing',fingerprint:closureHealth.headers.get('x-toolscout-runtime')});
+  if(closureHealth.headers.get('x-toolscout-runtime')!=='toolscout-2.0-final-phase-260')errors.push({code:'phase260_runtime_fingerprint_missing',fingerprint:closureHealth.headers.get('x-toolscout-runtime')});
   try{
     const data=JSON.parse(closureHealth.text);
     if(data.architecture!=='toolscout-2.0'||Number(data.phase)!==107)errors.push({code:'phase107_closure_wrong_version',architecture:data.architecture||null,phase:data.phase||null});
+    if(data.release!=='toolscout-2.0-final'||Number(data.releasePhase)!==260)errors.push({code:'phase260_final_release_not_live',release:data.release||null,releasePhase:data.releasePhase||null});
+    if(data.deploymentFingerprint!=='toolscout-2.0-final-phase-260')errors.push({code:'phase260_final_fingerprint_missing',fingerprint:data.deploymentFingerprint||null});
     if(Number(data.legacyEdges)!==0)errors.push({code:'phase107_legacy_edges_not_zero',legacyEdges:data.legacyEdges});
     if(Number(data.routeOwnership?.directCoveragePct)!==100||Number(data.routeOwnership?.legacyDeclaredGroups)!==0)errors.push({code:'phase107_direct_ownership_incomplete',routeOwnership:data.routeOwnership||null});
     if(data.productionClosure?.status!=='architecture_closed')errors.push({code:'phase107_architecture_not_closed',status:data.productionClosure?.status||null});
