@@ -52,6 +52,7 @@ function hasVendorTracking(rawUrl,slug){
   try{const url=new URL(value),host=url.hostname.toLowerCase().replace(/^www\./,'');
     if(host==='aff.trypipedrive.com'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='apollo'&&host==='get.apollo.io'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
+    if(slug==='unbounce'&&host==='unbounce.partnerlinks.io'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
     if(slug==='make'&&host==='make.com'&&/^\/en\/register\/?$/i.test(url.pathname)&&Boolean(url.searchParams.get('pc')))return true;
     if(slug==='shopify'&&host==='shopify.pxf.io'&&/^\/[a-z0-9_-]+\/?$/i.test(url.pathname))return true;
     if(slug==='adcreative-ai'&&host==='free-trial.adcreative.ai'&&/^\/[a-z0-9]+\/?$/i.test(url.pathname))return true;
