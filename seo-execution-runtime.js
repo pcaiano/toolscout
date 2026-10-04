@@ -182,7 +182,10 @@ export async function executeCloudflareSeoTask(env,task){
   }
   if(action==='deepen_existing_search_asset'){
     mutationProof=await verifyDepthIntervention(env,pathname);
-    if(!mutationProof.verified)return {verified:false,reason:'search_asset_depth_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
+    if(!mutationProof.verified){
+      const missing=Number(mutationProof?.status??mutationProof?.httpStatus)===404;
+      return {verified:false,reason:missing?'search_asset_missing_public_page':'search_asset_depth_not_yet_public',terminal:missing,executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
+    }
   }
   if(action==='improve_click_capture'){
     mutationProof=await verifyClickCaptureIntervention(env,pathname);
