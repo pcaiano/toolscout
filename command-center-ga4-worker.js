@@ -45,7 +45,7 @@ async function serviceAccountAccessToken(env){
   const key=await crypto.subtle.importKey('pkcs8',pemBytes(cfg.privateKey),{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
   const signature=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(unsigned));
   const assertion=`${unsigned}.${b64url(new Uint8Array(signature))}`;
-  const response=await fetch(GA_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth-grant-type:jwt-bearer',assertion}),signal:AbortSignal.timeout(GA_FETCH_TIMEOUT_MS)});
+  const response=await fetch(GA_TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion}),signal:AbortSignal.timeout(GA_FETCH_TIMEOUT_MS)});
   const body=await response.json().catch(()=>({}));
   if(!response.ok||!body.access_token)throw new Error(`ga4_oauth_${response.status}:${body.error_description||body.error||'token_failed'}`);
   tokenCache={email:cfg.clientEmail,token:body.access_token,expiresAt:now+n(body.expires_in||3600)};
