@@ -10,6 +10,11 @@ on:
       - 'scripts/validate-actions-resume-safety.mjs'
       - 'scripts/validate-growth-spend-policy.mjs'
       - 'tests/growth-spend-policy.test.mjs'
+      - 'compare.html'
+      - 'scripts/generate-comparisons.mjs'
+      - 'scripts/generate-competitive-gap-profiles.mjs'
+      - 'tests/comparison-editorial-contract.test.mjs'
+      - 'tests/competitive-gap-catalog-parity.test.mjs'
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
@@ -82,7 +87,10 @@ jobs:
       - name: Generate commercial comparisons
         run: node scripts/generate-comparisons.mjs
       - name: Validate comparison editorial contract
-        run: node --test tests/comparison-editorial-contract.test.mjs
+        run: |
+          node --test \
+            tests/comparison-editorial-contract.test.mjs \
+            tests/competitive-gap-catalog-parity.test.mjs
       - name: Enrich comparisons with decision context
         run: node scripts/enrich-comparison-context.mjs
       - name: Generate indexable tool profiles
