@@ -37,6 +37,75 @@ jobs:
             echo "::endgroup::"
           done
 
+      - name: Read outcome attribution truth from D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== strict human sources 7d ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+          WITH fv AS (
+            SELECT session_id,source,referrer_host,created_at,
+              ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY created_at ASC,id ASC) rn
+            FROM confirmed_visitor_events
+            WHERE created_at>=datetime('now','-7 days')
+          )
+          SELECT LOWER(COALESCE(NULLIF(h.referrer_host,''),NULLIF(v.referrer_host,''),NULLIF(h.source,''),NULLIF(v.source,''),'direct')) source_key,
+                 COUNT(DISTINCT h.session_id) strict_sessions,
+                 MAX(h.first_evidence_at) last_human_at
+          FROM traffic_human_evidence h
+          LEFT JOIN fv v ON v.session_id=h.session_id AND v.rn=1
+          WHERE h.first_evidence_at>=datetime('now','-7 days')
+          GROUP BY source_key
+          ORDER BY strict_sessions DESC,last_human_at DESC
+          LIMIT 30;
+          "
+
+          echo "=== proven distribution surfaces 30d ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+          SELECT l.surface_slug,o.surface_name,o.surface_type,o.status opportunity_status,
+                 COALESCE(n.status,'') network_status,
+                 l.browser_confirmed_sessions_30d strict_sessions,
+                 l.outbound_clicks_30d outbound_clicks,
+                 l.monetized_outbound_30d monetized_outbound,
+                 l.evidence_grade,
+                 o.action_url,o.live_url
+          FROM distribution_economic_learning l
+          JOIN distribution_opportunities o ON o.surface_slug=l.surface_slug
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=l.surface_slug
+          WHERE COALESCE(l.browser_confirmed_sessions_30d,0)>0
+             OR COALESCE(l.outbound_clicks_30d,0)>0
+             OR COALESCE(l.monetized_outbound_30d,0)>0
+          ORDER BY l.browser_confirmed_sessions_30d DESC,l.outbound_clicks_30d DESC
+          LIMIT 40;
+          "
+
+          echo "=== execution deferrals by action ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+          SELECT executor,action,status,COUNT(*) n,MIN(updated_at) oldest,MAX(updated_at) newest
+          FROM growth_execution_contract
+          WHERE status IN ('pending','claimed','attempted','deferred','stalled')
+          GROUP BY executor,action,status
+          ORDER BY n DESC,executor,action,status;
+          "
+
+          echo "=== scale proven task truth ==="
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --command "
+          SELECT c.task_id,c.subject_key,c.action,c.status,c.last_result,c.updated_at,
+                 o.status opportunity_status,
+                 COALESCE(n.status,'') network_status,
+                 COALESCE(l.browser_confirmed_sessions_30d,0) strict_sessions,
+                 COALESCE(l.outbound_clicks_30d,0) outbound_clicks
+          FROM growth_execution_contract c
+          LEFT JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+          LEFT JOIN distribution_network_outreach n ON n.surface_slug=c.subject_key
+          LEFT JOIN distribution_economic_learning l ON l.surface_slug=c.subject_key
+          WHERE c.action='scale_proven_surface'
+          ORDER BY c.updated_at DESC
+          LIMIT 50;
+          "
+
       - name: Summarize closure bottleneck
         shell: bash
         run: |
