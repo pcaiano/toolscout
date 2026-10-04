@@ -71,7 +71,7 @@ async function ccAssetJson(request,env,path,fallback){
 async function buildCommandCenterBusinessTruth(request,env){
   const affiliateEvidenceSchema=await affiliateNetworkEvidenceSchemaState(env);
   const affiliateEvidenceSchemaOk=affiliateEvidenceSchema.ok===true;
-  const [supervisorRows,contractRows,seoExecutionRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta,editorialAuthorityPortfolio]=await Promise.all([
+  const [supervisorRows,contractRows,seoExecutionRows,gscSignals,gscReality,gscHealth,gscDailyTrend,affiliateRegistry,affiliatePipeline,affiliateWorkflow,audienceRows,submissionRows,placementRows,actionRows,strictDailyRows,verifiedBacklinkRows,verifiedPlacementHistoryRows,engineActivityRows,actionPipelineRows,executionActionRows,emailCapacity,makeSenderConfig,contactSupplyMetrics,architectureRows,seRankingBacklinkTruth,authorityTruth,verifiedOutboundTruth,socialAffiliateTruth,affiliateNetworkEvidence,affiliateNetworkAccounts,affiliateNetworkProgramEvidence,firstPartyRedirectTruth,outboundTrackingMeta,editorialAuthorityPortfolio]=await Promise.all([
     env.DB.prepare(`SELECT engine,status,directive,directive_json,strict_humans_24h,strict_humans_7d,attributed_humans_7d,external_executions_24h,external_executions_7d,correction_count,last_correction_at,last_evaluated_at
       FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 ELSE 1 END,engine`).all().then(r=>r.results||[]).catch(()=>[]),
     env.DB.prepare(`SELECT executor,status,COUNT(*) n FROM growth_execution_contract GROUP BY executor,status`).all().then(r=>r.results||[]).catch(()=>[]),
@@ -165,6 +165,7 @@ async function buildCommandCenterBusinessTruth(request,env){
       ORDER BY CASE severity WHEN 'P1' THEN 0 ELSE 1 END,last_detected_at DESC
       LIMIT 10`).all().then(r=>r.results||[]).catch(()=>[]),
     ccAssetJson(request,env,'/data/se-ranking-backlink-truth.json',{observedAt:null,metrics:{},referringDomains:[]}),
+    ccAssetJson(request,env,'/data/authority-truth.json',{generatedAt:null,sources:{},reconciliation:{}}),
     env.DB.prepare(`WITH classified AS (
       SELECT v.*,
         CASE WHEN v.proof_type='user_activation_navigation'
@@ -666,7 +667,22 @@ async function buildCommandCenterBusinessTruth(request,env){
       throughputGap:authorityThroughputGap,
       policySource:'current_runtime_policy',
       stagnating:Boolean(backlink.stagnating),
-      history30:authorityHistory
+      history30:authorityHistory,
+      sourceComparison:{
+        generatedAt:authorityTruth?.generatedAt||null,
+        canonicalAhrefsDomainRating:authorityTruth?.reconciliation?.ahrefsDomainRating??null,
+        tinyStartupsAhrefsSnapshot:authorityTruth?.reconciliation?.ahrefsThirdPartySnapshot??null,
+        ahrefsBacklinksObserved:authorityTruth?.sources?.ahrefsDirect?.backlinksObserved??null,
+        ahrefsBacklinksExact:Boolean(authorityTruth?.sources?.ahrefsDirect?.backlinksExact),
+        ahrefsObservationStatus:authorityTruth?.sources?.ahrefsDirect?.status||'unavailable',
+        ahrefsApiVerification:authorityTruth?.sources?.ahrefsDirect?.apiVerification||null,
+        tinyStartupsRefreshCadence:authorityTruth?.sources?.tinyStartups?.refreshCadence||null,
+        seRankingBacklinks:authorityTruth?.sources?.seRanking?.backlinks??null,
+        seRankingReferringDomains:authorityTruth?.sources?.seRanking?.referringDomains??null,
+        seRankingDomainInlinkRank:authorityTruth?.sources?.seRanking?.domainInlinkRank??null,
+        status:authorityTruth?.reconciliation?.status||'unavailable',
+        reason:authorityTruth?.reconciliation?.reason||null
+      }
     },
     affiliate:{
       productionRoutes:productionRoutes.length,
