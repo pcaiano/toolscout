@@ -1,0 +1,83 @@
+name: One Shot Phase 253 Discovery Noise Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-phase-253-discovery-noise-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Read Phase 251 opportunity cohort and active contracts
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT surface_slug,surface_name,surface_type,status,action_url,human_required,distribution_score,created_at,updated_at
+          FROM distribution_opportunities
+          WHERE created_at>='2026-10-03 18:09:00'
+            AND created_at<='2026-10-03 18:12:30'
+          ORDER BY created_at ASC,surface_slug ASC;
+
+          SELECT c.task_id,c.executor,c.status contract_status,c.action,c.subject_key,
+                 o.surface_type,o.status opportunity_status,o.action_url,o.human_required,o.created_at opportunity_created_at,
+                 c.last_result,c.updated_at contract_updated_at
+          FROM growth_execution_contract c
+          JOIN distribution_opportunities o ON o.surface_slug=c.subject_key
+          WHERE c.subject_type='surface'
+            AND c.executor IN ('distribution_network','distribution_autonomous','make_sender')
+            AND c.status IN ('pending','claimed','attempted','deferred','stalled')
+            AND o.created_at>='2026-10-03 18:09:00'
+            AND o.created_at<='2026-10-03 18:12:30'
+          ORDER BY c.executor,c.status,c.updated_at DESC;
+          " | tee /tmp/phase253-audit.json
+
+      - name: Classify legacy cohort against Phase 252 gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const db=JSON.parse(fs.readFileSync('/tmp/phase253-audit.json','utf8'));
+          const opportunities=db[0]?.results||[];
+          const contracts=db[1]?.results||[];
+          const config=JSON.parse(fs.readFileSync('data/distribution-discovery-sources.json','utf8'));
+          const canonical=config?.guardrails?.canonical_hosts||{};
+          const overrides=config?.guardrails?.host_status_overrides||{};
+          const surface=/(?:^|[\s./_-])(directory|directories|registry|registries|submit|submission|listing|listings|launch|startup|resource|resources|newsletter|community|partner|publisher|media|press|roundup|comparison|review|curated|catalog|marketplace|showcase|discover|tool|tools)(?:$|[\s./_?&=-])/i;
+          const suspicious=[];
+          const admitted=[];
+          for(const row of opportunities){
+            let u=null;try{u=new URL(String(row.action_url||''))}catch{}
+            if(!u){suspicious.push({...row,reason:'invalid_action_url'});continue}
+            const host=u.hostname.toLowerCase().replace(/^www\./,'');
+            const text=(host+' '+u.pathname).toLowerCase();
+            const curated=Boolean(canonical[host]||overrides[host]);
+            if(!curated&&!surface.test(text))suspicious.push({...row,host,reason:'fails_phase252_gate'});
+            else admitted.push({...row,host,curated});
+          }
+          const suspiciousSet=new Set(suspicious.map(x=>x.surface_slug));
+          const riskyContracts=contracts.filter(x=>suspiciousSet.has(x.subject_key));
+          const proof={
+            cohort:opportunities.length,
+            suspicious:suspicious.length,
+            admitted:admitted.length,
+            activeContracts:contracts.length,
+            riskyActiveContracts:riskyContracts.length,
+            suspiciousRows:suspicious,
+            riskyContracts
+          };
+          console.log(JSON.stringify(proof,null,2));
+          NODE
