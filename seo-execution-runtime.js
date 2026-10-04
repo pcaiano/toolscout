@@ -97,6 +97,28 @@ async function verifyInternalLinkIntervention(env,pathname){
 async function verifyDepthIntervention(env,pathname){
   return externalSeoProof(env,pathname,'deepen_existing_search_asset');
 }
+async function verifyClickCaptureIntervention(env,pathname){
+  const url='https://trytoolscout.org'+pathname;
+  try{
+    const r=await fetch(url,{headers:{'Cache-Control':'no-cache','User-Agent':'ToolScout-SEO-Click-Capture-Probe/1.0'},signal:AbortSignal.timeout(8000)});
+    if(!r.ok)return {verified:false,reason:'click_capture_public_http_'+r.status,httpStatus:r.status};
+    const type=String(r.headers.get('content-type')||'').toLowerCase();
+    if(!type.includes('text/html'))return {verified:false,reason:'click_capture_public_not_html',httpStatus:r.status};
+    const html=await r.text();
+    const marker=/data-toolscout-click-capture=["']1["']/i.test(html);
+    const meta=html.match(/<meta\\b[^>]*data-toolscout-click-capture=["']1["'][^>]*>/i)?.[0]||'';
+    const description=(meta.match(/content=["']([^"']*)["']/i)||[])[1]||'';
+    const verified=marker&&description.trim().length>=70&&description.trim().length<=160;
+    return {verified,reason:verified?'click_capture_public_verified':'click_capture_marker_or_description_invalid',httpStatus:r.status,descriptionLength:description.trim().length};
+  }catch(error){
+    return {verified:false,reason:'click_capture_public_probe_failed',error:String(error?.message||error).slice(0,300)};
+  }
+}
+async function verifyIndexabilityIntervention(env,pathname){
+  const proof=await canonicalState(env,pathname);
+  const verified=proof?.indexable===true;
+  return {...proof,verified,reason:verified?'public_indexability_verified':proof?.noindex?'public_page_noindex':(proof?.reason||'public_indexability_not_verified')};
+}
 
 async function queueIndexNow(env,pathname){
   const a=await adapter(env);if(!a)return {queued:false,reason:'indexnow_adapter_unavailable'};
@@ -160,12 +182,20 @@ export async function executeCloudflareSeoTask(env,task){
     mutationProof=await verifyDepthIntervention(env,pathname);
     if(!mutationProof.verified)return {verified:false,reason:'search_asset_depth_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
   }
+  if(action==='improve_click_capture'){
+    mutationProof=await verifyClickCaptureIntervention(env,pathname);
+    if(!mutationProof.verified)return {verified:false,reason:'click_capture_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
+  }
+  if(action==='repair_indexing'){
+    mutationProof=await verifyIndexabilityIntervention(env,pathname);
+    if(!mutationProof.verified)return {verified:false,reason:'indexability_not_yet_public',executor:'seo_cloudflare',pathname,action,evidence,indexNow,mutationProof};
+  }
   return {
     verified:true,
     executor:'seo_cloudflare',
     pathname,
     action,
-    proof_kind:action==='repair_canonical_alignment'?'canonical_current_state_verified':action==='strengthen_internal_links'?'public_internal_links_verified':action==='deepen_existing_search_asset'?'public_search_asset_depth_verified':(mutationActions.has(action)?'cloudflare_runtime_state':'cloudflare_search_measurement'),
+    proof_kind:action==='repair_canonical_alignment'?'canonical_current_state_verified':action==='strengthen_internal_links'?'public_internal_links_verified':action==='deepen_existing_search_asset'?'public_search_asset_depth_verified':action==='improve_click_capture'?'public_click_capture_verified':action==='repair_indexing'?'public_indexability_verified':(mutationActions.has(action)?'cloudflare_runtime_state':'cloudflare_search_measurement'),
     evidence,
     canonicalProof,
     indexNow,
