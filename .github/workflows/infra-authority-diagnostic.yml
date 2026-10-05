@@ -40,7 +40,7 @@ jobs:
             AND status IN ('pending','claimed','attempted')
           ORDER BY priority_score DESC,updated_at ASC;
 
-          SELECT tool_slug,asset_url,status,contact_method,contact_email,vendor_domain,priority_score,last_attempt_at,public_dispatch_leased_at,outreach_error,updated_at
+          SELECT tool_slug,asset_url,status,contact_method,contact_email,vendor_domain,priority_score,public_dispatch_leased_at,outreach_error,updated_at
           FROM distribution_vendor_amplification
           WHERE tool_slug IN (
             SELECT subject_key FROM growth_execution_contract
@@ -50,7 +50,7 @@ jobs:
           )
           ORDER BY priority_score DESC;
 
-          SELECT surface_slug,status,contact_email,domain,priority_score,last_attempt_at,public_dispatch_leased_at,outreach_error,updated_at
+          SELECT surface_slug,status,contact_email,domain,priority_score,public_dispatch_leased_at,outreach_error,updated_at
           FROM distribution_network_outreach
           WHERE surface_slug IN (
             SELECT subject_key FROM growth_execution_contract
