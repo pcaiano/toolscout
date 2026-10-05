@@ -21,8 +21,8 @@
   const trackedUrl=(path,content='finder')=>{
     const url=new URL(path,HOME);
     url.searchParams.set('utm_source',publisher);
-    url.searchParams.set('utm_medium','embed');
-    url.searchParams.set('utm_campaign','toolscout_finder');
+    url.searchParams.set('utm_medium','distribution');
+    url.searchParams.set('utm_campaign','embed_finder');
     url.searchParams.set('utm_content',content);
     return url.toString();
   };
@@ -129,8 +129,8 @@
       const vendor=new URL(`/go/${encodeURIComponent(item.slug)}`,HOME);
       vendor.searchParams.set('source',`embed:${publisher}`);
       vendor.searchParams.set('utm_source',publisher);
-      vendor.searchParams.set('utm_medium','embed');
-      vendor.searchParams.set('utm_campaign','toolscout_finder');
+      vendor.searchParams.set('utm_medium','distribution');
+      vendor.searchParams.set('utm_campaign','embed_finder');
       vendor.searchParams.set('utm_content',item.slug);
       return `<article class="result" style="animation-delay:${index*45}ms">
         <div class="result-top"><div><div class="category">${esc(item.category||'Software')}</div><div class="name">${esc(item.name)}</div></div><div class="match">${match}</div></div>
