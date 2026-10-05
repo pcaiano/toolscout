@@ -1,0 +1,60 @@
+name: ToolScout Editorial Authority 95 Live Verify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/editorial-authority-95-live-verify.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-editorial-authority-95-live-verify
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify Editorial Authority report contract
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('reports/editorial-authority-portfolio.json','utf8'));
+          const s=r.summary||{};
+          if(r.hardFloorScore!==90||r.targetScore!==95||r.excellenceScore!==98)throw new Error('editorial_policy_regressed');
+          if(Number(s.belowHardFloor||0)!==0||Number(s.belowTarget||0)!==0)throw new Error('editorial_surface_below_target');
+          if(Number(s.healthy95Plus||0)!==Number(s.existing||0))throw new Error('not_all_existing_pages_healthy');
+          console.log(JSON.stringify({averageScore:s.averageScore,existing:s.existing,healthy95Plus:s.healthy95Plus,excellent98Plus:s.excellent98Plus,searchFitDiagnosis:s.searchFitDiagnosis},null,2));
+          NODE
+
+      - name: Run full production smoke
+        run: node scripts/verify-v2-live-smoke.mjs
+
+      - name: Verify live Editorial Authority evidence and legacy redirect
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 4 --retry-delay 2 -H 'Cache-Control: no-cache' 'https://trytoolscout.org/tools/semrush?authority95=1' | grep -q 'Editorial evidence:'
+          curl -fsS --retry 4 --retry-delay 2 -H 'Cache-Control: no-cache' 'https://trytoolscout.org/best-seo-tools?authority95=1' | grep -q 'Editorial evidence:'
+          curl -fsS --retry 4 --retry-delay 2 -H 'Cache-Control: no-cache' 'https://trytoolscout.org/semrush-vs-ahrefs?authority95=1' | grep -q 'Editorial evidence:'
+          code=$(curl -sS -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' 'https://trytoolscout.org/best-seo-keyword-research-tools')
+          location=$(curl -sSI -H 'Cache-Control: no-cache' 'https://trytoolscout.org/best-seo-keyword-research-tools' | tr -d '\r' | awk 'BEGIN{IGNORECASE=1}/^location:/{print $2}' | tail -1)
+          test "$code" = "308"
+          case "$location" in
+            https://trytoolscout.org/best-keyword-research-tools*|/best-keyword-research-tools*) ;;
+            *) echo "Unexpected legacy redirect target: $location"; exit 1 ;;
+          esac
