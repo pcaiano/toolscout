@@ -66,17 +66,13 @@ test('Growth Sprint runtime asset is included in the Worker static asset allowli
 });
 
 
-test('Growth Sprint production launcher is manual-only after successful launch',()=>{
-  const workflow=read('.github/workflows/growth-sprint-1-production.yml');
-  assert.match(workflow,/workflow_dispatch:/);
-  assert.doesNotMatch(workflow,/\n\s*push:/);
-  assert.doesNotMatch(workflow,/github\.event\.head_commit/);
+test('Dated Growth Sprint launcher is retired after successful launch',()=>{
+  const path=new URL('../.github/workflows/growth-sprint-1-production.yml',import.meta.url);
+  assert.equal(fs.existsSync(path),false);
 });
 
 
-test('Machine authority production repair is manual-only after successful deployment',()=>{
-  const workflow=read('.github/workflows/authority-truth-production-repair.yml');
-  assert.match(workflow,/workflow_dispatch:/);
-  assert.doesNotMatch(workflow,/\n\s*push:/);
-  assert.doesNotMatch(workflow,/github\.event\.head_commit/);
+test('Hardcoded machine authority repair workflow is retired',()=>{
+  const path=new URL('../.github/workflows/authority-truth-production-repair.yml',import.meta.url);
+  assert.equal(fs.existsSync(path),false);
 });
