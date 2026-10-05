@@ -1,5 +1,6 @@
 const PRIVATE_PREFIXES=['/analytics','/command-center','/admin','/api/','/oauth','/go/'];
 const HOME_PATHS=new Set(['/','/index.html']);
+const OFFICIAL_SOCIAL_HOSTS=new Set(['linkedin.com','x.com','bsky.app','dev.to','pinterest.com','threads.com']);
 
 function isHtml(response){
   return response&&response.ok&&String(response.headers.get('content-type')||'').toLowerCase().includes('text/html');
@@ -38,6 +39,9 @@ function stripNonCtaExternalLinks(html){
     try{
       const host=new URL(href).hostname.toLowerCase().replace(/^www\./,'');
       if(host==='trytoolscout.org')return match;
+      const attrs=String(before||'')+' '+String(after||'');
+      const markedSocial=/\bdata-toolscout-social-link\s*=\s*["']1["']/i.test(attrs);
+      if(markedSocial&&OFFICIAL_SOCIAL_HOSTS.has(host))return match;
     }catch{}
     return body;
   });
