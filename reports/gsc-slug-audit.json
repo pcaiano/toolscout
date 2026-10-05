@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T07:40:02.249Z",
-  "sourceGeneratedAt": "2026-10-05T07:40:01.971Z",
+  "generatedAt": "2026-10-05T08:35:54.873Z",
+  "sourceGeneratedAt": "2026-10-05T08:35:53.887Z",
   "summary": {
     "canonical": 33,
     "redirected": 3,
@@ -11,9 +11,9 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 2223,
+      "impressions": 2244,
       "clicks": 0,
-      "position": 80.2753
+      "position": 80.2224
     },
     {
       "slug": "best-crm-for-small-business",
@@ -59,9 +59,9 @@
       "slug": "best-project-management-tools",
       "status": "canonical",
       "target": "best-project-management-tools",
-      "impressions": 132,
+      "impressions": 133,
       "clicks": 0,
-      "position": 44.8788
+      "position": 44.9549
     },
     {
       "slug": "best-no-code-automation-tools",
@@ -75,9 +75,9 @@
       "slug": "best-keyword-research-tools",
       "status": "canonical",
       "target": "best-keyword-research-tools",
-      "impressions": 79,
+      "impressions": 80,
       "clicks": 0,
-      "position": 75.1899
+      "position": 75.425
     },
     {
       "slug": "best-free-project-management-tools",
@@ -91,9 +91,9 @@
       "slug": "best-crm-with-automation",
       "status": "canonical",
       "target": "best-crm-with-automation",
-      "impressions": 56,
+      "impressions": 60,
       "clicks": 0,
-      "position": 81.1786
+      "position": 78.1333
     },
     {
       "slug": "best-crm-for-sales-teams",
@@ -115,9 +115,9 @@
       "slug": "best-developer-tools",
       "status": "canonical",
       "target": "best-developer-tools",
-      "impressions": 45,
+      "impressions": 46,
       "clicks": 0,
-      "position": 64.5111
+      "position": 65.1304
     },
     {
       "slug": "best-team-collaboration-tools",
@@ -147,9 +147,17 @@
       "slug": "best-lead-capture-forms",
       "status": "canonical",
       "target": "best-lead-capture-forms",
-      "impressions": 16,
+      "impressions": 17,
       "clicks": 0,
-      "position": 49.1875
+      "position": 51.8235
+    },
+    {
+      "slug": "best-ai-assistants",
+      "status": "canonical",
+      "target": "best-ai-assistants",
+      "impressions": 15,
+      "clicks": 0,
+      "position": 64.4
     },
     {
       "slug": "best-product-analytics-tools",
@@ -158,14 +166,6 @@
       "impressions": 14,
       "clicks": 0,
       "position": 67.5714
-    },
-    {
-      "slug": "best-ai-assistants",
-      "status": "canonical",
-      "target": "best-ai-assistants",
-      "impressions": 11,
-      "clicks": 0,
-      "position": 62.5455
     },
     {
       "slug": "best-free-sales-funnel-software",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T07:40:08.263Z",
+  "generatedAt": "2026-10-05T08:36:05.076Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",
@@ -8,53 +8,54 @@
     "Unverified or thin candidates are held and retried instead of being published."
   ],
   "summary": {
-    "scannedGaps": 37,
-    "activeProfiles": 3,
+    "scannedGaps": 34,
+    "activeProfiles": 6,
     "newProfiles": 3,
     "resolvedAsExistingCoverage": 1,
-    "held": 33,
+    "held": 30,
     "contentResearch": 0,
     "searchVisibleProfiles": 0,
     "trafficObservedProfiles": 0
   },
   "admitted": [
     {
-      "slug": "anijam-ai",
-      "sourceUrl": "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "slug": "davinci-ai",
+      "sourceUrl": "https://davinci.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "category": "content",
       "features": [
-        "citations",
+        "multimodal",
+        "image generation",
         "video generation",
+        "video editing",
         "voice",
+        "automation",
+        "integrations",
+        "design",
+        "templates",
         "social media"
       ]
     },
     {
-      "slug": "chatzy-ai",
-      "sourceUrl": "https://chatzy.ai/",
+      "slug": "deep-swap-ai",
+      "sourceUrl": "https://deepswapai.com/",
       "category": "developer",
       "features": [
-        "citations",
-        "voice",
+        "analysis",
+        "API",
         "automation",
-        "deployment"
+        "design"
       ]
     },
     {
-      "slug": "cosupport-ai",
-      "sourceUrl": "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "ai-assistant",
+      "slug": "face-swap-ai",
+      "sourceUrl": "https://faceswapai.com/",
+      "category": "developer",
       "features": [
-        "AI assistant",
-        "chatbot",
-        "conversational AI",
+        "research",
         "citations",
-        "voice",
-        "collaboration",
+        "video generation",
         "API",
-        "automation",
-        "integrations",
-        "design"
+        "automation"
       ]
     }
   ],
@@ -99,21 +100,6 @@
       "slug": "coool-ai",
       "reason": "official-source-unreachable",
       "sourceUrl": "https://coool.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "davinci-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "deep-swap-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "face-swap-ai",
-      "reason": "cycle-admission-cap",
       "retry": "next-cycle"
     },
     {
@@ -252,6 +238,30 @@
     },
     {
       "slug": "cosupport-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "davinci-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "deep-swap-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "face-swap-ai",
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,

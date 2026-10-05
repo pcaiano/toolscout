@@ -4526,5 +4526,171 @@
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "davinci-ai",
+    "name": "Davinci AI",
+    "category": "content",
+    "description": "Generate stunning AI images and videos with DaVinci. Access Sora, Veo, Kling, Flux and 50+ top models in one platform. Trusted by 100M+ creators.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "multimodal",
+      "image generation",
+      "video generation",
+      "video editing",
+      "voice",
+      "automation",
+      "integrations",
+      "design",
+      "templates",
+      "social media"
+    ],
+    "bestFor": [
+      "content teams",
+      "creators evaluating content production software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://davinci.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T08:36:09.946Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "deep-swap-ai",
+    "name": "Deep Swap AI",
+    "category": "developer",
+    "description": "DeepSwapAI lets you preview AI face swap free with no sign-up. Earn free credits for a trial image; buy once for future watermark-free exports—no subscription.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "analysis",
+      "API",
+      "automation",
+      "design"
+    ],
+    "bestFor": [
+      "developers",
+      "engineering teams evaluating developer software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://deepswapai.com/",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T08:36:09.946Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Aixploria",
+          "Dynamite AI"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "face-swap-ai",
+    "name": "Face Swap AI",
+    "category": "developer",
+    "description": "Realistic AI face swap: photos, multiple faces, GIFs and videos up to 10 min. Photo swap: 6 credits; eligible verified accounts get one watermarked photo trial.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "research",
+      "citations",
+      "video generation",
+      "API",
+      "automation"
+    ],
+    "bestFor": [
+      "developers",
+      "engineering teams evaluating developer software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://faceswapai.com/",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T08:36:09.946Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Aixploria",
+          "Dynamite AI"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
   }
 ]

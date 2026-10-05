@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T07:40:08.209Z",
+  "generatedAt": "2026-10-05T08:36:05.033Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {
@@ -69,8 +69,8 @@
       "sampledUrls": 750
     }
   ],
-  "suppressedCovered": 24,
-  "count": 37,
+  "suppressedCovered": 31,
+  "count": 34,
   "gaps": [
     {
       "slug": "ai-background-remover",
@@ -132,20 +132,6 @@
       ]
     },
     {
-      "slug": "anijam-ai",
-      "candidateType": "software-entity",
-      "entityKey": "anijam",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/anijam-ai",
-        "https://www.aixploria.com/anijam-ai/"
-      ]
-    },
-    {
       "slug": "audio-editor",
       "candidateType": "software-entity",
       "entityKey": "audio-editor",
@@ -157,20 +143,6 @@
       "exampleUrls": [
         "https://www.capterra.com/audio-editing-software/features/audio-editor/",
         "https://dynamite-ai.com/categories/audio-editor"
-      ]
-    },
-    {
-      "slug": "chatzy-ai",
-      "candidateType": "software-entity",
-      "entityKey": "chatzy",
-      "mentions": 2,
-      "sources": [
-        "Aixploria",
-        "Dynamite AI"
-      ],
-      "exampleUrls": [
-        "https://www.aixploria.com/chatzy-ai/",
-        "https://dynamite-ai.com/tools/chatzy-ai"
       ]
     },
     {
@@ -213,20 +185,6 @@
       "exampleUrls": [
         "https://www.futurepedia.io/tool/coool-ai",
         "https://www.aixploria.com/coool-ai/"
-      ]
-    },
-    {
-      "slug": "cosupport-ai",
-      "candidateType": "software-entity",
-      "entityKey": "cosupport",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/cosupport-ai",
-        "https://www.aixploria.com/cosupport-ai/"
       ]
     },
     {

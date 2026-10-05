@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T07:41:19.267Z",
+  "generatedAt": "2026-10-05T08:37:43.547Z",
   "engine": "ToolScout Search Commercial Routing v1",
   "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
   "rules": {
@@ -61,9 +61,9 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2223,
+      "impressions": 2244,
       "ctr": 0,
-      "position": 80.2753,
+      "position": 80.2224,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -74,8 +74,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 138,
-          "position": 88.4275
+          "impressions": 150,
+          "position": 88.12
         },
         {
           "query": "seo tools for agency",
@@ -86,8 +86,8 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 115,
-          "position": 82.8435
+          "impressions": 116,
+          "position": 82.819
         },
         {
           "query": "seo agency tools",
@@ -99,7 +99,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 133.43,
+      "priorityScore": 133.59,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -770,9 +770,9 @@
       "pathname": "/best-project-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 132,
+      "impressions": 133,
       "ctr": 0,
-      "position": 44.8788,
+      "position": 44.9549,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -808,7 +808,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "editorial-depth",
-      "priorityScore": 95.8,
+      "priorityScore": 95.84,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -1897,57 +1897,54 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-lead-capture-forms",
-      "pathname": "/best-lead-capture-forms",
+      "page": "https://trytoolscout.org/best-keyword-research-tools",
+      "pathname": "/best-keyword-research-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 16,
+      "impressions": 80,
       "ctr": 0,
-      "position": 49.1875,
+      "position": 75.425,
       "topQueries": [
         {
-          "query": "lead validation forms",
+          "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 5,
-          "position": 46.6
+          "impressions": 52,
+          "position": 73.3462
         },
         {
-          "query": "lead capture forms",
+          "query": "competitive keyword research tools",
           "clicks": 0,
-          "impressions": 4,
-          "position": 38.25
+          "impressions": 13,
+          "position": 95.7692
         },
         {
-          "query": "secure lead capture forms",
+          "query": "keyword discovery tools",
           "clicks": 0,
-          "impressions": 2,
-          "position": 72.5
+          "impressions": 8,
+          "position": 73.25
         },
         {
-          "query": "best lead capture forms",
+          "query": "keyword discovery tools",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 70.3333
+        },
+        {
+          "query": "keyword research tools competitors",
           "clicks": 0,
           "impressions": 1,
-          "position": 39
-        },
-        {
-          "query": "lead capture forms and surveys",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 46
+          "position": 86
         }
       ],
-      "monetized": true,
-      "monetizedSlugs": [
-        "typeform"
-      ],
-      "lane": "editorial-depth",
-      "priorityScore": 76.44,
+      "monetized": false,
+      "monetizedSlugs": [],
+      "lane": "relevance-and-authority",
+      "priorityScore": 76.08,
       "actions": [
-        "deepen-decision-context",
-        "align-copy-to-observed-queries",
-        "strengthen-internal-links",
-        "prioritize-page-distribution",
-        "measure-monetized-outbound-and-revenue"
+        "improve-query-intent-match",
+        "deepen-evidence",
+        "strengthen-internal-authority",
+        "test-selective-distribution"
       ]
     }
   ]

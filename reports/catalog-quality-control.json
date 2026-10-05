@@ -1,225 +1,17 @@
 {
-  "generatedAt": "2026-10-05T07:40:14.179Z",
+  "generatedAt": "2026-10-05T08:36:10.259Z",
   "methodology": "Field-level first-party quality control for volatile catalog facts plus validated visual asset resolution. Ambiguous changes are reported, not silently rewritten.",
   "summary": {
-    "tools": 109,
-    "critical": 10,
+    "tools": 112,
+    "critical": 0,
     "high": 15,
-    "medium": 0,
+    "medium": 5,
     "low": 0,
-    "autoCorrections": 10,
-    "assetsResolved": 99
+    "autoCorrections": 0,
+    "assetsResolved": 102
   },
-  "corrections": [
-    {
-      "slug": "monday-crm",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "ahrefs",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "socialbee",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "moz-pro",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "squarespace",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "help-scout",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "basecamp",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "paperform",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "anijam-ai",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    },
-    {
-      "slug": "chatzy-ai",
-      "field": "freePlan",
-      "from": false,
-      "to": true,
-      "evidence": "official_source_explicit_free_plan"
-    }
-  ],
+  "corrections": [],
   "findings": [
-    {
-      "slug": "ahrefs",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://ahrefs.com/",
-        "https://ahrefs.com/pricing",
-        "https://ahrefs.com/pricing?utm_source=homepage"
-      ]
-    },
-    {
-      "slug": "anijam-ai",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-        "https://www.anijam.ai/pricing/"
-      ]
-    },
-    {
-      "slug": "basecamp",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://basecamp.com/",
-        "https://basecamp.com/pricing",
-        "https://basecamp.com/features"
-      ]
-    },
-    {
-      "slug": "chatzy-ai",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://chatzy.ai/",
-        "https://chatzy.ai/pricing"
-      ]
-    },
-    {
-      "slug": "help-scout",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://www.helpscout.com/",
-        "https://www.helpscout.com/pricing/"
-      ]
-    },
-    {
-      "slug": "monday-crm",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://monday.com/",
-        "https://monday.com/pricing",
-        "https://monday.com/pricing"
-      ]
-    },
-    {
-      "slug": "moz-pro",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://moz.com/products/pro",
-        "https://moz.com/products/api/pricing",
-        "https://moz.com/products/pro/pricing"
-      ]
-    },
-    {
-      "slug": "paperform",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://paperform.co/",
-        "https://paperform.co/pricing/",
-        "https://paperform.co/product/"
-      ]
-    },
-    {
-      "slug": "socialbee",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://socialbee.com/",
-        "https://socialbee.com/pricing/",
-        "https://socialbee.com/features/"
-      ]
-    },
-    {
-      "slug": "squarespace",
-      "severity": "critical",
-      "type": "free_plan_contradiction",
-      "catalogValue": false,
-      "observedValue": true,
-      "confidence": "explicit",
-      "reason": "official_source_explicit_free_plan",
-      "evidenceUrls": [
-        "https://www.squarespace.com/",
-        "https://www.squarespace.com/pricing",
-        "https://www.squarespace.com/financial-solutions"
-      ]
-    },
     {
       "slug": "attio",
       "severity": "high",
@@ -348,6 +140,165 @@
       "severity": "high",
       "type": "official_source_unavailable",
       "detail": "http_403"
+    },
+    {
+      "slug": "intercom",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "$19 per",
+        "$0.99 per",
+        "$85 per",
+        "$10",
+        "$132 per",
+        "$90.09 /mo",
+        "$19.00 /mo",
+        "$109.09 /mo",
+        "$33/mo",
+        "$1.99 per",
+        "$99 per",
+        "$29 per",
+        "$99/month",
+        "$35 per",
+        "$0.01 per"
+      ],
+      "current": [
+        "$19 per",
+        "$0.99 per",
+        "$85 per",
+        "$132 per",
+        "$99 /mo",
+        "$29 per",
+        "$99/month",
+        "$35 per",
+        "$0.01 per"
+      ],
+      "evidenceUrls": [
+        "https://www.intercom.com/",
+        "https://www.intercom.com/pricing",
+        "https://www.intercom.com/solutions/technology"
+      ]
+    },
+    {
+      "slug": "mailchimp",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "$ 20",
+        "$ 350",
+        "$20 /month",
+        "$ 13",
+        "$ 0 /month",
+        "$299 per month",
+        "$800/mo",
+        "$385/mo"
+      ],
+      "current": [
+        "$ 20",
+        "$ 350",
+        "$ 13",
+        "$ 0 /month",
+        "$299 per month",
+        "$800/mo",
+        "$385/mo"
+      ],
+      "evidenceUrls": [
+        "https://mailchimp.com/",
+        "https://mailchimp.com/pricing/marketing/",
+        "https://mailchimp.com/pricing/marketing/compare-plans/"
+      ]
+    },
+    {
+      "slug": "screaming-frog",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "£199 per year"
+      ],
+      "current": [
+        "€245 per year",
+        "£199 per year"
+      ],
+      "evidenceUrls": [
+        "https://www.screamingfrog.co.uk/seo-spider/",
+        "https://www.screamingfrog.co.uk/seo-spider/pricing/",
+        "https://www.screamingfrog.co.uk/log-file-analyser/pricing/"
+      ]
+    },
+    {
+      "slug": "slack",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "$51",
+        "$0",
+        "$8.75",
+        "$4.38",
+        "$7.25",
+        "$18",
+        "$9",
+        "$15",
+        "$45",
+        "$2.1",
+        "$8.75 per",
+        "$9 per"
+      ],
+      "current": [
+        "$51",
+        "$0",
+        "$8.75",
+        "$4.38",
+        "$7.25",
+        "$18",
+        "$9",
+        "$15",
+        "$2.1",
+        "$8.75 per",
+        "$9 per"
+      ],
+      "evidenceUrls": [
+        "https://slack.com/",
+        "https://slack.com/pricing",
+        "https://slack.com/pricing/paid-vs-free"
+      ]
+    },
+    {
+      "slug": "zapier",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "$40",
+        "$1",
+        "$0 /month",
+        "$19.99 /month",
+        "$69 /month",
+        "$400",
+        "$33.33 /month",
+        "$160",
+        "$13.33 /month",
+        "$800",
+        "$66.67 /month",
+        "$500,00"
+      ],
+      "current": [
+        "$150,00",
+        "$150",
+        "$0 /month",
+        "$19.99 /month",
+        "$69 /month",
+        "$400",
+        "$33.33 /month",
+        "$160",
+        "$13.33 /month",
+        "$800",
+        "$66.67 /month",
+        "$500,00"
+      ],
+      "evidenceUrls": [
+        "https://zapier.com/",
+        "https://zapier.com/pricing",
+        "https://zapier.com/solutions/revops-automation"
+      ]
     }
   ]
 }

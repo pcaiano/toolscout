@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T07:41:20.430Z",
-  "gscGeneratedAt": "2026-10-05T07:40:01.971Z",
+  "generatedAt": "2026-10-05T08:37:44.732Z",
+  "gscGeneratedAt": "2026-10-05T08:35:53.887Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 0,
@@ -43,9 +43,9 @@
     },
     {
       "intent": "best-lead-capture-forms",
-      "impressions": 16,
+      "impressions": 17,
       "clicks": 0,
-      "position": 49.1875,
+      "position": 51.8235,
       "meaningfulSample": false,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -108,15 +108,15 @@
     },
     {
       "intent": "best-keyword-research-tools",
-      "impressions": 79,
+      "impressions": 80,
       "clicks": 0,
-      "position": 75.1899,
+      "position": 75.425,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "competitive keyword research tools",
-        "impressions": 12,
-        "position": 95.9167,
+        "impressions": 13,
+        "position": 95.7692,
         "alignment": 1
       },
       "action": "measure-only"
@@ -133,15 +133,15 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 2223,
+      "impressions": 2244,
       "clicks": 0,
-      "position": 80.2753,
+      "position": 80.2224,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "seo software for agencies",
-        "impressions": 138,
-        "position": 88.4275,
+        "impressions": 150,
+        "position": 88.12,
         "alignment": 1
       },
       "action": "measure-only"
@@ -193,9 +193,9 @@
     },
     {
       "intent": "best-project-management-tools",
-      "impressions": 132,
+      "impressions": 133,
       "clicks": 0,
-      "position": 44.8788,
+      "position": 44.9549,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {

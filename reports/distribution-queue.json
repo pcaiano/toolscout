@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T07:41:23.097Z",
+  "generatedAt": "2026-10-05T08:37:46.898Z",
   "count": 47,
   "policy": "Only editorially verified assets are eligible for distribution. Page-level Search Console demand chooses which existing pages deserve attention. Monetization can increase measurement urgency but never changes editorial ranking. Original research can be promoted to editorial, community and indexing surfaces, while product directories continue to receive the ToolScout product profile.",
   "items": [
@@ -341,6 +341,36 @@
     },
     {
       "assetType": "guide",
+      "slug": "best-seo-tools-for-agencies",
+      "title": "Best SEO Tools for Agencies",
+      "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
+      "category": "seo",
+      "priorityScore": 75,
+      "demandBoost": 45,
+      "searchDemand": {
+        "impressions": 2244,
+        "clicks": 0,
+        "position": 80.2224,
+        "lane": "relevance-and-authority",
+        "monetized": false
+      },
+      "distributionReason": "Page-level GSC routing lane: relevance-and-authority. Distribution supports an already observed page rather than creating a new surface.",
+      "searchSnippet": "Best SEO Tools for Agencies - SEO platforms suited to agencies managing multiple clients, research workflows and reporting.",
+      "socialHook": "Need the right tool for best seo tools for agencies? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best seo tools for agencies? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-seo-tools-for-agencies",
+      "xPost": "Choosing a tool for best seo tools for agencies? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-seo-tools-for-agencies",
+      "redditStyle": "I put together a practical guide for best seo tools for agencies, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best SEO Tools for Agencies: a practical shortlist",
+      "newsletterIntro": "SEO platforms suited to agencies managing multiple clients, research workflows and reporting. See the shortlist and compare the options: https://trytoolscout.org/best-seo-tools-for-agencies",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "assetType": "guide",
       "slug": "best-crm-for-small-business",
       "title": "Best CRM for Small Business",
       "url": "https://trytoolscout.org/best-crm-for-small-business",
@@ -362,36 +392,6 @@
       "redditStyle": "I put together a practical guide for best crm for small business, focused on fit rather than a generic top-ten list.",
       "newsletterSubject": "Best CRM for Small Business: a practical shortlist",
       "newsletterIntro": "CRM recommendations weighted for simplicity, affordability and practical sales automation. See the shortlist and compare the options: https://trytoolscout.org/best-crm-for-small-business",
-      "hashtags": [
-        "#software",
-        "#AITools",
-        "#productivity",
-        "#ToolScout"
-      ]
-    },
-    {
-      "assetType": "guide",
-      "slug": "best-seo-tools-for-agencies",
-      "title": "Best SEO Tools for Agencies",
-      "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
-      "category": "seo",
-      "priorityScore": 74,
-      "demandBoost": 44,
-      "searchDemand": {
-        "impressions": 2223,
-        "clicks": 0,
-        "position": 80.2753,
-        "lane": "relevance-and-authority",
-        "monetized": false
-      },
-      "distributionReason": "Page-level GSC routing lane: relevance-and-authority. Distribution supports an already observed page rather than creating a new surface.",
-      "searchSnippet": "Best SEO Tools for Agencies - SEO platforms suited to agencies managing multiple clients, research workflows and reporting.",
-      "socialHook": "Need the right tool for best seo tools for agencies? ToolScout compares options around the job, not generic rankings.",
-      "linkedInPost": "Need the right tool for best seo tools for agencies? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-seo-tools-for-agencies",
-      "xPost": "Choosing a tool for best seo tools for agencies? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-seo-tools-for-agencies",
-      "redditStyle": "I put together a practical guide for best seo tools for agencies, focused on fit rather than a generic top-ten list.",
-      "newsletterSubject": "Best SEO Tools for Agencies: a practical shortlist",
-      "newsletterIntro": "SEO platforms suited to agencies managing multiple clients, research workflows and reporting. See the shortlist and compare the options: https://trytoolscout.org/best-seo-tools-for-agencies",
       "hashtags": [
         "#software",
         "#AITools",
@@ -498,9 +498,9 @@
       "priorityScore": 62,
       "demandBoost": 33,
       "searchDemand": {
-        "impressions": 132,
+        "impressions": 133,
         "clicks": 0,
-        "position": 44.8788,
+        "position": 44.9549,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -641,46 +641,16 @@
     },
     {
       "assetType": "guide",
-      "slug": "best-lead-capture-forms",
-      "title": "Best Lead Capture Forms",
-      "url": "https://trytoolscout.org/best-lead-capture-forms",
-      "category": "forms",
-      "priorityScore": 58,
-      "demandBoost": 25,
-      "searchDemand": {
-        "impressions": 16,
-        "clicks": 0,
-        "position": 49.1875,
-        "lane": "editorial-depth",
-        "monetized": true
-      },
-      "distributionReason": "Page-level GSC routing lane: editorial-depth. Distribution supports an already observed page rather than creating a new surface.",
-      "searchSnippet": "Best Lead Capture Forms - Form tools for capturing leads, qualifying prospects and connecting submissions to business workflows.",
-      "socialHook": "Need the right tool for best lead capture forms? ToolScout compares options around the job, not generic rankings.",
-      "linkedInPost": "Need the right tool for best lead capture forms? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-lead-capture-forms",
-      "xPost": "Choosing a tool for best lead capture forms? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-lead-capture-forms",
-      "redditStyle": "I put together a practical guide for best lead capture forms, focused on fit rather than a generic top-ten list.",
-      "newsletterSubject": "Best Lead Capture Forms: a practical shortlist",
-      "newsletterIntro": "Form tools for capturing leads, qualifying prospects and connecting submissions to business workflows. See the shortlist and compare the options: https://trytoolscout.org/best-lead-capture-forms",
-      "hashtags": [
-        "#software",
-        "#AITools",
-        "#productivity",
-        "#ToolScout"
-      ]
-    },
-    {
-      "assetType": "guide",
       "slug": "best-crm-with-automation",
       "title": "Best CRM with Automation",
       "url": "https://trytoolscout.org/best-crm-with-automation",
       "category": "crm",
-      "priorityScore": 56,
-      "demandBoost": 26,
+      "priorityScore": 57,
+      "demandBoost": 27,
       "searchDemand": {
-        "impressions": 56,
+        "impressions": 60,
         "clicks": 0,
-        "position": 81.1786,
+        "position": 78.1333,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -768,13 +738,13 @@
       "priorityScore": 43,
       "demandBoost": 28,
       "searchDemand": {
-        "impressions": 79,
+        "impressions": 80,
         "clicks": 0,
-        "position": 75.1899,
-        "opportunity": "relevance-gap",
-        "meaningfulSample": true
+        "position": 75.425,
+        "lane": "relevance-and-authority",
+        "monetized": false
       },
-      "distributionReason": "Observed search demand increases distribution priority. Low-sample first-page pages receive only a protected bounded boost.",
+      "distributionReason": "Page-level GSC routing lane: relevance-and-authority. Distribution supports an already observed page rather than creating a new surface.",
       "searchSnippet": "Best Keyword Research Tools - SEO tools selected for keyword discovery, search opportunity analysis and content planning.",
       "socialHook": "Need the right tool for best keyword research tools? ToolScout compares options around the job, not generic rankings.",
       "linkedInPost": "Need the right tool for best keyword research tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-keyword-research-tools",
@@ -798,9 +768,9 @@
       "priorityScore": 38,
       "demandBoost": 27,
       "searchDemand": {
-        "impressions": 45,
+        "impressions": 46,
         "clicks": 0,
-        "position": 64.5111,
+        "position": 65.1304,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -962,6 +932,36 @@
       "redditStyle": "I put together a practical guide for best crm for real estate, focused on fit rather than a generic top-ten list.",
       "newsletterSubject": "Best CRM for Real Estate: a practical shortlist",
       "newsletterIntro": "CRM recommendations for property professionals managing leads, clients, pipelines and follow-up. See the shortlist and compare the options: https://trytoolscout.org/best-crm-for-real-estate",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "assetType": "guide",
+      "slug": "best-lead-capture-forms",
+      "title": "Best Lead Capture Forms",
+      "url": "https://trytoolscout.org/best-lead-capture-forms",
+      "category": "forms",
+      "priorityScore": 33,
+      "demandBoost": 5,
+      "searchDemand": {
+        "impressions": 17,
+        "clicks": 0,
+        "position": 51.8235,
+        "opportunity": "insufficient-sample",
+        "meaningfulSample": false
+      },
+      "distributionReason": "Observed search demand increases distribution priority. Low-sample first-page pages receive only a protected bounded boost.",
+      "searchSnippet": "Best Lead Capture Forms - Form tools for capturing leads, qualifying prospects and connecting submissions to business workflows.",
+      "socialHook": "Need the right tool for best lead capture forms? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best lead capture forms? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-lead-capture-forms",
+      "xPost": "Choosing a tool for best lead capture forms? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-lead-capture-forms",
+      "redditStyle": "I put together a practical guide for best lead capture forms, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Lead Capture Forms: a practical shortlist",
+      "newsletterIntro": "Form tools for capturing leads, qualifying prospects and connecting submissions to business workflows. See the shortlist and compare the options: https://trytoolscout.org/best-lead-capture-forms",
       "hashtags": [
         "#software",
         "#AITools",
@@ -1134,9 +1134,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 11,
+        "impressions": 15,
         "clicks": 0,
-        "position": 62.5455,
+        "position": 64.4,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },

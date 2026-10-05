@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T07:41:20.110Z",
+  "generatedAt": "2026-10-05T08:37:44.453Z",
   "engine": "ToolScout Content Intelligence v1.3",
   "objective": "Choose and test content opportunities using observed page-level search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -20,7 +20,7 @@
       "observedGscIntents": 39,
       "observedGscPages": 139,
       "searchClicks": 7,
-      "searchImpressions": 6339,
+      "searchImpressions": 6372,
       "organicAcquisitionStatus": "early-search-acquisition",
       "indexingRecovery": 1,
       "actionableOpportunities": 20,
@@ -31,7 +31,7 @@
       "strikingMeaningful": 0,
       "strikingLowSample": 1,
       "authorityDepthOpportunities": 13,
-      "competitorResearchCandidates": 37
+      "competitorResearchCandidates": 34
     },
     "routingSummary": {
       "pages": 139,
@@ -47,8 +47,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 2223,
-        "position": 80.2753,
+        "impressions": 2244,
+        "position": 80.2224,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -57,7 +57,7 @@
       },
       {
         "intent": "best-crm-for-small-business",
-        "priorityScore": 53,
+        "priorityScore": 52,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -85,7 +85,7 @@
       },
       {
         "intent": "best-free-crm",
-        "priorityScore": 48,
+        "priorityScore": 47,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -116,8 +116,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 132,
-        "position": 44.8788,
+        "impressions": 133,
+        "position": 44.9549,
         "topTools": [
           "asana",
           "wrike",
@@ -126,12 +126,12 @@
       },
       {
         "intent": "best-keyword-research-tools",
-        "priorityScore": 40,
+        "priorityScore": 39,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 79,
-        "position": 75.1899,
+        "impressions": 80,
+        "position": 75.425,
         "topTools": [
           "surfer",
           "ahrefs",
@@ -140,12 +140,12 @@
       },
       {
         "intent": "best-crm-with-automation",
-        "priorityScore": 47,
+        "priorityScore": 44,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 56,
-        "position": 81.1786,
+        "impressions": 60,
+        "position": 78.1333,
         "topTools": [
           "close",
           "monday-crm",
@@ -175,10 +175,10 @@
         "pathname": "/best-seo-tools-for-agencies",
         "type": "guide",
         "lane": "relevance-and-authority",
-        "priorityScore": 133.43,
-        "impressions": 2223,
+        "priorityScore": 133.59,
+        "impressions": 2244,
         "clicks": 0,
-        "position": 80.2753,
+        "position": 80.2224,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [

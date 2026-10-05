@@ -1,8 +1,40 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-28T09:55:08Z",
+  "updatedAt": "2026-10-05T08:35:54.608Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Integration update",
+      "title": "Copilot code review: API support and new default effort level",
+      "summary": "You can now request a GitHub Copilot code review through the REST and GraphQL APIs and set the review effort level for each request.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level",
+      "articleUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+      "profileUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
+      "id": "chatgpt-introducing-gpt-6-1-sol",
+      "publishedAt": "2026-09-29",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Pricing and packaging update",
+      "title": "Introducing GPT-6.1 Sol",
+      "summary": "Meet GPT-6.1 Sol: near-Astra intelligence for coding, computer use, and professional work at one-fifth of Astra’s standard API input and output token prices.",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-1-sol",
+      "articleUrl": "/news/chatgpt-introducing-gpt-6-1-sol.html",
+      "profileUrl": "/news/chatgpt-introducing-gpt-6-1-sol.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "github-copilot-sandboxing-observability",
       "publishedAt": "2026-09-28",
@@ -148,6 +180,22 @@
       "partnerUpdate": false
     },
     {
+      "id": "toolscout-software-trends-2026-09",
+      "publishedAt": "2026-09-16",
+      "toolSlug": null,
+      "toolName": "ToolScout",
+      "label": "ToolScout analysis",
+      "title": "September software trends brief",
+      "summary": "A buyer focused look at public product releases and recurring software themes from official vendor sources.",
+      "sourceName": "ToolScout Software Trends",
+      "sourceUrl": "/software-trends-index.html",
+      "articleUrl": "/software-trends-index.html",
+      "profileUrl": "/software-trends-index.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
       "id": "notion-3-7-agent-skills",
       "publishedAt": "2026-09-15",
       "toolSlug": "notion",
@@ -175,22 +223,6 @@
       "sourceUrl": "https://community.hubspot.com/t/spotlight-feature-hubspot-mcp-server-updates/156456",
       "articleUrl": "/news/hubspot-mcp-server-updates.html",
       "profileUrl": "/news/hubspot-mcp-server-updates.html",
-      "outboundUrl": null,
-      "outboundLabel": null,
-      "partnerUpdate": false
-    },
-    {
-      "id": "toolscout-software-trends-2026-09",
-      "publishedAt": "2026-09-16",
-      "toolSlug": null,
-      "toolName": "ToolScout",
-      "label": "ToolScout analysis",
-      "title": "September software trends brief",
-      "summary": "A buyer focused look at public product releases and recurring software themes from official vendor sources.",
-      "sourceName": "ToolScout Software Trends",
-      "sourceUrl": "/software-trends-index.html",
-      "articleUrl": "/software-trends-index.html",
-      "profileUrl": "/software-trends-index.html",
       "outboundUrl": null,
       "outboundLabel": null,
       "partnerUpdate": false

@@ -1,17 +1,17 @@
 {
   "version": 4,
-  "edition": "2026-09",
-  "editionLabel": "September 2026",
-  "publishedAt": "2026-09-28T09:55:08.000Z",
+  "edition": "2026-10",
+  "editionLabel": "October 2026",
+  "publishedAt": "2026-10-05T08:35:54.608Z",
   "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
-  "updatedThrough": "2026-09-28",
+  "updatedThrough": "2026-10-02",
   "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout classifies buyer impact independently of affiliate status.",
-  "primarySourceCount": 11,
+  "primarySourceCount": 12,
   "searchVisibility": {
     "source": "Google Search Console",
-    "impressions": 6339,
+    "impressions": 6372,
     "clicks": 7,
-    "ctr": 0.1104,
+    "ctr": 0.1099,
     "position": 0
   },
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
@@ -32,8 +32,7 @@
       "title": "Business software is opening up to agent connections",
       "summary": "MCP and related integration layers are making software easier for AI tools to read from and act on with explicit permissions.",
       "evidence": [
-        "notion-mail-shuts-down",
-        "hubspot-mcp-server-update"
+        "notion-mail-shuts-down"
       ]
     },
     {
@@ -44,12 +43,68 @@
         "github-proof-of-presence-enterprise",
         "notion-mail-shuts-down",
         "zapier-next-gen-zaps-mcp",
-        "github-actions-workflow-execution-protections-ga",
-        "hubspot-mcp-server-update"
+        "github-actions-workflow-execution-protections-ga"
       ]
     }
   ],
   "updates": [
+    {
+      "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Integration update",
+      "title": "Copilot code review: API support and new default effort level",
+      "summary": "You can now request a GitHub Copilot code review through the REST and GraphQL APIs and set the review effort level for each request.",
+      "changeType": "integrations_connectivity",
+      "buyerImpact": "GitHub buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level"
+    },
+    {
+      "id": "chatgpt-introducing-gpt-6-1-sol",
+      "publishedAt": "2026-09-29",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Pricing and packaging update",
+      "title": "Introducing GPT-6.1 Sol",
+      "summary": "Meet GPT-6.1 Sol: near-Astra intelligence for coding, computer use, and professional work at one-fifth of Astra’s standard API input and output token prices.",
+      "changeType": "pricing_packaging",
+      "buyerImpact": "ChatGPT buyers should re-check total cost and plan eligibility because packaging changes can alter the economics of an existing shortlist.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-assistants",
+          "label": "Best AI Assistants"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-introducing-gpt-6-1-sol.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-1-sol"
+    },
     {
       "id": "github-copilot-sandboxing-observability",
       "publishedAt": "2026-09-28",
@@ -349,47 +404,6 @@
       "articleUrl": "/news/notion-3-7-agent-skills.html",
       "sourceName": "Notion release notes",
       "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15"
-    },
-    {
-      "id": "hubspot-mcp-server-update",
-      "publishedAt": "2026-09-15",
-      "toolSlug": "hubspot",
-      "toolName": "HubSpot",
-      "label": "Official product update",
-      "title": "HubSpot expands its MCP server from insight to action",
-      "summary": "HubSpot is broadening what teams can do with CRM data and actions from AI conversations through its MCP server and Claude connector.",
-      "changeType": "integrations_connectivity",
-      "buyerImpact": "HubSpot buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/hubspot",
-          "label": "HubSpot profile"
-        },
-        {
-          "type": "comparison",
-          "url": "/hubspot-vs-pipedrive",
-          "label": "hubspot vs pipedrive"
-        },
-        {
-          "type": "guide",
-          "url": "/best-free-crm",
-          "label": "Best Free CRM Tools"
-        },
-        {
-          "type": "guide",
-          "url": "/best-crm-with-automation",
-          "label": "Best CRM with Automation"
-        },
-        {
-          "type": "guide",
-          "url": "/best-affordable-crm",
-          "label": "Best Affordable CRM"
-        }
-      ],
-      "articleUrl": "/news/hubspot-mcp-server-updates.html",
-      "sourceName": "HubSpot Releases and Updates",
-      "sourceUrl": "https://community.hubspot.com/t/spotlight-feature-hubspot-mcp-server-updates/156456"
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",

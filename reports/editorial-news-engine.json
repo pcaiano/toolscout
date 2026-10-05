@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-10-05T08:35:54.609Z",
+  "engine": "ToolScout Editorial News Engine v1",
+  "lookbackDays": 14,
+  "maxPerRun": 4,
+  "sources": [
+    {
+      "id": "github-changelog",
+      "status": "ok",
+      "fetched": "https://github.blog/changelog/feed/",
+      "parsed": 10,
+      "recent": 1
+    },
+    {
+      "id": "openai-news",
+      "status": "ok",
+      "fetched": "https://openai.com/news/rss.xml",
+      "parsed": 1245,
+      "recent": 1
+    },
+    {
+      "id": "hubspot-releases",
+      "status": "error",
+      "error": "http_403"
+    },
+    {
+      "id": "notion-releases",
+      "status": "ok",
+      "fetched": "https://www.notion.com/releases",
+      "parsed": 0,
+      "recent": 0
+    },
+    {
+      "id": "zapier-product-updates",
+      "status": "ok",
+      "fetched": "https://community.zapier.com/product-updates",
+      "parsed": 24,
+      "recent": 0
+    }
+  ],
+  "candidates": 2,
+  "published": [
+    {
+      "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
+      "date": "2026-10-02",
+      "toolSlug": "github",
+      "title": "Copilot code review: API support and new default effort level",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level",
+      "score": 7
+    },
+    {
+      "id": "chatgpt-introducing-gpt-6-1-sol",
+      "date": "2026-09-29",
+      "toolSlug": "chatgpt",
+      "title": "Introducing GPT-6.1 Sol",
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-1-sol",
+      "score": 7
+    }
+  ],
+  "lastPublishedAt": "2026-10-02",
+  "status": "healthy"
+}

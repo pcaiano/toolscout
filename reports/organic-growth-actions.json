@@ -1,30 +1,30 @@
 {
-  "generatedAt": "2026-10-05T07:41:20.060Z",
+  "generatedAt": "2026-10-05T08:37:44.412Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-10-05T07:41:19.982Z",
+  "brainDirectivesGeneratedAt": "2026-10-05T08:37:44.334Z",
   "newInterventions": [
     {
-      "intent": "best-crm-for-small-business",
+      "intent": "best-crm-with-automation",
       "variant": "decision-depth-v1",
       "lane": "seo-authority-depth",
       "priorityScore": 100,
-      "impressions": 293,
-      "position": 77.6177,
-      "brainOpportunity": "search:best-crm-for-small-business",
+      "impressions": 60,
+      "position": 78.1333,
+      "brainOpportunity": "search:best-crm-with-automation",
       "brainActions": [
         "content_amplification",
         "search_measurement"
       ]
     },
     {
-      "intent": "best-social-media-management-tools",
+      "intent": "best-customer-support-tools",
       "variant": "decision-depth-v1",
       "lane": "seo-authority-depth",
       "priorityScore": 100,
-      "impressions": 172,
-      "position": 63.0523,
-      "brainOpportunity": "search:best-social-media-management-tools",
+      "impressions": 49,
+      "position": 80.0816,
+      "brainOpportunity": "search:best-customer-support-tools",
       "brainActions": [
         "content_amplification",
         "search_measurement"
@@ -36,11 +36,11 @@
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 2223,
+        "impressions": 2244,
         "ctr": 0,
-        "position": 80.2753
+        "position": 80.2224
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -56,11 +56,11 @@
       "intent": "best-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 132,
+        "impressions": 133,
         "ctr": 0,
-        "position": 44.8788
+        "position": 44.9549
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -80,7 +80,7 @@
         "ctr": 0,
         "position": 76.4057
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -100,7 +100,7 @@
         "ctr": 0,
         "position": 57.1852
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -120,7 +120,7 @@
         "ctr": 0,
         "position": 74.7397
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -167,7 +167,7 @@
         "ctr": 0,
         "position": 77.8456
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -183,11 +183,11 @@
       "intent": "best-keyword-research-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 79,
+        "impressions": 80,
         "ctr": 0,
-        "position": 75.1899
+        "position": 75.425
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -207,7 +207,7 @@
         "ctr": 0,
         "position": 77.6177
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -227,7 +227,7 @@
         "ctr": 0,
         "position": 63.0523
       },
-      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -238,6 +238,46 @@
         "ctr": 0,
         "position": 63.0523
       }
+    },
+    {
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "intent": "best-crm-with-automation",
+      "latest": {
+        "clicks": 0,
+        "impressions": 60,
+        "ctr": 0,
+        "position": 78.1333
+      },
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-10-05T08:37:44.412Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 60,
+        "ctr": 0,
+        "position": 78.1333
+      }
+    },
+    {
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "intent": "best-customer-support-tools",
+      "latest": {
+        "clicks": 0,
+        "impressions": 49,
+        "ctr": 0,
+        "position": 80.0816
+      },
+      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-10-05T08:37:44.412Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 49,
+        "ctr": 0,
+        "position": 80.0816
+      }
     }
   ],
   "indexingRecovery": [],
@@ -246,14 +286,14 @@
       "intent": "best-seo-tools-for-agencies",
       "variant": "decision-depth-v1",
       "outcome": "neutral",
-      "positionChange": 3.206,
+      "positionChange": 3.153,
       "clickGain": 0
     },
     {
       "intent": "best-project-management-tools",
       "variant": "decision-depth-v1",
       "outcome": "neutral",
-      "positionChange": 4.956,
+      "positionChange": 5.032,
       "clickGain": 0
     },
     {

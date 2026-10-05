@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-05T07:41:19.318Z",
+  "generatedAt": "2026-10-05T08:37:43.587Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v6",
   "objective": "Autonomously pursue sustainable search rankings and qualified clicks while separating indexing failures from content-performance failures.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 7,
-    "searchImpressions": 6339,
-    "ctr": 0.1104,
+    "searchImpressions": 6372,
+    "ctr": 0.1099,
     "gscStartDate": "2026-09-08",
     "gscEndDate": "2026-10-05",
     "gscDataState": "all",
@@ -34,7 +34,7 @@
     "observedGscIntents": 39,
     "observedGscPages": 139,
     "searchClicks": 7,
-    "searchImpressions": 6339,
+    "searchImpressions": 6372,
     "organicAcquisitionStatus": "early-search-acquisition",
     "indexingRecovery": 1,
     "actionableOpportunities": 20,
@@ -45,12 +45,12 @@
     "strikingMeaningful": 0,
     "strikingLowSample": 1,
     "authorityDepthOpportunities": 13,
-    "competitorResearchCandidates": 37
+    "competitorResearchCandidates": 34
   },
   "opportunities": [
     {
       "intent": "best-free-project-management-tools",
-      "priorityScore": 46,
+      "priorityScore": 45,
       "lane": "seo-indexing-recovery",
       "action": "repair-indexing",
       "reason": "Google indexing state is canonical-alternate. Fix technical discovery and canonical signals before changing editorial content.",
@@ -143,10 +143,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 2223,
+        "impressions": 2244,
         "clicks": 0,
         "ctr": 0,
-        "position": 80.2753,
+        "position": 80.2224,
         "opportunity": "relevance-gap",
         "opportunityScore": 32,
         "meaningfulSample": true,
@@ -161,7 +161,7 @@
     },
     {
       "intent": "best-crm-for-small-business",
-      "priorityScore": 53,
+      "priorityScore": 52,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -213,7 +213,7 @@
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "priorityScore": 51,
+      "priorityScore": 50,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -299,10 +299,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 132,
+        "impressions": 133,
         "clicks": 0,
         "ctr": 0,
-        "position": 44.8788,
+        "position": 44.9549,
         "opportunity": "authority-gap",
         "opportunityScore": 25,
         "meaningfulSample": true,
@@ -317,7 +317,7 @@
     },
     {
       "intent": "best-free-crm",
-      "priorityScore": 48,
+      "priorityScore": 47,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -369,7 +369,7 @@
     },
     {
       "intent": "best-ecommerce-platforms",
-      "priorityScore": 48,
+      "priorityScore": 46,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -417,58 +417,6 @@
         "bigcommerce",
         "woocommerce",
         "shopify"
-      ]
-    },
-    {
-      "intent": "best-crm-with-automation",
-      "priorityScore": 47,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "meaningful",
-      "indexingSignal": null,
-      "indexingBarrier": false,
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "indexing-safety",
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 56,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 81.1786,
-        "opportunity": "relevance-gap",
-        "opportunityScore": 18,
-        "meaningfulSample": true,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "meaningful"
-      },
-      "topTools": [
-        "close",
-        "monday-crm",
-        "hubspot"
       ]
     },
     {
@@ -523,8 +471,8 @@
       ]
     },
     {
-      "intent": "best-developer-tools",
-      "priorityScore": 43,
+      "intent": "best-crm-with-automation",
+      "priorityScore": 44,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -558,20 +506,20 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 45,
+        "impressions": 60,
         "clicks": 0,
         "ctr": 0,
-        "position": 64.5111,
+        "position": 78.1333,
         "opportunity": "relevance-gap",
-        "opportunityScore": 21,
+        "opportunityScore": 18,
         "meaningfulSample": true,
         "strategicOpportunity": false,
         "evidenceConfidence": "meaningful"
       },
       "topTools": [
-        "github",
-        "cursor",
-        "replit"
+        "close",
+        "monday-crm",
+        "hubspot"
       ]
     },
     {
@@ -627,7 +575,7 @@
       ]
     },
     {
-      "intent": "best-keyword-research-tools",
+      "intent": "best-developer-tools",
       "priorityScore": 40,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
@@ -662,10 +610,62 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 79,
+        "impressions": 46,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.1899,
+        "position": 65.1304,
+        "opportunity": "relevance-gap",
+        "opportunityScore": 21,
+        "meaningfulSample": true,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "meaningful"
+      },
+      "topTools": [
+        "github",
+        "cursor",
+        "replit"
+      ]
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "priorityScore": 39,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "meaningful",
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure"
+      ],
+      "qualityGates": [
+        "indexing-safety",
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 80,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 75.425,
         "opportunity": "relevance-gap",
         "opportunityScore": 19,
         "meaningfulSample": true,
@@ -680,7 +680,7 @@
     },
     {
       "intent": "best-customer-support-tools",
-      "priorityScore": 40,
+      "priorityScore": 37,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -732,7 +732,7 @@
     },
     {
       "intent": "best-team-collaboration-tools",
-      "priorityScore": 40,
+      "priorityScore": 37,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
@@ -1374,10 +1374,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 16,
+        "impressions": 17,
         "clicks": 0,
         "ctr": 0,
-        "position": 49.1875,
+        "position": 51.8235,
         "opportunity": "insufficient-sample",
         "opportunityScore": 14,
         "meaningfulSample": false,
@@ -1627,7 +1627,7 @@
     },
     {
       "intent": "best-video-content-tools",
-      "priorityScore": 30,
+      "priorityScore": 31,
       "lane": "measure",
       "action": "measure-and-recheck",
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
@@ -1657,6 +1657,7 @@
       "searchSignal": null,
       "topTools": [
         "descript",
+        "davinci-ai",
         "anijam-ai"
       ]
     },
@@ -1708,6 +1709,53 @@
       ]
     },
     {
+      "intent": "best-ai-assistants",
+      "priorityScore": 28,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "indexing-safety",
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 15,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 64.4,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 14,
+        "meaningfulSample": false,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "low"
+      },
+      "topTools": [
+        "cosupport-ai",
+        "chatgpt",
+        "gemini"
+      ]
+    },
+    {
       "intent": "best-website-builders",
       "priorityScore": 28,
       "lane": "measure",
@@ -1752,53 +1800,6 @@
         "framer",
         "wix",
         "squarespace"
-      ]
-    },
-    {
-      "intent": "best-ai-assistants",
-      "priorityScore": 26,
-      "lane": "measure",
-      "action": "measure-and-recheck",
-      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "low",
-      "indexingSignal": null,
-      "indexingBarrier": false,
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "measure",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "indexing-safety",
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 11,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 62.5455,
-        "opportunity": "insufficient-sample",
-        "opportunityScore": 12,
-        "meaningfulSample": false,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "low"
-      },
-      "topTools": [
-        "cosupport-ai",
-        "chatgpt",
-        "gemini"
       ]
     },
     {
@@ -2826,9 +2827,9 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2223,
+      "impressions": 2244,
       "ctr": 0,
-      "position": 80.2753,
+      "position": 80.2224,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -2839,8 +2840,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 138,
-          "position": 88.4275
+          "impressions": 150,
+          "position": 88.12
         },
         {
           "query": "seo tools for agency",
@@ -2851,8 +2852,8 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 115,
-          "position": 82.8435
+          "impressions": 116,
+          "position": 82.819
         },
         {
           "query": "seo agency tools",
@@ -2866,7 +2867,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 27.692,
+      "opportunityScore": 27.972,
       "outcome": "visibility-only"
     },
     {
@@ -3066,9 +3067,9 @@
       "pathname": "/best-project-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 132,
+      "impressions": 133,
       "ctr": 0,
-      "position": 44.8788,
+      "position": 44.9549,
       "topQueries": [
         {
           "query": "project automation tools",
@@ -3106,7 +3107,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.941,
+      "opportunityScore": 2.959,
       "outcome": "visibility-only"
     },
     {
@@ -3401,7 +3402,7 @@
   "autonomousActionQueue": [
     {
       "intent": "best-free-project-management-tools",
-      "priorityScore": 46,
+      "priorityScore": 45,
       "lane": "seo-indexing-recovery",
       "action": "repair-indexing",
       "indexingSignal": {
@@ -3466,7 +3467,7 @@
     },
     {
       "intent": "best-crm-for-small-business",
-      "priorityScore": 53,
+      "priorityScore": 52,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -3495,7 +3496,7 @@
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "priorityScore": 51,
+      "priorityScore": 50,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -3553,7 +3554,7 @@
     },
     {
       "intent": "best-free-crm",
-      "priorityScore": 48,
+      "priorityScore": 47,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -3582,36 +3583,7 @@
     },
     {
       "intent": "best-ecommerce-platforms",
-      "priorityScore": 48,
-      "lane": "seo-authority-depth",
-      "action": "deepen-existing",
-      "indexingSignal": null,
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "deepen-evidence-and-relevance",
-        "improve-query-intent-match",
-        "add-useful-comparison-context",
-        "strengthen-internal-links",
-        "validate-aeo-geo",
-        "publish",
-        "measure"
-      ],
-      "qualityGates": [
-        "indexing-safety",
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
-      "intent": "best-crm-with-automation",
-      "priorityScore": 47,
+      "priorityScore": 46,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -3668,8 +3640,8 @@
       ]
     },
     {
-      "intent": "best-developer-tools",
-      "priorityScore": 43,
+      "intent": "best-crm-with-automation",
+      "priorityScore": 44,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -3726,8 +3698,37 @@
       ]
     },
     {
-      "intent": "best-keyword-research-tools",
+      "intent": "best-developer-tools",
       "priorityScore": 40,
+      "lane": "seo-authority-depth",
+      "action": "deepen-existing",
+      "indexingSignal": null,
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "deepen-evidence-and-relevance",
+        "improve-query-intent-match",
+        "add-useful-comparison-context",
+        "strengthen-internal-links",
+        "validate-aeo-geo",
+        "publish",
+        "measure"
+      ],
+      "qualityGates": [
+        "indexing-safety",
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
+      "intent": "best-keyword-research-tools",
+      "priorityScore": 39,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -3756,7 +3757,7 @@
     },
     {
       "intent": "best-customer-support-tools",
-      "priorityScore": 40,
+      "priorityScore": 37,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -3785,7 +3786,7 @@
     },
     {
       "intent": "best-team-collaboration-tools",
-      "priorityScore": 40,
+      "priorityScore": 37,
       "lane": "seo-authority-depth",
       "action": "deepen-existing",
       "indexingSignal": null,
@@ -4284,7 +4285,7 @@
     },
     {
       "intent": "best-video-content-tools",
-      "priorityScore": 30,
+      "priorityScore": 31,
       "lane": "measure",
       "action": "measure-and-recheck",
       "indexingSignal": null,
@@ -4331,7 +4332,7 @@
       ]
     },
     {
-      "intent": "best-website-builders",
+      "intent": "best-ai-assistants",
       "priorityScore": 28,
       "lane": "measure",
       "action": "measure-and-recheck",
@@ -4355,8 +4356,8 @@
       ]
     },
     {
-      "intent": "best-ai-assistants",
-      "priorityScore": 26,
+      "intent": "best-website-builders",
+      "priorityScore": 28,
       "lane": "measure",
       "action": "measure-and-recheck",
       "indexingSignal": null,
@@ -4477,34 +4478,10 @@
       "reason": "Competitor patterns are research signals, not publication evidence."
     },
     {
-      "candidate": "anijam-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
       "candidate": "audio-editor",
       "competitorMentions": 2,
       "sources": [
         "Capterra",
-        "Dynamite AI"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
-      "candidate": "chatzy-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Aixploria",
         "Dynamite AI"
       ],
       "action": "auto-research-only",
@@ -4538,18 +4515,6 @@
     },
     {
       "candidate": "coool-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
-      "candidate": "cosupport-ai",
       "competitorMentions": 2,
       "sources": [
         "Futurepedia",

@@ -103,5 +103,111 @@
       "categoryEvidenceScore": 4,
       "competitorContentUsedForEditorialFacts": false
     }
+  },
+  {
+    "slug": "davinci-ai",
+    "name": "Davinci AI",
+    "category": "content",
+    "description": "Generate stunning AI images and videos with DaVinci. Access Sora, Veo, Kling, Flux and 50+ top models in one platform. Trusted by 100M+ creators.",
+    "sourceUrl": "https://davinci.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "multimodal",
+      "image generation",
+      "video generation",
+      "video editing",
+      "voice",
+      "automation",
+      "integrations",
+      "design",
+      "templates",
+      "social media"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/davinci-ai",
+        "https://www.aixploria.com/davinci-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 3,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "deep-swap-ai",
+    "name": "Deep Swap AI",
+    "category": "developer",
+    "description": "DeepSwapAI lets you preview AI face swap free with no sign-up. Earn free credits for a trial image; buy once for future watermark-free exports—no subscription.",
+    "sourceUrl": "https://deepswapai.com/",
+    "features": [
+      "analysis",
+      "API",
+      "automation",
+      "design"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "exampleUrls": [
+        "https://www.aixploria.com/deep-swap-ai/",
+        "https://dynamite-ai.com/tools/deep-swap-ai"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 17,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 3,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "face-swap-ai",
+    "name": "Face Swap AI",
+    "category": "developer",
+    "description": "Realistic AI face swap: photos, multiple faces, GIFs and videos up to 10 min. Photo swap: 6 credits; eligible verified accounts get one watermarked photo trial.",
+    "sourceUrl": "https://faceswapai.com/",
+    "features": [
+      "research",
+      "citations",
+      "video generation",
+      "API",
+      "automation"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "exampleUrls": [
+        "https://www.aixploria.com/face-swap-ai/",
+        "https://dynamite-ai.com/tools/face-swap-ai"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 17,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 1,
+      "competitorContentUsedForEditorialFacts": false
+    }
   }
 ]
