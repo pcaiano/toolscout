@@ -43,7 +43,16 @@ test.describe('mobile release smoke',()=>{
     for(const path of ['/tools.html','/make-vs-zapier.html','/.browser-fixtures/analytics.html']){
       await page.goto(base+path,{waitUntil:'domcontentloaded'});
       await page.waitForTimeout(100);
-      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),path+' overflow').toBeTruthy();
+      const overflow=await page.evaluate(()=>{
+        const viewport=window.innerWidth,doc=document.documentElement.scrollWidth;
+        const offenders=[...document.querySelectorAll('body *')].map(el=>{
+          const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+          return{tag:el.tagName,id:el.id||'',cls:String(el.className||'').slice(0,120),left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width),overflowX:s.overflowX,whiteSpace:s.whiteSpace};
+        }).filter(x=>x.right>viewport+2||x.left<-2).sort((a,b)=>(b.right-viewport)-(a.right-viewport)).slice(0,12);
+        return{ok:doc<=viewport+2,viewport,doc,offenders};
+      });
+      if(!overflow.ok)console.log('MOBILE_OVERFLOW_DIAGNOSTIC',path,JSON.stringify(overflow));
+      expect(overflow.ok,path+' overflow').toBeTruthy();
     }
   });
 });
