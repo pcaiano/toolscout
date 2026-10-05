@@ -17,8 +17,8 @@ html[data-toolscout-redesign="2"] body *{box-sizing:border-box}
 .ts2-global-nav{background:var(--ts-o);border-bottom:1px solid var(--ts-line)}
 .ts2-global-nav-inner{height:76px;max-width:1180px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .ts2-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ts-g);font-size:21px;font-weight:850;letter-spacing:-.045em}.ts2-brand img{width:24px;height:24px;border-radius:5px}
-.ts2-links{display:flex;align-items:center;gap:26px}.ts2-links a{color:#5F665F;text-decoration:none;font-size:13px;font-weight:650;transition:color var(--ts-fast) var(--ts-ease)}.ts2-links a:hover{color:var(--ts-g)}
-.ts2-links .ts2-cta{background:var(--ts-g);color:var(--ts-l);padding:11px 14px;border-radius:7px;font-weight:800}
+.ts2-actions{display:flex;align-items:center;gap:24px}.ts2-links{display:flex;align-items:center;gap:26px}.ts2-links a{color:#5F665F;text-decoration:none;font-size:13px;font-weight:650;transition:color var(--ts-fast) var(--ts-ease)}.ts2-links a:hover{color:var(--ts-g)}
+.ts2-cta{background:var(--ts-g);color:var(--ts-l);padding:11px 14px;border-radius:7px;font-weight:800;text-decoration:none;white-space:nowrap}
 .ts2-global-nav + .wrap > nav:first-child,.ts2-global-nav + .wrap > .brand:first-child{display:none!important}
 html[data-toolscout-redesign="2"] body>.wrap,html[data-toolscout-redesign="2"] body .wrap{max-width:1180px!important;margin:auto!important;padding-left:24px!important;padding-right:24px!important}
 html[data-toolscout-redesign="2"] body main,html[data-toolscout-redesign="2"] body .hero{animation:ts2Enter var(--ts-base) var(--ts-out) both}
@@ -43,7 +43,7 @@ html[data-toolscout-redesign="2"] body table{border-collapse:collapse!important;
 html[data-toolscout-redesign="2"] body details summary{cursor:pointer}
 html[data-toolscout-redesign="2"] body footer,html[data-toolscout-redesign="2"] body .disclosure{color:#737A73!important}
 @media(max-width:720px){
-  .ts2-global-nav-inner{height:68px;padding:0 18px}.ts2-links{gap:12px}.ts2-links a:not(.ts2-cta):not([href="/tools.html"]){display:none}.ts2-links .ts2-cta{padding:9px 11px}
+  .ts2-global-nav-inner{height:auto;min-height:68px;padding:12px 18px 10px;flex-wrap:wrap;row-gap:10px}.ts2-actions{display:contents}.ts2-cta{order:2;margin-left:auto;padding:9px 11px}.ts2-links{order:3;width:100%;gap:18px;overflow-x:auto;overscroll-behavior-inline:contain;padding:1px 0 3px;scrollbar-width:none}.ts2-links::-webkit-scrollbar{display:none}.ts2-links a{display:inline-flex!important;white-space:nowrap;font-size:12px}
   html[data-toolscout-redesign="2"] body>.wrap,html[data-toolscout-redesign="2"] body .wrap{padding-left:18px!important;padding-right:18px!important}
   html[data-toolscout-redesign="2"] body h1{font-size:48px!important}
   html[data-toolscout-redesign="2"] body .hero{padding-top:46px!important}
@@ -52,7 +52,7 @@ html[data-toolscout-redesign="2"] body footer,html[data-toolscout-redesign="2"] 
 </style>`;
 }
 function navHtml(){
-  return `<header class="ts2-global-nav"><div class="ts2-global-nav-inner"><a class="ts2-brand" href="/" aria-label="ToolScout home"><img src="/favicon.svg" alt="" width="24" height="24">ToolScout</a><nav class="ts2-links" aria-label="Primary"><a href="/compare.html">Compare</a><a href="/guides.html">Best picks</a><a href="/whats-new.html">What's new</a><a href="/tools.html">Tools</a><a class="ts2-cta" href="/#finder">Find my tools →</a></nav></div></header>`;
+  return `<header class="ts2-global-nav"><div class="ts2-global-nav-inner"><a class="ts2-brand" href="/" aria-label="ToolScout home"><img src="/favicon.svg" alt="" width="24" height="24">ToolScout</a><div class="ts2-actions"><nav class="ts2-links" aria-label="Primary"><a href="/tools.html">Tools</a><a href="/guides.html">Guides</a><a href="/compare.html">Compare</a><a href="/whats-new.html">What's new</a></nav><a class="ts2-cta" href="/#finder">Find my tools →</a></div></div></header>`;
 }
 export async function transformPublicRedesignResponse(request,response){
   if(request.method!=='GET'||!isHtml(response))return response;
