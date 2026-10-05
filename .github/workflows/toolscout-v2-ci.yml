@@ -117,6 +117,7 @@ on:
       - 'catalog-runtime-ranking.js'
       - 'catalog-autonomy-worker.js'
       - 'catalog-gap-runtime-worker.js'
+      - 'comparison-ai-runtime.js'
       - 'data/catalog-engine.json'
       - 'data/organic-growth-engine.json'
       - 'docs/OPERATING-CONTRACT.json'
@@ -249,6 +250,7 @@ jobs:
           node --check catalog-runtime-ranking.js
           node --check catalog-autonomy-worker.js
           node --check catalog-gap-runtime-worker.js
+          node --check comparison-ai-runtime.js
       - name: Wrangler dry-run build
         run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-wrangler-dry-run
 
