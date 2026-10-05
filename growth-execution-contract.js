@@ -141,7 +141,34 @@ export function genericBatchAdmissionWhere(executor){
 export function executorTaskOrderSql(executor){
   if(executor==='distribution_network')return "CASE action WHEN 'execute_alternate_routes' THEN 0 WHEN 'repair_stalled_route_execution' THEN 1 WHEN 'publisher_contact_discovery' THEN 2 WHEN 'scale_proven_surface' THEN 5 ELSE 4 END";
   if(executor==='distribution_autonomous')return "CASE action WHEN 'autonomous_route_qualification' THEN 0 WHEN 'verify_backlink_acquisition' THEN 3 ELSE 4 END";
-  if(executor==='catalog_cycle')return "CASE WHEN subject_type='catalog_gap' THEN 0 WHEN subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END";
+  if(executor==='catalog_cycle')return `CASE
+    WHEN subject_type='catalog_gap'
+      AND (
+        lower(subject_key) LIKE '%mcp%' OR lower(subject_key) LIKE '%chatgpt%' OR lower(subject_key) LIKE '%claude%'
+        OR lower(subject_key) LIKE '%gemini%' OR lower(subject_key) LIKE '%copilot%' OR lower(subject_key) LIKE '%agent%'
+        OR lower(subject_key) LIKE '%-ai' OR lower(subject_key) LIKE 'ai-%'
+      )
+      AND (
+        EXISTS (SELECT 1 FROM affiliate_network_program_evidence ane WHERE ane.tool_slug=growth_execution_contract.subject_key AND lower(ane.programme_status)='active')
+        OR EXISTS (SELECT 1 FROM affiliate_workflow aw WHERE aw.tool_slug=growth_execution_contract.subject_key AND lower(aw.status) IN ('active','approved'))
+        OR EXISTS (SELECT 1 FROM affiliate_program_discovery apd WHERE apd.tool_slug=growth_execution_contract.subject_key AND lower(apd.status) NOT IN ('research_required','rejected','no_program_found','unavailable','closed'))
+      ) THEN 0
+    WHEN subject_type='catalog_gap'
+      AND (
+        EXISTS (SELECT 1 FROM affiliate_network_program_evidence ane WHERE ane.tool_slug=growth_execution_contract.subject_key AND lower(ane.programme_status)='active')
+        OR EXISTS (SELECT 1 FROM affiliate_workflow aw WHERE aw.tool_slug=growth_execution_contract.subject_key AND lower(aw.status) IN ('active','approved'))
+      ) THEN 1
+    WHEN subject_type='catalog_gap'
+      AND EXISTS (SELECT 1 FROM affiliate_program_discovery apd WHERE apd.tool_slug=growth_execution_contract.subject_key AND lower(apd.status) NOT IN ('research_required','rejected','no_program_found','unavailable','closed')) THEN 2
+    WHEN subject_type='catalog_gap'
+      AND (
+        lower(subject_key) LIKE '%mcp%' OR lower(subject_key) LIKE '%chatgpt%' OR lower(subject_key) LIKE '%claude%'
+        OR lower(subject_key) LIKE '%gemini%' OR lower(subject_key) LIKE '%copilot%' OR lower(subject_key) LIKE '%agent%'
+        OR lower(subject_key) LIKE '%-ai' OR lower(subject_key) LIKE 'ai-%'
+      ) THEN 3
+    WHEN subject_type='catalog_gap' THEN 4
+    WHEN subject_type='news_update' AND action='catalog_impact_review' THEN 5
+    ELSE 6 END`;
   return "CASE WHEN action IS NULL THEN 0 ELSE 0 END";
 }
 export const MAKE_SENDER_READY_CONDITION=`(
