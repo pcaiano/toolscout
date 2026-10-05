@@ -81,6 +81,7 @@ import {handleFunnelRuntimeRoute} from './funnel-worker.js';
 import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
 import {transformComparisonAiResponse} from './comparison-ai-runtime.js';
 import {transformPublicRedesignResponse} from './public-redesign-runtime.js';
+import {handleNewsletterRoute} from './newsletter-runtime-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -2384,6 +2385,8 @@ export default{
   async fetch(request,env,ctx){
     const early=await earlyOwnedRoute(request,env,ctx);
     if(early)return early;
+    const newsletter=await handleNewsletterRoute(request,env);
+    if(newsletter)return newsletter;
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
       // Observability must be read-only. Command Center polling must never execute
