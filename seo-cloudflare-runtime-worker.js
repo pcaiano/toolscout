@@ -169,19 +169,9 @@ async function transformPage(request,response,env){
       const marker='<section class="section"><h2>How ToolScout chooses</h2>';
       html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
     }
-    if(['/guides','/tools','/compare'].includes(pathname)&&!html.includes('data-toolscout-index-recovery-links="1"')){
-      const weekly=weeklyLossTargets(cfg,pathname,4);
-      const contract=await recoveryTargets(env,4);
-      const merged=[],seenLinks=new Set();
-      for(const row of [...weekly,...contract]){
-        const key=String(row?.pathname||'');
-        if(!key||seenLinks.has(key))continue;
-        seenLinks.add(key);merged.push(row);
-        if(merged.length>=8)break;
-      }
-      const block=recoveryLinksBlock(merged);
-      if(block)html=html.replace(/<\/body>/i,block+'</body>');
-    }
+    // Core public hubs already expose contextual, crawlable internal links in their
+    // primary UI. Do not append search-demand link farms to the visible page.
+    // Search-demand recovery remains an engine concern, not a user-facing block.
     if(html===original)return response;
     const gate=validate(html,pathname,cfg);
     if(!gate.ok)return response;
