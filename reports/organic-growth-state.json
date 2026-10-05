@@ -1,16 +1,16 @@
 {
   "version": 4,
-  "updatedAt": "2026-10-05T08:37:44.412Z",
+  "updatedAt": "2026-10-05T11:05:27.602Z",
   "pages": {
     "best-seo-tools-for-agencies": {
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 2244,
+        "impressions": 2278,
         "ctr": 0,
-        "position": 80.2224
+        "position": 80.2441
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -30,7 +30,7 @@
         "ctr": 0,
         "position": 44.9549
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -50,7 +50,7 @@
         "ctr": 0,
         "position": 76.4057
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -66,11 +66,11 @@
       "intent": "best-crm-for-sales-teams",
       "latest": {
         "clicks": 0,
-        "impressions": 54,
+        "impressions": 56,
         "ctr": 0,
-        "position": 57.1852
+        "position": 58.1607
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -90,7 +90,7 @@
         "ctr": 0,
         "position": 74.7397
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -133,11 +133,11 @@
       "intent": "best-free-crm",
       "latest": {
         "clicks": 0,
-        "impressions": 149,
+        "impressions": 150,
         "ctr": 0,
-        "position": 77.8456
+        "position": 77.7067
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -157,7 +157,7 @@
         "ctr": 0,
         "position": 75.425
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -177,7 +177,7 @@
         "ctr": 0,
         "position": 38
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null
     },
@@ -201,7 +201,7 @@
         "ctr": 0,
         "position": 88
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null
     },
@@ -209,11 +209,11 @@
       "intent": "best-crm-for-small-business",
       "latest": {
         "clicks": 0,
-        "impressions": 293,
+        "impressions": 309,
         "ctr": 0,
-        "position": 77.6177
+        "position": 77.3333
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -245,7 +245,7 @@
         "ctr": 0,
         "position": 9
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null
     },
@@ -257,7 +257,7 @@
         "ctr": 0,
         "position": 79.9722
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null
     },
@@ -281,9 +281,17 @@
         "ctr": 0,
         "position": 65.1304
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
-      "indexing": null
+      "indexing": null,
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-10-05T11:05:27.602Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 46,
+        "ctr": 0,
+        "position": 65.1304
+      }
     },
     "best-ai-research-tools": {
       "intent": "best-ai-research-tools",
@@ -341,7 +349,7 @@
         "ctr": 0,
         "position": 34.1
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null
     },
@@ -349,11 +357,11 @@
       "intent": "best-competitor-seo-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 18,
+        "impressions": 19,
         "ctr": 0,
-        "position": 50.9444
+        "position": 53.5263
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null
     },
@@ -365,7 +373,7 @@
         "ctr": 0,
         "position": 51.8235
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null
     },
@@ -385,11 +393,11 @@
       "intent": "best-social-media-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 172,
+        "impressions": 174,
         "ctr": 0,
-        "position": 63.0523
+        "position": 62.7586
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -419,11 +427,11 @@
       "intent": "best-crm-with-automation",
       "latest": {
         "clicks": 0,
-        "impressions": 60,
+        "impressions": 64,
         "ctr": 0,
-        "position": 78.1333
+        "position": 76.2969
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {
@@ -443,7 +451,7 @@
         "ctr": 0,
         "position": 6
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z"
+      "lastSeenAt": "2026-10-05T11:05:27.602Z"
     },
     "best-customer-support-tools": {
       "contentOptimizationSuspended": false,
@@ -455,7 +463,7 @@
         "ctr": 0,
         "position": 80.0816
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z",
+      "lastSeenAt": "2026-10-05T11:05:27.602Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {
@@ -487,7 +495,7 @@
         "ctr": 0,
         "position": 92.75
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z"
+      "lastSeenAt": "2026-10-05T11:05:27.602Z"
     },
     "best-ecommerce-platforms": {
       "contentOptimizationSuspended": false,
@@ -495,11 +503,11 @@
       "intent": "best-ecommerce-platforms",
       "latest": {
         "clicks": 0,
-        "impressions": 28,
+        "impressions": 29,
         "ctr": 0,
-        "position": 32.1429
+        "position": 31.3103
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z"
+      "lastSeenAt": "2026-10-05T11:05:27.602Z"
     },
     "best-seo-tools": {
       "contentOptimizationSuspended": false,
@@ -511,7 +519,7 @@
         "ctr": 0,
         "position": 41.8571
       },
-      "lastSeenAt": "2026-10-05T08:37:44.412Z"
+      "lastSeenAt": "2026-10-05T11:05:27.602Z"
     }
   }
 }

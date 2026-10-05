@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T08:36:05.076Z",
+  "generatedAt": "2026-10-05T11:03:46.289Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",
@@ -8,19 +8,19 @@
     "Unverified or thin candidates are held and retried instead of being published."
   ],
   "summary": {
-    "scannedGaps": 34,
-    "activeProfiles": 6,
+    "scannedGaps": 31,
+    "activeProfiles": 9,
     "newProfiles": 3,
     "resolvedAsExistingCoverage": 1,
-    "held": 30,
+    "held": 27,
     "contentResearch": 0,
     "searchVisibleProfiles": 0,
     "trafficObservedProfiles": 0
   },
   "admitted": [
     {
-      "slug": "davinci-ai",
-      "sourceUrl": "https://davinci.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "slug": "goenhance-ai",
+      "sourceUrl": "https://www.goenhance.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "category": "content",
       "features": [
         "multimodal",
@@ -28,34 +28,37 @@
         "video generation",
         "video editing",
         "voice",
-        "automation",
-        "integrations",
-        "design",
-        "templates",
-        "social media"
-      ]
-    },
-    {
-      "slug": "deep-swap-ai",
-      "sourceUrl": "https://deepswapai.com/",
-      "category": "developer",
-      "features": [
-        "analysis",
         "API",
-        "automation",
         "design"
       ]
     },
     {
-      "slug": "face-swap-ai",
-      "sourceUrl": "https://faceswapai.com/",
+      "slug": "lip-sync-ai",
+      "sourceUrl": "https://lipsyncai.tools/?utm_source=dynamite_ai&amp;utm_medium=directory&amp;utm_campaign=launch_2026_07",
       "category": "developer",
       "features": [
+        "citations",
+        "voice",
+        "API",
+        "automation",
+        "forms"
+      ]
+    },
+    {
+      "slug": "lorka-ai",
+      "sourceUrl": "https://www.lorka.ai/",
+      "category": "ai-assistant",
+      "features": [
+        "AI assistant",
+        "chatbot",
+        "conversational AI",
         "research",
         "citations",
-        "video generation",
-        "API",
-        "automation"
+        "web search",
+        "analysis",
+        "writing",
+        "image generation",
+        "summarization"
       ]
     }
   ],
@@ -104,22 +107,7 @@
     },
     {
       "slug": "faq",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "goenhance-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "lip-sync-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "lorka-ai",
-      "reason": "cycle-admission-cap",
+      "reason": "official-source-not-resolved",
       "retry": "next-cycle"
     },
     {
@@ -262,6 +250,30 @@
     },
     {
       "slug": "face-swap-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "goenhance-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "lip-sync-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "lorka-ai",
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,

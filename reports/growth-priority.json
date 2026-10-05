@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T08:37:43.495Z",
+  "generatedAt": "2026-10-05T11:05:26.517Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance. ToolScout 2.0 adds an editorial-authority gap signal so observed-demand pages with weak primary-source evidence, buyer analysis or information gain are deepened before new surface is created.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 7,
-      "impressions": 6372,
-      "ctr": 0.1099
+      "impressions": 6442,
+      "ctr": 0.1087
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -40,10 +40,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 2244,
+        "impressions": 2278,
         "clicks": 0,
         "ctr": 0,
-        "position": 80.2224,
+        "position": 80.2441,
         "opportunity": "relevance-gap",
         "opportunityScore": 32,
         "meaningfulSample": true,
@@ -92,10 +92,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 293,
+        "impressions": 309,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.6177,
+        "position": 77.3333,
         "opportunity": "relevance-gap",
         "opportunityScore": 24,
         "meaningfulSample": true,
@@ -137,10 +137,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 54,
+        "impressions": 56,
         "clicks": 0,
         "ctr": 0,
-        "position": 57.1852,
+        "position": 58.1607,
         "opportunity": "relevance-gap",
         "opportunityScore": 22,
         "meaningfulSample": true,
@@ -233,10 +233,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 149,
+        "impressions": 150,
         "clicks": 0,
         "ctr": 0,
-        "position": 77.8456,
+        "position": 77.7067,
         "opportunity": "relevance-gap",
         "opportunityScore": 22,
         "meaningfulSample": true,
@@ -278,10 +278,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 28,
+        "impressions": 29,
         "clicks": 0,
         "ctr": 0,
-        "position": 32.1429,
+        "position": 31.3103,
         "opportunity": "authority-gap",
         "opportunityScore": 25,
         "meaningfulSample": true,
@@ -427,10 +427,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 60,
+        "impressions": 64,
         "clicks": 0,
         "ctr": 0,
-        "position": 78.1333,
+        "position": 76.2969,
         "opportunity": "relevance-gap",
         "opportunityScore": 18,
         "meaningfulSample": true,
@@ -451,10 +451,10 @@
       ],
       "editorialEligibility": "eligible",
       "editorialAuthority": {
-        "score": 83,
+        "score": 98,
         "target": 70,
         "primarySourceLinks": 3,
-        "hasAnalysis": false,
+        "hasAnalysis": true,
         "hasTradeoffs": true,
         "hasVerification": true,
         "freshUpdate": false,
@@ -476,10 +476,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 172,
+        "impressions": 174,
         "clicks": 0,
         "ctr": 0,
-        "position": 63.0523,
+        "position": 62.7586,
         "opportunity": "relevance-gap",
         "opportunityScore": 26,
         "meaningfulSample": true,
@@ -652,10 +652,10 @@
       ],
       "editorialEligibility": "eligible",
       "editorialAuthority": {
-        "score": 83,
+        "score": 98,
         "target": 70,
         "primarySourceLinks": 3,
-        "hasAnalysis": false,
+        "hasAnalysis": true,
         "hasTradeoffs": true,
         "hasVerification": true,
         "freshUpdate": false,
@@ -1219,10 +1219,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 18,
+        "impressions": 19,
         "clicks": 0,
         "ctr": 0,
-        "position": 50.9444,
+        "position": 53.5263,
         "opportunity": "insufficient-sample",
         "opportunityScore": 14,
         "meaningfulSample": false,
@@ -1538,6 +1538,46 @@
       "action": "watch"
     },
     {
+      "intent": "best-video-content-tools",
+      "title": "Best Video Content Tools",
+      "category": "content",
+      "priorityScore": 33,
+      "topFit": 6.39,
+      "eligibleToolCount": 4,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 8,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
+      "topTools": [
+        "descript",
+        "davinci-ai",
+        "goenhance-ai"
+      ],
+      "requiredCapabilities": [
+        "video",
+        "videos",
+        "screen recording",
+        "video editing",
+        "podcast editing"
+      ],
+      "editorialEligibility": "eligible",
+      "editorialAuthority": {
+        "score": 83,
+        "target": 70,
+        "primarySourceLinks": 3,
+        "hasAnalysis": false,
+        "hasTradeoffs": true,
+        "hasVerification": true,
+        "freshUpdate": false,
+        "gapPriorityBoost": 0,
+        "intervention": "measure"
+      },
+      "action": "watch"
+    },
+    {
       "intent": "best-sales-prospecting-tools",
       "title": "Best Sales Prospecting Tools",
       "category": "sales",
@@ -1589,50 +1629,10 @@
       "action": "watch"
     },
     {
-      "intent": "best-video-content-tools",
-      "title": "Best Video Content Tools",
-      "category": "content",
-      "priorityScore": 31,
-      "topFit": 6.39,
-      "eligibleToolCount": 3,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 6,
-      "commercialSignal": 8,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "descript",
-        "davinci-ai",
-        "anijam-ai"
-      ],
-      "requiredCapabilities": [
-        "video",
-        "videos",
-        "screen recording",
-        "video editing",
-        "podcast editing"
-      ],
-      "editorialEligibility": "eligible",
-      "editorialAuthority": {
-        "score": 83,
-        "target": 70,
-        "primarySourceLinks": 2,
-        "hasAnalysis": false,
-        "hasTradeoffs": true,
-        "hasVerification": true,
-        "freshUpdate": false,
-        "gapPriorityBoost": 0,
-        "intervention": "measure"
-      },
-      "action": "watch"
-    },
-    {
       "intent": "best-product-analytics-tools",
       "title": "Best Product Analytics Tools",
       "category": "analytics",
-      "priorityScore": 29,
+      "priorityScore": 30,
       "topFit": 8.58,
       "eligibleToolCount": 6,
       "minimumEligibleTools": 2,
@@ -1641,12 +1641,12 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 14,
+        "impressions": 15,
         "clicks": 0,
         "ctr": 0,
-        "position": 67.5714,
+        "position": 68.8,
         "opportunity": "insufficient-sample",
-        "opportunityScore": 13,
+        "opportunityScore": 14,
         "meaningfulSample": false,
         "strategicOpportunity": false,
         "evidenceConfidence": "low"
@@ -1685,18 +1685,18 @@
       "title": "Best AI Assistants",
       "category": "ai-assistant",
       "priorityScore": 28,
-      "topFit": 8.12,
-      "eligibleToolCount": 4,
+      "topFit": 6.62,
+      "eligibleToolCount": 5,
       "minimumEligibleTools": 2,
-      "catalogDepth": 8,
+      "catalogDepth": 10,
       "commercialSignal": 8,
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 15,
+        "impressions": 16,
         "clicks": 0,
         "ctr": 0,
-        "position": 64.4,
+        "position": 65.5625,
         "opportunity": "insufficient-sample",
         "opportunityScore": 14,
         "meaningfulSample": false,
@@ -1707,8 +1707,8 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "topTools": [
         "cosupport-ai",
-        "chatgpt",
-        "gemini"
+        "lorka-ai",
+        "chatgpt"
       ],
       "requiredCapabilities": [
         "ai assistant",

@@ -209,5 +209,114 @@
       "categoryEvidenceScore": 1,
       "competitorContentUsedForEditorialFacts": false
     }
+  },
+  {
+    "slug": "goenhance-ai",
+    "name": "Goenhance AI",
+    "category": "content",
+    "description": "GoEnhance AI – All-in-One AI Video Generator. Create videos from text, images, or existing clips with advanced models like Runway, Kling, and Veo 3.",
+    "sourceUrl": "https://www.goenhance.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "multimodal",
+      "image generation",
+      "video generation",
+      "video editing",
+      "voice",
+      "API",
+      "design"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/goenhance-ai",
+        "https://www.aixploria.com/goenhance-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 1,
+      "categoryEvidenceScore": 3,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "lip-sync-ai",
+    "name": "Lip Sync AI",
+    "category": "developer",
+    "description": "Create authorized lip sync videos with your own footage and audio. Sign in, pass a safety check, compare Basic and High Fidelity, then review the output.",
+    "sourceUrl": "https://lipsyncai.tools/?utm_source=dynamite_ai&amp;utm_medium=directory&amp;utm_campaign=launch_2026_07",
+    "features": [
+      "citations",
+      "voice",
+      "API",
+      "automation",
+      "forms"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "exampleUrls": [
+        "https://www.aixploria.com/lip-sync-ai/",
+        "https://dynamite-ai.com/tools/lip-sync-ai"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 17,
+      "officialSourceVotes": 1,
+      "categoryEvidenceScore": 1,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "lorka-ai",
+    "name": "Lorka AI",
+    "category": "ai-assistant",
+    "description": "Discover Lorka, a multi-AI tool to combine GPT, Gemini, DeepSeek, and more in a single subscription. Fast, flexible, all-in-one AI.",
+    "sourceUrl": "https://www.lorka.ai/",
+    "features": [
+      "AI assistant",
+      "chatbot",
+      "conversational AI",
+      "research",
+      "citations",
+      "web search",
+      "analysis",
+      "writing",
+      "image generation",
+      "summarization"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/lorka-ai",
+        "https://www.aixploria.com/lorka-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 12,
+      "officialSourceVotes": 1,
+      "categoryEvidenceScore": 3,
+      "competitorContentUsedForEditorialFacts": false
+    }
   }
 ]

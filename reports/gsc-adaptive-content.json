@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T08:37:44.732Z",
-  "gscGeneratedAt": "2026-10-05T08:35:53.887Z",
+  "generatedAt": "2026-10-05T11:05:27.912Z",
+  "gscGeneratedAt": "2026-10-05T11:03:33.641Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 0,
@@ -93,15 +93,15 @@
     },
     {
       "intent": "best-crm-for-small-business",
-      "impressions": 293,
+      "impressions": 309,
       "clicks": 0,
-      "position": 77.6177,
+      "position": 77.3333,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best crm for small business",
-        "impressions": 71,
-        "position": 78.4366,
+        "impressions": 72,
+        "position": 78.5,
         "alignment": 1
       },
       "action": "measure-only"
@@ -133,15 +133,15 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 2244,
+      "impressions": 2278,
       "clicks": 0,
-      "position": 80.2224,
+      "position": 80.2441,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "seo software for agencies",
-        "impressions": 150,
-        "position": 88.12,
+        "impressions": 151,
+        "position": 88.1325,
         "alignment": 1
       },
       "action": "measure-only"
@@ -163,9 +163,9 @@
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "impressions": 54,
+      "impressions": 56,
       "clicks": 0,
-      "position": 57.1852,
+      "position": 58.1607,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -178,9 +178,9 @@
     },
     {
       "intent": "best-free-crm",
-      "impressions": 149,
+      "impressions": 150,
       "clicks": 0,
-      "position": 77.8456,
+      "position": 77.7067,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {

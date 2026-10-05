@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T08:35:54.873Z",
-  "sourceGeneratedAt": "2026-10-05T08:35:53.887Z",
+  "generatedAt": "2026-10-05T11:03:35.734Z",
+  "sourceGeneratedAt": "2026-10-05T11:03:33.641Z",
   "summary": {
     "canonical": 33,
     "redirected": 3,
@@ -11,17 +11,17 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 2244,
+      "impressions": 2278,
       "clicks": 0,
-      "position": 80.2224
+      "position": 80.2441
     },
     {
       "slug": "best-crm-for-small-business",
       "status": "canonical",
       "target": "best-crm-for-small-business",
-      "impressions": 293,
+      "impressions": 309,
       "clicks": 0,
-      "position": 77.6177
+      "position": 77.3333
     },
     {
       "slug": "best-seo-keyword-research-tools",
@@ -35,17 +35,17 @@
       "slug": "best-social-media-management-tools",
       "status": "canonical",
       "target": "best-social-media-management-tools",
-      "impressions": 172,
+      "impressions": 174,
       "clicks": 0,
-      "position": 63.0523
+      "position": 62.7586
     },
     {
       "slug": "best-free-crm",
       "status": "canonical",
       "target": "best-free-crm",
-      "impressions": 149,
+      "impressions": 150,
       "clicks": 0,
-      "position": 77.8456
+      "position": 77.7067
     },
     {
       "slug": "best-funnel-builder",
@@ -91,17 +91,17 @@
       "slug": "best-crm-with-automation",
       "status": "canonical",
       "target": "best-crm-with-automation",
-      "impressions": 60,
+      "impressions": 64,
       "clicks": 0,
-      "position": 78.1333
+      "position": 76.2969
     },
     {
       "slug": "best-crm-for-sales-teams",
       "status": "canonical",
       "target": "best-crm-for-sales-teams",
-      "impressions": 54,
+      "impressions": 56,
       "clicks": 0,
-      "position": 57.1852
+      "position": 58.1607
     },
     {
       "slug": "best-customer-support-tools",
@@ -131,17 +131,17 @@
       "slug": "best-ecommerce-platforms",
       "status": "canonical",
       "target": "best-ecommerce-platforms",
-      "impressions": 28,
+      "impressions": 29,
       "clicks": 0,
-      "position": 32.1429
+      "position": 31.3103
     },
     {
       "slug": "best-competitor-seo-tools",
       "status": "canonical",
       "target": "best-competitor-seo-tools",
-      "impressions": 18,
+      "impressions": 19,
       "clicks": 0,
-      "position": 50.9444
+      "position": 53.5263
     },
     {
       "slug": "best-lead-capture-forms",
@@ -155,17 +155,17 @@
       "slug": "best-ai-assistants",
       "status": "canonical",
       "target": "best-ai-assistants",
-      "impressions": 15,
+      "impressions": 16,
       "clicks": 0,
-      "position": 64.4
+      "position": 65.5625
     },
     {
       "slug": "best-product-analytics-tools",
       "status": "canonical",
       "target": "best-product-analytics-tools",
-      "impressions": 14,
+      "impressions": 15,
       "clicks": 0,
-      "position": 67.5714
+      "position": 68.8
     },
     {
       "slug": "best-free-sales-funnel-software",

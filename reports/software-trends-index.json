@@ -2,16 +2,16 @@
   "version": 4,
   "edition": "2026-10",
   "editionLabel": "October 2026",
-  "publishedAt": "2026-10-05T08:35:54.608Z",
+  "publishedAt": "2026-10-05T11:03:35.487Z",
   "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
-  "updatedThrough": "2026-10-02",
+  "updatedThrough": "2026-10-05",
   "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout classifies buyer impact independently of affiliate status.",
   "primarySourceCount": 12,
   "searchVisibility": {
     "source": "Google Search Console",
-    "impressions": 6372,
+    "impressions": 6442,
     "clicks": 7,
-    "ctr": 0.1099,
+    "ctr": 0.1087,
     "position": 0
   },
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
@@ -21,10 +21,10 @@
       "title": "AI agents are becoming reusable team workflows",
       "summary": "Recent product releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
       "evidence": [
+        "github-selected-models-in-github-copilot-deprecated",
         "github-copilot-sandboxing-observability",
         "notion-mail-shuts-down",
-        "zapier-next-gen-zaps-mcp",
-        "notion-3-7-agent-skills"
+        "zapier-next-gen-zaps-mcp"
       ]
     },
     {
@@ -48,6 +48,63 @@
     }
   ],
   "updates": [
+    {
+      "id": "chatgpt-building-advertising-for-the-way-people-use-ai",
+      "publishedAt": "2026-10-05",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "AI and automation update",
+      "title": "Building advertising for the way people use AI",
+      "summary": "OpenAI introduces a new visual ad format in ChatGPT and expands measurement tools, attribution partnerships, and brand suitability for advertisers.",
+      "changeType": "ai_automation",
+      "buyerImpact": "ChatGPT buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-assistants",
+          "label": "Best AI Assistants"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement"
+    },
+    {
+      "id": "github-selected-models-in-github-copilot-deprecated",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Product retirement",
+      "title": "Selected models in GitHub Copilot deprecated",
+      "summary": "As of today, October 2, 2026, we have deprecated the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions).",
+      "changeType": "product_retirement",
+      "buyerImpact": "GitHub buyers should review migration, continuity and replacement requirements before relying on the affected workflow.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-selected-models-in-github-copilot-deprecated.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-selected-models-in-github-copilot-deprecated"
+    },
     {
       "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
       "publishedAt": "2026-10-02",
@@ -342,68 +399,6 @@
       "articleUrl": "/news/github-actions-workflow-execution-protections-ga.html",
       "sourceName": "GitHub Changelog",
       "sourceUrl": "https://github.blog/changelog/2026-09-17-workflow-execution-protections-in-github-actions-generally-available/"
-    },
-    {
-      "id": "github-ai-scan-codeql-setup",
-      "publishedAt": "2026-09-16",
-      "toolSlug": "github",
-      "toolName": "GitHub",
-      "label": "Official product update",
-      "title": "GitHub removes a setup barrier for AI Scan in pull requests",
-      "summary": "GitHub AI Scan can now check pull requests without requiring CodeQL default setup first, reducing configuration friction for eligible GitHub Advanced Security customers.",
-      "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/github",
-          "label": "GitHub profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-developer-tools",
-          "label": "Best Developer Tools"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-coding-tools",
-          "label": "Best AI Coding Tools"
-        }
-      ],
-      "articleUrl": "/news/github-ai-scan-codeql-setup.html",
-      "sourceName": "GitHub Changelog",
-      "sourceUrl": "https://github.blog/changelog/2026-09-16-code-scanning-ai-scan-no-longer-requires-codeql-default-setup/"
-    },
-    {
-      "id": "notion-3-7-agent-skills",
-      "publishedAt": "2026-09-15",
-      "toolSlug": "notion",
-      "toolName": "Notion",
-      "label": "Official release",
-      "title": "Notion 3.7 turns team prompts into reusable Agent skills",
-      "summary": "Notion 3.7 adds reusable team skills, a shared skills library and portability to external AI coding agents.",
-      "changeType": "ai_automation",
-      "buyerImpact": "Notion buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/notion",
-          "label": "Notion profile"
-        },
-        {
-          "type": "comparison",
-          "url": "/notion-vs-clickup",
-          "label": "notion vs clickup"
-        },
-        {
-          "type": "comparison",
-          "url": "/airtable-vs-notion",
-          "label": "airtable vs notion"
-        }
-      ],
-      "articleUrl": "/news/notion-3-7-agent-skills.html",
-      "sourceName": "Notion release notes",
-      "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15"
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",

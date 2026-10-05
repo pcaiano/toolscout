@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T08:37:46.898Z",
+  "generatedAt": "2026-10-05T11:05:30.029Z",
   "count": 47,
   "policy": "Only editorially verified assets are eligible for distribution. Page-level Search Console demand chooses which existing pages deserve attention. Monetization can increase measurement urgency but never changes editorial ranking. Original research can be promoted to editorial, community and indexing surfaces, while product directories continue to receive the ToolScout product profile.",
   "items": [
@@ -9,12 +9,12 @@
       "title": "MailerLite: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/mailerlite",
       "category": "software",
-      "priorityScore": 139,
+      "priorityScore": 140,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 14,
+        "impressions": 15,
         "clicks": 0,
-        "position": 16.2143,
+        "position": 15.8667,
         "lane": "authority-and-distribution",
         "monetized": true,
         "monetizedSlugs": [
@@ -22,13 +22,13 @@
         ]
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane authority-and-distribution. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for MailerLite, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
+      "searchSnippet": "ToolScout profile for MailerLite, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
       "socialHook": "ToolScout updated its decision context for MailerLite: Features &amp; Pricing. Here is the page and the criteria behind it.",
       "linkedInPost": "ToolScout updated its decision context for MailerLite: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/mailerlite",
       "xPost": "Updated ToolScout decision context for MailerLite: Features &amp; Pricing: https://trytoolscout.org/tools/mailerlite",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
       "newsletterSubject": "ToolScout update: MailerLite: Features &amp; Pricing",
-      "newsletterIntro": "ToolScout profile for MailerLite, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/mailerlite",
+      "newsletterIntro": "ToolScout profile for MailerLite, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/mailerlite",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -37,7 +37,7 @@
     {
       "assetType": "tool-profile",
       "slug": "apollo",
-      "title": "Apollo Tool Profile: Features, Pricing and Best For",
+      "title": "Apollo: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/apollo",
       "category": "software",
       "priorityScore": 128,
@@ -53,13 +53,13 @@
         ]
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane authority-and-distribution. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for Apollo, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
-      "socialHook": "ToolScout updated its decision context for Apollo Tool Profile: Features, Pricing and Best For. Here is the page and the criteria behind it.",
-      "linkedInPost": "ToolScout updated its decision context for Apollo Tool Profile: Features, Pricing and Best For. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/apollo",
-      "xPost": "Updated ToolScout decision context for Apollo Tool Profile: Features, Pricing and Best For: https://trytoolscout.org/tools/apollo",
+      "searchSnippet": "ToolScout profile for Apollo, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
+      "socialHook": "ToolScout updated its decision context for Apollo: Features &amp; Pricing. Here is the page and the criteria behind it.",
+      "linkedInPost": "ToolScout updated its decision context for Apollo: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/apollo",
+      "xPost": "Updated ToolScout decision context for Apollo: Features &amp; Pricing: https://trytoolscout.org/tools/apollo",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
-      "newsletterSubject": "ToolScout update: Apollo Tool Profile: Features, Pricing and Best For",
-      "newsletterIntro": "ToolScout profile for Apollo, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/apollo",
+      "newsletterSubject": "ToolScout update: Apollo: Features &amp; Pricing",
+      "newsletterIntro": "ToolScout profile for Apollo, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/apollo",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -68,27 +68,27 @@
     {
       "assetType": "tool-profile",
       "slug": "airtable",
-      "title": "Airtable Tool Profile: Features, Pricing and Best For",
+      "title": "Airtable: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/airtable",
       "category": "software",
       "priorityScore": 126,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 461,
+        "impressions": 466,
         "clicks": 0,
-        "position": 73.9436,
+        "position": 73.9957,
         "lane": "relevance-and-authority",
         "monetized": false,
         "monetizedSlugs": []
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane relevance-and-authority. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for Airtable, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
-      "socialHook": "ToolScout updated its decision context for Airtable Tool Profile: Features, Pricing and Best For. Here is the page and the criteria behind it.",
-      "linkedInPost": "ToolScout updated its decision context for Airtable Tool Profile: Features, Pricing and Best For. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/airtable",
-      "xPost": "Updated ToolScout decision context for Airtable Tool Profile: Features, Pricing and Best For: https://trytoolscout.org/tools/airtable",
+      "searchSnippet": "ToolScout profile for Airtable, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
+      "socialHook": "ToolScout updated its decision context for Airtable: Features &amp; Pricing. Here is the page and the criteria behind it.",
+      "linkedInPost": "ToolScout updated its decision context for Airtable: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/airtable",
+      "xPost": "Updated ToolScout decision context for Airtable: Features &amp; Pricing: https://trytoolscout.org/tools/airtable",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
-      "newsletterSubject": "ToolScout update: Airtable Tool Profile: Features, Pricing and Best For",
-      "newsletterIntro": "ToolScout profile for Airtable, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/airtable",
+      "newsletterSubject": "ToolScout update: Airtable: Features &amp; Pricing",
+      "newsletterIntro": "ToolScout profile for Airtable, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/airtable",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -114,13 +114,13 @@
         ]
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane ctr-and-snippet. This strengthens an existing page with observed demand.",
-      "searchSnippet": "Compare beehiiv and Kit side by side on pricing, capabilities, use cases and ToolScout fit signals.",
+      "searchSnippet": "Compare beehiiv and Kit side by side on pricing, capabilities, AI interoperability, use cases and ToolScout fit signals.",
       "socialHook": "ToolScout updated its decision context for beehiiv vs Kit: Software Comparison. Here is the page and the criteria behind it.",
       "linkedInPost": "ToolScout updated its decision context for beehiiv vs Kit: Software Comparison. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/beehiiv-vs-kit",
       "xPost": "Updated ToolScout decision context for beehiiv vs Kit: Software Comparison: https://trytoolscout.org/beehiiv-vs-kit",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
       "newsletterSubject": "ToolScout update: beehiiv vs Kit: Software Comparison",
-      "newsletterIntro": "Compare beehiiv and Kit side by side on pricing, capabilities, use cases and ToolScout fit signals. https://trytoolscout.org/beehiiv-vs-kit",
+      "newsletterIntro": "Compare beehiiv and Kit side by side on pricing, capabilities, AI interoperability, use cases and ToolScout fit signals. https://trytoolscout.org/beehiiv-vs-kit",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -146,13 +146,13 @@
         ]
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane ctr-and-snippet. This strengthens an existing page with observed demand.",
-      "searchSnippet": "Compare Jotform and Typeform side by side on pricing, capabilities, use cases and ToolScout fit signals.",
+      "searchSnippet": "Compare Jotform and Typeform side by side on pricing, capabilities, AI interoperability, use cases and ToolScout fit signals.",
       "socialHook": "ToolScout updated its decision context for Jotform vs Typeform: Software Comparison. Here is the page and the criteria behind it.",
       "linkedInPost": "ToolScout updated its decision context for Jotform vs Typeform: Software Comparison. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/jotform-vs-typeform",
       "xPost": "Updated ToolScout decision context for Jotform vs Typeform: Software Comparison: https://trytoolscout.org/jotform-vs-typeform",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
       "newsletterSubject": "ToolScout update: Jotform vs Typeform: Software Comparison",
-      "newsletterIntro": "Compare Jotform and Typeform side by side on pricing, capabilities, use cases and ToolScout fit signals. https://trytoolscout.org/jotform-vs-typeform",
+      "newsletterIntro": "Compare Jotform and Typeform side by side on pricing, capabilities, AI interoperability, use cases and ToolScout fit signals. https://trytoolscout.org/jotform-vs-typeform",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -161,7 +161,7 @@
     {
       "assetType": "tool-profile",
       "slug": "lemlist",
-      "title": "lemlist Tool Profile: Features, Pricing and Best For",
+      "title": "lemlist: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/lemlist",
       "category": "software",
       "priorityScore": 123,
@@ -177,13 +177,13 @@
         ]
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane ctr-and-snippet. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for lemlist, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
-      "socialHook": "ToolScout updated its decision context for lemlist Tool Profile: Features, Pricing and Best For. Here is the page and the criteria behind it.",
-      "linkedInPost": "ToolScout updated its decision context for lemlist Tool Profile: Features, Pricing and Best For. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/lemlist",
-      "xPost": "Updated ToolScout decision context for lemlist Tool Profile: Features, Pricing and Best For: https://trytoolscout.org/tools/lemlist",
+      "searchSnippet": "ToolScout profile for lemlist, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
+      "socialHook": "ToolScout updated its decision context for lemlist: Features &amp; Pricing. Here is the page and the criteria behind it.",
+      "linkedInPost": "ToolScout updated its decision context for lemlist: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/lemlist",
+      "xPost": "Updated ToolScout decision context for lemlist: Features &amp; Pricing: https://trytoolscout.org/tools/lemlist",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
-      "newsletterSubject": "ToolScout update: lemlist Tool Profile: Features, Pricing and Best For",
-      "newsletterIntro": "ToolScout profile for lemlist, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/lemlist",
+      "newsletterSubject": "ToolScout update: lemlist: Features &amp; Pricing",
+      "newsletterIntro": "ToolScout profile for lemlist, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/lemlist",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -209,13 +209,13 @@
         ]
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane ctr-and-snippet. This strengthens an existing page with observed demand.",
-      "searchSnippet": "Compare Apollo and lemlist side by side on pricing, capabilities, use cases and ToolScout fit signals.",
+      "searchSnippet": "Compare Apollo and lemlist side by side on pricing, capabilities, AI interoperability, use cases and ToolScout fit signals.",
       "socialHook": "ToolScout updated its decision context for Apollo vs lemlist: Software Comparison. Here is the page and the criteria behind it.",
       "linkedInPost": "ToolScout updated its decision context for Apollo vs lemlist: Software Comparison. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/apollo-vs-lemlist",
       "xPost": "Updated ToolScout decision context for Apollo vs lemlist: Software Comparison: https://trytoolscout.org/apollo-vs-lemlist",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
       "newsletterSubject": "ToolScout update: Apollo vs lemlist: Software Comparison",
-      "newsletterIntro": "Compare Apollo and lemlist side by side on pricing, capabilities, use cases and ToolScout fit signals. https://trytoolscout.org/apollo-vs-lemlist",
+      "newsletterIntro": "Compare Apollo and lemlist side by side on pricing, capabilities, AI interoperability, use cases and ToolScout fit signals. https://trytoolscout.org/apollo-vs-lemlist",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -240,13 +240,13 @@
         ]
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane ctr-and-snippet. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for Instantly, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
+      "searchSnippet": "ToolScout profile for Instantly, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
       "socialHook": "ToolScout updated its decision context for Instantly: Features &amp; Pricing. Here is the page and the criteria behind it.",
       "linkedInPost": "ToolScout updated its decision context for Instantly: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/instantly",
       "xPost": "Updated ToolScout decision context for Instantly: Features &amp; Pricing: https://trytoolscout.org/tools/instantly",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
       "newsletterSubject": "ToolScout update: Instantly: Features &amp; Pricing",
-      "newsletterIntro": "ToolScout profile for Instantly, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/instantly",
+      "newsletterIntro": "ToolScout profile for Instantly, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/instantly",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -255,7 +255,7 @@
     {
       "assetType": "tool-profile",
       "slug": "semrush",
-      "title": "Semrush Tool Profile: Features, Pricing and Best For",
+      "title": "Semrush: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/semrush",
       "category": "software",
       "priorityScore": 118,
@@ -269,13 +269,13 @@
         "monetizedSlugs": []
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane editorial-depth. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for Semrush, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
-      "socialHook": "ToolScout updated its decision context for Semrush Tool Profile: Features, Pricing and Best For. Here is the page and the criteria behind it.",
-      "linkedInPost": "ToolScout updated its decision context for Semrush Tool Profile: Features, Pricing and Best For. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/semrush",
-      "xPost": "Updated ToolScout decision context for Semrush Tool Profile: Features, Pricing and Best For: https://trytoolscout.org/tools/semrush",
+      "searchSnippet": "ToolScout profile for Semrush, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
+      "socialHook": "ToolScout updated its decision context for Semrush: Features &amp; Pricing. Here is the page and the criteria behind it.",
+      "linkedInPost": "ToolScout updated its decision context for Semrush: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/semrush",
+      "xPost": "Updated ToolScout decision context for Semrush: Features &amp; Pricing: https://trytoolscout.org/tools/semrush",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
-      "newsletterSubject": "ToolScout update: Semrush Tool Profile: Features, Pricing and Best For",
-      "newsletterIntro": "ToolScout profile for Semrush, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/semrush",
+      "newsletterSubject": "ToolScout update: Semrush: Features &amp; Pricing",
+      "newsletterIntro": "ToolScout profile for Semrush, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/semrush",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -284,7 +284,7 @@
     {
       "assetType": "tool-profile",
       "slug": "tally",
-      "title": "Tally Tool Profile: Features, Pricing and Best For",
+      "title": "Tally: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/tally",
       "category": "software",
       "priorityScore": 116,
@@ -298,13 +298,13 @@
         "monetizedSlugs": []
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane editorial-depth. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for Tally, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
-      "socialHook": "ToolScout updated its decision context for Tally Tool Profile: Features, Pricing and Best For. Here is the page and the criteria behind it.",
-      "linkedInPost": "ToolScout updated its decision context for Tally Tool Profile: Features, Pricing and Best For. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/tally",
-      "xPost": "Updated ToolScout decision context for Tally Tool Profile: Features, Pricing and Best For: https://trytoolscout.org/tools/tally",
+      "searchSnippet": "ToolScout profile for Tally, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
+      "socialHook": "ToolScout updated its decision context for Tally: Features &amp; Pricing. Here is the page and the criteria behind it.",
+      "linkedInPost": "ToolScout updated its decision context for Tally: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/tally",
+      "xPost": "Updated ToolScout decision context for Tally: Features &amp; Pricing: https://trytoolscout.org/tools/tally",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
-      "newsletterSubject": "ToolScout update: Tally Tool Profile: Features, Pricing and Best For",
-      "newsletterIntro": "ToolScout profile for Tally, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/tally",
+      "newsletterSubject": "ToolScout update: Tally: Features &amp; Pricing",
+      "newsletterIntro": "ToolScout profile for Tally, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/tally",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -313,27 +313,27 @@
     {
       "assetType": "tool-profile",
       "slug": "moz-pro",
-      "title": "Moz Pro Tool Profile: Features, Pricing and Best For",
+      "title": "Moz Pro: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/moz-pro",
       "category": "software",
       "priorityScore": 109,
       "demandBoost": 44,
       "searchDemand": {
-        "impressions": 168,
+        "impressions": 169,
         "clicks": 0,
-        "position": 68.7321,
+        "position": 68.6982,
         "lane": "editorial-depth",
         "monetized": false,
         "monetizedSlugs": []
       },
       "distributionReason": "Direct page distribution selected by GSC routing lane editorial-depth. This strengthens an existing page with observed demand.",
-      "searchSnippet": "ToolScout profile for Moz Pro, covering recorded use cases, key capabilities, pricing model and relevant software comparisons.",
-      "socialHook": "ToolScout updated its decision context for Moz Pro Tool Profile: Features, Pricing and Best For. Here is the page and the criteria behind it.",
-      "linkedInPost": "ToolScout updated its decision context for Moz Pro Tool Profile: Features, Pricing and Best For. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/moz-pro",
-      "xPost": "Updated ToolScout decision context for Moz Pro Tool Profile: Features, Pricing and Best For: https://trytoolscout.org/tools/moz-pro",
+      "searchSnippet": "ToolScout profile for Moz Pro, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
+      "socialHook": "ToolScout updated its decision context for Moz Pro: Features &amp; Pricing. Here is the page and the criteria behind it.",
+      "linkedInPost": "ToolScout updated its decision context for Moz Pro: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/moz-pro",
+      "xPost": "Updated ToolScout decision context for Moz Pro: Features &amp; Pricing: https://trytoolscout.org/tools/moz-pro",
       "redditStyle": "I updated this ToolScout page around the practical decision criteria people are actually searching for.",
-      "newsletterSubject": "ToolScout update: Moz Pro Tool Profile: Features, Pricing and Best For",
-      "newsletterIntro": "ToolScout profile for Moz Pro, covering recorded use cases, key capabilities, pricing model and relevant software comparisons. https://trytoolscout.org/tools/moz-pro",
+      "newsletterSubject": "ToolScout update: Moz Pro: Features &amp; Pricing",
+      "newsletterIntro": "ToolScout profile for Moz Pro, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons. https://trytoolscout.org/tools/moz-pro",
       "hashtags": [
         "#software",
         "#ToolScout"
@@ -348,9 +348,9 @@
       "priorityScore": 75,
       "demandBoost": 45,
       "searchDemand": {
-        "impressions": 2244,
+        "impressions": 2278,
         "clicks": 0,
-        "position": 80.2224,
+        "position": 80.2441,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -378,9 +378,9 @@
       "priorityScore": 75,
       "demandBoost": 40,
       "searchDemand": {
-        "impressions": 293,
+        "impressions": 309,
         "clicks": 0,
-        "position": 77.6177,
+        "position": 77.3333,
         "lane": "relevance-and-authority",
         "monetized": true
       },
@@ -438,9 +438,9 @@
       "priorityScore": 65,
       "demandBoost": 30,
       "searchDemand": {
-        "impressions": 54,
+        "impressions": 56,
         "clicks": 0,
-        "position": 57.1852,
+        "position": 58.1607,
         "lane": "editorial-depth",
         "monetized": true
       },
@@ -528,9 +528,9 @@
       "priorityScore": 62,
       "demandBoost": 32,
       "searchDemand": {
-        "impressions": 149,
+        "impressions": 150,
         "clicks": 0,
-        "position": 77.8456,
+        "position": 77.7067,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -581,36 +581,6 @@
     },
     {
       "assetType": "guide",
-      "slug": "best-competitor-seo-tools",
-      "title": "Best Competitor SEO Tools",
-      "url": "https://trytoolscout.org/best-competitor-seo-tools",
-      "category": "seo",
-      "priorityScore": 60,
-      "demandBoost": 25,
-      "searchDemand": {
-        "impressions": 18,
-        "clicks": 0,
-        "position": 50.9444,
-        "lane": "editorial-depth",
-        "monetized": true
-      },
-      "distributionReason": "Page-level GSC routing lane: editorial-depth. Distribution supports an already observed page rather than creating a new surface.",
-      "searchSnippet": "Best Competitor SEO Tools - Tools for competitor research, search visibility analysis, backlinks and content opportunities.",
-      "socialHook": "Need the right tool for best competitor seo tools? ToolScout compares options around the job, not generic rankings.",
-      "linkedInPost": "Need the right tool for best competitor seo tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-competitor-seo-tools",
-      "xPost": "Choosing a tool for best competitor seo tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-competitor-seo-tools",
-      "redditStyle": "I put together a practical guide for best competitor seo tools, focused on fit rather than a generic top-ten list.",
-      "newsletterSubject": "Best Competitor SEO Tools: a practical shortlist",
-      "newsletterIntro": "Tools for competitor research, search visibility analysis, backlinks and content opportunities. See the shortlist and compare the options: https://trytoolscout.org/best-competitor-seo-tools",
-      "hashtags": [
-        "#software",
-        "#AITools",
-        "#productivity",
-        "#ToolScout"
-      ]
-    },
-    {
-      "assetType": "guide",
       "slug": "best-free-project-management-tools",
       "title": "Best Free Project Management Tools",
       "url": "https://trytoolscout.org/best-free-project-management-tools",
@@ -648,9 +618,9 @@
       "priorityScore": 57,
       "demandBoost": 27,
       "searchDemand": {
-        "impressions": 60,
+        "impressions": 64,
         "clicks": 0,
-        "position": 78.1333,
+        "position": 76.2969,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -678,9 +648,9 @@
       "priorityScore": 51,
       "demandBoost": 35,
       "searchDemand": {
-        "impressions": 28,
+        "impressions": 29,
         "clicks": 0,
-        "position": 32.1429,
+        "position": 31.3103,
         "lane": "editorial-depth",
         "monetized": true
       },
@@ -708,9 +678,9 @@
       "priorityScore": 46,
       "demandBoost": 35,
       "searchDemand": {
-        "impressions": 172,
+        "impressions": 174,
         "clicks": 0,
-        "position": 63.0523,
+        "position": 62.7586,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -842,6 +812,36 @@
       "redditStyle": "I put together a practical guide for best customer support tools, focused on fit rather than a generic top-ten list.",
       "newsletterSubject": "Best Customer Support Tools: a practical shortlist",
       "newsletterIntro": "Helpdesk and customer support platforms for ticketing, messaging, knowledge and support automation. See the shortlist and compare the options: https://trytoolscout.org/best-customer-support-tools",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "assetType": "guide",
+      "slug": "best-competitor-seo-tools",
+      "title": "Best Competitor SEO Tools",
+      "url": "https://trytoolscout.org/best-competitor-seo-tools",
+      "category": "seo",
+      "priorityScore": 35,
+      "demandBoost": 5,
+      "searchDemand": {
+        "impressions": 19,
+        "clicks": 0,
+        "position": 53.5263,
+        "opportunity": "insufficient-sample",
+        "meaningfulSample": false
+      },
+      "distributionReason": "Observed search demand increases distribution priority. Low-sample first-page pages receive only a protected bounded boost.",
+      "searchSnippet": "Best Competitor SEO Tools - Tools for competitor research, search visibility analysis, backlinks and content opportunities.",
+      "socialHook": "Need the right tool for best competitor seo tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best competitor seo tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-competitor-seo-tools",
+      "xPost": "Choosing a tool for best competitor seo tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-competitor-seo-tools",
+      "redditStyle": "I put together a practical guide for best competitor seo tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Competitor SEO Tools: a practical shortlist",
+      "newsletterIntro": "Tools for competitor research, search visibility analysis, backlinks and content opportunities. See the shortlist and compare the options: https://trytoolscout.org/best-competitor-seo-tools",
       "hashtags": [
         "#software",
         "#AITools",
@@ -1134,9 +1134,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 15,
+        "impressions": 16,
         "clicks": 0,
-        "position": 64.4,
+        "position": 65.5625,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },
@@ -1224,9 +1224,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 14,
+        "impressions": 15,
         "clicks": 0,
-        "position": 67.5714,
+        "position": 68.8,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },

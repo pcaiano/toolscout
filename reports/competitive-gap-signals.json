@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T08:36:05.033Z",
+  "generatedAt": "2026-10-05T11:03:46.248Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {
@@ -69,8 +69,8 @@
       "sampledUrls": 750
     }
   ],
-  "suppressedCovered": 31,
-  "count": 34,
+  "suppressedCovered": 38,
+  "count": 31,
   "gaps": [
     {
       "slug": "ai-background-remover",
@@ -185,48 +185,6 @@
       "exampleUrls": [
         "https://www.futurepedia.io/tool/coool-ai",
         "https://www.aixploria.com/coool-ai/"
-      ]
-    },
-    {
-      "slug": "davinci-ai",
-      "candidateType": "software-entity",
-      "entityKey": "davinci",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/davinci-ai",
-        "https://www.aixploria.com/davinci-ai/"
-      ]
-    },
-    {
-      "slug": "deep-swap-ai",
-      "candidateType": "software-entity",
-      "entityKey": "deep-swap",
-      "mentions": 2,
-      "sources": [
-        "Aixploria",
-        "Dynamite AI"
-      ],
-      "exampleUrls": [
-        "https://www.aixploria.com/deep-swap-ai/",
-        "https://dynamite-ai.com/tools/deep-swap-ai"
-      ]
-    },
-    {
-      "slug": "face-swap-ai",
-      "candidateType": "software-entity",
-      "entityKey": "face-swap",
-      "mentions": 2,
-      "sources": [
-        "Aixploria",
-        "Dynamite AI"
-      ],
-      "exampleUrls": [
-        "https://www.aixploria.com/face-swap-ai/",
-        "https://dynamite-ai.com/tools/face-swap-ai"
       ]
     },
     {

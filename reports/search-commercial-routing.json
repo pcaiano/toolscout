@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T08:37:43.547Z",
+  "generatedAt": "2026-10-05T11:05:26.569Z",
   "engine": "ToolScout Search Commercial Routing v1",
   "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
   "rules": {
@@ -61,9 +61,9 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2244,
+      "impressions": 2278,
       "ctr": 0,
-      "position": 80.2224,
+      "position": 80.2441,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -74,8 +74,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 150,
-          "position": 88.12
+          "impressions": 151,
+          "position": 88.1325
         },
         {
           "query": "seo tools for agency",
@@ -92,14 +92,14 @@
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 100,
-          "position": 82.57
+          "impressions": 102,
+          "position": 82.5784
         }
       ],
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 133.59,
+      "priorityScore": 133.85,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -151,21 +151,21 @@
       "pathname": "/best-crm-for-small-business",
       "type": "guide",
       "clicks": 0,
-      "impressions": 293,
+      "impressions": 309,
       "ctr": 0,
-      "position": 77.6177,
+      "position": 77.3333,
       "topQueries": [
         {
           "query": "best crm for small business",
           "clicks": 0,
-          "impressions": 71,
-          "position": 78.4366
+          "impressions": 72,
+          "position": 78.5
         },
         {
           "query": "crm for small business",
           "clicks": 0,
-          "impressions": 27,
-          "position": 80.7778
+          "impressions": 28,
+          "position": 80.2857
         },
         {
           "query": "best crm tools for small business",
@@ -176,8 +176,8 @@
         {
           "query": "crm tools for small business",
           "clicks": 0,
-          "impressions": 21,
-          "position": 75.4286
+          "impressions": 22,
+          "position": 75.3636
         },
         {
           "query": "best small business crm",
@@ -191,7 +191,7 @@
         "zoho-crm"
       ],
       "lane": "relevance-and-authority",
-      "priorityScore": 119.4,
+      "priorityScore": 120.31,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -244,15 +244,15 @@
       "pathname": "/tools/mailerlite",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 14,
+      "impressions": 15,
       "ctr": 0,
-      "position": 16.2143,
+      "position": 15.8667,
       "topQueries": [
         {
           "query": "mailerlite software",
           "clicks": 0,
-          "impressions": 7,
-          "position": 9
+          "impressions": 8,
+          "position": 9.25
         },
         {
           "query": "mailerlite platform",
@@ -278,7 +278,7 @@
         "mailerlite"
       ],
       "lane": "authority-and-distribution",
-      "priorityScore": 110.55,
+      "priorityScore": 112.05,
       "actions": [
         "strengthen-internal-links",
         "prioritize-page-distribution",
@@ -397,15 +397,15 @@
       "pathname": "/tools/airtable",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 461,
+      "impressions": 466,
       "ctr": 0,
-      "position": 73.9436,
+      "position": 73.9957,
       "topQueries": [
         {
           "query": "airtable",
           "clicks": 0,
-          "impressions": 113,
-          "position": 63.8938
+          "impressions": 114,
+          "position": 64.0614
         },
         {
           "query": "what is airtable",
@@ -435,7 +435,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 106.22,
+      "priorityScore": 106.41,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -475,9 +475,9 @@
       "pathname": "/best-ecommerce-platforms",
       "type": "guide",
       "clicks": 0,
-      "impressions": 28,
+      "impressions": 29,
       "ctr": 0,
-      "position": 32.1429,
+      "position": 31.3103,
       "topQueries": [
         {
           "query": "best ecommerce platform",
@@ -515,7 +515,7 @@
         "shopify"
       ],
       "lane": "editorial-depth",
-      "priorityScore": 104.44,
+      "priorityScore": 105.94,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -962,40 +962,13 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/guides",
-      "pathname": "/guides",
-      "type": "other",
-      "clicks": 1,
-      "impressions": 9,
-      "ctr": 11.1111,
-      "position": 13.5556,
-      "topQueries": [
-        {
-          "query": "toolscout",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 10
-        }
-      ],
-      "monetized": false,
-      "monetizedSlugs": [],
-      "lane": "ctr-and-snippet",
-      "priorityScore": 90.45,
-      "actions": [
-        "protect-ranking",
-        "improve-title-snippet-alignment",
-        "strengthen-answer-first-copy",
-        "measure-qualified-clicks"
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/best-crm-for-sales-teams",
       "pathname": "/best-crm-for-sales-teams",
       "type": "guide",
       "clicks": 0,
-      "impressions": 54,
+      "impressions": 56,
       "ctr": 0,
-      "position": 57.1852,
+      "position": 58.1607,
       "topQueries": [
         {
           "query": "crm for sales team",
@@ -1033,7 +1006,7 @@
         "pipedrive"
       ],
       "lane": "editorial-depth",
-      "priorityScore": 90.38,
+      "priorityScore": 90.99,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -1043,19 +1016,46 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/guides",
+      "pathname": "/guides",
+      "type": "other",
+      "clicks": 1,
+      "impressions": 9,
+      "ctr": 11.1111,
+      "position": 13.5556,
+      "topQueries": [
+        {
+          "query": "toolscout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 10
+        }
+      ],
+      "monetized": false,
+      "monetizedSlugs": [],
+      "lane": "ctr-and-snippet",
+      "priorityScore": 90.45,
+      "actions": [
+        "protect-ranking",
+        "improve-title-snippet-alignment",
+        "strengthen-answer-first-copy",
+        "measure-qualified-clicks"
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-social-media-management-tools",
       "pathname": "/best-social-media-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 172,
+      "impressions": 174,
       "ctr": 0,
-      "position": 63.0523,
+      "position": 62.7586,
       "topQueries": [
         {
           "query": "social media management tools",
           "clicks": 0,
-          "impressions": 57,
-          "position": 65.0877
+          "impressions": 58,
+          "position": 64.8793
         },
         {
           "query": "social media management tool",
@@ -1066,8 +1066,8 @@
         {
           "query": "best social media management tools",
           "clicks": 0,
-          "impressions": 26,
-          "position": 49.8462
+          "impressions": 27,
+          "position": 48.8148
         },
         {
           "query": "best social media management tool",
@@ -1085,7 +1085,58 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "editorial-depth",
-      "priorityScore": 89.22,
+      "priorityScore": 89.41,
+      "actions": [
+        "deepen-decision-context",
+        "align-copy-to-observed-queries",
+        "strengthen-internal-links",
+        "prioritize-page-distribution"
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/moz-pro",
+      "pathname": "/tools/moz-pro",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 169,
+      "ctr": 0,
+      "position": 68.6982,
+      "topQueries": [
+        {
+          "query": "moz pro tools",
+          "clicks": 0,
+          "impressions": 62,
+          "position": 69.8065
+        },
+        {
+          "query": "moz free trial",
+          "clicks": 0,
+          "impressions": 37,
+          "position": 67.9189
+        },
+        {
+          "query": "moz pro tools",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 67.3529
+        },
+        {
+          "query": "moz pro overview",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 72.8571
+        },
+        {
+          "query": "moz pro free trial",
+          "clicks": 0,
+          "impressions": 8,
+          "position": 64.75
+        }
+      ],
+      "monetized": false,
+      "monetizedSlugs": [],
+      "lane": "editorial-depth",
+      "priorityScore": 88.91,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -1111,57 +1162,6 @@
         "improve-title-snippet-alignment",
         "strengthen-answer-first-copy",
         "measure-qualified-clicks"
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/moz-pro",
-      "pathname": "/tools/moz-pro",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 168,
-      "ctr": 0,
-      "position": 68.7321,
-      "topQueries": [
-        {
-          "query": "moz pro tools",
-          "clicks": 0,
-          "impressions": 62,
-          "position": 69.8065
-        },
-        {
-          "query": "moz free trial",
-          "clicks": 0,
-          "impressions": 37,
-          "position": 67.9189
-        },
-        {
-          "query": "moz pro tools",
-          "clicks": 0,
-          "impressions": 16,
-          "position": 67.625
-        },
-        {
-          "query": "moz pro overview",
-          "clicks": 0,
-          "impressions": 14,
-          "position": 72.8571
-        },
-        {
-          "query": "moz pro free trial",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 64.75
-        }
-      ],
-      "monetized": false,
-      "monetizedSlugs": [],
-      "lane": "editorial-depth",
-      "priorityScore": 88.81,
-      "actions": [
-        "deepen-decision-context",
-        "align-copy-to-observed-queries",
-        "strengthen-internal-links",
-        "prioritize-page-distribution"
       ]
     },
     {
@@ -1192,9 +1192,9 @@
       "pathname": "/best-free-crm",
       "type": "guide",
       "clicks": 0,
-      "impressions": 149,
+      "impressions": 150,
       "ctr": 0,
-      "position": 77.8456,
+      "position": 77.7067,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -1205,8 +1205,8 @@
         {
           "query": "best free crm tools",
           "clicks": 0,
-          "impressions": 17,
-          "position": 83.8235
+          "impressions": 18,
+          "position": 82.3333
         },
         {
           "query": "best free crm software",
@@ -1230,7 +1230,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 86.75,
+      "priorityScore": 86.86,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -1843,60 +1843,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-competitor-seo-tools",
-      "pathname": "/best-competitor-seo-tools",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 18,
-      "ctr": 0,
-      "position": 50.9444,
-      "topQueries": [
-        {
-          "query": "seo competitors search engine",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 43
-        },
-        {
-          "query": "seo competitor research tool",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 73
-        },
-        {
-          "query": "seo competitors tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 93
-        },
-        {
-          "query": "seo competitor research tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 98
-        },
-        {
-          "query": "seo competitors ranking tool",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 31
-        }
-      ],
-      "monetized": true,
-      "monetizedSlugs": [
-        "se-ranking"
-      ],
-      "lane": "editorial-depth",
-      "priorityScore": 76.44,
-      "actions": [
-        "deepen-decision-context",
-        "align-copy-to-observed-queries",
-        "strengthen-internal-links",
-        "prioritize-page-distribution",
-        "measure-monetized-outbound-and-revenue"
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/best-keyword-research-tools",
       "pathname": "/best-keyword-research-tools",
       "type": "guide",
@@ -1945,6 +1891,57 @@
         "deepen-evidence",
         "strengthen-internal-authority",
         "test-selective-distribution"
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/netlify",
+      "pathname": "/tools/netlify",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 78,
+      "ctr": 0,
+      "position": 59.8205,
+      "topQueries": [
+        {
+          "query": "netlify",
+          "clicks": 0,
+          "impressions": 23,
+          "position": 62.2174
+        },
+        {
+          "query": "what is netlify",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 70.5
+        },
+        {
+          "query": "netlify plans",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 72.3333
+        },
+        {
+          "query": "what is netlify used for",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 88
+        },
+        {
+          "query": "netlyfy",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 60.5
+        }
+      ],
+      "monetized": false,
+      "monetizedSlugs": [],
+      "lane": "editorial-depth",
+      "priorityScore": 75.65,
+      "actions": [
+        "deepen-decision-context",
+        "align-copy-to-observed-queries",
+        "strengthen-internal-links",
+        "prioritize-page-distribution"
       ]
     }
   ]

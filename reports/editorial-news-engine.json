@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T08:35:54.609Z",
+  "generatedAt": "2026-10-05T11:03:35.489Z",
   "engine": "ToolScout Editorial News Engine v1",
   "lookbackDays": 14,
   "maxPerRun": 4,
@@ -15,7 +15,7 @@
       "id": "openai-news",
       "status": "ok",
       "fetched": "https://openai.com/news/rss.xml",
-      "parsed": 1245,
+      "parsed": 1246,
       "recent": 1
     },
     {
@@ -41,22 +41,22 @@
   "candidates": 2,
   "published": [
     {
-      "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
-      "date": "2026-10-02",
-      "toolSlug": "github",
-      "title": "Copilot code review: API support and new default effort level",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level",
-      "score": 7
+      "id": "chatgpt-building-advertising-for-the-way-people-use-ai",
+      "date": "2026-10-05",
+      "toolSlug": "chatgpt",
+      "title": "Building advertising for the way people use AI",
+      "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement",
+      "score": 5
     },
     {
-      "id": "chatgpt-introducing-gpt-6-1-sol",
-      "date": "2026-09-29",
-      "toolSlug": "chatgpt",
-      "title": "Introducing GPT-6.1 Sol",
-      "sourceUrl": "https://openai.com/index/introducing-gpt-6-1-sol",
+      "id": "github-selected-models-in-github-copilot-deprecated",
+      "date": "2026-10-02",
+      "toolSlug": "github",
+      "title": "Selected models in GitHub Copilot deprecated",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-selected-models-in-github-copilot-deprecated",
       "score": 7
     }
   ],
-  "lastPublishedAt": "2026-10-02",
+  "lastPublishedAt": "2026-10-05",
   "status": "healthy"
 }

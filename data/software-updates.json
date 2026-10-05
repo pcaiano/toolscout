@@ -1,8 +1,40 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-05T08:35:54.608Z",
+  "updatedAt": "2026-10-05T11:03:35.487Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
+    {
+      "id": "chatgpt-building-advertising-for-the-way-people-use-ai",
+      "publishedAt": "2026-10-05",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "AI and automation update",
+      "title": "Building advertising for the way people use AI",
+      "summary": "OpenAI introduces a new visual ad format in ChatGPT and expands measurement tools, attribution partnerships, and brand suitability for advertisers.",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement",
+      "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "profileUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
+      "id": "github-selected-models-in-github-copilot-deprecated",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Product retirement",
+      "title": "Selected models in GitHub Copilot deprecated",
+      "summary": "As of today, October 2, 2026, we have deprecated the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions).",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-selected-models-in-github-copilot-deprecated",
+      "articleUrl": "/news/github-selected-models-in-github-copilot-deprecated.html",
+      "profileUrl": "/news/github-selected-models-in-github-copilot-deprecated.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
     {
       "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
       "publishedAt": "2026-10-02",

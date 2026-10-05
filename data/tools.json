@@ -5848,5 +5848,174 @@
       "verifiedAt": null,
       "sources": []
     }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "goenhance-ai",
+    "name": "Goenhance AI",
+    "category": "content",
+    "description": "GoEnhance AI – All-in-One AI Video Generator. Create videos from text, images, or existing clips with advanced models like Runway, Kling, and Veo 3.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": true,
+    "freePlanKnown": false,
+    "features": [
+      "multimodal",
+      "image generation",
+      "video generation",
+      "video editing",
+      "voice",
+      "API",
+      "design"
+    ],
+    "bestFor": [
+      "content teams",
+      "creators evaluating content production software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://www.goenhance.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T11:03:56.931Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "lip-sync-ai",
+    "name": "Lip Sync AI",
+    "category": "developer",
+    "description": "Create authorized lip sync videos with your own footage and audio. Sign in, pass a safety check, compare Basic and High Fidelity, then review the output.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "citations",
+      "voice",
+      "API",
+      "automation",
+      "forms"
+    ],
+    "bestFor": [
+      "developers",
+      "engineering teams evaluating developer software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://lipsyncai.tools/?utm_source=dynamite_ai&amp;utm_medium=directory&amp;utm_campaign=launch_2026_07",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T11:03:56.931Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Aixploria",
+          "Dynamite AI"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "lorka-ai",
+    "name": "Lorka AI",
+    "category": "ai-assistant",
+    "description": "Discover Lorka, a multi-AI tool to combine GPT, Gemini, DeepSeek, and more in a single subscription. Fast, flexible, all-in-one AI.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "AI assistant",
+      "chatbot",
+      "conversational AI",
+      "research",
+      "citations",
+      "web search",
+      "analysis",
+      "writing",
+      "image generation",
+      "summarization"
+    ],
+    "bestFor": [
+      "knowledge workers",
+      "teams evaluating general AI assistants"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://www.lorka.ai/",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T11:03:56.931Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
   }
 ]
