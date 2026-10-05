@@ -60,9 +60,9 @@
     .result-bottom{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:18px}.fit-note{font-size:12px;color:#7E867E}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--graphite);color:#fff!important;padding:11px 15px;border:1px solid var(--graphite);border-radius:7px;font-weight:800;text-decoration:none;cursor:pointer;transition:transform var(--fast) var(--ease),background var(--fast) var(--ease)}
     .btn:hover{transform:translateY(-1px)}.btn.secondary{background:transparent;color:var(--graphite)!important;border-color:var(--line)}.empty-state{padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:4px}.empty-state span{color:#646B64}
     .section{margin:0 auto 82px}.sectionHead{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:27px}.sectionHead .eyebrow{color:#6F766F}.sectionHead h2{font-size:clamp(36px,4.5vw,52px);line-height:1;letter-spacing:-.055em;margin:7px 0 0}.sectionHead p{max-width:440px;color:#646B64;line-height:1.6;margin:0}
-    .decisionDoors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.door{min-height:282px;border:1px solid var(--line);border-radius:10px;padding:25px;display:flex;flex-direction:column;color:var(--graphite);text-decoration:none;background:var(--soft);transition:transform var(--fast) var(--ease),border-color var(--fast) var(--ease)}
-    .door:hover{transform:translateY(-2px);border-color:#BFC6BE}.doorLabel{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#717971;font-weight:850}.doorLogos{display:flex;align-items:center;gap:7px;margin:18px 0 13px}.doorLogos img{width:38px;height:38px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px}.doorTag{display:inline-flex;align-self:flex-start;margin:20px 0 15px;padding:8px 10px;border:1px solid var(--graphite);border-radius:999px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.1em}
-    .door h3{font-size:28px;line-height:1.05;letter-spacing:-.045em;margin:0 0 10px}.door p{color:#646B64;font-size:14px;line-height:1.55;margin:0 0 22px}.doorAction{margin-top:auto;font-size:10px;font-weight:850;letter-spacing:.09em}.liveDot{display:inline-block;width:7px;height:7px;background:var(--lime);border-radius:50%;margin-right:7px}
+    .decisionDoors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--graphite);border-bottom:1px solid var(--line)}.door{min-height:236px;padding:24px 26px 22px;display:flex;flex-direction:column;color:var(--graphite);text-decoration:none;background:transparent;transition:background var(--fast) var(--ease),padding-left var(--fast) var(--ease)}.door+.door{border-left:1px solid var(--line)}
+    .door:hover{background:rgba(255,255,255,.48);padding-left:31px}.doorLabel{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#717971;font-weight:850}.doorTag{display:inline-flex;align-self:flex-start;margin:20px 0 16px;padding:6px 9px;background:var(--graphite);color:var(--off);border-radius:999px;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.1em}.doorTag.live{display:inline-flex;align-items:center;gap:7px}.doorTag.live .liveDot{margin:0}
+    .door h3{font-size:25px;line-height:1.08;letter-spacing:-.04em;margin:0 0 9px}.door p{color:#646B64;font-size:13px;line-height:1.52;margin:0 0 17px}.doorAction{margin-top:auto;font-size:10px;font-weight:850;letter-spacing:.09em}.liveDot{display:inline-block;width:7px;height:7px;background:var(--lime);border-radius:50%;margin-right:7px}
     .editorialProof{display:grid;grid-template-columns:5fr 7fr;gap:56px;border-top:1px solid var(--graphite);padding-top:54px}.editorialProof h2{font-size:39px;line-height:1.08;letter-spacing:-.05em;margin:8px 0}.editorialProof .statement{color:#646B64;font-size:17px;line-height:1.65;max-width:760px}.editorialProof .textLink{display:inline-block;margin-top:13px}
     .textLink{font-size:11px;letter-spacing:.07em;font-weight:850;text-decoration:none}.textLink:hover{text-decoration:underline}
     .compareBuilder{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:14px;align-items:end;border-top:1px solid var(--graphite);border-bottom:1px solid var(--line);padding:24px 0}.comparePicker{display:grid;gap:8px}.comparePicker label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#707770}.comparePicker select{width:100%;min-height:50px;border:1px solid var(--line);border-radius:8px;background:var(--soft);color:var(--graphite);padding:0 42px 0 14px;font-size:15px;font-weight:700;outline:0}.comparePicker select:focus{border-color:#9AA29A}.compareJoin{align-self:center;padding-bottom:14px;color:#767D76;font-size:10px;font-weight:900;letter-spacing:.12em}.compareGo{min-height:50px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;border-radius:8px;background:var(--graphite);color:#fff;text-decoration:none;font-size:12px;font-weight:850;white-space:nowrap}.compareGo:hover{transform:translateY(-1px)}.compareHint{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-top:13px;color:#707770;font-size:12px}.compareHint a{font-weight:850;text-decoration:none;color:var(--graphite)}
@@ -73,8 +73,8 @@
     .pulseSecondary{padding-left:34px}.pulseItem{position:relative;width:100%;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;padding:24px 34px 24px 0;cursor:pointer;color:var(--graphite);transition:padding-left var(--fast) var(--ease)}.pulseItem::after{content:"→";position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:17px;color:#777E77}.pulseItem:hover{padding-left:6px}.pulseItem small{display:block;color:#777E77;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:850}.pulseItem strong{display:block;font-size:17px;line-height:1.35;margin-top:7px}
     .trust{border-top:1px solid var(--line);padding-top:30px;text-align:left}.trust p{font-size:12px;line-height:1.6;color:#717871;max-width:740px}.trust-links{display:flex;gap:18px;flex-wrap:wrap;margin-top:13px}.trust-links a{font-size:12px;color:#555D55;text-decoration:none}.badgeRow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px;filter:grayscale(1);opacity:.58}.badgeRow img{max-height:44px;width:auto}
     .pageEnter{animation:pageEnter var(--base) var(--out) both}@keyframes pageEnter{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:none}}
-    @media(max-width:960px){.shell{padding-left:30px;padding-right:30px}.navActions{gap:16px}.navlinks{gap:16px}.hero{grid-template-columns:1fr}.heroStage{display:none}.decisionDoors{grid-template-columns:1fr}.door{min-height:auto}.editorialProof{grid-template-columns:1fr}.pulse{grid-template-columns:1fr}.pulseLead{border-right:0;border-bottom:1px solid var(--line);padding-right:0}.pulseSecondary{padding-left:0}}
-    @media(max-width:700px){.shell{padding-left:20px;padding-right:20px}nav{height:auto;min-height:72px;padding:14px 0 11px;align-items:center;flex-wrap:wrap;row-gap:11px}.brand{font-size:20px}.navActions{display:contents}.navCta{order:2;margin-left:auto;padding:10px 12px}.navlinks{order:3;width:100%;gap:18px;overflow-x:auto;overscroll-behavior-inline:contain;padding:1px 0 3px;scrollbar-width:none}.navlinks::-webkit-scrollbar{display:none}.navlinks a{display:inline-flex!important;white-space:nowrap;font-size:12px;color:#BAC0BA}.hero{min-height:auto}.heroCopy{padding:43px 0 39px}.hero h1{font-size:50px;margin:14px 0 22px}.heroLead{font-size:16px;margin-bottom:22px}.intentBox{min-height:54px}.goBtn{width:46px;height:46px}.heroProof{margin-top:13px}.guidedLink{padding-top:11px}.choices{grid-template-columns:1fr}.contentShell{padding-top:38px;padding-bottom:66px}.resultsWrap{margin-bottom:44px}.section{margin-bottom:54px}.sectionHead{align-items:flex-start;flex-direction:column;gap:14px;margin-bottom:20px}.sectionHead h2{font-size:34px}.sectionHead p{font-size:14px}.decisionDoors{gap:12px}.door{padding:19px;min-height:0}.doorTag{margin:14px 0 12px;padding:6px 9px}.doorLogos{margin:14px 0 11px}.doorLogos img{width:34px;height:34px}.door h3{font-size:24px;margin-bottom:8px}.door p{font-size:13px;line-height:1.5;margin-bottom:15px}.doorAction{margin-top:4px}.editorialProof{gap:16px;padding-top:36px}.editorialProof h2{font-size:29px}.editorialProof .statement{font-size:15px}.compareBuilder{grid-template-columns:1fr;gap:10px;padding:16px 0}.compareJoin{display:none}.comparePicker{gap:6px}.comparePicker select{min-height:48px}.compareGo{width:100%;min-height:48px}.compareHint{align-items:flex-start;flex-direction:column;gap:6px;margin-top:10px}.pickGrid{grid-template-columns:1fr}.pick:nth-child(odd),.pick:nth-child(even){padding:15px 0;border-left:0}.pulseLead{min-height:0;padding:22px 0 24px}.pulseBrand{margin-top:22px}.pulseLead h3{font-size:27px;margin-top:13px}.pulseLead p{font-size:14px}.pulseLinks{gap:10px 14px;margin-top:19px}.pulsePrimary{width:100%;min-height:44px}.pulseSecondary{padding-left:0}.pulseItem{padding:18px 34px 18px 0}.pulseItem strong{font-size:16px}.profile-card,.result-bottom{align-items:flex-start;flex-direction:column}.profile-card .chips{justify-content:flex-start}.reason-grid{grid-template-columns:1fr}.featured-badge{position:static;display:inline-block;margin-bottom:10px}.badgeRow{gap:10px}.badgeRow img{max-height:36px}}
+    @media(max-width:960px){.shell{padding-left:30px;padding-right:30px}.navActions{gap:16px}.navlinks{gap:16px}.hero{grid-template-columns:1fr}.heroStage{display:none}.decisionDoors{grid-template-columns:1fr}.door{min-height:auto}.door+.door{border-left:0;border-top:1px solid var(--line)}.editorialProof{grid-template-columns:1fr}.pulse{grid-template-columns:1fr}.pulseLead{border-right:0;border-bottom:1px solid var(--line);padding-right:0}.pulseSecondary{padding-left:0}}
+    @media(max-width:700px){.shell{padding-left:20px;padding-right:20px}nav{height:auto;min-height:72px;padding:14px 0 11px;align-items:center;flex-wrap:wrap;row-gap:11px}.brand{font-size:20px}.navActions{display:contents}.navCta{order:2;margin-left:auto;padding:10px 12px}.navlinks{order:3;width:100%;gap:18px;overflow-x:auto;overscroll-behavior-inline:contain;padding:1px 0 3px;scrollbar-width:none}.navlinks::-webkit-scrollbar{display:none}.navlinks a{display:inline-flex!important;white-space:nowrap;font-size:12px;color:#BAC0BA}.hero{min-height:auto}.heroCopy{padding:43px 0 39px}.hero h1{font-size:50px;margin:14px 0 22px}.heroLead{font-size:16px;margin-bottom:22px}.intentBox{min-height:54px}.goBtn{width:46px;height:46px}.heroProof{margin-top:13px}.guidedLink{padding-top:11px}.choices{grid-template-columns:1fr}.contentShell{padding-top:38px;padding-bottom:66px}.resultsWrap{margin-bottom:44px}.section{margin-bottom:54px}.sectionHead{align-items:flex-start;flex-direction:column;gap:14px;margin-bottom:20px}.sectionHead h2{font-size:34px}.sectionHead p{font-size:14px}.decisionDoors{gap:0}.door{padding:17px 0 18px;min-height:0}.door:hover{padding-left:0;background:transparent}.doorTag{margin:11px 0 10px;padding:5px 8px}.door h3{font-size:23px;margin-bottom:7px}.door p{font-size:13px;line-height:1.48;margin-bottom:11px;max-width:34rem}.doorAction{margin-top:2px}.editorialProof{gap:16px;padding-top:36px}.editorialProof h2{font-size:29px}.editorialProof .statement{font-size:15px}.compareBuilder{grid-template-columns:1fr;gap:10px;padding:16px 0}.compareJoin{display:none}.comparePicker{gap:6px}.comparePicker select{min-height:48px}.compareGo{width:100%;min-height:48px}.compareHint{align-items:flex-start;flex-direction:column;gap:6px;margin-top:10px}.pickGrid{grid-template-columns:1fr}.pick:nth-child(odd),.pick:nth-child(even){padding:15px 0;border-left:0}.pulseLead{min-height:0;padding:22px 0 24px}.pulseBrand{margin-top:22px}.pulseLead h3{font-size:27px;margin-top:13px}.pulseLead p{font-size:14px}.pulseLinks{gap:10px 14px;margin-top:19px}.pulsePrimary{width:100%;min-height:44px}.pulseSecondary{padding-left:0}.pulseItem{padding:18px 34px 18px 0}.pulseItem strong{font-size:16px}.profile-card,.result-bottom{align-items:flex-start;flex-direction:column}.profile-card .chips{justify-content:flex-start}.reason-grid{grid-template-columns:1fr}.featured-badge{position:static;display:inline-block;margin-bottom:10px}.badgeRow{gap:10px}.badgeRow img{max-height:36px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   </style>
 </head>
@@ -115,24 +115,19 @@
         <a class="door" href="/compare.html">
           <span class="doorLabel">01 / Compare</span>
           <span class="doorTag">Comparator</span>
-          <h3>Compare any two tools</h3><p>Choose the software you are deciding between and inspect the tradeoffs side by side.</p><span class="doorAction">Open comparator →</span>
+          <h3>Compare any two tools</h3><p>Put two products side by side and inspect the tradeoffs that matter.</p><span class="doorAction">Open comparator →</span>
         </a>
-        <a class="door" href="/best-crm-for-small-business.html">
+        <a class="door" href="/guides.html">
           <span class="doorLabel">02 / Discover</span>
-          <span class="doorLogos"><img src="https://www.google.com/s2/favicons?domain=pipedrive.com&sz=128" alt="Pipedrive logo"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=128" alt="HubSpot logo"><img src="https://www.google.com/s2/favicons?domain=monday.com&sz=128" alt="monday.com logo"></span>
-          <h3>CRM for a small business</h3><p>A focused shortlist built around the job, not the loudest vendor.</p><span class="doorAction">See the shortlist →</span>
+          <span class="doorTag">Guides</span>
+          <h3>Start with the job to solve</h3><p>Browse focused shortlists built around use case, constraints and fit.</p><span class="doorAction">Browse guides →</span>
         </a>
         <a class="door" href="#updates">
-          <span class="doorLabel"><i class="liveDot"></i>03 / What's new · live</span>
-          <span class="doorLogos" id="doorUpdateLogos"><img src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt="GitHub logo"></span>
-          <h3 id="doorUpdateTitle">Copilot code review now works through the API</h3><p>Fresh product changes selected for buyer relevance, not volume.</p><span class="doorAction">See what's new →</span>
+          <span class="doorLabel">03 / Follow</span>
+          <span class="doorTag live"><i class="liveDot"></i>Live updates</span>
+          <h3 id="doorUpdateTitle">Copilot code review now works through the API</h3><p>Follow software changes selected for buyer relevance, not volume.</p><span class="doorAction">See what's new →</span>
         </a>
       </div>
-    </section>
-
-    <section class="section editorialProof">
-      <div><div class="eyebrow">ToolScout view</div><h2>Evidence first.<br>Interpretation second.<br>Recommendation last.</h2></div>
-      <div><p class="statement">Software pages should help you make a decision, not make you process another database. ToolScout starts with the tradeoff, shows the evidence that matters, and keeps affiliate relationships out of ranking logic.</p><a class="textLink" href="/methodology.html">HOW TOOLSCOUT DECIDES →</a></div>
     </section>
 
     <section class="section" id="compare">
@@ -144,18 +139,6 @@
         <a class="compareGo" id="homeCompareGo" href="/compare.html">Compare →</a>
       </div>
       <div class="compareHint"><span>Any comparison eligible tool in the current ToolScout catalog.</span><a href="/compare.html">Open full comparator →</a></div>
-    </section>
-
-    <section class="section" id="picks">
-      <div class="sectionHead"><div><div class="eyebrow">Best picks</div><h2>Start with the job, not the brand.</h2></div><p>Shortlists are built around the task, constraints and current catalog evidence.</p></div>
-      <div class="pickGrid">
-        <a class="pick" href="/best-crm-for-small-business.html"><strong>Best CRM for small business</strong><span>→</span></a>
-        <a class="pick" href="/best-free-crm.html"><strong>Best free CRM tools</strong><span>→</span></a>
-        <a class="pick" href="/best-project-management-tools.html"><strong>Best project management tools</strong><span>→</span></a>
-        <a class="pick" href="/best-ai-coding-tools.html"><strong>Best AI coding tools</strong><span>→</span></a>
-        <a class="pick" href="/best-email-marketing-tools.html"><strong>Best email marketing tools</strong><span>→</span></a>
-        <a class="pick" href="/best-seo-tools.html"><strong>Best SEO tools</strong><span>→</span></a>
-      </div>
     </section>
 
     <section class="section" id="updates">
@@ -175,6 +158,23 @@
           <button type="button" class="pulseItem"><small>GitHub · 28 Sep 2026</small><strong>Copilot adds sandboxing and agent observability</strong></button>
         </div>
       </div>
+    </section>
+
+    <section class="section" id="picks">
+      <div class="sectionHead"><div><div class="eyebrow">Best picks</div><h2>Start with the job, not the brand.</h2></div><p>Shortlists are built around the task, constraints and current catalog evidence.</p></div>
+      <div class="pickGrid">
+        <a class="pick" href="/best-crm-for-small-business.html"><strong>Best CRM for small business</strong><span>→</span></a>
+        <a class="pick" href="/best-free-crm.html"><strong>Best free CRM tools</strong><span>→</span></a>
+        <a class="pick" href="/best-project-management-tools.html"><strong>Best project management tools</strong><span>→</span></a>
+        <a class="pick" href="/best-ai-coding-tools.html"><strong>Best AI coding tools</strong><span>→</span></a>
+        <a class="pick" href="/best-email-marketing-tools.html"><strong>Best email marketing tools</strong><span>→</span></a>
+        <a class="pick" href="/best-seo-tools.html"><strong>Best SEO tools</strong><span>→</span></a>
+      </div>
+    </section>
+
+    <section class="section editorialProof">
+      <div><div class="eyebrow">ToolScout view</div><h2>Evidence first.<br>Interpretation second.<br>Recommendation last.</h2></div>
+      <div><p class="statement">Software pages should help you make a decision, not make you process another database. ToolScout starts with the tradeoff, shows the evidence that matters, and keeps affiliate relationships out of ranking logic.</p><a class="textLink" href="/methodology.html">HOW TOOLSCOUT DECIDES →</a></div>
     </section>
 
     <section class="trust">
@@ -231,9 +231,8 @@
     document.getElementById('pulseTitle').textContent=item.title||'Software update';
     document.getElementById('pulseSummary').textContent=item.summary||'';
     document.getElementById('pulseArticle').href=item.articleUrl||item.profileUrl||'/whats-new.html';
-    const doorTitle=document.getElementById('doorUpdateTitle'),doorLogos=document.getElementById('doorUpdateLogos');
+    const doorTitle=document.getElementById('doorUpdateTitle');
     if(current===0&&doorTitle)doorTitle.textContent=item.title||'Latest software changes';
-    if(current===0&&doorLogos)doorLogos.innerHTML='<img src="'+esc(favicon(domain))+'" alt="'+esc((item.toolName||'Software')+' logo')+'">';
   }
   function renderSecondary(){
     if(!secondary)return;
