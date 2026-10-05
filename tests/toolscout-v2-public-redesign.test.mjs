@@ -21,7 +21,7 @@ test('public redesign injects the shared shell without changing canonical conten
   const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/tools/figma'),response);
   const html=await out.text();
   assert.match(html,/data-toolscout-public-redesign="2"/);
-  assert.match(html,/data-toolscout-redesign="2"/);
+  assert.match(html,/<html[^>]*data-toolscout-redesign="2"/);
   assert.match(html,/class="ts2-global-nav"/);
   assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/tools\/figma"/);
   assert.match(html,/>Figma</);
