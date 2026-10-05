@@ -155,7 +155,8 @@
     "embed_telemetry_never_stores_raw_finder_queries",
     "global_public_navigation_exposes_trends_and_publisher_kit",
     "software_trends_never_renders_second_local_header",
-    "software_trends_and_publisher_kit_remain_in_canonical_sitemap"
+    "software_trends_and_publisher_kit_remain_in_canonical_sitemap",
+    "toolscout_branded_email_uses_toolscout_2_visual_system"
   ],
   "mission": {
     "starts_on": "2026-09-29",
@@ -225,5 +226,26 @@
     "legacy_conservation_branch": "pre-conservation-2026-09-13",
     "conservation_stubs_removed": 53,
     "historical_one_shots_removed": 45
+  },
+  "email_brand": {
+    "sender": "ToolScout <pedro@trytoolscout.org>",
+    "visual_system": "toolscout_2",
+    "palette": {
+      "graphite": "#0B0D0C",
+      "off_white": "#F3F5F1",
+      "soft": "#F8F9F6",
+      "line": "#DDE2DC",
+      "muted": "#90978F",
+      "lime": "#B7FF3C"
+    },
+    "compatibility": "table_based_inline_css",
+    "central_shell": "distribution-sender-worker.js:toolScoutEmailShell",
+    "applies_to": [
+      "vendor_outreach",
+      "publisher_outreach",
+      "future_newsletters",
+      "future_transactional_email"
+    ],
+    "reputation_and_compliance_rules_remain_authoritative": true
   }
 }
