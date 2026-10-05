@@ -145,8 +145,10 @@ async function runPrimaryCycle(env,ctx,trigger){
   stages.submissionExecute=await internalJson(req,env,ctx,'/api/distribution/submissions/execute');
   stages.submissionVerify=await internalJson(req,env,ctx,'/api/distribution/submissions/verify');
   stages.autonomous=await internalJson(req,env,ctx,'/api/distribution/autonomous/refresh');
-  stages.authority=await internalJson(req,env,ctx,'/api/distribution/authority/close-loop');
+  // Claim/dispatch executable contracts before authority observes sender handoff.
+  // Authority still has its own conditional dispatch guard for standalone hourly recovery.
   stages.executionDispatch=await internalJson(req,env,ctx,'/api/growth/execution/dispatch');
+  stages.authority=await internalJson(req,env,ctx,'/api/distribution/authority/close-loop');
 
   // Re-audit after execution so the public supervisor and Command Center report the
   // post-action state rather than the pre-action intent.
@@ -206,7 +208,7 @@ async function runtimeMatrix(env,request=null){
       oauthLastError:googleOAuth.lastError||null,
       note:'SEO scheduling, GSC evidence, prioritization and safe technical/page-depth corrections run in Cloudflare. GitHub repository writes and GitHub Actions are fallback/manual recovery paths, not normal scheduling.'
     },
-    githubActions:{role:'fallback_only',scheduledPrimary:false,conservationStubsExpected:true},
+    githubActions:{role:'fallback_only',scheduledPrimary:false,conservationStubsExpected:false},
     recentRuns:recent
   };
 }

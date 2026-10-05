@@ -66,3 +66,15 @@ test('authority runnable truth uses the same readiness contract as make sender a
   assert.match(closedLoop,/executor='make_sender'.*status IN \('pending','claimed'\).*MAKE_SENDER_READY_CONDITION/s);
   assert.doesNotMatch(closedLoop,/runnable_external_queue[\s\S]{0,240}status IN \('pending','claimed','attempted'\)/);
 });
+
+
+test('Cloudflare primary cycle dispatches execution before authority recovery',()=>{
+  const primary=fs.readFileSync(new URL('../cloudflare-primary-runtime-worker.js',import.meta.url),'utf8');
+  const start=primary.indexOf('async function runPrimaryCycle');
+  const end=primary.indexOf('async function runtimeMatrix',start);
+  const body=primary.slice(start,end);
+  const dispatch=body.indexOf("stages.executionDispatch=await internalJson(req,env,ctx,'/api/growth/execution/dispatch')");
+  const authority=body.indexOf("stages.authority=await internalJson(req,env,ctx,'/api/distribution/authority/close-loop')");
+  assert.ok(dispatch>0);
+  assert.ok(authority>dispatch,'primary cycle must claim sender work before authority handoff observation');
+});

@@ -66,3 +66,10 @@ test('dated snapshot-bound recovery launchers stay retired',()=>{
     assert.equal(fs.existsSync(new URL('.github/workflows/'+name,root)),false,name+' must remain retired');
   }
 });
+
+
+test('runtime reports conservation stubs as retired',()=>{
+  const runtime=read('cloudflare-primary-runtime-worker.js');
+  assert.match(runtime,/conservationStubsExpected:false/);
+  assert.doesNotMatch(runtime,/conservationStubsExpected:true/);
+});
