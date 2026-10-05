@@ -30,6 +30,17 @@ const relatedGuides=(a,b)=>intents.map(intent=>({intent,score:Math.max(intentSco
 
 const dimensionLabel={price:'price',ease:'ease of use',automation:'automation',integrations:'integrations',sales:'sales workflows',ai:'AI capabilities',marketing:'marketing',seo:'SEO',research:'research',content:'content workflows',agency:'agency fit'};
 function listPhrase(items){const xs=(items||[]).filter(Boolean);if(xs.length<=1)return xs[0]||'workflow fit';if(xs.length===2)return `${xs[0]} and ${xs[1]}`;return `${xs.slice(0,-1).join(', ')}, and ${xs[xs.length-1]}`;}
+function aiProfile(tool){return tool?.aiIntegration&&typeof tool.aiIntegration==='object'?tool.aiIntegration:{status:'unverified',tier:'unknown',mcp:'unknown',assistants:[]};}
+function aiTier(tool){const p=aiProfile(tool);if(p.status!=='verified')return 'Not yet verified';return p.tier==='strong'?'Strong':p.tier==='moderate'?'Moderate':p.tier==='limited'?'Limited':'Verified';}
+function aiAssistants(tool){const xs=aiProfile(tool).assistants||[];return xs.length?listPhrase(xs):'No named assistant client recorded';}
+function aiMcp(tool){const p=aiProfile(tool);return p.mcp==='official'?'Official MCP':p.mcp==='community'?'Community MCP':'Not verified';}
+function aiComparisonSentence(a,b){
+  const ap=aiProfile(a),bp=aiProfile(b),rank={unknown:0,limited:1,moderate:2,strong:3},av=rank[ap.tier]||0,bv=rank[bp.tier]||0;
+  if(ap.status!=='verified'&&bp.status!=='verified')return 'ToolScout has not yet verified AI assistant or agent interoperability for either product, so this factor should not be used to choose between them yet.';
+  if(av===bv)return `${aiTier(a)} AI interoperability is recorded for ${a.name} and ${aiTier(b).toLowerCase()} for ${b.name}. Check the named assistant and MCP routes against the workflow you plan to automate.`;
+  const winner=av>bv?a:b,other=av>bv?b:a;
+  return `${winner.name} currently has the stronger verified AI interoperability profile. ${other.name} may still fit better on product capability, price or workflow depth.`;
+}
 function editorialConclusion(a,b){
   const aWins=dimensions.filter(key=>Number(a.scores?.[key]||0)>Number(b.scores?.[key]||0)).slice(0,3).map(key=>dimensionLabel[key]||key);
   const bWins=dimensions.filter(key=>Number(b.scores?.[key]||0)>Number(a.scores?.[key]||0)).slice(0,3).map(key=>dimensionLabel[key]||key);
@@ -39,7 +50,7 @@ function editorialConclusion(a,b){
   const bFeatures=new Set((b.features||[]).map(v=>String(v).toLowerCase()));
   const overlap=(a.features||[]).filter(v=>bFeatures.has(String(v).toLowerCase())).slice(0,3);
   const third=overlap.length?`Because both list ${listPhrase(overlap)}, compare the depth of those shared capabilities against your workflow before choosing.`:'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
-  return clean([first,second,third].filter(Boolean).join(' '));
+  return clean([first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' '));
 }
 function decisionGuidance(a,b){
   const ranked=dimensions
@@ -127,14 +138,14 @@ function headHtml(t){
 }
 function ctaHtml(t){return `<div class="actions"><a class="btn secondary" href="./tools/${encodeURIComponent(t.slug)}">Profile</a><a class="btn" href="/go/${encodeURIComponent(t.slug)}?source=compare" target="_blank" rel="nofollow sponsored noopener">Visit ${esc(t.name)}</a></div>`;}
 function initialTable(a,b){
-  const rows=[['Category',a.category,b.category],['Pricing',a.pricing||'See vendor',b.pricing||'See vendor'],['Free plan',freeLabel(a),freeLabel(b)],['Features',(a.features||[]).join(', '),(b.features||[]).join(', ')],['Best for',(a.bestFor||[]).join(', '),(b.bestFor||[]).join(', ')],['Last verified',a.lastVerified||'Not recorded',b.lastVerified||'Not recorded']];
+  const rows=[['Category',a.category,b.category],['Pricing',a.pricing||'See vendor',b.pricing||'See vendor'],['Free plan',freeLabel(a),freeLabel(b)],['AI interoperability',aiTier(a),aiTier(b)],['AI assistants',aiAssistants(a),aiAssistants(b)],['Agent connectivity',aiMcp(a),aiMcp(b)],['Features',(a.features||[]).join(', '),(b.features||[]).join(', ')],['Best for',(a.bestFor||[]).join(', '),(b.bestFor||[]).join(', ')],['Last verified',a.lastVerified||'Not recorded',b.lastVerified||'Not recorded']];
   return `<div class="row"><div class="cell label">Compare</div><div class="cell">${headHtml(a)}${ctaHtml(a)}</div><div class="cell">${headHtml(b)}${ctaHtml(b)}</div></div>`+rows.map(r=>`<div class="row"><div class="cell label">${esc(r[0])}</div><div class="cell value">${esc(r[1])}</div><div class="cell value">${esc(r[2])}</div></div>`).join('');
 }
 function render(a,b){
   const slug=`${a.slug}-vs-${b.slug}`;assertToolData(a,slug);assertToolData(b,slug);
   const title=`${a.name} vs ${b.name}: Software Comparison | ToolScout`;
-  const desc=`Compare ${a.name} and ${b.name} side by side on pricing, capabilities, use cases and ToolScout fit signals.`;
-  const schema={"@context":"https://schema.org","@type":"WebPage",name:clean(`${a.name} vs ${b.name} software comparison`),url:`${BASE}/${slug}`,description:clean(desc),isPartOf:{"@type":"WebSite",name:"ToolScout",url:`${BASE}/`},about:[{"@type":"SoftwareApplication",name:clean(a.name),url:a.sourceUrl},{"@type":"SoftwareApplication",name:clean(b.name),url:b.sourceUrl}]};
+  const desc=`Compare ${a.name} and ${b.name} side by side on pricing, capabilities, AI interoperability, use cases and ToolScout fit signals.`;
+  const schema={"@context":"https://schema.org","@type":"WebPage",name:clean(`${a.name} vs ${b.name} software comparison`),url:`${BASE}/${slug}`,description:clean(desc),isPartOf:{"@type":"WebSite",name:"ToolScout",url:`${BASE}/`},about:[{"@type":"SoftwareApplication",name:clean(a.name),url:a.sourceUrl,featureList:aiProfile(a).status==='verified'?[aiComparisonSentence(a,b)]:undefined},{"@type":"SoftwareApplication",name:clean(b.name),url:b.sourceUrl,featureList:aiProfile(b).status==='verified'?[aiComparisonSentence(a,b)]:undefined}]};
   let html=compareTemplate;
   html=html.replace(/<title>[\s\S]*?<\/title>/,`<title>${esc(title)}</title>`);
   html=html.replace(/<meta name="description" content="[^"]*">/,`<meta name="description" content="${esc(desc)}">`);
