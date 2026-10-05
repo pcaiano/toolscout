@@ -28,6 +28,8 @@ function stripCommercialVendorSourceLinks(html){
   out=out.replace(/\s*(?:·\s*)?<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>\s*[^<]{0,120}\s+official(?:\s+product)?\s+source\s*<\/a>/gi,'');
   out=out.replace(/<strong>\s*Editorial evidence:\s*<\/strong>\s*/gi,'');
   out=out.replace(/<strong>\s*Primary sources:\s*<\/strong>\s*/gi,'');
+  out=out.replace(/>\s*[.·]\s*Source data last checked\s*/gi,'>Information last checked ');
+  out=out.replace(/\bSource data last checked\b/gi,'Information last checked');
   return out;
 }
 function styleTag(){
