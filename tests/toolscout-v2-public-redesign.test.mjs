@@ -117,3 +117,20 @@ test('public social footer stays compact in ToolScout 2.0',()=>{
   assert.match(social,/margin:24px auto 0/);
   assert.doesNotMatch(social,/Follow ToolScout/);
 });
+
+
+test('tool profiles do not expose preliminary generic decision-depth blocks',()=>{
+  const seo=read('seo-cloudflare-runtime-worker.js');
+  assert.match(seo,/stripGenericToolDecisionDepth\(html,pathname\)/);
+  assert.match(seo,/data-og-variant=\["'\]cloudflare-decision-depth-v1/);
+  assert.match(seo,/if\(bestPageDepth&&!html\.includes\('organic-growth:runtime-start'\)/);
+});
+
+test('commercial source cleanup leaves readable verification wording',async()=>{
+  const source='<!doctype html><html><head></head><body><p class="small"><strong>Editorial evidence:</strong> <a href="https://vendor.example/docs">Official product source</a>. Source data last checked 2026-09-01. Vendor pricing can change.</p></body></html>';
+  const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
+  const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/tools/example'),response);
+  const html=await out.text();
+  assert.doesNotMatch(html,/Official product source|Source data last checked|>\s*\./);
+  assert.match(html,/Information last checked 2026-09-01/);
+});
