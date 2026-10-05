@@ -84,6 +84,43 @@ function decisionBlock(slug,criteria){
   const items=criteria.map(x=>`<li>${esc(String(x).replace(/([a-z])([A-Z])/g,'$1 $2'))}</li>`).join('');
   return `<!-- organic-growth:runtime-start --><section class="section organic-growth-context" data-og-variant="cloudflare-decision-depth-v1"><h2>How to choose ${esc(subject)}</h2><p>Start with the job you need the software to do, then compare the shortlist on workflow fit, integrations, usability and current cost. Remove any option that misses a must-have requirement before comparing secondary features.</p><h3>Decision checklist</h3><ul>${items}</ul><p>ToolScout updates this guide from observed search demand and current catalog evidence. Rankings remain based on fit, not affiliate payout.</p></section><!-- organic-growth:runtime-end -->`;
 }
+
+function toolProfileFacts(html){
+  const bestBlock=(String(html||'').match(/<h2\b[^>]*>\s*Best for\s*<\/h2>\s*<ul\b[^>]*>([\s\S]*?)<\/ul>/i)||[])[1]||'';
+  const best=[...bestBlock.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(x=>strip(x[1])).filter(Boolean).slice(0,4);
+  const capBlock=(String(html||'').match(/<h2\b[^>]*>\s*Key capabilities\s*<\/h2>\s*<div\b[^>]*class=["'][^"']*chips[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)||[])[1]||'';
+  const capabilities=[...capBlock.matchAll(/<span\b[^>]*>([\s\S]*?)<\/span>/gi)].map(x=>strip(x[1])).filter(Boolean).slice(0,5);
+  const pricing=strip((String(html||'').match(/<h2\b[^>]*>\s*Pricing at a glance\s*<\/h2>\s*<p\b[^>]*>([\s\S]*?)<\/p>/i)||[])[1]||'');
+  return {best,capabilities,pricing};
+}
+function toolDecisionDepthBlock(html){
+  const name=strip(String(html||'').match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'this tool');
+  const facts=toolProfileFacts(html);
+  const fit=facts.best.length?facts.best.join(', '):'the use cases listed in this profile';
+  const capabilities=facts.capabilities.length?facts.capabilities.join(', '):'the capabilities recorded above';
+  const items=[
+    `<li><strong>Workflow fit:</strong> Confirm that your real use case overlaps with ${esc(fit)}.</li>`,
+    `<li><strong>Capability fit:</strong> Test the must-have workflow against ${esc(capabilities)} before comparing secondary features.</li>`,
+    facts.pricing
+      ?`<li><strong>Commercial check:</strong> ${esc(facts.pricing)} Verify current limits, plan rules and contract terms before purchase.</li>`
+      :'<li><strong>Commercial check:</strong> Verify current pricing, limits and contract terms before purchase.</li>',
+    '<li><strong>Interoperability check:</strong> Validate the integrations, data portability and AI connectivity you actually need before committing.</li>'
+  ].join('');
+  return `<!-- organic-growth:runtime-start --><section class="section organic-growth-context" data-og-variant="cloudflare-tool-editorial-depth-v2"><h2>Decision checks before choosing ${esc(name)}</h2><p>Use the recorded profile as a shortlist filter, not as a substitute for validating the workflow you will run in production. ToolScout keeps the decision focused on fit, trade-offs and current evidence rather than feature count alone.</p><ul>${items}</ul></section><!-- organic-growth:runtime-end -->`;
+}
+function comparisonDecisionDepthBlock(html){
+  const title=strip(String(html||'').match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'this comparison');
+  return `<!-- organic-growth:runtime-start --><section class="section organic-growth-context" data-og-variant="cloudflare-comparison-editorial-depth-v2"><h2>Decision framework for ${esc(title)}</h2><p>Choose the workflow first, then compare the two products on the requirements that can change the decision: must-have capabilities, integrations, implementation effort, current plan limits and AI interoperability.</p><ul><li><strong>Eliminate on must-haves first.</strong> A lower-priority feature should not compensate for a missing requirement.</li><li><strong>Compare the live commercial terms.</strong> Pricing and limits change, so verify them before purchase.</li><li><strong>Use fit as the tie-breaker.</strong> Prefer the option that better matches the team's actual operating workflow, not the longer feature list.</li></ul></section><!-- organic-growth:runtime-end -->`;
+}
+function taskSpecificDepthBlock(html,pathname,cfg){
+  if(String(pathname||'').startsWith('/tools/'))return toolDecisionDepthBlock(html);
+  if(String(pathname||'').includes('-vs-')||String(pathname||'').startsWith('/compare'))return comparisonDecisionDepthBlock(html);
+  if(String(pathname||'').startsWith('/best-')){
+    const slug=String(pathname||'').replace(/^\//,'');
+    return decisionBlock(slug,criteriaFor(cfg,slug));
+  }
+  return comparisonDecisionDepthBlock(html);
+}
 function stripGenericToolDecisionDepth(html,pathname){
   if(!String(pathname||'').startsWith('/tools/'))return String(html||'');
   let out=String(html||'');
@@ -169,12 +206,15 @@ async function transformPage(request,response,env){
     const state=await activeState(env,pathname);
     const taskSpecificClickCapture=state&&String(state.reason||'')==='execution_contract:improve_click_capture';
     if(taskSpecificClickCapture)html=improveClickCapture(html,pathname);
-    const bestPageDepth=state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
-    if(bestPageDepth&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
-      const depthSlug=pathname.replace(/^\//,'');
-      const block=decisionBlock(depthSlug,criteriaFor(cfg,depthSlug));
-      const marker='<section class="section"><h2>How ToolScout chooses</h2>';
-      html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
+    const taskSpecificDepth=state&&String(state.reason||'')==='execution_contract:deepen_existing_search_asset';
+    const observedBestPageDepth=state&&String(state.reason||'')==='observed_search_demand'&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
+    if((taskSpecificDepth||observedBestPageDepth)&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
+      const block=taskSpecificDepth?taskSpecificDepthBlock(html,pathname,cfg):decisionBlock(pathname.replace(/^\//,''),criteriaFor(cfg,pathname.replace(/^\//,'')));
+      const bestMarker='<section class="section"><h2>How ToolScout chooses</h2>';
+      const toolMarker='<section class="section aiInterop"';
+      if(pathname.startsWith('/best-')&&html.includes(bestMarker))html=html.replace(bestMarker,block+bestMarker);
+      else if(pathname.startsWith('/tools/')&&html.includes(toolMarker))html=html.replace(toolMarker,block+toolMarker);
+      else html=html.replace(/<\/body>/i,block+'</body>');
     }
     // Core public hubs already expose contextual, crawlable internal links in their
     // primary UI. Do not append search-demand link farms to the visible page.
