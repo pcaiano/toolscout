@@ -62,8 +62,12 @@ await pool(publicPages,12,async value=>{
   if(!contentType.includes('text/html'))return;
   need(/data-toolscout-public-redesign=["']2["']/.test(r.text),label+'_public_redesign_style_missing',value);
   need(/<html\b[^>]*data-toolscout-redesign=["']2["']/i.test(r.text),label+'_redesign_scope_missing',value);
-  need(/class=["'][^"']*ts2-global-nav/.test(r.text),label+'_global_nav_missing',value);
+  const sharedNavCount=(r.text.match(/class=["'][^"']*\bts2-global-nav\b[^"']*["']/g)||[]).length;
+  need(sharedNavCount===1,label+'_global_nav_count',{url:value,count:sharedNavCount});
   need(/class=["'][^"']*ts2-brand/.test(r.text)&&/href=["']\/["']/.test(r.text),label+'_home_link_missing',value);
+  need(!/class=["'][^"']*\bts-global-nav\b[^"']*["']/.test(r.text),label+'_legacy_global_nav_present',value);
+  need(!/<nav\b[^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/i.test(r.text),label+'_legacy_branded_nav_present',value);
+  need(!/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>/i.test(r.text),label+'_legacy_top_nav_present',value);
 });
 
 const methodology=await get('/methodology');
