@@ -12,7 +12,30 @@ ToolScout helps people choose software and AI tools based on the job they need t
 
 Primary URL: https://trytoolscout.org/
 
-## Priority 1 — Product Hunt
+## Priority 0: Embed partnerships
+
+**Why:** ToolScout Finder is useful on the publisher's own site before it asks the publisher for traffic. That makes it a stronger outreach offer than a generic listing request.
+
+**Primary asset:** https://trytoolscout.org/distribution/publisher-kit
+
+**Offer:** a free Software Finder widget that installs with one script tag and returns ToolScout recommendations inside the publisher site.
+
+**Best-fit targets:** software and technology publishers, newsletters with web editions, agency resources, founder communities, incubators, accelerators, business resource libraries and editorial sites where readers actively choose software.
+
+**Outreach order:**
+
+1. Lead with the reader utility of the Finder.
+2. Link to the live demo and copy-paste integration code.
+3. Do not require payment, exclusivity or a reciprocal link.
+4. Use a stable publisher ID for attribution.
+5. Treat a verified external widget impression as adoption evidence.
+6. Expand relationships that produce real searches, referral sessions, profile clicks or vendor clicks.
+
+**Measurement:** publisher installations, widget impressions, searches, result views, ToolScout profile clicks, vendor clicks, attributed sessions and downstream monetized outbound. Raw Finder search text is not stored in embed telemetry.
+
+**Execution rule:** Distribution Network outreach should present Finder as the primary publisher offer. Compare and Pick remain secondary embed options.
+
+## Priority 1: Product Hunt
 
 **Why:** high-fit early-adopter audience and launch-driven discovery.
 
