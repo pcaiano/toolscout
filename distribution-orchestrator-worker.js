@@ -1589,7 +1589,7 @@ if(u.pathname==='/api/distribution/priorities/public-reconcile'&&request.method=
   return Response.json(await runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:'make_handoff_recovery'},()=>rebalanceDistributionPriorities(env)),{headers:H});
 }
 if(u.pathname==='/api/growth/engine-health/public-reconcile'&&request.method==='POST'){
-  if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
+  if(!(await growthEscalationHandoffOk(request))&&!(await executionAuth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   const results={};
   const run=async(key,engine,mission,minutes,fn,ledgerExtra={})=>{
     try{results[key]=await runWithLedger(env,{engine,mission,triggerName:'make_engine_health_recovery',singleFlightMinutes:minutes,...ledgerExtra},fn)}
