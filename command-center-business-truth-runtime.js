@@ -152,13 +152,15 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
   const activeSet=new Set(activeSlugs),productionSet=new Set(productionSlugs);
 
   const portfolio=Array.isArray(editorial?.portfolio)?editorial.portfolio:[];
-  const editorialTarget=truthNum(editorial?.targetScore)||70;
-  const editorialAverage=portfolio.length?Number((portfolio.reduce((sum,row)=>sum+truthNum(row?.editorialAuthorityScore),0)/portfolio.length).toFixed(1)):null;
+  const editorialHardFloor=truthNum(editorial?.hardFloorScore)||90;
+  const editorialTarget=truthNum(editorial?.targetScore)||95;
+  const editorialExcellence=truthNum(editorial?.excellenceScore)||98;
+  const editorialAverage=editorial?.summary?.averageScore==null?(portfolio.length?Number((portfolio.reduce((sum,row)=>sum+truthNum(row?.editorialAuthorityScore),0)/portfolio.length).toFixed(1)):null):Number(editorial.summary.averageScore);
   const editorialPriority=portfolio.slice(0,10).map(row=>({
     page:row.page,pageType:row.pageType,score:truthNum(row.editorialAuthorityScore),target:truthNum(row.targetScore)||editorialTarget,
     impressions:truthNum(row.impressions),clicks:truthNum(row.clicks),position:row.position==null?null:Number(row.position),
-    action:row.action||'observe',primarySourceLinks:truthNum(row.primarySourceLinks),
-    hasAnalysis:Boolean(row.hasAnalysis),hasTradeoffs:Boolean(row.hasTradeoffs),hasVerification:Boolean(row.hasVerification)
+    action:row.action||'observe',diagnosis:row.diagnosis||null,qualityBand:row.qualityBand||null,gapToTarget:truthNum(row.gapToTarget),primarySourceLinks:truthNum(row.primarySourceLinks),
+    hasAnalysis:Boolean(row.hasAnalysis),hasTradeoffs:Boolean(row.hasTradeoffs),hasVerification:Boolean(row.hasVerification),hasRecentVerification:Boolean(row.hasRecentVerification)
   }));
 
   return{
@@ -250,10 +252,19 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
       execution:{available:false,states:null,actions:null,total:null,ready:null,inFlight:null,deferred:null,verified:null,stalled:null,blocked:null,humanRequired:null,missingExecutors:null,updatedAt:null}
     },
     editorial:{
+      hardFloorScore:editorialHardFloor,
       targetScore:editorialTarget,
+      excellenceScore:editorialExcellence,
+      averageScore:editorialAverage,
       averagePriorityScore:editorialAverage,
       evaluated:truthNum(editorial?.summary?.evaluated),
+      existing:truthNum(editorial?.summary?.existing),
+      belowHardFloor:truthNum(editorial?.summary?.belowHardFloor),
+      improvement:truthNum(editorial?.summary?.improvement),
       belowTarget:truthNum(editorial?.summary?.belowTarget),
+      healthy95Plus:truthNum(editorial?.summary?.healthy95Plus),
+      excellent98Plus:truthNum(editorial?.summary?.excellent98Plus),
+      searchFitDiagnosis:truthNum(editorial?.summary?.searchFitDiagnosis),
       priorityCount:portfolio.length,
       generatedAt:editorial?.generatedAt||null,
       model:editorial?.model||'toolscout-editorial-authority-v1',
@@ -646,9 +657,11 @@ async function buildCommandCenterBusinessTruth(request,env){
   else if(truthNum(growth.attributed_humans_7d)>0){currentGrowthStatus='working';currentGrowthDirective='scale_proven_human_sources_and_existing_search_demand'}
   const editorialPortfolio=Array.isArray(editorialAuthorityPortfolio?.portfolio)?editorialAuthorityPortfolio.portfolio:[];
   const editorialSummary=editorialAuthorityPortfolio?.summary||{};
-  const editorialTarget=truthNum(editorialAuthorityPortfolio?.targetScore)||70;
-  const editorialAverage=editorialPortfolio.length?Number((editorialPortfolio.reduce((sum,row)=>sum+truthNum(row.editorialAuthorityScore),0)/editorialPortfolio.length).toFixed(1)):null;
-  const editorialPriority=editorialPortfolio.slice(0,10).map(row=>({page:row.page,pageType:row.pageType,score:truthNum(row.editorialAuthorityScore),target:truthNum(row.targetScore)||editorialTarget,impressions:truthNum(row.impressions),clicks:truthNum(row.clicks),position:row.position==null?null:Number(row.position),action:row.action||'observe',primarySourceLinks:truthNum(row.primarySourceLinks),hasAnalysis:Boolean(row.hasAnalysis),hasTradeoffs:Boolean(row.hasTradeoffs),hasVerification:Boolean(row.hasVerification)}));
+  const editorialHardFloor=truthNum(editorialAuthorityPortfolio?.hardFloorScore)||90;
+  const editorialTarget=truthNum(editorialAuthorityPortfolio?.targetScore)||95;
+  const editorialExcellence=truthNum(editorialAuthorityPortfolio?.excellenceScore)||98;
+  const editorialAverage=editorialSummary.averageScore==null?(editorialPortfolio.length?Number((editorialPortfolio.reduce((sum,row)=>sum+truthNum(row.editorialAuthorityScore),0)/editorialPortfolio.length).toFixed(1)):null):Number(editorialSummary.averageScore);
+  const editorialPriority=editorialPortfolio.slice(0,10).map(row=>({page:row.page,pageType:row.pageType,score:truthNum(row.editorialAuthorityScore),target:truthNum(row.targetScore)||editorialTarget,hardFloor:truthNum(row.hardFloorScore)||editorialHardFloor,excellence:truthNum(row.excellenceScore)||editorialExcellence,qualityBand:row.qualityBand||null,gapToTarget:truthNum(row.gapToTarget),impressions:truthNum(row.impressions),clicks:truthNum(row.clicks),position:row.position==null?null:Number(row.position),action:row.action||'observe',diagnosis:row.diagnosis||null,primarySourceLinks:truthNum(row.primarySourceLinks),hasAnalysis:Boolean(row.hasAnalysis),hasTradeoffs:Boolean(row.hasTradeoffs),hasVerification:Boolean(row.hasVerification),hasRecentVerification:Boolean(row.hasRecentVerification)}));
   return {
     ok:true,
     version:'command-center-business-truth-v6-editorial-authority',
@@ -950,10 +963,19 @@ async function buildCommandCenterBusinessTruth(request,env){
       execution:searchExecution
     },
     editorial:{
+      hardFloorScore:editorialHardFloor,
       targetScore:editorialTarget,
+      excellenceScore:editorialExcellence,
+      averageScore:editorialAverage,
       averagePriorityScore:editorialAverage,
       evaluated:truthNum(editorialSummary.evaluated),
+      existing:truthNum(editorialSummary.existing),
+      belowHardFloor:truthNum(editorialSummary.belowHardFloor),
+      improvement:truthNum(editorialSummary.improvement),
       belowTarget:truthNum(editorialSummary.belowTarget),
+      healthy95Plus:truthNum(editorialSummary.healthy95Plus),
+      excellent98Plus:truthNum(editorialSummary.excellent98Plus),
+      searchFitDiagnosis:truthNum(editorialSummary.searchFitDiagnosis),
       priorityCount:editorialPortfolio.length,
       generatedAt:editorialAuthorityPortfolio?.generatedAt||null,
       model:editorialAuthorityPortfolio?.model||'toolscout-editorial-authority-v1',
