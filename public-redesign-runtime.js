@@ -16,6 +16,7 @@ function isCommercialDecisionPath(pathname){
 function publicSurface(pathname){
   const p=String(pathname||'').replace(/\.html\/?$/i,'').replace(/\/$/,'')||'/';
   if(p==='/tools')return'tools';
+  if(/^\/tools\/[a-z0-9][a-z0-9-]*$/i.test(p))return'tool-profile';
   if(p==='/guides')return'guides';
   if(p==='/compare')return'compare';
   if(p==='/whats-new')return'whats-new';
@@ -37,6 +38,12 @@ function stripLegacyNavigation(html,surface){
   // What's New and software-news pages used a .top wrapper containing the legacy brand/nav pair.
   if(surface==='whats-new'||surface==='news'){
     out=out.replace(/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b(?=[^>]*class=["']brand["'])(?=[^>]*href=["']\/["'])[^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/div>/gi,'');
+  }
+  // Generated tool profiles used a standalone pre-2.0 ToolScout brand link above breadcrumbs.
+  // The shared ToolScout 2.0 header owns brand identity, so remove the duplicate at runtime
+  // for already-generated profiles as well as preventing it at generation time.
+  if(surface==='tool-profile'){
+    out=out.replace(/<a\b(?=[^>]*class=["'][^"']*\bbrand\b[^"']*["'])(?=[^>]*href=["']\/["'])[^>]*>\s*ToolScout\s*<\/a>/gi,'');
   }
   return out;
 }
@@ -79,6 +86,7 @@ html[data-toolscout-redesign="2"] body *{box-sizing:border-box}
 .ts2-cta{background:var(--ts-l);color:var(--ts-g);padding:12px 17px;border-radius:7px;font-weight:800;text-decoration:none;white-space:nowrap}
 html[data-toolscout-redesign="2"] .ts-global-nav{display:none!important}
 html[data-toolscout-surface="trends"] .darkBand .shell>nav:first-child{display:none!important}
+html[data-toolscout-surface="tool-profile"] body>.wrap>.brand{display:none!important}
 .ts2-global-nav + .wrap > nav:first-child,.ts2-global-nav + .wrap > .brand,.ts2-global-nav + .wrap > .top:first-child{display:none!important}
 html[data-toolscout-redesign="2"] body>.wrap,html[data-toolscout-redesign="2"] body .wrap{max-width:1180px!important;margin:auto!important;padding-left:24px!important;padding-right:24px!important}
 html[data-toolscout-redesign="2"] body main,html[data-toolscout-redesign="2"] body .hero{animation:ts2Enter var(--ts-base) var(--ts-out) both}
