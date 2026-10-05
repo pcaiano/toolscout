@@ -67,7 +67,6 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'distribution_network_refresh',owner:'distribution_network_runtime',plane:'executor',methods:['POST'],exact:['/api/distribution/network/refresh']},
   {id:'distribution_network_metrics',owner:'distribution_network_runtime',plane:'signals',methods:['GET'],exact:['/api/distribution/network/metrics']},
   {id:'distribution_public_embed',owner:'distribution_public_embed',plane:'public_site',methods:['GET'],exact:['/distribution/publisher-kit','/api/recommend','/embed/toolscout.js','/embed/toolscout-finder.js','/embed/toolscout-compare.js','/embed/toolscout-pick.js','/embed/badge.svg','/distribution/feed.xml']},
-  {id:'distribution_embed_events',owner:'distribution_public_embed',plane:'signals',methods:['POST','OPTIONS'],exact:['/api/distribution/embed-event']},
   {id:'distribution_linkable_assets',owner:'distribution_linkable_assets',plane:'executor',methods:['POST'],exact:['/api/distribution/linkable-assets/sync']},
   {id:'distribution_autonomous_refresh',owner:'distribution_throughput_runtime',plane:'executor',methods:['POST'],exact:['/api/distribution/autonomous/refresh']},
   {id:'distribution_submission_execute',owner:'distribution_throughput_runtime',plane:'executor',methods:['POST'],exact:['/api/distribution/submissions/execute']},
