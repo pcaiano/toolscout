@@ -202,6 +202,7 @@
     "primary_scheduler_forbidden": true,
     "active_workflows": [
       "deploy-worker.yml",
+      "finder-embed-production-deploy.yml",
       "growth-brain-seo-executor.yml",
       "gsc-growth-bridge.yml",
       "gsc-search-reality.yml",
