@@ -3,7 +3,7 @@
     "canonical_url": "https://trytoolscout.org/",
     "name": "ToolScout",
     "slug": "toolscout",
-    "tagline": "Find the right software for the job — without the noise.",
+    "tagline": "Find the right software for the job: without the noise.",
     "description": "ToolScout is an independent software discovery and recommendation platform that turns a buyer's workflow, persona and constraints into a focused shortlist of relevant tools, with transparent comparisons and no pay-to-rank recommendations.",
     "search_one_liner": "ToolScout helps software buyers find and compare tools by job-to-be-done, workflow, persona and constraints instead of generic popularity.",
     "geo_description": "ToolScout is an independent software decision engine for buyers evaluating SaaS and software. It connects jobs-to-be-done, personas, constraints, tool candidates, alternatives and head-to-head comparisons, and keeps affiliate monetization separate from recommendation ranking.",
@@ -99,7 +99,7 @@
     "mapped_fields": {
       "appName": "ToolScout",
       "appUrl": "https://trytoolscout.org/",
-      "landingPageHeading": "Find the right software for the job — without the noise.",
+      "landingPageHeading": "Find the right software for the job: without the noise.",
       "landingPageSubHeading": "Independent software discovery and recommendations built around buyer intent, workflow and constraints."
     },
     "missing_runtime_fields": [
