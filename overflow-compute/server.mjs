@@ -137,7 +137,33 @@ async function seoProof(pathname,action){
   if(action==='deepen_existing_search_asset'){
     const page=await fetchPublicHtml(pathname);
     const marker=page.ok&&(page.html.includes('organic-growth:runtime-start')||page.html.includes('organic-growth:start'));
-    return {verified:Boolean(marker),action,pathname,status:page.status,marker:Boolean(marker),error:page.error||null,observer:'render-overflow'};
+    const visibleText=page.ok?page.html
+      .replace(/<script\b[\s\S]*?<\/script>/gi,' ')
+      .replace(/<style\b[\s\S]*?<\/style>/gi,' ')
+      .replace(/<[^>]+>/g,' ')
+      .replace(/&[a-z0-9#]+;/gi,' ')
+      .replace(/\s+/g,' ')
+      .trim():'';
+    const wordCount=visibleText?visibleText.split(/\s+/).filter(Boolean).length:0;
+    const h2Count=page.ok?(page.html.match(/<h2\b/gi)||[]).length:0;
+    const sectionCount=page.ok?(page.html.match(/<section\b/gi)||[]).length:0;
+    const editorialSignal=page.ok&&/(ToolScout view|ToolScout analysis|Best for|trade-off|tradeoff|decision framework|editorial)/i.test(visibleText);
+    const structuredDepth=page.ok&&wordCount>=300&&h2Count>=4&&sectionCount>=3&&editorialSignal;
+    return {
+      verified:Boolean(marker||structuredDepth),
+      action,
+      pathname,
+      status:page.status,
+      marker:Boolean(marker),
+      structuredDepth:Boolean(structuredDepth),
+      wordCount,
+      h2Count,
+      sectionCount,
+      editorialSignal:Boolean(editorialSignal),
+      proofPolicy:'runtime_marker_or_structured_editorial_depth_v2',
+      error:page.error||null,
+      observer:'render-overflow'
+    };
   }
   return {verified:false,action,pathname,error:'unsupported_action',observer:'render-overflow'};
 }
