@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ToolScout 2.0 Motion Lab</title>
+<style>
+:root{
+  --g:#0B0D0C;--c:#141715;--o:#F3F5F1;--m:#90978F;--l:#B7FF3C;--line:#DDE2DC;
+  --instant:90ms;--fast:140ms;--base:180ms;--delib:260ms;
+  --ease:cubic-bezier(.2,.7,.2,1);--out:cubic-bezier(.16,1,.3,1);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--g);color:var(--o)}
+a{color:inherit}
+button,input{font:inherit}
+.shell{max-width:1180px;margin:auto;padding:0 32px}
+nav{height:84px;border-bottom:1px solid rgba(243,245,241,.08);display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.035em;display:flex;align-items:center;gap:12px}.mark{width:23px;height:23px;border:2px solid var(--l);position:relative}.mark:after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:var(--l);left:7px;top:7px}
+.navs{display:flex;gap:26px;align-items:center}.navs button{border:0;background:none;color:#cdd2cc;cursor:pointer;padding:10px 0;transition:color var(--fast) var(--ease)}.navs button:hover,.navs button[aria-current="page"]{color:#fff}
+main{min-height:720px}.view{display:none;opacity:0;transform:translateY(9px)}.view.active{display:block;animation:enter var(--base) var(--out) both}
+@keyframes enter{to{opacity:1;transform:none}}
+.hero{min-height:610px;display:grid;grid-template-columns:5fr 7fr;align-items:center}.hero-copy{padding:72px 0 88px;max-width:560px}
+.kicker{font-size:11px;letter-spacing:.1em;font-weight:800;color:var(--l);text-transform:uppercase}.hero h1{font-size:clamp(56px,7vw,82px);line-height:.94;letter-spacing:-.065em;margin:14px 0 25px}.lede{color:#c8cdc7;font-size:18px;line-height:1.55;max-width:440px}
+.intent{margin-top:30px;border:1px solid rgba(243,245,241,.17);background:var(--c);border-radius:9px;padding:5px;display:flex;min-height:58px;transition:transform var(--fast) var(--ease),border-color var(--fast) var(--ease)}
+.intent:focus-within{border-color:rgba(183,255,60,.65)}.intent.working{transform:scale(.992)}
+.intent input{flex:1;border:0;outline:0;background:transparent;color:var(--o);padding:0 14px;min-width:0}.go{width:48px;border:0;border-radius:7px;background:var(--l);color:var(--g);font-size:22px;font-weight:800;cursor:pointer;transition:transform var(--instant) var(--ease)}.go:active{transform:scale(.96)}
+.status{height:28px;margin-top:16px;color:#a8aea8;font-size:12px;display:flex;align-items:center;gap:8px}.dot{width:8px;height:8px;border-radius:50%;background:var(--l);opacity:.4;transition:opacity var(--base)}.status.live .dot{opacity:1}.criteria{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.chip{border:1px solid rgba(243,245,241,.12);padding:5px 8px;font-size:11px;color:#a8aea8;opacity:0;transform:translateY(6px);transition:opacity var(--base) var(--out),transform var(--base) var(--out)}.chip.show{opacity:1;transform:none}
+.results{margin-top:28px;border-top:1px solid rgba(243,245,241,.12)}.result{display:grid;grid-template-columns:54px 1fr auto;gap:16px;align-items:center;padding:18px 0;border-bottom:1px solid rgba(243,245,241,.10);opacity:0;transform:translateY(8px);transition:opacity var(--delib) var(--out),transform var(--delib) var(--out)}.result.show{opacity:1;transform:none}.logo{width:42px;height:42px;border-radius:9px;background:#fff;display:grid;place-items:center;overflow:hidden}.logo img{width:30px;height:30px;object-fit:contain}.result strong{display:block;font-size:18px}.result span{font-size:13px;color:#a8aea8}.score{font-size:12px;color:var(--l)}
+.light{background:var(--o);color:var(--g);padding:70px 0 90px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:30px}.section-head h2{font-size:46px;letter-spacing:-.05em;margin:8px 0}.section-head p{color:#5f665f;max-width:440px}
+.pulse{margin-top:28px;border-top:1px solid var(--g);display:grid;grid-template-columns:1.4fr 1fr}.lead-story{padding:28px 34px 30px 0;border-right:1px solid var(--line);min-height:280px}.live{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.1em;font-weight:800;text-transform:uppercase}.live i{width:7px;height:7px;background:var(--l);border-radius:50%;display:inline-block}.story-brand{display:flex;align-items:center;gap:10px;margin-top:28px}.story-brand img{width:30px;height:30px;border-radius:7px;background:#fff}.meta{font-size:10px;color:#717871;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.lead-story h3{font-size:31px;line-height:1.08;letter-spacing:-.04em;margin:14px 0}.lead-story p{font-size:15px;line-height:1.55;color:#5f665f;max-width:610px}.story-body{transition:opacity var(--base) var(--ease),transform var(--base) var(--ease)}.story-body.swap{opacity:0;transform:translateY(6px)}
+.secondary{padding-left:34px}.news-btn{width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:22px 0;cursor:pointer;transition:padding-left var(--fast) var(--ease),color var(--fast)}.news-btn:hover{padding-left:6px}.news-btn small{display:block;color:#717871;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.news-btn strong{display:block;font-size:16px;line-height:1.35;margin-top:7px}.more{display:inline-block;margin-top:26px;font-size:12px;font-weight:800;text-decoration:none}
+.compare{padding:76px 0 90px}.compare h1{font-size:74px;letter-spacing:-.06em;line-height:.94;margin:10px 0}.decision{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--o);margin-top:44px}.side{padding:34px 36px 34px 0}.side+ .side{padding-left:36px;border-left:1px solid rgba(243,245,241,.14)}.vendor{display:flex;gap:12px;align-items:center}.vendor img{width:46px;height:46px;border-radius:9px;background:#fff}.side h3{font-size:28px;margin:18px 0 10px;letter-spacing:-.035em}.side p{color:#a8aea8;line-height:1.55}
+.signal{transition:opacity var(--base),transform var(--base),color var(--base)}.signal.dim{opacity:.38}.signal.focus{color:var(--l);transform:translateX(4px)}
+.controls{position:fixed;right:18px;bottom:18px;background:rgba(20,23,21,.94);border:1px solid rgba(243,245,241,.12);padding:10px 12px;border-radius:9px;font-size:11px;color:#a8aea8}
+@media(max-width:760px){.shell{padding:0 20px}.navs{gap:14px}.navs button:nth-child(2){display:none}.hero{grid-template-columns:1fr;min-height:auto}.hero-copy{padding:60px 0}.hero h1{font-size:52px}.light{padding-top:54px}.section-head{display:block}.section-head h2{font-size:35px}.pulse{grid-template-columns:1fr}.lead-story{border-right:0;border-bottom:1px solid var(--line);padding-right:0}.secondary{padding-left:0}.compare h1{font-size:54px}.decision{grid-template-columns:1fr}.side+.side{padding-left:0;border-left:0;border-top:1px solid rgba(243,245,241,.14)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav>
+<div class="brand"><span class="mark"></span>ToolScout</div>
+<div class="navs">
+<button data-view="home" aria-current="page">Home</button>
+<button data-view="compare">Compare</button>
+<button data-view="news">What's new</button>
+</div>
+</nav>
+<main>
+<section id="home" class="view active">
+  <div class="hero">
+    <div class="hero-copy">
+      <div class="kicker">Independent software decisions</div>
+      <h1>Find the<br>right software.<br><span style="color:var(--l)">Faster.</span></h1>
+      <p class="lede">Independent software decisions, without the noise.</p>
+      <div class="intent" id="intent"><input id="need" value="CRM for a small consultancy" aria-label="What are you trying to do?"><button class="go" id="go">→</button></div>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">Ready to decide.</span></div>
+      <div class="criteria" id="criteria"><span class="chip">small team</span><span class="chip">sales pipeline</span><span class="chip">automation</span></div>
+      <div class="results" id="results">
+        <div class="result"><div class="logo"><img src="https://www.google.com/s2/favicons?domain=pipedrive.com&sz=128" alt=""></div><div><strong>Pipedrive</strong><span>Best when pipeline clarity matters most.</span></div><div class="score">Best fit</div></div>
+        <div class="result"><div class="logo"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=128" alt=""></div><div><strong>HubSpot</strong><span>Best when CRM and marketing need to live together.</span></div><div class="score">Strong fit</div></div>
+        <div class="result"><div class="logo"><img src="https://www.google.com/s2/favicons?domain=monday.com&sz=128" alt=""></div><div><strong>monday CRM</strong><span>Best when workflow flexibility matters.</span></div><div class="score">Consider</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="compare" class="view compare">
+  <div class="kicker">Automation / decision brief</div>
+  <h1>Make<br>vs Zapier</h1>
+  <p class="lede">Control or simplicity?</p>
+  <div class="decision">
+    <div class="side">
+      <div class="vendor"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""><strong>MAKE</strong></div>
+      <h3>Choose Make if...</h3>
+      <p>You build complex, multi-step workflows and want more visual control over logic, data and routing.</p>
+      <p class="signal dim" data-signal>Ease of adoption</p><p class="signal focus" data-signal>Workflow control</p><p class="signal dim" data-signal>Template breadth</p>
+    </div>
+    <div class="side">
+      <div class="vendor"><img src="https://www.google.com/s2/favicons?domain=zapier.com&sz=128" alt=""><strong>ZAPIER</strong></div>
+      <h3>Choose Zapier if...</h3>
+      <p>You want to automate quickly, hand workflows to less technical teammates and keep setup friction low.</p>
+      <p class="signal focus" data-signal>Ease of adoption</p><p class="signal dim" data-signal>Workflow control</p><p class="signal dim" data-signal>Template breadth</p>
+    </div>
+  </div>
+</section>
+
+<section id="news" class="view">
+  <div class="light" style="margin:0 calc(50% - 50vw)">
+    <div class="shell">
+      <div class="section-head"><div><div class="kicker" style="color:#6d746d">Editorial pulse</div><h2>What's new in software.</h2></div><p>Fresh product changes selected for buyer relevance, not volume.</p></div>
+      <div class="pulse">
+        <article class="lead-story">
+          <div class="live"><i></i> What's new · live</div>
+          <div class="story-body" id="storyBody">
+            <div class="story-brand"><img id="storyLogo" src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt=""><div><strong id="storyTool">GitHub</strong><div class="meta" id="storyMeta">Integration update · 2 Oct 2026</div></div></div>
+            <h3 id="storyTitle">Copilot code review now works through the API</h3>
+            <p id="storySummary">Teams can request Copilot code review through REST and GraphQL APIs, making review automation more relevant to connected developer workflows.</p>
+          </div>
+          <a class="more" href="https://trytoolscout.org/whats-new.html">VIEW ALL WHAT'S NEW →</a>
+        </article>
+        <div class="secondary" id="secondary"></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+<div class="controls">Motion lab · click the navigation, submit the intent, switch news stories</div>
+<script>
+const views=[...document.querySelectorAll('.view')];
+document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('[data-view]').forEach(b=>b.removeAttribute('aria-current'));btn.setAttribute('aria-current','page');
+  views.forEach(v=>v.classList.remove('active'));const target=document.getElementById(btn.dataset.view);target.classList.add('active');
+}));
+const status=document.getElementById('status'),text=document.getElementById('statusText'),intent=document.getElementById('intent');
+const chips=[...document.querySelectorAll('.chip')],results=[...document.querySelectorAll('.result')];
+document.getElementById('go').addEventListener('click',()=>{
+  chips.forEach(x=>x.classList.remove('show'));results.forEach(x=>x.classList.remove('show'));intent.classList.add('working');status.classList.add('live');text.textContent='Interpreting your need';
+  setTimeout(()=>{chips.forEach((x,i)=>setTimeout(()=>x.classList.add('show'),i*55));text.textContent='Matching the decision criteria';},150);
+  setTimeout(()=>{text.textContent='Shortlist ready';results.forEach((x,i)=>setTimeout(()=>x.classList.add('show'),i*70));intent.classList.remove('working');},470);
+});
+const stories=[
+ {tool:'GitHub',domain:'github.com',meta:'Integration update · 2 Oct 2026',title:'Copilot code review now works through the API',summary:'Teams can request Copilot code review through REST and GraphQL APIs, making review automation more relevant to connected developer workflows.'},
+ {tool:'ChatGPT',domain:'openai.com',meta:'Pricing and packaging · 29 Sep 2026',title:'GPT-6.1 Sol changes the price-performance equation',summary:'A lower-cost model tier can alter which AI assistant or coding stack makes economic sense for teams with sustained usage.'},
+ {tool:'GitHub',domain:'github.com',meta:'Official product update · 28 Sep 2026',title:'Copilot adds sandboxing and agent observability',summary:'Local sandboxing and agent monitoring give software teams more control over how AI-assisted development is governed and observed.'}
+];
+let current=0;const secondary=document.getElementById('secondary'),body=document.getElementById('storyBody');
+function renderSecondary(){secondary.innerHTML=stories.map((s,i)=>i===current?'':`<button class="news-btn" data-story="${i}"><small>${s.tool}</small><strong>${s.title}</strong></button>`).join('');secondary.querySelectorAll('[data-story]').forEach(b=>b.onclick=()=>selectStory(+b.dataset.story));}
+function selectStory(i){if(i===current)return;body.classList.add('swap');setTimeout(()=>{current=i;const s=stories[i];document.getElementById('storyLogo').src='https://www.google.com/s2/favicons?domain='+s.domain+'&sz=128';document.getElementById('storyTool').textContent=s.tool;document.getElementById('storyMeta').textContent=s.meta;document.getElementById('storyTitle').textContent=s.title;document.getElementById('storySummary').textContent=s.summary;body.classList.remove('swap');renderSecondary();},170);}
+renderSecondary();
+</script>
+</body>
+</html>
