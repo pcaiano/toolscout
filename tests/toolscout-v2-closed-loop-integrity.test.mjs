@@ -44,6 +44,19 @@ test('scheduled planning immediately materializes execution contracts without mo
   assert.ok(postSyncPos>opportunityPos,'newly planned actions must receive contracts in the same scheduler cycle');
 });
 
+test('opportunity coordination materializes contracts before reporting success on every invocation path',()=>{
+  const start=orchestrator.indexOf('async function coordinateGrowthOpportunities');
+  const end=orchestrator.indexOf('\nasync function ',start+40);
+  const body=orchestrator.slice(start,end>start?end:orchestrator.length);
+  const flush=body.indexOf('await flushGrowthWrites(env,growthWrites,40)');
+  const sync=body.indexOf('const executionContractSync=await syncExecutionContracts(env)');
+  const result=body.lastIndexOf('return {ok:true');
+  assert.ok(flush>=0);
+  assert.ok(sync>flush,'execution contracts must be materialized after the active opportunity set is written');
+  assert.ok(result>sync,'coordination must not report success before execution contract sync completes');
+  assert.match(body,/executionContractSync/);
+});
+
 test('affiliate schedule contract matches active versus maintenance cadence',()=>{
   assert.match(schedules,/affiliate_coverage:\{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS\.hourly,subcadence:'2h_active_12h_maintenance_or_recovery'/);
 });
