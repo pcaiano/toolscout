@@ -654,5 +654,113 @@
       "categoryEvidenceScore": 3,
       "competitorContentUsedForEditorialFacts": false
     }
+  },
+  {
+    "slug": "vmaker-ai",
+    "name": "Vmaker AI",
+    "category": "content",
+    "description": "With Vmaker AI, making videos yourself is simple. Vmaker is a DIY video making platform that allows you to record, edit and create stunning videos in minutes.",
+    "sourceUrl": "https://www.vmaker.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "citations",
+      "video generation",
+      "video editing",
+      "voice",
+      "automation",
+      "forms",
+      "social media"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/vmaker-ai",
+        "https://www.aixploria.com/vmaker-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 2,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "weryai",
+    "name": "Weryai",
+    "category": "design",
+    "description": "Create AI videos and images with Kling, Veo, Sora 2, and 4K enhancement tools on the official WeryAI platform. Free credits, no card.",
+    "sourceUrl": "https://www.weryai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "image generation",
+      "video generation",
+      "design",
+      "ecommerce"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/weryai",
+        "https://www.aixploria.com/weryai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 2,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "wondershare-repairit",
+    "name": "Wondershare Repairit",
+    "category": "developer",
+    "description": "Repair corrupted videos, photos, files, and audio with Wondershare Repairit. Restore, enhance, and recreate media with AI on Windows, Mac, mobile, and online in 3 simple steps!",
+    "sourceUrl": "https://repairit.wondershare.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "research",
+      "citations",
+      "analysis",
+      "writing",
+      "coding",
+      "video generation",
+      "video editing",
+      "collaboration",
+      "design",
+      "social media"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/wondershare-repairit",
+        "https://www.aixploria.com/wondershare-repairit/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 8,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 2,
+      "competitorContentUsedForEditorialFacts": false
+    }
   }
 ]

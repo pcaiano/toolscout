@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T12:23:52.864Z",
+  "generatedAt": "2026-10-05T15:56:09.407Z",
   "engine": "ToolScout Search Commercial Routing v1",
   "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
   "rules": {
@@ -61,9 +61,9 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2323,
+      "impressions": 2494,
       "ctr": 0,
-      "position": 80.257,
+      "position": 80.2346,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -74,8 +74,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 153,
-          "position": 88.0719
+          "impressions": 163,
+          "position": 88.0736
         },
         {
           "query": "seo tools for agency",
@@ -86,20 +86,20 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 117,
-          "position": 82.8462
+          "impressions": 122,
+          "position": 82.7705
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 104,
-          "position": 82.6154
+          "impressions": 116,
+          "position": 82.431
         }
       ],
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 134.19,
+      "priorityScore": 135.42,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -151,9 +151,9 @@
       "pathname": "/best-crm-for-small-business",
       "type": "guide",
       "clicks": 0,
-      "impressions": 309,
+      "impressions": 313,
       "ctr": 0,
-      "position": 77.3333,
+      "position": 77.3642,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -170,8 +170,8 @@
         {
           "query": "best crm tools for small business",
           "clicks": 0,
-          "impressions": 26,
-          "position": 73.9615
+          "impressions": 27,
+          "position": 74
         },
         {
           "query": "crm tools for small business",
@@ -191,7 +191,7 @@
         "zoho-crm"
       ],
       "lane": "relevance-and-authority",
-      "priorityScore": 120.31,
+      "priorityScore": 120.54,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -397,27 +397,27 @@
       "pathname": "/tools/airtable",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 466,
+      "impressions": 471,
       "ctr": 0,
-      "position": 73.9957,
+      "position": 74.0191,
       "topQueries": [
         {
           "query": "airtable",
           "clicks": 0,
-          "impressions": 114,
-          "position": 64.0614
+          "impressions": 115,
+          "position": 64.0957
         },
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 67,
-          "position": 86.5821
+          "impressions": 68,
+          "position": 86.6029
         },
         {
           "query": "what is airtable used for",
           "clicks": 0,
-          "impressions": 48,
-          "position": 91.2708
+          "impressions": 49,
+          "position": 91.2653
         },
         {
           "query": "airtable software",
@@ -428,14 +428,14 @@
         {
           "query": "airtabel",
           "clicks": 0,
-          "impressions": 37,
-          "position": 67.1892
+          "impressions": 38,
+          "position": 67.1842
         }
       ],
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 106.41,
+      "priorityScore": 106.59,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -475,9 +475,9 @@
       "pathname": "/best-ecommerce-platforms",
       "type": "guide",
       "clicks": 0,
-      "impressions": 29,
+      "impressions": 31,
       "ctr": 0,
-      "position": 31.3103,
+      "position": 34.6452,
       "topQueries": [
         {
           "query": "best ecommerce platform",
@@ -492,6 +492,12 @@
           "position": 76.5
         },
         {
+          "query": "best ecommerce platform",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 83
+        },
+        {
           "query": "top ecommerce platforms",
           "clicks": 0,
           "impressions": 2,
@@ -502,12 +508,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 17
-        },
-        {
-          "query": "best platform for ecommerce",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 42
         }
       ],
       "monetized": true,
@@ -515,12 +515,35 @@
         "shopify"
       ],
       "lane": "editorial-depth",
-      "priorityScore": 105.94,
+      "priorityScore": 103.39,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
         "strengthen-internal-links",
         "prioritize-page-distribution",
+        "measure-monetized-outbound-and-revenue"
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/apollo",
+      "pathname": "/tools/apollo",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 8,
+      "ctr": 0,
+      "position": 15.25,
+      "topQueries": [],
+      "monetized": true,
+      "monetizedSlugs": [
+        "apollo"
+      ],
+      "lane": "authority-and-distribution",
+      "priorityScore": 102.76,
+      "actions": [
+        "strengthen-internal-links",
+        "prioritize-page-distribution",
+        "queue-vendor-amplification-when-relevant",
+        "measure-position-change",
         "measure-monetized-outbound-and-revenue"
       ]
     },
@@ -567,29 +590,6 @@
         "improve-title-snippet-alignment",
         "strengthen-answer-first-copy",
         "measure-qualified-clicks"
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/apollo",
-      "pathname": "/tools/apollo",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 7,
-      "ctr": 0,
-      "position": 15.8571,
-      "topQueries": [],
-      "monetized": true,
-      "monetizedSlugs": [
-        "apollo"
-      ],
-      "lane": "authority-and-distribution",
-      "priorityScore": 100.06,
-      "actions": [
-        "strengthen-internal-links",
-        "prioritize-page-distribution",
-        "queue-vendor-amplification-when-relevant",
-        "measure-position-change",
-        "measure-monetized-outbound-and-revenue"
       ]
     },
     {
@@ -770,27 +770,27 @@
       "pathname": "/best-project-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 133,
+      "impressions": 135,
       "ctr": 0,
-      "position": 44.9549,
+      "position": 45.3407,
       "topQueries": [
+        {
+          "query": "work management tool buyers guide",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 57.1765
+        },
+        {
+          "query": "management tool",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 67.4706
+        },
         {
           "query": "project automation tools",
           "clicks": 0,
           "impressions": 16,
           "position": 38.1875
-        },
-        {
-          "query": "work management tool buyers guide",
-          "clicks": 0,
-          "impressions": 16,
-          "position": 56.8125
-        },
-        {
-          "query": "management tool",
-          "clicks": 0,
-          "impressions": 16,
-          "position": 66.75
         },
         {
           "query": "project management workflow tools",
@@ -808,7 +808,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "editorial-depth",
-      "priorityScore": 95.84,
+      "priorityScore": 95.67,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -915,6 +915,60 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-crm-for-sales-teams",
+      "pathname": "/best-crm-for-sales-teams",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 61,
+      "ctr": 0,
+      "position": 58.5574,
+      "topQueries": [
+        {
+          "query": "crm for sales team",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 64.0714
+        },
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 68.1
+        },
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 71
+        },
+        {
+          "query": "crm for sales managers",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 35.5
+        },
+        {
+          "query": "sales team crm",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 72.25
+        }
+      ],
+      "monetized": true,
+      "monetizedSlugs": [
+        "pipedrive"
+      ],
+      "lane": "editorial-depth",
+      "priorityScore": 92.45,
+      "actions": [
+        "deepen-decision-context",
+        "align-copy-to-observed-queries",
+        "strengthen-internal-links",
+        "prioritize-page-distribution",
+        "measure-monetized-outbound-and-revenue"
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/instantly",
       "pathname": "/tools/instantly",
       "type": "tool-profile",
@@ -962,60 +1016,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-crm-for-sales-teams",
-      "pathname": "/best-crm-for-sales-teams",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 56,
-      "ctr": 0,
-      "position": 58.1607,
-      "topQueries": [
-        {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 65.9091
-        },
-        {
-          "query": "crm for sales teams",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 68.1
-        },
-        {
-          "query": "crm for sales teams",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 71.1111
-        },
-        {
-          "query": "crm for sales managers",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 35.5
-        },
-        {
-          "query": "sales team crm",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 72
-        }
-      ],
-      "monetized": true,
-      "monetizedSlugs": [
-        "pipedrive"
-      ],
-      "lane": "editorial-depth",
-      "priorityScore": 90.99,
-      "actions": [
-        "deepen-decision-context",
-        "align-copy-to-observed-queries",
-        "strengthen-internal-links",
-        "prioritize-page-distribution",
-        "measure-monetized-outbound-and-revenue"
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/guides",
       "pathname": "/guides",
       "type": "other",
@@ -1047,9 +1047,9 @@
       "pathname": "/best-social-media-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 176,
+      "impressions": 178,
       "ctr": 0,
-      "position": 62.1648,
+      "position": 61.6517,
       "topQueries": [
         {
           "query": "social media management tools",
@@ -1085,7 +1085,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "editorial-depth",
-      "priorityScore": 89.61,
+      "priorityScore": 89.81,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -1098,9 +1098,9 @@
       "pathname": "/tools/moz-pro",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 169,
+      "impressions": 171,
       "ctr": 0,
-      "position": 68.6982,
+      "position": 68.6784,
       "topQueries": [
         {
           "query": "moz pro tools",
@@ -1117,8 +1117,8 @@
         {
           "query": "moz pro tools",
           "clicks": 0,
-          "impressions": 17,
-          "position": 67.3529
+          "impressions": 19,
+          "position": 67.3158
         },
         {
           "query": "moz pro overview",
@@ -1136,7 +1136,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "editorial-depth",
-      "priorityScore": 88.91,
+      "priorityScore": 89.12,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -1165,6 +1165,57 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-free-crm",
+      "pathname": "/best-free-crm",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 157,
+      "ctr": 0,
+      "position": 77.707,
+      "topQueries": [
+        {
+          "query": "best free crm tools",
+          "clicks": 0,
+          "impressions": 20,
+          "position": 68.5
+        },
+        {
+          "query": "best free crm tools",
+          "clicks": 0,
+          "impressions": 19,
+          "position": 81.4737
+        },
+        {
+          "query": "best free crm software",
+          "clicks": 0,
+          "impressions": 16,
+          "position": 81.5
+        },
+        {
+          "query": "best free crm",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 82.1538
+        },
+        {
+          "query": "best free free crm",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 83.1818
+        }
+      ],
+      "monetized": false,
+      "monetizedSlugs": [],
+      "lane": "relevance-and-authority",
+      "priorityScore": 87.65,
+      "actions": [
+        "improve-query-intent-match",
+        "deepen-evidence",
+        "strengthen-internal-authority",
+        "test-selective-distribution"
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-marketing-automation-tools",
       "pathname": "/best-marketing-automation-tools",
       "type": "guide",
@@ -1185,57 +1236,6 @@
         "strengthen-answer-first-copy",
         "measure-qualified-clicks",
         "measure-monetized-outbound-and-revenue"
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-free-crm",
-      "pathname": "/best-free-crm",
-      "type": "guide",
-      "clicks": 0,
-      "impressions": 150,
-      "ctr": 0,
-      "position": 77.7067,
-      "topQueries": [
-        {
-          "query": "best free crm tools",
-          "clicks": 0,
-          "impressions": 20,
-          "position": 68.5
-        },
-        {
-          "query": "best free crm tools",
-          "clicks": 0,
-          "impressions": 18,
-          "position": 82.3333
-        },
-        {
-          "query": "best free crm software",
-          "clicks": 0,
-          "impressions": 13,
-          "position": 81.6923
-        },
-        {
-          "query": "best free crm",
-          "clicks": 0,
-          "impressions": 12,
-          "position": 82.3333
-        },
-        {
-          "query": "free crm tools",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 82.1
-        }
-      ],
-      "monetized": false,
-      "monetizedSlugs": [],
-      "lane": "relevance-and-authority",
-      "priorityScore": 86.86,
-      "actions": [
-        "improve-query-intent-match",
-        "deepen-evidence",
-        "strengthen-internal-authority",
-        "test-selective-distribution"
       ]
     },
     {
@@ -1407,6 +1407,45 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/notebooklm",
+      "pathname": "/tools/notebooklm",
+      "type": "tool-profile",
+      "clicks": 0,
+      "impressions": 7,
+      "ctr": 0,
+      "position": 10.8571,
+      "topQueries": [
+        {
+          "query": "notebook lm pricing",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 10.25
+        },
+        {
+          "query": "notebooklm pricing",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 12.5
+        },
+        {
+          "query": "notebooklm prices",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 10
+        }
+      ],
+      "monetized": false,
+      "monetizedSlugs": [],
+      "lane": "ctr-and-snippet",
+      "priorityScore": 84.56,
+      "actions": [
+        "protect-ranking",
+        "improve-title-snippet-alignment",
+        "strengthen-answer-first-copy",
+        "measure-qualified-clicks"
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/claude",
       "pathname": "/tools/claude",
       "type": "tool-profile",
@@ -1461,15 +1500,15 @@
       "pathname": "/tools/zoho-crm",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 35,
+      "impressions": 36,
       "ctr": 0,
-      "position": 62.6571,
+      "position": 62.9722,
       "topQueries": [
         {
           "query": "crm software zoho",
           "clicks": 0,
-          "impressions": 28,
-          "position": 69.6786
+          "impressions": 29,
+          "position": 69.8276
         },
         {
           "query": "zoho crm sales rep public profile tool",
@@ -1501,52 +1540,13 @@
         "zoho-crm"
       ],
       "lane": "editorial-depth",
-      "priorityScore": 83.04,
+      "priorityScore": 83.51,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
         "strengthen-internal-links",
         "prioritize-page-distribution",
         "measure-monetized-outbound-and-revenue"
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/notebooklm",
-      "pathname": "/tools/notebooklm",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 6,
-      "ctr": 0,
-      "position": 10.3333,
-      "topQueries": [
-        {
-          "query": "notebook lm pricing",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 10.25
-        },
-        {
-          "query": "notebooklm prices",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 10
-        },
-        {
-          "query": "notebooklm pricing",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 11
-        }
-      ],
-      "monetized": false,
-      "monetizedSlugs": [],
-      "lane": "ctr-and-snippet",
-      "priorityScore": 82.82,
-      "actions": [
-        "protect-ranking",
-        "improve-title-snippet-alignment",
-        "strengthen-answer-first-copy",
-        "measure-qualified-clicks"
       ]
     },
     {
@@ -1843,13 +1843,67 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-competitor-seo-tools",
+      "pathname": "/best-competitor-seo-tools",
+      "type": "guide",
+      "clicks": 0,
+      "impressions": 21,
+      "ctr": 0,
+      "position": 52.5238,
+      "topQueries": [
+        {
+          "query": "seo competitors search engine",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 43
+        },
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 74.5
+        },
+        {
+          "query": "seo competitors tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 93
+        },
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 98
+        },
+        {
+          "query": "seo competitors ranking tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 31
+        }
+      ],
+      "monetized": true,
+      "monetizedSlugs": [
+        "se-ranking"
+      ],
+      "lane": "editorial-depth",
+      "priorityScore": 77.24,
+      "actions": [
+        "deepen-decision-context",
+        "align-copy-to-observed-queries",
+        "strengthen-internal-links",
+        "prioritize-page-distribution",
+        "measure-monetized-outbound-and-revenue"
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-keyword-research-tools",
       "pathname": "/best-keyword-research-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 80,
+      "impressions": 81,
       "ctr": 0,
-      "position": 75.425,
+      "position": 75.5309,
       "topQueries": [
         {
           "query": "keyword discovery tool",
@@ -1860,8 +1914,8 @@
         {
           "query": "competitive keyword research tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 95.7692
+          "impressions": 14,
+          "position": 94.9286
         },
         {
           "query": "keyword discovery tools",
@@ -1885,63 +1939,12 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 76.08,
+      "priorityScore": 76.29,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
         "strengthen-internal-authority",
         "test-selective-distribution"
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/netlify",
-      "pathname": "/tools/netlify",
-      "type": "tool-profile",
-      "clicks": 0,
-      "impressions": 78,
-      "ctr": 0,
-      "position": 59.8205,
-      "topQueries": [
-        {
-          "query": "netlify",
-          "clicks": 0,
-          "impressions": 23,
-          "position": 62.2174
-        },
-        {
-          "query": "what is netlify",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 70.5
-        },
-        {
-          "query": "netlify plans",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 72.3333
-        },
-        {
-          "query": "what is netlify used for",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 88
-        },
-        {
-          "query": "netlyfy",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 60.5
-        }
-      ],
-      "monetized": false,
-      "monetizedSlugs": [],
-      "lane": "editorial-depth",
-      "priorityScore": 75.65,
-      "actions": [
-        "deepen-decision-context",
-        "align-copy-to-observed-queries",
-        "strengthen-internal-links",
-        "prioritize-page-distribution"
       ]
     }
   ]

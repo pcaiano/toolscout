@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T12:23:53.683Z",
+  "generatedAt": "2026-10-05T15:56:10.685Z",
   "engine": "ToolScout Content Intelligence v1.3",
   "objective": "Choose and test content opportunities using observed page-level search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -20,18 +20,18 @@
       "observedGscIntents": 39,
       "observedGscPages": 139,
       "searchClicks": 7,
-      "searchImpressions": 6491,
+      "searchImpressions": 6725,
       "organicAcquisitionStatus": "early-search-acquisition",
       "indexingRecovery": 1,
-      "actionableOpportunities": 20,
+      "actionableOpportunities": 21,
       "firstPageOpportunities": 2,
       "firstPageMeaningful": 0,
       "firstPageLowSample": 2,
       "strikingDistanceOpportunities": 1,
       "strikingMeaningful": 0,
       "strikingLowSample": 1,
-      "authorityDepthOpportunities": 13,
-      "competitorResearchCandidates": 22
+      "authorityDepthOpportunities": 14,
+      "competitorResearchCandidates": 19
     },
     "routingSummary": {
       "pages": 139,
@@ -47,8 +47,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 2323,
-        "position": 80.257,
+        "impressions": 2494,
+        "position": 80.2346,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -61,8 +61,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 309,
-        "position": 77.3333,
+        "impressions": 313,
+        "position": 77.3642,
         "topTools": [
           "freshsales",
           "zoho-crm",
@@ -75,8 +75,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 176,
-        "position": 62.1648,
+        "impressions": 178,
+        "position": 61.6517,
         "topTools": [
           "socialbee",
           "buffer",
@@ -89,8 +89,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 150,
-        "position": 77.7067,
+        "impressions": 157,
+        "position": 77.707,
         "topTools": [
           "attio",
           "hubspot",
@@ -116,8 +116,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 133,
-        "position": 44.9549,
+        "impressions": 135,
+        "position": 45.3407,
         "topTools": [
           "asana",
           "wrike",
@@ -130,8 +130,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 80,
-        "position": 75.425,
+        "impressions": 81,
+        "position": 75.5309,
         "topTools": [
           "surfer",
           "ahrefs",
@@ -140,12 +140,12 @@
       },
       {
         "intent": "best-crm-with-automation",
-        "priorityScore": 44,
+        "priorityScore": 45,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 65,
-        "position": 76.3846,
+        "impressions": 72,
+        "position": 75.8472,
         "topTools": [
           "close",
           "monday-crm",
@@ -175,10 +175,10 @@
         "pathname": "/best-seo-tools-for-agencies",
         "type": "guide",
         "lane": "relevance-and-authority",
-        "priorityScore": 134.19,
-        "impressions": 2323,
+        "priorityScore": 135.42,
+        "impressions": 2494,
         "clicks": 0,
-        "position": 80.257,
+        "position": 80.2346,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [
@@ -209,10 +209,10 @@
         "pathname": "/best-crm-for-small-business",
         "type": "guide",
         "lane": "relevance-and-authority",
-        "priorityScore": 120.31,
-        "impressions": 309,
+        "priorityScore": 120.54,
+        "impressions": 313,
         "clicks": 0,
-        "position": 77.3333,
+        "position": 77.3642,
         "monetized": true,
         "monetizedSlugs": [
           "zoho-crm"
@@ -303,10 +303,10 @@
         "pathname": "/tools/airtable",
         "type": "tool-profile",
         "lane": "relevance-and-authority",
-        "priorityScore": 106.41,
-        "impressions": 466,
+        "priorityScore": 106.59,
+        "impressions": 471,
         "clicks": 0,
-        "position": 73.9957,
+        "position": 74.0191,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [
@@ -337,10 +337,10 @@
         "pathname": "/best-ecommerce-platforms",
         "type": "guide",
         "lane": "editorial-depth",
-        "priorityScore": 105.94,
-        "impressions": 29,
+        "priorityScore": 103.39,
+        "impressions": 31,
         "clicks": 0,
-        "position": 31.3103,
+        "position": 34.6452,
         "monetized": true,
         "monetizedSlugs": [
           "shopify"
@@ -354,20 +354,23 @@
         ]
       },
       {
-        "pathname": "/news/chatgpt-word-microsoft-office",
-        "type": "other",
-        "lane": "ctr-and-snippet",
-        "priorityScore": 100.83,
-        "impressions": 20,
+        "pathname": "/tools/apollo",
+        "type": "tool-profile",
+        "lane": "authority-and-distribution",
+        "priorityScore": 102.76,
+        "impressions": 8,
         "clicks": 0,
-        "position": 11.25,
-        "monetized": false,
-        "monetizedSlugs": [],
+        "position": 15.25,
+        "monetized": true,
+        "monetizedSlugs": [
+          "apollo"
+        ],
         "actions": [
-          "protect-ranking",
-          "improve-title-snippet-alignment",
-          "strengthen-answer-first-copy",
-          "measure-qualified-clicks"
+          "strengthen-internal-links",
+          "prioritize-page-distribution",
+          "queue-vendor-amplification-when-relevant",
+          "measure-position-change",
+          "measure-monetized-outbound-and-revenue"
         ]
       }
     ]
@@ -658,7 +661,8 @@
       "/tools/mailerlite",
       "/best-funnel-builder",
       "/tools/airtable",
-      "/best-ecommerce-platforms"
+      "/best-ecommerce-platforms",
+      "/tools/apollo"
     ],
     "testEligible": true,
     "allocationChangeEligible": false,

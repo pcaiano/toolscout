@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T12:22:13.338Z",
+  "generatedAt": "2026-10-05T15:54:04.693Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",
@@ -8,55 +8,54 @@
     "Unverified or thin candidates are held and retried instead of being published."
   ],
   "summary": {
-    "scannedGaps": 22,
-    "activeProfiles": 18,
+    "scannedGaps": 19,
+    "activeProfiles": 21,
     "newProfiles": 3,
     "resolvedAsExistingCoverage": 1,
-    "held": 18,
+    "held": 15,
     "contentResearch": 0,
     "searchVisibleProfiles": 0,
     "trafficObservedProfiles": 0
   },
   "admitted": [
     {
-      "slug": "teachquill",
-      "sourceUrl": "https://teachquill.com/",
-      "category": "forms",
+      "slug": "vmaker-ai",
+      "sourceUrl": "https://www.vmaker.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "content",
+      "features": [
+        "citations",
+        "video generation",
+        "video editing",
+        "voice",
+        "automation",
+        "forms",
+        "social media"
+      ]
+    },
+    {
+      "slug": "weryai",
+      "sourceUrl": "https://www.weryai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "design",
+      "features": [
+        "image generation",
+        "video generation",
+        "design",
+        "ecommerce"
+      ]
+    },
+    {
+      "slug": "wondershare-repairit",
+      "sourceUrl": "https://repairit.wondershare.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "developer",
       "features": [
         "research",
         "citations",
         "analysis",
         "writing",
-        "multimodal",
-        "collaboration",
-        "automation",
-        "forms",
-        "design",
-        "templates"
-      ]
-    },
-    {
-      "slug": "typli-ai",
-      "sourceUrl": "https://typli.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "ai-assistant",
-      "features": [
-        "conversational AI",
-        "writing",
-        "image generation",
-        "voice",
-        "automation",
-        "design",
-        "social media"
-      ]
-    },
-    {
-      "slug": "vidflux-ai",
-      "sourceUrl": "https://vidflux.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "content",
-      "features": [
-        "multimodal",
+        "coding",
         "video generation",
-        "forms",
+        "video editing",
+        "collaboration",
         "design",
         "social media"
       ]
@@ -132,7 +131,7 @@
     {
       "slug": "postwizard-ai",
       "reason": "first-party-evidence-too-thin",
-      "sourceUrl": "https://postwizard.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "sourceUrl": "https://postwizard.ai/",
       "descriptionLength": 129,
       "verifiedCapabilities": 0
     },
@@ -150,21 +149,6 @@
     {
       "slug": "video-editing",
       "reason": "official-source-not-resolved",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "vmaker-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "weryai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "wondershare-repairit",
-      "reason": "cycle-admission-cap",
       "retry": "next-cycle"
     }
   ],
@@ -308,6 +292,30 @@
     },
     {
       "slug": "vidflux-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "vmaker-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "weryai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "wondershare-repairit",
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,

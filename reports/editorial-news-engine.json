@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T12:22:04.578Z",
+  "generatedAt": "2026-10-05T15:53:54.132Z",
   "engine": "ToolScout Editorial News Engine v1",
   "lookbackDays": 14,
   "maxPerRun": 4,
@@ -15,7 +15,7 @@
       "id": "openai-news",
       "status": "ok",
       "fetched": "https://openai.com/news/rss.xml",
-      "parsed": 1246,
+      "parsed": 1247,
       "recent": 0
     },
     {
@@ -41,12 +41,12 @@
   "candidates": 1,
   "published": [
     {
-      "id": "github-confidential-comments-on-repository-security-advisories",
-      "date": "2026-10-02",
+      "id": "github-rate-limits-for-private-vulnerability-reports",
+      "date": "2026-10-01",
       "toolSlug": "github",
-      "title": "Confidential comments on repository security advisories",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories",
-      "score": 4
+      "title": "Rate limits for private vulnerability reports",
+      "sourceUrl": "https://github.blog/changelog/2026-10-01-rate-limits-for-private-vulnerability-reports",
+      "score": 5
     }
   ],
   "lastPublishedAt": "2026-10-05",

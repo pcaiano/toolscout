@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T12:23:57.042Z",
+  "generatedAt": "2026-10-05T15:56:14.432Z",
   "count": 47,
   "policy": "Only editorially verified assets are eligible for distribution. Page-level Search Console demand chooses which existing pages deserve attention. Monetization can increase measurement urgency but never changes editorial ranking. Original research can be promoted to editorial, community and indexing surfaces, while product directories continue to receive the ToolScout product profile.",
   "items": [
@@ -40,12 +40,12 @@
       "title": "Apollo: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/apollo",
       "category": "software",
-      "priorityScore": 128,
+      "priorityScore": 131,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 7,
+        "impressions": 8,
         "clicks": 0,
-        "position": 15.8571,
+        "position": 15.25,
         "lane": "authority-and-distribution",
         "monetized": true,
         "monetizedSlugs": [
@@ -71,12 +71,12 @@
       "title": "Airtable: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/airtable",
       "category": "software",
-      "priorityScore": 126,
+      "priorityScore": 127,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 466,
+        "impressions": 471,
         "clicks": 0,
-        "position": 73.9957,
+        "position": 74.0191,
         "lane": "relevance-and-authority",
         "monetized": false,
         "monetizedSlugs": []
@@ -317,11 +317,11 @@
       "url": "https://trytoolscout.org/tools/moz-pro",
       "category": "software",
       "priorityScore": 109,
-      "demandBoost": 44,
+      "demandBoost": 45,
       "searchDemand": {
-        "impressions": 169,
+        "impressions": 171,
         "clicks": 0,
-        "position": 68.6982,
+        "position": 68.6784,
         "lane": "editorial-depth",
         "monetized": false,
         "monetizedSlugs": []
@@ -348,9 +348,9 @@
       "priorityScore": 75,
       "demandBoost": 45,
       "searchDemand": {
-        "impressions": 2323,
+        "impressions": 2494,
         "clicks": 0,
-        "position": 80.257,
+        "position": 80.2346,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -378,9 +378,9 @@
       "priorityScore": 75,
       "demandBoost": 40,
       "searchDemand": {
-        "impressions": 309,
+        "impressions": 313,
         "clicks": 0,
-        "position": 77.3333,
+        "position": 77.3642,
         "lane": "relevance-and-authority",
         "monetized": true
       },
@@ -435,12 +435,12 @@
       "title": "Best CRM for Sales Teams",
       "url": "https://trytoolscout.org/best-crm-for-sales-teams",
       "category": "crm",
-      "priorityScore": 65,
-      "demandBoost": 30,
+      "priorityScore": 66,
+      "demandBoost": 31,
       "searchDemand": {
-        "impressions": 56,
+        "impressions": 61,
         "clicks": 0,
-        "position": 58.1607,
+        "position": 58.5574,
         "lane": "editorial-depth",
         "monetized": true
       },
@@ -498,9 +498,9 @@
       "priorityScore": 62,
       "demandBoost": 33,
       "searchDemand": {
-        "impressions": 133,
+        "impressions": 135,
         "clicks": 0,
-        "position": 44.9549,
+        "position": 45.3407,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -528,9 +528,9 @@
       "priorityScore": 62,
       "demandBoost": 32,
       "searchDemand": {
-        "impressions": 150,
+        "impressions": 157,
         "clicks": 0,
-        "position": 77.7067,
+        "position": 77.707,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -542,6 +542,36 @@
       "redditStyle": "I put together a practical guide for best free crm tools, focused on fit rather than a generic top-ten list.",
       "newsletterSubject": "Best Free CRM Tools: a practical shortlist",
       "newsletterIntro": "CRM recommendations prioritising genuinely useful free plans and low-cost entry points. See the shortlist and compare the options: https://trytoolscout.org/best-free-crm",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "assetType": "guide",
+      "slug": "best-competitor-seo-tools",
+      "title": "Best Competitor SEO Tools",
+      "url": "https://trytoolscout.org/best-competitor-seo-tools",
+      "category": "seo",
+      "priorityScore": 61,
+      "demandBoost": 26,
+      "searchDemand": {
+        "impressions": 21,
+        "clicks": 0,
+        "position": 52.5238,
+        "lane": "editorial-depth",
+        "monetized": true
+      },
+      "distributionReason": "Page-level GSC routing lane: editorial-depth. Distribution supports an already observed page rather than creating a new surface.",
+      "searchSnippet": "Best Competitor SEO Tools - Tools for competitor research, search visibility analysis, backlinks and content opportunities.",
+      "socialHook": "Need the right tool for best competitor seo tools? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best competitor seo tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-competitor-seo-tools",
+      "xPost": "Choosing a tool for best competitor seo tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-competitor-seo-tools",
+      "redditStyle": "I put together a practical guide for best competitor seo tools, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Competitor SEO Tools: a practical shortlist",
+      "newsletterIntro": "Tools for competitor research, search visibility analysis, backlinks and content opportunities. See the shortlist and compare the options: https://trytoolscout.org/best-competitor-seo-tools",
       "hashtags": [
         "#software",
         "#AITools",
@@ -615,12 +645,12 @@
       "title": "Best CRM with Automation",
       "url": "https://trytoolscout.org/best-crm-with-automation",
       "category": "crm",
-      "priorityScore": 57,
-      "demandBoost": 27,
+      "priorityScore": 58,
+      "demandBoost": 28,
       "searchDemand": {
-        "impressions": 65,
+        "impressions": 72,
         "clicks": 0,
-        "position": 76.3846,
+        "position": 75.8472,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -645,12 +675,12 @@
       "title": "Best Ecommerce Platforms",
       "url": "https://trytoolscout.org/best-ecommerce-platforms",
       "category": "ecommerce",
-      "priorityScore": 51,
-      "demandBoost": 35,
+      "priorityScore": 50,
+      "demandBoost": 34,
       "searchDemand": {
-        "impressions": 29,
+        "impressions": 31,
         "clicks": 0,
-        "position": 31.3103,
+        "position": 34.6452,
         "lane": "editorial-depth",
         "monetized": true
       },
@@ -678,9 +708,9 @@
       "priorityScore": 46,
       "demandBoost": 35,
       "searchDemand": {
-        "impressions": 176,
+        "impressions": 178,
         "clicks": 0,
-        "position": 62.1648,
+        "position": 61.6517,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -708,9 +738,9 @@
       "priorityScore": 43,
       "demandBoost": 28,
       "searchDemand": {
-        "impressions": 80,
+        "impressions": 81,
         "clicks": 0,
-        "position": 75.425,
+        "position": 75.5309,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -735,12 +765,12 @@
       "title": "Best Developer Tools",
       "url": "https://trytoolscout.org/best-developer-tools",
       "category": "developer",
-      "priorityScore": 38,
-      "demandBoost": 27,
+      "priorityScore": 40,
+      "demandBoost": 29,
       "searchDemand": {
-        "impressions": 46,
+        "impressions": 60,
         "clicks": 0,
-        "position": 65.1304,
+        "position": 66.2333,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -768,9 +798,9 @@
       "priorityScore": 38,
       "demandBoost": 24,
       "searchDemand": {
-        "impressions": 36,
+        "impressions": 38,
         "clicks": 0,
-        "position": 79.9722,
+        "position": 79.9211,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -812,36 +842,6 @@
       "redditStyle": "I put together a practical guide for best customer support tools, focused on fit rather than a generic top-ten list.",
       "newsletterSubject": "Best Customer Support Tools: a practical shortlist",
       "newsletterIntro": "Helpdesk and customer support platforms for ticketing, messaging, knowledge and support automation. See the shortlist and compare the options: https://trytoolscout.org/best-customer-support-tools",
-      "hashtags": [
-        "#software",
-        "#AITools",
-        "#productivity",
-        "#ToolScout"
-      ]
-    },
-    {
-      "assetType": "guide",
-      "slug": "best-competitor-seo-tools",
-      "title": "Best Competitor SEO Tools",
-      "url": "https://trytoolscout.org/best-competitor-seo-tools",
-      "category": "seo",
-      "priorityScore": 35,
-      "demandBoost": 5,
-      "searchDemand": {
-        "impressions": 19,
-        "clicks": 0,
-        "position": 53.5263,
-        "opportunity": "insufficient-sample",
-        "meaningfulSample": false
-      },
-      "distributionReason": "Observed search demand increases distribution priority. Low-sample first-page pages receive only a protected bounded boost.",
-      "searchSnippet": "Best Competitor SEO Tools - Tools for competitor research, search visibility analysis, backlinks and content opportunities.",
-      "socialHook": "Need the right tool for best competitor seo tools? ToolScout compares options around the job, not generic rankings.",
-      "linkedInPost": "Need the right tool for best competitor seo tools? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-competitor-seo-tools",
-      "xPost": "Choosing a tool for best competitor seo tools? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-competitor-seo-tools",
-      "redditStyle": "I put together a practical guide for best competitor seo tools, focused on fit rather than a generic top-ten list.",
-      "newsletterSubject": "Best Competitor SEO Tools: a practical shortlist",
-      "newsletterIntro": "Tools for competitor research, search visibility analysis, backlinks and content opportunities. See the shortlist and compare the options: https://trytoolscout.org/best-competitor-seo-tools",
       "hashtags": [
         "#software",
         "#AITools",
@@ -1224,9 +1224,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 15,
+        "impressions": 16,
         "clicks": 0,
-        "position": 68.8,
+        "position": 69.5,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },
@@ -1277,6 +1277,36 @@
     },
     {
       "assetType": "guide",
+      "slug": "best-forms-for-small-business",
+      "title": "Best Forms for Small Business",
+      "url": "https://trytoolscout.org/best-forms-for-small-business",
+      "category": "forms",
+      "priorityScore": 15,
+      "demandBoost": 2,
+      "searchDemand": {
+        "impressions": 2,
+        "clicks": 0,
+        "position": 38.5,
+        "opportunity": "insufficient-sample",
+        "meaningfulSample": false
+      },
+      "distributionReason": "Observed search demand increases distribution priority. Low-sample first-page pages receive only a protected bounded boost.",
+      "searchSnippet": "Best Forms for Small Business - Simple form builders for enquiries, surveys, lead collection, payments and business workflows.",
+      "socialHook": "Need the right tool for best forms for small business? ToolScout compares options around the job, not generic rankings.",
+      "linkedInPost": "Need the right tool for best forms for small business? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-forms-for-small-business",
+      "xPost": "Choosing a tool for best forms for small business? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-forms-for-small-business",
+      "redditStyle": "I put together a practical guide for best forms for small business, focused on fit rather than a generic top-ten list.",
+      "newsletterSubject": "Best Forms for Small Business: a practical shortlist",
+      "newsletterIntro": "Simple form builders for enquiries, surveys, lead collection, payments and business workflows. See the shortlist and compare the options: https://trytoolscout.org/best-forms-for-small-business",
+      "hashtags": [
+        "#software",
+        "#AITools",
+        "#productivity",
+        "#ToolScout"
+      ]
+    },
+    {
+      "assetType": "guide",
       "slug": "best-design-tools",
       "title": "Best Design Tools",
       "url": "https://trytoolscout.org/best-design-tools",
@@ -1298,36 +1328,6 @@
       "redditStyle": "I put together a practical guide for best design tools, focused on fit rather than a generic top-ten list.",
       "newsletterSubject": "Best Design Tools: a practical shortlist",
       "newsletterIntro": "Design platforms for visual content, interfaces, prototypes and collaborative creative workflows. See the shortlist and compare the options: https://trytoolscout.org/best-design-tools",
-      "hashtags": [
-        "#software",
-        "#AITools",
-        "#productivity",
-        "#ToolScout"
-      ]
-    },
-    {
-      "assetType": "guide",
-      "slug": "best-forms-for-small-business",
-      "title": "Best Forms for Small Business",
-      "url": "https://trytoolscout.org/best-forms-for-small-business",
-      "category": "forms",
-      "priorityScore": 14,
-      "demandBoost": 1,
-      "searchDemand": {
-        "impressions": 1,
-        "clicks": 0,
-        "position": 38,
-        "opportunity": "insufficient-sample",
-        "meaningfulSample": false
-      },
-      "distributionReason": "Observed search demand increases distribution priority. Low-sample first-page pages receive only a protected bounded boost.",
-      "searchSnippet": "Best Forms for Small Business - Simple form builders for enquiries, surveys, lead collection, payments and business workflows.",
-      "socialHook": "Need the right tool for best forms for small business? ToolScout compares options around the job, not generic rankings.",
-      "linkedInPost": "Need the right tool for best forms for small business? I built a practical ToolScout guide that compares the available options around the job, budget and workflow, not a generic top-ten list.\n\nhttps://trytoolscout.org/best-forms-for-small-business",
-      "xPost": "Choosing a tool for best forms for small business? ToolScout compares the options around the job, not generic rankings. https://trytoolscout.org/best-forms-for-small-business",
-      "redditStyle": "I put together a practical guide for best forms for small business, focused on fit rather than a generic top-ten list.",
-      "newsletterSubject": "Best Forms for Small Business: a practical shortlist",
-      "newsletterIntro": "Simple form builders for enquiries, surveys, lead collection, payments and business workflows. See the shortlist and compare the options: https://trytoolscout.org/best-forms-for-small-business",
       "hashtags": [
         "#software",
         "#AITools",

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-05T12:22:04.576Z",
+  "updatedAt": "2026-10-05T15:53:54.130Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
     {
@@ -95,6 +95,22 @@
       "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level",
       "articleUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
       "profileUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
+      "id": "github-rate-limits-for-private-vulnerability-reports",
+      "publishedAt": "2026-10-01",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "Rate limits for private vulnerability reports",
+      "summary": "Open source maintainers are receiving more low-quality and automated vulnerability reports, which can bury the reports that matter.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-01-rate-limits-for-private-vulnerability-reports",
+      "articleUrl": "/news/github-rate-limits-for-private-vulnerability-reports.html",
+      "profileUrl": "/news/github-rate-limits-for-private-vulnerability-reports.html",
       "outboundUrl": null,
       "outboundLabel": null,
       "partnerUpdate": false

@@ -2,16 +2,16 @@
   "version": 4,
   "edition": "2026-10",
   "editionLabel": "October 2026",
-  "publishedAt": "2026-10-05T12:22:04.576Z",
+  "publishedAt": "2026-10-05T15:53:54.130Z",
   "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
   "updatedThrough": "2026-10-05",
   "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout classifies buyer impact independently of affiliate status.",
   "primarySourceCount": 12,
   "searchVisibility": {
     "source": "Google Search Console",
-    "impressions": 6491,
+    "impressions": 6725,
     "clicks": 7,
-    "ctr": 0.1078,
+    "ctr": 0.1041,
     "position": 0
   },
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
@@ -212,6 +212,37 @@
       "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level"
     },
     {
+      "id": "github-rate-limits-for-private-vulnerability-reports",
+      "publishedAt": "2026-10-01",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "Rate limits for private vulnerability reports",
+      "summary": "Open source maintainers are receiving more low-quality and automated vulnerability reports, which can bury the reports that matter.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-rate-limits-for-private-vulnerability-reports.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-01-rate-limits-for-private-vulnerability-reports"
+    },
+    {
       "id": "chatgpt-introducing-gpt-6-1-sol",
       "publishedAt": "2026-09-29",
       "toolSlug": "chatgpt",
@@ -345,27 +376,6 @@
       "articleUrl": "/news/github-ssh-security-changes-2026.html",
       "sourceName": "GitHub Changelog",
       "sourceUrl": "https://github.blog/changelog/2026-09-22-security-improvements-for-ssh/"
-    },
-    {
-      "id": "chatgpt-introducing-gpt-6-sol-and-luna",
-      "publishedAt": "2026-09-22",
-      "toolSlug": "chatgpt",
-      "toolName": "ChatGPT",
-      "label": "AI and automation update",
-      "title": "Introducing GPT-6 Sol and Luna",
-      "summary": "Meet GPT-6 Sol and Luna, two models that bring frontier intelligence to everyday work with different balances of capability and cost.",
-      "changeType": "ai_automation",
-      "buyerImpact": "ChatGPT buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/chatgpt",
-          "label": "ChatGPT profile"
-        }
-      ],
-      "articleUrl": "/news/chatgpt-introducing-gpt-6-sol-and-luna.html",
-      "sourceName": "OpenAI",
-      "sourceUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna"
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",

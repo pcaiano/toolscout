@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T12:22:13.281Z",
+  "generatedAt": "2026-10-05T15:54:04.635Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {
@@ -69,8 +69,8 @@
       "sampledUrls": 750
     }
   ],
-  "suppressedCovered": 66,
-  "count": 22,
+  "suppressedCovered": 72,
+  "count": 19,
   "gaps": [
     {
       "slug": "ai-background-remover",
@@ -287,34 +287,6 @@
       ]
     },
     {
-      "slug": "teachquill",
-      "candidateType": "software-entity",
-      "entityKey": "teachquill",
-      "mentions": 2,
-      "sources": [
-        "Aixploria",
-        "Dynamite AI"
-      ],
-      "exampleUrls": [
-        "https://www.aixploria.com/teachquill/",
-        "https://dynamite-ai.com/tools/teachquill"
-      ]
-    },
-    {
-      "slug": "typli-ai",
-      "candidateType": "software-entity",
-      "entityKey": "typli",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/typli-ai",
-        "https://www.aixploria.com/typli-ai/"
-      ]
-    },
-    {
       "slug": "video-editing",
       "candidateType": "software-entity",
       "entityKey": "video-editing",
@@ -327,20 +299,6 @@
         "https://www.capterra.com/ai-video-generator-software/features/video-editing/",
         "https://www.capterra.com/animation-software/features/video-editing/",
         "https://dynamite-ai.com/categories/video-editing"
-      ]
-    },
-    {
-      "slug": "vidflux-ai",
-      "candidateType": "software-entity",
-      "entityKey": "vidflux",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/vidflux-ai",
-        "https://www.aixploria.com/vidflux-ai/"
       ]
     },
     {

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T12:23:56.081Z",
+  "generatedAt": "2026-10-05T15:56:13.378Z",
   "policy": "Only distinct informational intents with observed Search Console demand may become indexable blog candidates. Existing commercial guide intents are not duplicated in the blog.",
   "minimumImpressions": 10,
   "count": 4,
@@ -9,9 +9,9 @@
       "query": "what is airtable",
       "sourcePage": "https://trytoolscout.org/tools/airtable",
       "sourcePath": "/tools/airtable",
-      "impressions": 67,
+      "impressions": 68,
       "clicks": 0,
-      "position": 86.5821,
+      "position": 86.6029,
       "evidence": "Google Search Console query",
       "publicationStatus": "candidate-needs-grounded-content"
     },
@@ -20,9 +20,9 @@
       "query": "what is airtable used for",
       "sourcePage": "https://trytoolscout.org/tools/airtable",
       "sourcePath": "/tools/airtable",
-      "impressions": 48,
+      "impressions": 49,
       "clicks": 0,
-      "position": 91.2708,
+      "position": 91.2653,
       "evidence": "Google Search Console query",
       "publicationStatus": "candidate-needs-grounded-content"
     },
