@@ -51,7 +51,7 @@
     ?{bg:'#F3F5F1',panel:'#FFFFFF',text:'#0B0D0C',muted:'#5F665F',line:'#D9DED7',lime:'#86C900',limeText:'#0B0D0C'}
     :{bg:'#0B0D0C',panel:'#141814',text:'#F3F5F1',muted:'#A8B0A6',line:'#2C332D',lime:'#B7FF3C',limeText:'#0B0D0C'};
 
-  shadow.innerHTML=\`
+  shadow.innerHTML=`
     <style>
       :host{all:initial}
       *,*::before,*::after{box-sizing:border-box}
@@ -102,7 +102,7 @@
       <div class="status" role="status" aria-live="polite"><span class="dot"></span><span>Matching your need to the catalog...</span></div>
       <div class="results" aria-live="polite"></div>
       <div class="footer"><span>Independent recommendations. No pay to rank.</span><a href="${esc(trackedUrl('/','powered-by-toolscout'))}" target="_blank" rel="noopener"><strong>Powered by ToolScout</strong></a></div>
-    </section>\`;
+    </section>`;
 
   const form=shadow.querySelector('form');
   const input=shadow.querySelector('input');
@@ -111,7 +111,7 @@
   const results=shadow.querySelector('.results');
 
   function renderError(message){
-    results.innerHTML=\`<div class="error">${esc(message)}</div>\`;
+    results.innerHTML=`<div class="error">${esc(message)}</div>`;
   }
 
   function renderResults(data){
@@ -123,24 +123,24 @@
     results.innerHTML=items.map((item,index)=>{
       const match=item.match_type==='category_fit'
         ?esc(item.match_label||'Strong category fit')
-        :esc(item.match_label||\`${Number(item.match||0)}% match\`);
-      const reasons=(item.reasons||[]).slice(0,mode==='mini'?2:3).map(reason=>\`<span class="reason">${esc(reason)}</span>\`).join('');
-      const profile=trackedUrl(item.profile_url||\`/tools/${encodeURIComponent(item.slug)}\`,item.slug);
-      const vendor=new URL(\`/go/${encodeURIComponent(item.slug)}\`,HOME);
-      vendor.searchParams.set('source',\`embed:${publisher}\`);
+        :esc(item.match_label||`${Number(item.match||0)}% match`);
+      const reasons=(item.reasons||[]).slice(0,mode==='mini'?2:3).map(reason=>`<span class="reason">${esc(reason)}</span>`).join('');
+      const profile=trackedUrl(item.profile_url||`/tools/${encodeURIComponent(item.slug)}`,item.slug);
+      const vendor=new URL(`/go/${encodeURIComponent(item.slug)}`,HOME);
+      vendor.searchParams.set('source',`embed:${publisher}`);
       vendor.searchParams.set('utm_source',publisher);
       vendor.searchParams.set('utm_medium','embed');
       vendor.searchParams.set('utm_campaign','toolscout_finder');
       vendor.searchParams.set('utm_content',item.slug);
-      return \`<article class="result" style="animation-delay:${index*45}ms">
+      return `<article class="result" style="animation-delay:${index*45}ms">
         <div class="result-top"><div><div class="category">${esc(item.category||'Software')}</div><div class="name">${esc(item.name)}</div></div><div class="match">${match}</div></div>
-        ${mode==='mini'?'':\`<div class="description">${esc(item.description||'')}</div>\`}
+        ${mode==='mini'?'':`<div class="description">${esc(item.description||'')}</div>`}
         <div class="reasons">${reasons}</div>
         <div class="actions">
           <a class="profile" data-action="profile" data-slug="${esc(item.slug)}" href="${esc(profile)}" target="_blank" rel="noopener">See ToolScout analysis</a>
           <a class="vendor" data-action="vendor" data-slug="${esc(item.slug)}" href="${esc(vendor.toString())}" target="_blank" rel="nofollow sponsored noopener">Visit vendor</a>
         </div>
-      </article>\`;
+      </article>`;
     }).join('');
     results.querySelectorAll('a[data-action]').forEach(link=>{
       link.addEventListener('click',()=>event(link.dataset.action==='vendor'?'vendor_click':'profile_click',{result_slug:clean(link.dataset.slug,80)}));
