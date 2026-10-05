@@ -3,7 +3,7 @@ import path from 'node:path';
 import {transformCommandCenterRedesignResponse} from '../command-center-redesign-runtime.js';
 
 const root=process.cwd();
-const source=fs.readFileSync(path.join(root,'analytics.html'),'utf8');
+const source=fs.readFileSync(path.join(root,'analytics-v2.html'),'utf8');
 const request=new Request('https://trytoolscout.org/analytics',{method:'GET'});
 const response=new Response(source,{status:200,headers:{'Content-Type':'text/html; charset=UTF-8'}});
 const transformed=await transformCommandCenterRedesignResponse(request,response);
