@@ -50,3 +50,26 @@ test('authority gap closes at the 95 target instead of rewarding endless on-page
   const weak=authorityGapPriority({impressions:300,position:55,authorityScore:80,targetScore:95,hardFloorScore:90,weight:0.2});
   assert.ok(weak>healthy);
 });
+
+
+test('news authority rewards source, analysis and freshness without fake commercial tradeoffs',()=>{
+  const html='<html><head><title>Product update | ToolScout</title><meta name="description" content="A material product update for software buyers."><link rel="canonical" href="https://trytoolscout.org/news/example"><script type="application/ld+json">{}</script></head><body><h1>Product update</h1><p>October 5, 2026</p><h2>Why it matters</h2><p>ToolScout analysis explains the buyer impact and implementation implications.</p><a href="https://vendor.example/changelog">Primary source</a>'+('<p>Material release detail and buyer context.</p>'.repeat(25))+'</body></html>';
+  const out=scoreEditorialPage(html,{pageType:'news',hasFreshUpdate:true});
+  assert.equal(out.hasTradeoffs,false);
+  assert.ok(out.score>=95);
+});
+
+test('policy pages can meet the quality target through completeness rather than commercial analysis',()=>{
+  const html='<html><head><title>Privacy | ToolScout</title><meta name="description" content="How ToolScout handles privacy, analytics and user data."><link rel="canonical" href="https://trytoolscout.org/privacy"><meta name="robots" content="index,follow"></head><body><h1>Privacy</h1><p>Last verified 2026-10-01.</p>'+('<p>This policy explains collection, use, retention and user controls for ToolScout data.</p>'.repeat(20))+'</body></html>';
+  const out=scoreEditorialPage(html,{pageType:'policy'});
+  assert.equal(out.hasTradeoffs,false);
+  assert.ok(out.score>=95);
+});
+
+test('page type model distinguishes hubs, policy and editorial research surfaces',()=>{
+  assert.equal(pageTypeForPath('/privacy'),'policy');
+  assert.equal(pageTypeForPath('/affiliate-disclosure'),'policy');
+  assert.equal(pageTypeForPath('/whats-new'),'news_hub');
+  assert.equal(pageTypeForPath('/tools'),'hub');
+  assert.equal(pageTypeForPath('/software-trends-index'),'proprietary_dataset');
+});
