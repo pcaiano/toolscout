@@ -6,10 +6,12 @@ on:
       - '.github/workflows/**'
       - 'acquisition-value-model.js'
       - 'compute-router-worker.js'
+      - 'index.html'
       - 'toolscout-v2-closure-runtime.js'
       - 'traffic-integrity-live-worker.js'
       - 'affiliate-redirect-runtime.js'
       - 'public-editorial-runtime.js'
+      - 'public-redesign-runtime.js'
       - 'public-canonical-contract.js'
       - 'migrations/0091_catalog_runtime_schema.sql'
       - 'migrations/0092_traffic_integrity_runtime_schema.sql'
@@ -174,6 +176,7 @@ jobs:
           node --check traffic-integrity-live-worker.js
           node --check affiliate-redirect-runtime.js
           node --check public-editorial-runtime.js
+          node --check public-redesign-runtime.js
           node --check public-canonical-contract.js
           node --check public-decision-runtime.js
           node --check public-navigation-runtime.js
