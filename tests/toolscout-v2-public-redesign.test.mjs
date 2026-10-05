@@ -69,3 +69,26 @@ test('public redesign removes direct vendor source links from commercial decisio
   assert.doesNotMatch(html,/Official product source|Primary sources:/);
   assert.match(html,/href="\/go\/example"/);
 });
+
+
+test('public hubs receive ToolScout 2.0 surface styling and active navigation',async()=>{
+  const source='<!doctype html><html><head></head><body><div class="wrap"><main><h1>Hub</h1></main></div></body></html>';
+  for(const item of [
+    ['/tools.html','tools','>Tools<'],
+    ['/guides.html','guides','>Guides<'],
+    ['/compare.html','compare','>Compare<'],
+    ['/whats-new.html','whats-new',">What's new<"]
+  ]){
+    const [path,surface,label]=item;
+    const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
+    const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org'+path),response);
+    const html=await out.text();
+    assert.ok(html.includes('data-toolscout-surface="'+surface+'"'));
+    assert.ok(html.includes(label));
+    assert.match(html,/aria-current="page"/);
+  }
+  const runtime=read('public-redesign-runtime.js');
+  assert.match(runtime,/ToolScout 2\.0 hub surfaces/);
+  assert.match(runtime,/data-toolscout-surface="whats-new"/);
+  assert.match(runtime,/\.ts2-global-nav\{background:var\(--ts-g\)/);
+});
