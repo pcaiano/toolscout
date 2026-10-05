@@ -23,6 +23,7 @@ on:
       - 'scripts/audit-runtime-architecture.mjs'
       - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/evaluate-v2-integrity-audit.mjs'
+      - 'scripts/persist-v2-integrity-report.mjs'
       - 'tests/toolscout-v2-*.test.mjs'
 
 permissions:
