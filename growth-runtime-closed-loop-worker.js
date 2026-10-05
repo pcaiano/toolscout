@@ -155,7 +155,7 @@ async function discoverySnapshot(request,env){
   };
 }
 export function isQualifyingAuthorityBacklog(state,{externalAttemptObserved=false,handoffReady=false}={}){
-  return !externalAttemptObserved&&!handoffReady&&Number(state?.queue||0)>0&&Number(state?.runnableQueue||0)<=0;
+  return !externalAttemptObserved&&!handoffReady&&Number(state?.runnableQueue||0)<=0&&(Number(state?.queue||0)>0||Number(state?.deferredQueue||0)>0||Number(state?.qualificationQueue||0)>0);
 }
 
 async function closeAuthorityExecutionLoop(request,env,ctx){
