@@ -84,6 +84,13 @@ function decisionBlock(slug,criteria){
   const items=criteria.map(x=>`<li>${esc(String(x).replace(/([a-z])([A-Z])/g,'$1 $2'))}</li>`).join('');
   return `<!-- organic-growth:runtime-start --><section class="section organic-growth-context" data-og-variant="cloudflare-decision-depth-v1"><h2>How to choose ${esc(subject)}</h2><p>Start with the job you need the software to do, then compare the shortlist on workflow fit, integrations, usability and current cost. Remove any option that misses a must-have requirement before comparing secondary features.</p><h3>Decision checklist</h3><ul>${items}</ul><p>ToolScout updates this guide from observed search demand and current catalog evidence. Rankings remain based on fit, not affiliate payout.</p></section><!-- organic-growth:runtime-end -->`;
 }
+function stripGenericToolDecisionDepth(html,pathname){
+  if(!String(pathname||'').startsWith('/tools/'))return String(html||'');
+  let out=String(html||'');
+  out=out.replace(/<!-- organic-growth:runtime-start --><section\b[^>]*data-og-variant=["']cloudflare-decision-depth-v1["'][^>]*>[\s\S]*?<\/section><!-- organic-growth:runtime-end -->/gi,'');
+  out=out.replace(/<section\b[^>]*data-og-variant=["']cloudflare-decision-depth-v1["'][^>]*>[\s\S]*?<\/section>/gi,'');
+  return out;
+}
 function ensureFavicon(html){return /<link\b[^>]*rel=["'][^"']*icon/i.test(html)?html:html.replace(/<head>/i,'<head><link rel="icon" href="/favicon.svg" type="image/svg+xml">')}
 function shortenTitle(html,pathname){
   const m=html.match(/<title>([\s\S]*?)<\/title>/i);if(!m)return html;
@@ -158,13 +165,14 @@ async function transformPage(request,response,env){
     html=ensureFavicon(html);
     html=shortenTitle(html,pathname);
     html=ensureCanonical(html,pathname,cfg);
+    html=stripGenericToolDecisionDepth(html,pathname);
     const state=await activeState(env,pathname);
     const taskSpecificClickCapture=state&&String(state.reason||'')==='execution_contract:improve_click_capture';
     if(taskSpecificClickCapture)html=improveClickCapture(html,pathname);
     const taskSpecificDepth=state&&String(state.reason||'')==='execution_contract:deepen_existing_search_asset';
-    const bestPageDepth=state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
-    if((taskSpecificDepth||bestPageDepth)&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
-      const depthSlug=pathname.replace(/^\/tools\//,'').replace(/^\//,'');
+    const bestPageDepth=pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
+    if(bestPageDepth&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
+      const depthSlug=pathname.replace(/^\//,'');
       const block=decisionBlock(depthSlug,criteriaFor(cfg,depthSlug));
       const marker='<section class="section"><h2>How ToolScout chooses</h2>';
       html=html.includes(marker)?html.replace(marker,block+marker):html.replace(/<\/body>/i,block+'</body>');
