@@ -1,0 +1,77 @@
+name: ToolScout Engine Health Recovery
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/toolscout-v2-engine-health-recovery.yml'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: toolscout-v2-engine-health-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate recovery contracts
+        run: |
+          set -euo pipefail
+          node --check growth-scheduler.js
+          node --check distribution-network-worker.js
+          node --check distribution-orchestrator-worker.js
+          node --test tests/toolscout-v2-scheduler-ownership.test.mjs tests/toolscout-v2-execution-oidc.test.mjs
+          npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-engine-health-recovery
+
+      - name: Deploy bounded network-cycle recovery
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Run repo-scoped engine health recovery
+        id: recover
+        env:
+          OIDC_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
+          OIDC_REQUEST_TOKEN: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN_RESPONSE="$(curl -fsSL -H "Authorization: bearer ${OIDC_REQUEST_TOKEN}" "${OIDC_URL}&audience=toolscout-execution")"
+          TOKEN="$(printf '%s' "$TOKEN_RESPONSE" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);if(!j.value)process.exit(2);process.stdout.write(j.value)})")"
+          curl -fsSL --retry 3 --retry-delay 2 \
+            -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            https://trytoolscout.org/api/growth/engine-health/public-reconcile \
+            | tee engine-health-recovery.json
+          node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('engine-health-recovery.json','utf8'));const n=d?.results?.networkCycle;if(!n||n.ok===false)throw new Error('network_cycle_recovery_failed:'+JSON.stringify(n));console.log(JSON.stringify({ok:d.ok,networkCycle:n},null,2))"
+
+      - name: Verify network cycle ledger is closed
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT engine,mission,status,started_at,completed_at,detail,
+                 CAST((julianday('now')-julianday(COALESCE(completed_at,started_at)))*24*60 AS INTEGER) age_minutes
+          FROM engine_runs
+          WHERE engine='distribution' AND mission='network_cycle'
+          ORDER BY started_at DESC
+          LIMIT 1;
+          " | tee network-cycle-ledger.json
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('network-cycle-ledger.json','utf8'));const row=p?.[0]?.results?.[0];if(!row)throw new Error('network_cycle_ledger_missing');if(row.status!=='completed')throw new Error('network_cycle_not_completed:'+JSON.stringify(row));if(Number(row.age_minutes)>30)throw new Error('network_cycle_completion_stale:'+JSON.stringify(row));console.log(JSON.stringify(row,null,2))"
