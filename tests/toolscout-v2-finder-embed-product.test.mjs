@@ -83,6 +83,21 @@ test('embed telemetry migration stores interaction evidence without a raw query 
   assert.match(table,/result_slug TEXT/);
 });
 
+test('Finder supports three public colour themes with backwards-compatible aliases',()=>{
+  const src=read('embed/toolscout-finder.js');
+  assert.match(src,/requestedTheme/);
+  assert.match(src,/graphite:\{bg:'#0B0D0C'/);
+  assert.match(src,/paper:\{bg:'#F3F5F1'/);
+  assert.match(src,/neutral:\{bg:'#F8F9F6'/);
+  assert.match(src,/requestedTheme==='paper'\|\|requestedTheme==='light'/);
+  assert.match(src,/data-toolscout-theme/);
+  assert.match(src,/theme,/);
+  const profile=JSON.parse(read('data/distribution-publishing-profile.json'));
+  assert.deepEqual(profile.product.finder_widget.themes.map(x=>x.id),['graphite','paper','neutral']);
+  assert.equal(profile.product.finder_widget.legacy_theme_aliases.dark,'graphite');
+  assert.equal(profile.product.finder_widget.legacy_theme_aliases.light,'paper');
+});
+
 test('publisher kit leads with Finder Full and Mini plus a non-tracking live demo',async()=>{
   const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/distribution/publisher-kit'),{});
   assert.equal(response.status,200);
@@ -90,6 +105,15 @@ test('publisher kit leads with Finder Full and Mini plus a non-tracking live dem
   assert.match(html,/Add software discovery to your site\./);
   assert.match(html,/Finder Full/);
   assert.match(html,/Finder Mini/);
+  assert.match(html,/Finder Full · live demo/);
+  assert.match(html,/Finder Mini · live demo/);
+  assert.match(html,/data-mode="full" data-theme="graphite" data-track="false"/);
+  assert.match(html,/data-mode="mini" data-theme="paper" data-track="false"/);
+  assert.match(html,/Colour themes/);
+  assert.match(html,/data-theme="graphite"/);
+  assert.match(html,/data-theme="paper"/);
+  assert.match(html,/data-theme="neutral"/);
+  assert.match(html,/Existing <code>dark<\/code> and <code>light<\/code> values remain supported as aliases/);
   assert.match(html,/data-track="false"/);
   assert.match(html,/one script tag/i);
   assert.match(html,/raw Finder query/i);
