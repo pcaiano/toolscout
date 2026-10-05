@@ -83,7 +83,7 @@ This week's minimum acceptance conditions:
 3. No shadow queue may become more authoritative than canonical engine and D1 state.
 4. Render cannot directly mutate canonical ToolScout business state without Cloudflare revalidation.
 5. Render cannot independently send reputation-sensitive email.
-6. Remote browser or CAPTCHA workflows are optional human-assisted sidecars, not general autonomous executor capacity.
+6. Remote browser execution is the preferred interactive lane for exact, user-directed external forms and authenticated web workflows when available. It remains a bounded sidecar rather than general autonomous bulk executor capacity; CAPTCHA, MFA, payments, secret entry and legally consequential confirmations stay owner-only.
 7. Command Center loading must be bounded. Dependency failure must render as degraded or unavailable.
 8. Cloudflare and D1 conservation is architectural. Network-heavy work should stay off the control plane when the external executor can do it safely.
 9. Traffic and commercial truth keep their source boundaries defined in AGENTS.md. Do not replace GA4, GSC, the outbound ledger, or strict-human diagnostics with one another.
@@ -172,3 +172,5 @@ When the operating architecture changes, update this file and the JSON contract 
 53. source_unreachable_backoff inventory is deferred retry work, not runnable or stalled work. Health and Command Center truth must keep runnable, deferred and failed inventory separate so a large cooldown queue is not presented as an execution blockage.
 54. Catalog expansion research priority favors candidates with verified or strongly signaled AI interoperability, MCP or agent connectivity, and gives additional research priority to tools with known or active affiliate programmes. This affects discovery and research order only. Affiliate status, commission rate, or commercial value must never alter catalog admission quality gates, editorial ranking, comparison outcomes, or fit scoring.
 55. ToolScout audience capture writes each explicit-consent signup to the D1 newsletter_subscribers ledger for durability and immediately syncs it to HubSpot as the operational audience system. The HubSpot contact is upserted by email and subscribed to the portal's Marketing Information subscription type. D1 is a loss-prevention queue, not an alternate mailing database; failed HubSpot syncs remain observable and retry automatically.
+
+56. Exact external forms should become browser-ready work before they become owner-manual work. When a live browser capability is available, ChatGPT or Work should fill ordinary fields and navigate the workflow directly. Owner attention is reserved for CAPTCHA, MFA, unavailable credentials, payment, identity checks, legal attestations and other genuinely consequential confirmations. A browser submission still requires canonical verification before the placement is called live.
