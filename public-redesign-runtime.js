@@ -34,7 +34,13 @@ function stripCommercialVendorSourceLinks(html){
   return out;
 }
 function stripNonCtaExternalLinks(html){
-  return String(html||'').replace(/<a\b([^>]*?)href=(["'])https?:\/\/[^"']+\2([^>]*)>([\s\S]*?)<\/a>/gi,(match,before,quote,after,body)=>body);
+  return String(html||'').replace(/<a\b([^>]*?)href=(["'])(https?:\/\/[^"']+)\2([^>]*)>([\s\S]*?)<\/a>/gi,(match,before,quote,href,after,body)=>{
+    try{
+      const host=new URL(href).hostname.toLowerCase().replace(/^www\./,'');
+      if(host==='trytoolscout.org')return match;
+    }catch{}
+    return body;
+  });
 }
 
 function styleTag(){
