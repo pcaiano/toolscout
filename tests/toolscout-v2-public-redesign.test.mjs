@@ -92,3 +92,12 @@ test('public hubs receive ToolScout 2.0 surface styling and active navigation',a
   assert.match(runtime,/data-toolscout-surface="whats-new"/);
   assert.match(runtime,/\.ts2-global-nav\{background:var\(--ts-g\)/);
 });
+
+
+test('tool directory exposes profile and vendor visit actions side by side',()=>{
+  const html=read('tools.html');
+  assert.match(html,/class="tool-actions"/);
+  assert.match(html,/class="tool-link" href="\$\{profile\}">View profile<\/a>/);
+  assert.match(html,/class="tool-visit" href="\/go\/\$\{encodeURIComponent\(t\.slug\)\}\?source=tools-directory"/);
+  assert.match(html,/Visit tool ↗/);
+});
