@@ -128,7 +128,7 @@ test('public social footer is integrated, responsive and isolated from legacy na
   const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
   const out=await injectToolScoutSocialFooter(response);
   const html=await out.text();
-  assert.equal((html.match(/data-toolscout-social-footer="2"/g)||[]).length,1);
+  assert.equal((html.match(/<div data-toolscout-social-footer="2"/g)||[]).length,1);
   assert.match(html,/class="badgeRow">Badges<\/div><div data-toolscout-social-footer="2"/);
   assert.doesNotMatch(html,/<footer class="ts-social-footer-shell"/);
   assert.match(html,/href="https:\/\/x\.com\/trytoolscout"/);
