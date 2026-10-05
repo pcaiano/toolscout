@@ -476,3 +476,6 @@ The recovery contract now separates transport completion from external acceptanc
 
 Catalog curation and expansion now prioritize research of tools with verified or strongly signaled AI interoperability, MCP or agent connectivity, with an additional priority boost when a known or active affiliate programme exists. Affiliate commission rate does not influence the research score. This is a research-order policy only: admission quality gates, editorial fit, rankings and comparison outcomes remain affiliate-neutral.
 
+## Newsletter audience capture - 2026-10-05
+
+What's New and individual software-news articles now capture explicit ToolScout update subscriptions into the first-party D1 newsletter ledger. The runtime exposes admin-only newsletter metrics for total subscribers, 24h signups, MTD signups and HubSpot-pending records. HubSpot sync is downstream and must not block public signup acceptance.
