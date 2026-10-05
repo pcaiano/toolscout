@@ -1,39 +1,26 @@
 ---
 name: web-design-guidelines
-description: Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices".
-metadata:
-  author: vercel
-  version: "1.0.0"
-  argument-hint: <file-or-pattern>
+description: Audit ToolScout UI changes against current Vercel Web Interface Guidelines, with emphasis on accessibility, interaction quality, responsive behavior, performance, and clear navigation.
 ---
 
-# Web Interface Guidelines
+# Web Design Guidelines Review
 
-Review files for compliance with Web Interface Guidelines.
+Use this skill for a final review of user-facing ToolScout HTML, CSS, and JavaScript.
 
-## How It Works
-
-1. Fetch the latest guidelines from the source URL below
-2. Read the specified files (or prompt user for files/pattern)
-3. Check against all rules in the fetched guidelines
-4. Output findings in the terse `file:line` format
-
-## Guidelines Source
-
-Fetch fresh guidelines before each review:
-
-```
-https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
-```
-
-Use WebFetch to retrieve the latest rules. The fetched content contains all the rules and output format instructions.
-
-## Usage
-
-When a user provides a file or pattern argument:
-1. Fetch guidelines from the source URL above
-2. Read the specified files
-3. Apply all rules from the fetched guidelines
-4. Output findings using the format specified in the guidelines
-
-If no files specified, ask the user which files to review.
+1. Fetch the current Vercel Web Interface Guidelines from:
+   https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
+2. Review only the files and surfaces relevant to the redesign task.
+3. Report concrete findings with file paths and the smallest useful line range when available.
+4. Prioritize:
+   - accessibility and semantic HTML;
+   - visible focus and keyboard behavior;
+   - touch and mobile interaction;
+   - forms and error states;
+   - responsive layout;
+   - animation and reduced-motion handling;
+   - image sizing and loading;
+   - navigation state and deep links;
+   - performance problems that affect the user experience.
+5. Preserve ToolScout's existing URL, canonical, structured-data, analytics, affiliate-routing, and editorial contracts.
+6. Treat the current live site and repository contracts as constraints. Do not recommend a framework migration merely to satisfy a stylistic preference.
+7. After fixes, use the project Chrome DevTools MCP to verify the changed surface in desktop and mobile-sized viewports, including console and network errors.
